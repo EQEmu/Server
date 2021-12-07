@@ -5931,7 +5931,6 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id, u
 			RangedProcs[i].base_spellID = base_spell_id;
 			RangedProcs[i].proc_reuse_time = proc_reuse_time;
 			LogSpells("Added spell-granted ranged proc spell [{}] with chance [{}] to slot [{}]", spell_id, iChance, i);
-			Shout("ADD spells %i :: %i %i", i, RangedProcs[i].spellID, RangedProcs[i].base_spellID);
 			return true;
 		}
 	}

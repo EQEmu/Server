@@ -1431,7 +1431,6 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		}
 
 		if (LaunchProjectile) {
-			//Shout("Range Weapon %s Ammo Weapon %s", RangeWeapon->GetItem()->Name);
 			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillThrowing, WDmg, RangeWeapon,
 					    nullptr, AmmoSlot, speed);
 			return;

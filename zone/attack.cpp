@@ -4194,7 +4194,7 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 }
 
 void Mob::TryCombatProcs(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand, const EQ::ItemData* weapon_data) {
-	Shout("Try Comabt Proc");
+
 	if (!on) {
 		SetTarget(nullptr);
 		LogError("A null Mob object was passed to Mob::TryWeaponProc for evaluation!");
@@ -4213,7 +4213,6 @@ void Mob::TryCombatProcs(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand,
 
 	//used for special case when checking last ammo item on projectile hit.
 	if (!weapon_g && weapon_data) {
-		Shout("Use special case");
 		TryWeaponProc(nullptr, weapon_data, on, hand);
 		TrySpellProc(nullptr, weapon_data, on, hand);
 		return;
@@ -4240,15 +4239,6 @@ void Mob::TryCombatProcs(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand,
 
 void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon, Mob *on, uint16 hand)
 {
-	Shout("TryWeaponPROC bad");
-	/*
-		Proc logic is messy.
-		Mob::TryWeaponProc(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand) calls this function.
-		const EQ::ItemInstance *inst is used when we need to find augment procs and is passed to sub EVENT_WEAPON_PROC. Not required.
-		const EQ::ItemData *weapon is used to pull the weapons base proc data, therefore is required.
-	*/
-
-
 	if (!on) {
 		return;
 	}
@@ -4338,7 +4328,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	if (!on) {
 		return;
 	}
-	Shout("TrySpellProc %i", hand);
+
 	float ProcBonus = static_cast<float>(spellbonuses.SpellProcChance +
 		itembonuses.SpellProcChance + aabonuses.SpellProcChance);
 	float ProcChance = 0.0f;
@@ -4350,7 +4340,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	if (weapon){
 		skillinuse = GetSkillByItemType(weapon->ItemType);
 	}
-	Shout("TrySpellProc skill %i", static_cast<int>(skillinuse));
+
 	if (hand == EQ::invslot::slotSecondary) {
 		ProcChance /= 2;
 	}
@@ -4364,7 +4354,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			rangedattk = true;
 		}
 	}
-	Shout("TrySpellProc is ranged %i", rangedattk);
+
 	if (!weapon && hand == EQ::invslot::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK)) {
 		rangedattk = true;
 	}

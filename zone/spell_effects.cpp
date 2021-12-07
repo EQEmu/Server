@@ -1917,7 +1917,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
 #endif
-				Shout("ADD RANGED PROC %i %i %i", procid, spells[spell_id].limit_value[i], spell_id);
 				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, SE_RangedProc));
 				break;
 			}
