@@ -2389,7 +2389,8 @@ void Mob::SendIllusionPacket(
 	uint32 in_drakkin_heritage,
 	uint32 in_drakkin_tattoo,
 	uint32 in_drakkin_details,
-	float in_size
+	float in_size,
+	bool send_appearance_effects
 )
 {
 	uint8  new_texture     = in_texture;
@@ -2497,6 +2498,10 @@ void Mob::SendIllusionPacket(
 
 	/* Refresh armor and tints after send illusion packet */
 	SendArmorAppearance();
+
+	if (send_appearance_effects) {
+		//entity_list.SendAppearanceEffects(this); //C!Kayen
+	}
 
 	LogSpells(
 		"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
