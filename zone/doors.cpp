@@ -211,13 +211,23 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 
 	uint32 required_key_item       = GetKeyItem();
 	uint8  disable_add_to_key_ring = GetNoKeyring();
-	uint32 player_has_key          = 0;
+	bool player_has_key            = false;
 	uint32 player_key              = 0;
 
 	const EQ::ItemInstance *lock_pick_item = sender->GetInv().GetItem(EQ::invslot::slotCursor);
-	player_has_key = static_cast<uint32>(sender->GetInv().HasItem(required_key_item, 1));
 
-	if (player_has_key != INVALID_INDEX) {
+	// If classic key on cursor rule, check for it, otherwise owning it ok.
+	if (RuleB(Doors, RequireKeyOnCursor)) {
+		if (lock_pick_item != nullptr &&
+			lock_pick_item->GetItem()->ID == required_key_item) {
+			player_has_key = true;
+		}
+	}
+	else if (sender->GetInv().HasItem(required_key_item, 1) != INVALID_INDEX) {
+		player_has_key = true;
+	}
+
+	if (player_has_key) {
 		player_key = required_key_item;
 	}
 
