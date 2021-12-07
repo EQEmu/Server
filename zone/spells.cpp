@@ -4818,7 +4818,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	resist_modifier -= 2 * focus_resist;
 
-	int focus_incoming_resist = GetFocusEffect(focusFcResistIncoming, spell_id);
+	int focus_incoming_resist = GetFocusEffect(focusFcResistIncoming, spell_id, caster);
 
 	resist_modifier -= focus_incoming_resist;
 

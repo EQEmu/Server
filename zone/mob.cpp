@@ -4383,7 +4383,7 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 	}
 }
 
-int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
+int32 Mob::GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining)
 {
 	/*
 	Modifies incoming spell damage by percent, to increase or decrease damage, can be limited to specific resists.
@@ -4409,8 +4409,8 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		innate_mod = Vulnerability_Mod[HIGHEST_RESIST + 1];
 	}
 
-	fc_spell_vulnerability_mod = GetFocusEffect(focusSpellVulnerability, spell_id);
-	fc_spell_damage_pct_incomingPC_mod = GetFocusEffect(focusFcSpellDamagePctIncomingPC, spell_id);
+	fc_spell_vulnerability_mod = GetFocusEffect(focusSpellVulnerability, spell_id, caster);
+	fc_spell_damage_pct_incomingPC_mod = GetFocusEffect(focusFcSpellDamagePctIncomingPC, spell_id, caster);
 	
 	total_mod = fc_spell_vulnerability_mod + fc_spell_damage_pct_incomingPC_mod;
 
@@ -4421,6 +4421,24 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 
 	total_mod += innate_mod;
 	return total_mod;
+}
+
+bool Mob::IsTargetedFocusEffect(int focus_type) {
+
+	switch (focus_type) {
+	case focusSpellVulnerability:
+	case focusFcSpellDamagePctIncomingPC:
+	case focusFcDamageAmtIncoming:
+	case focusFcSpellDamageAmtIncomingPC:
+	case focusFcCastSpellOnLand:
+	case focusFcHealAmtIncoming:
+	case focusFcHealPctCritIncoming:
+	case focusFcHealPctIncoming:
+		return true;
+	default:
+		return false;
+
+	}
 }
 
 int32 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts)

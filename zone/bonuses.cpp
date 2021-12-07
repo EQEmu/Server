@@ -674,7 +674,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		uint8 focus = IsFocusEffect(0, 0, true, effect);
 		if (focus) {
-			newbon->FocusEffects[focus] = static_cast<uint8>(effect);
+			newbon->FocusEffects[focus] = effect;
 			continue;
 		}
 
@@ -1886,7 +1886,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					}
 				}
 				else {
-					new_bonus->FocusEffects[focus] = static_cast<uint8>(spells[spell_id].effect_id[i]);
+					new_bonus->FocusEffects[focus] = spells[spell_id].effect_id[i];
 				}
 				continue;
 			}
@@ -4108,9 +4108,9 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 		case SE_Fc_ResistIncoming:
 			focusFcResistIncoming;
 		case SE_Fc_Amplify_Mod:
-			focusFcResistIncoming;
+			focusFcAmplifyMod;
 		case SE_Fc_Amplify_Amt:
-			focusFcResistIncoming;
+			focusFcAmplifyAmt;
 		case SE_SpellHateMod:
 			return focusSpellHateMod;
 		case SE_ReduceReuseTimer:

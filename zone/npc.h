@@ -282,6 +282,8 @@ public:
 		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
+	int32 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster = nullptr);
+
     glm::vec4 m_SpawnPoint;
 
 	uint32	GetMaxDMG() const {return max_dmg;}
