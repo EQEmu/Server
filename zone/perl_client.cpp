@@ -5900,6 +5900,20 @@ XS(XS_Client_LearnDisciplines) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_ResetCastbarCooldownsBySlot);
+XS(XS_Client_ResetCastbarCooldownsBySlot) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::ResetCastbarCooldownsBySlot(THIS, int slot)");
+	{
+		Client* THIS;
+		int slot = (int) SvIV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ResetCastbarCooldownsBySlot(slot);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6132,6 +6146,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetAllDisciplineTimers"), XS_Client_ResetAllDisciplineTimers, file, "$");
+	newXSproto(strcpy(buf, "ResetCastbarCooldownsBySlot"), XS_Client_ResetCastbarCooldownsBySlot, file, "$$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
 	newXSproto(strcpy(buf, "Save"), XS_Client_Save, file, "$$");

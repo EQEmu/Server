@@ -6439,3 +6439,35 @@ int Client::GetNextAvailableDisciplineSlot(int starting_slot) {
 
 	return -1; // Return -1 if No Slots open
 }
+
+void Client::ResetCastbarCooldownsBySlot(int slot) {
+	if (slot < 0) {
+		for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
+			if(IsValidSpell(m_pp.mem_spells[i])) {
+				m_pp.spellSlotRefresh[i] = 1;
+				GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[i]));
+				if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[i]].timer_id)) {
+					GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[i]].timer_id));	
+				}
+				if (spells[m_pp.mem_spells[i]].timer_id > 0 && spells[m_pp.mem_spells[i]].timer_id < MAX_DISCIPLINE_TIMERS) {
+					SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[i]].timer_id, 0);
+				}
+				SendSpellBarEnable(m_pp.mem_spells[i]);
+				
+			}
+		}
+	} else if (slot < EQ::spells::SPELL_GEM_COUNT) {
+		if(IsValidSpell(m_pp.mem_spells[slot])) {
+			m_pp.spellSlotRefresh[slot] = 1;
+			GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[slot]));
+			if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[slot]].timer_id)) {
+				GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[slot]].timer_id));
+				
+			}
+			if (spells[m_pp.mem_spells[slot]].timer_id > 0 && spells[m_pp.mem_spells[slot]].timer_id < MAX_DISCIPLINE_TIMERS) {
+				SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[slot]].timer_id, 0);
+			}
+			SendSpellBarEnable(m_pp.mem_spells[slot]);
+		}
+	}
+}

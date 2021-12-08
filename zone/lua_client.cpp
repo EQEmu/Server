@@ -2311,6 +2311,11 @@ int Lua_Client::GetNextAvailableDisciplineSlot(int starting_slot) {
 	return self->GetNextAvailableDisciplineSlot(starting_slot);
 }
 
+void Lua_Client::ResetCastbarCooldownsBySlot(int slot) {
+	Lua_Safe_Call_Void();
+	self->ResetCastbarCooldownsBySlot(slot);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2586,6 +2591,7 @@ luabind::scope lua_register_client() {
 	.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin)
 	.def("ResetAA", (void(Lua_Client::*)(void))&Lua_Client::ResetAA)
 	.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
+	.def("ResetCastbarCooldownsBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownsBySlot)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)
