@@ -1,13 +1,13 @@
 #include "../client.h"
 
-void command_memspell(Client *c, const Seperator *sep)
+void command_unmemspell(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (
 		!arguments ||
 		!sep->IsNumber(1)
 	) {
-		c->Message(Chat::White, "Usage: #memspell [Spell ID] [Spell Gem]");
+		c->Message(Chat::White, "Usage: #unmemspell [Spell ID]");
 		return;
 	}
 
@@ -17,7 +17,7 @@ void command_memspell(Client *c, const Seperator *sep)
 	}
 
 	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
-	if (!IsValidSpell(spell_id)) {
+	if (!IsValidSpell(spell_id))  {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -28,12 +28,12 @@ void command_memspell(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto empty_slot = target->FindEmptyMemSlot();
-	if (empty_slot == -1) {
+	auto spell_gem = target->FindMemmedSpellBySpellID(spell_id);
+	if (spell_gem == -1) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} not have a place to memorize {} ({}).",
+				"{} not have {} ({}) memorized.",
 				(
 					c == target ?
 					"You do" :
@@ -50,30 +50,18 @@ void command_memspell(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto spell_gem = sep->IsNumber(2) ? std::stoul(sep->arg[2]) : empty_slot;
-	if (spell_gem > EQ::spells::SPELL_GEM_COUNT) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Spell Gems range from 0 to {}.",
-				EQ::spells::SPELL_GEM_COUNT
-			).c_str()
-		);
-		return;
-	}
-
-	target->MemSpell(spell_id, spell_gem);
+	target->UnmemSpellBySpellID(spell_id);
 
 	if (c != target) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) memorized to spell gem {} for {} ({}).",
+				"{} ({}) unmemorized for {} ({}) from spell gem {}.",
 				GetSpellName(spell_id),
 				spell_id,
-				spell_gem,
 				target->GetCleanName(),
-				target->GetID()
+				target->GetID(),
+				spell_gem
 			).c_str()
 		);
 	}

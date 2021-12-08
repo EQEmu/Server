@@ -163,7 +163,9 @@ public:
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll();
 	void UnmemSpellAll(bool update_client);
+	int FindEmptyMemSlot();
 	uint16 FindMemmedSpellBySlot(int slot);
+	int FindMemmedSpellBySpellID(uint16 spell_id);
 	int MemmedCount();
 	luabind::object GetLearnableDisciplines(lua_State* L);
 	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level);

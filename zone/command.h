@@ -301,6 +301,8 @@ void command_undye(Client *c, const Seperator *sep);
 void command_undyeme(Client *c, const Seperator *sep);
 void command_unfreeze(Client *c, const Seperator *sep);
 void command_unlock(Client *c, const Seperator *sep);
+void command_unmemspell(Client *c, const Seperator *sep);
+void command_unmemspells(Client *c, const Seperator *sep);
 void command_unscribespell(Client *c, const Seperator *sep);
 void command_unscribespells(Client *c, const Seperator *sep);
 void command_untraindisc(Client *c, const Seperator *sep);

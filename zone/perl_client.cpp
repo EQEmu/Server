@@ -1897,6 +1897,23 @@ XS(XS_Client_UnmemSpellAll) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_FindEmptyMemSlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_FindEmptyMemSlot) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::FindEmptyMemSlot(THIS)"); // @categories Account and Character, Spells and Disciplines
+	{
+		Client *THIS;
+		int RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->FindEmptyMemSlot();
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_FindMemmedSpellBySlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_FindMemmedSpellBySlot) {
 	dXSARGS;
@@ -1911,6 +1928,24 @@ XS(XS_Client_FindMemmedSpellBySlot) {
 		RETVAL = THIS->FindMemmedSpellBySlot(slot);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_FindMemmedSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_FindMemmedSpellBySpellID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySpellID(THIS, uint16 spell_id)"); // @categories Account and Character, Spells and Disciplines
+	{
+		Client *THIS;
+		int RETVAL;
+		dXSTARG;
+		uint16 spell_id = (uint16) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->FindMemmedSpellBySpellID(spell_id);
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -5960,7 +5995,9 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
 	newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 	newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
+	newXSproto(strcpy(buf, "FindEmptyMemSlot"), XS_Client_FindEmptyMemSlot, file, "$");
 	newXSproto(strcpy(buf, "FindMemmedSpellBySlot"), XS_Client_FindMemmedSpellBySlot, file, "$$");
+	newXSproto(strcpy(buf, "FindMemmedSpellBySpellID"), XS_Client_FindMemmedSpellBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "Fling"), XS_Client_Fling, file, "$$$$$;$$");
 	newXSproto(strcpy(buf, "ForageItem"), XS_Client_ForageItem, file, "$");
 	newXSproto(strcpy(buf, "Freeze"), XS_Client_Freeze, file, "$");
