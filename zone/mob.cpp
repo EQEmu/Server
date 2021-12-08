@@ -3020,12 +3020,33 @@ void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
 		}
 	}
 
-	if (!appearance_effect_param_list.empty())
-	{
-		uint8 random = zone->random.Int(0, SympatheticProcList.size() - 1);
-		int FinalSympatheticProc = SympatheticProcList[random];
-		SympatheticProcList.clear();
-		return FinalSympatheticProc;
+	if (appearance_effect_param_list.size())
+
+	
+	for (i = 0; i <= 5; i++) {
+		
+		if (!appearance_effect_param_list.empty()){
+			
+			if (appearance_effect_param_list.size() >= 5) {
+				SendAppearanceEffect(
+					appearance_effect_param_list[0],
+					appearance_effect_param_list[1],
+					appearance_effect_param_list[2],
+					appearance_effect_param_list[3],
+					appearance_effect_param_list[4],
+					receiver,
+					appearance_effect_slot_list[0], 0,
+					appearance_effect_slot_list[1], 0,
+					appearance_effect_slot_list[2], 0,
+					appearance_effect_slot_list[3], 0,
+					appearance_effect_slot_list[4], 0
+				);
+				appearance_effect_param_list.erase(appearance_effect_param_list.begin(), appearance_effect_param_list.begin() + 5);
+			}
+			else {
+				
+			}
+		}
 	}
 
 
