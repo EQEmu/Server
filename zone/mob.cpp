@@ -2500,7 +2500,7 @@ void Mob::SendIllusionPacket(
 	SendArmorAppearance();
 
 	if (send_appearance_effects) {
-		//entity_list.SendAppearanceEffects(this); //C!Kayen
+		SendSavedAppearenceEffects(nullptr);
 	}
 
 	LogSpells(
@@ -2956,6 +2956,18 @@ void Mob::ClearAppearenceEffects()
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
 		SetAppearenceEffect(i,0);
+	}
+}
+
+void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
+{
+	if (HasAppearenceEffect()) {
+		for (uint32 i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
+			Shout("[%i] Get apperance effect %i", i, GetAppearenceEffect(i));
+			if (GetAppearenceEffect(i)) {
+				SendAppearanceEffect(GetAppearenceEffect(i), 0, 0, 0, 0, receiver, i, 0);
+			}
+		}
 	}
 }
 

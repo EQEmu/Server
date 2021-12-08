@@ -428,6 +428,7 @@ public:
 	void SetAppearenceEffect(int32 slot, int32 value) { appearance_effects[slot] = value; }
 	int32 GetAppearenceEffect(int32 slot) const { return appearance_effects[slot]; }
 	void ClearAppearenceEffects();
+	void SendSavedAppearenceEffects(Client *receiver);
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }

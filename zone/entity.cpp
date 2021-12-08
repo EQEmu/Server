@@ -4596,14 +4596,7 @@ void EntityList::SendAppearanceEffects(Client *c)
 				++it;
 				continue;
 			}
-			if (cur->HasAppearenceEffect()){
-				for (uint32 i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
-					cur->Shout("[%i] Get apperance effect %i", i, cur->GetAppearenceEffect(i));
-					if (cur->GetAppearenceEffect(i)) {
-						cur->SendAppearanceEffect(cur->GetAppearenceEffect(i), 0, 0, 0, 0, c, i, 0);
-					}
-				}
-			}
+			cur->SendSavedAppearenceEffects(c);
 		}
 		++it;
 	}
