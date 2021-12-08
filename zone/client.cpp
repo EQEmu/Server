@@ -7206,7 +7206,7 @@ void Client::OpenLFGuildWindow()
 
 bool Client::IsXTarget(const Mob *m) const
 {
-	if(!XTargettingAvailable() || !m || (m->GetID() == 0))
+	if(!XTargettingAvailable() || !m || (m->GetID() == 0) || (!RuleB(Character, XTargetAllowCorpses) && m->IsCorpse()))
 		return false;
 
 	for(int i = 0; i < GetMaxXTargets(); ++i)
