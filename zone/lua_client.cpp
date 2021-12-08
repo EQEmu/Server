@@ -2311,9 +2311,19 @@ int Lua_Client::GetNextAvailableDisciplineSlot(int starting_slot) {
 	return self->GetNextAvailableDisciplineSlot(starting_slot);
 }
 
-void Lua_Client::ResetCastbarCooldownsBySlot(int slot) {
+void Lua_Client::ResetCastbarCooldownBySlot(int slot) {
 	Lua_Safe_Call_Void();
-	self->ResetCastbarCooldownsBySlot(slot);
+	self->ResetCastbarCooldownBySlot(slot);
+}
+
+void Lua_Client::ResetAllCastbarCooldowns() {
+	Lua_Safe_Call_Void();
+	self->ResetAllCastbarCooldowns();
+}
+
+void Lua_Client::ResetCastbarCooldownBySpellID(uint32 spell_id) {
+	Lua_Safe_Call_Void();
+	self->ResetCastbarCooldownBySpellID(spell_id);
 }
 
 luabind::scope lua_register_client() {
@@ -2591,7 +2601,9 @@ luabind::scope lua_register_client() {
 	.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin)
 	.def("ResetAA", (void(Lua_Client::*)(void))&Lua_Client::ResetAA)
 	.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
-	.def("ResetCastbarCooldownsBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownsBySlot)
+	.def("ResetAllCastbarCooldowns", (void(Lua_Client::*)(void))&Lua_Client::ResetAllCastbarCooldowns)
+	.def("ResetCastbarCooldownBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownBySlot)
+	.def("ResetCastbarCooldownBySpellID", (void(Lua_Client::*)(uint32))&Lua_Client::ResetCastbarCooldownBySpellID)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)

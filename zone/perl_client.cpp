@@ -5900,16 +5900,43 @@ XS(XS_Client_LearnDisciplines) {
 	XSRETURN(1);
 }
 
-XS(XS_Client_ResetCastbarCooldownsBySlot);
-XS(XS_Client_ResetCastbarCooldownsBySlot) {
+XS(XS_Client_ResetCastbarCooldownBySlot);
+XS(XS_Client_ResetCastbarCooldownBySlot) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ResetCastbarCooldownsBySlot(THIS, int slot)");
+		Perl_croak(aTHX_ "Usage: Client::ResetCastbarCooldownBySlot(THIS, int slot)");
 	{
 		Client* THIS;
 		int slot = (int) SvIV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->ResetCastbarCooldownsBySlot(slot);
+		THIS->ResetCastbarCooldownBySlot(slot);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_ResetAllCastbarCooldowns);
+XS(XS_Client_ResetAllCastbarCooldowns) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::ResetAllCastbarCooldowns(THIS)");
+	{
+		Client* THIS;
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ResetAllCastbarCooldowns();
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_ResetCastbarCooldownBySpellID);
+XS(XS_Client_ResetCastbarCooldownBySpellID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::ResetCastbarCooldownBySpellID(THIS, uint32 spell_id)");
+	{
+		Client* THIS;
+		uint32 spell_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ResetCastbarCooldownBySpellID(spell_id);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6146,7 +6173,9 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetAllDisciplineTimers"), XS_Client_ResetAllDisciplineTimers, file, "$");
-	newXSproto(strcpy(buf, "ResetCastbarCooldownsBySlot"), XS_Client_ResetCastbarCooldownsBySlot, file, "$$");
+	newXSproto(strcpy(buf, "ResetAllCastbarCooldowns"), XS_Client_ResetAllCastbarCooldowns, file, "$");
+	newXSproto(strcpy(buf, "ResetCastbarCooldownBySlot"), XS_Client_ResetCastbarCooldownBySlot, file, "$$");
+	newXSproto(strcpy(buf, "ResetCastbarCooldownBySpellID"), XS_Client_ResetCastbarCooldownBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
 	newXSproto(strcpy(buf, "Save"), XS_Client_Save, file, "$$");

@@ -1014,7 +1014,9 @@ public:
 	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
 	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
 	
-	void ResetCastbarCooldownsBySlot(int slot);
+	void ResetCastbarCooldownBySlot(int slot);
+	void ResetAllCastbarCooldowns();
+	void ResetCastbarCooldownBySpellID(uint32 spell_id);
 
 	bool CheckTitle(int titleset);
 	void EnableTitle(int titleset);
