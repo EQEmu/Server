@@ -424,9 +424,11 @@ public:
 	inline bool HasEndurUpkeep() const { return endur_upkeep; }
 	inline void SetEndurUpkeep(bool val) { endur_upkeep = val; }
 	bool HasBuffWithSpellGroup(int spell_group);
-	bool HasAppearenceEffect() const { return appearance_effects[MAX_APPEARANCE_EFFECTS + 1]; }
-	void SetAppearenceEffect(int32 slot, int32 value) { appearance_effects[slot] = value; }
-	int32 GetAppearenceEffect(int32 slot) const { return appearance_effects[slot]; }
+	//bool HasAppearenceEffect() const { return appearance_effects1[MAX_APPEARANCE_EFFECTS + 1]; }
+	//void SetAppearenceEffect(int32 slot, int32 value) { appearance_effects1[slot] = value; }
+	//int32 GetAppearenceEffect(int32 slot) const { return appearance_effects1[slot]; }
+	bool HasAppearenceEffects();
+	void SetAppearenceEffect(int32 slot, int32 value);
 	void ClearAppearenceEffects();
 	void SendSavedAppearenceEffects(Client *receiver);
 
@@ -1512,7 +1514,9 @@ protected:
 	Timer def_proclimit_timer[MAX_PROC_LIMIT_TIMERS];			//SPA 512
 	int32 def_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];			//SPA 512
 
-	int32 appearance_effects[MAX_APPEARANCE_EFFECTS];
+	int32 appearance_effects1[MAX_APPEARANCE_EFFECTS];
+	int32 appearance_effects2[MAX_APPEARANCE_EFFECTS];
+	int32 appearance_effects3[MAX_APPEARANCE_EFFECTS];
 
 	Timer shield_timer;
 	uint32 m_shield_target_id;

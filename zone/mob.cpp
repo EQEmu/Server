@@ -481,7 +481,9 @@ Mob::Mob(
 	}
 
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
-		appearance_effects[i] = 0;
+		appearance_effects1[i] = 0;
+		appearance_effects2[i] = 0;
+		appearance_effects3[i] = 0;
 	}
 
 	emoteid              = 0;
@@ -2952,23 +2954,92 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	safe_delete(outapp);
 }
 
+bool Mob::HasAppearenceEffects()
+{
+	if (appearance_effects1[MAX_APPEARANCE_EFFECTS + 1] ||
+		appearance_effects2[MAX_APPEARANCE_EFFECTS + 1] ||
+		appearance_effects3[MAX_APPEARANCE_EFFECTS + 1] || ) {
+		return true;
+	}
+	return false;
+}
+void Mob::SetAppearenceEffect(int32 slot, int32 value) 
+{
+	if (!appearance_effects1[slot]) {
+		appearance_effects1[slot] = value;
+	}
+	else if (!appearance_effects2[slot]) {
+		appearance_effects2[slot] = value;
+	}
+	else if (!appearance_effects3[slot]) {
+		appearance_effects3[slot] = value;
+	}
+}
+//int32 GetAppearenceEffect(int32 slot) const { return appearance_effects1[slot]; }
+
 void Mob::ClearAppearenceEffects()
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
-		SetAppearenceEffect(i,0);
+		appearance_effects1[i] = 0;
+		appearance_effects2[i] = 0;
+		appearance_effects3[i] = 0;
 	}
 }
 
 void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
 {
-	if (HasAppearenceEffect()) {
-		for (uint32 i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
+	std::vector<int> appearance_effect_param_list;
+	std::vector<int> appearance_effect_slot_list;
+	SympatheticProcList.push_back(proc_spellid);
+
+	if (!SympatheticProcList.empty())
+	{
+		uint8 random = zone->random.Int(0, SympatheticProcList.size() - 1);
+		int FinalSympatheticProc = SympatheticProcList[random];
+		SympatheticProcList.clear();
+		return FinalSympatheticProc;
+	}
+	int i = 0;
+	if (HasAppearenceEffects()) {
+		for (i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
+
+			if (appearance_effects1[i]) {
+				appearance_effect_param_list.push_back(appearance_effects1[i]);
+				appearance_effect_slot_list.push_back(i);
+			}
+
+			if (appearance_effects2[i]) {
+				appearance_effect_param_list.push_back(appearance_effects2[i]);
+				appearance_effect_slot_list.push_back(i);
+			}
+
+			if (appearance_effects3[i]) {
+				appearance_effect_param_list.push_back(appearance_effects3[i]);
+				appearance_effect_slot_list.push_back(i);
+			}
+		}
+	}
+
+	if (!appearance_effect_param_list.empty())
+	{
+		uint8 random = zone->random.Int(0, SympatheticProcList.size() - 1);
+		int FinalSympatheticProc = SympatheticProcList[random];
+		SympatheticProcList.clear();
+		return FinalSympatheticProc;
+	}
+
+
+	int i = 0;
+	/*
+	if (HasAppearenceEffects()) {
+		for (i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
 			Shout("[%i] Get apperance effect %i", i, GetAppearenceEffect(i));
 			if (GetAppearenceEffect(i)) {
 				SendAppearanceEffect(GetAppearenceEffect(i), 0, 0, 0, 0, receiver, i, 0);
 			}
 		}
 	}
+	*/
 }
 
 void Mob::SendTargetable(bool on, Client *specific_target) {
