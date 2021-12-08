@@ -245,6 +245,7 @@ void command_serverrules(Client *c, const Seperator *sep);
 void command_set_adventure_points(Client *c, const Seperator *sep);
 void command_setaapts(Client *c, const Seperator *sep);
 void command_setaaxp(Client *c, const Seperator *sep);
+void command_setaltcurrency(Client *c, const Seperator *sep);
 void command_setanim(Client *c, const Seperator *sep);
 void command_setcrystals(Client *c, const Seperator *sep);
 void command_setendurance(Client *c, const Seperator *sep);
