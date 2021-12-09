@@ -2990,8 +2990,7 @@ void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
 {
 	std::vector<int> appearance_effect_param_list;
 	std::vector<int> appearance_effect_slot_list;
-	SympatheticProcList.push_back(proc_spellid);
-
+	
 	if (!SympatheticProcList.empty())
 	{
 		uint8 random = zone->random.Int(0, SympatheticProcList.size() - 1);
@@ -3044,13 +3043,24 @@ void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
 				appearance_effect_param_list.erase(appearance_effect_param_list.begin(), appearance_effect_param_list.begin() + 5);
 			}
 			else {
-				
+				if (appearance_effect_param_list.size() >= 4) {
+					SendAppearanceEffect(
+						appearance_effect_param_list[0],
+						appearance_effect_param_list[1],
+						appearance_effect_param_list[2],
+						appearance_effect_param_list[3],
+						0,
+						receiver,
+						0, 0,
+						appearance_effect_slot_list[1], 0,
+						appearance_effect_slot_list[2], 0,
+						appearance_effect_slot_list[3], 0,
+						appearance_effect_slot_list[4], 0
+					);
+				}
 			}
 		}
 	}
-
-
-	int i = 0;
 	/*
 	if (HasAppearenceEffects()) {
 		for (i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
