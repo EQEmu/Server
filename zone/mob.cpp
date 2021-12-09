@@ -2879,7 +2879,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 		6 = right foot
 		9 = Face
 
-		value#ground = 1, will place the effect on ground, of corresponding slot is set to 0 effect is permanenant, if > 0 will fade if mob death/despawn.
+		value#ground = 1, will place the effect on ground, this is permanenant
 	*/
 
 	//higher values can crash client
@@ -2917,8 +2917,6 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	if (!value5ground && parm5) {
 		SetAppearenceEffects(value5slot, parm5);
 	}
-	//Shout("Value slot 2 %i Parama 2 %i", value1slot, parm1);
-	//Shout("SET %i [%i] %i %i %i", GetAppearenceEffect(1), GetAppearenceEffect(2), GetAppearenceEffect(3), GetAppearenceEffect(4), GetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1));
 
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
 	la->spawn_id = GetID();
