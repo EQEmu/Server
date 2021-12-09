@@ -2961,8 +2961,10 @@ void Mob::SetAppearenceEffects(int32 slot, int32 value)
 
 void Mob::GetAppearenceEffects()
 {
-	if (appearance_effects_id[0]) {
+	//used with GM command
+	if (!appearance_effects_id[0]) {
 		Message(Chat::Red, "No Appearance Effect exist on this mob");
+		return;
 	}
 	
 	for (int i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
@@ -2980,6 +2982,10 @@ void Mob::ClearAppearenceEffects()
 
 void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
 {
+	if (!appearance_effects_id[0]) {
+		return;
+	}
+
 	if (appearance_effects_id[0]) {
 		SendAppearanceEffect(appearance_effects_id[0], appearance_effects_id[1], appearance_effects_id[2], appearance_effects_id[3], appearance_effects_id[4], receiver,
 			appearance_effects_slot[0], 0, appearance_effects_slot[1], 0, appearance_effects_slot[2], 0, appearance_effects_slot[3], 0, appearance_effects_slot[4], 0);

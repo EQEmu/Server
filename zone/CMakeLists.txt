@@ -294,6 +294,7 @@ SET(gm_commands
     gm_commands/aggrozone.cpp
     gm_commands/ai.cpp
     gm_commands/appearance.cpp
+	gm_commands/appearanceeffects.cpp
     gm_commands/attack.cpp
     gm_commands/augmentitem.cpp
     gm_commands/ban.cpp
@@ -356,8 +357,7 @@ SET(gm_commands
     gm_commands/gassign.cpp
     gm_commands/gearup.cpp
     gm_commands/gender.cpp
-	gm_commands/getappearanceeffects.cpp
-    gm_commands/getplayerburiedcorpsecount.cpp
+	gm_commands/getplayerburiedcorpsecount.cpp
     gm_commands/getvariable.cpp
     gm_commands/ginfo.cpp
     gm_commands/giveitem.cpp

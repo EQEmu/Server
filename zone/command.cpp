@@ -120,6 +120,7 @@ int command_init(void)
 		command_add("aggrozone", "[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.", AccountStatus::GMAdmin, command_aggrozone) ||
 		command_add("ai", "[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target", AccountStatus::GMAdmin, command_ai) ||
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", AccountStatus::GMLeadAdmin, command_appearance) ||
+		command_add("appearanceeffects", "- View, set and remove appearance effects.", AccountStatus::GMAdmin, command_appearanceeffects) ||
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", AccountStatus::GMImpossible, command_apply_shared_memory) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
@@ -190,7 +191,6 @@ int command_init(void)
 		command_add("gassign", "[id] - Assign targetted NPC to predefined wandering grid id", AccountStatus::GMAdmin, command_gassign) ||
 		command_add("gearup", "Developer tool to quickly equip a character", AccountStatus::GMMgmt, command_gearup) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", AccountStatus::Guide, command_gender) ||
-		command_add("getappearanceeffects", "- Display your or your target's appearance effects.", AccountStatus::GMAdmin, command_getappearanceeffects) ||
 		command_add("getplayerburiedcorpsecount", "- Get your or your target's total number of buried player corpses.", AccountStatus::GMAdmin, command_getplayerburiedcorpsecount) ||
 		command_add("getvariable", "[varname] - Get the value of a variable from the database", AccountStatus::GMMgmt, command_getvariable) ||
 		command_add("ginfo", "- get group info on target.", AccountStatus::ApprenticeGuide, command_ginfo) ||
