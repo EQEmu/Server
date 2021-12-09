@@ -2961,7 +2961,7 @@ void Mob::GetAppearenceEffects()
 {
 	//used with GM command
 	if (!appearance_effects_id[0]) {
-		Message(Chat::Red, "No Appearance Effect exist on this mob");
+		Message(Chat::Red, "No Appearance Effects exist on this mob");
 		return;
 	}
 	
