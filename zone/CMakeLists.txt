@@ -357,7 +357,7 @@ SET(gm_commands
     gm_commands/gassign.cpp
     gm_commands/gearup.cpp
     gm_commands/gender.cpp
-	gm_commands/getplayerburiedcorpsecount.cpp
+    gm_commands/getplayerburiedcorpsecount.cpp
     gm_commands/getvariable.cpp
     gm_commands/ginfo.cpp
     gm_commands/giveitem.cpp
