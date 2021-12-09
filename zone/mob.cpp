@@ -481,9 +481,8 @@ Mob::Mob(
 	}
 
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
-		appearance_effects1[i] = 0;
-		appearance_effects2[i] = 0;
-		appearance_effects3[i] = 0;
+		appearance_effects_id[i] = 0;
+		appearance_effects_slot[i] = 0;
 	}
 
 	emoteid              = 0;
@@ -2904,27 +2903,22 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	}
 
 	if (!value1ground && parm1) {
-		SetAppearenceEffect(value1slot, parm1);
-		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
+		SetAppearenceEffects(value1slot, parm1);
 	}
 	if (!value2ground && parm2) {
-		SetAppearenceEffect(value2slot, parm2);
-		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
+		SetAppearenceEffects(value2slot, parm2);
 	}
 	if (!value3ground && parm3) {
-		SetAppearenceEffect(value3slot, parm3);
-		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
+		SetAppearenceEffects(value3slot, parm3);
 	}
 	if (!value4ground && parm4) {
-		SetAppearenceEffect(value4slot, parm4);
-		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
+		SetAppearenceEffects(value4slot, parm4);
 	}
 	if (!value5ground && parm5) {
-		SetAppearenceEffect(value5slot, parm5);
-		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
+		SetAppearenceEffects(value5slot, parm5);
 	}
-	Shout("Value slot 2 %i Parama 2 %i", value1slot, parm1);
-	Shout("SET %i [%i] %i %i %i", GetAppearenceEffect(1), GetAppearenceEffect(2), GetAppearenceEffect(3), GetAppearenceEffect(4), GetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1));
+	//Shout("Value slot 2 %i Parama 2 %i", value1slot, parm1);
+	//Shout("SET %i [%i] %i %i %i", GetAppearenceEffect(1), GetAppearenceEffect(2), GetAppearenceEffect(3), GetAppearenceEffect(4), GetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1));
 
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
 	la->spawn_id = GetID();
@@ -2954,123 +2948,47 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	safe_delete(outapp);
 }
 
-bool Mob::HasAppearenceEffects()
+void Mob::SetAppearenceEffects(int32 slot, int32 value) 
 {
-	if (appearance_effects1[MAX_APPEARANCE_EFFECTS + 1] ||
-		appearance_effects2[MAX_APPEARANCE_EFFECTS + 1] ||
-		appearance_effects3[MAX_APPEARANCE_EFFECTS + 1] || ) {
-		return true;
-	}
-	return false;
-}
-void Mob::SetAppearenceEffect(int32 slot, int32 value) 
-{
-	if (!appearance_effects1[slot]) {
-		appearance_effects1[slot] = value;
-	}
-	else if (!appearance_effects2[slot]) {
-		appearance_effects2[slot] = value;
-	}
-	else if (!appearance_effects3[slot]) {
-		appearance_effects3[slot] = value;
+	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
+		if (!appearance_effects_id[i]) {
+			appearance_effects_id[i] = value;
+			appearance_effects_slot[i] = slot;
+			return;
+		}
 	}
 }
-//int32 GetAppearenceEffect(int32 slot) const { return appearance_effects1[slot]; }
 
 void Mob::ClearAppearenceEffects()
 {
-	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
-		appearance_effects1[i] = 0;
-		appearance_effects2[i] = 0;
-		appearance_effects3[i] = 0;
+	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
+		appearance_effects_id[i] = 0;
+		appearance_effects_slot[i] = 0;
 	}
 }
 
 void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
 {
-	std::vector<int> appearance_effect_param_list;
-	std::vector<int> appearance_effect_slot_list;
-	
-	if (!SympatheticProcList.empty())
-	{
-		uint8 random = zone->random.Int(0, SympatheticProcList.size() - 1);
-		int FinalSympatheticProc = SympatheticProcList[random];
-		SympatheticProcList.clear();
-		return FinalSympatheticProc;
+	for (int i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
+		Shout("DEBUG %i :: Get Param %i GetSlot %i", i, appearance_effects_id[i], appearance_effects_slot[i]);
 	}
-	int i = 0;
-	if (HasAppearenceEffects()) {
-		for (i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
-
-			if (appearance_effects1[i]) {
-				appearance_effect_param_list.push_back(appearance_effects1[i]);
-				appearance_effect_slot_list.push_back(i);
-			}
-
-			if (appearance_effects2[i]) {
-				appearance_effect_param_list.push_back(appearance_effects2[i]);
-				appearance_effect_slot_list.push_back(i);
-			}
-
-			if (appearance_effects3[i]) {
-				appearance_effect_param_list.push_back(appearance_effects3[i]);
-				appearance_effect_slot_list.push_back(i);
-			}
-		}
-	}
-
-	if (appearance_effect_param_list.size())
-
-	
-	for (i = 0; i <= 5; i++) {
 		
-		if (!appearance_effect_param_list.empty()){
-			
-			if (appearance_effect_param_list.size() >= 5) {
-				SendAppearanceEffect(
-					appearance_effect_param_list[0],
-					appearance_effect_param_list[1],
-					appearance_effect_param_list[2],
-					appearance_effect_param_list[3],
-					appearance_effect_param_list[4],
-					receiver,
-					appearance_effect_slot_list[0], 0,
-					appearance_effect_slot_list[1], 0,
-					appearance_effect_slot_list[2], 0,
-					appearance_effect_slot_list[3], 0,
-					appearance_effect_slot_list[4], 0
-				);
-				appearance_effect_param_list.erase(appearance_effect_param_list.begin(), appearance_effect_param_list.begin() + 5);
-			}
-			else {
-				if (appearance_effect_param_list.size() >= 4) {
-					SendAppearanceEffect(
-						appearance_effect_param_list[0],
-						appearance_effect_param_list[1],
-						appearance_effect_param_list[2],
-						appearance_effect_param_list[3],
-						0,
-						receiver,
-						0, 0,
-						appearance_effect_slot_list[1], 0,
-						appearance_effect_slot_list[2], 0,
-						appearance_effect_slot_list[3], 0,
-						appearance_effect_slot_list[4], 0
-					);
-				}
-			}
-		}
+	if (appearance_effects_id[0]) {
+		SendAppearanceEffect(appearance_effects_id[0], appearance_effects_id[1], appearance_effects_id[2], appearance_effects_id[3], appearance_effects_id[4], receiver,
+			appearance_effects_slot[0], 0, appearance_effects_slot[1], 0, appearance_effects_slot[2], 0, appearance_effects_slot[3], 0, appearance_effects_slot[4], 0);
 	}
-	/*
-	if (HasAppearenceEffects()) {
-		for (i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
-			Shout("[%i] Get apperance effect %i", i, GetAppearenceEffect(i));
-			if (GetAppearenceEffect(i)) {
-				SendAppearanceEffect(GetAppearenceEffect(i), 0, 0, 0, 0, receiver, i, 0);
-			}
-		}
+	if (appearance_effects_id[5]) {
+		SendAppearanceEffect(appearance_effects_id[5], appearance_effects_id[6], appearance_effects_id[7], appearance_effects_id[8], appearance_effects_id[9], receiver,
+			appearance_effects_slot[5], 0, appearance_effects_slot[6], 0, appearance_effects_slot[7], 0, appearance_effects_slot[8], 0, appearance_effects_slot[9], 0);
 	}
-	*/
+	if (appearance_effects_id[10]) {
+		SendAppearanceEffect(appearance_effects_id[10], appearance_effects_id[11], appearance_effects_id[12], appearance_effects_id[13], appearance_effects_id[14], receiver,
+			appearance_effects_slot[10], 0, appearance_effects_slot[11], 0, appearance_effects_slot[12], 0, appearance_effects_slot[13], 0, appearance_effects_slot[14], 0);
+	}
+	if (appearance_effects_id[15]) {
+		SendAppearanceEffect(appearance_effects_id[15], appearance_effects_id[16], appearance_effects_id[17], appearance_effects_id[18], appearance_effects_id[19], receiver,
+			appearance_effects_slot[15], 0, appearance_effects_slot[16], 0, appearance_effects_slot[17], 0, appearance_effects_slot[18], 0, appearance_effects_slot[19], 0);
+	}
 }
 
 void Mob::SendTargetable(bool on, Client *specific_target) {

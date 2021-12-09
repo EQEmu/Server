@@ -184,7 +184,7 @@
 #define MAX_SYMPATHETIC_PROCS 10 // Number of sympathetic procs a client can have (This is arbitrary)
 #define MAX_FOCUS_PROC_LIMIT_TIMERS 20 //Number of focus recast timers that can be going at same time (This is arbitrary)
 #define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
-#define MAX_APPEARANCE_EFFECTS 9
+#define MAX_APPEARANCE_EFFECTS 20
 
 
 const int Z_AGGRO=10;
