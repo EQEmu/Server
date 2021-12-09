@@ -241,6 +241,9 @@ public:
 	void ResetTrade();
 	uint32 GetDisciplineTimer(uint32 timer_id);
 	void ResetDisciplineTimer(uint32 timer_id);
+	void ResetCastbarCooldownBySlot(int slot);
+	void ResetAllCastbarCooldowns();
+	void ResetCastbarCooldownBySpellID(uint32 spell_id);
 	void ResetAllDisciplineTimers();
 	bool UseDiscipline(int spell_id, int target_id);
 	bool HasDisciplineLearned(uint16 spell_id);
