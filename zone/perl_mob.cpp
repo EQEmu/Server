@@ -4809,7 +4809,7 @@ XS(XS_Mob_SendAppearanceEffectActor) {
 XS(XS_Mob_SendAppearanceEffectGround); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendAppearanceEffectGround) {
 	dXSARGS;
-	if (items < 3 || items > 7)
+	if (items < 3 || items > 8)
 		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffectGround(THIS, int32 effect1, [int32 effect2 = 0], [int32 effect3 = 0], [int32 effect4 = 0], [int32 effect5 = 0], [Client* single_client_to_send_to = null])"); // @categories Script Utility
 	{
 		Mob *THIS;
@@ -4821,10 +4821,10 @@ XS(XS_Mob_SendAppearanceEffectGround) {
 		Client *client = nullptr;
 		VALIDATE_THIS_IS_MOB;
 		if (items > 3) { parm2 = (int32)SvIV(ST(2)); }
-		if (items > 5) { parm3 = (int32)SvIV(ST(3)); }
-		if (items > 7) { parm4 = (int32)SvIV(ST(4)); }
-		if (items > 9) { parm5 = (int32)SvIV(ST(5)); }
-		if (items > 6) {
+		if (items > 4) { parm3 = (int32)SvIV(ST(3)); }
+		if (items > 5) { parm4 = (int32)SvIV(ST(4)); }
+		if (items > 6) { parm5 = (int32)SvIV(ST(5)); }
+		if (items > 7) {
 			if (sv_derived_from(ST(6), "Client")) {
 				IV tmp = SvIV((SV *)SvRV(ST(11)));
 				client = INT2PTR(Client *, tmp);
