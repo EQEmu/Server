@@ -480,7 +480,7 @@ Mob::Mob(
 		Vulnerability_Mod[i] = 0;
 	}
 
-	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
+	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		appearance_effects_id[i] = 0;
 		appearance_effects_slot[i] = 0;
 	}
