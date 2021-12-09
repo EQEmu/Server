@@ -98,6 +98,7 @@ void command_freeze(Client *c, const Seperator *sep);
 void command_gassign(Client *c, const Seperator *sep);
 void command_gearup(Client *c, const Seperator *sep);
 void command_gender(Client *c, const Seperator *sep);
+void command_getappearanceeffects(Client *c, const Seperator *sep);
 void command_getplayerburiedcorpsecount(Client *c, const Seperator *sep);
 void command_getvariable(Client *c, const Seperator *sep);
 void command_ginfo(Client *c, const Seperator *sep);

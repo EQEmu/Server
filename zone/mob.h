@@ -424,9 +424,8 @@ public:
 	inline bool HasEndurUpkeep() const { return endur_upkeep; }
 	inline void SetEndurUpkeep(bool val) { endur_upkeep = val; }
 	bool HasBuffWithSpellGroup(int spell_group);
-	//void SetAppearenceEffect(int32 slot, int32 value) { appearance_effects1[slot] = value; }
-	//int32 GetAppearenceEffect(int32 slot) const { return appearance_effects1[slot]; }
 	void SetAppearenceEffects(int32 slot, int32 value);
+	void GetAppearenceEffects();
 	void ClearAppearenceEffects();
 	void SendSavedAppearenceEffects(Client *receiver);
 

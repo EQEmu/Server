@@ -2959,6 +2959,17 @@ void Mob::SetAppearenceEffects(int32 slot, int32 value)
 	}
 }
 
+void Mob::GetAppearenceEffects()
+{
+	if (appearance_effects_id[0]) {
+		Message(Chat::Red, "No Appearance Effect exist on this mob");
+	}
+	
+	for (int i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
+		Message(Chat::Red, "ID: %i :: App Effect ID %i :: Slot %i");
+	}
+}
+
 void Mob::ClearAppearenceEffects()
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
