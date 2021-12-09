@@ -2966,7 +2966,7 @@ void Mob::GetAppearenceEffects()
 	}
 	
 	for (int i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
-		Message(Chat::Red, "ID: %i :: App Effect ID %i :: Slot %i");
+		Message(Chat::Red, "ID: %i :: App Effect ID %i :: Slot %i", i, appearance_effects_id[i], appearance_effects_slot[i]);
 	}
 }
 
@@ -2980,10 +2980,6 @@ void Mob::ClearAppearenceEffects()
 
 void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
 {
-	for (int i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
-		Shout("DEBUG %i :: Get Param %i GetSlot %i", i, appearance_effects_id[i], appearance_effects_slot[i]);
-	}
-		
 	if (appearance_effects_id[0]) {
 		SendAppearanceEffect(appearance_effects_id[0], appearance_effects_id[1], appearance_effects_id[2], appearance_effects_id[3], appearance_effects_id[4], receiver,
 			appearance_effects_slot[0], 0, appearance_effects_slot[1], 0, appearance_effects_slot[2], 0, appearance_effects_slot[3], 0, appearance_effects_slot[4], 0);
