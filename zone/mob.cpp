@@ -2965,7 +2965,7 @@ void Mob::GetAppearenceEffects()
 		return;
 	}
 	
-	for (int i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
+	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		Message(Chat::Red, "ID: %i :: App Effect ID %i :: Slot %i", i, appearance_effects_id[i], appearance_effects_slot[i]);
 	}
 }
