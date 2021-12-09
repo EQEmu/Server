@@ -2467,39 +2467,31 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyMerchantRequest, app, uint32);
 
-	NPC* tar = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
-	if (tar) {
-		if (DistanceSquared(m_Position, tar->GetPosition())  > USE_NPC_RANGE2)
-			return;
-
-		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
+	auto target = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
+	if (target) {
+		if (DistanceSquared(m_Position, target->GetPosition())  > USE_NPC_RANGE2) {
 			return;
 		}
 
-		uint32 alt_cur_id = tar->GetAltCurrencyType();
-		if (alt_cur_id == 0) {
+		if (target->GetClass() != ALT_CURRENCY_MERCHANT) {
 			return;
 		}
 
-		auto altc_iter = zone->AlternateCurrencies.begin();
-		bool found = false;
-		while (altc_iter != zone->AlternateCurrencies.end()) {
-			if ((*altc_iter).id == alt_cur_id) {
-				found = true;
-				break;
-			}
-			++altc_iter;
+		uint32 currency_id = target->GetAltCurrencyType();
+		if (!currency_id) {
+			return;
 		}
 
-		if (!found) {
+		auto currency_item_id = zone->GetCurrencyItemID(currency_id);
+		if (!currency_item_id) {
 			return;
 		}
 
 		std::stringstream ss(std::stringstream::in | std::stringstream::out);
 		std::stringstream item_ss(std::stringstream::in | std::stringstream::out);
-		ss << alt_cur_id << "|1|" << alt_cur_id;
+		ss << currency_id << "|1|" << currency_id;
 		uint32 count = 0;
-		uint32 merchant_id = tar->MerchantType;
+		uint32 merchant_id = target->MerchantType;
 		const EQ::ItemData *item = nullptr;
 
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
@@ -2510,14 +2502,16 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 				continue;
 			}
 
-			int32 fac = tar->GetPrimaryFaction();
-			if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+			auto faction_id = target->GetPrimaryFaction();
+			if (
+				faction_id &&
+				GetModCharacterFactionLevel(faction_id) < ml.faction_required
+			) {
 				continue;
 			}
 
 			item = database.GetItem(ml.item);
-			if (item)
-			{
+			if (item) {
 				item_ss << "^" << item->Name << "|";
 				item_ss << item->ID << "|";
 				item_ss << ml.alt_currency_cost << "|";
@@ -2531,8 +2525,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 
 		if (count > 0) {
 			ss << "|" << count << item_ss.str();
-		}
-		else {
+		} else {
 			ss << "|0";
 		}
 
@@ -2630,16 +2623,9 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyReclaim, app, AltCurrencyReclaim_Struct);
 	AltCurrencyReclaim_Struct *reclaim = (AltCurrencyReclaim_Struct*)app->pBuffer;
-	uint32 item_id = 0;
-	auto iter = zone->AlternateCurrencies.begin();
-	while (iter != zone->AlternateCurrencies.end()) {
-		if ((*iter).id == reclaim->currency_id) {
-			item_id = (*iter).item_id;
-		}
-		++iter;
-	}
+	uint32 item_id = zone->GetCurrencyItemID(reclaim->currency_id);
 
-	if (item_id == 0) {
+	if (!item_id) {
 		return;
 	}
 

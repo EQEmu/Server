@@ -7082,23 +7082,16 @@ void Client::SendAltCurrencies() {
 		altc->opcode = ALT_CURRENCY_OP_POPULATE;
 		altc->count = count;
 
-		uint32 i = 0;
-		auto iter = zone->AlternateCurrencies.begin();
-		while(iter != zone->AlternateCurrencies.end()) {
-			const EQ::ItemData* item = database.GetItem((*iter).item_id);
-			altc->entries[i].currency_number = (*iter).id;
-			altc->entries[i].unknown00 = 1;
-			altc->entries[i].currency_number2 = (*iter).id;
-			altc->entries[i].item_id = (*iter).item_id;
-			if(item) {
-				altc->entries[i].item_icon = item->Icon;
-				altc->entries[i].stack_size = item->StackSize;
-			} else {
-				altc->entries[i].item_icon = 1000;
-				altc->entries[i].stack_size = 1000;
-			}
-			i++;
-			++iter;
+		uint32 currency_id = 0;
+		for (const auto& alternate_currency : zone->AlternateCurrencies) {
+			const EQ::ItemData* item = database.GetItem(alternate_currency.item_id);
+			altc->entries[currency_id].currency_number = alternate_currency.id;
+			altc->entries[currency_id].unknown00 = 1;
+			altc->entries[currency_id].currency_number2 = alternate_currency.id;
+			altc->entries[currency_id].item_id = alternate_currency.item_id;
+			altc->entries[currency_id].item_icon = item ? item->Icon : 1000;
+			altc->entries[currency_id].stack_size = item ? item->StackSize : 1000;
+			currency_id++;
 		}
 
 		FastQueuePacket(&outapp);
@@ -7153,10 +7146,8 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 
 void Client::SendAlternateCurrencyValues()
 {
-	auto iter = zone->AlternateCurrencies.begin();
-	while(iter != zone->AlternateCurrencies.end()) {
-		SendAlternateCurrencyValue((*iter).id, false);
-		++iter;
+	for (const auto& alternate_currency : zone->AlternateCurrencies) {
+		SendAlternateCurrencyValue(alternate_currency.id, false);
 	}
 }
 

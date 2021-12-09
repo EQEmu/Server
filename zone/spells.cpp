@@ -5246,7 +5246,7 @@ void Mob::SendSpellBarEnable(uint16 spell_id)
 	manachange->spell_id = spell_id;
 	manachange->stamina = CastToClient()->GetEndurance();
 	manachange->keepcasting = 0;
-	manachange->slot = CastToClient()->FindMemmedSpellByID(spell_id);
+	manachange->slot = CastToClient()->FindMemmedSpellBySpellID(spell_id);
 	outapp->priority = 6;
 	CastToClient()->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -5377,88 +5377,98 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 
 void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0)
+	if (slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0) {
 		return;
+	}
 
-	if(update_client)
-	{
-		if(m_pp.mem_spells[slot] != 0xFFFFFFFF)
+	if(update_client) {
+		if (IsValidSpell(m_pp.mem_spells[slot])) {
 			UnmemSpell(slot, update_client);
+		}
 	}
 
 	m_pp.mem_spells[slot] = spell_id;
 	LogSpells("Spell [{}] memorized into slot [{}]", spell_id, slot);
 
-	database.SaveCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	database.SaveCharacterMemorizedSpell(CharacterID(), m_pp.mem_spells[slot], slot);
 
-	if(update_client)
-	{
+	if(update_client) {
 		MemorizeSpell(slot, spell_id, memSpellMemorize);
 	}
 }
 
 void Client::UnmemSpell(int slot, bool update_client)
 {
-	if(slot > EQ::spells::SPELL_GEM_COUNT || slot < 0)
+	if (slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0) {
 		return;
+	}
 
 	LogSpells("Spell [{}] forgotten from slot [{}]", m_pp.mem_spells[slot], slot);
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
-	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	database.DeleteCharacterMemorizedSpell(CharacterID(), m_pp.mem_spells[slot], slot);
 
-	if(update_client)
-	{
+	if(update_client) {
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
 	}
 }
 
 void Client::UnmemSpellBySpellID(int32 spell_id)
 {
-	for(int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
-		if(m_pp.mem_spells[i] == spell_id) {
-			UnmemSpell(i, true);
-			break;
-		}
+	auto spell_gem = FindMemmedSpellBySpellID(spell_id);
+	if (spell_gem >= EQ::spells::SPELL_GEM_COUNT || spell_gem < 0) {
+		return;
 	}
+
+	UnmemSpell(spell_gem);
 }
 
 void Client::UnmemSpellAll(bool update_client)
 {
-	int i;
-
-	for(i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++)
-		if(m_pp.mem_spells[i] != 0xFFFFFFFF)
-			UnmemSpell(i, update_client);
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
+			UnmemSpell(spell_gem, update_client);
+		}
+	}
 }
 
 uint32 Client::GetSpellIDByBookSlot(int book_slot) {
 	if (book_slot <= EQ::spells::SPELLBOOK_SIZE) {
 		return GetSpellByBookSlot(book_slot);
 	}
-	return -1;	//default
+	return -1;
+}
+
+int Client::FindEmptyMemSlot() {
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (!IsValidSpell(m_pp.mem_spells[spell_gem])) {
+			return spell_gem;
+		}
+	}
+	return -1;
 }
 
 uint16 Client::FindMemmedSpellBySlot(int slot) {
-	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
+	if (IsValidSpell(m_pp.mem_spells[slot])) {
 		return m_pp.mem_spells[slot];
-
+	}
 	return 0;
 }
 
 int Client::MemmedCount() {
 	int memmed_count = 0;
-	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++)
-		if (m_pp.mem_spells[i] != 0xFFFFFFFF)
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
 			memmed_count++;
-
+		}
+	}
 	return memmed_count;
 }
 
-int Client::FindMemmedSpellByID(uint16 spell_id) {
-	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
-		if (m_pp.mem_spells[i] == spell_id) {
-			return i;
+int Client::FindMemmedSpellBySpellID(uint16 spell_id) {
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem]) && m_pp.mem_spells[spell_gem] == spell_id) {
+			return spell_gem;
 		}
 	}
 	return -1;
