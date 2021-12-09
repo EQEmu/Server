@@ -25,6 +25,7 @@ void command_appearanceeffects(Client *c, const Seperator *sep)
 		Mob* m_target = c->GetTarget();
 		if (m_target) {
 			m_target->SendAppearanceEffect(app_effectid, 0, 0, 0, 0, nullptr, slot, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+			c->Message(Chat::White, "Appearance Effect ID %i for slot %i has been set.", app_effectid, slot);
 		}
 	}
 
@@ -36,6 +37,7 @@ void command_appearanceeffects(Client *c, const Seperator *sep)
 				m_target->GetHairStyle(), m_target->GetLuclinFace(), m_target->GetBeard(), 0xFF,
 				m_target->GetDrakkinHeritage(), m_target->GetDrakkinTattoo(), m_target->GetDrakkinDetails(), m_target->GetSize(), false);
 			m_target->ClearAppearenceEffects();
+			c->Message(Chat::White, "All Appearance Effects have been removed.");
 		}
 		return;
 	}
