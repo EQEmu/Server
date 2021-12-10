@@ -743,7 +743,12 @@ void Client::CompleteConnect()
 					}
 				}
 				else {
-					SendAppearancePacket(AT_Levitate, 2);
+					if (spell.limit_value[x1] == 1) {
+						SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::LevitateWhileRunning, true, true);
+					}
+					else {
+						SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::Levitating, true, true);
+					}
 				}
 				break;
 			}

@@ -1369,7 +1369,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				//this sends the levitate packet to everybody else
 				//who does not otherwise receive the buff packet.
-				SendAppearancePacket(AT_Levitate, 2, true, true);
+				if (spells[spell_id].limit_value[i] == 1) {
+					SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::LevitateWhileRunning, true, true);
+				}
+				else {
+					SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::Levitating, true, true);
+				}
 				break;
 			}
 
