@@ -652,10 +652,11 @@ void Client::CompleteConnect()
 
 		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
 			switch (spell.effect_id[x1]) {
-			case SE_IllusionCopy:
 			case SE_Illusion: {
-				Mob *caster = entity_list.GetMobID(buffs[j1].casterid);
-				ApplySpellEffectIllusion(spell.id, caster, j1, spell.base_value[x1], spell.limit_value[x1], spell.max_value[x1]);
+				if (buffs[j1].persistant_buff) {
+					Mob *caster = entity_list.GetMobID(buffs[j1].casterid);
+					ApplySpellEffectIllusion(spell.id, caster, j1, spell.base_value[x1], spell.limit_value[x1], spell.max_value[x1]);
+				}
 				break;
 			}
 			case SE_SummonHorse: {
