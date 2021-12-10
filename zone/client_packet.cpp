@@ -745,6 +745,8 @@ void Client::CompleteConnect()
 
 	entity_list.SendUntargetable(this);
 
+	entity_list.SendAppearanceEffects(this);
+
 	int x;
 	for (x = EQ::textures::textureBegin; x <= EQ::textures::LastTexture; x++) {
 		SendWearChange(x);

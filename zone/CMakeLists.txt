@@ -294,6 +294,7 @@ SET(gm_commands
     gm_commands/aggrozone.cpp
     gm_commands/ai.cpp
     gm_commands/appearance.cpp
+    gm_commands/appearanceeffects.cpp
     gm_commands/attack.cpp
     gm_commands/augmentitem.cpp
     gm_commands/ban.cpp

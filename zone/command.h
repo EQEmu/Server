@@ -34,6 +34,7 @@ void command_aggro(Client *c, const Seperator *sep);
 void command_aggrozone(Client *c, const Seperator *sep);
 void command_ai(Client *c, const Seperator *sep);
 void command_appearance(Client *c, const Seperator *sep);
+void command_appearanceeffects(Client *c, const Seperator *sep);
 void command_apply_shared_memory(Client *c, const Seperator *sep);
 void command_attack(Client *c, const Seperator *sep);
 void command_augmentitem(Client *c, const Seperator *sep);
