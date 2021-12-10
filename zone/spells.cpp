@@ -2930,7 +2930,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
 	if (caster == target && (target->aabonuses.IllusionPersistence || target->spellbonuses.IllusionPersistence ||
 				 target->itembonuses.IllusionPersistence) &&
-	    spell_id != 287 && spell_id != 601 && IsEffectInSpell(spell_id, SE_Illusion))
+	    spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion))
 		res = 10000; // ~16h override
 
 
