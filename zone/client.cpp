@@ -7197,7 +7197,7 @@ void Client::OpenLFGuildWindow()
 
 bool Client::IsXTarget(const Mob *m) const
 {
-	if(!XTargettingAvailable() || !m || (m->GetID() == 0))
+	if(!XTargettingAvailable() || !m || (m->GetID() == 0) || m->IsCorpse())
 		return false;
 
 	for(int i = 0; i < GetMaxXTargets(); ++i)
@@ -7455,6 +7455,13 @@ void Client::ProcessXTargetAutoHaters()
 
 		if (XTargets[i].ID != 0 && !GetXTargetAutoMgr()->contains_mob(XTargets[i].ID)) {
 			XTargets[i].ID = 0;
+			XTargets[i].Name[0] = 0;
+			XTargets[i].dirty = true;
+		}
+
+		if (XTargets[i].ID != 0 && entity_list.GetMob(XTargets[i].ID) && entity_list.GetMob(XTargets[i].ID)->IsCorpse()) {
+			XTargets[i].ID = 0;
+			XTargets[i].Name[0] = 0;
 			XTargets[i].dirty = true;
 		}
 
