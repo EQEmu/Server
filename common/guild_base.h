@@ -76,8 +76,12 @@ class BaseGuildManager
 		bool	GetGuildChannel(uint32 GuildID, char *ChannelBuffer) const;
 		const char *GetRankName(uint32 guild_id, uint8 rank) const;
 		const char *GetGuildName(uint32 guild_id) const;
+		std::string GetGuildNameByID(uint32 guild_id) const;
+		std::string GetGuildRankName(uint32 guild_id, uint8 rank) const;
+		bool IsCharacterInGuild(uint32 character_id, uint32 guild_id = 0);
 		bool	GetGuildNameByID(uint32 guild_id, std::string &into) const;
 		uint32	GetGuildIDByName(const char *GuildName);
+		uint32 GetGuildIDByCharacterID(uint32 character_id);
 		bool	IsGuildLeader(uint32 guild_id, uint32 char_id) const;
 		uint8	GetDisplayedRank(uint32 guild_id, uint8 rank, uint32 char_id) const;
 		bool	CheckGMStatus(uint32 guild_id, uint8 status) const;

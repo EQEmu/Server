@@ -5369,25 +5369,15 @@ void Client::ShowSkillsWindow()
 
 		// Current Skill Level out of Max Skill Level or a Check Mark for Maxed
 		popup_text += fmt::format(
-			"<td>{}{}{}</td>",
+			"<td>{}</td>",
 			(
 				skill_maxed ?
-				"<c \"#00FF00\">" :
-				""
-			),
-			(
-				skill_maxed ?				
-				"✔" :
+				"<c \"#00FF00\">✔</c>" :
 				fmt::format(
 					"{}/{}",
 					current_skill,
 					max_skill
 				)
-			),
-			(
-				skill_maxed ?
-				"</c>" :
-				""
 			)
 		);
 
