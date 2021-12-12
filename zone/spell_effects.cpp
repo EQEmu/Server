@@ -2202,9 +2202,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Rampage");
 #endif
-				if(caster)
-					entity_list.AEAttack(caster, 30, EQ::invslot::slotPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
-
+				//defulat live range is 40, with 1 attack per round, no hit count limit
+				float rampage_range = 40;
+				if (spells[spell_id].aoe_range) {
+					rampage_range = spells[spell_id].aoe_range; //added for expanded functionality
+				}
+				int attack_count = spells[spell_id].base_value[i]; //added for expanded functionality
+				int hit_count = spells[spell_id].limit_value[i]; //added for expanded functionality
+				if (caster) {
+					entity_list.AEAttack(caster, rampage_range, EQ::invslot::slotPrimary, hit_count, true, attack_count); // on live wars dont get a duration ramp, its a one shot deal
+				}
 				break;
 			}
 
