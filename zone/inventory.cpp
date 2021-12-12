@@ -2224,7 +2224,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);
-	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END && matslot != EQ::textures::armorHead) { // think this is to allow the client to update with /showhelm
+	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {
 		SendWearChange(matslot);
 	}
 

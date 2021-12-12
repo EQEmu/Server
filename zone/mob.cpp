@@ -3168,6 +3168,16 @@ bool Mob::UpdateActiveLight()
 	return (m_Light.Level[EQ::lightsource::LightActive] != old_light_level);
 }
 
+void Mob::SendWearChangeAndLighting(int8 last_texture) {
+
+	for (int i = EQ::textures::textureBegin; i <= last_texture; i++) {
+		SendWearChange(i);
+	}
+	UpdateActiveLight();
+	SendAppearancePacket(AT_Light, GetActiveLightType());
+
+}
+
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 	// Size Code
 	if (!bNoRestriction)

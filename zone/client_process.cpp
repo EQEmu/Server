@@ -199,6 +199,16 @@ bool Client::Process() {
 			instalog = true;
 		}
 
+		if (connect_delay_timer.Check()) {
+			Shout("Connect Delay Timer check");
+			SendWearChangeAndLighting(EQ::textures::LastTexture);
+			Mob *pet = GetPet();
+			if (pet) {
+				pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
+			}
+			connect_delay_timer.Disable();
+		}
+
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 

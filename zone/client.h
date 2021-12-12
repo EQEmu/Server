@@ -1870,6 +1870,8 @@ private:
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
 
+	Timer connect_delay_timer;
+
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
 
