@@ -1622,16 +1622,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Model Size: %d%%", effect_value);
 #endif
-				// Only allow 2 size changes from Base Size
-				float modifyAmount = (static_cast<float>(effect_value) / 100.0f);
-				float maxModAmount = GetBaseSize() * modifyAmount * modifyAmount;
-				if ((GetSize() <= GetBaseSize() && GetSize() > maxModAmount) ||
-					(GetSize() >= GetBaseSize() && GetSize() < maxModAmount) ||
-					(GetSize() <= GetBaseSize() && maxModAmount > 1.0f) ||
-					(GetSize() >= GetBaseSize() && maxModAmount < 1.0f))
-				{
-					ChangeSize(GetSize() * modifyAmount);
+				if (effect_value && effect_value != 100) {
+					// Only allow 2 size changes from Base Size
+					float modifyAmount = (static_cast<float>(effect_value) / 100.0f);
+					float maxModAmount = GetBaseSize() * modifyAmount * modifyAmount;
+					if ((GetSize() <= GetBaseSize() && GetSize() > maxModAmount) ||
+						(GetSize() >= GetBaseSize() && GetSize() < maxModAmount) ||
+						(GetSize() <= GetBaseSize() && maxModAmount > 1.0f) ||
+						(GetSize() >= GetBaseSize() && maxModAmount < 1.0f))
+					{
+						ChangeSize(GetSize() * modifyAmount);
+					}
 				}
+				//Only applies to SPA 89, max value also likely does something, but unknown.
+				else if (effect == SE_ModelSize && spells[spell_id].limit_value[i]) {
+					ChangeSize(spells[spell_id].limit_value[i]);
+				}
+
 				break;
 			}
 
