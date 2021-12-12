@@ -1870,7 +1870,7 @@ private:
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
 
-	Timer on_connect_complete_delay_timer;
+	Timer heroforge_wearchange_timer;
 	
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;

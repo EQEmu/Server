@@ -902,7 +902,7 @@ void Client::CompleteConnect()
 		safe_delete(p);
 	}
 
-	on_connect_complete_delay_timer.Start(250);
+	heroforge_wearchange_timer.Start(250);
 }
 
 // connecting opcode handlers

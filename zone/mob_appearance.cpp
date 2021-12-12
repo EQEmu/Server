@@ -433,13 +433,8 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 	wear_change->wear_slot_id = material_slot;
 
-	if (wear_change->hero_forge_model) {
-		que_wearchange_slot = material_slot;
-	}
-	else {
-		que_wearchange_slot = - 1;
-	}
-	Shout("que wearchange slot %i HF %i", que_wearchange_slot, wear_change->hero_forge_model);
+	// Part of a bug fix to ensure heroforge models send to other clients in zone.
+	queue_wearchange_slot = wear_change->hero_forge_model ? material_slot : -1;
 
 	if (!one_client) {
 		entity_list.QueueClients(this, packet);

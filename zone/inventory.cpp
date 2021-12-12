@@ -2228,8 +2228,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		SendWearChange(matslot);
 	}
 	// This is part of a bug fix to ensure heroforge graphics display to other clients in zone.
-	if (que_wearchange_slot >= 0) {
-		on_connect_complete_delay_timer.Start(100);//TOO HACKY BUT WORKS
+	if (queue_wearchange_slot >= 0) {
+		heroforge_wearchange_timer.Start(100);//TOO HACKY BUT WORKS
 	}
 
 	// Step 7: Save change to the database
