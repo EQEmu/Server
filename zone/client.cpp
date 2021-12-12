@@ -270,7 +270,7 @@ Client::Client(EQStreamInterface* ieqs)
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
 	dynamiczone_removal_timer.Disable();
 
-	connect_delay_timer.Disable();
+	on_connect_complete_delay_timer.Disable();
 
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));

@@ -199,14 +199,18 @@ bool Client::Process() {
 			instalog = true;
 		}
 
-		if (connect_delay_timer.Check()) {
-			Shout("Connect Delay Timer check");
+		if (on_connect_complete_delay_timer.Check()) {
+			/*
+				This addresses bug where on zone in heroforge models would not be sent to other clients when this was
+				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue. 
+				Unclear the underlying reason for this, if a better solution can be found then can move this back. 
+			*/
 			SendWearChangeAndLighting(EQ::textures::LastTexture);
 			Mob *pet = GetPet();
 			if (pet) {
 				pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
 			}
-			connect_delay_timer.Disable();
+			on_connect_complete_delay_timer.Disable();
 		}
 
 		if (IsStunned() && stunned_timer.Check())

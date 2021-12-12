@@ -902,7 +902,7 @@ void Client::CompleteConnect()
 		safe_delete(p);
 	}
 
-	connect_delay_timer.Start(250);
+	on_connect_complete_delay_timer.Start(250);
 }
 
 // connecting opcode handlers

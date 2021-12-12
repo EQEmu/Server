@@ -2224,7 +2224,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);
-	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {
+	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {// on Titanium and ROF2 /showhelm works even if sending helm slot
 		SendWearChange(matslot);
 	}
 
