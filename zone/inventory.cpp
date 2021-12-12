@@ -2227,7 +2227,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {// on Titanium and ROF2 /showhelm works even if sending helm slot
 		SendWearChange(matslot);
 	}
-	if (matslot == 0) {
+	if (que_wearchange_slot >= 0) {
 		on_connect_complete_delay_timer.Start(250);//TOO HACKY BUT WORKS
 	}
 

@@ -495,6 +495,8 @@ Mob::Mob(
 	use_double_melee_round_dmg_bonus = false;
 	dw_same_delay = 0;
 
+	que_wearchange_slot = -1;
+
 #ifdef BOTS
 	m_manual_follow = false;
 #endif

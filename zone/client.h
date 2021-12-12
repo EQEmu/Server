@@ -1871,7 +1871,7 @@ private:
 	Timer task_request_timer;
 
 	Timer on_connect_complete_delay_timer;
-
+	
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
 

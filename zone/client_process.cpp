@@ -205,10 +205,16 @@ bool Client::Process() {
 				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue. 
 				Unclear the underlying reason for this, if a better solution can be found then can move this back. 
 			*/
-			SendWearChangeAndLighting(EQ::textures::LastTexture);
-			Mob *pet = GetPet();
-			if (pet) {
-				pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
+			Shout("Timer Check QUE %i", que_wearchange_slot);
+			if (que_wearchange_slot == -1) {
+				SendWearChangeAndLighting(EQ::textures::LastTexture);
+				Mob *pet = GetPet();
+				if (pet) {
+					pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
+				}
+			}
+			else if (que_wearchange_slot >= 0) {
+				SendWearChange(static_cast<uint8>(que_wearchange_slot));
 			}
 			on_connect_complete_delay_timer.Disable();
 		}
