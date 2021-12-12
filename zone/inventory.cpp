@@ -2229,7 +2229,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	// This is part of a bug fix to ensure heroforge graphics display to other clients in zone.
 	if (queue_wearchange_slot >= 0) {
-		heroforge_wearchange_timer.Start(100);//TOO HACKY BUT WORKS
+		heroforge_wearchange_timer.Start(100);
 	}
 
 	// Step 7: Save change to the database
