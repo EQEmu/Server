@@ -1801,6 +1801,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	entity_list.RemoveFromTargets(this, true);
 	hate_list.RemoveEntFromHateList(this);
 	RemoveAutoXTargets();
+	ProcessXTargetAutoHaters();
 
 	//remove ourself from all proximities
 	ClearAllProximities();
@@ -2571,6 +2572,10 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		}
 
 		entity_list.RemoveFromAutoXTargets(this);
+
+		if (killer->GetUltimateOwner()->IsClient()) {
+			killer->GetUltimateOwner()->CastToClient()->ProcessXTargetAutoHaters();
+		}
 		uint16 emoteid = this->GetEmoteID();
 		auto corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,
 			level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS)
