@@ -7411,7 +7411,7 @@ void Client::RemoveAutoXTargets()
 	for(int i = 0; i < GetMaxXTargets(); ++i)
 	{
 		if(XTargets[i].Type == Auto)
-		{			
+		{
 			XTargets[i].ID = 0;
 			XTargets[i].Name[0] = 0;
 			SendXTargetPacket(i, nullptr);
