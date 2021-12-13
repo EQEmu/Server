@@ -912,7 +912,7 @@ typedef enum {
 #define SE_IllusionOther				202	// implemented - Project Illusion
 #define SE_MassGroupBuff				203	// implemented
 #define SE_GroupFearImmunity			204	// implemented - (Does not use bonus)
-#define SE_Rampage						205	// implemented
+#define SE_Rampage						205	// implemented, @Combat Instant, Perform a primary slot combat rounds on all creatures within a 40 foot radius, base: number of attack rounds, limit: max entities hit per round, max: none, Note: AE range is 40 by default. Custom: Set field 'aoe_range' to override default. Adding additional attacks and hit count limit.
 #define SE_AETaunt						206	// implemented
 #define SE_FleshToBone					207	// implemented
 //#define SE_PurgePoison				208	// not used
