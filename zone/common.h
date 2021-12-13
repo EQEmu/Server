@@ -617,7 +617,7 @@ struct StatBonuses {
 	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
 	uint8	AssassinateLevel[2];				// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
-	bool	IllusionPersistence;				// Causes illusions not to fade.
+	int		IllusionPersistence;				// 1=Causes illusions not to fade when zoning 2=Allow to persist after death.
 	uint16	extra_xtargets;						// extra xtarget entries
 	bool	ShroudofStealth;					// rogue improved invisiblity
 	uint16  ReduceFallDamage;					// reduce fall damage by percent

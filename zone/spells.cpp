@@ -2929,9 +2929,10 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
 	if (caster == target && (target->aabonuses.IllusionPersistence || target->spellbonuses.IllusionPersistence ||
-				 target->itembonuses.IllusionPersistence) &&
-	    spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion))
+		target->itembonuses.IllusionPersistence) &&
+		spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion)) {
 		res = 10000; // ~16h override
+	}
 
 
 	res = mod_buff_duration(res, caster, target, spell_id);
@@ -4373,7 +4374,8 @@ void Mob::BuffFadeNonPersistDeath()
 		auto current_spell_id = buffs[buff_slot].spellid;
 		if (
 			IsValidSpell(current_spell_id) &&
-			!IsPersistDeathSpell(current_spell_id)
+			!IsPersistDeathSpell(current_spell_id) &&
+			!HasPersistDeathIllusion(current_spell_id)
 		) {
 			BuffFadeBySlot(buff_slot, false);
 			recalc_bonus = true;

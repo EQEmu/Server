@@ -8938,3 +8938,13 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 		buffs[buffslot].persistant_buff = 0;
 	}
 }
+
+bool Mob::HasPersistDeathIllusion(int32 spell_id) {
+
+	if (spellbonuses.IllusionPersistence > 1 || aabonuses.IllusionPersistence > 1  || itembonuses.IllusionPersistence > 1) {
+		if (spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion) && IsBeneficialSpell(spell_id)) {
+			return true;
+		}
+	}
+	return false;
+}

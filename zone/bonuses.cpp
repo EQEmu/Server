@@ -1454,7 +1454,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_IllusionPersistence:
-			newbon->IllusionPersistence = true;
+			newbon->IllusionPersistence = base_value;
 			break;
 
 		case SE_LimitToSkill: {
@@ -3529,7 +3529,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			}
 
 			case SE_IllusionPersistence:
-				new_bonus->IllusionPersistence = true;
+				new_bonus->IllusionPersistence = effect_value;
 				break;
 
 			case SE_LimitToSkill:{
@@ -5410,9 +5410,9 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_IllusionPersistence:
-					if (negate_spellbonus) { spellbonuses.IllusionPersistence = false; }
-					if (negate_itembonus) { itembonuses.IllusionPersistence = false; }
-					if (negate_aabonus) { aabonuses.IllusionPersistence = false; }
+					if (negate_spellbonus) { spellbonuses.IllusionPersistence = effect_value; }
+					if (negate_itembonus) { itembonuses.IllusionPersistence = effect_value; }
+					if (negate_aabonus) { aabonuses.IllusionPersistence = effect_value; }
 					break;
 
 				case SE_Attack_Accuracy_Max_Percent:
