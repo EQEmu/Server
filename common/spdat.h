@@ -952,7 +952,7 @@ typedef enum {
 #define SE_IncreaseChanceMemwipe		242	// implemented - @Memblur, increases the chance to wipe hate with memory blurr, base: chance pct, limit: none, max: none, Note: Mods final blur chance after other bonuses added.
 #define SE_CharmBreakChance				243	// implemented - Total Domination
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
-#define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
+#define SE_TrapCircumvention			245	// implemented, @Traps, decreases the chance that you will set off a trap when opening a chest or other similar container by percentage, base: chance modifer, limit: none, max: none
 #define SE_SetBreathLevel				246 // *not implemented as bonus
 #define SE_RaiseSkillCap				247	// implemented[AA] - adds skill over the skill cap.
 #define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)

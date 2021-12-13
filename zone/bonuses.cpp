@@ -1773,6 +1773,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_TrapCircumvention:
+			newbon->TrapCircumvention += base_value;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -1784,9 +1788,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_NimbleEvasion:
 			break;
-		case SE_TrapCircumvention:
-			break;
-
 
 		// not handled here
 		case SE_HastenedAASkill:
@@ -3792,6 +3793,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_CompleteHeal:
 				new_bonus->CompleteHealBuffBlocker = true;
+				break;
+
+			case SE_TrapCircumvention:
+				new_bonus->TrapCircumvention += effect_value;
 				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table

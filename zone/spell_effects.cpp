@@ -240,7 +240,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (spells[spell_id].limit_value[i] && !PassCastRestriction(spells[spell_id].limit_value[i])) {
 					break; //no messages are given on live if this fails.
 				}
-
+				int trap_circumvention = spellbonuses.TrapCircumvention + itembonuses.TrapCircumvention + aabonuses.TrapCircumvention;
+				Shout("Check trap bonus %i", trap_circumvention);
 				// for offensive spells check if we have a spell rune on
 				int32 dmg = effect_value;
 				if(dmg < 0)
