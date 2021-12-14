@@ -120,6 +120,7 @@ int command_init(void)
 		command_add("aggrozone", "[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.", AccountStatus::GMAdmin, command_aggrozone) ||
 		command_add("ai", "[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target", AccountStatus::GMAdmin, command_ai) ||
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", AccountStatus::GMLeadAdmin, command_appearance) ||
+		command_add("appearanceeffects", "- [view] [set] [remove] appearance effects.", AccountStatus::GMAdmin, command_appearanceeffects) ||
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", AccountStatus::GMImpossible, command_apply_shared_memory) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
@@ -241,7 +242,7 @@ int command_init(void)
 		command_add("makepet", "[level] [class] [race] [texture] - Make a pet", AccountStatus::Guide, command_makepet) ||
 		command_add("mana", "- Fill your or your target's mana", AccountStatus::Guide, command_mana) ||
 		command_add("maxskills", "Maxes skills for you.", AccountStatus::GMMgmt, command_max_all_skills) ||
-		command_add("memspell", "[Slot] [Spell ID] - Memorize a Spell by ID in the specified Slot", AccountStatus::Guide, command_memspell) ||
+		command_add("memspell", "[Spell ID] [Spell Gem] - Memorize a Spell by ID to the specified Spell Gem for you or your target", AccountStatus::Guide, command_memspell) ||
 		command_add("merchant_close_shop",  "Closes a merchant shop", AccountStatus::GMAdmin, command_merchantcloseshop) ||
 		command_add("merchant_open_shop",  "Opens a merchants shop", AccountStatus::GMAdmin, command_merchantopenshop) ||
 		command_add("modifynpcstat", "- Modifys a NPC's stats", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
@@ -324,6 +325,7 @@ int command_init(void)
 		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", AccountStatus::GMAdmin, command_setaapts) ||
 		command_add("setaaxp", "[AA|Group|Raid] [AA Experience] - Set your or your player target's AA Experience by Type", AccountStatus::GMAdmin, command_setaaxp) ||
 		command_add("setadventurepoints", "- Set your or your player target's available adventure points", AccountStatus::GMLeadAdmin, command_set_adventure_points) ||
+		command_add("setaltcurrency", "[Currency ID] [Amount] - Set your or your target's available Alternate Currency by Currency ID", AccountStatus::GMAdmin, command_setaltcurrency) ||
 		command_add("setanim", "[Animation ID (IDs are 0 to 4)] - Set target's appearance to Animation ID", AccountStatus::GMMgmt, command_setanim) ||
 		command_add("setcrystals", "[value] - Set your or your player target's available radiant or ebon crystals", AccountStatus::GMAdmin, command_setcrystals) ||
 		command_add("setendurance", "[Endurance] - Set your or your target's Endurance", AccountStatus::GMAdmin, command_setendurance) ||
@@ -337,7 +339,7 @@ int command_init(void)
 		command_add("setpvppoints", "[Amount] - Set your or your player target's PVP points", AccountStatus::GMAdmin, command_setpvppoints) ||
 		command_add("setskill", "[skillnum] [value] - Set your target's skill skillnum to value", AccountStatus::Guide, command_setskill) ||
 		command_add("setskillall", "[value] - Set all of your target's skills to value", AccountStatus::Guide, command_setskillall) ||
-		command_add("setstartzone", "[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity", AccountStatus::QuestTroupe, command_setstartzone) ||
+		command_add("setstartzone", "[Zone ID|Zone Short Name] - Sets your or your target's starting zone (Use '0' or 'Reset' to allow the player use of /setstartcity)", AccountStatus::QuestTroupe, command_setstartzone) ||
 		command_add("setstat", "- Sets the stats to a specific value.", AccountStatus::Max, command_setstat) ||
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
 		command_add("showbonusstats", "[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.", AccountStatus::Guide, command_showbonusstats) ||
@@ -378,6 +380,8 @@ int command_init(void)
 		command_add("undyeme", "- Remove dye from all of your armor slots", AccountStatus::Player, command_undyeme) ||
 		command_add("unfreeze", "- Unfreeze your target", AccountStatus::QuestTroupe, command_unfreeze) ||
 		command_add("unlock", "- Unlock the worldserver", AccountStatus::GMLeadAdmin, command_unlock) ||
+		command_add("unmemspell", "[Spell ID] - Unmemorize a Spell by ID for you or your target", AccountStatus::Guide, command_unmemspell) ||
+		command_add("unmemspells", " - Unmemorize all spells for you or your target", AccountStatus::Guide, command_unmemspells) ||
 		command_add("unscribespell", "[spellid] - Unscribe specified spell from your target's spell book.", AccountStatus::GMCoder, command_unscribespell) ||
 		command_add("unscribespells", "- Clear out your or your player target's spell book.", AccountStatus::GMCoder, command_unscribespells) ||
 		command_add("untraindisc", "[spellid] - Untrain specified discipline from your target.", AccountStatus::GMCoder, command_untraindisc) ||

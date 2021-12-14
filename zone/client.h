@@ -792,8 +792,9 @@ public:
 	void UnmemSpell(int slot, bool update_client = true);
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll(bool update_client = true);
+	int FindEmptyMemSlot();
 	uint16 FindMemmedSpellBySlot(int slot);
-	int FindMemmedSpellByID(uint16 spell_id);
+	int FindMemmedSpellBySpellID(uint16 spell_id);
 	int MemmedCount();
 	std::vector<int> GetLearnableDisciplines(uint8 min_level = 1, uint8 max_level = 0);
 	std::vector<int> GetLearnedDisciplines();
@@ -1013,6 +1014,10 @@ public:
 
 	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
 	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
+	
+	void ResetCastbarCooldownBySlot(int slot);
+	void ResetAllCastbarCooldowns();
+	void ResetCastbarCooldownBySpellID(uint32 spell_id);
 
 	bool CheckTitle(int titleset);
 	void EnableTitle(int titleset);
@@ -1865,6 +1870,8 @@ private:
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
 
+	Timer heroforge_wearchange_timer;
+	
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
 

@@ -1264,7 +1264,8 @@ void EntityList::AEAttack(
 	float distance,
 	int Hand,
 	int count,
-	bool is_from_spell)
+	bool is_from_spell,
+	int attack_rounds)
 {
 	Mob   *current_mob     = nullptr;
 	float distance_squared = distance * distance;
@@ -1276,15 +1277,18 @@ void EntityList::AEAttack(
 		if (current_mob->IsNPC()
 			&& current_mob != attacker //this is not needed unless NPCs can use this
 			&& (attacker->IsAttackAllowed(current_mob))
-			&& current_mob->GetRace() != 216 && current_mob->GetRace() != 472 /* dont attack horses */
+			&& !current_mob->IsHorse() /* dont attack mounts */
 			&& (DistanceSquared(current_mob->GetPosition(), attacker->GetPosition()) <= distance_squared)
 			) {
 
-			if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER) {
-				attacker->Attack(current_mob, Hand, false, false, is_from_spell);
-			}
-			else {
-				attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+			for (int i = 0; i < attack_rounds; i++) {
+
+				if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER) {
+					attacker->Attack(current_mob, Hand, false, false, is_from_spell);
+				}
+				else {
+					attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+				}
 			}
 
 			hit_count++;

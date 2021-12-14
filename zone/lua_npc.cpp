@@ -267,9 +267,9 @@ int Lua_NPC::GetMaxWp() {
 	return self->GetMaxWp();
 }
 
-void Lua_NPC::DisplayWaypointInfo(Lua_Client to) {
+void Lua_NPC::DisplayWaypointInfo(Lua_Client client) {
 	Lua_Safe_Call_Void();
-	self->DisplayWaypointInfo(to);
+	self->DisplayWaypointInfo(client);
 }
 
 void Lua_NPC::CalculateNewWaypoint() {

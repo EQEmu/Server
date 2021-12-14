@@ -4809,31 +4809,22 @@ XS(XS_Mob_SendAppearanceEffectActor) {
 XS(XS_Mob_SendAppearanceEffectGround); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendAppearanceEffectGround) {
 	dXSARGS;
-	if (items < 3 || items > 12)
-		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffectGround(THIS, int32 effect1, uint32 slot1 = 1, [int32 effect2 = 0], [uint32 slot2 = 1], [int32 effect3 = 0], [uint32 slot3 = 1], [int32 effect4 = 0], [uint32 slot4 = 1], [int32 effect5 = 0], [uint32 slot5 = 1], [Client* single_client_to_send_to = null])"); // @categories Script Utility
+	if (items < 3 || items > 8)
+		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffectGround(THIS, int32 effect1, [int32 effect2 = 0], [int32 effect3 = 0], [int32 effect4 = 0], [int32 effect5 = 0], [Client* single_client_to_send_to = null])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int32 parm1 = (int32)SvIV(ST(1));
-		uint32 value1slot = (uint32)SvIV(ST(2));
 		int32 parm2 = 0;
-		uint32 value2slot = 1;
 		int32 parm3 = 0;
-		uint32 value3slot = 1;
 		int32 parm4 = 0;
-		uint32 value4slot = 1;
 		int32 parm5 = 0;
-		uint32 value5slot = 1;
 		Client *client = nullptr;
 		VALIDATE_THIS_IS_MOB;
-		if (items > 3) { parm2 = (int32)SvIV(ST(3)); }
-		if (items > 4) { value2slot = (uint32)SvIV(ST(4)); }
-		if (items > 5) { parm3 = (int32)SvIV(ST(5)); }
-		if (items > 6) { value3slot = (uint32)SvIV(ST(6)); }
-		if (items > 7) { parm4 = (int32)SvIV(ST(7)); }
-		if (items > 8) { value4slot = (uint32)SvIV(ST(8)); }
-		if (items > 9) { parm5 = (int32)SvIV(ST(9)); }
-		if (items > 10) { value5slot = (uint32)SvIV(ST(10)); }
-		if (items > 11) {
+		if (items > 3) { parm2 = (int32)SvIV(ST(2)); }
+		if (items > 4) { parm3 = (int32)SvIV(ST(3)); }
+		if (items > 5) { parm4 = (int32)SvIV(ST(4)); }
+		if (items > 6) { parm5 = (int32)SvIV(ST(5)); }
+		if (items > 7) {
 			if (sv_derived_from(ST(6), "Client")) {
 				IV tmp = SvIV((SV *)SvRV(ST(11)));
 				client = INT2PTR(Client *, tmp);
@@ -4844,8 +4835,8 @@ XS(XS_Mob_SendAppearanceEffectGround) {
 				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 		}
 
-		THIS->SendAppearanceEffect(parm1, parm2, parm3, parm4, parm5, client, value1slot, 1, value2slot, 1, value3slot, 1,
-			value4slot, 1, value5slot, 1);
+		THIS->SendAppearanceEffect(parm1, parm2, parm3, parm4, parm5, client, 1, 1, 1, 1, 1, 1,
+			1, 1, 1, 1);
 	}
 	XSRETURN_EMPTY;
 }
@@ -4858,7 +4849,11 @@ XS(XS_Mob_RemoveAllAppearanceEffects) {
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
-		THIS->SendIllusionPacket(THIS->GetRace());
+		THIS->SendIllusionPacket(THIS->GetRace(), THIS->GetGender(), THIS->GetTexture(), THIS->GetHelmTexture(),
+			THIS->GetHairColor(), THIS->GetBeardColor(), THIS->GetEyeColor1(), THIS->GetEyeColor2(),
+			THIS->GetHairStyle(), THIS->GetLuclinFace(), THIS->GetBeard(), 0xFF,
+			THIS->GetDrakkinHeritage(), THIS->GetDrakkinTattoo(), THIS->GetDrakkinDetails(), THIS->GetSize(), false);
+		THIS->ClearAppearenceEffects();
 	}
 	XSRETURN_EMPTY;
 }

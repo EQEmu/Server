@@ -775,20 +775,23 @@ XS(XS_NPC_DisplayWaypointInfo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_DisplayWaypointInfo) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::DisplayWaypointInfo(THIS, Client* target)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: NPC::DisplayWaypointInfo(THIS, Client* client)"); // @categories Script Utility
 	{
-		NPC    *THIS;
-		Client *to;
+		NPC *THIS;
+		Client *client;
 		VALIDATE_THIS_IS_NPC;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			to = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "to is not of type Client");
-		if (to == nullptr)
-			Perl_croak(aTHX_ "to is nullptr, avoiding crash.");
+			client = INT2PTR(Client *, tmp);
+		} else {
+			Perl_croak(aTHX_ "client is not of type Client");
+		}
 
-		THIS->DisplayWaypointInfo(to);
+		if (!client) {
+			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
+		}
+
+		THIS->DisplayWaypointInfo(client);
 	}
 	XSRETURN_EMPTY;
 }

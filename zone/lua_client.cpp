@@ -650,6 +650,16 @@ uint16 Lua_Client::FindMemmedSpellBySlot(int slot) {
 	return self->FindMemmedSpellBySlot(slot);
 }
 
+int Lua_Client::FindMemmedSpellBySpellID(uint16 spell_id) {
+	Lua_Safe_Call_Int();
+	return self->FindMemmedSpellBySpellID(spell_id);
+}
+
+int Lua_Client::FindEmptyMemSlot() {
+	Lua_Safe_Call_Int();
+	return self->FindEmptyMemSlot();
+}
+
 int Lua_Client::MemmedCount() {
 	Lua_Safe_Call_Int();
 	return self->MemmedCount();
@@ -2311,6 +2321,21 @@ int Lua_Client::GetNextAvailableDisciplineSlot(int starting_slot) {
 	return self->GetNextAvailableDisciplineSlot(starting_slot);
 }
 
+void Lua_Client::ResetCastbarCooldownBySlot(int slot) {
+	Lua_Safe_Call_Void();
+	self->ResetCastbarCooldownBySlot(slot);
+}
+
+void Lua_Client::ResetAllCastbarCooldowns() {
+	Lua_Safe_Call_Void();
+	self->ResetAllCastbarCooldowns();
+}
+
+void Lua_Client::ResetCastbarCooldownBySpellID(uint32 spell_id) {
+	Lua_Safe_Call_Void();
+	self->ResetCastbarCooldownBySpellID(spell_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2378,7 +2403,9 @@ luabind::scope lua_register_client() {
 	.def("Escape", (void(Lua_Client::*)(void))&Lua_Client::Escape)
 	.def("FailTask", (void(Lua_Client::*)(int))&Lua_Client::FailTask)
 	.def("FilteredMessage", &Lua_Client::FilteredMessage)
+	.def("FindEmptyMemSlot", (int(Lua_Client::*)(void))&Lua_Client::FindEmptyMemSlot)
 	.def("FindMemmedSpellBySlot", (uint16(Lua_Client::*)(int))&Lua_Client::FindMemmedSpellBySlot)
+	.def("FindMemmedSpellBySpellID", (int(Lua_Client::*)(uint16))&Lua_Client::FindMemmedSpellBySpellID)
 	.def("FindSpellBookSlotBySpellID", (int(Lua_Client::*)(int))&Lua_Client::FindSpellBookSlotBySpellID)
 	.def("Fling", (void(Lua_Client::*)(float,float,float,float))&Lua_Client::Fling)
 	.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool))&Lua_Client::Fling)
@@ -2586,6 +2613,9 @@ luabind::scope lua_register_client() {
 	.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin)
 	.def("ResetAA", (void(Lua_Client::*)(void))&Lua_Client::ResetAA)
 	.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
+	.def("ResetAllCastbarCooldowns", (void(Lua_Client::*)(void))&Lua_Client::ResetAllCastbarCooldowns)
+	.def("ResetCastbarCooldownBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownBySlot)
+	.def("ResetCastbarCooldownBySpellID", (void(Lua_Client::*)(uint32))&Lua_Client::ResetCastbarCooldownBySpellID)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)

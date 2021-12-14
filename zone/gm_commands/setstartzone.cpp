@@ -2,34 +2,59 @@
 
 void command_setstartzone(Client *c, const Seperator *sep)
 {
-	uint32 startzone = 0;
-	Client *target   = nullptr;
-	if (c->GetTarget() && c->GetTarget()->IsClient() && sep->arg[1][0] != 0) {
-		target = c->GetTarget()->CastToClient();
-	}
-	else {
-		c->Message(Chat::White, "Usage: (needs PC target) #setstartzone zonename");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #setstartzone [Zone ID|Zone Short Name]");
 		c->Message(
 			Chat::White,
-			"Optional Usage: Use '#setstartzone reset' or '#setstartzone 0' to clear a starting zone. Player can select a starting zone using /setstartcity"
+			"Optional Usage: Use '#setstartzone Reset' or '#setstartzone 0' to clear a starting zone. Player can select a starting zone using /setstartcity"
 		);
 		return;
 	}
 
-	if (sep->IsNumber(1)) {
-		startzone = atoi(sep->arg[1]);
-	}
-	else if (strcasecmp(sep->arg[1], "reset") == 0) {
-		startzone = 0;
-	}
-	else {
-		startzone = ZoneID(sep->arg[1]);
-		if (startzone == 0) {
-			c->Message(Chat::White, "Unable to locate zone '%s'", sep->arg[1]);
-			return;
-		}
+	auto target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
 	}
 
-	target->SetStartZone(startzone);
+	auto zone_id = (
+		sep->IsNumber(1) ?
+		std::stoul(sep->arg[1]) :
+		ZoneID(sep->arg[1])
+	);
+
+	target->SetStartZone(zone_id);
+
+	bool is_reset = (
+		!strcasecmp(sep->arg[1], "reset") ||
+		zone_id == 0
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Start Zone {} for {} |{}",
+			is_reset ? "Reset" : "Changed",
+			(
+				c == target ?
+				"Yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			(
+				zone_id ?
+				fmt::format(
+					" {} ({}) ID: {}",
+					ZoneLongName(zone_id),
+					ZoneName(zone_id),
+					zone_id
+				) :
+				""
+			)
+		).c_str()
+	);
 }
 

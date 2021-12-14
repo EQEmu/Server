@@ -380,6 +380,7 @@ public:
 	void	SendZoneAppearance(Client *c);
 	void	SendNimbusEffects(Client *c);
 	void	SendUntargetable(Client *c);
+	void	SendAppearanceEffects(Client *c);
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
 	void	QuestJournalledSayClose(Mob *sender, float dist, const char* mobname, const char* message, Journal::Options &opts);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
@@ -406,7 +407,8 @@ public:
 		float distance,
 		int Hand = EQ::invslot::slotPrimary,
 		int count = 0,
-		bool is_from_spell = false
+		bool is_from_spell = false,
+		int attack_rounds = 1
 	);
 	void AETaunt(Client *caster, float range = 0, int32 bonus_hate = 0);
 	void AESpell(
