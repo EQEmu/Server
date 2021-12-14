@@ -3483,7 +3483,7 @@ XS(XS__getcurrencyitemid) {
 	dXSTARG;
 
 	int RETVAL;
-	int currency_id = (int) SvUV(ST(0));
+	uint32 currency_id = (uint32) SvUV(ST(0));
 
 	RETVAL = quest_manager.getcurrencyitemid(currency_id);
 
@@ -3499,8 +3499,8 @@ XS(XS__getcurrencyid) {
 		Perl_croak(aTHX_ "Usage: quest::getcurrencyid(uint32 item_id)");
 	dXSTARG;
 
-	int 		RETVAL;
-	uint32      item_id = (int) SvUV(ST(0));
+	uint32 RETVAL;
+	uint32 item_id = (uint32) SvUV(ST(0));
 
 	RETVAL = quest_manager.getcurrencyid(item_id);
 	XSprePUSH;
@@ -8023,6 +8023,74 @@ XS(XS__getspell) {
     }
 }
 
+XS(XS__getldonthemename);
+XS(XS__getldonthemename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getldonthemename(uint32 theme_id)");
+	{
+		dXSTARG;
+		uint32 theme_id = (uint32) SvUV(ST(0));
+		std::string theme_name = quest_manager.getldonthemename(theme_id);
+
+		sv_setpv(TARG, theme_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
+XS(XS__getfactionname);
+XS(XS__getfactionname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getfactionname(int faction_id)");
+	{
+		dXSTARG;
+		int faction_id = (int) SvIV(ST(0));
+		std::string faction_name = quest_manager.getfactionname(faction_id);
+
+		sv_setpv(TARG, faction_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
+XS(XS__getlanguagename);
+XS(XS__getlanguagename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getlanguagename(int language_id)");
+	{
+		dXSTARG;
+		int language_id = (int) SvIV(ST(0));
+		std::string language_name = quest_manager.getlanguagename(language_id);
+
+		sv_setpv(TARG, language_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
+XS(XS__getbodytypename);
+XS(XS__getbodytypename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getbodytypename(uint32 bodytype_id)");
+	{
+		dXSTARG;
+		uint32 bodytype_id = (uint32) SvUV(ST(0));
+		std::string bodytype_name = quest_manager.getbodytypename(bodytype_id);
+
+		sv_setpv(TARG, bodytype_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8303,6 +8371,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
 	newXS(strcpy(buf, "getaaexpmodifierbycharid"), XS__getaaexpmodifierbycharid, file);
+	newXS(strcpy(buf, "getbodytypename"), XS__getbodytypename, file);
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getcleannpcnamebyid"), XS__getcleannpcnamebyid, file);
@@ -8315,10 +8384,13 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "get_expedition_by_zone_instance"), XS__get_expedition_by_zone_instance, file);
 	newXS(strcpy(buf, "get_expedition_lockout_by_char_id"), XS__get_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "get_expedition_lockouts_by_char_id"), XS__get_expedition_lockouts_by_char_id, file);
+	newXS(strcpy(buf, "getfactionname"), XS__getfactionname, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "getitemstat"), XS__getitemstat, file);
+	newXS(strcpy(buf, "getlanguagename"), XS__getlanguagename, file);
+	newXS(strcpy(buf, "getldonthemename"), XS__getldonthemename, file);
 	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);

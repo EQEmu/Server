@@ -2,14 +2,25 @@
 
 void command_wpinfo(Client *c, const Seperator *sep)
 {
-	Mob *t = c->GetTarget();
-
-	if (t == nullptr || !t->IsNPC()) {
-		c->Message(Chat::White, "You must target an NPC to use this.");
+	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
 	}
 
-	NPC *n = t->CastToNPC();
-	n->DisplayWaypointInfo(c);
+	auto target = c->GetTarget()->CastToNPC();
+
+	if (!target->GetGrid()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} ({}) is not a part of any grid.",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+		return;
+	}
+
+	target->DisplayWaypointInfo(c);
 }
 

@@ -241,6 +241,9 @@ public:
 	uint32 GetSpawnKillCount(uint32 in_spawnid);
 	uint32 GetTempMerchantQuantity(uint32 NPCID, uint32 Slot);
 
+	uint32 GetCurrencyID(uint32 item_id);
+	uint32 GetCurrencyItemID(uint32 currency_id);
+
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);
 	void ChangeWeather();

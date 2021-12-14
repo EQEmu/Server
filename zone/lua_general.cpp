@@ -918,11 +918,11 @@ std::string lua_get_class_name(uint8 class_id, uint8 level) {
 	return quest_manager.getclassname(class_id, level);
 }
 
-int lua_get_currency_id(uint32 item_id) {
+uint32 lua_get_currency_id(uint32 item_id) {
 	return quest_manager.getcurrencyid(item_id);
 }
 
-int lua_get_currency_item_id(int currency_id) {
+uint32 lua_get_currency_item_id(uint32 currency_id) {
 	return quest_manager.getcurrencyitemid(currency_id);
 }
 
@@ -3351,6 +3351,22 @@ Lua_Spell lua_get_spell(uint32 spell_id) {
 	return Lua_Spell(spell_id);
 }
 
+std::string lua_get_ldon_theme_name(uint32 theme_id) {
+	return quest_manager.getldonthemename(theme_id);
+}
+
+std::string lua_get_faction_name(int faction_id) {
+	return quest_manager.getfactionname(faction_id);
+}
+
+std::string lua_get_language_name(int language_id) {
+	return quest_manager.getlanguagename(language_id);
+}
+
+std::string lua_get_body_type_name(uint32 bodytype_id) {
+	return quest_manager.getbodytypename(bodytype_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3794,6 +3810,10 @@ luabind::scope lua_register_general() {
 		luabind::def("is_npc_spawned", &lua_is_npc_spawned),
 		luabind::def("count_spawned_npcs", &lua_count_spawned_npcs),
 		luabind::def("get_spell", &lua_get_spell),
+		luabind::def("get_ldon_theme_name", &lua_get_ldon_theme_name),
+		luabind::def("get_faction_name", &lua_get_faction_name),
+		luabind::def("get_language_name", &lua_get_language_name),
+		luabind::def("get_body_type_name", &lua_get_body_type_name),
 
 		/*
 			Cross Zone

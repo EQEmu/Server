@@ -1036,6 +1036,22 @@ std::string QuestManager::getskillname(int skill_id) {
 	return EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
+std::string QuestManager::getldonthemename(uint32 theme_id) {
+	return EQ::constants::GetLDoNThemeName(theme_id);
+}
+
+std::string QuestManager::getfactionname(int faction_id) {
+	return content_db.GetFactionName(faction_id);
+}
+
+std::string QuestManager::getlanguagename(int language_id) {
+	return EQ::constants::GetLanguageName(language_id);
+}
+
+std::string QuestManager::getbodytypename(uint32 bodytype_id) {
+	return EQ::constants::GetBodyTypeName(static_cast<bodyType>(bodytype_id));
+}
+
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
@@ -3009,28 +3025,12 @@ std::string QuestManager::getclassname(uint8 class_id, uint8 level) {
 	return GetClassIDName(class_id, level);
 }
 
-int QuestManager::getcurrencyid(uint32 item_id) {
-	auto iter = zone->AlternateCurrencies.begin();
-	while (iter != zone->AlternateCurrencies.end()) {
-		if (item_id == (*iter).item_id) {
-			return (*iter).id;
-		}
-		++iter;
-	}
-	return 0;
+uint32 QuestManager::getcurrencyid(uint32 item_id) {
+	return zone->GetCurrencyID(item_id);
 }
 
-int QuestManager::getcurrencyitemid(int currency_id) {
-	if (currency_id > 0) {
-		auto iter = zone->AlternateCurrencies.begin();
-		while (iter != zone->AlternateCurrencies.end()) {
-			if (currency_id == (*iter).id) {
-				return (*iter).item_id;
-			}
-			++iter;
-		}
-	}
-	return 0;
+uint32 QuestManager::getcurrencyitemid(uint32 currency_id) {
+	return zone->GetCurrencyItemID(currency_id);
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {

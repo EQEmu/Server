@@ -19,6 +19,8 @@
 
 #include "emu_constants.h"
 #include "languages.h"
+#include "data_verification.h"
+#include "bodytypes.h"
 
 
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
@@ -148,8 +150,9 @@ const char *EQ::constants::GetStanceName(StanceType stance_type) {
 }
 
 int EQ::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
-	if (stance_type >= EQ::constants::stancePassive && stance_type <= EQ::constants::stanceBurnAE)
+	if (EQ::ValueWithin(stance_type, EQ::constants::stancePassive, EQ::constants::stanceBurnAE)) {
 		return (stance_type - EQ::constants::stancePassive);
+	}
 
 	return 0;
 }
@@ -191,7 +194,7 @@ const std::map<int, std::string>& EQ::constants::GetLanguageMap()
 
 std::string EQ::constants::GetLanguageName(int language_id)
 {
-	if (language_id >= LANG_COMMON_TONGUE && language_id <= LANG_UNKNOWN) {
+	if (EQ::ValueWithin(language_id, LANG_COMMON_TONGUE, LANG_UNKNOWN)) {
 		auto languages = EQ::constants::GetLanguageMap();
 		return languages[language_id];
 	}
@@ -213,7 +216,7 @@ const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
 
 std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 {
-	if (theme_id >= LDoNThemes::Unused && theme_id <= LDoNThemes::TAK) {
+	if (EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
 		auto ldon_themes = EQ::constants::GetLDoNThemeMap();
 		return ldon_themes[theme_id];
 	}
@@ -235,12 +238,64 @@ const std::map<uint8, std::string>& EQ::constants::GetFlyModeMap()
 
 std::string EQ::constants::GetFlyModeName(uint8 flymode_id)
 {
-	if (
-		flymode_id >= GravityBehavior::Ground &&
-		flymode_id <= GravityBehavior::LevitateWhileRunning
-	) {
+	if (EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
 		auto flymodes = EQ::constants::GetFlyModeMap();
 		return flymodes[flymode_id];
+	}
+	return std::string();
+}
+
+const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
+{
+	static const std::map<bodyType, std::string> bodytype_map = {
+		{ BT_Humanoid, "Humanoid" },
+		{ BT_Lycanthrope, "Lycanthrope" },
+		{ BT_Undead, "Undead" },
+		{ BT_Giant, "Giant" },
+		{ BT_Construct, "Construct" },
+		{ BT_Extraplanar, "Extraplanar" },
+		{ BT_Magical, "Magical" },
+		{ BT_SummonedUndead, "Summoned Undead" },
+		{ BT_RaidGiant, "Raid Giant" },
+		{ BT_RaidColdain, "Raid Coldain" },
+		{ BT_NoTarget, "Untargetable" },
+		{ BT_Vampire, "Vampire" },
+		{ BT_Atenha_Ra, "Aten Ha Ra" },
+		{ BT_Greater_Akheva, "Greater Akheva" },
+		{ BT_Khati_Sha, "Khati Sha" },
+		{ BT_Seru, "Seru" },
+		{ BT_Grieg_Veneficus, "Grieg Veneficus" },
+		{ BT_Draz_Nurakk, "Draz Nurakk" },
+		{ BT_Zek, "Zek" },
+		{ BT_Luggald, "Luggald" },
+		{ BT_Animal, "Animal" },
+		{ BT_Insect, "Insect" },
+		{ BT_Monster, "Monster" },
+		{ BT_Summoned, "Summoned" },
+		{ BT_Plant, "Plant" },
+		{ BT_Dragon, "Dragon" },
+		{ BT_Summoned2, "Summoned 2" },
+		{ BT_Summoned3, "Summoned 3" },
+		{ BT_Dragon2, "Dragon 2" },
+		{ BT_VeliousDragon, "Velious Dragon" },
+		{ BT_Familiar, "Familiar" },
+		{ BT_Dragon3, "Dragon 3" },
+		{ BT_Boxes, "Boxes" },
+		{ BT_Muramite, "Muramite" },
+		{ BT_NoTarget2, "Untargetable 2" },
+		{ BT_SwarmPet, "Swarm Pet" },
+		{ BT_MonsterSummon, "Monster Summon" },
+		{ BT_InvisMan, "Invisible Man" },
+		{ BT_Special, "Special" },
+	};
+	return bodytype_map;
+}
+
+std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
+{
+	auto bodytypes = EQ::constants::GetBodyTypeMap();
+	if (!bodytypes[bodytype_id].empty()) {
+		return bodytypes[bodytype_id];
 	}
 	return std::string();
 }

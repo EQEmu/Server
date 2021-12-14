@@ -1475,7 +1475,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	//Check if buffs has numhits, then resend packet so it displays the hit count.
-	if (IsClient() && (spells[spell_id].buff_duration > 0 || spells[spell_id].short_buff_box)) {
+	if (IsClient() && spells[spell_id].hit_number) {
 		for (int i = 0; i < GetMaxTotalSlots(); i++) {
 			if (buffs[i].spellid == spell_id && buffs[i].hit_number > 0) {
 				CastToClient()->SendBuffNumHitPacket(buffs[i], i);
@@ -2929,9 +2929,10 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
 	if (caster == target && (target->aabonuses.IllusionPersistence || target->spellbonuses.IllusionPersistence ||
-				 target->itembonuses.IllusionPersistence) &&
-	    spell_id != 287 && spell_id != 601 && IsEffectInSpell(spell_id, SE_Illusion))
+		target->itembonuses.IllusionPersistence) &&
+		spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion)) {
 		res = 10000; // ~16h override
+	}
 
 
 	res = mod_buff_duration(res, caster, target, spell_id);
@@ -4373,7 +4374,8 @@ void Mob::BuffFadeNonPersistDeath()
 		auto current_spell_id = buffs[buff_slot].spellid;
 		if (
 			IsValidSpell(current_spell_id) &&
-			!IsPersistDeathSpell(current_spell_id)
+			!IsPersistDeathSpell(current_spell_id) &&
+			!HasPersistDeathIllusion(current_spell_id)
 		) {
 			BuffFadeBySlot(buff_slot, false);
 			recalc_bonus = true;
@@ -5246,7 +5248,7 @@ void Mob::SendSpellBarEnable(uint16 spell_id)
 	manachange->spell_id = spell_id;
 	manachange->stamina = CastToClient()->GetEndurance();
 	manachange->keepcasting = 0;
-	manachange->slot = CastToClient()->FindMemmedSpellByID(spell_id);
+	manachange->slot = CastToClient()->FindMemmedSpellBySpellID(spell_id);
 	outapp->priority = 6;
 	CastToClient()->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -5377,88 +5379,98 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 
 void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0)
+	if (slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0) {
 		return;
+	}
 
-	if(update_client)
-	{
-		if(m_pp.mem_spells[slot] != 0xFFFFFFFF)
+	if(update_client) {
+		if (IsValidSpell(m_pp.mem_spells[slot])) {
 			UnmemSpell(slot, update_client);
+		}
 	}
 
 	m_pp.mem_spells[slot] = spell_id;
 	LogSpells("Spell [{}] memorized into slot [{}]", spell_id, slot);
 
-	database.SaveCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	database.SaveCharacterMemorizedSpell(CharacterID(), m_pp.mem_spells[slot], slot);
 
-	if(update_client)
-	{
+	if(update_client) {
 		MemorizeSpell(slot, spell_id, memSpellMemorize);
 	}
 }
 
 void Client::UnmemSpell(int slot, bool update_client)
 {
-	if(slot > EQ::spells::SPELL_GEM_COUNT || slot < 0)
+	if (slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0) {
 		return;
+	}
 
 	LogSpells("Spell [{}] forgotten from slot [{}]", m_pp.mem_spells[slot], slot);
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
-	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	database.DeleteCharacterMemorizedSpell(CharacterID(), m_pp.mem_spells[slot], slot);
 
-	if(update_client)
-	{
+	if(update_client) {
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
 	}
 }
 
 void Client::UnmemSpellBySpellID(int32 spell_id)
 {
-	for(int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
-		if(m_pp.mem_spells[i] == spell_id) {
-			UnmemSpell(i, true);
-			break;
-		}
+	auto spell_gem = FindMemmedSpellBySpellID(spell_id);
+	if (spell_gem >= EQ::spells::SPELL_GEM_COUNT || spell_gem < 0) {
+		return;
 	}
+
+	UnmemSpell(spell_gem);
 }
 
 void Client::UnmemSpellAll(bool update_client)
 {
-	int i;
-
-	for(i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++)
-		if(m_pp.mem_spells[i] != 0xFFFFFFFF)
-			UnmemSpell(i, update_client);
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
+			UnmemSpell(spell_gem, update_client);
+		}
+	}
 }
 
 uint32 Client::GetSpellIDByBookSlot(int book_slot) {
 	if (book_slot <= EQ::spells::SPELLBOOK_SIZE) {
 		return GetSpellByBookSlot(book_slot);
 	}
-	return -1;	//default
+	return -1;
+}
+
+int Client::FindEmptyMemSlot() {
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (!IsValidSpell(m_pp.mem_spells[spell_gem])) {
+			return spell_gem;
+		}
+	}
+	return -1;
 }
 
 uint16 Client::FindMemmedSpellBySlot(int slot) {
-	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
+	if (IsValidSpell(m_pp.mem_spells[slot])) {
 		return m_pp.mem_spells[slot];
-
+	}
 	return 0;
 }
 
 int Client::MemmedCount() {
 	int memmed_count = 0;
-	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++)
-		if (m_pp.mem_spells[i] != 0xFFFFFFFF)
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
 			memmed_count++;
-
+		}
+	}
 	return memmed_count;
 }
 
-int Client::FindMemmedSpellByID(uint16 spell_id) {
-	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
-		if (m_pp.mem_spells[i] == spell_id) {
-			return i;
+int Client::FindMemmedSpellBySpellID(uint16 spell_id) {
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem]) && m_pp.mem_spells[spell_gem] == spell_id) {
+			return spell_gem;
 		}
 	}
 	return -1;
@@ -6438,4 +6450,68 @@ int Client::GetNextAvailableDisciplineSlot(int starting_slot) {
 	}
 
 	return -1; // Return -1 if No Slots open
+}
+
+void Client::ResetCastbarCooldownBySlot(int slot) {
+	if (slot < 0) {
+		for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
+			if(IsValidSpell(m_pp.mem_spells[i])) {
+				m_pp.spellSlotRefresh[i] = 1;
+				GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[i]));
+				if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[i]].timer_id)) {
+					GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[i]].timer_id));	
+				}
+				if (spells[m_pp.mem_spells[i]].timer_id > 0 && spells[m_pp.mem_spells[i]].timer_id < MAX_DISCIPLINE_TIMERS) {
+					SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[i]].timer_id, 0);
+				}
+				SendSpellBarEnable(m_pp.mem_spells[i]);
+			}
+		}
+	} else if (slot < EQ::spells::SPELL_GEM_COUNT) {
+		if(IsValidSpell(m_pp.mem_spells[slot])) {
+			m_pp.spellSlotRefresh[slot] = 1;
+			GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[slot]));
+			if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[slot]].timer_id)) {
+				GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[slot]].timer_id));
+				
+			}
+			if (spells[m_pp.mem_spells[slot]].timer_id > 0 && spells[m_pp.mem_spells[slot]].timer_id < MAX_DISCIPLINE_TIMERS) {
+				SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[slot]].timer_id, 0);
+			}
+			SendSpellBarEnable(m_pp.mem_spells[slot]);
+		}
+	}
+}
+
+void Client::ResetAllCastbarCooldowns() {
+	for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
+		if(IsValidSpell(m_pp.mem_spells[i])) {
+			m_pp.spellSlotRefresh[i] = 1;
+			GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[i]));
+			if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[i]].timer_id)) {
+				GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[i]].timer_id));	
+			}
+			if (spells[m_pp.mem_spells[i]].timer_id > 0 && spells[m_pp.mem_spells[i]].timer_id < MAX_DISCIPLINE_TIMERS) {
+				SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[i]].timer_id, 0);
+			}
+			SendSpellBarEnable(m_pp.mem_spells[i]);
+		}
+	}
+}
+
+void Client::ResetCastbarCooldownBySpellID(uint32 spell_id) {
+	for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
+		if(IsValidSpell(m_pp.mem_spells[i]) && m_pp.mem_spells[i] == spell_id) {
+			m_pp.spellSlotRefresh[i] = 1;
+			GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[i]));
+			if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[i]].timer_id)) {
+				GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[i]].timer_id));	
+			}
+			if (spells[m_pp.mem_spells[i]].timer_id > 0 && spells[m_pp.mem_spells[i]].timer_id < MAX_DISCIPLINE_TIMERS) {
+				SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[i]].timer_id, 0);
+			}
+			SendSpellBarEnable(m_pp.mem_spells[i]);
+			break;
+		}
+	}
 }

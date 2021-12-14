@@ -294,6 +294,7 @@ SET(gm_commands
     gm_commands/aggrozone.cpp
     gm_commands/ai.cpp
     gm_commands/appearance.cpp
+    gm_commands/appearanceeffects.cpp
     gm_commands/attack.cpp
     gm_commands/augmentitem.cpp
     gm_commands/ban.cpp
@@ -488,6 +489,7 @@ SET(gm_commands
     gm_commands/set_adventure_points.cpp
     gm_commands/setaapts.cpp
     gm_commands/setaaxp.cpp
+    gm_commands/setaltcurrency.cpp
     gm_commands/setanim.cpp
     gm_commands/setcrystals.cpp
     gm_commands/setendurance.cpp
@@ -541,6 +543,8 @@ SET(gm_commands
     gm_commands/undyeme.cpp
     gm_commands/unfreeze.cpp
     gm_commands/unlock.cpp
+    gm_commands/unmemspell.cpp
+    gm_commands/unmemspells.cpp
     gm_commands/unscribespell.cpp
     gm_commands/unscribespells.cpp
     gm_commands/untraindisc.cpp
