@@ -716,7 +716,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
         /* HoTT Ability */
         if(RuleB(Character, GrantHoTTOnCreate))
         {
-                query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, rank) VALUES (%u, %i, %i)", character_id, 14, 1);
+                query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%u, %i, %i)", character_id, 14, 1);
                 results = QueryDatabase(query);
         }
 
