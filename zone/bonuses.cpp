@@ -677,7 +677,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->FocusEffects[focus] = static_cast<uint8>(effect);
 			continue;
 		}
-
+		Shout("Effect %i RANK ID %i", effect, rank.id);
 		switch (effect) {
 		case SE_ACv2:
 		case SE_ArmorClass:
@@ -1070,6 +1070,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				}
 			}
 			break;
+		/*
+		SE_SkillAttackProc: {
+			for (int i = 0; i < MAX_CAST_ON_SKILL_USE; i += 3) {
+				if (!newbon->SkillAttackProc[i]) {
+					newbon->SkillAttackProc[i] = rank.id;   //aa rank id
+					newbon->SpellProc[i + 1] = base_value;	//proc spell id
+					newbon->SpellProc[i + 2] = limit_value; //proc rate modifer
+					break;
+				}
+			}
+		}
+		*/
 
 		case SE_WeaponProc:
 		case SE_AddMeleeProc:
