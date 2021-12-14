@@ -270,6 +270,8 @@ Client::Client(EQStreamInterface* ieqs)
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
 	dynamiczone_removal_timer.Disable();
 
+	heroforge_wearchange_timer.Disable();
+
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
 	memset(&m_epp, 0, sizeof(m_epp));

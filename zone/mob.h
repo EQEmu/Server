@@ -911,6 +911,7 @@ public:
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = 0; m_Light.Level[EQ::lightsource::LightEquipment] = 0; }
 	inline void SetSpellLightType(uint8 light_type) { m_Light.Type[EQ::lightsource::LightSpell] = (light_type & 0x0F); m_Light.Level[EQ::lightsource::LightSpell] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightSpell]); }
 
+	void SendWearChangeAndLighting(int8 last_texture);
 	inline uint8 GetActiveLightType() { return m_Light.Type[EQ::lightsource::LightActive]; }
 	bool UpdateActiveLight(); // returns true if change, false if no change
 
@@ -1515,6 +1516,8 @@ protected:
 
 	int32 appearance_effects_id[MAX_APPEARANCE_EFFECTS];
 	int32 appearance_effects_slot[MAX_APPEARANCE_EFFECTS];
+	
+	int queue_wearchange_slot;
 
 	Timer shield_timer;
 	uint32 m_shield_target_id;
