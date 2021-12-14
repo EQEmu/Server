@@ -2421,8 +2421,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		return false;
 	if (skillid > EQ::skills::HIGHEST_SKILL)
 		return false;
-	int skillval = GetRawSkill(skillid);
-	int maxlevel = GetClientMaxLevel();
+	int skillval = GetRawSkill(skillid);	
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
 	std::string export_string = fmt::format(
 		"{} {}",
