@@ -1040,14 +1040,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
-
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if(	buffs[slot].spellid != SPELL_UNKNOWN &&
 						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
-						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+						if (caster && TryDispel(caster->GetCasterLevel(spell_id), buffs[slot].casterlevel, effect_value)){
 							BuffFadeBySlot(slot);
 							slot = buff_count;
 						}
@@ -1296,11 +1295,21 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Blind: %+i", effect_value);
 #endif
-				// this should catch the cures
-				if (BeneficialSpell(spell_id) && spells[spell_id].buff_duration == 0)
-					BuffFadeByEffect(SE_Blind);
-				else if (!IsClient())
+				// 'cure blind'
+				if (BeneficialSpell(spell_id) && spells[spell_id].buff_duration == 0) {
+					int buff_count = GetMaxBuffSlots();
+					for (int slot = 0; slot < buff_count; slot++) {
+						if (buffs[slot].spellid != SPELL_UNKNOWN && IsEffectInSpell(buffs[slot].spellid, SE_Blind)) {
+							if (caster && TryDispel(caster->GetCasterLevel(spell_id), buffs[slot].casterlevel, 1)) {
+								BuffFadeBySlot(slot);
+								slot = buff_count;
+							}
+						}
+					}
+				}
+				else if (!IsClient()) {
 					CalculateNewFearpoint();
+				}
 				break;
 			}
 
