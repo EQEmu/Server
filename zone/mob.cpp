@@ -4213,15 +4213,17 @@ int Mob::GetSnaredAmount()
 
 void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int damage)
 {
-	if (!on)
+	if (!on) {
 		return;
+	}
 
-	if (!FromSkillProc)
+	if (!FromSkillProc) {
 		on->TryDefensiveProc(this, hand);
+	}
 
 	//Defensive Skill Procs
 	if (damage < 0 && damage >= -4) {
-		uint16 skillinuse = 0;
+		EQ::skills::SkillType skillinuse = EQ::skills::SkillBlock;
 		switch (damage) {
 			case (-1):
 				skillinuse = EQ::skills::SkillBlock;
@@ -4240,11 +4242,13 @@ void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int da
 			break;
 		}
 
-		if (on->HasSkillProcs())
+		if (on->HasSkillProcs()) {
 			on->TrySkillProc(this, skillinuse, 0, false, hand, true);
+		}
 
-		if (on->HasSkillProcSuccess())
+		if (on && on->HasSkillProcSuccess()) {
 			on->TrySkillProc(this, skillinuse, 0, true, hand, true);
+		}
 	}
 }
 
@@ -5617,7 +5621,7 @@ void Mob::SlowMitigation(Mob* caster)
 	}
 }
 
-uint16 Mob::GetSkillByItemType(int ItemType)
+EQ::skills::SkillType Mob::GetSkillByItemType(int ItemType)
 {
 	switch (ItemType) {
 	case EQ::item::ItemType1HSlash:
@@ -5672,22 +5676,6 @@ uint8 Mob::GetItemTypeBySkill(EQ::skills::SkillType skill)
 		return EQ::item::ItemTypeMartial;
 	}
  }
-
-
-bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
-
-	if (!IsValidSpell(spell_id))
-		return false;
-
-	for (int i = 0; i < EFFECT_COUNT; i++) {
-		if (spells[spell_id].effect_id[i] == SE_LimitToSkill){
-			if (spells[spell_id].base_value[i] == skill){
-				return true;
-			}
-		}
-	}
-	return false;
-}
 
 uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
 

@@ -1821,7 +1821,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddProcToWeapon(procid, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetProcLimitTimer(spell_id, SE_WeaponProc));
+				AddProcToWeapon(procid, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetProcLimitTimer(spell_id, ProcType::MELEE_PROC));
 				break;
 			}
 
@@ -1831,7 +1831,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
 #endif
-				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, SE_RangedProc));
+				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, ProcType::RANGED_PROC));
 				break;
 			}
 
@@ -1841,7 +1841,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Defensive Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddDefensiveProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, SE_DefensiveProc));
+				AddDefensiveProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, ProcType::DEFENSIVE_PROC));
 				break;
 			}
 
@@ -3156,7 +3156,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_LimitSpellClass:
 			case SE_Sanctuary:
 			case SE_PetMeleeMitigation:
-			case SE_SkillProc:
+			case SE_SkillProcAttempt:
 			case SE_SkillProcSuccess:
 			case SE_SpellResistReduction:
 			case SE_Duration_HP_Pct:
@@ -8518,6 +8518,87 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 	return true;
 }
 
+bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type, int aa_id)
+{
+	/*
+		Check if SE_AddMeleProc or SE_RangedProc have a skill limiter. Passes automatically if no skill limiters present.
+	*/
+	int32 proc_type_spaid = 0;
+	if (proc_type == ProcType::MELEE_PROC) {
+		proc_type_spaid = SE_AddMeleeProc;
+	}
+	if (proc_type == ProcType::RANGED_PROC) {
+		proc_type_spaid = SE_RangedProc;
+	}
+
+	bool match_proc_type = false;
+	bool has_limit_check = false;
+
+	if (!aa_id && spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+
+		if (spell_id == SPELL_UNKNOWN) {
+			return false;
+		}
+
+		for (int i = 0; i < EFFECT_COUNT; i++) {
+			if (spells[spell_id].effect_id[i] == proc_type_spaid) {
+				match_proc_type = true;
+			}
+			if (match_proc_type && spells[spell_id].effect_id[i] == SE_LimitToSkill && spells[spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
+				
+				has_limit_check = true;
+				if (spells[spell_id].base_value[i] == skill) {
+					return true;
+				}
+			}
+		}
+	}
+	else if (aabonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+
+		int rank_id = 1;
+		AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
+
+		if (!rank) {
+			return true;
+		}
+
+		AA::Ability *ability_in = rank->base_ability;
+		if (!ability_in) {
+			return true;
+		}
+
+		for (auto &aa : aa_ranks) {
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability = ability_rank.first;
+			auto rank = ability_rank.second;
+
+			if (!ability) {
+				continue;
+			}
+
+			for (auto &effect : rank->effects) {
+				if (effect.effect_id == proc_type_spaid) {
+					match_proc_type = true;
+				}
+
+				if (match_proc_type && effect.effect_id == SE_LimitToSkill && effect.base_value <= EQ::skills::HIGHEST_SKILL) {
+					has_limit_check = true;
+					if (effect.base_value == skill) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+
+	if (has_limit_check) {
+		return false; //Limit was found, but not matched, fail.
+	}
+	else {
+		return true; //No limit is present, automatically pass.
+	}
+}
+
 bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 {
 	switch (type) {
@@ -8760,7 +8841,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 		
-		if (proc_type == SE_WeaponProc) {
+		if (proc_type == ProcType::MELEE_PROC) {
 			if (spell_proclimit_spellid[i] == base_spell_id) {
 				if (spell_proclimit_timer[i].Enabled()) {
 					if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8773,7 +8854,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 				}
 			}
 		}
-		else if (proc_type == SE_RangedProc) {
+		else if (proc_type == ProcType::RANGED_PROC) {
 			if (ranged_proclimit_spellid[i] == base_spell_id) {
 				if (ranged_proclimit_timer[i].Enabled()) {
 					if (ranged_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8786,7 +8867,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 				}
 			}
 		}
-		else if (proc_type == SE_DefensiveProc) {
+		else if (proc_type == ProcType::DEFENSIVE_PROC) {
 			if (def_proclimit_spellid[i] == base_spell_id) {
 				if (def_proclimit_timer[i].Enabled()) {
 					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8813,7 +8894,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 
-		if (proc_type == SE_WeaponProc) {
+		if (proc_type == ProcType::MELEE_PROC) {
 			if (!spell_proclimit_spellid[i] && !is_set) {
 				spell_proclimit_spellid[i] = base_spell_id;
 				spell_proclimit_timer[i].SetTimer(proc_reuse_time);
@@ -8825,7 +8906,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 			}
 		}
 
-		if (proc_type == SE_RangedProc) {
+		if (proc_type == ProcType::RANGED_PROC) {
 			if (!ranged_proclimit_spellid[i] && !is_set) {
 				ranged_proclimit_spellid[i] = base_spell_id;
 				ranged_proclimit_timer[i].SetTimer(proc_reuse_time);
@@ -8837,7 +8918,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 			}
 		}
 
-		if (proc_type == SE_DefensiveProc) {
+		if (proc_type == ProcType::DEFENSIVE_PROC) {
 			if (!def_proclimit_spellid[i] && !is_set) {
 				def_proclimit_spellid[i] = base_spell_id;
 				def_proclimit_timer[i].SetTimer(proc_reuse_time);

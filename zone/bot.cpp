@@ -3248,7 +3248,7 @@ void Bot::AI_Process()
 					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
 
 					TEST_COMBATANTS();
-					TryWeaponProc(p_item, tar, EQ::invslot::slotPrimary);
+					TryCombatProcs(p_item, tar, EQ::invslot::slotPrimary);
 
 					// bool tripleSuccess = false;
 
@@ -3337,7 +3337,7 @@ void Bot::AI_Process()
 								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
 								TEST_COMBATANTS();
-								TryWeaponProc(s_item, tar, EQ::invslot::slotSecondary);
+								TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
 
 								TEST_COMBATANTS();
 								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {

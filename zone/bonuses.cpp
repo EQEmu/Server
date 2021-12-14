@@ -1074,11 +1074,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_WeaponProc:
 		case SE_AddMeleeProc:
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
-				if (!newbon->SpellProc[i]) {
-					newbon->SpellProc[i] = rank.id;   //aa rank id
-					newbon->SpellProc[i + 1] = base_value; //proc spell id
-					newbon->SpellProc[i + 2] = limit_value; //proc rate modifer
-					newbon->SpellProc[i + 3] = 0;	  //Lock out Timer
+				if (!newbon->SpellProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID]) {
+					newbon->SpellProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] = rank.id;   //aa rank id
+					newbon->SpellProc[i + SBIndex::COMBAT_PROC_SPELL_ID] = base_value; //proc spell id
+					newbon->SpellProc[i + SBIndex::COMBAT_PROC_RATE_MOD] = limit_value; //proc rate modifer
+					newbon->SpellProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = 0;	  //Lock out Timer
 					break;
 				}
 			}
@@ -1086,11 +1086,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_RangedProc:
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
-				if (!newbon->RangedProc[i]) {
-					newbon->RangedProc[i] = rank.id;   //aa rank id
-					newbon->RangedProc[i + 1] = base_value; //proc spell id
-					newbon->RangedProc[i + 2] = limit_value; //proc rate modifer
-					newbon->RangedProc[i + 3] = 0;	   //Lock out Timer
+				if (!newbon->RangedProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID]) {
+					newbon->RangedProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] = rank.id;   //aa rank id
+					newbon->RangedProc[i + SBIndex::COMBAT_PROC_SPELL_ID] = base_value; //proc spell id
+					newbon->RangedProc[i + SBIndex::COMBAT_PROC_RATE_MOD] = limit_value; //proc rate modifer
+					newbon->RangedProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = 0;	   //Lock out Timer
 					break;
 				}
 			}
@@ -1098,11 +1098,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_DefensiveProc:
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
-				if (!newbon->DefensiveProc[i]) {
-					newbon->DefensiveProc[i] = rank.id;   //aa rank id
-					newbon->DefensiveProc[i + 1] = base_value; //proc spell id
-					newbon->DefensiveProc[i + 2] = limit_value; //proc rate modifer
-					newbon->DefensiveProc[i + 3] = 0;	  //Lock out Timer
+				if (!newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID]) {
+					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] = rank.id;   //aa rank id
+					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID] = base_value; //proc spell id
+					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_RATE_MOD] = limit_value; //proc rate modifer
+					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = 0;	  //Lock out Timer
 					break;
 				}
 			}
@@ -1118,23 +1118,23 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->Proc_Timer_Modifier = true;
 
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
-				if (newbon->SpellProc[i] == rank.id) {
-					if (!newbon->SpellProc[i + 3]) {
-						newbon->SpellProc[i + 3] = limit_value;//Lock out Timer
+				if (newbon->SpellProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] == rank.id) {
+					if (!newbon->SpellProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER]) {
+						newbon->SpellProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = limit_value;//Lock out Timer
 						break;
 					}
 				}
 
-				if (newbon->RangedProc[i] == rank.id) {
-					if (!newbon->RangedProc[i + 3]) {
-						newbon->RangedProc[i + 3] = limit_value;//Lock out Timer
+				if (newbon->RangedProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] == rank.id) {
+					if (!newbon->RangedProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER]) {
+						newbon->RangedProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = limit_value;//Lock out Timer
 						break;
 					}
 				}
 
-				if (newbon->DefensiveProc[i] == rank.id) {
-					if (!newbon->DefensiveProc[i + 3]) {
-						newbon->DefensiveProc[i + 3] = limit_value;//Lock out Timer
+				if (newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] == rank.id) {
+					if (!newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER]) {
+						newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = limit_value;//Lock out Timer
 						break;
 					}
 				}
@@ -1208,9 +1208,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_SkillAttackProc: {
 			// You can only have one of these per client. [AA Dragon Punch]
-			newbon->SkillAttackProc[SBIndex::SKILLPROC_CHANCE]   = base_value; // Chance base 1000 = 100% proc rate
-			newbon->SkillAttackProc[SBIndex::SKILLPROC_SKILL]    = limit_value; // Skill to Proc Off
-			newbon->SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID] = rank.spell; // spell to proc
+			newbon->SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE]   = base_value; // Chance base 1000 = 100% proc rate
+			newbon->SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL]    = limit_value; // Skill to Proc Off
+			newbon->SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID] = rank.spell; // spell to proc
 			break;
 		}
 
@@ -1458,15 +1458,19 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_LimitToSkill: {
+
 			// Bad data or unsupported new skill
-			if (limit_value > EQ::skills::HIGHEST_SKILL)
+			if (base_value > EQ::skills::HIGHEST_SKILL) {
 				break;
-			if (base_value <= EQ::skills::HIGHEST_SKILL)
+			}
+			if (base_value <= EQ::skills::HIGHEST_SKILL) {
 				newbon->LimitToSkill[base_value] = true;
+				newbon->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
+			}
 			break;
 		}
 
-		case SE_SkillProc: {
+		case SE_SkillProcAttempt: {
 			for (int e = 0; e < MAX_SKILL_PROCS; e++) {
 				if (newbon->SkillProc[e] && newbon->SkillProc[e] == rank.id)
 					break; // Do not use the same aa id more than once.
@@ -3535,15 +3539,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_LimitToSkill:{
 				// Bad data or unsupported new skill
-				if (limit_value > EQ::skills::HIGHEST_SKILL)
+				if (effect_value > EQ::skills::HIGHEST_SKILL) {
 					break;
+				}
 				if (effect_value <= EQ::skills::HIGHEST_SKILL){
 					new_bonus->LimitToSkill[effect_value] = true;
+					new_bonus->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
 				}
 				break;
 			}
 
-			case SE_SkillProc:{
+			case SE_SkillProcAttempt:{
 
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
@@ -5528,7 +5534,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					}
 				}
 
-				case SE_SkillProc: {
+				case SE_SkillProcAttempt: {
 					for (int e = 0; e < MAX_SKILL_PROCS; e++)
 					{
 						if (negate_spellbonus) { spellbonuses.SkillProc[e] = effect_value; }
