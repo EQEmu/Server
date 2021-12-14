@@ -774,12 +774,15 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	//Check the disc timer
 	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.timer_id;
 	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)
-		/*char val1[20]={0};*/	//unused
-		/*char val2[20]={0};*/	//unused
-		uint32 remain = p_timers.GetRemainingTime(DiscTimer);
-		//MessageString(Chat::White, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
-		Message(0, "You can use this discipline in %d minutes %d seconds.", ((remain)/60), (remain%60));
-		return(false);
+		uint32 remaining_time = p_timers.GetRemainingTime(DiscTimer);
+		Message(
+			Chat::White,
+			fmt::format(
+				"You can use this discipline in {}.",
+				ConvertSecondsToTime(remaining_time)
+			).c_str()
+		);
+		return false;
 	}
 
 	if(spell.recast_time > 0)
@@ -1033,14 +1036,14 @@ void EntityList::AESpell(
 				//which have bad faction with us
 				if (
 					!(caster_mob->CheckAggro(current_mob) ||
-					  faction_value == FACTION_THREATENLY ||
+					  faction_value == FACTION_THREATENINGLY ||
 					  faction_value == FACTION_SCOWLS)) {
 					continue;
 				}
 			}
 			else {
 				//only affect mobs we would assist.
-				if (!(faction_value <= FACTION_AMIABLE)) {
+				if (!(faction_value <= FACTION_AMIABLY)) {
 					continue;
 				}
 			}
@@ -1209,13 +1212,13 @@ void EntityList::AEBardPulse(
 			if (is_detrimental_spell) {
 				//affect mobs that are on our hate list, or
 				//which have bad faction with us
-				if (!(caster->CheckAggro(current_mob) || faction == FACTION_THREATENLY || faction == FACTION_SCOWLS)) {
+				if (!(caster->CheckAggro(current_mob) || faction == FACTION_THREATENINGLY || faction == FACTION_SCOWLS)) {
 					continue;
 				}
 			}
 			else {
 				//only affect mobs we would assist.
-				if (!(faction <= FACTION_AMIABLE)) {
+				if (!(faction <= FACTION_AMIABLY)) {
 					continue;
 				}
 			}

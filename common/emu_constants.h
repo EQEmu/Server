@@ -22,6 +22,7 @@
 
 #include "eq_limits.h"
 #include "emu_versions.h"
+#include "bodytypes.h"
 
 #include <string.h>
 
@@ -220,11 +221,29 @@ namespace EQ
 			stanceBurnAE
 		};
 
+		enum GravityBehavior : uint8 {
+			Ground,
+			Flying,
+			Levitating,
+			Water,
+			Floating,
+			LevitateWhileRunning
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
 		extern const std::map<int, std::string>& GetLanguageMap();
 		std::string GetLanguageName(int language_id);
+
+		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
+		std::string GetLDoNThemeName(uint32 theme_id);
+    
+		extern const std::map<uint8, std::string>& GetFlyModeMap();
+		std::string GetFlyModeName(uint8 flymode_id);
+
+		extern const std::map<bodyType, std::string>& GetBodyTypeMap();
+		std::string GetBodyTypeName(bodyType bodytype_id);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
@@ -354,6 +373,12 @@ enum AccountStatus : uint8 {
 	GMMgmt = 200,
 	GMImpossible = 250,
 	Max = 255
+};
+
+enum Invisibility : uint8 {
+	Visible,
+	Invisible,
+	Special = 255
 };
 
 #endif /*COMMON_EMU_CONSTANTS_H*/

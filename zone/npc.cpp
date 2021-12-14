@@ -641,18 +641,21 @@ void NPC::ClearItemList() {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
 }
 
-void NPC::QueryLoot(Client* to)
+void NPC::QueryLoot(Client* to, bool is_pet_query)
 {
-	if (itemlist.size() > 0) {
-		to->Message(
-			Chat::White,
-			fmt::format(
-				"Loot | Name: {} ID: {} Loottable ID: {}",
-				GetName(),
-				GetNPCTypeID(),
-				GetLoottableID()
-			).c_str()
-		);
+	if (!itemlist.empty()) {
+		if (!is_pet_query) {
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Loot | {} ({}) ID: {} Loottable ID: {}",
+					GetName(),
+					GetID(),
+					GetNPCTypeID(),
+					GetLoottableID()
+				).c_str()
+			);
+		}
 
 		int item_count = 0;
 		for (auto current_item : itemlist) {
@@ -674,35 +677,45 @@ void NPC::QueryLoot(Client* to)
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Item {} | Name: {} ID: {} Min Level: {} Max Level: {}",
+					"Item {} | {} ({}){}",
 					item_number,
 					linker.GenerateLink().c_str(),
 					current_item->item_id,
-					current_item->trivial_min_level,
-					current_item->trivial_max_level
+					(
+						current_item->charges > 1 ?
+						fmt::format(
+							" Amount: {}",
+							current_item->charges
+						) :
+						""
+					)
 				).c_str()
 			);
 			item_count++;
 		}
 	}
 
-	bool has_money = (
-		platinum > 0 ||
-		gold > 0 ||
-		silver > 0 ||
-		copper > 0
-	);
-	if (has_money) {
-		to->Message(
-			Chat::White,
-			fmt::format(
-				"Money | Platinum: {} Gold: {} Silver: {} Copper: {}",
-				platinum,
-				gold,
-				silver,
-				copper
-			).c_str()
+	if (!is_pet_query) {
+		bool has_money = (
+			platinum > 0 ||
+			gold > 0 ||
+			silver > 0 ||
+			copper > 0
 		);
+		if (has_money) {
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Money | {}",
+					ConvertMoneyToString(
+						platinum,
+						gold,
+						silver,
+						copper
+					)
+				).c_str()
+			);
+		}
 	}
 }
 
@@ -2907,7 +2920,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 		return GetSpecialFactionCon(iOther);
 
 	if (primaryFaction == 0)
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 
 	//if we are a pet, use our owner's faction stuff
 	Mob *own = GetOwner();
@@ -2917,7 +2930,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 	//make sure iOther is an npc
 	//also, if we dont have a faction, then they arnt gunna think anything of us either
 	if(!iOther->IsNPC() || GetPrimaryFaction() == 0)
-		return(FACTION_INDIFFERENT);
+		return(FACTION_INDIFFERENTLY);
 
 	//if we get here, iOther is an NPC too
 
@@ -2941,7 +2954,7 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 			else if (fac->npc_value < 0)
 				return FACTION_SCOWLS;
 			else
-				return FACTION_INDIFFERENT;
+				return FACTION_INDIFFERENTLY;
 		}
 	}
 
@@ -2953,7 +2966,7 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 	if (GetPrimaryFaction() == other_faction)
 		return FACTION_ALLY;
 	else
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 }
 
 bool NPC::IsFactionListAlly(uint32 other_faction) {
@@ -3421,7 +3434,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 					}
 				}
 
-				if (sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE) {
+				if (sender->GetReverseFactionCon(mob) <= FACTION_AMIABLY) {
 					//attacking someone on same faction, or a friend
 					//Father Nitwit: make sure we can see them.
 					if (mob->CheckLosFN(sender)) {

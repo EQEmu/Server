@@ -221,8 +221,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return(false);
 	}
 
-	if (spellbonuses.NegateIfCombat)
+	if (spellbonuses.NegateIfCombat) {
 		BuffFadeByEffect(SE_NegateIfCombat);
+	}
 
 	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, entity_list.GetMobID(target_id))) {
 		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
@@ -881,6 +882,7 @@ void Mob::ZeroCastingVars()
 	casting_spell_resist_adjust = 0;
 	casting_spell_checks = false;
 	casting_spell_aa_id = 0;
+	casting_spell_recast_adjust = 0;
 	delaytimer = false;
 }
 
@@ -995,12 +997,18 @@ void Mob::StopCasting()
 			c->ResetAlternateAdvancementTimer(casting_spell_aa_id);
 		}
 
+		int casting_slot = -1;
+		if (casting_spell_slot < CastingSlot::MaxGems) {
+			casting_slot = static_cast<int>(casting_spell_slot);
+		}
+
 		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
 		auto mc = (ManaChange_Struct *)outapp->pBuffer;
 		mc->new_mana = GetMana();
 		mc->stamina = GetEndurance();
 		mc->spell_id = casting_spell_id;
 		mc->keepcasting = 0;
+		mc->slot = casting_slot;
 		c->FastQueuePacket(&outapp);
 	}
 	ZeroCastingVars();
@@ -1458,6 +1466,24 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
 
+	if (IsClient() && IsEffectInSpell(spell_id, SE_BindSight)) {
+		for (int i = 0; i < GetMaxTotalSlots(); i++) {
+			if (buffs[i].spellid == spell_id) {
+				CastToClient()->SendBuffNumHitPacket(buffs[i], i);//its hack, it works.
+			}
+		}
+	}
+
+	//Check if buffs has numhits, then resend packet so it displays the hit count.
+	if (IsClient() && spells[spell_id].hit_number) {
+		for (int i = 0; i < GetMaxTotalSlots(); i++) {
+			if (buffs[i].spellid == spell_id && buffs[i].hit_number > 0) {
+				CastToClient()->SendBuffNumHitPacket(buffs[i], i);
+				break;
+			}
+		}
+	}
+
 	//
 	// at this point the spell has successfully been cast
 	//
@@ -1477,10 +1503,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if((IsFromItem  && RuleB(Character, SkillUpFromItems)) || !IsFromItem) {
 				c->CheckSongSkillIncrease(spell_id);
 			}
-			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems)
-				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, spells[spell_id].recast_time / 1000);
-			if(RuleB(Spells, EnableBardMelody))
-				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
+			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
+				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, (spells[spell_id].recast_time / 1000) - (casting_spell_recast_adjust / 1000));
+			}
+			if (RuleB(Spells, EnableBardMelody)) {
+				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
+			}
 		}
 		LogSpells("Bard song [{}] should be started", spell_id);
 	}
@@ -1492,9 +1520,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			SendSpellBarEnable(spell_id);
 
 			// this causes the delayed refresh of the spell bar gems
-			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems)
-				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, spells[spell_id].recast_time / 1000);
-			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
+			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
+				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, (spells[spell_id].recast_time / 1000) - (casting_spell_recast_adjust / 1000));
+			}
+			
+			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
 
 			// this tells the client that casting may happen again
 			SetMana(GetMana());
@@ -2550,13 +2580,23 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			{
 				recast -= GetAA(aaTouchoftheWicked) * 420;
 			}
-			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//Client only
 
-			if(reduction)
+			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
+
+			if (reduction) {
 				recast -= reduction;
-
+				casting_spell_recast_adjust = reduction * 1000; //used later to adjust on client with memorizespell_struct
+				if (recast < 0) {
+					casting_spell_recast_adjust = spells[spell_id].recast_time;
+				}
+				recast = std::max(recast, 0);
+			}
+			
 			LogSpells("Spell [{}]: Setting long reuse timer to [{}] s (orig [{}])", spell_id, recast, spells[spell_id].recast_time);
-			CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
+			
+			if (recast > 0) {
+				CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
+			}
 		}
 	}
 
@@ -2890,7 +2930,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
 	if (caster == target && (target->aabonuses.IllusionPersistence || target->spellbonuses.IllusionPersistence ||
 				 target->itembonuses.IllusionPersistence) &&
-	    spell_id != 287 && spell_id != 601 && IsEffectInSpell(spell_id, SE_Illusion))
+	    spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion))
 		res = 10000; // ~16h override
 
 
@@ -2995,6 +3035,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	}
 
 	if (spellid1 == spellid2 ) {
+		
+		if (spellid1 == SPELL_EYE_OF_ZOMM && spellid2 == SPELL_EYE_OF_ZOMM) {//only the original Eye of Zomm spell will not take hold if affect is already on you, other versions client fades the buff as soon as cast.
+			MessageString(Chat::Red, SPELL_NO_HOLD);
+			return -1;
+		}
+
 		if (!IsStackableDot(spellid1) && !IsEffectInSpell(spellid1, SE_ManaBurn)) { // mana burn spells we need to use the stacking command blocks live actually checks those first, we should probably rework to that too
 			if (caster_level1 > caster_level2) { // cur buff higher level than new
 				if (IsEffectInSpell(spellid1, SE_ImprovedTaunt)) {
@@ -3645,11 +3691,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	}
 
 	// select target
-	if	// Bind Sight line of spells
-	(
-		spell_id == 500 ||	// bind sight
-		spell_id == 407		// cast sight
-	)
+	if (IsEffectInSpell(spell_id, SE_BindSight))
 	{
 		action->target = GetID();
 	}
@@ -4255,21 +4297,27 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	safe_delete(outapp);
 }
 
-bool Mob::FindBuff(uint16 spellid)
+bool Mob::FindBuff(uint16 spell_id)
 {
-	int i;
-
 	uint32 buff_count = GetMaxTotalSlots();
-	for(i = 0; i < buff_count; i++)
-		if(buffs[i].spellid == spellid)
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			current_spell_id == spell_id
+		) {
 			return true;
+		}
+	}
 
 	return false;
 }
 
 uint16 Mob::FindBuffBySlot(int slot) {
-	if (buffs[slot].spellid != SPELL_UNKNOWN)
-		return buffs[slot].spellid;
+	auto current_spell_id = buffs[slot].spellid;
+	if (IsValidSpell(current_spell_id)) {
+		return current_spell_id;
+	}
 
 	return 0;
 }
@@ -4277,167 +4325,221 @@ uint16 Mob::FindBuffBySlot(int slot) {
 uint32 Mob::BuffCount() {
 	uint32 active_buff_count = 0;
 	int buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; i++)
-		if (buffs[i].spellid != SPELL_UNKNOWN)
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (IsValidSpell(buffs[buff_slot].spellid)) {
 			active_buff_count++;
+		}
+	}
 
 	return active_buff_count;
 }
 
-bool Mob::HasBuffWithSpellGroup(int spellgroup)
+bool Mob::HasBuffWithSpellGroup(int spell_group)
 {
-	for (int i = 0; i < GetMaxTotalSlots(); i++) {
-		if (IsValidSpell(buffs[i].spellid) && spells[buffs[i].spellid].spell_group == spellgroup) {
+	for (int buff_slot = 0; buff_slot < GetMaxTotalSlots(); buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			spells[current_spell_id].spell_group == spell_group
+		) {
 			return true;
 		}
 	}
+
 	return false;
 }
 
-// removes all buffs
 void Mob::BuffFadeAll()
 {
+	bool recalc_bonus = false;
 	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN)
-			BuffFadeBySlot(j, false);
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeNonPersistDeath()
-{
-	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if (buffs[j].spellid != SPELL_UNKNOWN && !IsPersistDeathSpell(buffs[j].spellid))
-			BuffFadeBySlot(j, false);
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeDetrimental() {
-	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN) {
-			if(IsDetrimentalSpell(buffs[j].spellid))
-				BuffFadeBySlot(j, false);
-		}
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
-{
-	if(!caster)
-		return;
-
-	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN) {
-			if(IsDetrimentalSpell(buffs[j].spellid))
-			{
-				//this is a pretty terrible way to do this but
-				//there really isn't another way till I rewrite the basics
-				Mob * c = entity_list.GetMob(buffs[j].casterid);
-				if(c && c == caster)
-					BuffFadeBySlot(j, false);
-			}
-		}
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeBySitModifier()
-{
-	bool r_bonus = false;
-	uint32 buff_count = GetMaxTotalSlots();
-	for(uint32 j = 0; j < buff_count; ++j)
-	{
-		if(buffs[j].spellid != SPELL_UNKNOWN)
-		{
-			if(spells[buffs[j].spellid].disallow_sit)
-			{
-				BuffFadeBySlot(j, false);
-				r_bonus = true;
-			}
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (IsValidSpell(buffs[buff_slot].spellid)) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
 		}
 	}
 
-	if(r_bonus)
-	{
+	if (recalc_bonus) {
 		CalcBonuses();
 	}
 }
 
-// removes the buff matching spell_id
-void Mob::BuffFadeBySpellID(uint16 spell_id)
+void Mob::BuffFadeNonPersistDeath()
 {
+	bool recalc_bonus = false;
 	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++)
-	{
-		if (buffs[j].spellid == spell_id)
-			BuffFadeBySlot(j, false);
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			!IsPersistDeathSpell(current_spell_id)
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
 	}
 
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeBeneficial() {
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsBeneficialSpell(current_spell_id)
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeDetrimental() {
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsDetrimentalSpell(current_spell_id)
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
+{
+	if(!caster) {
+		return;
+	}
+
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsDetrimentalSpell(current_spell_id) &&
+			caster->GetID() == buffs[buff_slot].casterid
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeBySitModifier()
+{
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			spells[current_spell_id].disallow_sit
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeBySpellID(uint16 spell_id)
+{
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (buffs[buff_slot].spellid == spell_id) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
 }
 
 void Mob::BuffFadeBySpellIDAndCaster(uint16 spell_id, uint16 caster_id)
 {
 	bool recalc_bonus = false;
 	auto buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; ++i) {
-		if (buffs[i].spellid == spell_id && buffs[i].casterid == caster_id) {
-			BuffFadeBySlot(i, false);
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (
+			buffs[buff_slot].spellid == spell_id &&
+			buffs[buff_slot].casterid == caster_id
+		) {
+			BuffFadeBySlot(buff_slot, false);
 			recalc_bonus = true;
 		}
 	}
 
-	if (recalc_bonus)
+	if (recalc_bonus) {
 		CalcBonuses();
+	}
 }
 
-// removes buffs containing effectid, skipping skipslot
-void Mob::BuffFadeByEffect(int effect_id, int skipslot)
+void Mob::BuffFadeByEffect(int effect_id, int slot_to_skip)
 {
-	int i;
-
+	bool recalc_bonus = false;
 	int buff_count = GetMaxTotalSlots();
-	for(i = 0; i < buff_count; i++)
-	{
-		if(buffs[i].spellid == SPELL_UNKNOWN)
-			continue;
-		if(IsEffectInSpell(buffs[i].spellid, effect_id) && i != skipslot)
-			BuffFadeBySlot(i, false);
+	for(int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsEffectInSpell(current_spell_id, effect_id) &&
+			buff_slot != slot_to_skip
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
 	}
 
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
 }
 
 bool Mob::IsAffectedByBuff(uint16 spell_id)
 {
-	int buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; ++i)
-		if (buffs[i].spellid == spell_id)
-			return true;
-
-	return false;
+	return FindBuff(spell_id);
 }
 
 bool Mob::IsAffectedByBuffByGlobalGroup(GlobalGroup group)
 {
 	int buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; ++i) {
-		if (buffs[i].spellid == SPELL_UNKNOWN)
-			continue;
-		if (spells[buffs[i].spellid].spell_category == static_cast<int>(group))
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			spells[current_spell_id].spell_category == static_cast<int>(group)
+		) {
 			return true;
+		}
 	}
 
 	return false;
@@ -5144,6 +5246,7 @@ void Mob::SendSpellBarEnable(uint16 spell_id)
 	manachange->spell_id = spell_id;
 	manachange->stamina = CastToClient()->GetEndurance();
 	manachange->keepcasting = 0;
+	manachange->slot = CastToClient()->FindMemmedSpellBySpellID(spell_id);
 	outapp->priority = 6;
 	CastToClient()->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -5274,82 +5377,101 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 
 void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
 {
-	if(slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0)
+	if (slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0) {
 		return;
+	}
 
-	if(update_client)
-	{
-		if(m_pp.mem_spells[slot] != 0xFFFFFFFF)
+	if(update_client) {
+		if (IsValidSpell(m_pp.mem_spells[slot])) {
 			UnmemSpell(slot, update_client);
+		}
 	}
 
 	m_pp.mem_spells[slot] = spell_id;
 	LogSpells("Spell [{}] memorized into slot [{}]", spell_id, slot);
 
-	database.SaveCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	database.SaveCharacterMemorizedSpell(CharacterID(), m_pp.mem_spells[slot], slot);
 
-	if(update_client)
-	{
+	if(update_client) {
 		MemorizeSpell(slot, spell_id, memSpellMemorize);
 	}
 }
 
 void Client::UnmemSpell(int slot, bool update_client)
 {
-	if(slot > EQ::spells::SPELL_GEM_COUNT || slot < 0)
+	if (slot >= EQ::spells::SPELL_GEM_COUNT || slot < 0) {
 		return;
+	}
 
 	LogSpells("Spell [{}] forgotten from slot [{}]", m_pp.mem_spells[slot], slot);
 	m_pp.mem_spells[slot] = 0xFFFFFFFF;
 
-	database.DeleteCharacterMemorizedSpell(this->CharacterID(), m_pp.mem_spells[slot], slot);
+	database.DeleteCharacterMemorizedSpell(CharacterID(), m_pp.mem_spells[slot], slot);
 
-	if(update_client)
-	{
+	if(update_client) {
 		MemorizeSpell(slot, m_pp.mem_spells[slot], memSpellForget);
 	}
 }
 
 void Client::UnmemSpellBySpellID(int32 spell_id)
 {
-	for(int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
-		if(m_pp.mem_spells[i] == spell_id) {
-			UnmemSpell(i, true);
-			break;
-		}
+	auto spell_gem = FindMemmedSpellBySpellID(spell_id);
+	if (spell_gem >= EQ::spells::SPELL_GEM_COUNT || spell_gem < 0) {
+		return;
 	}
+
+	UnmemSpell(spell_gem);
 }
 
 void Client::UnmemSpellAll(bool update_client)
 {
-	int i;
-
-	for(i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++)
-		if(m_pp.mem_spells[i] != 0xFFFFFFFF)
-			UnmemSpell(i, update_client);
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
+			UnmemSpell(spell_gem, update_client);
+		}
+	}
 }
 
 uint32 Client::GetSpellIDByBookSlot(int book_slot) {
 	if (book_slot <= EQ::spells::SPELLBOOK_SIZE) {
 		return GetSpellByBookSlot(book_slot);
 	}
-	return -1;	//default
+	return -1;
+}
+
+int Client::FindEmptyMemSlot() {
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (!IsValidSpell(m_pp.mem_spells[spell_gem])) {
+			return spell_gem;
+		}
+	}
+	return -1;
 }
 
 uint16 Client::FindMemmedSpellBySlot(int slot) {
-	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
+	if (IsValidSpell(m_pp.mem_spells[slot])) {
 		return m_pp.mem_spells[slot];
-
+	}
 	return 0;
 }
 
 int Client::MemmedCount() {
 	int memmed_count = 0;
-	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++)
-		if (m_pp.mem_spells[i] != 0xFFFFFFFF)
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem])) {
 			memmed_count++;
-
+		}
+	}
 	return memmed_count;
+}
+
+int Client::FindMemmedSpellBySpellID(uint16 spell_id) {
+	for (int spell_gem = 0; spell_gem < EQ::spells::SPELL_GEM_COUNT; spell_gem++) {
+		if (IsValidSpell(m_pp.mem_spells[spell_gem]) && m_pp.mem_spells[spell_gem] == spell_id) {
+			return spell_gem;
+		}
+	}
+	return -1;
 }
 
 
@@ -6181,13 +6303,13 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 			auto fac = (*iter)->GetReverseFactionCon(this);
 			if (beneficial_targets) {
 				// only affect mobs we would assist.
-				if (!(fac <= FACTION_AMIABLE)) {
+				if (!(fac <= FACTION_AMIABLY)) {
 					++iter;
 					continue;
 				}
 			} else {
 				// affect mobs that are on our hate list, or which have bad faction with us
-				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENINGLY || fac == FACTION_SCOWLS)) {
 					++iter;
 					continue;
 				}
@@ -6256,13 +6378,13 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 			auto fac = (*iter)->GetReverseFactionCon(this);
 			if (beneficial_targets) {
 				// only affect mobs we would assist.
-				if (!(fac <= FACTION_AMIABLE)) {
+				if (!(fac <= FACTION_AMIABLY)) {
 					++iter;
 					continue;
 				}
 			} else {
 				// affect mobs that are on our hate list, or which have bad faction with us
-				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENINGLY || fac == FACTION_SCOWLS)) {
 					++iter;
 					continue;
 				}
@@ -6326,4 +6448,68 @@ int Client::GetNextAvailableDisciplineSlot(int starting_slot) {
 	}
 
 	return -1; // Return -1 if No Slots open
+}
+
+void Client::ResetCastbarCooldownBySlot(int slot) {
+	if (slot < 0) {
+		for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
+			if(IsValidSpell(m_pp.mem_spells[i])) {
+				m_pp.spellSlotRefresh[i] = 1;
+				GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[i]));
+				if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[i]].timer_id)) {
+					GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[i]].timer_id));	
+				}
+				if (spells[m_pp.mem_spells[i]].timer_id > 0 && spells[m_pp.mem_spells[i]].timer_id < MAX_DISCIPLINE_TIMERS) {
+					SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[i]].timer_id, 0);
+				}
+				SendSpellBarEnable(m_pp.mem_spells[i]);
+			}
+		}
+	} else if (slot < EQ::spells::SPELL_GEM_COUNT) {
+		if(IsValidSpell(m_pp.mem_spells[slot])) {
+			m_pp.spellSlotRefresh[slot] = 1;
+			GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[slot]));
+			if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[slot]].timer_id)) {
+				GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[slot]].timer_id));
+				
+			}
+			if (spells[m_pp.mem_spells[slot]].timer_id > 0 && spells[m_pp.mem_spells[slot]].timer_id < MAX_DISCIPLINE_TIMERS) {
+				SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[slot]].timer_id, 0);
+			}
+			SendSpellBarEnable(m_pp.mem_spells[slot]);
+		}
+	}
+}
+
+void Client::ResetAllCastbarCooldowns() {
+	for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
+		if(IsValidSpell(m_pp.mem_spells[i])) {
+			m_pp.spellSlotRefresh[i] = 1;
+			GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[i]));
+			if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[i]].timer_id)) {
+				GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[i]].timer_id));	
+			}
+			if (spells[m_pp.mem_spells[i]].timer_id > 0 && spells[m_pp.mem_spells[i]].timer_id < MAX_DISCIPLINE_TIMERS) {
+				SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[i]].timer_id, 0);
+			}
+			SendSpellBarEnable(m_pp.mem_spells[i]);
+		}
+	}
+}
+
+void Client::ResetCastbarCooldownBySpellID(uint32 spell_id) {
+	for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
+		if(IsValidSpell(m_pp.mem_spells[i]) && m_pp.mem_spells[i] == spell_id) {
+			m_pp.spellSlotRefresh[i] = 1;
+			GetPTimers().Clear(&database, (pTimerSpellStart + m_pp.mem_spells[i]));
+			if (!IsLinkedSpellReuseTimerReady(spells[m_pp.mem_spells[i]].timer_id)) {
+				GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[m_pp.mem_spells[i]].timer_id));	
+			}
+			if (spells[m_pp.mem_spells[i]].timer_id > 0 && spells[m_pp.mem_spells[i]].timer_id < MAX_DISCIPLINE_TIMERS) {
+				SetLinkedSpellReuseTimer(spells[m_pp.mem_spells[i]].timer_id, 0);
+			}
+			SendSpellBarEnable(m_pp.mem_spells[i]);
+			break;
+		}
+	}
 }

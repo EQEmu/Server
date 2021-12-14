@@ -19,12 +19,10 @@ void command_stun(Client *c, const Seperator *sep)
 		target = c->GetTarget();
 		if (target->IsClient()) {
 			target->CastToClient()->Stun(duration);
-		}
-		else if (target->IsNPC()) {
+		} else if (target->IsNPC()) {
 			target->CastToNPC()->Stun(duration);
 		}
-	}
-	else {
+	} else {
 		c->Stun(duration);
 	}
 
@@ -34,25 +32,25 @@ void command_stun(Client *c, const Seperator *sep)
 				"You stunned {} for {}.",
 				(
 					c == target ?
-						"yourself" :
-						fmt::format(
-							"{} ({})",
-							target->GetCleanName(),
-							target->GetID()
-						)
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
 				),
-				ConvertSecondsToTime(duration)
+				ConvertMillisecondsToTime(duration)
 			) :
 			fmt::format(
 				"You unstunned {}.",
 				(
 					c == target ?
-						"yourself" :
-						fmt::format(
-							"{} ({})",
-							target->GetCleanName(),
-							target->GetID()
-						)
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
 				)
 			)
 	);

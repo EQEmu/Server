@@ -2,15 +2,56 @@
 
 void command_nukeitem(Client *c, const Seperator *sep)
 {
-	int numitems, itemid;
-
-	if (c->GetTarget() && c->GetTarget()->IsClient() && (sep->IsNumber(1) || sep->IsHexNumber(1))) {
-		itemid   = sep->IsNumber(1) ? atoi(sep->arg[1]) : hextoi(sep->arg[1]);
-		numitems = c->GetTarget()->CastToClient()->NukeItem(itemid);
-		c->Message(Chat::White, " %u items deleted", numitems);
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Usage: #nukeitem [Item ID] - Removes the specified Item ID from you or your player target's inventory");
+		return;
 	}
-	else {
-		c->Message(Chat::White, "Usage: (targted) #nukeitem itemnum - removes the item from the player's inventory");
+
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+	
+	auto item_id = std::stoi(sep->arg[1]);
+	auto deleted_count = target->NukeItem(item_id);
+	if (deleted_count) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} ({}) deleted from {}.",
+				deleted_count,
+				database.CreateItemLink(item_id),
+				item_id,
+				(
+					c == target ?
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				)
+			).c_str()
+		);
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not find any {} ({}) to delete from {}.",
+				database.CreateItemLink(item_id),
+				item_id,
+				(
+					c == target ?
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				)
+			).c_str()
+		);
 	}
 }
 

@@ -1941,10 +1941,10 @@ int Lua_Mob::GetSkillDmgTaken(int skill) {
 	return self->GetSkillDmgTaken(static_cast<EQ::skills::SkillType>(skill));
 }
 
-int Lua_Mob::GetFcDamageAmtIncoming(Lua_Mob caster, uint32 spell_id, bool use_skill, uint16 skill)
+int Lua_Mob::GetFcDamageAmtIncoming(Lua_Mob caster, int32 spell_id)
 {
 	Lua_Safe_Call_Int();
-	return self->GetFcDamageAmtIncoming(caster, spell_id, use_skill, skill);
+	return self->GetFcDamageAmtIncoming(caster, spell_id);
 }
 
 int Lua_Mob::GetSkillDmgAmt(uint16 skill)

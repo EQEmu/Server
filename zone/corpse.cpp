@@ -1456,54 +1456,74 @@ void Corpse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 }
 
 void Corpse::QueryLoot(Client* to) {
-	int x = 0, y = 0; // x = visible items, y = total items
-	to->Message(Chat::White, "Coin: %ip, %ig, %is, %ic", platinum, gold, silver, copper);
+	if (itemlist.size() > 0) {
+		int player_corpse_limit = to->GetInv().GetLookup()->InventoryTypeSize.Corpse;
+		to->Message(
+			Chat::White,
+			fmt::format(
+				"Loot | Name: {} ID: {}",
+				GetName(),
+				GetNPCTypeID()
+			).c_str()
+		);
 
-	ItemList::iterator cur,end;
-	cur = itemlist.begin();
-	end = itemlist.end();
+		int item_count = 0;
+		for (auto current_item : itemlist) {
+			int item_number = (item_count + 1);
+			if (!current_item) {
+				LogError("Corpse::QueryLoot() - ItemList error, null item.");
+				continue;
+			}
 
-	int corpselootlimit = to->GetInv().GetLookup()->InventoryTypeSize.Corpse;
+			if (!current_item->item_id || !database.GetItem(current_item->item_id)) {
+				LogError("Corpse::QueryLoot() - Database error, invalid item.");
+				continue;
+			}
 
-	for(; cur != end; ++cur) {
-		ServerLootItem_Struct* sitem = *cur;
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkLootItem);
+			linker.SetLootData(current_item);
 
-		if (IsPlayerCorpse()) {
-			if (sitem->equip_slot >= EQ::invbag::GENERAL_BAGS_BEGIN && sitem->equip_slot <= EQ::invbag::CURSOR_BAG_END)
-				sitem->lootslot = 0xFFFF;
-			else
-				x < corpselootlimit ? sitem->lootslot = x : sitem->lootslot = 0xFFFF;
-
-			const EQ::ItemData* item = database.GetItem(sitem->item_id);
-
-			if (item)
-				to->Message((sitem->lootslot == 0xFFFF), "LootSlot: %i (EquipSlot: %i) Item: %s (%d), Count: %i", static_cast<int16>(sitem->lootslot), sitem->equip_slot, item->Name, item->ID, sitem->charges);
-			else
-				to->Message((sitem->lootslot == 0xFFFF), "Error: 0x%04x", sitem->item_id);
-
-			if (sitem->lootslot != 0xFFFF)
-				x++;
-
-			y++;
-		}
-		else {
-			sitem->lootslot=y;
-			const EQ::ItemData* item = database.GetItem(sitem->item_id);
-
-			if (item)
-				to->Message(Chat::White, "LootSlot: %i Item: %s (%d), Count: %i", sitem->lootslot, item->Name, item->ID, sitem->charges);
-			else
-				to->Message(Chat::White, "Error: 0x%04x", sitem->item_id);
-
-			y++;
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Item {} | Name: {} ({}){}",
+					item_number,
+					linker.GenerateLink().c_str(),
+					current_item->item_id,
+					(
+						current_item->charges > 1 ?
+						fmt::format(
+							" Amount: {}",
+							current_item->charges
+						) :
+						""
+					)
+				).c_str()
+			);
+			item_count++;
 		}
 	}
 
-	if (IsPlayerCorpse()) {
-		to->Message(Chat::White, "%i visible %s (%i total) on %s (DBID: %i).", x, x==1?"item":"items", y, this->GetName(), this->GetCorpseDBID());
-	}
-	else {
-		to->Message(Chat::White, "%i %s on %s.", y, y==1?"item":"items", this->GetName());
+	bool has_money = (
+		platinum > 0 ||
+		gold > 0 ||
+		silver > 0 ||
+		copper > 0
+	);
+	if (has_money) {
+		to->Message(
+			Chat::White,
+			fmt::format(
+				"Money | {}",
+				ConvertMoneyToString(
+					platinum,
+					gold,
+					silver,
+					copper
+				)
+			).c_str()
+		);
 	}
 }
 

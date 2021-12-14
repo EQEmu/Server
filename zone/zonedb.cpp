@@ -61,20 +61,31 @@ ZoneDatabase::~ZoneDatabase() {
 	}
 }
 
-bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd) {
-
-	std::string query = StringFormat("UPDATE zone SET underworld = %f, minclip = %f, "
-                                    "maxclip = %f, fog_minclip = %f, fog_maxclip = %f, "
-                                    "fog_blue = %i, fog_red = %i, fog_green = %i, "
-                                    "sky = %i, ztype = %i, zone_exp_multiplier = %f, "
-                                    "safe_x = %f, safe_y = %f, safe_z = %f "
-                                    "WHERE zoneidnumber = %i AND version = %i",
-                                    zd->underworld, zd->minclip,
-                                    zd->maxclip, zd->fog_minclip[0], zd->fog_maxclip[0],
-                                    zd->fog_blue[0], zd->fog_red[0], zd->fog_green[0],
-                                    zd->sky, zd->ztype, zd->zone_exp_multiplier,
-                                    zd->safe_x, zd->safe_y, zd->safe_z,
-                                    zoneid, instance_id);
+bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd) {
+	std::string query = fmt::format(
+		"UPDATE zone SET underworld = {:.2f}, minclip = {:.2f}, "
+		"maxclip = {:.2f}, fog_minclip = {:.2f}, fog_maxclip = {:.2f}, "
+		"fog_blue = {}, fog_red = {}, fog_green = {}, "
+		"sky = {}, ztype = {}, zone_exp_multiplier = {:.2f}, "
+		"safe_x = {:.2f}, safe_y = {:.2f}, safe_z = {:.2f} "
+		"WHERE zoneidnumber = {} AND version = {}",
+		zd->underworld,
+		zd->minclip,
+		zd->maxclip,
+		zd->fog_minclip[0],
+		zd->fog_maxclip[0],
+		zd->fog_blue[0],
+		zd->fog_red[0],
+		zd->fog_green[0],
+		zd->sky,
+		zd->ztype,
+		zd->zone_exp_multiplier,
+		zd->safe_x,
+		zd->safe_y,
+		zd->safe_z,
+		zoneid,
+		instance_version
+	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
         return false;
@@ -85,7 +96,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 
 bool ZoneDatabase::GetZoneCFG(
 	uint32 zoneid,
-	uint16 instance_id,
+	uint16 instance_version,
 	NewZone_Struct *zone_data,
 	bool &can_bind,
 	bool &can_combat,
@@ -102,7 +113,7 @@ bool ZoneDatabase::GetZoneCFG(
 	*map_filename = new char[100];
 	zone_data->zone_id = zoneid;
 
-	std::string query = StringFormat(
+	std::string query = fmt::format(
 		"SELECT "
 		"ztype, "						// 0
 		"fog_red, "						// 1
@@ -169,10 +180,10 @@ bool ZoneDatabase::GetZoneCFG(
 		"underworld_teleport_index, "	// 62
 		"lava_damage, "					// 63
 		"min_lava_damage "				// 64
-		"FROM zone WHERE zoneidnumber = %i AND version = %i %s",
+		"FROM zone WHERE zoneidnumber = {} AND version = {} {}",
 		zoneid,
-		instance_id,
-		ContentFilterCriteria::apply().c_str()
+		instance_version,
+		ContentFilterCriteria::apply()
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -3491,28 +3502,140 @@ void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
     QueryDatabase(query);
 }
 
-void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
+void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 {
-	if(!client)
+	if (!client) {
 		return;
+	}
 
-	std::string query = StringFormat("SELECT instance_list.id, zone, version "
-                                    "FROM instance_list JOIN instance_list_player "
-                                    "ON instance_list.id = instance_list_player.id "
-                                    "WHERE instance_list_player.charid = %lu",
-                                    (unsigned long)charid);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-        return;
+	std::string query = fmt::format(
+		"SELECT instance_list.id, zone, version, start_time, duration, never_expires "
+		"FROM instance_list JOIN instance_list_player "
+		"ON instance_list.id = instance_list_player.id "
+		"WHERE instance_list_player.charid = {}",
+		character_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
 
-    char name[64];
-    database.GetCharName(charid, name);
-    client->Message(Chat::White, "%s is part of the following instances:", name);
+	auto character_name = database.GetCharNameByID(character_id);
+	bool is_same_client = client->CharacterID() == character_id;
+	if (character_name.empty()) {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Character ID '{}' does not exist.",
+				character_id
+			).c_str()
+		);
+		return;
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        client->Message(Chat::White, "%s - id: %lu, version: %lu", ZoneName(atoi(row[1])),
-				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
-    }
+	if (!results.RowCount()) {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"{} not in any Instances.",
+				(
+					is_same_client ?
+					"You are" :
+					fmt::format(
+						"{} ({}) is",
+						character_name,
+						character_id
+					)
+				)
+			).c_str()
+		);
+		return;
+	}
+
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"{} in the following Instances.",
+			(
+				is_same_client ?
+				"You are" :
+				fmt::format(
+					"{} ({}) is",
+					character_name,
+					character_id
+				)
+			)
+		).c_str()
+	);
+
+	uint32 instance_count = 0;
+	for (auto row : results) {
+		auto instance_id = std::stoul(row[0]);
+		auto zone_id = std::stoul(row[1]);
+		auto version = std::stoul(row[2]);
+		auto start_time = std::stoul(row[3]);
+		auto duration = std::stoul(row[4]);
+		auto never_expires = std::stoi(row[5]) ? true : false;
+		std::string remaining_time_string = "Never";
+		timeval time_value;
+		gettimeofday(&time_value, nullptr);
+		auto current_time = time_value.tv_sec;
+		auto remaining_time = ((start_time + duration) - current_time);
+		if (!never_expires) {
+			if (remaining_time > 0) {
+				remaining_time_string = ConvertSecondsToTime(remaining_time);
+			} else {
+				remaining_time_string = "Already Expired";
+			}
+		}
+		
+		client->Message(
+			Chat::White,
+			fmt::format("Instance {} | Zone: {} ({}){}",
+				instance_id,
+				ZoneLongName(zone_id),
+				zone_id,
+				(
+					version ?
+					fmt::format(
+						" Version: {}",
+						version
+					) :
+					""
+				)
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Instance {} | Expires: {}",
+				instance_id,
+				remaining_time_string,
+				remaining_time
+			).c_str()
+		);
+
+		instance_count++;
+	}
+
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"{} in {} Instance{}.",
+			(
+				is_same_client ?
+				"You are" :
+				fmt::format(
+					"{} ({}) is",
+					character_name,
+					character_id
+				)
+			),
+			instance_count,
+			instance_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
 
 void ZoneDatabase::QGlobalPurge()

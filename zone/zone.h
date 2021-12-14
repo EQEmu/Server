@@ -134,7 +134,7 @@ public:
 	bool IsUCSServerAvailable() { return m_ucss_available; }
 	bool IsZone(uint32 zone_id, uint16 instance_id) const;
 	bool LoadGroundSpawns();
-	bool LoadZoneCFG(const char *filename, uint16 instance_id);
+	bool LoadZoneCFG(const char *filename, uint16 instance_version);
 	bool LoadZoneObjects();
 	bool Process();
 	bool SaveZoneCFG();
@@ -240,6 +240,9 @@ public:
 	uint32 CountSpawn2();
 	uint32 GetSpawnKillCount(uint32 in_spawnid);
 	uint32 GetTempMerchantQuantity(uint32 NPCID, uint32 Slot);
+
+	uint32 GetCurrencyID(uint32 item_id);
+	uint32 GetCurrencyItemID(uint32 currency_id);
 
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);

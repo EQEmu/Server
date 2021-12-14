@@ -204,7 +204,7 @@ enum {	//some random constants
 #define MIN_LEVEL_ALCHEMY 25
 
 //chance ratio that a
-#define THREATENLY_ARRGO_CHANCE 32 // 32/128 (25%) chance that a mob will arrgo on con Threatenly
+#define THREATENINGLY_AGGRO_CHANCE 32 // 32/128 (25%) chance that a mob will arrgo on con Threatenly
 
 //max factions per npc faction list
 #define MAX_NPC_FACTIONS 20

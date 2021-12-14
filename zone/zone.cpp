@@ -1262,7 +1262,7 @@ void Zone::ReloadStaticData() {
 	LogInfo("Zone Static Data Reloaded");
 }
 
-bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
+bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
 
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
@@ -1270,7 +1270,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 
 	if (!content_db.GetZoneCFG(
 		ZoneID(filename),
-		instance_id,
+		instance_version,
 		&newzone_data,
 		can_bind,
 		can_combat,
@@ -1285,7 +1285,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 		&map_name
 	)) {
 		// If loading a non-zero instance failed, try loading the default
-		if (instance_id != 0) {
+		if (instance_version != 0) {
 			safe_delete_array(map_name);
 			if (!content_db.GetZoneCFG(
 				ZoneID(filename),
@@ -1319,7 +1319,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 		GetShortName(),
 		GetLongName(),
 		GetInstanceVersion(),
-		instance_id
+		instance_version
 	);
 
 	return true;
@@ -2421,10 +2421,9 @@ void Zone::LoadAlternateCurrencies()
 		return;
     }
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-    {
-        current_currency.id = atoi(row[0]);
-        current_currency.item_id = atoi(row[1]);
+    for (auto row : results) {
+        current_currency.id = std::stoul(row[0]);
+        current_currency.item_id = std::stoul(row[1]);
         AlternateCurrencies.push_back(current_currency);
     }
 
@@ -2743,4 +2742,34 @@ DynamicZone* Zone::GetDynamicZone()
 	}
 
 	return nullptr;
+}
+
+uint32 Zone::GetCurrencyID(uint32 item_id)
+{
+	if (!item_id) {
+		return 0;
+	}
+	
+	for (const auto& alternate_currency : AlternateCurrencies) {
+		if (item_id == alternate_currency.item_id) {
+			return alternate_currency.id;
+		}
+	}
+
+	return 0;
+}
+
+uint32 Zone::GetCurrencyItemID(uint32 currency_id)
+{
+	if (!currency_id) {
+		return 0;
+	}
+
+	for (const auto& alternate_currency : AlternateCurrencies) {
+		if (currency_id == alternate_currency.id) {
+			return alternate_currency.item_id;
+		}
+	}
+
+	return 0;
 }

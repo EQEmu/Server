@@ -3,63 +3,66 @@
 
 void command_title(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0) {
+	int arguments = sep->argnum;
+	if (!arguments) {
 		c->Message(
 			Chat::White,
-			"Usage: #title [remove|text] [1 = Create row in title table] - remove or set title to 'text'"
+			"Usage: #title [Remove|Title] [Save (0 = False, 1 = True)]"
 		);
+		return;
 	}
-	else {
-		bool Save = (atoi(sep->arg[2]) == 1);
-
-		Mob *target_mob = c->GetTarget();
-		if (!target_mob) {
-			target_mob = c;
-		}
-		if (!target_mob->IsClient()) {
-			c->Message(Chat::Red, "#title only works on players.");
-			return;
-		}
-		Client *t = target_mob->CastToClient();
-
-		if (strlen(sep->arg[1]) > 31) {
-			c->Message(Chat::Red, "Title must be 31 characters or less.");
-			return;
-		}
-
-		bool removed = false;
-		if (!strcasecmp(sep->arg[1], "remove")) {
-			t->SetAATitle("");
-			removed = true;
-		}
-		else {
-			for (unsigned int i = 0; i < strlen(sep->arg[1]); i++)
-				if (sep->arg[1][i] == '_') {
-					sep->arg[1][i] = ' ';
-				}
-			if (!Save) {
-				t->SetAATitle(sep->arg[1]);
-			}
-			else {
-				title_manager.CreateNewPlayerTitle(t, sep->arg[1]);
-			}
-		}
-
-		t->Save();
-
-		if (removed) {
-			c->Message(Chat::Red, "%s's title has been removed.", t->GetName(), sep->arg[1]);
-			if (t != c) {
-				t->Message(Chat::Red, "Your title has been removed.", sep->arg[1]);
-			}
-		}
-		else {
-			c->Message(Chat::Red, "%s's title has been changed to '%s'.", t->GetName(), sep->arg[1]);
-			if (t != c) {
-				t->Message(Chat::Red, "Your title has been changed to '%s'.", sep->arg[1]);
-			}
-		}
+	
+	bool is_remove = !strcasecmp(sep->arg[1], "remove");
+	std::string title = is_remove ? "" : sep->arg[1];
+	bool save_title = sep->IsNumber(2) ? atobool(sep->arg[2]) : false;
+		
+	auto target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
 	}
+
+	if (title.size() > 31) {
+		c->Message(Chat::White, "Title must be 31 characters or less.");
+		return;
+	}
+
+	if (!title.empty()) {
+		find_replace(title, "_", " ");
+	}
+
+	if (!save_title || is_remove) {
+		target->SetAATitle(title.c_str());
+	} else if (save_title) {
+		title_manager.CreateNewPlayerTitle(target, title.c_str());
+	}
+
+	target->Save();
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Title has been {}{} for {}{}",
+			is_remove ? "removed" : "changed",
+			!is_remove && save_title ? " and saved" : "",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			(
+				is_remove ?
+				"." :
+				fmt::format(
+					" to '{}'.",
+					title
+				)
+			)
+		).c_str()
+	);
 }
 
 

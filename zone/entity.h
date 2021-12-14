@@ -380,6 +380,7 @@ public:
 	void	SendZoneAppearance(Client *c);
 	void	SendNimbusEffects(Client *c);
 	void	SendUntargetable(Client *c);
+	void	SendAppearanceEffects(Client *c);
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
 	void	QuestJournalledSayClose(Mob *sender, float dist, const char* mobname, const char* message, Journal::Options &opts);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
@@ -440,8 +441,8 @@ public:
 
 	void	ListNPCCorpses(Client* client);
 	void	ListPlayerCorpses(Client* client);
-	int32	DeleteNPCCorpses();
-	int32	DeletePlayerCorpses();
+	uint32	DeleteNPCCorpses();
+	uint32	DeletePlayerCorpses();
 	void	CorpseFix(Client* c);
 	void	WriteEntityIDs();
 	void	HalveAggro(Mob* who);

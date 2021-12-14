@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "world_store.h"
 
 extern uint32 numzones;
-extern bool holdzones;
 extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
 volatile bool UCSServerAvailable_ = false;
@@ -51,7 +50,7 @@ ZSList::~ZSList() {
 
 void ZSList::ShowUpTime(WorldTCPConnection* con, const char* adminname) {
 	uint32 ms = Timer::GetCurrentTime();
-	std::string time_string = ConvertSecondsToTime(ms);
+	std::string time_string = ConvertMillisecondsToTime(ms);
 	con->SendEmoteMessage(
 		adminname,
 		0,

@@ -3,25 +3,31 @@
 
 void command_getplayerburiedcorpsecount(Client *c, const Seperator *sep)
 {
-	Client *t = c;
-
+	Client *target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
-		t = c->GetTarget()->CastToClient();
-	}
-	else {
-		c->Message(Chat::White, "You must first select a target!");
-		return;
+		target = c->GetTarget()->CastToClient();
 	}
 
-	uint32 CorpseCount = database.GetCharacterBuriedCorpseCount(t->CharacterID());
-
-	if (CorpseCount > 0) {
-		c->Message(Chat::White, "Your target has a total of %u buried corpses.", CorpseCount);
-	}
-	else {
-		c->Message(Chat::White, "Your target doesn't have any buried corpses.");
-	}
-
-	return;
+	uint32 corpse_count = database.GetCharacterBuriedCorpseCount(target->CharacterID());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} {} buried corpse{}.",
+			(
+				c == target ?
+				"You have" :
+				fmt::format(
+					"{} ({}) has",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			(
+				corpse_count ?
+				std::to_string(corpse_count) :
+				"no"
+			),
+			corpse_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
-

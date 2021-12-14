@@ -593,6 +593,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
 				invisible_animals = true;
+				SetInvisible(Invisibility::Special);
 				break;
 			}
 
@@ -603,6 +604,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
 				invisible_undead = true;
+				SetInvisible(Invisibility::Special);
 				break;
 			}
 			case SE_SeeInvis:
@@ -622,22 +624,21 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if(IsClient()){
 					EQ::ItemInstance* transI = CastToClient()->GetInv().GetItem(EQ::invslot::slotCursor);
 					if (transI && transI->IsClassCommon() && transI->IsStackable()){
-						uint32 fcharges = transI->GetCharges();
-							//Does it sound like meat... maybe should check if it looks like meat too...
-							if(strstr(transI->GetItem()->Name, "meat") ||
-								strstr(transI->GetItem()->Name, "Meat") ||
-								strstr(transI->GetItem()->Name, "flesh") ||
-								strstr(transI->GetItem()->Name, "Flesh") ||
-								strstr(transI->GetItem()->Name, "parts") ||
-								strstr(transI->GetItem()->Name, "Parts")){
-								CastToClient()->DeleteItemInInventory(EQ::invslot::slotCursor, fcharges, true);
-								CastToClient()->SummonItem(13073, fcharges);
-							}
-							else{
-								Message(Chat::Red, "You can only transmute flesh to bone.");
-							}
+						int16 fcharges = transI->GetCharges();
+						//Does it sound like meat... maybe should check if it looks like meat too...
+						if(strstr(transI->GetItem()->Name, "meat") ||
+							strstr(transI->GetItem()->Name, "Meat") ||
+							strstr(transI->GetItem()->Name, "flesh") ||
+							strstr(transI->GetItem()->Name, "Flesh") ||
+							strstr(transI->GetItem()->Name, "parts") ||
+							strstr(transI->GetItem()->Name, "Parts")){
+							CastToClient()->DeleteItemInInventory(EQ::invslot::slotCursor, fcharges, true);
+							CastToClient()->SummonItem(13073, fcharges);
 						}
-					else{
+						else{
+							Message(Chat::Red, "You can only transmute flesh to bone.");
+						}
+					} else{
 						Message(Chat::Red, "You can only transmute flesh to bone.");
 					}
 				}
@@ -1368,7 +1369,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				//this sends the levitate packet to everybody else
 				//who does not otherwise receive the buff packet.
-				SendAppearancePacket(AT_Levitate, 2, true, true);
+				if (spells[spell_id].limit_value[i] == 1) {
+					SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::LevitateWhileRunning, true, true);
+				}
+				else {
+					SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::Levitating, true, true);
+				}
 				break;
 			}
 
@@ -1391,114 +1397,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Illusion: race %d", effect_value);
 #endif
-				// Gender Illusions
-				if(spell.base_value[i] == -1) {
-					// Specific Gender Illusions
-					if(spell_id == 1732 || spell_id == 1731) {
-						int specific_gender = -1;
-						// Male
-						if(spell_id == 1732)
-							specific_gender = 0;
-						// Female
-						else if (spell_id == 1731)
-							specific_gender = 1;
-						if(specific_gender > -1) {
-							if(caster && caster->GetTarget()) {
-								SendIllusionPacket
-								(
-									caster->GetTarget()->GetBaseRace(),
-									specific_gender,
-									caster->GetTarget()->GetTexture()
-								);
-							}
-						}
-					}
-					// Change Gender Illusions
-					else {
-						if(caster && caster->GetTarget()) {
-							int opposite_gender = 0;
-							if(caster->GetTarget()->GetGender() == 0)
-								opposite_gender = 1;
-
-							SendIllusionPacket
-							(
-								caster->GetTarget()->GetRace(),
-								opposite_gender,
-								caster->GetTarget()->GetTexture()
-							);
-						}
-					}
-				}
-				// Racial Illusions
-				else {
-					auto gender_id = (
-						spell.max_value[i] > 0 &&
-						(
-							spell.max_value[i] != 3 ||
-							spell.limit_value[i] == 0
-						) ?
-						(spell.max_value[i] - 1) :
-						Mob::GetDefaultGender(spell.base_value[i], GetGender())
-					);
-
-					auto race_size = GetRaceGenderDefaultHeight(
-						spell.base_value[i],
-						gender_id
-					);
-					
-					if (spell.base_value[i] != RACE_ELEMENTAL_75) {
-						if (spell.max_value[i] > 0) {
-							if (spell.limit_value[i] == 0) {
-								SendIllusionPacket(
-									spell.base_value[i],
-									gender_id
-								);
-							} else {
-								if (spell.max_value[i] != 3) {
-									SendIllusionPacket(
-										spell.base_value[i],
-										gender_id,
-										spell.limit_value[i],
-										spell.max_value[i]
-									);
-								} else {
-									SendIllusionPacket(
-										spell.base_value[i],
-										gender_id,
-										spell.limit_value[i],
-										spell.limit_value[i]
-									);
-								}
-							}
-						} else {
-							SendIllusionPacket(
-								spell.base_value[i],
-								gender_id,
-								spell.limit_value[i],
-								spell.max_value[i]
-							);
-						}
-						
-					} else {
-						SendIllusionPacket(
-							spell.base_value[i],
-							gender_id,
-							spell.limit_value[i]
-						);
-					}
-					SendAppearancePacket(AT_Size, race_size);
-				}
-
-				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
-					SendWearChange(x);
-				}
-
-				if (caster == this && spell.id != 287 && spell.id != 601 &&
-				    (spellbonuses.IllusionPersistence || aabonuses.IllusionPersistence ||
-				     itembonuses.IllusionPersistence))
-					buffs[buffslot].persistant_buff = 1;
-				else
-					buffs[buffslot].persistant_buff = 0;
+				ApplySpellEffectIllusion(spell_id, caster, buffslot, spells[spell_id].base_value[i], spells[spell_id].limit_value[i], spells[spell_id].max_value[i]);
 				break;
 			}
 
@@ -2292,7 +2191,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					else
 					{
 						entity_list.RemoveFromTargets(caster);
-						SetInvisible(1);
+						SetInvisible(Invisibility::Invisible);
 					}
 				}
 				break;
@@ -2547,6 +2446,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							if (CalcFocusEffect(focusFcTimerRefresh, spell_id, CastToClient()->m_pp.mem_spells[i])){
 								CastToClient()->m_pp.spellSlotRefresh[i] = 1;
 								CastToClient()->GetPTimers().Clear(&database, (pTimerSpellStart + CastToClient()->m_pp.mem_spells[i]));
+								if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[CastToClient()->m_pp.mem_spells[i]].timer_id)) {
+									CastToClient()->GetPTimers().Clear(&database, (pTimerLinkedSpellReuseStart + spells[CastToClient()->m_pp.mem_spells[i]].timer_id));
+								}
 							}
 						}
 					}
@@ -3324,7 +3226,6 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	effect_value = CalcSpellEffectValue_formula(formula, base_value, max_value, caster_level, spell_id, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
-
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)
 		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effect_id[effect_id])) {
 			oval = effect_value;
@@ -3344,29 +3245,34 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		it will focus the base value correctly.
 
 	*/
-	if (GetClass() != BARD) {
 
-		if (caster_id && instrument_mod > 10) {
-			//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
+	/*
+		Calculate base effects modifier for casters who are not bards.
+	*/
+	
+	//This is checked from Mob::SpellEffects and applied to instant spells and runes.
+	if (caster && caster->GetClass() != BARD && caster->HasBaseEffectFocus()) {
+
+		oval = effect_value;
+		int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
+		effect_value += effect_value * mod / 100;
+		
+		LogSpells("Instant Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+			oval, mod, effect_value);
+	}
+	//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
+	else if (caster_id && instrument_mod > 10) {
+
+		Mob* buff_caster = entity_list.GetMob(caster_id);//If targeted bard song needed to confirm caster is not bard.
+		if (buff_caster && buff_caster->GetClass() != BARD) {
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 
 			LogSpells("Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
 				oval, instrument_mod, effect_value);
 		}
-		else if (!caster_id) {
-			//This is checked from Mob::SpellEffects and applied to instant spells and runes.
-			if (caster && caster->HasBaseEffectFocus()) {
-				oval = effect_value;
-				int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
-				effect_value += effect_value * mod / 100;
-
-				LogSpells("Instant Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
-					oval, mod, effect_value);
-			}
-		}
 	}
-
+	
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effect_id[effect_id], caster, caster_id);
 
 	return effect_value;
@@ -4184,7 +4090,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Invisibility2:
 			case SE_Invisibility:
 			{
-				SetInvisible(0);
+				SetInvisible(Invisibility::Visible);
 				break;
 			}
 
@@ -4437,9 +4343,17 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_EyeOfZomm:
 			{
 				if (IsClient())
-					{
-					CastToClient()->SetControlledMobId(0);
+				{
+					NPC* tmp_eye_of_zomm = entity_list.GetNPCByID(CastToClient()->GetControlledMobId());
+					//On live there is about a 6 second delay before it despawns once new one spawns. 
+					if (tmp_eye_of_zomm) {
+						tmp_eye_of_zomm->GetSwarmInfo()->duration->Disable();
+						tmp_eye_of_zomm->GetSwarmInfo()->duration->Start(6000);
+						tmp_eye_of_zomm->DisableSwarmTimer();
+						tmp_eye_of_zomm->StartSwarmTimer(6000);
 					}
+					CastToClient()->SetControlledMobId(0);
+				}
 			}
 
 			case SE_Weapon_Stance:
@@ -6312,7 +6226,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 {
-	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration)
+	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime)
 		return 0;
 
 	int32 realTotal = 0;
@@ -7086,72 +7000,12 @@ bool Mob::DoHPToManaCovert(uint16 mana_cost)
 	return false;
 }
 
-int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, uint16 skill )
+int32 Mob::GetFcDamageAmtIncoming(Mob *caster, int32 spell_id)
 {
-	//Used to check focus derived from SE_FcDamageAmtIncoming which adds direct damage to Spells or Skill based attacks.
-	//Used to check focus derived from SE_Fc_Spell_Damage_Amt_IncomingPC which adds direct damage to Spells.
+	//THIS is target of spell cast
 	int32 dmg = 0;
-	bool limit_exists = false;
-	bool skill_found = false;
-
-	if (!caster)
-		return 0;
-
-	if (spellbonuses.FocusEffects[focusFcDamageAmtIncoming]){
-		int buff_count = GetMaxTotalSlots();
-		for(int i = 0; i < buff_count; i++){
-
-			if( (IsValidSpell(buffs[i].spellid) && (IsEffectInSpell(buffs[i].spellid, SE_FcDamageAmtIncoming))) ){
-
-				if (use_skill){
-					int32 temp_dmg = 0;
-					for (int e = 0; e < EFFECT_COUNT; e++) {
-
-						if (spells[buffs[i].spellid].effect_id[e] == SE_FcDamageAmtIncoming){
-							temp_dmg += spells[buffs[i].spellid].base_value[e];
-							continue;
-						}
-
-						if (!skill_found){
-							if ((spells[buffs[i].spellid].effect_id[e] == SE_LimitToSkill) ||
-								(spells[buffs[i].spellid].effect_id[e] == SE_LimitCastingSkill)){
-								limit_exists = true;
-
-								if (spells[buffs[i].spellid].base_value[e] == skill)
-									skill_found = true;
-							}
-						}
-					}
-					if ((!limit_exists) || (limit_exists && skill_found)){
-						dmg += temp_dmg;
-						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
-					}
-				}
-
-				else{
-					int32 focus = caster->CalcFocusEffect(focusFcDamageAmtIncoming, buffs[i].spellid, spell_id);
-					if(focus){
-						dmg += focus;
-						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
-					}
-				}
-			}
-		}
-	}
-	if (spellbonuses.FocusEffects[focusFcSpellDamageAmtIncomingPC]) {
-		int buff_count = GetMaxTotalSlots();
-		for (int i = 0; i < buff_count; i++) {
-
-			if ((IsValidSpell(buffs[i].spellid) && (IsEffectInSpell(buffs[i].spellid, SE_FcDamageAmtIncoming)))) {
-
-				int32 focus = caster->CalcFocusEffect(focusFcSpellDamageAmtIncomingPC, buffs[i].spellid, spell_id);
-				if (focus) {
-					dmg += focus;
-					CheckNumHitsRemaining(NumHit::MatchingSpells, i);
-				}
-			}
-		}
-	}
+	dmg += GetFocusEffect(focusFcDamageAmtIncoming, spell_id); //SPA 297 SE_FcDamageAmtIncoming
+	dmg += GetFocusEffect(focusFcSpellDamageAmtIncomingPC, spell_id); //SPA 484 SE_Fc_Spell_Damage_Amt_IncomingPC
 	return dmg;
 }
 
@@ -8961,3 +8815,119 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 	}
 }
 
+void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, int base, int limit, int max)
+{
+	// Gender Illusions
+	if (base == -1) {
+		// Specific Gender Illusions
+		if (spell_id == SPELL_ILLUSION_MALE || spell_id == SPELL_ILLUSION_FEMALE) {
+			int specific_gender = -1;
+			// Male
+			if (spell_id == SPELL_ILLUSION_MALE)
+				specific_gender = 0;
+			// Female
+			else if (spell_id == SPELL_ILLUSION_FEMALE)
+				specific_gender = 1;
+			if (specific_gender > -1) {
+				if (caster && caster->GetTarget()) {
+					SendIllusionPacket
+					(
+						caster->GetTarget()->GetBaseRace(),
+						specific_gender,
+						caster->GetTarget()->GetTexture()
+					);
+				}
+			}
+		}
+		// Change Gender Illusions
+		else {
+			if (caster && caster->GetTarget()) {
+				int opposite_gender = 0;
+				if (caster->GetTarget()->GetGender() == 0)
+					opposite_gender = 1;
+
+				SendIllusionPacket
+				(
+					caster->GetTarget()->GetRace(),
+					opposite_gender,
+					caster->GetTarget()->GetTexture()
+				);
+			}
+		}
+	}
+	// Racial Illusions
+	else {
+		auto gender_id = (
+			max > 0 &&
+			(
+				max != 3 ||
+				limit == 0
+				) ?
+				(max - 1) :
+			Mob::GetDefaultGender(base, GetGender())
+		);
+
+		auto race_size = GetRaceGenderDefaultHeight(
+			base,
+			gender_id
+		);
+
+		if (base != RACE_ELEMENTAL_75) {
+			if (max > 0) {
+				if (limit == 0) {
+					SendIllusionPacket(
+						base,
+						gender_id
+					);
+				}
+				else {
+					if (max != 3) {
+						SendIllusionPacket(
+							base,
+							gender_id,
+							limit,
+							max
+						);
+					}
+					else {
+						SendIllusionPacket(
+							base,
+							gender_id,
+							limit,
+							limit
+						);
+					}
+				}
+			}
+			else {
+				SendIllusionPacket(
+					base,
+					gender_id,
+					limit,
+					max
+				);
+			}
+
+		}
+		else {
+			SendIllusionPacket(
+				base,
+				gender_id,
+				limit
+			);
+		}
+		SendAppearancePacket(AT_Size, race_size);
+	}
+
+	for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
+		SendWearChange(x);
+	}
+
+	if (caster == this && spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE &&
+		(spellbonuses.IllusionPersistence || aabonuses.IllusionPersistence || itembonuses.IllusionPersistence)) {
+		buffs[buffslot].persistant_buff = 1;
+	}
+	else {
+		buffs[buffslot].persistant_buff = 0;
+	}
+}

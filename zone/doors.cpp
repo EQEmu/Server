@@ -383,7 +383,9 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	if (!IsDoorOpen() || (open_type == 58)) {
 		if (!disable_timer)
 			close_timer.Start();
-		SetOpenState(true);
+		
+		if(strncmp(destination_zone_name, "NONE", strlen("NONE")) == 0)
+			SetOpenState(true);
 	} else {
 		close_timer.Disable();
 		if (!disable_timer)

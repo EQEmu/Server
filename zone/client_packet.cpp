@@ -652,55 +652,10 @@ void Client::CompleteConnect()
 
 		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
 			switch (spell.effect_id[x1]) {
-			case SE_IllusionCopy:
 			case SE_Illusion: {
-				if (spell.base_value[x1] == -1) {
-					if (gender == 1)
-						gender = 0;
-					else if (gender == 0)
-						gender = 1;
-					SendIllusionPacket(GetRace(), gender, 0xFF, 0xFF);
-				}
-				else if (spell.base_value[x1] == -2) // WTF IS THIS
-				{
-					if (GetRace() == 128 || GetRace() == 130 || GetRace() <= 12)
-						SendIllusionPacket(GetRace(), GetGender(), spell.limit_value[x1], spell.max_value[x1]);
-				}
-				else if (spell.max_value[x1] > 0)
-				{
-					SendIllusionPacket(spell.base_value[x1], 0xFF, spell.limit_value[x1], spell.max_value[x1]);
-				}
-				else
-				{
-					SendIllusionPacket(spell.base_value[x1], 0xFF, 0xFF, 0xFF);
-				}
-				switch (spell.base_value[x1]) {
-				case OGRE:
-					SendAppearancePacket(AT_Size, 9);
-					break;
-				case TROLL:
-					SendAppearancePacket(AT_Size, 8);
-					break;
-				case VAHSHIR:
-				case BARBARIAN:
-					SendAppearancePacket(AT_Size, 7);
-					break;
-				case HALF_ELF:
-				case WOOD_ELF:
-				case DARK_ELF:
-				case FROGLOK:
-					SendAppearancePacket(AT_Size, 5);
-					break;
-				case DWARF:
-					SendAppearancePacket(AT_Size, 4);
-					break;
-				case HALFLING:
-				case GNOME:
-					SendAppearancePacket(AT_Size, 3);
-					break;
-				default:
-					SendAppearancePacket(AT_Size, 6);
-					break;
+				if (buffs[j1].persistant_buff) {
+					Mob *caster = entity_list.GetMobID(buffs[j1].casterid);
+					ApplySpellEffectIllusion(spell.id, caster, j1, spell.base_value[x1], spell.limit_value[x1], spell.max_value[x1]);
 				}
 				break;
 			}
@@ -743,7 +698,12 @@ void Client::CompleteConnect()
 					}
 				}
 				else {
-					SendAppearancePacket(AT_Levitate, 2);
+					if (spell.limit_value[x1] == 1) {
+						SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::LevitateWhileRunning, true, true);
+					}
+					else {
+						SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::Levitating, true, true);
+					}
 				}
 				break;
 			}
@@ -784,6 +744,8 @@ void Client::CompleteConnect()
 	entity_list.SendNimbusEffects(this);
 
 	entity_list.SendUntargetable(this);
+
+	entity_list.SendAppearanceEffects(this);
 
 	int x;
 	for (x = EQ::textures::textureBegin; x <= EQ::textures::LastTexture; x++) {
@@ -857,39 +819,18 @@ void Client::CompleteConnect()
 	}
 
 	if (zone && zone->GetInstanceTimer()) {
-
-		bool   is_permanent           = false;
-		uint32 remaining_time_seconds = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
-		uint32 day                    = (remaining_time_seconds / 86400);
-		uint32 hour                   = (remaining_time_seconds / 3600) % 24;
-		uint32 minute                 = (remaining_time_seconds / 60) % 60;
-		uint32 second                 = (remaining_time_seconds / 1) % 60;
-
-		if (day) {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in %u days, %u hours, %u minutes, and %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), day, hour, minute, second
-			);
-		}
-		else if (hour) {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in %u hours, %u minutes, and %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), hour, minute, second
-			);
-		}
-		else if (minute) {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in %u minutes, and %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), minute, second
-			);
-		}
-		else {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in in %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), second
-			);
-		}
-
+		bool is_permanent = false;
+		uint32 remaining_time = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
+		auto time_string = ConvertSecondsToTime(remaining_time);
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"{} ({}) will expire in {}.",
+				zone->GetLongName(),
+				zone->GetInstanceID(),
+				time_string
+			).c_str()
+		);
 	}
 
 	SendRewards();
@@ -1957,14 +1898,6 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	}
 
 	Adventure_Purchase_Struct* aps = (Adventure_Purchase_Struct*)app->pBuffer;
-	/*
-	Get item apc->itemid (can check NPC if thats necessary), ldon point theme check only if theme is not 0 (I am not sure what 1-5 are though for themes)
-	if(ldon_points_available >= item ldonpointcost)
-	{
-	give item (67 00 00 00 for the packettype using opcode 0x02c5)
-	ldon_points_available -= ldonpointcost;
-	}
-	*/
 	uint32 merchantid = 0;
 	Mob* tmp = entity_list.GetMob(aps->npcid);
 	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
@@ -2021,39 +1954,47 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 		}
 
 		if (item->LDoNTheme <= LDoNThemeBits::TAKBit) {
+			uint32 ldon_theme;
 			if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
 				if (m_pp.ldon_points_tak < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Deepest Guk Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::TAK;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
 				if (m_pp.ldon_points_ruj < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Miragul's Menagerie Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::RUJ;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
 				if (m_pp.ldon_points_mmc < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Mistmoore Catacombs Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::MMC;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
 				if (m_pp.ldon_points_mir < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Rujarkian Hills Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::MIR;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
 				if (m_pp.ldon_points_guk < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Takish-Hiz Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::GUK;
 				}
 			}
 
-
+			merchant_type = fmt::format(
+				"{} Point{}",
+				EQ::constants::GetLDoNThemeName(ldon_theme),
+				item_cost != 1 ? "s" : ""
+			);
 		}
 	} else if (aps->Type == DiscordMerchant) {
 		if (GetPVPPoints() < item_cost) {
 			cannot_afford = true;
-			merchant_type = fmt::format("PVP Point{}", item_cost != 1 ? "s" : "");
+			merchant_type = fmt::format(
+				"PVP Point{}",
+				item_cost != 1 ? "s" : ""
+			);
 		}
 	} else if (aps->Type == NorrathsKeepersMerchant) {
 		if (GetRadiantCrystals() < item_cost) {
@@ -2278,7 +2219,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 
 	if (!inst->IsStackable())
 	{
-		DeleteItemInInventory(ams_in->slot, 0, false);
+		DeleteItemInInventory(ams_in->slot);
 	}
 	else
 	{
@@ -2293,7 +2234,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 			return;
 		}
 
-		DeleteItemInInventory(ams_in->slot, ams_in->charges, false);
+		DeleteItemInInventory(ams_in->slot, ams_in->charges);
 		price *= ams_in->charges;
 	}
 
@@ -2486,39 +2427,31 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyMerchantRequest, app, uint32);
 
-	NPC* tar = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
-	if (tar) {
-		if (DistanceSquared(m_Position, tar->GetPosition())  > USE_NPC_RANGE2)
-			return;
-
-		if (tar->GetClass() != ALT_CURRENCY_MERCHANT) {
+	auto target = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
+	if (target) {
+		if (DistanceSquared(m_Position, target->GetPosition())  > USE_NPC_RANGE2) {
 			return;
 		}
 
-		uint32 alt_cur_id = tar->GetAltCurrencyType();
-		if (alt_cur_id == 0) {
+		if (target->GetClass() != ALT_CURRENCY_MERCHANT) {
 			return;
 		}
 
-		auto altc_iter = zone->AlternateCurrencies.begin();
-		bool found = false;
-		while (altc_iter != zone->AlternateCurrencies.end()) {
-			if ((*altc_iter).id == alt_cur_id) {
-				found = true;
-				break;
-			}
-			++altc_iter;
+		uint32 currency_id = target->GetAltCurrencyType();
+		if (!currency_id) {
+			return;
 		}
 
-		if (!found) {
+		auto currency_item_id = zone->GetCurrencyItemID(currency_id);
+		if (!currency_item_id) {
 			return;
 		}
 
 		std::stringstream ss(std::stringstream::in | std::stringstream::out);
 		std::stringstream item_ss(std::stringstream::in | std::stringstream::out);
-		ss << alt_cur_id << "|1|" << alt_cur_id;
+		ss << currency_id << "|1|" << currency_id;
 		uint32 count = 0;
-		uint32 merchant_id = tar->MerchantType;
+		uint32 merchant_id = target->MerchantType;
 		const EQ::ItemData *item = nullptr;
 
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
@@ -2529,14 +2462,16 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 				continue;
 			}
 
-			int32 fac = tar->GetPrimaryFaction();
-			if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+			auto faction_id = target->GetPrimaryFaction();
+			if (
+				faction_id &&
+				GetModCharacterFactionLevel(faction_id) < ml.faction_required
+			) {
 				continue;
 			}
 
 			item = database.GetItem(ml.item);
-			if (item)
-			{
+			if (item) {
 				item_ss << "^" << item->Name << "|";
 				item_ss << item->ID << "|";
 				item_ss << ml.alt_currency_cost << "|";
@@ -2550,8 +2485,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 
 		if (count > 0) {
 			ss << "|" << count << item_ss.str();
-		}
-		else {
+		} else {
 			ss << "|0";
 		}
 
@@ -2649,16 +2583,9 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyReclaim, app, AltCurrencyReclaim_Struct);
 	AltCurrencyReclaim_Struct *reclaim = (AltCurrencyReclaim_Struct*)app->pBuffer;
-	uint32 item_id = 0;
-	auto iter = zone->AlternateCurrencies.begin();
-	while (iter != zone->AlternateCurrencies.end()) {
-		if ((*iter).id == reclaim->currency_id) {
-			item_id = (*iter).item_id;
-		}
-		++iter;
-	}
+	uint32 item_id = zone->GetCurrencyItemID(reclaim->currency_id);
 
-	if (item_id == 0) {
+	if (!item_id) {
 		return;
 	}
 
@@ -2764,7 +2691,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 
 		if (!inst->IsStackable())
 		{
-			DeleteItemInInventory(sell->slot_id, 0, false);
+			DeleteItemInInventory(sell->slot_id);
 		}
 		else
 		{
@@ -2779,7 +2706,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 				return;
 			}
 
-			DeleteItemInInventory(sell->slot_id, sell->charges, false);
+			DeleteItemInInventory(sell->slot_id, sell->charges);
 			cost *= sell->charges;
 		}
 
@@ -3386,6 +3313,13 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
+	if (GetTarget() == this) {
+		MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+		auto_fire = false;
+		return;
+	}
+
 	bool *af = (bool*)app->pBuffer;
 	auto_fire = *af;
 	if(!RuleB(Character, EnableRangerAutoFire))
@@ -4000,8 +3934,9 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 	uint16 SpellID = m->GetSpellIDFromSlot(brrs->SlotID);
 
-	if (SpellID && IsBeneficialSpell(SpellID) && !spells[SpellID].no_remove)
+	if (SpellID && (IsBeneficialSpell(SpellID) || IsEffectInSpell(SpellID, SE_BindSight)) && !spells[SpellID].no_remove) {
 		m->BuffFadeBySlot(brrs->SlotID, true);
+	}
 }
 
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
@@ -4875,7 +4810,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (tmob->IsNPC())
 	{
 		if (GetFeigned())
-			con->faction = FACTION_INDIFFERENT;
+			con->faction = FACTION_INDIFFERENTLY;
 	}
 
 	if (!(con->faction == FACTION_SCOWLS))
@@ -4883,21 +4818,21 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 		if (tmob->IsNPC())
 		{
 			if (tmob->CastToNPC()->IsOnHatelist(this))
-				con->faction = FACTION_THREATENLY;
+				con->faction = FACTION_THREATENINGLY;
 		}
 	}
 
-	if (con->faction == FACTION_APPREHENSIVE) {
+	if (con->faction == FACTION_APPREHENSIVELY) {
 		con->faction = FACTION_SCOWLS;
 	}
-	else if (con->faction == FACTION_DUBIOUS) {
-		con->faction = FACTION_THREATENLY;
+	else if (con->faction == FACTION_DUBIOUSLY) {
+		con->faction = FACTION_THREATENINGLY;
 	}
 	else if (con->faction == FACTION_SCOWLS) {
-		con->faction = FACTION_APPREHENSIVE;
+		con->faction = FACTION_APPREHENSIVELY;
 	}
-	else if (con->faction == FACTION_THREATENLY) {
-		con->faction = FACTION_DUBIOUS;
+	else if (con->faction == FACTION_THREATENINGLY) {
+		con->faction = FACTION_DUBIOUSLY;
 	}
 
 	mod_consider(tmob, con);
@@ -4956,54 +4891,44 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Consider_Struct))
-	{
+	if (app->size != sizeof(Consider_Struct)) {
 		LogDebug("Size mismatch in Consider corpse expected [{}] got [{}]", sizeof(Consider_Struct), app->size);
 		return;
 	}
+
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
-	Corpse* tcorpse = entity_list.GetCorpseByID(conin->targetid);
+	Corpse* target = entity_list.GetCorpseByID(conin->targetid);
 	std::string export_string = fmt::format("{}", conin->targetid);
-	if (tcorpse && tcorpse->IsNPCCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
-			return;
-		}
-
-		uint32 min; uint32 sec; uint32 ttime;
-		if ((ttime = tcorpse->GetDecayTime()) != 0) {
-			sec = (ttime / 1000) % 60; // Total seconds
-			min = (ttime / 60000) % 60; // Total seconds / 60 drop .00
-			char val1[20] = { 0 };
-			char val2[20] = { 0 };
-			MessageString(Chat::NPCQuestSay, CORPSE_DECAY1, ConvertArray(min, val1), ConvertArray(sec, val2));
-		}
-		else {
-			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
-		}
+	if (!target) {
+		return;
 	}
-	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
-			return;
-		}
 
-		uint32 day, hour, min, sec, ttime;
-		if ((ttime = tcorpse->GetDecayTime()) != 0) {
-			sec = (ttime / 1000) % 60; // Total seconds
-			min = (ttime / 60000) % 60; // Total seconds
-			hour = (ttime / 3600000) % 24; // Total hours
-			day = ttime / 86400000; // Total Days
-			if (day)
-				Message(0, "This corpse will decay in %i days, %i hours, %i minutes and %i seconds.", day, hour, min, sec);
-			else if (hour)
-				Message(0, "This corpse will decay in %i hours, %i minutes and %i seconds.", hour, min, sec);
-			else
-				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
+	if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0)) {
+		return;
+	}
 
-			Message(0, "This corpse %s be resurrected.", tcorpse->IsRezzed() ? "cannot" : "can");
+	uint32 decay_time = target->GetDecayTime();
+	if (decay_time) {
+		auto time_string = ConvertSecondsToTime(decay_time, true);
+		Message(
+			Chat::NPCQuestSay,
+			fmt::format(
+				"This corpse will decay in {}.",
+				time_string
+			).c_str()
+		);
+		
+		if (target->IsPlayerCorpse()) {
+			Message(
+				Chat::NPCQuestSay,
+				fmt::format(
+					"This corpse {} be resurrected.",
+					target->IsRezzed() ? "cannot" : "can"
+				).c_str()
+			);
 		}
-		else {
-			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
-		}
+	} else {
+		MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
 	}
 }
 
@@ -9057,48 +8982,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					{
 						LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
 					}
-					else
-					{
-
-						/*
-						//This is food/drink - consume it
-						if (item->ItemType == EQ::item::ItemTypeFood && m_pp.hunger_level < 5000)
-						{
-							Consume(item, item->ItemType, slot_id, false);
-						}
-						else if (item->ItemType == EQ::item::ItemTypeDrink && m_pp.thirst_level < 5000)
-						{
-							Consume(item, item->ItemType, slot_id, false);
-						}
-						else if (item->ItemType == EQ::item::ItemTypeAlcohol)
-						{
-#if EQDEBUG >= 1
-							LogDebug("Drinking Alcohol from slot:[{}]", slot_id);
-#endif
-							// This Seems to be handled in OP_DeleteItem handling
-							//DeleteItemInInventory(slot_id, 1, false);
-							//entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
-							//Should add intoxication level to the PP at some point
-							//CheckIncreaseSkill(ALCOHOL_TOLERANCE, nullptr, 25);
-						}
-
-						EQApplicationPacket *outapp2 = nullptr;
-						outapp2 = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
-						Stamina_Struct* sta = (Stamina_Struct*)outapp2->pBuffer;
-
-						if (m_pp.hunger_level > 6000)
-							sta->food = 6000;
-						if (m_pp.thirst_level > 6000)
-							sta->water = 6000;
-
-						sta->food = m_pp.hunger_level;
-						sta->water = m_pp.thirst_level;
-
-						QueuePacket(outapp2);
-						safe_delete(outapp2);
-						*/
-					}
-
 				}
 				else
 				{
@@ -12911,7 +12794,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		else
 			zone_id = atoi(row[0]);
 
-		std::string zone_long_name = zone_store.GetZoneLongName(zone_id);
+		std::string zone_long_name = ZoneLongName(zone_id);
 		Message(Chat::Yellow, "%d - %s", zone_id, zone_long_name.c_str());
 	}
 
@@ -12978,8 +12861,14 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	pTimerType timer = pTimerShieldAbility;
 
 	if (!p_timers.Expired(&database, timer, false)) {
-		uint32 remain = p_timers.GetRemainingTime(timer);
-		Message(Chat::White, "You can use the ability /shield in %d minutes %d seconds.", ((remain) / 60), (remain % 60));
+		uint32 remaining_time = p_timers.GetRemainingTime(timer);
+		Message(
+			Chat::White,
+			fmt::format(
+				"You can use the ability /shield in {}.",
+				ConvertSecondsToTime(remaining_time)
+			).c_str()
+		);
 		return;
 	}
 
@@ -13413,26 +13302,14 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	// end QS code
 
 	// Now remove the item from the player, this happens regardless of outcome
-	if (!inst->IsStackable())
-		this->DeleteItemInInventory(mp->itemslot, 0, false);
-	else {
-		// HACK: DeleteItemInInventory uses int8 for quantity type. There is no consistent use of types in code in this path so for now iteratively delete from inventory.
-		if (mp->quantity > 255) {
-			uint32 temp = mp->quantity;
-			while (temp > 255 && temp != 0) {
-				// Delete chunks of 255
-				this->DeleteItemInInventory(mp->itemslot, 255, false);
-				temp -= 255;
-			}
-			if (temp != 0) {
-				// Delete remaining
-				this->DeleteItemInInventory(mp->itemslot, temp, false);
-			}
-		}
-		else {
-			this->DeleteItemInInventory(mp->itemslot, mp->quantity, false);
-		}
-	}
+	DeleteItemInInventory(
+		mp->itemslot,
+		(
+			!inst->IsStackable() ?
+			0 :
+			mp->quantity
+		)
+	);
 
 
 	//This forces the price to show up correctly for charged items.

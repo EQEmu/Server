@@ -162,6 +162,11 @@
 #define SPELL_RESURRECTION_SICKNESS3 37624
 #define SPELL_PACT_OF_HATE_RECOURSE 40375
 #define SPELL_INCENDIARY_OOZE_BUFF 32513
+#define SPELL_EYE_OF_ZOMM 323
+#define SPELL_MINOR_ILLUSION 287
+#define SPELL_ILLUSION_TREE 601
+#define SPELL_ILLUSION_FEMALE 1731
+#define SPELL_ILLUSION_MALE 1732
 
 //spellgroup ids
 #define SPELLGROUP_FRENZIED_BURNOUT 2754
@@ -183,7 +188,7 @@
 #define MAX_SYMPATHETIC_PROCS 10 // Number of sympathetic procs a client can have (This is arbitrary)
 #define MAX_FOCUS_PROC_LIMIT_TIMERS 20 //Number of focus recast timers that can be going at same time (This is arbitrary)
 #define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
-
+#define MAX_APPEARANCE_EFFECTS 20 //Up to 20 Appearance Effects can be saved to a mobs appearance effect array, these will be sent to other clients when they enter a zone (This is arbitrary)
 
 
 const int Z_AGGRO=10;
@@ -775,7 +780,7 @@ typedef enum {
 //#define SE_CorpseBomb					70	// not used
 #define SE_NecPet						71	// implemented
 //#define SE_PreserveCorpse				72	// not used
-#define SE_BindSight					73	// implemented
+#define SE_BindSight					73	// implemented, @Vision, see through the eyes of your target, click off buff to end effect, base: 1, limit: none, max: none
 #define SE_FeignDeath					74	// implemented
 #define SE_VoiceGraft					75	// implemented
 #define SE_Sentinel						76	// *not implemented?(just seems to send a message)
@@ -863,7 +868,7 @@ typedef enum {
 #define SE_Reflect						158 // implemented, @SpellMisc, reflect casted detrimental spell back at caster, base: chance pct, limit: resist modifier (positive value reduces resists), max: pct of base dmg mod (50=50pct of base)
 #define SE_AllStats						159	// implemented
 //#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
-#define SE_MitigateSpellDamage			161	// implemented - rune with max value
+#define SE_MitigateSpellDamage			161	// implemented, @Runes, mitigate incoming spell damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
 #define SE_MitigateMeleeDamage			162	// implemented - rune with max value
 #define SE_NegateAttacks				163	// implemented
 #define SE_AppraiseLDonChest			164	// implemented
@@ -1012,7 +1017,7 @@ typedef enum {
 //#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
 #define SE_ZoneSuspendMinion			308 // implemented, @Pet, allow suspended pets to be resummoned upon zoning, base: 1, limit: none, max: none, Calc: Bool
 #define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
-#define SE_ReduceReuseTimer				310 // implemented, @Fc, On Caster, disc reuse time mod, base: milliseconds
+#define SE_ReduceReuseTimer				310 // implemented, @Fc, On Caster, spell and disc reuse time mod by amount, base: milliseconds
 #define SE_LimitCombatSkills			311 // implemented, @Ff, Include or exclude combat skills or procs (non-memorizable spells) from being focused, base1: 0=Exclude if proc 1=Allow only if proc
 #define SE_Sanctuary					312 // implemented - Places caster at bottom hate list, effect fades if cast cast spell on targets other than self.
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
@@ -1152,7 +1157,7 @@ typedef enum {
 #define SE_BStacker						447 // implemented
 #define SE_CStacker						448 // implemented
 #define SE_DStacker						449 // implemented
-#define SE_MitigateDotDamage			450 // implemented  DOT spell mitigation rune with max value
+#define SE_MitigateDotDamage			450 // implemented, @Runes, mitigate incoming dot damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
 #define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
 #define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken in a single hit

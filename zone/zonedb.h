@@ -423,8 +423,8 @@ public:
 	/* Faction   */
 	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);
 	bool		GetFactionData(FactionMods* fd, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id); //needed for factions Dec, 16 2001
-	bool		GetFactionName(int32 faction_id, char* name, uint32 buflen); // needed for factions Dec, 16 2001
-	std::string GetFactionName(int32 faction_id);
+	bool		GetFactionName(int faction_id, char* name, uint32 buflen); // needed for factions Dec, 16 2001
+	std::string GetFactionName(int faction_id);
 	bool		GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction = 0); // improve faction handling
 	bool		SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // needed for factions Dec, 16 2001
 	bool		LoadFactionData();
@@ -438,7 +438,7 @@ public:
 	/* Zone related   */
 	bool		GetZoneCFG(
 		uint32 zoneid, 
-		uint16 instance_id, 
+		uint16 instance_version, 
 		NewZone_Struct *data, 
 		bool &can_bind, 
 		bool &can_combat, 
@@ -451,7 +451,7 @@ public:
 		uint8 &zone_type, 
 		int &ruleset, 
 		char **map_filename);
-	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd);
+	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
 	bool		UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location);
 	uint8		GetUseCFGSafeCoords();
@@ -576,7 +576,7 @@ public:
 	uint8 RaidGroupCount(uint32 raidid, uint32 groupid);
 
 	/* Instancing   */
-	void ListAllInstances(Client* c, uint32 charid);
+	void ListAllInstances(Client* c, uint32 character_id);
 
 	/* QGlobals   */
 	void QGlobalPurge();
