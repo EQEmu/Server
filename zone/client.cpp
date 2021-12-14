@@ -2447,27 +2447,16 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	// Make sure we're not already at skill cap
 	if (skillval < maxskill)
 	{
-		double Chance = 0;
-		if (RuleB(Character, UseExponentialDecaySkillUpFormula)) {
-			if (RuleI(Character, SkillUpMaximumChancePercentage) <= RuleI(Character, SkillUpMinimumChancePercentage)) {
-				Chance = RuleI(Character, SkillUpMinimumChancePercentage);
-			}
-			else {
-				// f(x) = max - min * .99 +/- modification + min
-				// This results in a exponential decay where as you skill up, you lose a slight chance to skill up, ranging from your maximum to approaching your minimum
-				double working_chance = ((RuleI(Character, SkillUpMaximumChancePercentage) - RuleI(Character, SkillUpMinimumChancePercentage)) * (pow(0.99 + (chancemodi / 10000),skillval) + RuleI(Character, SkillUpMinimumChancePercentage)));
-				Chance = (working_chance + (working_chance * RuleI(Character, SkillUpModifier) / 100)) >= RuleI(Character, SkillUpMaximumChancePercentage) ? RuleI(Character, SkillUpMaximumChancePercentage) : (working_chance + (working_chance * RuleI(Character, SkillUpModifier) / 100));				
-			}
+		double Chance = 0;		
+		if (RuleI(Character, SkillUpMaximumChancePercentage) + chancemodi - RuleI(Character, SkillUpMinimumChancePercentage) <= RuleI(Character, SkillUpMinimumChancePercentage)) {
+			Chance = RuleI(Character, SkillUpMinimumChancePercentage);
 		}
 		else {
-			// the higher your current skill level, the harder it is
-			Chance = 10 + chancemodi + ((252 - skillval) / 20);
-
-			// Make it always possible
-			Chance = Chance < 1 ? 1 : Chance;			
-
-			Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
-
+			// f(x) = (max - min + modification) * .99^skillval + min
+			// This results in a exponential decay where as you skill up, you lose a slight chance to skill up, ranging from your modified maximum to approaching your minimum
+			// This result is increased by the existing SkillUpModifier rule
+			double working_chance = ((RuleI(Character, SkillUpMaximumChancePercentage) - RuleI(Character, SkillUpMinimumChancePercentage)) + chancemodi * (pow(0.99, skillval) + RuleI(Character, SkillUpMinimumChancePercentage)));
+			Chance = (working_chance * RuleI(Character, SkillUpModifier) / 100);
 			Chance = mod_increase_skill_chance(Chance, against_who);
 		}
 

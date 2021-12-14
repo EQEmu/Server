@@ -1562,7 +1562,7 @@ public:
 	int mod_client_damage(int damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemInstance* weapon, Mob* other);
 	bool mod_client_message(char* message, uint8 chan_num);
 	bool mod_can_increase_skill(EQ::skills::SkillType skillid, Mob* against_who);
-	int16 mod_increase_skill_chance(int16 chance, Mob* against_who);
+	double mod_increase_skill_chance(double chance, Mob* against_who);
 	int mod_bindwound_percent(int max_percent, Mob* bindmob);
 	int mod_bindwound_hp(int bindhps, Mob* bindmob);
 	int mod_client_haste(int h);
