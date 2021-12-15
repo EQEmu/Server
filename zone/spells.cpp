@@ -307,7 +307,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	std::string export_string = fmt::format("{}", spell_id);
 	if(IsClient()) {
 		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), export_string, 0) != 0) {
-			return false;
+			if (IsDiscipline(spell_id)) {
+				CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, 0);
+			} else {
+				CastToClient()->SendSpellBarEnable(spell_id);
+			}
+			return(false);
 		}
 	} else if(IsNPC()) {
 		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0);
