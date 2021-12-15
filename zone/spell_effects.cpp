@@ -2883,8 +2883,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					caster->MessageString(Chat::SpellFailure, IMMUNE_FEAR);
 					break;
 				}
+				int max_level = 0;
+				if (spells[spell_id].max_value[i] >= 1000) {
+					max_level = spells[spell_id].max_value[i] - 1000;
+				}
+				else {
+					max_level = caster->GetLevel() + spells[spell_id].max_value[i];
+				}
 
-				if (spells[spell_id].max_value[i] == 0 || GetLevel() <= spells[spell_id].max_value[i]) {
+				if (spells[spell_id].max_value[i] == 0 || GetLevel() <= max_level) {
 					if (IsClient() && spells[spell_id].limit_value[i])
 						Stun(spells[spell_id].limit_value[i]);
 					else
