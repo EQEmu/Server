@@ -4213,15 +4213,17 @@ int Mob::GetSnaredAmount()
 
 void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int damage)
 {
-	if (!on)
+	if (!on) {
 		return;
+	}
 
-	if (!FromSkillProc)
+	if (!FromSkillProc) {
 		on->TryDefensiveProc(this, hand);
+	}
 
 	//Defensive Skill Procs
 	if (damage < 0 && damage >= -4) {
-		uint16 skillinuse = 0;
+		EQ::skills::SkillType skillinuse = EQ::skills::SkillBlock;
 		switch (damage) {
 			case (-1):
 				skillinuse = EQ::skills::SkillBlock;
@@ -4240,11 +4242,13 @@ void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int da
 			break;
 		}
 
-		if (on->HasSkillProcs())
+		if (on->HasSkillProcs()) {
 			on->TrySkillProc(this, skillinuse, 0, false, hand, true);
+		}
 
-		if (on->HasSkillProcSuccess())
+		if (on && on->HasSkillProcSuccess()) {
 			on->TrySkillProc(this, skillinuse, 0, true, hand, true);
+		}
 	}
 }
 
@@ -4477,7 +4481,7 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 	}
 }
 
-int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
+int32 Mob::GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining)
 {
 	/*
 	Modifies incoming spell damage by percent, to increase or decrease damage, can be limited to specific resists.
@@ -4503,8 +4507,8 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		innate_mod = Vulnerability_Mod[HIGHEST_RESIST + 1];
 	}
 
-	fc_spell_vulnerability_mod = GetFocusEffect(focusSpellVulnerability, spell_id);
-	fc_spell_damage_pct_incomingPC_mod = GetFocusEffect(focusFcSpellDamagePctIncomingPC, spell_id);
+	fc_spell_vulnerability_mod = GetFocusEffect(focusSpellVulnerability, spell_id, caster);
+	fc_spell_damage_pct_incomingPC_mod = GetFocusEffect(focusFcSpellDamagePctIncomingPC, spell_id, caster);
 	
 	total_mod = fc_spell_vulnerability_mod + fc_spell_damage_pct_incomingPC_mod;
 
@@ -4515,6 +4519,24 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 
 	total_mod += innate_mod;
 	return total_mod;
+}
+
+bool Mob::IsTargetedFocusEffect(int focus_type) {
+
+	switch (focus_type) {
+	case focusSpellVulnerability:
+	case focusFcSpellDamagePctIncomingPC:
+	case focusFcDamageAmtIncoming:
+	case focusFcSpellDamageAmtIncomingPC:
+	case focusFcCastSpellOnLand:
+	case focusFcHealAmtIncoming:
+	case focusFcHealPctCritIncoming:
+	case focusFcHealPctIncoming:
+		return true;
+	default:
+		return false;
+
+	}
 }
 
 int32 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts)
@@ -5599,7 +5621,7 @@ void Mob::SlowMitigation(Mob* caster)
 	}
 }
 
-uint16 Mob::GetSkillByItemType(int ItemType)
+EQ::skills::SkillType Mob::GetSkillByItemType(int ItemType)
 {
 	switch (ItemType) {
 	case EQ::item::ItemType1HSlash:
@@ -5654,22 +5676,6 @@ uint8 Mob::GetItemTypeBySkill(EQ::skills::SkillType skill)
 		return EQ::item::ItemTypeMartial;
 	}
  }
-
-
-bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
-
-	if (!IsValidSpell(spell_id))
-		return false;
-
-	for (int i = 0; i < EFFECT_COUNT; i++) {
-		if (spells[spell_id].effect_id[i] == SE_LimitToSkill){
-			if (spells[spell_id].base_value[i] == skill){
-				return true;
-			}
-		}
-	}
-	return false;
-}
 
 uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
 

@@ -1260,7 +1260,7 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 }
 
 bool ZoneDatabase::LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("SELECT slot, rank FROM character_leadership_abilities WHERE `id` = %u", character_id);
+	std::string query = StringFormat("SELECT slot, `rank` FROM character_leadership_abilities WHERE `id` = %u", character_id);
 	auto results = database.QueryDatabase(query); uint32 slot = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		slot = atoi(row[0]);
@@ -1562,7 +1562,7 @@ bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 	for (int i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
 		if (pp->leader_abilities.ranks[i] > 0){
 			if (first_entry != 1){
-				query = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, rank) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+				query = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
 				first_entry = 1;
 			}
 			query = query + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);

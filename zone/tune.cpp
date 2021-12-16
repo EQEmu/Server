@@ -1014,8 +1014,6 @@ void Mob::TuneMeleeMitigation(Mob *attacker, DamageHitInfo &hit, int ac_override
 
 	// +0.5 for rounding, min to 1 dmg
 	hit.damage_done = std::max(static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5), 1);
-
-	//Shout("mitigation %d vs offense %d. base %d rolled %f damage %d", mitigation, hit.offense, hit.base_damage, roll, hit.damage_done);
 }
 
 int Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
@@ -1093,10 +1091,6 @@ int Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 			auto over_cap = ac - softcap;
 			ac = softcap + (over_cap * returns);
 		}
-		//Shout("ACSum ac %i softcap %i returns %.2f", ac, softcap, static_cast<float>(returns));
-	}
-	else {
-		//Shout("ACSum ac %i", ac);
 	}
 
 	return ac;
@@ -1384,7 +1378,6 @@ bool Mob::TuneCheckHitChance(Mob* other, DamageHitInfo &hit, int avoidance_overr
 
 	Mob *attacker = other;
 	Mob *defender = this;
-	//Shout("CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
 	if (defender->IsClient() && defender->CastToClient()->IsSitting())
 		return true;
@@ -1402,7 +1395,6 @@ bool Mob::TuneCheckHitChance(Mob* other, DamageHitInfo &hit, int avoidance_overr
 	// Then your chance to simply avoid the attack is checked (defender's avoidance roll beat the attacker's accuracy roll.)
 	int tohit_roll = zone->random.Roll0(accuracy);
 	int avoid_roll = zone->random.Roll0(avoidance);
-	//Shout("CheckHitChance accuracy(%d => %d) avoidance(%d => %d)", accuracy, tohit_roll, avoidance, avoid_roll);
 
 	// tie breaker? Don't want to be biased any one way
 	if (tohit_roll == avoid_roll)

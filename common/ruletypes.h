@@ -808,6 +808,10 @@ RULE_CATEGORY(Command)
 RULE_BOOL(Command, DyeCommandRequiresDyes, false, "Enable this to require a Prismatic Dye (32557) each time someone uses #dye.")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Doors)
+RULE_BOOL(Doors, RequireKeyOnCursor, false, "Enable this to require pre-keyring keys to be on player cursor to open doors.")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL

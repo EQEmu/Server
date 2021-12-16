@@ -1821,7 +1821,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddProcToWeapon(procid, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetProcLimitTimer(spell_id, SE_WeaponProc));
+				AddProcToWeapon(procid, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetProcLimitTimer(spell_id, ProcType::MELEE_PROC));
 				break;
 			}
 
@@ -1831,7 +1831,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
 #endif
-				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, SE_RangedProc));
+				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, ProcType::RANGED_PROC));
 				break;
 			}
 
@@ -1841,7 +1841,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Defensive Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddDefensiveProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, SE_DefensiveProc));
+				AddDefensiveProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, ProcType::DEFENSIVE_PROC));
 				break;
 			}
 
@@ -2883,8 +2883,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					caster->MessageString(Chat::SpellFailure, IMMUNE_FEAR);
 					break;
 				}
+				int max_level = 0;
+				if (spells[spell_id].max_value[i] >= 1000) {
+					max_level = spells[spell_id].max_value[i] - 1000;
+				}
+				else {
+					max_level = caster->GetLevel() + spells[spell_id].max_value[i];
+				}
 
-				if (spells[spell_id].max_value[i] == 0 || GetLevel() <= spells[spell_id].max_value[i]) {
+				if (spells[spell_id].max_value[i] == 0 || GetLevel() <= max_level) {
 					if (IsClient() && spells[spell_id].limit_value[i])
 						Stun(spells[spell_id].limit_value[i]);
 					else
@@ -3156,7 +3163,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_LimitSpellClass:
 			case SE_Sanctuary:
 			case SE_PetMeleeMitigation:
-			case SE_SkillProc:
+			case SE_SkillProcAttempt:
 			case SE_SkillProcSuccess:
 			case SE_SpellResistReduction:
 			case SE_Duration_HP_Pct:
@@ -5218,13 +5225,12 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 
 //given an item/spell's focus ID and the spell being cast, determine the focus ammount, if any
 //assumes that spell_id is not a bard spell and that both ids are valid spell ids
-int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus, uint16 casterid)
+int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus, uint16 casterid, Mob *caster)
 {
 	/*
 	'this' is always the caster of the spell_id, most foci check for effects on the caster, however some check for effects on the target.
 	'casterid' is the casterid of the caster of spell_id, used when spell_id is cast on a target with a focus effect that is checked by incoming spell.
 	*/
-
 	if (!IsValidSpell(focus_id) || !IsValidSpell(spell_id)) {
 		return 0;
 	}
@@ -5252,6 +5258,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 		is_from_item_click = true;
 	}
+
 
 	bool LimitInclude[MaxLimitInclude] = {false};
 	/* Certain limits require only one of several Include conditions to be true. Determined by limits being negative or positive
@@ -5523,23 +5530,25 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_Ff_Same_Caster://hmm do i need to pass casterid from buff slot here
 				if (focus_spell.base_value[i] == 0) {
-					if (casterid == GetID()) {
+					if (caster && casterid == caster->GetID()) {
 						return 0;
 					}//Mob casting is same as target, fail if you are casting on yourself.
 				}
 				else if (focus_spell.base_value[i] == 1) {
-					if (casterid != GetID()) {
+					if (caster && casterid != caster->GetID()) {
 						return 0;
 					}//Mob casting is not same as target, fail if you are not casting on yourself.
 				}
 				break;
 
-			case SE_Ff_CasterClass:
+			case SE_Ff_CasterClass: {
+
 				// Do not use this limit more then once per spell. If multiple class, treat value like items would.
-				if (!PassLimitClass(focus_spell.base_value[i], GetClass())) {
+				if (caster && !PassLimitClass(focus_spell.base_value[i], caster->GetClass())) {
 					return 0;
 				}
 				break;
+			}
 
 			case SE_Ff_DurationMax:
 				if (focus_spell.base_value[i] > spell.buff_duration) {
@@ -6247,10 +6256,11 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
+int32 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster)
 {
-	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime)
+	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime) {
 		return 0;
+	}
 
 	int32 realTotal = 0;
 	int32 realTotal2 = 0;
@@ -6448,7 +6458,7 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 				continue;
 
 			if(rand_effectiveness) {
-				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true);
+				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true, buffs[buff_slot].casterid, caster);
 				if (focus_max2 > 0 && focus_max_real2 >= 0 && focus_max2 > focus_max_real2) {
 					focus_max_real2 = focus_max2;
 					buff_tracker = buff_slot;
@@ -6460,7 +6470,7 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 				}
 			}
 			else {
-				Total2 = CalcFocusEffect(type, focusspellid, spell_id);
+				Total2 = CalcFocusEffect(type, focusspellid, spell_id, false, buffs[buff_slot].casterid, caster);
 				if (Total2 > 0 && realTotal2 >= 0 && Total2 > realTotal2) {
 					realTotal2 = Total2;
 					buff_tracker = buff_slot;
@@ -6473,8 +6483,13 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 			}
 		}
 
+		uint16 original_caster_id = 0;
+		if (buff_tracker >= 0 && buffs[buff_tracker].casterid > 0) {
+			original_caster_id = buffs[buff_tracker].casterid;
+		}
+
 		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
-			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id);
+			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id, false, original_caster_id, caster);
 
 		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
 		if(buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
@@ -6523,7 +6538,7 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	return realTotal + realTotal2 + realTotal3 + worneffect_bonus;
 }
 
-int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
+int32 NPC::GetFocusEffect(focusType type, uint16 spell_id, Mob* caster) {
 
 	int32 realTotal = 0;
 	int32 realTotal2 = 0;
@@ -6586,7 +6601,7 @@ int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 	}
 
-	if (RuleB(Spells, NPC_UseFocusFromSpells) && spellbonuses.FocusEffects[type]){
+	if ((RuleB(Spells, NPC_UseFocusFromSpells) || IsTargetedFocusEffect(type)) && spellbonuses.FocusEffects[type]){
 
 		//Spell Focus
 		int32 Total2 = 0;
@@ -6604,7 +6619,7 @@ int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 				continue;
 
 			if(rand_effectiveness) {
-				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true);
+				focus_max2 = CalcFocusEffect(type, focusspellid, spell_id, true, buffs[buff_slot].casterid, caster);
 				if (focus_max2 > 0 && focus_max_real2 >= 0 && focus_max2 > focus_max_real2) {
 					focus_max_real2 = focus_max2;
 					buff_tracker = buff_slot;
@@ -6616,7 +6631,7 @@ int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 			else {
-				Total2 = CalcFocusEffect(type, focusspellid, spell_id);
+				Total2 = CalcFocusEffect(type, focusspellid, spell_id, false, buffs[buff_slot].casterid, caster);
 				if (Total2 > 0 && realTotal2 >= 0 && Total2 > realTotal2) {
 					realTotal2 = Total2;
 					buff_tracker = buff_slot;
@@ -6629,8 +6644,14 @@ int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 			}
 		}
 
-		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
-			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id);
+		uint16 original_caster_id = 0;
+		if (buff_tracker >= 0 && buffs[buff_tracker].casterid > 0) {
+			original_caster_id = buffs[buff_tracker].casterid;
+		}
+
+		if (focusspell_tracker && rand_effectiveness && focus_max_real2 != 0) {
+			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id, false, original_caster_id, caster);
+		}
 
 		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
 		if(buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
@@ -7027,8 +7048,8 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, int32 spell_id)
 {
 	//THIS is target of spell cast
 	int32 dmg = 0;
-	dmg += GetFocusEffect(focusFcDamageAmtIncoming, spell_id); //SPA 297 SE_FcDamageAmtIncoming
-	dmg += GetFocusEffect(focusFcSpellDamageAmtIncomingPC, spell_id); //SPA 484 SE_Fc_Spell_Damage_Amt_IncomingPC
+	dmg += GetFocusEffect(focusFcDamageAmtIncoming, spell_id, caster); //SPA 297 SE_FcDamageAmtIncoming
+	dmg += GetFocusEffect(focusFcSpellDamageAmtIncomingPC, spell_id, caster); //SPA 484 SE_Fc_Spell_Damage_Amt_IncomingPC
 	return dmg;
 }
 
@@ -7094,7 +7115,6 @@ bool Mob::PassLimitClass(uint32 Classes_, uint16 Class_)
 		return false;
 
 	Class_ += 1;
-
 	for (int CurrentClass = 1; CurrentClass <= PLAYER_CLASS_COUNT; ++CurrentClass){
 		if (Classes_ % 2 == 1){
 			if (CurrentClass == Class_)
@@ -8351,7 +8371,7 @@ void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 			if ((IsValidSpell(buffs[i].spellid) && (buffs[i].spellid != spell_id) && IsEffectInSpell(buffs[i].spellid, SE_Fc_Cast_Spell_On_Land))) {
 
 				//Step 2: Check if we pass all focus limiters and focus chance roll
-				trigger_spell_id = caster->CalcFocusEffect(focusFcCastSpellOnLand, buffs[i].spellid, spell_id, false, buffs[i].casterid);
+				trigger_spell_id = CalcFocusEffect(focusFcCastSpellOnLand, buffs[i].spellid, spell_id, false, buffs[i].casterid, caster);
 
 				if (IsValidSpell(trigger_spell_id) && (trigger_spell_id != spell_id)) {
 
@@ -8503,6 +8523,87 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 		return false;
 	}
 	return true;
+}
+
+bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type, int aa_id)
+{
+	/*
+		Check if SE_AddMeleProc or SE_RangedProc have a skill limiter. Passes automatically if no skill limiters present.
+	*/
+	int32 proc_type_spaid = 0;
+	if (proc_type == ProcType::MELEE_PROC) {
+		proc_type_spaid = SE_AddMeleeProc;
+	}
+	if (proc_type == ProcType::RANGED_PROC) {
+		proc_type_spaid = SE_RangedProc;
+	}
+
+	bool match_proc_type = false;
+	bool has_limit_check = false;
+
+	if (!aa_id && spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+
+		if (spell_id == SPELL_UNKNOWN) {
+			return false;
+		}
+
+		for (int i = 0; i < EFFECT_COUNT; i++) {
+			if (spells[spell_id].effect_id[i] == proc_type_spaid) {
+				match_proc_type = true;
+			}
+			if (match_proc_type && spells[spell_id].effect_id[i] == SE_LimitToSkill && spells[spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
+				
+				has_limit_check = true;
+				if (spells[spell_id].base_value[i] == skill) {
+					return true;
+				}
+			}
+		}
+	}
+	else if (aabonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+
+		int rank_id = 1;
+		AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
+
+		if (!rank) {
+			return true;
+		}
+
+		AA::Ability *ability_in = rank->base_ability;
+		if (!ability_in) {
+			return true;
+		}
+
+		for (auto &aa : aa_ranks) {
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability = ability_rank.first;
+			auto rank = ability_rank.second;
+
+			if (!ability) {
+				continue;
+			}
+
+			for (auto &effect : rank->effects) {
+				if (effect.effect_id == proc_type_spaid) {
+					match_proc_type = true;
+				}
+
+				if (match_proc_type && effect.effect_id == SE_LimitToSkill && effect.base_value <= EQ::skills::HIGHEST_SKILL) {
+					has_limit_check = true;
+					if (effect.base_value == skill) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+
+	if (has_limit_check) {
+		return false; //Limit was found, but not matched, fail.
+	}
+	else {
+		return true; //No limit is present, automatically pass.
+	}
 }
 
 bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
@@ -8747,7 +8848,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 		
-		if (proc_type == SE_WeaponProc) {
+		if (proc_type == ProcType::MELEE_PROC) {
 			if (spell_proclimit_spellid[i] == base_spell_id) {
 				if (spell_proclimit_timer[i].Enabled()) {
 					if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8760,7 +8861,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 				}
 			}
 		}
-		else if (proc_type == SE_RangedProc) {
+		else if (proc_type == ProcType::RANGED_PROC) {
 			if (ranged_proclimit_spellid[i] == base_spell_id) {
 				if (ranged_proclimit_timer[i].Enabled()) {
 					if (ranged_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8773,7 +8874,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 				}
 			}
 		}
-		else if (proc_type == SE_DefensiveProc) {
+		else if (proc_type == ProcType::DEFENSIVE_PROC) {
 			if (def_proclimit_spellid[i] == base_spell_id) {
 				if (def_proclimit_timer[i].Enabled()) {
 					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8800,7 +8901,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 
-		if (proc_type == SE_WeaponProc) {
+		if (proc_type == ProcType::MELEE_PROC) {
 			if (!spell_proclimit_spellid[i] && !is_set) {
 				spell_proclimit_spellid[i] = base_spell_id;
 				spell_proclimit_timer[i].SetTimer(proc_reuse_time);
@@ -8812,7 +8913,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 			}
 		}
 
-		if (proc_type == SE_RangedProc) {
+		if (proc_type == ProcType::RANGED_PROC) {
 			if (!ranged_proclimit_spellid[i] && !is_set) {
 				ranged_proclimit_spellid[i] = base_spell_id;
 				ranged_proclimit_timer[i].SetTimer(proc_reuse_time);
@@ -8824,7 +8925,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 			}
 		}
 
-		if (proc_type == SE_DefensiveProc) {
+		if (proc_type == ProcType::DEFENSIVE_PROC) {
 			if (!def_proclimit_spellid[i] && !is_set) {
 				def_proclimit_spellid[i] = base_spell_id;
 				def_proclimit_timer[i].SetTimer(proc_reuse_time);

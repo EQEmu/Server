@@ -1609,19 +1609,19 @@ uint32 GetProcLimitTimer(int32 spell_id, int proc_type) {
 	bool use_next_timer = false;
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 
-		if (proc_type == SE_WeaponProc) {
+		if (proc_type == ProcType::MELEE_PROC) {
 			if (spells[spell_id].effect_id[i] == SE_WeaponProc || spells[spell_id].effect_id[i] == SE_AddMeleeProc) {
 				use_next_timer = true;
 			}
 		}
 
-		if (proc_type == SE_RangedProc) {
+		if (proc_type == ProcType::RANGED_PROC) {
 			if (spells[spell_id].effect_id[i] == SE_RangedProc) {
 				use_next_timer = true;
 			}
 		}
 
-		if (proc_type == SE_DefensiveProc) {
+		if (proc_type == ProcType::DEFENSIVE_PROC) {
 			if (spells[spell_id].effect_id[i] == SE_DefensiveProc) {
 				use_next_timer = true;
 			}
