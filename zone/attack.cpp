@@ -4758,8 +4758,13 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 
 bool Mob::TryFinishingBlow(Mob *defender, int &damage)
 {
-	// base2 of FinishingBlowLvl is the HP limit (cur / max) * 1000, 10% is listed as 100
-	if (defender && !defender->IsClient() && defender->GetHPRatio() < 10) {
+	float hp_limit = 10.0f;
+	auto fb_hp_limit = std::max({ aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO], spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO], itembonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] });
+
+	if (fb_hp_limit) {
+		hp_limit = fb_hp_limit/10.0f;
+	}
+	if (defender && !defender->IsClient() && defender->GetHPRatio() < hp_limit) {
 
 		uint32 FB_Dmg =
 				   aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG];
