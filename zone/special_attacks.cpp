@@ -196,14 +196,6 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	DoAttack(who, my_hit);
 
 	who->AddToHateList(this, hate, 0);
-	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL] == skill &&
-		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID])) {
-		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] / 1000.0f;
-		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID], who, EQ::spells::CastingSlot::Item, 0, -1,
-						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
-	}
-
 	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
 
 	// Make sure 'this' has not killed the target and 'this' is not dead (Damage shield ect).
@@ -211,6 +203,8 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 		return;
 	if (HasDied())
 		return;
+
+	TryCastOnSkillUse(who, skill);
 
 	if (HasSkillProcs()) {
 		TrySkillProc(who, skill, ReuseTime * 1000);
@@ -916,6 +910,8 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		TryWeaponProc(Ammo, Ammo->GetItem(), other, EQ::invslot::slotRange);
 	}
 
+	TryCastOnSkillUse(other, EQ::skills::SkillArchery);
+
 	// Skill Proc Attempt
 	if (HasSkillProcs() && other && !other->HasDied()) {
 		if (ReuseTime) {
@@ -1278,6 +1274,8 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	if (other && !other->HasDied()) {
 		TrySpellProc(nullptr, (const EQ::ItemData*)nullptr, other, EQ::invslot::slotRange);
 	}
+
+	TryCastOnSkillUse(other, skillInUse);
 
 	if (HasSkillProcs() && other && !other->HasDied()) {
 		TrySkillProc(other, skillInUse, 0, false, EQ::invslot::slotRange);
@@ -2046,6 +2044,8 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 		MessageString(Chat::SpellFailure, FAILED_TAUNT);
 	}
 
+	TryCastOnSkillUse(who, EQ::skills::SkillTaunt);
+
 	if (HasSkillProcs()) {
 		TrySkillProc(who, EQ::skills::SkillTaunt, TauntReuseTime * 1000);
 	}
@@ -2100,6 +2100,8 @@ void Mob::InstillDoubt(Mob *who) {
 			entity_list.AEAttack(target, 50);
 		}*/
 	}
+
+	TryCastOnSkillUse(who, EQ::skills::SkillIntimidation);
 
 	if (HasSkillProcs()) {
 		TrySkillProc(who, EQ::skills::SkillIntimidation, InstillDoubtReuseTime * 1000);
@@ -2253,18 +2255,12 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 	}
 
 	other->AddToHateList(this, hate, 0);
-	if (damage > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL] == skillinuse &&
-		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID])) {
-		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] / 1000.0f;
-		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
-						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
-	}
-
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 
 	if (HasDied())
 		return;
+
+	TryCastOnSkillUse(other, skillinuse);
 
 	if (CanSkillProc && HasSkillProcs()) {
 		TrySkillProc(other, skillinuse, ReuseTime);
