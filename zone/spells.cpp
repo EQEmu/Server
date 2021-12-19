@@ -180,14 +180,19 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	{
 		LogSpells("Spell casting canceled: not able to cast now. Valid? [{}], casting [{}], waiting? [{}], spellend? [{}], stunned? [{}], feared? [{}], mezed? [{}], silenced? [{}], amnesiad? [{}]",
 			IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced(), IsAmnesiad() );
-		if(IsSilenced() && !IsDiscipline(spell_id))
+		
+		if (IsSilenced() && !IsDiscipline(spell_id)) {
 			MessageString(Chat::Red, SILENCED_STRING);
-		if(IsAmnesiad() && IsDiscipline(spell_id))
+		}
+		if (IsAmnesiad() && IsDiscipline(spell_id)) {
 			MessageString(Chat::Red, MELEE_SILENCE);
-		if(IsClient())
+		}
+		if (IsClient()) {
 			CastToClient()->SendSpellBarEnable(spell_id);
-		if(casting_spell_id && IsNPC())
+		}
+		if (casting_spell_id && IsNPC()) {
 			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		}
 		return(false);
 	}
 	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
