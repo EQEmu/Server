@@ -1402,22 +1402,25 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 	return std::max(0, AggroAmount);
 }
 
-void Mob::AddFeignMemory(Client* attacker) {
-	if(feign_memory_list.empty() && AI_feign_remember_timer != nullptr)
+void Mob::AddFeignMemory(Mob* attacker) {
+	if (feign_memory_list.empty() && AI_feign_remember_timer != nullptr) {
 		AI_feign_remember_timer->Start(AIfeignremember_delay);
-	feign_memory_list.insert(attacker->CharacterID());
+	}
+	feign_memory_list.insert(attacker->GetID());
 }
 
-void Mob::RemoveFromFeignMemory(Client* attacker) {
-	feign_memory_list.erase(attacker->CharacterID());
-	if(feign_memory_list.empty() && AI_feign_remember_timer != nullptr)
+void Mob::RemoveFromFeignMemory(Mob* attacker) {
+	feign_memory_list.erase(attacker->GetID());
+	if (feign_memory_list.empty() && AI_feign_remember_timer != nullptr) {
 		AI_feign_remember_timer->Disable();
+	}
 	if(feign_memory_list.empty())
 	{
 		minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 		maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
-		if(AI_feign_remember_timer != nullptr)
+		if (AI_feign_remember_timer != nullptr) {
 			AI_feign_remember_timer->Disable();
+		}
 	}
 }
 
@@ -1425,22 +1428,24 @@ void Mob::ClearFeignMemory() {
 	auto RememberedCharID = feign_memory_list.begin();
 	while (RememberedCharID != feign_memory_list.end())
 	{
-		Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-		if(remember_client != nullptr) //Still in zone
-			remember_client->RemoveXTarget(this, false);
+		Mob* remember_client = entity_list.GetMob(*RememberedCharID);
+		if (remember_client->IsClient() && remember_client != nullptr) { //Still in zone
+			remember_client->CastToClient()->RemoveXTarget(this, false);
+		}
 		++RememberedCharID;
 	}
 
 	feign_memory_list.clear();
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
-	if(AI_feign_remember_timer != nullptr)
+	if (AI_feign_remember_timer != nullptr) {
 		AI_feign_remember_timer->Disable();
+	}
 }
 
-bool Mob::IsOnFeignMemory(Client *attacker) const
+bool Mob::IsOnFeignMemory(Mob *attacker) const
 {
-	return feign_memory_list.find(attacker->CharacterID()) != feign_memory_list.end();
+	return feign_memory_list.find(attacker->GetID()) != feign_memory_list.end();
 }
 
 bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {

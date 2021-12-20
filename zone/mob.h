@@ -670,10 +670,10 @@ public:
 	bool HateSummon();
 	void FaceTarget(Mob* mob_to_face = 0);
 	void WipeHateList();
-	void AddFeignMemory(Client* attacker);
-	void RemoveFromFeignMemory(Client* attacker);
+	void AddFeignMemory(Mob* attacker);
+	void RemoveFromFeignMemory(Mob* attacker);
 	void ClearFeignMemory();
-	bool IsOnFeignMemory(Client *attacker) const;
+	bool IsOnFeignMemory(Mob *attacker) const;
 	void PrintHateListToClient(Client *who) { hate_list.PrintHateListToClient(who); }
 	std::list<struct_HateList*>& GetHateList() { return hate_list.GetHateList(); }
 	std::list<struct_HateList*> GetHateListByDistance(int distance = 0) { return hate_list.GetHateListByDistance(distance); }
