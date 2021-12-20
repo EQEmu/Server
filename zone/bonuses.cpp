@@ -1207,11 +1207,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_SkillAttackProc: {
-			// You can only have one of these per client. [AA Dragon Punch]
-			newbon->SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE]   = base_value; // Chance base 1000 = 100% proc rate
-			newbon->SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL]    = limit_value; // Skill to Proc Off
-			newbon->SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID] = rank.spell; // spell to proc
-			break;
+			for (int i = 0; i < MAX_CAST_ON_SKILL_USE i += 3) {
+				if (!newbon->SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) { // spell id
+					newbon->SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] = rank.spell; // spell to proc
+					newbon->SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE] = base_value; // Chance base 1000 = 100% proc rate
+					newbon->SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL] = limit_value; // Skill to Proc Offr
+					
+					if (limit_value < EQ::skills::HIGHEST_SKILL) {
+						newbon->HasSkillAttackProc[limit_value] = true; //check first before looking for any effects.
+					}
+					break;
+				}
+			}
 		}
 
 		case SE_DamageModifier: {
@@ -3576,6 +3583,21 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					}
 				}
 				break;
+			}
+
+			case SE_SkillAttackProc: {
+				for (int i = 0; i < MAX_CAST_ON_SKILL_USE i += 3) { 
+					if (!new_bonus->SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) { // spell id
+						new_bonus->SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] = max_value; // spell to proc
+						new_bonus->SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE] = effect_value; // Chance base 1000 = 100% proc rate
+						new_bonus->SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL] = limit_value; // Skill to Proc Offr
+						
+						if (limit_value < EQ::skills::HIGHEST_SKILL) {
+							new_bonus->HasSkillAttackProc[limit_value] = true; //check first before looking for any effects.
+						}
+						break;
+					}
+				}
 			}
 
 			case SE_PC_Pet_Rampage: {

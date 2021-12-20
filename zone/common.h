@@ -572,6 +572,7 @@ struct StatBonuses {
 	uint8	IncreaseRunSpeedCap;				// Increase max run speed above cap.
 	int32	DoubleSpecialAttack;				// Chance to to perform a double special attack (ie flying kick 2x)
 	int32	SkillAttackProc[3];					// [0] chance to proc [2] spell on [1] skill usage
+	bool	HasSkillAttackProc[EQ::skills::HIGHEST_SKILL + 1]; //check if any skill proc is present before assessing for all skill procs
 	uint8	FrontalStunResist;					// Chance to resist a frontal stun
 	int32	BindWound;							// Increase amount of HP by percent.
 	int32	MaxBindWound;						// Increase max amount of HP you can bind wound.
@@ -671,9 +672,9 @@ namespace SBIndex {
 	constexpr uint16 POSITION_FRONT							= 1; // SPA 503-506
 	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
 	constexpr uint16 PET_RAMPAGE_DMG_MOD                    = 1; // SPA 465,465
-	constexpr uint16 SKILLATK_PROC_CHANCE                   = 0; // SPA 427
-	constexpr uint16 SKILLATK_PROC_SKILL                    = 1; // SPA 427
-	constexpr uint16 SKILLATK_PROC_SPELL_ID                 = 2; // SPA 427
+	constexpr uint16 SKILLATK_PROC_SPELL_ID                 = 0; // SPA 288
+	constexpr uint16 SKILLATK_PROC_CHANCE                   = 1; // SPA 288
+	constexpr uint16 SKILLATK_PROC_SKILL                    = 2; // SPA 288
 	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 0; // SPA 219
 	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 1; // SPA 219
 	constexpr uint16 DOUBLE_RIPOSTE_CHANCE                  = 0; // SPA 223
@@ -692,7 +693,7 @@ namespace SBIndex {
 	constexpr uint16 COMBAT_PROC_ORIGIN_ID                  = 0; // SPA 
 	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA 
 	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA 
-	constexpr uint16 COMBAT_PROC_REUSE_TIMER              = 3; // SPA 
+	constexpr uint16 COMBAT_PROC_REUSE_TIMER                = 3; // SPA 
 };
 
 

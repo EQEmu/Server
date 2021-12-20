@@ -1603,29 +1603,26 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
-	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL] == my_hit.skill &&
-		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID])) {
-		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] / 1000.0f;
-		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
-						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
-	}
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
-	if (IsDead()) return false;
+	if (IsDead()) {
+		return false;
+	}
 
 	MeleeLifeTap(my_hit.damage_done);
 
 	CommonBreakInvisibleFromCombat();
 
-	if (GetTarget())
+	if (GetTarget()) {
 		TriggerDefensiveProcs(other, Hand, true, my_hit.damage_done);
+	}
 
-	if (my_hit.damage_done > 0)
+	if (my_hit.damage_done > 0) {
 		return true;
-
-	else
+	}
+	else {
 		return false;
+	}
 }
 
 //used by complete heal and #heal
@@ -4489,6 +4486,8 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		}
 	}
 
+	TryCastOnSkillUse(on, skillinuse);
+
 	if (HasSkillProcs() && hand != EQ::invslot::slotRange) { //We check ranged skill procs within the attack functions.
 		TrySkillProc(on, skillinuse, 0, false, hand);
 	}
@@ -5270,6 +5269,53 @@ float Mob::GetSkillProcChances(uint16 ReuseTime, uint16 hand) {
 	}
 
 	return ProcChance;
+}
+
+void Mob::TryCastOnSkillUse(Mob *on, EQ::skills::SkillType skill) {
+	
+	if (!spellbonuses.HasSkillAttackProc[skill] && !itembonuses.HasSkillAttackProc[skill] && !aabonuses.HasSkillAttackProc[skill]) {
+		return;
+	}
+
+	if (!on) {
+		SetTarget(nullptr);
+		LogError("A null Mob object was passed to Mob::TryCastOnSkillUse for evaluation!");
+		return;
+	}
+
+	if (on->HasDied()) {
+		return;
+	}
+
+	if (spellbonuses.HasSkillAttackProc[skill]) {
+		for (int i = 0; i < MAX_CAST_ON_SKILL_USE i += 3) {
+			if (spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] && skill == spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]) {
+				if (IsValidSpell(spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) && zone->random.Int(1, 1000) <= spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]) {
+					SpellFinished(spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID], on, EQ::spells::CastingSlot::Item, 0, -1, spells[spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
+				}
+			}
+		}
+	}
+
+	if (itembonuses.HasSkillAttackProc[skill]) {
+		for (int i = 0; i < MAX_CAST_ON_SKILL_USE i += 3) {
+			if (itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] && skill == itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]) {
+				if (IsValidSpell(itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) && zone->random.Int(1, 1000) <= spellbonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]) {
+					SpellFinished(itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID], on, EQ::spells::CastingSlot::Item, 0, -1, spells[itembonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
+				}
+			}
+		}
+	}
+
+	if (aabonuses.HasSkillAttackProc[skill]) {
+		for (int i = 0; i < MAX_CAST_ON_SKILL_USE i += 3) {
+			if (IsValidSpell(aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]) && aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID] && skill == aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SKILL]) {
+				if (zone->random.Int(1, 1000) <= aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_CHANCE]) {
+					SpellFinished(aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID], on, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SkillAttackProc[i + SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
+				}
+			}
+		}
+	}
 }
 
 bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {

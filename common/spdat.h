@@ -189,6 +189,7 @@
 #define MAX_FOCUS_PROC_LIMIT_TIMERS 20 //Number of focus recast timers that can be going at same time (This is arbitrary)
 #define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
 #define MAX_APPEARANCE_EFFECTS 20 //Up to 20 Appearance Effects can be saved to a mobs appearance effect array, these will be sent to other clients when they enter a zone (This is arbitrary)
+#define MAX_CAST_ON_SKILL_USE 36; //Actual amount is MAX/3
 
 
 const int Z_AGGRO=10;
@@ -1004,7 +1005,7 @@ typedef enum {
 #define SE_NimbleEvasion				285	// *not implemented - base1 = 100 for max
 #define SE_FcDamageAmt					286	// implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
 #define SE_SpellDurationIncByTic		287 // implemented, @Fc, SPA: 287, SE_SpellDurationIncByTic,			On Caster, spell buff duration mod, base: tics
-#define SE_SkillAttackProc				288	// implemented[AA] - Chance to proc spell on skill attack usage (ex. Dragon Punch)
+#define SE_SkillAttackProc				288	// implemented, @Procs, chance to cast a spell when using a skill, base: chance, limit: skill, max: spellid, note: if used in AA the spell id is set in aa_ranks spell field, chance is calculated as 100% = value 1000.
 #define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
 #define SE_Purify						291 // implemented, @Dispel, remove up specified amount of detiremental spells, base: amt removed, limit: none, max: none, Note: excluding charm, fear, resurrection, and revival sickness
