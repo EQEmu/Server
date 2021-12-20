@@ -1557,18 +1557,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Feign Death");
 #endif
-				//todo, look up spell ID in DB
-				if(spell_id == 2488) //Dook- Lifeburn fix
+				if(spell_id == SPELL_LIFEBURN) //Dook- Lifeburn fix
 					break;
 
 				if(IsClient()) {
 					CastToClient()->SetHorseId(0); // dismount if have horse
 
 					if (zone->random.Int(0, 99) > spells[spell_id].base_value[i]) {
-						CastToClient()->SetFeigned(false);
+						SetFeigned(false);
 						entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, GetName());
 					} else {
-						CastToClient()->SetFeigned(true);
+						SetFeigned(true);
 					}
 				}
 				break;

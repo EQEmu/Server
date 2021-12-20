@@ -1296,6 +1296,10 @@ public:
 	bool CanOpenDoors() const;
 	void SetCanOpenDoors(bool can_open);
 
+	void SetFeigned(bool in_feigned);
+	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
+	inline bool GetFeigned() const { return(feigned); }
+
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
@@ -1719,6 +1723,9 @@ protected:
 	AuraMgr aura_mgr;
 	AuraMgr trap_mgr;
 
+	bool feigned;
+	Timer forget_timer; // our 2 min everybody forgets you timer
+
 	bool m_can_open_doors;
 
 	MobMovementManager *mMovementManager;
@@ -1726,7 +1733,7 @@ protected:
 private:
 	void _StopSong(); //this is not what you think it is
 	Mob* target;
-
+	
 
 #ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
