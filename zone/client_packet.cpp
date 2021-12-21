@@ -4061,7 +4061,12 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			return;
 		}
 
-		CastSpell(spell_to_cast, castspell->target_id, slot);
+		if (IsValidSpell(spell_to_cast)) {
+			CastSpell(spell_to_cast, castspell->target_id, slot);
+		}
+		else {
+			InterruptSpell();
+		}
 	}
 	/* Spell Slot or Potion Belt Slot */
 	else if (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)	// ITEM or POTION cast
