@@ -34,7 +34,7 @@ XS(XS_HateEntry_GetEnt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetEnt) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)"); // @categories Script Utility, Hate and Aggro
+		Perl_croak(aTHX_ "Usage: HateEntry::GetEnt(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		Mob             *RETVAL;
