@@ -1370,7 +1370,7 @@ void Mob::AI_Process() {
 			remembered_feigned_mobid = feign_memory_list.begin();
 			while (remembered_feigned_mobid != feign_memory_list.end()) {
 				Mob *remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
-				if (remembered_mob == nullptr) {
+				if (remembered_mob == nullptr || remembered_mob->IsCorpse()) {
 					//they are gone now...
 					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 				}
