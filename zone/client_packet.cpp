@@ -10187,8 +10187,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	Mob* mypet = this->GetPet();
 	Mob *target = entity_list.GetMob(pet->target);
 
-	Shout("Pet Commands %i", pet->command);
-
 	if (!mypet || pet->command == PET_LEADER) {
 		if (pet->command == PET_LEADER) {
 			// we either send the ID of an NPC we're interested in or no ID for our own pet
