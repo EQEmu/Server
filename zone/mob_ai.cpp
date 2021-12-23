@@ -1000,6 +1000,14 @@ void Mob::AI_Process() {
 					continue;
 				}
 
+				if (door->GetTriggerDoorID() > 0) {
+					continue;
+				}
+
+				if (door->GetDoorParam() > 0) {
+					continue;
+				}
+
 				float distance                = DistanceSquared(m_Position, door->GetPosition());
 				float distance_scan_door_open = 20;
 
