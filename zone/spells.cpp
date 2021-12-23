@@ -223,6 +223,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if(DivineAura()) {
 		LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 		InterruptSpell(173, 0x121, false);
+		if(IsClient()) {
+			CastToClient()->SendSpellBarEnable(spell_id);
+		}
 		return(false);
 	}
 
