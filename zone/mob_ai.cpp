@@ -841,12 +841,15 @@ void Client::AI_Process()
 			std::set<uint32>::iterator RememberedCharID;
 			RememberedCharID = feign_memory_list.begin();
 			while (RememberedCharID != feign_memory_list.end()) {
-				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if (remember_client == nullptr) {
+				Shout("Check FD List: %i", RememberedCharID);
+				Mob* remember_client = entity_list.GetMob(*RememberedCharID);
+				if (remember_client == nullptr || remember_client->IsCorpse()) {
 					//they are gone now...
 					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+					Shout("Erase FD ID %i", RememberedCharID);
 				} else if (!remember_client->GetFeigned()) {
-					AddToHateList(remember_client->CastToMob(),1);
+					Shout("Now standing %i ADD TO HATE LIST %i", RememberedCharID);
+					AddToHateList(remember_client,1);
 					RememberedCharID = feign_memory_list.erase(RememberedCharID);
 					break;
 				} else {
@@ -1367,14 +1370,17 @@ void Mob::AI_Process() {
 			// check to see if any of our previous feigned targets have gotten up.
 			std::set<uint32>::iterator RememberedCharID;
 			RememberedCharID = feign_memory_list.begin();
+			Shout("PASS2 :: Check FD List: %i", RememberedCharID);
 			while (RememberedCharID != feign_memory_list.end()) {
-				Client *remember_client = entity_list.GetClientByCharID(*RememberedCharID);
+				Mob *remember_client = entity_list.GetMob(*RememberedCharID);
 				if (remember_client == nullptr) {
 					//they are gone now...
+					Shout("PASS2 ::  Erase FD ID %i", RememberedCharID);
 					RememberedCharID = feign_memory_list.erase(RememberedCharID);
 				}
 				else if (!remember_client->GetFeigned()) {
-					AddToHateList(remember_client->CastToMob(), 1);
+					Shout("PASS :: 2 Now standing %i ADD TO HATE LIST %i", RememberedCharID);
+					AddToHateList(remember_client, 1);
 					RememberedCharID = feign_memory_list.erase(RememberedCharID);
 					break;
 				}
