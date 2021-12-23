@@ -810,6 +810,11 @@ public:
 	uint16 ScribeSpells(uint8 min_level, uint8 max_level);
 	uint16 LearnDisciplines(uint8 min_level, uint8 max_level);
 
+	// Configurable Tracking Skill
+	uint16 GetClassTrackingDistanceMultiplier(uint16 class_);
+
+	bool CanThisClassTrack();
+
 	// defer save used when bulk saving
 	void UnscribeSpell(int slot, bool update_client = true, bool defer_save = false);
 	void UnscribeSpellAll(bool update_client = true);
