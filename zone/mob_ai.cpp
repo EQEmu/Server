@@ -1554,6 +1554,11 @@ void Mob::AI_Process() {
 		}
 	}
 
+	if (forget_timer.Check()) {
+		forget_timer.Disable();
+		entity_list.ClearZoneFeignAggro(this);
+	}
+
 	//Do Ranged attack here
 	if (doranged) {
 		RangedAttack(target);

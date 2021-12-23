@@ -455,7 +455,7 @@ public:
 	void	ClearAggro(Mob* targ);
 	void    ClearWaterAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
-	void	ClearZoneFeignAggro(Client* targ);
+	void	ClearZoneFeignAggro(Mob* targ);
 	void	AggroZone(Mob* who, uint32 hate = 0);
 
 	bool	Fighting(Mob* targ);

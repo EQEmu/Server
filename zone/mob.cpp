@@ -6507,11 +6507,11 @@ void Mob::ShieldAbilityClearVariables()
 }
 
 void Mob::SetFeigned(bool in_feigned) {
-	if (in_feigned)
-	{
+	
+	if (in_feigned)	{
+
 		if (IsClient()) {
-			if (RuleB(Character, FeignKillsPet))
-			{
+			if (RuleB(Character, FeignKillsPet)){
 				SetPet(0);
 			}
 			CastToClient()->SetHorseId(0);
