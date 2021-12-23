@@ -1617,6 +1617,8 @@ void NPC::DoClassAttacks(Mob *target) {
 	bool ca_time = classattack_timer.Check(false);
 	bool ka_time = knightattack_timer.Check(false);
 
+	const EQ::ItemData* boots = database.GetItem(equipment[EQ::invslot::slotFeet]);
+
 	//only check attack allowed if we are going to do something
 	if((taunt_time || ca_time || ka_time) && !IsAttackAllowed(target))
 		return;
@@ -1688,7 +1690,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animKick, 0, false);
 					int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
 
-					if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0) {
+					if (GetWeaponDamage(target, boots) <= 0) {
 						dmg = DMG_INVULNERABLE;
 					}
 
@@ -1739,7 +1741,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animKick, 0, false);
 				int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
 
-				if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
+				if (GetWeaponDamage(target, boots) <= 0)
 					dmg = DMG_INVULNERABLE;
 
 				reuse = (KickReuseTime + 3) * 1000;
