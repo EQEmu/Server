@@ -733,96 +733,78 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 
 //basically the same as Group's version just with more people like a lot of non group specific raid stuff
 //this only functions if the member has a group in the raid. This does not support /autosplit?
-void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter)
+void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter)
 {
-	//avoid unneeded work
-	if (gid == RAID_GROUPLESS)
+	if (
+		!platinum &&
+		!gold &&
+		!silver &&
+		!copper
+	) {
 		return;
+	}
 
-	if(copper == 0 && silver == 0 && gold == 0 && platinum == 0)
+	uint32 member_index;
+	uint8 split_count = 0;
+	for (member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+		if (members[member_index].member) {
+			split_count++;
+		}
+	}
+
+	if (!split_count) {
 		return;
+	}
 
-	uint32 i;
-	uint8 membercount = 0;
-	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
-		if (members[i].member != nullptr && members[i].GroupNumber == gid) {
-			membercount++;
+	uint32 split_modifier;
+	if (split_count > 1) {
+		split_modifier = platinum % split_count;
+		if (split_modifier) {
+			platinum -= split_modifier;
+			gold += (10 * split_modifier);
+		}
+
+		split_modifier = gold % split_count;
+		if (split_modifier) {
+			gold -= split_modifier;
+			silver += (10 * split_modifier);
+		}
+
+		split_modifier = silver % split_count;
+		if (split_modifier) {
+			silver -= split_modifier;
+			copper += (10 * split_modifier);
 		}
 	}
 
-	if (membercount == 0)
-		return;
+	uint32 copper_split = copper / split_count;
+	uint32 silver_split = silver / split_count;
+	uint32 gold_split = gold / split_count;
+	uint32 platinum_split = platinum / split_count;
 
-	uint32 mod;
-	//try to handle round off error a little better
-	if(membercount > 1) {
-		mod = platinum % membercount;
-		if((mod) > 0) {
-			platinum -= mod;
-			gold += 10 * mod;
-		}
-		mod = gold % membercount;
-		if((mod) > 0) {
-			gold -= mod;
-			silver += 10 * mod;
-		}
-		mod = silver % membercount;
-		if((mod) > 0) {
-			silver -= mod;
-			copper += 10 * mod;
-		}
-	}
-
-	//calculate the splits
-	//We can still round off copper pieces, but I dont care
-	uint32 sc;
-	uint32 cpsplit = copper / membercount;
-	sc = copper % membercount;
-	uint32 spsplit = silver / membercount;
-	uint32 gpsplit = gold / membercount;
-	uint32 ppsplit = platinum / membercount;
-
-	char buf[128];
-	buf[63] = '\0';
-	std::string msg = "You receive";
-	bool one = false;
-
-	if(ppsplit > 0) {
-		snprintf(buf, 63, " %u platinum", ppsplit);
-		msg += buf;
-		one = true;
-	}
-	if(gpsplit > 0) {
-		if(one)
-			msg += ",";
-		snprintf(buf, 63, " %u gold", gpsplit);
-		msg += buf;
-		one = true;
-	}
-	if(spsplit > 0) {
-		if(one)
-			msg += ",";
-		snprintf(buf, 63, " %u silver", spsplit);
-		msg += buf;
-		one = true;
-	}
-	if(cpsplit > 0) {
-		if(one)
-			msg += ",";
-		//this message is not 100% accurate for the splitter
-		//if they are receiving any roundoff
-		snprintf(buf, 63, " %u copper", cpsplit);
-		msg += buf;
-		one = true;
-	}
-	msg += " as your split";
-
-	for (i = 0; i < MAX_RAID_MEMBERS; i++) {
-		if (members[i].member != nullptr && members[i].GroupNumber == gid) { // If Group Member is Client
-			//I could not get MoneyOnCorpse to work, so we use this
-			members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
-
-			members[i].member->Message(Chat::Green, msg.c_str());
+	
+	for (member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+		if (members[member_index].member) {
+			Client *c = members[member_index].member;
+			c->AddMoneyToPP(
+				copper_split,
+				silver_split,
+				gold_split,
+				platinum_split,
+				true
+			);
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"You receieve {} as your split.",
+					ConvertMoneyToString(
+						platinum_split,
+						gold_split,
+						silver_split,
+						copper_split
+					)
+				).c_str()
+			);
 		}
 	}
 }

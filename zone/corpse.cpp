@@ -937,8 +937,9 @@ void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
 }
 
 void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* app) {
-	if (!client)
+	if (!client) {
 		return;
+	}
 
 	// Added 12/08. Started compressing loot struct on live.
 	if(player_corpse_depop) {
@@ -959,8 +960,9 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		return;
 	}
 
-	if(!being_looted_by || (being_looted_by != 0xFFFFFFFF && !entity_list.GetID(being_looted_by)))
+	if(!being_looted_by || (being_looted_by != 0xFFFFFFFF && !entity_list.GetID(being_looted_by))) {
 		being_looted_by = 0xFFFFFFFF;
+	}
 
 	if (DistanceSquaredNoZ(client->GetPosition(), m_Position) > 625) {
 		SendLootReqErrorPacket(client, LootResponse::TooFar);
@@ -977,26 +979,32 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// loot_request_type is scoped to class Corpse and reset on a per-loot session basis
 	if (client->GetGM()) {
-		if (client->Admin() >= AccountStatus::GMAdmin)
-			loot_request_type = LootRequestType::GMAllowed;
-		else
-			loot_request_type = LootRequestType::GMPeek;
-	}
-	else {
+		loot_request_type = (
+			client->Admin() >= AccountStatus::GMAdmin ?
+			LootRequestType::GMAllowed :
+			LootRequestType::GMPeek
+		);
+	} else {
 		if (IsPlayerCorpse()) {
 			if (char_id == client->CharacterID()) {
 				loot_request_type = LootRequestType::Self;
-			}
-			else if (CanPlayerLoot(client->CharacterID())) {
-				if (GetPlayerKillItem() == -1)
+			} else if (CanPlayerLoot(client->CharacterID())) {
+				auto player_kill_item = GetPlayerKillItem();
+				if (player_kill_item == -1) {
 					loot_request_type = LootRequestType::AllowedPVPAll;
-				else if (GetPlayerKillItem() == 1)
+				} else if (player_kill_item == 1) {
 					loot_request_type = LootRequestType::AllowedPVPSingle;
-				else if (GetPlayerKillItem() > 1)
+				} else if (player_kill_item > 1) {
 					loot_request_type = LootRequestType::AllowedPVPDefined;
+				}
 			}
-		}
-		else if ((IsNPCCorpse() || become_npc) && CanPlayerLoot(client->CharacterID())) {
+		} else if (
+			CanPlayerLoot(client->CharacterID()) &&
+			(
+				IsNPCCorpse() ||
+				become_npc
+			)
+		) {
 			loot_request_type = LootRequestType::AllowedPVE;
 		}
 
@@ -1010,71 +1018,104 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	}
 
 	being_looted_by = client->GetID();
-	client->CommonBreakInvisible(); // we should be "all good" so lets break invis now instead of earlier before all error checking is done
+	client->CommonBreakInvisible();
 
-	// process coin
 	bool loot_coin = false;
 	std::string tmp;
-	if (database.GetVariable("LootCoin", tmp))
+	if (database.GetVariable("LootCoin", tmp)) {
 		loot_coin = (tmp[0] == 1 && tmp[1] == '\0');
-
-	if (loot_request_type == LootRequestType::GMPeek || loot_request_type == LootRequestType::GMAllowed) {
-		client->Message(Chat::Yellow, "This corpse contains %u platinum, %u gold, %u silver and %u copper.",
-			GetPlatinum(), GetGold(), GetSilver(), GetCopper());
-
-		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
-		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*)outapp->pBuffer;
-
-		d->response = static_cast<uint8>(LootResponse::Normal);
-		d->unknown1 = 0x42;
-		d->unknown2 = 0xef;
-
-		d->copper = 0;
-		d->silver = 0;
-		d->gold = 0;
-		d->platinum = 0;
-
-		outapp->priority = 6;
-		client->QueuePacket(outapp);
-
-		safe_delete(outapp);
 	}
-	else {
-		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
-		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*)outapp->pBuffer;
 
-		d->response = static_cast<uint8>(LootResponse::Normal);
-		d->unknown1 = 0x42;
-		d->unknown2 = 0xef;
+	if (
+		loot_request_type == LootRequestType::GMPeek ||
+		loot_request_type == LootRequestType::GMAllowed
+	) {
+		if (
+			GetPlatinum() ||
+			GetGold() ||
+			GetSilver() ||
+			GetCopper()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"This corpse contains {}.",
+					ConvertMoneyToString(
+						GetPlatinum(),
+						GetGold(),
+						GetSilver(),
+						GetCopper()
+					)
+				).c_str()
+			);
+		}
+	}
 
-		Group* cgroup = client->GetGroup();
+	auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
+	moneyOnCorpseStruct* d = (moneyOnCorpseStruct*) outapp->pBuffer;
 
-		// this can be reworked into a switch and/or massaged to include specialized pve loot rules based on 'LootRequestType'
-		if (!IsPlayerCorpse() && client->IsGrouped() && client->AutoSplitEnabled() && cgroup) {
+	d->response = static_cast<uint8>(LootResponse::Normal);
+	d->unknown1 = 0x42;
+	d->unknown2 = 0xef;
+
+	if (
+		loot_request_type != LootRequestType::GMPeek &&
+		loot_request_type != LootRequestType::GMAllowed
+		) {
+		Group* client_group = client->GetGroup();
+		Raid* client_raid = client->GetRaid();
+
+		if (!IsPlayerCorpse() && client->IsGrouped() && client->AutoSplitEnabled() && client_group) {
 			d->copper = 0;
 			d->silver = 0;
 			d->gold = 0;
 			d->platinum = 0;
-			cgroup->SplitMoney(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), client);
-		}
-		else {
+			client_group->SplitMoney(
+				GetCopper(),
+				GetSilver(),
+				GetGold(),
+				GetPlatinum(),
+				client
+			);
+		} else if (!IsPlayerCorpse() && client->IsRaidGrouped() && client->AutoSplitEnabled() && client_raid) {
+			d->copper = 0;
+			d->silver = 0;
+			d->gold = 0;
+			d->platinum = 0;
+			client_raid->SplitMoney(
+				GetCopper(),
+				GetSilver(),
+				GetGold(),
+				GetPlatinum(),
+				client
+			);			
+		} else {
 			d->copper = GetCopper();
 			d->silver = GetSilver();
 			d->gold = GetGold();
 			d->platinum = GetPlatinum();
-			client->AddMoneyToPP(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), false);
+			client->AddMoneyToPP(
+				GetCopper(),
+				GetSilver(),
+				GetGold(),
+				GetPlatinum(),
+				false
+			);
 		}
 
 		RemoveCash();
 		Save();
-
-		outapp->priority = 6;
-		client->QueuePacket(outapp);
-
-		safe_delete(outapp);
+	} else {
+		d->copper = 0;
+		d->silver = 0;
+		d->gold = 0;
+		d->platinum = 0;
 	}
 
-	// process items
+	outapp->priority = 6;
+	client->QueuePacket(outapp);
+	safe_delete(outapp);
+
 	auto timestamps = database.GetItemRecastTimestamps(client->CharacterID());
 
 	if (loot_request_type == LootRequestType::AllowedPVPDefined) {
@@ -1083,17 +1124,18 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		auto pkinst = database.CreateItem(pkitem, pkitem->MaxCharges);
 
 		if (pkinst) {
-			if (pkitem->RecastDelay)
-				pkinst->SetRecastTimestamp(timestamps.count(pkitem->RecastType) ? timestamps.at(pkitem->RecastType) : 0);
-
+			if (pkitem->RecastDelay) {
+				pkinst->SetRecastTimestamp(
+					timestamps.count(pkitem->RecastType) ?
+					timestamps.at(pkitem->RecastType) :
+					0
+				);
+			}
 			LogInventory("MakeLootRequestPackets() Slot [{}], Item [{}]", EQ::invslot::CORPSE_BEGIN, pkitem->Name);
-
 			client->SendItemPacket(EQ::invslot::CORPSE_BEGIN, pkinst, ItemPacketLoot);
 			safe_delete(pkinst);
-		}
-		else {
+		} else {
 			LogInventory("MakeLootRequestPackets() PlayerKillItem [{}] not found", pkitemid);
-
 			client->Message(Chat::Red, "PlayerKillItem (id: %i) could not be found!", pkitemid);
 		}
 
@@ -1110,17 +1152,28 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		item_data->lootslot = 0xFFFF;
 
 		// align server and client corpse slot mappings so translators can function properly
-		while (loot_slot <= EQ::invslot::CORPSE_END && (((uint64)1 << loot_slot) & corpse_mask) == 0)
+		while (loot_slot <= EQ::invslot::CORPSE_END && (((uint64)1 << loot_slot) & corpse_mask) == 0) {
 			++loot_slot;
-		if (loot_slot > EQ::invslot::CORPSE_END)
+		}
+
+		if (loot_slot > EQ::invslot::CORPSE_END) {
 			continue;
+		}
 
 		if (IsPlayerCorpse()) {
-			if (loot_request_type == LootRequestType::AllowedPVPSingle && loot_slot != EQ::invslot::CORPSE_BEGIN)
+			if (
+				loot_request_type == LootRequestType::AllowedPVPSingle &&
+				loot_slot != EQ::invslot::CORPSE_BEGIN
+			) {
 				continue;
+			}
 
-			if (item_data->equip_slot < EQ::invslot::POSSESSIONS_BEGIN || item_data->equip_slot > EQ::invslot::POSSESSIONS_END)
+			if (
+				item_data->equip_slot < EQ::invslot::POSSESSIONS_BEGIN ||
+				item_data->equip_slot > EQ::invslot::POSSESSIONS_END
+			) {
 				continue;
+			}
 		}
 
 		const auto *item = database.GetItem(item_data->item_id);
@@ -1135,27 +1188,30 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			item_data->aug_6,
 			item_data->attuned
 		);
-		if (!inst)
+		if (!inst) {
 			continue;
+		}
 
-		if (item->RecastDelay)
-			inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
+		if (item->RecastDelay) {
+			inst->SetRecastTimestamp(
+				timestamps.count(item->RecastType) ?
+				timestamps.at(item->RecastType) :
+				0
+			);
+		}
 
 		LogInventory("MakeLootRequestPackets() Slot [{}], Item [{}]", loot_slot, item->Name);
-
 		client->SendItemPacket(loot_slot, inst, ItemPacketLoot);
 		safe_delete(inst);
-
 		item_data->lootslot = loot_slot++;
 	}
 
-	// Disgrace: Client seems to require that we send the packet back...
 	client->QueuePacket(app);
-
-	// This is required for the 'Loot All' feature to work for SoD clients. I expect it is to tell the client that the
-	// server has now sent all the items on the corpse.
-	if (client->ClientVersion() >= EQ::versions::ClientVersion::SoD)
+	if (client->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
+		// This is required for the 'Loot All' feature to work for SoD clients. I expect it is to tell the client that the
+		// server has now sent all the items on the corpse.
 		SendLootReqErrorPacket(client, LootResponse::LootAll);
+	}
 }
 
 void Corpse::LootItem(Client *client, const EQApplicationPacket *app)

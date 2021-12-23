@@ -115,92 +115,75 @@ Group::~Group()
 
 //Split money used in OP_Split (/split and /autosplit).
 void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter) {
-	//avoid unneeded work
-	if(copper == 0 && silver == 0 && gold == 0 && platinum == 0)
+	if (
+		!platinum &&
+		!gold &&
+		!silver &&
+		!copper
+	) {
 		return;
+	}
 
-	uint32 i;
-	uint8 membercount = 0;
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		// Don't split with Mercs or Bots
-		if (members[i] != nullptr && members[i]->IsClient()) {
-			membercount++;
+	uint32 member_index;
+	uint8 split_count = 0;
+	for (member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+		if (members[member_index] && members[member_index]->IsClient()) { // Don't split with Mercs or Bots
+			split_count++;
 		}
 	}
 
-	if (membercount == 0)
+	if (!split_count) {
 		return;
+	}
 
-	uint32 mod;
-	//try to handle round off error a little better
-	if(membercount > 1) {
-		mod = platinum % membercount;
-		if((mod) > 0) {
-			platinum -= mod;
-			gold += 10 * mod;
+	uint32 split_modifier;
+	if(split_count > 1) {
+		split_modifier = platinum % split_count;
+		if (split_modifier) {
+			platinum -= split_modifier;
+			gold += (10 * split_modifier);
 		}
-		mod = gold % membercount;
-		if((mod) > 0) {
-			gold -= mod;
-			silver += 10 * mod;
+
+		split_modifier = gold % split_count;
+		if (split_modifier) {
+			gold -= split_modifier;
+			silver += (10 * split_modifier);
 		}
-		mod = silver % membercount;
-		if((mod) > 0) {
-			silver -= mod;
-			copper += 10 * mod;
+
+		split_modifier = silver % split_count;
+		if (split_modifier) {
+			silver -= split_modifier;
+			copper += (10 * split_modifier);
 		}
 	}
 
-	//calculate the splits
-	//We can still round off copper pieces, but I dont care
-	uint32 sc;
-	uint32 cpsplit = copper / membercount;
-	sc = copper % membercount;
-	uint32 spsplit = silver / membercount;
-	uint32 gpsplit = gold / membercount;
-	uint32 ppsplit = platinum / membercount;
+	uint32 copper_split = copper / split_count;
+	uint32 silver_split = silver / split_count;
+	uint32 gold_split = gold / split_count;
+	uint32 platinum_split = platinum / split_count;
 
-	char buf[128];
-	buf[63] = '\0';
-	std::string msg = "You receive";
-	bool one = false;
-
-	if(ppsplit > 0) {
-		snprintf(buf, 63, " %u platinum", ppsplit);
-		msg += buf;
-		one = true;
-	}
-	if(gpsplit > 0) {
-		if(one)
-			msg += ",";
-		snprintf(buf, 63, " %u gold", gpsplit);
-		msg += buf;
-		one = true;
-	}
-	if(spsplit > 0) {
-		if(one)
-			msg += ",";
-		snprintf(buf, 63, " %u silver", spsplit);
-		msg += buf;
-		one = true;
-	}
-	if(cpsplit > 0) {
-		if(one)
-			msg += ",";
-		//this message is not 100% accurate for the splitter
-		//if they are receiving any roundoff
-		snprintf(buf, 63, " %u copper", cpsplit);
-		msg += buf;
-		one = true;
-	}
-	msg += " as your split";
-
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (members[i] != nullptr && members[i]->IsClient()) { // If Group Member is Client
-			Client *c = members[i]->CastToClient();
-			//I could not get MoneyOnCorpse to work, so we use this
-			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
-			c->Message(Chat::Green, msg.c_str());
+	for (member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+		if (members[member_index] && members[member_index]->IsClient()) {
+			Client *c = members[member_index]->CastToClient();				
+			c->AddMoneyToPP(
+				copper_split,
+				silver_split,
+				gold_split,
+				platinum_split,
+				true
+			);
+			c->Message(
+				Chat::Green,
+				fmt::format(
+					"You receieve {} as your split.",
+					ConvertMoneyToString(
+						platinum_split,
+						gold_split,
+						silver_split,
+						copper_split
+					)
+				).c_str()
+			);
 		}
 	}
 }

@@ -13647,35 +13647,33 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 	//Per the note above, Im not exactly sure what to do on error
 	//to notify the client of the error...
 
-	Group *group = nullptr;
-	Raid *raid = nullptr;
+	Group *group = GetGroup();
+	Raid *raid = GetRaid();
 
-	if (IsRaidGrouped())
-		raid = GetRaid();
-	else if (IsGrouped())
-		group = GetGroup();
-
-	// is there an actual error message for this?
-	if (raid == nullptr && group == nullptr) {
+	if (!raid && !group) {
 		Message(Chat::Red, "You can not split money if you're not in a group.");
 		return;
 	}
 
-	if (!TakeMoneyFromPP(static_cast<uint64>(split->copper) +
-		10 * static_cast<uint64>(split->silver) +
-		100 * static_cast<uint64>(split->gold) +
-		1000 * static_cast<uint64>(split->platinum))) {
+	if (
+		!TakeMoneyFromPP(
+			static_cast<uint64>(split->copper) +
+			10 * static_cast<uint64>(split->silver) +
+			100 * static_cast<uint64>(split->gold) +
+			1000 * static_cast<uint64>(split->platinum)
+		)
+	) {
 		Message(Chat::Red, "You do not have enough money to do that split.");
 		return;
 	}
 
-	if (raid)
-		raid->SplitMoney(raid->GetGroup(this), split->copper, split->silver, split->gold, split->platinum);
-	else if (group)
+	if (raid) {
+		raid->SplitMoney(split->copper, split->silver, split->gold, split->platinum);
+	} else if (group) {
 		group->SplitMoney(split->copper, split->silver, split->gold, split->platinum);
+	}
 
 	return;
-
 }
 
 void Client::Handle_OP_Surname(const EQApplicationPacket *app)
