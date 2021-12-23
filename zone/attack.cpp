@@ -433,7 +433,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = false;
-	if (RuleB(Combat, ImmuneToEnargeFromRiposteSpellEffect)) {
+	if (RuleB(Combat, ImmuneToEnrageFromRiposteSpellEffect)) {
 		ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance || attacker->IsEnraged();
 	}
 
