@@ -838,25 +838,21 @@ void Client::AI_Process()
 	else
 	{
 		if(AI_feign_remember_timer->Check()) {
-			std::set<uint32>::iterator RememberedCharID;
-			RememberedCharID = feign_memory_list.begin();
-			Shout("timer check %i", RememberedCharID);
-			while (RememberedCharID != feign_memory_list.end()) {
+			std::set<uint32>::iterator remembered_feigned_mobid;
+			remembered_feigned_mobid = feign_memory_list.begin();
+			while (remembered_feigned_mobid != feign_memory_list.end()) {
 				
-				Mob* remember_client = entity_list.GetMob(*RememberedCharID);
-				Shout("AI_feign_remember_timer->Check() :: Check FD List: %i", RememberedCharID, remember_client->GetFeigned());
-				if (remember_client == nullptr || remember_client->IsCorpse()) {
+				Mob* remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
+				if (remembered_mob == nullptr || remembered_mob->IsCorpse()) {
 					//they are gone now...
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
-					Shout("AI_feign_remember_timer->Check() :: Erase FD ID %i", RememberedCharID);
-				} else if (!remember_client->GetFeigned()) {
-					Shout("AI_feign_remember_timer->Check() :: Now standing %i ADD TO HATE LIST %i", RememberedCharID);
-					AddToHateList(remember_client,1);
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
+				} else if (!remembered_mob->GetFeigned()) {
+					AddToHateList(remembered_mob,1);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 					break;
 				} else {
 					//they are still feigned, carry on...
-					++RememberedCharID;
+					++remembered_feigned_mobid;
 				}
 			}
 		}
@@ -1370,25 +1366,22 @@ void Mob::AI_Process() {
 			// 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
-			std::set<uint32>::iterator RememberedCharID;
-			RememberedCharID = feign_memory_list.begin();
-			//Shout("PASS2 :: Check FD List: %i", RememberedCharID);
-			while (RememberedCharID != feign_memory_list.end()) {
-				Mob *remember_client = entity_list.GetMob(*RememberedCharID);
-				if (remember_client == nullptr) {
+			std::set<uint32>::iterator remembered_feigned_mobid;
+			remembered_feigned_mobid = feign_memory_list.begin();
+			while (remembered_feigned_mobid != feign_memory_list.end()) {
+				Mob *remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
+				if (remembered_mob == nullptr) {
 					//they are gone now...
-					Shout("PASS2 ::  Erase FD ID %i", RememberedCharID);
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 				}
-				else if (!remember_client->GetFeigned()) {
-					Shout("PASS :: 2 Now standing %i ADD TO HATE LIST %i", RememberedCharID);
-					AddToHateList(remember_client, 1);
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+				else if (!remembered_mob->GetFeigned()) {
+					AddToHateList(remembered_mob, 1);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 					break;
 				}
 				else {
 					//they are still feigned, carry on...
-					++RememberedCharID;
+					++remembered_feigned_mobid;
 				}
 			}
 		}

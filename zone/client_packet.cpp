@@ -10695,22 +10695,20 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 
 	case PET_FEIGN: {
-		Shout("Found FD command do I have command %i", aabonuses.PetCommands[PetCommand]);
 		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
 			if (mypet->IsFeared())
 				break;
 
 			int pet_fd_chance = aabonuses.FeignedMinionChance;
-			Shout("Get Chance %i", pet_fd_chance);
-			pet_fd_chance = 100;
 			if (zone->random.Int(0, 99) > pet_fd_chance) {
 				mypet->SetFeigned(false);
 				entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, mypet->GetCleanName());
 			}
 			else {
+				bool immune_aggro = GetSpecialAbility(IMMUNE_AGGRO);
 				mypet->SetSpecialAbility(IMMUNE_AGGRO, 1);
 				mypet->WipeHateList();
-				mypet->SetPetOrder(SPO_Sit);
+				mypet->SetPetOrder(SPO_FeignDeath);
 				mypet->SetRunAnimSpeed(0);
 				mypet->StopNavigation();
 				mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
@@ -10719,9 +10717,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				if (!mypet->UseBardSpellLogic()) {
 					mypet->InterruptSpell();
 				}
-				mypet->SetSpecialAbility(IMMUNE_AGGRO, 0);
+
+				if (!immune_aggro) {
+					mypet->SetSpecialAbility(IMMUNE_AGGRO, 0);
+				}
 			}
-			mypet->Shout("Try FD comlpeted");
 		}
 		break;
 	}

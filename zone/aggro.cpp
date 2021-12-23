@@ -1406,7 +1406,7 @@ void Mob::AddFeignMemory(Mob* attacker) {
 	if (feign_memory_list.empty() && AI_feign_remember_timer != nullptr) {
 		AI_feign_remember_timer->Start(AIfeignremember_delay);
 	}
-	Shout("Mob::AddFeignMemory INSERT INTO ARRAY: %i", attacker->GetID());
+
 	if (attacker) {
 		feign_memory_list.insert(attacker->GetID());
 	}
@@ -1417,8 +1417,6 @@ void Mob::RemoveFromFeignMemory(Mob* attacker) {
 	if (!attacker) {
 		return;
 	}
-
-	Shout("Mob::RemoveFromFeignMemory Remove from ARRAY: %i", attacker->GetID());
 
 	feign_memory_list.erase(attacker->GetID());
 	if (feign_memory_list.empty() && AI_feign_remember_timer != nullptr) {
@@ -1435,25 +1433,14 @@ void Mob::RemoveFromFeignMemory(Mob* attacker) {
 }
 
 void Mob::ClearFeignMemory() {
-	auto RememberedCharID = feign_memory_list.begin();
-	while (RememberedCharID != feign_memory_list.end())
+	auto remembered_feigned_mobid = feign_memory_list.begin();
+	while (remembered_feigned_mobid != feign_memory_list.end())
 	{
-		
-		Mob* remember_client = entity_list.GetMob(*RememberedCharID);
-		Shout("Mob::ClearFeignMemory TRy ID %i [%i]", RememberedCharID, remember_client->GetID());
-		if (remember_client) {
-			remember_client->Shout("ClearFeignMemory:: REMEMBER_CLIENT FOUND");
+		Mob* remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
+		if (remembered_mob->IsClient() && remembered_mob != nullptr) { //Still in zone
+			remembered_mob->CastToClient()->RemoveXTarget(this, false);
 		}
-		else {
-			Shout("ClearFeignMemory :: REMEMBER_CLIENT FAILED");
-		}
-
-
-		if (remember_client->IsClient() && remember_client != nullptr) { //Still in zone
-			Shout("Mob::ClearFeignMemory FIOUND ID %i REmove from X target", RememberedCharID);
-			remember_client->CastToClient()->RemoveXTarget(this, false);
-		}
-		++RememberedCharID;
+		++remembered_feigned_mobid;
 	}
 
 	feign_memory_list.clear();
