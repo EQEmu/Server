@@ -1225,6 +1225,66 @@ uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)
 	return results.RowCount();
 }
 
+std::string BaseGuildManager::GetGuildNameByID(uint32 guild_id) const {
+	if(guild_id == GUILD_NONE) {
+		return std::string();
+	}
 
+	std::map<uint32, GuildInfo *>::const_iterator res;
+	res = m_guilds.find(guild_id);
+	if(res == m_guilds.end()) {
+		return "Invalid Guild";
+	}
 
+	return res->second->name;
+}
 
+std::string BaseGuildManager::GetGuildRankName(uint32 guild_id, uint8 rank) const
+{
+	if(rank > GUILD_MAX_RANK) {
+		return "Invalid Rank";
+	}
+
+	std::map<uint32, GuildInfo *>::const_iterator res;
+	res = m_guilds.find(guild_id);
+	if(res == m_guilds.end()) {
+		return "Invalid Guild Rank";
+	}
+
+	return res->second->ranks[rank].name;
+}
+
+uint32 BaseGuildManager::GetGuildIDByCharacterID(uint32 character_id)
+{
+    if(!m_db) {
+		return GUILD_NONE;
+	}
+
+    std::string query = fmt::format(
+		"SELECT `guild_id` FROM `guild_members` WHERE char_id = {} LIMIT 1",
+		character_id
+	);
+    auto results = m_db->QueryDatabase(query);
+	if(!results.Success() || !results.RowCount()) {
+		return GUILD_NONE;
+	}
+
+	auto row = results.begin();
+	auto guild_id = std::stoul(row[0]);
+	return guild_id;
+}
+
+bool BaseGuildManager::IsCharacterInGuild(uint32 character_id, uint32 guild_id)
+{
+	auto current_guild_id = GetGuildIDByCharacterID(character_id);
+
+	if (current_guild_id == GUILD_NONE) {
+		return false;
+	}
+	
+	if (guild_id && current_guild_id != guild_id) {
+		return false;
+	}
+
+	return true;
+}
