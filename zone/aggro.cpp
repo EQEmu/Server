@@ -1438,8 +1438,17 @@ void Mob::ClearFeignMemory() {
 	auto RememberedCharID = feign_memory_list.begin();
 	while (RememberedCharID != feign_memory_list.end())
 	{
-		Shout("Mob::ClearFeignMemory TRy ID %i", RememberedCharID);
+		
 		Mob* remember_client = entity_list.GetMob(*RememberedCharID);
+		Shout("Mob::ClearFeignMemory TRy ID %i [%i]", RememberedCharID, remember_client->GetID());
+		if (remember_client) {
+			remember_client->Shout("ClearFeignMemory:: REMEMBER_CLIENT FOUND");
+		}
+		else {
+			Shout("ClearFeignMemory :: REMEMBER_CLIENT FAILED");
+		}
+
+
 		if (remember_client->IsClient() && remember_client != nullptr) { //Still in zone
 			Shout("Mob::ClearFeignMemory FIOUND ID %i REmove from X target", RememberedCharID);
 			remember_client->CastToClient()->RemoveXTarget(this, false);

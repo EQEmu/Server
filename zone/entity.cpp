@@ -3515,12 +3515,18 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			it->second->RemoveFromHateList(targ);
 			if (targ->IsClient()) {
 				if (it->second->GetLevel() >= 35 && zone->random.Roll(60)) {
-					it->second->AddFeignMemory(targ->CastToClient());
+					it->second->AddFeignMemory(targ);
 					targ->Shout("EntityList::ClearFeignAggro ADD TO FD ROLL FAIllED");
 				}
 				else {
 					targ->CastToClient()->RemoveXTarget(it->second, false);
 					targ->Shout("EntityList::ClearFeignAggro Remove me from Xtarget");
+				}
+			}
+			else if (targ->IsPet()){
+				if (it->second->GetLevel() >= 35 && zone->random.Roll(60)) {
+					it->second->AddFeignMemory(targ);
+					targ->Shout("EntityList::ClearFeignAggro PET ADD TO FD ROLL FAIllED");
 				}
 			}
 		}

@@ -10695,23 +10695,22 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			Shout("Get Chance %i", pet_fd_chance);
 			pet_fd_chance = 100;
 			if (zone->random.Int(0, 99) > pet_fd_chance) {
-				SetFeigned(false);
+				mypet->SetFeigned(false);
 				entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, mypet->GetCleanName());
 			}
 			else {
-				SetSpecialAbility(IMMUNE_AGGRO, 1);
+				mypet->SetSpecialAbility(IMMUNE_AGGRO, 1);
 				mypet->WipeHateList();
 				mypet->SetPetOrder(SPO_Sit);
 				mypet->SetRunAnimSpeed(0);
-				//mypet->CastToNPC()->SaveGuardSpot(mypet->GetPosition());
 				mypet->StopNavigation();
 				mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
-				SetFeigned(true);
+				mypet->SetFeigned(true);
 				mypet->SetTarget(nullptr);
 				if (!mypet->UseBardSpellLogic()) {
 					mypet->InterruptSpell();
 				}
-				SetSpecialAbility(IMMUNE_AGGRO, 0);
+				mypet->SetSpecialAbility(IMMUNE_AGGRO, 0);
 			}
 			mypet->Shout("Try FD comlpeted");
 		}
