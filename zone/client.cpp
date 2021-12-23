@@ -154,6 +154,7 @@ Client::Client(EQStreamInterface* ieqs)
   TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
   charm_update_timer(6000),
   rest_timer(1),
+  pick_lock_timer(1000),
   charm_class_attacks_timer(3000),
   charm_cast_timer(3500),
   qglobal_purge_timer(30000),

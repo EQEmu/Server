@@ -288,8 +288,11 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 
 		/**
 		 * Key required
+		 * If using a lock_pick_item leave messaging to that code below
 		 */
-		sender->Message(Chat::LightBlue, "This is locked...");
+		if (lock_pick_item == nullptr && !IsDoorOpen()) {
+			sender->Message(Chat::LightBlue, "This is locked...");
+		}
 
 		/**
 		 * GM can always open locks
@@ -335,19 +338,30 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		 */
 		else if (lock_pick_item != nullptr) {
 			if (sender->GetSkill(EQ::skills::SkillPickLock)) {
+				Timer* pick_lock_timer = sender->GetPickLockTimer();
 				if (lock_pick_item->GetItem()->ItemType == EQ::item::ItemTypeLockPick) {
+					if (!pick_lock_timer->Check()) {
+						// Stop full scale mad spamming
+						safe_delete(outapp);
+						return;
+					}
+
 					float player_pick_lock_skill = sender->GetSkill(EQ::skills::SkillPickLock);
-					sender->CheckIncreaseSkill(EQ::skills::SkillPickLock, nullptr, 1);
 
 					LogSkills("Client has lockpicks: skill=[{}]", player_pick_lock_skill);
 
 					if (GetLockpick() <= player_pick_lock_skill) {
+
+						// Stop full scale spamming
+						pick_lock_timer->Start(1000, true);
+
 						if (!IsDoorOpen()) {
+							sender->CheckIncreaseSkill(EQ::skills::SkillPickLock, nullptr, 1);
 							move_door_packet->action = static_cast<uint8>(invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR);
+							sender->MessageString(Chat::LightBlue, DOORS_SUCCESSFUL_PICK);
 						} else {
 							move_door_packet->action = static_cast<uint8>(invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR);
 						}
-						sender->MessageString(Chat::LightBlue, DOORS_SUCCESSFUL_PICK);
 					} else {
 						sender->MessageString(Chat::LightBlue, DOORS_INSUFFICIENT_SKILL);
 						safe_delete(outapp);
