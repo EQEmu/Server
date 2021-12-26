@@ -7453,13 +7453,15 @@ void Client::ProcessXTargetAutoHaters()
 		if (XTargets[i].Type != Auto)
 			continue;
 
+		auto *mob = entity_list.GetMob(XTargets[i].ID);
+
 		if (XTargets[i].ID != 0 && !GetXTargetAutoMgr()->contains_mob(XTargets[i].ID)) {
 			XTargets[i].ID = 0;
 			XTargets[i].Name[0] = 0;
 			XTargets[i].dirty = true;
 		}
 
-		if (XTargets[i].ID != 0 && entity_list.GetMob(XTargets[i].ID) && !entity_list.GetMob(XTargets[i].ID)->IsValidXTarget()) {
+		if (XTargets[i].ID != 0 && mob && !mob->IsValidXTarget()) {
 			XTargets[i].ID = 0;
 			XTargets[i].Name[0] = 0;
 			XTargets[i].dirty = true;

@@ -6610,5 +6610,5 @@ void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::stri
 }
 
 bool Mob::IsValidXTarget() const {
-	return (!GetID() == 0 || !IsCorpse());
+	return (GetID() > 0 || !IsCorpse());
 }

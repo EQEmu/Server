@@ -2573,7 +2573,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 		entity_list.RemoveFromAutoXTargets(this);
 
-		if (killer->GetUltimateOwner()->IsClient()) {
+		if (killer->GetUltimateOwner() && killer->GetUltimateOwner()->IsClient()) {
 			killer->GetUltimateOwner()->CastToClient()->ProcessXTargetAutoHaters();
 		}
 		uint16 emoteid = this->GetEmoteID();
