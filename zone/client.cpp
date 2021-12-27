@@ -145,7 +145,6 @@ Client::Client(EQStreamInterface* ieqs)
   global_channel_timer(1000),
   fishing_timer(8000),
   endupkeep_timer(1000),
-  forget_timer(0),
   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
   client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
   client_zone_wide_full_position_update_timer(5 * 60 * 1000),
@@ -186,7 +185,6 @@ Client::Client(EQStreamInterface* ieqs)
 	character_id = 0;
 	conn_state = NoPacketsReceived;
 	client_data_loaded = false;
-	feigned = false;
 	berserk = false;
 	dead = false;
 	eqs = ieqs;
@@ -2676,22 +2674,6 @@ void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing, uint32 re
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
-
-void Client::SetFeigned(bool in_feigned) {
-	if (in_feigned)
-	{
-		if(RuleB(Character, FeignKillsPet))
-		{
-			SetPet(0);
-		}
-		SetHorseId(0);
-		entity_list.ClearFeignAggro(this);
-		forget_timer.Start(FeignMemoryDuration);
-	} else {
-		forget_timer.Disable();
-	}
-	feigned=in_feigned;
- }
 
 void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQ::ItemData* item, bool buying)
 {

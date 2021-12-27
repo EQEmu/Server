@@ -835,9 +835,6 @@ public:
 	inline uint8 GetBecomeNPCLevel() const { return npclevel; }
 	inline void SetBecomeNPC(bool flag) { npcflag = flag; }
 	inline void SetBecomeNPCLevel(uint8 level) { npclevel = level; }
-	void SetFeigned(bool in_feigned);
-	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
-	inline bool GetFeigned() const { return(feigned); }
 	EQStreamInterface* Connection() { return eqs; }
 #ifdef PACKET_PROFILER
 	void DumpPacketProfile() { if(eqs) eqs->DumpPacketProfile(); }
@@ -1850,7 +1847,6 @@ private:
 	Timer global_channel_timer;
 	Timer fishing_timer;
 	Timer endupkeep_timer;
-	Timer forget_timer; // our 2 min everybody forgets you timer
 	Timer autosave_timer;
 	Timer client_scan_npc_aggro_timer;
 	Timer client_zone_wide_full_position_update_timer;
@@ -1890,7 +1886,6 @@ private:
 
 	bool npcflag;
 	uint8 npclevel;
-	bool feigned;
 	bool bZoning;
 	bool tgb;
 	bool instalog;

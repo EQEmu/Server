@@ -1515,10 +1515,10 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 			continue;
 
 		if (RemoveFromXTargets) {
-			if (m->IsClient() && (mob->CheckAggro(m) || mob->IsOnFeignMemory(m->CastToClient())))
+			if (m->IsClient() && (mob->CheckAggro(m) || mob->IsOnFeignMemory(m)))
 				m->CastToClient()->RemoveXTarget(mob, false);
 			// FadingMemories calls this function passing the client.
-			else if (mob->IsClient() && (m->CheckAggro(mob) || m->IsOnFeignMemory(mob->CastToClient())))
+			else if (mob->IsClient() && (m->CheckAggro(mob) || m->IsOnFeignMemory(mob)))
 				mob->CastToClient()->RemoveXTarget(m, false);
 		}
 
@@ -3488,7 +3488,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		// add Feign Memory check because sometimes weird stuff happens
-		if (it->second->CheckAggro(targ) || (targ->IsClient() && it->second->IsOnFeignMemory(targ->CastToClient()))) {
+		if (it->second->CheckAggro(targ) || (targ->IsClient() && it->second->IsOnFeignMemory(targ))) {
 			if (it->second->GetSpecialAbility(IMMUNE_FEIGN_DEATH)) {
 				++it;
 				continue;
@@ -3514,22 +3514,31 @@ void EntityList::ClearFeignAggro(Mob *targ)
 
 			it->second->RemoveFromHateList(targ);
 			if (targ->IsClient()) {
-				if (it->second->GetLevel() >= 35 && zone->random.Roll(60))
-					it->second->AddFeignMemory(targ->CastToClient());
-				else
+				if (it->second->GetLevel() >= 35 && zone->random.Roll(60)) {
+					it->second->AddFeignMemory(targ);
+				}
+				else {
 					targ->CastToClient()->RemoveXTarget(it->second, false);
+				}
+			}
+			else if (targ->IsPet()){
+				if (it->second->GetLevel() >= 35 && zone->random.Roll(60)) {
+					it->second->AddFeignMemory(targ);
+				}
 			}
 		}
 		++it;
 	}
 }
 
-void EntityList::ClearZoneFeignAggro(Client *targ)
+void EntityList::ClearZoneFeignAggro(Mob *targ)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		it->second->RemoveFromFeignMemory(targ);
-		targ->CastToClient()->RemoveXTarget(it->second, false);
+		if (targ && targ->IsClient()) {
+			targ->CastToClient()->RemoveXTarget(it->second, false);
+		}
 		++it;
 	}
 }

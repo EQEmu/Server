@@ -10255,6 +10255,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+				mypet->SetFeigned(false);
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10301,6 +10302,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+				mypet->SetFeigned(false);
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10376,6 +10378,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsNPC()) {
 
 				// Set Sit button to unpressed - send stand anim/end hpregen
+				mypet->SetFeigned(false);
 				SetPetCommandState(PET_BUTTON_SIT, 0);
 				mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 
@@ -10396,6 +10399,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_FOLLOWING);
 			mypet->SetPetOrder(SPO_Follow);
 
@@ -10443,6 +10447,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_GUARDME_STRING);
 			mypet->SetPetOrder(SPO_Follow);
 
@@ -10463,12 +10468,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (mypet->GetPetOrder() == SPO_Sit)
 			{
+				mypet->SetFeigned(false);
 				mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 				mypet->SetPetOrder(SPO_Follow);
 				mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 			}
 			else
 			{
+				mypet->SetFeigned(false);
 				mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 				mypet->SetPetOrder(SPO_Sit);
 				mypet->SetRunAnimSpeed(0);
@@ -10483,6 +10490,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 			SetPetCommandState(PET_BUTTON_SIT, 0);
 			mypet->SetPetOrder(SPO_Follow);
@@ -10494,6 +10502,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 			SetPetCommandState(PET_BUTTON_SIT, 1);
 			mypet->SetPetOrder(SPO_Sit);
@@ -10687,6 +10696,38 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 		break;
 	}
+
+	case PET_FEIGN: {
+		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
+			if (mypet->IsFeared())
+				break;
+
+			int pet_fd_chance = aabonuses.FeignedMinionChance;
+			if (zone->random.Int(0, 99) > pet_fd_chance) {
+				mypet->SetFeigned(false);
+				entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, mypet->GetCleanName());
+			}
+			else {
+				bool immune_aggro = GetSpecialAbility(IMMUNE_AGGRO);
+				mypet->SetSpecialAbility(IMMUNE_AGGRO, 1);
+				mypet->WipeHateList();
+				mypet->SetPetOrder(SPO_FeignDeath);
+				mypet->SetRunAnimSpeed(0);
+				mypet->StopNavigation();
+				mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
+				mypet->SetFeigned(true);
+				mypet->SetTarget(nullptr);
+				if (!mypet->UseBardSpellLogic()) {
+					mypet->InterruptSpell();
+				}
+
+				if (!immune_aggro) {
+					mypet->SetSpecialAbility(IMMUNE_AGGRO, 0);
+				}
+			}
+		}
+		break;
+	}
 	case PET_STOP: {
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
@@ -10694,7 +10735,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
 			} else {
-				mypet->SetPetStop(true);
 				mypet->StopNavigation();
 				mypet->SetTarget(nullptr);
 				if (mypet->IsPetRegroup()) {

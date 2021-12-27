@@ -1571,8 +1571,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_FeignedMinion:
-			if (newbon->FeignedMinionChance < base_value)
+			if (newbon->FeignedMinionChance < base_value) {
 				newbon->FeignedMinionChance = base_value;
+			}
+			newbon->PetCommands[PET_FEIGN] = true;
 			break;
 
 		case SE_AdditionalAura:

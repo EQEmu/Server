@@ -838,20 +838,21 @@ void Client::AI_Process()
 	else
 	{
 		if(AI_feign_remember_timer->Check()) {
-			std::set<uint32>::iterator RememberedCharID;
-			RememberedCharID = feign_memory_list.begin();
-			while (RememberedCharID != feign_memory_list.end()) {
-				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if (remember_client == nullptr) {
+			std::set<uint32>::iterator remembered_feigned_mobid;
+			remembered_feigned_mobid = feign_memory_list.begin();
+			while (remembered_feigned_mobid != feign_memory_list.end()) {
+				
+				Mob* remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
+				if (remembered_mob == nullptr || remembered_mob->IsCorpse()) {
 					//they are gone now...
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
-				} else if (!remember_client->GetFeigned()) {
-					AddToHateList(remember_client->CastToMob(),1);
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
+				} else if (!remembered_mob->GetFeigned()) {
+					AddToHateList(remembered_mob,1);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 					break;
 				} else {
 					//they are still feigned, carry on...
-					++RememberedCharID;
+					++remembered_feigned_mobid;
 				}
 			}
 		}
@@ -1373,22 +1374,22 @@ void Mob::AI_Process() {
 			// 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
-			std::set<uint32>::iterator RememberedCharID;
-			RememberedCharID = feign_memory_list.begin();
-			while (RememberedCharID != feign_memory_list.end()) {
-				Client *remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if (remember_client == nullptr) {
+			std::set<uint32>::iterator remembered_feigned_mobid;
+			remembered_feigned_mobid = feign_memory_list.begin();
+			while (remembered_feigned_mobid != feign_memory_list.end()) {
+				Mob *remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
+				if (remembered_mob == nullptr || remembered_mob->IsCorpse()) {
 					//they are gone now...
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 				}
-				else if (!remember_client->GetFeigned()) {
-					AddToHateList(remember_client->CastToMob(), 1);
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+				else if (!remembered_mob->GetFeigned()) {
+					AddToHateList(remembered_mob, 1);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 					break;
 				}
 				else {
 					//they are still feigned, carry on...
-					++RememberedCharID;
+					++remembered_feigned_mobid;
 				}
 			}
 		}
@@ -1485,6 +1486,10 @@ void Mob::AI_Process() {
 						}
 						break;
 					}
+					case SPO_FeignDeath: {
+						SetAppearance(eaDead, false);
+						break;
+					}
 				}
 				if (IsPetRegroup()) {
 					return;
@@ -1555,6 +1560,11 @@ void Mob::AI_Process() {
 				}
 			}
 		}
+	}
+
+	if (forget_timer.Check()) {
+		forget_timer.Disable();
+		entity_list.ClearZoneFeignAggro(this);
 	}
 
 	//Do Ranged attack here

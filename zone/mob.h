@@ -71,7 +71,7 @@ class Mob : public Entity {
 public:
 	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD,
 						CLIENT_KICKED, DISCONNECTED, CLIENT_ERROR, CLIENT_CONNECTINGALL };
-	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard };
+	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard, SPO_FeignDeath };
 
 	struct SpecialAbility {
 		SpecialAbility() {
@@ -670,10 +670,10 @@ public:
 	bool HateSummon();
 	void FaceTarget(Mob* mob_to_face = 0);
 	void WipeHateList();
-	void AddFeignMemory(Client* attacker);
-	void RemoveFromFeignMemory(Client* attacker);
+	void AddFeignMemory(Mob* attacker);
+	void RemoveFromFeignMemory(Mob* attacker);
 	void ClearFeignMemory();
-	bool IsOnFeignMemory(Client *attacker) const;
+	bool IsOnFeignMemory(Mob *attacker) const;
 	void PrintHateListToClient(Client *who) { hate_list.PrintHateListToClient(who); }
 	std::list<struct_HateList*>& GetHateList() { return hate_list.GetHateList(); }
 	std::list<struct_HateList*> GetHateListByDistance(int distance = 0) { return hate_list.GetHateListByDistance(distance); }
@@ -1296,6 +1296,10 @@ public:
 	bool CanOpenDoors() const;
 	void SetCanOpenDoors(bool can_open);
 
+	void SetFeigned(bool in_feigned);
+	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
+	inline bool GetFeigned() const { return(feigned); }
+
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
@@ -1720,6 +1724,9 @@ protected:
 	AuraMgr aura_mgr;
 	AuraMgr trap_mgr;
 
+	bool feigned;
+	Timer forget_timer; // our 2 min everybody forgets you timer
+
 	bool m_can_open_doors;
 
 	MobMovementManager *mMovementManager;
@@ -1727,7 +1734,7 @@ protected:
 private:
 	void _StopSong(); //this is not what you think it is
 	Mob* target;
-
+	
 
 #ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
