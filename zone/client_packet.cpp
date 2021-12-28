@@ -5894,8 +5894,10 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 
 void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 {
-	if (GetClass() != MONK)
+	if (!HasSkill(EQ::skills::SkillFeignDeath)) {
 		return;
+	}
+	
 	if (!p_timers.Expired(&database, pTimerFeignDeath, false)) {
 		Message(Chat::Red, "Ability recovery time not yet met.");
 		return;
