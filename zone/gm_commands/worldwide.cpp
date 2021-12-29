@@ -62,7 +62,7 @@ void command_worldwide(Client *c, const Seperator *sep)
 	}
 	else if (sub_command == "message") {
 		if (sep->arg[2]) {
-			std::string message = sep->arg[2];
+			std::string message = sep->argplus[2];
 			quest_manager.WorldWideMessage(
 				Chat::White,
 				fmt::format(

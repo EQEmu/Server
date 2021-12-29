@@ -10,6 +10,10 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 	int killed_count = 0;
 	for (auto& npc_entity : entity_list.GetNPCList()) {
 		auto entity_id = npc_entity.first;
+		if (!entity_id) {
+			continue;
+		}
+
 		auto npc = npc_entity.second;
 		if (!npc) {
 			continue;
