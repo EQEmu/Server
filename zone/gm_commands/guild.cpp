@@ -225,10 +225,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 		guild_mgr.ListGuilds(c);
 	} else if (is_rename) {
-		if (
-			arguments != 3 ||
-			!sep->IsNumber(2)
-		) {
+		if (!sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #guild rename [Guild ID] [New Guild Name]");
 		} else {
 			auto guild_id = std::stoul(sep->arg[2]);
