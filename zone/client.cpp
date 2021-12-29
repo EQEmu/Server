@@ -861,7 +861,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				{
 					if(AttemptedMessages > RuleI(Chat, MaxMessagesBeforeKick))
 					{
-						Kick("Sent too many chat messages at once.");
+						KickLinkDead("Sent too many chat messages at once.");
 						return;
 					}
 					if(GlobalChatLimiterTimer)
@@ -2627,6 +2627,19 @@ void Client::Kick(const std::string &reason) {
 	client_state = CLIENT_KICKED;
 
 	LogClientLogin("Client [{}] kicked, reason [{}]", GetCleanName(), reason.c_str());
+}
+
+// KickLinkDead is similar to Kick
+// the difference is that Kick immediately makes a player exit the zone and boots them to character select.
+// While kick linkdead puts them to character select and makes them in a linkdead state
+void Client::KickLinkDead(const std::string& reason) {
+	LogClientLogin("Client [{}] forced linkdead, reason [{}]", GetCleanName(), reason.c_str());
+	LinkDead();
+	auto outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
+	GMKick_Struct* gmk = (GMKick_Struct*)outapp->pBuffer;
+	strcpy(gmk->name, GetName());
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::WorldKick() {

@@ -1239,7 +1239,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		LogClientLogin("[{}] failed zone auth check", cze->char_name);
 		if (nullptr != client) {
 			client->Save();
-			client->Kick("Failed auth check");
+			client->KickLinkDead("Failed auth check");
 		}
 		return;
 	}
@@ -10148,7 +10148,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 				itm_to ? itm_to->GetID() : 0,
 				casting_spell_id);
 			database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
-			Kick("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
+			KickLinkDead("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
 			return;
 		}
 	}
@@ -10192,7 +10192,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
-	Kick("Unimplemented move multiple items"); // TODO: lets not desync though
+	KickLinkDead("Unimplemented move multiple items");
 }
 
 void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
