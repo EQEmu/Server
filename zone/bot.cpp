@@ -27,6 +27,7 @@
 #include "../common/say_link.h"
 
 extern volatile bool is_zone_loaded;
+extern bool Critical;
 
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
@@ -6983,7 +6984,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	if (spells[spell_id].targettype == ST_Self)
 		return value;
 
-	bool Critical = false;
+	Critical = false;
 	int32 value_BaseEffect = 0;
 	value_BaseEffect = (value + (value*GetBotFocusEffect(focusFcBaseEffects, spell_id) / 100));
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
@@ -7028,8 +7029,9 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 				value += (GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value) * ratio / 100);
-
-			entity_list.MessageClose(this, false, 100, Chat::SpellCrit, "%s delivers a critical blast! (%d)", GetName(), -value);
+			//Mitch
+			//if (!RuleB(Bots, DisplaySpellDamage))
+			entity_list.MessageClose(this, false, 100, Chat::SpellCrit, "%s\'s %s delivers a critical blast to %s! (%d)", GetName(), spells[spell_id].name, target->GetCleanName(), -value);
 
 			return value;
 		}
@@ -7060,7 +7062,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int32 value_BaseEffect = 0;
 	int32 chance = 0;
 	int8 modifier = 1;
-	bool Critical = false;
+	Critical = false; //mitch
 	value_BaseEffect = (value + (value*GetBotFocusEffect(focusFcBaseEffects, spell_id) / 100));
 	value = value_BaseEffect;
 	value += int(value_BaseEffect*GetBotFocusEffect(focusImprovedHeal, spell_id) / 100);

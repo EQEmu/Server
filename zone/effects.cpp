@@ -31,6 +31,8 @@
 #include "zone_store.h"
 #include "position.h"
 
+extern bool Critical; //Mitch
+
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 {
 	float extrange = 100;
@@ -48,7 +50,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	if (IsNPC())
 		value += value*CastToNPC()->GetSpellFocusDMG()/100;
 
-	bool Critical = false;
+	Critical = false; //Mitch removed bool
 	int32 value_BaseEffect = 0;
 	int chance = 0;
 
@@ -268,7 +270,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int32 value_BaseEffect = 0;
 	int16 chance = 0;
 	int8 modifier = 1;
-	bool Critical = false;
+	Critical = false; //mitch
 
 	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
 
