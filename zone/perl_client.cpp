@@ -1753,7 +1753,7 @@ XS(XS_Client_GetDuelTarget) {
 		Perl_croak(aTHX_ "Usage: Client::GetDuelTarget(THIS)"); // @categories Account and Character, Script Utility
 	{
 		Client *THIS;
-		uint16 RETVAL;
+		uint32 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetDuelTarget();
@@ -1786,7 +1786,7 @@ XS(XS_Client_SetDuelTarget) {
 		Perl_croak(aTHX_ "Usage: Client::SetDuelTarget(THIS, set_id)"); // @categories Account and Character
 	{
 		Client *THIS;
-		uint16 set_id = (uint16) SvUV(ST(1));
+		uint32 set_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetDuelTarget(set_id);
 	}
