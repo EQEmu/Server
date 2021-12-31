@@ -5613,7 +5613,7 @@ XS(XS_Client_SendToInstance);
 XS(XS_Client_SendToInstance) {
 	dXSARGS;
 	if (items != 10)
-		Perl_croak(aTHX_ "Usage: Client::SendToInstance(THIS, std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration)");
+		Perl_croak(aTHX_ "Usage: Client::SendToInstance(THIS, string instance_type, string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, string instance_identifier, uint32 duration)");
 	{
 		Client* THIS;
 		std::string instance_type = (std::string) SvPV_nolen(ST(1));
