@@ -810,6 +810,11 @@ public:
 	uint16 ScribeSpells(uint8 min_level, uint8 max_level);
 	uint16 LearnDisciplines(uint8 min_level, uint8 max_level);
 
+	// Configurable Tracking Skill
+	uint16 GetClassTrackingDistanceMultiplier(uint16 class_);
+
+	bool CanThisClassTrack();
+
 	// defer save used when bulk saving
 	void UnscribeSpell(int slot, bool update_client = true, bool defer_save = false);
 	void UnscribeSpellAll(bool update_client = true);
@@ -830,9 +835,6 @@ public:
 	inline uint8 GetBecomeNPCLevel() const { return npclevel; }
 	inline void SetBecomeNPC(bool flag) { npcflag = flag; }
 	inline void SetBecomeNPCLevel(uint8 level) { npclevel = level; }
-	void SetFeigned(bool in_feigned);
-	/// this cures timing issues cuz dead animation isn't done but server side feigning is?
-	inline bool GetFeigned() const { return(feigned); }
 	EQStreamInterface* Connection() { return eqs; }
 #ifdef PACKET_PROFILER
 	void DumpPacketProfile() { if(eqs) eqs->DumpPacketProfile(); }
@@ -1528,6 +1530,7 @@ public:
 	void UpdateMercLevel();
 	void CheckMercSuspendTimer();
 	Timer* GetMercTimer() { return &merc_timer; };
+	Timer* GetPickLockTimer() { return &pick_lock_timer; };
 
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
@@ -1640,7 +1643,7 @@ protected:
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;
 
-	int32 GetFocusEffect(focusType type, uint16 spell_id);
+	int32 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr);
 	uint16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 
 	void FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost);
@@ -1844,7 +1847,6 @@ private:
 	Timer global_channel_timer;
 	Timer fishing_timer;
 	Timer endupkeep_timer;
-	Timer forget_timer; // our 2 min everybody forgets you timer
 	Timer autosave_timer;
 	Timer client_scan_npc_aggro_timer;
 	Timer client_zone_wide_full_position_update_timer;
@@ -1869,7 +1871,10 @@ private:
 	Timer consent_throttle_timer;
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
+	Timer pick_lock_timer;
 
+	Timer heroforge_wearchange_timer;
+	
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
 
@@ -1881,7 +1886,6 @@ private:
 
 	bool npcflag;
 	uint8 npclevel;
-	bool feigned;
 	bool bZoning;
 	bool tgb;
 	bool instalog;

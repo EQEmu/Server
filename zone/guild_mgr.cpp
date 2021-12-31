@@ -190,53 +190,123 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 }
 
 void ZoneGuildManager::ListGuilds(Client *c) const {
-	c->Message(Chat::White, "Listing guilds on the server:");
-	char leadername[64];
-	std::map<uint32, GuildInfo *>::const_iterator cur, end;
-	cur = m_guilds.begin();
-	end = m_guilds.end();
-	int r = 0;
-	for(; cur != end; ++cur) {
-		leadername[0] = '\0';
-		database.GetCharName(cur->second->leader_char_id, leadername);
-		if (leadername[0] == '\0')
-			c->Message(Chat::White, "  Guild #%i <%s>", cur->first, cur->second->name.c_str());
-		else
-			c->Message(Chat::White, "  Guild #%i <%s> Leader: %s", cur->first, cur->second->name.c_str(), leadername);
-		r++;
+	if (m_guilds.size()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Listing {} Guild{}.",
+				m_guilds.size(),
+				m_guilds.size() != 1 ? "s" : ""
+			).c_str()
+		);
+		
+		for (const auto& guild : m_guilds) {
+			auto leader_name = database.GetCharNameByID(guild.second->leader_char_id);
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Guild {} | {}Name: {}",
+					guild.first,
+					(
+						!leader_name.empty() ?
+						fmt::format(
+							"Leader: {} ({}) ",
+							leader_name,
+							guild.second->leader_char_id
+						) :
+						""
+					),
+					guild.second->name
+				).c_str()
+			);
+		}
+	} else {
+		c->Message(Chat::White, "There are no Guilds to list.");
 	}
-	c->Message(Chat::White, "%i guilds listed.", r);
 }
 
 
 void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
-	if(res == m_guilds.end()) {
-		c->Message(Chat::White, "Guild %d not found.", guild_id);
+	if (res == m_guilds.end()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Guild ID {} could not be found.",
+				guild_id
+			).c_str()
+		);
 		return;
 	}
 
 	const GuildInfo *info = res->second;
 
-	c->Message(Chat::White, "Guild info DB# %i <%s>", guild_id, info->name.c_str());
+	auto leader_name = database.GetCharNameByID(info->leader_char_id);	
+	std::string popup_text = "<table>";
+	popup_text += fmt::format(
+		"<tr><td>Name</td><td>{}</td><td>Guild ID</td><td>{}</td></tr>",
+		info->name,
+		guild_id
+	);
+	popup_text += fmt::format(
+		"<tr><td>Leader</td><td>{}</td><td>Character ID</td><td>{}</td></tr>",
+		leader_name,
+		info->leader_char_id
+	);
+	popup_text += "<br><br>";
+	popup_text += "<tr>";
+	popup_text += "<td>Rank</td>";
+	popup_text += "<td>Demote</td>";
+	popup_text += "<td>Hear Guild Chat</td>";
+	popup_text += "<td>Invite</td>";
+	popup_text += "<td>Promote</td>";
+	popup_text += "<td>Remove</td>";
+	popup_text += "<td>Set MOTD</td>";
+	popup_text += "<td>Speak Guild Chat</td>";
+	popup_text += "<td>War/Peace</td>";
+	popup_text += "</tr>";
 
-	char leadername[64];
-	database.GetCharName(info->leader_char_id, leadername);
-	c->Message(Chat::White, "Guild Leader: %s", leadername);
-
-	char permbuffer[256];
-	uint8 i;
-	for (i = 0; i <= GUILD_MAX_RANK; i++) {
-		char *permptr = permbuffer;
-		uint8 r;
-		for(r = 0; r < _MaxGuildAction; r++)
-			permptr += sprintf(permptr, "  %s: %c", GuildActionNames[r], info->ranks[i].permissions[r]?'Y':'N');
-
-		c->Message(Chat::White, "Rank %i: %s", i, info->ranks[i].name.c_str());
-		c->Message(Chat::White, "Permissions: %s", permbuffer);
+	for (uint8 guild_rank = 0; guild_rank <= GUILD_MAX_RANK; guild_rank++) {
+		auto can_hear_guild_chat = info->ranks[guild_rank].permissions[GUILD_HEAR] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_speak_guild_chat = info->ranks[guild_rank].permissions[GUILD_SPEAK] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_invite = info->ranks[guild_rank].permissions[GUILD_INVITE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_remove = info->ranks[guild_rank].permissions[GUILD_REMOVE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_promote = info->ranks[guild_rank].permissions[GUILD_PROMOTE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_demote = info->ranks[guild_rank].permissions[GUILD_DEMOTE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_set_motd = info->ranks[guild_rank].permissions[GUILD_MOTD] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		auto can_war_peace = info->ranks[guild_rank].permissions[GUILD_WARPEACE] ? "<c \"#00FF00\">✔</c>" : "<c \"#F62217\">❌</c>";
+		popup_text += fmt::format(
+			"<tr>"
+			"<td>{} ({})</td>"
+			"<td>{}</td>"
+			"<td>{}</td>"
+			"<td>{}</td>"
+			"<td>{}</td>"
+			"<td>{}</td>"
+			"<td>{}</td>"
+			"<td>{}</td>"
+			"<td>{}</td>"
+			"</tr>",
+			!info->ranks[guild_rank].name.empty() ? info->ranks[guild_rank].name : "Nameless",
+			guild_rank,
+			can_demote,
+			can_hear_guild_chat,
+			can_invite,
+			can_promote,
+			can_remove,
+			can_set_motd,
+			can_speak_guild_chat,
+			can_war_peace
+		);
 	}
 
+	popup_text += "</table>";
+
+	c->SendPopupToClient(
+		"Guild Information",
+		popup_text.c_str()
+	);
 }
 
 //in theory, we could get a pile of unused entries in this array, but only if

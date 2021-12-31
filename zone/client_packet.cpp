@@ -721,17 +721,17 @@ void Client::CompleteConnect()
 			case SE_AddMeleeProc:
 			case SE_WeaponProc:
 			{
-				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetProcLimitTimer(buffs[j1].spellid, SE_WeaponProc));
+				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetProcLimitTimer(buffs[j1].spellid, ProcType::MELEE_PROC));
 				break;
 			}
 			case SE_DefensiveProc:
 			{
-				AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, SE_DefensiveProc));
+				AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, ProcType::DEFENSIVE_PROC));
 				break;
 			}
 			case SE_RangedProc:
 			{
-				AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, SE_RangedProc));
+				AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, ProcType::RANGED_PROC));
 				break;
 			}
 			}
@@ -747,28 +747,11 @@ void Client::CompleteConnect()
 
 	entity_list.SendAppearanceEffects(this);
 
-	int x;
-	for (x = EQ::textures::textureBegin; x <= EQ::textures::LastTexture; x++) {
-		SendWearChange(x);
-	}
-	// added due to wear change above
-	UpdateActiveLight();
-	SendAppearancePacket(AT_Light, GetActiveLightType());
-
-	Mob *pet = GetPet();
-	if (pet != nullptr) {
-		for (x = EQ::textures::textureBegin; x <= EQ::textures::LastTexture; x++) {
-			pet->SendWearChange(x);
-		}
-		// added due to wear change above
-		pet->UpdateActiveLight();
-		pet->SendAppearancePacket(AT_Light, pet->GetActiveLightType());
-	}
-
 	entity_list.SendTraders(this);
 
-	if (GetPet()) {
-		GetPet()->SendPetBuffsToClient();
+	Mob *pet = GetPet();
+	if (pet) {
+		pet->SendPetBuffsToClient();
 	}
 
 	if (GetGroup())
@@ -918,6 +901,8 @@ void Client::CompleteConnect()
 		worldserver.SendPacket(p);
 		safe_delete(p);
 	}
+
+	heroforge_wearchange_timer.Start(250);
 }
 
 // connecting opcode handlers
@@ -3918,6 +3903,10 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 	else if (brrs->EntityID == GetPetID()) {
 		m = GetPet();
 	}
+	else if (GetGM())
+	{
+		m = entity_list.GetMobID(brrs->EntityID);
+	}
 #ifdef BOTS
 	else {
 		Mob* bot_test = entity_list.GetMob(brrs->EntityID);
@@ -3934,7 +3923,7 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 	uint16 SpellID = m->GetSpellIDFromSlot(brrs->SlotID);
 
-	if (SpellID && (IsBeneficialSpell(SpellID) || IsEffectInSpell(SpellID, SE_BindSight)) && !spells[SpellID].no_remove) {
+	if (SpellID && (GetGM() || ((IsBeneficialSpell(SpellID) || IsEffectInSpell(SpellID, SE_BindSight)) && !spells[SpellID].no_remove))) {
 		m->BuffFadeBySlot(brrs->SlotID, true);
 	}
 }
@@ -4076,7 +4065,12 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			return;
 		}
 
-		CastSpell(spell_to_cast, castspell->target_id, slot);
+		if (IsValidSpell(spell_to_cast)) {
+			CastSpell(spell_to_cast, castspell->target_id, slot);
+		}
+		else {
+			InterruptSpell();
+		}
 	}
 	/* Spell Slot or Potion Belt Slot */
 	else if (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)	// ITEM or POTION cast
@@ -5464,8 +5458,11 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 			}
 			else
 			{
+				int fail_rate = 25;
+				int trap_circumvention = spellbonuses.TrapCircumvention + itembonuses.TrapCircumvention + aabonuses.TrapCircumvention;
+				fail_rate -= fail_rate * trap_circumvention / 100;
 				MessageString(Chat::Skills, FAIL_DISARM_DETECTED_TRAP);
-				if (zone->random.Int(0, 99) < 25) {
+				if (zone->random.Int(0, 99) < fail_rate) {
 					trap->Trigger(this);
 				}
 			}
@@ -5901,8 +5898,10 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 
 void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 {
-	if (GetClass() != MONK)
+	if (!HasSkill(EQ::skills::SkillFeignDeath)) {
 		return;
+	}
+	
 	if (!p_timers.Expired(&database, pTimerFeignDeath, false)) {
 		Message(Chat::Red, "Ability recovery time not yet met.");
 		return;
@@ -10262,6 +10261,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+				mypet->SetFeigned(false);
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10308,6 +10308,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+				mypet->SetFeigned(false);
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10383,6 +10384,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsNPC()) {
 
 				// Set Sit button to unpressed - send stand anim/end hpregen
+				mypet->SetFeigned(false);
 				SetPetCommandState(PET_BUTTON_SIT, 0);
 				mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 
@@ -10403,6 +10405,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_FOLLOWING);
 			mypet->SetPetOrder(SPO_Follow);
 
@@ -10450,6 +10453,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_GUARDME_STRING);
 			mypet->SetPetOrder(SPO_Follow);
 
@@ -10470,12 +10474,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (mypet->GetPetOrder() == SPO_Sit)
 			{
+				mypet->SetFeigned(false);
 				mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 				mypet->SetPetOrder(SPO_Follow);
 				mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 			}
 			else
 			{
+				mypet->SetFeigned(false);
 				mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 				mypet->SetPetOrder(SPO_Sit);
 				mypet->SetRunAnimSpeed(0);
@@ -10490,6 +10496,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 			SetPetCommandState(PET_BUTTON_SIT, 0);
 			mypet->SetPetOrder(SPO_Follow);
@@ -10501,6 +10508,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 			SetPetCommandState(PET_BUTTON_SIT, 1);
 			mypet->SetPetOrder(SPO_Sit);
@@ -10694,6 +10702,38 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 		break;
 	}
+
+	case PET_FEIGN: {
+		if (aabonuses.PetCommands[PetCommand] && mypet->IsNPC()) {
+			if (mypet->IsFeared())
+				break;
+
+			int pet_fd_chance = aabonuses.FeignedMinionChance;
+			if (zone->random.Int(0, 99) > pet_fd_chance) {
+				mypet->SetFeigned(false);
+				entity_list.MessageCloseString(this, false, 200, 10, STRING_FEIGNFAILED, mypet->GetCleanName());
+			}
+			else {
+				bool immune_aggro = GetSpecialAbility(IMMUNE_AGGRO);
+				mypet->SetSpecialAbility(IMMUNE_AGGRO, 1);
+				mypet->WipeHateList();
+				mypet->SetPetOrder(SPO_FeignDeath);
+				mypet->SetRunAnimSpeed(0);
+				mypet->StopNavigation();
+				mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
+				mypet->SetFeigned(true);
+				mypet->SetTarget(nullptr);
+				if (!mypet->UseBardSpellLogic()) {
+					mypet->InterruptSpell();
+				}
+
+				if (!immune_aggro) {
+					mypet->SetSpecialAbility(IMMUNE_AGGRO, 0);
+				}
+			}
+		}
+		break;
+	}
 	case PET_STOP: {
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
@@ -10701,7 +10741,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
 			} else {
-				mypet->SetPetStop(true);
 				mypet->StopNavigation();
 				mypet->SetTarget(nullptr);
 				if (mypet->IsPetRegroup()) {
@@ -14071,8 +14110,9 @@ void Client::Handle_OP_TGB(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Track(const EQApplicationPacket *app)
 {
-	if (GetClass() != RANGER && GetClass() != DRUID && GetClass() != BARD)
+	if (!CanThisClassTrack()) {
 		return;
+	}
 
 	if (GetSkill(EQ::skills::SkillTracking) == 0)
 		SetSkill(EQ::skills::SkillTracking, 1);
@@ -14087,10 +14127,9 @@ void Client::Handle_OP_Track(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TrackTarget(const EQApplicationPacket *app)
 {
-	int PlayerClass = GetClass();
-
-	if ((PlayerClass != RANGER) && (PlayerClass != DRUID) && (PlayerClass != BARD))
+	if (!CanThisClassTrack()) {
 		return;
+	}
 
 	if (app->size != sizeof(TrackTarget_Struct))
 	{

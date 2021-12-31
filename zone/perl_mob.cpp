@@ -6203,7 +6203,7 @@ XS(XS_Mob_DeleteBucket);
 XS(XS_Mob_DeleteBucket) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::DeleteBucket(THIS, std::string bucket_name)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::DeleteBucket(THIS, string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		std::string bucket_name = (std::string) SvPV_nolen(ST(1));
@@ -6217,7 +6217,7 @@ XS(XS_Mob_GetBucket);
 XS(XS_Mob_GetBucket) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBucket(THIS, std::string bucket_name)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::GetBucket(THIS, string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		dXSTARG;
@@ -6236,7 +6236,7 @@ XS(XS_Mob_GetBucketExpires);
 XS(XS_Mob_GetBucketExpires) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBucketExpires(THIS, std::string bucket_name)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketExpires(THIS, string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		dXSTARG;
@@ -6273,7 +6273,7 @@ XS(XS_Mob_GetBucketRemaining);
 XS(XS_Mob_GetBucketRemaining) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBucketRemaining(THIS, std::string bucket_name)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketRemaining(THIS, string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		dXSTARG;
@@ -6292,7 +6292,7 @@ XS(XS_Mob_SetBucket);
 XS(XS_Mob_SetBucket) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetBucket(THIS, std::string bucket_name, std::string bucket_value, [std::string expiration])"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::SetBucket(THIS, string bucket_name, string bucket_value, [string expiration])"); // @categories Script Utility
 	{
 		Mob* THIS;
 		std::string key = (std::string) SvPV_nolen(ST(1));

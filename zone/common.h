@@ -496,7 +496,7 @@ struct StatBonuses {
 	int32	CharmBreakChance;					// chance to break charm
 	int32	SongRange;							// increases range of beneficial bard songs
 	uint32	HPToManaConvert;					// Uses HP to cast spells at specific conversion
-	uint8	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
+	int32	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
 	int16	FocusEffectsWorn[HIGHEST_FOCUS+1];	// Optional to allow focus effects to be applied additively from worn slot
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
 	int32	SkillDamageAmount2[EQ::skills::HIGHEST_SKILL + 2];	// Adds skill specific damage
@@ -533,7 +533,7 @@ struct StatBonuses {
 	int32	Metabolism;							// Food/drink consumption rates.
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
 	int32   FactionModPct;						// Modifies amount of faction gained.
-	bool	LimitToSkill[EQ::skills::HIGHEST_SKILL + 2];		// Determines if we need to search for a skill proc.
+	bool	LimitToSkill[EQ::skills::HIGHEST_SKILL + 3];		// Determines if we need to search for a skill proc.
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 	int32   SpellProc[MAX_AA_PROCS];		// Max number of spells containing melee spell procs.
@@ -561,6 +561,7 @@ struct StatBonuses {
 	bool	CompleteHealBuffBlocker;			// Use in SPA 101 to prevent recast of complete heal from this effect till blocker buff is removed.
 
 	// AAs
+	int32	TrapCircumvention;					// reduce chance to trigger a trap.
 	uint16  SecondaryForte;						// allow a second skill to be specialized with a cap of this value.
 	int32	ShieldDuration;						// extends duration of /shield ability
 	int32	ExtendedShielding;					// extends range of /shield ability
@@ -571,6 +572,7 @@ struct StatBonuses {
 	uint8	IncreaseRunSpeedCap;				// Increase max run speed above cap.
 	int32	DoubleSpecialAttack;				// Chance to to perform a double special attack (ie flying kick 2x)
 	int32	SkillAttackProc[3];					// [0] chance to proc [2] spell on [1] skill usage
+	bool	HasSkillAttackProc[EQ::skills::HIGHEST_SKILL + 1]; //check if any skill proc is present before assessing for all skill procs
 	uint8	FrontalStunResist;					// Chance to resist a frontal stun
 	int32	BindWound;							// Increase amount of HP by percent.
 	int32	MaxBindWound;						// Increase max amount of HP you can bind wound.
@@ -605,7 +607,7 @@ struct StatBonuses {
 	int32	OffhandRiposteFail;					// chance for opponent to fail riposte with offhand attack.
 	int32	ItemATKCap;							// Raise item attack cap
 	int32	FinishingBlow[2];					// Chance to do a finishing blow for specified damage amount.
-	uint32	FinishingBlowLvl[2];				// Sets max level an NPC can be affected by FB. (base1 = lv, base2= ???)
+	uint32	FinishingBlowLvl[2];				// Sets max level an NPC can be affected by FB. (base1 = lv, base2= hit point ratio)
 	int32	ShieldEquipDmgMod;					// Increases weapon's base damage by base1 % when shield is equipped (indirectly increasing hate)
 	bool	TriggerOnCastRequirement;			// Triggers off various different conditions defined as emum SpellRestrictions
 	int8	StunBashChance;						// chance to stun with bash.
@@ -617,7 +619,7 @@ struct StatBonuses {
 	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
 	uint8	AssassinateLevel[2];				// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
-	bool	IllusionPersistence;				// Causes illusions not to fade.
+	int		IllusionPersistence;				// 1=Causes illusions not to fade when zoning 2=Allow to persist after death.
 	uint16	extra_xtargets;						// extra xtarget entries
 	bool	ShroudofStealth;					// rogue improved invisiblity
 	uint16  ReduceFallDamage;					// reduce fall damage by percent
@@ -670,9 +672,9 @@ namespace SBIndex {
 	constexpr uint16 POSITION_FRONT							= 1; // SPA 503-506
 	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
 	constexpr uint16 PET_RAMPAGE_DMG_MOD                    = 1; // SPA 465,465
-	constexpr uint16 SKILLPROC_CHANCE                       = 0; // SPA 427
-	constexpr uint16 SKILLPROC_SKILL                        = 1; // SPA 427
-	constexpr uint16 SKILLPROC_SPELL_ID                     = 2; // SPA 427
+	constexpr uint16 SKILLATK_PROC_SPELL_ID                 = 0; // SPA 288
+	constexpr uint16 SKILLATK_PROC_CHANCE                   = 1; // SPA 288
+	constexpr uint16 SKILLATK_PROC_SKILL                    = 2; // SPA 288
 	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 0; // SPA 219
 	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 1; // SPA 219
 	constexpr uint16 DOUBLE_RIPOSTE_CHANCE                  = 0; // SPA 223
@@ -681,20 +683,25 @@ namespace SBIndex {
 	constexpr uint16 FINISHING_EFFECT_PROC_CHANCE           = 0; // SPA 278, 439, 217
 	constexpr uint16 FINISHING_EFFECT_DMG                   = 1; // SPA 278, 439, 217
 	constexpr uint16 FINISHING_EFFECT_LEVEL_MAX             = 0; // SPA 440, 345, 346
-	constexpr uint16 FINISHING_EFFECT_LEVEL_CHANCE_BONUS    = 1; // SPA 440, 345, 346
+	constexpr uint16 FINISHING_EFFECT_LEVEL_CHANCE_BONUS    = 1; // SPA 345, 346
+	constexpr uint16 FINISHING_BLOW_LEVEL_HP_RATIO			= 1; // SPA 440
 	constexpr uint16 DOUBLE_MELEE_ROUND_CHANCE              = 0; // SPA 471
 	constexpr uint16 DOUBLE_MELEE_ROUND_DMG_BONUS			= 1; // SPA 471
 	constexpr uint16 REFLECT_CHANCE                         = 0; // SPA 158
 	constexpr uint16 REFLECT_RESISTANCE_MOD                 = 1; // SPA 158
 	constexpr uint16 REFLECT_DMG_EFFECTIVENESS              = 2; // SPA 158
+	constexpr uint16 COMBAT_PROC_ORIGIN_ID                  = 0; // SPA 
+	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA 
+	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA 
+	constexpr uint16 COMBAT_PROC_REUSE_TIMER                = 3; // SPA 
 };
 
 
 typedef struct
 {
-	uint16 spellID;
+	int32 spellID;
 	uint16 chance;
-	uint16 base_spellID;
+	int32 base_spellID;
 	int level_override;
 	uint32 proc_reuse_time;
 } tProc;

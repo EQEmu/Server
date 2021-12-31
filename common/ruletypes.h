@@ -176,6 +176,22 @@ RULE_BOOL(Character, EnableRangerAutoFire, true, "Enable Ranger /autofire by def
 RULE_BOOL(Character, EnableTGB, true, "Enable /tgb (Target Group Buff) by default, to disable change to false for a classic experience.")
 RULE_INT(Character, SkillUpMaximumChancePercentage, 25, "Maximum chance to improve a combat skill, before skill-specific modifiers.  This should be greater than SkillUpMinimumChancePercentage.")
 RULE_INT(Character, SkillUpMinimumChancePercentage, 2, "Minimum chance to improve a combat skill, after skill-specific modifiers.  This should be lesser than SkillUpMaximumChancePercentage.")
+RULE_INT(Character, WarriorTrackingDistanceMultiplier, 0, "If you want warriors to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, ClericTrackingDistanceMultiplier, 0, "If you want clerics to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, PaladinTrackingDistanceMultiplier, 0, "If you want paladins to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, RangerTrackingDistanceMultiplier, 12, "If you want rangers to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, ShadowKnightTrackingDistanceMultiplier, 0, "If you want shadow knights to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, DruidTrackingDistanceMultiplier, 10, "If you want druids to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, MonkTrackingDistanceMultiplier, 0, "If you want monks to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, BardTrackingDistanceMultiplier, 7, "If you want bards to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, RogueTrackingDistanceMultiplier, 0, "If you want rogues to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, ShamanTrackingDistanceMultiplier, 0, "If you want shaman to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, NecromancerTrackingDistanceMultiplier, 0, "If you want necromancers to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, WizardTrackingDistanceMultiplier, 0, "If you want wizards to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, MagicianTrackingDistanceMultiplier, 0, "If you want magicians to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, EnchanterTrackingDistanceMultiplier, 0, "If you want enchanters to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, BeastlordTrackingDistanceMultiplier, 0, "If you want beastlords to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_INT(Character, BerserkerTrackingDistanceMultiplier, 0, "If you want berserkers to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -494,6 +510,7 @@ RULE_INT(Combat, SneakPullAssistRange, 400, "Modified range of assist for sneak 
 RULE_BOOL(Combat, Classic2HBAnimation, false, "2HB will use the 2 hand piercing animation instead of the overhead slashing animation")
 RULE_BOOL(Combat, ArcheryConsumesAmmo, true, "Set to false to disable Archery Ammo Consumption")
 RULE_BOOL(Combat, ThrowingConsumesAmmo, true, "Set to false to disable Throwing Ammo Consumption")
+RULE_BOOL(Combat, ImmuneToEnrageFromRiposteSpellEffect, true, "Set to false to disable SPA 173 SE_RiposteChance from making those with the effect on them immune to enrage")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -808,6 +825,10 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(Command)
 RULE_BOOL(Command, DyeCommandRequiresDyes, false, "Enable this to require a Prismatic Dye (32557) each time someone uses #dye.")
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Doors)
+RULE_BOOL(Doors, RequireKeyOnCursor, false, "Enable this to require pre-keyring keys to be on player cursor to open doors.")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

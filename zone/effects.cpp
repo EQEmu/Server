@@ -356,14 +356,18 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	if (spells[spell_id].buff_duration < 1) {
 
 		if (target) {
-			value += int(base_value * target->GetFocusEffect(focusFcHealPctIncoming, spell_id)/100); //SPA 393 Add before critical
-			value += int(base_value * target->GetFocusEffect(focusFcHealPctCritIncoming, spell_id)/100); //SPA 395 Add before critical (?)
+			value += int(base_value * target->GetFocusEffect(focusFcHealPctIncoming, spell_id, this)/100); //SPA 393 Add before critical
+			value += int(base_value * target->GetFocusEffect(focusFcHealPctCritIncoming, spell_id, this)/100); //SPA 395 Add before critical (?)
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
 
-		if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value); //Item Heal Amt Add before critical
+		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
+		if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);//Item Heal Amt Add before critical
+		}
+		else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);//Item Heal Amt Add before critical
 		}
 
 		if (target) {
@@ -379,7 +383,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += GetFocusEffect(focusFcAmplifyAmt, spell_id); //SPA 508 ? Add after critical
 
 		if (target) {
-			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id); //SPA 394 Add after critical
+			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id, this); //SPA 394 Add after critical
 		}
 
 		if (IsNPC() && CastToNPC()->GetHealScale()) {
@@ -1264,7 +1268,8 @@ void EntityList::AEAttack(
 	float distance,
 	int Hand,
 	int count,
-	bool is_from_spell)
+	bool is_from_spell,
+	int attack_rounds)
 {
 	Mob   *current_mob     = nullptr;
 	float distance_squared = distance * distance;
@@ -1276,15 +1281,18 @@ void EntityList::AEAttack(
 		if (current_mob->IsNPC()
 			&& current_mob != attacker //this is not needed unless NPCs can use this
 			&& (attacker->IsAttackAllowed(current_mob))
-			&& current_mob->GetRace() != 216 && current_mob->GetRace() != 472 /* dont attack horses */
+			&& !current_mob->IsHorse() /* dont attack mounts */
 			&& (DistanceSquared(current_mob->GetPosition(), attacker->GetPosition()) <= distance_squared)
 			) {
 
-			if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER) {
-				attacker->Attack(current_mob, Hand, false, false, is_from_spell);
-			}
-			else {
-				attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+			for (int i = 0; i < attack_rounds; i++) {
+
+				if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER) {
+					attacker->Attack(current_mob, Hand, false, false, is_from_spell);
+				}
+				else {
+					attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+				}
 			}
 
 			hit_count++;

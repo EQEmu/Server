@@ -26,6 +26,7 @@
 #define SPELLBOOK_UNKNOWN 0xFFFFFFFF		//player profile spells are 32 bit
 
 //some spell IDs which will prolly change, but are needed
+#define SPELL_LIFEBURN 2755
 #define SPELL_LEECH_TOUCH 2766
 #define SPELL_LAY_ON_HANDS 87
 #define SPELL_HARM_TOUCH 88
@@ -189,6 +190,7 @@
 #define MAX_FOCUS_PROC_LIMIT_TIMERS 20 //Number of focus recast timers that can be going at same time (This is arbitrary)
 #define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
 #define MAX_APPEARANCE_EFFECTS 20 //Up to 20 Appearance Effects can be saved to a mobs appearance effect array, these will be sent to other clients when they enter a zone (This is arbitrary)
+#define MAX_CAST_ON_SKILL_USE 36; //Actual amount is MAX/3
 
 
 const int Z_AGGRO=10;
@@ -532,6 +534,15 @@ enum ReflectSpellType
 	REFLECT_ALL_PLAYER_SPELLS         = 2,
 	RELFECT_ALL_SINGLE_TARGET_SPELLS  = 3,
 	REFLECT_ALL_SPELLS                = 4,
+};
+//For better organizing in proc effects, not used in spells.
+enum ProcType
+{
+	MELEE_PROC             = 1,
+	RANGED_PROC            = 2,
+	DEFENSIVE_PROC         = 3,
+	SKILL_PROC             = 4,
+	SKILL_PROC_SUCCESS     = 5,
 };
 
 enum SpellTypes : uint32
@@ -912,7 +923,7 @@ typedef enum {
 #define SE_IllusionOther				202	// implemented - Project Illusion
 #define SE_MassGroupBuff				203	// implemented
 #define SE_GroupFearImmunity			204	// implemented - (Does not use bonus)
-#define SE_Rampage						205	// implemented
+#define SE_Rampage						205	// implemented, @Combat Instant, Perform a primary slot combat rounds on all creatures within a 40 foot radius, base: number of attack rounds, limit: max entities hit per round, max: none, Note: AE range is 40 by default. Custom: Set field 'aoe_range' to override default. Adding additional attacks and hit count limit.
 #define SE_AETaunt						206	// implemented
 #define SE_FleshToBone					207	// implemented
 //#define SE_PurgePoison				208	// not used
@@ -952,7 +963,7 @@ typedef enum {
 #define SE_IncreaseChanceMemwipe		242	// implemented - @Memblur, increases the chance to wipe hate with memory blurr, base: chance pct, limit: none, max: none, Note: Mods final blur chance after other bonuses added.
 #define SE_CharmBreakChance				243	// implemented - Total Domination
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
-#define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
+#define SE_TrapCircumvention			245	// implemented, @Traps, decreases the chance that you will set off a trap when opening a chest or other similar container by percentage, base: chance modifer, limit: none, max: none
 #define SE_SetBreathLevel				246 // *not implemented as bonus
 #define SE_RaiseSkillCap				247	// implemented[AA] - adds skill over the skill cap.
 #define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
@@ -988,14 +999,14 @@ typedef enum {
 #define	SE_FinishingBlow				278 // implemented[AA] - chance to do massive damage under 10% HP (base1 = chance, base2 = damage)
 #define SE_Flurry						279	// implemented
 #define SE_PetFlurry					280 // implemented[AA]
-#define SE_FeignedMinion				281	// *not implemented[AA] ability allows you to instruct your pet to feign death via the '/pet feign' command. value = succeed chance
+#define SE_FeignedMinion				281	// implemented, ability allows you to instruct your pet to feign death via the '/pet feign' command, base: succeed chance, limit: none, max: none, Note: Only implemented as an AA.
 #define SE_ImprovedBindWound			282	// implemented[AA] - increase bind wound amount by percent.
 #define SE_DoubleSpecialAttack			283	// implemented[AA] - Chance to perform second special attack as monk
 //#define SE_LoHSetHeal					284	// not used
 #define SE_NimbleEvasion				285	// *not implemented - base1 = 100 for max
 #define SE_FcDamageAmt					286	// implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
 #define SE_SpellDurationIncByTic		287 // implemented, @Fc, SPA: 287, SE_SpellDurationIncByTic,			On Caster, spell buff duration mod, base: tics
-#define SE_SkillAttackProc				288	// implemented[AA] - Chance to proc spell on skill attack usage (ex. Dragon Punch)
+#define SE_SkillAttackProc				288	// implemented, @Procs, chance to cast a spell when using a skill, base: chance, limit: skill, max: spellid, note: if used in AA the spell id is set in aa_ranks spell field, chance is calculated as 100% = value 1000.
 #define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
 #define SE_Purify						291 // implemented, @Dispel, remove up specified amount of detiremental spells, base: amt removed, limit: none, max: none, Note: excluding charm, fear, resurrection, and revival sickness
@@ -1134,8 +1145,8 @@ typedef enum {
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 //#define SE_Display					425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
-#define SE_SkillProc					427 // implemented - chance to proc when using a skill(ie taunt)
-#define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc
+#define SE_SkillProcAttempt				427 // implemented - chance to proc when using a skill(ie taunt)
+#define SE_LimitToSkill					428 // implemented, @Procs, limits what combat skills will effect a skill proc, base: skill value, limit: none, max: none
 #define SE_SkillProcSuccess				429 // implemented - chance to proc when tje skill in use successfully fires.
 //#define SE_PostEffect					430 // *not implemented - Fear of the Dark(27641) - Alters vision
 //#define SE_PostEffectData				431 // *not implemented - Fear of the Dark(27641) - Alters vision

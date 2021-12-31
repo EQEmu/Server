@@ -407,7 +407,8 @@ public:
 		float distance,
 		int Hand = EQ::invslot::slotPrimary,
 		int count = 0,
-		bool is_from_spell = false
+		bool is_from_spell = false,
+		int attack_rounds = 1
 	);
 	void AETaunt(Client *caster, float range = 0, int32 bonus_hate = 0);
 	void AESpell(
@@ -454,7 +455,7 @@ public:
 	void	ClearAggro(Mob* targ);
 	void    ClearWaterAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
-	void	ClearZoneFeignAggro(Client* targ);
+	void	ClearZoneFeignAggro(Mob* targ);
 	void	AggroZone(Mob* who, uint32 hate = 0);
 
 	bool	Fighting(Mob* targ);

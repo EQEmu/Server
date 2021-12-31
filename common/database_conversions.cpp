@@ -1452,7 +1452,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				for (i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
 					if (pp->leader_abilities.ranks[i] > 0 && pp->leader_abilities.ranks[i] < 6){
 						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, rank) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+							rquery = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
 							first_entry = 1;
 						}
 						rquery = rquery + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);

@@ -145,7 +145,6 @@ Client::Client(EQStreamInterface* ieqs)
   global_channel_timer(1000),
   fishing_timer(8000),
   endupkeep_timer(1000),
-  forget_timer(0),
   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
   client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
   client_zone_wide_full_position_update_timer(5 * 60 * 1000),
@@ -154,6 +153,7 @@ Client::Client(EQStreamInterface* ieqs)
   TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),
   charm_update_timer(6000),
   rest_timer(1),
+  pick_lock_timer(1000),
   charm_class_attacks_timer(3000),
   charm_cast_timer(3500),
   qglobal_purge_timer(30000),
@@ -185,7 +185,6 @@ Client::Client(EQStreamInterface* ieqs)
 	character_id = 0;
 	conn_state = NoPacketsReceived;
 	client_data_loaded = false;
-	feigned = false;
 	berserk = false;
 	dead = false;
 	eqs = ieqs;
@@ -269,6 +268,8 @@ Client::Client(EQStreamInterface* ieqs)
 	SetMerc(0);
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
 	dynamiczone_removal_timer.Disable();
+
+	heroforge_wearchange_timer.Disable();
 
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
@@ -2676,22 +2677,6 @@ void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing, uint32 re
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
-
-void Client::SetFeigned(bool in_feigned) {
-	if (in_feigned)
-	{
-		if(RuleB(Character, FeignKillsPet))
-		{
-			SetPet(0);
-		}
-		SetHorseId(0);
-		entity_list.ClearFeignAggro(this);
-		forget_timer.Start(FeignMemoryDuration);
-	} else {
-		forget_timer.Disable();
-	}
-	feigned=in_feigned;
- }
 
 void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQ::ItemData* item, bool buying)
 {
@@ -5372,25 +5357,15 @@ void Client::ShowSkillsWindow()
 
 		// Current Skill Level out of Max Skill Level or a Check Mark for Maxed
 		popup_text += fmt::format(
-			"<td>{}{}{}</td>",
+			"<td>{}</td>",
 			(
 				skill_maxed ?
-				"<c \"#00FF00\">" :
-				""
-			),
-			(
-				skill_maxed ?				
-				"✔" :
+				"<c \"#00FF00\">✔</c>" :
 				fmt::format(
 					"{}/{}",
 					current_skill,
 					max_skill
 				)
-			),
-			(
-				skill_maxed ?
-				"</c>" :
-				""
 			)
 		);
 
@@ -10878,4 +10853,47 @@ uint16 Client::LearnDisciplines(uint8 min_level, uint8 max_level)
 	}
 
 	return learned_disciplines;
+}
+
+uint16 Client::GetClassTrackingDistanceMultiplier(uint16 class_) {
+	switch (class_) {
+	case WARRIOR:
+		return RuleI(Character, WarriorTrackingDistanceMultiplier);
+	case CLERIC:
+		return RuleI(Character, ClericTrackingDistanceMultiplier);
+	case PALADIN:
+		return RuleI(Character, PaladinTrackingDistanceMultiplier);
+	case RANGER:
+		return RuleI(Character, RangerTrackingDistanceMultiplier);
+	case SHADOWKNIGHT:
+		return RuleI(Character, ShadowKnightTrackingDistanceMultiplier);
+	case DRUID:
+		return RuleI(Character, DruidTrackingDistanceMultiplier);
+	case MONK:
+		return RuleI(Character, MonkTrackingDistanceMultiplier);
+	case BARD:
+		return RuleI(Character, BardTrackingDistanceMultiplier);
+	case ROGUE:
+		return RuleI(Character, RogueTrackingDistanceMultiplier);
+	case SHAMAN:
+		return RuleI(Character, ShamanTrackingDistanceMultiplier);
+	case NECROMANCER:
+		return RuleI(Character, NecromancerTrackingDistanceMultiplier);
+	case WIZARD:
+		return RuleI(Character, WizardTrackingDistanceMultiplier);
+	case MAGICIAN:
+		return RuleI(Character, MagicianTrackingDistanceMultiplier);
+	case ENCHANTER:
+		return RuleI(Character, EnchanterTrackingDistanceMultiplier);
+	case BEASTLORD:
+		return RuleI(Character, BeastlordTrackingDistanceMultiplier);
+	case BERSERKER:
+		return RuleI(Character, BerserkerTrackingDistanceMultiplier);
+	default: 
+		return 0;
+	}
+}
+
+bool Client::CanThisClassTrack() {
+	return (GetClassTrackingDistanceMultiplier(GetClass()) > 0) ? true : false;
 }
