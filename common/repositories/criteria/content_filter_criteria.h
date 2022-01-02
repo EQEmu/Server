@@ -40,14 +40,14 @@ namespace ContentFilterCriteria {
 		}
 
 		criteria += fmt::format(
-			" AND ({}min_expansion <= {} OR {}min_expansion = 0)",
+			" AND ({}min_expansion <= {} OR {}min_expansion = -1)",
 			table_prefix,
 			current_expansion_filter_criteria,
 			table_prefix
 		);
 
 		criteria += fmt::format(
-			" AND ({}max_expansion >= {} OR {}max_expansion = 0)",
+			" AND ({}max_expansion >= {} OR {}max_expansion = -1)",
 			table_prefix,
 			current_expansion_filter_criteria,
 			table_prefix
