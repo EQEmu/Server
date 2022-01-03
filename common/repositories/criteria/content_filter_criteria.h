@@ -58,7 +58,7 @@ namespace ContentFilterCriteria {
 		std::string              flags_in_filter_enabled;
 		std::string              flags_in_filter_disabled;
 		if (!flags_enabled.empty()) {
-			flags_in_filter_enabled  = fmt::format(
+			flags_in_filter_enabled = fmt::format(
 				" OR CONCAT(',', {}content_flags, ',') REGEXP ',({}),' ",
 				table_prefix,
 				implode("|", flags_enabled)
@@ -73,13 +73,15 @@ namespace ContentFilterCriteria {
 		}
 
 		criteria += fmt::format(
-			" AND ({}content_flags IS NULL{}) ",
+			" AND (({}content_flags IS NULL OR {}content_flags = ''){}) ",
+			table_prefix,
 			table_prefix,
 			flags_in_filter_enabled
 		);
 
 		criteria += fmt::format(
-			" AND ({}content_flags_disabled IS NULL{}) ",
+			" AND (({}content_flags_disabled IS NULL OR {}content_flags_disabled = ''){}) ",
+			table_prefix,
 			table_prefix,
 			flags_in_filter_disabled
 		);
