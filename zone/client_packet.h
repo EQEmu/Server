@@ -97,8 +97,8 @@
 	void Handle_OP_Disarm(const EQApplicationPacket *app);
 	void Handle_OP_DisarmTraps(const EQApplicationPacket *app);
 	void Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app);
-	void Handle_OP_DuelResponse(const EQApplicationPacket *app);
-	void Handle_OP_DuelResponse2(const EQApplicationPacket *app);
+	void Handle_OP_DuelDecline(const EQApplicationPacket *app);
+	void Handle_OP_DuelAccept(const EQApplicationPacket *app);
 	void Handle_OP_DumpName(const EQApplicationPacket *app);
 	void Handle_OP_Dye(const EQApplicationPacket *app);
 	void Handle_OP_DzAddPlayer(const EQApplicationPacket *app);

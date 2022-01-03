@@ -194,8 +194,8 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Disarm] = &Client::Handle_OP_Disarm;
 	ConnectedOpcodes[OP_DisarmTraps] = &Client::Handle_OP_DisarmTraps;
 	ConnectedOpcodes[OP_DoGroupLeadershipAbility] = &Client::Handle_OP_DoGroupLeadershipAbility;
-	ConnectedOpcodes[OP_DuelResponse] = &Client::Handle_OP_DuelResponse;
-	ConnectedOpcodes[OP_DuelResponse2] = &Client::Handle_OP_DuelResponse2;
+	ConnectedOpcodes[OP_DuelDecline] = &Client::Handle_OP_DuelDecline;
+	ConnectedOpcodes[OP_DuelAccept] = &Client::Handle_OP_DuelAccept;
 	ConnectedOpcodes[OP_DumpName] = &Client::Handle_OP_DumpName;
 	ConnectedOpcodes[OP_Dye] = &Client::Handle_OP_Dye;
 	ConnectedOpcodes[OP_DzAddPlayer] = &Client::Handle_OP_DzAddPlayer;
@@ -5539,7 +5539,7 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_DuelResponse(const EQApplicationPacket *app)
+void Client::Handle_OP_DuelDecline(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(DuelResponse_Struct)) {
 		return;
@@ -5568,7 +5568,7 @@ void Client::Handle_OP_DuelResponse(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_DuelResponse2(const EQApplicationPacket *app)
+void Client::Handle_OP_DuelAccept(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Duel_Struct)) {
 		return;
@@ -5585,7 +5585,7 @@ void Client::Handle_OP_DuelResponse2(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (GetDuelTarget() != ds->duel_initiator || !IsDueling()) {
+	if (GetDuelTarget() != ds->duel_initiator || IsDueling()) {
 		return;
 	}
 
@@ -5597,7 +5597,7 @@ void Client::Handle_OP_DuelResponse2(const EQApplicationPacket *app)
 		ds2->duel_target = entity->GetID();
 		initiator->CastToClient()->QueuePacket(outapp);
 
-		outapp->SetOpcode(OP_DuelResponse2);
+		outapp->SetOpcode(OP_DuelAccept);
 		ds2->duel_initiator = initiator->GetID();
 
 		initiator->CastToClient()->QueuePacket(outapp);
@@ -12488,10 +12488,6 @@ void Client::Handle_OP_RequestDuel(const EQApplicationPacket *app)
 	ds->duel_initiator = ds->duel_target;
 	ds->duel_target = duel;
 	Entity* entity = entity_list.GetID(ds->duel_target);
-
-	if (GetID() != ds->duel_initiator) {
-		return;
-	}
 
 	if (
 		GetID() != ds->duel_target &&
