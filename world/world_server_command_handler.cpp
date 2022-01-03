@@ -165,37 +165,37 @@ namespace WorldserverCommandHandler {
 
 		Json::Value              player_tables_json;
 		std::vector<std::string> player_tables  = DatabaseSchema::GetPlayerTables();
-		for (const auto          &table : player_tables) {
+		for (const auto          &table: player_tables) {
 			player_tables_json.append(table);
 		}
 
 		Json::Value              content_tables_json;
 		std::vector<std::string> content_tables = DatabaseSchema::GetContentTables();
-		for (const auto          &table : content_tables) {
+		for (const auto          &table: content_tables) {
 			content_tables_json.append(table);
 		}
 
 		Json::Value              server_tables_json;
 		std::vector<std::string> server_tables  = DatabaseSchema::GetServerTables();
-		for (const auto          &table : server_tables) {
+		for (const auto          &table: server_tables) {
 			server_tables_json.append(table);
 		}
 
 		Json::Value              login_tables_json;
 		std::vector<std::string> login_tables   = DatabaseSchema::GetLoginTables();
-		for (const auto          &table : login_tables) {
+		for (const auto          &table: login_tables) {
 			login_tables_json.append(table);
 		}
 
 		Json::Value              state_tables_json;
 		std::vector<std::string> state_tables   = DatabaseSchema::GetStateTables();
-		for (const auto          &table : state_tables) {
+		for (const auto          &table: state_tables) {
 			state_tables_json.append(table);
 		}
 
 		Json::Value              version_tables_json;
 		std::vector<std::string> version_tables = DatabaseSchema::GetVersionTables();
-		for (const auto          &table : version_tables) {
+		for (const auto          &table: version_tables) {
 			version_tables_json.append(table);
 		}
 
@@ -313,10 +313,19 @@ namespace WorldserverCommandHandler {
 
 		content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
 
-		std::vector<std::string> flags = {
+		std::vector<ContentFlagsRepository::ContentFlags> flags = {};
+		auto                                              f     = ContentFlagsRepository::NewEntity();
+		f.enabled = 1;
+
+		std::vector<std::string> flag_names = {
 			"hateplane_enabled",
 			"patch_nerf_7077",
 		};
+
+		for (auto &name: flag_names) {
+			f.flag_name = name;
+			flags.push_back(f);
+		}
 
 		content_service.SetContentFlags(flags);
 

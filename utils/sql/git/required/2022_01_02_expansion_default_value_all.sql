@@ -109,3 +109,9 @@ ALTER TABLE `merchantlist` CHANGE `max_expansion` `max_expansion` tinyint(4)  NO
 ALTER TABLE `merchantlist` CHANGE `min_expansion` `min_expansion` tinyint(4)  NOT NULL DEFAULT -1  COMMENT '';
 UPDATE merchantlist set min_expansion = -1 where min_expansion = 0;
 UPDATE merchantlist set max_expansion = -1 where max_expansion = 0;
+
+-- spawnentry
+ALTER TABLE `spawnentry` ADD `min_expansion` tinyint(4)  NOT NULL DEFAULT -1;
+ALTER TABLE `spawnentry` ADD `max_expansion` tinyint(4)  NOT NULL DEFAULT -1;
+ALTER TABLE `spawnentry` ADD `content_flags` varchar(100) NULL;
+ALTER TABLE `spawnentry` ADD `content_flags_disabled` varchar(100) NULL;

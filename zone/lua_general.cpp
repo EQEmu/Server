@@ -1410,7 +1410,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		lua_remove_spawn_point(spawn2_id);
 
 		auto t = new Spawn2(spawn2_id, spawngroup_id, x, y, z, heading, respawn,
-			variance, timeleft, grid, path_when_zone_idle, condition_id, 
+			variance, timeleft, grid, path_when_zone_idle, condition_id,
 			condition_min_value, enabled, static_cast<EmuAppearance>(animation));
 
 		zone->spawn2_list.Insert(t);
@@ -1743,7 +1743,7 @@ bool lua_is_content_flag_enabled(std::string content_flag){
 }
 
 void lua_set_content_flag(std::string flag_name, bool enabled){
-	ZoneStore::SetContentFlag(flag_name, enabled);
+	content_service.SetContentFlag(flag_name, enabled);
 }
 
 Lua_Expedition lua_get_expedition() {

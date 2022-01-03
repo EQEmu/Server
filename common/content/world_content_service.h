@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include "../repositories/content_flags_repository.h"
 
 class Database;
 
@@ -160,15 +161,25 @@ public:
 	bool IsCurrentExpansionTheBurningLands() { return current_expansion == Expansion::ExpansionNumber::TheBurningLands; }
 	bool IsCurrentExpansionTormentOfVelious() { return current_expansion == Expansion::ExpansionNumber::TormentOfVelious; }
 
+	const std::vector<ContentFlagsRepository::ContentFlags> &GetContentFlags() const;
+	std::vector<std::string> GetContentFlagsEnabled();
+	std::vector<std::string> GetContentFlagsDisabled();
+	bool IsContentFlagEnabled(const std::string& content_flag);
+	void SetContentFlags(std::vector<ContentFlagsRepository::ContentFlags> content_flags);
+	void ReloadContentFlags();
+	WorldContentService * SetExpansionContext();
+
+	WorldContentService * SetDatabase(Database *database);
+	Database *GetDatabase() const;
+
+	void SetContentFlag(const std::string &content_flag_name, bool enabled);
+
 private:
 	int current_expansion{};
-	std::vector<std::string> content_flags;
-public:
-	const std::vector<std::string> &GetContentFlags() const;
-	bool IsContentFlagEnabled(const std::string& content_flag);
-	void SetContentFlags(std::vector<std::string> content_flags);
-	void ReloadContentFlags(Database &db);
-	void SetExpansionContext();
+	std::vector<ContentFlagsRepository::ContentFlags> content_flags;
+
+	// reference to database
+	Database *m_database;
 };
 
 extern WorldContentService content_service;

@@ -54,7 +54,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 					auto flag_name = e.event_data;
 					if (!flag_name.empty()) {
 						LogScheduler("Deactivating event [{}] resetting content flags", e.description);
-						content_service->ReloadContentFlags(*m_database);
+						content_service->ReloadContentFlags();
 					}
 
 					// force active events clear and reapply all active events because we reset the entire state
@@ -117,8 +117,13 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 							flag_name
 						);
 
+						// add new flag entity to stack
 						auto flags = content_service->GetContentFlags();
-						flags.push_back(flag_name);
+						auto f     = ContentFlagsRepository::NewEntity();
+						f.flag_name = flag_name;
+						f.enabled   = 1;
+						flags.push_back(f);
+
 						content_service->SetContentFlags(flags);
 						m_active_events.push_back(e);
 					}

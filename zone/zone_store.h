@@ -42,9 +42,6 @@ public:
 	std::string GetZoneLongName(uint32 zone_id);
 	const char *GetZoneName(uint32 zone_id, bool error_unknown = false);
 	const char *GetZoneLongName(uint32 zone_id, bool error_unknown = false);
-
-	static void LoadContentFlags();
-	static void SetContentFlag(const std::string& content_flag_name, bool enabled);
 };
 
 extern ZoneStore zone_store;

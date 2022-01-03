@@ -53,19 +53,22 @@ namespace ContentFilterCriteria {
 			table_prefix
 		);
 
-		std::vector<std::string> flags = content_service.GetContentFlags();
+		std::vector<std::string> flags_disabled = content_service.GetContentFlagsDisabled();
+		std::vector<std::string> flags_enabled  = content_service.GetContentFlagsEnabled();
 		std::string              flags_in_filter_enabled;
 		std::string              flags_in_filter_disabled;
-		if (!flags.empty()) {
-			flags_in_filter_enabled = fmt::format(
+		if (!flags_enabled.empty()) {
+			flags_in_filter_enabled  = fmt::format(
 				" OR CONCAT(',', {}content_flags, ',') REGEXP ',({}),' ",
 				table_prefix,
-				implode("|", flags)
+				implode("|", flags_enabled)
 			);
+		}
+		if (!flags_disabled.empty()) {
 			flags_in_filter_disabled = fmt::format(
-				" OR CONCAT(',', {}content_flags_disabled, ',') NOT REGEXP ',({}),' ",
+				" OR CONCAT(',', {}content_flags_disabled, ',') REGEXP ',({}),' ",
 				table_prefix,
-				implode("|", flags)
+				implode("|", flags_disabled)
 			);
 		}
 

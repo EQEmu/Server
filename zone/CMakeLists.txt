@@ -459,6 +459,7 @@ SET(gm_commands
     gm_commands/refreshgroup.cpp
     gm_commands/reloadaa.cpp
     gm_commands/reloadallrules.cpp
+    gm_commands/reloadcontentflags.cpp
     gm_commands/reloademote.cpp
     gm_commands/reloadlevelmods.cpp
     gm_commands/reloadmerchants.cpp

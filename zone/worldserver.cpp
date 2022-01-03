@@ -1977,6 +1977,34 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
 	}
+	case ServerOP_ReloadContentFlags: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Content flags (and expansion) reloaded for {}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							"Instance ID: {}",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
+		content_service.SetExpansionContext()->ReloadContentFlags();
+		break;
+	}
 	case ServerOP_ReloadLogs: {
 		LogSys.LoadLogDatabaseSettings();
 		break;
@@ -2069,7 +2097,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					DialogueWindow::Render(client.second, message);
 				}
@@ -2243,7 +2271,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 			break;
-		} 
+		}
 		break;
 	}
 	case ServerOP_CZMarquee:
@@ -2290,7 +2318,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					client.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 				}
@@ -2343,7 +2371,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					client.second->Message(type, message);
 				}
@@ -2425,7 +2453,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					switch (update_subtype) {
 						case CZMoveUpdateSubtype_MoveZone:
@@ -2492,7 +2520,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					client.second->SetEntityVariable(variable_name, variable_value);
 				}
@@ -2549,7 +2577,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					client.second->Signal(signal);
 				}
@@ -2609,7 +2637,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			if (client_raid) {
 				for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 					if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
-						auto raid_member = client_raid->members[member_index].member->CastToClient();						
+						auto raid_member = client_raid->members[member_index].member->CastToClient();
 						switch (update_subtype) {
 							case CZSpellUpdateSubtype_Cast:
 								raid_member->SpellFinished(spell_id, raid_member);
@@ -2635,7 +2663,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				}
 			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					switch (update_subtype) {
 						case CZSpellUpdateSubtype_Cast:
@@ -2792,9 +2820,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 							break;
 					}
 				}
-			}			
+			}
 		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
+			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					switch (update_subtype) {
 						case CZTaskUpdateSubtype_ActivityReset:
@@ -2968,7 +2996,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWSEV->min_status;
 		uint8 max_status = WWSEV->max_status;
 		if (update_type == WWSetEntityVariableUpdateType_Character) {
-			for (auto &client : entity_list.GetClientList()) {				
+			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->SetEntityVariable(variable_name, variable_value);
 				}
@@ -2988,7 +3016,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWS->min_status;
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSignalUpdateType_Character) {
-			for (auto &client : entity_list.GetClientList()) {				
+			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->Signal(signal);
 				}
@@ -3008,13 +3036,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWS->min_status;
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSpellUpdateType_Cast) {
-			for (auto &client : entity_list.GetClientList()) {				
+			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->SpellFinished(spell_id, client.second);
 				}
 			}
 		} else if (update_type == WWSpellUpdateType_Remove) {
-			for (auto &client : entity_list.GetClientList()) {				
+			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->BuffFadeBySpellID(spell_id);
 				}
@@ -3031,8 +3059,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		int update_count = WWTU->update_count;
 		bool enforce_level_requirement = WWTU->enforce_level_requirement;
 		uint8 min_status = WWTU->min_status;
-		uint8 max_status = WWTU->max_status;		
-		for (auto &client : entity_list.GetClientList()) {				
+		uint8 max_status = WWTU->max_status;
+		for (auto &client : entity_list.GetClientList()) {
 			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 				switch (update_type) {
 					case WWTaskUpdateType_ActivityReset:

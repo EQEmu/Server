@@ -216,6 +216,7 @@ void command_randomfeatures(Client *c, const Seperator *sep);
 void command_refreshgroup(Client *c, const Seperator *sep);
 void command_reloadaa(Client *c, const Seperator *sep);
 void command_reloadallrules(Client *c, const Seperator *sep);
+void command_reloadcontentflags(Client *c, const Seperator *sep);
 void command_reloademote(Client *c, const Seperator *sep);
 void command_reloadlevelmods(Client *c, const Seperator *sep);
 void command_reloadmerchants(Client *c, const Seperator *sep);
