@@ -8596,8 +8596,8 @@ Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
 
 void Bot::ProcessBotGroupInvite(Client* c, std::string botName) {
 	if(c) {
-		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(c, botName);
-
+		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(entity_list.GetBotByBotName(botName)->GetOwner()->CastToClient(), botName);
+		//Mitch changed entity from c
 		if(invitedBot && !invitedBot->HasGroup()) {
 			if(!c->IsGrouped()) {
 				Group *g = new Group(c);
