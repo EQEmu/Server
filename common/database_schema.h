@@ -82,7 +82,6 @@ namespace DatabaseSchema {
 			{"player_titlesets",               "char_id"},
 			{"quest_globals",                  "charid"},
 			{"timers",                         "char_id"},
-			{"titles",                         "char_id"},
 			{"trader",                         "char_id"},
 			{"zone_flags",                     "charID"}
 		};
@@ -158,7 +157,6 @@ namespace DatabaseSchema {
 			"spell_buckets",
 			"spell_globals",
 			"timers",
-			"titles",
 			"trader",
 			"trader_audit",
 			"zone_flags"
@@ -270,6 +268,7 @@ namespace DatabaseSchema {
 			"perl_event_export_settings",
 			"profanity_list",
 			"rule_sets",
+			"titles",
 			"rule_values",
 			"variables",
 		};
