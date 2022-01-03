@@ -90,6 +90,7 @@ const std::vector<ContentFlagsRepository::ContentFlags> &WorldContentService::Ge
 std::vector<std::string> WorldContentService::GetContentFlagsEnabled()
 {
 	std::vector<std::string> enabled_flags;
+	
 	for (auto &f: GetContentFlags()) {
 		if (f.enabled) {
 			enabled_flags.emplace_back(f.flag_name);
@@ -105,6 +106,7 @@ std::vector<std::string> WorldContentService::GetContentFlagsEnabled()
 std::vector<std::string> WorldContentService::GetContentFlagsDisabled()
 {
 	std::vector<std::string> disabled_flags;
+
 	for (auto &f: GetContentFlags()) {
 		if (!f.enabled) {
 			disabled_flags.emplace_back(f.flag_name);
@@ -140,6 +142,7 @@ bool WorldContentService::IsContentFlagEnabled(const std::string &content_flag)
 void WorldContentService::ReloadContentFlags()
 {
 	std::vector<ContentFlagsRepository::ContentFlags> set_content_flags;
+	s
 	auto                                              flags = ContentFlagsRepository::All(*GetDatabase());
 
 	set_content_flags.reserve(flags.size());
