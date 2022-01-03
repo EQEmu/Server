@@ -14117,6 +14117,10 @@ void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 		std::cout << "Wrong size on OP_Taunt. Got: " << app->size << ", Expected: " << sizeof(ClientTarget_Struct) << std::endl;
 		return;
 	}
+	
+	if (!HasSkill(EQ::skills::SkillTaunt)) {
+		return;
+	}
 
 	if (!p_timers.Expired(&database, pTimerTaunt, false)) {
 		Message(Chat::Red, "Ability recovery time not yet met.");
