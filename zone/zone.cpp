@@ -1255,9 +1255,8 @@ void Zone::ReloadStaticData() {
 		);
 	} // if that fails, try the file name, then load defaults
 
-	content_service.SetExpansionContext();
+	content_service.SetExpansionContext()->ReloadContentFlags();
 
-	ZoneStore::LoadContentFlags();
 
 	LogInfo("Zone Static Data Reloaded");
 }
@@ -2749,7 +2748,7 @@ uint32 Zone::GetCurrencyID(uint32 item_id)
 	if (!item_id) {
 		return 0;
 	}
-	
+
 	for (const auto& alternate_currency : AlternateCurrencies) {
 		if (item_id == alternate_currency.item_id) {
 			return alternate_currency.id;

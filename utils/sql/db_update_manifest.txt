@@ -428,6 +428,7 @@
 9172|2021_05_21_shared_tasks.sql|SHOW TABLES LIKE 'shared_tasks'|empty|
 9173|2021_09_14_zone_lava_damage.sql|SHOW COLUMNS FROM `zone` LIKE 'lava_damage'|empty|
 9174|2021_10_09_not_null_door_columns.sql|SELECT * FROM db_version WHERE version >= 9174|empty|
+9175|2022_01_02_expansion_default_value_all.sql|SHOW COLUMNS FROM `forage` LIKE 'min_expansion'|contains|unsigned
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

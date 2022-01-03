@@ -41,6 +41,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "shared_task_world_messaging.h"
 #include "../common/shared_tasks.h"
 #include "shared_task_manager.h"
+#include "../common/content/world_content_service.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -866,6 +867,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ReloadRules: {
 		zoneserver_list.SendPacket(pack);
 		RuleManager::Instance()->LoadRules(&database, "default", true);
+		break;
+	}
+	case ServerOP_ReloadContentFlags: {
+		zoneserver_list.SendPacket(pack);
+		content_service.SetExpansionContext()->ReloadContentFlags();
 		break;
 	}
 	case ServerOP_ReloadRulesWorld:
