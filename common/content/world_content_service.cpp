@@ -131,7 +131,7 @@ void WorldContentService::SetContentFlags(std::vector<ContentFlagsRepository::Co
 bool WorldContentService::IsContentFlagEnabled(const std::string &content_flag)
 {
 	for (auto &f: GetContentFlags()) {
-		if (f.flag_name == content_flag) {
+		if (f.flag_name == content_flag && f.enabled == true) {
 			return true;
 		}
 	}
