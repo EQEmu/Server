@@ -11081,7 +11081,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	else if (victim->GetOwnerID()) {
 		Message(0, "You cannot steal from pets!");
 	}
-	else if (!CombatRange(victim, 3.0)) { //Give benefit of the doubt due to pathing NPCs
+	else if (Distance(GetPosition(), victim->GetPosition()) > 15) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
 		database.SetMQDetectionFlag(this->AccountName(), this->GetName(), "OP_PickPocket was sent from outside combat range.", zone->GetShortName());
 	}
