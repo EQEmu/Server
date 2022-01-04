@@ -43,109 +43,93 @@ static const EQ::skills::SkillType TradeskillUnknown = EQ::skills::Skill1HBlunt;
 
 void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo)
 {
-	if (!user || !in_augment)
-	{
+	if (!user || !in_augment) {
 		LogError("Client or AugmentItem_Struct not set in Object::HandleAugmentation");
 		return;
 	}
 
 	EQ::ItemInstance* container = nullptr;
 
-	if (worldo)
-	{
+	if (worldo) {
 		container = worldo->m_inst;
-	}
-	else
-	{
-		// Check to see if they have an inventory container type 53 that is used for this.
+	} else { // Check to see if they have an inventory container type 53 that is used for this.
 		EQ::InventoryProfile& user_inv = user->GetInv();
 		EQ::ItemInstance* inst = nullptr;
 
 		inst = user_inv.GetItem(in_augment->container_slot);
-		if (inst)
-		{
+		if (inst) {
 			const EQ::ItemData* item = inst->GetItem();
-			if (item && inst->IsType(EQ::item::ItemClassBag) && item->BagType == 53)
-			{
-				// We have found an appropriate inventory augmentation sealer
+			if (item && inst->IsType(EQ::item::ItemClassBag) && item->BagType == EQ::item::BagTypeAugmentationSealer) { // We have found an appropriate inventory augmentation sealer				
 				container = inst;
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
-				uint8 itemsFound = 0;
-				for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++)
-				{
+				uint8 items_found = 0;
+				for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++) {
 					const EQ::ItemInstance* inst = container->GetItem(i);
-					if (inst)
-					{
-						itemsFound++;
+					if (inst) {
+						items_found++;
 					}
 				}
 
-				if (itemsFound != 2)
-				{
-					user->Message(Chat::Red, "Error: Too many/few items in augmentation container.");
+				if (items_found < 2) {
+					user->Message(Chat::Red, "Error: Too few items in augmentation container.");
+					return;
+				} else if (items_found > 2) {
+					user->Message(Chat::Red, "Error: Too many items in augmentation container.");
 					return;
 				}
 			}
 		}
 	}
 
-	if(!container)
-	{
+	if(!container) {
 		LogError("Player tried to augment an item without a container set");
 		user->Message(Chat::Red, "Error: This item is not a container!");
 		return;
 	}
 
 	EQ::ItemInstance *tobe_auged = nullptr, *auged_with = nullptr;
-	int8 slot=-1;
+	int8 slot = -1;
 
-	// Verify 2 items in the augmentation device
-	if (container->GetItem(0) && container->GetItem(1))
-	{
+	if (container->GetItem(0) && container->GetItem(1)) { // Verify 2 items in the augmentation device
 		// Verify 1 item is augmentable and the other is not
-		if (container->GetItem(0)->IsAugmentable() && !container->GetItem(1)->IsAugmentable())
-		{
+		if (container->GetItem(0)->IsAugmentable() && !container->GetItem(1)->IsAugmentable()) {
 			tobe_auged = container->GetItem(0);
 			auged_with = container->GetItem(1);
-		}
-		else if (!container->GetItem(0)->IsAugmentable() && container->GetItem(1)->IsAugmentable())
-		{
+		} else if (!container->GetItem(0)->IsAugmentable() && container->GetItem(1)->IsAugmentable()) {
 			tobe_auged = container->GetItem(1);
 			auged_with = container->GetItem(0);
-		}
-		else
-		{
+		} else {
 			// Either 2 augmentable items found or none found
 			// This should never occur due to client restrictions, but prevent in case of a hack
-			user->Message(Chat::Red, "Error: Must be 1 augmentable item in the sealer");
+			user->Message(Chat::Red, "Error: There must be 1 augmentable item in the sealer.");
 			return;
 		}
-	}
-	else
-	{
-		// This happens if the augment button is clicked more than once quickly while augmenting
-		if (!container->GetItem(0))
-		{
-			user->Message(Chat::Red, "Error: No item in slot 0 of sealer");
+	} else { // This happens if the augment button is clicked more than once quickly while augmenting		
+		if (!container->GetItem(0))	{
+			user->Message(Chat::Red, "Error: No item in the first slot of sealer.");
 		}
-		if (!container->GetItem(1))
-		{
-			user->Message(Chat::Red, "Error: No item in slot 1 of sealer");
+		
+		if (!container->GetItem(1)) {
+			user->Message(Chat::Red, "Error: No item in the second slot of sealer.");
 		}
 		return;
 	}
 
-	bool deleteItems = false;
+	if (!RuleB(Inventory, AllowMultipleOfSameAugment) && tobe_auged->ContainsAugmentByID(auged_with->GetID())) {
+		user->Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
+		return;
+	}
 
-	EQ::ItemInstance *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
+	bool delete_items = false;
 
-	// Adding augment
-	if (in_augment->augment_slot == -1)
-	{
-		if (((slot=tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType()))!=-1) &&
-			(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
-		{
+	EQ::ItemInstance *item_one_to_push = nullptr, *item_two_to_push = nullptr;
+
+	if (in_augment->augment_slot == -1) { // Adding augment
+		if (
+			((slot = tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType())) != -1) &&
+			tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)
+		) {
 			tobe_auged->PutAugment(slot, *auged_with);
 
 			EQ::ItemInstance *aug = tobe_auged->GetAugment(slot);
@@ -158,20 +142,15 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 				parse->EventItem(EVENT_AUGMENT_INSERT, user, aug, nullptr, "", slot, &args);
 			}
 
-			itemOneToPush = tobe_auged->Clone();
-			deleteItems = true;
+			item_one_to_push = tobe_auged->Clone();
+			delete_items = true;
+		} else {
+			user->Message(Chat::Red, "Error: No available slot for augment.");
 		}
-		else
-		{
-			user->Message(Chat::Red, "Error: No available slot for augment");
-		}
-	}
-	else
-	{
+	} else {
 		EQ::ItemInstance *old_aug = nullptr;
-		bool isSolvent = auged_with->GetItem()->ItemType == EQ::item::ItemTypeAugmentationSolvent;
-		if (!isSolvent && auged_with->GetItem()->ItemType != EQ::item::ItemTypeAugmentationDistiller)
-		{
+		bool is_solvent = auged_with->GetItem()->ItemType == EQ::item::ItemTypeAugmentationSolvent;
+		if (!is_solvent && auged_with->GetItem()->ItemType != EQ::item::ItemTypeAugmentationDistiller) {
 			LogError("Player tried to remove an augment without a solvent or distiller");
 			user->Message(Chat::Red, "Error: Missing an augmentation solvent or distiller for removing this augment.");
 
@@ -180,8 +159,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 		EQ::ItemInstance *aug = tobe_auged->GetAugment(in_augment->augment_slot);
 		if (aug) {
-			if (!isSolvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller)
-			{
+			if (!is_solvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller) {
 				LogError("Player tried to safely remove an augment with the wrong distiller (item [{}] vs expected [{}])", auged_with->GetItem()->ID, aug->GetItem()->AugDistiller);
 				user->Message(Chat::Red, "Error: Wrong augmentation distiller for safely removing this augment.");
 				return;
@@ -191,29 +169,27 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
 			args.assign(1, tobe_auged);
-			args.push_back(&isSolvent);
+			args.push_back(&is_solvent);
 
 			parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
 		}
 
-		if (isSolvent)
+		if (is_solvent) {
 			tobe_auged->DeleteAugment(in_augment->augment_slot);
-		else
+		} else {
 			old_aug = tobe_auged->RemoveAugment(in_augment->augment_slot);
+		}
 
-		itemOneToPush = tobe_auged->Clone();
-		if (old_aug)
-			itemTwoToPush = old_aug->Clone();
+		item_one_to_push = tobe_auged->Clone();
+		if (old_aug) {
+			item_two_to_push = old_aug->Clone();
+		}
 
-
-
-		deleteItems = true;
+		delete_items = true;
 	}
 
-	if (deleteItems)
-	{
-		if (worldo)
-		{
+	if (delete_items) {
+		if (worldo) {
 			container->Clear();
 			auto outapp = new EQApplicationPacket(OP_ClearObject, sizeof(ClearObject_Struct));
 			ClearObject_Struct *cos = (ClearObject_Struct *)outapp->pBuffer;
@@ -221,34 +197,26 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			user->QueuePacket(outapp);
 			safe_delete(outapp);
 			database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
-		}
-		else
-		{
-			// Delete items in our inventory container...
-			for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++)
-			{
+		} else { // Delete items in our inventory container...
+			for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++) {
 				const EQ::ItemInstance* inst = container->GetItem(i);
-				if (inst)
-				{
+				if (inst) {
 					user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_augment->container_slot, i), 0, true);
 				}
 			}
-			// Explicitly mark container as cleared.
-			container->Clear();
+			
+			container->Clear(); // Explicitly mark container as cleared.
 		}
 	}
 
 	// Must push items after the items in inventory are deleted - necessary due to lore items...
-	if (itemOneToPush)
-	{
-		user->PushItemOnCursor(*itemOneToPush, true);
+	if (item_one_to_push) {
+		user->PushItemOnCursor(*item_one_to_push, true);
 	}
 
-	if (itemTwoToPush)
-	{
-		user->PushItemOnCursor(*itemTwoToPush, true);
+	if (item_two_to_push) {
+		user->PushItemOnCursor(*item_two_to_push, true);
 	}
-
 }
 
 // Perform tradeskill combine

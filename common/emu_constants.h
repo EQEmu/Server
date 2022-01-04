@@ -381,4 +381,11 @@ enum Invisibility : uint8 {
 	Special = 255
 };
 
+enum AugmentActions : int {
+	Insert,
+	Remove,
+	Swap,
+	Destroy
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

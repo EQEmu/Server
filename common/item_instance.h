@@ -132,6 +132,7 @@ namespace EQ
 		void DeleteAugment(uint8 slot);
 		ItemInstance* RemoveAugment(uint8 index);
 		bool IsAugmented();
+		bool ContainsAugmentByID(uint32 item_id);
 		ItemInstance* GetOrnamentationAug(int32 ornamentationAugtype) const;
 		bool UpdateOrnamentationInfo();
 		static bool CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll = false);

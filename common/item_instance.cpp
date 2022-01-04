@@ -689,6 +689,25 @@ bool EQ::ItemInstance::IsAugmented()
 	return false;
 }
 
+bool EQ::ItemInstance::ContainsAugmentByID(uint32 item_id)
+{
+	if (!m_item || !m_item->IsClassCommon()) {
+		return false;
+	}
+
+	if (!item_id) {
+		return false;
+	}
+	
+	for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
+		if (GetAugmentItemID(augment_slot) == item_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // Has attack/delay?
 bool EQ::ItemInstance::IsWeapon() const
 {
