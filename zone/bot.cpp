@@ -20,6 +20,7 @@
 
 #include "bot.h"
 #include "object.h"
+#include "raids.h"
 #include "doors.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
@@ -10092,5 +10093,276 @@ void Bot::StopMoving(float new_heading)
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
+
+void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
+			//Client* player_accepting_invite = entity_list.GetClientByName(raid_command_packet->player_name);
+			
+			if (player_accepting_invite) {
+				if (player_accepting_invite->IsRaidGrouped()) {
+					b_owner->MessageString(Chat::White, ALREADY_IN_RAID, player_accepting_invite->GetName()); //group failed, must invite members not in raid...
+					return;
+				}
+				Raid* raid = entity_list.GetRaidByMob(player_accepting_invite);
+				if (raid) {
+					raid->VerifyRaid();
+					Group* group = player_accepting_invite->GetGroup();
+					if (group) {
+						if (group->GroupCount() + raid->RaidCount() > MAX_RAID_MEMBERS) {
+							b_owner->Message(Chat::Red, "Invite failed, group invite would create a raid larger than the maximum number of members allowed.");
+							return;
+						}
+					}
+					else {
+						if (1 + raid->RaidCount() > MAX_RAID_MEMBERS) {
+							b_owner->Message(Chat::Red, "Invite failed, member invite would create a raid larger than the maximum number of members allowed.");
+							return;
+						}
+					}
+					if (group) {//add us all
+						uint32 free_group_id = raid->GetFreeGroup();
+						Client* addClient = nullptr;
+						for (int x = 0; x < 6; x++) {
+							if (group->members[x]) {
+								Client* c = nullptr;
+								if (group->members[x]->IsBot())
+									c = group->members[x]->CastToClient();
+									
+								if (!addClient)
+								{
+									addClient = c;
+									raid->SetGroupLeader(addClient->GetName());
+								}
+
+								raid->SendRaidCreate(b_owner);
+								raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+								if (group->IsLeader(group->members[x]))
+									raid->AddMember(c, free_group_id, false, true);
+								else
+									raid->AddMember(c, free_group_id);
+								raid->SendBulkRaid(b_owner);
+								if (raid->IsLocked()) {
+									raid->SendRaidLockTo(b_owner);
+								}
+							}
+						}
+						group->JoinRaidXTarget(raid);
+						group->DisbandGroup(true);
+						raid->GroupUpdate(free_group_id);
+					}
+					else {
+						raid->SendRaidCreate(b_owner);
+						raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+						raid->AddMember(b_owner);
+						raid->SendBulkRaid(b_owner);
+						if (raid->IsLocked()) {
+							raid->SendRaidLockTo(b_owner);
+						}
+					}
+				}
+				else
+				{
+					Group* player_invited_group = player_accepting_invite->GetGroup();
+					Group* group = entity_list.GetGroupByClient(b_owner); // player_accepting_invite->GetGroup();
+					if (group) //if our target has a group
+					{
+//						raid = new Raid(player_accepting_invite);
+						raid = new Raid(b_owner);
+						entity_list.AddRaid(raid);
+						raid->SetRaidDetails();
+
+						uint32 raid_free_group_id = raid->GetFreeGroup();
+
+						/* If we already have a group then cycle through adding us... */
+						if (player_invited_group) {
+							Client* client_to_be_leader = nullptr;
+							for (int x = 0; x < 6; x++) {
+								if (player_invited_group->members[x]) {
+									if (!client_to_be_leader) {
+										if (player_invited_group->members[x]->IsClient()) {
+											client_to_be_leader = player_invited_group->members[x]->CastToClient();
+											raid->SetGroupLeader(client_to_be_leader->GetName());
+										}
+									}
+									if (player_invited_group->IsLeader(player_invited_group->members[x])) {
+										Client* c = nullptr;
+
+										if (player_invited_group->members[x]->IsClient() || player_invited_group->members[x]->IsBot())
+											c = player_invited_group->members[x]->CastToClient();
+										else
+											continue;
+
+										raid->SendRaidCreate(b_owner);
+										raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+										raid->AddMember(c, raid_free_group_id, true, true, true);
+										raid->SendBulkRaid(c);
+
+										if (raid->IsLocked()) {
+											raid->SendRaidLockTo(b_owner);
+										}
+									}
+									else {
+										Client* c = nullptr;
+
+										if (player_invited_group->members[x]->IsClient() || player_invited_group->members[x]->IsBot())
+											c = player_invited_group->members[x]->CastToClient();
+										else
+											continue;
+
+										raid->SendRaidCreate(b_owner);
+										raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+										raid->AddMember(c, raid_free_group_id);
+										raid->SendBulkRaid(b_owner);
+
+										if (raid->IsLocked()) {
+											raid->SendRaidLockTo(b_owner);
+										}
+									}
+								}
+							}
+							player_invited_group->JoinRaidXTarget(raid, true);
+							player_invited_group->DisbandGroup(true);
+							raid->GroupUpdate(raid_free_group_id);
+							raid_free_group_id = raid->GetFreeGroup();
+						}
+						else {
+//							raid->SendRaidCreate(player_accepting_invite);
+//							raid->AddMember(player_accepting_invite, 0xFFFFFFFF, true, false, true);
+							raid->SendRaidCreate(b_owner);
+							raid->AddMember(b_owner, 0xFFFFFFFF, true, false, true);
+						}
+
+						Client* client_to_add = nullptr;
+						/* Add client to an existing group */
+						for (int x = 0; x < 6; x++) {
+							if (group->members[x]) {
+								if (!client_to_add) {
+									if (group->members[x]->IsClient() || group->members[x]->IsBot()) {
+										client_to_add = group->members[x]->CastToClient();
+										raid->SetGroupLeader(client_to_add->GetName());
+									}
+								}
+								if (group->IsLeader(group->members[x])) {
+									Client* c = nullptr;
+
+									if (group->members[x]->IsClient() || group->members[x]->IsClient())
+										c = group->members[x]->CastToClient();
+									else
+										continue;
+
+									raid->SendRaidCreate(b_owner);
+									raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+									raid->AddMember(c, raid_free_group_id, false, true);
+									raid->SendBulkRaid(b_owner);
+
+									if (raid->IsLocked()) {
+										raid->SendRaidLockTo(b_owner);
+									}
+								}
+								else
+								{
+									Client* c = nullptr;
+
+									if (group->members[x]->IsClient() || group->members[x]->IsBot())
+										c = group->members[x]->CastToClient();
+									else
+										continue;
+
+									raid->SendRaidCreate(b_owner);
+									raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+									raid->AddMember(c, raid_free_group_id);
+									raid->SendBulkRaid(b_owner);
+
+									if (raid->IsLocked()) {
+										raid->SendRaidLockTo(b_owner);
+									}
+								}
+							}
+						}
+						group->JoinRaidXTarget(raid);
+						group->DisbandGroup(true);
+
+						raid->GroupUpdate(raid_free_group_id);
+					}
+					/* Target does not have a group */
+					else {
+						if (player_invited_group) {
+
+							raid = new Raid(b_owner);
+
+							entity_list.AddRaid(raid);
+							raid->SetRaidDetails();
+							Client* addClientig = nullptr;
+							for (int x = 0; x < 6; x++) {
+								if (player_invited_group->members[x]) {
+									if (!addClientig) {
+										if (player_invited_group->members[x]->IsClient() || player_invited_group->members[x]->IsBot()) {
+											addClientig = player_invited_group->members[x]->CastToClient();
+											raid->SetGroupLeader(addClientig->GetName());
+										}
+									}
+									if (player_invited_group->IsLeader(player_invited_group->members[x])) {
+										Client* c = nullptr;
+
+										if (player_invited_group->members[x]->IsClient() || player_invited_group->members[x]->IsBot())
+											c = player_invited_group->members[x]->CastToClient();
+										else
+											continue;
+
+										raid->SendRaidCreate(b_owner);
+										raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+										raid->AddMember(c, 0, true, true, true);
+										raid->SendBulkRaid(b_owner);
+
+										if (raid->IsLocked()) {
+											raid->SendRaidLockTo(b_owner);
+										}
+									}
+									else
+									{
+										Client* c = nullptr;
+										if (player_invited_group->members[x]->IsClient() || player_invited_group->members[x]->IsBot())
+											c = player_invited_group->members[x]->CastToClient();
+										else
+											continue;
+
+										raid->SendRaidCreate(b_owner);
+										raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+										raid->AddMember(c, 0);
+										raid->SendBulkRaid(b_owner);
+										if (raid->IsLocked()) {
+											raid->SendRaidLockTo(b_owner);
+										}
+									}
+								}
+							}
+							raid->SendRaidCreate(b_owner);
+							raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+							raid->SendBulkRaid(b_owner);
+							player_invited_group->JoinRaidXTarget(raid, true);
+							raid->AddMember(b_owner);
+							player_invited_group->DisbandGroup(true);
+							raid->GroupUpdate(0);
+							if (raid->IsLocked()) {
+								raid->SendRaidLockTo(b_owner);
+							}
+						}
+						else { // neither has a group
+							raid = new Raid(b_owner);
+							entity_list.AddRaid(raid);
+							raid->SetRaidDetails();
+//							raid->SendRaidCreate(b_owner);  // Not needed as one raid member is a bot
+							raid->SendRaidCreate(b_owner);
+							raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+							raid->AddMember(b_owner, 0xFFFFFFFF, true, false, true);
+							raid->SendBulkRaid(b_owner);
+							raid->AddBot(player_accepting_invite);
+							if (raid->IsLocked()) {
+								raid->SendRaidLockTo(b_owner);
+							}
+						}
+					}
+				}
+			}
+		}
 
 #endif

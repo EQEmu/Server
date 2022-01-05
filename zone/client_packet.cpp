@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdio.h>
 #include <string.h>
 #include <zlib.h>
+#include "bot.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -11321,7 +11322,38 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 	{
 		case RaidCommandInviteIntoExisting:
 		case RaidCommandInvite: {
+//Mitch
+#ifdef BOTS
+			Bot* player_to_invite = nullptr;
+			Client* player_to_invite_owner = nullptr;
+			if (entity_list.GetBotByBotName(raid_command_packet->player_name)) {
+				Bot* player_to_invite = entity_list.GetBotByBotName(raid_command_packet->player_name);
+				Client* player_to_invite_owner = player_to_invite->GetOwner()->CastToClient();
 
+				if (!player_to_invite) {
+					break;
+				}
+
+				Group* player_to_invite_group = player_to_invite->GetGroup();
+
+				if (player_to_invite->HasRaid()) {
+					Message(Chat::Red, "%s is already in a raid.", player_to_invite->GetName());
+					break;
+				}
+
+				if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
+					MessageString(Chat::Red, ALREADY_IN_PARTY);
+					break;
+				}
+
+				if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite)) {
+					Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
+					break;
+				}
+
+				Bot::ProcessRaidInvite(player_to_invite, player_to_invite_owner);
+			}
+#else			
 			Client *player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
 			if (!player_to_invite)
@@ -11344,22 +11376,25 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				break;
 			}
 
-			/* Send out invite to the client */
-			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
-			RaidGeneral_Struct *raid_command = (RaidGeneral_Struct*)outapp->pBuffer;
+				/* Send out invite to the client */
+				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+				RaidGeneral_Struct* raid_command = (RaidGeneral_Struct*)outapp->pBuffer;
 
-			strn0cpy(raid_command->leader_name, raid_command_packet->leader_name, 64);
-			strn0cpy(raid_command->player_name, raid_command_packet->player_name, 64);
+				strn0cpy(raid_command->leader_name, raid_command_packet->leader_name, 64);
+				strn0cpy(raid_command->player_name, raid_command_packet->player_name, 64);
 
-			raid_command->parameter = 0;
-			raid_command->action = 20;
+				raid_command->parameter = 0;
+				raid_command->action = 20;
 
-			player_to_invite->QueuePacket(outapp);
+				player_to_invite->QueuePacket(outapp);
 
-			safe_delete(outapp);
+				safe_delete(outapp);
+#endif
 
-			break;
-		}
+				break;
+			}
+
+		
 		case RaidCommandAcceptInvite: {
 			Client *player_accepting_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 			if (player_accepting_invite) {

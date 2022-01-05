@@ -24,6 +24,7 @@
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
+#include "bot.h" //Mitch
 
 #include "worldserver.h"
 
@@ -162,6 +163,81 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
+//Mitch
+void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool looter) {
+	if (!b)
+		return;
+
+	std::string query = StringFormat("INSERT INTO raid_members SET raidid = %lu, charid = %lu, "
+		"groupid = %lu, _class = %d, level = %d, name = '%s', "
+		"isgroupleader = %d, israidleader = %d, islooter = %d",
+		(unsigned long)GetID(), (unsigned long)b->GetBotID(),
+		(unsigned long)group, b->GetClass(), b->GetLevel(),
+		b->GetName(), groupleader, rleader, looter);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success()) {
+		LogError("Error inserting into raid members: [{}]", results.ErrorMessage().c_str());
+	}
+
+	LearnMembers();
+	VerifyRaid();
+	if (rleader) {
+		database.SetRaidGroupLeaderInfo(RAID_GROUPLESS, GetID());
+		UpdateRaidAAs();
+	}
+	if (group != RAID_GROUPLESS && groupleader) {
+		database.SetRaidGroupLeaderInfo(group, GetID());
+		UpdateGroupAAs(group);
+	}
+	if (group < 12)
+		GroupUpdate(group);
+	else // get raid AAs, GroupUpdate will handles it otherwise
+		//SendGroupLeadershipAA(c, RAID_GROUPLESS); Is this needed for bots?
+	SendRaidAddAll(b->GetOwner()->GetName());
+
+	b->SetRaidGrouped(true);
+	SendRaidMOTD(b->GetOwner()->CastToClient());
+
+	// Mitch What to do here?
+	// xtarget shit ..........
+	//if (group == RAID_GROUPLESS) {
+	//	if (rleader) {
+	//		GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
+	//		c->GetXTargetAutoMgr()->clear();
+	//		c->SetXTargetAutoMgr(GetXTargetAutoMgr());
+	//	}
+	//	else {
+	//		if (!c->GetXTargetAutoMgr()->empty()) {
+	//			GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
+	//			c->GetXTargetAutoMgr()->clear();
+	//			c->RemoveAutoXTargets();
+	//		}
+
+	//		c->SetXTargetAutoMgr(GetXTargetAutoMgr());
+
+	//		if (!c->GetXTargetAutoMgr()->empty())
+	//			c->SetDirtyAutoHaters();
+	//	}
+	//}
+
+	Raid* raid_update = nullptr;
+	raid_update = b->GetOwner()->GetRaid();
+	if (raid_update) {
+		raid_update->SendHPManaEndPacketsTo(b->GetOwner()->CastToClient());
+		raid_update->SendHPManaEndPacketsFrom(b->GetOwner()->CastToClient());
+	}
+
+	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
+	ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
+	rga->rid = GetID();
+	strn0cpy(rga->playername, b->GetOwner()->GetName(), 64);
+	rga->zoneid = zone->GetZoneID();
+	rga->instance_id = zone->GetInstanceID();
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 
 void Raid::RemoveMember(const char *characterName)
 {
