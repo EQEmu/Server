@@ -194,7 +194,7 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 		GroupUpdate(group);
 	else // get raid AAs, GroupUpdate will handles it otherwise
 		//SendGroupLeadershipAA(c, RAID_GROUPLESS); Is this needed for bots?
-	SendRaidAddAll(b->GetOwner()->GetName());
+	//SendRaidAddAll(b->GetOwner()->GetName());
 
 	b->SetRaidGrouped(true);
 	SendRaidMOTD(b->GetOwner()->CastToClient());
@@ -231,7 +231,7 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
-	strn0cpy(rga->playername, b->GetOwner()->GetName(), 64);
+	strn0cpy(rga->playername, b->GetName(), 64);
 	rga->zoneid = zone->GetZoneID();
 	rga->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
@@ -1097,7 +1097,7 @@ void Raid::SendRaidAddAll(const char *who)
 {
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(strcmp(members[x].membername, who) == 0)
+		if(strcmp(members[x].membername, who) == 0 && members[x].membername != "MyBard") //Mitch add IsBot
 		{
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			RaidAddMember_Struct *ram = (RaidAddMember_Struct*)outapp->pBuffer;
@@ -1227,7 +1227,12 @@ void Raid::SendBulkRaid(Client *to)
 	{
 		if(strlen(members[x].membername) > 0 && (strcmp(members[x].membername, to->GetName()) != 0)) //don't send ourself
 		{
-			SendRaidAdd(members[x].membername, to);
+#ifdef BOTS
+			if(!entity_list.GetBotByBotName(members[x].membername))
+				SendRaidAdd(members[x].membername, to);
+#else
+				SendRaidAdd(members[x].membername, to);
+#endif
 		}
 	}
 }
@@ -1616,14 +1621,22 @@ void Raid::VerifyRaid()
 		}
 		else{
 			Client *c = entity_list.GetClientByName(members[x].membername);
+#ifdef BOTS
+			Bot* b = entity_list.GetBotByBotName(members[x].membername); //Mitch
+#endif
 			if(c){
 				members[x].member = c;
 			}
-			else{
+#ifdef BOTS
+			else if(b){
+				members[x].member = b->CastToClient(); //Raid requires client* we are forcing it here to be a BOT
+			}
+#endif
+			else {
 				members[x].member = nullptr;
 			}
 		}
-		if(members[x].IsRaidLeader){
+		if(members[x].IsRaidLeader && !members[x].member->IsBot()){ //Mitch added reference to IsBot
 			if(strlen(members[x].membername) > 0){
 				SetLeader(members[x].member);
 				strn0cpy(leadername, members[x].membername, 64);
