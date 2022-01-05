@@ -12832,7 +12832,7 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 
 	SetTitle_Struct *sts = (SetTitle_Struct *)app->pBuffer;
 
-	if (title_manager.HasTitle(this, sts->title_id)) {
+	if (!title_manager.HasTitle(this, sts->title_id)) {
 		return;
 	}
 
