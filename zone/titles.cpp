@@ -140,12 +140,12 @@ bool TitleManager::HasTitle(Client* client, uint32 title_id)
 	}
 
 	for (const auto& title : titles) {
-		if (title.title_id == title_id && title.character_id == client->CharacterID()) {
-			return true;
+		if (title.title_id == title_id) {
+			return IsClientEligibleForTitle(client, title);
 		}
 	}
 
-	return true;
+	return false;
 }
 
 bool TitleManager::IsClientEligibleForTitle(Client *client, TitleEntry title)
@@ -266,26 +266,21 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
 
 	client->SetTitleSuffix(suffix);
 
-	auto escaped_suffix = new char[strlen(suffix) * 2 + 1];
-	database.DoEscapeString(escaped_suffix, suffix, strlen(suffix));
-
 	std::string query = fmt::format(
 		"SELECT `id` FROM titles WHERE `suffix` = '{}' AND char_id = {}",
-		escaped_suffix,
+		EscapeString(suffix),
 		client->CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
-	if (results.Success() && results.RowCount() > 0) {
-		safe_delete_array(escaped_suffix);
+	if (results.Success() && results.RowCount()) {
 		return;
 	}
 
 	query = fmt::format(
 		"INSERT INTO titles (`char_id`, `suffix`) VALUES ({}, '{}')",
 		client->CharacterID(),
-		escaped_suffix
+		EscapeString(suffix)
 	);
-	safe_delete_array(escaped_suffix);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		return;
@@ -361,7 +356,7 @@ void Client::RemoveTitle(int title_set)
 	TitlesRepository::DeleteWhere(
 		database,
 		fmt::format(
-			"WHERE `title_set` = {} AND `char_id` = {}",
+			"`title_set` = {} AND `char_id` = {}",
 			title_set,
 			CharacterID()
 		)
