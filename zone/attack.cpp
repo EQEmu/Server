@@ -1799,7 +1799,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	entity_list.RemoveFromTargets(this, true);
 	hate_list.RemoveEntFromHateList(this);
 	RemoveAutoXTargets();
-	ProcessXTargetAutoHaters();
 
 	//remove ourself from all proximities
 	ClearAllProximities();
