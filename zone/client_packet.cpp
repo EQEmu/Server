@@ -11322,7 +11322,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 	{
 		case RaidCommandInviteIntoExisting:
 		case RaidCommandInvite: {
-//Mitch
+			//Mitch
 #ifdef BOTS
 			Bot* player_to_invite = nullptr;
 			Client* player_to_invite_owner = nullptr;
@@ -11353,28 +11353,30 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 
 				Bot::ProcessRaidInvite(player_to_invite, player_to_invite_owner);
 			}
-#else			
-			Client *player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
+			else
+			{
+#endif
+				Client* player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
-			if (!player_to_invite)
-				break;
+				if (!player_to_invite)
+					break;
 
-			Group *player_to_invite_group = player_to_invite->GetGroup();
+				Group* player_to_invite_group = player_to_invite->GetGroup();
 
-			if (player_to_invite->HasRaid()) {
-				Message(Chat::Red, "%s is already in a raid.", player_to_invite->GetName());
-				break;
-			}
+				if (player_to_invite->HasRaid()) {
+					Message(Chat::Red, "%s is already in a raid.", player_to_invite->GetName());
+					break;
+				}
 
-			if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
-				MessageString(Chat::Red, ALREADY_IN_PARTY);
-				break;
-			}
+				if (player_to_invite_group && player_to_invite_group->IsGroupMember(this)) {
+					MessageString(Chat::Red, ALREADY_IN_PARTY);
+					break;
+				}
 
-			if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite)) {
-				Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
-				break;
-			}
+				if (player_to_invite_group && !player_to_invite_group->IsLeader(player_to_invite)) {
+					Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
+					break;
+				}
 
 				/* Send out invite to the client */
 				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
@@ -11389,10 +11391,10 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				player_to_invite->QueuePacket(outapp);
 
 				safe_delete(outapp);
-#endif
 
 				break;
 			}
+		}
 
 		
 		case RaidCommandAcceptInvite: {

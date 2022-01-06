@@ -221,12 +221,12 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 	//	}
 	//}
 
-	Raid* raid_update = nullptr;
-	raid_update = b->GetOwner()->GetRaid();
-	if (raid_update) {
-		raid_update->SendHPManaEndPacketsTo(b->GetOwner()->CastToClient());
-		raid_update->SendHPManaEndPacketsFrom(b->GetOwner()->CastToClient());
-	}
+//	Raid* raid_update = nullptr;
+//	raid_update = b->GetOwner()->GetRaid();
+//	if (raid_update) {
+//		raid_update->SendHPManaEndPacketsTo(b->GetOwner()->CastToClient());
+//		raid_update->SendHPManaEndPacketsFrom(b->GetOwner()->CastToClient());
+//	}
 
 	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
@@ -1227,7 +1227,7 @@ void Raid::SendBulkRaid(Client *to)
 	{
 		if(strlen(members[x].membername) > 0 && (strcmp(members[x].membername, to->GetName()) != 0)) //don't send ourself
 		{
-#ifdef BOTS
+#ifdef BOTSS
 			if(!entity_list.GetBotByBotName(members[x].membername))
 				SendRaidAdd(members[x].membername, to);
 #else
@@ -1241,7 +1241,7 @@ void Raid::QueuePacket(const EQApplicationPacket *app, bool ack_req)
 {
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(members[x].member)
+		if(members[x].member && !members[x].member->IsBot())
 		{
 			members[x].member->QueuePacket(app, ack_req);
 		}

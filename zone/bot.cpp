@@ -10102,7 +10102,7 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 					b_owner->MessageString(Chat::White, ALREADY_IN_RAID, player_accepting_invite->GetName()); //group failed, must invite members not in raid...
 					return;
 				}
-				Raid* raid = entity_list.GetRaidByMob(player_accepting_invite);
+				Raid* raid = entity_list.GetRaidByClient(b_owner);
 				if (raid) {
 					raid->VerifyRaid();
 					Group* group = player_accepting_invite->GetGroup();
@@ -10150,9 +10150,9 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 						raid->GroupUpdate(free_group_id);
 					}
 					else {
-						raid->SendRaidCreate(b_owner);
-						raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
-						raid->AddMember(b_owner);
+						//raid->SendRaidCreate(b_owner);
+						//raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+						raid->AddBot(player_accepting_invite);
 						raid->SendBulkRaid(b_owner);
 						if (raid->IsLocked()) {
 							raid->SendRaidLockTo(b_owner);
@@ -10354,8 +10354,9 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 							raid->SendRaidCreate(b_owner);
 							raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
 							raid->AddMember(b_owner, 0xFFFFFFFF, true, false, true);
-							raid->SendBulkRaid(b_owner);
 							raid->AddBot(player_accepting_invite);
+							raid->SendBulkRaid(b_owner);
+
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(b_owner);
 							}
