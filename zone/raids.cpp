@@ -1633,7 +1633,7 @@ void Raid::VerifyRaid()
 				members[x].member = nullptr;
 			}
 		}
-		if(members[x].IsRaidLeader && !members[x].member->IsBot()){ //Mitch added reference to IsBot
+		if(members[x].IsRaidLeader){ 
 			if(strlen(members[x].membername) > 0){
 				SetLeader(members[x].member);
 				strn0cpy(leadername, members[x].membername, 64);

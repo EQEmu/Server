@@ -10108,13 +10108,13 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 					Group* group = player_accepting_invite->GetGroup();
 					if (group) {
 						if (group->GroupCount() + raid->RaidCount() > MAX_RAID_MEMBERS) {
-							b_owner->Message(Chat::Red, "Invite failed, group invite would create a raid larger than the maximum number of members allowed.");
+							b_owner->Message(Chat::Red, "Invite failed, bot group invite would create a raid larger than the maximum number of members allowed.");
 							return;
 						}
 					}
 					else {
 						if (1 + raid->RaidCount() > MAX_RAID_MEMBERS) {
-							b_owner->Message(Chat::Red, "Invite failed, member invite would create a raid larger than the maximum number of members allowed.");
+							b_owner->Message(Chat::Red, "Invite failed, bot invite would create a raid larger than the maximum number of members allowed.");
 							return;
 						}
 					}
@@ -10122,6 +10122,7 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 						uint32 free_group_id = raid->GetFreeGroup();
 						Client* addClient = nullptr;
 						Bot* addBot = nullptr;
+						
 						for (int x = 0; x < 6; x++) {
 							if (group->members[x]) {
 								Client* c = nullptr;
