@@ -813,7 +813,7 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req, CLIENT_CO
 		AddPacket(app, ack_req);
 	}
 	else
-		if(eqs)
+		if(eqs && !IsBot()) //Mitch added the BoTcheck for a fail safe on trying to send a packet to a BoT!
 			eqs->QueuePacket(app, ack_req);
 }
 

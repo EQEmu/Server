@@ -188,7 +188,7 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 	}
 	if (group != RAID_GROUPLESS && groupleader) {
 		database.SetRaidGroupLeaderInfo(group, GetID());
-		UpdateGroupAAs(group);
+		//UpdateGroupAAs(group);
 	}
 	if (group < 12)
 		GroupUpdate(group);
@@ -1227,12 +1227,7 @@ void Raid::SendBulkRaid(Client *to)
 	{
 		if(strlen(members[x].membername) > 0 && (strcmp(members[x].membername, to->GetName()) != 0)) //don't send ourself
 		{
-#ifdef BOTSS
-			if(!entity_list.GetBotByBotName(members[x].membername))
 				SendRaidAdd(members[x].membername, to);
-#else
-				SendRaidAdd(members[x].membername, to);
-#endif
 		}
 	}
 }
@@ -1342,8 +1337,10 @@ void Raid::GroupUpdate(uint32 gid, bool initial)
 		if(strlen(members[x].membername) > 0){
 			if(members[x].GroupNumber == gid){
 				if(members[x].member) {
-					SendGroupUpdate(members[x].member);
-					SendGroupLeadershipAA(members[x].member, gid);
+					if (members[x].member->IsClient()) { //Mitch added
+						SendGroupUpdate(members[x].member);
+						SendGroupLeadershipAA(members[x].member, gid);
+					}
 				}
 			}
 		}

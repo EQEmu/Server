@@ -10121,25 +10121,45 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 					if (group) {//add us all
 						uint32 free_group_id = raid->GetFreeGroup();
 						Client* addClient = nullptr;
+						Bot* addBot = nullptr;
 						for (int x = 0; x < 6; x++) {
 							if (group->members[x]) {
 								Client* c = nullptr;
-								if (group->members[x]->IsBot())
+								Bot* b = nullptr;
+								if (group->members[x]->IsBot()) {
+									b = group->members[x]->CastToBot();
+									if (x == 0) {
+										raid->AddBot(b, free_group_id, false, true, false);
+										raid->SetGroupLeader(b->GetName());
+									}
+									else {
+										raid->AddBot(b, free_group_id, false, false, false);
+									}
+								}
+								else if (group->members[x]->IsClient()) {
 									c = group->members[x]->CastToClient();
-									
-								if (!addClient)
-								{
-									addClient = c;
-									raid->SetGroupLeader(addClient->GetName());
+									if (x == 0) {
+										raid->AddMember(c, free_group_id, false, true, false);
+										raid->SetGroupLeader(c->GetName());
+									}
+									else {
+										raid->AddMember(c, free_group_id, false, false, false);
+									}
 								}
 
-								raid->SendRaidCreate(b_owner);
-								raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
-								if (group->IsLeader(group->members[x]))
-									raid->AddMember(c, free_group_id, false, true);
-								else
-									raid->AddMember(c, free_group_id);
-								raid->SendBulkRaid(b_owner);
+								//if (!addClient)
+								//{
+								//	addClient = c;
+								//	raid->SetGroupLeader(addClient->GetName());
+								//}
+
+								//raid->SendRaidCreate(b_owner);
+								//raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
+								//if (group->IsLeader(group->members[x]))
+//									raid->AddMember(c, free_group_id, false, true);
+	//							else
+		//							raid->AddMember(c, free_group_id);
+								//raid->SendRaidGroupAdd(b_owner->GetName(), free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(b_owner);
 								}
@@ -10149,7 +10169,7 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 						group->DisbandGroup(true);
 						raid->GroupUpdate(free_group_id);
 					}
-					else {
+					else { // Jan 6 this also now works.  One player already in a raid, invites one or many bots.
 						//raid->SendRaidCreate(b_owner);
 						//raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
 						raid->AddBot(player_accepting_invite);
@@ -10346,7 +10366,7 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 								raid->SendRaidLockTo(b_owner);
 							}
 						}
-						else { // neither has a group
+						else { // neither has a group - Jan 6 this appears to work now.  One ungrouped player, one/many ungrouped bots
 							raid = new Raid(b_owner);
 							entity_list.AddRaid(raid);
 							raid->SetRaidDetails();
