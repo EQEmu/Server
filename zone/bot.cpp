@@ -10136,16 +10136,24 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 									else {
 										raid->AddBot(b, free_group_id, false, false, false);
 									}
+									raid->SendBulkRaid(b->CastToClient());
 								}
 								else if (group->members[x]->IsClient()) {
 									c = group->members[x]->CastToClient();
 									if (x == 0) {
+										raid->SendRaidCreate(c);
+										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, free_group_id, false, true, false);
 										raid->SetGroupLeader(c->GetName());
 									}
 									else {
+										raid->SendRaidCreate(c);
+										raid->SendMakeLeaderPacketTo(raid->leadername, c);
 										raid->AddMember(c, free_group_id, false, false, false);
 									}
+									raid->SendBulkRaid(c);
+									if (raid->IsLocked())
+										raid->SendRaidLockTo(c);
 								}
 
 								//if (!addClient)
@@ -10161,9 +10169,7 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 	//							else
 		//							raid->AddMember(c, free_group_id);
 								//raid->SendRaidGroupAdd(b_owner->GetName(), free_group_id);
-								if (raid->IsLocked()) {
-									raid->SendRaidLockTo(b_owner);
-								}
+								
 							}
 						}
 						group->JoinRaidXTarget(raid);
@@ -10174,7 +10180,9 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 						//raid->SendRaidCreate(b_owner);
 						//raid->SendMakeLeaderPacketTo(raid->leadername, b_owner);
 						raid->AddBot(player_accepting_invite);
-						raid->SendBulkRaid(b_owner);
+						// Set indicator that bot owner has already received this update.  Mitch
+						
+						//raid->SendBulkRaid(b_owner);
 						if (raid->IsLocked()) {
 							raid->SendRaidLockTo(b_owner);
 						}

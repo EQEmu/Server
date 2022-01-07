@@ -194,10 +194,11 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 		GroupUpdate(group);
 	else // get raid AAs, GroupUpdate will handles it otherwise
 		//SendGroupLeadershipAA(c, RAID_GROUPLESS); Is this needed for bots?
-	//SendRaidAddAll(b->GetOwner()->GetName());
-
+		SendRaidAddAll(b->GetName());
+	
+	members[GetPlayerIndex(b->GetName())].SentToBotOwner = true;  //Mitch indicates that the BotOwner has received this raid info already.
 	b->SetRaidGrouped(true);
-	SendRaidMOTD(b->GetOwner()->CastToClient());
+	//SendRaidMOTD(b->GetOwner()->CastToClient());
 
 	// Mitch What to do here?
 	// xtarget shit ..........
@@ -1075,7 +1076,7 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(strcmp(members[x].membername, who) == 0)
+		if(strcmp(members[x].membername, who) == 0 || !members[x].SentToBotOwner) //Mitch
 		{
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			RaidAddMember_Struct *ram = (RaidAddMember_Struct*)outapp->pBuffer;
@@ -1095,12 +1096,15 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 
 void Raid::SendRaidAddAll(const char *who)
 {
-	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
+	for (int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(strcmp(members[x].membername, who) == 0 && members[x].membername != "MyBard") //Mitch add IsBot
+		if (strcmp(members[x].membername, who) == 0 ) //Mitch add IsBot
+		//if (!members[x].member->IsBot() ||
+		//	strcmp(members[x].membername, who) == 0 ||
+		//	(members[x].SentToBotOwner && members[x].member->GetOwnerID() != entity_list.GetClientByName(who)->CharacterID())) //Mitch add IsBot
 		{
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
-			RaidAddMember_Struct *ram = (RaidAddMember_Struct*)outapp->pBuffer;
+			RaidAddMember_Struct* ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
 			ram->raidGen.parameter = members[x].GroupNumber;
 			strcpy(ram->raidGen.leader_name, members[x].membername);
@@ -1111,6 +1115,7 @@ void Raid::SendRaidAddAll(const char *who)
 			this->QueuePacket(outapp);
 			safe_delete(outapp);
 			return;
+
 		}
 	}
 }
