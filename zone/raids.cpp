@@ -190,11 +190,11 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 		database.SetRaidGroupLeaderInfo(group, GetID());
 		//UpdateGroupAAs(group);
 	}
-	if (group < 12)
-		GroupUpdate(group);
-	else // get raid AAs, GroupUpdate will handles it otherwise
+//	if (group < 12)
+//		GroupUpdate(group);
+//	else // get raid AAs, GroupUpdate will handles it otherwise
 		//SendGroupLeadershipAA(c, RAID_GROUPLESS); Is this needed for bots?
-		SendRaidAddAll(b->GetName());
+	SendRaidAddAll(b->GetName());
 	
 	members[GetPlayerIndex(b->GetName())].SentToBotOwner = true;  //Mitch indicates that the BotOwner has received this raid info already.
 	b->SetRaidGrouped(true);
@@ -1076,7 +1076,7 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(strcmp(members[x].membername, who) == 0 || !members[x].SentToBotOwner) //Mitch
+		if(strcmp(members[x].membername, who) == 0)// || !members[x].SentToBotOwner) //Mitch
 		{
 			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			RaidAddMember_Struct *ram = (RaidAddMember_Struct*)outapp->pBuffer;
