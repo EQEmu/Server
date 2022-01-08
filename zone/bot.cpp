@@ -10119,6 +10119,7 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 				}
 			}
 			//Usecase #3 - Raid already created, Bot is BotGroupLeader.
+			//UseCase #5 - Raid already created, Client is groupleader with at least one Bot in group
 			if (group) {//add us all								// Is the player already in a group?  If yes, add all players from the group
 				uint32 free_group_id = raid->GetFreeGroup();
 				Client* addClient = nullptr;
@@ -10189,14 +10190,20 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 				}
 			}
 		}
-		//No raid exists.
+// No raid exists at this point
+// Usecase #1 - Client invites another client. No groups involved. Handled by Raid Accept Invite routine
+// Usecase #2 -	Client invites their own bot. No groups involved. Handled here.
+// Usecase #4 - Client invites their own bot to a group then to raid. Handled here.
+// Usecase #5 - Client invites another client that is in a group with their own bot. Handled here.
+// Usecase #6 - Client with a bot in a group invites another client that is in a group with their own bot. Handled here.
 		else
-		{															// A raid does not already exist.  One needs to be created before going forward
+		{															
 			Group* player_invited_group = player_accepting_invite->GetGroup();
 			Group* group = entity_list.GetGroupByClient(b_owner); // player_accepting_invite->GetGroup();
-			if (group) //if our target has a group
+			if (group) 
+// No raid.  Invited member (Bot Owner) has a group.  Member inviting does not have a group
+// Usecase #5
 			{
-				//						raid = new Raid(player_accepting_invite);
 				raid = new Raid(b_owner);
 				entity_list.AddRaid(raid);
 				raid->SetRaidDetails();

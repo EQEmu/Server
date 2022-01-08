@@ -11326,7 +11326,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 #ifdef BOTS
 			Bot* player_to_invite = nullptr;
 			Client* player_to_invite_owner = nullptr;
-			if (entity_list.GetBotByBotName(raid_command_packet->player_name)) {
+
+			
+			if (entity_list.GetBotByBotName(raid_command_packet->player_name) ) {
 				Bot* player_to_invite = entity_list.GetBotByBotName(raid_command_packet->player_name);
 				Client* player_to_invite_owner = player_to_invite->GetOwner()->CastToClient();
 
@@ -11352,6 +11354,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				}
 
 				Bot::ProcessRaidInvite(player_to_invite, player_to_invite_owner);
+				break;
 			}
 			else
 			{
@@ -11377,6 +11380,25 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 					Message(Chat::Red, "You can only invite an ungrouped player or group leader to join your raid.");
 					break;
 				}
+
+//				bool player_accepting_invite_has_bots_in_group = false;
+				Bot* b = nullptr;
+				Group* g = player_to_invite->GetGroup();
+				if (player_to_invite->HasGroup() && g->IsLeader(player_to_invite))
+				{
+					for (int x = 0; x < 6; x++)
+					{
+						if (g->members[x]->IsBot())
+						{
+							b = entity_list.GetBotByBotName(g->members[x]->GetName());
+//							player_accepting_invite_has_bots_in_group = true;
+							break;
+						}
+					}
+					Bot::ProcessRaidInvite(b, player_to_invite);
+					break;
+				}
+
 
 				/* Send out invite to the client */
 				auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
