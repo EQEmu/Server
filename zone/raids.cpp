@@ -1341,11 +1341,9 @@ void Raid::GroupUpdate(uint32 gid, bool initial)
 	{
 		if(strlen(members[x].membername) > 0){
 			if(members[x].GroupNumber == gid){
-				if(members[x].member) {
-					if (members[x].member->IsClient()) { //Mitch added
-						SendGroupUpdate(members[x].member);
-						SendGroupLeadershipAA(members[x].member, gid);
-					}
+				if (members[x].member) {
+					SendGroupUpdate(members[x].member);
+					SendGroupLeadershipAA(members[x].member, gid);
 				}
 			}
 		}

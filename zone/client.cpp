@@ -825,7 +825,7 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 		return;
 	}
 	else {
-		if(eqs)
+		if(eqs && !IsBot()) //Mitch added
 			eqs->FastQueuePacket((EQApplicationPacket **)app, ack_req);
 		else if (app && (*app))
 			delete *app;
