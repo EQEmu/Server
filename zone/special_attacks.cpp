@@ -2262,10 +2262,8 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		damage = DMG_INVULNERABLE;
 	}
 
-	bool CanSkillProc = true;
 	if (skillinuse == EQ::skills::SkillOffense) {    // Hack to allow damage to display.
 		skillinuse = EQ::skills::SkillTigerClaw; //'strike' your opponent - Arbitrary choice for message.
-		CanSkillProc = false;			    // Disable skill procs
 	}
 
 	other->AddToHateList(this, hate, 0);
@@ -2275,14 +2273,6 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		return;
 
 	TryCastOnSkillUse(other, skillinuse);
-
-	if (CanSkillProc && HasSkillProcs()) {
-		TrySkillProc(other, skillinuse, ReuseTime);
-	}
-
-	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess()) {
-		TrySkillProc(other, skillinuse, ReuseTime, true);
-	}
 }
 
 bool Mob::CanDoSpecialAttack(Mob *other) {
