@@ -11414,20 +11414,34 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 			// If the accepting client is in a group with a Bot, send the invite to Bot:ProcessRaidInvite
 			// instead of remaining here.
 			Bot* b = nullptr;
-			Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
-			Group* g = c->GetGroup();
-			if (c->HasGroup() && g->IsLeader(c))
+			Client* invitee = entity_list.GetClientByName(raid_command_packet->leader_name);
+			Client* invitor = entity_list.GetClientByName(raid_command_packet->player_name);
+			Group* g_invitee = invitee->GetGroup();
+			Group* g_invitor = invitor->GetGroup();
+
+			if (invitee->HasGroup() && g_invitee->IsLeader(invitee))
 			{
 				for (int x = 0; x < 6; x++)
 				{
-					if (g->members[x]->IsBot())
+					if (g_invitee->members[x]->IsBot())
 					{
-						b = entity_list.GetBotByBotName(g->members[x]->GetName());
+						b = entity_list.GetBotByBotName(g_invitee->members[x]->GetName());
+						Bot::ProcessRaidInvite(b, player_accepting_invite);
 						break;
 					}
 				}
-				Bot::ProcessRaidInvite(b, player_accepting_invite);
-				break;
+			}
+			if (invitee && invitor->HasGroup() && g_invitor->IsLeader(invitor))
+			{
+				for (int x = 0; x < 6; x++)
+				{
+					if (g_invitor->members[x]->IsBot())
+					{
+						b = entity_list.GetBotByBotName(g_invitor->members[x]->GetName());
+						Bot::ProcessRaidInvite2(player_accepting_invite);
+						break;
+					}
+				}
 			}
 #endif
 			if (player_accepting_invite) {

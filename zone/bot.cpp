@@ -10094,8 +10094,56 @@ void Bot::StopMoving(float new_heading)
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
+void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
+
+	Raid* raid = entity_list.GetRaidByClient(invitor);
+	Group* g_invitee = invitee->GetGroup();
+	Group* g_invitor = invitor->GetGroup();
+
+	if (raid)
+	{
+		if (g_invitee) 
+		{
+			//As there is already a raid, just add this group
+		}
+		else
+		{
+			//As there is already a raid and no group, just add this single client
+		}
+	}
+	else
+	{
+		//As there is no raid
+		//First, create the raid
+		if (g_invitor)
+		{
+			//Second, add the invitor group
+			if (g_invitee)
+			{
+				//Third, add the invitee group
+			}
+			else
+			{
+				//Third, no group so add the single client
+			}
+		}
+		else
+		{
+			//Second, add the single invitor
+			if (g_invitee)
+			{
+				//Third, add the invitee group
+			}
+			else
+			{
+				//Third, no group so add the single client
+			}
+		}
+	}
+}
+
 void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
-			
+	
 	if (player_accepting_invite) {
 		if (player_accepting_invite->IsRaidGrouped()) {
 			b_owner->MessageString(Chat::White, ALREADY_IN_RAID, player_accepting_invite->GetName()); //group failed, must invite members not in raid...
@@ -10123,7 +10171,7 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 
 //Usecase #3 - Raid already created, Bot is BotGroupLeader.
 //UseCase #5 - Raid already created, Client is groupleader with at least one Bot in group
-			if (group) {//add us all								// Is the player already in a group?  If yes, add all players from the group
+			if (group) {
 				uint32 free_group_id = raid->GetFreeGroup();
 				Client* addClient = nullptr;
 				Bot* addBot = nullptr;
@@ -10204,15 +10252,15 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 		{															
 // No raid at this point.
 // Several usecases here.
-// 1. Inviting Client does not have a group, invited player is a single client
-// 2. Inviting Client does not have a group, invited player is a single bot that they own
-// 3. Inviting Client does not have a group, invited player is a single bot that they do not own
-// 4. Inviting Client does not have a group, invited player is a single bot in a group of other bots
-// 5. Inviting Client does not have a group, invited player is a single bot in a group of other mixed players and bots
-// 6. Inviting Client does not have a group, invited player is a single client in a group of other players only
-// 7. Inviting Client does not have a group, invited player is a single client in a group of bots only
-// 8. Inviting Client does not have a group, invited player is a single client in a group of mixed players and bots
-			
+// Working from raids.cpp 1. Inviting Client does not have a group, invited player is a single client
+// Working                2. Inviting Client does not have a group, invited player is a single bot that they own
+// Working                3. Inviting Client does not have a group, invited player is a single bot that they do not own
+// Working                4. Inviting Client does not have a group, invited player is a single bot in a group of other bots
+// Working                5. Inviting Client does not have a group, invited player is a single bot in a group of other mixed players and bots
+// Working from raids.cpp 6. Inviting Client does not have a group, invited player is a single client in a group of other players only
+// Working                7. Inviting Client does not have a group, invited player is a single client in a group of bots only
+// Working                8. Inviting Client does not have a group, invited player is a single client in a group of mixed players and bots
+
 			Group* player_invited_group = player_accepting_invite->GetGroup();
 			Group* group = entity_list.GetGroupByClient(b_owner); // player_accepting_invite->GetGroup();
 // No raid. Check to see if Inviting client has a group?
@@ -10390,7 +10438,8 @@ void Bot::ProcessRaidInvite(Bot* player_accepting_invite, Client* b_owner) {
 						raid->SendRaidLockTo(b_owner);
 					}
 				}
-// No raid. Inviting client DOES NOT HAVE a group.  Invited client DOES NOT HAVE a group.  Working?
+// 2. Inviting Client does not have a group, invited player is a single bot that they own
+// 3. Inviting Client does not have a group, invited player is a single bot that they do not own
 				else {
 					raid = new Raid(b_owner);
 					entity_list.AddRaid(raid);
