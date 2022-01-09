@@ -783,7 +783,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 
 void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, const EQ::ItemInstance *Ammo,
 			     uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
-			     uint32 ammo_id, const EQ::ItemData *AmmoItem, int AmmoSlot, float speed)
+			     uint32 ammo_id, const EQ::ItemData *AmmoItem, int AmmoSlot, float speed, bool DisableProcs)
 {
 	if ((other == nullptr ||
 	     ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
@@ -848,7 +848,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	if (LaunchProjectile) { // 1: Shoot the Projectile once we calculate weapon damage.
 		TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
-				    Ammo, AmmoSlot, speed);
+				    Ammo, AmmoSlot, speed, DisableProcs);
 		return;
 	}
 
@@ -896,46 +896,49 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillArchery);
 
 
+	if (!DisableProcs) {
+		// Weapon Proc
+		if (RangeWeapon && other && !other->HasDied()) {
+			TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange);
+		}
 
-	// Weapon Proc
-	if (RangeWeapon && other && !other->HasDied()) {
-		TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange);
-	}
-
-	// Ammo Proc, do not try spell procs if from ammo.
-	if (last_ammo_used) {
-		TryWeaponProc(nullptr, last_ammo_used, other, EQ::invslot::slotRange);
-	}
-	else if (Ammo && other && !other->HasDied()) {
-		TryWeaponProc(Ammo, Ammo->GetItem(), other, EQ::invslot::slotRange);
+		// Ammo Proc, do not try spell procs if from ammo.
+		if (last_ammo_used) {
+			TryWeaponProc(nullptr, last_ammo_used, other, EQ::invslot::slotRange);
+		}
+		else if (Ammo && other && !other->HasDied()) {
+			TryWeaponProc(Ammo, Ammo->GetItem(), other, EQ::invslot::slotRange);
+		}
 	}
 
 	TryCastOnSkillUse(other, EQ::skills::SkillArchery);
 
-	// Skill Proc Attempt
-	if (HasSkillProcs() && other && !other->HasDied()) {
-		if (ReuseTime) {
-			TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime);
+	if (!DisableProcs) {
+		// Skill Proc Attempt
+		if (HasSkillProcs() && other && !other->HasDied()) {
+			if (ReuseTime) {
+				TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime);
+			}
+			else {
+				TrySkillProc(other, EQ::skills::SkillArchery, 0, false, EQ::invslot::slotRange);
+			}
 		}
-		else {
-			TrySkillProc(other, EQ::skills::SkillArchery, 0, false, EQ::invslot::slotRange);
-		}
-	}
 
-	// Skill Proc Success ... can proc off hits OR misses
-	if (HasSkillProcSuccess() && other && !other->HasDied()) {
-		if (ReuseTime) {
-			TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime, true);
-		}
-		else {
-			TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
+		// Skill Proc Success ... can proc off hits OR misses
+		if (HasSkillProcSuccess() && other && !other->HasDied()) {
+			if (ReuseTime) {
+				TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime, true);
+			}
+			else {
+				TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
+			}
 		}
 	}
 }
 
 bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::SkillType skillInUse,
 			      uint16 weapon_dmg, const EQ::ItemInstance *RangeWeapon,
-			      const EQ::ItemInstance *Ammo, int AmmoSlot, float speed)
+			      const EQ::ItemInstance *Ammo, int AmmoSlot, float speed, bool DisableProcs)
 {
 	if (!other)
 		return false;
@@ -996,6 +999,7 @@ bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::
 	ProjectileAtk[slot].ammo_slot = AmmoSlot;
 	ProjectileAtk[slot].skill = skillInUse;
 	ProjectileAtk[slot].speed_mod = speed;
+	ProjectileAtk[slot].disable_procs = DisableProcs;
 
 	SetProjectileAttack(true);
 
@@ -1072,11 +1076,11 @@ void Mob::ProjectileAttack()
 						DoArcheryAttackDmg(target, nullptr, nullptr, ProjectileAtk[i].wpn_dmg,
 								   0, 0, 0, ProjectileAtk[i].ranged_id,
 								   ProjectileAtk[i].ammo_id, nullptr,
-								   ProjectileAtk[i].ammo_slot);
+								   ProjectileAtk[i].ammo_slot, 4.0f, ProjectileAtk[i].disable_procs);
 					else if (ProjectileAtk[i].skill == EQ::skills::SkillThrowing)
 						DoThrowingAttackDmg(target, nullptr, nullptr, ProjectileAtk[i].wpn_dmg,
 								    0, 0, 0, ProjectileAtk[i].ranged_id,
-								    ProjectileAtk[i].ammo_slot);
+								    ProjectileAtk[i].ammo_slot, 4.0f, ProjectileAtk[i].disable_procs);
 					else if (ProjectileAtk[i].skill == EQ::skills::SkillConjuration &&
 						 IsValidSpell(ProjectileAtk[i].wpn_dmg))
 						SpellOnTarget(ProjectileAtk[i].wpn_dmg, target, false, true,
@@ -1376,12 +1380,12 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 }
 
 void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, const EQ::ItemData *AmmoItem,
-			      uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
-			      int AmmoSlot, float speed)
+	uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
+	int AmmoSlot, float speed, bool DisableProcs)
 {
 	if ((other == nullptr ||
-	     ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
-	     HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
+		((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
+		HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
 		return;
 	}
 
@@ -1398,11 +1402,12 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	if (RuleB(Combat, ProjectileDmgOnImpact)) {
 		if (AmmoItem) {
 			LaunchProjectile = true;
-		} else {
+		}
+		else {
 			if (!RangeWeapon && range_id) {
 				if (IsClient()) {
 					m_RangeWeapon = CastToClient()->m_inv[AmmoSlot];
-					
+
 					if (m_RangeWeapon && m_RangeWeapon->GetItem() && m_RangeWeapon->GetItem()->ID == range_id) {
 						RangeWeapon = m_RangeWeapon;
 					}
@@ -1412,7 +1417,8 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 				}
 			}
 		}
-	} else if (AmmoItem) {
+	}
+	else if (AmmoItem) {
 		SendItemAnimation(other, AmmoItem, EQ::skills::SkillThrowing);
 	}
 
@@ -1430,10 +1436,11 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 
 		if (LaunchProjectile) {
 			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillThrowing, WDmg, RangeWeapon,
-					    nullptr, AmmoSlot, speed);
+				nullptr, AmmoSlot, speed);
 			return;
 		}
-	} else {
+	}
+	else {
 		WDmg = weapon_damage;
 	}
 
@@ -1458,7 +1465,8 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		TotalDmg = my_hit.damage_done;
 
 		LogCombat("Item DMG [{}]. Hit for damage [{}]", WDmg, TotalDmg);
-	} else {
+	}
+	else {
 		TotalDmg = DMG_INVULNERABLE;
 	}
 
@@ -1467,25 +1475,29 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillThrowing);
 
-	if (other && !other->HasDied()) {
+	if (!DisableProcs && other && !other->HasDied()) {
 		TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange, last_ammo_used);
 	}
 
-	if (HasSkillProcs() && other && !other->HasDied()) {
-		if (ReuseTime) {
-			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
-		}
-		else {
-			TrySkillProc(other, EQ::skills::SkillThrowing, 0, false, EQ::invslot::slotRange);
-		}
-	}
+	TryCastOnSkillUse(other, EQ::skills::SkillThrowing);
 
-	if (HasSkillProcSuccess() && other && !other->HasDied()) {
-		if (ReuseTime) {
-			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime, true);
+	if (!DisableProcs) {
+		if (HasSkillProcs() && other && !other->HasDied()) {
+			if (ReuseTime) {
+				TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
+			}
+			else {
+				TrySkillProc(other, EQ::skills::SkillThrowing, 0, false, EQ::invslot::slotRange);
+			}
 		}
-		else {
-			TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
+
+		if (HasSkillProcSuccess() && other && !other->HasDied()) {
+			if (ReuseTime) {
+				TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime, true);
+			}
+			else {
+				TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
+			}
 		}
 	}
 
@@ -2250,10 +2262,8 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		damage = DMG_INVULNERABLE;
 	}
 
-	bool CanSkillProc = true;
 	if (skillinuse == EQ::skills::SkillOffense) {    // Hack to allow damage to display.
 		skillinuse = EQ::skills::SkillTigerClaw; //'strike' your opponent - Arbitrary choice for message.
-		CanSkillProc = false;			    // Disable skill procs
 	}
 
 	other->AddToHateList(this, hate, 0);
@@ -2263,14 +2273,6 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		return;
 
 	TryCastOnSkillUse(other, skillinuse);
-
-	if (CanSkillProc && HasSkillProcs()) {
-		TrySkillProc(other, skillinuse, ReuseTime);
-	}
-
-	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess()) {
-		TrySkillProc(other, skillinuse, ReuseTime, true);
-	}
 }
 
 bool Mob::CanDoSpecialAttack(Mob *other) {

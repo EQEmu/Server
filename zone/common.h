@@ -737,6 +737,7 @@ typedef struct
 	int ammo_slot;
 	uint8 skill;
 	float speed_mod;
+	bool disable_procs;
 } tProjatk;
 
 //eventually turn this into a typedef and

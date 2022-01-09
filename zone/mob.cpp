@@ -355,6 +355,7 @@ Mob::Mob(
 		ProjectileAtk[i].ammo_slot     = 0;
 		ProjectileAtk[i].skill         = 0;
 		ProjectileAtk[i].speed_mod     = 0.0f;
+		ProjectileAtk[i].disable_procs = false;
 	}
 
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
