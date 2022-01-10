@@ -116,6 +116,10 @@ private:
 	bool HandleEnterWorldPacket(const EQApplicationPacket *app);
 	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
 	bool HandleZoneChangePacket(const EQApplicationPacket *app);
+	bool HandleChecksumPacket(const EQApplicationPacket *app);
+	bool ChecksumVerificationCRC1EQGame(uint64 checksum);
+	bool ChecksumVerificationCRC2SkillCaps(uint64 checksum);
+	bool ChecksumVerificationCRC3BaseData(uint64 checksum);
 
 	EQStreamInterface* eqs;
 };

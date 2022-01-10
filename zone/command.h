@@ -310,6 +310,7 @@ void command_unscribespell(Client *c, const Seperator *sep);
 void command_unscribespells(Client *c, const Seperator *sep);
 void command_untraindisc(Client *c, const Seperator *sep);
 void command_untraindiscs(Client *c, const Seperator *sep);
+void command_updatechecksum(Client* c, const Seperator* sep);
 void command_uptime(Client *c, const Seperator *sep);
 void command_version(Client *c, const Seperator *sep);
 void command_viewcurrencies(Client *c, const Seperator *sep);
