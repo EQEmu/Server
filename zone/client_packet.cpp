@@ -10717,6 +10717,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
 			} else {
+				mypet->SetPetStop(true);
 				mypet->StopNavigation();
 				mypet->SetTarget(nullptr);
 				if (mypet->IsPetRegroup()) {
