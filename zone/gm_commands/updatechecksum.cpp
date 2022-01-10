@@ -1,4 +1,7 @@
 #include "../client.h"
+#include "../worldserver.h"
+
+extern WorldServer worldserver;
 
 void command_updatechecksum(Client* c, const Seperator* sep) {
 	if (c)
