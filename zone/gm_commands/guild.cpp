@@ -64,7 +64,7 @@ void command_guild(Client *c, const Seperator *sep)
 	}
 
 	if (is_create) {
-		if (arguments != 3) {
+		if (arguments < 3) {
 			c->Message(Chat::White, "Usage: #guild create [Character ID|Character Name] [Guild Name]");
 		} else {
 			auto leader_id = (
