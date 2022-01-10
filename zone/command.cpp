@@ -387,7 +387,7 @@ int command_init(void)
 		command_add("unscribespells", "- Clear out your or your player target's spell book.", AccountStatus::GMCoder, command_unscribespells) ||
 		command_add("untraindisc", "[spellid] - Untrain specified discipline from your target.", AccountStatus::GMCoder, command_untraindisc) ||
 		command_add("untraindiscs", "- Untrains all disciplines from your target.", AccountStatus::GMCoder, command_untraindiscs) ||
-		command_add("updatechecksum", "gm only", 250, command_updatechecksum) ||
+		command_add("updatechecksum", "gm only", AccountStatus::GMImpossible, command_updatechecksum) ||
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", AccountStatus::Steward, command_uptime) ||
 		command_add("version", "- Display current version of EQEmu server", AccountStatus::Player, command_version) ||
 		command_add("viewcurrencies", "- View your or your target's currencies", AccountStatus::GMAdmin, command_viewcurrencies) ||
