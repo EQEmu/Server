@@ -10106,6 +10106,7 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 		{
 			//As there is already a raid, just add this group
 			raid->SendBulkRaid(invitee);
+			raid->SendMakeLeaderPacketTo(raid->leadername, invitee); //added to resolve Basic's raid window not showing a raid leader
 			uint32 raid_free_group_id = raid->GetFreeGroup();
 			for (int x = 0; x < 6; x++) {
 				if (g_invitee->members[x]) {
@@ -10154,8 +10155,8 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 		{
 			//As there is already a raid and no group, just add this single client
 			raid->SendRaidCreate(invitee);
-			raid->SendMakeLeaderPacketTo(raid->leadername, invitee);
 			raid->AddMember(invitee);
+			raid->SendMakeLeaderPacketTo(raid->leadername, invitee); //moved to be after the addmember to resolve raid window not showing a raid leader
 			if (raid->IsLocked()) {
 				raid->SendRaidLockTo(invitee);
 			}
@@ -10168,6 +10169,8 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 		raid = new Raid(invitor);
 		entity_list.AddRaid(raid);
 		raid->SetRaidDetails();
+		raid->SendRaidCreate(invitor);
+		raid->SendMakeLeaderPacketTo(raid->leadername, invitor); //added to resolve no raid leader shown in Rola's raid window
 		
 		if (g_invitor)
 		{
@@ -10181,9 +10184,11 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 						if (x == 0) {
 							raid->AddBot(b, 0, false, true, false);
 							raid->SetGroupLeader(b->GetName());
+							raid->GroupUpdate(0);
 						}
 						else {
 							raid->AddBot(b, 0, false, false, false);
+							raid->GroupUpdate(0);
 						}
 					}
 					else if (g_invitor->members[x] && g_invitor->members[x]->IsClient()) {
@@ -10193,6 +10198,7 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							raid->AddMember(c, 0, false, true, false);
 							raid->SetGroupLeader(c->GetName());
+							raid->GroupUpdate(0);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10201,6 +10207,7 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 							raid->SendRaidCreate(c);
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							raid->AddMember(c, 0, false, false, false);
+							raid->GroupUpdate(0);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10227,9 +10234,11 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 							if (x == 0) {
 								raid->AddBot(b, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(b->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 							}
 							else {
 								raid->AddBot(b, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id);
 							}
 						}
 						else if (g_invitee->members[x] && g_invitee->members[x]->IsClient()) {
@@ -10239,6 +10248,7 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(c->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10247,6 +10257,7 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 								raid->SendRaidCreate(c);
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id); 
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10296,9 +10307,11 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 							if (x == 0) {
 								raid->AddBot(b, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(b->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 							}
 							else {
 								raid->AddBot(b, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id);
 							}
 						}
 						else if (g_invitee->members[x] && g_invitee->members[x]->IsClient()) {
@@ -10308,6 +10321,7 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(c->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10316,6 +10330,7 @@ void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
 								raid->SendRaidCreate(c);
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10364,9 +10379,11 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 						if (x == 0) {
 							raid->AddBot(b, raid_free_group_id, false, true, false);
 							raid->SetGroupLeader(b->GetName());
+							raid->GroupUpdate(raid_free_group_id);
 						}
 						else {
 							raid->AddBot(b, raid_free_group_id, false, false, false);
+							raid->GroupUpdate(raid_free_group_id);
 						}
 					}
 					else if (g_invitee->members[x] && g_invitee->members[x]->IsClient()) {
@@ -10376,6 +10393,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							raid->AddMember(c, raid_free_group_id, false, true, false);
 							raid->SetGroupLeader(c->GetName());
+							raid->GroupUpdate(raid_free_group_id);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10384,6 +10402,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							raid->SendRaidCreate(c);
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							raid->AddMember(c, raid_free_group_id, false, false, false);
+							raid->GroupUpdate(raid_free_group_id);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10429,9 +10448,11 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 						if (x == 0) {
 							raid->AddBot(b, 0, false, true, false);
 							raid->SetGroupLeader(b->GetName());
+							raid->GroupUpdate(0);
 						}
 						else {
 							raid->AddBot(b, 0, false, false, false);
+							raid->GroupUpdate(0);
 						}
 					}
 					else if (g_invitor->members[x] && g_invitor->members[x]->IsClient()) {
@@ -10441,6 +10462,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							raid->AddMember(c, 0, false, true, false);
 							raid->SetGroupLeader(c->GetName());
+							raid->GroupUpdate(0);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10449,6 +10471,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							raid->SendRaidCreate(c);
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							raid->AddMember(c, 0, false, false, false);
+							raid->GroupUpdate(0);
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10475,9 +10498,11 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							if (x == 0) {
 								raid->AddBot(b, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(b->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 							}
 							else {
 								raid->AddBot(b, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id);
 							}
 						}
 						else if (g_invitee->members[x] && g_invitee->members[x]->IsClient()) {
@@ -10487,6 +10512,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(c->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10495,6 +10521,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 								raid->SendRaidCreate(c);
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10543,9 +10570,11 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							if (x == 0) {
 								raid->AddBot(b, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(b->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 							}
 							else {
 								raid->AddBot(b, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id);
 							}
 						}
 						else if (g_invitee->members[x] && g_invitee->members[x]->IsClient()) {
@@ -10555,6 +10584,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, true, false);
 								raid->SetGroupLeader(c->GetName());
+								raid->GroupUpdate(raid_free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10563,6 +10593,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 								raid->SendRaidCreate(c);
 								raid->SendMakeLeaderPacketTo(raid->leadername, c);
 								raid->AddMember(c, raid_free_group_id, false, false, false);
+								raid->GroupUpdate(raid_free_group_id);
 								if (raid->IsLocked()) {
 									raid->SendRaidLockTo(c);
 								}
@@ -10583,6 +10614,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 				//raid->SendRaidCreate(invitee);
 				//raid->SendMakeLeaderPacketTo(raid->leadername, invitee);
 				raid->AddBot(invitee);
+				invitee->SetFollowID(invitor->GetID());
 				//if (raid->IsLocked()) {
 				//	raid->SendRaidLockTo(invitee);
 				//}
