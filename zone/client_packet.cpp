@@ -11327,9 +11327,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 			Bot* player_to_invite = nullptr;
 			Client* player_to_invite_owner = nullptr;
 			
-			
-
-			
 			if (entity_list.GetBotByBotName(raid_command_packet->player_name) ) {
 				Bot* player_to_invite = entity_list.GetBotByBotName(raid_command_packet->player_name);
 				Client* player_to_invite_owner = player_to_invite->GetOwner()->CastToClient();
@@ -11419,30 +11416,43 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 			Group* g_invitee = invitee->GetGroup();
 			Group* g_invitor = invitor->GetGroup();
 
-			if (invitee->HasGroup() && g_invitee->IsLeader(invitee))
+			bool invitor_has_bot = false;
+			bool invitee_has_bot = false;
+
+			if (g_invitor && g_invitor->IsLeader(invitor))
 			{
 				for (int x = 0; x < 6; x++)
 				{
-					if (g_invitee->members[x]->IsBot())
-					{
-						b = entity_list.GetBotByBotName(g_invitee->members[x]->GetName());
-						Bot::ProcessRaidInvite(b, player_accepting_invite);
-						break;
-					}
-				}
-			}
-			if (invitee && invitor->HasGroup() && g_invitor->IsLeader(invitor))
-			{
-				for (int x = 0; x < 6; x++)
-				{
-					if (g_invitor->members[x]->IsBot())
+					if (g_invitor->members[x] && g_invitor->members[x]->IsBot())
 					{
 						b = entity_list.GetBotByBotName(g_invitor->members[x]->GetName());
-						Bot::ProcessRaidInvite2(player_accepting_invite);
+						invitee_has_bot = true;
+					}
+				}
+			}
+			if (g_invitee && g_invitee->IsLeader(invitee))
+			{
+				for (int x = 0; x < 6; x++)
+				{
+					if (g_invitee->members[x] && g_invitee->members[x]->IsBot())
+					{
+						b = entity_list.GetBotByBotName(g_invitee->members[x]->GetName());
+						invitee_has_bot = true;
 						break;
 					}
 				}
 			}
+			if (invitor_has_bot || invitee_has_bot) {
+				Bot::ProcessRaidInvite2(invitee, invitor);
+				break;
+			}
+			else
+			if (invitee->IsBot())
+			{
+				Bot::ProcessRaidInvite(b, player_accepting_invite);
+				break;
+			}
+
 #endif
 			if (player_accepting_invite) {
 				if (IsRaidGrouped()) {
