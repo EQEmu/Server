@@ -2540,15 +2540,12 @@ void Bot::AI_Process()
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
 	
-	Raid* bot_raid = entity_list.GetRaidByClient(bot_owner);
-	int bot_raid_group = 0;
-	if (bot_raid)
-		bot_raid_group = bot_raid->GetGroup(GetName()) + 1;
-
+	Raid* bot_raid = entity_list.GetRaidByBot(this);
+	
 //#pragma region PRIMARY AI SKIP CHECKS
 
 	// Primary reasons for not processing AI
-	if (!bot_owner || (!bot_group && !bot_raid_group) || !IsAIControlled()) {
+	if (!bot_owner || (!bot_group && !bot_raid) || !IsAIControlled()) {
 		return;
 	}
 
@@ -2561,7 +2558,21 @@ void Bot::AI_Process()
 	}
 
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
-	Client* leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
+	Client* leash_owner = nullptr;
+
+	if (bot_group) {
+		leash_owner = (bot_group->GetLeader() && bot_group->GetLeader()->IsClient() ? bot_group->GetLeader()->CastToClient() : bot_owner);
+	}
+	else if (bot_raid) {
+		int bot_raid_group = bot_raid->GetGroup(GetName());
+		if (bot_raid_group > 0) {
+			leash_owner = bot_raid->GetGroupLeader(bot_raid_group)->CastToClient();
+		}
+		else {
+			leash_owner = bot_raid->GetLeader();
+		}
+	}
+
 	if (!leash_owner) {
 		return;
 	}
@@ -8382,6 +8393,11 @@ void Bot::Camp(bool databaseSave) {
 	//auto group = GetGroup();
 	if(GetGroup())
 		RemoveBotFromGroup(this, GetGroup());
+	
+	//Mitch
+	Raid* bot_raid = entity_list.GetRaidByBot(this);
+	if (bot_raid)
+		bot_raid->RemoveMember(this->GetName());
 
 	// RemoveBotFromGroup() code is too complicated for this to work as-is (still needs to be addressed to prevent memory leaks)
 	//if (group->GroupCount() < 2)

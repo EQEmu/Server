@@ -11723,6 +11723,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		}
 		case RaidCommandDisband: {
 			Raid *raid = entity_list.GetRaidByClient(this);
+			Client* c = entity_list.GetClientByName(raid_command_packet->leader_name);
+
 			if (raid) {
 				uint32 group = raid->GetGroup(raid_command_packet->leader_name);
 
@@ -11753,7 +11755,16 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						}
 					}
 				}
-
+#ifdef BOTS
+				//check to see if the leader_name has any bots in the raid
+				//if so, remove them as well
+				
+				for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+				{
+					if (raid->members[i] && raid->members[i].member->IsBot() && raid->members[i].member->GetOwnerID() == entity_list.GetClientByName(raid_command_packet->leader_name)->CharacterID())
+						raid->RemoveMember(raid->members[i].membername);
+				}
+#endif
 				raid->RemoveMember(raid_command_packet->leader_name);
 				Client *c = entity_list.GetClientByName(raid_command_packet->leader_name);
 				if (c)

@@ -246,6 +246,16 @@ void Raid::RemoveMember(const char *characterName)
 	auto results = database.QueryDatabase(query);
 
 	Client *client = entity_list.GetClientByName(characterName);
+#ifdef BOTS
+	Bot* bot = entity_list.GetBotByBotName(characterName);
+
+	if (bot) {
+		bot->SetFollowID(bot->GetOwner()->GetID());
+		bot->SetGrouped(0);
+		bot->SetTarget(nullptr);
+	}
+#endif
+
 	disbandCheck = true;
 	SendRaidRemoveAll(characterName);
 	SendRaidDisband(client);
@@ -1731,7 +1741,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 		if(members[x].member) {
 			if(!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				members[x].member->QueuePacket(&hpapp, false);
-				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
+				if (members[x].member->IsClient() && members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) { //Mitch
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
 					mana_update->spawn_id = mob->GetID();
