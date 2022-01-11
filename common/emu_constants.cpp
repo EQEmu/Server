@@ -299,3 +299,41 @@ std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
 	}
 	return std::string();
 }
+
+const std::map<uint8, std::string>& EQ::constants::GetAccountStatusMap()
+{
+	static const std::map<uint8, std::string> account_status_map = {
+		{ AccountStatus::Player, "Player" },
+		{ AccountStatus::Steward, "Steward" },
+		{ AccountStatus::ApprenticeGuide, "Apprentice Guide" },
+		{ AccountStatus::Guide, "Guide" },
+		{ AccountStatus::QuestTroupe, "Quest Troupe" },
+		{ AccountStatus::SeniorGuide, "Senior Guide" },
+		{ AccountStatus::GMTester, "GM Tester" },
+		{ AccountStatus::EQSupport, "EQ Support" },
+		{ AccountStatus::GMStaff, "GM Staff" },
+		{ AccountStatus::GMAdmin, "GM Admin" },
+		{ AccountStatus::GMLeadAdmin, "GM Lead Admin" },
+		{ AccountStatus::QuestMaster, "Quest Master" },
+		{ AccountStatus::GMAreas, "GM Areas" },
+		{ AccountStatus::GMCoder, "GM Coder" },
+		{ AccountStatus::GMMgmt, "GM Mgmt" },
+		{ AccountStatus::GMImpossible, "GM Impossible" },	
+		{ AccountStatus::Max, "GM Max" }
+	};
+	return account_status_map;
+}
+
+std::string EQ::constants::GetAccountStatusName(uint8 account_status)
+{
+	auto account_statuses = EQ::constants::GetAccountStatusMap();
+	std::string status_name;
+	for (auto status_level = account_statuses.rbegin(); status_level != account_statuses.rend(); ++status_level) {
+		if (account_status >= status_level->first) {
+			status_name = status_level->second;
+			break;
+		}
+	}
+
+	return status_name;
+}

@@ -245,6 +245,9 @@ namespace EQ
 		extern const std::map<bodyType, std::string>& GetBodyTypeMap();
 		std::string GetBodyTypeName(bodyType bodytype_id);
 
+		extern const std::map<uint8, std::string>& GetAccountStatusMap();
+		std::string GetAccountStatusName(uint8 account_status);
+
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
 		const int STANCE_TYPE_COUNT = stanceBurnAE;
