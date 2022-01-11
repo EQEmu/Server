@@ -1128,9 +1128,11 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			itr = spec->salvage.begin();
 			uint8 sc = 0;
 			while(itr != spec->salvage.end()) {
-				for(sc = 0; sc < itr->second; sc++)
-					if(zone->random.Roll(SalvageChance))
+				for (sc = 0; sc < itr->second; sc++) {
+					if (zone->random.Roll(SalvageChance)) {
 						SummonItem(itr->first, 1);
+					}
+				}
 				++itr;
 			}
 		}
@@ -1403,7 +1405,6 @@ bool ZoneDatabase::GetTradeRecipe(
 	DBTradeskillRecipe_Struct *spec
 )
 {
-
 	std::string container_where_filter;
 	if (some_id == 0) {
 		// world combiner so no item number
@@ -1526,10 +1527,10 @@ bool ZoneDatabase::GetTradeRecipe(
 		"FROM tradeskill_recipe_entries "
 		"WHERE salvagecount > 0 AND recipe_id = %u", recipe_id
 	);
-
+	
 	results = QueryDatabase(query);
 	if (results.Success()) {
-		for (auto row = results.begin(); row != results.begin(); ++row) {
+		for (auto row = results.begin(); row != results.end(); ++row) {
 			uint32 item = (uint32) atoi(row[0]);
 			uint8  num  = (uint8) atoi(row[1]);
 			spec->salvage.push_back(std::pair<uint32, uint8>(item, num));
