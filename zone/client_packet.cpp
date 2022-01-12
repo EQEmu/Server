@@ -11755,20 +11755,35 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						}
 					}
 				}
-#ifdef BOTS
-				//check to see if the leader_name has any bots in the raid
-				//if so, remove them as well
-				
-				for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
-				{
-					if (raid->members[i] && raid->members[i].member->IsBot() && raid->members[i].member->GetOwnerID() == entity_list.GetClientByName(raid_command_packet->leader_name)->CharacterID())
-						raid->RemoveMember(raid->members[i].membername);
-				}
-#endif
 				raid->RemoveMember(raid_command_packet->leader_name);
 				Client *c = entity_list.GetClientByName(raid_command_packet->leader_name);
-				if (c)
+				if (c) {
+#ifdef BOTS
+					//check to see if the leader_name has any bots in the raid
+					//if so, remove them as well
+
+//					for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+//					{
+//						if (raid->members[i].member && raid->members[i].member->IsBot() && raid->members[i].member->CastToBot()->GetOwner()->CastToClient()->CharacterID() == entity_list.GetClientByName(raid_command_packet->leader_name)->CharacterID())
+//							raid->RemoveMember(raid->members[i].membername);
+//					}
+					std::vector<Bot*> raid_members_bots;
+					int owner_id = entity_list.GetClientByName(raid_command_packet->leader_name)->CharacterID();
+					for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+					{
+						if (raid->members[i].member && raid->members[i].member->IsBot() && raid->members[i].member->CastToBot()->GetOwner()->CastToClient()->CharacterID() == owner_id)
+						{
+							raid_members_bots.emplace_back(raid->members[i].member->CastToBot());
+						}
+					}
+					for (auto bot_iter : raid_members_bots) {
+						if (bot_iter && bot_iter->IsBot())
+							raid->RemoveMember(bot_iter->GetName());
+					}
+#endif
+
 					raid->SendGroupDisband(c);
+				}
 				else {
 					auto pack =
 						new ServerPacket(ServerOP_RaidGroupDisband, sizeof(ServerRaidGeneralAction_Struct));

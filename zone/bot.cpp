@@ -10510,7 +10510,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 //			raid->GroupUpdate(0, true);
 //			raid->SendBulkRaid(invitee); //Send a raid updates to the invitor
 			g_invitor->JoinRaidXTarget(raid, true);
-			g_invitor->DisbandGroup(true);
+//			g_invitor->DisbandGroup(true);
 			raid->GroupUpdate(0, true);
 			if (raid->IsLocked()) {
 				raid->SendRaidLockTo(invitor);
