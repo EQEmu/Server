@@ -10115,7 +10115,7 @@ void Bot::StopMoving(float new_heading)
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
-void Bot::ProcessRaidInvite2(Client* invitee, Client* invitor) {
+void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 
 	Raid* raid = entity_list.GetRaidByClient(invitor);
 	Group* g_invitee = invitee->GetGroup();
