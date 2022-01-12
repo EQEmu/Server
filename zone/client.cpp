@@ -7426,17 +7426,9 @@ void Client::ProcessXTargetAutoHaters()
 	std::queue<int> empty_slots;
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		if (XTargets[i].Type != Auto)
-			continue;
-
-		auto *mob = entity_list.GetMob(XTargets[i].ID);
+			continue;		
 
 		if (XTargets[i].ID != 0 && !GetXTargetAutoMgr()->contains_mob(XTargets[i].ID)) {
-			XTargets[i].ID = 0;
-			XTargets[i].Name[0] = 0;
-			XTargets[i].dirty = true;
-		}
-
-		if (XTargets[i].ID != 0 && mob && !mob->IsValidXTarget()) {
 			XTargets[i].ID = 0;
 			XTargets[i].Name[0] = 0;
 			XTargets[i].dirty = true;
