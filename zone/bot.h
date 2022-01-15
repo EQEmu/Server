@@ -362,8 +362,6 @@ public:
 	static std::string RaceIdToString(uint16 raceId);
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, std::string botName);
-	static void ProcessRaidInvite(Bot* invitee, Client* invitor); //Mitch
-	static void ProcessRaidInvite(Client* invitee, Client* invitor); //Mitch	
 	static void ProcessBotGroupInvite(Client* c, std::string botName);
 	static void ProcessBotGroupDisband(Client* c, std::string botName);
 	static void BotOrderCampAll(Client* c);
@@ -380,6 +378,12 @@ public:
 	static int32 GetDisciplineRecastTimer(Bot *caster, int timer_index);
 	static bool CheckDisciplineRecastTimers(Bot *caster, int timer_index);
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
+
+	//Raid methods
+	void PetAIProcess_Raid();
+	void AI_Process_Raid();
+	static void ProcessRaidInvite(Bot* invitee, Client* invitor); //Mitch
+	static void ProcessRaidInvite(Client* invitee, Client* invitor); //Mitch	
 
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);

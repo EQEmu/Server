@@ -123,6 +123,7 @@ public:
 	bool	IsGroupLeader(const char *who);
 	bool	IsRaidMember(const char *name);
 	void	UpdateLevel(const char *name, int newLevel);
+	std::vector<RaidMember> GetRaidGroupMembers(uint32 gid);
 
 	uint32	GetFreeGroup();
 	uint8	GroupCount(uint32 gid);

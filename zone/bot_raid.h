@@ -16,8 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifndef BOT_H
-#define BOT_H
+#ifndef BOT_RAID_H
+#define BOT_RAID_H
 
 #ifdef BOTS
 
@@ -38,9 +38,10 @@
 
 #include <sstream>
 
-
 extern WorldServer worldserver;
+
+//void Bot::PetAIProcess_Raid();
 
 #endif // BOTS
 
-#endif // BOT_H
+#endif // BOT_RAID_H
