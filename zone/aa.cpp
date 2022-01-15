@@ -278,8 +278,9 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 	Corpse *CorpseToUse = nullptr;
 	CorpseToUse = entity_list.GetClosestCorpse(this, nullptr);
 
-	if (!CorpseToUse)
+	if (!CorpseToUse) {
 		return;
+	}
 
 	/* TODO: Does WTD use pet focus?
 	int act_power = 0;
@@ -454,8 +455,6 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 	while (summon_count > 0) {
 		int pet_duration = duration;
 
-		//this is a little messy, but the only way to do it right
-		//it would be possible to optimize out this copy for the last pet, but oh well
 		NPCType *npc_dup = nullptr;
 		if (made_npc != nullptr) {
 			npc_dup = new NPCType;
@@ -463,10 +462,8 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 		}
 
 		swarm_pet_npc = new NPC(
-			(npc_dup != nullptr) ? npc_dup : npc_type,	//make sure we give the NPC the correct data pointer
-			0,
-			GetPosition(),
-			GravityBehavior::Water);
+			(npc_dup != nullptr) ? npc_dup : npc_type,
+			0,GetPosition(),GravityBehavior::Water);
 
 		swarm_pet_npc->SetFollowID(GetID());
 
