@@ -3082,25 +3082,30 @@ void NPC::ClearLastName()
 
 void NPC::DepopSwarmPets()
 {
-
+	Shout("1 Depop Swarmpets %i", GetSwarmInfo()->target);
 	if (GetSwarmInfo()) {
 		if (GetSwarmInfo()->duration->Check(false)){
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
-			if (owner)
+			if (owner) {
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-
+			}
 			Depop();
 			return;
 		}
-
+		//CCCCCCCCCCCCCCCCCCCCCCCXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXCCCCCCCCCCCC DEBUG
 		//This is only used for optional quest or rule derived behavior now if you force a temp pet on a specific target.
+		Shout("2 Depop Swarmpets %i", GetSwarmInfo()->target);
+		/*
+			This is no longer going to work since DepopSwarmpets is only checking from timer
+		*/
 		if (GetSwarmInfo()->target) {
 			Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
 			if(!targMob || (targMob && targMob->IsCorpse())){
 				Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
-				if (owner)
+				if (owner) {
 					owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-
+				}
+				Shout("DEPOP");
 				Depop();
 				return;
 			}
