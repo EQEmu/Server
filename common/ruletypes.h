@@ -508,7 +508,7 @@ RULE_INT(Combat, SneakPullAssistRange, 400, "Modified range of assist for sneak 
 RULE_BOOL(Combat, Classic2HBAnimation, false, "2HB will use the 2 hand piercing animation instead of the overhead slashing animation")
 RULE_BOOL(Combat, ArcheryConsumesAmmo, true, "Set to false to disable Archery Ammo Consumption")
 RULE_BOOL(Combat, ThrowingConsumesAmmo, true, "Set to false to disable Throwing Ammo Consumption")
-RULE_BOOL(Combat, ImmuneToEnrageFromRiposteSpellEffect, true, "Set to false to disable SPA 173 SE_RiposteChance from making those with the effect on them immune to enrage")
+RULE_BOOL(Combat, UseLiveRiposteMechanics, false, "Set to true to disable SPA 173 SE_RiposteChance from making those with the effect on them immune to enrage, can longer riposte from a riposte.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

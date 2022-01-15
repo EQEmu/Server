@@ -433,9 +433,20 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = false;
-	if (RuleB(Combat, ImmuneToEnrageFromRiposteSpellEffect)) {
+	if (!RuleB(Combat, UseLiveRiposteMechanics)) {
 		ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance || attacker->IsEnraged();
 	}
+	/*
+		Live Riposte Mechanics (~Kayen updated 1/22)
+		-Ripostes can not trigger another riposte. (Ie. Riposte from defender can't then trigger the attacker to riposte)
+		-Ripostes can not be 'avoided', only hit or miss.
+		-Attacker with SPA 173 is not immune to riposte. The defender can riposte against the attackers melee hits.
+
+		Legacy Riposte Mechanics
+		-Ripostes can trigger another riposte
+		-Attacker with SPA 173 is immune to riposte
+		-Attacker that is enraged is immune to riposte
+	*/
 
 	// Need to check if we have something in MainHand to actually attack with (or fists)
 	if (hit.hand != EQ::invslot::slotRange && (CanThisClassRiposte() || IsEnraged()) && InFront && !ImmuneRipo) {
@@ -1373,25 +1384,27 @@ int Client::DoDamageCaps(int base_damage)
 
 // other is the defender, this is the attacker
 //SYNC WITH: tune.cpp, mob.h TuneDoAttack
-void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
+void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool FromRiposte)
 {
 	if (!other)
 		return;
 	LogCombat("[{}]::DoAttack vs [{}] base [{}] min [{}] offense [{}] tohit [{}] skill [{}]", GetName(),
 		other->GetName(), hit.base_damage, hit.min_damage, hit.offense, hit.tohit, hit.skill);
 
-	// check to see if we hit..
-	if (other->AvoidDamage(this, hit)) {
+	if (!RuleB(Combat, UseLiveRiposteMechanics)) {
+		FromRiposte = false;
+	}
+
+	// check to see if we hit.. 
+	if (!FromRiposte && other->AvoidDamage(this, hit)) {
 		int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
 		if (strike_through && zone->random.Roll(strike_through)) {
 			MessageString(Chat::StrikeThrough,
 				STRIKETHROUGH_STRING); // You strike through your opponents defenses!
 			hit.damage_done = 1;			// set to one, we will check this to continue
 		}
-		// I'm pretty sure you can riposte a riposte
 		if (hit.damage_done == DMG_RIPOSTED) {
 			DoRiposte(other);
-			//if (IsDead())
 			return;
 		}
 		LogCombat("Avoided/strikethrough damage with code [{}]", hit.damage_done);
@@ -1574,7 +1587,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
 
-		DoAttack(other, my_hit, opts);
+		DoAttack(other, my_hit, opts, bRiposte);
 	}
 	else {
 		my_hit.damage_done = DMG_INVULNERABLE;
@@ -2166,7 +2179,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		my_hit.offense = offense(my_hit.skill);
 		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
 
-		DoAttack(other, my_hit, opts);
+		DoAttack(other, my_hit, opts, bRiposte);
 
 		other->AddToHateList(this, hate);
 
@@ -4822,6 +4835,7 @@ void Mob::DoRiposte(Mob *defender)
 	}
 
 	defender->Attack(this, EQ::invslot::slotPrimary, true);
+
 	if (HasDied())
 		return;
 
