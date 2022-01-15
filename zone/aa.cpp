@@ -1286,6 +1286,7 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 		return 0;
 	}
 
+	int total_reduction = 0;
 	for(auto &aa : aa_ranks) {
 		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
 		auto ability = ability_rank.first;
@@ -1297,12 +1298,12 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 
 		for(auto &effect : rank->effects) {
 			if(effect.effect_id == SE_HastenedAASkill && effect.limit_value == ability_in->id) {
-				return effect.base_value;
+				total_reduction += effect.base_value;
 			}
 		}
 	}
 
-	return 0;
+	return total_reduction;
 }
 
 void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
