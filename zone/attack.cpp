@@ -2915,8 +2915,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	}
 
-	if (other->GetTempPetCount())
+	if (other->GetTempPetCount()) {
 		entity_list.AddTempPetsToHateList(other, this, bFrenzy);
+	}
 
 	if (!wasengaged) {
 		if (IsNPC() && other->IsClient() && other->CastToClient())

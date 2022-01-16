@@ -800,7 +800,7 @@ public:
 	inline void Amnesia(bool newval) { amnesiad = newval; }
 	void TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme=true, bool sticktarg=false, uint16 *controlled_pet_id = nullptr);
 	void TypesTemporaryPets(uint32 typesid, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme=true, bool sticktarg=false);
-	void WakeTheDead(uint16 spell_id, Mob *target, uint32 duration);
+	void WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint32 duration);
 	void Spin();
 	void Kill();
 	bool PassCharismaCheck(Mob* caster, uint16 spell_id);

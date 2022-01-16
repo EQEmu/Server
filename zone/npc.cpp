@@ -3082,25 +3082,23 @@ void NPC::ClearLastName()
 
 void NPC::DepopSwarmPets()
 {
-
 	if (GetSwarmInfo()) {
 		if (GetSwarmInfo()->duration->Check(false)){
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
-			if (owner)
+			if (owner) {
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-
+			}
 			Depop();
 			return;
 		}
 
-		//This is only used for optional quest or rule derived behavior now if you force a temp pet on a specific target.
 		if (GetSwarmInfo()->target) {
 			Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
 			if(!targMob || (targMob && targMob->IsCorpse())){
 				Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
-				if (owner)
+				if (owner) {
 					owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-
+				}
 				Depop();
 				return;
 			}

@@ -213,7 +213,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		glm::vec2(5, 5), glm::vec2(-5, 5), glm::vec2(5, -5), glm::vec2(-5, -5),
 		glm::vec2(10, 10), glm::vec2(-10, 10), glm::vec2(10, -10), glm::vec2(-10, -10),
 		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
-	};;
+	};
 
 	while(summon_count > 0) {
 		int pet_duration = pet.duration;
@@ -273,63 +273,94 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	delete made_npc;
 }
 
-void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
-{
-	Corpse *CorpseToUse = nullptr;
-	CorpseToUse = entity_list.GetClosestCorpse(this, nullptr);
+void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint32 duration) {
 
-	if(!CorpseToUse)
+	/*
+		SPA 299 Wake The Dead, 'animateDead' should be temp pet, always spawns 1 pet from corpse, max value is duration
+		SPA 306 Wake The Dead, 'animateDead#' should be temp pet, base is amount of pets from indivual corpses, max value is duration
+		Max range for closet corpse is 250 units.
+		TODO: Should use temp pets
+	*/
+
+	if (!corpse_to_use) {
 		return;
+	}
 
-	//assuming we have pets in our table; we take the first pet as a base type.
-	const NPCType *base_type = content_db.LoadNPCTypesData(500);
-	auto make_npc = new NPCType;
-	memcpy(make_npc, base_type, sizeof(NPCType));
+	/* TODO: Does WTD use pet focus?
+	int act_power = 0;
 
-	//combat stats
-	make_npc->AC = ((GetLevel() * 7) + 550);
-	make_npc->ATK = GetLevel();
-	make_npc->max_dmg = (GetLevel() * 4) + 2;
-	make_npc->min_dmg = 1;
+	if (IsClient()) {
+		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
+		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
+	}
+	*/
 
-	//base stats
-	make_npc->current_hp = (GetLevel() * 55);
-	make_npc->max_hp = (GetLevel() * 55);
-	make_npc->STR = 85 + (GetLevel() * 3);
-	make_npc->STA = 85 + (GetLevel() * 3);
-	make_npc->DEX = 85 + (GetLevel() * 3);
-	make_npc->AGI = 85 + (GetLevel() * 3);
-	make_npc->INT = 85 + (GetLevel() * 3);
-	make_npc->WIS = 85 + (GetLevel() * 3);
-	make_npc->CHA = 85 + (GetLevel() * 3);
-	make_npc->MR = 25;
-	make_npc->FR = 25;
-	make_npc->CR = 25;
-	make_npc->DR = 25;
-	make_npc->PR = 25;
+	SwarmPet_Struct pet;
+	pet.count = 1;
+	pet.duration = 1;
 
-	//level class and gender
-	make_npc->level = GetLevel();
-	make_npc->class_ = CorpseToUse->class_;
-	make_npc->race = CorpseToUse->race;
-	make_npc->gender = CorpseToUse->gender;
-	make_npc->loottable_id = 0;
-	//name
+	//pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000; //TODO: Does WTD use pet focus?
+
+	pet.npc_id = WAKE_THE_DEAD_NPCTYPEID;
+	
+	NPCType *made_npc = nullptr;
+
+	const NPCType *npc_type = content_db.LoadNPCTypesData(WAKE_THE_DEAD_NPCTYPEID);
+	if (npc_type == nullptr) {
+		//log write
+		LogError("Unknown npc type for 'Wake the Dead' swarm pet spell id: [{}]", spell_id);
+		Message(0, "Unable to find pet!");
+		return;
+	}
+
+	made_npc = new NPCType;
+	memcpy(made_npc, npc_type, sizeof(NPCType));
+
 	char NewName[64];
 	sprintf(NewName, "%s`s Animated Corpse", GetCleanName());
-	strcpy(make_npc->name, NewName);
+	strcpy(made_npc->name, NewName);
+	npc_type = made_npc;
+
+	//combat stats
+	made_npc->AC = ((GetLevel() * 7) + 550);
+	made_npc->ATK = GetLevel();
+	made_npc->max_dmg = (GetLevel() * 4) + 2;
+	made_npc->min_dmg = 1;
+
+	//base stats
+	made_npc->current_hp = (GetLevel() * 55);
+	made_npc->max_hp = (GetLevel() * 55);
+	made_npc->STR = 85 + (GetLevel() * 3);
+	made_npc->STA = 85 + (GetLevel() * 3);
+	made_npc->DEX = 85 + (GetLevel() * 3);
+	made_npc->AGI = 85 + (GetLevel() * 3);
+	made_npc->INT = 85 + (GetLevel() * 3);
+	made_npc->WIS = 85 + (GetLevel() * 3);
+	made_npc->CHA = 85 + (GetLevel() * 3);
+	made_npc->MR = 25;
+	made_npc->FR = 25;
+	made_npc->CR = 25;
+	made_npc->DR = 25;
+	made_npc->PR = 25;
+
+	//level class and gender
+	made_npc->level = GetLevel();
+	made_npc->class_ = corpse_to_use->class_;
+	made_npc->race = corpse_to_use->race;
+	made_npc->gender = corpse_to_use->gender;
+	made_npc->loottable_id = 0;
 
 	//appearance
-	make_npc->beard = CorpseToUse->beard;
-	make_npc->beardcolor = CorpseToUse->beardcolor;
-	make_npc->eyecolor1 = CorpseToUse->eyecolor1;
-	make_npc->eyecolor2 = CorpseToUse->eyecolor2;
-	make_npc->haircolor = CorpseToUse->haircolor;
-	make_npc->hairstyle = CorpseToUse->hairstyle;
-	make_npc->helmtexture = CorpseToUse->helmtexture;
-	make_npc->luclinface = CorpseToUse->luclinface;
-	make_npc->size = CorpseToUse->size;
-	make_npc->texture = CorpseToUse->texture;
+	made_npc->beard = corpse_to_use->beard;
+	made_npc->beardcolor = corpse_to_use->beardcolor;
+	made_npc->eyecolor1 = corpse_to_use->eyecolor1;
+	made_npc->eyecolor2 = corpse_to_use->eyecolor2;
+	made_npc->haircolor = corpse_to_use->haircolor;
+	made_npc->hairstyle = corpse_to_use->hairstyle;
+	made_npc->helmtexture = corpse_to_use->helmtexture;
+	made_npc->luclinface = corpse_to_use->luclinface;
+	made_npc->size = corpse_to_use->size;
+	made_npc->texture = corpse_to_use->texture;
 
 	//cast stuff.. based off of PEQ's if you want to change
 	//it you'll have to mod this code, but most likely
@@ -337,130 +368,144 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	//part of their spell list; can't think of any smooth
 	//way to do this
 	//some basic combat mods here too since it's convienent
-	switch(CorpseToUse->class_)
+	switch (corpse_to_use->class_)
 	{
 	case CLERIC:
-		make_npc->npc_spells_id = 1;
+		made_npc->npc_spells_id = 1;
 		break;
 	case WIZARD:
-		make_npc->npc_spells_id = 2;
+		made_npc->npc_spells_id = 2;
 		break;
 	case NECROMANCER:
-		make_npc->npc_spells_id = 3;
+		made_npc->npc_spells_id = 3;
 		break;
 	case MAGICIAN:
-		make_npc->npc_spells_id = 4;
+		made_npc->npc_spells_id = 4;
 		break;
 	case ENCHANTER:
-		make_npc->npc_spells_id = 5;
+		made_npc->npc_spells_id = 5;
 		break;
 	case SHAMAN:
-		make_npc->npc_spells_id = 6;
+		made_npc->npc_spells_id = 6;
 		break;
 	case DRUID:
-		make_npc->npc_spells_id = 7;
+		made_npc->npc_spells_id = 7;
 		break;
 	case PALADIN:
 		//SPECATK_TRIPLE
-		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->current_hp = make_npc->current_hp * 150 / 100;
-		make_npc->max_hp = make_npc->max_hp * 150 / 100;
-		make_npc->npc_spells_id = 8;
+		strcpy(made_npc->special_abilities, "6,1");
+		made_npc->current_hp = made_npc->current_hp * 150 / 100;
+		made_npc->max_hp = made_npc->max_hp * 150 / 100;
+		made_npc->npc_spells_id = 8;
 		break;
 	case SHADOWKNIGHT:
-		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->current_hp = make_npc->current_hp * 150 / 100;
-		make_npc->max_hp = make_npc->max_hp * 150 / 100;
-		make_npc->npc_spells_id = 9;
+		strcpy(made_npc->special_abilities, "6,1");
+		made_npc->current_hp = made_npc->current_hp * 150 / 100;
+		made_npc->max_hp = made_npc->max_hp * 150 / 100;
+		made_npc->npc_spells_id = 9;
 		break;
 	case RANGER:
-		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->current_hp = make_npc->current_hp * 135 / 100;
-		make_npc->max_hp = make_npc->max_hp * 135 / 100;
-		make_npc->npc_spells_id = 10;
+		strcpy(made_npc->special_abilities, "7,1");
+		made_npc->current_hp = made_npc->current_hp * 135 / 100;
+		made_npc->max_hp = made_npc->max_hp * 135 / 100;
+		made_npc->npc_spells_id = 10;
 		break;
 	case BARD:
-		strcpy(make_npc->special_abilities, "6,1");
-		make_npc->current_hp = make_npc->current_hp * 110 / 100;
-		make_npc->max_hp = make_npc->max_hp * 110 / 100;
-		make_npc->npc_spells_id = 11;
+		strcpy(made_npc->special_abilities, "6,1");
+		made_npc->current_hp = made_npc->current_hp * 110 / 100;
+		made_npc->max_hp = made_npc->max_hp * 110 / 100;
+		made_npc->npc_spells_id = 11;
 		break;
 	case BEASTLORD:
-		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->current_hp = make_npc->current_hp * 110 / 100;
-		make_npc->max_hp = make_npc->max_hp * 110 / 100;
-		make_npc->npc_spells_id = 12;
+		strcpy(made_npc->special_abilities, "7,1");
+		made_npc->current_hp = made_npc->current_hp * 110 / 100;
+		made_npc->max_hp = made_npc->max_hp * 110 / 100;
+		made_npc->npc_spells_id = 12;
 		break;
 	case ROGUE:
-		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->current_hp = make_npc->current_hp * 110 / 100;
-		make_npc->max_hp = make_npc->max_hp * 110 / 100;
+		strcpy(made_npc->special_abilities, "7,1");
+		made_npc->max_dmg = made_npc->max_dmg * 150 / 100;
+		made_npc->current_hp = made_npc->current_hp * 110 / 100;
+		made_npc->max_hp = made_npc->max_hp * 110 / 100;
 		break;
 	case MONK:
-		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->current_hp = make_npc->current_hp * 135 / 100;
-		make_npc->max_hp = make_npc->max_hp * 135 / 100;
+		strcpy(made_npc->special_abilities, "7,1");
+		made_npc->max_dmg = made_npc->max_dmg * 150 / 100;
+		made_npc->current_hp = made_npc->current_hp * 135 / 100;
+		made_npc->max_hp = made_npc->max_hp * 135 / 100;
 		break;
 	case WARRIOR:
 	case BERSERKER:
-		strcpy(make_npc->special_abilities, "7,1");
-		make_npc->max_dmg = make_npc->max_dmg * 150 /100;
-		make_npc->current_hp = make_npc->current_hp * 175 / 100;
-		make_npc->max_hp = make_npc->max_hp * 175 / 100;
+		strcpy(made_npc->special_abilities, "7,1");
+		made_npc->max_dmg = made_npc->max_dmg * 150 / 100;
+		made_npc->current_hp = made_npc->current_hp * 175 / 100;
+		made_npc->max_hp = made_npc->max_hp * 175 / 100;
 		break;
 	default:
-		make_npc->npc_spells_id = 0;
+		made_npc->npc_spells_id = 0;
 		break;
 	}
 
-	make_npc->loottable_id = 0;
-	make_npc->merchanttype = 0;
-	make_npc->d_melee_texture1 = 0;
-	make_npc->d_melee_texture2 = 0;
+	made_npc->loottable_id = 0;
+	made_npc->merchanttype = 0;
+	made_npc->d_melee_texture1 = 0;
+	made_npc->d_melee_texture2 = 0;
 
-	auto npca = new NPC(make_npc, 0, GetPosition(), GravityBehavior::Water);
 
-	if(!npca->GetSwarmInfo()){
-		auto nSI = new SwarmPet;
-		npca->SetSwarmInfo(nSI);
-		npca->GetSwarmInfo()->duration = new Timer(duration*1000);
-	}
-	else{
-		npca->GetSwarmInfo()->duration->Start(duration*1000);
-	}
+	int summon_count = 0;
+	summon_count = pet.count;
 
-	npca->StartSwarmTimer(duration * 1000);
-	npca->GetSwarmInfo()->owner_id = GetID();
+	NPC* swarm_pet_npc = nullptr;
+	//TODO: potenitally add support for multiple pets per corpse
+	while (summon_count > 0) {
+		int pet_duration = duration;
 
-	//give the pet somebody to "love"
-	if(target != nullptr){
-		npca->AddToHateList(target, 100000);
-		npca->GetSwarmInfo()->target = target->GetID();
-	}
-
-	//gear stuff, need to make sure there's
-	//no situation where this stuff can be duped
-	for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
-	{
-		uint32 sitem = 0;
-		sitem = CorpseToUse->GetWornItem(x);
-		if(sitem){
-			const EQ::ItemData * itm = database.GetItem(sitem);
-			npca->AddLootDrop(itm, &npca->itemlist, NPC::NewLootDropEntry(), true);
+		NPCType *npc_dup = nullptr;
+		if (made_npc != nullptr) {
+			npc_dup = new NPCType;
+			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
+
+		swarm_pet_npc = new NPC(
+			(npc_dup != nullptr) ? npc_dup : npc_type,
+			0, corpse_to_use->GetPosition(),GravityBehavior::Water);
+
+		swarm_pet_npc->SetFollowID(GetID());
+
+		if (!swarm_pet_npc->GetSwarmInfo()) {
+			auto nSI = new SwarmPet;
+			swarm_pet_npc->SetSwarmInfo(nSI);
+			swarm_pet_npc->GetSwarmInfo()->duration = new Timer(pet_duration * 1000);
+		}
+		else {
+			swarm_pet_npc->GetSwarmInfo()->duration->Start(pet_duration * 1000);
+		}
+
+		swarm_pet_npc->StartSwarmTimer(pet_duration * 1000);
+
+		//removing this prevents the pet from attacking
+		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
+
+		//give the pets somebody to "love"
+		if (target != nullptr) {
+			swarm_pet_npc->AddToHateList(target, 10000, 1000);
+			swarm_pet_npc->GetSwarmInfo()->target = 0;
+		}
+
+		//we allocated a new NPC type object, give the NPC ownership of that memory
+		if (npc_dup != nullptr)
+			swarm_pet_npc->GiveNPCTypeData(npc_dup);
+
+		entity_list.AddNPC(swarm_pet_npc, true, true);
+		summon_count--;
 	}
-
-	//we allocated a new NPC type object, give the NPC ownership of that memory
-	if(make_npc != nullptr)
-		npca->GiveNPCTypeData(make_npc);
-
-	entity_list.AddNPC(npca, true, true);
 
 	//the target of these swarm pets will take offense to being cast on...
-	if(target != nullptr)
+	if (target != nullptr)
 		target->AddToHateList(this, 1, 0);
+
+	// The other pointers we make are handled elsewhere.
+	delete made_npc;
 }
 
 void Client::ResetAA() {
