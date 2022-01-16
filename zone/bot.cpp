@@ -4906,7 +4906,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
 
-		DoAttack(other, my_hit, opts);
+		DoAttack(other, my_hit, opts, FromRiposte);
 
 		LogCombat("Final damage after all reductions: [{}]", my_hit.damage_done);
 	} else {
