@@ -282,7 +282,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint3
 		TODO: Should use temp pets
 	*/
 
-	if (corpse_to_use) {
+	if (!corpse_to_use) {
 		return;
 	}
 
