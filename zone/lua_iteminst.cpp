@@ -264,6 +264,16 @@ void Lua_ItemInst::ClearTimers() {
 	self->ClearTimers();
 }
 
+bool Lua_ItemInst::ContainsAugmentByID(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->ContainsAugmentByID(item_id);
+}
+
+int Lua_ItemInst::CountAugmentByID(uint32 item_id) {
+	Lua_Safe_Call_Int();
+	return self->CountAugmentByID(item_id);
+}
+
 luabind::scope lua_register_iteminst() {
 	return luabind::class_<Lua_ItemInst>("ItemInst")
 	.def(luabind::constructor<>())
@@ -274,6 +284,8 @@ luabind::scope lua_register_iteminst() {
 	.def("AddExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::AddExp)
 	.def("ClearTimers", (void(Lua_ItemInst::*)(void))&Lua_ItemInst::ClearTimers)
 	.def("Clone", (Lua_ItemInst(Lua_ItemInst::*)(void))&Lua_ItemInst::Clone)
+	.def("ContainsAugmentByID", (bool(Lua_ItemInst::*)(uint32))&Lua_ItemInst::ContainsAugmentByID)
+	.def("CountAugmentByID", (int(Lua_ItemInst::*)(uint32))&Lua_ItemInst::CountAugmentByID)
 	.def("DeleteCustomData", (void(Lua_ItemInst::*)(std::string))&Lua_ItemInst::DeleteCustomData)
 	.def("GetAugment", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugment)
 	.def("GetAugmentItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetAugmentItemID)

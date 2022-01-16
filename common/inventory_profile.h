@@ -140,6 +140,12 @@ namespace EQ
 		// Remove item from inventory (and take control of memory)
 		ItemInstance* PopItem(int16 slot_id);
 
+		// Check if player has a specific augment equipped by Item ID
+		bool HasAugmentEquippedByID(uint32 item_id);
+
+		// Check how many of a specific augment the player has equipped by Item ID
+		int CountAugmentEquippedByID(uint32 item_id);
+
 		// Check whether there is space for the specified number of the specified item.
 		bool HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity);
 

@@ -590,6 +590,37 @@ bool EQ::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Quan
 // Checks that user has at least 'quantity' number of items in a given inventory slot
 // Returns first slot it was found in, or SLOT_INVALID if not found
 
+bool EQ::InventoryProfile::HasAugmentEquippedByID(uint32 item_id)
+{
+	bool has_equipped = false;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->ContainsAugmentByID(item_id)) {
+			has_equipped = true;
+			break;
+		}
+	}
+
+	return has_equipped;
+}
+
+int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
+{
+	int quantity = 0;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->ContainsAugmentByID(item_id)) {
+			quantity += item->CountAugmentByID(item_id);
+		}
+	}
+	
+	return quantity;
+}
+
 //This function has a flaw in that it only returns the last stack that it looked at
 //when quantity is greater than 1 and not all of quantity can be found in 1 stack.
 int16 EQ::InventoryProfile::HasItem(uint32 item_id, uint8 quantity, uint8 where)

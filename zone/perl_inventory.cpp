@@ -414,6 +414,41 @@ XS(XS_Inventory_PutItem) {
 	XSRETURN(1);
 }
 
+XS(XS_Inventory_HasAugmentEquippedByID);
+XS(XS_Inventory_HasAugmentEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Inventory::HasAugmentEquippedByID(THIS, uint32 item_id)");
+	{
+		EQ::InventoryProfile* THIS;
+		bool has_equipped = false;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_INVENTORY;
+		has_equipped = THIS->HasAugmentEquippedByID(item_id);
+		ST(0) = boolSV(has_equipped);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Inventory_CountAugmentEquippedByID);
+XS(XS_Inventory_CountAugmentEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Inventory::CountAugmentEquippedByID(THIS, uint32 item_id)");
+	{
+		EQ::InventoryProfile* THIS;
+		int quantity = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_INVENTORY;
+		quantity = THIS->CountAugmentEquippedByID(item_id);
+		XSprePUSH;
+		PUSHi((IV)quantity);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -430,6 +465,7 @@ XS(boot_Inventory) {
 	char buf[128];
 	XS_VERSION_BOOTCHECK;
 	newXSproto(strcpy(buf, "CanItemFitInContainer"), XS_Inventory_CanItemFitInContainer, file, "$$$");
+	newXSproto(strcpy(buf, "CountAugmentEquippedByID"), XS_Inventory_CountAugmentEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "CheckNoDrop"), XS_Inventory_CheckNoDrop, file, "$$");
 	newXSproto(strcpy(buf, "DeleteItem"), XS_Inventory_DeleteItem, file, "$$;$");
 	newXSproto(strcpy(buf, "FindFreeSlot"), XS_Inventory_FindFreeSlot, file, "$$$;$$");
@@ -439,6 +475,7 @@ XS(boot_Inventory) {
 	newXSproto(strcpy(buf, "GetSlotByItemInst"), XS_Inventory_GetSlotByItemInst, file, "$$");
 	newXSproto(strcpy(buf, "GetSlotFromMaterial"), XS_Inventory_GetSlotFromMaterial, file, "$$");
 	newXSproto(strcpy(buf, "GetSlotID"), XS_Inventory_GetSlotID, file, "$$;$");
+	newXSproto(strcpy(buf, "HasAugmentEquippedByID"), XS_Inventory_HasAugmentEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "HasItem"), XS_Inventory_HasItem, file, "$$;$$");
 	newXSproto(strcpy(buf, "HasItemByLoreGroup"), XS_Inventory_HasItemByLoreGroup, file, "$$;$");
 	newXSproto(strcpy(buf, "HasItemByUse"), XS_Inventory_HasItemByUse, file, "$$;$$");
