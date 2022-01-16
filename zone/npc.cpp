@@ -509,7 +509,7 @@ void NPC::SetTarget(Mob* mob) {
 	if(mob == GetTarget())		//dont bother if they are allready our target
 		return;
 
-	//This is not the default behavior for swarm pets, must be specified from quest functions or rules value.
+	//This is not the default behavior for swarm pets, must be specified from quest functions or rules value. //KAYEN DEBUG
 	if(GetSwarmInfo() && GetSwarmInfo()->target && GetTarget() && (GetTarget()->GetHP() > 0)) {
 		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
 		if(targ != mob){

@@ -4329,6 +4329,56 @@ Corpse *EntityList::GetClosestCorpse(Mob *sender, const char *Name)
 	return ClosestCorpse;
 }
 
+void EntityList::TryWakeTheDead(Mob *sender, Mob *target, int32 spell_id, uint32 max_distance, uint32 duration, uint32 amount_pets)
+{
+	if (!sender) {
+		return;
+	}
+
+	std::vector<int> used_corpse_list;
+
+	for (int i = 0; i < amount_pets; i++)
+	{
+		uint32 CurrentDistance, ClosestDistance = 4294967295u;
+		Corpse *CurrentCorpse, *ClosestCorpse = nullptr;
+
+		auto it = corpse_list.begin();
+		while (it != corpse_list.end()) {
+			CurrentCorpse = it->second;
+
+			++it;
+
+			bool corpse_already_used = false;
+			for (auto itr = used_corpse_list.begin(); itr != used_corpse_list.end(); ++itr) {
+				if ((*itr) && (*itr) == CurrentCorpse->GetID()) {
+					corpse_already_used = true;
+					continue;
+				}
+			}
+
+			if (corpse_already_used) {
+				continue;
+			}
+
+			CurrentDistance = static_cast<uint32>(sender->CalculateDistance(CurrentCorpse->GetX(), CurrentCorpse->GetY(), CurrentCorpse->GetZ()));
+
+			if (max_distance && CurrentDistance > max_distance) {
+				continue;
+			}
+
+			if (CurrentDistance < ClosestDistance) {
+				ClosestDistance = CurrentDistance;
+				ClosestCorpse = CurrentCorpse;
+			}
+		}
+
+		if (ClosestCorpse) {
+			sender->WakeTheDead(spell_id, ClosestCorpse, target, duration);
+			used_corpse_list.push_back(ClosestCorpse->GetID());
+		}
+	}
+}
+
 void EntityList::ForceGroupUpdate(uint32 gid)
 {
 	auto it = client_list.begin();

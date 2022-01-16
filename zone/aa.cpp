@@ -213,7 +213,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		glm::vec2(5, 5), glm::vec2(-5, 5), glm::vec2(5, -5), glm::vec2(-5, -5),
 		glm::vec2(10, 10), glm::vec2(-10, 10), glm::vec2(10, -10), glm::vec2(-10, -10),
 		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
-	};;
+	};
 
 	while(summon_count > 0) {
 		int pet_duration = pet.duration;
@@ -273,12 +273,16 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	delete made_npc;
 }
 
-void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
+void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint32 duration) {
 
-	Corpse *CorpseToUse = nullptr;
-	CorpseToUse = entity_list.GetClosestCorpse(this, nullptr);
+	/*
+		SPA 299 Wake The Dead, 'animateDead' should be temp pet, always spawns 1 pet from corpse, max value is duration
+		SPA 306 Wake The Dead, 'animateDead#' should be temp pet, base is amount of pets from indivual corpses, max value is duration
+		Max range for closet corpse is 250 units.
+		TODO: Should use temp pets
+	*/
 
-	if (!CorpseToUse) {
+	if (corpse_to_use) {
 		return;
 	}
 
@@ -295,15 +299,16 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 	pet.count = 1;
 	pet.duration = 1;
 
-
 	//pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000; //TODO: Does WTD use pet focus?
 
+	pet.npc_id = WAKE_THE_DEAD_NPCTYPEID;
+	
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = content_db.LoadNPCTypesData(500);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(WAKE_THE_DEAD_NPCTYPEID);
 	if (npc_type == nullptr) {
 		//log write
-		LogError("Unknown npc type for swarm pet spell id: [{}]", spell_id);
+		LogError("Unknown npc type for 'Wake the Dead' swarm pet spell id: [{}]", spell_id);
 		Message(0, "Unable to find pet!");
 		return;
 	}
@@ -340,22 +345,22 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 
 	//level class and gender
 	made_npc->level = GetLevel();
-	made_npc->class_ = CorpseToUse->class_;
-	made_npc->race = CorpseToUse->race;
-	made_npc->gender = CorpseToUse->gender;
+	made_npc->class_ = corpse_to_use->class_;
+	made_npc->race = corpse_to_use->race;
+	made_npc->gender = corpse_to_use->gender;
 	made_npc->loottable_id = 0;
 
 	//appearance
-	made_npc->beard = CorpseToUse->beard;
-	made_npc->beardcolor = CorpseToUse->beardcolor;
-	made_npc->eyecolor1 = CorpseToUse->eyecolor1;
-	made_npc->eyecolor2 = CorpseToUse->eyecolor2;
-	made_npc->haircolor = CorpseToUse->haircolor;
-	made_npc->hairstyle = CorpseToUse->hairstyle;
-	made_npc->helmtexture = CorpseToUse->helmtexture;
-	made_npc->luclinface = CorpseToUse->luclinface;
-	made_npc->size = CorpseToUse->size;
-	made_npc->texture = CorpseToUse->texture;
+	made_npc->beard = corpse_to_use->beard;
+	made_npc->beardcolor = corpse_to_use->beardcolor;
+	made_npc->eyecolor1 = corpse_to_use->eyecolor1;
+	made_npc->eyecolor2 = corpse_to_use->eyecolor2;
+	made_npc->haircolor = corpse_to_use->haircolor;
+	made_npc->hairstyle = corpse_to_use->hairstyle;
+	made_npc->helmtexture = corpse_to_use->helmtexture;
+	made_npc->luclinface = corpse_to_use->luclinface;
+	made_npc->size = corpse_to_use->size;
+	made_npc->texture = corpse_to_use->texture;
 
 	//cast stuff.. based off of PEQ's if you want to change
 	//it you'll have to mod this code, but most likely
@@ -363,7 +368,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 	//part of their spell list; can't think of any smooth
 	//way to do this
 	//some basic combat mods here too since it's convienent
-	switch (CorpseToUse->class_)
+	switch (corpse_to_use->class_)
 	{
 	case CLERIC:
 		made_npc->npc_spells_id = 1;
@@ -447,11 +452,11 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 	made_npc->d_melee_texture2 = 0;
 
 
-	int summon_count = 1;
+	int summon_count = 0;
 	summon_count = pet.count;
 
 	NPC* swarm_pet_npc = nullptr;
-
+	//TODO: potenitally add support for multiple pets per corpse
 	while (summon_count > 0) {
 		int pet_duration = duration;
 
@@ -463,7 +468,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 
 		swarm_pet_npc = new NPC(
 			(npc_dup != nullptr) ? npc_dup : npc_type,
-			0,GetPosition(),GravityBehavior::Water);
+			0, corpse_to_use->GetPosition(),GravityBehavior::Water);
 
 		swarm_pet_npc->SetFollowID(GetID());
 
@@ -483,7 +488,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration) {
 
 		//give the pets somebody to "love"
 		if (target != nullptr) {
-			swarm_pet_npc->AddToHateList(target, 1000, 1000);
+			swarm_pet_npc->AddToHateList(target, 10000, 1000);
 			swarm_pet_npc->GetSwarmInfo()->target = 0;
 		}
 

@@ -478,6 +478,7 @@ public:
 	uint32	CheckNPCsClose(Mob *center);
 
 	Corpse* GetClosestCorpse(Mob* sender, const char *Name);
+	void	TryWakeTheDead(Mob* sender, Mob* target, int32 spell_id, uint32 max_distance, uint32 duration, uint32 amount_pets);
 	NPC* GetClosestBanker(Mob* sender, uint32 &distance);
 	void	CameraEffect(uint32 duration, uint32 intensity);
 	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType, bool skip_client_pets=false);

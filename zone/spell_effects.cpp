@@ -2300,9 +2300,29 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 
 					Mob* m_target = caster->GetTarget();
-
 					if (m_target) {
-						caster->WakeTheDead(spell_id, m_target, dur);
+						entity_list.TryWakeTheDead(caster, m_target, spell_id, 250, dur, 1);
+					}
+				}
+				break;
+			}
+
+			case SE_ArmyOfTheDead:
+			{
+				if (caster && caster->IsClient()) {
+					int dur = spells[spell_id].max_value[i];
+					if (!dur) {
+						dur = 60;
+					}
+
+					int amount = spells[spell_id].base_value[i];
+					if (!amount) {
+						amount = 1;
+					}
+
+					Mob* m_target = caster->GetTarget();
+					if (m_target) {
+						entity_list.TryWakeTheDead(caster, m_target, spell_id, 250, dur, amount);
 					}
 				}
 				break;
