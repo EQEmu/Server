@@ -615,7 +615,6 @@ int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
 		item = GetItem(slot_id);
 		if (item && item->ContainsAugmentByID(item_id)) {
 			quantity += item->CountAugmentByID(item_id);
-			break;
 		}
 	}
 	
