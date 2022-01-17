@@ -569,6 +569,22 @@ void Client::CompleteConnect()
 		if (raid) {
 			SetRaidGrouped(true);
 			raid->LearnMembers();
+#ifdef BOTS
+			std::vector<RaidMember> r_members = raid->GetMembers();
+			for (RaidMember iter : r_members) {
+				if (iter.member && iter.member->IsBot() && iter.member->GetOwner()->CastToClient()->CharacterID() == this->CharacterID()) {
+					iter.member->CastToBot()->Spawn(this);
+					iter.member->CastToBot()->SetRaidGrouped(true);
+					uint32 r_group = raid->GetGroup(iter.member->GetName());
+					if (r_group > 0) {
+						iter.member->CastToBot()->SetFollowID(raid->GetGroupLeader(r_group)->CastToClient()->GetID());
+					}
+					else {
+						iter.member->CastToBot()->SetFollowID(raid->GetLeader()->GetID());
+					}
+				}
+			}
+#endif
 			raid->VerifyRaid();
 			raid->GetRaidDetails();
 			/*

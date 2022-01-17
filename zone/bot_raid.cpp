@@ -54,7 +54,7 @@ void Bot::AI_Process_Raid()
 
 	Raid* raid = entity_list.GetRaidByBot(this);
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
-	int r_group = raid->GetGroup(GetName());
+	uint32 r_group = raid->GetGroup(GetName());
 
 	LogAI("Bot_Raid: Entered Raid Process() for [{}].", this->GetCleanName());
 
