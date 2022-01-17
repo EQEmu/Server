@@ -394,7 +394,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 			if (spells[spell_id].target_type == ST_Self) {
 				float distance = CalculateDistance(m_target->GetX(), m_target->GetY(), m_target->GetZ());
-				if (distance <= 200) { //Live distance on, targetlock pets that self cast.
+				if (distance <= 200) { //Live distance on targetlock pets that self cast. No message is given if not in range.
 					activiate_pet = true;
 				}
 			}
