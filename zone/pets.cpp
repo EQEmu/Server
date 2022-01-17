@@ -388,15 +388,17 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	if (record.petcontrol == petTargetLock)
 	{
-		Mob* target = GetTarget();
+		Mob* m_target = GetTarget();
 
-		if (target){
-			npc->AddToHateList(target, 1);
-			npc->SetPetTargetLockID(target->GetID());
+		if (m_target){
+			npc->AddToHateList(m_target, 1);
+			npc->SetPetTargetLockID(m_target->GetID());
 			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+			npc->StartPetTargetLockTimer(500);
 		}
-		else
+		else {
 			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
+		}
 	}
 }
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some

@@ -260,6 +260,7 @@ public:
 	uint32	GetSwarmTarget();
 	void	SetSwarmTarget(int target_id = 0);
 	void	DepopSwarmPets();
+	void	DepopTargetLockedPets();
 	void	PetOnSpawn(NewSpawn_Struct* ns);
 
 	void	SignalNPC(int _signal_id);
@@ -303,6 +304,8 @@ public:
 	void	Disarm(Client* client, int chance);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
 	void	DisableSwarmTimer() { swarm_timer.Disable(); }
+	void	StartPetTargetLockTimer(uint32 duration) { pettargetlock_timer.Start(duration); }
+	void	DisablePetTargetLockTimer() { pettargetlock_timer.Disable(); }
 
 	void AddLootDrop(
 		const EQ::ItemData *item2,
@@ -551,6 +554,7 @@ protected:
 
 	Timer	attacked_timer;		//running while we are being attacked (damaged)
 	Timer	swarm_timer;
+	Timer	pettargetlock_timer;
 	Timer	monkattack_timer;	//additional timer for tiger claw usage
 	Timer	classattack_timer;
 	Timer	knightattack_timer;
