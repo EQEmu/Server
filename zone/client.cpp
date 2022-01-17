@@ -6482,11 +6482,12 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		swarm_pet_npc->StartSwarmTimer(pet_duration * 1000);
 
 		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
+		swarm_pet_npc->SetFollowID(GetID());
 
 		// Give the pets alittle more agro than the caster and then agro them on the target
 		target->AddToHateList(swarm_pet_npc, (target->GetHateAmount(this) + 100), (target->GetDamageAmount(this) + 100));
 		swarm_pet_npc->AddToHateList(target, 1000, 1000);
-		swarm_pet_npc->GetSwarmInfo()->target = target->GetID();
+		swarm_pet_npc->GetSwarmInfo()->target = 0;
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
 		if(npc_dup != nullptr)
