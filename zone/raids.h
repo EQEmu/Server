@@ -114,6 +114,7 @@ public:
 
 	void	AddMember(Client *c, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false);
 	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false); //Mitch
+	void    RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char* msg, ...); //Mitch
 	void	RemoveMember(const char *c);
 	void	DisbandRaid();
 	void	MoveMember(const char *name, uint32 newGroup);
