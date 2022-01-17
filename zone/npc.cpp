@@ -3103,30 +3103,6 @@ void NPC::DepopSwarmPets()
 	}
 }
 
-void NPC::TryDepopTargetLockedPets(Mob* current_target) {
-
-	if (!current_target || (current_target && (current_target->GetID() != GetPetTargetLockID()) || current_target->IsCorpse())) {
-
-		//Use when swarmpets are set to auto lock from quest or rule
-		if (GetSwarmInfo() && GetSwarmInfo()->target) {
-			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
-			if (owner) {
-				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-			}
-			Depop();
-			return;
-		}
-		//Use when pets are given petype 5
-		if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()) {
-			CastSpell(SPELL_UNSUMMON_SELF, GetID()); //Live like behavior, damages self for 20K
-			if (!HasDied()) {
-				Kill(); //Ensure pet dies if over 20k HP.
-			}
-			return;
-		}
-	}
-}
-
 void NPC::ModifyStatsOnCharm(bool is_charm_removed)
 {
 	if (is_charm_removed) {

@@ -416,6 +416,33 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		}
 	}
 }
+
+void NPC::TryDepopTargetLockedPets(Mob* current_target) {
+
+	if (!current_target || (current_target && (current_target->GetID() != GetPetTargetLockID()) || current_target->IsCorpse())) {
+
+		//Use when swarmpets are set to auto lock from quest or rule
+		if (GetSwarmInfo() && GetSwarmInfo()->target) {
+			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
+			if (owner) {
+				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+			}
+			Depop();
+			return;
+		}
+		//Use when pets are given petype 5
+		if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()) {
+			CastSpell(SPELL_UNSUMMON_SELF, GetID()); //Live like behavior, damages self for 20K
+			if (!HasDied()) {
+				Kill(); //Ensure pet dies if over 20k HP.
+			}
+			return;
+		}
+	}
+}
+
+
+
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
