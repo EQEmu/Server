@@ -3118,7 +3118,7 @@ void NPC::TryDepopTargetLockedPets(Mob* current_target) {
 		}
 
 		if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()) {
-			Kill();
+			Kill(); //On live casts spell 892 Unsummon which hits pet for 20k damage. (~Kayen: Too limiting to use that for emu since pet can have more than 20k HP)
 			return;
 		}
 	}

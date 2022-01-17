@@ -385,7 +385,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	SetPetID(npc->GetID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
-
 	if (record.petcontrol == petTargetLock)
 	{
 		Mob* m_target = GetTarget();
@@ -394,7 +393,6 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc->AddToHateList(m_target, 1);
 			npc->SetPetTargetLockID(m_target->GetID());
 			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
-			npc->StartPetTargetLockTimer(500);
 		}
 		else {
 			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)

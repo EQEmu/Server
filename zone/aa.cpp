@@ -153,7 +153,6 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			swarm_pet_npc->AddToHateList(targ, 1000, 1000);
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
-				swarm_pet_npc->StartPetTargetLockTimer(500);
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
 				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
 			}
@@ -262,7 +261,6 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
-				swarm_pet_npc->StartPetTargetLockTimer(500);
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
 				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
 			}
