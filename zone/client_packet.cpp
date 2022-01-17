@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #ifdef BOTS
 #include "bot.h"
+#include "bot_command.h"
 #endif
 
 extern QueryServ* QServ;
@@ -573,7 +574,10 @@ void Client::CompleteConnect()
 			std::vector<RaidMember> r_members = raid->GetMembers();
 			for (RaidMember iter : r_members) {
 				if (iter.member && iter.member->IsBot() && iter.member->GetOwner()->CastToClient()->CharacterID() == this->CharacterID()) {
-					iter.member->CastToBot()->Spawn(this);
+					char buffer[70];
+					sprintf(buffer, "spawn %s", iter.member->GetName());
+					bot_command_real_dispatch(this, buffer); 
+					//iter.member->CastToBot()->Spawn(this);
 					iter.member->CastToBot()->SetRaidGrouped(true);
 					uint32 r_group = raid->GetGroup(iter.member->GetName());
 					if (r_group > 0) {
