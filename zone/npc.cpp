@@ -117,7 +117,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	npc_type_data->always_aggro
 ),
 	  attacked_timer(CombatEventTimer_expire),
-	  swarm_timer(100), 
+	  swarm_timer(100),
 	  classattack_timer(1000),
 	  monkattack_timer(1000),
 	  knightattack_timer(1000),
@@ -512,15 +512,6 @@ void NPC::SetTarget(Mob* mob) {
 	if (GetPetTargetLockID()) {
 		TryDepopTargetLockedPets(mob);
 	}
-	/*
-	//This is not the default behavior for swarm pets, must be specified from quest functions or rules value.
-	if(GetSwarmInfo() && GetSwarmInfo()->target && GetTarget() && (GetTarget()->GetHP() > 0)) {
-		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
-		if(targ != mob){
-			return;
-		}
-	}
-	*/
 
 	if (mob) {
 		SetAttackTimer();
