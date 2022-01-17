@@ -389,13 +389,30 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	{
 		Mob* m_target = GetTarget();
 
-		if (m_target){
+		bool activiate_pet = false;
+		if (m_target && m_target->GetID() != GetID()) {
+
+			if (spells[spell_id].target_type == ST_Self) {
+				float distance = CalculateDistance(m_target->GetX(), m_target->GetY(), m_target->GetZ());
+				if (distance <= 200) { //Live distance on, targetlock pets that self cast.
+					activiate_pet = true;
+				}
+			}
+			else {
+				activiate_pet = true;
+			}
+		}
+		
+		if (activiate_pet){
 			npc->AddToHateList(m_target, 1);
 			npc->SetPetTargetLockID(m_target->GetID());
 			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
 		}
 		else {
-			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
+			npc->CastSpell(SPELL_UNSUMMON_SELF, npc->GetID()); //Live like behavior, damages self for 20K
+			if (!npc->HasDied()) {
+				npc->Kill(); //Ensure pet dies if over 20k HP.
+			}
 		}
 	}
 }
