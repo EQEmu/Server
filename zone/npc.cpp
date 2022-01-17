@@ -118,7 +118,6 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100), 
-	  pettargetlock_timer(500),
 	  classattack_timer(1000),
 	  monkattack_timer(1000),
 	  knightattack_timer(1000),
@@ -144,7 +143,6 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	respawn2         = in_respawn;
 
 	swarm_timer.Disable();
-	pettargetlock_timer.Disable();
 
 	if (size <= 0.0f) {
 		size = GetRaceGenderDefaultHeight(race, gender);
@@ -511,6 +509,10 @@ void NPC::SetTarget(Mob* mob) {
 	if(mob == GetTarget())		//dont bother if they are allready our target
 		return;
 
+	if (GetPetTargetLockID()) {
+		TryDepopTargetLockedPets(mob);
+	}
+	/*
 	//This is not the default behavior for swarm pets, must be specified from quest functions or rules value.
 	if(GetSwarmInfo() && GetSwarmInfo()->target && GetTarget() && (GetTarget()->GetHP() > 0)) {
 		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
@@ -518,6 +520,7 @@ void NPC::SetTarget(Mob* mob) {
 			return;
 		}
 	}
+	*/
 
 	if (mob) {
 		SetAttackTimer();
@@ -851,10 +854,6 @@ bool NPC::Process()
 
 	if (swarm_timer.Check()) {
 		DepopSwarmPets();
-	}
-
-	if (pettargetlock_timer.Check()) {
-		DepopTargetLockedPets();
 	}
 
 	if (mob_close_scan_timer.Check()) {
@@ -3104,26 +3103,21 @@ void NPC::DepopSwarmPets()
 	}
 }
 
-void NPC::DepopTargetLockedPets()
-{
-	Shout("Check: DepopTargetLockedPets()");
-	if (GetSwarmInfo() && GetSwarmInfo()->target) {
-		Mob *m_target = entity_list.GetMob(GetSwarmInfo()->target);
-		if (!m_target || (m_target && m_target->IsCorpse())) {
+void NPC::TryDepopTargetLockedPets(Mob* current_target) {
+
+	if (!current_target || (current_target && (current_target->GetID() != GetPetTargetLockID()) || current_target->IsCorpse())) {
+
+		if (GetSwarmInfo() && GetSwarmInfo()->target) {
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
 			if (owner) {
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
 			}
-			DisablePetTargetLockTimer();
+			Shout("DEPOP");
 			Depop();
 			return;
 		}
-	}
 
-	if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()) {
-		Mob *m_target = entity_list.GetMob(GetPetTargetLockID());
-		if (!m_target || (m_target && m_target->IsCorpse())) {
-			DisablePetTargetLockTimer();
+		if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()) {
 			Kill();
 			return;
 		}
