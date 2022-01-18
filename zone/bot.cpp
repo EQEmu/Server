@@ -2300,8 +2300,8 @@ bool Bot::Process()
 	}
 
 	// Bot AI
-	Raid* raid = entity_list.GetRaidByBot(this);
-	if (raid)
+	uint32 raid = entity_list.GetRaidByBot(this)->GetID();
+	if (raid >= 0)
 		AI_Process_Raid();
 	else
 		AI_Process();

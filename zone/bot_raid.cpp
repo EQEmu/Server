@@ -75,7 +75,7 @@ void Bot::AI_Process_Raid()
 
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = nullptr;
-	if (r_group > 0) {
+	if (r_group >= 0) {
 		leash_owner = raid->GetGroupLeader(r_group)->CastToClient();
 	}
 	else {

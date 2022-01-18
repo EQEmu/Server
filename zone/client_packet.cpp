@@ -571,20 +571,25 @@ void Client::CompleteConnect()
 			SetRaidGrouped(true);
 			raid->LearnMembers();
 #ifdef BOTS
+			std::list<BotsAvailableList> bots_list;
+			database.botdb.LoadBotsList(this->CharacterID(), bots_list);
 			std::vector<RaidMember> r_members = raid->GetMembers();
-			for (RaidMember iter : r_members) {
-				if (iter.member && iter.member->IsBot() && iter.member->GetOwner()->CastToClient()->CharacterID() == this->CharacterID()) {
-					char buffer[70];
-					sprintf(buffer, "spawn %s", iter.member->GetName());
-					bot_command_real_dispatch(this, buffer); 
-					//iter.member->CastToBot()->Spawn(this);
-					iter.member->CastToBot()->SetRaidGrouped(true);
-					uint32 r_group = raid->GetGroup(iter.member->GetName());
-					if (r_group > 0) {
-						iter.member->CastToBot()->SetFollowID(raid->GetGroupLeader(r_group)->CastToClient()->GetID());
-					}
-					else {
-						iter.member->CastToBot()->SetFollowID(raid->GetLeader()->GetID());
+			for (const RaidMember& iter : r_members) {
+				if (iter.membername) {
+					for (const BotsAvailableList& b_iter : bots_list)
+					{
+						if (strcmp(iter.membername, b_iter.Name) == 0)
+						{
+							char buffer[71] = "^spawn ";
+							strcat(buffer, iter.membername);
+							bot_command_real_dispatch(this, buffer);
+							Bot* b = entity_list.GetBotByBotName(iter.membername);
+							if (b)
+							{
+								b->SetRaidGrouped(true);
+								//b->SetFollowID(this->GetID());
+							}
+						}
 					}
 				}
 			}
