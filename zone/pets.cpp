@@ -273,6 +273,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
+		EntityList::RemoveNumbers(npc_type->name);
+		entity_list.MakeNameUnique(npc_type->name);
 	} else if (record.petnaming == 0) {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
