@@ -814,7 +814,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			instant_recast = false;
 			
 			if (GetClass() == BARD && IsCasting() && spells[spell_id].cast_time == 0) {
-				if (DoCastingChecks(spell_id, GetID())) {
+				if (DoCastingChecks(spell_id, target)) {
 					SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline, 0, -1, spells[spell_id].resist_difficulty, false, -1, (uint32)DiscTimer, reduced_recast);
 				}
 			}
@@ -828,7 +828,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	if (instant_recast)	{ 
 		if (GetClass() == BARD && IsCasting() && spells[spell_id].cast_time == 0) {
-			if (DoCastingChecks(spell_id, GetID())) {
+			if (DoCastingChecks(spell_id, target)) {
 				SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline);
 			}
 		}
