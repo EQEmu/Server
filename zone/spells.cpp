@@ -162,11 +162,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]",
 		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
-	Shout("[casting_spell_id %i ] Cast spell %i Slot %i [%s]", casting_spell_id, spell_id, slot, spells[spell_id].name);
-
-	if(casting_spell_id == spell_id)
+	if (casting_spell_id == spell_id)
 		ZeroCastingVars();
-
+	
 	if
 	(
 		!IsValidSpell(spell_id) ||
@@ -195,8 +193,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		if (casting_spell_id && IsNPC()) {
 			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 		}
-		Shout("Abort");
-		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Discipline);
+
 		return(false);
 	}
 	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
@@ -247,7 +244,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		if ((item_slot != -1 && cast_time == 0) || aa_id) {
 			can_send_spellbar_enable = false;
 		}
-
 		if (can_send_spellbar_enable) {
 			SendSpellBarEnable(spell_id);
 		}
@@ -627,15 +623,25 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
  * it's probably doing something wrong.
  */
 
-bool Mob::DoCastingChecks()
+bool Mob::DoCastingChecks(int32 spell_id, uint16 target_id)
 {
 	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
 		casting_spell_checks = true;
 		return true;
 	}
 
-	uint16 spell_id = casting_spell_id;
-	Mob *spell_target = entity_list.GetMob(casting_spell_targetid);
+	bool set_state_variable = false;
+
+	if (spell_id == SPELL_UNKNOWN) {
+		spell_id = casting_spell_id;
+		set_state_variable = true;
+	}
+	if (!target_id) {
+		target_id = casting_spell_targetid;
+		set_state_variable = true;
+	}
+
+	Mob *spell_target = entity_list.GetMob(target_id);
 
 	if (RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
@@ -672,7 +678,9 @@ bool Mob::DoCastingChecks()
 		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id))
 			return false;
 
-	casting_spell_checks = true;
+	if (set_state_variable) {
+		casting_spell_checks = true;
+	}
 	return true;
 }
 
@@ -2150,7 +2158,8 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // we can't interrupt in this, or anything called from this!
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
-						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override)
+						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
+						uint32 timer, uint32 timer_duration)
 {
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
@@ -2574,6 +2583,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	//set our reuse timer on long ass reuse_time spells...
 	if(IsClient() && !isproc)
 	{
+		//Support for bards to get disc recast timers while singing.
+		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+			CastToClient()->GetPTimers().Start(timer, timer_duration);
+			LogSpells("Spell [{}]: Setting bard custom disciple reuse timer [{}] to [{}]", spell_id, timer, timer_duration);
+		}
+
 		if(casting_spell_aa_id) {
 			AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
 
@@ -2584,7 +2599,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			//aa new todo: aa expendable charges here
-			Shout("SET DISC INTERNAL RECAST HERE");
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
