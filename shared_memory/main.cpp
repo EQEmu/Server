@@ -167,6 +167,9 @@ int main(int argc, char **argv)
 
 
 	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+	content_service.SetDatabase(&database)
+		->SetExpansionContext()
+		->ReloadContentFlags();
 
 	LogInfo(
 		"Current expansion is [{}] ({})",
