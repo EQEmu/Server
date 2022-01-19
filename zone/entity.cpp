@@ -2048,15 +2048,16 @@ Raid* EntityList::GetRaidByClient(Client* client)
 	return nullptr;
 }
 
-Raid* EntityList::GetRaidByBot(Bot* bot)
+Raid* EntityList::GetRaidByBotName(const char* name)
 {
+	
 	std::list<Raid*>::iterator iterator;
 	iterator = raid_list.begin();
 
 	while (iterator != raid_list.end()) {
 		for (auto& member : (*iterator)->members) {
-			if (member.member) {
-				if (member.member == bot->CastToClient()) {
+			if (member.membername) {
+				if (strcmp(member.membername, name) == 0) {
 					//client->p_raid_instance = *iterator;
 					return *iterator;
 				}

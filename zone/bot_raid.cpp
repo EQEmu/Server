@@ -52,7 +52,7 @@ void Bot::AI_Process_Raid()
 #define PASSIVE (GetBotStance() == EQ::constants::stancePassive)
 #define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
 
-	Raid* raid = entity_list.GetRaidByBot(this);
+	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	uint32 r_group = raid->GetGroup(GetName());
 
@@ -75,11 +75,11 @@ void Bot::AI_Process_Raid()
 
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = nullptr;
-	if (r_group >= 0) {
-		leash_owner = raid->GetGroupLeader(r_group)->CastToClient();
+	if (r_group < 12) {
+		leash_owner = raid->GetGroupLeader(r_group);
 	}
 	else {
-		leash_owner = raid->GetLeader();
+		leash_owner = bot_owner;
 	}
 
 	if (!leash_owner) {
@@ -94,7 +94,12 @@ void Bot::AI_Process_Raid()
 		follow_mob = leash_owner;
 		SetFollowID(leash_owner->GetID());
 	}
+	
+	if (send_hp_update_timer.Check(false)) {
 
+		raid->SendHPManaEndPacketsFrom(this);
+
+	}
 	// Berserk updates should occur if primary AI criteria are met
 	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 
@@ -1531,7 +1536,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 	// Bot AI Raid
 
-	Raid* raid = entity_list.GetRaidByBot(this);
+	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
 	if (!raid)
 		return false;
 
@@ -2592,7 +2597,7 @@ void Raid::RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char*
 uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 	uint8 needHealed = 0;
 	Raid* raid = nullptr;
-	raid = entity_list.GetRaidByBot(this);
+	raid = entity_list.GetRaidByBotName(this->GetName());
 	uint32 r_group = raid->GetGroup(this->GetName());
 	std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 	for (RaidMember iter : raid_group_members) {

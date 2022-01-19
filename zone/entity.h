@@ -198,7 +198,7 @@ public:
 	Raid *GetRaidByID(uint32 id);
 	Raid *GetRaidByLeaderName(const char *leader);
 #ifdef BOTS
-	Raid* GetRaidByBot(Bot* bot);
+	Raid* GetRaidByBotName(const char* name);
 #endif
 
 	Corpse *GetCorpseByOwner(Client* client);
