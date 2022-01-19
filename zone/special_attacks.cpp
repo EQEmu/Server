@@ -219,8 +219,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 {
 	if (!GetTarget())
 		return;
-	// make sure were actually able to use such an attack.
-	if (spellend_timer.Enabled() || IsFeared() || IsStunned() || IsMezzed() || DivineAura() || dead)
+	// make sure were actually able to use such an attack. (Bards can throw while casting. ~Kayen confirmed on live 1/22)
+	if ((spellend_timer.Enabled() && GetClass() != BARD)|| IsFeared() || IsStunned() || IsMezzed() || DivineAura() || dead)
 		return;
 
 	pTimerType timer = pTimerCombatAbility;
@@ -228,7 +228,6 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	// to be more checks here
 	if (ClientVersion() >= EQ::versions::ClientVersion::RoF2 && ca_atk->m_skill == EQ::skills::SkillTigerClaw)
 		timer = pTimerCombatAbility2;
-
 
 	bool CanBypassSkillCheck = false;
 
@@ -1356,7 +1355,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	}
 
 	if(!IsAttackAllowed(other) ||
-		IsCasting() ||
+		(IsCasting() && GetClass() != BARD) ||
 		IsSitting() ||
 		(DivineAura() && !GetGM()) ||
 		IsStunned() ||
