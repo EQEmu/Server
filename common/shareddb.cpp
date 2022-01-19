@@ -2019,8 +2019,7 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	loot_table_entries = 0;
 	const std::string query =
 		fmt::format(
-			"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable WHERE TRUE {}",
-			ContentFilterCriteria::apply()
+			"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable"
 		);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -2043,8 +2042,7 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	loot_drop_entries = 0;
 
 	const std::string query = fmt::format(
-		"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop WHERE TRUE {}",
-		ContentFilterCriteria::apply()
+		"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop"
 	);
 
     auto results = QueryDatabase(query);
@@ -2083,11 +2081,9 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 			FROM
 			  loottable
 			  LEFT JOIN loottable_entries ON loottable.id = loottable_entries.loottable_id
-			WHERE TRUE {}
 			ORDER BY
 			  id
-			),
-			ContentFilterCriteria::apply()
+			)
 		);
 
     auto results = QueryDatabase(query);
@@ -2166,12 +2162,9 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			FROM
 			  lootdrop
 			  JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
-			WHERE
-			  TRUE {}
 			ORDER BY
 			  lootdrop_id
-		),
-		ContentFilterCriteria::apply()
+		)
 	);
 
     auto results = QueryDatabase(query);
