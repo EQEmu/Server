@@ -162,6 +162,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]",
 		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
+	Shout("[casting_spell_id %i ] Cast spell %i Slot %i [%s]", casting_spell_id, spell_id, slot, spells[spell_id].name);
+
 	if(casting_spell_id == spell_id)
 		ZeroCastingVars();
 
@@ -193,6 +195,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		if (casting_spell_id && IsNPC()) {
 			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 		}
+		Shout("Abort");
+		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Discipline);
 		return(false);
 	}
 	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
@@ -2580,6 +2584,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			//aa new todo: aa expendable charges here
+			Shout("SET DISC INTERNAL RECAST HERE");
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}

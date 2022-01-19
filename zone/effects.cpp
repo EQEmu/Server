@@ -725,6 +725,9 @@ void Client::SendDisciplineUpdate() {
 
 bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	// Dont let client waste a reuse timer if they can't use the disc
+
+	Shout("1 Use Disc %i %i", spell_id, target);
+
 	if (IsStunned() || IsFeared() || IsMezzed() || IsAmnesiad() || IsPet())
 	{
 		return(false);
@@ -744,7 +747,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		Message(Chat::Red, "This tome contains invalid knowledge.");
 		return(false);
 	}
-
+	Shout("2 Use Disc %i %i", spell_id, target);
 	//can we use the spell?
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 	uint8 level_to_use = spell.classes[GetClass() - 1];
@@ -788,7 +791,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		);
 		return false;
 	}
-
+	Shout("3 Use Disc %i %i", spell_id, target);
 	if(spell.recast_time > 0)
 	{
 		uint32 reduced_recast = spell.recast_time / 1000;
@@ -818,6 +821,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	{
 		CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 	}
+	Shout("4 Use Disc %i %i", spell_id, target);
 	return(true);
 }
 
