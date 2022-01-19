@@ -509,12 +509,8 @@ void NPC::SetTarget(Mob* mob) {
 	if(mob == GetTarget())		//dont bother if they are allready our target
 		return;
 
-	//This is not the default behavior for swarm pets, must be specified from quest functions or rules value.
-	if(GetSwarmInfo() && GetSwarmInfo()->target && GetTarget() && (GetTarget()->GetHP() > 0)) {
-		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
-		if(targ != mob){
-			return;
-		}
+	if (GetPetTargetLockID()) {
+		TryDepopTargetLockedPets(mob);
 	}
 
 	if (mob) {
@@ -846,6 +842,10 @@ bool NPC::Process()
 	}
 
 	SpellProcess();
+
+	if (swarm_timer.Check()) {
+		DepopSwarmPets();
+	}
 
 	if (mob_close_scan_timer.Check()) {
 		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
@@ -3089,28 +3089,6 @@ void NPC::DepopSwarmPets()
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
 			}
 			Depop();
-			return;
-		}
-
-		if (GetSwarmInfo()->target) {
-			Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
-			if(!targMob || (targMob && targMob->IsCorpse())){
-				Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
-				if (owner) {
-					owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-				}
-				Depop();
-				return;
-			}
-		}
-	}
-
-	if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()){
-
-		Mob *targMob = entity_list.GetMob(GetPetTargetLockID());
-
-		if(!targMob || (targMob && targMob->IsCorpse())){
-			Kill();
 			return;
 		}
 	}

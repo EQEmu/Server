@@ -136,9 +136,6 @@ void Mob::SpellProcess()
 void NPC::SpellProcess()
 {
 	Mob::SpellProcess();
-	if (swarm_timer.Check()) {
-		DepopSwarmPets();
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
