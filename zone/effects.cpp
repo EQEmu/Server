@@ -748,6 +748,10 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return(false);
 	}
 
+	if (DivineAura() && !spells[spell_id].cast_not_standing) {
+		return false;
+	}
+
 	//can we use the spell?
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 	uint8 level_to_use = spell.classes[GetClass() - 1];

@@ -219,8 +219,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return(false);
 	}
 
-	//cannot cast under divine aura
-	if(DivineAura()) {
+	//cannot cast under divine aura, unless spell has 'cast_not_standing' flag. 
+	if(DivineAura() && !spells[spell_id].cast_not_standing) {
 		LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 		InterruptSpell(173, 0x121, false);
 		if(IsClient()) {
