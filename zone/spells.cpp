@@ -162,9 +162,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]",
 		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
-	if (casting_spell_id == spell_id)
+	if (casting_spell_id == spell_id) {
 		ZeroCastingVars();
-	
+	}
 	if
 	(
 		!IsValidSpell(spell_id) ||
@@ -193,7 +193,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		if (casting_spell_id && IsNPC()) {
 			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 		}
-
 		return(false);
 	}
 	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
@@ -630,15 +629,20 @@ bool Mob::DoCastingChecks(int32 spell_id, uint16 target_id)
 		return true;
 	}
 
-	bool set_state_variable = false;
+	bool ignore_casting_spell_checks = false;
+	/*
+		If variables are passed into this function it is NOT being called from main spell process
+		thefore we do not want to set the 'casting_spell_checks' state keeping variable.
+	*/
+	if (spell_id != SPELL_UNKNOWN || target_id) {
+		ignore_casting_spell_checks = true;
+	}
 
 	if (spell_id == SPELL_UNKNOWN) {
 		spell_id = casting_spell_id;
-		set_state_variable = true;
 	}
 	if (!target_id) {
 		target_id = casting_spell_targetid;
-		set_state_variable = true;
 	}
 
 	Mob *spell_target = entity_list.GetMob(target_id);
@@ -678,7 +682,7 @@ bool Mob::DoCastingChecks(int32 spell_id, uint16 target_id)
 		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id))
 			return false;
 
-	if (set_state_variable) {
+	if (!ignore_casting_spell_checks){
 		casting_spell_checks = true;
 	}
 	return true;
