@@ -4462,7 +4462,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 }
 
 //Used for effects that should occur after the completion of the spell
-void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
+void Mob::TryAfterSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 {
 	if (!IsValidSpell(spell_id))
 		return;

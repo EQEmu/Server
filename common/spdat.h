@@ -179,8 +179,6 @@
 #define SPELLGROUP_FURIOUS_RAMPAGE 38106
 #define SPELLGROUP_SHROUD_OF_PRAYER 41050
 
-
-
 #define EFFECT_COUNT 12
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
@@ -192,6 +190,9 @@
 #define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
 #define MAX_APPEARANCE_EFFECTS 20 //Up to 20 Appearance Effects can be saved to a mobs appearance effect array, these will be sent to other clients when they enter a zone (This is arbitrary)
 #define MAX_CAST_ON_SKILL_USE 36 //Actual amount is MAX/3
+
+#define ZONE_TUTORIAL 183
+#define ZONE_LOAD 184
 
 
 const int Z_AGGRO=10;

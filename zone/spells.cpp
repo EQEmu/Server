@@ -553,7 +553,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			StopCasting();
 			return false;
 		}
-		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust);
+		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust); //
 		return(true);
 	}
 
@@ -1483,7 +1483,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		TrySympatheticProc(target, spell_id);
 	}
 
-	TryOnSpellFinished(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
+	TryAfterSpellFinished(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
 
 	TryTwincast(this, target, spell_id);
 
@@ -1675,7 +1675,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 				return false;
 			}
 		}
-
 		else if (IsBeneficialSpell(spell_id)) {
 			if ((IsNPC() && !IsEngaged()) || (IsClient() && !CastToClient()->GetAggroCount())) {
 				if (IsDiscipline(spell_id))
@@ -2193,63 +2192,49 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 					}
 				}
 			}
-    }
-  }
+		}
+	}
 
 	if( spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()){
-		if(IsClient()){
-				if(!CastToClient()->GetGM()){
-					MessageString(Chat::Red, CAST_OUTDOORS);
-					return false;
-				}
-			}
+		if(IsClient() && !CastToClient()->GetGM()){
+			MessageString(Chat::Red, CAST_OUTDOORS);
+			return false;
 		}
+	}
 
-	if(IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()){
-			if(IsClient()){
-				if(!CastToClient()->GetGM()){
-					Message(Chat::Red, "You can't levitate in this zone.");
-					return false;
-				}
-			}
+	if(IsClient() && !zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)){
+		if(!CastToClient()->GetGM()){
+			Message(Chat::Red, "You can't levitate in this zone.");
+			return false;
 		}
+	}
 
 	if(IsClient() && !CastToClient()->GetGM()){
-
 		if(zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))){
-			const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
-			if(msg){
-				Message(Chat::Red, msg);
-				return false;
-			}
-			else{
-				Message(Chat::Red, "You can't cast this spell here.");
-				return false;
-			}
 
+			if (!CastToClient()->GetGM()) {
+				const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
+				if (msg) {
+					Message(Chat::Red, msg);
+					return false;
+				}
+				else {
+					Message(Chat::Red, "You can't cast this spell here.");
+					return false;
+				}
+			}
+			else {
+				LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
+			}
 		}
 	}
 
-	if (IsClient() && CastToClient()->GetGM()){
-		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))){
-			LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
-		}
-	}
-
-	if
-	(
-		this->IsClient() &&
-		(zone->GetZoneID() == 183 || zone->GetZoneID() == 184) &&	// load
-		CastToClient()->Admin() < AccountStatus::QuestTroupe
-	)
-	{
-		if
-		(
-			IsEffectInSpell(spell_id, SE_Gate) ||
+	if	(IsClient() && 
+		(zone->GetZoneID() == ZONE_TUTORIAL || zone->GetZoneID() == ZONE_LOAD) &&
+		CastToClient()->Admin() < AccountStatus::QuestTroupe){
+		if(	IsEffectInSpell(spell_id, SE_Gate) ||
 			IsEffectInSpell(spell_id, SE_Translocate) ||
-			IsEffectInSpell(spell_id, SE_Teleport)
-		)
-		{
+			IsEffectInSpell(spell_id, SE_Teleport)){
 			Message(0, "The Gods brought you here, only they can send you away.");
 			return false;
 		}

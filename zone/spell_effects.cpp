@@ -2835,7 +2835,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				break;
 			}
-			/*Calc for base1 is found in TryOnSpellFinished() due to needing to account for AOE functionality
+			/*Calc for base1 is found in TryAfterSpellFinished() due to needing to account for AOE functionality
 			since effect can potentially kill caster*/
 			case SE_Health_Transfer: {
 				effect_value = spells[spell_id].limit_value[i];
