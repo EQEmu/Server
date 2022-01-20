@@ -3791,8 +3791,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
-	// invuln mobs can't be affected by any spells, good or bad
-	if(spelltar->GetInvul() || spelltar->DivineAura()) {
+	// invuln mobs can't be affected by any spells, good or bad, except if caster is casting a spell with 'cast_not_standing' on self.
+	if ((spelltar->GetInvul() && !spelltar->DivineAura()) ||
+		(spelltar != this && spelltar->DivineAura()) ||
+		(spelltar == this && spelltar->DivineAura() && !spells[spell_id].cast_not_standing)) {
 		LogSpells("Casting spell [{}] on [{}] aborted: they are invulnerable", spell_id, spelltar->GetName());
 		safe_delete(action_packet);
 		return false;
