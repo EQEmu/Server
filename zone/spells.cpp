@@ -171,9 +171,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		casting_spell_id ||
 		delaytimer ||
 		spellend_timer.Enabled() ||
-		IsStunned() ||
+		(IsStunned() && !IgnoreCastingRestriction(spell_id)) ||
 		IsFeared() ||
-		IsMezzed() ||
+		(IsMezzed() && !IgnoreCastingRestriction(spell_id)) ||
 		(IsSilenced() && !IsDiscipline(spell_id)) ||
 		(IsAmnesiad() && IsDiscipline(spell_id))
 	)
@@ -228,7 +228,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 		return(false);
 	}
-	Shout("PAss1 ");
+
 	if (spellbonuses.NegateIfCombat) {
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
