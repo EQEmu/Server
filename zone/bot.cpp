@@ -7713,11 +7713,25 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 
 bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
+	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+
 	if(isMainGroupMGB && (GetClass() != BARD)) {
 		BotGroupSay(this, "MGB %s", spells[spell_id].name);
 		SpellOnTarget(spell_id, this);
 		entity_list.AESpell(this, this, spell_id, true);
-	} else {
+	}
+	else if (raid) 
+	{
+		for (RaidMember iter : raid->GetRaidGroupMembers(raid->GetGroup(this->GetName()))) {
+			if (iter.member) {
+				SpellOnTarget(spell_id, iter.member);
+				if (iter.member && iter.member->GetPetID())
+					SpellOnTarget(spell_id, iter.member ->GetPet());
+			}
+		}
+	}
+	else
+	{
 		Group *g = GetGroup();
 		if(g) {
 			for(int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
@@ -9277,7 +9291,19 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			else
 				return false;
 		}
-
+//added raid check
+		if (caster->IsRaidGrouped()) {
+			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
+			uint32 g = raid->GetGroup(caster->GetName());
+			if (g < 12) {
+				for (RaidMember &iter : raid->GetRaidGroupMembers(g)) {
+					if (iter.member) {
+						if (caster->AICastSpell(iter.member, chanceToCast, SpellType_Buff) || caster->AICastSpell(iter.member->GetPet(), chanceToCast, SpellType_Buff))
+							return true;
+					}
+				}
+			}
+		}
 		if(caster->HasGroup()) {
 			Group *g = caster->GetGroup();
 			if(g) {
@@ -9333,6 +9359,19 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		if (botCasterClass == BARD || caster->IsEngaged())
 			return false;
 
+		//added raid check
+		if (caster->IsRaidGrouped()) {
+			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
+			uint32 g = raid->GetGroup(caster->GetName());
+			if (g < 12) {
+				for (RaidMember& iter : raid->GetRaidGroupMembers(g)) {
+					if (iter.member) {
+						if (caster->AICastSpell(iter.member, iChance, SpellType_PreCombatBuff) || caster->AICastSpell(iter.member->GetPet(), iChance, SpellType_PreCombatBuff))
+							return true;
+					}
+				}
+			}
+		}
 		if (caster->HasGroup()) {
 			Group *g = caster->GetGroup();
 			if (g) {
@@ -10462,9 +10501,9 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 		raid = new Raid(invitor);
 		entity_list.AddRaid(raid);
 		raid->SetRaidDetails();
-		raid->SendRaidCreate(invitor);
-		raid->SetLeader(invitor);	//Added Jan 18
-		raid->SendMakeLeaderPacketTo(raid->leadername, invitor);
+//		raid->SendRaidCreate(invitor);
+//		raid->SetLeader(invitor);	//Added Jan 18
+//		raid->SendMakeLeaderPacketTo(raid->leadername, invitor);
 
 		if (g_invitor)
 		{
@@ -10490,8 +10529,8 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 						c = g_invitor->members[x]->CastToClient();
 						if (x == 0) {
 							raid->SendRaidCreate(c);
-							raid->SendMakeLeaderPacketTo(invitor->GetName(), c);
 							raid->AddMember(c, 0, true, true, true);
+							raid->SendMakeLeaderPacketTo(raid->leadername, c);
 							//raid->SetGroupLeader(c->GetName()); //Mitch Jan 18
 							//raid->GroupUpdate(0, true);
 							if (raid->IsLocked()) {
@@ -10582,8 +10621,8 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 		{
 			//Second, add the single invitor
 			raid->SendRaidCreate(invitor);
-			raid->SendMakeLeaderPacketTo(invitor->GetName(), invitor);  //Mitch Jan 18
 			raid->AddMember(invitor, 0xFFFFFFFF, true, false, true);
+			raid->SendMakeLeaderPacketTo(invitor->GetName(), invitor);  //Mitch Jan 18
 			if (raid->IsLocked()) {
 				raid->SendRaidLockTo(invitor);
 			}

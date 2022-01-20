@@ -253,6 +253,7 @@ void Raid::RemoveMember(const char *characterName)
 		bot->SetFollowID(bot->GetOwner()->GetID());
 		bot->SetGrouped(0);
 		bot->SetTarget(nullptr);
+		bot->SetRaidGrouped(0);
 	}
 #endif
 
