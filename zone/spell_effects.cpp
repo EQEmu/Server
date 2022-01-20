@@ -8280,7 +8280,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "This spell will only work on clockwork gnomes.");
 		break;
 	case IS_WISP_AND_HP_LESS_THAN_10_PCT:
-		Message(Chat::Red, "This spell will only work on wisps at or below 10% of their maximum HP.");
+		Message(Chat::Red, "This spell will only work on wisps at or below 10 pct of their maximum HP.");
 		break;
 	case IS_CLASS_MELEE_THAT_CAN_BASH_OR_KICK_EXCEPT_BARD:
 		Message(Chat::Red, "This spell will only work on non-bard targets that can bash or kick.");
@@ -8469,16 +8469,16 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "This spell will only cast if you do not have Frenzied Burnout active.");
 		break;
 	case IS_HP_ABOVE_75_PCT:
-		Message(Chat::Red, "Your taret's HP must be at or above 75% of its maximum.");
+		Message(Chat::Red, "Your taret's HP must be at or above 75 pct of its maximum.");
 		break;
 	case IS_HP_LESS_THAN_20_PCT:
-		Message(Chat::Red, "Your target's HP must be at 20% of its maximum or below.");
+		Message(Chat::Red, "Your target's HP must be at 20 pct of its maximum or below.");
 		break;
 	case IS_HP_LESS_THAN_50_PCT:
-		Message(Chat::Red, "Your target's HP must be at 50% of its maximum or below.");
+		Message(Chat::Red, "Your target's HP must be at 50 pct of its maximum or below.");
 		break;
 	case IS_HP_LESS_THAN_75_PCT:
-		Message(Chat::Red, "Your target's HP must be at 75% of its maximum or below.");
+		Message(Chat::Red, "Your target's HP must be at 75 pct of its maximum or below.");
 		break;
 	case IS_NOT_IN_COMBAT:
 		Message(Chat::Red, "This spell will only affect creatures that are not in combat.");
@@ -8544,7 +8544,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "Your target must have least 20 pets on their hate list.");
 		break;
 	case IS_HP_LESS_THAN_35_PCT:
-		Message(Chat::Red, "Your target's HP must be at 35% of its maximum or below.");
+		Message(Chat::Red, "Your target's HP must be at 35 pct of its maximum or below.");
 		break;
 	case HAS_BETWEEN_1_TO_2_PETS_ON_HATELIST:
 		Message(Chat::Red, "Your target must have between 1 and 2 pets on their hate list.");
@@ -8566,181 +8566,181 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		break;
 	case IS_HP_BETWEEN_5_AND_9_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 5% and 9% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 5 pct and 9 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 5% and 9% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 5 pct and 9 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_10_AND_14_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 10% and 14% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 10 pct and 14 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 10% and 14% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 10 pct and 14 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_15_AND_19_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 15% and 19% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 15 pct and 19 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 15% and 19% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 15 pct and 19 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_20_AND_24_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 20% and 54% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 20 pct and 54 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 20% and 24% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 20 pct and 24 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_25_AND_29_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 25% and 29% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 25 pct and 29 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 25% and 29% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 25 pct and 29 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_30_AND_34_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 30% and 34% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 30 pct and 34 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 30% and 34% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 30 pct and 34 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_35_AND_39_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 35% and 39% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 35 pct and 39 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 35% and 39% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 35 pct and 39 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_40_AND_44_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 40% and 44% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 40 pct and 44 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 40% and 44% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 40 pct and 44 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_45_AND_49_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 45% and 49% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 45 pct and 49 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 45% and 49% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 45 pct and 49 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_50_AND_54_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 50% and 54% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 50 pct and 54 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 50% and 54% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 50 pct and 54 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_55_AND_59_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 55% and 59% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 55 pct and 59 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 55% and 59% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 55 pct and 59 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_5_AND_15_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 5% and 15% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 5 pct and 15 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 5% and 15% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 5 pct and 15 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_15_AND_25_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 15% and 25% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 15 pct and 25 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 15% and 25% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 15 pct and 25 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_1_AND_25_PCT:
-		Message(Chat::Red, "Your target's HP must be at 25% of its maximum or below.");
+		Message(Chat::Red, "Your target's HP must be at 25 pct of its maximum or below.");
 		break;
 	case IS_HP_BETWEEN_25_AND_35_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 25% and 35% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 25 pct and 35 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 25% and 35% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 25 pct and 35 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_35_AND_45_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 35% and 45% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 35 pct and 45 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 35% and 45% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 35 pct and 45 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_45_AND_55_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 45% and 55% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 45 pct and 55 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 45% and 55% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 45 pct and 55 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_55_AND_65_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 55% and 65% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 55 pct and 65 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 55% and 65% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 55 pct and 65 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_65_AND_75_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 65% and 75% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 65 pct and 75 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 65% and 75% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 65 pct and 75 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_75_AND_85_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 75% and 85% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 75 pct and 85 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 75% and 85% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 75 pct and 85 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BETWEEN_85_AND_95_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 85% and 95% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be between 85 pct and 95 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 85% and 95% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be between 85 pct and 95 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_ABOVE_45_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at least 45% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be at least 45 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at least 45% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at least 45 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_ABOVE_55_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at least 55% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be at least 55 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at least 55% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at least 55 pct of your maximum HP.");
 		}
 		break;
 	case UNKNOWN_TOO_MUCH_HP_410:
@@ -8751,175 +8751,175 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		break;
 	case IS_HP_ABOVE_99_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at or above 99% of its maximum.");
+			Message(Chat::Red, "Your target's HP must be at or above 99 pct of its maximum.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or above 99% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or above 99 pct of your maximum HP.");
 		}
 		break;
 	case IS_MANA_ABOVE_10_PCT:
-		Message(Chat::Red, "You must have at least 10% of your maximum mana available to cast this spell.");
+		Message(Chat::Red, "You must have at least 10 pct of your maximum mana available to cast this spell.");
 		break;
 	case IS_HP_BELOW_5_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 5% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 5 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 5% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 5 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_10_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 10% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 10 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 10% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 10 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_15_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 15% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 15 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 15% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 15 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_20_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 20% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 20 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 20% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 20 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_25_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 25% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 25 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 25% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 25 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_30_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 30% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 30 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 30% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 30 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_35_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 35% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 35 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 35% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 35 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_40_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 40% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 40 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 40% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 40 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_45_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 45% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 45 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 45% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 45 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_50_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 50% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 50 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 50% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 50 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_55_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 55% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 55 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 55% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 55 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_60_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 60% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 60 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 60% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 60 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_65_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 65% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 65 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 65% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 65 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_70_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 70% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 70 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 70% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 70 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_75_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 75% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 75 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 75% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 75 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_80_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 80% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 80 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 80% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 80 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_85_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 85% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 85 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 85% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 85 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_90_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 90% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 90 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 90% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 90 pct of your maximum HP.");
 		}
 		break;
 	case IS_HP_BELOW_95_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 95% of its maximum or below.");
+			Message(Chat::Red, "Your target's HP must be at 95 pct of its maximum or below.");
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 95% of your maximum HP.");
+			Message(Chat::Red, "This ability requires you to be at or below 95 pct of your maximum HP.");
 		}
 		break;
 	case IS_ENDURANCE_BELOW_40_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 40% of your maximum endurance.");
+		Message(Chat::Red, "This ability requires you to be at or below 40 pct of your maximum endurance.");
 		break;
 	case IS_MANA_BELOW_40_PCT:
-		Message(Chat::Red, "This spells requires you to be at or below 40% of your maximum mana.");
+		Message(Chat::Red, "This spells requires you to be at or below 40 pct of your maximum mana.");
 		break;
 	case IS_HP_ABOVE_20_PCT:
-		Message(Chat::Red, "Your target's HP must be at least 21% of its maximum.");
+		Message(Chat::Red, "Your target's HP must be at least 21 pct of its maximum.");
 		break;
 	case IS_BODY_TYPE_UNDEFINED:
 		Message(Chat::Red, "This spell will only work on creatures with an undefined body type.");
@@ -9045,13 +9045,13 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "This spell will only work on warriors, casters, or priests.");
 		break;
 	case IS_END_BELOW_21_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 21% of your maximum endurance.");
+		Message(Chat::Red, "This ability requires you to be at or below 21 pct of your maximum endurance.");
 		break;
 	case IS_END_BELOW_25_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 25% of your maximum endurance.");
+		Message(Chat::Red, "This ability requires you to be at or below 25 pct of your maximum endurance.");
 		break;
 	case IS_END_BELOW_29_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 29% of your maximum endurance.");
+		Message(Chat::Red, "This ability requires you to be at or below 29 pct of your maximum endurance.");
 		break;
 	case IS_HUMANOID_LEVEL_84_MAX:
 		Message(Chat::Red, "This spell will only work on humanoids up to level 84.");
@@ -9129,7 +9129,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "This spell will only work on targets between level 96 and 105.");
 		break;
 	case IS_HP_LESS_THAN_80_PCT:
-		Message(Chat::Red, "Your target's HP must be at 80% of its maximum or below.");
+		Message(Chat::Red, "Your target's HP must be at 80 pct of its maximum or below.");
 		break;
 	case IS_LEVEL_ABOVE_34:
 		Message(Chat::Red, "Your target must be level 35 or higher.");
@@ -9201,10 +9201,10 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "Your target cannot receive another Quiet Prayer this soon.");
 		break;
 	case IS_MANA_BELOW_20_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 20% of your maximum mana.");
+		Message(Chat::Red, "This ability requires you to be at or below 20 pct of your maximum mana.");
 		break;
 	case IS_MANA_ABOVE_50_PCT:
-		Message(Chat::Red, "This ability requires you to be at or above 50% of your maximum mana.");
+		Message(Chat::Red, "This ability requires you to be at or above 50 pct of your maximum mana.");
 		break;
 	case COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER:
 		Message(Chat::Red, "You have completed Legendary Answerer.");
@@ -9222,10 +9222,10 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "This ability requires you to be a caster or priest.");
 		break;
 	case IS_END_OR_MANA_ABOVE_20_PCT:
-		Message(Chat::Red, "You must have at least 20% of your maximum mana and endurance to use this ability.");
+		Message(Chat::Red, "You must have at least 20 pct of your maximum mana and endurance to use this ability.");
 		break;
 	case IS_END_OR_MANA_BELOW_30_PCT:
-		Message(Chat::Red, "Your target already has 30% or more of their maximum mana or endurance.");
+		Message(Chat::Red, "Your target already has 30 pct or more of their maximum mana or endurance.");
 		break;
 	case IS_CLASS_BARD2:
 		if (target_requirement) {
@@ -9247,7 +9247,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		Message(Chat::Red, "This ability cannot be activated while Furious Rampage is active.");
 		break;
 	case IS_END_OR_MANA_BELOW_30_PCT2:
-		Message(Chat::Red, "You can only perform this solo if you have less than 30% mana or endurance.");
+		Message(Chat::Red, "You can only perform this solo if you have less than 30 pct mana or endurance.");
 		break;
 	case HAS_NO_HARMONIOUS_PRECISION_BUFF:
 		Message(Chat::Red, "This spell will not work if you have the Harmonious Precision line active.");
