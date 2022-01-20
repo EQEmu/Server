@@ -196,7 +196,6 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 		//SendGroupLeadershipAA(c, RAID_GROUPLESS); Is this needed for bots?
 	SendRaidAddAll(b->GetName());
 	
-	members[GetPlayerIndex(b->GetName())].SentToBotOwner = true;  //Mitch indicates that the BotOwner has received this raid info already.
 	b->SetRaidGrouped(true);
 	//SendRaidMOTD(b->GetOwner()->CastToClient());
 
