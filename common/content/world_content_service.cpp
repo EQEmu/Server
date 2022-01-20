@@ -160,9 +160,11 @@ bool WorldContentService::DoEnabledFlagsPass(const char *content_flags) {
 
 	auto split_content_flags = SplitString(std::string(content_flags));
 
-	for (auto content_flag : split_content_flags)
-		if(this->IsContentFlagEnabled(content_flag))
+	for (auto content_flag : split_content_flags) {
+		if(IsContentFlagEnabled(content_flag)) {
 			return true;
+		}
+	}
 
 	return false;
 }
@@ -173,9 +175,11 @@ bool WorldContentService::DoDisabledFlagsPass(const char *content_flags) {
 
 	auto split_content_flags = SplitString(std::string(content_flags));
 
-	for (const auto& content_flag : split_content_flags)
-		if(this->IsContentFlagDisabled(content_flag))
+	for (const auto& content_flag : split_content_flags) {
+		if(IsContentFlagDisabled(content_flag)) {
 			return true;
+		}
+	}
 
 	return false;
 }
