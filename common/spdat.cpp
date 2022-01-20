@@ -1674,7 +1674,7 @@ bool CastRestrictedSpell(int spellid)
 
 bool IgnoreCastingRestriction(int32 spell_id) {
 	/*
-		field 'cast_not_standing' allows casting when stunned, mezed, Divine Aura, SPA 343 Interrupt casting
+		field 'cast_not_standing' allows casting when sitting, stunned, mezed, Divine Aura, through SPA 343 Interrupt casting
 		Likely also allows for casting while feared, but need to confirm. Possibly also while charmed.
 		This field also allows for damage to ignore DA immunity.
 	*/
