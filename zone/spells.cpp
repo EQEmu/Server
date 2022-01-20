@@ -1633,7 +1633,8 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		targetType = ST_Target;
 
 	if (spell_target && spells[spell_id].cast_restriction && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)){
-		Message(Chat::Red, "Your target does not meet the spell requirements."); //Current live also adds description after this from dbstr_us type 39
+		//Message(Chat::Red, "Your target does not meet the spell requirements."); //Current live also adds description after this from dbstr_us type 39
+		SendCastRestrictionMessage(spells[spell_id].cast_restriction);
 		return false;
 	}
 

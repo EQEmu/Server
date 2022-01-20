@@ -1539,7 +1539,6 @@ int GetViralSpreadRange(int32 spell_id);
 bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect);
 uint32 GetProcLimitTimer(int32 spell_id, int proc_type);
 bool IgnoreCastingRestriction(int32 spell_id);
-
 int CalcPetHp(int levelb, int classb, int STA = 75);
 int GetSpellEffectDescNum(uint16 spell_id);
 DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType = 0);
