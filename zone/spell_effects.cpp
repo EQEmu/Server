@@ -8195,12 +8195,13 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		return;
 	}
 	/*
-		Most of these are the live messages that unsupported clients give.
+		Most of these are the live messages that modern clients give. Current live dbstr_us type 39
+		Having these messages display greatly enhances the useabllity of these fields. (CastRestriction=target, caster_requirement_id=caster)
 		If target_requirement is false then use the caster requirement message.
 		Added support for different messages for certain high yield restrictions based on if
 		target or caster requirements.
 	*/
-	Message(Chat::Red, "This ability requires you to be at or below 35% of your maximum HP.");
+
 	switch (requirement_id)
 	{
 	case IS_ANIMAL_OR_HUMANOID:

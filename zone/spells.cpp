@@ -230,6 +230,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
 
+	DoAdvancedCastingChecks(spell_id, target_id);
+
 	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, entity_list.GetMobID(target_id))) {
 		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
 		return false;
@@ -610,7 +612,35 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
 
 	safe_delete(outapp);
 }
+bool Mob::DoAdvancedCastingChecks(int32 spell_id, uint16 target_id) {
 
+	Mob *spell_target = entity_list.GetMob(target_id);
+
+	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
+		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
+		if (IsClient()) {
+			CastToClient()->SendSpellBarEnable(spell_id);
+		}
+		if (casting_spell_id && IsNPC()) {
+			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		}
+		return false;
+	}
+
+	if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
+		SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false);
+		if (IsClient()) {
+			CastToClient()->SendSpellBarEnable(spell_id);
+		}
+		if (casting_spell_id && IsNPC()) {
+			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		}
+		return false;
+	}
+
+
+	return true;
+}
 /*
  * Some failures should be caught before the spell finishes casting
  * This is especially helpful to clients when they cast really long things
@@ -1632,14 +1662,13 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	if (isproc && IsNPC() && CastToNPC()->GetInnateProcSpellID() == spell_id)
 		targetType = ST_Target;
 
-	if (spell_target && spells[spell_id].cast_restriction && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)){
-		//Message(Chat::Red, "Your target does not meet the spell requirements."); //Current live also adds description after this from dbstr_us type 39
-		SendCastRestrictionMessage(spells[spell_id].cast_restriction);
+	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)){
+		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
 		return false;
 	}
 
 	if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
-		MessageString(Chat::Red, SPELL_WOULDNT_HOLD);
+		SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false);
 		return false;
 	}
 
@@ -1653,14 +1682,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 				return false;
 			}
 		}
-
 		else if (IsBeneficialSpell(spell_id)) {
 			if ((IsNPC() && IsEngaged()) || (IsClient() && CastToClient()->GetAggroCount())) {
-				if (IsDiscipline(spell_id))
+				if (IsDiscipline(spell_id)) {
 					MessageString(Chat::Red, NO_ABILITY_IN_COMBAT);
-				else
+				}
+				else {
 					MessageString(Chat::Red, NO_CAST_IN_COMBAT);
-
+				}
 				return false;
 			}
 		}
@@ -1678,11 +1707,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		}
 		else if (IsBeneficialSpell(spell_id)) {
 			if ((IsNPC() && !IsEngaged()) || (IsClient() && !CastToClient()->GetAggroCount())) {
-				if (IsDiscipline(spell_id))
+				if (IsDiscipline(spell_id)) {
 					MessageString(Chat::Red, NO_ABILITY_OUT_OF_COMBAT);
-				else
+				}
+				else {
 					MessageString(Chat::Red, NO_CAST_OUT_OF_COMBAT);
-
+				}
 				return false;
 			}
 		}
