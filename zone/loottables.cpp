@@ -54,6 +54,13 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 	if (!lts)
 		return;
 
+
+	if(!content_service.DoEnabledFlagsPass(lts->content_flags))
+		return;
+
+	if(!content_service.DoDisabledFlagsPass(lts->content_flags_disabled))
+		return;
+
 	uint32 min_cash = lts->mincash;
 	uint32 max_cash = lts->maxcash;
 	if(min_cash > max_cash) {
@@ -127,6 +134,12 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	if (loot_drop->NumEntries == 0) {
 		return;
 	}
+
+	if(!content_service.DoEnabledFlagsPass(loot_drop->content_flags))
+		return;
+
+	if(!content_service.DoDisabledFlagsPass(loot_drop->content_flags_disabled))
+		return;
 
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (droplimit == 0 && mindrop == 0) {
@@ -706,4 +719,3 @@ void ZoneDatabase::LoadGlobalLoot()
 		zone->AddGlobalLootEntry(e);
 	}
 }
-

@@ -35,6 +35,8 @@ struct LootTable_Struct {
 	uint32	maxcash;
 	uint32	avgcoin;
 	uint32	NumEntries;
+	char content_flags[100];
+	char content_flags_disabled[100];
 	LootTableEntries_Struct Entries[0];
 };
 
@@ -52,6 +54,8 @@ struct LootDropEntries_Struct {
 
 struct LootDrop_Struct {
 	uint32	NumEntries;
+	char content_flags[100];
+	char content_flags_disabled[100];
 	LootDropEntries_Struct Entries[0];
 };
 #pragma pack()

@@ -139,6 +139,47 @@ bool WorldContentService::IsContentFlagEnabled(const std::string &content_flag)
 	return false;
 }
 
+/**
+ * @param content_flag
+ * @return
+ */
+bool WorldContentService::IsContentFlagDisabled(const std::string &content_flag)
+{
+	for (auto &f: GetContentFlags()) {
+		if (f.flag_name == content_flag && f.enabled == false) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool WorldContentService::DoEnabledFlagsPass(const char *content_flags) {
+	if(strlen(content_flags) == 0)
+		return true;
+
+	auto split_content_flags = SplitString(std::string(content_flags));
+
+	for (auto content_flag : split_content_flags)
+		if(this->IsContentFlagEnabled(content_flag))
+			return true;
+
+	return false;
+}
+
+bool WorldContentService::DoDisabledFlagsPass(const char *content_flags) {
+	if(strlen(content_flags) == 0)
+		return true;
+
+	auto split_content_flags = SplitString(std::string(content_flags));
+
+	for (const auto& content_flag : split_content_flags)
+		if(this->IsContentFlagDisabled(content_flag))
+			return true;
+
+	return false;
+}
+
 void WorldContentService::ReloadContentFlags()
 {
 	std::vector<ContentFlagsRepository::ContentFlags> set_content_flags;
