@@ -1671,3 +1671,14 @@ bool CastRestrictedSpell(int spellid)
 			return false;
 	}
 }
+
+bool IgnoreCastingRestriction(int32 spell_id) {
+	/*
+		field 'cast_not_standing' allows casting when stunned, mezed, Divine Aura, SPA 343 Interrupt casting
+		Need to verify for charm and fear.
+	*/
+	if (spells[spell_id].cast_not_standing) {
+		return true;
+	}
+	return false;
+}

@@ -748,7 +748,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return(false);
 	}
 
-	if (DivineAura() && !spells[spell_id].cast_not_standing) {
+	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
 		return false;
 	}
 

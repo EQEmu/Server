@@ -1289,7 +1289,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		target_id = GetPetID();
 
 	// extra handling for cast_not_standing spells
-	if (!spells[rank->spell].cast_not_standing) {
+	if (!IgnoreCastingRestriction(rank->spell)) {
 		if (GetAppearance() == eaSitting) // we need to stand!
 			SetAppearance(eaStanding, false);
 
