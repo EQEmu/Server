@@ -151,10 +151,14 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		//give the pets somebody to "love"
 		if (targ != nullptr) {
 			swarm_pet_npc->AddToHateList(targ, 1000, 1000);
-			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg)
+			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
-			else
+				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
+				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+			}
+			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
+			}
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
@@ -255,10 +259,14 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		if(targ != nullptr){
 			swarm_pet_npc->AddToHateList(targ, 1000, 1000);
 
-			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg)
+			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
-			else
+				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
+				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+			}
+			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
+			}
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory

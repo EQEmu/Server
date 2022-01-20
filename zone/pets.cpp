@@ -273,6 +273,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
+		EntityList::RemoveNumbers(npc_type->name);
+		entity_list.MakeNameUnique(npc_type->name);
 	} else if (record.petnaming == 0) {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
@@ -385,20 +387,64 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	SetPetID(npc->GetID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
-
 	if (record.petcontrol == petTargetLock)
 	{
-		Mob* target = GetTarget();
+		Mob* m_target = GetTarget();
 
-		if (target){
-			npc->AddToHateList(target, 1);
-			npc->SetPetTargetLockID(target->GetID());
+		bool activiate_pet = false;
+		if (m_target && m_target->GetID() != GetID()) {
+
+			if (spells[spell_id].target_type == ST_Self) {
+				float distance = CalculateDistance(m_target->GetX(), m_target->GetY(), m_target->GetZ());
+				if (distance <= 200) { //Live distance on targetlock pets that self cast. No message is given if not in range.
+					activiate_pet = true;
+				}
+			}
+			else {
+				activiate_pet = true;
+			}
+		}
+		
+		if (activiate_pet){
+			npc->AddToHateList(m_target, 1);
+			npc->SetPetTargetLockID(m_target->GetID());
 			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
 		}
-		else
-			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
+		else {
+			npc->CastSpell(SPELL_UNSUMMON_SELF, npc->GetID()); //Live like behavior, damages self for 20K
+			if (!npc->HasDied()) {
+				npc->Kill(); //Ensure pet dies if over 20k HP.
+			}
+		}
 	}
 }
+
+void NPC::TryDepopTargetLockedPets(Mob* current_target) {
+
+	if (!current_target || (current_target && (current_target->GetID() != GetPetTargetLockID()) || current_target->IsCorpse())) {
+
+		//Use when swarmpets are set to auto lock from quest or rule
+		if (GetSwarmInfo() && GetSwarmInfo()->target) {
+			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
+			if (owner) {
+				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+			}
+			Depop();
+			return;
+		}
+		//Use when pets are given petype 5
+		if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()) {
+			CastSpell(SPELL_UNSUMMON_SELF, GetID()); //Live like behavior, damages self for 20K
+			if (!HasDied()) {
+				Kill(); //Ensure pet dies if over 20k HP.
+			}
+			return;
+		}
+	}
+}
+
+
+
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
