@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include "../loottable.h"
 #include "../repositories/content_flags_repository.h"
 
 class Database;
@@ -170,8 +171,7 @@ public:
 	void ReloadContentFlags();
 	WorldContentService * SetExpansionContext();
 
-	bool DoEnabledFlagsPass(const char *content_flags);
-	bool DoDisabledFlagsPass(const char *content_flags);
+	bool DoesPassContentFiltering(const ContentFlags_Struct& content_flags);
 
 	WorldContentService * SetDatabase(Database *database);
 	Database *GetDatabase() const;

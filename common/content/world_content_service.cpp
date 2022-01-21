@@ -22,6 +22,7 @@
 #include "../database.h"
 #include "../rulesys.h"
 #include "../eqemu_logsys.h"
+#include "../loottable.h"
 #include "../repositories/content_flags_repository.h"
 
 
@@ -154,34 +155,28 @@ bool WorldContentService::IsContentFlagDisabled(const std::string &content_flag)
 	return false;
 }
 
-bool WorldContentService::DoEnabledFlagsPass(const char *content_flags) {
-	if(strlen(content_flags) == 0)
-		return true;
+bool WorldContentService::DoesPassContentFiltering(const ContentFlags_Struct& content_flags) {
+	if(content_flags.min_expansion >= 0 && current_expansion < content_flags.min_expansion) {
+		return false;
+	}
 
-	auto split_content_flags = SplitString(std::string(content_flags));
+	if(content_flags.max_expansion >= 0 && current_expansion > content_flags.max_expansion) {
+		return false;
+	}
 
-	for (auto content_flag : split_content_flags) {
-		if(IsContentFlagEnabled(content_flag)) {
-			return true;
+	for(auto content_flag : SplitString(content_flags.content_flags)) {
+		if(!contains(GetContentFlagsEnabled(), content_flag)) {
+			return false;
 		}
 	}
 
-	return false;
-}
-
-bool WorldContentService::DoDisabledFlagsPass(const char *content_flags) {
-	if(strlen(content_flags) == 0)
-		return true;
-
-	auto split_content_flags = SplitString(std::string(content_flags));
-
-	for (const auto& content_flag : split_content_flags) {
-		if(IsContentFlagDisabled(content_flag)) {
-			return true;
+	for(auto content_flag : SplitString(content_flags.content_flags_disabled)) {
+		if(!contains(GetContentFlagsDisabled(), content_flag)) {
+			return false;
 		}
 	}
 
-	return false;
+	return true;
 }
 
 void WorldContentService::ReloadContentFlags()

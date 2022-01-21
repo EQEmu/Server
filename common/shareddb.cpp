@@ -2019,7 +2019,8 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	loot_table_entries = 0;
 	const std::string query =
 		fmt::format(
-			"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable"
+			"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable WHERE TRUE {}",
+			ContentFilterCriteria::apply()
 		);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -2042,7 +2043,8 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	loot_drop_entries = 0;
 
 	const std::string query = fmt::format(
-		"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop"
+		"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop WHERE TRUE {}",
+		ContentFilterCriteria::apply()
 	);
 
     auto results = QueryDatabase(query);
@@ -2073,19 +2075,23 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 			  loottable.mincash,
 			  loottable.maxcash,
 			  loottable.avgcoin,
-			  COALESCE(loottable.content_flags, ''),
-			  COALESCE(loottable.content_flags_disabled, ''),
 			  loottable_entries.lootdrop_id,
 			  loottable_entries.multiplier,
 			  loottable_entries.droplimit,
 			  loottable_entries.mindrop,
-			  loottable_entries.probability
+			  loottable_entries.probability,
+			  loottable.min_expansion,
+			  loottable.max_expansion,
+			  loottable.content_flags,
+			  loottable.content_flags_disabled
 			FROM
 			  loottable
 			  LEFT JOIN loottable_entries ON loottable.id = loottable_entries.loottable_id
+			WHERE TRUE {}
 			ORDER BY
 			  id
-			)
+			),
+			ContentFilterCriteria::apply()
 		);
 
     auto results = QueryDatabase(query);
@@ -2112,24 +2118,27 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 			lt->mincash = static_cast<uint32>(atoul(row[1]));
 			lt->maxcash = static_cast<uint32>(atoul(row[2]));
 			lt->avgcoin = static_cast<uint32>(atoul(row[3]));
-		}
 
-		strn0cpy(lt->content_flags, row[4], sizeof(lt->content_flags));
-		strn0cpy(lt->content_flags_disabled, row[5], sizeof(lt->content_flags_disabled));
+			lt->content_flags.min_expansion = static_cast<int16>(atoi(row[9]));
+			lt->content_flags.max_expansion = static_cast<int16>(atoi(row[10]));
+
+			strn0cpy(lt->content_flags.content_flags,          row[11], sizeof(lt->content_flags.content_flags));
+			strn0cpy(lt->content_flags.content_flags_disabled, row[12],  sizeof(lt->content_flags.content_flags_disabled));
+		}
 
 		if (current_entry > 128) {
 			continue;
 		}
 
-		if (!row[6]) {
+		if (!row[4]) {
 			continue;
 		}
 
-		lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[6]));
-		lt->Entries[current_entry].multiplier  = static_cast<uint8>(atoi(row[7]));
-		lt->Entries[current_entry].droplimit   = static_cast<uint8>(atoi(row[8]));
-		lt->Entries[current_entry].mindrop     = static_cast<uint8>(atoi(row[9]));
-		lt->Entries[current_entry].probability = static_cast<float>(atof(row[10]));
+		lt->Entries[current_entry].lootdrop_id = static_cast<uint32>(atoul(row[4]));
+		lt->Entries[current_entry].multiplier  = static_cast<uint8>(atoi(row[5]));
+		lt->Entries[current_entry].droplimit   = static_cast<uint8>(atoi(row[6]));
+		lt->Entries[current_entry].mindrop     = static_cast<uint8>(atoi(row[7]));
+		lt->Entries[current_entry].probability = static_cast<float>(atof(row[8]));
 
 		++(lt->NumEntries);
 		++current_entry;
@@ -2155,8 +2164,6 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 		SQL(
 			SELECT
 			  lootdrop.id,
-			  COALESCE(lootdrop.content_flags, ''),
-			  COALESCE(lootdrop.content_flags_disabled, ''),
 			  lootdrop_entries.item_id,
 			  lootdrop_entries.item_charges,
 			  lootdrop_entries.equip_item,
@@ -2165,13 +2172,20 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			  lootdrop_entries.trivial_max_level,
 			  lootdrop_entries.npc_min_level,
 			  lootdrop_entries.npc_max_level,
-			  lootdrop_entries.multiplier
+			  lootdrop_entries.multiplier,
+			  lootdrop.min_expansion,
+			  lootdrop.max_expansion,
+			  lootdrop.content_flags,
+			  lootdrop.content_flags_disabled
 			FROM
 			  lootdrop
 			  JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
+			WHERE
+			  TRUE {}
 			ORDER BY
 			  lootdrop_id
-		)
+		),
+		ContentFilterCriteria::apply()
 	);
 
     auto results = QueryDatabase(query);
@@ -2195,24 +2209,27 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			memset(loot_drop, 0, sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260));
 			current_entry = 0;
 			current_id    = id;
-		}
 
-		strn0cpy(p_loot_drop_struct->content_flags, row[1], sizeof(p_loot_drop_struct->content_flags));
-		strn0cpy(p_loot_drop_struct->content_flags_disabled, row[2], sizeof(p_loot_drop_struct->content_flags_disabled));
+			p_loot_drop_struct->content_flags.min_expansion = static_cast<int16>(atoi(row[10]));
+			p_loot_drop_struct->content_flags.max_expansion = static_cast<int16>(atoi(row[11]));
+
+			strn0cpy(p_loot_drop_struct->content_flags.content_flags,          row[12], sizeof(p_loot_drop_struct->content_flags.content_flags));
+			strn0cpy(p_loot_drop_struct->content_flags.content_flags_disabled, row[13], sizeof(p_loot_drop_struct->content_flags.content_flags_disabled));
+		}
 
 		if (current_entry >= 1260) {
 			continue;
 		}
 
-		p_loot_drop_struct->Entries[current_entry].item_id           = static_cast<uint32>(atoul(row[3]));
-		p_loot_drop_struct->Entries[current_entry].item_charges      = static_cast<int8>(atoi(row[4]));
-		p_loot_drop_struct->Entries[current_entry].equip_item        = static_cast<uint8>(atoi(row[5]));
-		p_loot_drop_struct->Entries[current_entry].chance            = static_cast<float>(atof(row[6]));
-		p_loot_drop_struct->Entries[current_entry].trivial_min_level = static_cast<uint16>(atoi(row[7]));
-		p_loot_drop_struct->Entries[current_entry].trivial_max_level = static_cast<uint16>(atoi(row[8]));
-		p_loot_drop_struct->Entries[current_entry].npc_min_level     = static_cast<uint16>(atoi(row[9]));
-		p_loot_drop_struct->Entries[current_entry].npc_max_level     = static_cast<uint16>(atoi(row[10]));
-		p_loot_drop_struct->Entries[current_entry].multiplier        = static_cast<uint8>(atoi(row[11]));
+		p_loot_drop_struct->Entries[current_entry].item_id           = static_cast<uint32>(atoul(row[1]));
+		p_loot_drop_struct->Entries[current_entry].item_charges      = static_cast<int8>(atoi(row[2]));
+		p_loot_drop_struct->Entries[current_entry].equip_item        = static_cast<uint8>(atoi(row[3]));
+		p_loot_drop_struct->Entries[current_entry].chance            = static_cast<float>(atof(row[4]));
+		p_loot_drop_struct->Entries[current_entry].trivial_min_level = static_cast<uint16>(atoi(row[5]));
+		p_loot_drop_struct->Entries[current_entry].trivial_max_level = static_cast<uint16>(atoi(row[6]));
+		p_loot_drop_struct->Entries[current_entry].npc_min_level     = static_cast<uint16>(atoi(row[7]));
+		p_loot_drop_struct->Entries[current_entry].npc_max_level     = static_cast<uint16>(atoi(row[8]));
+		p_loot_drop_struct->Entries[current_entry].multiplier        = static_cast<uint8>(atoi(row[9]));
 
 		++(p_loot_drop_struct->NumEntries);
 		++current_entry;

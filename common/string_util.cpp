@@ -1021,6 +1021,11 @@ std::vector<std::string> GetBadWords()
 	};
 }
 
+bool contains(std::vector<std::string> container, std::string element)
+{
+    return std::find(container.begin(), container.end(), element) != container.end();
+}
+
 std::string ConvertSecondsToTime(int duration, bool is_milliseconds)
 {
 	if (duration <= 0) {
