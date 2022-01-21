@@ -5028,8 +5028,9 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 	if ((GetPullingFlag() || GetReturningFlag()) && my_owner && my_owner->IsClient()) {
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
-
-	entity_list.RemoveBot(this->GetID());
+	if (!this->IsRaidGrouped())
+		entity_list.RemoveBot(this->GetID());
+	
 	return true;
 }
 
@@ -8403,8 +8404,11 @@ void Bot::Camp(bool databaseSave) {
 	
 	//Mitch
 	Raid* bot_raid = entity_list.GetRaidByBotName(this->GetName());
-	if (bot_raid)
+	if (bot_raid) {
+		bot_raid->SendRaidGroupRemove(this->GetName(), bot_raid->GetGroup(this->GetName()));
 		bot_raid->RemoveMember(this->GetName());
+	}
+
 
 	// RemoveBotFromGroup() code is too complicated for this to work as-is (still needs to be addressed to prevent memory leaks)
 	//if (group->GroupCount() < 2)
@@ -9230,11 +9234,49 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 					}
 				}
 			}
+#ifdef BOTS
+			else if (caster->IsRaidGrouped())
+			{
+				//added raid check
+				Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
+				uint32 g = raid->GetGroup(caster->GetName());
+				if (g < 12) {
+					for (RaidMember& iter : raid->GetRaidGroupMembers(g)) {
+						if (iter.member && !iter.member->qglobal) {
+							if (iter.member->IsClient() && iter.member->GetHPRatio() < 90) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+							else if ((iter.member->GetClass() == WARRIOR || iter.member->GetClass() == PALADIN || iter.member->GetClass() == SHADOWKNIGHT) && iter.member->GetHPRatio() < 95) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+							else if (iter.member->GetClass() == ENCHANTER && iter.member->GetHPRatio() < 80) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+							else if (iter.member->GetHPRatio() < 70) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+
+						}
+
+						if (iter.member && !iter.member->qglobal && iter.member->HasPet() && iter.member->GetPet()->GetHPRatio() < 50) {
+							if (iter.member->GetPet()->GetOwner() != caster && caster->IsEngaged() && iter.member->IsCasting() && iter.member->GetClass() != ENCHANTER)
+								continue;
+
+							if (caster->AICastSpell(iter.member->GetPet(), 100, SpellType_Heal))
+								return true;
+						}
+					}
+				}	
+			}
+#endif
 		}
 
 		if( botCasterClass == PALADIN || botCasterClass == BEASTLORD || botCasterClass == RANGER) {
-			if(caster->HasGroup()) {
-				Group *g = caster->GetGroup();
+			if(caster->HasGroup() || caster->IsRaidGrouped()) {
 				float hpRatioToHeal = 25.0f;
 				switch(caster->GetBotStance()) {
 				case EQ::constants::stanceReactive:
@@ -9251,6 +9293,9 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 					hpRatioToHeal = 25.0f;
 					break;
 				}
+				Group* g = caster->GetGroup();
+				Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
+				uint32 gid = raid->GetGroup(caster->GetName());
 
 				if(g) {
 					for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -9279,6 +9324,37 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 						}
 					}
 				}
+				else if (gid < 12)
+				{
+					for (RaidMember& iter : raid->GetRaidGroupMembers(gid)) {
+						if (iter.member && !iter.member->qglobal) {
+							if (iter.member->IsClient() && iter.member->GetHPRatio() < hpRatioToHeal) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+							else if ((iter.member->GetClass() == WARRIOR || iter.member->GetClass() == PALADIN || iter.member->GetClass() == SHADOWKNIGHT) && iter.member->GetHPRatio() < hpRatioToHeal) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+							else if (iter.member->GetClass() == ENCHANTER && iter.member->GetHPRatio() < hpRatioToHeal) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+							else if (iter.member->GetHPRatio() < hpRatioToHeal / 2) {
+								if (caster->AICastSpell(iter.member, 100, SpellType_Heal))
+									return true;
+							}
+						}
+
+						if (iter.member && !iter.member->qglobal && iter.member->HasPet() && iter.member->GetPet()->GetHPRatio() < 25) {
+							if (iter.member->GetPet()->GetOwner() != caster && caster->IsEngaged() && iter.member->IsCasting() && iter.member->GetClass() != ENCHANTER)
+								continue;
+
+							if (caster->AICastSpell(iter.member->GetPet(), 100, SpellType_Heal))
+								return true;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -9291,6 +9367,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			else
 				return false;
 		}
+#ifdef BOTS
 //added raid check
 		if (caster->IsRaidGrouped()) {
 			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
@@ -9304,6 +9381,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				}
 			}
 		}
+#endif
 		if(caster->HasGroup()) {
 			Group *g = caster->GetGroup();
 			if(g) {
@@ -9336,6 +9414,26 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				}
 			}
 		}
+		else if (caster->IsRaidGrouped())
+		{
+			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
+			uint32 gid = raid->GetGroup(caster->GetName());
+			if (gid < 12) {
+				for (RaidMember& iter : raid->GetRaidGroupMembers(gid)) {
+					if (iter.member && caster->GetNeedsCured(iter.member)) {
+						if (caster->AICastSpell(iter.member, caster->GetChanceToCastBySpellType(SpellType_Cure), SpellType_Cure))
+							return true;
+						else if (botCasterClass == BARD)
+							return false;
+					}
+
+					if (iter.member && iter.member->GetPet() && caster->GetNeedsCured(iter.member->GetPet())) {
+						if (caster->AICastSpell(iter.member->GetPet(), (int)caster->GetChanceToCastBySpellType(SpellType_Cure) / 4, SpellType_Cure))
+							return true;
+					}
+				}
+			}
+		}
 	}
 
 	if (iSpellTypes == SpellType_HateRedux) {
@@ -9353,6 +9451,20 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				}
 			}
 		}
+		else if (caster->IsRaidGrouped())
+		{
+			Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
+			uint32 gid = raid->GetGroup(caster->GetName());
+			if (gid < 12) {
+				for (RaidMember& iter : raid->GetRaidGroupMembers(gid)) {
+					if (iter.member && caster->GetNeedsHateRedux(iter.member)) {
+						if (caster->AICastSpell(iter.member, caster->GetChanceToCastBySpellType(SpellType_HateRedux), SpellType_HateRedux))
+							return true;
+					}
+				}
+			}
+		}
+
 	}
 
 	if (iSpellTypes == SpellType_PreCombatBuff) {
@@ -9371,8 +9483,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 					}
 				}
 			}
-		}
-		if (caster->HasGroup()) {
+		} else if (caster->HasGroup()) {
 			Group *g = caster->GetGroup();
 			if (g) {
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
