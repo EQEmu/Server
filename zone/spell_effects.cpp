@@ -8200,6 +8200,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		If target_requirement is false then use the caster requirement message.
 		Added support for different messages for certain high yield restrictions based on if
 		target or caster requirements.
+		//TODO COMBINE STRING
 	*/
 
 	switch (requirement_id)
@@ -9257,10 +9258,10 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		break;
 	default:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target does not meet the requirements to be affected by this spell.");
+			Message(Chat::Red, "Your target does not meet the spell requirements.");
 		}
 		else {
-			Message(Chat::Red, "The caster does not meet the requirements to cast this spell.");
+			Message(Chat::Red, "You do not meet the spell requirements.");
 		}
 		break;
 	}

@@ -230,7 +230,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
 
-	DoAdvancedCastingChecks(spell_id, target_id);
+	if (!DoAdvancedCastingChecks(true, spell_id, target_id)) {
+		return false;
+	}
 
 	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, entity_list.GetMobID(target_id))) {
 		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
@@ -612,34 +614,111 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
 
 	safe_delete(outapp);
 }
-bool Mob::DoAdvancedCastingChecks(int32 spell_id, uint16 target_id) {
+bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 target_id) {
+
+	/*
+		These are casting requirements or target requirements that will cancel a spell before spell finishes casting.
+		- cast_restriction : checks specific requirements on target
+		- caster_requirmement_id : checks specific requirements on caster
+		- target level restriction on buffs
+		- linked timer spells
+
+		*Trigger before items glow, hence we are doing it wrong o
+	*/
+
 
 	Mob *spell_target = entity_list.GetMob(target_id);
-
+	Shout("DoAdvancedCastingChecks");
 	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
+		Shout("Pass");
 		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
-		if (IsClient()) {
-			CastToClient()->SendSpellBarEnable(spell_id);
-		}
-		if (casting_spell_id && IsNPC()) {
-			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		if (check_on_casting){
+			if (IsClient()) {
+					CastToClient()->SendSpellBarEnable(spell_id);
+				}
+			if (casting_spell_id && IsNPC()) {
+				CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+			}
 		}
 		return false;
 	}
 
 	if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
 		SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false);
-		if (IsClient()) {
-			CastToClient()->SendSpellBarEnable(spell_id);
-		}
-		if (casting_spell_id && IsNPC()) {
-			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		if (check_on_casting) {
+			if (IsClient()) {
+				CastToClient()->SendSpellBarEnable(spell_id);
+			}
+			if (casting_spell_id && IsNPC()) {
+				CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+			}
 		}
 		return false;
 	}
 
+	if (RuleB(Spells, BuffLevelRestrictions)) {
+		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
+		if (spell_target && spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
+			LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
+			if (!IsBardSong(spell_id)) {
+				MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
+			}
+
+			if (check_on_casting) {
+				if (IsClient()) {
+					CastToClient()->SendSpellBarEnable(spell_id);
+				}
+				if (casting_spell_id && IsNPC()) {
+					CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+				}
+			}//Stop casting
+			return false;
+		}
+	}
+
+	if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems) {
+		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id)) {
+			if (check_on_casting) {
+				if (IsClient()) {
+					CastToClient()->SendSpellBarEnable(spell_id);
+				}
+				if (casting_spell_id && IsNPC()) {
+					CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+				}
+			}//Stop casting
+			
+			return false;
+		}
+	}
 
 	return true;
+}
+
+bool Mob::DoAdvancedCastingChecksEndofCasting(bool check_on_casting, int32 spell_id, uint16 target_id) {
+
+
+
+	if (spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()) {
+		MessageString(Chat::Red, CAST_OUTDOORS);
+		return false;
+	}
+
+	if (IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()) {
+		Message(Chat::Red, "You can't levitate in this zone.");
+		return false;
+	}
+
+	if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
+		const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
+		if (msg) {
+			Message(Chat::Red, msg);
+			return false;
+		}
+		else {
+			Message(Chat::Red, "You can't cast this spell here.");
+			return false;
+		}
+	}
 }
 /*
  * Some failures should be caught before the spell finishes casting
@@ -705,9 +784,12 @@ bool Mob::DoCastingChecks(int32 spell_id, uint16 target_id)
 		}
 	}
 
-	if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems)
-		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id))
+	if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems) {
+		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id)) {
+			Shout("Cancel this");
 			return false;
+		}
+	}
 
 	if (!ignore_casting_spell_checks){
 		casting_spell_checks = true;
