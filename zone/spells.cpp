@@ -622,12 +622,14 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 		- caster_requirmement_id : checks specific requirements on caster
 		- target level restriction on buffs
 		- linked timer spells
+		- must be out of combat spell field
 
 		*Trigger before items glow, hence we are doing it wrong o
 	*/
 
 
 	Mob *spell_target = entity_list.GetMob(target_id);
+
 	Shout("DoAdvancedCastingChecks");
 	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
 		Shout("Pass");
@@ -691,6 +693,69 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 		}
 	}
 
+	if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
+		const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
+		if (msg) {
+			Message(Chat::Red, msg);
+			return false;
+		}
+		else {
+			Message(Chat::Red, "You can't cast this spell here.");
+			return false;
+		} // Stop casting
+	}
+
+	if (IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()) {
+		Message(Chat::Red, "You have entered an area where levitation effects do not function.");
+		return false;
+	}
+
+	//Must be out of combat. (If Beneficial checks casters combat state, Deterimental checks targets)
+	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
+		if (IsDetrimentalSpell(spell_id)) {
+			if (spell_target &&
+				((spell_target->IsNPC() && spell_target->IsEngaged()) ||
+				(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount()))) {
+				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
+				return false;
+			}
+		}
+		else if (IsBeneficialSpell(spell_id)) {
+			if ((IsNPC() && IsEngaged()) || (IsClient() && CastToClient()->GetAggroCount())) {
+				if (IsDiscipline(spell_id)) {
+					MessageString(Chat::Red, NO_ABILITY_IN_COMBAT);
+				}
+				else {
+					MessageString(Chat::Red, NO_CAST_IN_COMBAT);
+				}
+				return false;
+			}
+		}
+	}
+
+	// Must be in combat. (If Beneficial checks casters combat state, Deterimental checks targets)
+	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
+		if (IsDetrimentalSpell(spell_id)) {
+			if (spell_target &&
+				((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
+				(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount()))) {
+				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
+				return false;
+			}
+		}
+		else if (IsBeneficialSpell(spell_id)) {
+			if ((IsNPC() && !IsEngaged()) || (IsClient() && !CastToClient()->GetAggroCount())) {
+				if (IsDiscipline(spell_id)) {
+					MessageString(Chat::Red, NO_ABILITY_OUT_OF_COMBAT);
+				}
+				else {
+					MessageString(Chat::Red, NO_CAST_OUT_OF_COMBAT);
+				}
+				return false;
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -703,22 +768,8 @@ bool Mob::DoAdvancedCastingChecksEndofCasting(bool check_on_casting, int32 spell
 		return false;
 	}
 
-	if (IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()) {
-		Message(Chat::Red, "You can't levitate in this zone.");
-		return false;
-	}
 
-	if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
-		const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
-		if (msg) {
-			Message(Chat::Red, msg);
-			return false;
-		}
-		else {
-			Message(Chat::Red, "You can't cast this spell here.");
-			return false;
-		}
-	}
+
 }
 /*
  * Some failures should be caught before the spell finishes casting
