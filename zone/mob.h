@@ -338,7 +338,7 @@ public:
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1, int reflect_effectiveness = 0, int32 duration_override = 0);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction, EQ::spells::CastingSlot slot, bool isproc = false);
-	bool DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 target_id); //Rename this.
+	bool DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 target_id, uint32 aa_id); //Rename this.
 	bool DoAdvancedCastingChecksEndofCasting(bool check_on_casting, int32 spell_id, uint16 target_id); //Rename this.
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
@@ -347,6 +347,7 @@ public:
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
 	void StopCasting();
+	void StopCastingSpell(int32 spell_id, uint32 aa_id); //Rename this
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks(int32 spell_id = SPELL_UNKNOWN, uint16 target_id = 0);
