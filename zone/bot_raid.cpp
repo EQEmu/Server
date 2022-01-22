@@ -19,7 +19,6 @@
 #ifdef BOTS
 
 #include "bot.h"
-#include "bot_raid.h"
 #include "object.h"
 #include "raids.h"
 #include "doors.h"
@@ -75,7 +74,7 @@ void Bot::AI_Process_Raid()
 
 	// We also need a leash owner and follow mob (subset of primary AI criteria)
 	Client* leash_owner = nullptr;
-	if (r_group < 12) {
+	if (r_group < 12 && !leash_owner) {
 		leash_owner = raid->GetGroupLeader(r_group);
 	}
 	else {
@@ -313,9 +312,7 @@ void Bot::AI_Process_Raid()
 
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 				for (RaidMember iter : raid_group_members) {
-				
-//				for (int counter = 0; counter < raid->GroupCount(r_group); counter++) {
-//					Group* bot_group = this->GetGroup();
+
 					Mob* bg_member = iter.member;// bot_group->members[counter];
 					if (!bg_member) {
 						continue;
@@ -422,9 +419,9 @@ void Bot::AI_Process_Raid()
 
 		else if (bo_alt_combat && m_alt_combat_hate_timer.Check()) { // Find a mob from hate list to target
 
-			// Group roles can be expounded upon in the future
-			Group* bot_group = this->GetGroup(); //Mitch
-			auto assist_mob = entity_list.GetMob(bot_group->GetMainAssistName());
+			// Raid Group roles can be expounded upon in the future
+			//r_group is the uint32 group id
+			auto assist_mob = raid->GetRaidMainAssistOneByName(this->GetName());
 			bool find_target = true;
 
 			if (assist_mob) {
@@ -1540,6 +1537,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 	// Bot AI Raid
 
 	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+	uint32 r_group = raid->GetGroup(GetName());
 	if (!raid)
 		return false;
 
@@ -2424,7 +2422,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 		break;
 	}
 	case SpellType_Cure: {
-		if (GetNeedsCured(tar) && (tar->DontCureMeBefore() < Timer::GetCurrentTime()) && !(GetNumberNeedingHealedInGroup(25, false) > 0) && !(GetNumberNeedingHealedInGroup(40, false) > 2))
+		if (GetNeedsCured(tar) && (tar->DontCureMeBefore() < Timer::GetCurrentTime()) && !(GetNumberNeedingHealedInRaidGroup(25, false) > 0) && !(GetNumberNeedingHealedInRaidGroup(40, false) > 2))
 		{
 			botSpell = GetBestBotSpellForCure(this, tar);
 
@@ -2438,16 +2436,12 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			if (castedSpell) {
 				if (botClass != BARD) {
 					if (IsGroupSpell(botSpell.SpellId)) {
-						Group* g;
-
-						if (this->HasGroup()) {
-							Group* g = this->GetGroup();
-
-							if (g) {
-								for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-									if (g->members[i] && !g->members[i]->qglobal) {
+						if (this->IsRaidGrouped()) {
+							if (r_group) {
+								for (RaidMember iter : raid->GetRaidGroupMembers(r_group)) {
+									if (iter.member && !iter.member->qglobal) {
 										if (TempDontCureMeBeforeTime != tar->DontCureMeBefore())
-											g->members[i]->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
+											iter.member->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
 									}
 								}
 							}

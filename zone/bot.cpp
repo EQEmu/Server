@@ -4049,7 +4049,13 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 					this->SendWearChange(materialFromSlot);
 			}
 		}
+		Raid* raid = entity_list.GetRaidByBotName(this->GetName());
 
+		if (raid)
+		{
+			raid->VerifyRaid();
+			this->SetRaidGrouped(true);
+		}
 		return true;
 	}
 
@@ -5028,8 +5034,23 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 	if ((GetPullingFlag() || GetReturningFlag()) && my_owner && my_owner->IsClient()) {
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
-	if (!this->IsRaidGrouped())
+
+	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
+	uint32 gid = raid->GetGroup(this->GetName());
+	if (raid) 
+	{
+		for (int x = 0; x < MAX_RAID_MEMBERS; x++) 
+		{
+			if (strcmp(raid->members[x].membername, this->GetName()) == 0) 
+			{
+				raid->members[x].member = nullptr;
+			}
+		}
+	}
+	else
+	{
 		entity_list.RemoveBot(this->GetID());
+	}
 	
 	return true;
 }
@@ -9294,8 +9315,10 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 					break;
 				}
 				Group* g = caster->GetGroup();
+				uint32 gid = 0xff;
 				Raid* raid = entity_list.GetRaidByBotName(caster->GetName());
-				uint32 gid = raid->GetGroup(caster->GetName());
+				if (raid)
+					uint32 gid = raid->GetGroup(caster->GetName());
 
 				if(g) {
 					for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {

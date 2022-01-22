@@ -1738,7 +1738,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 	mob->CreateHPPacket(&hpapp);
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if(members[x].member && members[x].membername) {
+		if(members[x].member) {
 			if(!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				members[x].member->QueuePacket(&hpapp, false);
 				if (members[x].member->IsClient() && members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) { //Mitch
@@ -1987,4 +1987,15 @@ bool Raid::DoesAnyMemberHaveExpeditionLockout(
 	return std::any_of(raid_members.begin(), raid_members.end(), [&](const RaidMember& raid_member) {
 		return Expedition::HasLockoutByCharacterName(raid_member.membername, expedition_name, event_name);
 	});
+}
+Mob* Raid::GetRaidMainAssistOneByName(const char* name)
+{
+	Raid* raid = entity_list.GetRaidByBotName(name);
+	std::vector<RaidMember> raid_members = raid->GetMembers();
+
+	for (RaidMember& iter : raid_members)
+	{
+		if (iter.IsRaidMainAssistOne)
+			return iter.member->CastToMob();
+	}
 }
