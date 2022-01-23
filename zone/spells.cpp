@@ -210,7 +210,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
 
-	if (!DoAdvancedCastingChecks(true, spell_id, target_id, aa_id)) {
+	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), aa_id)) {
 		return false;
 	}
 
@@ -594,7 +594,7 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
 
 	safe_delete(outapp);
 }
-bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 target_id, uint32 aa_id) {
+bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id) {
 
 	/*
 		These are casting requirements or target requirements that will cancel a spell before spell finishes casting.
@@ -613,42 +613,33 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 	*/
 	
 
-	Mob *spell_target = entity_list.GetMob(target_id);
-
 	//These are checked on the caster, when a spell casting is iniated.
 	if (check_on_casting) {
-
-		if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
-			MessageString(Chat::Red, SPELL_WOULDNT_HOLD);//Live message 'You cannot cast detrimental spells here'
-			StopCastingSpell(spell_id, aa_id);
-			return false;
-		}
-
+		
+		/*
+			Linked Reused Timers that are not ready
+		*/
 		if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems) {
 			if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id)) {
 				StopCastingSpell(spell_id, aa_id);
 				return false;
 			}
 		}
-
+		/*
+			Spells that use caster_requirement_id field which requires specific conditions on caster to be met before casting.
+		*/
 		if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
 			SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false);
 			StopCastingSpell(spell_id, aa_id);
 			return false;
 		}
-
-		//Must be out of combat. (If Beneficial checks casters combat state, Deterimental checks targets)
+		/*
+			Spells that use field can_cast_in_comabt or can_cast_out of combat restricting 
+			caster to meet one of those conditions. If beneficial spell check casters state.
+			If detrimental check the targets state (done elsewhere in this function).
+		*/
 		if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
-			if (IsDetrimentalSpell(spell_id)) {
-				if (spell_target &&
-					((spell_target->IsNPC() && spell_target->IsEngaged()) ||
-					(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount()))) {
-					MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
-					StopCastingSpell(spell_id, aa_id);
-					return false;
-				}
-			}
-			else if (IsBeneficialSpell(spell_id)) {
+			 if (IsBeneficialSpell(spell_id)) {
 				if ((IsNPC() && IsEngaged()) || (IsClient() && CastToClient()->GetAggroCount())) {
 					if (IsDiscipline(spell_id)) {
 						MessageString(Chat::Red, NO_ABILITY_IN_COMBAT);
@@ -661,18 +652,8 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 				}
 			}
 		}
-		// Must be in combat. (If Beneficial checks casters combat state, Deterimental checks targets)
 		else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
-			if (IsDetrimentalSpell(spell_id)) {
-				if (spell_target &&
-					((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
-					(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount()))) {
-					MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
-					StopCastingSpell(spell_id, aa_id);
-					return false;
-				}
-			}
-			else if (IsBeneficialSpell(spell_id)) {
+			 if (IsBeneficialSpell(spell_id)) {
 				if ((IsNPC() && !IsEngaged()) || (IsClient() && !CastToClient()->GetAggroCount())) {
 					if (IsDiscipline(spell_id)) {
 						MessageString(Chat::Red, NO_ABILITY_OUT_OF_COMBAT);
@@ -685,20 +666,48 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 				}
 			}
 		}
-
+		/*
+			Focus version of Silence will prevent spell casting
+		*/
 		if (IsClient()) {
 			int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);//client only
-
 			if (chance && zone->random.Roll(chance)) {
 				MessageString(Chat::Red, SILENCED_STRING);
 				StopCastingSpell(spell_id, aa_id);
 				return(false);
 			}
 		}
+
+		/*
+			Cannot cast life tap on self
+		*/
+		if (this == spell_target && IsLifetapSpell(spell_id)) {
+			LogSpells("You cannot lifetap yourself");
+			MessageString(Chat::SpellFailure, CANT_DRAIN_SELF);
+			if (check_on_casting) {
+				StopCastingSpell(spell_id, aa_id);
+			}
+			return false;
+		}
+
+		/*
+			Cannot cast sacrifice on self
+		*/
+		if (this == spell_target && IsSacrificeSpell(spell_id)) {
+			LogSpells("You cannot sacrifice yourself");
+			MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
+			if (check_on_casting) {
+				StopCastingSpell(spell_id, aa_id);
+			}
+			return false;
+		}
 	}
 
 	Shout("DoAdvancedCastingChecks");
 
+	/*
+		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
+	*/
 	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
 		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
 		if (check_on_casting){
@@ -707,6 +716,37 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 		return false;
 	}
 
+	/*
+		Spells that use field can_cast_in_comabt or can_cast_out of combat restricting
+		caster to meet one of those conditions. If beneficial spell check casters state (done else where in this function)
+		if detrimental check the targets state.
+	*/
+	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
+		if (IsDetrimentalSpell(spell_id)) {
+			if (spell_target &&
+				((spell_target->IsNPC() && spell_target->IsEngaged()) ||
+				(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount()))) {
+				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
+				if (check_on_casting) {
+					StopCastingSpell(spell_id, aa_id);
+				}
+				return false;
+			}
+		}
+	}
+	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
+		if (IsDetrimentalSpell(spell_id)) {
+			if (spell_target &&
+				((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
+				(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount()))) {
+				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
+				if (check_on_casting) {
+					StopCastingSpell(spell_id, aa_id);
+				}
+				return false;
+			}
+		}
+	}
 
 	if (RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
@@ -744,7 +784,11 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 		}
 	}
 
-	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) {
+	/*
+		Zones where you can not use levitate spells.
+	*/
+
+	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) { //check on spellfinished.
 		Message(Chat::Red, "You have entered an area where levitation effects do not function.");
 		if (check_on_casting) {
 			StopCastingSpell(spell_id, aa_id);
@@ -752,29 +796,15 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, uint16 
 		return false;
 	}
 
-	//client prevents cast bar initiation
-	if (IsLifetapSpell(spell_id)) {
-		if (this == spell_target) {
-			LogSpells("You cannot lifetap yourself");
-			MessageString(Chat::SpellFailure, CANT_DRAIN_SELF);
-			if (check_on_casting) {
-				StopCastingSpell(spell_id, aa_id);
-			}
-			return false;
-		}
+	/*
+		Zones where you can not use detrimental spells.
+	*/
+	if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
+		Message(Chat::Red, "You cannot cast detrimental spells here.");
+		StopCastingSpell(spell_id, aa_id);
+		return false;
 	}
 	
-	//abort after cast starts.
-	if (IsSacrificeSpell(spell_id)){
-		if (this == spell_target){	
-			LogSpells("You cannot sacrifice yourself");
-			MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
-			if (check_on_casting) {
-				StopCastingSpell(spell_id, aa_id);
-			}
-			return false;
-		}
-	}
 	return true;
 }
 
@@ -2393,6 +2423,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 	}
 
+	if (!DoAdvancedCastingChecks(false, spell_id, spell_target, casting_spell_aa_id)) {
+
+	}
+
+	/*
+		This is only checked when casting is completed.	
+	*/
 	if( spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()){
 		if(IsClient() && !CastToClient()->GetGM()){
 			MessageString(Chat::Red, CAST_OUTDOORS);
