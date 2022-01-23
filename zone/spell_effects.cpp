@@ -8189,7 +8189,7 @@ bool Mob::PassCastRestriction(int value)
 	return false;
 }
 
-void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement){
+void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement, bool is_discipline){
 
 	if (!IsClient()) {
 		return;
@@ -8200,8 +8200,22 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 		If target_requirement is false then use the caster requirement message.
 		Added support for different messages for certain high yield restrictions based on if
 		target or caster requirements.
-		//TODO COMBINE STRING
+
 	*/
+
+	std::string msg = "";
+
+	if (target_requirement) {
+		msg = "Your target does not meet the spell requirements. ";
+	}
+	else {
+		if (is_discipline) {
+			msg = "Your combat ability is interrupted. ";
+		}
+		else {
+			msg = "Your spell is interrupted. ";
+		}
+	}
 
 	switch (requirement_id)
 	{
@@ -9261,7 +9275,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 			Message(Chat::Red, "Your target does not meet the spell requirements.");
 		}
 		else {
-			Message(Chat::Red, "You do not meet the spell requirements.");
+			Message(Chat::Red, "Your spell would not take hold on your target.");
 		}
 		break;
 	}

@@ -648,7 +648,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 			Spells that use caster_requirement_id field which requires specific conditions on caster to be met before casting.
 		*/
 		if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
-			SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false);
+			SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false, IsDiscipline(spell_id));
 			StopCastingSpell(spell_id, aa_id);
 			return false;
 		}
@@ -785,7 +785,7 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob *
 		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
 	*/
 	if (spells[spell_id].cast_restriction && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
-		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
+		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true, IsDiscipline(spell_id));
 		return false;
 	}
 	/*
@@ -824,7 +824,6 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob *
 			return false;
 		}
 	}
-
 	/*
 		Prevents buff from being cast based on tareget ing PC OR NPC (1 = PCs, 2 = NPCs)
 		These target types skip pcnpc only check (according to dev quotes)
@@ -2418,7 +2417,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	}
 
 	if (!from_casted_spell && !DoAdvancedCastingChecks(false, spell_id, spell_target, casting_spell_aa_id, false)) {
-
+		Shout("Fail spell finished casting check.");
+		return false;
 	}
 
 	/*
