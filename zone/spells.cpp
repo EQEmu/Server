@@ -691,64 +691,6 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 	Shout("DoAdvancedCastingChecks");
 
 	/*
-		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
-	*/
-	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
-		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
-		if (check_on_casting){
-			StopCastingSpell(spell_id, aa_id);
-		}
-		return false;
-	}
-
-	/*
-		Spells that use field can_cast_in_comabt or can_cast_out of combat restricting
-		caster to meet one of those conditions. If beneficial spell check casters state (done else where in this function)
-		if detrimental check the targets state.
-	*/
-	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
-		if (IsDetrimentalSpell(spell_id)) {
-			if (spell_target &&
-				((spell_target->IsNPC() && spell_target->IsEngaged()) ||
-				(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount()))) {
-				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
-				if (check_on_casting) {
-					StopCastingSpell(spell_id, aa_id);
-				}
-				return false;
-			}
-		}
-	}
-	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
-		if (IsDetrimentalSpell(spell_id)) {
-			if (spell_target &&
-				((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
-				(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount()))) {
-				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
-				if (check_on_casting) {
-					StopCastingSpell(spell_id, aa_id);
-				}
-				return false;
-			}
-		}
-	}
-	/*
-		Prevent buffs from being cast on targets who don't meet level restriction
-	*/
-	if (RuleB(Spells, BuffLevelRestrictions)) {
-		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
-		if (spell_target && spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
-			LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
-			if (!IsBardSong(spell_id)) {
-				MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
-			}
-			if (check_on_casting) {
-				StopCastingSpell(spell_id, aa_id);
-			}
-			return false;
-		}
-	}
-	/*
 		Prevent blocked spells from being casted in a zone.
 		If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
 	*/
@@ -757,14 +699,14 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 			if (IsClient()) {
 				if (!CastToClient()->GetGM()) {
 					const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
-						if (msg) {
-							Message(Chat::Red, msg);
-								return false;
-						}
-						else {
-							Message(Chat::Red, "You can't cast this spell here.");
-								return false;
-						}
+					if (msg) {
+						Message(Chat::Red, msg);
+						return false;
+					}
+					else {
+						Message(Chat::Red, "You can't cast this spell here.");
+						return false;
+					}
 				}
 				else {
 					LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
@@ -772,29 +714,6 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 			}
 			return false;
 		}
-	}
-	/*
-		Cannot cast life tap on self
-	*/
-	if (this == spell_target && IsLifetapSpell(spell_id)) {
-		LogSpells("You cannot lifetap yourself");
-		MessageString(Chat::SpellFailure, CANT_DRAIN_SELF);
-		if (check_on_casting) {
-			StopCastingSpell(spell_id, aa_id);
-		}
-		return false;
-	}
-
-	/*
-		Cannot cast sacrifice on self
-	*/
-	if (this == spell_target && IsSacrificeSpell(spell_id)) {
-		LogSpells("You cannot sacrifice yourself");
-		MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
-		if (check_on_casting) {
-			StopCastingSpell(spell_id, aa_id);
-		}
-		return false;
 	}
 
 	/*
@@ -816,8 +735,79 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		StopCastingSpell(spell_id, aa_id);
 		return false;
 	}
+
+	if (!DoAdvancedTargetingChecks(check_on_casting, spell_id, spell_target, aa_id)){
+		StopCastingSpell(spell_id, aa_id);
+		return false;
+	}
 	
 	return true;
+}
+
+bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* spell_target, uint32 aa_id) {
+
+	/*
+		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
+	*/
+	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
+		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
+		return false;
+	}
+	/*
+		Spells that use field can_cast_in_comabt or can_cast_out of combat restricting
+		caster to meet one of those conditions. If beneficial spell check casters state (done else where in this function)
+		if detrimental check the targets state.
+	*/
+	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
+		if (IsDetrimentalSpell(spell_id)) {
+			if (spell_target &&
+				((spell_target->IsNPC() && spell_target->IsEngaged()) ||
+				(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount()))) {
+				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
+				return false;
+			}
+		}
+	}
+	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
+		if (IsDetrimentalSpell(spell_id)) {
+			if (spell_target &&
+				((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
+				(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount()))) {
+				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
+				return false;
+			}
+		}
+	}
+	/*
+		Prevent buffs from being cast on targets who don't meet level restriction
+	*/
+	if (RuleB(Spells, BuffLevelRestrictions)) {
+		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
+		if (spell_target && spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
+			LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
+			if (!IsBardSong(spell_id)) {
+				MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
+			}
+			return false;
+		}
+	}
+	/*
+		Cannot cast life tap on self
+	*/
+	if (this == spell_target && IsLifetapSpell(spell_id)) {
+		LogSpells("You cannot lifetap yourself");
+		MessageString(Chat::SpellFailure, CANT_DRAIN_SELF);
+		return false;
+	}
+
+	/*
+		Cannot cast sacrifice on self
+	*/
+	if (this == spell_target && IsSacrificeSpell(spell_id)) {
+		LogSpells("You cannot sacrifice yourself");
+		MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
+		return false;
+	}
 }
 
 bool Mob::DoAdvancedCastingChecksEndofCasting(bool check_on_casting, int32 spell_id, uint16 target_id) {
