@@ -193,9 +193,10 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return(false);
 	}
 
-	bool from_instant_cast_item = false;
-	if (item_slot != -1 && cast_time == 0) {
-		from_instant_cast_item = true;
+	//If spell spell fails here determine if we need to send packet to client.
+	bool send_spellbar_enable = true;
+	if ((item_slot != -1 && cast_time == 0) || aa_id) {
+		send_spellbar_enable = false;
 	}
 
 	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
@@ -208,7 +209,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	Shout("Cast spell %i", spell_id);
 
-	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), aa_id, from_instant_cast_item)) {
+	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), send_spellbar_enable)) {
 		Shout("DoAdvancedCasting Checks FAIL");
 		return false;
 	}
@@ -597,7 +598,7 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
 
 	safe_delete(outapp);
 }
-bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id, bool from_instant_cast_item) {
+bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, bool send_spellbar_enable) {
 	/*
 		3 places to check this
 		- On cast begin
@@ -633,7 +634,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
 			LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 			InterruptSpell(173, 0x121, false);
-			StopCastingSpell(spell_id, aa_id);
+			StopCastingSpell(spell_id, send_spellbar_enable);
 			return(false);
 		}
 		/*
@@ -641,7 +642,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		*/
 		if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems) {
 			if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id)) {
-				StopCastingSpell(spell_id, aa_id);
+				StopCastingSpell(spell_id, send_spellbar_enable);
 				return false;
 			}
 		}
@@ -651,7 +652,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
 			SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false, IsDiscipline(spell_id));
 			Shout("Caste requirement fail");
-			StopCastingSpell(spell_id, aa_id);
+			StopCastingSpell(spell_id, send_spellbar_enable);
 			return false;
 		}
 		/*
@@ -668,7 +669,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 					else {
 						MessageString(Chat::Red, NO_CAST_IN_COMBAT);
 					}
-					StopCastingSpell(spell_id, aa_id);
+					StopCastingSpell(spell_id, send_spellbar_enable);
 					return false;
 				}
 			}
@@ -682,7 +683,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 					else {
 						MessageString(Chat::Red, NO_CAST_OUT_OF_COMBAT);
 					}
-					StopCastingSpell(spell_id, aa_id);
+					StopCastingSpell(spell_id, send_spellbar_enable);
 					return false;
 				}
 			}
@@ -694,7 +695,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 			int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);//client only
 			if (chance && zone->random.Roll(chance)) {
 				MessageString(Chat::Red, SILENCED_STRING);
-				StopCastingSpell(spell_id, aa_id);
+				StopCastingSpell(spell_id, send_spellbar_enable);
 				return(false);
 			}
 		}
@@ -734,7 +735,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) { //check on spellfinished.
 		Message(Chat::Red, "You have entered an area where levitation effects do not function.");
 		if (check_on_casting) {
-			StopCastingSpell(spell_id, aa_id);
+			StopCastingSpell(spell_id, send_spellbar_enable);
 		}
 		return false;
 	}
@@ -744,12 +745,12 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 	*/
 	if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
 		Message(Chat::Red, "You cannot cast detrimental spells here.");
-		StopCastingSpell(spell_id, aa_id);
+		StopCastingSpell(spell_id, send_spellbar_enable);
 		return false;
 	}
 
-	if (!DoAdvancedTargetingChecks(check_on_casting, spell_id, spell_target, aa_id)){
-		StopCastingSpell(spell_id, aa_id);
+	if (!DoAdvancedTargetingChecks(check_on_casting, spell_id, spell_target, 0)){
+		StopCastingSpell(spell_id, send_spellbar_enable);
 		return false;
 	}
 
@@ -1303,17 +1304,19 @@ void Mob::StopCasting()
 	ZeroCastingVars();
 }
 
-void Mob::StopCastingSpell(int32 spell_id, uint32 aa_id)
+void Mob::StopCastingSpell(int32 spell_id, bool send_spellbar_enable)
 {
+	/*
+		This is used when spells fail at CastSpell or when CastSpell is bypassed and spell is launched initially from SpellFinished.
+		send_spellbar_enabled is false when the following
+		-AA that fail at CastSpell because they never get timer set.
+		-Instant cast items that fail at CastSpell because they never get timer set.
+	*/
 	if (casting_spell_id && IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 	}
 
-	if (IsClient()) {
-		if (aa_id) { //Rest AA Timer on failed cast
-			CastToClient()->MessageString(Chat::SpellFailure, ABILITY_FAILED);
-			CastToClient()->ResetAlternateAdvancementTimer(aa_id);
-		}
+	if (send_spellbar_enable) {
 		SendSpellBarEnable(spell_id);
 	}
 }
@@ -2418,7 +2421,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 	}
 
-	if (!from_casted_spell && !DoAdvancedCastingChecks(false, spell_id, spell_target, casting_spell_aa_id, false)) {
+	if (!from_casted_spell && !DoAdvancedCastingChecks(false, spell_id, spell_target, true)) {
 		Shout("Fail spell finished casting check.");
 		return false;
 	}
