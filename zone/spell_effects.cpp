@@ -8189,7 +8189,7 @@ bool Mob::PassCastRestriction(int value)
 	return false;
 }
 
-void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement, bool is_discipline){
+void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement, bool is_discipline) {
 
 	if (!IsClient()) {
 		return;
@@ -8220,1067 +8220,1066 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 	switch (requirement_id)
 	{
 	case IS_ANIMAL_OR_HUMANOID:
-		Message(Chat::Red, "This spell will only work on animals or humanoid creatures.");
+		Message(Chat::Red, "%s This spell will only work on animals or humanoid creatures.", msg);
 		break;
 	case IS_DRAGON:
-		Message(Chat::Red, "This spell will only work on dragons.");
+		Message(Chat::Red, "%s This spell will only work on dragons.", msg);
 		break;
 	case IS_ANIMAL_OR_INSECT:
-		Message(Chat::Red, "This spell will only work on animals or insects.");
+		Message(Chat::Red, "%s This spell will only work on animals or insects.", msg);
 		break;
 	case IS_BODY_TYPE_MISC:
-		Message(Chat::Red, "This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, insects, constructs, dragons, Skyshrine dragons, Muramites, or creatures constructed from magic.");
+		Message(Chat::Red, "%s This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, insects, constructs, dragons, Skyshrine dragons, Muramites, or creatures constructed from magic.", msg);
 		break;
 	case IS_BODY_TYPE_MISC2:
-		Message(Chat::Red, "This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, or insects.");
+		Message(Chat::Red, "%s This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, or insects.", msg);
 		break;
 	case IS_PLANT:
-		Message(Chat::Red, "This spell will only work on plants.");
+		Message(Chat::Red, "%s This spell will only work on plants.", msg);
 		break;
 	case IS_GIANT:
-		Message(Chat::Red, "This spell will only work on animals.");
+		Message(Chat::Red, "%s This spell will only work on animals.", msg);
 		break;
 	case IS_NOT_ANIMAL_OR_HUMANOID:
-		Message(Chat::Red, "This spell will only work on targets that are neither animals or humanoid.");
+		Message(Chat::Red, "%s This spell will only work on targets that are neither animals or humanoid.", msg);
 		break;
 	case IS_BIXIE:
-		Message(Chat::Red, "This spell will only work on bixies.");
+		Message(Chat::Red, "%s This spell will only work on bixies.", msg);
 		break;
 	case IS_HARPY:
-		Message(Chat::Red, "This spell will only work on harpies.");
+		Message(Chat::Red, "%s This spell will only work on harpies.", msg);
 		break;
 	case IS_GNOLL:
-		Message(Chat::Red, "This spell will only work on gnolls.");
+		Message(Chat::Red, "%s This spell will only work on gnolls.", msg);
 		break;
 	case IS_SPORALI:
-		Message(Chat::Red, "This spell will only work on fungusoids.");
+		Message(Chat::Red, "%s This spell will only work on fungusoids.", msg);
 		break;
 	case IS_KOBOLD:
-		Message(Chat::Red, "This spell will only work on kobolds.");
+		Message(Chat::Red, "%s This spell will only work on kobolds.", msg);
 		break;
 	case IS_FROSTCRYPT_SHADE:
-		Message(Chat::Red, "This spell will only work on undead creatures or the Shades of Frostcrypt.");
+		Message(Chat::Red, "%s This spell will only work on undead creatures or the Shades of Frostcrypt.", msg);
 		break;
 	case IS_DRAKKIN:
-		Message(Chat::Red, "This spell will only work on Drakkin.");
+		Message(Chat::Red, "%s This spell will only work on Drakkin.", msg);
 		break;
 	case IS_UNDEAD_OR_VALDEHOLM_GIANT:
-		Message(Chat::Red, "This spell will only work on undead creatures or the inhabitants of Valdeholm.");
+		Message(Chat::Red, "%s This spell will only work on undead creatures or the inhabitants of Valdeholm.", msg);
 		break;
 	case IS_ANIMAL_OR_PLANT:
-		Message(Chat::Red, "This spell will only work on plants or animals.");
+		Message(Chat::Red, "%s This spell will only work on plants or animals.", msg);
 		break;
 	case IS_SUMMONED:
-		Message(Chat::Red, "This spell will only work on constructs, elementals, or summoned elemental minions.");
+		Message(Chat::Red, "%s This spell will only work on constructs, elementals, or summoned elemental minions.", msg);
 		break;
 	case IS_WIZARD_USED_ON_MAGE_FIRE_PET:
-		Message(Chat::Red, "This spell will only work on wizards.");
+		Message(Chat::Red, "%s This spell will only work on wizards.", msg);
 		break;
 	case IS_UNDEAD:
-		Message(Chat::Red, "This spell will only work on undead.");
+		Message(Chat::Red, "%s This spell will only work on undead.", msg);
 		break;
 	case IS_NOT_UNDEAD_OR_SUMMONED_OR_VAMPIRE:
-		Message(Chat::Red, "This spell will only work on creatures that are not undead, constructs, elementals, or vampires.");
+		Message(Chat::Red, "%s This spell will only work on creatures that are not undead, constructs, elementals, or vampires.", msg);
 		break;
 	case IS_FAE_OR_PIXIE:
-		Message(Chat::Red, "This spell will only work on Fae or pixies.");
+		Message(Chat::Red, "%s This spell will only work on Fae or pixies.", msg);
 		break;
 	case IS_HUMANOID:
-		Message(Chat::Red, "This spell will only work on humanoids.");
+		Message(Chat::Red, "%s This spell will only work on humanoids.", msg);
 		break;
 	case IS_UNDEAD_AND_HP_LESS_THAN_10_PCT:
-		Message(Chat::Red, "The Essence Extractor whirrs but does not light up.");
+		Message(Chat::Red, "%s The Essence Extractor whirrs but does not light up.", msg);
 		break;
 	case IS_CLOCKWORK_AND_HP_LESS_THAN_45_PCT:
-		Message(Chat::Red, "This spell will only work on clockwork gnomes.");
+		Message(Chat::Red, "%s This spell will only work on clockwork gnomes.", msg);
 		break;
 	case IS_WISP_AND_HP_LESS_THAN_10_PCT:
-		Message(Chat::Red, "This spell will only work on wisps at or below 10 pct of their maximum HP.");
+		Message(Chat::Red, "%s This spell will only work on wisps at or below 10 pct of their maximum HP.", msg);
 		break;
 	case IS_CLASS_MELEE_THAT_CAN_BASH_OR_KICK_EXCEPT_BARD:
-		Message(Chat::Red, "This spell will only work on non-bard targets that can bash or kick.");
+		Message(Chat::Red, "%s This spell will only work on non-bard targets that can bash or kick.", msg);
 		break;
 	case IS_CLASS_PURE_MELEE:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect melee classes (warriors, monks, rogues, and berserkers).");
+			Message(Chat::Red, "%s This spell will only affect melee classes (warriors, monks, rogues, and berserkers).", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by melee classes (warriors, monks, rogues, and berserkers).");
+			Message(Chat::Red, "%s This ability can only be used by melee classes (warriors, monks, rogues, and berserkers).", msg);
 		}
 		break;
 	case IS_CLASS_PURE_CASTER:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect pure caster classes (necromancers, wizards, magicians, and enchanters).");
+			Message(Chat::Red, "%s This spell will only affect pure caster classes (necromancers, wizards, magicians, and enchanters).", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by pure caster classes (necromancers, wizards, magicians, and enchanters).");
+			Message(Chat::Red, "%s This ability can only be used by pure caster classes (necromancers, wizards, magicians, and enchanters).", msg);
 		}
 		break;
 	case IS_CLASS_HYBRID_CLASS:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect hybrid classes (paladins, rangers, shadow knights, bards, and beastlords).");
+			Message(Chat::Red, "%s This spell will only affect hybrid classes (paladins, rangers, shadow knights, bards, and beastlords).", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by hybrid classes (paladins, rangers, shadow knights, bards, and beastlords).");
+			Message(Chat::Red, "%s This ability can only be used by hybrid classes (paladins, rangers, shadow knights, bards, and beastlords).", msg);
 		}
 		break;
 	case IS_CLASS_WARRIOR:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Warriors.");
+			Message(Chat::Red, "%s This spell will only affect Warriors.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Warriors.");
+			Message(Chat::Red, "%s This ability can only be used by Warriors.", msg);
 		}
 		break;
 	case IS_CLASS_CLERIC:
 		if (target_requirement) {
-		Message(Chat::Red, "This spell will only affect Clerics.");
+			Message(Chat::Red, "%s This spell will only affect Clerics.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Clerics.");
+			Message(Chat::Red, "%s This ability can only be used by Clerics.", msg);
 		}
 		break;
 	case IS_CLASS_PALADIN:
 		if (target_requirement) {
-		Message(Chat::Red, "This spell will only affect Paladins.");
+			Message(Chat::Red, "%s This spell will only affect Paladins.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Paladins.");
+			Message(Chat::Red, "%s This ability can only be used by Paladins.", msg);
 		}
 		break;
 	case IS_CLASS_RANGER:
 		if (target_requirement) {
-		Message(Chat::Red, "This spell will only affect Warriors.");
+			Message(Chat::Red, "%s This spell will only affect Warriors.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Warriors.");
+			Message(Chat::Red, "%s This ability can only be used by Warriors.", msg);
 		}
 		break;
 	case IS_CLASS_SHADOWKNIGHT:
 		if (target_requirement) {
-		Message(Chat::Red, "This spell will only affect Shadow Knights.");
+			Message(Chat::Red, "%s This spell will only affect Shadow Knights.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Shadow Knights.");
+			Message(Chat::Red, "%s This ability can only be used by Shadow Knights.", msg);
 		}
 		break;
 	case IS_CLASS_DRUID:
 		if (target_requirement) {
-		Message(Chat::Red, "This spell will only affect Druids.");
+			Message(Chat::Red, "%s This spell will only affect Druids.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Druids.");
+			Message(Chat::Red, "%s This ability can only be used by Druids.", msg);
 		}
 		break;
 	case IS_CLASS_MONK:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Monks.");
+			Message(Chat::Red, "%s This spell will only affect Monks.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Monks.");
+			Message(Chat::Red, "%s This ability can only be used by Monks.", msg);
 		}
 		break;
 	case IS_CLASS_BARD:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Bards.");
+			Message(Chat::Red, "%s This spell will only affect Bards.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Bards..");
+			Message(Chat::Red, "%s This ability can only be used by Bards..", msg);
 		}
 		break;
 	case IS_CLASS_ROGUE:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Rogues.");
+			Message(Chat::Red, "%s This spell will only affect Rogues.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Rogues.");
+			Message(Chat::Red, "%s This ability can only be used by Rogues.", msg);
 		}
 		break;
 	case IS_CLASS_SHAMAN:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Shamans.");
+			Message(Chat::Red, "%s This spell will only affect Shamans.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Shamans.");
+			Message(Chat::Red, "%s This ability can only be used by Shamans.", msg);
 		}
 		break;
 	case IS_CLASS_NECRO:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Necromancers.");
+			Message(Chat::Red, "%s This spell will only affect Necromancers.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Necromancers.");
+			Message(Chat::Red, "%s This ability can only be used by Necromancers.", msg);
 		}
 		break;
 	case IS_CLASS_WIZARD:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Wizards.");
+			Message(Chat::Red, "%s This spell will only affect Wizards.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Wizards.");
+			Message(Chat::Red, "%s This ability can only be used by Wizards.", msg);
 		}
 		break;
 	case IS_CLASS_MAGE:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Magicians.");
+			Message(Chat::Red, "%s This spell will only affect Magicians.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Magicians.");
+			Message(Chat::Red, "%s This ability can only be used by Magicians.", msg);
 		}
 		break;
 	case IS_CLASS_ENCHANTER:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Enchanters.");
+			Message(Chat::Red, "%s This spell will only affect Enchanters.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Enchanters.");
+			Message(Chat::Red, "%s This ability can only be used by Enchanters.", msg);
 		}
 		break;
 	case IS_CLASS_BEASTLORD:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Beastlords.");
+			Message(Chat::Red, "%s This spell will only affect Beastlords.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Beastlords.");
+			Message(Chat::Red, "%s This ability can only be used by Beastlords.", msg);
 		}
 		break;
 	case IS_CLASS_BERSERKER:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Berserkers.");
+			Message(Chat::Red, "%s This spell will only affect Berserkers.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Berserkers.");
+			Message(Chat::Red, "%s This ability can only be used by Berserkers.", msg);
 		}
 		break;
 	case IS_CLASS_CLR_SHM_DRU:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect priest classes (clerics, druids, and shaman).");
+			Message(Chat::Red, "%s This spell will only affect priest classes (clerics, druids, and shaman).", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by priest classes (clerics, druids, and shaman).");
+			Message(Chat::Red, "%s This ability can only be used by priest classes (clerics, druids, and shaman).", msg);
 		}
 		break;
 	case IS_CLASS_NOT_WAR_PAL_SK:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will not affect Warriors, Paladins, or Shadow Knights.");
+			Message(Chat::Red, "%s This spell will not affect Warriors, Paladins, or Shadow Knights.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Warriors, Paladins, or Shadow Knights.");
+			Message(Chat::Red, "%s This ability can only be used by Warriors, Paladins, or Shadow Knights.", msg);
 		}
 		break;
 	case IS_LEVEL_UNDER_100:
-		Message(Chat::Red, "This spell will not affect any target over level 100.");
+		Message(Chat::Red, "%s This spell will not affect any target over level 100.", msg);
 		break;
 	case IS_NOT_RAID_BOSS:
-		Message(Chat::Red, "This spell will not affect raid bosses.");
+		Message(Chat::Red, "%s This spell will not affect raid bosses.", msg);
 		break;
 	case IS_RAID_BOSS:
-		Message(Chat::Red, "This spell will only affect raid bosses.");
+		Message(Chat::Red, "%s This spell will only affect raid bosses.", msg);
 		break;
 	case FRENZIED_BURNOUT_ACTIVE:
-		Message(Chat::Red, "This spell will only cast if you have Frenzied Burnout active.");
+		Message(Chat::Red, "%s This spell will only cast if you have Frenzied Burnout active.", msg);
 		break;
 	case FRENZIED_BURNOUT_NOT_ACTIVE:
-		Message(Chat::Red, "This spell will only cast if you do not have Frenzied Burnout active.");
+		Message(Chat::Red, "%s This spell will only cast if you do not have Frenzied Burnout active.", msg);
 		break;
 	case IS_HP_ABOVE_75_PCT:
-		Message(Chat::Red, "Your taret's HP must be at or above 75 pct of its maximum.");
+		Message(Chat::Red, "%s Your taret's HP must be at or above 75 pct of its maximum.", msg);
 		break;
 	case IS_HP_LESS_THAN_20_PCT:
-		Message(Chat::Red, "Your target's HP must be at 20 pct of its maximum or below.");
+		Message(Chat::Red, "%s Your target's HP must be at 20 pct of its maximum or below.", msg);
 		break;
 	case IS_HP_LESS_THAN_50_PCT:
-		Message(Chat::Red, "Your target's HP must be at 50 pct of its maximum or below.");
+		Message(Chat::Red, "%s Your target's HP must be at 50 pct of its maximum or below.", msg);
 		break;
 	case IS_HP_LESS_THAN_75_PCT:
-		Message(Chat::Red, "Your target's HP must be at 75 pct of its maximum or below.");
+		Message(Chat::Red, "%s Your target's HP must be at 75 pct of its maximum or below.", msg);
 		break;
 	case IS_NOT_IN_COMBAT:
-		Message(Chat::Red, "This spell will only affect creatures that are not in combat.");
+		Message(Chat::Red, "%s This spell will only affect creatures that are not in combat.", msg);
 		break;
 	case HAS_AT_LEAST_1_PET_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 1 pet on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 1 pet on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_2_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 2 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 2 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_3_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 3 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 3 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_4_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 4 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 4 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_5_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 5 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 5 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_6_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 6 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 6 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_7_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 7 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 7 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_8_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 8 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 8 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_9_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 9 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 9 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_10_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 10 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 10 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_11_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 11 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 11 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_12_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 12 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 12 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_13_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 13 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 13 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_14_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 14 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 14 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_15_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 15 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 15 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_16_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 16 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 16 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_17_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 17 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 17 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_18_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 18 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 18 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_19_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 19 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 19 pets on their hate list.", msg);
 		break;
 	case HAS_AT_LEAST_20_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have least 20 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have least 20 pets on their hate list.", msg);
 		break;
 	case IS_HP_LESS_THAN_35_PCT:
-		Message(Chat::Red, "Your target's HP must be at 35 pct of its maximum or below.");
+		Message(Chat::Red, "%s Your target's HP must be at 35 pct of its maximum or below.", msg);
 		break;
 	case HAS_BETWEEN_1_TO_2_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have between 1 and 2 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have between 1 and 2 pets on their hate list.", msg);
 		break;
 	case HAS_BETWEEN_3_TO_5_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have between 3 and 5 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have between 3 and 5 pets on their hate list.", msg);
 		break;
 	case HAS_BETWEEN_6_TO_9_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have between 6 and 9 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have between 6 and 9 pets on their hate list.", msg);
 		break;
 	case HAS_BETWEEN_10_TO_14_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have between 10 and 14 pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have between 10 and 14 pets on their hate list.", msg);
 		break;
 	case HAS_MORE_THAN_14_PETS_ON_HATELIST:
-		Message(Chat::Red, "Your target must have between 15 or more pets on their hate list.");
+		Message(Chat::Red, "%s Your target must have between 15 or more pets on their hate list.", msg);
 		break;
 	case IS_CLASS_CHAIN_OR_PLATE:
-		Message(Chat::Red, "This spell will only affect plate or chain wearing classes.");
+		Message(Chat::Red, "%s This spell will only affect plate or chain wearing classes.", msg);
 		break;
 	case IS_HP_BETWEEN_5_AND_9_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 5 pct and 9 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 5 pct and 9 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 5 pct and 9 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 5 pct and 9 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_10_AND_14_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 10 pct and 14 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 10 pct and 14 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 10 pct and 14 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 10 pct and 14 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_15_AND_19_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 15 pct and 19 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 15 pct and 19 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 15 pct and 19 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 15 pct and 19 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_20_AND_24_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 20 pct and 54 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 20 pct and 54 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 20 pct and 24 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 20 pct and 24 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_25_AND_29_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 25 pct and 29 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 25 pct and 29 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 25 pct and 29 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 25 pct and 29 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_30_AND_34_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 30 pct and 34 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 30 pct and 34 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 30 pct and 34 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 30 pct and 34 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_35_AND_39_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 35 pct and 39 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 35 pct and 39 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 35 pct and 39 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 35 pct and 39 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_40_AND_44_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 40 pct and 44 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 40 pct and 44 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 40 pct and 44 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 40 pct and 44 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_45_AND_49_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 45 pct and 49 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 45 pct and 49 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 45 pct and 49 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 45 pct and 49 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_50_AND_54_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 50 pct and 54 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 50 pct and 54 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 50 pct and 54 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 50 pct and 54 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_55_AND_59_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 55 pct and 59 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 55 pct and 59 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 55 pct and 59 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 55 pct and 59 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_5_AND_15_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 5 pct and 15 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 5 pct and 15 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 5 pct and 15 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 5 pct and 15 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_15_AND_25_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 15 pct and 25 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 15 pct and 25 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 15 pct and 25 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 15 pct and 25 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_1_AND_25_PCT:
-		Message(Chat::Red, "Your target's HP must be at 25 pct of its maximum or below.");
+		Message(Chat::Red, "%s Your target's HP must be at 25 pct of its maximum or below.", msg);
 		break;
 	case IS_HP_BETWEEN_25_AND_35_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 25 pct and 35 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 25 pct and 35 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 25 pct and 35 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 25 pct and 35 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_35_AND_45_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 35 pct and 45 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 35 pct and 45 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 35 pct and 45 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 35 pct and 45 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_45_AND_55_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 45 pct and 55 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 45 pct and 55 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 45 pct and 55 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 45 pct and 55 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_55_AND_65_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 55 pct and 65 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 55 pct and 65 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 55 pct and 65 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 55 pct and 65 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_65_AND_75_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 65 pct and 75 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 65 pct and 75 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 65 pct and 75 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 65 pct and 75 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_75_AND_85_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 75 pct and 85 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 75 pct and 85 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 75 pct and 85 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 75 pct and 85 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BETWEEN_85_AND_95_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be between 85 pct and 95 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be between 85 pct and 95 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be between 85 pct and 95 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be between 85 pct and 95 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_ABOVE_45_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at least 45 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be at least 45 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at least 45 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at least 45 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_ABOVE_55_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at least 55 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be at least 55 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at least 55 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at least 55 pct of your maximum HP.", msg);
 		}
 		break;
 	case UNKNOWN_TOO_MUCH_HP_410:
-		Message(Chat::Red, "Your target has too much HP to be affected by this spell.");
+		Message(Chat::Red, "%s Your target has too much HP to be affected by this spell.", msg);
 		break;
 	case UNKNOWN_TOO_MUCH_HP_411:
-		Message(Chat::Red, "Your target has too much HP to be affected by this spell.");
+		Message(Chat::Red, "%s Your target has too much HP to be affected by this spell.", msg);
 		break;
 	case IS_HP_ABOVE_99_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at or above 99 pct of its maximum.");
+			Message(Chat::Red, "%s Your target's HP must be at or above 99 pct of its maximum.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or above 99 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or above 99 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_MANA_ABOVE_10_PCT:
-		Message(Chat::Red, "You must have at least 10 pct of your maximum mana available to cast this spell.");
+		Message(Chat::Red, "%s You must have at least 10 pct of your maximum mana available to cast this spell.", msg);
 		break;
 	case IS_HP_BELOW_5_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 5 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 5 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 5 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 5 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_10_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 10 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 10 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 10 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 10 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_15_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 15 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 15 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 15 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 15 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_20_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 20 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 20 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 20 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 20 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_25_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 25 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 25 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 25 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 25 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_30_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 30 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 30 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 30 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 30 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_35_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 35 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 35 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 35 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 35 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_40_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 40 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 40 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 40 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 40 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_45_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 45 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 45 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 45 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 45 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_50_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 50 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 50 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 50 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 50 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_55_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 55 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 55 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 55 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 55 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_60_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 60 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 60 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 60 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 60 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_65_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 65 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 65 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 65 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 65 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_70_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 70 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 70 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 70 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 70 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_75_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 75 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 75 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 75 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 75 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_80_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 80 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 80 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 80 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 80 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_85_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 85 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 85 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 85 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 85 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_90_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 90 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 90 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 90 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 90 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_HP_BELOW_95_PCT:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target's HP must be at 95 pct of its maximum or below.");
+			Message(Chat::Red, "%s Your target's HP must be at 95 pct of its maximum or below.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability requires you to be at or below 95 pct of your maximum HP.");
+			Message(Chat::Red, "%s This ability requires you to be at or below 95 pct of your maximum HP.", msg);
 		}
 		break;
 	case IS_ENDURANCE_BELOW_40_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 40 pct of your maximum endurance.");
+		Message(Chat::Red, "%s This ability requires you to be at or below 40 pct of your maximum endurance.", msg);
 		break;
 	case IS_MANA_BELOW_40_PCT:
-		Message(Chat::Red, "This spells requires you to be at or below 40 pct of your maximum mana.");
+		Message(Chat::Red, "%s This spells requires you to be at or below 40 pct of your maximum mana.", msg);
 		break;
 	case IS_HP_ABOVE_20_PCT:
-		Message(Chat::Red, "Your target's HP must be at least 21 pct of its maximum.");
+		Message(Chat::Red, "%s Your target's HP must be at least 21 pct of its maximum.", msg);
 		break;
 	case IS_BODY_TYPE_UNDEFINED:
-		Message(Chat::Red, "This spell will only work on creatures with an undefined body type.");
+		Message(Chat::Red, "%s This spell will only work on creatures with an undefined body type.", msg);
 		break;
 	case IS_BODY_TYPE_HUMANOID:
-		Message(Chat::Red, "This spell will only work on humanoid creatures.");
+		Message(Chat::Red, "%s This spell will only work on humanoid creatures.", msg);
 		break;
 	case IS_BODY_TYPE_WEREWOLF:
-		Message(Chat::Red, "This spell will only work on lycanthrope creatures.");
+		Message(Chat::Red, "%s This spell will only work on lycanthrope creatures.", msg);
 		break;
 	case IS_BODY_TYPE_UNDEAD:
-		Message(Chat::Red, "This spell will only work on undead creatures.");
+		Message(Chat::Red, "%s This spell will only work on undead creatures.", msg);
 		break;
 	case IS_BODY_TYPE_GIANTS:
-		Message(Chat::Red, "This spell will only work on giants.");
+		Message(Chat::Red, "%s This spell will only work on giants.", msg);
 		break;
 	case IS_BODY_TYPE_CONSTRUCTS:
-		Message(Chat::Red, "This spell will only work on constructs.");
+		Message(Chat::Red, "%s This spell will only work on constructs.", msg);
 		break;
 	case IS_BODY_TYPE_EXTRAPLANAR:
-		Message(Chat::Red, "This spell will only work on extraplanar creatures.");
+		Message(Chat::Red, "%s This spell will only work on extraplanar creatures.", msg);
 		break;
 	case IS_BODY_TYPE_MAGICAL_CREATURE:
-		Message(Chat::Red, "This spell will only work on creatures constructed from magic.");
+		Message(Chat::Red, "%s This spell will only work on creatures constructed from magic.", msg);
 		break;
 	case IS_BODY_TYPE_UNDEADPET:
-		Message(Chat::Red, "This spell will only work on animated undead servants.");
+		Message(Chat::Red, "%s This spell will only work on animated undead servants.", msg);
 		break;
 	case IS_BODY_TYPE_KAELGIANT:
-		Message(Chat::Red, "This spell will only work on the Giants of Kael Drakkal.");
+		Message(Chat::Red, "%s This spell will only work on the Giants of Kael Drakkal.", msg);
 		break;
 	case IS_BODY_TYPE_COLDAIN:
-		Message(Chat::Red, "This spell will only work on Coldain Dwarves.");
+		Message(Chat::Red, "%s This spell will only work on Coldain Dwarves.", msg);
 		break;
 	case IS_BODY_TYPE_VAMPIRE:
-		Message(Chat::Red, "This spell will only work on vampires.");
+		Message(Chat::Red, "%s This spell will only work on vampires.", msg);
 		break;
 	case IS_BODY_TYPE_ATEN_HA_RA:
-		Message(Chat::Red, "This spell will only work on Aten Ha Ra.");
+		Message(Chat::Red, "%s This spell will only work on Aten Ha Ra.", msg);
 		break;
 	case IS_BODY_TYPE_GREATER_AHKEVANS:
-		Message(Chat::Red, "This spell will only work on Greater Ahkevans.");
+		Message(Chat::Red, "%s This spell will only work on Greater Ahkevans.", msg);
 		break;
 	case IS_BODY_TYPE_KHATI_SHA:
-		Message(Chat::Red, "This spell will only work on Khati Sha.");
+		Message(Chat::Red, "%s This spell will only work on Khati Sha.", msg);
 		break;
 	case IS_BODY_TYPE_LORD_INQUISITOR_SERU:
-		Message(Chat::Red, "This spell will only work on Lord Inquisitor Seru.");
+		Message(Chat::Red, "%s This spell will only work on Lord Inquisitor Seru.", msg);
 		break;
 	case IS_BODY_TYPE_GRIEG_VENEFICUS:
-		Message(Chat::Red, "This spell will only work on Grieg Veneficus.");
+		Message(Chat::Red, "%s This spell will only work on Grieg Veneficus.", msg);
 		break;
 	case IS_BODY_TYPE_FROM_PLANE_OF_WAR:
-		Message(Chat::Red, "This spell will only work on creatures from the Plane of War.");
+		Message(Chat::Red, "%s This spell will only work on creatures from the Plane of War.", msg);
 		break;
 	case IS_BODY_TYPE_LUGGALD:
-		Message(Chat::Red, "This spell will only work on Luggalds.");
+		Message(Chat::Red, "%s This spell will only work on Luggalds.", msg);
 		break;
 	case IS_BODY_TYPE_ANIMAL:
-		Message(Chat::Red, "This spell will only work on animals.");
+		Message(Chat::Red, "%s This spell will only work on animals.", msg);
 		break;
 	case IS_BODY_TYPE_INSECT:
-		Message(Chat::Red, "This spell will only work on insects.");
+		Message(Chat::Red, "%s This spell will only work on insects.", msg);
 		break;
 	case IS_BODY_TYPE_MONSTER:
-		Message(Chat::Red, "This spell will only work on monsters.");
+		Message(Chat::Red, "%s This spell will only work on monsters.", msg);
 		break;
 	case IS_BODY_TYPE_ELEMENTAL:
-		Message(Chat::Red, "This spell will only work on elemental creatures.");
+		Message(Chat::Red, "%s This spell will only work on elemental creatures.", msg);
 		break;
 	case IS_BODY_TYPE_PLANT:
-		Message(Chat::Red, "This spell will only work on plants.");
+		Message(Chat::Red, "%s This spell will only work on plants.", msg);
 		break;
 	case IS_BODY_TYPE_DRAGON2:
-		Message(Chat::Red, "This spell will only work on dragons.");
+		Message(Chat::Red, "%s This spell will only work on dragons.", msg);
 		break;
 	case IS_BODY_TYPE_SUMMONED_ELEMENTAL:
-		Message(Chat::Red, "This spell will only work on summoned elementals.");
+		Message(Chat::Red, "%s This spell will only work on summoned elementals.", msg);
 		break;
 	case IS_BODY_TYPE_DRAGON_OF_TOV:
-		Message(Chat::Red, "This spell will only work on Dragons of Veeshan's Temple.");
+		Message(Chat::Red, "%s This spell will only work on Dragons of Veeshan's Temple.", msg);
 		break;
 	case IS_BODY_TYPE_FAMILIAR:
-		Message(Chat::Red, "This spell will only work on familiars.");
+		Message(Chat::Red, "%s This spell will only work on familiars.", msg);
 		break;
 	case IS_BODY_TYPE_MURAMITE:
-		Message(Chat::Red, "This spell will only work on Muramites.");
+		Message(Chat::Red, "%s This spell will only work on Muramites.", msg);
 		break;
 	case IS_NOT_UNDEAD_OR_SUMMONED:
-		Message(Chat::Red, "This spell will only targets that are not undead or summoned.");
+		Message(Chat::Red, "%s This spell will only targets that are not undead or summoned.", msg);
 		break;
 	case IS_NOT_PLANT:
-		Message(Chat::Red, "This spell will not affect plants.");
+		Message(Chat::Red, "%s This spell will not affect plants.", msg);
 		break;
 	case IS_NOT_CLIENT:
-		Message(Chat::Red, "This spell will not work on adventurers.");
+		Message(Chat::Red, "%s This spell will not work on adventurers.", msg);
 		break;
 	case IS_CLIENT:
-		Message(Chat::Red, "This spell will only work on adventurers.");
+		Message(Chat::Red, "%s This spell will only work on adventurers.", msg);
 		break;
 	case IS_LEVEL_ABOVE_42_AND_IS_CLIENT:
-		Message(Chat::Red, "This spell will only work on level 43 or higher adventurers.");
+		Message(Chat::Red, "%s This spell will only work on level 43 or higher adventurers.", msg);
 		break;
 	case IS_TREANT:
-		Message(Chat::Red, "This spell will only work on treants.");
+		Message(Chat::Red, "%s This spell will only work on treants.", msg);
 		break;
 	case IS_BIXIE2:
-		Message(Chat::Red, "This spell will only work on bixies.");
+		Message(Chat::Red, "%s This spell will only work on bixies.", msg);
 		break;
 	case IS_SCARECROW:
-		Message(Chat::Red, "This spell will only work on scarecrows.");
+		Message(Chat::Red, "%s This spell will only work on scarecrows.", msg);
 		break;
 	case IS_VAMPIRE_OR_UNDEAD_OR_UNDEADPET:
-		Message(Chat::Red, "This spell will only work on vampires, undead, or animated undead creatures.");
+		Message(Chat::Red, "%s This spell will only work on vampires, undead, or animated undead creatures.", msg);
 		break;
 	case IS_NOT_VAMPIRE_OR_UNDEAD:
-		Message(Chat::Red, "This spell will not work on vampires or undead creatures.");
+		Message(Chat::Red, "%s This spell will not work on vampires or undead creatures.", msg);
 		break;
 	case IS_CLASS_KNIGHT_HYBRID_MELEE:
-		Message(Chat::Red, "This spell will only work on knights, hybrids, or melee classes.");
+		Message(Chat::Red, "%s This spell will only work on knights, hybrids, or melee classes.", msg);
 		break;
 	case IS_CLASS_WARRIOR_CASTER_PRIEST:
-		Message(Chat::Red, "This spell will only work on warriors, casters, or priests.");
+		Message(Chat::Red, "%s This spell will only work on warriors, casters, or priests.", msg);
 		break;
 	case IS_END_BELOW_21_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 21 pct of your maximum endurance.");
+		Message(Chat::Red, "%s This ability requires you to be at or below 21 pct of your maximum endurance.", msg);
 		break;
 	case IS_END_BELOW_25_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 25 pct of your maximum endurance.");
+		Message(Chat::Red, "%s This ability requires you to be at or below 25 pct of your maximum endurance.", msg);
 		break;
 	case IS_END_BELOW_29_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 29 pct of your maximum endurance.");
+		Message(Chat::Red, "%s This ability requires you to be at or below 29 pct of your maximum endurance.", msg);
 		break;
 	case IS_HUMANOID_LEVEL_84_MAX:
-		Message(Chat::Red, "This spell will only work on humanoids up to level 84.");
+		Message(Chat::Red, "%s This spell will only work on humanoids up to level 84.", msg);
 		break;
 	case IS_HUMANOID_LEVEL_86_MAX:
-		Message(Chat::Red, "This spell will only work on humanoids up to level 86.");
+		Message(Chat::Red, "%s This spell will only work on humanoids up to level 86.", msg);
 		break;
 	case IS_HUMANOID_LEVEL_88_MAX:
-		Message(Chat::Red, "This spell will only work on humanoids up to level 88.");
+		Message(Chat::Red, "%s This spell will only work on humanoids up to level 88.", msg);
 		break;
 	case HAS_CRYSTALLIZED_FLAME_BUFF:
-		Message(Chat::Red, "This spell will only work on targets afflicted by Crystallized Flame.");
+		Message(Chat::Red, "%s This spell will only work on targets afflicted by Crystallized Flame.", msg);
 		break;
 	case HAS_INCENDIARY_OOZE_BUFF:
-		Message(Chat::Red, "This spell will only work on targets afflicted by Incendiary Ooze.");
+		Message(Chat::Red, "%s This spell will only work on targets afflicted by Incendiary Ooze.", msg);
 		break;
 	case IS_LEVEL_90_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 90.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 90.", msg);
 		break;
 	case IS_LEVEL_92_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 92.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 92.", msg);
 		break;
 	case IS_LEVEL_94_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 94.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 94.", msg);
 		break;
 	case IS_LEVEL_95_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 95.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 95.", msg);
 		break;
 	case IS_LEVEL_97_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 97.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 97.", msg);
 		break;
 	case IS_LEVEL_99_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 99.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 99.", msg);
 		break;
 	case IS_LEVEL_100_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 100.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 100.", msg);
 		break;
 	case IS_LEVEL_102_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 102.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 102.", msg);
 		break;
 	case IS_LEVEL_104_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 104.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 104.", msg);
 		break;
 	case IS_LEVEL_105_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 105.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 105.", msg);
 		break;
 	case IS_LEVEL_107_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 107.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 107.", msg);
 		break;
 	case IS_LEVEL_109_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 109.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 109.", msg);
 		break;
 	case IS_LEVEL_110_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 110.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 110.", msg);
 		break;
 	case IS_LEVEL_112_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 112.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 112.", msg);
 		break;
 	case IS_LEVEL_114_MAX:
-		Message(Chat::Red, "This spell will ony work targets level up to level 114.");
+		Message(Chat::Red, "%s This spell will ony work targets level up to level 114.", msg);
 		break;
 	case HAS_TBL_ESIANTI_ACCESS:
-		Message(Chat::Red, "This spell will only transport adventurers who have gained access to Esianti: Palace of the Winds.");
+		Message(Chat::Red, "%s This spell will only transport adventurers who have gained access to Esianti: Palace of the Winds.", msg);
 		break;
 	case IS_BETWEEN_LEVEL_1_AND_75:
-		Message(Chat::Red, "This spell will only work on targets between level 1 and 75.");
+		Message(Chat::Red, "%s This spell will only work on targets between level 1 and 75.", msg);
 		break;
 	case IS_BETWEEN_LEVEL_76_AND_85:
-		Message(Chat::Red, "This spell will only work on targets between level 76 and 85.");
+		Message(Chat::Red, "%s This spell will only work on targets between level 76 and 85.", msg);
 		break;
 	case IS_BETWEEN_LEVEL_86_AND_95:
-		Message(Chat::Red, "This spell will only work on targets between level 86 and 95.");
+		Message(Chat::Red, "%s This spell will only work on targets between level 86 and 95.", msg);
 		break;
 	case IS_BETWEEN_LEVEL_96_AND_105:
-		Message(Chat::Red, "This spell will only work on targets between level 96 and 105.");
+		Message(Chat::Red, "%s This spell will only work on targets between level 96 and 105.", msg);
 		break;
 	case IS_HP_LESS_THAN_80_PCT:
-		Message(Chat::Red, "Your target's HP must be at 80 pct of its maximum or below.");
+		Message(Chat::Red, "%s Your target's HP must be at 80 pct of its maximum or below.", msg);
 		break;
 	case IS_LEVEL_ABOVE_34:
-		Message(Chat::Red, "Your target must be level 35 or higher.");
+		Message(Chat::Red, "%s Your target must be level 35 or higher.", msg);
 		break;
 	case IN_TWO_HANDED_STANCE:
-		Message(Chat::Red, "You must be in your two-handed stance to use this ability.");
+		Message(Chat::Red, "%s You must be in your two-handed stance to use this ability.", msg);
 		break;
 	case IN_DUAL_WIELD_HANDED_STANCE:
-		Message(Chat::Red, "You must be in your dual-wielding stance to use this ability.");
+		Message(Chat::Red, "%s You must be in your dual-wielding stance to use this ability.", msg);
 		break;
 	case IN_SHIELD_STANCE:
-		Message(Chat::Red, "You must be in your shield stance to use this ability.");
+		Message(Chat::Red, "%s You must be in your shield stance to use this ability.", msg);
 		break;
 	case NOT_IN_TWO_HANDED_STANCE:
-		Message(Chat::Red, "You may not use this ability if you are in your two-handed stance.");
+		Message(Chat::Red, "%s You may not use this ability if you are in your two-handed stance.", msg);
 		break;
 	case NOT_IN_DUAL_WIELD_HANDED_STANCE:
-		Message(Chat::Red, "You may not use this ability if you are in your dual-wielding stance.");
+		Message(Chat::Red, "%s You may not use this ability if you are in your dual-wielding stance.", msg);
 		break;
 	case NOT_IN_SHIELD_STANCE:
-		Message(Chat::Red, "You may not use this ability if you are in your shield stance.");
+		Message(Chat::Red, "%s You may not use this ability if you are in your shield stance.", msg);
 		break;
 	case LEVEL_46_MAX:
-		Message(Chat::Red, "Your target must be level 46 or below.");
+		Message(Chat::Red, "%s Your target must be level 46 or below.", msg);
 		break;
 	case HAS_NO_MANA_BURN_BUFF:
-		Message(Chat::Red, "This spell will not take hold until the effects of the previous Mana Burn have expired.");
+		Message(Chat::Red, "%s This spell will not take hold until the effects of the previous Mana Burn have expired.", msg);
 		break;
 	case IS_CLIENT_AND_MALE_PLATE_USER:
-		Message(Chat::Red, "Your target wouldn't look right as that Jann.");
+		Message(Chat::Red, "%s Your target wouldn't look right as that Jann.", msg);
 		break;
 	case IS_CLEINT_AND_MALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-		Message(Chat::Red, "Your target wouldn't look right as that Jann.");
+		Message(Chat::Red, "%s Your target wouldn't look right as that Jann.", msg);
 		break;
 	case IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-		Message(Chat::Red, "Your target wouldn't look right as that Jann.");
+		Message(Chat::Red, "%s Your target wouldn't look right as that Jann.", msg);
 		break;
 	case IS_CLIENT_AND_FEMALE_PLATE_USER:
-		Message(Chat::Red, "Your target wouldn't look right as that Jann.");
+		Message(Chat::Red, "%s Your target wouldn't look right as that Jann.", msg);
 		break;
 	case IS_CLIENT_AND_FEMALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-		Message(Chat::Red, "Your target wouldn't look right as that Jann.");
+		Message(Chat::Red, "%s Your target wouldn't look right as that Jann.", msg);
 		break;
 	case IS_CLIENT_AND_FEMALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-		Message(Chat::Red, "Your target wouldn't look right as that Jann.");
+		Message(Chat::Red, "%s Your target wouldn't look right as that Jann.", msg);
 		break;
 	case HAS_TRAVELED_TO_STRATOS:
-		Message(Chat::Red, "You must travel to Stratos at least once before wishing to go there.");
+		Message(Chat::Red, "%s You must travel to Stratos at least once before wishing to go there.", msg);
 		break;
 	case HAS_TRAVELED_TO_AALISHAI:
-		Message(Chat::Red, "You must travel to Aalishai at least once before wishing to go there.");
+		Message(Chat::Red, "%s You must travel to Aalishai at least once before wishing to go there.", msg);
 		break;
 	case HAS_TRAVELED_TO_MEARATS:
-		Message(Chat::Red, "You must travel to Mearatas at least once before wishing to go there.");
+		Message(Chat::Red, "%s You must travel to Mearatas at least once before wishing to go there.", msg);
 		break;
 	case IS_HP_ABOVE_50_PCT:
-		Message(Chat::Red, "This target must be above 50 pct of its maximum hit points.");
+		Message(Chat::Red, "%s This target must be above 50 pct of its maximum hit points.", msg);
 		break;
 	case IS_HP_UNDER_50_PCT:
-		Message(Chat::Red, " This target must be at oe below 50 pct of its maximum hit points.");
+		Message(Chat::Red, "%s  This target must be at oe below 50 pct of its maximum hit points.", msg);
 		break;
 	case IS_OFF_HAND_EQUIPED:
-		Message(Chat::Red, "You must be wielding a weapon or shield in your offhand to use this ability.");
+		Message(Chat::Red, "%s You must be wielding a weapon or shield in your offhand to use this ability.", msg);
 		break;
 	case HAS_NO_PACT_OF_FATE_RECOURSE_BUFF:
-		Message(Chat::Red, "This spell will not work while Pact of Fate Recourse is active.");
+		Message(Chat::Red, "%s This spell will not work while Pact of Fate Recourse is active.", msg);
 		break;
 	case HAS_NO_SHROUD_OF_PRAYER_BUFF:
-		Message(Chat::Red, "Your target cannot receive another Quiet Prayer this soon.");
+		Message(Chat::Red, "%s Your target cannot receive another Quiet Prayer this soon.", msg);
 		break;
 	case IS_MANA_BELOW_20_PCT:
-		Message(Chat::Red, "This ability requires you to be at or below 20 pct of your maximum mana.");
+		Message(Chat::Red, "%s This ability requires you to be at or below 20 pct of your maximum mana.", msg);
 		break;
 	case IS_MANA_ABOVE_50_PCT:
-		Message(Chat::Red, "This ability requires you to be at or above 50 pct of your maximum mana.");
+		Message(Chat::Red, "%s This ability requires you to be at or above 50 pct of your maximum mana.", msg);
 		break;
 	case COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER:
-		Message(Chat::Red, "You have completed Legendary Answerer.");
+		Message(Chat::Red, "%s You have completed Legendary Answerer.", msg);
 		break;
 	case HAS_NO_ROGUES_FURY_BUFF:
-		Message(Chat::Red, "This spell will not affect anyone that currently has Rogue's Fury active.");
+		Message(Chat::Red, "%s This spell will not affect anyone that currently has Rogue's Fury active.", msg);
 		break;
 	case NOT_COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER:
-		Message(Chat::Red, "You must complete Legendary Answerer.");
+		Message(Chat::Red, "%s You must complete Legendary Answerer.", msg);
 		break;
 	case IS_SUMMONED_OR_UNDEAD:
-		Message(Chat::Red, "This spell can only be used on summoned or undead.");
+		Message(Chat::Red, "%s This spell can only be used on summoned or undead.", msg);
 		break;
 	case IS_CLASS_CASTER_PRIEST:
-		Message(Chat::Red, "This ability requires you to be a caster or priest.");
+		Message(Chat::Red, "%s This ability requires you to be a caster or priest.", msg);
 		break;
 	case IS_END_OR_MANA_ABOVE_20_PCT:
-		Message(Chat::Red, "You must have at least 20 pct of your maximum mana and endurance to use this ability.");
+		Message(Chat::Red, "%s You must have at least 20 pct of your maximum mana and endurance to use this ability.", msg);
 		break;
 	case IS_END_OR_MANA_BELOW_30_PCT:
-		Message(Chat::Red, "Your target already has 30 pct or more of their maximum mana or endurance.");
+		Message(Chat::Red, "%s Your target already has 30 pct or more of their maximum mana or endurance.", msg);
 		break;
 	case IS_CLASS_BARD2:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell will only affect Bards.");
+			Message(Chat::Red, "%s This spell will only affect Bards.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can only be used by Bards.");
+			Message(Chat::Red, "%s This ability can only be used by Bards.", msg);
 		}
 		break;
 	case IS_NOT_CLASS_BARD:
 		if (target_requirement) {
-			Message(Chat::Red, "This spell can not affect Bards.");
+			Message(Chat::Red, "%s This spell can not affect Bards.", msg);
 		}
 		else {
-			Message(Chat::Red, "This ability can not be used by Bards.");
+			Message(Chat::Red, "%s This ability can not be used by Bards.", msg);
 		}
 		break;
 	case HAS_NO_FURIOUS_RAMPAGE_BUFF:
-		Message(Chat::Red, "This ability cannot be activated while Furious Rampage is active.");
+		Message(Chat::Red, "%s This ability cannot be activated while Furious Rampage is active.", msg);
 		break;
 	case IS_END_OR_MANA_BELOW_30_PCT2:
-		Message(Chat::Red, "You can only perform this solo if you have less than 30 pct mana or endurance.");
+		Message(Chat::Red, "%s You can only perform this solo if you have less than 30 pct mana or endurance.", msg);
 		break;
 	case HAS_NO_HARMONIOUS_PRECISION_BUFF:
-		Message(Chat::Red, "This spell will not work if you have the Harmonious Precision line active.");
+		Message(Chat::Red, "%s This spell will not work if you have the Harmonious Precision line active.", msg);
 		break;
 	case HAS_NO_HARMONIOUS_EXPANSE_BUFF:
-		Message(Chat::Red, "This spell will not work if you have the Harmonious Expanse line active.");
+		Message(Chat::Red, "%s This spell will not work if you have the Harmonious Expanse line active.", msg);
 		break;
 	default:
 		if (target_requirement) {
-			Message(Chat::Red, "Your target does not meet the spell requirements.");
+			Message(Chat::Red, "Your target does not meet the spell requirements.", msg);
 		}
 		else {
-			Message(Chat::Red, "Your spell would not take hold on your target.");
+			Message(Chat::Red, "Your spell would not take hold on your target.", msg);
 		}
 		break;
 	}
 }
-
 
 bool Mob::TrySpellProjectile(Mob* spell_target, uint16 spell_id, float speed) {
 

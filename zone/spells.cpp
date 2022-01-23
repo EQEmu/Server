@@ -209,6 +209,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	Shout("Cast spell %i", spell_id);
 
 	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), aa_id, from_instant_cast_item)) {
+		Shout("DoAdvancedCasting Checks FAIL");
 		return false;
 	}
 
@@ -649,6 +650,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		*/
 		if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
 			SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false, IsDiscipline(spell_id));
+			Shout("Caste requirement fail");
 			StopCastingSpell(spell_id, aa_id);
 			return false;
 		}
