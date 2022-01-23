@@ -822,14 +822,16 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			
 			if (GetClass() == BARD && IsCasting() && spells[spell_id].cast_time == 0) {
 				if (DoCastingChecks(spell_id, target)) {
-					SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline, 0, -1, spells[spell_id].resist_difficulty, false, -1, (uint32)DiscTimer, reduced_recast);
+					if (SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline, 0, -1, spells[spell_id].resist_difficulty, false, -1, (uint32)DiscTimer, reduced_recast)) {
+						SendDisciplineTimer(spells[spell_id].timer_id, reduced_recast);
+					}
 				}
 			}
 			else {
-				CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
+				if (CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast)) {
+					SendDisciplineTimer(spells[spell_id].timer_id, reduced_recast);
+				}
 			}
-			
-			SendDisciplineTimer(spells[spell_id].timer_id, reduced_recast);
 		}
 	}
 
