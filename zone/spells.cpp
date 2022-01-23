@@ -595,7 +595,12 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
 	safe_delete(outapp);
 }
 bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id) {
-
+	/*
+		3 places to check this
+		- On cast begin
+		- On cast end to catch anything that bypass begin cast.
+		- On determine spell targets to enforce target restrictions from AOE.
+	*/
 	/*
 		These are casting requirements or target requirements that will cancel a spell before spell finishes casting.
 		- cast_restriction : checks specific requirements on target (cast initiates)
@@ -612,6 +617,10 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		*Trigger before items glow, hence we are doing it wrong o
 	*/
 	
+	//If already passed checks when spell casting was iniated then we do not need to check these again.
+	if (casting_spell_checks) {
+		check_on_casting = false;
+	}
 
 	//These are checked on the caster, when a spell casting is iniated.
 	if (check_on_casting) {
@@ -677,30 +686,6 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 				return(false);
 			}
 		}
-
-		/*
-			Cannot cast life tap on self
-		*/
-		if (this == spell_target && IsLifetapSpell(spell_id)) {
-			LogSpells("You cannot lifetap yourself");
-			MessageString(Chat::SpellFailure, CANT_DRAIN_SELF);
-			if (check_on_casting) {
-				StopCastingSpell(spell_id, aa_id);
-			}
-			return false;
-		}
-
-		/*
-			Cannot cast sacrifice on self
-		*/
-		if (this == spell_target && IsSacrificeSpell(spell_id)) {
-			LogSpells("You cannot sacrifice yourself");
-			MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
-			if (check_on_casting) {
-				StopCastingSpell(spell_id, aa_id);
-			}
-			return false;
-		}
 	}
 
 	Shout("DoAdvancedCastingChecks");
@@ -747,7 +732,9 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 			}
 		}
 	}
-
+	/*
+		Prevent buffs from being cast on targets who don't meet level restriction
+	*/
 	if (RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
 		if (spell_target && spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
@@ -761,7 +748,10 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 			return false;
 		}
 	}
-	//If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
+	/*
+		Prevent blocked spells from being casted in a zone.
+		If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
+	*/
 	if (check_on_casting || (!check_on_casting && IsClient())) {
 		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
 			if (IsClient()) {
@@ -783,11 +773,33 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 			return false;
 		}
 	}
+	/*
+		Cannot cast life tap on self
+	*/
+	if (this == spell_target && IsLifetapSpell(spell_id)) {
+		LogSpells("You cannot lifetap yourself");
+		MessageString(Chat::SpellFailure, CANT_DRAIN_SELF);
+		if (check_on_casting) {
+			StopCastingSpell(spell_id, aa_id);
+		}
+		return false;
+	}
+
+	/*
+		Cannot cast sacrifice on self
+	*/
+	if (this == spell_target && IsSacrificeSpell(spell_id)) {
+		LogSpells("You cannot sacrifice yourself");
+		MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
+		if (check_on_casting) {
+			StopCastingSpell(spell_id, aa_id);
+		}
+		return false;
+	}
 
 	/*
 		Zones where you can not use levitate spells.
 	*/
-
 	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) { //check on spellfinished.
 		Message(Chat::Red, "You have entered an area where levitation effects do not function.");
 		if (check_on_casting) {
