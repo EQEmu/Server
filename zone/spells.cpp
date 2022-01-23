@@ -192,25 +192,23 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 		return(false);
 	}
-	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
-	if (spellbonuses.Sanctuary && (spells[spell_id].target_type != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id))
-		BuffFadeByEffect(SE_Sanctuary);
 
-	//cannot cast under divine aura, unless spell has 'cast_not_standing' flag. 
-	if(DivineAura() && !IgnoreCastingRestriction(spell_id)) {
-		LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
-		InterruptSpell(173, 0x121, false);
-		if(IsClient()) {
-			CastToClient()->SendSpellBarEnable(spell_id);
-		}
-		return(false);
+	bool from_instant_cast_item = false;
+	if (item_slot != -1 && cast_time == 0) {
+		from_instant_cast_item = true;
 	}
-	Shout("Cast spell %i", spell_id);
+
+	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
+	if (spellbonuses.Sanctuary && (spells[spell_id].target_type != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id)) {
+		BuffFadeByEffect(SE_Sanctuary);
+	}
 	if (spellbonuses.NegateIfCombat) {
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
 
-	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), aa_id)) {
+	Shout("Cast spell %i", spell_id);
+
+	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), aa_id, from_instant_cast_item)) {
 		return false;
 	}
 
@@ -220,16 +218,20 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(entity_list.GetMobID(target_id))) {
+		
+
 		bool can_send_spellbar_enable = true;
 		if ((item_slot != -1 && cast_time == 0) || aa_id) {
 			can_send_spellbar_enable = false;
 		}
 		if (can_send_spellbar_enable) {
+			Shout("Send spell bar");
 			SendSpellBarEnable(spell_id);
 		}
 		if (casting_spell_id && IsNPC()) {
 			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 		}
+
 		return false;
 	}
 
@@ -594,7 +596,7 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
 
 	safe_delete(outapp);
 }
-bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id) {
+bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id, bool from_instant_cast_item) {
 	/*
 		3 places to check this
 		- On cast begin
@@ -613,18 +615,26 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		- can not cast sacrifice on self (cast initiates) [cancel before begin cast message]
 		- charm restrictions (cast initiates) [cancel before begin cast message]
 		- levitate zone restriction (client blocks)  [cancel before begin cast message]
+		- pcnpc_only_flag - (client blocks] [cancel before being cast message]
 
 		*Trigger before items glow, hence we are doing it wrong o
 	*/
 	
-	//If already passed checks when spell casting was iniated then we do not need to check these again.
-	if (casting_spell_checks) {
-		check_on_casting = false;
-	}
+	//If already passed checks when spell casting was iniated then we do not need to check these again, othewrise check a start of spellfinished.
 
-	//These are checked on the caster, when a spell casting is iniated.
+	Shout("DoAdvancedCastingChecks %i check", check_on_casting);
+	//These are checked on the caster, only done when spell casting is iniated.
 	if (check_on_casting) {
-		
+
+		/*
+			Cannot cast under divine aura, unless spell has 'cast_not_standing' flag. 
+		*/
+		if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
+			LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
+			InterruptSpell(173, 0x121, false);
+			StopCastingSpell(spell_id, aa_id);
+			return(false);
+		}
 		/*
 			Linked Reused Timers that are not ready
 		*/
@@ -688,10 +698,10 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		}
 	}
 
-	Shout("DoAdvancedCastingChecks");
-
+	//The below checks are done at the start of spell finished if not from a casted spell.
+	
 	/*
-		Prevent blocked spells from being casted in a zone.
+		Zone ares that prevent blocked spells from being cast.
 		If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
 	*/
 	if (check_on_casting || (!check_on_casting && IsClient())) {
@@ -740,16 +750,39 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		StopCastingSpell(spell_id, aa_id);
 		return false;
 	}
-	
+
+	if (check_on_casting) {
+		casting_spell_checks = true;
+	}
 	return true;
 }
 
-bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* spell_target, uint32 aa_id) {
+bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id) {
+
+	//Cannot check targeting on cast.
+	if (check_on_casting && !spell_target && (IsGroupSpell(spell_id) ||
+			spells[spell_id].target_type == ST_AEClientV1 ||
+			spells[spell_id].target_type == ST_AECaster ||
+			spells[spell_id].target_type == ST_Ring ||
+			spells[spell_id].target_type == ST_Beam)){
+		return true; 
+	}
+
+	if (check_on_casting && !spell_target && spells[spell_id].target_type == ST_Self) {
+		spell_target = this;
+	}
+
+	//If we still do not have a target end.
+	if (!spell_target){
+		return false;
+	}
+
+	spell_target->Shout("I AM THE SPELL TARGET");
 
 	/*
 		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
 	*/
-	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
+	if (spells[spell_id].cast_restriction && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
 		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
 		return false;
 	}
@@ -760,8 +793,7 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* 
 	*/
 	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
 		if (IsDetrimentalSpell(spell_id)) {
-			if (spell_target &&
-				((spell_target->IsNPC() && spell_target->IsEngaged()) ||
+			if (((spell_target->IsNPC() && spell_target->IsEngaged()) ||
 				(spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount()))) {
 				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
 				return false;
@@ -770,8 +802,7 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* 
 	}
 	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
 		if (IsDetrimentalSpell(spell_id)) {
-			if (spell_target &&
-				((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
+			if (((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
 				(spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount()))) {
 				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
 				return false;
@@ -783,11 +814,25 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* 
 	*/
 	if (RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
-		if (spell_target && spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
+		if (spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
 			LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
 			if (!IsBardSong(spell_id)) {
 				MessageString(Chat::SpellFailure, SPELL_TOO_POWERFUL);
 			}
+			return false;
+		}
+	}
+
+	/*
+		Prevents buff from being cast based on tareget ing PC OR NPC (1 = PCs, 2 = NPCs)
+		These target types skip pcnpc only check (according to dev quotes)
+	*/
+	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList &&
+		spells[spell_id].target_type != ST_HateList) {
+		if (spells[spell_id].pcnpc_only_flag == 1 && !spell_target->IsClient() && !spell_target->IsMerc() && !spell_target->IsBot()) {
+			return false;
+		}
+		else if (spells[spell_id].pcnpc_only_flag == 2 && (spell_target->IsClient() || spell_target->IsMerc() || spell_target->IsBot())) {
 			return false;
 		}
 	}
@@ -799,7 +844,6 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* 
 		MessageString(Chat::SpellFailure, CANT_DRAIN_SELF);
 		return false;
 	}
-
 	/*
 		Cannot cast sacrifice on self
 	*/
@@ -808,6 +852,8 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* 
 		MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
 		return false;
 	}
+
+	return true;
 }
 
 bool Mob::DoAdvancedCastingChecksEndofCasting(bool check_on_casting, int32 spell_id, uint16 target_id) {
@@ -1698,7 +1744,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	// we're done casting, now try to apply the spell
-	if( !SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust) )
+	if( !SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
 	{
 		LogSpells("Casting of [{}] canceled: SpellFinished returned false", spell_id);
 		// most of the cases we return false have a message already or are logic errors that shouldn't happen
@@ -1860,62 +1906,6 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	// Yes. This code will cause issues if they have the proc as innate AND on a weapon. Oh well.
 	if (isproc && IsNPC() && CastToNPC()->GetInnateProcSpellID() == spell_id)
 		targetType = ST_Target;
-
-	if (spells[spell_id].cast_restriction && spell_target && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)){
-		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true);
-		return false;
-	}
-
-	if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
-		SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false);
-		return false;
-	}
-
-	//Must be out of combat. (If Beneficial checks casters combat state, Deterimental checks targets)
-	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
-		if (IsDetrimentalSpell(spell_id)) {
-			if (spell_target &&
-			    ((spell_target->IsNPC() && spell_target->IsEngaged()) ||
-			     (spell_target->IsClient() && spell_target->CastToClient()->GetAggroCount()))) {
-				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
-				return false;
-			}
-		}
-		else if (IsBeneficialSpell(spell_id)) {
-			if ((IsNPC() && IsEngaged()) || (IsClient() && CastToClient()->GetAggroCount())) {
-				if (IsDiscipline(spell_id)) {
-					MessageString(Chat::Red, NO_ABILITY_IN_COMBAT);
-				}
-				else {
-					MessageString(Chat::Red, NO_CAST_IN_COMBAT);
-				}
-				return false;
-			}
-		}
-	}
-
-	// Must be in combat. (If Beneficial checks casters combat state, Deterimental checks targets)
-	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
-		if (IsDetrimentalSpell(spell_id)) {
-			if (spell_target &&
-			    ((spell_target->IsNPC() && !spell_target->IsEngaged()) ||
-			     (spell_target->IsClient() && !spell_target->CastToClient()->GetAggroCount()))) {
-				MessageString(Chat::Red, SPELL_NO_EFFECT); // Unsure correct string
-				return false;
-			}
-		}
-		else if (IsBeneficialSpell(spell_id)) {
-			if ((IsNPC() && !IsEngaged()) || (IsClient() && !CastToClient()->GetAggroCount())) {
-				if (IsDiscipline(spell_id)) {
-					MessageString(Chat::Red, NO_ABILITY_OUT_OF_COMBAT);
-				}
-				else {
-					MessageString(Chat::Red, NO_CAST_OUT_OF_COMBAT);
-				}
-				return false;
-			}
-		}
-	}
 
 	switch (targetType)
 	{
@@ -2389,7 +2379,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
-						uint32 timer, uint32 timer_duration)
+						uint32 timer, uint32 timer_duration, bool from_casted_spell)
 {
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
@@ -2425,7 +2415,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 	}
 
-	if (!DoAdvancedCastingChecks(false, spell_id, spell_target, casting_spell_aa_id)) {
+	if (!from_casted_spell && !DoAdvancedCastingChecks(false, spell_id, spell_target, casting_spell_aa_id, false)) {
 
 	}
 
@@ -2436,33 +2426,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		if(IsClient() && !CastToClient()->GetGM()){
 			MessageString(Chat::Red, CAST_OUTDOORS);
 			return false;
-		}
-	}
-
-	if(IsClient() && !zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)){
-		if(!CastToClient()->GetGM()){
-			Message(Chat::Red, "You can't levitate in this zone.");
-			return false;
-		}
-	}
-
-	if(IsClient() && !CastToClient()->GetGM()){
-		if(zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))){
-
-			if (!CastToClient()->GetGM()) {
-				const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
-				if (msg) {
-					Message(Chat::Red, msg);
-					return false;
-				}
-				else {
-					Message(Chat::Red, "You can't cast this spell here.");
-					return false;
-				}
-			}
-			else {
-				LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
-			}
 		}
 	}
 
@@ -3875,8 +3838,6 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectiveness, bool use_resist_adjust, int16 resist_adjust,
 			bool isproc, int level_override, int32 duration_override)
 {
-	bool is_damage_or_lifetap_spell = IsDamageSpell(spell_id) || IsLifetapSpell(spell_id);
-
 	// well we can't cast a spell on target without a target
 	if(!spelltar)
 	{
@@ -3888,6 +3849,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
 		return false;
 
+	if (!IsValidSpell(spell_id))
+		return false;
+
+	bool is_damage_or_lifetap_spell = IsDamageSpell(spell_id) || IsLifetapSpell(spell_id);
+
 	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
@@ -3895,11 +3861,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
+	if (!DoAdvancedTargetingChecks(false, spell_id, spelltar, 0)) {
+		return false;
+	}
+
 	EQApplicationPacket *action_packet = nullptr, *message_packet = nullptr;
 	float spell_effectiveness;
-
-	if(!IsValidSpell(spell_id))
-		return false;
 
 	// these target types skip pcnpc only check (according to dev quotes)
 	// other AE spells this is redundant, oh well
