@@ -760,16 +760,18 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id) {
 
 	//Cannot check targeting on cast.
-	if (check_on_casting && !spell_target && (IsGroupSpell(spell_id) ||
+	if (check_on_casting && !spell_target){
+		
+		if (IsGroupSpell(spell_id) ||
 			spells[spell_id].target_type == ST_AEClientV1 ||
 			spells[spell_id].target_type == ST_AECaster ||
 			spells[spell_id].target_type == ST_Ring ||
-			spells[spell_id].target_type == ST_Beam)){
-		return true; 
-	}
-
-	if (check_on_casting && !spell_target && spells[spell_id].target_type == ST_Self) {
-		spell_target = this;
+			spells[spell_id].target_type == ST_Beam){
+			return true;
+		}
+		else if (spells[spell_id].target_type == ST_Self) {
+			spell_target = this;
+		}
 	}
 
 	//If we still do not have a target end.
