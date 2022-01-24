@@ -2583,9 +2583,6 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 		entity_list.RemoveFromAutoXTargets(this);
 
-		if (killer != nullptr && killer->GetUltimateOwner() && killer->GetUltimateOwner()->IsClient()) {
-			killer->GetUltimateOwner()->CastToClient()->ProcessXTargetAutoHaters();
-		}
 		uint16 emoteid = this->GetEmoteID();
 		auto corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,
 			level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS)
