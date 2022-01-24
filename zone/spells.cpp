@@ -6284,6 +6284,22 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
 }
 
+void Client::SendItemRecastTimer(uint32 recast_type, uint32 recast_delay)
+{
+	if (!recast_delay) {
+		recast_delay = GetPTimers().GetRemainingTime(pTimerItemStart + recast_type);
+	}
+
+	if (recast_delay) {
+		auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
+		ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
+		ird->recast_delay = recast_delay;
+		ird->recast_type = recast_type;
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
+
 void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ)
 {
 	if (!distance) { return; }
