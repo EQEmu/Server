@@ -6650,7 +6650,3 @@ void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::stri
 	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
 	DataBucket::SetData(full_bucket_name, bucket_value, expiration);
 }
-
-bool Mob::IsValidXTarget() const {
-	return (GetID() > 0 || !IsCorpse());
-}

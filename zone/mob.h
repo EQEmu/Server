@@ -1307,8 +1307,6 @@ public:
 	std::string GetBucketRemaining(std::string bucket_name);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
 
-	bool IsValidXTarget() const;
-
 #ifdef BOTS
 	// Bots HealRotation methods
 	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
