@@ -8426,8 +8426,10 @@ void Bot::Camp(bool databaseSave) {
 	//Mitch
 	Raid* bot_raid = entity_list.GetRaidByBotName(this->GetName());
 	if (bot_raid) {
+		uint32 gid = bot_raid->GetGroup(this->GetName());
 		bot_raid->SendRaidGroupRemove(this->GetName(), bot_raid->GetGroup(this->GetName()));
 		bot_raid->RemoveMember(this->GetName());
+		bot_raid->GroupUpdate(gid);
 	}
 
 
@@ -8655,7 +8657,8 @@ Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
 
 void Bot::ProcessBotGroupInvite(Client* c, std::string botName) {
 	if(c) {
-		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(entity_list.GetBotByBotName(botName)->GetOwner()->CastToClient(), botName);
+//		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(entity_list.GetBotByBotName(botName)->GetOwner()->CastToClient(), botName);
+		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(c, botName);
 		//Mitch changed entity from c
 		if(invitedBot && !invitedBot->HasGroup()) {
 			if(!c->IsGrouped()) {
@@ -10292,6 +10295,9 @@ uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::const
 
 void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 
+	if (!invitee || !invitor)
+		return;
+
 	Raid* raid = entity_list.GetRaidByClient(invitor);
 	Group* g_invitee = invitee->GetGroup();
 	Group* g_invitor = invitor->GetGroup();
@@ -10560,6 +10566,9 @@ void Bot::ProcessRaidInvite(Client* invitee, Client* invitor) {
 
 void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 
+	if (!invitee || !invitor)
+		return;
+
 	Raid* raid = entity_list.GetRaidByClient(invitor);
 	Group* g_invitee = invitee->GetGroup();
 	Group* g_invitor = invitor->GetGroup();
@@ -10686,7 +10695,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 //			raid->GroupUpdate(0, true);
 //			raid->SendBulkRaid(invitee); //Send a raid updates to the invitor
 			g_invitor->JoinRaidXTarget(raid, true);
-//			g_invitor->DisbandGroup(true);
+			g_invitor->DisbandGroup(true); //Added Jan 23 to fix group database and entity integrity
 			raid->GroupUpdate(0, true);
 			if (raid->IsLocked()) {
 				raid->SendRaidLockTo(invitor);

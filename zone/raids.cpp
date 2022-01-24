@@ -110,6 +110,14 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 
 	LearnMembers();
 	VerifyRaid();
+
+#ifdef BOTS
+	if (rleader) {
+		database.SetRaidGroupLeaderInfo(group, GetID());
+		UpdateRaidAAs();
+	}
+	else 
+#endif
 	if (rleader) {
 		database.SetRaidGroupLeaderInfo(RAID_GROUPLESS, GetID());
 		UpdateRaidAAs();
@@ -182,18 +190,22 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 
 	LearnMembers();
 	VerifyRaid();
-	if (rleader) {
-		database.SetRaidGroupLeaderInfo(RAID_GROUPLESS, GetID());
-		UpdateRaidAAs();
-	}
-	if (group != RAID_GROUPLESS && groupleader) {
-		database.SetRaidGroupLeaderInfo(group, GetID());
-		//UpdateGroupAAs(group);
-	}
-//	if (group < 12)
-//		GroupUpdate(group);
-//	else // get raid AAs, GroupUpdate will handles it otherwise
-		//SendGroupLeadershipAA(c, RAID_GROUPLESS); Is this needed for bots?
+//	Bots are being invited and cannot be the raid leader
+//	if (rleader) {
+//		database.SetRaidGroupLeaderInfo(RAID_GROUPLESS, GetID());
+//		UpdateRaidAAs();
+//	}
+
+// Bots can be group leaders, though they do not have GroupAA
+//	if (group != RAID_GROUPLESS && groupleader) {
+//		database.SetRaidGroupLeaderInfo(group, GetID());
+//		UpdateGroupAAs(group); //Mitch Jan 22
+//	}
+
+	if (group < 12) //Jan22
+		GroupUpdate(group); //Jan22
+	else // get raid AAs, GroupUpdate will handles it otherwise Jan 22
+		SendGroupLeadershipAA(b->GetOwner()->CastToClient(), RAID_GROUPLESS); //Is this needed for bots? Jan 22
 	SendRaidAddAll(b->GetName());
 	
 	b->SetRaidGrouped(true);
