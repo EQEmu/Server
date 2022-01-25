@@ -5036,10 +5036,11 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 	}
 
 	Raid* raid = entity_list.GetRaidByBotName(this->GetName());
-	uint32 gid = raid->GetGroup(this->GetName());
+	
 	if (raid) 
 	{
-		for (int x = 0; x < MAX_RAID_MEMBERS; x++) 
+ 
+		for (int x = 0; x < MAX_RAID_MEMBERS; x++)
 		{
 			if (strcmp(raid->members[x].membername, this->GetName()) == 0) 
 			{
