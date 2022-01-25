@@ -6989,9 +6989,9 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 #ifdef BOTS
 		else if (Invitee->IsBot()) {
 			Client* inviter = entity_list.GetClientByName(gis->inviter_name);
-			Bot* invitee = entity_list.GetBotByBotName(gis->invitee_name);
+			//Bot* invitee = entity_list.GetBotByBotName(gis->invitee_name);
 			if (inviter->IsRaidGrouped())
-				Bot::ProcessRaidInvite(invitee, inviter);
+				Bot::ProcessRaidInvite(Invitee->CastToBot(), inviter);
 			else
 				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
 		}
@@ -11779,10 +11779,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 				}
 				// If any of the bots are a group leader then re-create the botgroup on disband, dropping any clients
 				for (auto bot_iter : raid_members_bots) {
-					if (bot_iter && raid->IsGroupLeader(bot_iter->GetName()))
+					if (bot_iter && raid->IsRaidMember(bot_iter->GetName()) && raid->IsGroupLeader(bot_iter->GetName()))
 					{
 						// Remove the entire BOT group in this case
 						uint32 gid = raid->GetGroup(bot_iter->GetName());
+						 
 						std::vector<RaidMember> r_group_members = raid->GetRaidGroupMembers(gid);
 						Group* group_inst = new Group(bot_iter);
 						entity_list.AddGroup(group_inst);
@@ -11791,10 +11792,15 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						for (auto member_iter : r_group_members) {
 							if (!member_iter.member->IsClient() && strcmp(member_iter.membername, bot_iter->GetName()) == 0)
 								bot_iter->SetFollowID(owner_id);
+								
 							else
 								Bot::AddBotToGroup(member_iter.member->CastToBot(), group_inst);
 							raid->RemoveMember(bot_iter->GetName());
 						}
+					}
+					else if (bot_iter && raid->IsRaidMember(bot_iter->GetName()))
+					{
+						raid->RemoveMember(bot_iter->GetName());
 					}
 				}
 			}
@@ -11823,6 +11829,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 							raid->RemoveMember(member_iter.member->CastToBot()->GetName());
 						}
 					}
+					break;
 				}
 				else if (gid <12 && raid->GetGroupLeader(gid)->IsBot())
 				{
@@ -11878,7 +11885,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			}
 			//r->SendRaidGroupRemove(ri->leader_name, grp);
 			raid->GroupUpdate(group);// break
-								//}
+			if (!raid->RaidCount())
+				raid->DisbandRaid();
 		}
 		break;
 	}

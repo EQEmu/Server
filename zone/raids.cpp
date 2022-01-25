@@ -261,10 +261,10 @@ void Raid::RemoveMember(const char *characterName)
 	Bot* bot = entity_list.GetBotByBotName(characterName);
 
 	if (bot) {
-		bot->SetFollowID(bot->GetOwner()->GetID());
-		bot->SetGrouped(0);
+		bot->SetFollowID(bot->GetOwner()->CastToClient()->GetID());
+		bot->SetGrouped(false);
 		bot->SetTarget(nullptr);
-		bot->SetRaidGrouped(0);
+		bot->SetRaidGrouped(false);
 	}
 #endif
 
