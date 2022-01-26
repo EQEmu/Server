@@ -163,32 +163,20 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		ZeroCastingVars();
 	}
 
-
-	//If spell spell fails here determine if we need to send packet to client to reset spell bar.
+	//If spell fails checks here determine if we need to send packet to client to reset spell bar.
 	bool send_spellbar_enable = true;
 	if ((item_slot != -1 && cast_time == 0) || aa_id) {
 		send_spellbar_enable = false;
 	}
 
-	if
-	(
-		!IsValidSpell(spell_id) ||
-		casting_spell_id ||
-		delaytimer ||
-		spellend_timer.Enabled()
-	)
-	{
-		LogSpells("Spell casting canceled: not able to cast now. Valid? [{}], casting [{}], waiting? [{}], spellend? [{}], stunned? [{}], feared? [{}], mezed? [{}], silenced? [{}], amnesiad? [{}]",
-			IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced(), IsAmnesiad() );
-		
-
-		if (IsClient()) {
-			CastToClient()->SendSpellBarEnable(spell_id);
-		}
-		if (casting_spell_id && IsNPC()) {
-			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
-		}
-		return(false);
+	if(!IsValidSpell(spell_id) || 
+		casting_spell_id || 
+		delaytimer || 
+		spellend_timer.Enabled()){
+		LogSpells("Spell casting canceled: not able to cast now. Valid? [{}], casting [{}], waiting? [{}], spellend? [{}]",
+			IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled());
+		StopCastSpell(spell_id, send_spellbar_enable);
+		return false;
 	}
 
 	Shout("Cast spell %i", spell_id);
@@ -196,7 +184,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (!DoCastingChecksOnCaster(spell_id) ||
 		!DoCastingChecksZoneRestrictions(true, spell_id) ||
 		!DoCastingChecksOnTarget(true, spell_id, entity_list.GetMobID(target_id))) {
-		StopCastingSpell(spell_id, send_spellbar_enable);
+		StopCastSpell(spell_id, send_spellbar_enable);
 		return false;
 	}
 	else {
@@ -207,6 +195,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (spellbonuses.Sanctuary && (spells[spell_id].target_type != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id)) {
 		BuffFadeByEffect(SE_Sanctuary);
 	}
+
 	if (spellbonuses.NegateIfCombat) {
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
@@ -479,10 +468,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
-		if (!DoCastingChecks()) {
-			StopCasting();
-			return false;
-		}
 		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust); //
 		return(true);
 	}
@@ -508,11 +493,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		auto item = CastToClient()->GetInv().GetItem(item_slot);
 		if (item && item->GetItem())
 			MessageString(Chat::Spells, BEGINS_TO_GLOW, item->GetItem()->Name);
-	}
-
-	if (!DoCastingChecks()) {
-		StopCasting();
-		return false;
 	}
 
 	return(true);
@@ -693,13 +673,16 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 	*/
 
 	//If already passed checks when spell casting was iniated then we do not need to check these again, othewrise check a start of spellfinished.
-
+	bool ignore_if_npc_or_gm = false;
+	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
+		ignore_if_npc_or_gm = true;
+	}
 
 	/*
 		Zone ares that prevent blocked spells from being cast.
 		If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
 	*/
-	if (check_on_casting || (!check_on_casting && IsClient())) {
+	if ((check_on_casting && !ignore_if_npc_or_gm) || (!check_on_casting && IsClient())) {
 		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
 			if (IsClient()) {
 				if (!CastToClient()->GetGM()) {
@@ -723,7 +706,7 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 	/*
 		Zones where you can not use levitate spells.
 	*/
-	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) { //check on spellfinished.
+	if (!ignore_if_npc_or_gm && !zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) { //check on spellfinished.
 		Message(Chat::Red, "You have entered an area where levitation effects do not function.");
 		return false;
 	}
@@ -739,7 +722,7 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 		/*
 			Zones where you can not cast out door only spells. This is only checked when casting is completed.
 		*/
-		if (spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()) {
+		if (!ignore_if_npc_or_gm && spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()) {
 			if (IsClient() && !CastToClient()->GetGM()) {
 				MessageString(Chat::Red, CAST_OUTDOORS);
 				return false;
@@ -765,6 +748,11 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 
 
 bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *spell_target) {
+
+	bool ignore_if_npc_or_gm = false;
+	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
+		ignore_if_npc_or_gm = true;
+	}
 
 	if (check_on_casting && !spell_target){
 		
@@ -821,7 +809,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Prevent buffs from being cast on targets who don't meet level restriction
 	*/
-	if (RuleB(Spells, BuffLevelRestrictions)) {
+	if (!ignore_if_npc_or_gm && RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
 		if (spells[spell_id].target_type != ST_Self && !spell_target->CheckSpellLevelRestriction(spell_id)) {
 			LogSpells("Spell [{}] failed: recipient did not meet the level restrictions", spell_id);
@@ -1342,7 +1330,7 @@ void Mob::StopCasting()
 	ZeroCastingVars();
 }
 
-void Mob::StopCastingSpell(int32 spell_id, bool send_spellbar_enable)
+void Mob::StopCastSpell(int32 spell_id, bool send_spellbar_enable)
 {
 	/*
 		This is used when spells fail at CastSpell or when CastSpell is bypassed and spell is launched initially from SpellFinished.

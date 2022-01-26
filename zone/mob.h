@@ -348,7 +348,7 @@ public:
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
 	void StopCasting();
-	void StopCastingSpell(int32 spell_id, bool send_spellbar_enable); //Rename this
+	void StopCastSpell(int32 spell_id, bool send_spellbar_enable); //Rename this
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks(int32 spell_id = SPELL_UNKNOWN, uint16 target_id = 0);
