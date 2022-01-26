@@ -1356,6 +1356,13 @@ void Mob::StopCastSpell(int32 spell_id, bool send_spellbar_enable)
 void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slot,
 							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
+	if (!IsValidSpell(spell_id))
+	{
+		LogSpells("Casting of [{}] canceled: invalid spell id", spell_id);
+		InterruptSpell();
+		return;
+	}
+
 	bool IsFromItem = false;
 	EQ::ItemInstance *item = nullptr;
 
@@ -1385,13 +1392,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				return;
 			}
 		}
-	}
-
-	if(!IsValidSpell(spell_id))
-	{
-		LogSpells("Casting of [{}] canceled: invalid spell id", spell_id);
-		InterruptSpell();
-		return;
 	}
 
 	// prevent rapid recast - this can happen if somehow the spell gems
@@ -1577,7 +1577,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							continue;		// no instrument required, go to next component
 
 						// percussion songs (13000 = hand drum)
-						case 13000:
+						case INSTRUMENT_HAND_DRUM:
 							if(itembonuses.percussionMod == 0) {			// check for the appropriate instrument type
 								HasInstrument = false;
 								c->MessageString(Chat::Red, SONG_NEEDS_DRUM);	// send an error message if missing
@@ -1585,7 +1585,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							break;
 
 						// wind songs (13001 = wooden flute)
-						case 13001:
+						case INSTRUMENT_WOODEN_FLUTE:
 							if(itembonuses.windMod == 0) {
 								HasInstrument = false;
 								c->MessageString(Chat::Red, SONG_NEEDS_WIND);
@@ -1593,7 +1593,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							break;
 
 						// string songs (13011 = lute)
-						case 13011:
+						case INSTRUMENT_LUTE:
 							if(itembonuses.stringedMod == 0) {
 								HasInstrument = false;
 								c->MessageString(Chat::Red, SONG_NEEDS_STRINGS);
@@ -1601,7 +1601,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							break;
 
 						// brass songs (13012 = horn)
-						case 13012:
+						case INSTRUMENT_HORN:
 							if(itembonuses.brassMod == 0) {
 								HasInstrument = false;
 								c->MessageString(Chat::Red, SONG_NEEDS_BRASS);

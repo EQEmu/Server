@@ -194,6 +194,12 @@
 #define ZONE_TUTORIAL 183
 #define ZONE_LOAD 184
 
+//instrument item id's used as song components
+#define INSTRUMENT_HAND_DRUM 13000
+#define INSTRUMENT_WOODEN_FLUTE 13001
+#define INSTRUMENT_LUTE 13011
+#define INSTRUMENT_HORN 13012
+
 
 const int Z_AGGRO=10;
 
