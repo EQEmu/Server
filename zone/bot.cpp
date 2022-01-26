@@ -5048,10 +5048,10 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 			}
 		}
 	}
-	else
-	{
-		entity_list.RemoveBot(this->GetID());
-	}
+//	else
+//	{
+	entity_list.RemoveBot(this->GetID());
+//	}
 	
 	return true;
 }

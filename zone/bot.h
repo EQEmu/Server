@@ -152,8 +152,8 @@ public:
 		ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
-	virtual Raid* GetRaid() { return entity_list.GetRaidByMob(this); }
-	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); }
+	virtual Raid* GetRaid() { return entity_list.GetRaidByMob(this); } // GetRaidByMob(this);
+	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); } // GetGroupByMob;
 
 	// Common, but informal "interfaces" with Client object
 	uint32 CharacterID() { return GetBotID(); } // Just returns the Bot Id
