@@ -338,9 +338,11 @@ public:
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1, int reflect_effectiveness = 0, int32 duration_override = 0);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction, EQ::spells::CastingSlot slot, bool isproc = false);
+	bool DoCastingChecksOnCaster(int32 spell_id); //Rename this.
+	bool DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id); //Rename this.
+	bool DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob* spell_target); //Rename this.
 	bool DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob* spell_target, bool send_spellbar_enable); //Rename this.
-	bool DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob* spell_target, uint32 aa_id); //Rename this.
-	bool DoAdvancedCastingChecksEndofCasting(bool check_on_casting, int32 spell_id, uint16 target_id); //Rename this.
+
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);

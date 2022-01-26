@@ -209,11 +209,24 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	Shout("Cast spell %i", spell_id);
 
+	if (!DoCastingChecksOnCaster(spell_id) ||
+		!DoCastingChecksZoneRestrictions(true, spell_id) ||
+		!DoCastingChecksOnTarget(true, spell_id, entity_list.GetMobID(target_id))) {
+		StopCastingSpell(spell_id, send_spellbar_enable);
+		return false;
+	}
+	else {
+		casting_spell_checks = true;
+	}
+
+	/*
 	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), send_spellbar_enable)) {
 		Shout("DoAdvancedCasting Checks FAIL");
 		StopCastingSpell(spell_id, send_spellbar_enable);
 		return false;
 	}
+	*/
+
 
 	if (HasActiveSong() && IsBardSong(spell_id)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
@@ -720,7 +733,7 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 		return false;
 	}
 
-	if (!DoAdvancedTargetingChecks(check_on_casting, spell_id, spell_target, 0)){
+	if (!DoCastingChecksOnTarget(check_on_casting, spell_id, spell_target)){
 		return false;
 	}
 
@@ -730,7 +743,205 @@ bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *sp
 	return true;
 }
 
-bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, uint32 aa_id) {
+bool Mob::DoCastingChecksOnCaster(int32 spell_id) {
+
+	//TODO: In spellfinished need to determine when fails if we wipe variable when we reset or not. Use is_from_casted_spell to determine.
+	//if not from a casted spell then we don't use any of the casting variables.
+
+	/*
+		3 places to check this
+		- On cast begin
+		- On cast end to catch anything that bypass begin cast.
+		- On determine spell targets to enforce target restrictions from AOE.
+	*/
+	/*
+		These are casting requirements or target requirements that will cancel a spell before spell finishes casting.
+		- cast_restriction : checks specific requirements on target (cast initiates)
+		- caster_requirmement_id : checks specific requirements on caster (cast initiates)
+		- target level restriction on buffs (cast initiates)
+		- linked timer spells. (cast initiates) [cancel before begin cast message]
+		- must be out of combat spell field. (client blocks)
+		- must be in combat spell field. (client blocks)
+		- can not cast life tap on self (client blocks) [cancel before begin cast message]
+		- can not cast sacrifice on self (cast initiates) [cancel before begin cast message]
+		- charm restrictions (cast initiates) [cancel before begin cast message]
+		- levitate zone restriction (client blocks)  [cancel before begin cast message]
+		- pcnpc_only_flag - (client blocks] [cancel before being cast message]
+
+		*Trigger before items glow, hence we are doing it wrong o
+	*/
+
+	//If already passed checks when spell casting was iniated then we do not need to check these again, othewrise check a start of spellfinished.
+
+	/*
+		Cannot cast under divine aura, unless spell has 'cast_not_standing' flag.
+	*/
+	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
+		LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
+		InterruptSpell(173, 0x121, false);
+		return(false);
+	}
+	/*
+		Linked Reused Timers that are not ready
+	*/
+	if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems) {
+		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id)) {
+			return false;
+		}
+	}
+	/*
+		Spells that use caster_requirement_id field which requires specific conditions on caster to be met before casting.
+	*/
+	if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
+		SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false, IsDiscipline(spell_id));
+		return false;
+	}
+	/*
+		Spells that use field can_cast_in_comabt or can_cast_out of combat restricting
+		caster to meet one of those conditions. If beneficial spell check casters state.
+		If detrimental check the targets state (done elsewhere in this function).
+	*/
+	if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
+		if (IsBeneficialSpell(spell_id)) {
+			if ((IsNPC() && IsEngaged()) || (IsClient() && CastToClient()->GetAggroCount())) {
+				if (IsDiscipline(spell_id)) {
+					MessageString(Chat::Red, NO_ABILITY_IN_COMBAT);
+				}
+				else {
+					MessageString(Chat::Red, NO_CAST_IN_COMBAT);
+				}
+				return false;
+			}
+		}
+	}
+	else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
+		if (IsBeneficialSpell(spell_id)) {
+			if ((IsNPC() && !IsEngaged()) || (IsClient() && !CastToClient()->GetAggroCount())) {
+				if (IsDiscipline(spell_id)) {
+					MessageString(Chat::Red, NO_ABILITY_OUT_OF_COMBAT);
+				}
+				else {
+					MessageString(Chat::Red, NO_CAST_OUT_OF_COMBAT);
+				}
+				return false;
+			}
+		}
+	}
+	/*
+		Focus version of Silence will prevent spell casting
+	*/
+	if (IsClient()) {
+		int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);//client only
+		if (chance && zone->random.Roll(chance)) {
+			MessageString(Chat::Red, SILENCED_STRING);
+			return(false);
+		}
+	}
+
+	return true;
+}
+
+bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id) {
+
+	//TODO: In spellfinished need to determine when fails if we wipe variable when we reset or not. Use is_from_casted_spell to determine.
+	//if not from a casted spell then we don't use any of the casting variables.
+
+	/*
+		3 places to check this
+		- On cast begin
+		- On cast end to catch anything that bypass begin cast.
+		- On determine spell targets to enforce target restrictions from AOE.
+	*/
+	/*
+		These are casting requirements or target requirements that will cancel a spell before spell finishes casting.
+		- cast_restriction : checks specific requirements on target (cast initiates)
+		- caster_requirmement_id : checks specific requirements on caster (cast initiates)
+		- target level restriction on buffs (cast initiates)
+		- linked timer spells. (cast initiates) [cancel before begin cast message]
+		- must be out of combat spell field. (client blocks)
+		- must be in combat spell field. (client blocks)
+		- can not cast life tap on self (client blocks) [cancel before begin cast message]
+		- can not cast sacrifice on self (cast initiates) [cancel before begin cast message]
+		- charm restrictions (cast initiates) [cancel before begin cast message]
+		- levitate zone restriction (client blocks)  [cancel before begin cast message]
+		- pcnpc_only_flag - (client blocks] [cancel before being cast message]
+
+		*Trigger before items glow, hence we are doing it wrong o
+	*/
+
+	//If already passed checks when spell casting was iniated then we do not need to check these again, othewrise check a start of spellfinished.
+
+
+	/*
+		Zone ares that prevent blocked spells from being cast.
+		If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
+	*/
+	if (check_on_casting || (!check_on_casting && IsClient())) {
+		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
+			if (IsClient()) {
+				if (!CastToClient()->GetGM()) {
+					const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
+					if (msg) {
+						Message(Chat::Red, msg);
+						return false;
+					}
+					else {
+						Message(Chat::Red, "You can't cast this spell here.");
+						return false;
+					}
+				}
+				else {
+					LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
+				}
+			}
+			return false;
+		}
+	}
+	/*
+		Zones where you can not use levitate spells.
+	*/
+	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) { //check on spellfinished.
+		Message(Chat::Red, "You have entered an area where levitation effects do not function.");
+		return false;
+	}
+	/*
+		Zones where you can not use detrimental spells.
+	*/
+	if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
+		Message(Chat::Red, "You cannot cast detrimental spells here.");
+		return false;
+	}
+
+	if (check_on_casting) {
+		/*
+			Zones where you can not cast out door only spells. This is only checked when casting is completed.
+		*/
+		if (spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()) {
+			if (IsClient() && !CastToClient()->GetGM()) {
+				MessageString(Chat::Red, CAST_OUTDOORS);
+				return false;
+			}
+		}
+		/*
+			Zones where you can not gate.
+		*/
+		if (IsClient() &&
+			(zone->GetZoneID() == ZONE_TUTORIAL || zone->GetZoneID() == ZONE_LOAD) &&
+			CastToClient()->Admin() < AccountStatus::QuestTroupe) {
+			if (IsEffectInSpell(spell_id, SE_Gate) ||
+				IsEffectInSpell(spell_id, SE_Translocate) ||
+				IsEffectInSpell(spell_id, SE_Teleport)) {
+				Message(0, "The Gods brought you here, only they can send you away.");
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *spell_target) {
 
 	//Cannot check targeting on cast.
 	if (check_on_casting && !spell_target){
@@ -826,12 +1037,16 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob *
 		MessageString(Chat::SpellFailure, CANNOT_SAC_SELF);
 		return false;
 	}
-
+	/*
+		Max level of target for harmony to take hold
+	*/
 	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, spell_target)) {
 		MessageString(Chat::SpellFailure, SPELL_NO_EFFECT);
 		return false;
 	}
-
+	/*
+		Various charm related target restrictions	
+	*/
 	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(spell_target)) {
 		return false;
 	}
@@ -839,18 +1054,6 @@ bool Mob::DoAdvancedTargetingChecks(bool check_on_casting, int32 spell_id, Mob *
 	return true;
 }
 
-bool Mob::DoAdvancedCastingChecksEndofCasting(bool check_on_casting, int32 spell_id, uint16 target_id) {
-
-
-
-	if (spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()) {
-		MessageString(Chat::Red, CAST_OUTDOORS);
-		return false;
-	}
-
-
-
-}
 /*
  * Some failures should be caught before the spell finishes casting
  * This is especially helpful to clients when they cast really long things
@@ -2399,37 +2602,16 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			}
 		}
 	}
-
-	if (!from_casted_spell && !DoAdvancedCastingChecks(false, spell_id, spell_target, true)) {
-		Shout("Fail spell finished casting check.");
+	//If spell was casted then we already checked these so skip, otherwise check here if being called directly from spell finished.
+	if (!from_casted_spell && (!DoCastingChecksZoneRestrictions(false, spell_id) || !DoCastingChecksOnTarget(false, spell_id, spell_target))) {
 		return false;
-	}
-
-	/*
-		This is only checked when casting is completed.	
-	*/
-	if( spells[spell_id].zone_type == 1 && !zone->CanCastOutdoor()){
-		if(IsClient() && !CastToClient()->GetGM()){
-			MessageString(Chat::Red, CAST_OUTDOORS);
-			return false;
-		}
-	}
-
-	if	(IsClient() && 
-		(zone->GetZoneID() == ZONE_TUTORIAL || zone->GetZoneID() == ZONE_LOAD) &&
-		CastToClient()->Admin() < AccountStatus::QuestTroupe){
-		if(	IsEffectInSpell(spell_id, SE_Gate) ||
-			IsEffectInSpell(spell_id, SE_Translocate) ||
-			IsEffectInSpell(spell_id, SE_Teleport)){
-			Message(0, "The Gods brought you here, only they can send you away.");
-			return false;
-		}
 	}
 
 	//determine the type of spell target we have
 	CastAction_type CastAction;
-	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc))
+	if (!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc)) {
 		return(false);
+	}
 
 	LogSpells("Spell [{}]: target type [{}], target [{}], AE center [{}]", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
 
@@ -3847,7 +4029,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
-	if (!DoAdvancedTargetingChecks(false, spell_id, spelltar, 0)) {
+	if (!DoCastingChecksOnTarget(false, spell_id, spelltar)) {
 		return false;
 	}
 
