@@ -162,28 +162,26 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (casting_spell_id == spell_id) {
 		ZeroCastingVars();
 	}
+
+
+	//If spell spell fails here determine if we need to send packet to client to reset spell bar.
+	bool send_spellbar_enable = true;
+	if ((item_slot != -1 && cast_time == 0) || aa_id) {
+		send_spellbar_enable = false;
+	}
+
 	if
 	(
 		!IsValidSpell(spell_id) ||
 		casting_spell_id ||
 		delaytimer ||
-		spellend_timer.Enabled() ||
-		(IsStunned() && !IgnoreCastingRestriction(spell_id)) ||
-		IsFeared() ||
-		(IsMezzed() && !IgnoreCastingRestriction(spell_id)) ||
-		(IsSilenced() && !IsDiscipline(spell_id)) ||
-		(IsAmnesiad() && IsDiscipline(spell_id))
+		spellend_timer.Enabled()
 	)
 	{
 		LogSpells("Spell casting canceled: not able to cast now. Valid? [{}], casting [{}], waiting? [{}], spellend? [{}], stunned? [{}], feared? [{}], mezed? [{}], silenced? [{}], amnesiad? [{}]",
 			IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced(), IsAmnesiad() );
 		
-		if (IsSilenced() && !IsDiscipline(spell_id)) {
-			MessageString(Chat::Red, SILENCED_STRING);
-		}
-		if (IsAmnesiad() && IsDiscipline(spell_id)) {
-			MessageString(Chat::Red, MELEE_SILENCE);
-		}
+
 		if (IsClient()) {
 			CastToClient()->SendSpellBarEnable(spell_id);
 		}
@@ -191,12 +189,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 		}
 		return(false);
-	}
-
-	//If spell spell fails here determine if we need to send packet to client.
-	bool send_spellbar_enable = true;
-	if ((item_slot != -1 && cast_time == 0) || aa_id) {
-		send_spellbar_enable = false;
 	}
 
 	Shout("Cast spell %i", spell_id);
@@ -460,6 +452,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				else {
 					InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
 				}
+				ZeroCastingVars();
 				return(false);
 			}
 		}
@@ -480,8 +473,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// now tell the people in the area -- we ALWAYS want to send this, even instant cast spells.
 	// The only time this is skipped is for NPC innate procs and weapon procs. Procs from buffs
 	// oddly still send this. Since those cases don't reach here, we don't need to check them
-	if (slot != CastingSlot::Discipline)
+	if (slot != CastingSlot::Discipline) {
 		SendBeginCast(spell_id, orgcasttime);
+	}
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
@@ -576,14 +570,39 @@ bool Mob::DoCastingChecksOnCaster(int32 spell_id) {
 	*/
 
 	//If already passed checks when spell casting was iniated then we do not need to check these again, othewrise check a start of spellfinished.
-
+	/*
+		Cannot cast if stunned or mezzed, unless spell has 'cast_not_standing' flag.
+	*/
+	if ((IsStunned() || IsMezzed()) && !IgnoreCastingRestriction(spell_id)) {
+		return false;
+	}
+	/*
+		Can not cast if feared.
+	*/
+	if (IsFeared()) {
+		return false;
+	}
+	/*
+		Can not cast if spell	
+	*/
+	if ((IsSilenced() && !IsDiscipline(spell_id))) {
+		MessageString(Chat::Red, SILENCED_STRING);
+		return false;
+	}
+	/*
+		Can not cast if discipline.
+	*/
+	if (IsAmnesiad() && IsDiscipline(spell_id)) {
+		MessageString(Chat::Red, MELEE_SILENCE);
+		return false;
+	}
 	/*
 		Cannot cast under divine aura, unless spell has 'cast_not_standing' flag.
 	*/
 	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
 		LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 		InterruptSpell(173, 0x121, false);
-		return(false);
+		return false;
 	}
 	/*
 		Linked Reused Timers that are not ready
