@@ -1353,7 +1353,8 @@ void QuestManager::save() {
 
 void QuestManager::faction(int faction_id, int faction_value, int temp) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient()) {
+	running_quest run = quests_running_.top();
+	if(run.owner->IsCharmed() == false && initiator && initiator->IsClient()) {
 		if(faction_id != 0 && faction_value != 0) {
 			initiator->SetFactionLevel2(
 				initiator->CharacterID(),
