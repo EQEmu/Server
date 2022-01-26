@@ -3051,7 +3051,7 @@ XS(XS__UpdateSpawnTimer);
 XS(XS__UpdateSpawnTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::UpdateSpawnTimer(uint32 spawn2_id, uint32 updated_time_till_repop)");
+		Perl_croak(aTHX_ "Usage: quest::updatespawntimer(uint32 spawn2_id, uint32 updated_time_till_repop)");
 
 	uint32 spawn2_id               = (int) SvIV(ST(0));
 	uint32 updated_time_till_repop = (int) SvIV(ST(1));
