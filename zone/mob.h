@@ -341,8 +341,6 @@ public:
 	bool DoCastingChecksOnCaster(int32 spell_id); //Rename this.
 	bool DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id); //Rename this.
 	bool DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob* spell_target); //Rename this.
-	bool DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob* spell_target, bool send_spellbar_enable); //Rename this.
-
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);

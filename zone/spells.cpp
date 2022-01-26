@@ -199,14 +199,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		send_spellbar_enable = false;
 	}
 
-	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
-	if (spellbonuses.Sanctuary && (spells[spell_id].target_type != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id)) {
-		BuffFadeByEffect(SE_Sanctuary);
-	}
-	if (spellbonuses.NegateIfCombat) {
-		BuffFadeByEffect(SE_NegateIfCombat);
-	}
-
 	Shout("Cast spell %i", spell_id);
 
 	if (!DoCastingChecksOnCaster(spell_id) ||
@@ -219,14 +211,13 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		casting_spell_checks = true;
 	}
 
-	/*
-	if (!DoAdvancedCastingChecks(true, spell_id, entity_list.GetMobID(target_id), send_spellbar_enable)) {
-		Shout("DoAdvancedCasting Checks FAIL");
-		StopCastingSpell(spell_id, send_spellbar_enable);
-		return false;
+	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
+	if (spellbonuses.Sanctuary && (spells[spell_id].target_type != ST_Self && GetTarget() != this) || IsDetrimentalSpell(spell_id)) {
+		BuffFadeByEffect(SE_Sanctuary);
 	}
-	*/
-
+	if (spellbonuses.NegateIfCombat) {
+		BuffFadeByEffect(SE_NegateIfCombat);
+	}
 
 	if (HasActiveSong() && IsBardSong(spell_id)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
@@ -421,8 +412,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			cast_time = GetActSpellCasttime(spell_id, cast_time); 
 		}
 	}
-	else
+	else {
 		orgcasttime = cast_time;
+	}
 
 	// we checked for spells not requiring targets above
 	if(target_id == 0) {
@@ -440,68 +432,32 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// ok now we know the target
 	casting_spell_targetid = target_id;
 
-	if (RuleB(Spells, InvisRequiresGroup) && IsInvisSpell(spell_id)) {
-		if (IsClient() && GetTarget() && GetTarget()->IsClient()) {
-			Client* spell_caster = this->CastToClient();
-			Client* spell_target = entity_list.GetClientByID(target_id);
-			if (spell_target && spell_target->GetID() != GetID()) {
-				bool cast_failed = true;
-				if (spell_target->IsGrouped()) {
-					Group *target_group = spell_target->GetGroup();
-					Group *my_group = GetGroup();
-					if (
-						target_group &&
-						my_group &&
-						(target_group->GetID() == my_group->GetID())
-					) {
-						cast_failed = false;
-					}
-				} else if (spell_target->IsRaidGrouped()) {
-					Raid *target_raid = spell_target->GetRaid();
-					Raid *my_raid = GetRaid();
-					if (
-						target_raid &&
-						my_raid &&
-						(target_raid->GetGroup(spell_target) == my_raid->GetGroup(spell_caster))
-					) {
-						cast_failed = false;
-					}
-				}
-
-				if (cast_failed) {
-					InterruptSpell(spell_id);
-					MessageString(Chat::Red, TARGET_GROUP_MEMBER);
-					return false;
-				}
-			}
-		}
-	}
-
 	// We don't get actual mana cost here, that's done when we consume the mana
-	if (mana_cost == -1)
+	if (mana_cost == -1) {
 		mana_cost = spell.mana;
+	}
 
 	// mana is checked for clients on the frontend. we need to recheck it for NPCs though
 	// If you're at full mana, let it cast even if you dont have enough mana
 
 	// we calculated this above, now enforce it
-	if(mana_cost > 0 && slot != CastingSlot::Item)
-	{
+	if(mana_cost > 0 && slot != CastingSlot::Item) {
 		int my_curmana = GetMana();
 		int my_maxmana = GetMaxMana();
-		if(my_curmana < mana_cost)	// not enough mana
-		{
+		if(my_curmana < mana_cost) {// not enough mana
 			//this is a special case for NPCs with no mana...
-			if(IsNPC() && my_curmana == my_maxmana)
-			{
+			if(IsNPC() && my_curmana == my_maxmana){
 				mana_cost = 0;
-			} else {
+			}
+			else {
+				//The client will prevent spell casting if insufficient mana, this is only for serverside enforcement.
 				LogSpells("Spell Error not enough mana spell=[{}] mymana=[{}] cost=[{}]\n", spell_id, my_curmana, mana_cost);
 				if(IsClient()) {
 					//clients produce messages... npcs should not for this case
 					MessageString(Chat::Red, INSUFFICIENT_MANA);
 					InterruptSpell();
-				} else {
+				} 
+				else {
 					InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
 				}
 				return(false);
@@ -509,8 +465,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	if(mana_cost > GetMana())
+	if (mana_cost > GetMana()) {
 		mana_cost = GetMana();
+	}
 
 	// we know our mana cost now
 	casting_spell_mana = mana_cost;
@@ -588,159 +545,6 @@ void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
 	); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 
 	safe_delete(outapp);
-}
-bool Mob::DoAdvancedCastingChecks(bool check_on_casting, int32 spell_id, Mob *spell_target, bool send_spellbar_enable) {
-	
-	//TODO: In spellfinished need to determine when fails if we wipe variable when we reset or not. Use is_from_casted_spell to determine.
-	//if not from a casted spell then we don't use any of the casting variables.
-	
-	/*
-		3 places to check this
-		- On cast begin
-		- On cast end to catch anything that bypass begin cast.
-		- On determine spell targets to enforce target restrictions from AOE.
-	*/
-	/*
-		These are casting requirements or target requirements that will cancel a spell before spell finishes casting.
-		- cast_restriction : checks specific requirements on target (cast initiates)
-		- caster_requirmement_id : checks specific requirements on caster (cast initiates)
-		- target level restriction on buffs (cast initiates)
-		- linked timer spells. (cast initiates) [cancel before begin cast message]
-		- must be out of combat spell field. (client blocks)
-		- must be in combat spell field. (client blocks)
-		- can not cast life tap on self (client blocks) [cancel before begin cast message]
-		- can not cast sacrifice on self (cast initiates) [cancel before begin cast message]
-		- charm restrictions (cast initiates) [cancel before begin cast message]
-		- levitate zone restriction (client blocks)  [cancel before begin cast message]
-		- pcnpc_only_flag - (client blocks] [cancel before being cast message]
-
-		*Trigger before items glow, hence we are doing it wrong o
-	*/
-	
-	//If already passed checks when spell casting was iniated then we do not need to check these again, othewrise check a start of spellfinished.
-
-	Shout("DoAdvancedCastingChecks %i check", check_on_casting);
-	//These are checked on the caster, only done when spell casting is iniated.
-	if (check_on_casting) {
-
-		/*
-			Cannot cast under divine aura, unless spell has 'cast_not_standing' flag. 
-		*/
-		if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
-			LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
-			InterruptSpell(173, 0x121, false);
-			return(false);
-		}
-		/*
-			Linked Reused Timers that are not ready
-		*/
-		if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems) {
-			if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id)) {
-				return false;
-			}
-		}
-		/*
-			Spells that use caster_requirement_id field which requires specific conditions on caster to be met before casting.
-		*/
-		if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
-			SendCastRestrictionMessage(spells[spell_id].caster_requirement_id, false, IsDiscipline(spell_id));
-			return false;
-		}
-		/*
-			Spells that use field can_cast_in_comabt or can_cast_out of combat restricting 
-			caster to meet one of those conditions. If beneficial spell check casters state.
-			If detrimental check the targets state (done elsewhere in this function).
-		*/
-		if (!spells[spell_id].can_cast_in_combat && spells[spell_id].can_cast_out_of_combat) {
-			 if (IsBeneficialSpell(spell_id)) {
-				if ((IsNPC() && IsEngaged()) || (IsClient() && CastToClient()->GetAggroCount())) {
-					if (IsDiscipline(spell_id)) {
-						MessageString(Chat::Red, NO_ABILITY_IN_COMBAT);
-					}
-					else {
-						MessageString(Chat::Red, NO_CAST_IN_COMBAT);
-					}
-					return false;
-				}
-			}
-		}
-		else if (spells[spell_id].can_cast_in_combat && !spells[spell_id].can_cast_out_of_combat) {
-			 if (IsBeneficialSpell(spell_id)) {
-				if ((IsNPC() && !IsEngaged()) || (IsClient() && !CastToClient()->GetAggroCount())) {
-					if (IsDiscipline(spell_id)) {
-						MessageString(Chat::Red, NO_ABILITY_OUT_OF_COMBAT);
-					}
-					else {
-						MessageString(Chat::Red, NO_CAST_OUT_OF_COMBAT);
-					}
-					return false;
-				}
-			}
-		}
-		/*
-			Focus version of Silence will prevent spell casting
-		*/
-		if (IsClient()) {
-			int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);//client only
-			if (chance && zone->random.Roll(chance)) {
-				MessageString(Chat::Red, SILENCED_STRING);
-				return(false);
-			}
-		}
-	}
-
-	//The below checks are done at the start of spell finished if not from a casted spell.
-	
-	/*
-		Zone ares that prevent blocked spells from being cast.
-		If on cast iniated then check any mob casting, if on spellfinished only check if is from client.
-	*/
-	if (check_on_casting || (!check_on_casting && IsClient())) {
-		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
-			if (IsClient()) {
-				if (!CastToClient()->GetGM()) {
-					const char *msg = zone->GetSpellBlockedMessage(spell_id, glm::vec3(GetPosition()));
-					if (msg) {
-						Message(Chat::Red, msg);
-						return false;
-					}
-					else {
-						Message(Chat::Red, "You can't cast this spell here.");
-						return false;
-					}
-				}
-				else {
-					LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
-				}
-			}
-			return false;
-		}
-	}
-
-	/*
-		Zones where you can not use levitate spells.
-	*/
-	if (!zone->CanLevitate() && IsEffectInSpell(spell_id, SE_Levitate)) { //check on spellfinished.
-		Message(Chat::Red, "You have entered an area where levitation effects do not function.");
-		return false;
-	}
-
-	/*
-		Zones where you can not use detrimental spells.
-	*/
-	if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
-		Message(Chat::Red, "You cannot cast detrimental spells here.");
-		return false;
-	}
-
-	if (!DoCastingChecksOnTarget(check_on_casting, spell_id, spell_target)){
-		return false;
-	}
-
-	if (check_on_casting) {
-		casting_spell_checks = true;
-	}
-	return true;
 }
 
 bool Mob::DoCastingChecksOnCaster(int32 spell_id) {
@@ -830,7 +634,7 @@ bool Mob::DoCastingChecksOnCaster(int32 spell_id) {
 	/*
 		Focus version of Silence will prevent spell casting
 	*/
-	if (IsClient()) {
+	if (IsClient() && !IsDiscipline(spell_id)) {
 		int chance = CastToClient()->GetFocusEffect(focusFcMute, spell_id);//client only
 		if (chance && zone->random.Roll(chance)) {
 			MessageString(Chat::Red, SILENCED_STRING);
@@ -943,7 +747,6 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 
 bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *spell_target) {
 
-	//Cannot check targeting on cast.
 	if (check_on_casting && !spell_target){
 		
 		if (IsGroupSpell(spell_id) ||
@@ -967,6 +770,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 
 	/*
 		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
+		[Insufficient mana first]
 	*/
 	if (spells[spell_id].cast_restriction && !spell_target->PassCastRestriction(spells[spell_id].cast_restriction)) {
 		SendCastRestrictionMessage(spells[spell_id].cast_restriction, true, IsDiscipline(spell_id));
@@ -1049,6 +853,39 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	*/
 	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(spell_target)) {
 		return false;
+	}
+	/*
+		Requires target to be in same group or same raid in order to apply invisible.
+	*/
+	if (check_on_casting && RuleB(Spells, InvisRequiresGroup) && IsInvisSpell(spell_id)) {
+		if (IsClient() && spell_target && spell_target->IsClient()) {
+			if (spell_target && spell_target->GetID() != GetID()) {
+				bool cast_failed = true;
+				if (spell_target->IsGrouped()) {
+					Group *target_group = spell_target->GetGroup();
+					Group *my_group = GetGroup();
+					if (target_group &&	
+						my_group &&
+						(target_group->GetID() == my_group->GetID())) {
+						cast_failed = false;
+					}
+				}
+				else if (spell_target->IsRaidGrouped()) {
+					Raid *target_raid = spell_target->GetRaid();
+					Raid *my_raid = GetRaid();
+					if (target_raid &&
+						my_raid &&
+						(target_raid->GetGroup(spell_target->CastToClient()) == my_raid->GetGroup(this->CastToClient()))) {
+						cast_failed = false;
+					}
+				}
+
+				if (cast_failed) {
+					MessageString(Chat::Red, TARGET_GROUP_MEMBER);
+					return false;
+				}
+			}
+		}
 	}
 
 	return true;
