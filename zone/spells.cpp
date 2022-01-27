@@ -860,7 +860,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Various charm related target restrictions	
 	*/
-	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(spell_target, spell_id, check_on_casting)) {
+	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(spell_target)) {
 		return false;
 	}
 	/*
@@ -2913,23 +2913,24 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 void Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 
+	/*
+		Check any bard specific special behaviors we need before applying the pulse.
+	*/
+
 	if (!spell_target) {
 		return;
 	}
 
 	/*
-		Check any bard specific special behaviors we need before applying the pulse.
+		Bard song charm that have no mana will continue to try and pulse on target, but will only reapply when charm fades.
+		Live does not spam client with do not take hold messages. Checking here avoids that from happening. Only try to reapply if charm fades.
 	*/
-
-	//bard song charm that have no mana will pulse on target without error but will only reapply when charm fades.
 	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SE_Charm)) {
-		Shout("3 BARD LOGIC :: FAIL :: Charm pulse, pass on reapplying the spell unless its faded.");
 		return;
 	}
 	Shout("3 BARD LOGIC :: PASS :: Now apply that pulse!");
 
-
-	if (!SpellFinished(spell_id, spell_target, slot, spells[bardsong].mana, 0xFFFFFFFF, spells[bardsong].resist_difficulty)) {
+	if (!SpellFinished(spell_id, spell_target, slot, spells[spell_id].mana, 0xFFFFFFFF, spells[spell_id].resist_difficulty)) {
 		InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, spell_id);
 	}
 }

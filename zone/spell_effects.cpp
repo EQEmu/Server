@@ -9612,18 +9612,13 @@ bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
 	return true;
 }
 
-bool Mob::PassCharmTargetRestriction(Mob *target, int32 spell_id, bool check_on_casting) {
+bool Mob::PassCharmTargetRestriction(Mob *target) {
 	
 	//Level restriction check should not go here.
 	if (!target) {
 		return false;
 	}
 
-	//This is only checked on pulse, not initial cast. Bard song charm that have no mana will pulse on target without error but will only reapply when charm fades.
-	//if (!check_on_casting && GetClass() == BARD && spells[spell_id].mana == 0 && IsActiveBardSong(spell_id) && bardsong_target_id == target->GetID()) {
-	//	return true;
-	//}
-	
 	if (target->IsClient() && IsClient()) {
 		MessageString(Chat::Red, CANNOT_AFFECT_PC);
 		LogSpells("Spell casting canceled: Can not cast charm on a client.");
