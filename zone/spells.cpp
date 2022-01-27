@@ -1882,6 +1882,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if (RuleB(Spells, EnableBardMelody)) {
 				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
 			}
+
+			if (!IsFromItem) {
+				c->CheckSongSkillIncrease(spell_id);
+			}
 		}
 		LogSpells("Bard song [{}] should be started", spell_id);
 	}
