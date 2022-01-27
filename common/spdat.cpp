@@ -1483,13 +1483,13 @@ bool IsPulsingBardSongTargetingSelf(int32 spell_id) {
 	*/
 
 
-		/* 03 */	//ST_GroupTeleport = 0x03,
-		/* 04 */	//ST_AECaster = 0x04,
-		/* 05 */	//ST_Target = 0x05,
-		/* 06 */	//ST_Self = 0x06,
-		/* 08 */	//ST_AETarget = 0x08,
-		/* 40 */	//ST_AEBard = 0x28,
-		/* 41 */	//ST_Group = 0x29,
+		/* 03 */	//ST_GroupTeleport = 0x03, [target is set to self]
+		/* 04 */	//ST_AECaster = 0x04, [target is set to self]
+		/* 05 */	//ST_Target = 0x05, [target is target]
+		/* 06 */	//ST_Self = 0x06, [target is set to self]
+		/* 08 */	//ST_AETarget = 0x08,  [target is target]
+		/* 40 */	//ST_AEBard = 0x28, [target is set to self]
+		/* 41 */	//ST_Group = 0x29, [target is set to self]
 	return true;
 }
 

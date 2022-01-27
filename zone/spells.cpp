@@ -860,7 +860,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	/*
 		Various charm related target restrictions	
 	*/
-	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(spell_target)) {
+	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(spell_target, spell_id, check_on_casting)) {
 		return false;
 	}
 	/*
@@ -1427,7 +1427,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// a spell bar slot
 	if(GetClass() == BARD) // bard's can move when casting any spell...
 	{
-		if (IsBardSong(spell_id)) {
+		Shout("Mob::CastedSpellFinished :: <<<Try Set Pulse>>> :: spell %i target type %i", spell_id, spells[spell_id].target_type);
+		if (IsBardSong(spell_id) && slot < CastingSlot::MaxGems) {
 			if (spells[spell_id].buff_duration == 0xFFFF) {
 				LogSpells("Bard song [{}] not applying bard logic because duration. dur=[{}], recast=[{}]", spells[spell_id].buff_duration);
 			}
@@ -1435,12 +1436,15 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				if (IsPulsingBardSong(spell_id)) {
 					bardsong = spell_id;
 					bardsong_slot = slot;
-					//NOTE: theres a lot more target types than this to think about... [HOWEVER, target type should never be undefined since it is set in DoCastSpell
+					
 					
 					if (!spell_target) {
 						Shout("DEBUG CRITICAL ERROR <<<NO TARGET TYPE FOUND>>>>>>>>>>>>>>>>>");
 					}
-
+					Shout("Mob::CastedSpellFinished :: Set Pulse :: target type %i", spells[spell_id].target_type);
+					//NOTE: theres a lot more target types than this to think about... [HOWEVER, target type should never be undefined since it is set in DoCastSpell]
+					//So this should never happen, but bards only have 2 target types which are below, as a failsafe I can see the logic. TODO: Optimize this.
+					//Perhaps interupt it if its a targeted spell but you have no target, since something went wrong...
 					if (!spell_target || 
 						(spells[spell_id].target_type != ST_Target && spells[spell_id].target_type != ST_AETarget)) {
 						bardsong_target_id = GetID();
@@ -1450,6 +1454,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					}
 					bardsong_timer.Start(6000);
 				}
+				Shout("start bard song TARGET %i", bardsong_target_id);
 				LogSpells("Bard song [{}] started: slot [{}], target id [{}]", bardsong, (int)bardsong_slot, bardsong_target_id);
 				bard_song_mode = true;
 			}
@@ -2906,6 +2911,29 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	return true;
 }
 
+void Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
+
+	if (!spell_target) {
+		return;
+	}
+
+	/*
+		Check any bard specific special behaviors we need before applying the pulse.
+	*/
+
+	//bard song charm that have no mana will pulse on target without error but will only reapply when charm fades.
+	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SE_Charm)) {
+		Shout("3 BARD LOGIC :: FAIL :: Charm pulse, pass on reapplying the spell unless its faded.");
+		return;
+	}
+	Shout("3 BARD LOGIC :: PASS :: Now apply that pulse!");
+
+
+	if (!SpellFinished(spell_id, spell_target, slot, spells[bardsong].mana, 0xFFFFFFFF, spells[bardsong].resist_difficulty)) {
+		InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, spell_id);
+	}
+}
+
 /*
  * handle bard song pulses...
  *
@@ -3734,6 +3762,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			return -1;
 		}
 	}
+	//do not fade buff if from bard pulse, live does not give a fades message.
+	bool from_bard_song_pulse = caster ? caster->IsActiveBardSong(spell_id) : false;
 
 	// at this point we know that this buff will stick, but we have
 	// to remove some other buffs already worn if will_overwrite is true
@@ -3743,8 +3773,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		end = overwrite_slots.end();
 		for (; cur != end; ++cur) {
 			// strip spell
-			Shout("Bard Logic:: Strip Buff");
-			if (!IsActiveBardSong(spell_id)) {
+			Shout("Bard Logic:: Strip Buff %i", from_bard_song_pulse);
+			if (!from_bard_song_pulse) {
 				BuffFadeBySlot(*cur, false);
 			}
 
@@ -6793,7 +6823,7 @@ void Client::ResetCastbarCooldownBySpellID(uint32 spell_id) {
 }
 
 bool Mob::IsActiveBardSong(int32 spell_id) {
-
+	
 	if (spell_id == bardsong) {
 		return true;
 	}
