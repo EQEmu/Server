@@ -2428,7 +2428,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 	}
 
-  //Guard Assist Code
+    //Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist) && spell_target && IsDetrimentalSpell(spell_id) && spell_target != this) {
 		if (IsClient() && spell_target->IsClient()|| (HasOwner() && GetOwner()->IsClient() && spell_target->IsClient())) {
 			auto& mob_list = entity_list.GetCloseMobList(spell_target);
@@ -2446,6 +2446,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			}
 		}
 	}
+
 	//If spell was casted then we already checked these so skip, otherwise check here if being called directly from spell finished.
 	if (!from_casted_spell && (!DoCastingChecksZoneRestrictions(false, spell_id) || !DoCastingChecksOnTarget(false, spell_id, spell_target))) {
 		return false;
@@ -2496,11 +2497,10 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		range = spells[spell_id].aoe_range;
 
 	range = GetActSpellRange(spell_id, range);
-	if(IsPlayerIllusionSpell(spell_id)
-		&& IsClient()
-		&& (HasProjectIllusion())){
+	if(IsClient() && IsPlayerIllusionSpell(spell_id) && (HasProjectIllusion())){
 		range = 100;
 	}
+
 	if(spell_target != nullptr && spell_target != this) {
 		//casting a spell on somebody but ourself, make sure they are in range
 		float dist2 = DistanceSquared(m_Position, spell_target->GetPosition());
@@ -2775,8 +2775,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		SetEndurance(GetEndurance() - EQ::ClampUpper(end_cost, GetEndurance()));
 		TryTriggerOnCastRequirement();
 	}
-	if (mgb)
+	if (mgb) {
 		SetMGB(false);
+	}
 
 	//set our reuse timer on long ass reuse_time spells...
 	if(IsClient() && !isproc)
@@ -3707,7 +3708,10 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		end = overwrite_slots.end();
 		for (; cur != end; ++cur) {
 			// strip spell
-			BuffFadeBySlot(*cur, false);
+			Shout("Bard Logic:: Strip Buff");
+			if (!IsActiveBardSong(spell_id)) {
+				BuffFadeBySlot(*cur, false);
+			}
 
 			// if we hadn't found a free slot before, or if this is earlier
 			// we use it
@@ -6750,4 +6754,12 @@ void Client::ResetCastbarCooldownBySpellID(uint32 spell_id) {
 			break;
 		}
 	}
+}
+
+bool Mob::IsActiveBardSong(int32 spell_id) {
+
+	if (spell_id == bardsong) {
+		return true;
+	}
+	return false;
 }

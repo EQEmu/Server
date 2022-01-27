@@ -361,6 +361,7 @@ public:
 	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
 	void TryAfterSpellFinished(Mob *caster, Mob *target, uint16 spell_id);
 	void ApplySpellEffectIllusion(int32 spell_id, Mob* caster, int buffslot, int base, int limit, int max);
+	bool IsActiveBardSong(int32 spell_id); //Bard
 
 	//Buff
 	void BuffProcess();
