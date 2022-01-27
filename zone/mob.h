@@ -361,7 +361,11 @@ public:
 	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
 	void TryAfterSpellFinished(Mob *caster, Mob *target, uint16 spell_id);
 	void ApplySpellEffectIllusion(int32 spell_id, Mob* caster, int buffslot, int base, int limit, int max);
+	
+	//New Bard Logic
 	bool IsActiveBardSong(int32 spell_id); //Bard
+	bool HasActiveSong() const { return(bardsong != 0); }
+
 
 	//Buff
 	void BuffProcess();
@@ -1129,7 +1133,6 @@ public:
 
 	void InstillDoubt(Mob *who);
 	int16 GetResist(uint8 type) const;
-	bool HasActiveSong() const { return(bardsong != 0); }
 	bool Charmed() const { return typeofpet == petCharmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
 	uint32 GetZoneID() const; //for perl

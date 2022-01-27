@@ -156,6 +156,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	uint32 timer, uint32 timer_duration, int16 *resist_adjust,
 	uint32 aa_id)
 {
+	Shout("<Start> Mob::CastSpell %i", spell_id);
 	LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]",
 		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
@@ -179,8 +180,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return false;
 	}
 
-	Shout("Cast spell %i", spell_id);
-
 	if (!DoCastingChecksOnCaster(spell_id) ||
 		!DoCastingChecksZoneRestrictions(true, spell_id) ||
 		!DoCastingChecksOnTarget(true, spell_id, entity_list.GetMobID(target_id))) {
@@ -203,6 +202,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (HasActiveSong() && IsBardSong(spell_id)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
 		//Note: this does NOT tell the client
+		Shout("Stop SONG");
 		_StopSong();
 	}
 
@@ -301,6 +301,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 					uint32 item_slot, uint32 timer, uint32 timer_duration,
 					int16 resist_adjust, uint32 aa_id)
 {
+	Shout("<Start> Mob::DoCastSpell %i", spell_id);
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
 
@@ -407,6 +408,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		} else {
 			InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
 		}
+		ZeroCastingVars();
 		return(false);
 	}
 
@@ -1213,6 +1215,8 @@ void Mob::InterruptSpell(uint16 spellid)
 // color not used right now
 void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 {
+	Shout("Mob::InterruptSpell");
+
 	EQApplicationPacket *outapp = nullptr;
 	uint16 message_other;
 	bool bard_song_mode = false; //has the bard song gone to auto repeat mode
@@ -1424,9 +1428,39 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(GetClass() == BARD) // bard's can move when casting any spell...
 	{
 		if (IsBardSong(spell_id)) {
+			if (spells[spell_id].buff_duration == 0xFFFF) {
+				LogSpells("Bard song [{}] not applying bard logic because duration. dur=[{}], recast=[{}]", spells[spell_id].buff_duration);
+			}
+			else {
+				if (IsPulsingBardSong(spell_id)) {
+					bardsong = spell_id;
+					bardsong_slot = slot;
+					//NOTE: theres a lot more target types than this to think about... [HOWEVER, target type should never be undefined since it is set in DoCastSpell
+					
+					if (!spell_target) {
+						Shout("DEBUG CRITICAL ERROR <<<NO TARGET TYPE FOUND>>>>>>>>>>>>>>>>>");
+					}
+
+					if (!spell_target || 
+						(spells[spell_id].target_type != ST_Target && spells[spell_id].target_type != ST_AETarget)) {
+						bardsong_target_id = GetID();
+					}
+					else {
+						bardsong_target_id = spell_target->GetID();
+					}
+					bardsong_timer.Start(6000);
+				}
+				LogSpells("Bard song [{}] started: slot [{}], target id [{}]", bardsong, (int)bardsong_slot, bardsong_target_id);
+				bard_song_mode = true;
+			}
+		}
+		/*
+		if (IsBardSong(spell_id)) {
 			if(spells[spell_id].buff_duration == 0xFFFF) {
 				LogSpells("Bard song [{}] not applying bard logic because duration. dur=[{}], recast=[{}]", spells[spell_id].buff_duration);
-			} else {
+			} 
+			else
+			{
 				// So long recast bard songs need special bard logic, although the effects don't repulse like other songs
 				// This is basically a hack to get that effect
 				// You can hold down the long recast spells, but you only get the effects once
@@ -1447,6 +1481,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				bard_song_mode = true;
 			}
 		}
+		*/
 	}
 	else // not bard, check movement
 	{
@@ -6238,6 +6273,7 @@ int Mob::GetCasterLevel(uint16 spell_id) {
 //you should really know what your doing before you call this
 void Mob::_StopSong()
 {
+	Shout("Mob::_StopSong()");
 	bardsong = 0;
 	bardsong_target_id = 0;
 	bardsong_slot = CastingSlot::Gem1;

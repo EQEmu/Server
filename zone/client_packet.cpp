@@ -3977,6 +3977,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
+	Shout("Client::Handle_OP_CastSpell");
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
@@ -9543,18 +9544,23 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 {
+	Shout("Client::Handle_OP_ManaChange");
 	if (app->size == 0) {
 		// i think thats the sign to stop the songs
-		if (IsBardSong(casting_spell_id) || bardsong != 0)
-			InterruptSpell(SONG_ENDS, 0x121);
-		else
+		if (IsBardSong(casting_spell_id) || HasActiveSong()) {
+			InterruptSpell(SONG_ENDS, 0x121); //Live doesn't send song end message anymore (~Kayen 1/26/22)
+		}
+		else {
 			InterruptSpell(INTERRUPT_SPELL, 0x121);
-
+		}
 		return;
 	}
-	else	// I don't think the client sends proper manachanges
-	{			// with a length, just the 0 len ones for stopping songs
-				//ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
+	/*
+		I don't think the client sends proper manachanges
+		with a length, just the 0 len ones for stopping songs
+		ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
+	*/
+	else{	
 		printf("OP_ManaChange from client:\n");
 		DumpPacket(app);
 	}
