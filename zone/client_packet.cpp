@@ -8739,6 +8739,8 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
+	Shout("Client::Handle_OP_ItemVerifyRequest");
+
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
@@ -8790,7 +8792,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	spell_id = item->Click.Effect;
-
+	bool is_bard_song_active = false;
+	Shout("1 Client::Handle_OP_ItemVerifyRequest %i", spell_id);
 	if
 		(
 			spell_id > 0 &&
@@ -8811,9 +8814,33 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			)
 		)
 	{
-		SendSpellBarEnable(spell_id);
-		return;
+		/*
+			Bards can click items while casting spell gems, it stops that song cast and replaces it with item click cast. 
+			Can not click while casting other items.
+			TODO: Should I make this a rule???
+		*/
+		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems) 
+		{
+			outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
+			InterruptCast_Struct* ic = (InterruptCast_Struct*)outapp->pBuffer;
+			ic->messageid = SONG_ENDS;
+			ic->spawnid = GetID();
+			outapp->priority = 5;
+			CastToClient()->QueuePacket(outapp);
+			safe_delete(outapp);
+
+			is_bard_song_active = true;
+
+			Shout("INTERRUPT AND CAAST Client::Handle_OP_ItemVerifyRequest %i ", spell_id);
+		}
+		else
+		{
+			SendSpellBarEnable(spell_id);
+			Shout("FAIL Client::Handle_OP_ItemVerifyRequest %i FAIL", spell_id);
+			return;
+		}
 	}
+	Shout("2 Client::Handle_OP_ItemVerifyRequest %i", spell_id);
 
 	// Modern clients don't require pet targeted for item clicks that are ST_Pet
 	if (spell_id > 0 && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet))
@@ -8877,6 +8904,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 			{
+				Shout("3 Client::Handle_OP_ItemVerifyRequest %i", spell_id);
 				if (inst->GetCharges() == 0)
 				{
 					//Message(0, "This item is out of charges.");
@@ -8899,10 +8927,16 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					{
 						return;
 					}
-
+					Shout("4 Client::Handle_OP_ItemVerifyRequest %i [Cast time %i]", spell_id, item->CastTime);
 					if (i == 0) {
-						if (!IsCastWhileInvis(item->Click.Effect))
+						if (!IsCastWhileInvis(item->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
+						}
+						if (is_bard_song_active) {
+							SendSpellBarDisable();
+							ZeroCastingVars();
+							ZeroBardPulseVars();
+						}
 						CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
 					}
 				}

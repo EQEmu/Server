@@ -366,6 +366,7 @@ public:
 	void ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);
 	bool IsActiveBardSong(int32 spell_id); //Bard
 	bool HasActiveSong() const { return(bardsong != 0); }
+	void ZeroBardPulseVars();
 
 
 	//Buff

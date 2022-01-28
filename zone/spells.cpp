@@ -199,7 +199,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
 
-	if (HasActiveSong() && IsBardSong(spell_id)) {
+	//Casting a spell from an item click will also stop bard pulse.
+	if (HasActiveSong() && (IsBardSong(spell_id) || slot == CastingSlot::Item)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
 		//Note: this does NOT tell the client
 		Shout("Stop SONG");
@@ -6309,6 +6310,16 @@ int Mob::GetCasterLevel(uint16 spell_id) {
 void Mob::_StopSong()
 {
 	Shout("Mob::_StopSong()");
+	bardsong = 0;
+	bardsong_target_id = 0;
+	bardsong_slot = CastingSlot::Gem1;
+	bardsong_timer.Disable();
+}
+
+void Mob::ZeroBardPulseVars() 
+{
+	Shout("Mob::ZeroBardPulseVars() ");
+
 	bardsong = 0;
 	bardsong_target_id = 0;
 	bardsong_slot = CastingSlot::Gem1;
