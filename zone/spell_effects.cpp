@@ -2169,7 +2169,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if (!casters_pet->GetTarget()) {
 						casters_pet->StopNavigation();
 					}
-					//if (GetPetOrder() == SPO_Follow)
 				}
 				break;
 			}
