@@ -10405,12 +10405,13 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	case PET_TAUNT: {
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			bool tauntStatus = mypet->CastToNPC()->IsTaunting();
-			MessageString(Chat::PetResponse, tauntStatus ? PET_NO_TAUNT : PET_DO_TAUNT);
 			mypet->CastToNPC()->SetTaunting(!tauntStatus);
 			if (RuleB(Pets, TauntTogglesPetTanking)) {
+				Message(Chat::PetResponse, tauntStatus ? "No longer taunting attackers or holding aggro, Master." : "Taunting attackers and holding aggro as normal, Master.");
 				mypet->SetSpecialAbility(41, !tauntStatus);
-				LogDebug("Toggle Pet Tanking: [{}] :: Allow Tank (41): [{}]", mypet->CastToNPC()->IsTaunting() ? "ON" : "OFF", mypet->GetSpecialAbility(41) ? "True" : "False");
 			}
+			else
+				MessageString(Chat::PetResponse, tauntStatus ? PET_NO_TAUNT : PET_DO_TAUNT);
 		}
 		break;
 	}
