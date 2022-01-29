@@ -9052,7 +9052,7 @@ void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target->IsNPC())
+	if (target && target->IsNPC())
 	{
 		if (HasSkill(EQ::skills::SkillDisarmTraps))
 		{
@@ -9078,7 +9078,7 @@ void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target && target->IsNPC() && !target->IsTrap() && !target->IsAura()) {
+	if (target && target->IsNPC() && !target->IsAura()) {
 		HandleLDoNOpen(target->CastToNPC());
 	}
 }
@@ -9086,7 +9086,7 @@ void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target->IsNPC())
+	if (target && target->IsNPC())
 	{
 		if (HasSkill(EQ::skills::SkillPickLock))
 		{
