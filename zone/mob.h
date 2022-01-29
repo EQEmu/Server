@@ -1071,6 +1071,7 @@ public:
 	inline const bool IsRoamer() const { return roamer; }
 	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
+	inline const bool IsPermaRooted() const { return permarooted; }
 	int GetSnaredAmount();
 	inline const bool IsPseudoRooted() const { return pseudo_rooted; }
 	inline void SetPseudoRoot(bool prState) { pseudo_rooted = prState; }
@@ -1317,8 +1318,6 @@ public:
 	std::string GetBucketKey();
 	std::string GetBucketRemaining(std::string bucket_name);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration = "");
-
-	bool IsValidXTarget() const;
 
 #ifdef BOTS
 	// Bots HealRotation methods

@@ -3094,6 +3094,7 @@ void Mob::TempName(const char *newname)
 	char temp_name[64];
 	char old_name[64];
 	strn0cpy(old_name, GetName(), 64);
+	clean_name[0] = 0;
 
 	if(newname)
 		strn0cpy(temp_name, newname, 64);
@@ -3102,7 +3103,6 @@ void Mob::TempName(const char *newname)
 	if(!newname) {
 		strn0cpy(temp_name, GetOrigName(), 64);
 		SetName(temp_name);
-		//CleanMobName(GetName(), temp_name);
 		strn0cpy(temp_name, GetCleanName(), 64);
 	}
 
@@ -6649,8 +6649,4 @@ std::string Mob::GetBucketRemaining(std::string bucket_name) {
 void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration) {
 	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
 	DataBucket::SetData(full_bucket_name, bucket_value, expiration);
-}
-
-bool Mob::IsValidXTarget() const {
-	return (GetID() > 0 || !IsCorpse());
 }
