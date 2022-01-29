@@ -465,6 +465,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// now tell the people in the area -- we ALWAYS want to send this, even instant cast spells.
 	// The only time this is skipped is for NPC innate procs and weapon procs. Procs from buffs
 	// oddly still send this. Since those cases don't reach here, we don't need to check them
+	Shout("Send Begin Cast SLOT [ %i ] 22 %i?", slot, orgcasttime);
 	if (slot != CastingSlot::Discipline) {
 		SendBeginCast(spell_id, orgcasttime);
 	}
@@ -773,7 +774,6 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 
 	//If we still do not have a target end.
 	if (!spell_target){
-		MessageString(Chat::Red, SPELL_NEED_TAR); // This should never happen.
 		return false;
 	}
 
@@ -1774,6 +1774,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		//Test the aug recast delay
 		if(IsClient() && fromaug && recastdelay > 0)
 		{
+			Shout("Set Timer from AUGment");
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
 				MessageString(Chat::Red, SPELL_RECAST);
 				LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
@@ -2496,11 +2497,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 	//If spell was casted then we already checked these so skip, otherwise check here if being called directly from spell finished.
 	if (!from_casted_spell){
-		if (!DoCastingChecksZoneRestrictions(false, spell_id)) {
+		if (!DoCastingChecksZoneRestrictions(true, spell_id)) {
 			Shout("DoCastingChecksZoneRestrictions FAIL");
 			return false;
 		}
-		if (!DoCastingChecksOnTarget(false, spell_id, spell_target)) {
+		if (!DoCastingChecksOnTarget(true, spell_id, spell_target)) {
 			Shout("DoCastingChecksOnTarget FAIL");
 			return false;
 		}
@@ -6877,7 +6878,7 @@ bool Mob::IsActiveBardSong(int32 spell_id) {
 
 void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot)
 {
-
+	Shout("Mob::DoBardCastingFromItemClick %i %i %i %i", is_casting_bard_song, cast_time, spell_id, target_id);
 	if (is_casting_bard_song) {
 		//For spells with cast times. Cancel song cast, stop pusling and start item cast.
 		if (cast_time != 0) {
@@ -6897,13 +6898,14 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 	}
 
 	if (cast_time != 0) {
+		Shout("Mob::DoBardCastingFromItemClick Cast time %i [ ERROR NOT DISPLAYING CAST TIME FROM AUGS]", cast_time);
 		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
 	else if (DoCastingChecksOnCaster(spell_id)) {
-		Shout("Do Bard Instant Cast items");
+		Shout("Mob::DoBardCastingFromItemClick Do Bard Instant Cast items");
 		if (!SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot)) {
-			Shout("Instant cast item click FAIL");
+			Shout("Mob::DoBardCastingFromItemClick Instant cast item click FAIL");
 		}
 	}
 }
