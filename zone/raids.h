@@ -135,7 +135,7 @@ public:
 	bool	IsGroupLeader(const char *who);
 	bool	IsRaidMember(const char *name);
 	void	UpdateLevel(const char *name, int newLevel);
-	std::vector<RaidMember> GetRaidGroupMembers(uint32 gid);
+	
 
 	uint32	GetFreeGroup();
 	uint8	GroupCount(uint32 gid);
@@ -257,6 +257,7 @@ public:
 	bool DoesAnyMemberHaveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, int max_check_count = 0);
 
 	std::vector<RaidMember> GetMembers() const;
+	std::vector<RaidMember> GetRaidGroupMembers(uint32 gid);
 
 	RaidMember members[MAX_RAID_MEMBERS];
 	char leadername[64];

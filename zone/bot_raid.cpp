@@ -314,9 +314,9 @@ void Bot::AI_Process_Raid()
 			else {
 
 				std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
-				for (RaidMember iter : raid_group_members) {
+				for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
 
-					Mob* bg_member = iter.member;// bot_group->members[counter];
+					Mob* bg_member = iter->member;// bot_group->members[counter];
 					if (!bg_member) {
 						continue;
 					}
@@ -1525,6 +1525,8 @@ void Bot::PetAIProcess_Raid() {
 std::vector<RaidMember> Raid::GetRaidGroupMembers(uint32 gid) 
 {
 	std::vector<RaidMember> raid_group_members;
+	raid_group_members.clear();
+
 	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
 	{
 		if (members[i].member && members[i].GroupNumber == gid)
@@ -1775,12 +1777,12 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						if (IsGroupSpell(botSpell.SpellId)) {
 							if (IsRaidGrouped()) {
 								uint32 r_group = raid->GetGroup(GetName());
-								std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 								BotGroupSay(this, "Casting %s.", spells[botSpell.SpellId].name);
 								//raid->RaidBotGroupSay(this, 0, 100, "Casting %s.", spells[botSpell.SpellId].name);
-								for (RaidMember iter : raid_group_members) {
-									if (iter.member && !iter.member->qglobal) {
-										iter.member->SetDontHealMeBefore(Timer::GetCurrentTime() + 1000);
+								std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
+								for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
+									if (iter->member && !iter->member->qglobal) {
+										iter->member->SetDontHealMeBefore(Timer::GetCurrentTime() + 1000);
 									}
 								}
 							}
@@ -2441,10 +2443,11 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					if (IsGroupSpell(botSpell.SpellId)) {
 						if (this->IsRaidGrouped()) {
 							if (r_group) {
-								for (RaidMember iter : raid->GetRaidGroupMembers(r_group)) {
-									if (iter.member && !iter.member->qglobal) {
+								std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
+								for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
+									if (iter->member && !iter->member->qglobal) {
 										if (TempDontCureMeBeforeTime != tar->DontCureMeBefore())
-											iter.member->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
+											iter->member->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
 									}
 								}
 							}
@@ -2600,13 +2603,13 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 	raid = entity_list.GetRaidByBotName(this->GetName());
 	uint32 r_group = raid->GetGroup(this->GetName());
 	std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
-	for (RaidMember iter : raid_group_members) {
-		if (iter.member && !iter.member->qglobal) {
-			if (iter.member->GetHPRatio() <= hpr)
+	for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
+		if (iter->member && !iter->member->qglobal) {
+			if (iter->member->GetHPRatio() <= hpr)
 				needHealed++;
 
 				if (includePets) {
-					if (iter.member->GetPet() && iter.member->GetPet()->GetHPRatio() <= hpr)
+					if (iter->member->GetPet() && iter->member->GetPet()->GetHPRatio() <= hpr)
 						needHealed++;
 				}
 			}
