@@ -1612,8 +1612,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 			// Taunt persists when zoning on newer clients, overwrite default.
 			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-				if (!firstlogon) {
-					pet->SetTaunting(m_petinfo.taunting);
+				pet->SetTaunting(m_petinfo.taunting);
+				SetPetCommandState(PET_BUTTON_TAUNT, m_petinfo.taunting);
+				if (RuleB(Pets, TauntTogglesPetTanking)) {
+					pet->SetSpecialAbility(41, pet->CastToNPC()->IsTaunting());
 				}
 			}
 		}
@@ -10402,15 +10404,12 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_TAUNT: {
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (mypet->CastToNPC()->IsTaunting())
-			{
-				MessageString(Chat::PetResponse, PET_NO_TAUNT);
-				mypet->CastToNPC()->SetTaunting(false);
-			}
-			else
-			{
-				MessageString(Chat::PetResponse, PET_DO_TAUNT);
-				mypet->CastToNPC()->SetTaunting(true);
+			bool tauntStatus = mypet->CastToNPC()->IsTaunting();
+			MessageString(Chat::PetResponse, tauntStatus ? PET_NO_TAUNT : PET_DO_TAUNT);
+			mypet->CastToNPC()->SetTaunting(!tauntStatus);
+			if (RuleB(Pets, TauntTogglesPetTanking)) {
+				mypet->SetSpecialAbility(41, !tauntStatus);
+				LogDebug("Toggle Pet Tanking: [{}] :: Allow Tank (41): [{}]", mypet->CastToNPC()->IsTaunting() ? "ON" : "OFF", mypet->GetSpecialAbility(41) ? "True" : "False");
 			}
 		}
 		break;
