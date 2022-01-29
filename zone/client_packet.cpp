@@ -9052,7 +9052,7 @@ void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target && target->IsNPC())
+	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillDisarmTraps))
 		{
@@ -9071,7 +9071,7 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target && target->GetClass() == LDON_TREASURE)
+	if (target && target->GetClass() == LDON_TREASURE && !target->IsAura())
 		Message(Chat::Yellow, "%s", target->GetCleanName());
 }
 
@@ -9086,7 +9086,7 @@ void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target && target->IsNPC())
+	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillPickLock))
 		{
@@ -9105,7 +9105,7 @@ void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target->IsNPC())
+	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillSenseTraps))
 		{
