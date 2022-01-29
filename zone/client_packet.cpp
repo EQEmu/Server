@@ -3977,7 +3977,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
-	Shout("Client::Handle_OP_CastSpell");
+	Shout("1 Client::Handle_OP_CastSpell");
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
@@ -4031,6 +4031,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	{
 		if (m_inv.SupportsClickCasting(castspell->inventoryslot) || slot == CastingSlot::PotionBelt)	// sanity check
 		{
+			Shout("2 Client::Handle_OP_CastSpell");
 			// packet field types will be reviewed as packet transistions occur
 			const EQ::ItemInstance* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
 																			   //bool cancast = true;
@@ -4046,13 +4047,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 				if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 				{
+					Shout("3 Client::Handle_OP_CastSpell");
 					if (item->Click.Level2 > 0)
 					{
 						if (GetLevel() >= item->Click.Level2)
 						{
 							EQ::ItemInstance* p_inst = (EQ::ItemInstance*)inst;
 							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
-
+							Shout("4 Client::Handle_OP_CastSpell");
 							if (i == 0) {
 								CastSpell(item->Click.Effect, castspell->target_id, slot, item->CastTime, 0, 0, castspell->inventoryslot);
 							}
@@ -8792,7 +8794,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	spell_id = item->Click.Effect;
-	bool is_bard_song_active = false;
+	bool is_casting_bard_song = false;
 	Shout("1 Client::Handle_OP_ItemVerifyRequest %i", spell_id);
 	if
 		(
@@ -8819,9 +8821,9 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			Can not click while casting other items.
 			TODO: Should I make this a rule???
 		*/
-		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems) 
+		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
 		{
-			is_bard_song_active = true;
+			is_casting_bard_song = true;
 
 			Shout("INTERRUPT AND CAAST Client::Handle_OP_ItemVerifyRequest %i ", spell_id);
 		}
@@ -8927,31 +8929,12 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						if (!IsCastWhileInvis(item->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
 						}
-						if (is_bard_song_active) {
-
-							if (item->CastTime != 0) {
-								outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
-								InterruptCast_Struct* ic = (InterruptCast_Struct*)outapp->pBuffer;
-								ic->messageid = SONG_ENDS;
-								ic->spawnid = GetID();
-								outapp->priority = 5;
-								CastToClient()->QueuePacket(outapp);
-								safe_delete(outapp);
-
-								SendSpellBarDisable();
-								ZeroCastingVars();
-								ZeroBardPulseVars();
-							}
-							else {
-								if (DoCastingChecksOnCaster(item->Click.Effect)) {
-									Shout("Do Bard Instant Cast items");
-									if (!SpellFinished(item->Click.Effect, entity_list.GetMob(target_id), CastingSlot::Item, 0, slot_id)) {
-										Shout("Instant cast item click FAIL");
-									}
-								}
-							}
+						if (GetClass() == BARD){
+							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id);
 						}
-						CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
+						else {
+							CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
+						}
 					}
 				}
 				else
@@ -8988,9 +8971,15 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 
 					if (i == 0) {
-						if (!IsCastWhileInvis(augitem->Click.Effect))
+						if (!IsCastWhileInvis(augitem->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
-						CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
+						}
+						if (GetClass() == BARD) {
+							DoBardCastingFromItemClick(is_casting_bard_song, augitem->CastTime, augitem->Click.Effect, target_id, CastingSlot::Item, slot_id);
+						}
+						else {
+							CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
+						}
 					}
 				}
 				else

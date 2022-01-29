@@ -773,10 +773,11 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 
 	//If we still do not have a target end.
 	if (!spell_target){
+		MessageString(Chat::Red, SPELL_NEED_TAR); // This should never happen.
 		return false;
 	}
 
-	spell_target->Shout("I AM THE SPELL TARGET");
+	spell_target->Shout("Mob::DoCastingChecksOnTarget :: I AM THE SPELL TARGET");
 
 	/*
 		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
@@ -2494,9 +2495,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	}
 
 	//If spell was casted then we already checked these so skip, otherwise check here if being called directly from spell finished.
-	if (!from_casted_spell && (!DoCastingChecksZoneRestrictions(false, spell_id) || !DoCastingChecksOnTarget(false, spell_id, spell_target))) {
-		Shout("Restriction Fail!");
-		return false;
+	if (!from_casted_spell){
+		if (!DoCastingChecksZoneRestrictions(false, spell_id)) {
+			Shout("DoCastingChecksZoneRestrictions FAIL");
+			return false;
+		}
+		if (!DoCastingChecksOnTarget(false, spell_id, spell_target)) {
+			Shout("DoCastingChecksOnTarget FAIL");
+			return false;
+		}
 	}
 
 	//determine the type of spell target we have
@@ -6866,4 +6873,37 @@ bool Mob::IsActiveBardSong(int32 spell_id) {
 		return true;
 	}
 	return false;
+}
+
+void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot)
+{
+
+	if (is_casting_bard_song) {
+		//For spells with cast times. Cancel song cast, stop pusling and start item cast.
+		if (cast_time != 0) {
+			EQApplicationPacket *outapp = nullptr;
+			outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
+			InterruptCast_Struct* ic = (InterruptCast_Struct*)outapp->pBuffer;
+			ic->messageid = SONG_ENDS;
+			ic->spawnid = GetID();
+			outapp->priority = 5;
+			CastToClient()->QueuePacket(outapp);
+			safe_delete(outapp);
+
+			SendSpellBarDisable();
+			ZeroCastingVars();
+			ZeroBardPulseVars();
+		}
+	}
+
+	if (cast_time != 0) {
+		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
+	}
+	//Instant cast items do not stop bard songs or interrupt casting.
+	else if (DoCastingChecksOnCaster(spell_id)) {
+		Shout("Do Bard Instant Cast items");
+		if (!SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot)) {
+			Shout("Instant cast item click FAIL");
+		}
+	}
 }
