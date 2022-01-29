@@ -2458,6 +2458,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
 						uint32 timer, uint32 timer_duration, bool from_casted_spell)
 {
+	Shout("Mob::SpellFinished %i", spell_id);
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
 
@@ -2494,12 +2495,14 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 	//If spell was casted then we already checked these so skip, otherwise check here if being called directly from spell finished.
 	if (!from_casted_spell && (!DoCastingChecksZoneRestrictions(false, spell_id) || !DoCastingChecksOnTarget(false, spell_id, spell_target))) {
+		Shout("Restriction Fail!");
 		return false;
 	}
 
 	//determine the type of spell target we have
 	CastAction_type CastAction;
 	if (!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc)) {
+		Shout("Targets Fail!");
 		return(false);
 	}
 
@@ -2823,8 +2826,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if (mgb) {
 		SetMGB(false);
 	}
-
-	//set our reuse timer on long ass reuse_time spells...
+	/*
+		Set Recast Timer on spells.
+	*/
 	if(IsClient() && !isproc)
 	{
 		//Support for bards to get disc recast timers while singing.
@@ -2875,7 +2879,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			}
 		}
 	}
-
+	/*
+		Set Recast Timer on item clicks.	
+	*/
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
@@ -2925,7 +2931,6 @@ void Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 	if (!spell_target) {
 		return;
 	}
-
 	/*
 		Bard song charm that have no mana will continue to try and pulse on target, but will only reapply when charm fades.
 		Live does not spam client with do not take hold messages. Checking here avoids that from happening. Only try to reapply if charm fades.

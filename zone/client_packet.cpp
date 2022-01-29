@@ -8821,14 +8821,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		*/
 		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems) 
 		{
-			outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
-			InterruptCast_Struct* ic = (InterruptCast_Struct*)outapp->pBuffer;
-			ic->messageid = SONG_ENDS;
-			ic->spawnid = GetID();
-			outapp->priority = 5;
-			CastToClient()->QueuePacket(outapp);
-			safe_delete(outapp);
-
 			is_bard_song_active = true;
 
 			Shout("INTERRUPT AND CAAST Client::Handle_OP_ItemVerifyRequest %i ", spell_id);
@@ -8936,9 +8928,28 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 							CommonBreakInvisible(); // client can't do this for us :(
 						}
 						if (is_bard_song_active) {
-							SendSpellBarDisable();
-							ZeroCastingVars();
-							ZeroBardPulseVars();
+
+							if (item->CastTime != 0) {
+								outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
+								InterruptCast_Struct* ic = (InterruptCast_Struct*)outapp->pBuffer;
+								ic->messageid = SONG_ENDS;
+								ic->spawnid = GetID();
+								outapp->priority = 5;
+								CastToClient()->QueuePacket(outapp);
+								safe_delete(outapp);
+
+								SendSpellBarDisable();
+								ZeroCastingVars();
+								ZeroBardPulseVars();
+							}
+							else {
+								if (DoCastingChecksOnCaster(item->Click.Effect)) {
+									Shout("Do Bard Instant Cast items");
+									if (!SpellFinished(item->Click.Effect, entity_list.GetMob(target_id), CastingSlot::Item, 0, slot_id)) {
+										Shout("Instant cast item click FAIL");
+									}
+								}
+							}
 						}
 						CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
 					}
