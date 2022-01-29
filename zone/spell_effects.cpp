@@ -2163,9 +2163,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Call Pet");
 #endif
 				// this is cast on self, not on the pet
-				if(GetPet() && GetPet()->IsNPC())
-				{
-					GetPet()->CastToNPC()->GMMove(GetX(), GetY(), GetZ(), GetHeading());
+				Mob *casters_pet = GetPet();
+				if(casters_pet && casters_pet->IsNPC()){
+					casters_pet->CastToNPC()->GMMove(GetX(), GetY(), GetZ(), GetHeading());
+					if (!casters_pet->GetTarget()) {
+						casters_pet->StopNavigation();
+					}
+					//if (GetPetOrder() == SPO_Follow)
 				}
 				break;
 			}
