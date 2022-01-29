@@ -168,9 +168,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		casting_spell_id ||
 		delaytimer ||
 		spellend_timer.Enabled() ||
-		IsStunned() ||
+		(IsStunned() && !IgnoreCastingRestriction(spell_id)) ||
 		IsFeared() ||
-		IsMezzed() ||
+		(IsMezzed() && !IgnoreCastingRestriction(spell_id)) ||
 		(IsSilenced() && !IsDiscipline(spell_id)) ||
 		(IsAmnesiad() && IsDiscipline(spell_id))
 	)
@@ -217,7 +217,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//cannot cast under divine aura, unless spell has 'cast_not_standing' flag. 
-	if(DivineAura() && !spells[spell_id].cast_not_standing) {
+	if(DivineAura() && !IgnoreCastingRestriction(spell_id)) {
 		LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 		InterruptSpell(173, 0x121, false);
 		if(IsClient()) {
@@ -3792,7 +3792,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	// invuln mobs can't be affected by any spells, good or bad, except if caster is casting a spell with 'cast_not_standing' on self.
 	if ((spelltar->GetInvul() && !spelltar->DivineAura()) ||
 		(spelltar != this && spelltar->DivineAura()) ||
-		(spelltar == this && spelltar->DivineAura() && !spells[spell_id].cast_not_standing)) {
+		(spelltar == this && spelltar->DivineAura() && !IgnoreCastingRestriction(spell_id))) {
 		LogSpells("Casting spell [{}] on [{}] aborted: they are invulnerable", spell_id, spelltar->GetName());
 		safe_delete(action_packet);
 		return false;
