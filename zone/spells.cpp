@@ -2759,7 +2759,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		//Support for bards to get disc recast timers while singing
 		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
 			CastToClient()->GetPTimers().Start(timer, timer_duration);
-			LogSpells("Spell [{}]: Setting bard item or disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
+			LogSpells("Spell [{}]: Setting bard disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
 		}
 
 		if(casting_spell_aa_id) {
@@ -2815,7 +2815,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		CastToNPC()->AI_Event_SpellCastFinished(true, static_cast<uint16>(slot));
 	}
 
-	ApplyHealthTransferDamage(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
+	ApplyHealthTransferDamage(this, target, spell_id);
 
 	//This needs to be here for bind sight to update correctly on client.
 	if (IsClient() && IsEffectInSpell(spell_id, SE_BindSight)) {
