@@ -2900,26 +2900,25 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	return true;
 }
 
-void Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
+bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 
 	/*
-		Check any bard specific special behaviors we need before applying the pulse.
+		Check any bard specific special behaviors we need before applying the next pulse.
 	*/
-
 	if (!spell_target) {
-		return;
+		return false;
 	}
 	/*
 		Bard song charm that have no mana will continue to try and pulse on target, but will only reapply when charm fades.
 		Live does not spam client with do not take hold messages. Checking here avoids that from happening. Only try to reapply if charm fades.
 	*/
 	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SE_Charm)) {
-		return;
+		return true;
 	}
 	Shout("3 BARD LOGIC :: PASS :: Now apply that pulse!");
 
 	if (!SpellFinished(spell_id, spell_target, slot, spells[spell_id].mana, 0xFFFFFFFF, spells[spell_id].resist_difficulty)) {
-		InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, spell_id);
+		return false;
 	}
 }
 
@@ -6945,13 +6944,8 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
-	else if (DoCastingChecksOnCaster(spell_id)) {
-		if (recast_delay != 0) {
-			pTimerType ItemTimer = pTimerItemStart + recast_type;
-			SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot, spells[spell_id].resist_difficulty, false, -1, (uint32)ItemTimer, recast_delay);
-		}
-		else {
-			SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
-		}
+	if (DoCastingChecksOnCaster(spell_id)) {
+		Shout("Mob::DoBardCastingFromItemClick INSTANT");
+		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
 	}
 }
