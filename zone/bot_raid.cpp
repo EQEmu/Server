@@ -1531,7 +1531,7 @@ std::vector<RaidMember> Raid::GetRaidGroupMembers(uint32 gid)
 	{
 		if (members[i].member && members[i].GroupNumber == gid)
 		{
-			raid_group_members.emplace_back(members[i]);
+			raid_group_members.push_back(members[i]);
 		}
 	}
 	return raid_group_members;
@@ -1780,9 +1780,10 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 								BotGroupSay(this, "Casting %s.", spells[botSpell.SpellId].name);
 								//raid->RaidBotGroupSay(this, 0, 100, "Casting %s.", spells[botSpell.SpellId].name);
 								std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
-								for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
-									if (iter->member && !iter->member->qglobal) {
-										iter->member->SetDontHealMeBefore(Timer::GetCurrentTime() + 1000);
+								//for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
+								for (int i = 0; i < raid_group_members.size(); ++i){
+									if (raid_group_members.at(i).member && !raid_group_members.at(i).member->qglobal) {
+										raid_group_members.at(i).member->SetDontHealMeBefore(Timer::GetCurrentTime() + 1000);
 									}
 								}
 							}
@@ -2603,13 +2604,14 @@ uint8 Bot::GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets) {
 	raid = entity_list.GetRaidByBotName(this->GetName());
 	uint32 r_group = raid->GetGroup(this->GetName());
 	std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
-	for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
-		if (iter->member && !iter->member->qglobal) {
-			if (iter->member->GetHPRatio() <= hpr)
+	//for (std::vector<RaidMember>::iterator iter = raid_group_members.begin(); iter != raid_group_members.end(); ++iter) {
+	for (int i = 0; i< raid_group_members.size(); ++i) {
+		if (raid_group_members.at(i).member && !raid_group_members.at(i).member->qglobal) {
+			if (raid_group_members.at(i).member->GetHPRatio() <= hpr)
 				needHealed++;
 
 				if (includePets) {
-					if (iter->member->GetPet() && iter->member->GetPet()->GetHPRatio() <= hpr)
+					if (raid_group_members.at(i).member->GetPet() && raid_group_members.at(i).member->GetPet()->GetHPRatio() <= hpr)
 						needHealed++;
 				}
 			}

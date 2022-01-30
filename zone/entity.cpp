@@ -2050,7 +2050,7 @@ Raid* EntityList::GetRaidByClient(Client* client)
 
 Raid* EntityList::GetRaidByBotName(const char* name)
 {
-	
+
 	std::list<Raid*>::iterator iterator;
 	iterator = raid_list.begin();
 
@@ -2069,6 +2069,26 @@ Raid* EntityList::GetRaidByBotName(const char* name)
 
 	return nullptr;
 }
+
+Raid* EntityList::GetRaidByBot(Bot* bot)
+{
+
+	std::list<Raid*>::iterator iterator;
+	iterator = raid_list.begin();
+
+	while (iterator != raid_list.end()) {
+		for (auto& member : (*iterator)->members) {
+			if (member.member && member.member->CastToBot() == bot) {
+				bot->p_raid_instance = *iterator;
+				return *iterator;
+			}
+		}
+		++iterator;
+	}
+	return nullptr;
+}
+
+
 
 Raid *EntityList::GetRaidByMob(Mob *mob)
 {
