@@ -1338,8 +1338,6 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 	if (dispel && spells[spell_id].hate_added > 0 && !on_hatelist)
 		AggroAmount -= 100;
 
-	Shout("AggroAmount %i Bonus Hate %i + nonModifedAggro %i", AggroAmount, spells[spell_id].bonus_hate, nonModifiedAggro);
-
 	return AggroAmount + spells[spell_id].bonus_hate + nonModifiedAggro;
 }
 
