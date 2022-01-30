@@ -3977,7 +3977,6 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
-	Shout("1 Client::Handle_OP_CastSpell");
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
@@ -4031,7 +4030,6 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	{
 		if (m_inv.SupportsClickCasting(castspell->inventoryslot) || slot == CastingSlot::PotionBelt)	// sanity check
 		{
-			Shout("2 Client::Handle_OP_CastSpell");
 			// packet field types will be reviewed as packet transistions occur
 			const EQ::ItemInstance* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
 																			   //bool cancast = true;
@@ -4047,14 +4045,12 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 				if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 				{
-					Shout("3 Client::Handle_OP_CastSpell");
 					if (item->Click.Level2 > 0)
 					{
 						if (GetLevel() >= item->Click.Level2)
 						{
 							EQ::ItemInstance* p_inst = (EQ::ItemInstance*)inst;
 							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
-							Shout("4 Client::Handle_OP_CastSpell");
 							if (i == 0) {
 								CastSpell(item->Click.Effect, castspell->target_id, slot, item->CastTime, 0, 0, castspell->inventoryslot);
 							}
@@ -8741,8 +8737,6 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
-	Shout("Client::Handle_OP_ItemVerifyRequest");
-
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
@@ -8795,7 +8789,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 	spell_id = item->Click.Effect;
 	bool is_casting_bard_song = false;
-	Shout("1 Client::Handle_OP_ItemVerifyRequest %i", spell_id);
+
 	if
 		(
 			spell_id > 0 &&
@@ -8834,8 +8828,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			return;
 		}
 	}
-	Shout("2 Client::Handle_OP_ItemVerifyRequest %i", spell_id);
-
 	// Modern clients don't require pet targeted for item clicks that are ST_Pet
 	if (spell_id > 0 && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet))
 		target_id = GetPetID();
@@ -8898,8 +8890,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 			{
-				Shout("3 Client::Handle_OP_ItemVerifyRequest %i CHARGES %i AUG %i Item %id", spell_id, inst->GetCharges(), tryaug, inst->GetID());
-				if (inst->GetCharges() == 0)
+					if (inst->GetCharges() == 0)
 				{
 					//Message(0, "This item is out of charges.");
 					MessageString(Chat::Red, ITEM_OUT_OF_CHARGES);
@@ -8924,7 +8915,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					{
 						return;
 					}
-					Shout("4 Client::Handle_OP_ItemVerifyRequest %i [Cast time %i]", spell_id, item->CastTime);
 					if (i == 0) {
 						if (!IsCastWhileInvis(item->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
