@@ -1382,21 +1382,18 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		}
 	}
 	/*
+		Reinforcement only. Checks Item and Augment click recasts.
 		Titanium client will prevent item recast on its own. This is only used to enforce. Titanium items are cast from Handle_OP_CastSpell.
 		SOF+ client does not prevent item recast on its own. We enforce this in Handle_OP_ItemVerifyRequest where items are cast from.
 	*/
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
-		item = CastToClient()->GetInv().GetItem(inventory_slot);
-		if(item && item->GetItem()->RecastDelay > 0)
-		{
-			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + item->GetItem()->RecastType), false)) {
-				MessageString(Chat::Red, SPELL_RECAST);
-				LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
-				StopCasting();
-				return;
-			}
+		if (CastToClient()->HasItemRecastTimer(spell_id, inventory_slot)) {
+			MessageString(Chat::Red, SPELL_RECAST);
+			LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+			StopCasting();
+			return;
 		}
 	}
 
@@ -1771,30 +1768,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			break;
 		}
 
-		//Test the aug recast delay
-		if(IsClient() && fromaug && recastdelay > 0)
-		{
-			Shout("Set Timer from AUGment");
-			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
-				MessageString(Chat::Red, SPELL_RECAST);
-				LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
-				StopCasting();
-				return;
-			}
-			else
-			{
-				//Can we start the timer here?  I don't see why not.
-				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
-				if (recasttype != -1) {
-					database.UpdateItemRecastTimestamps(
-						CastToClient()->CharacterID(),
-						recasttype,
-						CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp()
-					);
-				}
-			}
-		}
-
 		if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug)
 		{
 			//const ItemData* item = item->GetItem();
@@ -1819,7 +1792,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	// we're done casting, now try to apply the spell
-	if( !SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
+	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
 	{
 		LogSpells("Casting of [{}] canceled: SpellFinished returned false", spell_id);
 		// most of the cases we return false have a message already or are logic errors that shouldn't happen
@@ -2839,7 +2812,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	*/
 	if(IsClient() && !isproc)
 	{
-		//Support for bards to get disc recast timers while singing, and instant cast item recast timers.
+		//Support for bards to get disc recast timers while singing
 		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
 			CastToClient()->GetPTimers().Start(timer, timer_duration);
 			LogSpells("Spell [{}]: Setting bard item or disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
@@ -6575,9 +6548,6 @@ void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay)
 
 void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 {
-	if (inventory_slot == 0xFFFFFFFF) {
-		return;
-	}
 	Shout("Recast from item? %i", inventory_slot);
 	EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(inventory_slot);
 	
@@ -6641,6 +6611,52 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 		}
 	}
 }
+
+bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
+{
+	EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(inventory_slot);
+
+	int recast_delay = 0;
+	int recast_type = 0;
+	bool from_augment = false;
+
+	if (!item) {
+		return false;
+	}
+
+	//Check primary item.
+	if (item->GetItem()->RecastDelay > 0) {
+		recast_type = item->GetItem()->RecastType;
+		recast_delay = item->GetItem()->RecastDelay;
+	}
+	//Check augmenent
+	else {
+		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+			const EQ::ItemInstance* aug_i = item->GetAugment(r);
+
+			if (!aug_i) {
+				continue;
+			}
+			const EQ::ItemData* aug = aug_i->GetItem();
+			if (!aug) {
+				continue;
+			}
+
+			if (aug->Click.Effect == spell_id) {
+				recast_delay = aug_i->GetItem()->RecastDelay;
+				recast_type = aug_i->GetItem()->RecastType;
+				break;
+			}
+		}
+	}
+	
+	if (!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
+		return true;
+	}
+
+	return false;
+}
+
 
 void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ)
 {
