@@ -1771,9 +1771,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		CheckNumHitsRemaining(NumHit::MatchingSpells);
 		TrySympatheticProc(target, spell_id);
 	}
-
-	TryAfterSpellFinished(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
-
+	
 	TryTwincast(this, target, spell_id);
 
 	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
@@ -2816,6 +2814,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if (IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(true, static_cast<uint16>(slot));
 	}
+
+	ApplyHealthTransferDamage(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
+
 	//This needs to be here for bind sight to update correctly on client.
 	if (IsClient() && IsEffectInSpell(spell_id, SE_BindSight)) {
 		for (int i = 0; i < GetMaxTotalSlots(); i++) {
