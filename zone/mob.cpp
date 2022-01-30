@@ -4402,7 +4402,7 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 }
 
 void Mob::TryTriggerOnCastRequirement()
-{//this is probably not checked in correct location
+{
 	if (spellbonuses.TriggerOnCastRequirement) {
 		int buff_count = GetMaxTotalSlots();
 		for (int e = 0; e < buff_count; e++) {

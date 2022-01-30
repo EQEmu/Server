@@ -8886,7 +8886,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 			{
-					if (inst->GetCharges() == 0)
+				if (inst->GetCharges() == 0)
 				{
 					//Message(0, "This item is out of charges.");
 					MessageString(Chat::Red, ITEM_OUT_OF_CHARGES);

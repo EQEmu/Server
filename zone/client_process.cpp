@@ -224,7 +224,6 @@ bool Client::Process() {
 		cheat_manager.ClientProcess();
 
 		if (bardsong_timer.Check() && bardsong != 0) {
-			Shout("1 BARD LOGIC :: Do bard pulse");
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
 			//doing the next pulse on them...
 			Mob *song_target = nullptr;
@@ -239,11 +238,6 @@ bool Client::Process() {
 				InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 			}
 			else {
-				/*
-				if (!ApplyNextBardPulse(bardsong, song_target, bardsong_slot))
-					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-				*/
-				Shout("2 BARD LOGIC :: Apply ID: %i Target Name: %s Slot: %i", bardsong, song_target->GetCleanName(), bardsong_slot);
 				if (!ApplyBardPulse(bardsong, song_target, bardsong_slot)) {
 					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 				}
