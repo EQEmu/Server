@@ -1781,24 +1781,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
 
-	if (IsClient() && IsEffectInSpell(spell_id, SE_BindSight)) {
-		for (int i = 0; i < GetMaxTotalSlots(); i++) {
-			if (buffs[i].spellid == spell_id) {
-				CastToClient()->SendBuffNumHitPacket(buffs[i], i);//its hack, it works.
-			}
-		}
-	}
-
-	//Check if buffs has numhits, then resend packet so it displays the hit count.
-	if (IsClient() && spells[spell_id].hit_number) {
-		for (int i = 0; i < GetMaxTotalSlots(); i++) {
-			if (buffs[i].spellid == spell_id && buffs[i].hit_number > 0) {
-				CastToClient()->SendBuffNumHitPacket(buffs[i], i);
-				break;
-			}
-		}
-	}
-
 	//
 	// at this point the spell has successfully been cast
 	//
@@ -2831,8 +2813,26 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		CastToClient()->SetItemRecastTimer(spell_id, inventory_slot);
 	}
 
-	if(IsNPC())
+	if (IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(true, static_cast<uint16>(slot));
+	}
+	//This needs to be here for bind sight to update correctly on client.
+	if (IsClient() && IsEffectInSpell(spell_id, SE_BindSight)) {
+		for (int i = 0; i < GetMaxTotalSlots(); i++) {
+			if (buffs[i].spellid == spell_id) {
+				CastToClient()->SendBuffNumHitPacket(buffs[i], i);//its hack, it works.
+			}
+		}
+	}
+	//Check if buffs has numhits, then resend packet so it displays the hit count.
+	if (IsClient() && spells[spell_id].hit_number) {
+		for (int i = 0; i < GetMaxTotalSlots(); i++) {
+			if (buffs[i].spellid == spell_id && buffs[i].hit_number > 0) {
+				CastToClient()->SendBuffNumHitPacket(buffs[i], i);
+				break;
+			}
+		}
+	}
 
 	return true;
 }
