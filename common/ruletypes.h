@@ -174,6 +174,8 @@ RULE_INT(Character, ResurrectionSicknessSpellID, 756, "756 is Default Resurrecti
 RULE_BOOL(Character, EnableBardMelody, true, "Enable Bard /melody by default, to disable change to false for a classic experience.")
 RULE_BOOL(Character, EnableRangerAutoFire, true, "Enable Ranger /autofire by default, to disable change to false for a classic experience.")
 RULE_BOOL(Character, EnableTGB, true, "Enable /tgb (Target Group Buff) by default, to disable change to false for a classic experience.")
+RULE_INT(Character, SkillUpMaximumChancePercentage, 25, "Maximum chance to improve a combat skill, before skill-specific modifiers.  This should be greater than SkillUpMinimumChancePercentage.")
+RULE_INT(Character, SkillUpMinimumChancePercentage, 2, "Minimum chance to improve a combat skill, after skill-specific modifiers.  This should be lesser than SkillUpMaximumChancePercentage.")
 RULE_INT(Character, WarriorTrackingDistanceMultiplier, 0, "If you want warriors to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_INT(Character, ClericTrackingDistanceMultiplier, 0, "If you want clerics to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_INT(Character, PaladinTrackingDistanceMultiplier, 0, "If you want paladins to be able to track, increase this above 0.  0 disables tracking packets.")
