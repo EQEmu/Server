@@ -19,6 +19,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/string_util.h"
 #include "../common/misc_functions.h"
+#include "../common/repositories/titles_repository.h"
 
 #include "client.h"
 #include "entity.h"
@@ -34,206 +35,191 @@ TitleManager::TitleManager() {
 
 bool TitleManager::LoadTitles()
 {
-	Titles.clear();
+	titles.clear();
 
 	std::string query = "SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, "
-                        "`min_aa_points`, `max_aa_points`, `class`, `gender`, `char_id`, "
-                        "`status`, `item_id`, `prefix`, `suffix`, `title_set` FROM titles";
-    auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+						"`min_aa_points`, `max_aa_points`, `class`, `gender`, `char_id`, "
+						"`status`, `item_id`, `prefix`, `suffix`, `title_set` FROM titles";
+	auto results = database.QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-        TitleEntry Title;
-		Title.TitleID = atoi(row[0]);
-		Title.SkillID = (EQ::skills::SkillType) atoi(row[1]);
-		Title.MinSkillValue = atoi(row[2]);
-		Title.MaxSkillValue = atoi(row[3]);
-		Title.MinAAPoints = atoi(row[4]);
-		Title.MaxAAPoints = atoi(row[5]);
-		Title.Class = atoi(row[6]);
-		Title.Gender = atoi(row[7]);
-		Title.CharID = atoi(row[8]);
-		Title.Status = atoi(row[9]);
-		Title.ItemID = atoi(row[10]);
-		Title.Prefix = row[11];
-		Title.Suffix = row[12];
-		Title.TitleSet = atoi(row[13]);
-		Titles.push_back(Title);
+	for (auto row : results) {
+		TitleEntry title;
+		title.title_id = std::stoi(row[0]);
+		title.skill_id = (EQ::skills::SkillType) std::stoi(row[1]);
+		title.min_skill_value = std::stoi(row[2]);
+		title.max_skill_value = std::stoi(row[3]);
+		title.min_aa_points = std::stoi(row[4]);
+		title.max_aa_points = std::stoi(row[5]);
+		title.class_id = std::stoi(row[6]);
+		title.gender_id = std::stoi(row[7]);
+		title.character_id = std::stoi(row[8]);
+		title.status = std::stoi(row[9]);
+		title.item_id = std::stoi(row[10]);
+		title.prefix = row[11];
+		title.suffix = row[12];
+		title.titleset = std::stoi(row[13]);
+		titles.push_back(title);
 	}
 
 	return true;
 }
 
-EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
+EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *client)
 {
-	std::vector<TitleEntry>::iterator Iterator;
-
-	std::vector<TitleEntry> AvailableTitles;
-
-	uint32 Length = 4;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if(!IsClientEligibleForTitle(c, Iterator))
-		{
-			++Iterator;
+	std::vector<TitleEntry> available_titles;
+	uint32 length = 4;
+	for (const auto& title : titles) {
+		if (!IsClientEligibleForTitle(client, title)) {
 			continue;
 		}
 
-		AvailableTitles.push_back((*Iterator));
-
-		Length += Iterator->Prefix.length() + Iterator->Suffix.length() + 6;
-
-		++Iterator;
-
+		available_titles.push_back(title);
+		length += title.prefix.length() + title.suffix.length() + 6;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_SendTitleList, Length);
-
-	char *Buffer = (char *)outapp->pBuffer;
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, AvailableTitles.size());
-
-	Iterator = AvailableTitles.begin();
-
-	while(Iterator != AvailableTitles.end())
-	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, Iterator->TitleID);
-
-		VARSTRUCT_ENCODE_STRING(Buffer, Iterator->Prefix.c_str());
-
-		VARSTRUCT_ENCODE_STRING(Buffer, Iterator->Suffix.c_str());
-
-		++Iterator;
+	auto outapp = new EQApplicationPacket(OP_SendTitleList, length);
+	char *buffer = (char *)outapp->pBuffer;
+	VARSTRUCT_ENCODE_TYPE(uint32, buffer, available_titles.size());
+	for (const auto& available_title : available_titles) {
+		VARSTRUCT_ENCODE_TYPE(uint32, buffer, available_title.title_id);
+		VARSTRUCT_ENCODE_STRING(buffer, available_title.prefix.c_str());
+		VARSTRUCT_ENCODE_STRING(buffer, available_title.suffix.c_str());
 	}
 	return(outapp);
 }
 
-int TitleManager::NumberOfAvailableTitles(Client *c)
+int TitleManager::NumberOfAvailableTitles(Client *client)
 {
-	int Count = 0;
-
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if(IsClientEligibleForTitle(c, Iterator))
-			++Count;
-
-		++Iterator;
-	}
-
-	return Count;
-}
-
-std::string TitleManager::GetPrefix(int TitleID)
-{
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if((*Iterator).TitleID == TitleID)
-			return (*Iterator).Prefix;
-
-		++Iterator;
-	}
-
-	return "";
-}
-
-std::string TitleManager::GetSuffix(int TitleID)
-{
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if((*Iterator).TitleID == TitleID)
-			return (*Iterator).Suffix;
-
-		++Iterator;
-	}
-
-	return "";
-}
-
-bool TitleManager::IsClientEligibleForTitle(Client *c, std::vector<TitleEntry>::iterator Title)
-{
-		if((Title->CharID >= 0) && (c->CharacterID() != static_cast<uint32>(Title->CharID)))
-			return false;
-
-		if((Title->Status >= 0) && (c->Admin() < Title->Status))
-			return false;
-
-		if((Title->Gender >= 0) && (c->GetBaseGender() != Title->Gender))
-			return false;
-
-		if((Title->Class >= 0) && (c->GetBaseClass() != Title->Class))
-			return false;
-
-		if((Title->MinAAPoints >= 0) && (c->GetSpentAA() < static_cast<uint32>(Title->MinAAPoints)))
-			return false;
-
-		if((Title->MaxAAPoints >= 0) && (c->GetSpentAA() > static_cast<uint32>(Title->MaxAAPoints)))
-			return false;
-
-		if(Title->SkillID >= 0)
-		{
-			if ((Title->MinSkillValue >= 0) && (c->GetRawSkill(static_cast<EQ::skills::SkillType>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
-				return false;
-
-			if ((Title->MaxSkillValue >= 0) && (c->GetRawSkill(static_cast<EQ::skills::SkillType>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
-				return false;
-
+	int count = 0;
+	for (const auto& title : titles) {
+		if (IsClientEligibleForTitle(client, title)) {
+			++count;
 		}
+	}
 
-		if ((Title->ItemID >= 1) && (c->GetInv().HasItem(Title->ItemID, 0, 0xFF) == INVALID_INDEX))
-			return false;
-
-		if((Title->TitleSet > 0) && (!c->CheckTitle(Title->TitleSet)))
-			return false;
-
-		return true;
+	return count;
 }
 
-bool TitleManager::IsNewAATitleAvailable(int AAPoints, int Class)
+std::string TitleManager::GetPrefix(int title_id)
 {
-	std::vector<TitleEntry>::iterator Iterator;
+	if (!title_id) {
+		return "";
+	}
 
-	Iterator = Titles.begin();
+	for (const auto& title : titles) {
+		if (title.title_id == title_id) {
+			return title.prefix;
+		}
+	}
 
-	while(Iterator != Titles.end())
-	{
-		if((((*Iterator).Class == -1) || ((*Iterator).Class == Class)) && ((*Iterator).MinAAPoints == AAPoints))
-			return true;
+	return "";
+}
 
-		++Iterator;
+std::string TitleManager::GetSuffix(int title_id)
+{
+	if (!title_id) {
+		return "";
+	}
+
+	for (const auto& title : titles) {
+		if (title.title_id == title_id) {
+			return title.suffix;
+		}
+	}
+
+	return "";
+}
+
+bool TitleManager::HasTitle(Client* client, uint32 title_id)
+{
+	if (!client || !title_id) {
+		return false;
+	}
+
+	for (const auto& title : titles) {
+		if (title.title_id == title_id) {
+			return IsClientEligibleForTitle(client, title);
+		}
 	}
 
 	return false;
 }
 
-bool TitleManager::IsNewTradeSkillTitleAvailable(int SkillID, int SkillValue)
+bool TitleManager::IsClientEligibleForTitle(Client *client, TitleEntry title)
 {
-	std::vector<TitleEntry>::iterator Iterator;
+	if (!client) {
+		return false;
+	}
 
-	Iterator = Titles.begin();
+	if (title.character_id >= 0 && client->CharacterID() != static_cast<uint32>(title.character_id)) {
+		return false;
+	}
 
-	while(Iterator != Titles.end())
-	{
-		if(((*Iterator).SkillID == SkillID) && ((*Iterator).MinSkillValue == SkillValue))
+	if (title.status >= 0 && client->Admin() < title.status) {
+		return false;
+	}
+
+	if (title.gender_id >= 0 && client->GetBaseGender() != title.gender_id) {
+		return false;
+	}
+
+	if (title.class_id >= 0 && client->GetBaseClass() != title.class_id) {
+		return false;
+	}
+
+	if (title.min_aa_points >= 0 && client->GetSpentAA() < title.min_aa_points) {
+		return false;
+	}
+
+	if (title.max_aa_points >= 0 && client->GetSpentAA() > title.max_aa_points) {
+		return false;
+	}
+
+	if (title.skill_id >= 0) {
+		auto skill_id = static_cast<EQ::skills::SkillType>(title.skill_id);
+		if (title.min_skill_value >= 0 && client->GetRawSkill(skill_id) < static_cast<uint32>(title.min_skill_value)) {
+			return false;
+		}
+
+		if (title.max_skill_value >= 0 && client->GetRawSkill(skill_id) > static_cast<uint32>(title.max_skill_value)) {
+			return false;
+		}
+	}
+
+	if (title.item_id >= 1 && client->GetInv().HasItem(title.item_id) == INVALID_INDEX) {
+		return false;
+	}
+
+	if (title.titleset > 0 && !client->CheckTitle(title.titleset)) {
+		return false;
+	}
+
+	return true;
+}
+
+bool TitleManager::IsNewAATitleAvailable(int aa_points, int class_id)
+{
+	for (const auto& title : titles) {
+		if (
+			(title.class_id == -1 || title.class_id == class_id) &&
+			title.min_aa_points == aa_points
+		) {
 			return true;
+		}
+	}
 
-		++Iterator;
+	return false;
+}
+
+bool TitleManager::IsNewTradeSkillTitleAvailable(int skill_id, int skill_value)
+{
+	for (const auto& title : titles) {
+		if (title.skill_id == skill_id && title.min_skill_value == skill_value) {
+			return true;
+		}
 	}
 
 	return false;
@@ -241,142 +227,138 @@ bool TitleManager::IsNewTradeSkillTitleAvailable(int SkillID, int SkillValue)
 
 void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
 {
-	if(!client || !title)
+	if (!client || !title) {
 		return;
-
-	auto escTitle = new char[strlen(title) * 2 + 1];
+	}
 
 	client->SetAATitle(title);
 
-	database.DoEscapeString(escTitle, title, strlen(title));
-    auto query = StringFormat("SELECT `id` FROM titles "
-                            "WHERE `prefix` = '%s' AND char_id = %i",
-                            escTitle, client->CharacterID());
-    auto results = database.QueryDatabase(query);
-	if (results.Success() && results.RowCount() > 0){
-        safe_delete_array(escTitle);
-        return;
+	auto query = fmt::format(
+		"SELECT `id` FROM titles WHERE `prefix` = '{}' AND char_id = {}",
+		EscapeString(title),
+		client->CharacterID()
+	);
+	auto results = database.QueryDatabase(query);
+	if (results.Success() && results.RowCount()){
+		return;
 	}
 
-	query = StringFormat("INSERT INTO titles (`char_id`, `prefix`) VALUES(%i, '%s')",
-							client->CharacterID(), escTitle);
-    safe_delete_array(escTitle);
-    results = database.QueryDatabase(query);
-	if(!results.Success()) {
-        return;
-    }
+	query = fmt::format(
+		"INSERT INTO titles (`char_id`, `prefix`) VALUES ({}, '{}')",
+		client->CharacterID(),
+		EscapeString(title)
+	);
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
 
-    auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-    worldserver.SendPacket(pack);
-    safe_delete(pack);
+	auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }
 
 void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
 {
-	if(!client || !suffix)
+	if (!client || !suffix) {
 		return;
-
-    client->SetTitleSuffix(suffix);
-
-    auto escSuffix = new char[strlen(suffix) * 2 + 1];
-    database.DoEscapeString(escSuffix, suffix, strlen(suffix));
-
-    std::string query = StringFormat("SELECT `id` FROM titles "
-                                    "WHERE `suffix` = '%s' AND char_id = %i",
-                                    escSuffix, client->CharacterID());
-    auto results = database.QueryDatabase(query);
-	if (results.Success() && results.RowCount() > 0) {
-			safe_delete_array(escSuffix);
-			return;
-    }
-
-    query = StringFormat("INSERT INTO titles (`char_id`, `suffix`) VALUES(%i, '%s')",
-                        client->CharacterID(), escSuffix);
-    safe_delete_array(escSuffix);
-    results = database.QueryDatabase(query);
-	if(!results.Success()) {
-        return;
-    }
-
-    auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-    worldserver.SendPacket(pack);
-    safe_delete(pack);
-}
-
-void Client::SetAATitle(const char *Title)
-{
-	strn0cpy(m_pp.title, Title, sizeof(m_pp.title));
-
-	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
-
-	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
-
-	strn0cpy(strs->title, Title, sizeof(strs->title));
-
-	strs->entity_id = GetID();
-
-	entity_list.QueueClients(this, outapp, false);
-
-	safe_delete(outapp);
-}
-
-void Client::SetTitleSuffix(const char *Suffix)
-{
-	strn0cpy(m_pp.suffix, Suffix, sizeof(m_pp.suffix));
-
-	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
-
-	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
-
-	strs->is_suffix = 1;
-
-	strn0cpy(strs->title, Suffix, sizeof(strs->title));
-
-	strs->entity_id = GetID();
-
-	entity_list.QueueClients(this, outapp, false);
-
-	safe_delete(outapp);
-}
-
-void Client::EnableTitle(int titleSet) {
-
-	if (CheckTitle(titleSet))
-		return;
-
-	std::string query = StringFormat("INSERT INTO player_titlesets "
-                                    "(char_id, title_set) VALUES (%i, %i)",
-                                    CharacterID(), titleSet);
-    auto results = database.QueryDatabase(query);
-	if(!results.Success())
-		LogError("Error in EnableTitle query for titleset [{}] and charid [{}]", titleSet, CharacterID());
-
-}
-
-bool Client::CheckTitle(int titleSet) {
-
-	std::string query = StringFormat("SELECT `id` FROM player_titlesets "
-                                    "WHERE `title_set`=%i AND `char_id`=%i LIMIT 1",
-                                    titleSet, CharacterID());
-    auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-        return false;
 	}
 
-	if (results.RowCount() == 0)
-        return false;
+	client->SetTitleSuffix(suffix);
+
+	std::string query = fmt::format(
+		"SELECT `id` FROM titles WHERE `suffix` = '{}' AND char_id = {}",
+		EscapeString(suffix),
+		client->CharacterID()
+	);
+	auto results = database.QueryDatabase(query);
+	if (results.Success() && results.RowCount()) {
+		return;
+	}
+
+	query = fmt::format(
+		"INSERT INTO titles (`char_id`, `suffix`) VALUES ({}, '{}')",
+		client->CharacterID(),
+		EscapeString(suffix)
+	);
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
+
+	auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void Client::SetAATitle(const char *title)
+{
+	strn0cpy(m_pp.title, title, sizeof(m_pp.title));
+	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
+	strn0cpy(strs->title, title, sizeof(strs->title));
+	strs->entity_id = GetID();
+	entity_list.QueueClients(this, outapp, false);
+	safe_delete(outapp);
+}
+
+void Client::SetTitleSuffix(const char *suffix)
+{
+	strn0cpy(m_pp.suffix, suffix, sizeof(m_pp.suffix));
+	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
+	strs->is_suffix = 1;
+	strn0cpy(strs->title, suffix, sizeof(strs->title));
+	strs->entity_id = GetID();
+	entity_list.QueueClients(this, outapp, false);
+	safe_delete(outapp);
+}
+
+void Client::EnableTitle(int title_set)
+{
+	if (CheckTitle(title_set)) {
+		return;
+	}
+
+	std::string query = fmt::format(
+		"INSERT INTO player_titlesets (char_id, title_set) VALUES ({}, {})",
+		CharacterID(),
+		title_set
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("Error in EnableTitle query for titleset [{}] and charid [{}]", title_set, CharacterID());
+	}
+
+}
+
+bool Client::CheckTitle(int title_set)
+{
+	std::string query = fmt::format(
+		"SELECT `id` FROM player_titlesets WHERE `title_set` = {} AND `char_id` = {} LIMIT 1",
+		title_set,
+		CharacterID()
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return false;
+	}
 
 	return true;
 }
 
-void Client::RemoveTitle(int titleSet) {
-
-	if (!CheckTitle(titleSet))
+void Client::RemoveTitle(int title_set)
+{
+	if (!CheckTitle(title_set)) {
 		return;
+	}
 
-	std::string query = StringFormat("DELETE FROM player_titlesets "
-                                    "WHERE `title_set` = %i AND `char_id` = %i",
-                                    titleSet, CharacterID());
-   database.QueryDatabase(query);
+	TitlesRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`title_set` = {} AND `char_id` = {}",
+			title_set,
+			CharacterID()
+		)
+	);
 }
-
