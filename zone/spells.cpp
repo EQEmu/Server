@@ -2839,10 +2839,10 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	*/
 	if(IsClient() && !isproc)
 	{
-		//Support for bards to get disc recast timers while singing.
+		//Support for bards to get disc recast timers while singing, and instant cast items.
 		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
 			CastToClient()->GetPTimers().Start(timer, timer_duration);
-			LogSpells("Spell [{}]: Setting bard custom disciple reuse timer [{}] to [{}]", spell_id, timer, timer_duration);
+			LogSpells("Spell [{}]: Setting bard item or disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
 		}
 
 		if(casting_spell_aa_id) {
@@ -6876,7 +6876,7 @@ bool Mob::IsActiveBardSong(int32 spell_id) {
 	return false;
 }
 
-void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot)
+void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot, uint32 recast_type, uint32 recast_delay)
 {
 	Shout("Mob::DoBardCastingFromItemClick %i %i %i %i", is_casting_bard_song, cast_time, spell_id, target_id);
 	if (is_casting_bard_song) {
@@ -6896,16 +6896,19 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 			ZeroBardPulseVars();
 		}
 	}
-
+	Shout("Mob::DoBardCastingFromItemClick Recast type %i Recast Timer %i", recast_type, recast_delay);
 	if (cast_time != 0) {
 		Shout("Mob::DoBardCastingFromItemClick Cast time %i [ ERROR NOT DISPLAYING CAST TIME FROM AUGS]", cast_time);
 		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
 	else if (DoCastingChecksOnCaster(spell_id)) {
-		Shout("Mob::DoBardCastingFromItemClick Do Bard Instant Cast items");
-		if (!SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot)) {
-			Shout("Mob::DoBardCastingFromItemClick Instant cast item click FAIL");
+		if (recast_delay != 0) {
+			pTimerType ItemTimer = pTimerItemStart + recast_type;
+			SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot, spells[spell_id].resist_difficulty, false, -1, (uint32)ItemTimer, recast_delay);
+		}
+		else {
+			SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
 		}
 	}
 }
