@@ -2839,7 +2839,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	*/
 	if(IsClient() && !isproc)
 	{
-		//Support for bards to get disc recast timers while singing, and instant cast items.
+		//Support for bards to get disc recast timers while singing, and instant cast item recast timers.
 		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
 			CastToClient()->GetPTimers().Start(timer, timer_duration);
 			LogSpells("Spell [{}]: Setting bard item or disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
@@ -6597,6 +6597,34 @@ void Client::SendItemRecastTimer(uint32 recast_type, uint32 recast_delay)
 		ird->recast_type = recast_type;
 		QueuePacket(outapp);
 		safe_delete(outapp);
+	}
+}
+
+void Client::SetItemRecastTimer(int32 spell_id, uint32 recast_type, int32 recast_delay, bool from_augment)
+{
+	//must use SPA 415 with focus (SPA 310) to reduce item recast
+	int reduction = GetFocusEffect(focusReduceRecastTime, spell_id);
+	if (reduction) {
+		recast_delay -= reduction;
+	}
+
+	recast_delay = std::max(recast_delay, 0);
+
+	if (recast_delay > 0) {
+
+		GetPTimers().Start((pTimerItemStart + recast_type), static_cast<uint32>(recast_delay));
+		if (recast_type != -1) {
+			database.UpdateItemRecastTimestamps(
+				CharacterID(),
+				recast_type,
+				GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
+			);
+		}
+
+		//Does not work with augment click recast.
+		if (!from_augment) {
+			SendItemRecastTimer(recast_type, static_cast<uint32>(recast_delay));
+		}
 	}
 }
 
