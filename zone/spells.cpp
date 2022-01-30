@@ -2888,40 +2888,10 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 	}
 	/*
-		Set Recast Timer on item clicks.	
+		Set Recast Timer on item clicks, including augmenets.	
 	*/
-	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
-	{
-		EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
-		if(itm && itm->GetItem()->RecastDelay > 0){
-			auto recast_type = itm->GetItem()->RecastType;
-			int recast_delay = itm->GetItem()->RecastDelay;
-			//must use SPA 415 with focus (SPA 310) to reduce item recast
-			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
-			if (reduction) {
-				recast_delay -= reduction;
-			}
-			recast_delay = std::max(recast_delay, 0);
-
-			if (recast_delay > 0) {
-
-				CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), recast_delay);
-				if (recast_type != -1) {
-					database.UpdateItemRecastTimestamps(
-						CastToClient()->CharacterID(),
-						recast_type,
-						CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
-					);
-				}
-
-				auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
-				ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
-				ird->recast_delay = static_cast<uint32>(recast_delay);
-				ird->recast_type = recast_type;
-				CastToClient()->QueuePacket(outapp);
-				safe_delete(outapp);
-			}
-		}
+	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)){
+		CastToClient()->SetItemRecastTimer(spell_id, inventory_slot);
 	}
 
 	if(IsNPC())
@@ -6584,8 +6554,12 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
 }
 
-void Client::SendItemRecastTimer(uint32 recast_type, uint32 recast_delay)
+void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay)
 {
+	if (recast_type == -1) {
+		return;
+	}
+
 	if (!recast_delay) {
 		recast_delay = GetPTimers().GetRemainingTime(pTimerItemStart + recast_type);
 	}
@@ -6594,14 +6568,56 @@ void Client::SendItemRecastTimer(uint32 recast_type, uint32 recast_delay)
 		auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
 		ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 		ird->recast_delay = recast_delay;
-		ird->recast_type = recast_type;
+		ird->recast_type = static_cast<uint32>(recast_type);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
 }
 
-void Client::SetItemRecastTimer(int32 spell_id, uint32 recast_type, int32 recast_delay, bool from_augment)
+void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 {
+	if (inventory_slot == 0xFFFFFFFF) {
+		return;
+	}
+	Shout("Recast from item? %i", inventory_slot);
+	EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(inventory_slot);
+	
+	int recast_delay = 0;
+	int recast_type = 0;
+	bool from_augment = false;
+
+	if (!item) {
+		return;
+	}
+
+	//Check primary item.
+	if (item->GetItem()->RecastDelay > 0) {
+		Shout("Set Recast from item");
+		recast_type = item->GetItem()->RecastType;
+		recast_delay = item->GetItem()->RecastDelay;
+	}
+	//Check augmenent
+	else{
+		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+			const EQ::ItemInstance* aug_i = item->GetAugment(r);
+
+			if (!aug_i) {
+				continue;
+			}
+			const EQ::ItemData* aug = aug_i->GetItem();
+			if (!aug) {
+				continue;
+			}
+
+			if (aug->Click.Effect == spell_id) {
+				Shout("Set Recast from augment");
+				recast_delay = aug_i->GetItem()->RecastDelay;
+				recast_type = aug_i->GetItem()->RecastType;
+				from_augment = true;
+				break;
+			}
+		}
+	}
 	//must use SPA 415 with focus (SPA 310) to reduce item recast
 	int reduction = GetFocusEffect(focusReduceRecastTime, spell_id);
 	if (reduction) {
@@ -6621,7 +6637,6 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 recast_type, int32 recast
 			);
 		}
 
-		//Does not work with augment click recast.
 		if (!from_augment) {
 			SendItemRecastTimer(recast_type, static_cast<uint32>(recast_delay));
 		}

@@ -8898,7 +8898,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 			{
-				Shout("3 Client::Handle_OP_ItemVerifyRequest %i", spell_id);
+				Shout("3 Client::Handle_OP_ItemVerifyRequest %i CHARGES %i AUG %i Item %id", spell_id, inst->GetCharges(), tryaug, inst->GetID());
 				if (inst->GetCharges() == 0)
 				{
 					//Message(0, "This item is out of charges.");
