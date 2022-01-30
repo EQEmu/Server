@@ -9087,7 +9087,7 @@ void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target->IsNPC())
+	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillDisarmTraps))
 		{
@@ -9106,21 +9106,22 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target && target->GetClass() == LDON_TREASURE)
+	if (target && target->GetClass() == LDON_TREASURE && !target->IsAura())
 		Message(Chat::Yellow, "%s", target->GetCleanName());
 }
 
 void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target && target->IsNPC())
+	if (target && target->IsNPC() && !target->IsAura()) {
 		HandleLDoNOpen(target->CastToNPC());
+	}
 }
 
 void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target->IsNPC())
+	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillPickLock))
 		{
@@ -9139,7 +9140,7 @@ void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
-	if (target->IsNPC())
+	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillSenseTraps))
 		{
@@ -12877,17 +12878,15 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 
 	SetTitle_Struct *sts = (SetTitle_Struct *)app->pBuffer;
 
-	std::string Title;
-
-	if (!sts->is_suffix)
-	{
-		Title = title_manager.GetPrefix(sts->title_id);
-		SetAATitle(Title.c_str());
+	if (!title_manager.HasTitle(this, sts->title_id)) {
+		return;
 	}
-	else
-	{
-		Title = title_manager.GetSuffix(sts->title_id);
-		SetTitleSuffix(Title.c_str());
+
+	std::string title = !sts->is_suffix ? title_manager.GetPrefix(sts->title_id) : title_manager.GetSuffix(sts->title_id);
+	if (!sts->is_suffix) {
+		SetAATitle(title.c_str());
+	} else {
+		SetTitleSuffix(title.c_str());
 	}
 }
 

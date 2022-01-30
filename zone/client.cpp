@@ -2422,7 +2422,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		return false;
 	if (skillid > EQ::skills::HIGHEST_SKILL)
 		return false;
-	int skillval = GetRawSkill(skillid);
+	int skillval = GetRawSkill(skillid);	
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
 	std::string export_string = fmt::format(
 		"{} {}",
@@ -2447,23 +2447,26 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	// Make sure we're not already at skill cap
 	if (skillval < maxskill)
 	{
-		// the higher your current skill level, the harder it is
-		int32 Chance = 10 + chancemodi + ((252 - skillval) / 20);
-
-		Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
-
-		Chance = mod_increase_skill_chance(Chance, against_who);
-
-		if(Chance < 1)
-			Chance = 1; // Make it always possible
+		double Chance = 0;		
+		if (RuleI(Character, SkillUpMaximumChancePercentage) + chancemodi - RuleI(Character, SkillUpMinimumChancePercentage) <= RuleI(Character, SkillUpMinimumChancePercentage)) {
+			Chance = RuleI(Character, SkillUpMinimumChancePercentage);
+		}
+		else {
+			// f(x) = (max - min + modification) * .99^skillval + min
+			// This results in a exponential decay where as you skill up, you lose a slight chance to skill up, ranging from your modified maximum to approaching your minimum
+			// This result is increased by the existing SkillUpModifier rule
+			double working_chance = (((RuleI(Character, SkillUpMaximumChancePercentage) - RuleI(Character, SkillUpMinimumChancePercentage) + chancemodi) * (pow(0.99, skillval))) + RuleI(Character, SkillUpMinimumChancePercentage));
+			Chance = (working_chance * RuleI(Character, SkillUpModifier) / 100);
+			Chance = mod_increase_skill_chance(Chance, against_who);
+		}
 
 		if(zone->random.Real(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
-			LogSkills("Skill [{}] at value [{}] successfully gain with [{}]% chance (mod [{}])", skillid, skillval, Chance, chancemodi);
+			LogSkills("Skill [{}] at value [{}] successfully gain with [{}] chance (mod [{}])", skillid, skillval, Chance, chancemodi);
 			return true;
 		} else {
-			LogSkills("Skill [{}] at value [{}] failed to gain with [{}]% chance (mod [{}])", skillid, skillval, Chance, chancemodi);
+			LogSkills("Skill [{}] at value [{}] failed to gain with [{}] chance (mod [{}])", skillid, skillval, Chance, chancemodi);
 		}
 	} else {
 		LogSkills("Skill [{}] at value [{}] cannot increase due to maxmum [{}]", skillid, skillval, maxskill);
