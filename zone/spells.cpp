@@ -156,7 +156,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	uint32 timer, uint32 timer_duration, int16 *resist_adjust,
 	uint32 aa_id)
 {
-	Shout("<Start> Mob::CastSpell %i", spell_id);
 	LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]",
 		(IsValidSpell(spell_id)) ? spells[spell_id].name : "UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot == 0xFFFFFFFF) ? 999 : item_slot);
 
@@ -203,8 +202,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (HasActiveSong() && (IsBardSong(spell_id) || slot == CastingSlot::Item)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
 		//Note: this does NOT tell the client
-		Shout("Stop SONG");
-		_StopSong();
+		ZeroBardPulseVars();
 	}
 
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
@@ -302,7 +300,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 					uint32 item_slot, uint32 timer, uint32 timer_duration,
 					int16 resist_adjust, uint32 aa_id)
 {
-	Shout("<Start> Mob::DoCastSpell %i", spell_id);
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
 
@@ -465,7 +462,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// now tell the people in the area -- we ALWAYS want to send this, even instant cast spells.
 	// The only time this is skipped is for NPC innate procs and weapon procs. Procs from buffs
 	// oddly still send this. Since those cases don't reach here, we don't need to check them
-	Shout("Send Begin Cast SLOT [ %i ] 22 %i?", slot, orgcasttime);
 	if (slot != CastingSlot::Discipline) {
 		SendBeginCast(spell_id, orgcasttime);
 	}
@@ -777,8 +773,6 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		return false;
 	}
 
-	spell_target->Shout("Mob::DoCastingChecksOnTarget :: I AM THE SPELL TARGET");
-
 	/*
 		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
 		[Insufficient mana first]
@@ -968,7 +962,6 @@ bool Mob::DoCastingChecks(int32 spell_id, uint16 target_id)
 
 	if (IsClient() && spells[spell_id].timer_id > 0 && casting_spell_slot < CastingSlot::MaxGems) {
 		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].timer_id)) {
-			Shout("Cancel this");
 			return false;
 		}
 	}
@@ -1206,6 +1199,16 @@ void Mob::ZeroCastingVars()
 	delaytimer = false;
 }
 
+
+//This will cause server to stop trying to pulse a bard song. Does not stop song clientside.
+void Mob::ZeroBardPulseVars()
+{
+	bardsong = 0;
+	bardsong_target_id = 0;
+	bardsong_slot = CastingSlot::Gem1;
+	bardsong_timer.Disable();
+}
+
 void Mob::InterruptSpell(uint16 spellid)
 {
 	if (spellid == SPELL_UNKNOWN)
@@ -1217,8 +1220,6 @@ void Mob::InterruptSpell(uint16 spellid)
 // color not used right now
 void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 {
-	Shout("Mob::InterruptSpell");
-
 	EQApplicationPacket *outapp = nullptr;
 	uint16 message_other;
 	bool bard_song_mode = false; //has the bard song gone to auto repeat mode
@@ -1247,8 +1248,9 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	if(!spellid)
 		return;
 
-	if (bardsong || IsBardSong(casting_spell_id))
-		_StopSong();
+	if (bardsong || IsBardSong(casting_spell_id)) {
+		ZeroBardPulseVars();
+	}
 
 	if(bard_song_mode) {
 		return;
@@ -1426,7 +1428,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// a spell bar slot
 	if(GetClass() == BARD) // bard's can move when casting any spell...
 	{
-		Shout("Mob::CastedSpellFinished :: <<<Try Set Pulse>>> :: spell %i target type %i", spell_id, spells[spell_id].target_type);
 		if (IsBardSong(spell_id) && slot < CastingSlot::MaxGems) {
 			if (spells[spell_id].buff_duration == 0xFFFF) {
 				LogSpells("Bard song [{}] not applying bard logic because duration. dur=[{}], recast=[{}]", spells[spell_id].buff_duration);
@@ -1435,57 +1436,22 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				if (IsPulsingBardSong(spell_id)) {
 					bardsong = spell_id;
 					bardsong_slot = slot;
-					
-					
-					if (!spell_target) {
-						Shout("DEBUG CRITICAL ERROR <<<NO TARGET TYPE FOUND>>>>>>>>>>>>>>>>>");
+				
+					if (spell_target) {
+						bardsong_target_id = spell_target->GetID();
 					}
-					Shout("Mob::CastedSpellFinished :: Set Pulse :: target type %i", spells[spell_id].target_type);
-					//NOTE: theres a lot more target types than this to think about... [HOWEVER, target type should never be undefined since it is set in DoCastSpell]
-					//So this should never happen, but bards only have 2 target types which are below, as a failsafe I can see the logic. TODO: Optimize this.
-					//Perhaps interupt it if its a targeted spell but you have no target, since something went wrong...
-					if (!spell_target || 
-						(spells[spell_id].target_type != ST_Target && spells[spell_id].target_type != ST_AETarget)) {
-						bardsong_target_id = GetID();
+					else if (spells[spell_id].target_type != ST_Target && spells[spell_id].target_type != ST_AETarget) {
+						bardsong_target_id = GetID(); //This is a failsafe, you should always have a spell_target unless that target died/zoned.
 					}
 					else {
-						bardsong_target_id = spell_target->GetID();
+						InterruptSpell();
 					}
 					bardsong_timer.Start(6000);
 				}
-				Shout("start bard song TARGET %i", bardsong_target_id);
 				LogSpells("Bard song [{}] started: slot [{}], target id [{}]", bardsong, (int)bardsong_slot, bardsong_target_id);
 				bard_song_mode = true;
 			}
 		}
-		/*
-		if (IsBardSong(spell_id)) {
-			if(spells[spell_id].buff_duration == 0xFFFF) {
-				LogSpells("Bard song [{}] not applying bard logic because duration. dur=[{}], recast=[{}]", spells[spell_id].buff_duration);
-			} 
-			else
-			{
-				// So long recast bard songs need special bard logic, although the effects don't repulse like other songs
-				// This is basically a hack to get that effect
-				// You can hold down the long recast spells, but you only get the effects once
-				// Songs with mana cost also do not repulse
-				// AAs that use SE_TemporaryPets or SE_Familiar also do not repulse
-				// TODO fuck bards.
-				if (spells[spell_id].recast_time == 0 && spells[spell_id].mana == 0 && !IsEffectInSpell(spell_id, SE_TemporaryPets) && !IsEffectInSpell(spell_id, SE_Familiar)) {
-					bardsong = spell_id;
-					bardsong_slot = slot;
-					//NOTE: theres a lot more target types than this to think about...
-					if (spell_target == nullptr || (spells[spell_id].target_type != ST_Target && spells[spell_id].target_type != ST_AETarget))
-						bardsong_target_id = GetID();
-					else
-						bardsong_target_id = spell_target->GetID();
-					bardsong_timer.Start(6000);
-				}
-				LogSpells("Bard song [{}] started: slot [{}], target id [{}]", bardsong, (int) bardsong_slot, bardsong_target_id);
-				bard_song_mode = true;
-			}
-		}
-		*/
 	}
 	else // not bard, check movement
 	{
@@ -2433,8 +2399,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
 						uint32 timer, uint32 timer_duration, bool from_casted_spell)
 {
-	Shout("Mob::SpellFinished %i", spell_id);
-	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
 
 	if(!IsValidSpell(spell_id))
@@ -2471,11 +2435,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	//If spell was casted then we already checked these so skip, otherwise check here if being called directly from spell finished.
 	if (!from_casted_spell){
 		if (!DoCastingChecksZoneRestrictions(true, spell_id)) {
-			Shout("DoCastingChecksZoneRestrictions FAIL");
+			LogSpells("Spell [{}]: Zone restriction failure.", spell_id);
 			return false;
 		}
 		if (!DoCastingChecksOnTarget(true, spell_id, spell_target)) {
-			Shout("DoCastingChecksOnTarget FAIL");
+			LogSpells("Spell [{}]: Casting checks on Target failure.", spell_id);
 			return false;
 		}
 	}
@@ -2483,7 +2447,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	//determine the type of spell target we have
 	CastAction_type CastAction;
 	if (!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc)) {
-		Shout("Targets Fail!");
+		LogSpells("Spell [{}]: Determine spell targets failure.", spell_id);
 		return(false);
 	}
 
@@ -2888,7 +2852,6 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SE_Charm)) {
 		return true;
 	}
-	Shout("3 BARD LOGIC :: PASS :: Now apply that pulse!");
 
 	if (!SpellFinished(spell_id, spell_target, slot, spells[spell_id].mana, 0xFFFFFFFF, spells[spell_id].resist_difficulty)) {
 		return false;
@@ -3734,7 +3697,6 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		end = overwrite_slots.end();
 		for (; cur != end; ++cur) {
 			// strip spell
-			Shout("Bard Logic:: Strip Buff %i", from_bard_song_pulse);
 			if (!from_bard_song_pulse) {
 				BuffFadeBySlot(*cur, false);
 			}
@@ -6260,28 +6222,6 @@ int Mob::GetCasterLevel(uint16 spell_id) {
 	return std::max(1, level);
 }
 
-//this method does NOT tell the client to stop singing the song.
-//this is NOT the right way to stop a mob from singing, use InterruptSpell
-//you should really know what your doing before you call this
-void Mob::_StopSong()
-{
-	Shout("Mob::_StopSong()");
-	bardsong = 0;
-	bardsong_target_id = 0;
-	bardsong_slot = CastingSlot::Gem1;
-	bardsong_timer.Disable();
-}
-
-void Mob::ZeroBardPulseVars() 
-{
-	Shout("Mob::ZeroBardPulseVars() ");
-
-	bardsong = 0;
-	bardsong_target_id = 0;
-	bardsong_slot = CastingSlot::Gem1;
-	bardsong_timer.Disable();
-}
-
 //This member function sets the buff duration on the client
 //however it does not work if sent quickly after an action packets, which is what one might perfer to do
 //Thus I use this in the buff process to update the correct duration once after casting
@@ -6548,7 +6488,6 @@ void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay)
 
 void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 {
-	Shout("Recast from item? %i", inventory_slot);
 	EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(inventory_slot);
 	
 	int recast_delay = 0;
@@ -6561,7 +6500,6 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 
 	//Check primary item.
 	if (item->GetItem()->RecastDelay > 0) {
-		Shout("Set Recast from item");
 		recast_type = item->GetItem()->RecastType;
 		recast_delay = item->GetItem()->RecastDelay;
 	}
@@ -6579,7 +6517,6 @@ void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 			}
 
 			if (aug->Click.Effect == spell_id) {
-				Shout("Set Recast from augment");
 				recast_delay = aug_i->GetItem()->RecastDelay;
 				recast_type = aug_i->GetItem()->RecastType;
 				from_augment = true;
@@ -6936,7 +6873,6 @@ bool Mob::IsActiveBardSong(int32 spell_id) {
 
 void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot, uint32 recast_type, uint32 recast_delay)
 {
-	Shout("Mob::DoBardCastingFromItemClick %i %i %i %i", is_casting_bard_song, cast_time, spell_id, target_id);
 	if (is_casting_bard_song) {
 		//For spells with cast times. Cancel song cast, stop pusling and start item cast.
 		if (cast_time != 0) {
@@ -6954,14 +6890,12 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 			ZeroBardPulseVars();
 		}
 	}
-	Shout("Mob::DoBardCastingFromItemClick Recast type %i Recast Timer %i", recast_type, recast_delay);
+
 	if (cast_time != 0) {
-		Shout("Mob::DoBardCastingFromItemClick Cast time %i [ ERROR NOT DISPLAYING CAST TIME FROM AUGS]", cast_time);
 		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
 	if (DoCastingChecksOnCaster(spell_id)) {
-		Shout("Mob::DoBardCastingFromItemClick INSTANT");
 		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
 	}
 }

@@ -1747,7 +1747,6 @@ protected:
 	MobMovementManager *mMovementManager;
 
 private:
-	void _StopSong(); //this is not what you think it is
 	Mob* target;
 	
 
