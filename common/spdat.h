@@ -1544,7 +1544,6 @@ int GetViralMaxSpreadTime(int32 spell_id);
 int GetViralSpreadRange(int32 spell_id);
 bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect);
 bool IsPulsingBardSong(int32 spell_id);
-bool IsPulsingBardSongTargetingSelf(int32 spell_id);
 uint32 GetProcLimitTimer(int32 spell_id, int proc_type);
 bool IgnoreCastingRestriction(int32 spell_id);
 int CalcPetHp(int levelb, int classb, int STA = 75);

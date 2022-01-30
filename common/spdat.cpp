@@ -1475,24 +1475,6 @@ bool IsPulsingBardSong(int32 spell_id)
 	return true;
 }
 
-bool IsPulsingBardSongTargetingSelf(int32 spell_id) {
-
-	/*
-		DEBUG SPELL EFFECT MAY NOT NEED THESE
-		These are all the target types live bards use.
-	*/
-
-
-		/* 03 */	//ST_GroupTeleport = 0x03, [target is set to self]
-		/* 04 */	//ST_AECaster = 0x04, [target is set to self]
-		/* 05 */	//ST_Target = 0x05, [target is target]
-		/* 06 */	//ST_Self = 0x06, [target is set to self]
-		/* 08 */	//ST_AETarget = 0x08,  [target is target]
-		/* 40 */	//ST_AEBard = 0x28, [target is set to self]
-		/* 41 */	//ST_Group = 0x29, [target is set to self]
-	return true;
-}
-
 int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 {
 	if (!IsValidSpell(spell_id))

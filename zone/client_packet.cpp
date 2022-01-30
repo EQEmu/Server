@@ -8811,20 +8811,16 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		)
 	{
 		/*
-			Bards can click items while casting spell gems, it stops that song cast and replaces it with item click cast. 
+			Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast. 
 			Can not click while casting other items.
-			TODO: Should I make this a rule???
 		*/
 		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
 		{
 			is_casting_bard_song = true;
-
-			Shout("INTERRUPT AND CAAST Client::Handle_OP_ItemVerifyRequest %i ", spell_id);
 		}
 		else
 		{
 			SendSpellBarEnable(spell_id);
-			Shout("FAIL Client::Handle_OP_ItemVerifyRequest %i FAIL", spell_id);
 			return;
 		}
 	}
@@ -9573,7 +9569,6 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 {
-	Shout("Client::Handle_OP_ManaChange");
 	if (app->size == 0) {
 		// i think thats the sign to stop the songs
 		if (IsBardSong(casting_spell_id) || HasActiveSong()) {
