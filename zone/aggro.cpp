@@ -1319,10 +1319,10 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 	if (dispel && target && target->GetHateAmount(this) < 100)
 		AggroAmount += 50;
 
-	if (spells[spell_id].hate_added > 0) // overrides the hate (ex. tash)
+	if (spells[spell_id].hate_added != 0) // overrides the hate (ex. tash), can be negative.
 		AggroAmount = spells[spell_id].hate_added;
 
-	if (GetOwner() && IsPet())
+	if (GetOwner() && IsPet() && AggroAmount > 0)
 		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
 
 	// hate focus ignored on first action for some reason
@@ -1337,6 +1337,8 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 	// We add this 100 in AddToHateList so we need to account for the oddities here
 	if (dispel && spells[spell_id].hate_added > 0 && !on_hatelist)
 		AggroAmount -= 100;
+
+	Shout("AggroAmount %i Bonus Hate %i + nonModifedAggro %i", AggroAmount, spells[spell_id].bonus_hate, nonModifiedAggro);
 
 	return AggroAmount + spells[spell_id].bonus_hate + nonModifiedAggro;
 }
