@@ -3696,6 +3696,10 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
 			}
 		}
+		Shout("Attack :: Pet count %i", GetTempPetCount());
+		if (GetTempPetCount()) {
+			//entity_list.AddTempPetsToHateListOnOwnerDamage(this, attacker, spell_id);
+		}
 
 		//see if any runes want to reduce this damage
 		if (spell_id == SPELL_UNKNOWN) {
