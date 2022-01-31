@@ -387,7 +387,6 @@ public:
 	static void ProcessRaidInvite(Bot* invitee, Client* invitor); //Mitch
 	static void ProcessRaidInvite(Client* invitee, Client* invitor); //Mitch	
 	uint8 GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets); //Mitch
-	bool m_dirtyautohaters;
 	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
 
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
@@ -677,6 +676,7 @@ private:
 	Timer m_auto_defend_timer;
 	//Timer m_combat_jitter_timer;
 	//bool m_combat_jitter_flag;
+	bool m_dirtyautohaters;
 	bool m_guard_flag;
 	bool m_hold_flag;
 	bool m_attack_flag;
@@ -743,6 +743,7 @@ private:
 
 	public:
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
+
 };
 
 #endif // BOTS

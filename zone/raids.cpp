@@ -1750,7 +1750,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 	mob->CreateHPPacket(&hpapp);
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if(members[x].member) {
+		if(members[x].member && members[x].member->CastToBot()->GetBotID() == 0   ) {
 			if(!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				members[x].member->QueuePacket(&hpapp, false);
 				if (members[x].member->IsClient() && members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) { //Mitch
@@ -1810,7 +1810,7 @@ void Raid::SendEndurancePacketFrom(Mob *mob)
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if (members[x].member) {
+		if (members[x].member && members[x].member->CastToBot()->GetBotID() == 0) {
 			if (!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
@@ -1917,7 +1917,7 @@ void Raid::CheckGroupMentor(uint32 group_id, Client *c)
 void Raid::SetDirtyAutoHaters()
 {
 	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
-		if (members[i].member)
+		if (members[i].member && members[i].member->CastToBot()->GetBotID() == 0)
 			members[i].member->SetDirtyAutoHaters();
 
 }

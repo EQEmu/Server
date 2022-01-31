@@ -3839,7 +3839,7 @@ void Mob::CommonDamage(Mob* attacker, int& damage, const uint16 spell_id, const 
 		if (!FromDamageShield) {
 #ifdef BOTS
 			// If a bot is the attacker, send a damage message ot the Bot Owner
-			if (spell_id != SPELL_UNKNOWN && damage > 0 && !Critical && attacker && attacker != this && attacker->IsBot() && RuleB(Bots, DisplaySpellDamage)) {
+			if (attacker->GetTarget() && spell_id != SPELL_UNKNOWN && damage > 0 && !Critical && attacker && attacker != this && attacker->IsBot() && RuleB(Bots, DisplaySpellDamage)) {
 				attacker->CastToBot()->GetBotOwner()->FilteredMessageString(
 					attacker->CastToBot()->GetBotOwner(),
 					Chat::DotDamage,
@@ -3894,7 +3894,7 @@ void Mob::CommonDamage(Mob* attacker, int& damage, const uint16 spell_id, const 
 		}
 #ifdef BOTS
 		// If a bot is the attacker, send a damage message ot the Bot Owner
-		else if (spell_id != SPELL_UNKNOWN && attacker->IsBot() && damage > 0 && !Critical && attacker && attacker != this && RuleB(Bots, DisplaySpellDamage)) {
+		else if (attacker->GetTarget() && spell_id != SPELL_UNKNOWN && attacker->IsBot() && damage > 0 && !Critical && attacker && attacker != this && RuleB(Bots, DisplaySpellDamage)) {
 			attacker->CastToBot()->GetBotOwner()->FilteredMessageString(
 				attacker->CastToBot()->GetBotOwner(),
 				Chat::DotDamage,
