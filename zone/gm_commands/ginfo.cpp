@@ -40,17 +40,9 @@ void command_ginfo(Client *c, const Seperator *sep)
 	);
 	std::string popup_text = "<table>";
 	popup_text += fmt::format(
-		"<tr><td>Group ID</td><td>{}</td><td>Members</td><td>{}</td><td>Leader</td><td>{}</td>",
+		"<tr><td>Group ID</td><td>{}</td><td>Members</td><td>{}</td>",
 		target_group->GetID(),
-		target_group->GroupCount(),
-		(
-			strcmp(target_group->GetLeaderName(), c->GetCleanName()) ?
-			target_group->GetLeaderName() :
-			fmt::format(
-				"{} (You)",
-				target_group->GetLeaderName()
-			)
-		)
+		target_group->GroupCount()
 	);
 	popup_text += "<br><br>";
 	popup_text += "<tr>";
