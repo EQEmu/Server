@@ -436,7 +436,6 @@ Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["cwp"]                        = mob->GetCWP();
 		row["cwpp"]                       = mob->GetCWPP();
 		row["divine_aura"]                = mob->DivineAura();
-		row["do_casting_checks"]          = mob->DoCastingChecks();
 		row["dont_buff_me_before"]        = mob->DontBuffMeBefore();
 		row["dont_cure_me_before"]        = mob->DontCureMeBefore();
 		row["dont_dot_me_before"]         = mob->DontDotMeBefore();

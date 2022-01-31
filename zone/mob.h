@@ -351,7 +351,6 @@ public:
 	void StopCastSpell(int32 spell_id, bool send_spellbar_enable); //Rename this
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
-	bool DoCastingChecks(int32 spell_id = SPELL_UNKNOWN, uint16 target_id = 0); //depreciated 1/26/22
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
 	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed = 1.5f);
 	void ResourceTap(int32 damage, uint16 spell_id);
