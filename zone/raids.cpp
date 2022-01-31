@@ -1531,6 +1531,16 @@ void Raid::SendAllRaidLeadershipAA()
 			SendGroupLeadershipAA(members[i].member, members[i].GroupNumber);
 }
 
+bool Raid::IsRaidMemberBot(Client* client)
+{
+	if (client->CastToBot()->GetBotID() == 0) {
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
 void Raid::LockRaid(bool lockFlag)
 {
 	std::string query = StringFormat("UPDATE raid_details SET locked = %d WHERE raidid = %lu",
@@ -1708,7 +1718,7 @@ void Raid::SendHPManaEndPacketsTo(Client *client)
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if(members[x].member) {
+		if(members[x].member && !IsRaidMemberBot(members[x].member)) {
 			if((members[x].member != client) && (members[x].GroupNumber == group_id)) {
 
 				members[x].member->CreateHPPacket(&hp_packet);
@@ -1750,10 +1760,10 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 	mob->CreateHPPacket(&hpapp);
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if(members[x].member && members[x].member->CastToBot()->GetBotID() == 0   ) {
+		if(members[x].member && !IsRaidMemberBot(members[x].member)) {
 			if(!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				members[x].member->QueuePacket(&hpapp, false);
-				if (members[x].member->IsClient() && members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) { //Mitch
+				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
 					mana_update->spawn_id = mob->GetID();
@@ -1783,7 +1793,7 @@ void Raid::SendManaPacketFrom(Mob *mob)
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if (members[x].member) {
+		if (members[x].member && !IsRaidMemberBot(members[x].member)) {
 			if (!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
@@ -1810,7 +1820,7 @@ void Raid::SendEndurancePacketFrom(Mob *mob)
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
 	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-		if (members[x].member && members[x].member->CastToBot()->GetBotID() == 0) {
+		if (members[x].member && !IsRaidMemberBot(members[x].member)) {
 			if (!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
