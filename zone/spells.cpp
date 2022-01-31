@@ -2764,6 +2764,7 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 
 	/*
 		Check any bard specific special behaviors we need before applying the next pulse.
+		Note: Silence does not stop an active bard pulse.
 	*/
 	if (!spell_target) {
 		return false;
@@ -2780,6 +2781,12 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 	*/
 	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
 		return true;
+	}
+	/*
+		Fear will stop pulsing.	
+	*/
+	if (IsFeared()) {
+		return false;
 	}
 
 	if (!SpellFinished(spell_id, spell_target, slot, spells[spell_id].mana, 0xFFFFFFFF, spells[spell_id].resist_difficulty)) {
