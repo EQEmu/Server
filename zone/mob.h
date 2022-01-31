@@ -287,8 +287,6 @@ public:
 
 	//Song
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
-	bool ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);
-	void BardPulse(uint16 spell_id, Mob *caster);
 
 	//Spell
 	void SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide,
