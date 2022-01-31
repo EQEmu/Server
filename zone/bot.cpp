@@ -7349,7 +7349,7 @@ void Bot::GenerateSpecialAttacks() {
 
 bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	if(GetClass() == BARD) {
-		if(!ApplyNextBardPulse(bardsong, this, bardsong_slot))
+		if(!ApplyBardPulse(bardsong, this, bardsong_slot))
 			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 
 		stopLogic = true;

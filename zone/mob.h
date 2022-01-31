@@ -336,9 +336,9 @@ public:
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1, int reflect_effectiveness = 0, int32 duration_override = 0);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction, EQ::spells::CastingSlot slot, bool isproc = false);
-	bool DoCastingChecksOnCaster(int32 spell_id); //Rename this.
-	bool DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id); //Rename this.
-	bool DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob* spell_target); //Rename this.
+	bool DoCastingChecksOnCaster(int32 spell_id);
+	bool DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id);
+	bool DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob* spell_target);
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
@@ -346,7 +346,7 @@ public:
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
 	void StopCasting();
-	void StopCastSpell(int32 spell_id, bool send_spellbar_enable); //Rename this
+	void StopCastSpell(int32 spell_id, bool send_spellbar_enable);
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
@@ -359,9 +359,9 @@ public:
 	void ApplyHealthTransferDamage(Mob *caster, Mob *target, uint16 spell_id);
 	void ApplySpellEffectIllusion(int32 spell_id, Mob* caster, int buffslot, int base, int limit, int max);
 	
-	//New Bard Logic
+	//Bard Logic
 	bool ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);
-	bool IsActiveBardSong(int32 spell_id); //Bard
+	bool IsActiveBardSong(int32 spell_id);
 	bool HasActiveSong() const { return(bardsong != 0); }
 	void ZeroBardPulseVars();
 	void DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot, 
