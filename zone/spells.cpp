@@ -1313,6 +1313,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
+		item  = CastToClient()->GetInv().GetItem(inventory_slot); //checked for in reagents and charges.
 		if (CastToClient()->HasItemRecastTimer(spell_id, inventory_slot)) {
 			MessageString(Chat::Red, SPELL_RECAST);
 			LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
@@ -6246,6 +6247,10 @@ bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 	bool from_augment = false;
 
 	if (!item) {
+		return false;
+	}
+
+	if (!item->GetItem()) {
 		return false;
 	}
 
