@@ -6569,7 +6569,6 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 	/*
 		Known bug: When a bard uses an augment with a clicky that has a cast time, the cast won't display. This issue only affects bards.
 	*/
-
 	if (is_casting_bard_song) {
 		//For spells with cast times. Cancel song cast, stop pusling and start item cast.
 		if (cast_time != 0) {
@@ -6592,7 +6591,7 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
-	if (DoCastingChecksOnCaster(spell_id)) {
+	else if (DoCastingChecksOnCaster(spell_id)) {
 		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
 	}
 }
