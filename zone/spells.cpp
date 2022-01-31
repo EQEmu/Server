@@ -2775,6 +2775,12 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 	if (spell_target->IsCharmed() && spells[spell_id].mana == 0 && spell_target->GetOwner() == this && IsEffectInSpell(spell_id, SE_Charm)) {
 		return true;
 	}
+	/*
+		If divine aura applied while pulsing, it is not interrupted but does not reapply until DA fades.
+	*/
+	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
+		return true;
+	}
 
 	if (!SpellFinished(spell_id, spell_target, slot, spells[spell_id].mana, 0xFFFFFFFF, spells[spell_id].resist_difficulty)) {
 		return false;
