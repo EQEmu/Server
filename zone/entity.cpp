@@ -4237,7 +4237,7 @@ void EntityList::AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, i
 				if (
 					attacker &&
 					attacker != n &&
-					//!n->IsEngaged() &&
+					!n->IsEngaged() &&
 					!n->GetSpecialAbility(IMMUNE_AGGRO) &&
 					!(n->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && attacker->IsClient()) &&
 					!(n->GetSpecialAbility(IMMUNE_AGGRO_NPC) && attacker->IsNPC()) &&

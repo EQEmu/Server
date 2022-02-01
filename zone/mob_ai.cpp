@@ -1068,7 +1068,6 @@ void Mob::AI_Process() {
 	}
 
 	if (engaged) {
-
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
 
@@ -1333,6 +1332,7 @@ void Mob::AI_Process() {
 
 		}    //end is within combat rangepet
 		else {
+
 			// See if we can summon the mob to us
 			if (!HateSummon()) {
 				//could not summon them, check ranged...
@@ -1348,31 +1348,16 @@ void Mob::AI_Process() {
 					}
 				}
 				// mob/npc waits until call for help complete, others can move
-				else if (AI_movement_timer->Check()){
-					if (IsTempPet()) {
-						Shout("AI PASS TIMER CHECK");
-					}
-					if (target && (GetOwnerID() || IsTempPet() || IsBot() || CastToNPC()->GetCombatEvent())) {
+				else if (AI_movement_timer->Check() && target &&
+						(GetOwnerID() || IsBot() || IsTempPet() ||
+						CastToNPC()->GetCombatEvent())) {
+					if (!IsRooted()) {
+						LogAI("Pursuing [{}] while engaged", target->GetName());
+						RunTo(target->GetX(), target->GetY(), target->GetZ());
 
-						if (!IsRooted()) {
-							if (IsTempPet()) {
-								Shout("Run to target");
-							}
-							LogAI("Pursuing [{}] while engaged", target->GetName());
-							RunTo(target->GetX(), target->GetY(), target->GetZ());
-
-						}
-						else {
-							if (IsTempPet()) {
-								Shout("Face Target");
-							}
-							FaceTarget();
-						}
 					}
 					else {
-						if (IsTempPet()) {
-							Shout("SUPER FAILURE");
-						}
+						FaceTarget();
 					}
 				}
 			}
