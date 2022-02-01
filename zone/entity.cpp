@@ -4233,7 +4233,6 @@ void EntityList::AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, i
 		NPC* n = it->second;
 		if (n && n->GetSwarmInfo()) {
 			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
-				n->Shout("Found %i Engaged %i", n->GetID(), n->IsEngaged());
 				if (
 					attacker &&
 					attacker != n &&
@@ -4244,7 +4243,6 @@ void EntityList::AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, i
 					!attacker->IsTrap() &&
 					!attacker->IsCorpse()
 					) {
-					n->Shout("new function CHECK");
 					n->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
 					n->SetTarget(attacker);
 				}
