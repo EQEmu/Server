@@ -8963,6 +8963,26 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 	}
 }
 
+void Mob::SendIllusionWearChange(Client* c) {
+
+	/*
+		We send this to client on Client::CompleteConnect() to properly update textures of
+		other mobs in zone with illusions on them.
+	*/
+	if (!c) {
+		return;
+	}
+
+	if (!spellbonuses.Illusion && !itembonuses.Illusion && !aabonuses.Illusion) {
+		return;
+	}
+
+	for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
+		SendWearChange(x, c);
+	}
+}
+
+
 void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, int base, int limit, int max)
 {
 	// Gender Illusions
