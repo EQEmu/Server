@@ -22,29 +22,34 @@ void command_npceditmass(Client *c, const Seperator *sep)
 	);
 
 	std::string search_column, search_value, change_column, change_value;
+
 	if (sep->arg[1]) {
 		search_column = sep->arg[1];
 	}
+
 	if (sep->arg[2]) {
 		search_value = sep->arg[2];
 	}
+
 	if (sep->arg[3]) {
 		change_column = sep->arg[3];
 	}
+
 	if (sep->arg[4]) {
 		change_value = sep->arg[4];
 	}
 
 	bool valid_change_column = false;
 	bool valid_search_column = false;
-	auto results             = content_db.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 
 	std::vector<std::string> possible_column_options;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		if (row[0] == change_column) {
 			valid_change_column = true;
 		}
+
 		if (row[0] == search_column) {
 			valid_search_column = true;
 		}
@@ -55,40 +60,58 @@ void command_npceditmass(Client *c, const Seperator *sep)
 	std::string options_glue = ", ";
 
 	if (!valid_search_column) {
-		c->Message(Chat::Red, "You must specify a valid search column. [%s] is not valid", search_column.c_str());
-		c->Message(Chat::Yellow, "Possible columns [%s]", implode(options_glue, possible_column_options).c_str());
+		c->Message(
+			Chat::Red,
+			fmt::format(
+				"You must specify a valid search column. [{}] is not valid",
+				search_column
+			).c_str()
+		);
+
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Possible columns [{}]",
+				implode(options_glue, possible_column_options)
+			).c_str()
+		);
 		return;
 	}
 
 	if (!valid_change_column) {
-		c->Message(Chat::Red, "You must specify a valid change column. [%s] is not valid", change_column.c_str());
-		c->Message(Chat::Yellow, "Possible columns [%s]", implode(options_glue, possible_column_options).c_str());
+		c->Message(
+			Chat::Red,
+			fmt::format(
+				"You must specify a valid change column. [{}] is not valid",
+				change_column
+			).c_str()
+		);
+
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Possible columns [{}]",
+				implode(options_glue, possible_column_options)
+			).c_str()
+		);
 		return;
 	}
 
 	if (!valid_search_column || !valid_change_column) {
-		c->Message(Chat::Red, "One requested column is invalid");
+		c->Message(Chat::Red, "One requested column is invalid.");
 		return;
 	}
 
 	query = fmt::format(
 		SQL(
-			select
-			id,
-			name,
-			{ 0 },
-			{ 1 }
-				from
-					npc_types
-				where
-				id IN(
-					select
-				spawnentry.npcID
-				from
-					spawnentry
-				join spawn2 on spawn2.spawngroupID = spawnentry.spawngroupID
-				where
-				spawn2.zone = '{2}' and spawn2.version = {3}
+			SELECT id, name, {}, {}
+			FROM npc_types
+			WHERE id IN(
+				SELECT spawnentry.npcID
+				FROM spawnentry
+				JOIN spawn2
+				ON spawn2.spawngroupID = spawnentry.spawngroupID
+				WHERE spawn2.zone = '{}' AND spawn2.version = {}
 			)
 		),
 		search_column,
@@ -99,7 +122,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 
 	std::string status = "(Searching)";
 
-	if (strcasecmp(sep->arg[5], "apply") == 0) {
+	if (!strcasecmp(sep->arg[5], "apply")) {
 		status = "(Applying)";
 	}
 
@@ -113,15 +136,14 @@ void command_npceditmass(Client *c, const Seperator *sep)
 
 	int found_count = 0;
 	results = content_db.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
-
-		std::string npc_id                      = row[0];
-		std::string npc_name                    = row[1];
-		std::string search_column_value         = str_tolower(row[2]);
+	for (auto row : results) {
+		std::string npc_id = row[0];
+		std::string npc_name = row[1];
+		std::string search_column_value = str_tolower(row[2]);
 		std::string change_column_current_value = row[3];
 
 		if (exact_match) {
-			if (search_column_value.compare(search_value) != 0) {
+			if (search_column_value.compare(search_value)) {
 				continue;
 			}
 		}
@@ -134,7 +156,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
-				"NPC ({0}) [{1}] ({2}) [{3}] Current ({4}) [{5}] New [{6}] {7}",
+				"NPC ({}) [{}] ({}) [{}] Current ({}) [{}] New [{}] {}",
 				npc_id,
 				npc_name,
 				search_column,
@@ -176,18 +198,44 @@ void command_npceditmass(Client *c, const Seperator *sep)
 			)
 		);
 
-		c->Message(Chat::Yellow, "Changes applied to (%i) NPC's", found_count);
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Changes applied to {} NPC{}.",
+				found_count,
+				found_count != 1 ? "s" : ""
+			).c_str()
+		);
 		zone->Repop();
 	}
 	else {
-		c->Message(Chat::Yellow, "Found (%i) NPC's that match this search...", found_count);
-
 		if (found_count > 0) {
 			c->Message(
-				Chat::Yellow, "To apply these changes, click <%s> or type [%s]",
-				EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
-				saylink.c_str()
+				Chat::Yellow,
+				fmt::format(
+					"{} NPC{} match your search.",
+					found_count,
+					found_count != 1 ? "s" : ""
+				).c_str()
 			);
+
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Would you like to {} these changes?",
+					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "apply")
+				).c_str()
+			);
+
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You can also use '{}'.",
+					saylink
+				).c_str()
+			);
+		} else {
+			c->Message(Chat::Yellow, "No NPCs match your search.");
 		}
 	}
 }
