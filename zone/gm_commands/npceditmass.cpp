@@ -69,7 +69,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		);
 
 		c->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"Possible columns [{}]",
 				implode(options_glue, possible_column_options)
@@ -88,7 +88,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		);
 
 		c->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"Possible columns [{}]",
 				implode(options_glue, possible_column_options)
@@ -154,30 +154,17 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		}
 
 		c->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
-				"Name: {} ID: {}",
+				"NPC ({}) [{}] ({}) [{}] Current ({}) [{}] New [{}] {}",
+				npc_id,
 				npc_name,
-				npc_id
-			).c_str()
-		);
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Search Column: {} Search Value: {}",
 				search_column,
-				search_column_value
-			).c_str()
-		);
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Change Column: {} Current Value: {} Change Value: {}",
+				search_column_value,
 				change_column,
 				change_column_current_value,
-				change_value
+				change_value,
+				status
 			).c_str()
 		);
 
@@ -212,7 +199,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		);
 
 		c->Message(
-			Chat::White,
+			Chat::Yellow,
 			fmt::format(
 				"Changes applied to {} NPC{}.",
 				found_count,
@@ -224,7 +211,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 	else {
 		if (found_count > 0) {
 			c->Message(
-				Chat::White,
+				Chat::Yellow,
 				fmt::format(
 					"{} NPC{} match your search.",
 					found_count,
@@ -233,7 +220,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 			);
 
 			c->Message(
-				Chat::White,
+				Chat::Yellow,
 				fmt::format(
 					"Would you like to {} these changes?",
 					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "apply")
@@ -241,14 +228,14 @@ void command_npceditmass(Client *c, const Seperator *sep)
 			);
 
 			c->Message(
-				Chat::White,
+				Chat::Yellow,
 				fmt::format(
 					"You can also use '{}'.",
 					saylink
 				).c_str()
 			);
 		} else {
-			c->Message(Chat::White, "No NPCs match your search.");
+			c->Message(Chat::Yellow, "No NPCs match your search.");
 		}
 	}
 }
