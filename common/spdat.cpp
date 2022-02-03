@@ -1464,6 +1464,10 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 
 bool IsPulsingBardSong(int32 spell_id)
 {
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+	
 	if (spells[spell_id].buff_duration == 0xFFFF ||
 		spells[spell_id].recast_time> 0 ||
 		spells[spell_id].mana > 0 || 
