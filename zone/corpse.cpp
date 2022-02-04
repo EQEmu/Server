@@ -1570,7 +1570,7 @@ uint16 Corpse::CountItem(uint32 item_id) {
 		}
 
 		if (loot_item->item_id == item_id) {
-			item_count += loot_item->charges;
+			item_count += loot_item->charges > 0 ? loot_item->charges : 1;
 		}
 	}
 	return item_count;
