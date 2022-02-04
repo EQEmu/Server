@@ -8993,15 +8993,13 @@ void Mob::ApplyIllusionToCorpse(int32 spell_id, Corpse* new_corpse) {
 		return;
 	}
 
-	for (int i = 0; i < EFFECT_COUNT; i++)
-	{
+	for (int i = 0; i < EFFECT_COUNT; i++){
 		if (spells[spell_id].effect_id[i] == SE_Illusion) {
 			new_corpse->ApplySpellEffectIllusion(spell_id, nullptr, -1, spells[spell_id].base_value[i], spells[spell_id].limit_value[i], spells[spell_id].max_value[i]);
 			return;
 		}
 	}
 }
-
 
 void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, int base, int limit, int max)
 {
@@ -9112,7 +9110,6 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 	}
 
 	if (buffslot != -1) {
-
 		if (caster == this && spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE &&
 			(spellbonuses.IllusionPersistence || aabonuses.IllusionPersistence || itembonuses.IllusionPersistence)) {
 			buffs[buffslot].persistant_buff = 1;
