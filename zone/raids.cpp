@@ -209,6 +209,7 @@ void Raid::AddBot(Bot* b, uint32 group, bool rleader, bool groupleader, bool loo
 	SendRaidAddAll(b->GetName());
 	
 	b->SetRaidGrouped(true);
+	b->p_raid_instance = this;
 	//SendRaidMOTD(b->GetOwner()->CastToClient());
 
 	// Mitch What to do here?
