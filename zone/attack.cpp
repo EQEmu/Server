@@ -2869,7 +2869,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	} //MERC
 
-	  // then add pet owner if there's one
+	//if I am a pet, then add pet owner if there's one
 	if (owner) { // Other is a pet, add him and it
 				 // EverHood 6/12/06
 				 // Can't add a feigned owner to hate list
@@ -2884,8 +2884,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 				!(this->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && owner->IsClient()) &&
 				!(this->GetSpecialAbility(IMMUNE_AGGRO_NPC) && owner->IsNPC())
 			) {
-				if (owner->IsClient() && !CheckAggro(owner))
+				if (owner->IsClient() && !CheckAggro(owner)) {
 					owner->CastToClient()->AddAutoXTarget(this);
+				}
 				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
 			}
 		}
@@ -2912,8 +2913,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	}
 
-	if (other->GetTempPetCount()) {
-		entity_list.AddTempPetsToHateList(other, this, bFrenzy);
+	//I have a swarm pet, add other to it.
+	if (GetTempPetCount()) {
+		entity_list.AddTempPetsToHateList(this, other, bFrenzy);
 	}
 
 	if (!wasengaged) {
@@ -3695,6 +3697,10 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				pet->SetTarget(attacker);
 				MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
 			}
+		}
+
+		if (GetTempPetCount()) {
+			entity_list.AddTempPetsToHateListOnOwnerDamage(this, attacker, spell_id);
 		}
 
 		//see if any runes want to reduce this damage

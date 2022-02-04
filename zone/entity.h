@@ -315,6 +315,7 @@ public:
 	void	DestroyTempPets(Mob *owner);
 	int16	CountTempPets(Mob *owner);
 	void	AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy = false);
+	void	AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, int32 spell_id);
 	Entity *GetEntityMob(uint16 id);
 	Entity *GetEntityMerc(uint16 id);
 	Entity *GetEntityDoor(uint16 id);
@@ -381,6 +382,7 @@ public:
 	void	SendNimbusEffects(Client *c);
 	void	SendUntargetable(Client *c);
 	void	SendAppearanceEffects(Client *c);
+	void    SendIllusionWearChange(Client *c);
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
 	void	QuestJournalledSayClose(Mob *sender, float dist, const char* mobname, const char* message, Journal::Options &opts);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);

@@ -358,6 +358,7 @@ public:
 	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
 	void ApplyHealthTransferDamage(Mob *caster, Mob *target, uint16 spell_id);
 	void ApplySpellEffectIllusion(int32 spell_id, Mob* caster, int buffslot, int base, int limit, int max);
+	void SendIllusionWearChange(Client* c);
 	
 	//Bard Logic
 	bool ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);
