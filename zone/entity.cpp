@@ -4686,6 +4686,25 @@ void EntityList::SendAppearanceEffects(Client *c)
 	}
 }
 
+void EntityList::SendIllusionWearChange(Client *c)
+{
+	if (!c) {
+		return;
+	}
+
+	for (auto &e : mob_list) {
+		auto &mob = e.second;
+
+		if (mob) {
+			if (mob == c) {
+				continue;
+			}
+
+			mob->SendIllusionWearChange(c);
+		}
+	}
+}
+
 void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 {
 	// This is only called for SoF clients, as regular /who is now handled server-side for that client.
