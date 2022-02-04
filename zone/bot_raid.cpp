@@ -231,6 +231,7 @@ void Bot::AI_Process_Raid()
 		if (NOT_HOLDING && NOT_PASSIVE) {
 
 			auto attack_target = bot_owner->GetTarget();
+
 			if (attack_target) {
 
 				InterruptSpell();

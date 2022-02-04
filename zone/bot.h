@@ -387,7 +387,7 @@ public:
 	static void ProcessRaidInvite(Bot* invitee, Client* invitor); //Mitch
 	static void ProcessRaidInvite(Client* invitee, Client* invitor); //Mitch	
 	uint8 GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets); //Mitch
-	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
+	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; } //Mitch
 
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
