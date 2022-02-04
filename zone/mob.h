@@ -285,9 +285,6 @@ public:
 	void SetInvisible(uint8 state);
 	void SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color = 0, uint32 hero_forge_model = 0);
 
-	//Song
-	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
-
 	//Spell
 	void SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide,
 		uint32 unk020, bool perm_effect = false, Client *c = nullptr, uint32 caster_id = 0, uint32 target_id = 0);
@@ -360,13 +357,14 @@ public:
 	void ApplySpellEffectIllusion(int32 spell_id, Mob* caster, int buffslot, int base, int limit, int max);
 	void SendIllusionWearChange(Client* c);
 	
-	//Bard Logic
+	//Bard 
 	bool ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);
 	bool IsActiveBardSong(int32 spell_id);
 	bool HasActiveSong() const { return(bardsong != 0); }
 	void ZeroBardPulseVars();
 	void DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot, 
 		uint32 recast_type , uint32 recast_delay);
+	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
 
 	//Buff
 	void BuffProcess();
