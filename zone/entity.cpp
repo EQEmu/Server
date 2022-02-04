@@ -4659,24 +4659,20 @@ void EntityList::SendAppearanceEffects(Client *c)
 
 void EntityList::SendIllusionWearChange(Client *c)
 {
-
 	if (!c) {
 		return;
 	}
 
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		Mob *cur = it->second;
+	for (auto &e : mob_list) {
+		auto &mob = e.second;
 
-		if (cur) {
-			if (cur == c) {
-				++it;
+		if (mob) {
+			if (mob == c) {
 				continue;
 			}
 
-			cur->SendIllusionWearChange(c);
+			mob->SendIllusionWearChange(c);
 		}
-		++it;
 	}
 }
 
