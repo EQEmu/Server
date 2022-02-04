@@ -5836,31 +5836,27 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 	if (spell_id == SPELL_UNKNOWN) {
 		return(false);
 	}
-
-	if ((spells[spell_id].cast_time == 0) && (spells[spell_id].recast_time == 0) && (spells[spell_id].recovery_time == 0))
-	{
-
-		for (int i = 0; i < MAX_PROCS; i++){
-			if (PermaProcs[i].spellID == spell_id || 
-				SpellProcs[i].spellID == spell_id ||
-				RangedProcs[i].spellID == spell_id || 
-				DefensiveProcs[i].spellID == spell_id){
-				return true;
-			}
-		}
-
-		if (IsClient()) {
-			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
-
-				if (aabonuses.SpellProc[i + 1] == spell_id ||
-					aabonuses.RangedProc[i + 1] == spell_id ||
-					aabonuses.DefensiveProc[i + 1] == spell_id) {
-					return true;
-				}
-			}
+	/*
+		Procs that originate from casted spells are still limited by SPA 311 (~Kayen confirmed on live 2/4/22)
+	*/
+	for (int i = 0; i < MAX_PROCS; i++) {
+		if (PermaProcs[i].spellID == spell_id ||
+			SpellProcs[i].spellID == spell_id ||
+			RangedProcs[i].spellID == spell_id ||
+			DefensiveProcs[i].spellID == spell_id) {
+			return true;
 		}
 	}
 
+	if (IsClient()) {
+		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
+			if (aabonuses.SpellProc[i + 1] == spell_id ||
+				aabonuses.RangedProc[i + 1] == spell_id ||
+				aabonuses.DefensiveProc[i + 1] == spell_id) {
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
