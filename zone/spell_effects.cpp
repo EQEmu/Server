@@ -8984,13 +8984,10 @@ void Mob::SendIllusionWearChange(Client* c) {
 
 void Mob::ApplyIllusionToCorpse(int32 spell_id, Corpse* new_corpse) {
 
-	//Transfers most illusions over to the corpse.
-
+	//Transfers most illusions over to the corpse upon death
 	if (!IsValidSpell(spell_id)) {
 		return;
 	}
-
-	//Corpse *new_corpse = entity_list.GetCorpseByID(corpse_id);
 
 	if (!new_corpse) {
 		return;
@@ -9000,9 +8997,9 @@ void Mob::ApplyIllusionToCorpse(int32 spell_id, Corpse* new_corpse) {
 	{
 		if (spells[spell_id].effect_id[i] == SE_Illusion) {
 			new_corpse->ApplySpellEffectIllusion(spell_id, nullptr, -1, spells[spell_id].base_value[i], spells[spell_id].limit_value[i], spells[spell_id].max_value[i]);
+			return;
 		}
 	}
-
 }
 
 
