@@ -587,6 +587,7 @@ void Client::CompleteConnect()
 							if (b)
 							{
 								b->SetRaidGrouped(true);
+								b->p_raid_instance = raid;
 								//b->SetFollowID(this->GetID());
 							}
 						}
