@@ -4208,7 +4208,7 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		NPC* n = it->second;
-		if (n->GetSwarmInfo()) {
+		if (n && n->GetSwarmInfo()) {
 			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
 				if (
 					!n->GetSpecialAbility(IMMUNE_AGGRO) &&
@@ -4216,6 +4216,35 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 					!(n->GetSpecialAbility(IMMUNE_AGGRO_NPC) && other->IsNPC())
 				) {
 					n->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+				}
+			}
+		}
+		++it;
+	}
+}
+
+void EntityList::AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, int32 spell_id)
+{
+	if (!attacker || !owner)
+		return;
+
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		NPC* n = it->second;
+		if (n && n->GetSwarmInfo()) {
+			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
+				if (
+					attacker &&
+					attacker != n &&
+					!n->IsEngaged() &&
+					!n->GetSpecialAbility(IMMUNE_AGGRO) &&
+					!(n->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && attacker->IsClient()) &&
+					!(n->GetSpecialAbility(IMMUNE_AGGRO_NPC) && attacker->IsNPC()) &&
+					!attacker->IsTrap() &&
+					!attacker->IsCorpse()
+					) {
+					n->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
+					n->SetTarget(attacker);
 				}
 			}
 		}
