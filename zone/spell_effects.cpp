@@ -2200,11 +2200,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Fading Memories");
 #endif
 				if(zone->random.Roll(spells[spell_id].base_value[i])) {
-
-					if(caster && caster->IsClient())
-						caster->CastToClient()->Escape();
-					else
-					{
+					if (IsClient()) {
+						CastToClient()->Escape();
+					}
+					else{
 						entity_list.RemoveFromTargets(caster);
 						SetInvisible(Invisibility::Invisible);
 					}
@@ -3232,6 +3231,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Ff_FocusTimerMin:
 			case SE_Proc_Timer_Modifier:
 			case SE_FFItemClass:
+			case SE_SpellEffectResistChance:
 			{
 				break;
 			}
