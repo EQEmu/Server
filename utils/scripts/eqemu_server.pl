@@ -1911,7 +1911,7 @@ sub fetch_peq_db_full
 sub map_files_fetch_bulk
 {
     print "[Install] Fetching Latest Maps... (This could take a few minutes...)\n";
-    get_remote_file("http://github.com/Akkadius/EQEmuMaps/archive/master.zip", "maps/maps.zip", 1);
+    get_remote_file("http://analytics.akkadius.com/maps.zip", "maps/maps.zip", 1);
     unzip('maps/maps.zip', 'maps/');
     my @files;
     my $start_dir = "maps/EQEmuMaps-master/";
