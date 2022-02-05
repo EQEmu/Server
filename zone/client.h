@@ -980,7 +980,7 @@ public:
 	//bool DecreaseByType(uint32 type, uint8 amt);
 	bool DecreaseByID(uint32 type, int16 quantity);
 	uint8 SlotConvert2(uint8 slot); //Maybe not needed.
-	void Escape(); //AA Escape
+	void Escape(int max_level = 0); //AA Escape
 	void DisenchantSummonedBags(bool client_update = true);
 	void RemoveNoRent(bool client_update = true);
 	void RemoveDuplicateLore(bool client_update = true);

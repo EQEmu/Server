@@ -2199,9 +2199,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fading Memories");
 #endif
+				int max_level = 0;
+
+				if (RuleB(Spells, UseFadingMemoriesMaxLevel)) {
+					max_level = spells[spell_id].max_value[i];
+				}
+
 				if(zone->random.Roll(spells[spell_id].base_value[i])) {
 					if (IsClient()) {
-						CastToClient()->Escape();
+						CastToClient()->Escape(max_level);
 					}
 					else{
 						entity_list.RemoveFromTargets(caster);

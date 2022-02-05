@@ -3594,10 +3594,7 @@ bool Mob::HateSummon() {
 		if(summon_level == 1) {
 			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
-			float summoner_zoff = this->GetZOffset();
-			float summoned_zoff = target->GetZOffset();
 			auto new_pos = m_Position;
-			new_pos.z -= (summoner_zoff - summoned_zoff);
 			float angle = new_pos.w - target->GetHeading();
 			new_pos.w = target->GetHeading();
 

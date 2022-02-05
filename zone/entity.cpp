@@ -1504,7 +1504,7 @@ void EntityList::ReplaceWithTarget(Mob *pOldMob, Mob *pNewTarget)
 	}
 }
 
-void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
+void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets, int max_level)
 {
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
@@ -1512,6 +1512,9 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 		++it;
 
 		if (!m)
+			continue;
+
+		if (max_level && m->GetLevel() > max_level)
 			continue;
 
 		if (RemoveFromXTargets) {
