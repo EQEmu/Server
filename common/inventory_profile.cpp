@@ -621,6 +621,37 @@ int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
 	return quantity;
 }
 
+bool EQ::InventoryProfile::HasItemEquippedByID(uint32 item_id)
+{
+	bool has_equipped = false;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->GetID() == item_id) {
+			has_equipped = true;
+			break;
+		}
+	}
+
+	return has_equipped;
+}
+
+int EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
+{
+	int quantity = 0;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->GetID() == item_id) {
+			quantity += item->IsStackable() ? item->GetCharges() : 1;
+		}
+	}
+	
+	return quantity;
+}
+
 //This function has a flaw in that it only returns the last stack that it looked at
 //when quantity is greater than 1 and not all of quantity can be found in 1 stack.
 int16 EQ::InventoryProfile::HasItem(uint32 item_id, uint8 quantity, uint8 where)
