@@ -449,6 +449,41 @@ XS(XS_Inventory_CountAugmentEquippedByID) {
 	XSRETURN(1);
 }
 
+XS(XS_Inventory_HasItemEquippedByID);
+XS(XS_Inventory_HasItemEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Inventory::HasItemEquippedByID(THIS, uint32 item_id)");
+	{
+		EQ::InventoryProfile* THIS;
+		bool has_equipped = false;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_INVENTORY;
+		has_equipped = THIS->HasItemEquippedByID(item_id);
+		ST(0) = boolSV(has_equipped);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Inventory_CountItemEquippedByID);
+XS(XS_Inventory_CountItemEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Inventory::CountItemEquippedByID(THIS, uint32 item_id)");
+	{
+		EQ::InventoryProfile* THIS;
+		int quantity = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_INVENTORY;
+		quantity = THIS->CountItemEquippedByID(item_id);
+		XSprePUSH;
+		PUSHi((IV)quantity);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -466,6 +501,7 @@ XS(boot_Inventory) {
 	XS_VERSION_BOOTCHECK;
 	newXSproto(strcpy(buf, "CanItemFitInContainer"), XS_Inventory_CanItemFitInContainer, file, "$$$");
 	newXSproto(strcpy(buf, "CountAugmentEquippedByID"), XS_Inventory_CountAugmentEquippedByID, file, "$$");
+	newXSproto(strcpy(buf, "CountItemEquippedByID"), XS_Inventory_CountItemEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "CheckNoDrop"), XS_Inventory_CheckNoDrop, file, "$$");
 	newXSproto(strcpy(buf, "DeleteItem"), XS_Inventory_DeleteItem, file, "$$;$");
 	newXSproto(strcpy(buf, "FindFreeSlot"), XS_Inventory_FindFreeSlot, file, "$$$;$$");
@@ -479,6 +515,7 @@ XS(boot_Inventory) {
 	newXSproto(strcpy(buf, "HasItem"), XS_Inventory_HasItem, file, "$$;$$");
 	newXSproto(strcpy(buf, "HasItemByLoreGroup"), XS_Inventory_HasItemByLoreGroup, file, "$$;$");
 	newXSproto(strcpy(buf, "HasItemByUse"), XS_Inventory_HasItemByUse, file, "$$;$$");
+	newXSproto(strcpy(buf, "HasItemEquippedByID"), XS_Inventory_HasItemEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "HasSpaceForItem"), XS_Inventory_HasSpaceForItem, file, "$$$");
 	newXSproto(strcpy(buf, "PopItem"), XS_Inventory_PopItem, file, "$$");
 	newXSproto(strcpy(buf, "PushCursor"), XS_Inventory_PushCursor, file, "$$");
