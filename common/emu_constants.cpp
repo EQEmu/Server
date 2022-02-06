@@ -226,12 +226,12 @@ std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 const std::map<uint8, std::string>& EQ::constants::GetFlyModeMap()
 {
 	static const std::map<uint8, std::string> flymode_map = {
-		{ EQ::constants::GravityBehavior::Ground, "Ground" },
-		{ EQ::constants::GravityBehavior::Flying, "Flying" },
-		{ EQ::constants::GravityBehavior::Levitating, "Levitating" },
-		{ EQ::constants::GravityBehavior::Water, "Water" },
-		{ EQ::constants::GravityBehavior::Floating, "Floating" },
-		{ EQ::constants::GravityBehavior::LevitateWhileRunning, "Levitating While Running" },
+		{ GravityBehavior::Ground, "Ground" },
+		{ GravityBehavior::Flying, "Flying" },
+		{ GravityBehavior::Levitating, "Levitating" },
+		{ GravityBehavior::Water, "Water" },
+		{ GravityBehavior::Floating, "Floating" },
+		{ GravityBehavior::LevitateWhileRunning, "Levitating While Running" },
 	};
 	return flymode_map;
 }
@@ -336,4 +336,24 @@ std::string EQ::constants::GetAccountStatusName(uint8 account_status)
 	}
 
 	return status_name;
+}
+
+const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
+{
+	static const std::map<uint8, std::string> damage_type_map = {
+		{ EnvironmentalDamage::Lava, "Lava" },
+		{ EnvironmentalDamage::Drowning, "Drowning" },
+		{ EnvironmentalDamage::Falling, "Falling" },
+		{ EnvironmentalDamage::Trap, "Trap" }
+	};
+	return damage_type_map;
+}
+
+std::string EQ::constants::GetEnvironmentalDamageName(uint8 damage_type)
+{
+	if (EQ::ValueWithin(damage_type, EnvironmentalDamage::Lava, EnvironmentalDamage::Trap)) {
+		auto damage_types = EQ::constants::GetEnvironmentalDamageMap();
+		return damage_types[damage_type];
+	}
+	return std::string();
 }
