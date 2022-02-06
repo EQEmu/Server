@@ -3995,14 +3995,6 @@ void Bot::Depop() {
 	if(HasGroup())
 		Bot::RemoveBotFromGroup(this, GetGroup());
 	
-	//Mitch
-	Raid* bot_raid = entity_list.GetRaidByBotName(this->GetName());
-	if (bot_raid) {
-		uint32 gid = bot_raid->GetGroup(this->GetName());
-		bot_raid->SendRaidGroupRemove(this->GetName(), bot_raid->GetGroup(this->GetName()));
-		bot_raid->RemoveMember(this->GetName());
-		bot_raid->GroupUpdate(gid);
-	}
 	if(HasPet())
 		GetPet()->Depop();
 
@@ -8434,7 +8426,14 @@ void Bot::Camp(bool databaseSave) {
 	if(GetGroup())
 		RemoveBotFromGroup(this, GetGroup());
 	
-
+	//Mitch
+	Raid* bot_raid = entity_list.GetRaidByBotName(this->GetName());
+	if (bot_raid) {
+		uint32 gid = bot_raid->GetGroup(this->GetName());
+		bot_raid->SendRaidGroupRemove(this->GetName(), bot_raid->GetGroup(this->GetName()));
+		bot_raid->RemoveMember(this->GetName());
+		bot_raid->GroupUpdate(gid);
+	}
 
 
 	// RemoveBotFromGroup() code is too complicated for this to work as-is (still needs to be addressed to prevent memory leaks)
