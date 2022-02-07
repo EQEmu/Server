@@ -1253,11 +1253,13 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 	uint32 charges = 0;
 	// We don't have the AA
-	if (!GetAA(rank_id, &charges))
+	if (!GetAA(rank_id, &charges)) {
 		return;
+	}
 	//if expendable make sure we have charges
-	if (ability->charges > 0 && charges < 1)
+	if (ability->charges > 0 && charges < 1) {
 		return;
+	}
 
 	//check cooldown
 	if (!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
@@ -1274,12 +1276,12 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			Message(Chat::Red, "You can use this ability again in %u minute(s) %u seconds",
 				aaremain_min, aaremain_sec);
 		}
-
 		return;
 	}
 
-	if (!IsCastWhileInvis(rank->spell))
+	if (!IsCastWhileInvis(rank->spell)) {
 		CommonBreakInvisible();
+	}
 
 	if (spells[rank->spell].sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
 		MessageString(Chat::SpellFailure, SNEAK_RESTRICT);
@@ -1317,6 +1319,20 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, 0xFFFFFFFF, 0, nullptr, rank->id);
 		}
 	}
+}
+
+void Client::SetAARecastTimer(AA::Rank *rank_in, int32 spell_id) {
+	
+	//calculate AA cooldown
+	int timer_duration = rank_in->recast_time - GetAlternateAdvancementCooldownReduction(rank_in);
+	
+	if (timer_duration <= 0) {
+		return;
+	}
+
+	CastToClient()->GetPTimers().Start(rank_in->spell_type + pTimerAAStart, timer_duration);
+	CastToClient()->SendAlternateAdvancementTimer(rank_in->spell_type, 0, 0);
+	LogSpells("Spell [{}]: Setting AA reuse timer [{}] to [{}]", spell_id, rank_in->spell_type + pTimerAAStart, timer_duration);
 }
 
 int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {

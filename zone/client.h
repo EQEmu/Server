@@ -1495,6 +1495,8 @@ public:
 	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0);
 	void SetItemRecastTimer(int32 spell_id, uint32 inventory_slot);
 	bool HasItemRecastTimer(int32 spell_id, uint32 inventory_slot);
+	void SetDisciplineRecastTimer(int32 spell_id);
+	void SetAARecastTimer(AA::Rank *rank_in, int32 spell_id);
 
 	inline bool AggroMeterAvailable() const { return ((m_ClientVersionBit & EQ::versions::maskRoF2AndLater)) && RuleB(Character, EnableAggroMeter); } // RoF untested
 	inline void SetAggroMeterLock(int in) { m_aggrometer.set_lock_id(in); }
