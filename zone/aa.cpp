@@ -1226,7 +1226,7 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 
 void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
-
+	Shout("1 Client::ActivateAlternateAdvancementAbility");
 	if (!rank) {
 		return;
 	}
@@ -1240,7 +1240,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 	//do not allow AA to cast if your actively casting another AA.
-	if (rank->spell == casting_spell_id) {
+	if (rank->spell == casting_spell_id && rank->id == casting_spell_aa_id) {
 		return;
 	}
 
@@ -1264,7 +1264,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if (ability->charges > 0 && charges < 1) {
 		return;
 	}
-
+	Shout("2 Client::ActivateAlternateAdvancementAbility");
 	//check cooldown
 	if (!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
 		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
@@ -1293,13 +1293,15 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 	//
 	// Modern clients don't require pet targeted for AA casts that are ST_Pet
-	if (spells[rank->spell].target_type == ST_Pet || spells[rank->spell].target_type == ST_SummonedPet)
+	if (spells[rank->spell].target_type == ST_Pet || spells[rank->spell].target_type == ST_SummonedPet) {
 		target_id = GetPetID();
+	}
 
 	// extra handling for cast_not_standing spells
 	if (!IgnoreCastingRestriction(rank->spell)) {
-		if (GetAppearance() == eaSitting) // we need to stand!
+		if (GetAppearance() == eaSitting) { // we need to stand!
 			SetAppearance(eaStanding, false);
+		}
 
 		if (GetAppearance() != eaStanding) {
 			MessageString(Chat::SpellFailure, STAND_TO_CAST);
@@ -1327,6 +1329,10 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 void Client::SetAARecastTimer(AA::Rank *rank_in, int32 spell_id) {
 	
+	if (!rank_in) {
+		return;
+	}
+
 	//calculate AA cooldown
 	int timer_duration = rank_in->recast_time - GetAlternateAdvancementCooldownReduction(rank_in);
 	
@@ -1370,6 +1376,8 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 }
 
 void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
+	Shout("Mob::ExpendAlternateAdvancementCharge");
+	return;
 	for (auto &iter : aa_ranks) {
 		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
 		if (ability && aa_id == ability->id) {

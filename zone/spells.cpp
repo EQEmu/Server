@@ -2697,13 +2697,18 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				active_aa_id = casting_spell_aa_id;
 			}
 			Shout("Active AA id %i Spell %i", active_aa_id, spell_id);
+
 			AA::Rank *rank = zone->GetAlternateAdvancementRank(active_aa_id);
 
 			CastToClient()->SetAARecastTimer(rank, spell_id);
+			Shout("try expendtiable");
 
 			//Need to test this for bard casts.
 			if (rank && rank->base_ability) {
 				ExpendAlternateAdvancementCharge(rank->base_ability->id);
+			}
+			else {
+				Shout("try expendtiable FAIL");
 			}
 		}
 		//Set Custom Recast Timer
@@ -2804,6 +2809,8 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 	if (!SpellFinished(spell_id, spell_target, slot, spells[spell_id].mana, 0xFFFFFFFF, spells[spell_id].resist_difficulty)) {
 		return false;
 	}
+
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
