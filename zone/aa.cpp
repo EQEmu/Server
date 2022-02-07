@@ -1226,7 +1226,7 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 
 void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
-	Shout("1 Client::ActivateAlternateAdvancementAbility");
+
 	if (!rank) {
 		return;
 	}
@@ -1264,7 +1264,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if (ability->charges > 0 && charges < 1) {
 		return;
 	}
-	Shout("2 Client::ActivateAlternateAdvancementAbility");
+
 	//check cooldown
 	if (!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
 		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
@@ -1376,8 +1376,7 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 }
 
 void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
-	Shout("Mob::ExpendAlternateAdvancementCharge");
-	return;
+
 	for (auto &iter : aa_ranks) {
 		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
 		if (ability && aa_id == ability->id) {
