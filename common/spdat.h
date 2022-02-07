@@ -191,9 +191,6 @@
 #define MAX_APPEARANCE_EFFECTS 20 //Up to 20 Appearance Effects can be saved to a mobs appearance effect array, these will be sent to other clients when they enter a zone (This is arbitrary)
 #define MAX_CAST_ON_SKILL_USE 36 //Actual amount is MAX/3
 
-#define ZONE_TUTORIAL 183
-#define ZONE_LOAD 184
-
 //instrument item id's used as song components
 #define INSTRUMENT_HAND_DRUM 13000
 #define INSTRUMENT_WOODEN_FLUTE 13001
