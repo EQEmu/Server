@@ -1491,7 +1491,10 @@ public:
 	void LeaveRaidXTargets(Raid *r);
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
-	void SendItemRecastTimer(uint32 recast_type, uint32 recast_delay = 0);
+
+	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0);
+	void SetItemRecastTimer(int32 spell_id, uint32 inventory_slot);
+	bool HasItemRecastTimer(int32 spell_id, uint32 inventory_slot);
 
 	inline bool AggroMeterAvailable() const { return ((m_ClientVersionBit & EQ::versions::maskRoF2AndLater)) && RuleB(Character, EnableAggroMeter); } // RoF untested
 	inline void SetAggroMeterLock(int in) { m_aggrometer.set_lock_id(in); }

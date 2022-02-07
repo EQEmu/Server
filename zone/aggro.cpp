@@ -660,6 +660,9 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC())
 		return false;
 
+	if (target->IsHorse())
+		return false;
+
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
 	Mob *our_owner = GetOwner();
