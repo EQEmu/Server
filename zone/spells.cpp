@@ -2683,7 +2683,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 		//Set Discipline Recast Timer
 		else if (slot == CastingSlot::Discipline) {
-			CastToClient()->SetDisciplineRecastTimer(spell_id);
+			if (spell_id == casting_spell_id || (GetClass() == BARD && spells[spell_id].cast_time == 0 && spell_id != casting_spell_id)) {
+				CastToClient()->SetDisciplineRecastTimer(spell_id);
+			}
 		}
 		//Set AA Recast Timer.
 		else if (slot == CastingSlot::AltAbility){
@@ -6321,11 +6323,9 @@ void Client::SetDisciplineRecastTimer(int32 spell_id) {
 		return;
 	}
 
-	if (spell_id == casting_spell_id || (GetClass() == BARD && spell_id != casting_spell_id && spells[spell_id].cast_time == 0)){
-		CastToClient()->GetPTimers().Start((uint32)DiscTimer, timer_duration);
-		CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, timer_duration);
-		LogSpells("Spell [{}]: Setting disciple reuse timer [{}] to [{}]", spell_id, spells[spell_id].timer_id, timer_duration);
-	}
+	CastToClient()->GetPTimers().Start((uint32)DiscTimer, timer_duration);
+	CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, timer_duration);
+	LogSpells("Spell [{}]: Setting disciple reuse timer [{}] to [{}]", spell_id, spells[spell_id].timer_id, timer_duration);
 }
 
 
