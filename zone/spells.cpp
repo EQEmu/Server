@@ -1681,7 +1681,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	// we're done casting, now try to apply the spell
-	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
+	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, true))
 	{
 		LogSpells("Casting of [{}] canceled: SpellFinished returned false", spell_id);
 		// most of the cases we return false have a message already or are logic errors that shouldn't happen
@@ -2300,7 +2300,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
-						uint32 timer, uint32 timer_duration, bool from_casted_spell, uint32 aa_id)
+						bool from_casted_spell, uint32 aa_id)
 {
 	Mob *ae_center = nullptr;
 
@@ -2682,17 +2682,22 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			CastToClient()->SetItemRecastTimer(spell_id, inventory_slot);
 		}
 		//Set Discipline Recast Timer
-		if (slot == CastingSlot::Discipline) {
+		else if (slot == CastingSlot::Discipline) {
 			CastToClient()->SetDisciplineRecastTimer(spell_id);
 		}
-		//Set AA Recast Timer.
-		Shout("casting_spell_aa_id %i || aa_id %i slot %i", casting_spell_aa_id, aa_id, slot);
-		if (casting_spell_aa_id || aa_id) {
-			if (!aa_id) {
-				aa_id = casting_spell_aa_id;
+		else if (slot == CastingSlot::AltAbility){
+			//Set AA Recast Timer.
+			Shout("casting_spell_aa_id %i || aa_id %i slot %i spell_id %i", casting_spell_aa_id, aa_id, slot, spell_id);
+			uint32 active_aa_id = 0;
+			//aa_id is only passed directly into spellfinished when a bard is using AA while casting, this supports casting an AA while clicking an instant AA.
+			if (GetClass() == BARD && spells[spell_id].cast_time == 0 && casting_spell_aa_id != aa_id) {
+				active_aa_id = aa_id;
 			}
-
-			AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
+			else {
+				active_aa_id = casting_spell_aa_id;
+			}
+			Shout("Active AA id %i Spell %i", active_aa_id, spell_id);
+			AA::Rank *rank = zone->GetAlternateAdvancementRank(active_aa_id);
 
 			CastToClient()->SetAARecastTimer(rank, spell_id);
 

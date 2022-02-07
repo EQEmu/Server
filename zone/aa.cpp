@@ -1239,6 +1239,10 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if (!IsValidSpell(rank->spell)) {
 		return;
 	}
+	//do not allow AA to cast if your actively casting another AA.
+	if (rank->spell == casting_spell_id) {
+		return;
+	}
 
 	if (!CanUseAlternateAdvancementRank(rank)) {
 		return;
@@ -1312,9 +1316,9 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			if (!DoCastingChecksOnCaster(rank->spell)) {
 				return;
 			}
-			SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1,
-				spells[rank->spell].resist_difficulty, false, -1, 0xFFFFFFFF, 0, false, rank->id);
+			SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false, -1, false, rank->id);
 		}
+		//Known issue: If you attempt to give a Bard an AA with a cast time, the cast timer will not display on the client (no live bard AA have cast time).
 		else {
 			CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, 0xFFFFFFFF, 0, nullptr, rank->id);
 		}
