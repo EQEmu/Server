@@ -2675,7 +2675,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		SetMGB(false);
 	}
 
-	if (IsClient() && !isproc)
+	//all spell triggers use Item slot, but don't have an item associated. We don't need to check recast timers on these.
+	bool is_triggered_spell = false;
+	if (slot == CastingSlot::Item && inventory_slot == 0xFFFFFFFF) {
+		is_triggered_spell = true;
+	}
+
+	if (IsClient() && !isproc && !is_triggered_spell)
 	{
 		//Set Item or Augment Click Recast Timer
 		if (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt) {
