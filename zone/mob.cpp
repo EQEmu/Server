@@ -3984,6 +3984,16 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		return;
 	}
 
+	if (IsSilenced() && !IsDiscipline(spell_id)) {
+		MessageString(Chat::Red, SILENCED_STRING);
+		return;
+	}
+
+	if (IsAmnesiad() && IsDiscipline(spell_id)) {
+		MessageString(Chat::Red, MELEE_SILENCE);
+		return;
+	}
+
 	if(inst && IsClient()) {
 		//const cast is dirty but it would require redoing a ton of interfaces at this point
 		//It should be safe as we don't have any truly const EQ::ItemInstance floating around anywhere.
