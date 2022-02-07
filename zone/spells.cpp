@@ -2300,7 +2300,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
-						uint32 timer, uint32 timer_duration, bool from_casted_spell)
+						uint32 timer, uint32 timer_duration, bool from_casted_spell, uint32 aa_id)
 {
 	Mob *ae_center = nullptr;
 
@@ -2674,32 +2674,79 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if (mgb) {
 		SetMGB(false);
 	}
-	/*
-		Set Recast Timer on spells.
-	*/
-	if(IsClient() && !isproc)
+
+	if (IsClient() && !isproc)
 	{
-		//Support for bards to get disc recast timers while singing
-		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
-			CastToClient()->GetPTimers().Start(timer, timer_duration);
-			LogSpells("Spell [{}]: Setting bard disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
+		/*
+			Set Item or Augment Click Recast Timer
+		*/
+		if (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt) {
+			CastToClient()->SetItemRecastTimer(spell_id, inventory_slot);
 		}
+		/*
+			Set Discipline Recast Timer
+		*/
+		if (slot == CastingSlot::Discipline) {
 
-		if(casting_spell_aa_id) {
-			AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
+			//Set Recast timer for bards using disciplines while singing.
+			if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+				CastToClient()->GetPTimers().Start(timer, timer_duration);
+				CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, timer_duration);
+				LogSpells("Spell [{}]: Setting bard disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
+			}
+			else if (spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
+			{
+				CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
+				CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, casting_spell_timer_duration);
+				LogSpells("Spell [{}]: Setting disciple reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
+			}
 
-			if(rank && rank->base_ability) {
+			Shout("Displcine reset timer");
+		}
+		/*
+			Set AA Recast Timer.
+		*/
+		Shout("casting_spell_aa_id %i || aa_id %i", casting_spell_aa_id, aa_id);
+		if (casting_spell_aa_id || aa_id) {
+			if (!aa_id) {
+				aa_id = casting_spell_aa_id;
+			}
+
+			AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
+
+			//calculate AA cooldown
+			int cooldown = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
+			if (cooldown < 0) {
+				cooldown = 0;
+			}
+
+			if (cooldown > 0) {
+				//set recast timer on AA
+				Shout("Set recast timer %i", aa_id);
+				CastToClient()->GetPTimers().Start(rank->spell_type + pTimerAAStart, cooldown);
+				CastToClient()->SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
+				LogSpells("Spell [{}]: Setting AA reuse timer [{}] to [{}]", spell_id, rank->spell_type + pTimerAAStart, cooldown);
+			}
+
+			//Need to test this for bard casts.
+			if (rank && rank->base_ability) {
 				ExpendAlternateAdvancementCharge(rank->base_ability->id);
 			}
 		}
-		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
+		/*
+			Set Custom Recast Timer
+		*/
+		else if (spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			//aa new todo: aa expendable charges here
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
-		else if(spells[spell_id].recast_time > 1000 && !spells[spell_id].is_discipline) {
-			int recast = spells[spell_id].recast_time/1000;
+		/*
+			Set Spell Recast Timer
+		*/
+		else if (spells[spell_id].recast_time > 1000 && !spells[spell_id].is_discipline) {
+			int recast = spells[spell_id].recast_time / 1000;
 			if (spell_id == SPELL_LAY_ON_HANDS)	//lay on hands
 			{
 				recast -= GetAA(aaFervrentBlessing) * 420;
@@ -2719,20 +2766,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				}
 				recast = std::max(recast, 0);
 			}
-			
+
 			LogSpells("Spell [{}]: Setting long reuse timer to [{}] s (orig [{}])", spell_id, recast, spells[spell_id].recast_time);
-			
+
 			if (recast > 0) {
 				CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
 			}
 		}
 	}
-	/*
-		Set Recast Timer on item clicks, including augmenets.	
-	*/
-	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)){
-		CastToClient()->SetItemRecastTimer(spell_id, inventory_slot);
-	}
+
 
 	if (IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(true, static_cast<uint16>(slot));

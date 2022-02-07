@@ -1227,27 +1227,27 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
 
-	if(!rank) {
+	if (!rank) {
 		return;
 	}
 
 	AA::Ability *ability = rank->base_ability;
-	if(!ability) {
+	if (!ability) {
 		return;
 	}
 
-	if(!IsValidSpell(rank->spell)) {
+	if (!IsValidSpell(rank->spell)) {
 		return;
 	}
 
-	if(!CanUseAlternateAdvancementRank(rank)) {
+	if (!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
-	
+
 	bool use_toggle_passive_hotkey = UseTogglePassiveHotkey(*rank);
 
 	//make sure it is not a passive
-	if(!rank->effects.empty() && !use_toggle_passive_hotkey) {
+	if (!rank->effects.empty() && !use_toggle_passive_hotkey) {
 		return;
 	}
 
@@ -1256,32 +1256,26 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if (!GetAA(rank_id, &charges))
 		return;
 	//if expendable make sure we have charges
-	if(ability->charges > 0 && charges < 1)
+	if (ability->charges > 0 && charges < 1)
 		return;
 
 	//check cooldown
-	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
+	if (!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
 		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
 		uint32 aaremain_hr = aaremain / (60 * 60);
 		uint32 aaremain_min = (aaremain / 60) % 60;
 		uint32 aaremain_sec = aaremain % 60;
 
-		if(aaremain_hr >= 1) {
+		if (aaremain_hr >= 1) {
 			Message(Chat::Red, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
-			aaremain_hr, aaremain_min, aaremain_sec);
+				aaremain_hr, aaremain_min, aaremain_sec);
 		}
 		else {
 			Message(Chat::Red, "You can use this ability again in %u minute(s) %u seconds",
-			aaremain_min, aaremain_sec);
+				aaremain_min, aaremain_sec);
 		}
 
 		return;
-	}
-
-	//calculate cooldown
-	int cooldown = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
-	if(cooldown < 0) {
-		cooldown = 0;
 	}
 
 	if (!IsCastWhileInvis(rank->spell))
@@ -1312,24 +1306,17 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 	else {
 		// Bards can cast instant cast AAs while they are casting or channeling item cast.
-		if (GetClass() == BARD  && IsCasting() && spells[rank->spell].cast_time == 0) {
+		if (GetClass() == BARD && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell)) {
 				return;
 			}
-			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false)) {
-				return;
-			}
-			ExpendAlternateAdvancementCharge(ability->id);
+			SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1,
+				spells[rank->spell].resist_difficulty, false, -1, 0xFFFFFFFF, 0, false, rank->id);
 		}
 		else {
-			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
-				return;
-			}
+			CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, 0xFFFFFFFF, 0, nullptr, rank->id);
 		}
 	}
-
-	CastToClient()->GetPTimers().Start(rank->spell_type + pTimerAAStart, cooldown);
-	SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 }
 
 int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
