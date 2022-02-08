@@ -1546,12 +1546,30 @@ void Raid::SendAllRaidLeadershipAA()
 
 bool Raid::IsRaidMemberBot(Client* client)
 {
-	if (client->CastToBot()->GetBotID() == 0) {
-		return false;
+	std::string query = StringFormat("SELECT mob_type FROM vw_bot_character_mobs WHERE name = '%s' LIMIT 1",
+		client->GetCleanName());
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success())
+		return true; //return true to avoid sending a packet to a non-existant client as a failsafe
+
+	if (results.RowCount() == 0) {
+		LogError(
+			"Error getting B/C info for character name [{}] for IsRaidMemberBot. Error [{}]",
+			client->GetCleanName(),
+			results.ErrorMessage().c_str()
+		);
+		return true;//return true to avoid sending a packet to a non-existant client as a failsafe
 	}
-	else
-	{
-		return true;
+
+	auto row = results.begin();
+	const char* c = "C";
+	const char* b = "B";
+	if (strcmp(row[0], c) == 0) {
+		return false;	// client is a client
+	}
+	else if (strcmp(row[0], b) == 0) {
+		return true;	// client is actually a bot
 	}
 }
 void Raid::LockRaid(bool lockFlag)
@@ -2036,9 +2054,10 @@ Mob* Raid::GetRaidMainAssistOneByName(const char* name)
 	Raid* raid = entity_list.GetRaidByBotName(name);
 	std::vector<RaidMember> raid_members = raid->GetMembers();
 
-	for (RaidMember& iter : raid_members)
+	for (RaidMember iter : raid_members)
 	{
 		if (iter.IsRaidMainAssistOne)
 			return iter.member->CastToMob();
 	}
+	return nullptr;
 }

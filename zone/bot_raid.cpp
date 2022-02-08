@@ -428,6 +428,10 @@ void Bot::AI_Process_Raid()
 			auto assist_mob = raid->GetRaidMainAssistOneByName(this->GetName());
 			bool find_target = true;
 
+			if (!assist_mob) {
+				bot_owner->Message(Chat::Yellow, "Assist Mob is nullptr");
+			}
+
 			if (assist_mob) {
 
 				if (assist_mob->GetTarget()) {
