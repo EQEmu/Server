@@ -1845,6 +1845,40 @@ XS(XS_NPC_GetLootList) {
 	}
 }
 
+XS(XS_NPC_AddAISpellEffect); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_AddAISpellEffect) {
+	dXSARGS;
+	if (items != 5)
+		Perl_croak(aTHX_ "Usage: NPC::AddAISpellEffect(THIS, spell effect id, base value, limit value, max value)"); // @categories Spells and Disciplines
+	{
+		NPC *THIS;
+
+		int spell_effect_id = (int)SvIV(ST(1));
+		int base_value		= (int)SvIV(ST(2));
+		int limit_value		= (int)SvIV(ST(3));
+		int max_value		= (int)SvIV(ST(4));
+
+		VALIDATE_THIS_IS_NPC;
+		THIS->AddSpellEffectToNPCList(spell_effect_id, base_value, limit_value, max_value, true);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_RemoveAISpellEffect); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_RemoveAISpellEffect) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpellEffect(THIS, int spell_effect_id)"); // @categories Spells and Disciplines
+	{
+		NPC *THIS;
+		int spell_effect_id = (int)SvIV(ST(1));
+		VALIDATE_THIS_IS_NPC;
+		THIS->RemoveSpellEffectFromNPCList(spell_effect_id, true);
+	}
+	XSRETURN_EMPTY;
+}
+
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1969,6 +2003,8 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "StartSwarmTimer"), XS_NPC_StartSwarmTimer, file, "$$");
 	newXSproto(strcpy(buf, "StopWandering"), XS_NPC_StopWandering, file, "$");
 	newXSproto(strcpy(buf, "UpdateWaypoint"), XS_NPC_UpdateWaypoint, file, "$$");
+	newXSproto(strcpy(buf, "AddAISpellEffect"), XS_NPC_AddAISpellEffect, file, "$$$$$");
+	newXSproto(strcpy(buf, "RemoveAISpellEffect"), XS_NPC_RemoveAISpellEffect, file, "$");
 	XSRETURN_YES;
 }
 
