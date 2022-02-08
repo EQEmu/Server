@@ -645,15 +645,53 @@ bool HateList::IsHateListEmpty() {
 
 void HateList::PrintHateListToClient(Client *c)
 {
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		struct_HateList *e = (*iterator);
-		c->Message(Chat::White, "- name: %s, damage: %d, hate: %d",
-			(e->entity_on_hatelist && e->entity_on_hatelist->GetName()) ? e->entity_on_hatelist->GetName() : "(null)",
-			e->hatelist_damage, e->stored_hate_amount);
+	if (list.size()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Displaying hate list for {} ({}).",
+				hate_owner->GetCleanName(),
+				hate_owner->GetID()
+			).c_str()
+		);
 
-		++iterator;
+		auto entity_number = 1;
+		for (const auto& hate_entity : list) {
+			if (hate_entity->entity_on_hatelist) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Hate Entity {} | Name: {} ({}) Damage: {} Hate: {}",
+						entity_number,
+						hate_entity->entity_on_hatelist->GetName(),
+						hate_entity->entity_on_hatelist->GetID(),
+						hate_entity->hatelist_damage,
+						hate_entity->stored_hate_amount
+					).c_str()
+				);
+			} else {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Hate Entity {} | Damage: {} Hate: {}",
+						entity_number,
+						hate_entity->hatelist_damage,
+						hate_entity->stored_hate_amount
+					).c_str()
+				);
+			}
+
+			entity_number++;
+		}
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} ({}) has nothing on its hatelist.",
+				hate_owner->GetCleanName(),
+				hate_owner->GetID()
+			).c_str()
+		);
 	}
 }
 
