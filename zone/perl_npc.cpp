@@ -1898,6 +1898,7 @@ XS(boot_NPC) {
 	XS_VERSION_BOOTCHECK;
 	newXSproto(strcpy(buf, "AI_SetRoambox"), XS_NPC_AI_SetRoambox, file, "$$$$$$;$$");
 	newXSproto(strcpy(buf, "AddAISpell"), XS_NPC_AddSpellToNPCList, file, "$$$$$$$");
+	newXSproto(strcpy(buf, "AddAISpellEffect"), XS_NPC_AddAISpellEffect, file, "$$$$$");
 	newXSproto(strcpy(buf, "AddCash"), XS_NPC_AddCash, file, "$$$$$");
 	newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");
 	newXSproto(strcpy(buf, "AddItem"), XS_NPC_AddItem, file, "$$;$$$$$$$$");
@@ -1973,6 +1974,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "PickPocket"), XS_NPC_PickPocket, file, "$$");
 	newXSproto(strcpy(buf, "RecalculateSkills"), XS_NPC_RecalculateSkills, file, "$");
 	newXSproto(strcpy(buf, "RemoveAISpell"), XS_NPC_RemoveSpellFromNPCList, file, "$$");
+	newXSproto(strcpy(buf, "RemoveAISpellEffect"), XS_NPC_RemoveAISpellEffect, file, "$$");
 	newXSproto(strcpy(buf, "RemoveCash"), XS_NPC_RemoveCash, file, "$");
 	newXSproto(strcpy(buf, "RemoveDefensiveProc"), XS_NPC_RemoveDefensiveProc, file, "$$");
 	newXSproto(strcpy(buf, "RemoveFromHateList"), XS_NPC_RemoveFromHateList, file, "$$");
@@ -2003,8 +2005,6 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "StartSwarmTimer"), XS_NPC_StartSwarmTimer, file, "$$");
 	newXSproto(strcpy(buf, "StopWandering"), XS_NPC_StopWandering, file, "$");
 	newXSproto(strcpy(buf, "UpdateWaypoint"), XS_NPC_UpdateWaypoint, file, "$$");
-	newXSproto(strcpy(buf, "AddAISpellEffect"), XS_NPC_AddAISpellEffect, file, "$$$$$");
-	newXSproto(strcpy(buf, "RemoveAISpellEffect"), XS_NPC_RemoveAISpellEffect, file, "$");
 	XSRETURN_YES;
 }
 
