@@ -4530,7 +4530,6 @@ int32 Mob::GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining)
 	}
 
 	total_mod += innate_mod;
-	Shout("total mod %i", total_mod);
 	return total_mod;
 }
 
