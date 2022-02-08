@@ -1849,7 +1849,7 @@ XS(XS_NPC_AddAISpellEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddAISpellEffect) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: NPC::AddAISpellEffect(THIS, spell effect id, base value, limit value, max value)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: NPC::AddAISpellEffect(THIS, spell_effect id, base_value, limit_value, max_value)"); // @categories Spells and Disciplines
 	{
 		NPC *THIS;
 
@@ -1868,7 +1868,7 @@ XS(XS_NPC_RemoveAISpellEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RemoveAISpellEffect) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpellEffect(THIS, int spell_effect_id)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpellEffect(THIS, int spelleffect_id)"); // @categories Spells and Disciplines
 	{
 		NPC *THIS;
 		int spell_effect_id = (int)SvIV(ST(1));
