@@ -2210,7 +2210,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if(zone->random.Roll(spells[spell_id].base_value[i])) {
 					if (IsClient()) {
 						int pre_aggro_count = CastToClient()->GetAggroCount();
-						CastToClient()->Escape(max_level);
+						entity_list.RemoveFromTargetsFadingMemories(this, true, max_level);
+						SetInvisible(Invisibility::Invisible);
+
+						MessageString(Chat::Skills, ESCAPE);
 						int post_aggro_count = CastToClient()->GetAggroCount();
 						Shout("Pre %i Post %i", pre_aggro_count, post_aggro_count);
 						if (RuleB(Spells, UseFadingMemoriesMaxLevel)) {
