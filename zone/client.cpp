@@ -3452,7 +3452,7 @@ uint8 Client::SlotConvert2(uint8 slot){
 
 void Client::Escape(int max_level)
 {
-	entity_list.RemoveFromTargets(this, true, max_level);
+	entity_list.RemoveFromTargetsFadingMemories(this, true, max_level);
 	SetInvisible(Invisibility::Invisible);
 
 	MessageString(Chat::Skills, ESCAPE);

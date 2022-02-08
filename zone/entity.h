@@ -388,7 +388,8 @@ public:
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
 	void	ExpeditionWarning(uint32 minutes_left);
 
-	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false, int max_level = 0);
+	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
+	void	RemoveFromTargetsFadingMemories(Mob* ent, bool RemoveFromXTargets = false, uint32 max_level = 0);
 	void	RemoveFromXTargets(Mob* mob);
 	void	RemoveFromAutoXTargets(Mob* mob);
 	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);

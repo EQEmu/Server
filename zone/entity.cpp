@@ -1504,7 +1504,7 @@ void EntityList::ReplaceWithTarget(Mob *pOldMob, Mob *pNewTarget)
 	}
 }
 
-void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets, int max_level)
+void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 {
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
@@ -1514,10 +1514,7 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets, int max_le
 		if (!m)
 			continue;
 
-		if (max_level && m->GetLevel() > max_level)
-			continue;
-
-		if (RemoveFromXTargets) {
+		if (RemoveFromXTargets && mob) {
 			if (m->IsClient() && (mob->CheckAggro(m) || mob->IsOnFeignMemory(m)))
 				m->CastToClient()->RemoveXTarget(mob, false);
 			// FadingMemories calls this function passing the client.
@@ -1526,6 +1523,32 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets, int max_le
 		}
 
 		m->RemoveFromHateList(mob);
+	}
+}
+
+void EntityList::RemoveFromTargetsFadingMemories(Mob *ent, bool RemoveFromXTargets, uint32 max_level)
+{
+	for (auto &e : mob_list) {
+		auto &mob = e.second;
+
+		if (!mob) {
+			continue;
+		}
+
+		if (max_level && mob->GetLevel() > max_level)
+			continue;
+
+		if (mob->GetSpecialAbility(IMMUNE_FADING_MEMORIES))
+			continue;
+
+		if (RemoveFromXTargets && ent) {
+			if (mob->IsClient() && (ent->CheckAggro(mob) || ent->IsOnFeignMemory(mob)))
+				mob->CastToClient()->RemoveXTarget(ent, false);
+			else if (ent->IsClient() && (mob->CheckAggro(ent) || mob->IsOnFeignMemory(ent)))
+				ent->CastToClient()->RemoveXTarget(mob, false);
+		}
+
+		mob->RemoveFromHateList(ent);
 	}
 }
 
