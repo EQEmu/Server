@@ -2205,6 +2205,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					max_level = spells[spell_id].max_value[i];
 				}
 
+				
+				// you failed to escape from all your opponents.
+				// you failed to escape from combat but you evade some of your opponents
 				if(zone->random.Roll(spells[spell_id].base_value[i])) {
 					if (IsClient()) {
 						CastToClient()->Escape(max_level);
