@@ -1845,6 +1845,40 @@ XS(XS_NPC_GetLootList) {
 	}
 }
 
+XS(XS_NPC_AddAISpellEffect); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_AddAISpellEffect) {
+	dXSARGS;
+	if (items != 5)
+		Perl_croak(aTHX_ "Usage: NPC::AddAISpellEffect(THIS, spell_effect id, base_value, limit_value, max_value)"); // @categories Spells and Disciplines
+	{
+		NPC *THIS;
+
+		int spell_effect_id = (int)SvIV(ST(1));
+		int base_value		= (int)SvIV(ST(2));
+		int limit_value		= (int)SvIV(ST(3));
+		int max_value		= (int)SvIV(ST(4));
+
+		VALIDATE_THIS_IS_NPC;
+		THIS->AddSpellEffectToNPCList(spell_effect_id, base_value, limit_value, max_value, true);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_RemoveAISpellEffect); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_RemoveAISpellEffect) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpellEffect(THIS, int spelleffect_id)"); // @categories Spells and Disciplines
+	{
+		NPC *THIS;
+		int spell_effect_id = (int)SvIV(ST(1));
+		VALIDATE_THIS_IS_NPC;
+		THIS->RemoveSpellEffectFromNPCList(spell_effect_id, true);
+	}
+	XSRETURN_EMPTY;
+}
+
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1864,6 +1898,7 @@ XS(boot_NPC) {
 	XS_VERSION_BOOTCHECK;
 	newXSproto(strcpy(buf, "AI_SetRoambox"), XS_NPC_AI_SetRoambox, file, "$$$$$$;$$");
 	newXSproto(strcpy(buf, "AddAISpell"), XS_NPC_AddSpellToNPCList, file, "$$$$$$$");
+	newXSproto(strcpy(buf, "AddAISpellEffect"), XS_NPC_AddAISpellEffect, file, "$$$$$");
 	newXSproto(strcpy(buf, "AddCash"), XS_NPC_AddCash, file, "$$$$$");
 	newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");
 	newXSproto(strcpy(buf, "AddItem"), XS_NPC_AddItem, file, "$$;$$$$$$$$");
@@ -1939,6 +1974,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "PickPocket"), XS_NPC_PickPocket, file, "$$");
 	newXSproto(strcpy(buf, "RecalculateSkills"), XS_NPC_RecalculateSkills, file, "$");
 	newXSproto(strcpy(buf, "RemoveAISpell"), XS_NPC_RemoveSpellFromNPCList, file, "$$");
+	newXSproto(strcpy(buf, "RemoveAISpellEffect"), XS_NPC_RemoveAISpellEffect, file, "$$");
 	newXSproto(strcpy(buf, "RemoveCash"), XS_NPC_RemoveCash, file, "$");
 	newXSproto(strcpy(buf, "RemoveDefensiveProc"), XS_NPC_RemoveDefensiveProc, file, "$$");
 	newXSproto(strcpy(buf, "RemoveFromHateList"), XS_NPC_RemoveFromHateList, file, "$$");
