@@ -4053,7 +4053,6 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 						{
 							EQ::ItemInstance* p_inst = (EQ::ItemInstance*)inst;
 							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
-
 							if (i == 0) {
 								CastSpell(item->Click.Effect, castspell->target_id, slot, item->CastTime, 0, 0, castspell->inventoryslot);
 							}
@@ -8791,6 +8790,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	spell_id = item->Click.Effect;
+	bool is_casting_bard_song = false;
 
 	if
 		(
@@ -8812,10 +8812,20 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			)
 		)
 	{
-		SendSpellBarEnable(spell_id);
-		return;
+		/*
+			Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast. 
+			Can not click while casting other items.
+		*/
+		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
+		{
+			is_casting_bard_song = true;
+		}
+		else
+		{
+			SendSpellBarEnable(spell_id);
+			return;
+		}
 	}
-
 	// Modern clients don't require pet targeted for item clicks that are ST_Pet
 	if (spell_id > 0 && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet))
 		target_id = GetPetID();
@@ -8903,11 +8913,16 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					{
 						return;
 					}
-
 					if (i == 0) {
-						if (!IsCastWhileInvis(item->Click.Effect))
+						if (!IsCastWhileInvis(item->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
-						CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
+						}
+						if (GetClass() == BARD){
+							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
+						}
+						else {
+							CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
+						}
 					}
 				}
 				else
@@ -8944,9 +8959,15 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 
 					if (i == 0) {
-						if (!IsCastWhileInvis(augitem->Click.Effect))
+						if (!IsCastWhileInvis(augitem->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
-						CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
+						}
+						if (GetClass() == BARD) {
+							DoBardCastingFromItemClick(is_casting_bard_song, augitem->CastTime, augitem->Click.Effect, target_id, CastingSlot::Item, slot_id, augitem->RecastType, augitem->RecastDelay);
+						}
+						else {
+							CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
+						}
 					}
 				}
 				else
@@ -9552,16 +9573,20 @@ void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 {
 	if (app->size == 0) {
 		// i think thats the sign to stop the songs
-		if (IsBardSong(casting_spell_id) || bardsong != 0)
-			InterruptSpell(SONG_ENDS, 0x121);
-		else
+		if (IsBardSong(casting_spell_id) || HasActiveSong()) {
+			InterruptSpell(SONG_ENDS, 0x121); //Live doesn't send song end message anymore (~Kayen 1/26/22)
+		}
+		else {
 			InterruptSpell(INTERRUPT_SPELL, 0x121);
-
+		}
 		return;
 	}
-	else	// I don't think the client sends proper manachanges
-	{			// with a length, just the 0 len ones for stopping songs
-				//ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
+	/*
+		I don't think the client sends proper manachanges
+		with a length, just the 0 len ones for stopping songs
+		ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
+	*/
+	else{	
 		printf("OP_ManaChange from client:\n");
 		DumpPacket(app);
 	}

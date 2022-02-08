@@ -1462,6 +1462,23 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 	//Allowing anything not confirmed to be restricted / allowed to receive modifiers, as to not inhbit anyone making custom bard songs.
 }
 
+bool IsPulsingBardSong(int32 spell_id)
+{
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+	
+	if (spells[spell_id].buff_duration == 0xFFFF ||
+		spells[spell_id].recast_time> 0 ||
+		spells[spell_id].mana > 0 || 
+		IsEffectInSpell(spell_id, SE_TemporaryPets) || 
+		IsEffectInSpell(spell_id, SE_Familiar)) {
+		return false;
+	}
+	
+	return true;
+}
+
 int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 {
 	if (!IsValidSpell(spell_id))

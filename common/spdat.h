@@ -179,8 +179,6 @@
 #define SPELLGROUP_FURIOUS_RAMPAGE 38106
 #define SPELLGROUP_SHROUD_OF_PRAYER 41050
 
-
-
 #define EFFECT_COUNT 12
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
@@ -192,6 +190,12 @@
 #define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
 #define MAX_APPEARANCE_EFFECTS 20 //Up to 20 Appearance Effects can be saved to a mobs appearance effect array, these will be sent to other clients when they enter a zone (This is arbitrary)
 #define MAX_CAST_ON_SKILL_USE 36 //Actual amount is MAX/3
+
+//instrument item id's used as song components
+#define INSTRUMENT_HAND_DRUM 13000
+#define INSTRUMENT_WOODEN_FLUTE 13001
+#define INSTRUMENT_LUTE 13011
+#define INSTRUMENT_HORN 13012
 
 
 const int Z_AGGRO=10;
@@ -1030,7 +1034,7 @@ typedef enum {
 #define SE_ZoneSuspendMinion			308 // implemented, @Pet, allow suspended pets to be resummoned upon zoning, base: 1, limit: none, max: none, Calc: Bool
 #define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
 #define SE_ReduceReuseTimer				310 // implemented, @Fc, On Caster, spell and disc reuse time mod by amount, base: milliseconds
-#define SE_LimitCombatSkills			311 // implemented, @Ff, Include or exclude combat skills or procs (non-memorizable spells) from being focused, base1: 0=Exclude if proc 1=Allow only if proc
+#define SE_LimitCombatSkills			311 // implemented, @Ff, Include or exclude combat skills or procs from being focused, base1: 0=Exclude if proc 1=Allow only if proc.
 #define SE_Sanctuary					312 // implemented - Places caster at bottom hate list, effect fades if cast cast spell on targets other than self.
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
@@ -1536,9 +1540,9 @@ int GetViralMinSpreadTime(int32 spell_id);
 int GetViralMaxSpreadTime(int32 spell_id);
 int GetViralSpreadRange(int32 spell_id);
 bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect);
+bool IsPulsingBardSong(int32 spell_id);
 uint32 GetProcLimitTimer(int32 spell_id, int proc_type);
 bool IgnoreCastingRestriction(int32 spell_id);
-
 int CalcPetHp(int levelb, int classb, int STA = 75);
 int GetSpellEffectDescNum(uint16 spell_id);
 DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType = 0);

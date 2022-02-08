@@ -1891,6 +1891,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			//m_epp.perAA = 0;	//reset to no AA exp on death.
 		}
 
+		int32 illusion_spell_id = spellbonuses.Illusion;
+
 		//this generates a lot of 'updates' to the client that the client does not need
 		BuffFadeNonPersistDeath();
 		if (RuleB(Character, UnmemSpellsOnDeath)) {
@@ -1936,13 +1938,12 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 					}
 				}
 			}
-
 			entity_list.AddCorpse(new_corpse, GetID());
 			SetID(0);
 
 			//send the become corpse packet to everybody else in the zone.
 			entity_list.QueueClients(this, &app2, true);
-
+			ApplyIllusionToCorpse(illusion_spell_id, new_corpse);
 			LeftCorpse = true;
 		}
 	}
@@ -2340,6 +2341,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	if (p_depop == true)
 		return false;
 
+	int32 illusion_spell_id = spellbonuses.Illusion;
+
 	HasAISpellEffects = false;
 	BuffFadeAll();
 	uint8 killed_level = GetLevel();
@@ -2595,8 +2598,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 		// entity_list.RemoveMobFromCloseLists(this);
 		close_mobs.clear();
-
 		this->SetID(0);
+		ApplyIllusionToCorpse(illusion_spell_id, corpse);
 
 		if (killer != 0 && emoteid != 0)
 			corpse->CastToNPC()->DoNPCEmote(AFTERDEATH, emoteid);
