@@ -1052,6 +1052,10 @@ std::string QuestManager::getbodytypename(uint32 bodytype_id) {
 	return EQ::constants::GetBodyTypeName(static_cast<bodyType>(bodytype_id));
 }
 
+std::string QuestManager::getconsiderlevelname(uint8 consider_level) {
+	return EQ::constants::GetConsiderLevelName(consider_level);
+}
+
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())

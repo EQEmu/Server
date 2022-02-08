@@ -8092,6 +8092,23 @@ XS(XS__getbodytypename) {
 	}
 }
 
+XS(XS__getconsiderlevelname);
+XS(XS__getconsiderlevelname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getconsiderlevelname(uint8 consider_level)");
+	{
+		dXSTARG;
+		uint8 consider_level = (uint8) SvUV(ST(0));
+		std::string consider_level_name = quest_manager.getconsiderlevelname(consider_level);
+
+		sv_setpv(TARG, consider_level_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8376,6 +8393,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getcleannpcnamebyid"), XS__getcleannpcnamebyid, file);
+	newXS(strcpy(buf, "getconsiderlevelname"), XS__getconsiderlevelname, file);
 	newXS(strcpy(buf, "gethexcolorcode"), XS__gethexcolorcode, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
 	newXS(strcpy(buf, "getexpmodifierbycharid"), XS__getexpmodifierbycharid, file);
