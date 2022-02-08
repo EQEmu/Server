@@ -259,7 +259,7 @@ int command_init(void)
 		command_add("npcedit", "[column] [value] - Mega NPC editing command", AccountStatus::GMAdmin, command_npcedit) ||
 		command_add("npceditmass", "[name-search] [column] [value] - Mass (Zone wide) NPC data editing command", AccountStatus::GMAdmin, command_npceditmass) ||
 		command_add("npcemote", "[message] - Make your NPC target emote a message.", AccountStatus::GMLeadAdmin, command_npcemote) ||
-		command_add("npcloot", "[show/money/add/remove] [itemid/all/money: pp gp sp cp] - Manipulate the loot an NPC is carrying", AccountStatus::QuestTroupe, command_npcloot) ||
+		command_add("npcloot", "- Manipulate the loot an NPC is carrying. Use #npcloot help for more information.", AccountStatus::QuestTroupe, command_npcloot) ||
 		command_add("npcsay", "[message] - Make your NPC target say a message.", AccountStatus::GMLeadAdmin, command_npcsay) ||
 		command_add("npcshout", "[message] - Make your NPC target shout a message.", AccountStatus::GMLeadAdmin, command_npcshout) ||
 		command_add("npcspawn", "[create/add/update/remove/delete] - Manipulate spawn DB", AccountStatus::GMAreas, command_npcspawn) ||
