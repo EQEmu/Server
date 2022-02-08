@@ -260,8 +260,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->ResourceTap(-dmg, spell_id);
 					}
 
-					dmg = -dmg;
-					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+					if (dmg <= 0) {
+						dmg = -dmg;
+						Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+					}
+					//handles custom situation where quest function mitigation put high enough to allow damage to heal.
+					else {
+						HealDamage(dmg, caster);
+					}
 				}
 				else if(dmg > 0) {
 					//healing spell...
