@@ -89,6 +89,7 @@ struct RaidMember{
 	bool IsRaidLeader;
 	bool IsLooter;
 #ifdef BOTS
+	bool IsBot = false;
 	bool IsGroupHealer;
 	bool IsRaidSlower;
 	bool IsRaidMainAssistOne;
