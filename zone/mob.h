@@ -255,6 +255,7 @@ public:
 	EQ::InternalTextureProfile mob_texture_profile = {};
 
 	bool IsInvisible(Mob* other = 0) const;
+	void SetInvisible(uint8 state);
 
 	EQ::skills::SkillType AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
 
@@ -282,7 +283,6 @@ public:
 	void SendLevelAppearance();
 	void SendStunAppearance();
 	void SendTargetable(bool on, Client *specific_target = nullptr);
-	void SetInvisible(uint8 state);
 	void SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color = 0, uint32 hero_forge_model = 0);
 
 	//Spell

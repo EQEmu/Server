@@ -867,7 +867,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->MaxBindWound += base_value;
 			break;
 		case SE_SeeInvis:
-			newbon->SeeInvis = base_value;
+			if (newbon->SeeInvis < base_value)
+				newbon->SeeInvis = base_value;
 			break;
 		case SE_BaseMovementSpeed:
 			newbon->BaseMovementSpeed += base_value;
@@ -3839,6 +3840,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_InvisVsAnimals:
 				if (new_bonus->invisibility_verse_animal < effect_value)
 					new_bonus->invisibility_verse_animal = effect_value;
+				break;
+
+			case SE_SeeInvis:
+				if (new_bonus->SeeInvis < effect_value)
+					new_bonus->SeeInvis = effect_value;
 				break;
 
 			case SE_ZoneSuspendMinion:
