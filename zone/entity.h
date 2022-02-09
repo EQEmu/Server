@@ -389,6 +389,7 @@ public:
 	void	ExpeditionWarning(uint32 minutes_left);
 
 	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
+	void	RemoveFromTargetsFadingMemories(Mob* spell_target, bool RemoveFromXTargets = false, uint32 max_level = 0);
 	void	RemoveFromXTargets(Mob* mob);
 	void	RemoveFromAutoXTargets(Mob* mob);
 	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
