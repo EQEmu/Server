@@ -6599,8 +6599,6 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 	}
 }
 
-
-
 int16 Mob::GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot)
 {
 	int16 DeleteChargeFromSlot = -1;
