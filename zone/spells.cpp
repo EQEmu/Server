@@ -1627,57 +1627,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
-		bool fromaug = false;
-		EQ::ItemData* augitem = nullptr;
-		uint32 recastdelay = 0;
-		int recasttype = 0;
-
-		while (true) {
-			if (item == nullptr)
-				break;
-
-			for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
-				const EQ::ItemInstance* aug_i = item->GetAugment(r);
-
-				if (!aug_i)
-					continue;
-				const EQ::ItemData* aug = aug_i->GetItem();
-				if (!aug)
-					continue;
-
-				if (aug->Click.Effect == spell_id)
-				{
-					recastdelay = aug_i->GetItem()->RecastDelay;
-					recasttype = aug_i->GetItem()->RecastType;
-					fromaug = true;
-					break;
-				}
-			}
-
-			break;
-		}
-
-		if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug)
-		{
-			//const ItemData* item = item->GetItem();
-			int16 charges = item->GetItem()->MaxCharges;
-
-			if(fromaug) { charges = -1; } //Don't destroy the parent item
-
-			if(charges > -1) {	// charged item, expend a charge
-				LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
-				DeleteChargeFromSlot = inventory_slot;
-			} else {
-				LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
-			}
-		}
-		else
-		{
-			LogSpells("Item used to cast spell [{}] was missing from inventory slot [{}] after casting!", spell_id, inventory_slot);
-			Message(Chat::Red, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
-			InterruptSpell();
-			return;
-		}
+		DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, inventory_slot);
 	}
 
 	// we're done casting, now try to apply the spell
@@ -1699,8 +1649,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 
-	if(DeleteChargeFromSlot >= 0)
+	if (DeleteChargeFromSlot >= 0) {
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
+	}
 
 	//
 	// at this point the spell has successfully been cast
@@ -6639,6 +6590,72 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
 	else if (DoCastingChecksOnCaster(spell_id)) {
-		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
+		int16 DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, item_slot);
+		if (SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot)) {
+			if (IsClient() && DeleteChargeFromSlot >= 0) {
+				CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
+			}
+		}
 	}
+}
+
+
+
+int16 Mob::GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot)
+{
+	int16 DeleteChargeFromSlot = -1;
+
+	if (!IsClient() || inventory_slot == 0xFFFFFFFF) {
+		return DeleteChargeFromSlot;
+	}
+
+	EQ::ItemInstance *item = nullptr;
+	item = CastToClient()->GetInv().GetItem(inventory_slot);
+
+	bool fromaug = false;
+	EQ::ItemData* augitem = nullptr;
+
+	while (true) {
+		if (item == nullptr)
+			break;
+
+		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+			const EQ::ItemInstance* aug_i = item->GetAugment(r);
+
+			if (!aug_i) {
+				continue;
+			}
+			const EQ::ItemData* aug = aug_i->GetItem();
+			if (!aug) {
+				continue;
+			}
+			if (aug->Click.Effect == spell_id){
+				fromaug = true;
+				break;
+			}
+		}
+
+		break;
+	}
+
+	if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug){
+		int16 charges = item->GetItem()->MaxCharges;
+
+		if (fromaug) { charges = -1; } //Don't destroy the parent item
+
+		if (charges > -1) {	// charged item, expend a charge
+			LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
+			DeleteChargeFromSlot = inventory_slot;
+		}
+		else {
+			LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
+		}
+	}
+	else{
+		LogSpells("Item used to cast spell [{}] was missing from inventory slot [{}] after casting!", spell_id, inventory_slot);
+		Message(Chat::Red, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
+		InterruptSpell();
+		return DeleteChargeFromSlot;
+	}
+	return DeleteChargeFromSlot;
 }
