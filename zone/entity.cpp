@@ -1514,7 +1514,7 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 		if (!m)
 			continue;
 
-		if (RemoveFromXTargets) {
+		if (RemoveFromXTargets && mob) {
 			if (m->IsClient() && (mob->CheckAggro(m) || mob->IsOnFeignMemory(m)))
 				m->CastToClient()->RemoveXTarget(mob, false);
 			// FadingMemories calls this function passing the client.
@@ -1523,6 +1523,32 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 		}
 
 		m->RemoveFromHateList(mob);
+	}
+}
+
+void EntityList::RemoveFromTargetsFadingMemories(Mob *spell_target, bool RemoveFromXTargets, uint32 max_level)
+{
+	for (auto &e : mob_list) {
+		auto &mob = e.second;
+
+		if (!mob) {
+			continue;
+		}
+
+		if (max_level && mob->GetLevel() > max_level)
+			continue;
+
+		if (mob->GetSpecialAbility(IMMUNE_FADING_MEMORIES))
+			continue;
+
+		if (RemoveFromXTargets && spell_target) {
+			if (mob->IsClient() && (spell_target->CheckAggro(mob) || spell_target->IsOnFeignMemory(mob)))
+				mob->CastToClient()->RemoveXTarget(spell_target, false);
+			else if (spell_target->IsClient() && (mob->CheckAggro(spell_target) || mob->IsOnFeignMemory(spell_target)))
+				spell_target->CastToClient()->RemoveXTarget(mob, false);
+		}
+
+		mob->RemoveFromHateList(spell_target);
 	}
 }
 

@@ -2208,9 +2208,41 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Fading Memories");
 #endif
+				int max_level = 0;
+
+				if (RuleB(Spells, UseFadingMemoriesMaxLevel)) {
+					//handle ROF2 era where limit value determines max level
+					if (spells[spell_id].limit_value[i]) {
+						max_level = spells[spell_id].limit_value[i];
+					}
+					//handle modern client era where max value determines max level or range above client.
+					else if (spells[spell_id].max_value[i]) {
+						if (spells[spell_id].max_value[i] >= 1000) {
+							max_level = 1000 - spells[spell_id].max_value[i];
+						}
+						else {
+							max_level = GetLevel() + spells[spell_id].max_value[i];
+						}
+					}
+				}
+
 				if(zone->random.Roll(spells[spell_id].base_value[i])) {
 					if (IsClient()) {
-						CastToClient()->Escape();
+						int pre_aggro_count = CastToClient()->GetAggroCount();
+						entity_list.RemoveFromTargetsFadingMemories(this, true, max_level);
+						SetInvisible(Invisibility::Invisible);
+						int post_aggro_count = CastToClient()->GetAggroCount();
+						if (RuleB(Spells, UseFadingMemoriesMaxLevel)) {
+							if (pre_aggro_count == post_aggro_count) {
+								Message(Chat::SpellFailure, "You failed to escape from all your opponents.");
+								break;
+							}
+							else if (post_aggro_count) {
+								Message(Chat::SpellFailure, "You failed to escape from combat but you evade some of your opponents.");
+								break;
+							}
+						}
+						MessageString(Chat::Skills, ESCAPE);
 					}
 					else{
 						entity_list.RemoveFromTargets(caster);
