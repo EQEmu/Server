@@ -1247,13 +1247,13 @@ void Raid::SendBulkRaid(Client *to)
 {
 	if(!to)
 		return;
-	
-	//if (IsRaidMemberBot(to))
-	//	return;
+
+	if (members[GetPlayerIndex(to)].IsBot)
+		return;
 
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
-		if(members[x].member && !members[x].IsBot && strlen(members[x].membername) > 0 && (strcmp(members[x].membername, to->GetName()) != 0)) //don't send ourself
+		if(members[x].member && strlen(members[x].membername) > 0 && (strcmp(members[x].membername, to->GetName()) != 0)) //don't send ourself
 		{
 				SendRaidAdd(members[x].membername, to);
 		}
@@ -1446,7 +1446,7 @@ void Raid::SendRaidUnlockTo(Client *c)
 
 void Raid::SendGroupDisband(Client *to)
 {
-	if(!to || members[GetPlayerIndex(to)].IsBot)
+	if(!to)
 		return;
 
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
