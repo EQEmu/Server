@@ -10248,27 +10248,32 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 		return;
 	}
 
-	if (duration == 0) {
-		duration = CalcBuffDuration(this, this, spell_id);
-
-		if (duration > 0){
-			duration = GetActSpellDuration(spell_id, duration);
-		}
-	}
-
 	int buff_count = GetMaxBuffSlots();
 	for (int slot = 0; slot < buff_count; slot++) {
 		
 		if (!adjust_all_buffs) {
 			if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
+				if (duration == 0) {
+					duration = CalcBuffDuration(this, this, spell_id);
+
+					if (duration > 0) {
+						duration = GetActSpellDuration(spell_id, duration);
+					}
+				}
 				SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
 				return;
 			}
 		}
 		else {
 			if (buffs[slot].spellid != SPELL_UNKNOWN) {
-				SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
-				return;
+				if (duration == 0) {
+					duration = CalcBuffDuration(this, this, spell_id);
+
+					if (duration > 0) {
+						duration = GetActSpellDuration(spell_id, duration);
+					}
+				}
+				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration);
 			}
 		}
 	}
