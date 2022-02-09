@@ -240,8 +240,8 @@ void load_opcode_names()
 	opcode_map[0x00a1] = "LiveOP_SaveOnZoneReq";
 	opcode_map[0x0185] = "LiveOP_Logout";
 	opcode_map[0x0298] = "LiveOP_RequestDuel";
-	opcode_map[0x0a5d] = "LiveOP_DuelResponse";
-	opcode_map[0x016e] = "LiveOP_DuelResponse2";
+	opcode_map[0x0a5d] = "LiveOP_DuelDecline";
+	opcode_map[0x016e] = "LiveOP_DuelAccept";
 	opcode_map[0x007c] = "LiveOP_InstillDoubt";
 	opcode_map[0x00ac] = "LiveOP_SafeFallSuccess";
 	opcode_map[0x02fb] = "LiveOP_DisciplineUpdate";

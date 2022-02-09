@@ -63,6 +63,7 @@ public:
 
 		if (!m_started) {
 			m_started = true;
+			mob->turning = true;
 			mob->SetMoving(true);
 
 			if (dist > 15.0f && rotate_to_speed > 0.0 && rotate_to_speed <= 25.0) { //send basic rotation
@@ -84,6 +85,7 @@ public:
 			mob->SetHeading(to);
 			mob->SetMoving(false);
 			mob_movement_manager->SendCommandToClients(mob, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
+			mob->turning = false;
 			return true;
 		}
 
@@ -1370,7 +1372,9 @@ void MobMovementManager::UpdatePathBoat(Mob *who, float x, float y, float z, Mob
 {
 	auto eiter = _impl->Entries.find(who);
 	auto &ent  = (*eiter);
+	float to = who->CalculateHeadingToTarget(x, y);
 
+	PushRotateTo(ent.second, who, to, mode);
 	PushSwimTo(ent.second, x, y, z, mode);
 	PushStopMoving(ent.second);
 }

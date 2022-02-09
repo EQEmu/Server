@@ -44,6 +44,12 @@ void EQEmuConfig::parse_config()
 		if (_root["server"]["world"]["loginserver"].get("legacy", "0").asString() == "1") { LoginLegacy = true; }
 		LoginAccount  = _root["server"]["world"]["loginserver"].get("account", "").asString();
 		LoginPassword = _root["server"]["world"]["loginserver"].get("password", "").asString();
+
+		// at least today, this is wrong a majority of the time
+		// remove this if eqemulator ever upgrades its loginserver
+		if (LoginHost.find("login.eqemulator.net") != std::string::npos) {
+			LoginLegacy = true;
+		}
 	}
 	else {
 		char str[32];
@@ -62,12 +68,19 @@ void EQEmuConfig::parse_config()
 
 			loginconfig->LoginLegacy = false;
 			if (_root["server"]["world"][str].get("legacy", "0").asString() == "1") { loginconfig->LoginLegacy = true; }
+
+			// at least today, this is wrong a majority of the time
+			// remove this if eqemulator ever upgrades its loginserver
+			if (loginconfig->LoginHost.find("login.eqemulator.net") != std::string::npos) {
+				loginconfig->LoginLegacy = true;
+			}
+
 			loginlist.Insert(loginconfig);
 		} while (LoginCount < 100);
 	}
 
 
-	//<locked> from xml converts to json as locked: "", so i default to "false". 
+	//<locked> from xml converts to json as locked: "", so i default to "false".
 	//The only way to enable locked is by switching to true, meaning this value is always false until manually set true
 	Locked = false;
 	if (_root["server"]["world"].get("locked", "false").asString() == "true") { Locked = true; }

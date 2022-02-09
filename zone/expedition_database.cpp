@@ -26,75 +26,25 @@
 #include "../common/string_util.h"
 #include <fmt/core.h>
 
-uint32_t ExpeditionDatabase::InsertExpedition(
-	const std::string& uuid, uint32_t dz_id, const std::string& expedition_name,
-	uint32_t leader_id, uint32_t min_players, uint32_t max_players)
+uint32_t ExpeditionDatabase::InsertExpedition(uint32_t dz_id)
 {
-	LogExpeditionsDetail(
-		"Inserting new expedition [{}] leader [{}] uuid [{}]", expedition_name, leader_id, uuid
-	);
+	LogExpeditionsDetail("Inserting new expedition dz [{}]", dz_id);
 
 	std::string query = fmt::format(SQL(
 		INSERT INTO expeditions
-			(uuid, dynamic_zone_id, expedition_name, leader_id, min_players, max_players)
+			(dynamic_zone_id)
 		VALUES
-			('{}', {}, '{}', {}, {}, {});
-	), uuid, dz_id, EscapeString(expedition_name), leader_id, min_players, max_players);
+			({});
+	), dz_id);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogExpeditions("Failed to obtain an expedition id for [{}]", expedition_name);
+		LogExpeditions("Failed to obtain an expedition id for dz [{}]", dz_id);
 		return 0;
 	}
 
 	return results.LastInsertedID();
-}
-
-std::string ExpeditionDatabase::LoadExpeditionsSelectQuery()
-{
-	return std::string(SQL(
-		SELECT
-			expeditions.id,
-			expeditions.uuid,
-			expeditions.dynamic_zone_id,
-			expeditions.expedition_name,
-			expeditions.leader_id,
-			expeditions.min_players,
-			expeditions.max_players,
-			expeditions.add_replay_on_join,
-			expeditions.is_locked,
-			character_data.name leader_name,
-			expedition_members.character_id,
-			member_data.name
-		FROM expeditions
-			INNER JOIN character_data ON expeditions.leader_id = character_data.id
-			INNER JOIN expedition_members ON expeditions.id = expedition_members.expedition_id
-				AND expedition_members.is_current_member = TRUE
-			INNER JOIN character_data member_data ON expedition_members.character_id = member_data.id
-	));
-}
-
-MySQLRequestResult ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Loading expedition [{}]", expedition_id);
-
-	std::string query = fmt::format(SQL(
-		{} WHERE expeditions.id = {};
-	), LoadExpeditionsSelectQuery(), expedition_id);
-
-	return database.QueryDatabase(query);
-}
-
-MySQLRequestResult ExpeditionDatabase::LoadAllExpeditions()
-{
-	LogExpeditionsDetail("Loading all expeditions from database");
-
-	std::string query = fmt::format(SQL(
-		{} ORDER BY expeditions.id;
-	), LoadExpeditionsSelectQuery());
-
-	return database.QueryDatabase(query);
 }
 
 std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(uint32_t character_id)
@@ -170,54 +120,6 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 	return lockouts;
 }
 
-std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>>
-ExpeditionDatabase::LoadMultipleExpeditionLockouts(
-	const std::vector<uint32_t>& expedition_ids)
-{
-	LogExpeditionsDetail("Loading internal lockouts for [{}] expeditions", expedition_ids.size());
-
-	std::string in_expedition_ids_query = fmt::format("{}", fmt::join(expedition_ids, ","));
-
-	// these are loaded into the same container type expeditions use to store lockouts
-	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>> lockouts;
-
-	if (!in_expedition_ids_query.empty())
-	{
-		std::string query = fmt::format(SQL(
-			SELECT
-				expedition_lockouts.expedition_id,
-				expedition_lockouts.from_expedition_uuid,
-				expeditions.expedition_name,
-				expedition_lockouts.event_name,
-				UNIX_TIMESTAMP(expedition_lockouts.expire_time),
-				expedition_lockouts.duration
-			FROM expedition_lockouts
-				INNER JOIN expeditions ON expedition_lockouts.expedition_id = expeditions.id
-			WHERE expedition_id IN ({})
-			ORDER BY expedition_id;
-		), in_expedition_ids_query);
-
-		auto results = database.QueryDatabase(query);
-
-		if (results.Success())
-		{
-			for (auto row = results.begin(); row != results.end(); ++row)
-			{
-				auto expedition_id = strtoul(row[0], nullptr, 10);
-				lockouts[expedition_id].emplace(row[3], ExpeditionLockoutTimer{
-					row[1],                                               // expedition_uuid
-					row[2],                                               // expedition_name
-					row[3],                                               // event_name
-					strtoull(row[4], nullptr, 10),                        // expire_time
-					static_cast<uint32_t>(strtoul(row[5], nullptr, 10))   // original duration
-				});
-			}
-		}
-	}
-
-	return lockouts;
-}
-
 void ExpeditionDatabase::DeleteAllCharacterLockouts(uint32_t character_id)
 {
 	LogExpeditionsDetail("Deleting all character [{}] lockouts", character_id);
@@ -268,7 +170,7 @@ void ExpeditionDatabase::DeleteCharacterLockout(
 }
 
 void ExpeditionDatabase::DeleteMembersLockout(
-	const std::vector<ExpeditionMember>& members,
+	const std::vector<DynamicZoneMember>& members,
 	const std::string& expedition_name, const std::string& event_name)
 {
 	LogExpeditionsDetail("Deleting members lockout: [{}]:[{}]", expedition_name, event_name);
@@ -276,7 +178,7 @@ void ExpeditionDatabase::DeleteMembersLockout(
 	std::string query_character_ids;
 	for (const auto& member : members)
 	{
-		fmt::format_to(std::back_inserter(query_character_ids), "{},", member.char_id);
+		fmt::format_to(std::back_inserter(query_character_ids), "{},", member.id);
 	}
 
 	if (!query_character_ids.empty())
@@ -305,67 +207,6 @@ void ExpeditionDatabase::DeleteLockout(uint32_t expedition_id, const std::string
 	), expedition_id, EscapeString(event_name));
 
 	database.QueryDatabase(query);
-}
-
-uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_id)
-{
-	LogExpeditionsDetail("Getting expedition id for character [{}]", character_id);
-
-	uint32_t expedition_id = 0;
-	auto query = fmt::format(SQL(
-		SELECT expedition_id FROM expedition_members
-		WHERE character_id = {} AND is_current_member = TRUE;
-	), character_id);
-
-	auto results = database.QueryDatabase(query);
-	if (results.Success() && results.RowCount() > 0)
-	{
-		auto row = results.begin();
-		expedition_id = strtoul(row[0], nullptr, 10);
-	}
-	return expedition_id;
-}
-
-uint32_t ExpeditionDatabase::GetMemberCount(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Getting expedition [{}] member count from db", expedition_id);
-
-	uint32_t member_count = 0;
-	if (expedition_id != 0)
-	{
-		auto query = fmt::format(SQL(
-			SELECT COUNT(*)
-			FROM expedition_members
-			WHERE expedition_id = {} AND is_current_member = TRUE;
-		), expedition_id);
-
-		auto results = database.QueryDatabase(query);
-		if (results.Success() && results.RowCount() > 0)
-		{
-			auto row = results.begin();
-			member_count = strtoul(row[0], nullptr, 10);
-		}
-	}
-	return member_count;
-}
-
-bool ExpeditionDatabase::HasMember(uint32_t expedition_id, uint32_t character_id)
-{
-	LogExpeditionsDetail("Checking db expedition [{}] for character [{}]", expedition_id, character_id);
-
-	if (expedition_id == 0 || character_id == 0)
-	{
-		return false;
-	}
-
-	auto query = fmt::format(SQL(
-		SELECT id
-		FROM expedition_members
-		WHERE expedition_id = {} AND character_id = {} AND is_current_member = TRUE;
-	), expedition_id, character_id);
-
-	auto results = database.QueryDatabase(query);
-	return (results.Success() && results.RowCount() > 0);
 }
 
 void ExpeditionDatabase::InsertCharacterLockouts(uint32_t character_id,
@@ -406,7 +247,7 @@ void ExpeditionDatabase::InsertCharacterLockouts(uint32_t character_id,
 }
 
 void ExpeditionDatabase::InsertMembersLockout(
-	const std::vector<ExpeditionMember>& members, const ExpeditionLockoutTimer& lockout)
+	const std::vector<DynamicZoneMember>& members, const ExpeditionLockoutTimer& lockout)
 {
 	LogExpeditionsDetail(
 		"Inserting members lockout [{}]:[{}] with expire time [{}]",
@@ -418,7 +259,7 @@ void ExpeditionDatabase::InsertMembersLockout(
 	{
 		fmt::format_to(std::back_inserter(insert_values),
 			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
-			member.char_id,
+			member.id,
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
 			lockout.GetExpeditionUUID(),
@@ -509,50 +350,6 @@ void ExpeditionDatabase::InsertLockouts(
 	}
 }
 
-void ExpeditionDatabase::InsertMember(uint32_t expedition_id, uint32_t character_id)
-{
-	LogExpeditionsDetail("Inserting character [{}] into expedition [{}]", character_id, expedition_id);
-
-	auto query = fmt::format(SQL(
-		INSERT INTO expedition_members
-			(expedition_id, character_id)
-		VALUES
-			({}, {})
-		ON DUPLICATE KEY UPDATE is_current_member = TRUE;
-	), expedition_id, character_id);
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::InsertMembers(
-	uint32_t expedition_id, const std::vector<ExpeditionMember>& members)
-{
-	LogExpeditionsDetail("Inserting characters into expedition [{}]", expedition_id);
-
-	std::string insert_values;
-	for (const auto& member : members)
-	{
-		fmt::format_to(std::back_inserter(insert_values),
-			"({}, {}),",
-			expedition_id, member.char_id
-		);
-	}
-
-	if (!insert_values.empty())
-	{
-		insert_values.pop_back(); // trailing comma
-
-		auto query = fmt::format(SQL(
-			INSERT INTO expedition_members
-				(expedition_id, character_id)
-			VALUES {}
-			ON DUPLICATE KEY UPDATE is_current_member = TRUE;
-		), insert_values);
-
-		database.QueryDatabase(query);
-	}
-}
-
 void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 {
 	LogExpeditionsDetail("Updating lock state [{}] for expedition [{}]", is_locked, expedition_id);
@@ -560,29 +357,6 @@ void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 	auto query = fmt::format(SQL(
 		UPDATE expeditions SET is_locked = {} WHERE id = {};
 	), is_locked, expedition_id);
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::DeleteMember(uint32_t expedition_id, uint32_t character_id)
-{
-	LogExpeditionsDetail("Removing member [{}] from expedition [{}]", character_id, expedition_id);
-
-	auto query = fmt::format(SQL(
-		UPDATE expedition_members SET is_current_member = FALSE
-		WHERE expedition_id = {} AND character_id = {};
-	), expedition_id, character_id);
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::DeleteAllMembers(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Removing all members of expedition [{}]", expedition_id);
-
-	auto query = fmt::format(SQL(
-		UPDATE expedition_members SET is_current_member = FALSE WHERE expedition_id = {};
-	), expedition_id);
 
 	database.QueryDatabase(query);
 }
@@ -598,7 +372,7 @@ void ExpeditionDatabase::UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool 
 	database.QueryDatabase(query);
 }
 
-void ExpeditionDatabase::AddLockoutDuration(const std::vector<ExpeditionMember>& members,
+void ExpeditionDatabase::AddLockoutDuration(const std::vector<DynamicZoneMember>& members,
 	const ExpeditionLockoutTimer& lockout, int seconds)
 {
 	LogExpeditionsDetail(
@@ -610,7 +384,7 @@ void ExpeditionDatabase::AddLockoutDuration(const std::vector<ExpeditionMember>&
 	{
 		fmt::format_to(std::back_inserter(insert_values),
 			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
-			member.char_id,
+			member.id,
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
 			lockout.GetExpeditionUUID(),

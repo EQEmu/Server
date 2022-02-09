@@ -70,9 +70,9 @@ struct AISpells_Struct {
 
 struct AISpellsEffects_Struct {
 	uint16	spelleffectid;
-	int32	base;
+	int32	base_value;
 	int32	limit;
-	int32	max;
+	int32	max_value;
 };
 
 struct AISpellsVar_Struct {
@@ -114,8 +114,8 @@ public:
 	virtual ~NPC();
 
 	static NPC *SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position);
-	static void SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_number, int32 zoffset);
-	static void SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position);
+	static void SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_number, int32 zoffset);
+	static NPC * SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position);
 
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
@@ -175,11 +175,12 @@ public:
 
 	bool	DatabaseCastAccepted(int spell_id);
 	bool	IsFactionListAlly(uint32 other_faction);
+	bool	IsGuard();
 	FACTION_VALUE CheckNPCFactionAlly(int32 other_faction);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
 
-	void	GoToBind(uint8 bindnum = 0)	{ GMMove(m_SpawnPoint.x, m_SpawnPoint.y, m_SpawnPoint.z, m_SpawnPoint.w); }
-	void	Gate(uint8 bindnum = 0);
+	void	GoToBind(uint8 bind_number = 0)	{ GMMove(m_SpawnPoint.x, m_SpawnPoint.y, m_SpawnPoint.z, m_SpawnPoint.w); }
+	void	Gate(uint8 bind_number = 0);
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
 	void	SetPetState(SpellBuff_Struct *buffs, uint32 *items);
@@ -197,11 +198,17 @@ public:
 	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void	CheckTrivialMinMaxLevelDrop(Mob *killer);
 	void	ClearItemList();
+	inline const ItemList &GetItemList() { return itemlist; }
 	ServerLootItem_Struct*	GetItem(int slot_id);
 	void	AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum);
 	void	AddCash();
 	void	RemoveCash();
-	void	QueryLoot(Client* to);
+	void	QueryLoot(Client* to, bool is_pet_query = false);
+	bool	HasItem(uint32 item_id);
+	uint16	CountItem(uint32 item_id);
+	uint32	GetItemIDBySlot(uint16 loot_slot);
+	uint16	GetFirstSlotByItemID(uint32 item_id);
+	std::vector<int> GetLootList();
 	uint32	CountLoot();
 	inline uint32	GetLoottableID()	const { return loottable_id; }
 	virtual void UpdateEquipmentLight();
@@ -253,6 +260,7 @@ public:
 	uint32	GetSwarmTarget();
 	void	SetSwarmTarget(int target_id = 0);
 	void	DepopSwarmPets();
+	void	TryDepopTargetLockedPets(Mob* current_target);
 	void	PetOnSpawn(NewSpawn_Struct* ns);
 
 	void	SignalNPC(int _signal_id);
@@ -275,6 +283,8 @@ public:
 		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
+	int32 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster = nullptr);
+
     glm::vec4 m_SpawnPoint;
 
 	uint32	GetMaxDMG() const {return max_dmg;}
@@ -293,6 +303,7 @@ public:
 	void	PickPocket(Client* thief);
 	void	Disarm(Client* client, int chance);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
+	void	DisableSwarmTimer() { swarm_timer.Disable(); }
 
 	void AddLootDrop(
 		const EQ::ItemData *item2,
@@ -307,7 +318,7 @@ public:
 		uint32 aug6 = 0
 	);
 
-	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop);
+	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose=false);
 
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
@@ -319,7 +330,7 @@ public:
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
-	void				DisplayWaypointInfo(Client *to);
+	void				DisplayWaypointInfo(Client *client);
 	void				CalculateNewWaypoint();
 	void				AssignWaypoints(int32 grid_id, int start_wp = 0);
 	void				SetWaypointPause();
@@ -438,8 +449,10 @@ public:
 
 	uint32 GetAdventureTemplate() const { return adventure_template_id; }
 	void AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
-	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
+	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value, bool apply_bonus = false);
 	void RemoveSpellFromNPCList(uint16 spell_id);
+	void RemoveSpellEffectFromNPCList(uint16 iSpellEffectID, bool apply_bonus = false);
+	bool HasAISpellEffect(uint16 spell_effect_id);
 	Timer *GetRefaceTimer() const { return reface_timer; }
 	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
 
@@ -489,6 +502,25 @@ public:
 	float GetRoamboxDestinationZ() const;
 	uint32 GetRoamboxDelay() const;
 	uint32 GetRoamboxMinDelay() const;
+
+	inline uint8 GetArmTexture() { return armtexture; }
+	inline uint8 GetBracerTexture() { return bracertexture; }
+	inline uint8 GetHandTexture() { return handtexture; }
+	inline uint8 GetFeetTexture() { return feettexture; }
+	inline uint8 GetLegTexture() { return legtexture; }
+
+	inline int GetCharmedAccuracy() { return charm_accuracy_rating; }
+	inline int GetCharmedArmorClass() { return charm_ac; }
+	inline int GetCharmedAttack() { return charm_atk; }
+	inline int GetCharmedAttackDelay() { return charm_attack_delay; }
+	inline int GetCharmedAvoidance() { return charm_avoidance_rating; }
+	inline int GetCharmedMaxDamage() { return charm_max_dmg; }
+	inline int GetCharmedMinDamage() { return charm_min_dmg; }
+
+	inline bool GetAlwaysAggro() { return always_aggro; }
+	inline bool GetNPCAggro() { return npc_aggro; }
+	inline bool GetIgnoreDespawn() { return ignore_despawn; }
+	inline bool GetSkipGlobalLoot() { return skip_global_loot; }
 
 	std::unique_ptr<Timer> AIautocastspell_timer;
 
@@ -542,7 +574,7 @@ protected:
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
-	int16 GetFocusEffect(focusType type, uint16 spell_id);
+	int32 GetFocusEffect(focusType type, uint16 spell_id);
 	uint16 innate_proc_spell_id;
 
 	uint32	npc_spells_effects_id;

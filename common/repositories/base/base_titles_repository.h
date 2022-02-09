@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -24,7 +24,7 @@ public:
 		int         max_skill_value;
 		int         min_aa_points;
 		int         max_aa_points;
-		int         class;
+		int         class_;
 		int         gender;
 		int         char_id;
 		int         status;
@@ -48,7 +48,7 @@ public:
 			"max_skill_value",
 			"min_aa_points",
 			"max_aa_points",
-			"class",
+			"`class`",
 			"gender",
 			"char_id",
 			"status",
@@ -97,7 +97,7 @@ public:
 		entry.max_skill_value = -1;
 		entry.min_aa_points   = -1;
 		entry.max_aa_points   = -1;
-		entry.class           = -1;
+		entry.class_          = -1;
 		entry.gender          = -1;
 		entry.char_id         = -1;
 		entry.status          = -1;
@@ -146,7 +146,7 @@ public:
 			entry.max_skill_value = atoi(row[3]);
 			entry.min_aa_points   = atoi(row[4]);
 			entry.max_aa_points   = atoi(row[5]);
-			entry.class           = atoi(row[6]);
+			entry.class_          = atoi(row[6]);
 			entry.gender          = atoi(row[7]);
 			entry.char_id         = atoi(row[8]);
 			entry.status          = atoi(row[9]);
@@ -192,7 +192,7 @@ public:
 		update_values.push_back(columns[3] + " = " + std::to_string(titles_entry.max_skill_value));
 		update_values.push_back(columns[4] + " = " + std::to_string(titles_entry.min_aa_points));
 		update_values.push_back(columns[5] + " = " + std::to_string(titles_entry.max_aa_points));
-		update_values.push_back(columns[6] + " = " + std::to_string(titles_entry.class));
+		update_values.push_back(columns[6] + " = " + std::to_string(titles_entry.class_));
 		update_values.push_back(columns[7] + " = " + std::to_string(titles_entry.gender));
 		update_values.push_back(columns[8] + " = " + std::to_string(titles_entry.char_id));
 		update_values.push_back(columns[9] + " = " + std::to_string(titles_entry.status));
@@ -227,7 +227,7 @@ public:
 		insert_values.push_back(std::to_string(titles_entry.max_skill_value));
 		insert_values.push_back(std::to_string(titles_entry.min_aa_points));
 		insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-		insert_values.push_back(std::to_string(titles_entry.class));
+		insert_values.push_back(std::to_string(titles_entry.class_));
 		insert_values.push_back(std::to_string(titles_entry.gender));
 		insert_values.push_back(std::to_string(titles_entry.char_id));
 		insert_values.push_back(std::to_string(titles_entry.status));
@@ -270,7 +270,7 @@ public:
 			insert_values.push_back(std::to_string(titles_entry.max_skill_value));
 			insert_values.push_back(std::to_string(titles_entry.min_aa_points));
 			insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-			insert_values.push_back(std::to_string(titles_entry.class));
+			insert_values.push_back(std::to_string(titles_entry.class_));
 			insert_values.push_back(std::to_string(titles_entry.gender));
 			insert_values.push_back(std::to_string(titles_entry.char_id));
 			insert_values.push_back(std::to_string(titles_entry.status));
@@ -317,7 +317,7 @@ public:
 			entry.max_skill_value = atoi(row[3]);
 			entry.min_aa_points   = atoi(row[4]);
 			entry.max_aa_points   = atoi(row[5]);
-			entry.class           = atoi(row[6]);
+			entry.class_          = atoi(row[6]);
 			entry.gender          = atoi(row[7]);
 			entry.char_id         = atoi(row[8]);
 			entry.status          = atoi(row[9]);
@@ -355,7 +355,7 @@ public:
 			entry.max_skill_value = atoi(row[3]);
 			entry.min_aa_points   = atoi(row[4]);
 			entry.max_aa_points   = atoi(row[5]);
-			entry.class           = atoi(row[6]);
+			entry.class_          = atoi(row[6]);
 			entry.gender          = atoi(row[7]);
 			entry.char_id         = atoi(row[8]);
 			entry.status          = atoi(row[9]);

@@ -27,13 +27,13 @@ enum FACTION_VALUE {
 	FACTION_ALLY = 1,
 	FACTION_WARMLY = 2,
 	FACTION_KINDLY = 3,
-	FACTION_AMIABLE = 4,
+	FACTION_AMIABLY = 4,
 
-	FACTION_INDIFFERENT = 5,
+	FACTION_INDIFFERENTLY = 5,
 
-	FACTION_APPREHENSIVE = 6,
-	FACTION_DUBIOUS = 7,
-	FACTION_THREATENLY = 8,
+	FACTION_APPREHENSIVELY = 6,
+	FACTION_DUBIOUSLY = 7,
+	FACTION_THREATENINGLY = 8,
 	FACTION_SCOWLS = 9
 };
 
@@ -50,8 +50,8 @@ struct NPCFactionList {
 struct FactionMods
 {
 	int32 base;
-	int16	min; 	// The lowest your personal earned faction can go - before race/class/diety adjustments.
-	int16	max; 	// The highest your personal earned faction can go - before race/class/diety adjustments.
+	int16	min; 	// The lowest your personal earned faction can go - before race/class/deity adjustments.
+	int16	max; 	// The highest your personal earned faction can go - before race/class/deity adjustments.
 	int32 class_mod;
 	int32 race_mod;
 	int32 deity_mod;
@@ -61,8 +61,8 @@ struct Faction {
 	int32	id;
 	std::map<std::string, int16> mods;
 	int16	base;
-	int16	min; // The lowest your personal earned faction can go - before race/class/diety adjustments.
-	int16	max; // The highest your personal earned faction can go - before race/class/diety adjustments.
+	int16	min; // The lowest your personal earned faction can go - before race/class/deity adjustments.
+	int16	max; // The highest your personal earned faction can go - before race/class/deity adjustments.
 	char	name[50];
 };
 
@@ -75,6 +75,6 @@ struct NPCFaction
 	uint8 temp;
 };
 
-const char *FactionValueToString(FACTION_VALUE fv);
+const char *FactionValueToString(FACTION_VALUE faction_value);
 FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value);
 #endif

@@ -1,6 +1,7 @@
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/repositories/character_activities_repository.h"
+#include "../common/repositories/character_task_timers_repository.h"
 #include "../common/repositories/character_tasks_repository.h"
 #include "../common/repositories/completed_tasks_repository.h"
 #include "../common/rulesys.h"
@@ -9,8 +10,13 @@
 #include "quest_parser_collection.h"
 #include "task_client_state.h"
 #include "zonedb.h"
+#include "../common/shared_tasks.h"
+#include "worldserver.h"
+#include "dynamic_zone.h"
+#include "string_ids.h"
 
-extern QueryServ *QServ;
+extern WorldServer worldserver;
+extern QueryServ   *QServ;
 
 ClientTaskState::ClientTaskState()
 {
@@ -23,9 +29,13 @@ ClientTaskState::ClientTaskState()
 		m_active_quests[i].task_id = TASKSLOTEMPTY;
 	}
 
+	m_active_task = {};
 	m_active_task.slot    = 0;
 	m_active_task.task_id = TASKSLOTEMPTY;
-	// TODO: shared task
+
+	m_active_shared_task = {};
+	m_active_shared_task.slot    = 0;
+	m_active_shared_task.task_id = TASKSLOTEMPTY;
 }
 
 ClientTaskState::~ClientTaskState()
@@ -92,7 +102,7 @@ void ClientTaskState::SendTaskHistory(Client *client, int task_index)
 	for (int i = 0; i < p_task_data->activity_count; i++) {
 		if (m_completed_tasks[adjusted_task_index].activity_done[i]) {
 			task_history_reply_data_1 = (TaskHistoryReplyData1_Struct *) reply;
-			task_history_reply_data_1->ActivityType = p_task_data->activity_information[i].activity_type;
+			task_history_reply_data_1->ActivityType = static_cast<uint32_t>(p_task_data->activity_information[i].activity_type);
 			reply = (char *) task_history_reply_data_1 + sizeof(TaskHistoryReplyData1_Struct);
 			VARSTRUCT_ENCODE_STRING(reply, p_task_data->activity_information[i].target_name.c_str());
 			VARSTRUCT_ENCODE_STRING(reply, p_task_data->activity_information[i].item_list.c_str());
@@ -321,7 +331,7 @@ bool ClientTaskState::HasSlotForTask(TaskInformation *task)
 		case TaskType::Task:
 			return m_active_task.task_id == TASKSLOTEMPTY;
 		case TaskType::Shared:
-			return false; // todo
+			return m_active_shared_task.task_id == TASKSLOTEMPTY;
 		case TaskType::Quest:
 			for (auto &active_quest : m_active_quests) {
 				if (active_quest.task_id == TASKSLOTEMPTY) {
@@ -359,20 +369,39 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 {
 	bool all_activities_complete = true;
 
+	LogTasksDetail(
+		"[UnlockActivities] Fetching task info for character_id [{}] task [{}] slot [{}] current_step [{}] accepted_time [{}] updated [{}]",
+		character_id,
+		task_info.task_id,
+		task_info.slot,
+		task_info.current_step,
+		task_info.accepted_time,
+		task_info.updated
+	);
+
 	TaskInformation *p_task_data = task_manager->m_task_data[task_info.task_id];
 	if (p_task_data == nullptr) {
 		return true;
 	}
 
+	for (int i = 0; i < p_task_data->activity_count; i++) {
+		if (task_info.activity[i].activity_id >= 0) {
+			LogTasksDetail(
+				"[UnlockActivities] character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}] sequence [{}]",
+				character_id,
+				task_info.task_id,
+				task_info.activity[i].activity_id,
+				task_info.activity[i].done_count,
+				task_info.activity[i].activity_state,
+				task_info.activity[i].updated,
+				p_task_data->sequence_mode
+			);
+		}
+	}
+
 	// On loading the client state, all activities that are not completed, are
 	// marked as hidden. For Sequential (non-stepped) mode, we mark the first
 	// activity_information as active if not complete.
-	LogTasks(
-		"character_id [{}] task_id [{}] sequence_mode [{}]",
-		character_id,
-		task_info.task_id,
-		p_task_data->sequence_mode
-	);
 
 	if (p_task_data->sequence_mode == ActivitiesSequential) {
 		if (task_info.activity[0].activity_state != ActivityCompleted) {
@@ -418,15 +447,18 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 				}
 			}
 
-			CompletedTaskInformation completed_task_information{};
-			completed_task_information.task_id        = task_info.task_id;
-			completed_task_information.completed_time = time(nullptr);
+			if (p_task_data->type != TaskType::Shared) {
+				CompletedTaskInformation completed_task_information{};
+				completed_task_information.task_id        = task_info.task_id;
+				completed_task_information.completed_time = time(nullptr);
 
-			for (int i = 0; i < p_task_data->activity_count; i++) {
-				completed_task_information.activity_done[i] = (task_info.activity[i].activity_state == ActivityCompleted);
+				for (int i = 0; i < p_task_data->activity_count; i++) {
+					completed_task_information.activity_done[i] = (task_info.activity[i].activity_state ==
+						ActivityCompleted);
+				}
+
+				m_completed_tasks.push_back(completed_task_information);
 			}
-
-			m_completed_tasks.push_back(completed_task_information);
 		}
 
 		LogTasks("Returning sequential task, AllActivitiesComplete is [{}]", all_activities_complete);
@@ -505,24 +537,42 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 				}
 			}
 
-			CompletedTaskInformation completed_task_information{};
-			completed_task_information.task_id        = task_info.task_id;
-			completed_task_information.completed_time = time(nullptr);
+			if (p_task_data->type != TaskType::Shared) {
+				CompletedTaskInformation completed_task_information{};
+				completed_task_information.task_id        = task_info.task_id;
+				completed_task_information.completed_time = time(nullptr);
 
-			for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-				completed_task_information.activity_done[activity_id] =
-					(task_info.activity[activity_id].activity_state == ActivityCompleted);
+				for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
+					completed_task_information.activity_done[activity_id] =
+						(task_info.activity[activity_id].activity_state == ActivityCompleted);
+				}
+
+				m_completed_tasks.push_back(completed_task_information);
 			}
-
-			m_completed_tasks.push_back(completed_task_information);
 		}
 		return true;
 	}
 
 	// Mark all non-completed tasks in the current step as active
 	for (int activity = 0; activity < p_task_data->activity_count; activity++) {
+		LogTasksDetail(
+			"[UnlockActivities] - Debug task [{}] activity [{}] step_number [{}] current_step [{}]",
+			task_info.task_id,
+			activity,
+			p_task_data->activity_information[activity].step_number,
+			(int) task_info.current_step
+
+		);
+
 		if ((p_task_data->activity_information[activity].step_number == (int) task_info.current_step) &&
 			(task_info.activity[activity].activity_state == ActivityHidden)) {
+
+			LogTasksDetail(
+				"[UnlockActivities] -- Debug task [{}] activity [{}] (ActivityActive)",
+				task_info.task_id,
+				activity
+			);
+
 			task_info.activity[activity].activity_state = ActivityActive;
 			task_info.activity[activity].updated        = true;
 		}
@@ -531,23 +581,17 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 	return false;
 }
 
-void ClientTaskState::UpdateTasksOnKill(Client *client, int npc_type_id)
-{
-	UpdateTasksByNPC(client, ActivityKill, npc_type_id);
-}
-
 bool ClientTaskState::UpdateTasksOnSpeakWith(Client *client, int npc_type_id)
 {
-	return UpdateTasksByNPC(client, ActivitySpeakWith, npc_type_id);
+	return UpdateTasksByNPC(client, TaskActivityType::SpeakWith, npc_type_id);
 }
 
-bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int npc_type_id)
+bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity_type, int npc_type_id)
 {
 
 	int is_updating = false;
 
-	// If the client has no tasks, there is nothing further to check.
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return false;
 	}
 
@@ -583,7 +627,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int np
 					client->GetName(),
 					current_task->task_id,
 					activity_id,
-					activity_type,
+					static_cast<int32_t>(activity_type),
 					npc_type_id
 				);
 				continue;
@@ -624,7 +668,7 @@ int ClientTaskState::ActiveSpeakTask(int npc_type_id)
 
 	// This method is to be used from Perl quests only and returns the task_id of the first
 	// active task found which has an active SpeakWith activity_information for this NPC.
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return 0;
 	}
 
@@ -648,7 +692,7 @@ int ClientTaskState::ActiveSpeakTask(int npc_type_id)
 			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
-			if (activity_info->activity_type != ActivitySpeakWith) {
+			if (activity_info->activity_type != TaskActivityType::SpeakWith) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -670,7 +714,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 
 	// This method is to be used from Perl quests only and returns the activity_id of the first
 	// active activity_information found in the specified task which is to SpeakWith this NPC.
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return -1;
 	}
 	if (task_id <= 0 || task_id >= MAXTASKS) {
@@ -697,7 +741,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
-			if (activity_info->activity_type != ActivitySpeakWith) {
+			if (activity_info->activity_type != TaskActivityType::SpeakWith) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -715,7 +759,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 	return 0;
 }
 
-void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_type, int item_id, int count)
+void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activity_type, int item_id, int count)
 {
 
 	// This method updates the client's task activities of the specified type which relate
@@ -727,11 +771,11 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 
 	LogTasks(
 		"[UpdateTasksForItem] activity_type [{}] item_id [{}]",
-		activity_type,
+		static_cast<int32_t>(activity_type),
 		item_id
 	);
 
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return;
 	}
 
@@ -758,7 +802,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 				continue;
 			}
 			// We are only interested in the ActivityType we were called with
-			if (activity_info->activity_type != (int) activity_type) {
+			if (activity_info->activity_type != activity_type) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -766,7 +810,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 				LogTasks(
 					"[UpdateTasksForItem] Error: Character [{}] activity_information type [{}] for Item [{}] failed zone check",
 					client->GetName(),
-					activity_type,
+					static_cast<int32_t>(activity_type),
 					item_id
 				);
 				continue;
@@ -800,7 +844,8 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
 {
 	LogTasks("[UpdateTasksOnExplore] explore_id [{}]", explore_id);
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+
+	if (!HasActiveTasks()) {
 		return;
 	}
 
@@ -827,7 +872,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
 				continue;
 			}
 			// We are only interested in explore activities
-			if (activity_info->activity_type != ActivityExplore) {
+			if (activity_info->activity_type != TaskActivityType::Explore) {
 				continue;
 			}
 			if (!activity_info->CheckZone(zone->GetZoneID())) {
@@ -890,7 +935,8 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 	bool is_updated = false;
 
 	LogTasks("[UpdateTasksOnDeliver] [{}]", npc_type_id);
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+
+	if (!HasActiveTasks()) {
 		return false;
 	}
 
@@ -917,8 +963,8 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 			}
 
 			// We are only interested in Deliver activities
-			if (activity_info->activity_type != ActivityDeliver &&
-				activity_info->activity_type != ActivityGiveCash) {
+			if (activity_info->activity_type != TaskActivityType::Deliver &&
+				activity_info->activity_type != TaskActivityType::GiveCash) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -936,7 +982,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 			}
 			// Is the activity_information related to these items ?
 			//
-			if ((activity_info->activity_type == ActivityGiveCash) && cash) {
+			if ((activity_info->activity_type == TaskActivityType::GiveCash) && cash) {
 				LogTasks("[UpdateTasksOnDeliver] Increment on GiveCash");
 				IncrementDoneCount(client, p_task_data, i, activity_id, cash);
 				is_updated = true;
@@ -985,7 +1031,8 @@ void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
 	// If the client has no tasks, there is nothing further to check.
 
 	LogTasks("[UpdateTasksOnTouch] [{}] ", zone_id);
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+
+	if (!HasActiveTasks()) {
 		return;
 	}
 
@@ -1011,7 +1058,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
 				continue;
 			}
 			// We are only interested in touch activities
-			if (activity_info->activity_type != ActivityTouch) {
+			if (activity_info->activity_type != TaskActivityType::Touch) {
 				continue;
 			}
 			if (activity_info->goal_method != METHODSINGLEID) {
@@ -1048,10 +1095,55 @@ void ClientTaskState::IncrementDoneCount(
 	bool ignore_quest_update
 )
 {
-	Log(Logs::General, Logs::Tasks, "[UPDATE] IncrementDoneCount");
-
 	auto info = GetClientTaskInfo(task_information->type, task_index);
 	if (info == nullptr) {
+		return;
+	}
+
+	LogTasks(
+		"[IncrementDoneCount] client [{}] task_id [{}] activity_id [{}] count [{}]",
+		client->GetCleanName(),
+		info->task_id,
+		activity_id,
+		count
+	);
+
+	// shared task shim
+	// intercept and pass to world first before processing normally
+	if (!client->m_shared_task_update && task_information->type == TaskType::Shared) {
+
+		// struct
+		auto pack = new ServerPacket(ServerOP_SharedTaskUpdate, sizeof(ServerSharedTaskActivityUpdate_Struct));
+		auto *r   = (ServerSharedTaskActivityUpdate_Struct *) pack->pBuffer;
+
+		// fill
+		r->source_character_id = client->CharacterID();
+		r->task_id             = info->task_id;
+		r->activity_id         = activity_id;
+		r->done_count          = info->activity[activity_id].done_count + count;
+		r->ignore_quest_update = ignore_quest_update;
+
+		LogTasksDetail(
+			"[IncrementDoneCount] shared_task sending client [{}] task_id [{}] activity_id [{}] count [{}] ignore_quest_update [{}]",
+			r->source_character_id,
+			r->task_id,
+			r->activity_id,
+			r->done_count,
+			(ignore_quest_update ? "true" : "false")
+		);
+
+		SyncSharedTaskZoneClientDoneCountState(
+			client,
+			task_information,
+			task_index,
+			activity_id,
+			r->done_count
+		);
+
+		// send
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+
 		return;
 	}
 
@@ -1062,24 +1154,19 @@ void ClientTaskState::IncrementDoneCount(
 	}
 
 	if (!ignore_quest_update) {
-		char buf[24];
-		snprintf(
-			buf,
-			23,
-			"%d %d %d",
+		std::string export_string = fmt::format(
+			"{} {} {}",
 			info->activity[activity_id].done_count,
 			info->activity[activity_id].activity_id,
 			info->task_id
 		);
-		buf[23] = '\0';
-		parse->EventPlayer(EVENT_TASK_UPDATE, client, buf, 0);
+		parse->EventPlayer(EVENT_TASK_UPDATE, client, export_string, 0);
 	}
 
 	info->activity[activity_id].updated = true;
 	// Have we reached the goal count for this activity_information ?
 	if (info->activity[activity_id].done_count >= task_information->activity_information[activity_id].goal_count) {
-		Log(
-			Logs::General, Logs::Tasks, "[UPDATE] Done (%i) = Goal (%i) for activity_information %i",
+		LogTasks("[IncrementDoneCount] done_count [{}] goal_count [{}] activity_id [{}]",
 			info->activity[activity_id].done_count,
 			task_information->activity_information[activity_id].goal_count,
 			activity_id
@@ -1089,49 +1176,45 @@ void ClientTaskState::IncrementDoneCount(
 		info->activity[activity_id].activity_state = ActivityCompleted;
 		// Unlock subsequent activities for this task
 		bool task_complete = UnlockActivities(client->CharacterID(), *info);
-		Log(Logs::General, Logs::Tasks, "[UPDATE] TaskCompleted is %i", task_complete);
+		LogTasks("[IncrementDoneCount] task_complete is [{}]", task_complete);
 		// and by the 'Task Stage Completed' message
 		client->SendTaskActivityComplete(info->task_id, activity_id, task_index, task_information->type);
 		// Send the updated task/activity_information list to the client
 		task_manager->SendSingleActiveTaskToClient(client, *info, task_complete, false);
 		// Inform the client the task has been updated, both by a chat message
-		client->Message(Chat::White, "Your task '%s' has been updated.", task_information->title.c_str());
+		client->MessageString(Chat::White, TASK_UPDATED, task_information->title.c_str());
 
-		if (task_information->activity_information[activity_id].goal_method != METHODQUEST) {
-			if (!ignore_quest_update) {
-				char buf[24];
-				snprintf(buf, 23, "%d %d", info->task_id, info->activity[activity_id].activity_id);
-				buf[23] = '\0';
-				parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, buf, 0);
-			}
-			/* QS: PlayerLogTaskUpdates :: Update */
-			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
-				std::string event_desc = StringFormat(
-					"Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i",
-					info->task_id,
-					info->activity[activity_id].activity_id,
-					info->activity[activity_id].done_count,
-					client->GetZoneID(),
-					client->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
-			}
+		if (!ignore_quest_update) {
+			std::string export_string = fmt::format(
+				"{} {}",
+				info->task_id,
+				info->activity[activity_id].activity_id
+			);
+			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, export_string, 0);
+		}
+		/* QS: PlayerLogTaskUpdates :: Update */
+		if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
+			std::string event_desc = StringFormat(
+				"Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i",
+				info->task_id,
+				info->activity[activity_id].activity_id,
+				info->activity[activity_id].done_count,
+				client->GetZoneID(),
+				client->GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
 		}
 
 		// If this task is now complete, the Completed tasks will have been
 		// updated in UnlockActivities. Send the completed task list to the
 		// client. This is the same sequence the packets are sent on live.
 		if (task_complete) {
-			char buf[24];
-			snprintf(
-				buf,
-				23,
-				"%d %d %d",
+			std::string export_string = fmt::format(
+				"{} {} {}",
 				info->activity[activity_id].done_count,
 				info->activity[activity_id].activity_id,
 				info->task_id
 			);
-			buf[23] = '\0';
-			parse->EventPlayer(EVENT_TASK_COMPLETE, client, buf, 0);
+			parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
 
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
@@ -1145,16 +1228,24 @@ void ClientTaskState::IncrementDoneCount(
 				QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
 			}
 
-			task_manager->SendCompletedTasksToClient(client, this);
 			client->SendTaskActivityComplete(info->task_id, 0, task_index, task_information->type, 0);
 			task_manager->SaveClientState(client, this);
-			//c->SendTaskComplete(TaskIndex);
-			client->CancelTask(task_index, task_information->type);
-			//if(Task->reward_method != METHODQUEST) RewardTask(c, Task);
+
 			// If Experience and/or cash rewards are set, reward them from the task even if reward_method is METHODQUEST
 			RewardTask(client, task_information);
 			//RemoveTask(c, TaskIndex);
 
+			// add replay timer (world adds timers to shared task members)
+			AddReplayTimer(client, *info, *task_information);
+
+			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
+			if (task_information->type == TaskType::Shared) {
+				return;
+			}
+
+			task_manager->SendCompletedTasksToClient(client, this);
+
+			client->CancelTask(task_index, task_information->type);
 		}
 
 	}
@@ -1164,8 +1255,7 @@ void ClientTaskState::IncrementDoneCount(
 			client,
 			info->task_id,
 			activity_id,
-			task_index,
-			task_information->activity_information[activity_id].optional
+			task_index
 		);
 		task_manager->SaveClientState(client, this);
 	}
@@ -1178,6 +1268,10 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		return;
 	}
 
+	if (!task_information->completion_emote.empty()) {
+		client->Message(Chat::Yellow, task_information->completion_emote.c_str());
+	}
+
 	const EQ::ItemData *item_data;
 	std::vector<int>   reward_list;
 
@@ -1187,7 +1281,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 				client->SummonItem(task_information->reward_id);
 				item_data = database.GetItem(task_information->reward_id);
 				if (item_data) {
-					client->Message(Chat::Yellow, "You receive %s as a reward.", item_data->Name);
+					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
 				}
 			}
 			break;
@@ -1198,7 +1292,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 				client->SummonItem(item_id);
 				item_data = database.GetItem(item_id);
 				if (item_data) {
-					client->Message(Chat::Yellow, "You receive %s as a reward.", item_data->Name);
+					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
 				}
 			}
 			break;
@@ -1208,13 +1302,6 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 			break;
 		}
 	}
-
-	if (!task_information->completion_emote.empty()) {
-		client->SendColoredText(
-			Chat::Yellow,
-			task_information->completion_emote
-		);
-	} // unsure if they use this packet or color, should work
 
 	// just use normal NPC faction ID stuff
 	if (task_information->faction_reward) {
@@ -1294,12 +1381,21 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		}
 	}
 
+	if (task_information->reward_radiant_crystals > 0 || task_information->reward_ebon_crystals > 0)
+	{
+		client->AddCrystals(task_information->reward_radiant_crystals, task_information->reward_ebon_crystals);
+	}
+
 	client->SendSound();
 }
 
 bool ClientTaskState::IsTaskActive(int task_id)
 {
 	if (m_active_task.task_id == task_id) {
+		return true;
+	}
+
+	if (m_active_shared_task.task_id == task_id) {
 		return true;
 	}
 
@@ -1325,10 +1421,20 @@ void ClientTaskState::FailTask(Client *client, int task_id)
 		m_active_task_count
 	);
 
+
+	// type: Task
 	if (m_active_task.task_id == task_id) {
-		client->SendTaskFailed(task_id, 0, TaskType::Task);
+		client->SendTaskFailed(task_id, TASKSLOTTASK, TaskType::Task);
 		// Remove the task from the client
-		client->CancelTask(0, TaskType::Task);
+		client->CancelTask(TASKSLOTTASK, TaskType::Task);
+		return;
+	}
+
+	// type: Shared Task
+	if (m_active_shared_task.task_id == task_id) {
+		client->SendTaskFailed(task_id, TASKSLOTSHAREDTASK, TaskType::Shared);
+		// Remove the task from the client
+		client->CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
 		return;
 	}
 
@@ -1357,15 +1463,19 @@ bool ClientTaskState::IsTaskActivityActive(int task_id, int activity_id)
 	if (activity_id < 0) {
 		return false;
 	}
-	if (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY) {
+	if (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
+		m_active_shared_task.task_id == TASKSLOTEMPTY) {
 		return false;
 	}
 
 	int  active_task_index = -1;
 	auto task_type         = TaskType::Task;
-
 	if (m_active_task.task_id == task_id) {
-		active_task_index = 0;
+		active_task_index = TASKSLOTTASK;
+	}
+	if (m_active_shared_task.task_id == task_id) {
+		task_type         = TaskType::Shared;
+		active_task_index = TASKSLOTSHAREDTASK;
 	}
 
 	if (active_task_index == -1) {
@@ -1426,7 +1536,8 @@ void ClientTaskState::UpdateTaskActivity(
 	);
 
 	// Quick sanity check
-	if (activity_id < 0 || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) {
+	if (activity_id < 0 || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
+							m_active_shared_task.task_id == TASKSLOTEMPTY)) {
 		return;
 	}
 
@@ -1434,7 +1545,11 @@ void ClientTaskState::UpdateTaskActivity(
 	auto type              = TaskType::Task;
 
 	if (m_active_task.task_id == task_id) {
-		active_task_index = 0;
+		active_task_index = TASKSLOTTASK;
+	}
+	if (m_active_shared_task.task_id == task_id) {
+		type              = TaskType::Shared;
+		active_task_index = TASKSLOTSHAREDTASK;
 	}
 
 	if (active_task_index == -1) {
@@ -1494,14 +1609,19 @@ void ClientTaskState::ResetTaskActivity(Client *client, int task_id, int activit
 	);
 
 	// Quick sanity check
-	if (activity_id < 0 || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) {
+	if (activity_id < 0 || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
+							m_active_shared_task.task_id == TASKSLOTEMPTY)) {
 		return;
 	}
 
 	int  active_task_index = -1;
 	auto type              = TaskType::Task;
 	if (m_active_task.task_id == task_id) {
-		active_task_index = 0;
+		active_task_index = TASKSLOTTASK;
+	}
+	if (m_active_shared_task.task_id == task_id) {
+		type              = TaskType::Shared;
+		active_task_index = TASKSLOTSHAREDTASK;
 	}
 
 	if (active_task_index == -1) {
@@ -1556,32 +1676,67 @@ void ClientTaskState::ResetTaskActivity(Client *client, int task_id, int activit
 	);
 }
 
+void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Client *c)
+{
+	auto task_data = task_manager->m_task_data[task->task_id];
+
+	c->Message(Chat::White, "------------------------------------------------");
+	c->Message(
+		Chat::White, "# [%s] | task_id [%i] title [%s] slot (%i)",
+		Tasks::GetTaskTypeDescription(task_data->type).c_str(),
+		task->task_id,
+		task_data->title.c_str(),
+		task->slot
+	);
+	c->Message(Chat::White, "------------------------------------------------");
+	c->Message(
+		Chat::White,
+		" -- Description [%s]\n",
+		task_data->description.c_str()
+	);
+
+	for (int activity_id = 0; activity_id < task_manager->GetActivityCount(task->task_id); activity_id++) {
+		std::vector<std::string> update_increments = {"1", "5", "50"};
+		std::string              update_saylinks;
+
+		for (auto &increment: update_increments) {
+			auto task_update_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+				fmt::format(
+					"#task update {} {} {}",
+					task->task_id,
+					task->activity[activity_id].activity_id,
+					increment
+				),
+				false,
+				increment
+			);
+
+			update_saylinks += "[" + task_update_saylink + "] ";
+		}
+
+		c->Message(
+			Chat::White,
+			" --- Update %s activity_id [%i] done_count [%i] state [%d] (%s)",
+			update_saylinks.c_str(),
+			task->activity[activity_id].activity_id,
+			task->activity[activity_id].done_count,
+			task->activity[activity_id].activity_state,
+			Tasks::GetActivityStateDescription(task->activity[activity_id].activity_state).c_str()
+		);
+	}
+}
+
 void ClientTaskState::ShowClientTasks(Client *client)
 {
 	client->Message(Chat::White, "------------------------------------------------");
 	client->Message(Chat::White, "# Task Information | Client [%s]", client->GetCleanName());
 //	client->Message(Chat::White, "------------------------------------------------");
 	if (m_active_task.task_id != TASKSLOTEMPTY) {
-		client->Message(
-			Chat::White,
-			"Task: %i %s",
-			m_active_task.task_id,
-			task_manager->m_task_data[m_active_task.task_id]->title.c_str()
-		);
-		client->Message(
-			Chat::White,
-			"  description: [%s]\n",
-			task_manager->m_task_data[m_active_task.task_id]->description.c_str()
-		);
-		for (int activity_id = 0; activity_id < task_manager->GetActivityCount(m_active_task.task_id); activity_id++) {
-			client->Message(
-				Chat::White,
-				"  activity_information: %2d, done_count: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
-				m_active_task.activity[activity_id].activity_id,
-				m_active_task.activity[activity_id].done_count,
-				m_active_task.activity[activity_id].activity_state
-			);
-		}
+		ShowClientTaskInfoMessage(&m_active_task, client);
+	}
+
+	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
+		ShowClientTaskInfoMessage(&m_active_shared_task, client);
 	}
 
 	for (auto &active_quest : m_active_quests) {
@@ -1589,48 +1744,7 @@ void ClientTaskState::ShowClientTasks(Client *client)
 			continue;
 		}
 
-		client->Message(Chat::White, "------------------------------------------------");
-		client->Message(
-			Chat::White, "# Quest | task_id [%i] title [%s]",
-			active_quest.task_id,
-			task_manager->m_task_data[active_quest.task_id]->title.c_str()
-		);
-		client->Message(Chat::White, "------------------------------------------------");
-
-		client->Message(
-			Chat::White,
-			" -- Description [%s]\n",
-			task_manager->m_task_data[active_quest.task_id]->description.c_str()
-		);
-
-		for (int activity_id = 0; activity_id < task_manager->GetActivityCount(active_quest.task_id); activity_id++) {
-			std::vector<std::string> update_increments = {"1", "5", "50"};
-			std::string              update_saylinks;
-
-			for (auto &increment: update_increments) {
-				auto task_update_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
-					fmt::format(
-						"#task update {} {} {}",
-						active_quest.task_id,
-						active_quest.activity[activity_id].activity_id,
-						increment
-					),
-					false,
-					increment
-				);
-
-				update_saylinks += "[" + task_update_saylink + "] ";
-			}
-
-			client->Message(
-				Chat::White,
-				" --- activity_id [%i] done_count [%i] state [%d] (0=hidden 1=active 2=complete) | Update %s",
-				active_quest.activity[activity_id].activity_id,
-				active_quest.activity[activity_id].done_count,
-				active_quest.activity[activity_id].activity_state,
-				update_saylinks.c_str()
-			);
-		}
+		ShowClientTaskInfoMessage(&active_quest, client);
 	}
 
 	client->Message(Chat::White, "------------------------------------------------");
@@ -1639,6 +1753,8 @@ void ClientTaskState::ShowClientTasks(Client *client)
 // TODO: Shared Task
 int ClientTaskState::TaskTimeLeft(int task_id)
 {
+
+	// type "task"
 	if (m_active_task.task_id == task_id) {
 		int time_now = time(nullptr);
 
@@ -1652,6 +1768,24 @@ int ClientTaskState::TaskTimeLeft(int task_id)
 		}
 
 		int time_left = (m_active_task.accepted_time + p_task_data->duration - time_now);
+
+		return (time_left > 0 ? time_left : 0);
+	}
+
+	// type "shared task"
+	if (m_active_shared_task.task_id == task_id) {
+		int time_now = time(nullptr);
+
+		TaskInformation *p_task_data = task_manager->m_task_data[task_id];
+		if (p_task_data == nullptr) {
+			return -1;
+		}
+
+		if (!p_task_data->duration) {
+			return -1;
+		}
+
+		int time_left = (m_active_shared_task.accepted_time + p_task_data->duration - time_now);
 
 		return (time_left > 0 ? time_left : 0);
 	}
@@ -1731,12 +1865,14 @@ bool ClientTaskState::TaskOutOfTime(TaskType task_type, int index)
 
 void ClientTaskState::TaskPeriodicChecks(Client *client)
 {
+
+	// type "task"
 	if (m_active_task.task_id != TASKSLOTEMPTY) {
-		if (TaskOutOfTime(TaskType::Task, 0)) {
+		if (TaskOutOfTime(TaskType::Task, TASKSLOTTASK)) {
 			// Send Red Task Failed Message
-			client->SendTaskFailed(m_active_task.task_id, 0, TaskType::Task);
+			client->SendTaskFailed(m_active_task.task_id, TASKSLOTTASK, TaskType::Task);
 			// Remove the task from the client
-			client->CancelTask(0, TaskType::Task);
+			client->CancelTask(TASKSLOTTASK, TaskType::Task);
 			// It is a conscious decision to only fail one task per call to this method,
 			// otherwise the player will not see all the failed messages where multiple
 			// tasks fail at the same time.
@@ -1744,7 +1880,19 @@ void ClientTaskState::TaskPeriodicChecks(Client *client)
 		}
 	}
 
-	// TODO: shared tasks -- although that will probably be manager in world checking and telling zones to fail us
+	// type "shared"
+	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
+		if (TaskOutOfTime(TaskType::Shared, TASKSLOTSHAREDTASK)) {
+			// Send Red Task Failed Message
+			client->SendTaskFailed(m_active_shared_task.task_id, TASKSLOTSHAREDTASK, TaskType::Shared);
+			// Remove the task from the client
+			client->CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
+			// It is a conscious decision to only fail one task per call to this method,
+			// otherwise the player will not see all the failed messages where multiple
+			// tasks fail at the same time.
+			return;
+		}
+	}
 
 	if (m_active_task_count == 0) {
 		return;
@@ -1783,12 +1931,15 @@ bool ClientTaskState::IsTaskActivityCompleted(TaskType task_type, int index, int
 {
 	switch (task_type) {
 		case TaskType::Task:
-			if (index != 0) {
+			if (index != TASKSLOTTASK) {
 				return false;
 			}
 			return m_active_task.activity[activity_id].activity_state == ActivityCompleted;
 		case TaskType::Shared:
-			return false; // TODO: shared tasks
+			if (index != TASKSLOTSHAREDTASK) {
+				return false;
+			}
+			return m_active_shared_task.activity[activity_id].activity_state == ActivityCompleted;
 		case TaskType::Quest:
 			if (index < MAXACTIVEQUESTS) {
 				return m_active_quests[index].activity[activity_id].activity_state == ActivityCompleted;
@@ -1802,33 +1953,58 @@ bool ClientTaskState::IsTaskActivityCompleted(TaskType task_type, int index, int
 // should we be defaulting to hidden?
 ActivityState ClientTaskState::GetTaskActivityState(TaskType task_type, int index, int activity_id)
 {
+	ActivityState return_state = ActivityHidden;
 	switch (task_type) {
 		case TaskType::Task:
-			if (index != 0) {
-				return ActivityHidden;
+			if (index != TASKSLOTTASK) {
+				return_state = ActivityHidden;
+				break;
 			}
-			return m_active_task.activity[activity_id].activity_state;
+			return_state = m_active_task.activity[activity_id].activity_state;
+			break;
 		case TaskType::Shared:
-			return ActivityHidden; // TODO: shared tasks
+			if (index != TASKSLOTSHAREDTASK) {
+				return_state = ActivityHidden;
+				break;
+			}
+			return_state = m_active_shared_task.activity[activity_id].activity_state;
+			break;
 		case TaskType::Quest:
 			if (index < MAXACTIVEQUESTS) {
-				return m_active_quests[index].activity[activity_id].activity_state;
+				return_state = m_active_quests[index].activity[activity_id].activity_state;
+				break;
 			}
+			break;
 		default:
-			return ActivityHidden;
+			return_state = ActivityHidden;
 	}
+
+	LogTasksDetail(
+		"-- [GetTaskActivityState] task_type [{}] ({}) index [{}] activity_id [{}] activity_state [{}] ({})",
+		Tasks::GetTaskTypeIdentifier(task_type),
+		Tasks::GetTaskTypeDescription(task_type),
+		index,
+		activity_id,
+		Tasks::GetActivityStateIdentifier(return_state),
+		Tasks::GetActivityStateDescription(return_state)
+	);
+
+	return return_state;
 }
 
 int ClientTaskState::GetTaskActivityDoneCount(TaskType task_type, int index, int activity_id)
 {
 	switch (task_type) {
 		case TaskType::Task:
-			if (index != 0) {
+			if (index != TASKSLOTTASK) {
 				return 0;
 			}
 			return m_active_task.activity[activity_id].done_count;
 		case TaskType::Shared:
-			return 0; // TODO: shared tasks
+			if (index != TASKSLOTSHAREDTASK) {
+				return 0;
+			}
+			return m_active_shared_task.activity[activity_id].done_count;
 		case TaskType::Quest:
 			if (index < MAXACTIVEQUESTS) {
 				return m_active_quests[index].activity[activity_id].done_count;
@@ -1840,11 +2016,16 @@ int ClientTaskState::GetTaskActivityDoneCount(TaskType task_type, int index, int
 
 int ClientTaskState::GetTaskActivityDoneCountFromTaskID(int task_id, int activity_id)
 {
+
+	// type "task"
 	if (m_active_task.task_id == task_id) {
 		return m_active_task.activity[activity_id].done_count;
 	}
 
-	// TODO: shared tasks
+	// type "shared"
+	if (m_active_shared_task.task_id == task_id) {
+		return m_active_shared_task.activity[activity_id].done_count;
+	}
 
 	int active_task_index = -1;
 
@@ -1874,7 +2055,8 @@ int ClientTaskState::GetTaskStartTime(TaskType task_type, int index)
 			return m_active_task.accepted_time;
 		case TaskType::Quest:
 			return m_active_quests[index].accepted_time;
-		case TaskType::Shared: // TODO
+		case TaskType::Shared:
+			return m_active_shared_task.accepted_time;
 		default:
 			return -1;
 	}
@@ -1887,9 +2069,16 @@ void ClientTaskState::CancelAllTasks(Client *client)
 	// It removes tasks from the in-game client state ready for them to be
 	// resent to the client, in case an updated task fails to load
 
-	CancelTask(client, 0, TaskType::Task, false);
+	// task
+	// these cancels lock up the client for some reason
+	CancelTask(client, TASKSLOTTASK, TaskType::Task, false);
 	m_active_task.task_id = TASKSLOTEMPTY;
 
+	// shared task
+	CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, false);
+	m_active_shared_task.task_id = TASKSLOTEMPTY;
+
+	// "quests"
 	for (int task_index = 0; task_index < MAXACTIVEQUESTS; task_index++)
 		if (m_active_quests[task_index].task_id != TASKSLOTEMPTY) {
 			CancelTask(client, task_index, TaskType::Quest, false);
@@ -1899,22 +2088,58 @@ void ClientTaskState::CancelAllTasks(Client *client)
 	// TODO: shared
 }
 
-void ClientTaskState::CancelTask(Client *client, int sequence_number, TaskType task_type, bool remove_from_db)
+void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_from_db)
 {
+	LogTasks("CancelTask");
+
+	// shared task middleware
+	// intercept and pass to world first before processing normally
+	if (!c->m_requested_shared_task_removal && task_type == TaskType::Shared && m_active_shared_task.task_id != 0) {
+
+		// struct
+		auto pack = new ServerPacket(ServerOP_SharedTaskAttemptRemove, sizeof(ServerSharedTaskAttemptRemove_Struct));
+		auto *r   = (ServerSharedTaskAttemptRemove_Struct *) pack->pBuffer;
+
+		// fill
+		r->requested_character_id = c->CharacterID();
+		r->requested_task_id      = m_active_shared_task.task_id;
+		r->remove_from_db         = remove_from_db;
+
+		// send
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+
+		return;
+	}
+
+	// packet
 	auto outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
 
-	CancelTask_Struct *cts = (CancelTask_Struct *) outapp->pBuffer;
+	// fill
+	auto *cts = (CancelTask_Struct *) outapp->pBuffer;
 	cts->SequenceNumber = sequence_number;
 	cts->type           = static_cast<uint32>(task_type);
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask");
-
-	client->QueuePacket(outapp);
+	// send
+	c->QueuePacket(outapp);
 	safe_delete(outapp);
 
+	// persistence
 	if (remove_from_db) {
-		RemoveTask(client, sequence_number, task_type);
+		RemoveTask(c, sequence_number, task_type);
 	}
+}
+
+void ClientTaskState::KickPlayersSharedTask(Client* client)
+{
+	uint32_t pack_size = sizeof(ServerSharedTaskKickPlayers_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_SharedTaskKickPlayers, pack_size);
+	auto buf = reinterpret_cast<ServerSharedTaskKickPlayers_Struct*>(pack->pBuffer);
+
+	buf->source_character_id = client->CharacterID();
+	buf->task_id             = m_active_shared_task.task_id;
+
+	worldserver.SendPacket(pack.get());
 }
 
 void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType task_type)
@@ -1925,7 +2150,7 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 	int task_id = -1;
 	switch (task_type) {
 		case TaskType::Task:
-			if (sequence_number == 0) {
+			if (sequence_number == TASKSLOTTASK) {
 				task_id = m_active_task.task_id;
 			}
 			break;
@@ -1934,7 +2159,11 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 				task_id = m_active_quests[sequence_number].task_id;
 			}
 			break;
-		case TaskType::Shared: // TODO:
+		case TaskType::Shared:
+			if (sequence_number == TASKSLOTSHAREDTASK) {
+				task_id = m_active_shared_task.task_id;
+			}
+			break;
 		default:
 			break;
 	}
@@ -1954,7 +2183,8 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 			m_active_task.task_id = TASKSLOTEMPTY;
 			break;
 		case TaskType::Shared:
-			break; // TODO: shared tasks
+			m_active_shared_task.task_id = TASKSLOTEMPTY;
+			break;
 		case TaskType::Quest:
 			m_active_quests[sequence_number].task_id = TASKSLOTEMPTY;
 			m_active_task_count--;
@@ -1966,48 +2196,26 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 
 void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 {
-	auto task_type    = task_manager->GetTaskType(task_id);
-	int  character_id = client->CharacterID();
-
-	CharacterActivitiesRepository::DeleteWhere(
-		database,
-		fmt::format("charid = {} AND taskid = {}", character_id, task_id)
-	);
-
-	CharacterTasksRepository::DeleteWhere(
-		database,
-		fmt::format("charid = {} AND taskid = {} AND type = {}", character_id, task_id, (int) task_type)
-	);
-
-	switch (task_type) {
+	switch (task_manager->GetTaskType(task_id)) {
 		case TaskType::Task: {
 			if (m_active_task.task_id == task_id) {
-				auto              outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
-				CancelTask_Struct *cts   = (CancelTask_Struct *) outapp->pBuffer;
-				cts->SequenceNumber = 0;
-				cts->type           = static_cast<uint32>(task_type);
 				LogTasks("[UPDATE] RemoveTaskByTaskID found Task [{}]", task_id);
-				client->QueuePacket(outapp);
-				safe_delete(outapp);
-				m_active_task.task_id = TASKSLOTEMPTY;
+				CancelTask(client, TASKSLOTTASK, TaskType::Task, true);
 			}
 			break;
 		}
 		case TaskType::Shared: {
-			break; // TODO: shared tasks
+			if (m_active_shared_task.task_id == task_id) {
+				LogTasks("[UPDATE] RemoveTaskByTaskID found Shared Task [{}]", task_id);
+				CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, true);
+			}
+			break;
 		}
 		case TaskType::Quest: {
 			for (int active_quest = 0; active_quest < MAXACTIVEQUESTS; active_quest++) {
-				if (m_active_quests[active_quest].task_id == task_id) {
-					auto              outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
-					CancelTask_Struct *cts   = (CancelTask_Struct *) outapp->pBuffer;
-					cts->SequenceNumber = active_quest;
-					cts->type           = static_cast<uint32>(task_type);
+				if (m_active_quests[active_quest].task_id == task_id) {					
 					LogTasks("[UPDATE] RemoveTaskByTaskID found Quest [{}] at index [{}]", task_id, active_quest);
-					m_active_quests[active_quest].task_id = TASKSLOTEMPTY;
-					m_active_task_count--;
-					client->QueuePacket(outapp);
-					safe_delete(outapp);
+					CancelTask(client, active_quest, TaskType::Quest, true);
 				}
 			}
 		}
@@ -2017,7 +2225,13 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 	}
 }
 
-void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id, bool enforce_level_requirement)
+void ClientTaskState::AcceptNewTask(
+	Client *client,
+	int task_id,
+	int npc_type_id,
+	time_t accept_time,
+	bool enforce_level_requirement
+)
 {
 	if (!task_manager || task_id < 0 || task_id >= MAXTASKS) {
 		client->Message(Chat::Red, "Task system not functioning, or task_id %i out of range.", task_id);
@@ -2025,9 +2239,34 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 	}
 
 	auto task = task_manager->m_task_data[task_id];
-
 	if (task == nullptr) {
 		client->Message(Chat::Red, "Invalid task_id %i", task_id);
+		return;
+	}
+
+	// shared task
+	// intercept and pass to world first before processing normally
+	if (!client->m_requesting_shared_task && task->type == TaskType::Shared) {
+		LogTasksDetail(
+			"[AcceptNewTask] Initiating shared_task request | task_id [{}] character_id [{}] name [{}]",
+			task_id,
+			client->CharacterID(),
+			client->GetCleanName()
+		);
+
+		// struct
+		auto pack = new ServerPacket(ServerOP_SharedTaskRequest, sizeof(ServerSharedTaskRequest_Struct));
+		auto *r   = (ServerSharedTaskRequest_Struct *) pack->pBuffer;
+
+		// fill
+		r->requested_character_id = client->CharacterID();
+		r->requested_task_id      = task_id;
+		r->requested_npc_type_id  = npc_type_id;
+
+		// send
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+
 		return;
 	}
 
@@ -2040,8 +2279,9 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 			}
 			break;
 		case TaskType::Shared: // TODO: shared tasks
-			// if (something)
-			max_tasks = true;
+			if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
+				max_tasks = true;
+			}
 			break;
 		case TaskType::Quest:
 			if (m_active_task_count == MAXACTIVEQUESTS) {
@@ -2053,11 +2293,7 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 	}
 
 	if (max_tasks) {
-		client->Message(
-			Chat::Red,
-			"You already have the maximum allowable number of active tasks (%i)",
-			MAXACTIVEQUESTS
-		);
+		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, ".", ".", client->GetName());
 		return;
 	}
 
@@ -2065,19 +2301,53 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 	if (task->type == TaskType::Quest) {
 		for (auto &active_quest : m_active_quests) {
 			if (active_quest.task_id == task_id) {
-				client->Message(Chat::Red, "You have already been assigned this task.");
+				// live doesn't have an eqstr for it but this seems to be the string used for this scenario
+				client->Message(Chat::Yellow, "You are already working on a task for this person, you must finish it before asking for another.");
 				return;
 			}
 		}
 	}
 
 	if (enforce_level_requirement && !task_manager->ValidateLevel(task_id, client->GetLevel())) {
-		client->Message(Chat::Red, "You are outside the level range of this task.");
+		client->MessageString(Chat::Yellow, TASK_NOT_RIGHT_LEVEL);
 		return;
 	}
 
 	if (!task_manager->IsTaskRepeatable(task_id) && IsTaskCompleted(task_id)) {
 		return;
+	}
+
+	// solo task timer lockout validation
+	if (task->type != TaskType::Shared)
+	{
+		auto task_timers = CharacterTaskTimersRepository::GetWhere(database, fmt::format(
+			"character_id = {} AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
+			client->CharacterID(), task_id
+		));
+
+		if (!task_timers.empty())
+		{
+			auto timer_type = static_cast<TaskTimerType>(task_timers.front().timer_type);
+			auto seconds = task_timers.front().expire_time - std::time(nullptr);
+			auto days  = fmt::format_int(seconds / 86400).str();
+			auto hours = fmt::format_int((seconds / 3600) % 24).str();
+			auto mins  = fmt::format_int((seconds / 60) % 60).str();
+
+			// these solo task messages are in SharedTaskMessage for convenience
+			namespace EQStr = SharedTaskMessage;
+			if (timer_type == TaskTimerType::Replay)
+			{
+				int eqstr_id = EQStr::TASK_ASSIGN_WAIT_REPLAY_TIMER;
+				client->MessageString(Chat::Red, eqstr_id, days.c_str(), hours.c_str(), mins.c_str());
+			}
+			else if (timer_type == TaskTimerType::Request)
+			{
+				int eqstr_id = EQStr::TASK_ASSIGN_WAIT_REQUEST_TIMER;
+				client->Message(Chat::Red, fmt::format(EQStr::GetEQStr(eqstr_id), days, hours, mins).c_str());
+			}
+
+			return;
+		}
 	}
 
 	// We do it this way, because when the Client cancels a task, it retains the sequence number of the remaining
@@ -2090,9 +2360,11 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 		case TaskType::Task:
 			active_slot = &m_active_task;
 			break;
-		case TaskType::Shared: // TODO: shared
-			active_slot         = nullptr;
+
+		case TaskType::Shared:
+			active_slot = &m_active_shared_task;
 			break;
+
 		case TaskType::Quest:
 			for (int task_index = 0; task_index < MAXACTIVEQUESTS; task_index++) {
 				Log(Logs::General, Logs::Tasks,
@@ -2104,22 +2376,19 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 				}
 			}
 			break;
+
 		default:
 			break;
 	}
 
 	// This shouldn't happen unless there is a bug in the handling of ActiveTaskCount somewhere
 	if (active_slot == nullptr) {
-		client->Message(
-			Chat::Red,
-			"You already have the maximum allowable number of active tasks (%i)",
-			MAXACTIVEQUESTS
-		);
+		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, ".", ".", client->GetName());
 		return;
 	}
 
 	active_slot->task_id       = task_id;
-	active_slot->accepted_time = time(nullptr);
+	active_slot->accepted_time = static_cast<int>(accept_time);
 	active_slot->updated       = true;
 	active_slot->current_step  = -1;
 
@@ -2136,12 +2405,39 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 		m_active_task_count++;
 	}
 
+	// add request timer (shared task timers are added to members by world)
+	if (task->request_timer_seconds > 0)
+	{
+		auto expire_time = active_slot->accepted_time + task->request_timer_seconds;
+
+		auto seconds = expire_time - std::time(nullptr);
+		if (seconds > 0) // not already expired
+		{
+			if (task->type != TaskType::Shared)
+			{
+				auto timer = CharacterTaskTimersRepository::NewEntity();
+				timer.character_id = client->CharacterID();
+				timer.task_id      = task_id;
+				timer.timer_type   = static_cast<int>(TaskTimerType::Request);
+				timer.expire_time  = expire_time;
+
+				CharacterTaskTimersRepository::InsertOne(database, timer);
+			}
+
+			client->Message(Chat::Yellow, fmt::format(
+				SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REQUEST_TIMER),
+				task->title,
+				fmt::format_int(seconds / 86400).c_str(),       // days
+				fmt::format_int((seconds / 3600) % 24).c_str(), // hours
+				fmt::format_int((seconds / 60) % 60).c_str()    // minutes
+			).c_str());
+		}
+	}
+
 	task_manager->SendSingleActiveTaskToClient(client, *active_slot, false, true);
-	client->Message(
-		Chat::White,
-		"You have been assigned the task '%s'.",
-		task_manager->m_task_data[task_id]->title.c_str()
-	);
+	client->StartTaskRequestCooldownTimer();
+	client->MessageString(Chat::White, YOU_ASSIGNED_TASK, task->title.c_str());
+
 	task_manager->SaveClientState(client, this);
 	std::string buf = std::to_string(task_id);
 
@@ -2174,4 +2470,249 @@ void ClientTaskState::ProcessTaskProximities(Client *client, float x, float y, f
 
 		UpdateTasksOnExplore(client, explore_id);
 	}
+}
+
+void ClientTaskState::SharedTaskIncrementDoneCount(
+	Client *client,
+	int task_id,
+	int activity_id,
+	int done_count,
+	bool ignore_quest_update
+)
+{
+	TaskInformation *t = task_manager->m_task_data[task_id];
+
+	auto info = GetClientTaskInfo(t->type, TASKSLOTSHAREDTASK);
+	if (info == nullptr) {
+		return;
+	}
+
+	// absolute value update
+	info->activity[activity_id].done_count = done_count;
+
+	LogTasksDetail(
+		"[SharedTaskIncrementDoneCount] Setting task_id [{}] to absolute done_count value of [{}] via increment [{}]",
+		task_id,
+		info->activity[activity_id].done_count,
+		done_count
+	);
+
+	IncrementDoneCount(
+		client,
+		t,
+		TASKSLOTSHAREDTASK,
+		activity_id,
+		0, // no op
+		ignore_quest_update
+	);
+}
+
+const ClientTaskInformation &ClientTaskState::GetActiveSharedTask() const
+{
+	return m_active_shared_task;
+}
+
+bool ClientTaskState::HasActiveSharedTask()
+{
+	return GetActiveSharedTask().task_id != 0;
+}
+
+void ClientTaskState::CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz_request)
+{
+	auto task = task_manager->m_task_data[task_id];
+	if (!task)
+	{
+		return;
+	}
+
+	// dz should be named the version-based zone name (used in choose zone window and dz window on live)
+	auto zone_info = zone_store.GetZone(dz_request.GetZoneID(), dz_request.GetZoneVersion());
+	dz_request.SetName(zone_info.long_name.empty() ? task->title : zone_info.long_name);
+	dz_request.SetMinPlayers(task->min_players);
+	dz_request.SetMaxPlayers(task->max_players);
+
+	// a task might create a dz from an objective so override dz duration to time remaining
+	// live probably creates the dz with the shared task and just adds members for objectives
+	std::chrono::seconds seconds(TaskTimeLeft(task_id));
+	if (task->duration == 0 || seconds.count() < 0)
+	{
+		// todo: maybe add a rule for duration
+		// cap unlimited duration tasks so instance isn't held indefinitely
+		// expected behavior is to re-acquire any unlimited tasks that have an expired dz
+		seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::hours(24));
+	}
+
+	dz_request.SetDuration(static_cast<uint32_t>(seconds.count()));
+
+	if (task->type == TaskType::Task || task->type == TaskType::Quest)
+	{
+		if (task->type == TaskType::Task) {
+			dz_request.SetType(DynamicZoneType::Task);
+		} else {
+			dz_request.SetType(DynamicZoneType::Quest);
+		}
+
+		// todo: can enable non-shared task dz creation when dz ids are persisted for them (db also)
+		//DynamicZoneMember solo_member{ client->CharacterID(), client->GetCleanName() };
+		//DynamicZone::CreateNew(dz_request, { solo_member });
+	}
+	else if (task->type == TaskType::Shared)
+	{
+		dz_request.SetType(DynamicZoneType::Mission);
+
+		// shared task missions are created in world
+		EQ::Net::DynamicPacket dyn_pack = dz_request.GetSerializedDzPacket();
+
+		auto pack_size = sizeof(ServerSharedTaskCreateDynamicZone_Struct) + dyn_pack.Length();
+		auto pack = std::make_unique<ServerPacket>(ServerOP_SharedTaskCreateDynamicZone, static_cast<uint32_t>(pack_size));
+		auto buf = reinterpret_cast<ServerSharedTaskCreateDynamicZone_Struct*>(pack->pBuffer);
+		buf->source_character_id = client->CharacterID();
+		buf->task_id = task_id;
+		buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
+		memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+
+		worldserver.SendPacket(pack.get());
+	}
+
+}
+
+void ClientTaskState::ListTaskTimers(Client* client)
+{
+	LogTasksDetail("[ListTaskTimers] Client [{}]", client->GetCleanName());
+
+	// this isn't live-like but we need to throttle query (alternative is caching timers)
+	if (!client->m_list_task_timers_rate_limit.Check()) {
+		client->Message(Chat::White, "Sending messages too fast");
+		return;
+	}
+
+	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(
+		database, fmt::format(
+			"character_id = {} AND expire_time > NOW()",
+			client->CharacterID()
+		)
+	);
+
+	for (const auto& task_timer : character_task_timers)
+	{
+		auto task = task_manager->m_task_data[task_timer.task_id];
+		if (task)
+		{
+			auto timer_type = static_cast<TaskTimerType>(task_timer.timer_type);
+			auto seconds = task_timer.expire_time - std::time(nullptr);
+			auto days  = fmt::format_int(seconds / 86400).str();
+			auto hours = fmt::format_int((seconds / 3600) % 24).str();
+			auto mins  = fmt::format_int((seconds / 60) % 60).str();
+
+			if (timer_type == TaskTimerType::Replay)
+			{
+				client->MessageString(Chat::Yellow, SharedTaskMessage::REPLAY_TIMER_REMAINING,
+					task->title.c_str(), days.c_str(), hours.c_str(), mins.c_str());
+			}
+			else
+			{
+				auto eqstr = SharedTaskMessage::GetEQStr(SharedTaskMessage::REQUEST_TIMER_REMAINING);
+				client->Message(Chat::Yellow, fmt::format(eqstr, task->title, days, hours, mins).c_str());
+			}
+		}
+	}
+
+	if (character_task_timers.empty()) {
+		client->MessageString(Chat::Yellow, SharedTaskMessage::YOU_NO_CURRENT_REPLAY_TIMERS);
+	}
+}
+
+void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, TaskInformation& task)
+{
+	// world adds timers for shared tasks and handles messages
+	if (task.type != TaskType::Shared && task.replay_timer_seconds > 0)
+	{
+		// solo task replay timers are based on completion time
+		auto expire_time = std::time(nullptr) + task.replay_timer_seconds;
+
+		auto timer = CharacterTaskTimersRepository::NewEntity();
+		timer.character_id = client->CharacterID();
+		timer.task_id      = client_task.task_id;
+		timer.expire_time  = expire_time;
+		timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+
+		CharacterTaskTimersRepository::InsertOne(database, timer);
+
+		client->Message(Chat::Yellow, fmt::format(
+			SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
+			task.title,
+			fmt::format_int(task.replay_timer_seconds / 86400).c_str(),       // days
+			fmt::format_int((task.replay_timer_seconds / 3600) % 24).c_str(), // hours
+			fmt::format_int((task.replay_timer_seconds / 60) % 60).c_str()    // minutes
+		).c_str());
+	}
+}
+
+// Sync zone client donecount state
+//
+// World is always authoritative, but we still need to keep zone state in sync with reality and in this case we need
+// to update zone since world hasn't had a chance to let clients at the zone level know it's ok to progress to the next
+// donecount
+//
+// If we send updates too fast and world has not had a chance to confirm and then inform clients to set their
+// absolute state we will miss and discard updates because each update sets the same donecount
+//
+// Example: say we have a 100 kill task and we kill 10 mobs in an AOE, world gets 10 updates at once but they are
+// all from the same donecount so world only confirms 1 was actually killed and the task updates only 1 which is not
+// intended behavior.
+//
+// In this case we need to ensure that clients at the zone level increment internally even if they aren't
+// necessarily confirmed by world yet because any of them could inform world of the next donecount so we need to sync
+// zone-level before sending updates to world
+void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
+	Client *p_client,
+	TaskInformation *p_information,
+	int task_index,
+	int activity_id,
+	uint32 done_count
+)
+{
+	for (auto &e : entity_list.GetClientList()) {
+		auto c = e.second;
+		if (c->GetSharedTaskId() == p_client->GetSharedTaskId()) {
+			auto t = c->GetTaskState()->GetClientTaskInfo(p_information->type, task_index);
+			if (t == nullptr) {
+				continue;
+			}
+
+			LogTasksDetail(
+				"[IncrementDoneCount] Setting internally client [{}] to donecount [{}]",
+				c->GetCleanName(),
+				done_count
+			);
+
+			t->activity[activity_id].done_count = (int) done_count;
+		}
+	}
+}
+
+bool ClientTaskState::HasActiveTasks()
+{
+	if (!task_manager) {
+		return false;
+	}
+
+	if (m_active_task.task_id != TASKSLOTEMPTY) {
+		return true;
+	}
+
+	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
+		return true;
+	}
+
+	bool has_active_quest = false;
+	for (auto &active_quest : m_active_quests) {
+		if (active_quest.task_id == TASKSLOTEMPTY) {
+			continue;
+		}
+
+		return true;
+	}
+
+	return false;
 }

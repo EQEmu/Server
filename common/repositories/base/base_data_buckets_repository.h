@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -18,7 +18,7 @@
 class BaseDataBucketsRepository {
 public:
 	struct DataBuckets {
-		int         id;
+		int64       id;
 		std::string key;
 		std::string value;
 		int         expires;
@@ -110,7 +110,7 @@ public:
 		if (results.RowCount() == 1) {
 			DataBuckets entry{};
 
-			entry.id      = atoi(row[0]);
+			entry.id      = strtoll(row[0], NULL, 10);
 			entry.key     = row[1] ? row[1] : "";
 			entry.value   = row[2] ? row[2] : "";
 			entry.expires = atoi(row[3]);
@@ -241,7 +241,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DataBuckets entry{};
 
-			entry.id      = atoi(row[0]);
+			entry.id      = strtoll(row[0], NULL, 10);
 			entry.key     = row[1] ? row[1] : "";
 			entry.value   = row[2] ? row[2] : "";
 			entry.expires = atoi(row[3]);
@@ -269,7 +269,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DataBuckets entry{};
 
-			entry.id      = atoi(row[0]);
+			entry.id      = strtoll(row[0], NULL, 10);
 			entry.key     = row[1] ? row[1] : "";
 			entry.value   = row[2] ? row[2] : "";
 			entry.expires = atoi(row[3]);

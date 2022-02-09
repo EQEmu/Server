@@ -87,6 +87,26 @@ std::string WorldStore::GetZoneName(uint32 zone_id)
 
 /**
  * @param zone_id
+ * @param error_unknown
+ * @return
+ */
+const char *WorldStore::GetZoneLongName(uint32 zone_id, bool error_unknown)
+{
+	for (auto &z: zones) {
+		if (z.zoneidnumber == zone_id) {
+			return z.long_name.c_str();
+		}
+	}
+
+	if (error_unknown) {
+		return "UNKNOWN";
+	}
+
+	return nullptr;
+}
+
+/**
+ * @param zone_id
  * @return
  */
 std::string WorldStore::GetZoneLongName(uint32 zone_id)

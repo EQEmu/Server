@@ -509,12 +509,10 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				m_inst->SetRecastTimestamp(
 				    database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
 
-			char buf[10];
-			snprintf(buf, 9, "%u", item->ID);
-			buf[9] = '\0';
+			std::string export_string = fmt::format("{}", item->ID);
 			std::vector<EQ::Any> args;
 			args.push_back(m_inst);
-			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, this->GetID(), &args))
+			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, export_string, this->GetID(), &args))
 			{
 				auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 				memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));

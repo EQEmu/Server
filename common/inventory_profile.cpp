@@ -224,7 +224,7 @@ EQ::ItemInstance* EQ::InventoryProfile::GetItem(int16 slot_id, uint8 bagidx) con
 	return GetItem(InventoryProfile::CalcSlotId(slot_id, bagidx));
 }
 
-// Put an item snto specified slot
+// Put an item into specified slot
 int16 EQ::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 {
 	if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
@@ -399,7 +399,7 @@ bool EQ::InventoryProfile::SwapItem(
 }
 
 // Remove item from inventory (with memory delete)
-bool EQ::InventoryProfile::DeleteItem(int16 slot_id, uint8 quantity) {
+bool EQ::InventoryProfile::DeleteItem(int16 slot_id, int16 quantity) {
 	// Pop item out of inventory map (or queue)
 	ItemInstance *item_to_delete = PopItem(slot_id);
 
@@ -589,6 +589,68 @@ bool EQ::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Quan
 
 // Checks that user has at least 'quantity' number of items in a given inventory slot
 // Returns first slot it was found in, or SLOT_INVALID if not found
+
+bool EQ::InventoryProfile::HasAugmentEquippedByID(uint32 item_id)
+{
+	bool has_equipped = false;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->ContainsAugmentByID(item_id)) {
+			has_equipped = true;
+			break;
+		}
+	}
+
+	return has_equipped;
+}
+
+int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
+{
+	int quantity = 0;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->ContainsAugmentByID(item_id)) {
+			quantity += item->CountAugmentByID(item_id);
+		}
+	}
+	
+	return quantity;
+}
+
+bool EQ::InventoryProfile::HasItemEquippedByID(uint32 item_id)
+{
+	bool has_equipped = false;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->GetID() == item_id) {
+			has_equipped = true;
+			break;
+		}
+	}
+
+	return has_equipped;
+}
+
+int EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
+{
+	int quantity = 0;
+	ItemInstance* item = nullptr;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (item && item->GetID() == item_id) {
+			quantity += item->IsStackable() ? item->GetCharges() : 1;
+		}
+	}
+	
+	return quantity;
+}
 
 //This function has a flaw in that it only returns the last stack that it looked at
 //when quantity is greater than 1 and not all of quantity can be found in 1 stack.

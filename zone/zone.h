@@ -134,7 +134,7 @@ public:
 	bool IsUCSServerAvailable() { return m_ucss_available; }
 	bool IsZone(uint32 zone_id, uint16 instance_id) const;
 	bool LoadGroundSpawns();
-	bool LoadZoneCFG(const char *filename, uint16 instance_id);
+	bool LoadZoneCFG(const char *filename, uint16 instance_version);
 	bool LoadZoneObjects();
 	bool Process();
 	bool SaveZoneCFG();
@@ -167,7 +167,7 @@ public:
 	inline const uint32 &graveyard_zoneid() { return pgraveyard_zoneid; }
 	inline const uint32 GetInstanceID() const { return instanceid; }
 	inline const uint32 GetZoneID() const { return zoneid; }
-	inline glm::vec3 GetSafePoint() { return m_SafePoint; }
+	inline glm::vec4 GetSafePoint() { return m_SafePoint; }
 	inline glm::vec4 GetGraveyardPoint() { return m_Graveyard; }
 	inline std::vector<int> GetGlobalLootTables(NPC *mob) const { return m_global_loot.GetGlobalLootTables(mob); }
 	inline Timer *GetInstanceTimer() { return Instance_Timer; }
@@ -222,6 +222,7 @@ public:
 	std::vector<GridRepository::Grid>             zone_grids;
 	std::vector<GridEntriesRepository::GridEntry> zone_grid_entries;
 
+	std::unordered_map<uint32, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 	std::unordered_map<uint32, std::unique_ptr<Expedition>> expedition_cache;
 
 	time_t weather_timer;
@@ -239,6 +240,9 @@ public:
 	uint32 CountSpawn2();
 	uint32 GetSpawnKillCount(uint32 in_spawnid);
 	uint32 GetTempMerchantQuantity(uint32 NPCID, uint32 Slot);
+
+	uint32 GetCurrencyID(uint32 item_id);
+	uint32 GetCurrencyItemID(uint32 currency_id);
 
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);
@@ -289,7 +293,6 @@ public:
 	void SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
 	void SpawnStatus(Mob *client);
 	void StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
-	void UpdateHotzone();
 	void UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void weatherSend(Client *client = nullptr);
 
@@ -328,24 +331,29 @@ public:
 			auto message_split = SplitString(message, '\n');
 			entity_list.MessageStatus(
 				0,
-				80,
+				AccountStatus::QuestTroupe,
 				LogSys.GetGMSayColorFromCategory(log_category),
-				"%s",
 				message_split[0].c_str()
 			);
 
 			for (size_t iter = 1; iter < message_split.size(); ++iter) {
 				entity_list.MessageStatus(
 					0,
-					80,
+					AccountStatus::QuestTroupe,
 					LogSys.GetGMSayColorFromCategory(log_category),
-					"--- %s",
-					message_split[iter].c_str()
+					fmt::format(
+						"--- {}",
+						message_split[iter]
+					).c_str()					
 				);
 			}
-		}
-		else {
-			entity_list.MessageStatus(0, 80, LogSys.GetGMSayColorFromCategory(log_category), "%s", message.c_str());
+		} else {
+			entity_list.MessageStatus(
+				0,
+				AccountStatus::QuestTroupe,
+				LogSys.GetGMSayColorFromCategory(log_category),
+				message.c_str()
+			);
 		}
 	}
 
@@ -356,6 +364,7 @@ public:
 	 */
 	void mod_init();
 	void mod_repop();
+	void SetIsHotzone(bool is_hotzone);
 
 private:
 	bool      allow_mercs;
@@ -376,7 +385,7 @@ private:
 	char      *map_name;
 	char      *short_name;
 	char      file_name[16];
-	glm::vec3 m_SafePoint;
+	glm::vec4 m_SafePoint;
 	glm::vec4 m_Graveyard;
 	int       default_ruleset;
 	int       zone_total_blocked_spells;
@@ -401,7 +410,6 @@ private:
 	Timer                               *Weather_Timer;
 	Timer                               autoshutdown_timer;
 	Timer                               clientauth_timer;
-	Timer                               hotzone_timer;
 	Timer                               initgrids_timer;
 	Timer                               qglobal_purge_timer;
 	ZoneSpellsBlocked                   *blocked_spells;

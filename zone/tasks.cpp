@@ -5,8 +5,10 @@
 #include "client.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
+#include "string_ids.h"
 #include "tasks.h"
 #include "zonedb.h"
+#include "../common/repositories/character_task_timers_repository.h"
 
 extern QueryServ *QServ;
 
@@ -17,7 +19,7 @@ void Client::LoadClientTaskState()
 			safe_delete(task_state);
 		}
 
-		task_state = new ClientTaskState;
+		task_state = new ClientTaskState();
 		if (!task_manager->LoadClientState(this, task_state)) {
 			safe_delete(task_state);
 		}
@@ -95,10 +97,8 @@ void Client::SendTaskActivityComplete(
 void Client::SendTaskFailed(int task_id, int task_index, TaskType task_type)
 {
 	// 0x54eb
-	char buf[24];
-	snprintf(buf, 23, "%d", task_id);
-	buf[23] = '\0';
-	parse->EventPlayer(EVENT_TASK_FAIL, this, buf, 0);
+	std::string export_string = fmt::format("{}", task_id);
+	parse->EventPlayer(EVENT_TASK_FAIL, this, export_string, 0);
 
 	TaskActivityComplete_Struct *task_activity_complete;
 
@@ -118,6 +118,42 @@ void Client::SendTaskFailed(int task_id, int task_index, TaskType task_type)
 	safe_delete(outapp);
 }
 
+bool Client::HasTaskRequestCooldownTimer()
+{
+	if (task_request_timer.Check(false))
+	{
+		task_request_timer.Disable();
+	}
 
+	return (!GetGM() && task_request_timer.Enabled());
+}
 
+void Client::SendTaskRequestCooldownTimerMessage()
+{
+	if (HasTaskRequestCooldownTimer())
+	{
+		uint32_t seconds = task_request_timer.GetRemainingTime() / 1000;
+		MessageString(Chat::Yellow, TASK_REQUEST_COOLDOWN_TIMER,
+			".", ".", // args start at %3 for this eqstr
+			GetName(),
+			fmt::format_int(seconds / 60).c_str(), // minutes
+			fmt::format_int(seconds % 60).c_str()  // seconds
+		);
+	}
+}
 
+void Client::StartTaskRequestCooldownTimer()
+{
+	uint32_t milliseconds = RuleI(TaskSystem, RequestCooldownTimerSeconds) * 1000;
+	task_request_timer.Start(milliseconds);
+
+	uint32_t size = sizeof(uint32_t);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskRequestTimer, size);
+	outapp->WriteUInt32(milliseconds);
+	QueuePacket(outapp.get());
+}
+
+void Client::PurgeTaskTimers()
+{
+	CharacterTaskTimersRepository::DeleteWhere(database, fmt::format("character_id = {}", CharacterID()));
+}

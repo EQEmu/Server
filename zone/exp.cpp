@@ -327,6 +327,10 @@ void Client::CalculateStandardAAExp(uint32 &add_aaxp, uint8 conlevel, bool resex
 		add_aaxp *= RuleR(Character, FinalExpMultiplier);
 	}
 
+	if (RuleB(Character, EnableCharacterEXPMods)) {
+		add_aaxp *= GetAAEXPModifier(this->GetZoneID());
+	}
+
 	add_aaxp = (uint32)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
 }
 
@@ -484,6 +488,10 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 
 	if (RuleR(Character, FinalExpMultiplier) >= 0) {
 		add_exp *= RuleR(Character, FinalExpMultiplier);
+	}
+
+	if (RuleB(Character, EnableCharacterEXPMods)) {
+		add_exp *= GetEXPModifier(this->GetZoneID());
 	}
 
 	add_exp = GetEXP() + add_exp;
@@ -785,7 +793,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		FastQueuePacket(&outapp);
 	}
 
-	if (admin>=100 && GetGM()) {
+	if (admin >= AccountStatus::GMAdmin && GetGM()) {
 		char val1[20]={0};
 		char val2[20]={0};
 		char val3[20]={0};

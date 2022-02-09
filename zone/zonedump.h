@@ -201,37 +201,6 @@ struct PlayerCorpse_Struct {
 	//std::list<player_lootitem::ServerLootItem_Struct*> items;
 };
 
-struct Door {
-	uint32	db_id;
-	uint8	door_id;
-	char	zone_name[32];
-	char	door_name[32];
-	float	pos_x;
-	float	pos_y;
-	float	pos_z;
-	float	heading;
-	int		incline;
-	uint8	opentype;
-	uint32	guild_id;
-	uint16	lock_pick;
-	uint32	keyitem;
-	uint8	nokeyring;
-	uint8	trigger_door;
-	uint8	trigger_type;
-	uint8	disable_timer;
-	uint32	door_param;
-	int		invert_state;
-	uint16	size;
-	char	dest_zone[16];
-	uint32	dest_instance_id;
-	float	dest_x;
-	float	dest_y;
-	float	dest_z;
-	float	dest_heading;
-	uint8	is_ldon_door;
-	uint32	client_version_mask;
-};
-
 #pragma pack()
 
 #endif

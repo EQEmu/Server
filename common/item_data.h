@@ -482,7 +482,7 @@ namespace EQ
 		uint32	Haste;
 		uint32	DamageShield;
 		uint32	RecastDelay;
-		uint32	RecastType;
+		int	RecastType;
 		uint32	AugDistiller;
 		bool	Attuneable;
 		bool	NoPet;

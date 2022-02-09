@@ -32,7 +32,7 @@ public:
 	Spawn2(uint32 spawn2_id, uint32 spawngroup_id,
 		float x, float y, float z, float heading,
 		uint32 respawn, uint32 variance,
-		uint32 timeleft = 0, uint32 grid = 0,
+		uint32 timeleft = 0, uint32 grid = 0, bool in_path_when_zone_idle=false,
 		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding);
 	~Spawn2();
 
@@ -54,6 +54,7 @@ public:
 	float	GetY()		{ return y; }
 	float	GetZ()		{ return z; }
 	float	GetHeading() { return heading; }
+	bool	PathWhenZoneIdle() { return path_when_zone_idle; }
 	void	SetRespawnTimer(uint32 newrespawntime) { respawn_ = newrespawntime; };
 	void	SetVariance(uint32 newvariance) { variance_ = newvariance; }
 	const uint32 GetVariance() const { return variance_; }
@@ -86,6 +87,7 @@ private:
 	float	heading;
 	uint32	variance_;
 	uint32	grid_;
+	bool	path_when_zone_idle;
 	uint16	condition_id;
 	int16	condition_min_value;
 	bool enabled;

@@ -535,7 +535,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		if(members[x].member == caster) {
 			caster->SpellOnTarget(spellid, caster);
 #ifdef GROUP_BUFF_PETS
-			if(spells[spellid].targettype != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
+			if(spells[spellid].target_type != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
 				caster->SpellOnTarget(spellid, caster->GetPet());
 #endif
 		}
@@ -546,7 +546,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 				if(distance <= range2){
 					caster->SpellOnTarget(spellid, members[x].member);
 #ifdef GROUP_BUFF_PETS
-					if(spells[spellid].targettype != ST_GroupNoPets && members[x].member->GetPet() && members[x].member->HasPetAffinity() && !members[x].member->GetPet()->IsCharmed())
+					if(spells[spellid].target_type != ST_GroupNoPets && members[x].member->GetPet() && members[x].member->HasPetAffinity() && !members[x].member->GetPet()->IsCharmed())
 						caster->SpellOnTarget(spellid, members[x].member->GetPet());
 #endif
 				}
@@ -823,42 +823,6 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 			members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 
 			members[i].member->Message(Chat::Green, msg.c_str());
-		}
-	}
-}
-
-void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
-	uint32 z;
-	float range, distance;
-
-	if(!caster)
-		return;
-
-	range = caster->GetAOERange(spellid);
-
-	float range2 = range*range;
-
-	for(z=0; z < MAX_RAID_MEMBERS; z++) {
-		if(members[z].member == caster) {
-			caster->BardPulse(spellid, caster);
-#ifdef GROUP_BUFF_PETS
-			if(caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
-				caster->BardPulse(spellid, caster->GetPet());
-#endif
-		}
-		else if(members[z].member != nullptr)
-		{
-			if(members[z].GroupNumber == gid){
-				distance = DistanceSquared(caster->GetPosition(), members[z].member->GetPosition());
-				if(distance <= range2) {
-					members[z].member->BardPulse(spellid, caster);
-#ifdef GROUP_BUFF_PETS
-					if(members[z].member->GetPet() && members[z].member->HasPetAffinity() && !members[z].member->GetPet()->IsCharmed())
-						members[z].member->GetPet()->BardPulse(spellid, caster);
-#endif
-				} else
-					LogSpells("Group bard pulse: [{}] is out of range [{}] at distance [{}] from [{}]", members[z].member->GetName(), range, distance, caster->GetName());
-			}
 		}
 	}
 }

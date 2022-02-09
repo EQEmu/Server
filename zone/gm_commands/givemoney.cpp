@@ -1,0 +1,50 @@
+#include "../client.h"
+
+void command_givemoney(Client *c, const Seperator *sep)
+{
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) { //as long as the first one is a number, we'll just let atoi convert the rest to 0 or a number
+		c->Message(Chat::Red, "Usage: #Usage: #givemoney [Platinum] [Gold] [Silver] [Copper]");
+		return;
+	}
+
+	
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	uint32 platinum = std::stoul(sep->arg[1]);
+	uint32 gold = sep->IsNumber(2) ? std::stoul(sep->arg[2]) : 0;
+	uint32 silver = sep->IsNumber(3) ? std::stoul(sep->arg[3]) : 0;
+	uint32 copper = sep->IsNumber(4) ? std::stoul(sep->arg[4]) : 0;
+	if (!platinum && !gold && !silver && !copper) {
+		c->Message(Chat::Red, "Usage: #Usage: #givemoney [Platinum] [Gold] [Silver] [Copper]");
+		return;
+	}
+
+	target->AddMoneyToPP(
+		copper,
+		silver,
+		gold,
+		platinum,
+		true
+	);
+	
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Added {} to {}.",
+			ConvertMoneyToString(platinum, gold, silver, copper),
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			)
+		).c_str()
+	);
+}

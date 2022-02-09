@@ -18,9 +18,8 @@
  *
  */
 
-#include "expedition.h"
+#include "dynamic_zone.h"
 #include "expedition_message.h"
-#include "expedition_state.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "zonelist.h"
@@ -35,43 +34,9 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
 	{
-	case ServerOP_ExpeditionChooseNewLeader:
-	{
-		ExpeditionMessage::ChooseNewLeader(pack);
-		break;
-	}
 	case ServerOP_ExpeditionCreate:
 	{
-		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_state.AddExpedition(buf->expedition_id);
 		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMemberChange:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberChange_Struct*>(pack->pBuffer);
-		expedition_state.MemberChange(buf->expedition_id, buf->char_id, buf->removed);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMemberSwap:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberSwap_Struct*>(pack->pBuffer);
-		expedition_state.MemberChange(buf->expedition_id, buf->add_char_id, false);
-		expedition_state.MemberChange(buf->expedition_id, buf->remove_char_id, true);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMembersRemoved:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_state.RemoveAllMembers(buf->expedition_id);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionGetOnlineMembers:
-	{
-		ExpeditionMessage::GetOnlineMembers(pack);
 		break;
 	}
 	case ServerOP_ExpeditionDzAddPlayer:
@@ -102,12 +67,6 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_ExpeditionRequestInvite:
 	{
 		ExpeditionMessage::RequestInvite(pack);
-		break;
-	}
-	case ServerOP_ExpeditionSecondsRemaining:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
-		expedition_state.SetSecondsRemaining(buf->expedition_id, buf->new_duration_seconds);
 		break;
 	}
 	}
@@ -144,10 +103,10 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	ClientListEntry* new_leader_cle = client_list.FindCharacter(buf->new_leader_name);
 	if (new_leader_cle && new_leader_cle->Server())
 	{
-		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-		if (expedition)
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz && dz->GetLeaderID() == buf->requester_id)
 		{
-			buf->is_success = expedition->SetNewLeader(new_leader_cle->CharID());
+			buf->is_success = dz->SetNewLeader(new_leader_cle->CharID());
 		}
 
 		buf->is_online = true;
@@ -161,33 +120,6 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	{
 		requester_cle->Server()->SendPacket(pack);
 	}
-}
-
-void ExpeditionMessage::GetOnlineMembers(ServerPacket* pack)
-{
-	auto buf = reinterpret_cast<ServerExpeditionCharacters_Struct*>(pack->pBuffer);
-
-	// not efficient but only requested during caching
-	char zone_name[64] = {0};
-	std::vector<ClientListEntry*> all_clients;
-	all_clients.reserve(client_list.GetClientCount());
-	client_list.GetClients(zone_name, all_clients);
-
-	for (uint32_t i = 0; i < buf->count; ++i)
-	{
-		auto it = std::find_if(all_clients.begin(), all_clients.end(), [&](const ClientListEntry* cle) {
-			return (cle && cle->CharID() == buf->entries[i].character_id);
-		});
-
-		if (it != all_clients.end())
-		{
-			buf->entries[i].character_zone_id = (*it)->zone();
-			buf->entries[i].character_instance_id = (*it)->instance();
-			buf->entries[i].character_online = true;
-		}
-	}
-
-	zoneserver_list.SendPacket(buf->sender_zone_id, buf->sender_instance_id, pack);
 }
 
 void ExpeditionMessage::SaveInvite(ServerPacket* pack)
@@ -215,15 +147,5 @@ void ExpeditionMessage::RequestInvite(ServerPacket* pack)
 		{
 			cle->Server()->SendPacket(invite_pack.get());
 		}
-	}
-}
-
-void ExpeditionMessage::ChooseNewLeader(ServerPacket* pack)
-{
-	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-	auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-	if (expedition)
-	{
-		expedition->ChooseNewLeader();
 	}
 }

@@ -80,6 +80,8 @@ public:
 	void SetTimer(std::string name, uint32 time);
 	void StopTimer(std::string name);
 	void ClearTimers();
+	bool ContainsAugmentByID(uint32 item_id);
+	int CountAugmentByID(uint32 item_id);
 
 private:
 	bool cloned_;

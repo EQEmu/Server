@@ -66,17 +66,17 @@ float Lua_Spell::GetRange() {
 
 float Lua_Spell::GetAoeRange() {
 	Lua_Safe_Call_Real();
-	return self->aoerange;
+	return self->aoe_range;
 }
 
 float Lua_Spell::GetPushBack() {
 	Lua_Safe_Call_Real();
-	return self->pushback;
+	return self->push_back;
 }
 
 float Lua_Spell::GetPushUp() {
 	Lua_Safe_Call_Real();
-	return self->pushup;
+	return self->push_up;
 }
 
 uint32 Lua_Spell::GetCastTime() {
@@ -96,17 +96,17 @@ uint32 Lua_Spell::GetRecastTime() {
 
 uint32 Lua_Spell::GetBuffdurationFormula() {
 	Lua_Safe_Call_Int();
-	return self->buffdurationformula;
+	return self->buff_duration_formula;
 }
 
 uint32 Lua_Spell::GetBuffDuration() {
 	Lua_Safe_Call_Int();
-	return self->buffduration;
+	return self->buff_duration;
 }
 
 uint32 Lua_Spell::GetAEDuration() {
 	Lua_Safe_Call_Int();
-	return self->AEDuration;
+	return self->aoe_duration;
 }
 
 int Lua_Spell::GetMana() {
@@ -121,7 +121,7 @@ int Lua_Spell::GetBase(int i) {
 		return 0;
 	}
 
-	return self->base[i];
+	return self->base_value[i];
 }
 
 int Lua_Spell::GetBase2(int i) {
@@ -131,7 +131,7 @@ int Lua_Spell::GetBase2(int i) {
 		return 0;
 	}
 
-	return self->base2[i];
+	return self->limit_value[i];
 }
 
 int Lua_Spell::GetMax(int i) {
@@ -141,7 +141,7 @@ int Lua_Spell::GetMax(int i) {
 		return 0;
 	}
 
-	return self->max[i];
+	return self->max_value[i];
 }
 
 int Lua_Spell::GetComponents(int i) {
@@ -151,7 +151,7 @@ int Lua_Spell::GetComponents(int i) {
 		return 0;
 	}
 
-	return self->components[i];
+	return self->component[i];
 }
 
 int Lua_Spell::GetComponentCounts(int i) {
@@ -161,7 +161,7 @@ int Lua_Spell::GetComponentCounts(int i) {
 		return 0;
 	}
 
-	return self->component_counts[i];
+	return self->component_count[i];
 }
 
 int Lua_Spell::GetNoexpendReagent(int i) {
@@ -171,7 +171,7 @@ int Lua_Spell::GetNoexpendReagent(int i) {
 		return 0;
 	}
 
-	return self->NoexpendReagent[i];
+	return self->no_expend_reagent[i];
 }
 
 int Lua_Spell::GetFormula(int i) {
@@ -186,17 +186,17 @@ int Lua_Spell::GetFormula(int i) {
 
 int Lua_Spell::GetGoodEffect() {
 	Lua_Safe_Call_Int();
-	return self->goodEffect;
+	return self->good_effect;
 }
 
 int Lua_Spell::GetActivated() {
 	Lua_Safe_Call_Int();
-	return self->Activated;
+	return self->activated;
 }
 
 int Lua_Spell::GetResistType() {
 	Lua_Safe_Call_Int();
-	return self->resisttype;
+	return self->resist_type;
 }
 
 int Lua_Spell::GetEffectID(int i) {
@@ -206,17 +206,17 @@ int Lua_Spell::GetEffectID(int i) {
 		return 0;
 	}
 
-	return self->effectid[i];
+	return self->effect_id[i];
 }
 
 int Lua_Spell::GetTargetType() {
 	Lua_Safe_Call_Int();
-	return self->targettype;
+	return self->target_type;
 }
 
 int Lua_Spell::GetBaseDiff() {
 	Lua_Safe_Call_Int();
-	return self->basediff;
+	return self->base_difficulty;
 }
 
 int Lua_Spell::GetSkill() {
@@ -226,17 +226,17 @@ int Lua_Spell::GetSkill() {
 
 int Lua_Spell::GetZoneType() {
 	Lua_Safe_Call_Int();
-	return self->zonetype;
+	return self->zone_type;
 }
 
 int Lua_Spell::GetEnvironmentType() {
 	Lua_Safe_Call_Int();
-	return self->EnvironmentType;
+	return self->environment_type;
 }
 
 int Lua_Spell::GetTimeOfDay() {
 	Lua_Safe_Call_Int();
-	return self->TimeOfDay;
+	return self->time_of_day;
 }
 
 int Lua_Spell::GetClasses(int i) {
@@ -251,12 +251,12 @@ int Lua_Spell::GetClasses(int i) {
 
 int Lua_Spell::GetCastingAnim() {
 	Lua_Safe_Call_Int();
-	return self->CastingAnim;
+	return self->casting_animation;
 }
 
 int Lua_Spell::GetSpellAffectIndex() {
 	Lua_Safe_Call_Int();
-	return self->SpellAffectIndex;
+	return self->spell_affect_index;
 }
 
 int Lua_Spell::GetDisallowSit() {
@@ -281,12 +281,12 @@ int Lua_Spell::GetUninterruptable() {
 
 int Lua_Spell::GetResistDiff() {
 	Lua_Safe_Call_Int();
-	return self->ResistDiff;
+	return self->resist_difficulty;
 }
 
 int Lua_Spell::GetRecourseLink() {
 	Lua_Safe_Call_Int();
-	return self->RecourseLink;
+	return self->recourse_link;
 }
 
 int Lua_Spell::GetShortBuffBox() {
@@ -296,62 +296,72 @@ int Lua_Spell::GetShortBuffBox() {
 
 int Lua_Spell::GetDescNum() {
 	Lua_Safe_Call_Int();
-	return self->descnum;
+	return self->description_id;
 }
 
 int Lua_Spell::GetEffectDescNum() {
 	Lua_Safe_Call_Int();
-	return self->effectdescnum;
+	return self->effect_description_id;
 }
 
 int Lua_Spell::GetBonusHate() {
 	Lua_Safe_Call_Int();
-	return self->bonushate;
+	return self->bonus_hate;
 }
 
 int Lua_Spell::GetEndurCost() {
 	Lua_Safe_Call_Int();
-	return self->EndurCost;
+	return self->endurance_cost;
 }
 
 int Lua_Spell::GetEndurTimerIndex() {
 	Lua_Safe_Call_Int();
-	return self->EndurUpkeep;
+	return self->endurance_upkeep;
 }
 
 int Lua_Spell::GetHateAdded() {
 	Lua_Safe_Call_Int();
-	return self->HateAdded;
+	return self->hate_added;
 }
 
 int Lua_Spell::GetEndurUpkeep() {
 	Lua_Safe_Call_Int();
-	return self->EndurUpkeep;
+	return self->endurance_upkeep;
 }
 
 int Lua_Spell::GetNumHits() {
 	Lua_Safe_Call_Int();
-	return self->numhits;
+	return self->hit_number;
 }
 
 int Lua_Spell::GetPVPResistBase() {
 	Lua_Safe_Call_Int();
-	return self->pvpresistbase;
+	return self->pvp_resist_base;
 }
 
 int Lua_Spell::GetPVPResistCalc() {
 	Lua_Safe_Call_Int();
-	return self->pvpresistcalc;
+	return self->pvp_resist_per_level;
 }
 
 int Lua_Spell::GetPVPResistCap() {
 	Lua_Safe_Call_Int();
-	return self->pvpresistcap;
+	return self->pvp_resist_cap;
 }
 
 int Lua_Spell::GetSpellCategory() {
 	Lua_Safe_Call_Int();
 	return self->spell_category;
+}
+
+int Lua_Spell::GetPVPDuration() {
+	Lua_Safe_Call_Int();
+	return self->pvp_duration;
+}
+
+int Lua_Spell::GetPVPDurationCap() {
+	Lua_Safe_Call_Int();
+	return self->pvp_duration_cap;
 }
 
 int Lua_Spell::GetCanMGB() {
@@ -366,12 +376,12 @@ int Lua_Spell::GetDispelFlag() {
 
 int Lua_Spell::GetMinResist() {
 	Lua_Safe_Call_Int();
-	return self->MinResist;
+	return self->min_resist;
 }
 
 int Lua_Spell::GetMaxResist() {
 	Lua_Safe_Call_Int();
-	return self->MaxResist;
+	return self->max_resist;
 }
 
 int Lua_Spell::GetViralTargets() {
@@ -386,7 +396,7 @@ int Lua_Spell::GetViralTimer() {
 
 int Lua_Spell::GetNimbusEffect() {
 	Lua_Safe_Call_Int();
-	return self->NimbusEffect;
+	return self->nimbus_effect;
 }
 
 float Lua_Spell::GetDirectionalStart() {
@@ -401,7 +411,7 @@ float Lua_Spell::GetDirectionalEnd() {
 
 int Lua_Spell::GetSpellGroup() {
 	Lua_Safe_Call_Int();
-	return self->spellgroup;
+	return self->spell_group;
 }
 
 int Lua_Spell::GetPowerfulFlag() {
@@ -411,27 +421,27 @@ int Lua_Spell::GetPowerfulFlag() {
 
 int Lua_Spell::GetCastRestriction() {
 	Lua_Safe_Call_Int();
-	return self->CastRestriction;
+	return self->cast_restriction;
 }
 
 bool Lua_Spell::GetAllowRest() {
 	Lua_Safe_Call_Bool();
-	return self->AllowRest;
+	return self->allow_rest;
 }
 
 bool Lua_Spell::GetInCombat() {
 	Lua_Safe_Call_Bool();
-	return self->InCombat;
+	return self->can_cast_in_combat;
 }
 
 bool Lua_Spell::GetOutOfCombat() {
 	Lua_Safe_Call_Bool();
-	return self->OutofCombat;
+	return self->can_cast_out_of_combat;
 }
 
 int Lua_Spell::GetAEMaxTargets() {
 	Lua_Safe_Call_Int();
-	return self->aemaxtargets;
+	return self->aoe_max_targets;
 }
 
 int Lua_Spell::GetMaxTargets() {
@@ -441,27 +451,27 @@ int Lua_Spell::GetMaxTargets() {
 
 bool Lua_Spell::GetPersistDeath() {
 	Lua_Safe_Call_Bool();
-	return self->persistdeath;
+	return self->persist_death;
 }
 
 float Lua_Spell::GetMinDist() {
 	Lua_Safe_Call_Real();
-	return self->min_dist;
+	return self->min_distance;
 }
 
 float Lua_Spell::GetMinDistMod() {
 	Lua_Safe_Call_Real();
-	return self->min_dist_mod;
+	return self->min_distance_mod;
 }
 
 float Lua_Spell::GetMaxDist() {
 	Lua_Safe_Call_Real();
-	return self->max_dist;
+	return self->max_distance;
 }
 
 float Lua_Spell::GetMaxDistMod() {
 	Lua_Safe_Call_Real();
-	return self->max_dist_mod;
+	return self->max_distance_mod;
 }
 
 float Lua_Spell::GetMinRange() {
@@ -471,97 +481,105 @@ float Lua_Spell::GetMinRange() {
 
 int Lua_Spell::GetDamageShieldType() {
 	Lua_Safe_Call_Int();
-	return self->DamageShieldType;
+	return self->damage_shield_type;
+}
+
+int Lua_Spell::GetRank() {
+	Lua_Safe_Call_Int();
+	return self->rank;
 }
 
 luabind::scope lua_register_spell() {
 	return luabind::class_<Lua_Spell>("Spell")
-		.def(luabind::constructor<>())
-		.def(luabind::constructor<int>())
-		.property("null", &Lua_Spell::Null)
-		.property("valid", &Lua_Spell::Valid)
-		.def("ID", &Lua_Spell::GetID)
-		.def("Name", &Lua_Spell::GetName)
-		.def("Player1", &Lua_Spell::GetPlayer1)
-		.def("TeleportZone", &Lua_Spell::GetTeleportZone)
-		.def("YouCast", &Lua_Spell::GetYouCast)
-		.def("OtherCasts", &Lua_Spell::GetOtherCasts)
-		.def("CastOnYou", &Lua_Spell::GetCastOnYou)
-		.def("CastOnOther", &Lua_Spell::GetCastOnOther)
-		.def("SpellFades", &Lua_Spell::GetSpellFades)
-		.def("Range", &Lua_Spell::GetRange)
-		.def("AoeRange", &Lua_Spell::GetAoeRange)
-		.def("PushBack", &Lua_Spell::GetPushBack)
-		.def("PushUp", &Lua_Spell::GetPushUp)
-		.def("CastTime", &Lua_Spell::GetCastTime)
-		.def("RecoveryTime", &Lua_Spell::GetRecoveryTime)
-		.def("RecastTime", &Lua_Spell::GetRecastTime)
-		.def("BuffdurationFormula", &Lua_Spell::GetBuffdurationFormula)
-		.def("BuffDuration", &Lua_Spell::GetBuffDuration)
-		.def("AEDuration", &Lua_Spell::GetAEDuration)
-		.def("Mana", &Lua_Spell::GetMana)
-		.def("Base", &Lua_Spell::GetBase)
-		.def("Base2", &Lua_Spell::GetBase2)
-		.def("Max", &Lua_Spell::GetMax)
-		.def("Components", &Lua_Spell::GetComponents)
-		.def("ComponentCounts", &Lua_Spell::GetComponentCounts)
-		.def("NoexpendReagent", &Lua_Spell::GetNoexpendReagent)
-		.def("Formula", &Lua_Spell::GetFormula)
-		.def("GoodEffect", &Lua_Spell::GetGoodEffect)
-		.def("Activated", &Lua_Spell::GetActivated)
-		.def("ResistType", &Lua_Spell::GetResistType)
-		.def("EffectID", &Lua_Spell::GetEffectID)
-		.def("TargetType", &Lua_Spell::GetTargetType)
-		.def("BaseDiff", &Lua_Spell::GetBaseDiff)
-		.def("Skill", &Lua_Spell::GetSkill)
-		.def("ZoneType", &Lua_Spell::GetZoneType)
-		.def("EnvironmentType", &Lua_Spell::GetEnvironmentType)
-		.def("TimeOfDay", &Lua_Spell::GetTimeOfDay)
-		.def("Classes", &Lua_Spell::GetClasses)
-		.def("CastingAnim", &Lua_Spell::GetCastingAnim)
-		.def("SpellAffectIndex", &Lua_Spell::GetSpellAffectIndex)
-		.def("DisallowSit", &Lua_Spell::GetDisallowSit)
-		.def("Deities", &Lua_Spell::GetDeities)
-		.def("Uninterruptable", &Lua_Spell::GetUninterruptable)
-		.def("ResistDiff", &Lua_Spell::GetResistDiff)
-		.def("RecourseLink", &Lua_Spell::GetRecourseLink)
-		.def("ShortBuffBox", &Lua_Spell::GetShortBuffBox)
-		.def("DescNum", &Lua_Spell::GetDescNum)
-		.def("EffectDescNum", &Lua_Spell::GetEffectDescNum)
-		.def("BonusHate", &Lua_Spell::GetBonusHate)
-		.def("EndurCost", &Lua_Spell::GetEndurCost)
-		.def("EndurTimerIndex", &Lua_Spell::GetEndurTimerIndex)
-		.def("HateAdded", &Lua_Spell::GetHateAdded)
-		.def("EndurUpkeep", &Lua_Spell::GetEndurUpkeep)
-		.def("NumHits", &Lua_Spell::GetNumHits)
-		.def("PVPResistBase", &Lua_Spell::GetPVPResistBase)
-		.def("PVPResistCalc", &Lua_Spell::GetPVPResistCalc)
-		.def("PVPResistCap", &Lua_Spell::GetPVPResistCap)
-		.def("SpellCategory", &Lua_Spell::GetSpellCategory)
-		.def("CanMGB", &Lua_Spell::GetCanMGB)
-		.def("DispelFlag", &Lua_Spell::GetDispelFlag)
-		.def("MinResist", &Lua_Spell::GetMinResist)
-		.def("MaxResist", &Lua_Spell::GetMaxResist)
-		.def("ViralTargets", &Lua_Spell::GetViralTargets)
-		.def("ViralTimer", &Lua_Spell::GetViralTimer)
-		.def("NimbusEffect", &Lua_Spell::GetNimbusEffect)
-		.def("DirectionalStart", &Lua_Spell::GetDirectionalStart)
-		.def("DirectionalEnd", &Lua_Spell::GetDirectionalEnd)
-		.def("SpellGroup", &Lua_Spell::GetSpellGroup)
-		.def("PowerfulFlag", &Lua_Spell::GetPowerfulFlag)
-		.def("CastRestriction", &Lua_Spell::GetCastRestriction)
-		.def("AllowRest", &Lua_Spell::GetAllowRest)
-		.def("InCombat", &Lua_Spell::GetInCombat)
-		.def("OutOfCombat", &Lua_Spell::GetOutOfCombat)
-		.def("AEMaxTargets", &Lua_Spell::GetAEMaxTargets)
-		.def("MaxTargets", &Lua_Spell::GetMaxTargets)
-		.def("PersistDeath", &Lua_Spell::GetPersistDeath)
-		.def("MinDist", &Lua_Spell::GetMinDist)
-		.def("MinDistMod", &Lua_Spell::GetMinDistMod)
-		.def("MaxDist", &Lua_Spell::GetMaxDist)
-		.def("MaxDistMod", &Lua_Spell::GetMaxDistMod)
-		.def("MinRange", &Lua_Spell::GetMinRange)
-		.def("DamageShieldType", &Lua_Spell::GetDamageShieldType);
+	.def(luabind::constructor<>())
+	.def(luabind::constructor<int>())
+	.property("null", &Lua_Spell::Null)
+	.property("valid", &Lua_Spell::Valid)
+	.def("AEDuration", &Lua_Spell::GetAEDuration)
+	.def("AEMaxTargets", &Lua_Spell::GetAEMaxTargets)
+	.def("Activated", &Lua_Spell::GetActivated)
+	.def("AllowRest", &Lua_Spell::GetAllowRest)
+	.def("AoeRange", &Lua_Spell::GetAoeRange)
+	.def("Base", &Lua_Spell::GetBase)
+	.def("Base2", &Lua_Spell::GetBase2)
+	.def("BaseDiff", &Lua_Spell::GetBaseDiff)
+	.def("BonusHate", &Lua_Spell::GetBonusHate)
+	.def("BuffDuration", &Lua_Spell::GetBuffDuration)
+	.def("BuffdurationFormula", &Lua_Spell::GetBuffdurationFormula)
+	.def("CanMGB", &Lua_Spell::GetCanMGB)
+	.def("CastOnOther", &Lua_Spell::GetCastOnOther)
+	.def("CastOnYou", &Lua_Spell::GetCastOnYou)
+	.def("CastRestriction", &Lua_Spell::GetCastRestriction)
+	.def("CastTime", &Lua_Spell::GetCastTime)
+	.def("CastingAnim", &Lua_Spell::GetCastingAnim)
+	.def("Classes", &Lua_Spell::GetClasses)
+	.def("ComponentCounts", &Lua_Spell::GetComponentCounts)
+	.def("Components", &Lua_Spell::GetComponents)
+	.def("DamageShieldType", &Lua_Spell::GetDamageShieldType)
+	.def("Deities", &Lua_Spell::GetDeities)
+	.def("DescNum", &Lua_Spell::GetDescNum)
+	.def("DirectionalEnd", &Lua_Spell::GetDirectionalEnd)
+	.def("DirectionalStart", &Lua_Spell::GetDirectionalStart)
+	.def("DisallowSit", &Lua_Spell::GetDisallowSit)
+	.def("DispelFlag", &Lua_Spell::GetDispelFlag)
+	.def("EffectDescNum", &Lua_Spell::GetEffectDescNum)
+	.def("EffectID", &Lua_Spell::GetEffectID)
+	.def("EndurCost", &Lua_Spell::GetEndurCost)
+	.def("EndurTimerIndex", &Lua_Spell::GetEndurTimerIndex)
+	.def("EndurUpkeep", &Lua_Spell::GetEndurUpkeep)
+	.def("EnvironmentType", &Lua_Spell::GetEnvironmentType)
+	.def("Formula", &Lua_Spell::GetFormula)
+	.def("GoodEffect", &Lua_Spell::GetGoodEffect)
+	.def("HateAdded", &Lua_Spell::GetHateAdded)
+	.def("ID", &Lua_Spell::GetID)
+	.def("InCombat", &Lua_Spell::GetInCombat)
+	.def("Mana", &Lua_Spell::GetMana)
+	.def("Max", &Lua_Spell::GetMax)
+	.def("MaxDist", &Lua_Spell::GetMaxDist)
+	.def("MaxDistMod", &Lua_Spell::GetMaxDistMod)
+	.def("MaxResist", &Lua_Spell::GetMaxResist)
+	.def("MaxTargets", &Lua_Spell::GetMaxTargets)
+	.def("MinDist", &Lua_Spell::GetMinDist)
+	.def("MinDistMod", &Lua_Spell::GetMinDistMod)
+	.def("MinRange", &Lua_Spell::GetMinRange)
+	.def("MinResist", &Lua_Spell::GetMinResist)
+	.def("Name", &Lua_Spell::GetName)
+	.def("NimbusEffect", &Lua_Spell::GetNimbusEffect)
+	.def("NoexpendReagent", &Lua_Spell::GetNoexpendReagent)
+	.def("NumHits", &Lua_Spell::GetNumHits)
+	.def("OtherCasts", &Lua_Spell::GetOtherCasts)
+	.def("OutOfCombat", &Lua_Spell::GetOutOfCombat)
+	.def("PVPDuration", &Lua_Spell::GetPVPDuration)
+	.def("PVPDurationCap", &Lua_Spell::GetPVPDurationCap)
+	.def("PVPResistBase", &Lua_Spell::GetPVPResistBase)
+	.def("PVPResistCalc", &Lua_Spell::GetPVPResistCalc)
+	.def("PVPResistCap", &Lua_Spell::GetPVPResistCap)
+	.def("PersistDeath", &Lua_Spell::GetPersistDeath)
+	.def("Player1", &Lua_Spell::GetPlayer1)
+	.def("PowerfulFlag", &Lua_Spell::GetPowerfulFlag)
+	.def("PushBack", &Lua_Spell::GetPushBack)
+	.def("PushUp", &Lua_Spell::GetPushUp)
+	.def("Range", &Lua_Spell::GetRange)
+	.def("Rank", &Lua_Spell::GetRank)
+	.def("RecastTime", &Lua_Spell::GetRecastTime)
+	.def("RecourseLink", &Lua_Spell::GetRecourseLink)
+	.def("RecoveryTime", &Lua_Spell::GetRecoveryTime)
+	.def("ResistDiff", &Lua_Spell::GetResistDiff)
+	.def("ResistType", &Lua_Spell::GetResistType)
+	.def("ShortBuffBox", &Lua_Spell::GetShortBuffBox)
+	.def("Skill", &Lua_Spell::GetSkill)
+	.def("SpellAffectIndex", &Lua_Spell::GetSpellAffectIndex)
+	.def("SpellCategory", &Lua_Spell::GetSpellCategory)
+	.def("SpellFades", &Lua_Spell::GetSpellFades)
+	.def("SpellGroup", &Lua_Spell::GetSpellGroup)
+	.def("TargetType", &Lua_Spell::GetTargetType)
+	.def("TeleportZone", &Lua_Spell::GetTeleportZone)
+	.def("TimeOfDay", &Lua_Spell::GetTimeOfDay)
+	.def("Uninterruptable", &Lua_Spell::GetUninterruptable)
+	.def("ViralTargets", &Lua_Spell::GetViralTargets)
+	.def("ViralTimer", &Lua_Spell::GetViralTimer)
+	.def("YouCast", &Lua_Spell::GetYouCast)
+	.def("ZoneType", &Lua_Spell::GetZoneType);
 }
 
 #endif
