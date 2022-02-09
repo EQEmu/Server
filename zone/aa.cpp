@@ -1333,9 +1333,12 @@ void Client::SetAARecastTimer(AA::Rank *rank_in, int32 spell_id) {
 		return;
 	}
 
-	//calculate AA cooldown
-	int timer_duration = rank_in->recast_time - GetAlternateAdvancementCooldownReduction(rank_in);
-	
+	int timer_duration = rank_in->recast_time;
+
+	if (timer_duration) {
+		timer_duration = rank_in->recast_time - GetAlternateAdvancementCooldownReduction(rank_in);
+	}
+
 	if (timer_duration <= 0) {
 		return;
 	}

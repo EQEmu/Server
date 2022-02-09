@@ -6227,9 +6227,9 @@ void Client::SetDisciplineRecastTimer(int32 spell_id) {
 		if (GetPTimers().Enabled((uint32)DiscTimer)) {
 			GetPTimers().Clear(&database, (uint32)DiscTimer);
 		}
-		else {
-			timer_duration -= focus;
-		}
+	}
+	else {
+		timer_duration -= focus;
 	}
 
 	if (timer_duration <= 0) {
