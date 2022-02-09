@@ -5625,6 +5625,7 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::
 
 void Mob::CommonBreakInvisibleFromCombat()
 {
+	Shout("CommonBreakInvisibleFromCombat()");
 	//break invis when you attack
 	if (invisible) {
 		LogCombat("Removing invisibility due to melee attack");

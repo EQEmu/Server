@@ -6401,6 +6401,7 @@ void Mob::CancelSneakHide()
 
 void Mob::CommonBreakInvisible()
 {
+	Shout("Break ALL INVS");
 	BreakInvisibleSpells();
 	CancelSneakHide();
 }

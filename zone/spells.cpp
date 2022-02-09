@@ -3722,7 +3722,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 
 	// Prevent double invising, which made you uninvised
 	// Not sure if all 3 should be stacking
-
+	/*
 	if (!RuleB(Spells, AllowDoubleInvis)) {
 		if (IsEffectInSpell(spell_id, SE_Invisibility))
 		{
@@ -3754,6 +3754,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 			}
 		}
 	}
+	*/
 
 	if(!(IsClient() && CastToClient()->GetGM()) && !IsHarmonySpell(spell_id))	// GMs can cast on anything
 	{

@@ -589,6 +589,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invisibility");
 #endif
+				Shout("ADD INVS %i", spell_id);
 				SetInvisible(spell.base_value[i]);
 				break;
 			}
@@ -4157,6 +4158,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Invisibility2:
 			case SE_Invisibility:
 			{
+				Shout("Drop INVS %i", buffs[slot].spellid);
 				SetInvisible(Invisibility::Visible);
 				break;
 			}
@@ -9547,6 +9549,7 @@ void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 
 void Mob::BreakInvisibleSpells()
 {
+	Shout("BreakInvisibleSpells()");
 	if(invisible) {
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);

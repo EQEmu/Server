@@ -3819,6 +3819,9 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 {
+	/*
+		Note: if invisibility is on client, this will force it to drop.
+	*/
 	if (app->size != sizeof(SpellBuffPacket_Struct))
 	{
 		LogError("Size mismatch in OP_Buff. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
@@ -3833,10 +3836,14 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 	//something about IsDetrimentalSpell() crashes this portion of code..
 	//tbh we shouldn't use it anyway since this is a simple red vs blue buff check and
 	//isdetrimentalspell() is much more complex
-	if (spid == 0xFFFF || (IsValidSpell(spid) && (spells[spid].good_effect == 0)))
+	if (spid == 0xFFFF || (IsValidSpell(spid) && (spells[spid].good_effect == 0))) {
 		QueuePacket(app);
-	else
+	}
+	else {
+		Shout("Bonuses %i", spellbonuses.invisibility);
+		Shout("Handle_OP_Buff Fade buff %i", spid);
 		BuffFadeBySpellID(spid);
+	}
 
 	return;
 }
@@ -3990,14 +3997,20 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		return;
 	}
 
+	Shout("Bonuses %i", spellbonuses.invisibility);
+	if (spellbonuses.invisibility) {
+		BuffFadeByEffect(SE_Invisibility);
+		BuffFadeByEffect(SE_Invisibility2);
+	}
+
+	Shout("Casting %i %i %i", invisible_undead, invisible_animals, invisible);
 	// Hack for broken RoF2 which allows casting after a zoned IVU/IVA
 	if (invisible_undead || invisible_animals) {
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		BuffFadeByEffect(SE_Invisibility);  // Included per JJ for completeness - client handles this one atm
 	}
-
+	Shout("Casting DROP %i %i %i", invisible_undead, invisible_animals, invisible);
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
 	m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);

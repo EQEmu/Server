@@ -3824,6 +3824,23 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_Invisibility:
+			case SE_Invisibility2:
+				if (new_bonus->invisibility < effect_value)
+					new_bonus->invisibility = effect_value;
+				break;
+
+			case SE_InvisVsUndead:
+			case SE_InvisVsUndead2:
+				if (new_bonus->invisibility_verse_undead < effect_value)
+					new_bonus->invisibility_verse_undead = effect_value;
+				break;
+
+			case SE_InvisVsAnimals:
+				if (new_bonus->invisibility_verse_animal < effect_value)
+					new_bonus->invisibility_verse_animal = effect_value;
+				break;
+
 			case SE_ZoneSuspendMinion:
 				new_bonus->ZoneSuspendMinion = effect_value;
 				break;
