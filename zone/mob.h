@@ -357,7 +357,8 @@ public:
 	void ApplySpellEffectIllusion(int32 spell_id, Mob* caster, int buffslot, int base, int limit, int max);
 	void ApplyIllusionToCorpse(int32 spell_id, Corpse* new_corpse);
 	void SendIllusionWearChange(Client* c);
-	int16 GetItemSlotToConsumeCharge(int32 spell_id, uint32 );
+	int16 GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot);
+	bool CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot);
 	
 	//Bard 
 	bool ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);

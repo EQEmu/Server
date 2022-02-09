@@ -8792,38 +8792,40 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	spell_id = item->Click.Effect;
 	bool is_casting_bard_song = false;
 
-	if
-		(
-			spell_id > 0 &&
-			(
-				!IsValidSpell(spell_id) ||
-				casting_spell_id ||
-				delaytimer ||
-				spellend_timer.Enabled() ||
-				IsStunned() ||
-				IsFeared() ||
-				IsMezzed() ||
-				DivineAura() ||
-				(spells[spell_id].target_type == ST_Ring) ||
-				(IsSilenced() && !IsDiscipline(spell_id)) ||
-				(IsAmnesiad() && IsDiscipline(spell_id)) ||
-				(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) ||
-				(inst->IsScaling() && inst->GetExp() <= 0) // charms don't have spells when less than 0
-			)
-		)
-	{
-		/*
-			Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast. 
-			Can not click while casting other items.
-		*/
-		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
-		{
-			is_casting_bard_song = true;
-		}
-		else
-		{
+	if (spell_id > 0) {
+
+		if (!IsValidSpell(spell_id) ||
+			IsStunned() ||
+			IsFeared() ||
+			IsMezzed() ||
+			DivineAura() ||
+			(spells[spell_id].target_type == ST_Ring) ||
+			(IsSilenced() && !IsDiscipline(spell_id)) ||
+			(IsAmnesiad() && IsDiscipline(spell_id)) ||
+			(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) ||
+			(inst->IsScaling() && inst->GetExp() <= 0)) { // charms don't have spells when less than 0
+
 			SendSpellBarEnable(spell_id);
 			return;
+		}
+
+		if (casting_spell_id ||
+			delaytimer ||
+			spellend_timer.Enabled()) {
+
+			/*
+				Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast.
+				Can not click while casting other items.
+			*/
+			if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
+			{
+				is_casting_bard_song = true;
+			}
+			else
+			{
+				SendSpellBarEnable(spell_id);
+				return;
+			}
 		}
 	}
 	// Modern clients don't require pet targeted for item clicks that are ST_Pet
