@@ -6502,6 +6502,21 @@ XS(XS_Mob_GetHateRandomNPC) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_SetBuffDuration); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetBuffDuration) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, spell_id, duration)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		int spell_id = (int)SvIV(ST(1));
+		int duration = (int)SvIV(ST(2));
+		VALIDATE_THIS_IS_MOB;
+		THIS->SetBuffDuration(spell_id, duration);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef BOTS
 XS(XS_Mob_CastToBot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToBot)
@@ -6850,6 +6865,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetAppearance"), XS_Mob_SetAppearance, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBodyType"), XS_Mob_SetBodyType, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBucket"), XS_Mob_SetBucket, file, "$$$;$");
+	newXSproto(strcpy(buf, "SetBuffDuration"), XS_Mob_SetBuffDuration, file, "$$$");
 	newXSproto(strcpy(buf, "SetCurrentWP"), XS_Mob_SetCurrentWP, file, "$$");
 	newXSproto(strcpy(buf, "SetDeltas"), XS_Mob_SetDeltas, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetDisableMelee"), XS_Mob_SetDisableMelee, file, "$$");
