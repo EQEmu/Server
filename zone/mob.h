@@ -438,7 +438,7 @@ public:
 	void GetAppearenceEffects();
 	void ClearAppearenceEffects();
 	void SendSavedAppearenceEffects(Client *receiver);
-	void SetBuffDuration(Mob *spell_target, int32 spell_id, int32 duration);
+	void SetBuffDuration(int32 spell_id, int32 duration);
 	void AddBuffToTarget(Mob *spell_target, int32 spell_id, int32 duration);
 
 	//Basic Stats/Inventory

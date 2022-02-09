@@ -3398,6 +3398,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	// at this point we know that this buff will stick, but we have
 	// to remove some other buffs already worn if will_overwrite is true
+	Shout("willoverride %i disable override %i emptyslot %i duration %i", will_overwrite, disable_buff_overrwrite, emptyslot, duration);
 	if (will_overwrite && !disable_buff_overrwrite) {
 		std::vector<int>::iterator cur, end;
 		cur = overwrite_slots.begin();

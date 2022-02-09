@@ -10235,7 +10235,7 @@ bool Mob::HasPersistDeathIllusion(int32 spell_id) {
 	return false;
 }
 
-void Mob::SetBuffDuration(Mob *spell_target, int32 spell_id, int32 duration) {
+void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 	Shout("Test %i %i", spell_id, duration);
 
 	bool adjust_all_buffs = false;
@@ -10245,8 +10245,7 @@ void Mob::SetBuffDuration(Mob *spell_target, int32 spell_id, int32 duration) {
 	}
 
 	if (!adjust_all_buffs && !IsValidSpell(spell_id) ||
-		duration < 0 ||
-		!spell_target) {
+		duration < 0) {
 		return;
 	}
 
@@ -10262,7 +10261,8 @@ void Mob::SetBuffDuration(Mob *spell_target, int32 spell_id, int32 duration) {
 						duration = GetActSpellDuration(spell_id, duration);
 					}
 				}
-				SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
+				Shout("Cast spell %i", buffs[slot].spellid);
+				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 				return;
 			}
 		}
@@ -10275,7 +10275,7 @@ void Mob::SetBuffDuration(Mob *spell_target, int32 spell_id, int32 duration) {
 						duration = GetActSpellDuration(spell_id, duration);
 					}
 				}
-				SpellOnTarget(buffs[slot].spellid, spell_target, 0, false, 0, false, -1, duration);
+				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 			}
 		}
 	}
