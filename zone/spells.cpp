@@ -206,55 +206,10 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
-	if(item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
+	if (item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(item_slot);
-		int bitmask = 1;
-		bitmask = bitmask << (CastToClient()->GetClass() - 1);
-		if( itm && itm->GetItem()->Classes != 65535 ) {
-			if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
-					// They are casting a spell from an item that requires equipping but shouldn't let them equip it
-					LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) which they shouldn't be able to equip!",
-						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
-					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item with an invalid class");
-				}
-				else {
-					MessageString(Chat::Red, MUST_EQUIP_ITEM);
-				}
-				return(false);
-			}
-			if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectClick2) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
-					// They are casting a spell from an item that they don't meet the race/class requirements to cast
-					LogError("HACKER: [{}] (account: [{}]) attempted to click a race/class restricted effect on item [{}] (id: [{}]) which they shouldn't be able to click!",
-						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
-					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
-				}
-				else {
-					if (CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::RoF)
-					{
-						// Line 181 in eqstr_us.txt was changed in RoF+
-						Message(Chat::Yellow, "Your race, class, or deity cannot use this item.");
-					}
-					else
-					{
-						MessageString(Chat::Red, CANNOT_USE_ITEM);
-					}
-				}
-				return(false);
-			}
-		}
-		if (itm && (itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && item_slot > EQ::invslot::EQUIPMENT_END){
-			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
-				// They are attempting to cast a must equip clicky without having it equipped
-				LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
-				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
-			}
-			else {
-				MessageString(Chat::Red, MUST_EQUIP_ITEM);
-			}
-			return(false);
+		if (!CheckItemRaceClassDietyRestrictionsOnCast(item_slot)) {
+			return false;
 		}
 	}
 
@@ -1627,57 +1582,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
-		bool fromaug = false;
-		EQ::ItemData* augitem = nullptr;
-		uint32 recastdelay = 0;
-		int recasttype = 0;
-
-		while (true) {
-			if (item == nullptr)
-				break;
-
-			for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
-				const EQ::ItemInstance* aug_i = item->GetAugment(r);
-
-				if (!aug_i)
-					continue;
-				const EQ::ItemData* aug = aug_i->GetItem();
-				if (!aug)
-					continue;
-
-				if (aug->Click.Effect == spell_id)
-				{
-					recastdelay = aug_i->GetItem()->RecastDelay;
-					recasttype = aug_i->GetItem()->RecastType;
-					fromaug = true;
-					break;
-				}
-			}
-
-			break;
-		}
-
-		if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug)
-		{
-			//const ItemData* item = item->GetItem();
-			int16 charges = item->GetItem()->MaxCharges;
-
-			if(fromaug) { charges = -1; } //Don't destroy the parent item
-
-			if(charges > -1) {	// charged item, expend a charge
-				LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
-				DeleteChargeFromSlot = inventory_slot;
-			} else {
-				LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
-			}
-		}
-		else
-		{
-			LogSpells("Item used to cast spell [{}] was missing from inventory slot [{}] after casting!", spell_id, inventory_slot);
-			Message(Chat::Red, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
-			InterruptSpell();
-			return;
-		}
+		DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, inventory_slot);
 	}
 
 	// we're done casting, now try to apply the spell
@@ -1699,8 +1604,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 
-	if(DeleteChargeFromSlot >= 0)
+	if (DeleteChargeFromSlot >= 0) {
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
+	}
 
 	//
 	// at this point the spell has successfully been cast
@@ -6638,7 +6544,128 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
-	else if (DoCastingChecksOnCaster(spell_id)) {
-		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
+	else if (CheckItemRaceClassDietyRestrictionsOnCast(item_slot) && DoCastingChecksOnCaster(spell_id)) {
+		int16 DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, item_slot);
+		if (SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot)) {
+			if (IsClient() && DeleteChargeFromSlot >= 0) {
+				CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
+			}
+		}
+	}
+}
+
+int16 Mob::GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot)
+{
+	int16 DeleteChargeFromSlot = -1;
+
+	if (!IsClient() || inventory_slot == 0xFFFFFFFF) {
+		return DeleteChargeFromSlot;
+	}
+
+	EQ::ItemInstance *item = nullptr;
+	item = CastToClient()->GetInv().GetItem(inventory_slot);
+
+	bool fromaug = false;
+	EQ::ItemData* augitem = nullptr;
+
+	while (true) {
+		if (item == nullptr)
+			break;
+
+		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+			const EQ::ItemInstance* aug_i = item->GetAugment(r);
+
+			if (!aug_i) {
+				continue;
+			}
+			const EQ::ItemData* aug = aug_i->GetItem();
+			if (!aug) {
+				continue;
+			}
+			if (aug->Click.Effect == spell_id){
+				fromaug = true;
+				break;
+			}
+		}
+
+		break;
+	}
+
+	if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug){
+		int16 charges = item->GetItem()->MaxCharges;
+
+		if (fromaug) { charges = -1; } //Don't destroy the parent item
+
+		if (charges > -1) {	// charged item, expend a charge
+			LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
+			DeleteChargeFromSlot = inventory_slot;
+		}
+		else {
+			LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
+		}
+	}
+	else{
+		LogSpells("Item used to cast spell [{}] was missing from inventory slot [{}] after casting!", spell_id, inventory_slot);
+		Message(Chat::Red, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
+		InterruptSpell();
+		return DeleteChargeFromSlot;
+	}
+	return DeleteChargeFromSlot;
+}
+
+bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
+
+	if (inventory_slot == 0xFFFFFFFF) {
+		return false;
+	}
+
+	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
+	EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+	int bitmask = 1;
+	bitmask = bitmask << (CastToClient()->GetClass() - 1);
+	if (itm && itm->GetItem()->Classes != 65535) {
+		if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && !(itm->GetItem()->Classes & bitmask)) {
+			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+				// They are casting a spell from an item that requires equipping but shouldn't let them equip it
+				LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) which they shouldn't be able to equip!",
+					CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item with an invalid class");
+			}
+			else {
+				MessageString(Chat::Red, MUST_EQUIP_ITEM);
+			}
+			return(false);
+		}
+		if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectClick2) && !(itm->GetItem()->Classes & bitmask)) {
+			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+				// They are casting a spell from an item that they don't meet the race/class requirements to cast
+				LogError("HACKER: [{}] (account: [{}]) attempted to click a race/class restricted effect on item [{}] (id: [{}]) which they shouldn't be able to click!",
+					CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
+			}
+			else {
+				if (CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::RoF)
+				{
+					// Line 181 in eqstr_us.txt was changed in RoF+
+					Message(Chat::Yellow, "Your race, class, or deity cannot use this item.");
+				}
+				else
+				{
+					MessageString(Chat::Red, CANNOT_USE_ITEM);
+				}
+			}
+			return(false);
+		}
+	}
+	if (itm && (itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && inventory_slot > EQ::invslot::EQUIPMENT_END) {
+		if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+			// They are attempting to cast a must equip clicky without having it equipped
+			LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+			database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
+		}
+		else {
+			MessageString(Chat::Red, MUST_EQUIP_ITEM);
+		}
+		return(false);
 	}
 }
