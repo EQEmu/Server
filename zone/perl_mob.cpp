@@ -6505,14 +6505,24 @@ XS(XS_Mob_GetHateRandomNPC) {
 XS(XS_Mob_SetBuffDuration); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetBuffDuration) {
 	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, spell_id, duration)"); // @categories Script Utility
+	if (items != 4)
+		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, target, spell_id, duration)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
-		int spell_id = (int)SvIV(ST(1));
-		int duration = (int)SvIV(ST(2));
+		Mob* other;
+		int spell_id = (int)SvIV(ST(2));
+		int duration = (int)SvIV(ST(3));
 		VALIDATE_THIS_IS_MOB;
-		THIS->SetBuffDuration(spell_id, duration);
+		if (sv_derived_from(ST(1), "Mob")) {
+			IV tmp = SvIV((SV *)SvRV(ST(1)));
+			other = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "other is not of type Mob");
+		if (other == nullptr)
+			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
+
+		THIS->SetBuffDuration(other, spell_id, duration);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6865,7 +6875,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetAppearance"), XS_Mob_SetAppearance, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBodyType"), XS_Mob_SetBodyType, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBucket"), XS_Mob_SetBucket, file, "$$$;$");
-	newXSproto(strcpy(buf, "SetBuffDuration"), XS_Mob_SetBuffDuration, file, "$$$");
+	newXSproto(strcpy(buf, "SetBuffDuration"), XS_Mob_SetBuffDuration, file, "$$$$");
 	newXSproto(strcpy(buf, "SetCurrentWP"), XS_Mob_SetCurrentWP, file, "$$");
 	newXSproto(strcpy(buf, "SetDeltas"), XS_Mob_SetDeltas, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetDisableMelee"), XS_Mob_SetDisableMelee, file, "$$");
