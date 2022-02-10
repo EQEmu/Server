@@ -4204,7 +4204,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 			case SE_SeeInvis:
 			{
-				see_invis = 0;
+				see_invis = innate_see_invis;
 				break;
 			}
 

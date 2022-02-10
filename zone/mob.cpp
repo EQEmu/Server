@@ -440,7 +440,7 @@ Mob::Mob(
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;
 
-	see_invis         = GetSeeInvisible(in_see_invis);
+	innate_see_invis  = GetSeeInvisible(in_see_invis);
 	see_invis_undead  = GetSeeInvisible(in_see_invis_undead);
 	see_hide          = GetSeeInvisible(in_see_hide);
 	see_improved_hide = GetSeeInvisible(in_see_improved_hide);
@@ -6544,9 +6544,9 @@ void Mob::SetFeigned(bool in_feigned) {
 	feigned = in_feigned;
 }
 
-void Mob::SetSeeInvisibleLevel() {
-
-	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis });
+void Mob::SetSeeInvisibleLevel() 
+{
+	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis});
 }
 
 #ifdef BOTS

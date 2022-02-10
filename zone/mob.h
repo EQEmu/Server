@@ -261,7 +261,7 @@ public:
 
 	uint8 GetSeeInvisibleLevel();
 	void SetSeeInvisibleLevel();
-	uint8 Mob::SetSeeInvisibleLevel2() { see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis }); }
+	//void SetSeeInvisibleLevel2() { see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis }); }
 
 	/**
 	 ************************************************
@@ -982,7 +982,7 @@ public:
 	void SetBodyType(bodyType new_body, bool overwrite_orig);
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	uint8 invisible, see_invis;
+	uint8 invisible, see_invis, innate_see_invis;
 	bool invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
 	bool see_invis_undead, see_hide, see_improved_hide;
 	bool qglobal;
