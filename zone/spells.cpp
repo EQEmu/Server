@@ -697,7 +697,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		Always check again on SpellOnTarget to account for AE checks.
 	*/
 
-
+	bool ignore_on_casting = false;
 	bool ignore_if_npc_or_gm = false;
 	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
 		ignore_if_npc_or_gm = true;
@@ -705,15 +705,22 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 
 	if (check_on_casting){
 		
-		if (IsGroupSpell(spell_id) ||
-			spells[spell_id].target_type == ST_AEClientV1 ||
-			spells[spell_id].target_type == ST_AECaster ||
-			spells[spell_id].target_type == ST_Ring ||
-			spells[spell_id].target_type == ST_Beam){
-			return true;
+		if (!spell_target) {
+			if (IsGroupSpell(spell_id) ||
+				spells[spell_id].target_type == ST_AEClientV1 ||
+				spells[spell_id].target_type == ST_AECaster ||
+				spells[spell_id].target_type == ST_Ring ||
+				spells[spell_id].target_type == ST_Beam) {
+				return true;
+			}
+			else if (spells[spell_id].target_type == ST_Self) {
+				spell_target = this;
+			}
 		}
-		else if (!spell_target && spells[spell_id].target_type == ST_Self) {
-			spell_target = this;
+		else {
+			if (IsGroupSpell(spell_id) && spell_target != this) {
+				ignore_on_casting = true;
+			}
 		}
 	}
 
@@ -773,15 +780,20 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		Prevents buff from being cast based on tareget ing PC OR NPC (1 = PCs, 2 = NPCs)
 		These target types skip pcnpc only check (according to dev quotes)
 	*/
-	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList &&
-		spells[spell_id].target_type != ST_HateList) {
-		if (spells[spell_id].pcnpc_only_flag == 1 && !spell_target->IsClient() && !spell_target->IsMerc() && !spell_target->IsBot()) {
-			Message(Chat::SpellFailure, "This spell only works on other PCs");
-			return false;
-		}
-		else if (spells[spell_id].pcnpc_only_flag == 2 && (spell_target->IsClient() || spell_target->IsMerc() || spell_target->IsBot())) {
-			Message(Chat::SpellFailure, "This spell only works on NPCs.");
-			return false;
+	if (!ignore_on_casting) {
+		if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList && spells[spell_id].target_type != ST_HateList) {
+			if (spells[spell_id].pcnpc_only_flag == 1 && !spell_target->IsClient() && !spell_target->IsMerc() && !spell_target->IsBot()) {
+				if (check_on_casting) {
+					Message(Chat::SpellFailure, "This spell only works on other PCs");
+				}
+				return false;
+			}
+			else if (spells[spell_id].pcnpc_only_flag == 2 && (spell_target->IsClient() || spell_target->IsMerc() || spell_target->IsBot())) {
+				if (check_on_casting) {
+					Message(Chat::SpellFailure, "This spell only works on NPCs.");
+				}
+				return false;
+			}
 		}
 	}
 	/*
@@ -1274,7 +1286,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		item  = CastToClient()->GetInv().GetItem(inventory_slot); //checked for in reagents and charges.
 		if (CastToClient()->HasItemRecastTimer(spell_id, inventory_slot)) {
 			MessageString(Chat::Red, SPELL_RECAST);
-			LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+			LogSpells("Casting of [{}] canceled: item or augment spell reuse timer not expired", spell_id);
 			StopCasting();
 			return;
 		}
@@ -3482,10 +3494,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
-	if (!DoCastingChecksOnTarget(false, spell_id, spelltar)) {
-		return false;
-	}
-
 	EQApplicationPacket *action_packet = nullptr, *message_packet = nullptr;
 	float spell_effectiveness;
 
@@ -3578,6 +3586,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	}
 
 	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);
+
+	if (!DoCastingChecksOnTarget(false, spell_id, spelltar)) {
+		safe_delete(action_packet);
+		return false;
+	}
 
 	// now check if the spell is allowed to land
 	if (RuleB(Spells, EnableBlockedBuffs)) {
