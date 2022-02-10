@@ -614,14 +614,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				SetInvisible(Invisibility::Special);
 				break;
 			}
-			case SE_SeeInvis:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "See Invisible");
-#endif
-				see_invis = spell.base_value[i];
-				break;
-			}
 
 			case SE_FleshToBone:
 			{

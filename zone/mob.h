@@ -257,6 +257,12 @@ public:
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
 	inline uint8 SeeInvisible() const { return see_invis; }
 
+	void SetSeeInvisible(uint8 val) { see_invis = val; }
+
+	uint8 GetSeeInvisibleLevel();
+	void SetSeeInvisibleLevel();
+	uint8 Mob::SetSeeInvisibleLevel2() { see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis }); }
+
 	/**
 	 ************************************************
 	 * Appearance

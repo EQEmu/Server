@@ -6544,6 +6544,11 @@ void Mob::SetFeigned(bool in_feigned) {
 	feigned = in_feigned;
 }
 
+void Mob::SetSeeInvisibleLevel() {
+
+	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis });
+}
+
 #ifdef BOTS
 bool Mob::JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation)
 {
