@@ -209,7 +209,7 @@ int command_init(void)
 		command_add("hair", "- Change the hair style of your target", AccountStatus::QuestTroupe, command_hair) ||
 		command_add("haircolor", "- Change the hair color of your target", AccountStatus::QuestTroupe, command_haircolor) ||
 		command_add("haste", "[percentage] - Set your haste percentage", AccountStatus::GMAdmin, command_haste) ||
-		command_add("hatelist", " - Display hate list for target.", AccountStatus::QuestTroupe, command_hatelist) ||
+		command_add("hatelist", "- Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "- Completely heal your target", AccountStatus::Steward, command_heal) ||
 		command_add("helm", "- Change the helm of your target", AccountStatus::QuestTroupe, command_helm) ||
 		command_add("help", "[search term] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
