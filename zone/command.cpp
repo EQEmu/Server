@@ -183,7 +183,7 @@ int command_init(void)
 		command_add("findzone", "[search criteria] - Search database zones", AccountStatus::GMAdmin, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", AccountStatus::QuestTroupe, command_fixmob) ||
 		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", AccountStatus::Player, command_flag) ||
-		command_add("flagedit", "- Edit zone flags on your target", AccountStatus::GMAdmin, command_flagedit) ||
+		command_add("flagedit", "- Edit zone flags on your target. Use #flagedit help for more info.", AccountStatus::GMAdmin, command_flagedit) ||
 		command_add("flags", "- displays the flags of you or your target", AccountStatus::Player, command_flags) ||
 		command_add("flymode", "[0/1/2/3/4/5] - Set your or your player target's flymode to ground/flying/levitate/water/floating/levitate_running", AccountStatus::Guide, command_flymode) ||
 		command_add("fov", "- Check wether you're behind or in your target's field of view", AccountStatus::QuestTroupe, command_fov) ||
