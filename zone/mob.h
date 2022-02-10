@@ -226,10 +226,6 @@ public:
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
 	void CommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
-	void BreakInvisibleSpells();
-	virtual void CancelSneakHide();
-	void CommonBreakInvisible();
-	void CommonBreakInvisibleFromCombat();
 	bool HasDied();
 	virtual bool CheckDualWield();
 	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
@@ -246,6 +242,21 @@ public:
 		return;
 	}
 
+	//invisible
+	bool IsInvisible(Mob* other = 0) const;
+	void SetInvisible(uint8 state);
+
+	void BreakInvisibleSpells();
+	virtual void CancelSneakHide();
+	void CommonBreakInvisible();
+	void CommonBreakInvisibleFromCombat();
+
+	inline bool GetSeeInvisible(uint8 see_invis);
+	inline bool SeeHide() const { return see_hide; }
+	inline bool SeeImprovedHide() const { return see_improved_hide; }
+	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
+	inline uint8 SeeInvisible() const { return see_invis; }
+
 	/**
 	 ************************************************
 	 * Appearance
@@ -254,16 +265,7 @@ public:
 
 	EQ::InternalTextureProfile mob_texture_profile = {};
 
-	bool IsInvisible(Mob* other = 0) const;
-	void SetInvisible(uint8 state);
-
 	EQ::skills::SkillType AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
-
-	inline bool GetSeeInvisible(uint8 see_invis);
-	inline bool SeeHide() const { return see_hide; }
-	inline bool SeeImprovedHide() const { return see_improved_hide; }
-	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
-	inline uint8 SeeInvisible() const { return see_invis; }
 
 	int32 GetTextureProfileMaterial(uint8 material_slot) const;
 	int32 GetTextureProfileColor(uint8 material_slot) const;
