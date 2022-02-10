@@ -6209,13 +6209,19 @@ bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 			}
 
 			if (aug->Click.Effect == spell_id) {
-				recast_delay = aug_i->GetItem()->RecastDelay;
-				recast_type = aug_i->GetItem()->RecastType;
+				if (aug_i->GetItem() && aug_i->GetItem()->RecastDelay > 0) {
+					recast_delay = aug_i->GetItem()->RecastDelay;
+					recast_type = aug_i->GetItem()->RecastType;
+				}
 				break;
 			}
 		}
 	}
-	
+	//do not check if item has no recast delay.
+	if (!recast_delay) {
+		return false;
+	}
+	//if time is not expired, then it exists and therefore we have a recast on this item.
 	if (!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
 		return true;
 	}
