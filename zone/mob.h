@@ -243,24 +243,30 @@ public:
 	}
 
 	//invisible
-	bool IsInvisible(Mob* other = 0) const;
+	//bool IsInvisible(Mob* other = 0) const;
+	bool IsInvisible(Mob* other = 0);
 	void SetInvisible(uint8 state);
+	
+	void SetSeeInvisibleLevel();
+	inline int16 GetSeeInvisible(int16 see_invis);
+
+	inline uint8 GetInvisibleLevel() const { return invisible; }
 
 	void BreakInvisibleSpells();
 	virtual void CancelSneakHide();
 	void CommonBreakInvisible();
 	void CommonBreakInvisibleFromCombat();
 
-	inline bool GetSeeInvisible(uint8 see_invis);
+	
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
 	inline uint8 SeeInvisible() const { return see_invis; }
 
-	void SetSeeInvisible(uint8 val) { see_invis = val; }
+	//void SetSeeInvisible(uint8 val) { see_invis = val; }
 
-	uint8 GetSeeInvisibleLevel();
-	void SetSeeInvisibleLevel();
+	//uint8 GetSeeInvisibleLevel();
+	
 	//void SetSeeInvisibleLevel2() { see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis }); }
 
 	/**

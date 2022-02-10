@@ -603,18 +603,17 @@ void Mob::SetInvisible(uint8 state)
 }
 
 //check to see if `this` is invisible to `other`
-bool Mob::IsInvisible(Mob* other) const
+//bool Mob::IsInvisible(Mob* other) const
+bool Mob::IsInvisible(Mob* other)
 {
-	if(!other)
+	if (!other) {
 		return(false);
-
-	uint8 SeeInvisBonus = 0;
-	if (IsClient())
-		SeeInvisBonus = aabonuses.SeeInvis;
-
+	}
+	Shout("Invisible %i and See invisible %i", other->SeeInvisible());
 	//check regular invisibility
-	if (invisible && invisible > (other->SeeInvisible()))
+	if (invisible && invisible > (other->SeeInvisible())) {
 		return true;
+	}
 
 	//check invis vs. undead
 	if (other->GetBodyType() == BT_Undead || other->GetBodyType() == BT_SummonedUndead) {
@@ -6110,19 +6109,37 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 	return CalculateHeadingAngleBetweenPositions(this_x, this_y, other_x, other_y);
 }
 
-bool Mob::GetSeeInvisible(uint8 see_invis)
+int16 Mob::GetSeeInvisible(int16 see_invis)
 {
-	if(see_invis > 0)
-	{
-		if(see_invis == 1)
-			return true;
-		else
-		{
-			if (zone->random.Int(0, 99) < see_invis)
-				return true;
+	/*
+		Returns the NPC's see invisible level based on 'see_invs' value in npc_types.
+		1 = See Invs Level 1, 2-99 will gives a random roll to apply see invs level 1
+		100 = See Invs Level 2, where 101-199 gives a random roll to apply see invs 2, if fails get see invs 1
+		ect... for higher levels, 200,300 ect.
+	*/
+	
+	//covers npcs with no see invs or standard level 1 see invs.
+	if (!see_invis) {
+		return 0;
+	}
+	else if (see_invis == 1) {
+		return 1;
+	}
+	//random chance to apply standard level 1 see invs
+	if (see_invis > 1 && see_invis < 100) {
+		if (zone->random.Int(0, 99) < see_invis) {
+			return 1;
 		}
 	}
-	return false;
+	//covers npcs with see invis levels beyond level 1
+	int16 see_invis_level = see_invis / 100;;
+
+	int random_remainder = see_invis % 100;
+	if (zone->random.Int(0, 99) < random_remainder) {
+		return see_invis_level;
+	}
+
+	return (see_invis_level - 1);
 }
 
 int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
@@ -6547,6 +6564,7 @@ void Mob::SetFeigned(bool in_feigned) {
 void Mob::SetSeeInvisibleLevel() 
 {
 	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis});
+	Shout("SetSeeInvisibleLevel() %i", see_invis);
 }
 
 #ifdef BOTS

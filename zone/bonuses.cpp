@@ -871,7 +871,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->SeeInvis = base_value;
 			}
 			SetSeeInvisibleLevel();
-			SetSeeInvisible(std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis }));
 			break;
 		case SE_BaseMovementSpeed:
 			newbon->BaseMovementSpeed += base_value;
