@@ -703,7 +703,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		ignore_if_npc_or_gm = true;
 	}
 
-	if (check_on_casting && !spell_target){
+	if (check_on_casting){
 		
 		if (IsGroupSpell(spell_id) ||
 			spells[spell_id].target_type == ST_AEClientV1 ||
@@ -712,7 +712,7 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 			spells[spell_id].target_type == ST_Beam){
 			return true;
 		}
-		else if (spells[spell_id].target_type == ST_Self) {
+		else if (!spell_target && spells[spell_id].target_type == ST_Self) {
 			spell_target = this;
 		}
 	}
@@ -776,9 +776,11 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList &&
 		spells[spell_id].target_type != ST_HateList) {
 		if (spells[spell_id].pcnpc_only_flag == 1 && !spell_target->IsClient() && !spell_target->IsMerc() && !spell_target->IsBot()) {
+			Message(Chat::SpellFailure, "This spell only works on other PCs");
 			return false;
 		}
 		else if (spells[spell_id].pcnpc_only_flag == 2 && (spell_target->IsClient() || spell_target->IsMerc() || spell_target->IsBot())) {
+			Message(Chat::SpellFailure, "This spell only works on NPCs.");
 			return false;
 		}
 	}
