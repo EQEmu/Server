@@ -3949,9 +3949,10 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 		case SE_Invisibility2:
 		case SE_InvisVsUndead2: {
-			Shout("TEST FIXED INVS");
-			if (buff.ticsremaining <= 3 && buff.ticsremaining > 1) {
-				MessageString(Chat::Spells, INVIS_BEGIN_BREAK);
+			if (!IsBardSong(buff.spellid)) {
+				if (buff.ticsremaining <= 3 && buff.ticsremaining > 1) {
+					MessageString(Chat::Spells, INVIS_BEGIN_BREAK);
+				}
 			}
 			break;
 		}
