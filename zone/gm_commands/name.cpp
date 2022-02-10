@@ -2,29 +2,41 @@
 
 void command_name(Client *c, const Seperator *sep)
 {
-	Client *target;
-
-	if ((strlen(sep->arg[1]) == 0) || (!(c->GetTarget() && c->GetTarget()->IsClient()))) {
-		c->Message(Chat::White, "Usage: #name newname (requires player target)");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #name [New Name] - Rename your player target");
+		return;
 	}
-	else {
-		target = c->GetTarget()->CastToClient();
-		char *oldname = strdup(target->GetName());
-		if (target->ChangeFirstName(sep->arg[1], c->GetName())) {
-			c->Message(Chat::White, "Successfully renamed %s to %s", oldname, sep->arg[1]);
-			// until we get the name packet working right this will work
-			c->Message(Chat::White, "Sending player to char select.");
-			target->Kick("Name was changed");
-		}
-		else {
+
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		auto target = c->GetTarget()->CastToClient();
+
+		std::string new_name = sep->arg[1];
+		std::string old_name = target->GetCleanName();
+
+		if (target->ChangeFirstName(new_name.c_str(), c->GetCleanName())) {
 			c->Message(
-				Chat::Red,
-				"ERROR: Unable to rename %s. Check that the new name '%s' isn't already taken.",
-				oldname,
-				sep->arg[2]
+				Chat::White,
+				fmt::format(
+					"Successfully renamed {} to {}",
+					old_name,
+					new_name
+				).c_str()
+			);
+
+			c->Message(Chat::White, "Sending player to char select.");
+
+			target->Kick("Name was changed");
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Unable to rename {}. Check that the new name '{}' isn't already taken.",
+					old_name,
+					new_name
+				).c_str()
 			);
 		}
-		free(oldname);
 	}
 }
 
