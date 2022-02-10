@@ -8092,6 +8092,22 @@ XS(XS__getbodytypename) {
 	}
 }
 
+XS(XS__getenvironmentaldamagename);
+XS(XS__getenvironmentaldamagename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getenvironmentaldamagename(uint8 damage_type)");
+
+	dXSTARG;
+	uint8 damage_type = (uint8) SvIV(ST(0));
+	std::string environmental_damage_name = quest_manager.getenvironmentaldamagename(damage_type);
+
+	sv_setpv(TARG, environmental_damage_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8398,6 +8414,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
 	newXS(strcpy(buf, "getgendername"), XS__getgendername, file);
 	newXS(strcpy(buf, "getdeityname"), XS__getdeityname, file);
+	newXS(strcpy(buf, "getenvironmentaldamagename"), XS__getenvironmentaldamagename, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
