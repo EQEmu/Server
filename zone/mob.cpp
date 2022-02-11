@@ -584,14 +584,36 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	return(ANIM_STAND);
 }
 
-void Mob::SetInvisibleAppearance(uint8 state, int16 invisible_level)
+
+void Mob::CalcSeeInvisibleLevel()
 {
+	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis });
+	Shout("CalcSeeInvisibleLevel() %i", see_invis);
+}
+
+void Mob::CalcInvisibleLevel()
+{
+	invisible = std::max({ spellbonuses.invisibility, escape_invisible });
+	Shout("CalcInvisibleLevel() %i", invisible);
+}
+
+void Mob::SetInvisibleAppearance(uint8 state, bool from_spell_effect)
+{
+	Shout("SetInvisibleAppearance");
+
 	if (state != Invisibility::Special) {
-		if (!escape_invisible) {
-			escape_invisible = 1;
+
+		if (state == Invisibility::Visible) {
+			SendAppearancePacket(AT_Invis, Invisibility::Visible);
+			SetInvisibleLevel(0);
 		}
-		Shout("SetInvisibleAppearance");
-		SendAppearancePacket(AT_Invis, invisible);
+		else {
+			//if your setting invisible from a script then we use the internal invis variable
+			if (!from_spell_effect) {
+				escape_invisible = state;
+			}
+			SendAppearancePacket(AT_Invis, Invisibility::Invisible);
+		}
 	}
 
 	// Invis and hide breaks charms
@@ -6592,18 +6614,6 @@ void Mob::SetFeigned(bool in_feigned) {
 		forget_timer.Disable();
 	}
 	feigned = in_feigned;
-}
-
-void Mob::CalcSeeInvisibleLevel() 
-{
-	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis});
-	Shout("CalcSeeInvisibleLevel() %i", see_invis);
-}
-
-void Mob::CalcInvisibleLevel()
-{
-	invisible = std::max({ spellbonuses.invisibility, escape_invisible });
-	Shout("CalcInvisibleLevel() %i", invisible);
 }
 
 #ifdef BOTS

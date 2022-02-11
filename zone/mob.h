@@ -245,7 +245,7 @@ public:
 	//invisible
 	//bool IsInvisible(Mob* other = 0) const;
 	bool IsInvisible(Mob* other = 0);
-	void SetInvisibleAppearance(uint8 state, int16 invisible_level = 0);
+	void SetInvisibleAppearance(uint8 state, bool from_spell_effect = false);
 	
 	void CalcSeeInvisibleLevel();
 	void CalcInvisibleLevel();
@@ -254,6 +254,7 @@ public:
 	inline int16 GetInnateSeeInvisible(int16 see_invis);
 
 	inline int16 GetInvisibleLevel() const { return invisible; }
+	inline void SetInvisibleLevel(int16 val) { invisible = val; }
 
 	void BreakInvisibleSpells();
 	virtual void CancelSneakHide();
