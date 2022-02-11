@@ -245,12 +245,15 @@ public:
 	//invisible
 	//bool IsInvisible(Mob* other = 0) const;
 	bool IsInvisible(Mob* other = 0);
-	void SetInvisible(uint8 state);
+	void SetInvisibleAppearance(uint8 state, int16 invisible_level = 0);
 	
 	void CalcSeeInvisibleLevel();
-	inline int16 GetSeeInvisible(int16 see_invis);
+	void CalcInvisibleLevel();
+	void RemoveInvisible(uint8 invisible_type);
+	
+	inline int16 GetInnateSeeInvisible(int16 see_invis);
 
-	inline uint8 GetInvisibleLevel() const { return invisible; }
+	inline int16 GetInvisibleLevel() const { return invisible; }
 
 	void BreakInvisibleSpells();
 	virtual void CancelSneakHide();
@@ -261,13 +264,8 @@ public:
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
-	inline uint8 SeeInvisible() const { return see_invis; }
+	inline int16 SeeInvisible() const { return see_invis; }
 
-	//void SetSeeInvisible(uint8 val) { see_invis = val; }
-
-	//uint8 GetSeeInvisibleLevel();
-	
-	//void CalcSeeInvisibleLevel2() { see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis }); }
 
 	/**
 	 ************************************************
@@ -988,7 +986,7 @@ public:
 	void SetBodyType(bodyType new_body, bool overwrite_orig);
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	uint8 invisible;
+	int16 invisible, escape_invisible;
 	int16 see_invis, innate_see_invis;
 	bool invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
 	bool see_invis_undead, see_hide, see_improved_hide;

@@ -540,6 +540,14 @@ enum ReflectSpellType
 	RELFECT_ALL_SINGLE_TARGET_SPELLS  = 3,
 	REFLECT_ALL_SPELLS                = 4,
 };
+
+enum InvisibilityType {
+	TYPE_INVISIBLE					= 0,
+	TYPE_INVISIBLE_VERSE_UNDAEAD	= 1,
+	TYPE_INVISIBLE_VERSE_ANIMAL		= 3,
+	TYPE_HIDDEN						= 4,
+};
+
 //For better organizing in proc effects, not used in spells.
 enum ProcType
 {

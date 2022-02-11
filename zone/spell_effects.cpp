@@ -590,7 +590,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Invisibility");
 #endif
 				Shout("ADD INVS %i", spell_id);
-				SetInvisible(spell.base_value[i]);
+				SetInvisibleAppearance(spell.base_value[i]);
 				break;
 			}
 
@@ -600,7 +600,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
 				invisible_animals = true;
-				SetInvisible(Invisibility::Special);
+				SetInvisibleAppearance(Invisibility::Special);
 				break;
 			}
 
@@ -611,7 +611,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
 				invisible_undead = true;
-				SetInvisible(Invisibility::Special);
+				SetInvisibleAppearance(Invisibility::Special);
 				break;
 			}
 
@@ -2223,7 +2223,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if (IsClient()) {
 						int pre_aggro_count = CastToClient()->GetAggroCount();
 						entity_list.RemoveFromTargetsFadingMemories(this, true, max_level);
-						SetInvisible(Invisibility::Invisible);
+						SetInvisibleAppearance(Invisibility::Invisible);
 						int post_aggro_count = CastToClient()->GetAggroCount();
 						if (RuleB(Spells, UseFadingMemoriesMaxLevel)) {
 							if (pre_aggro_count == post_aggro_count) {
@@ -2239,7 +2239,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 					else{
 						entity_list.RemoveFromTargets(caster);
-						SetInvisible(Invisibility::Invisible);
+						SetInvisibleAppearance(Invisibility::Invisible);
 					}
 				}
 				break;
@@ -4185,7 +4185,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Invisibility:
 			{
 				Shout("Drop INVS %i", buffs[slot].spellid);
-				SetInvisible(Invisibility::Visible);
+				SetInvisibleAppearance(Invisibility::Visible);
 				break;
 			}
 

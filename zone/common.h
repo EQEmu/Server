@@ -561,9 +561,9 @@ struct StatBonuses {
 	bool	ZoneSuspendMinion;					// base 1 allows suspended minions to zone
 	bool	CompleteHealBuffBlocker;			// Use in SPA 101 to prevent recast of complete heal from this effect till blocker buff is removed.
 	int32	Illusion;							// illusion spell id
-	uint8	invisibility;						// invisibility level
-	uint8	invisibility_verse_undead;			// IVU level
-	uint8	invisibility_verse_animal;			// IVA level
+	int16	invisibility;						// invisibility level
+	int16	invisibility_verse_undead;			// IVU level
+	int16	invisibility_verse_animal;			// IVA level
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.

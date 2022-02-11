@@ -440,10 +440,10 @@ Mob::Mob(
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;
 
-	innate_see_invis  = GetSeeInvisible(in_see_invis);
-	see_invis_undead  = GetSeeInvisible(in_see_invis_undead);
-	see_hide          = GetSeeInvisible(in_see_hide);
-	see_improved_hide = GetSeeInvisible(in_see_improved_hide);
+	innate_see_invis  = GetInnateSeeInvisible(in_see_invis);
+	see_invis_undead  = GetInnateSeeInvisible(in_see_invis_undead);
+	see_hide          = GetInnateSeeInvisible(in_see_hide);
+	see_improved_hide = GetInnateSeeInvisible(in_see_improved_hide);
 
 	qglobal = in_qglobal != 0;
 
@@ -584,10 +584,13 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	return(ANIM_STAND);
 }
 
-void Mob::SetInvisible(uint8 state)
+void Mob::SetInvisibleAppearance(uint8 state, int16 invisible_level)
 {
 	if (state != Invisibility::Special) {
-		invisible = state;
+		if (!escape_invisible) {
+			escape_invisible = 1;
+		}
+		Shout("SetInvisibleAppearance");
 		SendAppearancePacket(AT_Invis, invisible);
 	}
 
@@ -599,6 +602,23 @@ void Mob::SetInvisible(uint8 state)
 		}
 
 		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]", GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
+	}
+}
+
+void Mob::RemoveInvisible(uint8 invisible_type) {
+
+	if (InvisibilityType::TYPE_INVISIBLE) {
+		invisible = 0;
+		escape_invisible = 0;
+	}
+
+	if (InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD) {
+		invisible_undead = 0;
+		
+	}
+
+	if (InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL) {
+		invisible_animals = 0;
 	}
 }
 
@@ -6109,7 +6129,7 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 	return CalculateHeadingAngleBetweenPositions(this_x, this_y, other_x, other_y);
 }
 
-int16 Mob::GetSeeInvisible(int16 see_invis)
+int16 Mob::GetInnateSeeInvisible(int16 see_invis)
 {
 	/*
 		Returns the NPC's see invisible level based on 'see_invs' value in npc_types.
@@ -6578,6 +6598,12 @@ void Mob::CalcSeeInvisibleLevel()
 {
 	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis});
 	Shout("CalcSeeInvisibleLevel() %i", see_invis);
+}
+
+void Mob::CalcInvisibleLevel()
+{
+	invisible = std::max({ spellbonuses.invisibility, escape_invisible });
+	Shout("CalcInvisibleLevel() %i", invisible);
 }
 
 #ifdef BOTS
