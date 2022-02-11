@@ -1202,6 +1202,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 // There are a few cases where this is what live does :P
 void Mob::StopCasting()
 {
+	Shout("AA FAIL %i", casting_spell_aa_id);
 	if (casting_spell_id && IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 	}
@@ -2221,7 +2222,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
-						uint32 timer, uint32 timer_duration, bool from_casted_spell)
+						uint32 timer, uint32 timer_duration, bool from_casted_spell, uint32 aa_id)
 {
 	Mob *ae_center = nullptr;
 
@@ -2600,22 +2601,27 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	*/
 	if(IsClient() && !isproc)
 	{
-		//Support for bards to get disc recast timers while singing
-		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
-			CastToClient()->GetPTimers().Start(timer, timer_duration);
-			LogSpells("Spell [{}]: Setting bard disciple reuse timer from spell finished [{}] to [{}]", spell_id, timer, timer_duration);
-		}
+		//handle expendable AA's
+		if (slot == CastingSlot::AltAbility) {
+			if (!aa_id) {
+				aa_id = casting_spell_aa_id;
+			}
+			if (aa_id) {
+				AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
 
-		if(casting_spell_aa_id) {
-			AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
-
-			if(rank && rank->base_ability) {
-				ExpendAlternateAdvancementCharge(rank->base_ability->id);
+				if (rank && rank->base_ability) {
+					ExpendAlternateAdvancementCharge(rank->base_ability->id);
+				}
 			}
 		}
+		//handle bard AA and Discipline recast timers when singing
+		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+			CastToClient()->GetPTimers().Start(timer, timer_duration);
+			LogSpells("Spell [{}]: Setting BARD custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
+		}
+		//handles AA and Discipline recast timers
 		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
-			//aa new todo: aa expendable charges here
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}

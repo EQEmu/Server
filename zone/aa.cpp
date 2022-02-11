@@ -1018,11 +1018,12 @@ void Client::SendAlternateAdvancementPoints() {
 }
 
 void Client::SendAlternateAdvancementTimer(int ability, int begin, int end) {
+
 	auto outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 	uaaout->ability = ability;
 	uaaout->begin = begin;
-	uaaout->end = end;
+	uaaout->end = static_cast<uint32>(time(nullptr));
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -1051,10 +1052,20 @@ void Client::SendAlternateAdvancementTimers() {
 }
 
 void Client::ResetAlternateAdvancementTimer(int ability) {
+	
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
+
 	if(rank) {
-		SendAlternateAdvancementTimer(rank->spell_type, 0, time(0));
+		
+		auto outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
+		UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
+		uaaout->ability = rank->spell_type;
+		uaaout->begin = 0;
+		uaaout->end = static_cast<uint32>(time(nullptr));
+		QueuePacket(outapp);
+		
 		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
+		safe_delete(outapp);
 	}
 }
 
@@ -1079,6 +1090,7 @@ void Client::ResetAlternateAdvancementTimers() {
 	}
 
 	for(auto &i : r_timers) {
+		Shout("Clear timers %i", i);
 		p_timers.Clear(&database, i);
 	}
 
@@ -1278,10 +1290,9 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 
-	//calculate cooldown
-	int cooldown = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
-	if (cooldown < 0) {
-		cooldown = 0;
+	int timer_duration = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
+	if (timer_duration < 0) {
+		timer_duration = 0;
 	}
 
 	if (!IsCastWhileInvis(rank->spell))
@@ -1316,19 +1327,18 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			if (!DoCastingChecksOnCaster(rank->spell)) {
 				return;
 			}
-			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false)) {
+			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false, -1,
+				rank->spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
 				return;
 			}
-			ExpendAlternateAdvancementCharge(ability->id);
+			//ExpendAlternateAdvancementCharge(ability->id);
 		}
 		else {
-			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
+			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
 				return;
 			}
 		}
 	}
-
-	CastToClient()->GetPTimers().Start(rank->spell_type + pTimerAAStart, cooldown);
 	SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 }
 
