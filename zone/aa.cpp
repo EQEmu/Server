@@ -1331,7 +1331,6 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 				rank->spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
 				return;
 			}
-			//ExpendAlternateAdvancementCharge(ability->id);
 		}
 		else {
 			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
