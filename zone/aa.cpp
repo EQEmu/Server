@@ -1278,10 +1278,9 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 
-	//calculate cooldown
-	int cooldown = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
-	if (cooldown < 0) {
-		cooldown = 0;
+	int timer_duration = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
+	if (timer_duration < 0) {
+		timer_duration = 0;
 	}
 
 	if (!IsCastWhileInvis(rank->spell))
@@ -1316,20 +1315,18 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			if (!DoCastingChecksOnCaster(rank->spell)) {
 				return;
 			}
-			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false)) {
+
+			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false, -1,
+				rank->spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
 				return;
 			}
-			ExpendAlternateAdvancementCharge(ability->id);
 		}
 		else {
-			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
+			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
 				return;
 			}
 		}
 	}
-
-	CastToClient()->GetPTimers().Start(rank->spell_type + pTimerAAStart, cooldown);
-	SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 }
 
 int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
