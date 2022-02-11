@@ -583,7 +583,7 @@ struct StatBonuses {
 	int32	MaxBindWound;						// Increase max amount of HP you can bind wound.
 	int32	ChannelChanceSpells;				// Modify chance to channel a spell.
 	int32	ChannelChanceItems;					// Modify chance to channel a items.
-	uint8	SeeInvis;							// See Invs.
+	int16	SeeInvis;							// See Invs.
 	uint8	TripleBackstab;						// Chance to triple backstab
 	bool	FrontalBackstabMinDmg;				// Allow frontal backstabs for min damage
 	uint8	FrontalBackstabChance;				// Chance to backstab from the front for full damage

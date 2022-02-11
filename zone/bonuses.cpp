@@ -47,6 +47,7 @@ void Mob::CalcBonuses()
 	CalcMaxMana();
 	SetAttackTimer();
 	CalcAC();
+	CalcSeeInvisibleLevel();
 
 	/* Fast walking NPC's are prone to disappear into walls/hills
 		We set this here because NPC's can cast spells to change walkspeed/runspeed
@@ -870,7 +871,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			if (newbon->SeeInvis < base_value) {
 				newbon->SeeInvis = base_value;
 			}
-			SetSeeInvisibleLevel();
 			break;
 		case SE_BaseMovementSpeed:
 			newbon->BaseMovementSpeed += base_value;
@@ -3848,7 +3848,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->SeeInvis < effect_value) {
 					new_bonus->SeeInvis = effect_value;
 				}
-				SetSeeInvisibleLevel();
 				break;
 
 			case SE_ZoneSuspendMinion:

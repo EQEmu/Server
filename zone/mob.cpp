@@ -81,7 +81,7 @@ Mob::Mob(
 	uint32 in_drakkin_details,
 	EQ::TintProfile in_armor_tint,
 	uint8 in_aa_title,
-	uint8 in_see_invis, // see through invis/ivu
+	int16 in_see_invis, // see through invis/ivu
 	uint8 in_see_invis_undead,
 	uint8 in_see_hide,
 	uint8 in_see_improved_hide,
@@ -609,7 +609,7 @@ bool Mob::IsInvisible(Mob* other)
 	if (!other) {
 		return(false);
 	}
-	Shout("Invisible %i and See invisible %i", other->SeeInvisible());
+	//Shout("Invisible %i and See invisible %i", other->SeeInvisible());
 	//check regular invisibility
 	if (invisible && invisible > (other->SeeInvisible())) {
 		return true;
@@ -6118,13 +6118,15 @@ int16 Mob::GetSeeInvisible(int16 see_invis)
 		ect... for higher levels, 200,300 ect.
 	*/
 	
-	//covers npcs with no see invs or standard level 1 see invs.
+	//npc does not have see invis
 	if (!see_invis) {
 		return 0;
 	}
-	else if (see_invis == 1) {
+	//npc has basic see invis
+	if (see_invis == 1) {
 		return 1;
 	}
+	
 	//random chance to apply standard level 1 see invs
 	if (see_invis > 1 && see_invis < 100) {
 		if (zone->random.Int(0, 99) < see_invis) {
@@ -6132,13 +6134,24 @@ int16 Mob::GetSeeInvisible(int16 see_invis)
 		}
 	}
 	//covers npcs with see invis levels beyond level 1
-	int16 see_invis_level = see_invis / 100;;
+	int16 see_invis_level = 1;
+	see_invis_level += (see_invis / 100);
 
-	int random_remainder = see_invis % 100;
-	if (zone->random.Int(0, 99) < random_remainder) {
+	Shout("see level %i", see_invis_level);
+
+	int see_invis_chance = see_invis % 100;
+
+	Shout("see chance %i", see_invis_chance);
+
+	//has enhanced see invis level
+	if (see_invis_chance == 0) {
 		return see_invis_level;
 	}
-
+	//has chance for enhanced see invis level
+	if (zone->random.Int(0, 99) < see_invis_chance) {
+		return see_invis_level;
+	}
+	//failed chance at attempted enhanced see invs level, use previous level.
 	return (see_invis_level - 1);
 }
 
@@ -6561,10 +6574,10 @@ void Mob::SetFeigned(bool in_feigned) {
 	feigned = in_feigned;
 }
 
-void Mob::SetSeeInvisibleLevel() 
+void Mob::CalcSeeInvisibleLevel() 
 {
 	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis});
-	Shout("SetSeeInvisibleLevel() %i", see_invis);
+	Shout("CalcSeeInvisibleLevel() %i", see_invis);
 }
 
 #ifdef BOTS

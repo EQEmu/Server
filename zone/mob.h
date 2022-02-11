@@ -147,7 +147,7 @@ public:
 		uint32 in_drakkin_details,
 		EQ::TintProfile in_armor_tint,
 		uint8 in_aa_title,
-		uint8 in_see_invis, // see through invis
+		int16 in_see_invis, // see through invis
 		uint8 in_see_invis_undead, // see through invis vs. undead
 		uint8 in_see_hide,
 		uint8 in_see_improved_hide,
@@ -247,7 +247,7 @@ public:
 	bool IsInvisible(Mob* other = 0);
 	void SetInvisible(uint8 state);
 	
-	void SetSeeInvisibleLevel();
+	void CalcSeeInvisibleLevel();
 	inline int16 GetSeeInvisible(int16 see_invis);
 
 	inline uint8 GetInvisibleLevel() const { return invisible; }
@@ -267,7 +267,7 @@ public:
 
 	//uint8 GetSeeInvisibleLevel();
 	
-	//void SetSeeInvisibleLevel2() { see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis }); }
+	//void CalcSeeInvisibleLevel2() { see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis }); }
 
 	/**
 	 ************************************************
@@ -988,7 +988,8 @@ public:
 	void SetBodyType(bodyType new_body, bool overwrite_orig);
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	uint8 invisible, see_invis, innate_see_invis;
+	uint8 invisible;
+	int16 see_invis, innate_see_invis;
 	bool invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
 	bool see_invis_undead, see_hide, see_improved_hide;
 	bool qglobal;
