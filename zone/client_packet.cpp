@@ -6960,6 +6960,13 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 					Invitee->CastToClient()->QueuePacket(app);
 				}
 			}
+			else {
+				if (RuleB(Character, OnInviteReceiveAlreadyinGroupMessage)) {
+					if (!Invitee->CastToClient()->MercOnlyOrNoGroup()) {
+						Message(Chat::LightGray, "%s is already in another group.", Invitee->GetCleanName());
+					}
+				}
+			}
 		}
 #ifdef BOTS
 		else if (Invitee->IsBot()) {

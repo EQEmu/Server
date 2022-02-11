@@ -192,6 +192,7 @@ RULE_INT(Character, MagicianTrackingDistanceMultiplier, 0, "If you want magician
 RULE_INT(Character, EnchanterTrackingDistanceMultiplier, 0, "If you want enchanters to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_INT(Character, BeastlordTrackingDistanceMultiplier, 0, "If you want beastlords to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_INT(Character, BerserkerTrackingDistanceMultiplier, 0, "If you want berserkers to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_BOOL(Character, OnInviteReceiveAlreadyinGroupMessage, true, "If you want clients to receive a message when trying to invite a player into a group that is currently in another group.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

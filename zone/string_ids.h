@@ -469,6 +469,7 @@
 #define LEADER_OF_X_GUILD			12258
 #define NOT_IN_A_GUILD				12259
 #define TARGET_PLAYER_FOR_GUILD_STATUS		12260
+#define TARGET_ALREADY_IN_GROUP		12265	//% 1 is already in another group.
 #define GROUP_INVITEE_NOT_FOUND		12268	//You must target a player or use /invite <name> to invite someone to your group.
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
 #define ALREADY_IN_PARTY			12272	//That person is already in your party.
