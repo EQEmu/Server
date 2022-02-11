@@ -1018,7 +1018,6 @@ void Client::SendAlternateAdvancementPoints() {
 }
 
 void Client::SendAlternateAdvancementTimer(int ability, int begin, int end) {
-
 	auto outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 	uaaout->ability = ability;
@@ -1052,9 +1051,7 @@ void Client::SendAlternateAdvancementTimers() {
 }
 
 void Client::ResetAlternateAdvancementTimer(int ability) {
-	
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
-
 	if(rank) {
 		SendAlternateAdvancementTimer(rank->spell_type, 0, time(0));
 		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
