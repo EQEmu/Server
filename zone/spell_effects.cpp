@@ -8248,7 +8248,7 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 
 	*/
 
-	std::string msg = "";
+	const char *msg = "";
 
 	if (target_requirement) {
 		msg = "Your target does not meet the spell requirements. ";

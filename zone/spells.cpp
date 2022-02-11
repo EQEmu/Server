@@ -2600,6 +2600,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	*/
 	if(IsClient() && !isproc)
 	{
+
 		//handle expendable AA's
 		if (slot == CastingSlot::AltAbility) {
 			if (!aa_id) {
@@ -2621,6 +2622,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			LogSpells("Spell [{}]: Setting BARD custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
 		//handles AA and Discipline recast timers
+		else if (spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
+		{
+			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
+			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
+		}
 		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
