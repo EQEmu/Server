@@ -5784,8 +5784,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 {
-	if (!ClientFinishedLoading())
-	{
+	if (!ClientFinishedLoading()) {
 		SetHP(GetHP() - 1);
 		return;
 	}
@@ -5795,38 +5794,46 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
 	EnvDamage2_Struct* ed = (EnvDamage2_Struct*)app->pBuffer;
-
-	int damage = ed->damage;
-
-	if (ed->dmgtype == 252) {
-
-		int mod = spellbonuses.ReduceFallDamage + itembonuses.ReduceFallDamage + aabonuses.ReduceFallDamage;
-
+	auto damage = ed->damage;
+	if (ed->dmgtype == EQ::constants::EnvironmentalDamage::Falling) {
+		uint32 mod = spellbonuses.ReduceFallDamage + itembonuses.ReduceFallDamage + aabonuses.ReduceFallDamage;
 		damage -= damage * mod / 100;
 	}
 
-	if (damage < 0)
+	if (damage < 0) {
 		damage = 31337;
+	}
 
 	if (admin >= minStatusToAvoidFalling && GetGM()) {
-		Message(Chat::Red, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Your GM status protects you from {} points of {} (Type {}) damage.",
+				ed->damage,
+				EQ::constants::GetEnvironmentalDamageName(ed->dmgtype),
+				ed->dmgtype
+			).c_str()
+		);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
-	}
-	else if (GetInvul()) {
-		Message(Chat::Red, "Your invuln status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+	} else if (GetInvul()) {
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Your invulnerability protects you from {} points of {} (Type {}) damage.",
+				ed->damage,
+				EQ::constants::GetEnvironmentalDamageName(ed->dmgtype),
+				ed->dmgtype
+			).c_str()
+		);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
-	}
-	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184) {
-		// Hard coded tutorial and load zones for no fall damage
+	} else if (zone->GetZoneID() == Zones::TUTORIAL || zone->GetZoneID() == Zones::LOAD) { // Hard coded tutorial and load zones for no fall damage
 		return;
-	}
-	else {
+	} else {
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
-
-		/* EVENT_ENVIRONMENTAL_DAMAGE */
 		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
 		std::string export_string = fmt::format(
 			"{} {} {}",
@@ -6951,6 +6958,13 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 				{
 					//The correct opcode, no reason to bother wasting time reconstructing the packet
 					Invitee->CastToClient()->QueuePacket(app);
+				}
+			}
+			else {
+				if (RuleB(Character, OnInviteReceiveAlreadyinGroupMessage)) {
+					if (!Invitee->CastToClient()->MercOnlyOrNoGroup()) {
+						Message(Chat::LightGray, "%s is already in another group.", Invitee->GetCleanName());
+					}
 				}
 			}
 		}
