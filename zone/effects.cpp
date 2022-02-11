@@ -806,7 +806,10 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		}
 	}
 	else {
-		CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
+		if (!CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline)) {
+			LogSpells("Discipline [{}] failed at cast spell.", spell_id);
+			return false;
+		}
 	}
 
 	return(true);

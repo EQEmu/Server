@@ -3702,3 +3702,8 @@ const SPDat_Spell_Struct* QuestManager::getspell(uint32 spell_id) {
     }
     return nullptr;
 }
+
+std::string QuestManager::getenvironmentaldamagename(uint8 damage_type) {
+	std::string environmental_damage_name = EQ::constants::GetEnvironmentalDamageName(damage_type);
+	return environmental_damage_name;
+}

@@ -2761,9 +2761,8 @@ void NPC::ApplyAISpellEffects(StatBonuses* newbon)
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value)
+void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value, bool apply_bonus)
 {
-
 	if(!iSpellEffectID)
 		return;
 
@@ -2775,6 +2774,40 @@ void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32
 	t.limit = limit;
 	t.max_value = max_value;
 	AIspellsEffects.push_back(t);
+
+	//we recalculate if applied from quest script.
+	if (apply_bonus) {
+		CalcBonuses();
+	}
+}
+
+void NPC::RemoveSpellEffectFromNPCList(uint16 iSpellEffectID, bool apply_bonus)
+{
+	auto iter = AIspellsEffects.begin();
+	while (iter != AIspellsEffects.end())
+	{
+		if ((*iter).spelleffectid == iSpellEffectID)
+		{
+			iter = AIspellsEffects.erase(iter);
+			continue;
+		}
+		++iter;
+	}
+
+	if (apply_bonus) {
+		CalcBonuses();
+	}
+}
+
+bool NPC::HasAISpellEffect(uint16 spell_effect_id)
+{
+	for (const auto& spell_effect : AIspellsEffects) {
+		if (spell_effect.spelleffectid == spell_effect_id) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value) {

@@ -230,6 +230,13 @@ namespace EQ
 			LevitateWhileRunning
 		};
 
+		enum EnvironmentalDamage : uint8 {
+			Lava = 250,
+			Drowning,
+			Falling,
+			Trap
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
@@ -250,6 +257,9 @@ namespace EQ
 
 		extern const std::map<uint8, std::string>& GetConsiderLevelMap();
 		std::string GetConsiderLevelName(uint8 consider_level);
+
+		extern const std::map<uint8, std::string>& GetEnvironmentalDamageMap();
+		std::string GetEnvironmentalDamageName(uint8 damage_type);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
