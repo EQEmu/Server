@@ -1090,7 +1090,6 @@ void Client::ResetAlternateAdvancementTimers() {
 	}
 
 	for(auto &i : r_timers) {
-		Shout("Clear timers %i", i);
 		p_timers.Clear(&database, i);
 	}
 
