@@ -338,6 +338,31 @@ std::string EQ::constants::GetAccountStatusName(uint8 account_status)
 	return status_name;
 }
 
+const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
+{
+	static const std::map<uint8, std::string> consider_level_map = {
+		{ ConsiderLevel::Ally, "Ally" },
+		{ ConsiderLevel::Warmly, "Warmly" },
+		{ ConsiderLevel::Kindly, "Kindly" },
+		{ ConsiderLevel::Amiably, "Amiably" },
+		{ ConsiderLevel::Indifferently, "Indifferently" },
+		{ ConsiderLevel::Apprehensively, "Apprehensively" },
+		{ ConsiderLevel::Dubiously, "Dubiously" },
+		{ ConsiderLevel::Threateningly, "Threateningly" },
+		{ ConsiderLevel::Scowls, "Scowls" }
+	};
+	return consider_level_map;
+}
+
+std::string EQ::constants::GetConsiderLevelName(uint8 faction_consider_level)
+{
+	auto consider_levels = EQ::constants::GetConsiderLevelMap();
+	if (!consider_levels[faction_consider_level].empty()) {
+		return consider_levels[faction_consider_level];
+	}
+	return std::string();
+}
+
 const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
 {
 	static const std::map<uint8, std::string> damage_type_map = {

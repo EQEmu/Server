@@ -119,6 +119,7 @@ public:
 	std::string getfactionname(int faction_id);
 	std::string getlanguagename(int language_id);
 	std::string getbodytypename(uint32 bodytype_id);
+	std::string getconsiderlevelname(uint8 consider_level);
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
