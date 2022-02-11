@@ -1056,16 +1056,8 @@ void Client::ResetAlternateAdvancementTimer(int ability) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
 
 	if(rank) {
-		
-		auto outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
-		UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
-		uaaout->ability = rank->spell_type;
-		uaaout->begin = 0;
-		uaaout->end = static_cast<uint32>(time(nullptr));
-		QueuePacket(outapp);
-		
+		SendAlternateAdvancementTimer(rank->spell_type, 0, time(0));
 		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
-		safe_delete(outapp);
 	}
 }
 
@@ -1321,11 +1313,13 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		TogglePassiveAlternativeAdvancement(*rank, ability->id);
 	}
 	else {
+		
 		// Bards can cast instant cast AAs while they are casting or channeling item cast.
 		if (GetClass() == BARD && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell)) {
 				return;
 			}
+			
 			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false, -1,
 				rank->spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
 				return;
@@ -1337,7 +1331,6 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			}
 		}
 	}
-	SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 }
 
 int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {

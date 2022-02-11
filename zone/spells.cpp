@@ -1202,7 +1202,6 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 // There are a few cases where this is what live does :P
 void Mob::StopCasting()
 {
-	Shout("AA FAIL %i", casting_spell_aa_id);
 	if (casting_spell_id && IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 	}
@@ -2612,6 +2611,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				if (rank && rank->base_ability) {
 					ExpendAlternateAdvancementCharge(rank->base_ability->id);
 				}
+
+				CastToClient()->SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 			}
 		}
 		//handle bard AA and Discipline recast timers when singing
