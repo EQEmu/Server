@@ -2600,19 +2600,17 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	*/
 	if(IsClient() && !isproc)
 	{
-
-		//handle expendable AA's
 		if (slot == CastingSlot::AltAbility) {
 			if (!aa_id) {
 				aa_id = casting_spell_aa_id;
 			}
 			if (aa_id) {
 				AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
-
+				//handle expendable AA's
 				if (rank && rank->base_ability) {
 					ExpendAlternateAdvancementCharge(rank->base_ability->id);
 				}
-
+				//set AA recast timer
 				CastToClient()->SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 			}
 		}

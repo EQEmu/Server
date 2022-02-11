@@ -1313,7 +1313,6 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		TogglePassiveAlternativeAdvancement(*rank, ability->id);
 	}
 	else {
-
 		// Bards can cast instant cast AAs while they are casting or channeling item cast.
 		if (GetClass() == BARD && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell)) {
