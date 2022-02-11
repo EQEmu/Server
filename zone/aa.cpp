@@ -1023,7 +1023,7 @@ void Client::SendAlternateAdvancementTimer(int ability, int begin, int end) {
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 	uaaout->ability = ability;
 	uaaout->begin = begin;
-	uaaout->end = static_cast<uint32>(time(nullptr));
+	uaaout->end = end;
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
