@@ -589,7 +589,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invisibility");
 #endif
-				SetInvisibleAppearance(Invisibility::Invisible, true);
+				SetInvisible(Invisibility::Invisible, true);
 				break;
 			}
 
@@ -599,7 +599,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
-				SetInvisibleAppearance(Invisibility::Special, true);
+				SetInvisible(Invisibility::Special, true);
 				break;
 			}
 
@@ -609,7 +609,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
-				SetInvisibleAppearance(Invisibility::Special, true);
+				SetInvisible(Invisibility::Special, true);
 				break;
 			}
 
@@ -2221,7 +2221,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if (IsClient()) {
 						int pre_aggro_count = CastToClient()->GetAggroCount();
 						entity_list.RemoveFromTargetsFadingMemories(this, true, max_level);
-						SetInvisibleAppearance(Invisibility::Invisible);
+						SetInvisible(Invisibility::Invisible);
 						int post_aggro_count = CastToClient()->GetAggroCount();
 						if (RuleB(Spells, UseFadingMemoriesMaxLevel)) {
 							if (pre_aggro_count == post_aggro_count) {
@@ -2237,7 +2237,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 					else{
 						entity_list.RemoveFromTargets(caster);
-						SetInvisibleAppearance(Invisibility::Invisible);
+						SetInvisible(Invisibility::Invisible);
 					}
 				}
 				break;
@@ -4185,7 +4185,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Invisibility:
 			{
 				Shout("Mob::BuffFadeBySlot INVIS %i", buffs[slot].spellid);
-				SetInvisibleAppearance(Invisibility::Visible);
+				SetInvisible(Invisibility::Visible);
 				break;
 			}
 
@@ -9565,7 +9565,7 @@ void Mob::BreakInvisibleSpells()
 	if(invisible_undead) {
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD);
+		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD);
 	}
 	if(invisible_animals){
 		BuffFadeByEffect(SE_ImprovedInvisAnimals);

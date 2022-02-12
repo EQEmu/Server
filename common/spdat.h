@@ -543,9 +543,8 @@ enum ReflectSpellType
 
 enum InvisibilityType {
 	TYPE_INVISIBLE					= 0,
-	TYPE_INVISIBLE_VERSE_UNDAEAD	= 1,
-	TYPE_INVISIBLE_VERSE_ANIMAL		= 3,
-	TYPE_HIDDEN						= 4,
+	TYPE_INVISIBLE_VERSE_UNDEAD		= 1,
+	TYPE_INVISIBLE_VERSE_ANIMAL		= 2,
 };
 
 //For better organizing in proc effects, not used in spells.

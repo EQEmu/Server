@@ -319,7 +319,7 @@ bool Lua_Mob::IsInvisible(Lua_Mob other) {
 
 void Lua_Mob::SetInvisible(int state) {
 	Lua_Safe_Call_Void();
-	self->SetInvisibleAppearance(state);
+	self->SetInvisible(state);
 }
 
 bool Lua_Mob::FindBuff(int spell_id) {

@@ -911,7 +911,7 @@ XS(XS_Mob_SetInvisible) {
 		Mob *THIS;
 		uint8 state = (uint8) SvUV(ST(1));
 		VALIDATE_THIS_IS_MOB;
-		THIS->SetInvisibleAppearance(state);
+		THIS->SetInvisible(state);
 	}
 	XSRETURN_EMPTY;
 }

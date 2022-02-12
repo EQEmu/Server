@@ -3453,7 +3453,7 @@ uint8 Client::SlotConvert2(uint8 slot){
 void Client::Escape()
 {
 	entity_list.RemoveFromTargets(this, true);
-	SetInvisibleAppearance(Invisibility::Invisible);
+	SetInvisible(Invisibility::Invisible);
 	MessageString(Chat::Skills, ESCAPE);
 }
 

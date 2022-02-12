@@ -5637,7 +5637,7 @@ void Mob::CommonBreakInvisibleFromCombat()
 		LogCombat("Removing invisibility vs. undead due to melee attack");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD);
+		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD);
 	}
 	if (invisible_animals) {
 		LogCombat("Removing invisibility vs. animals due to melee attack");

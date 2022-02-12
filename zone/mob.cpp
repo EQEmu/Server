@@ -603,9 +603,9 @@ void Mob::CalcInvisibleLevel()
 	Shout("CalcInvisibleLevel() %i [NON BUFF %i]", invisible, nobuff_invisible);
 }
 
-void Mob::SetInvisibleAppearance(uint8 state, bool from_spell_effect)
+void Mob::SetInvisible(uint8 state, bool from_spell_effect)
 {
-	Shout("SetInvisibleAppearance %i", invisible);
+	Shout("SetInvisible %i", invisible);
 
 	if (state != Invisibility::Special) {
 
@@ -646,7 +646,7 @@ void Mob::RemoveInvisible(uint8 invisible_type)
 			nobuff_invisible = 0;
 			break;
 
-		case InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD:
+		case InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD:
 			invisible_undead = 0;
 			break;
 

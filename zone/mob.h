@@ -245,7 +245,7 @@ public:
 	//invisible
 	//bool IsInvisible(Mob* other = 0) const;
 	bool IsInvisible(Mob* other = 0);
-	void SetInvisibleAppearance(uint8 state, bool from_spell_effect = false);
+	void SetInvisible(uint8 state, bool from_spell_effect = false);
 	
 	void CalcSeeInvisibleLevel();
 	void CalcInvisibleLevel();
@@ -254,7 +254,6 @@ public:
 	inline uint8 GetInnateSeeInvisible(uint16 in_see_invis);
 
 	inline uint8 GetInvisibleLevel() const { return invisible; }
-	inline void SetInvisibleLevel(int16 val) { invisible = val; }
 
 	void BreakInvisibleSpells();
 	virtual void CancelSneakHide();
@@ -264,12 +263,12 @@ public:
 	
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
-	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
+	inline uint8 SeeInvisibleUndead() const { return see_invis_undead; }
 	inline uint8 SeeInvisible() const { return see_invis; }
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals; //NOTE: NO see invis for animals.
-	uint8 see_invis, innate_see_invis, see_invis_undead;
+	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals; 
+	uint8 see_invis, innate_see_invis, see_invis_undead; //TODO: see_invis_animal added to npc_types
 
 	bool sneaking, hidden, improved_hidden;
 	bool see_hide, see_improved_hide;
