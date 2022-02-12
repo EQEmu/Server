@@ -3986,18 +3986,22 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	}
 
 	Shout("Bonuses %i", spellbonuses.invisibility);
-	if (spellbonuses.invisibility) {
+	if (invisible) {
+		Shout("nuke ALL invs");
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
 	}
 
 	Shout("Casting %i %i %i", invisible_undead, invisible_animals, invisible);
 	// Hack for broken RoF2 which allows casting after a zoned IVU/IVA
-	if (invisible_undead || invisible_animals) {
-		BuffFadeByEffect(SE_InvisVsAnimals);
-		BuffFadeByEffect(SE_ImprovedInvisAnimals);
+	if (invisible_undead) {
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
+	}
+	if (invisible_animals) {
+		BuffFadeByEffect(SE_InvisVsAnimals);
+		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 	}
 	Shout("Casting DROP %i %i %i", invisible_undead, invisible_animals, invisible);
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
