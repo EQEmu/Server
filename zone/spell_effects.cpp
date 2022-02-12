@@ -4151,14 +4151,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				break;
 			}
 
-			case SE_Invisibility2:
-			case SE_Invisibility:
-			{
-				Shout("Mob::BuffFadeBySlot INVIS %i", buffs[slot].spellid);
-				//SetInvisible(Invisibility::Visible);
-				break;
-			}
-
 			case SE_Silence:
 			{
 				Silence(false);
