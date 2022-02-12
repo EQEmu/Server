@@ -611,7 +611,7 @@ void Mob::SetInvisible(uint8 state, bool from_spell_effect)
 
 		if (state == Invisibility::Visible) {
 			SendAppearancePacket(AT_Invis, Invisibility::Visible);
-			RemoveInvisible(InvisibilityType::TYPE_INVISIBLE);
+			ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE);
 		}
 		else {
 			/*
@@ -636,9 +636,8 @@ void Mob::SetInvisible(uint8 state, bool from_spell_effect)
 	}
 }
 
-void Mob::RemoveInvisible(uint8 invisible_type) 
+void Mob::ZeroInvisibleVars(uint8 invisible_type) 
 {
-
 	switch (invisible_type) {
 		
 		case InvisibilityType::TYPE_INVISIBLE:

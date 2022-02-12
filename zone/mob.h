@@ -249,7 +249,7 @@ public:
 	
 	void CalcSeeInvisibleLevel();
 	void CalcInvisibleLevel();
-	void RemoveInvisible(uint8 invisible_type);
+	void ZeroInvisibleVars(uint8 invisible_type);
 	
 	inline uint8 GetInnateSeeInvisible(uint16 in_see_invis);
 

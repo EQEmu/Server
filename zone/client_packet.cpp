@@ -13553,7 +13553,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			}
 			return;
 		}
-		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE);
+		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE);
 		hidden = false;
 		improved_hidden = false;
 		entity_list.QueueClients(this, app, true);

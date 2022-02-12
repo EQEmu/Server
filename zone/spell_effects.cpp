@@ -9560,17 +9560,17 @@ void Mob::BreakInvisibleSpells()
 	if(invisible) {
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
-		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE);
+		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE);
 	}
 	if(invisible_undead) {
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD);
+		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD);
 	}
 	if(invisible_animals){
 		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsAnimals);
-		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL);
+		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL);
 	}
 }
 
