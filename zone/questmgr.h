@@ -119,6 +119,7 @@ public:
 	std::string getfactionname(int faction_id);
 	std::string getlanguagename(int language_id);
 	std::string getbodytypename(uint32 bodytype_id);
+	std::string getconsiderlevelname(uint8 consider_level);
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
@@ -330,7 +331,8 @@ public:
 	std::string getinventoryslotname(int16 slot_id);
 	int getitemstat(uint32 item_id, std::string stat_identifier);
 	int getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot = 0);
-	const SPDat_Spell_Struct *getspell(uint32 spell_id);	
+	const SPDat_Spell_Struct *getspell(uint32 spell_id);
+	std::string getenvironmentaldamagename(uint8 damage_type);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

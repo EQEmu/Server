@@ -8092,6 +8092,39 @@ XS(XS__getbodytypename) {
 	}
 }
 
+XS(XS__getconsiderlevelname);
+XS(XS__getconsiderlevelname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getconsiderlevelname(uint8 consider_level)");
+	{
+		dXSTARG;
+		uint8 consider_level = (uint8) SvUV(ST(0));
+		std::string consider_level_name = quest_manager.getconsiderlevelname(consider_level);
+
+		sv_setpv(TARG, consider_level_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
+XS(XS__getenvironmentaldamagename);
+XS(XS__getenvironmentaldamagename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getenvironmentaldamagename(uint8 damage_type)");
+
+	dXSTARG;
+	uint8 damage_type = (uint8) SvIV(ST(0));
+	std::string environmental_damage_name = quest_manager.getenvironmentaldamagename(damage_type);
+
+	sv_setpv(TARG, environmental_damage_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8376,6 +8409,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getcleannpcnamebyid"), XS__getcleannpcnamebyid, file);
+	newXS(strcpy(buf, "getconsiderlevelname"), XS__getconsiderlevelname, file);
 	newXS(strcpy(buf, "gethexcolorcode"), XS__gethexcolorcode, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
 	newXS(strcpy(buf, "getexpmodifierbycharid"), XS__getexpmodifierbycharid, file);
@@ -8398,6 +8432,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
 	newXS(strcpy(buf, "getgendername"), XS__getgendername, file);
 	newXS(strcpy(buf, "getdeityname"), XS__getdeityname, file);
+	newXS(strcpy(buf, "getenvironmentaldamagename"), XS__getenvironmentaldamagename, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);

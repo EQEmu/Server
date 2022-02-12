@@ -1,104 +1,249 @@
 #include "../client.h"
 #include "../corpse.h"
+#include "../../common/data_verification.h"
 
 void command_npcloot(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget() == 0) {
-		c->Message(Chat::White, "Error: No target");
-		// #npcloot show
+	if (!c->GetTarget() || (!c->GetTarget()->IsNPC() && !c->GetTarget()->IsCorpse())) {
+		c->Message(Chat::White, "You must target an NPC or a Corpse to use this command.");
+		return;
 	}
-	else if (strcasecmp(sep->arg[1], "show") == 0) {
-		if (c->GetTarget()->IsNPC()) {
-			c->GetTarget()->CastToNPC()->QueryLoot(c);
-		}
-		else if (c->GetTarget()->IsCorpse()) {
-			c->GetTarget()->CastToCorpse()->QueryLoot(c);
-		}
-		else {
-			c->Message(Chat::White, "Error: Target's type doesnt have loot");
-		}
+	
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #npcloot add [Item ID] [Charges] [Equip] [Augment 1 ID] [Augment 2 ID] [Augment 3 ID] [Augment 4 ID] [Augment 5 ID] [Augment 6 ID] - Adds the specified item to an NPC's loot");
+		c->Message(Chat::White, "Usage: #npcloot money [Platinum] [Gold] [Silver] [Copper] - Set an NPC's current money");
+		c->Message(Chat::White, "Usage: #npcloot remove [All|Item ID] - Remove loot from an NPC by ID or remove all loot");
+		c->Message(Chat::White, "Usage: #npcloot show - Shows target NPC's or Corpse's current loot");
+		return;
 	}
-		// These 2 types are *BAD* for the next few commands
-	else if (c->GetTarget()->IsClient() || c->GetTarget()->IsCorpse()) {
-		c->Message(Chat::White, "Error: Invalid target type, try a NPC =).");
-		// #npcloot add
+
+	bool is_add = !strcasecmp(sep->arg[1], "add");
+	bool is_money = !strcasecmp(sep->arg[1], "money");
+	bool is_remove = !strcasecmp(sep->arg[1], "remove");
+	bool is_show = !strcasecmp(sep->arg[1], "show");
+
+	if (
+		!is_add &&
+		!is_money &&
+		!is_remove &&
+		!is_show
+	) {
+		c->Message(Chat::White, "Usage: #npcloot add [Item ID] [Charges] [Equip] [Augment 1 ID] [Augment 2 ID] [Augment 3 ID] [Augment 4 ID] [Augment 5 ID] [Augment 6 ID] - Adds the specified item to an NPC's loot");
+		c->Message(Chat::White, "Usage: #npcloot money [Platinum] [Gold] [Silver] [Copper] - Set an NPC's current money");
+		c->Message(Chat::White, "Usage: #npcloot remove [All|Item ID] - Remove loot from an NPC by ID or remove all loot");
+		c->Message(Chat::White, "Usage: #npcloot show - Shows target NPC's or Corpse's current loot");
+		return;
 	}
-	else if (strcasecmp(sep->arg[1], "add") == 0) {
-		// #npcloot add item
-		if (c->GetTarget()->IsNPC() && sep->IsNumber(2)) {
-			uint32 item = atoi(sep->arg[2]);
-			if (database.GetItem(item)) {
-				if (sep->arg[3][0] != 0 && sep->IsNumber(3)) {
-					c->GetTarget()->CastToNPC()->AddItem(item, atoi(sep->arg[3]), 0);
-				}
-				else {
-					c->GetTarget()->CastToNPC()->AddItem(item, 1, 0);
-				}
-				c->Message(Chat::White, "Added item(%i) to the %s's loot.", item, c->GetTarget()->GetName());
-			}
-			else {
-				c->Message(Chat::White, "Error: #npcloot add: Item(%i) does not exist!", item);
-			}
+
+	if (is_add) {
+		if (!c->GetTarget()->IsNPC() || !sep->IsNumber(2)) {
+			c->Message(Chat::White, "Usage: #npcloot add [Item ID] [Charges] [Equip] [Augment 1 ID] [Augment 2 ID] [Augment 3 ID] [Augment 4 ID] [Augment 5 ID] [Augment 6 ID] - Adds the specified item to an NPC's loot");
+			return;
 		}
-		else if (!sep->IsNumber(2)) {
-			c->Message(Chat::White, "Error: #npcloot add: Itemid must be a number.");
+
+		auto item_id = std::stoul(sep->arg[2]);
+		auto item_charges = sep->IsNumber(3) ? static_cast<uint16>(std::stoul(sep->arg[3])) : 1;
+		bool equip_item = arguments >= 4 ? atobool(sep->arg[4]) : false;
+		auto augment_one_id = sep->IsNumber(5) ? std::stoul(sep->arg[5]) : 0;
+		auto augment_two_id = sep->IsNumber(6) ? std::stoul(sep->arg[6]) : 0;
+		auto augment_three_id = sep->IsNumber(7) ? std::stoul(sep->arg[7]) : 0;
+		auto augment_four_id = sep->IsNumber(8) ? std::stoul(sep->arg[8]) : 0;
+		auto augment_five_id = sep->IsNumber(9) ? std::stoul(sep->arg[9]) : 0;
+		auto augment_six_id = sep->IsNumber(10) ? std::stoul(sep->arg[10]) : 0;
+
+		auto item_data = database.GetItem(item_id);
+
+		if (!item_data) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Item ID {} could not be found",
+					item_id
+				).c_str()
+			);
+			return;
 		}
-		else {
-			c->Message(Chat::White, "Error: #npcloot add: This is not a valid target.");
+
+		c->GetTarget()->CastToNPC()->AddItem(
+			item_id,
+			item_charges,
+			equip_item,
+			augment_one_id,
+			augment_two_id,
+			augment_three_id,
+			augment_four_id,
+			augment_five_id,
+			augment_six_id
+		);
+
+		auto item = database.CreateItem(
+			item_id,
+			item_charges,
+			augment_one_id,
+			augment_two_id,
+			augment_three_id,
+			augment_four_id,
+			augment_five_id,
+			augment_six_id
+		);
+
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(item);
+
+		auto item_link = linker.GenerateLink();
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Added {} ({}) to {} ({}).",
+				item_link,
+				item_id,
+				c->GetTarget()->GetCleanName(),
+				c->GetTarget()->GetID()
+			).c_str()
+		);
+	} else if (is_money) {
+		if (!c->GetTarget()->IsNPC()) {
+			c->Message(Chat::White, "You must target an NPC to use this command.");
+			return;
 		}
-	}
-		// #npcloot remove
-	else if (strcasecmp(sep->arg[1], "remove") == 0) {
-		//#npcloot remove all
-		if (strcasecmp(sep->arg[2], "all") == 0) {
-			c->Message(Chat::White, "Error: #npcloot remove all: Not yet implemented.");
-			//#npcloot remove itemid
+
+		auto target = c->GetTarget()->CastToNPC();
+
+		if (sep->IsNumber(2)) {
+			uint16 platinum = EQ::Clamp(std::stoi(sep->arg[2]), 0, 65535);
+			uint16 gold = sep->IsNumber(3) ? EQ::Clamp(std::stoi(sep->arg[3]), 0, 65535) : 0;
+			uint16 silver = sep->IsNumber(4) ? EQ::Clamp(std::stoi(sep->arg[4]), 0, 65535) : 0;
+			uint16 copper = sep->IsNumber(5) ? EQ::Clamp(std::stoi(sep->arg[5]), 0, 65535) : 0;
+			target->AddCash(
+				copper,
+				silver,
+				gold,
+				platinum
+			);
+
+			auto money_string = (
+				(
+					copper ||
+					silver ||
+					gold ||
+					platinum
+				) ?
+				ConvertMoneyToString(
+					platinum,
+					gold,
+					silver,
+					copper
+				) :
+				"no money"
+			);
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) now has {}.",
+					target->GetCleanName(),
+					target->GetID(),
+					money_string
+				).c_str()
+			);
+		} else {
+			c->Message(Chat::White, "Usage: #npcloot money [Platinum] [Gold] [Silver] [Copper] - Set an NPC's current money");
 		}
-		else {
-			if (c->GetTarget()->IsNPC() && sep->IsNumber(2)) {
-				uint32 item = atoi(sep->arg[2]);
-				c->GetTarget()->CastToNPC()->RemoveItem(item);
-				c->Message(Chat::White, "Removed item(%i) from the %s's loot.", item, c->GetTarget()->GetName());
-			}
-			else if (!sep->IsNumber(2)) {
-				c->Message(Chat::White, "Error: #npcloot remove: Item must be a number.");
-			}
-			else {
-				c->Message(Chat::White, "Error: #npcloot remove: This is not a valid target.");
-			}
+	} else if (is_remove) {
+		if (!c->GetTarget()->IsNPC()) {
+			c->Message(Chat::White, "You must target an NPC to use this command.");
+			return;
 		}
-	}
-		// #npcloot money
-	else if (strcasecmp(sep->arg[1], "money") == 0) {
-		if (c->GetTarget()->IsNPC() && sep->IsNumber(2) && sep->IsNumber(3) && sep->IsNumber(4) && sep->IsNumber(5)) {
-			if ((atoi(sep->arg[2]) < 34465 && atoi(sep->arg[2]) >= 0) &&
-				(atoi(sep->arg[3]) < 34465 && atoi(sep->arg[3]) >= 0) &&
-				(atoi(sep->arg[4]) < 34465 && atoi(sep->arg[4]) >= 0) &&
-				(atoi(sep->arg[5]) < 34465 && atoi(sep->arg[5]) >= 0)) {
-				c->GetTarget()->CastToNPC()->AddCash(
-					atoi(sep->arg[5]),
-					atoi(sep->arg[4]),
-					atoi(sep->arg[3]),
-					atoi(sep->arg[2]));
+
+		auto target = c->GetTarget()->CastToNPC();
+
+		bool is_remove_all = !strcasecmp(sep->arg[2], "all");
+		if (is_remove_all) {
+			auto loot_list = target->GetLootList();
+			auto total_item_count = 0;
+			for (const auto& item_id : loot_list) {
+				auto item_count = target->CountItem(item_id);
+
+				target->RemoveItem(item_id);
+
 				c->Message(
 					Chat::White,
-					"Set %i Platinum, %i Gold, %i Silver, and %i Copper as %s's money.",
-					atoi(sep->arg[2]),
-					atoi(sep->arg[3]),
-					atoi(sep->arg[4]),
-					atoi(sep->arg[5]),
-					c->GetTarget()->GetName());
+					fmt::format(
+						"Removed {} {} ({}) from {} ({}).",
+						item_count,
+						database.CreateItemLink(item_id),
+						item_id,
+						target->GetCleanName(),
+						target->GetID()
+					).c_str()
+				);
+
+				total_item_count += item_count;
 			}
-			else {
-				c->Message(Chat::White, "Error: #npcloot money: Values must be between 0-34465.");
+
+			if (!total_item_count) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{} ({}) has no items to remove.",
+						target->GetCleanName(),
+						target->GetID()
+					).c_str()
+				);
+			} else {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{} Item{} removed from {} ({}).",
+						total_item_count,
+						total_item_count != 1 ? "s" : "",
+						target->GetCleanName(),
+						target->GetID()
+					).c_str()
+				);
+			}
+		} else {
+			if (sep->IsNumber(2)) {
+				auto item_id = std::stoul(sep->arg[2]);
+				auto item_count = target->CountItem(item_id);
+				if (item_count) {
+					target->RemoveItem(item_id);
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"Removed {} {} ({}) from {} ({}).",
+							item_count,
+							database.CreateItemLink(item_id),
+							item_id,
+							target->GetCleanName(),
+							target->GetID()
+						).c_str()
+					);
+				} else {
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"{} ({}) does not have any {} ({}).",
+							target->GetCleanName(),
+							target->GetID(),
+							database.CreateItemLink(item_id),
+							item_id
+						).c_str()
+					);
+				}
+			} else {
+				c->Message(Chat::White, "Usage: #npcloot remove [All|Item ID] - Remove loot from an NPC by ID or remove all loot");
 			}
 		}
-		else {
-			c->Message(Chat::White, "Usage: #npcloot money platinum gold silver copper");
+	} else if (is_show) {
+		if (c->GetTarget()->IsNPC()) {
+			c->GetTarget()->CastToNPC()->QueryLoot(c);
+		} else if (c->GetTarget()->IsCorpse()) {
+			c->GetTarget()->CastToCorpse()->QueryLoot(c);
 		}
-	}
-	else {
-		c->Message(Chat::White, "Usage: #npcloot [show/money/add/remove] [itemid/all/money: pp gp sp cp]");
 	}
 }
 
