@@ -598,21 +598,16 @@ void Mob::CalcInvisibleLevel()
 {
 	bool is_invisible = invisible;
 
-	Shout("CalcInvisibleLevel() %i", invisible);
 	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
 	invisible_undead = spellbonuses.invisibility_verse_undead;
 	invisible_animals = spellbonuses.invisibility_verse_animal;
-	Shout("CalcInvisibleLevel() %i [NON BUFF %i]", invisible, nobuff_invisible);
-
 
 	if (!is_invisible && invisible) {
-		Shout("<<<<<<<<<<<<<<<<<< Set INVIS from bonus");
 		SetInvisible(Invisibility::Invisible, true);
 		return;
 	}
 	
 	if (is_invisible && !invisible) {
-		Shout("<<<<<<<<<<<<<<<<<<<<< REMOVE INVIS from bonus");
 		SetInvisible(Invisibility::Visible, true);
 		return;
 	}
@@ -620,8 +615,6 @@ void Mob::CalcInvisibleLevel()
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 {
-	Shout("Mob::SetInvisible :: invisible %i state %i", invisible, state);
-
 	if (state == Invisibility::Visible) {
 		SendAppearancePacket(AT_Invis, Invisibility::Visible);
 		ZeroInvisibleVars(InvisType::T_INVISIBLE);
@@ -667,13 +660,12 @@ void Mob::ZeroInvisibleVars(uint8 invisible_type)
 }
 
 //check to see if `this` is invisible to `other`
-//bool Mob::IsInvisible(Mob* other) const
-bool Mob::IsInvisible(Mob* other)
+bool Mob::IsInvisible(Mob* other) const
 {
 	if (!other) {
 		return(false);
 	}
-	//Shout("Invisible %i and See invisible %i", other->SeeInvisible());
+
 	//check regular invisibility
 	if (invisible && (invisible > other->SeeInvisible())) {
 		return true;

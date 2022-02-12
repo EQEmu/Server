@@ -242,9 +242,8 @@ public:
 		return;
 	}
 
-	//invisible
-	//bool IsInvisible(Mob* other = 0) const;
-	bool IsInvisible(Mob* other = 0);
+	//Invisible
+	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state, bool set_on_bonus_calc = false);
 	
 	void CalcSeeInvisibleLevel();
@@ -253,31 +252,26 @@ public:
 	
 	inline uint8 GetInnateSeeInvisible(uint16 in_see_invis);
 
-	inline uint8 GetInvisibleLevel() const { return invisible; }
-
 	void BreakInvisibleSpells();
 	virtual void CancelSneakHide();
 	void CommonBreakInvisible();
 	void CommonBreakInvisibleFromCombat();
 
-	
+	inline uint8 GetInvisibleLevel() const { return invisible; }
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	inline uint8 SeeInvisibleUndead() const { return see_invis_undead; }
 	inline uint8 SeeInvisible() const { return see_invis; }
-	inline uint8 SeeInvisibleAnimal() const { return see_invis_animal; }
 
 	inline void SetInnateSeeInvisible(bool val) { innate_see_invis = val; }
 	inline void SetSeeInvisibleUndead(bool val) { see_invis_undead = val; }
-	inline void SetSeeInvisibleAnimal(bool val) { see_invis_animal = val; }
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
 	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals; 
-	uint8 see_invis, innate_see_invis, see_invis_undead, see_invis_animal; //TODO: see_invis_animal added to npc_types
+	uint8 see_invis, innate_see_invis, see_invis_undead; //TODO: do we need a see_invis_animal ?
 
 	bool sneaking, hidden, improved_hidden;
 	bool see_hide, see_improved_hide;
-
 
 	/**
 	 ************************************************

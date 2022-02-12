@@ -9518,7 +9518,6 @@ void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 
 void Mob::BreakInvisibleSpells()
 {
-	Shout("BreakInvisibleSpells()");
 	if(invisible) {
 		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 		BuffFadeByEffect(SE_Invisibility);
