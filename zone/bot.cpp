@@ -7104,7 +7104,8 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot s
 			bardsong_timer.Disable();
 		}
 
-		Result = DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, aa_id);
+		Result = CastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, aa_id);
+	
 	}
 	return Result;
 }
