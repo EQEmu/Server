@@ -939,7 +939,7 @@ XS(XS_Mob_SetSeeInvisibleUndeadLevel) {
 		Mob *THIS;
 		uint8 see_invis_undead_level = (uint8)SvUV(ST(1));
 		VALIDATE_THIS_IS_MOB;
-		THIS->SetInnateSeeInvisible(see_invis_undead_level);
+		THIS->SetSeeInvisibleUndead(see_invis_undead_level);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5829,11 +5829,12 @@ XS(XS_Mob_SeeInvisibleUndead) {
 		Perl_croak(aTHX_ "Usage: Mob::SeeInvisibleUndead(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		bool RETVAL;
+		uint8 RETVAL;
+		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->SeeInvisibleUndead();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
 }

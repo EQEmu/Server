@@ -250,7 +250,7 @@ public:
 	void CalcInvisibleLevel();
 	void ZeroInvisibleVars(uint8 invisible_type);
 	
-	inline uint8 GetInnateSeeInvisible(uint16 in_see_invis);
+	inline uint8 GetInnateSeeInvisibleLevel(uint16 in_see_invis);
 
 	void BreakInvisibleSpells();
 	virtual void CancelSneakHide();
@@ -258,6 +258,8 @@ public:
 	void CommonBreakInvisibleFromCombat();
 
 	inline uint8 GetInvisibleLevel() const { return invisible; }
+	inline uint8 GetInvisibleUndeadLevel() const { return invisible_undead; }
+
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	inline uint8 SeeInvisibleUndead() const { return see_invis_undead; }

@@ -443,10 +443,10 @@ Mob::Mob(
 	nobuff_invisible = 0;
 	see_invis = 0;
 
-	innate_see_invis  = GetInnateSeeInvisible(in_see_invis);
-	see_invis_undead  = GetInnateSeeInvisible(in_see_invis_undead);
-	see_hide          = GetInnateSeeInvisible(in_see_hide);
-	see_improved_hide = GetInnateSeeInvisible(in_see_improved_hide);
+	innate_see_invis  = GetInnateSeeInvisibleLevel(in_see_invis);
+	see_invis_undead  = GetInnateSeeInvisibleLevel(in_see_invis_undead);
+	see_hide          = GetInnateSeeInvisibleLevel(in_see_hide);
+	see_improved_hide = GetInnateSeeInvisibleLevel(in_see_improved_hide);
 
 	qglobal = in_qglobal != 0;
 
@@ -6168,7 +6168,7 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 	return CalculateHeadingAngleBetweenPositions(this_x, this_y, other_x, other_y);
 }
 
-uint8 Mob::GetInnateSeeInvisible(uint16 in_see_invis)
+uint8 Mob::GetInnateSeeInvisibleLevel(uint16 in_see_invis)
 {
 	/*
 		Returns the NPC's see invisible level based on 'see_invs' value in npc_types.
@@ -6486,7 +6486,6 @@ void Mob::CancelSneakHide()
 
 void Mob::CommonBreakInvisible()
 {
-	Shout("CommonBreakInvisible() Break ALL INVS");
 	BreakInvisibleSpells();
 	CancelSneakHide();
 }
