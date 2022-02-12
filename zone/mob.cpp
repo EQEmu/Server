@@ -679,20 +679,22 @@ bool Mob::IsInvisible(Mob* other)
 	}
 	//Shout("Invisible %i and See invisible %i", other->SeeInvisible());
 	//check regular invisibility
-	if (invisible && invisible > (other->SeeInvisible())) {
+	if (invisible && (invisible > other->SeeInvisible())) {
 		return true;
 	}
 
 	//check invis vs. undead
 	if (other->GetBodyType() == BT_Undead || other->GetBodyType() == BT_SummonedUndead) {
-		if(invisible_undead && !other->SeeInvisibleUndead())
+		if (invisible_undead && (invisible_undead > other->SeeInvisibleUndead())) {
 			return true;
+		}
 	}
 
-	//check invis vs. animals...
+	//check invis vs. animals. //TODO: should we have a specific see invisible animal stat or this how live does it?
 	if (other->GetBodyType() == BT_Animal){
-		if(invisible_animals && !other->SeeInvisible())
+		if (invisible_animals && (invisible_animals > other->SeeInvisible())) {
 			return true;
+		}
 	}
 
 	if(hidden){
@@ -709,8 +711,9 @@ bool Mob::IsInvisible(Mob* other)
 
 	//handle sneaking
 	if(sneaking) {
-		if(BehindMob(other, GetX(), GetY()) )
+		if (BehindMob(other, GetX(), GetY())) {
 			return true;
+		}
 	}
 
 	return(false);
@@ -6495,7 +6498,7 @@ void Mob::CancelSneakHide()
 
 void Mob::CommonBreakInvisible()
 {
-	Shout("Break ALL INVS");
+	Shout("CommonBreakInvisible() Break ALL INVS");
 	BreakInvisibleSpells();
 	CancelSneakHide();
 }

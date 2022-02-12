@@ -5627,29 +5627,12 @@ void Mob::CommonBreakInvisibleFromCombat()
 {
 	Shout("CommonBreakInvisibleFromCombat()");
 	//break invis when you attack
-	if (invisible) {
-		LogCombat("Removing invisibility due to melee attack");
-		BuffFadeByEffect(SE_Invisibility);
-		BuffFadeByEffect(SE_Invisibility2);
-		ZeroInvisibleVars(InvisType::T_INVISIBLE);
-	}
-	if (invisible_undead) {
-		LogCombat("Removing invisibility vs. undead due to melee attack");
-		BuffFadeByEffect(SE_InvisVsUndead);
-		BuffFadeByEffect(SE_InvisVsUndead2);
-		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
-	}
-	if (invisible_animals) {
-		LogCombat("Removing invisibility vs. animals due to melee attack");
-		BuffFadeByEffect(SE_ImprovedInvisAnimals);
-		BuffFadeByEffect(SE_InvisVsAnimals);
-		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
-	}
-
+	BreakInvisibleSpells();
 	CancelSneakHide();
 
-	if (spellbonuses.NegateIfCombat)
+	if (spellbonuses.NegateIfCombat) {
 		BuffFadeByEffect(SE_NegateIfCombat);
+	}
 
 	hidden = false;
 	improved_hidden = false;

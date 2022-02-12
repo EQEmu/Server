@@ -9520,19 +9520,19 @@ void Mob::BreakInvisibleSpells()
 {
 	Shout("BreakInvisibleSpells()");
 	if(invisible) {
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
-		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 	}
 	if(invisible_undead) {
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
 	}
 	if(invisible_animals){
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
 		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsAnimals);
-		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
 	}
 }
 
