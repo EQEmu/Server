@@ -221,9 +221,6 @@ XS(XS_EQDB_escape_string)
 	XSRETURN(1);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
 XS(boot_EQDB); /* prototype to pass -Wmissing-prototypes */
 XS(boot_EQDB)
 {

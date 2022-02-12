@@ -260,9 +260,6 @@ XS(XS_EQDBRes_fetch_lengths)
 	XSRETURN(1);
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
 XS(boot_EQDBRes); /* prototype to pass -Wmissing-prototypes */
 XS(boot_EQDBRes)
 {
