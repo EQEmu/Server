@@ -3454,7 +3454,6 @@ void Client::Escape()
 {
 	entity_list.RemoveFromTargets(this, true);
 	SetInvisibleAppearance(Invisibility::Invisible);
-
 	MessageString(Chat::Skills, ESCAPE);
 }
 

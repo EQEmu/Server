@@ -589,8 +589,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invisibility");
 #endif
-				Shout("ADD INVS %i", spell_id);
-				SetInvisibleAppearance(spell.base_value[i]);
+				SetInvisibleAppearance(Invisibility::Invisible, true);
 				break;
 			}
 
@@ -600,7 +599,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
 				invisible_animals = true;
-				SetInvisibleAppearance(Invisibility::Special);
+				SetInvisibleAppearance(Invisibility::Special, true);
 				break;
 			}
 
@@ -611,7 +610,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
 				invisible_undead = true;
-				SetInvisibleAppearance(Invisibility::Special);
+				SetInvisibleAppearance(Invisibility::Special, true);
 				break;
 			}
 
@@ -3270,6 +3269,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Proc_Timer_Modifier:
 			case SE_FFItemClass:
 			case SE_SpellEffectResistChance:
+			case SE_SeeInvis:
 			{
 				break;
 			}

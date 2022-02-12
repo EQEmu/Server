@@ -561,9 +561,9 @@ struct StatBonuses {
 	bool	ZoneSuspendMinion;					// base 1 allows suspended minions to zone
 	bool	CompleteHealBuffBlocker;			// Use in SPA 101 to prevent recast of complete heal from this effect till blocker buff is removed.
 	int32	Illusion;							// illusion spell id
-	int16	invisibility;						// invisibility level
-	int16	invisibility_verse_undead;			// IVU level
-	int16	invisibility_verse_animal;			// IVA level
+	uint8	invisibility;						// invisibility level
+	uint8	invisibility_verse_undead;			// IVU level
+	uint8	invisibility_verse_animal;			// IVA level
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.
@@ -583,7 +583,7 @@ struct StatBonuses {
 	int32	MaxBindWound;						// Increase max amount of HP you can bind wound.
 	int32	ChannelChanceSpells;				// Modify chance to channel a spell.
 	int32	ChannelChanceItems;					// Modify chance to channel a items.
-	int16	SeeInvis;							// See Invs.
+	uint8	SeeInvis;							// See Invs.
 	uint8	TripleBackstab;						// Chance to triple backstab
 	bool	FrontalBackstabMinDmg;				// Allow frontal backstabs for min damage
 	uint8	FrontalBackstabChance;				// Chance to backstab from the front for full damage

@@ -81,7 +81,7 @@ Mob::Mob(
 	uint32 in_drakkin_details,
 	EQ::TintProfile in_armor_tint,
 	uint8 in_aa_title,
-	int16 in_see_invis, // see through invis/ivu
+	uint16 in_see_invis, // see through invis/ivu
 	uint8 in_see_invis_undead,
 	uint8 in_see_hide,
 	uint8 in_see_improved_hide,
@@ -440,6 +440,9 @@ Mob::Mob(
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;
 
+	nobuff_invisible = 0;
+	see_invis = 0;
+
 	innate_see_invis  = GetInnateSeeInvisible(in_see_invis);
 	see_invis_undead  = GetInnateSeeInvisible(in_see_invis_undead);
 	see_hide          = GetInnateSeeInvisible(in_see_hide);
@@ -593,24 +596,28 @@ void Mob::CalcSeeInvisibleLevel()
 
 void Mob::CalcInvisibleLevel()
 {
-	invisible = std::max({ spellbonuses.invisibility, escape_invisible });
+	Shout("CalcInvisibleLevel() %i", invisible);
+	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
 	Shout("CalcInvisibleLevel() %i", invisible);
 }
 
 void Mob::SetInvisibleAppearance(uint8 state, bool from_spell_effect)
 {
-	Shout("SetInvisibleAppearance");
+	Shout("SetInvisibleAppearance %i", invisible);
 
 	if (state != Invisibility::Special) {
 
 		if (state == Invisibility::Visible) {
 			SendAppearancePacket(AT_Invis, Invisibility::Visible);
-			SetInvisibleLevel(0);
+			RemoveInvisible(InvisibilityType::TYPE_INVISIBLE);
 		}
 		else {
-			//if your setting invisible from a script then we use the internal invis variable
+			/*
+				if your setting invisible from a script, or escape/fading memories effect then 
+				we use the internal invis variable which allows invisible without a buff on mob.
+			*/
 			if (!from_spell_effect) {
-				escape_invisible = state;
+				nobuff_invisible = state;
 			}
 			SendAppearancePacket(AT_Invis, Invisibility::Invisible);
 		}
@@ -631,7 +638,7 @@ void Mob::RemoveInvisible(uint8 invisible_type) {
 
 	if (InvisibilityType::TYPE_INVISIBLE) {
 		invisible = 0;
-		escape_invisible = 0;
+		nobuff_invisible = 0;
 	}
 
 	if (InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD) {
@@ -6151,7 +6158,7 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 	return CalculateHeadingAngleBetweenPositions(this_x, this_y, other_x, other_y);
 }
 
-int16 Mob::GetInnateSeeInvisible(int16 see_invis)
+uint8 Mob::GetInnateSeeInvisible(uint16 in_see_invis)
 {
 	/*
 		Returns the NPC's see invisible level based on 'see_invs' value in npc_types.
@@ -6159,42 +6166,38 @@ int16 Mob::GetInnateSeeInvisible(int16 see_invis)
 		100 = See Invs Level 2, where 101-199 gives a random roll to apply see invs 2, if fails get see invs 1
 		ect... for higher levels, 200,300 ect.
 	*/
-	
+
 	//npc does not have see invis
-	if (!see_invis) {
+	if (!in_see_invis) {
 		return 0;
 	}
 	//npc has basic see invis
-	if (see_invis == 1) {
+	if (in_see_invis == 1) {
 		return 1;
 	}
 	
 	//random chance to apply standard level 1 see invs
-	if (see_invis > 1 && see_invis < 100) {
-		if (zone->random.Int(0, 99) < see_invis) {
+	if (in_see_invis > 1 && in_see_invis < 100) {
+		if (zone->random.Int(0, 99) < in_see_invis) {
 			return 1;
 		}
 	}
-	//covers npcs with see invis levels beyond level 1
-	int16 see_invis_level = 1;
-	see_invis_level += (see_invis / 100);
+	//covers npcs with see invis levels beyond level 1, max calculated level allowed is 254
+	int see_invis_level = 1;
+	see_invis_level += (in_see_invis / 100);
 
-	Shout("see level %i", see_invis_level);
-
-	int see_invis_chance = see_invis % 100;
-
-	Shout("see chance %i", see_invis_chance);
+	int see_invis_chance = in_see_invis % 100;
 
 	//has enhanced see invis level
 	if (see_invis_chance == 0) {
-		return see_invis_level;
+		return std::min(see_invis_level, 254);
 	}
 	//has chance for enhanced see invis level
 	if (zone->random.Int(0, 99) < see_invis_chance) {
-		return see_invis_level;
+		return std::min(see_invis_level, 254);
 	}
 	//failed chance at attempted enhanced see invs level, use previous level.
-	return (see_invis_level - 1);
+	return std::min((see_invis_level - 1), 254);
 }
 
 int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)

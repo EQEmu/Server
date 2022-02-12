@@ -147,7 +147,7 @@ public:
 		uint32 in_drakkin_details,
 		EQ::TintProfile in_armor_tint,
 		uint8 in_aa_title,
-		int16 in_see_invis, // see through invis
+		uint16 in_see_invis, // see through invis
 		uint8 in_see_invis_undead, // see through invis vs. undead
 		uint8 in_see_hide,
 		uint8 in_see_improved_hide,
@@ -251,9 +251,9 @@ public:
 	void CalcInvisibleLevel();
 	void RemoveInvisible(uint8 invisible_type);
 	
-	inline int16 GetInnateSeeInvisible(int16 see_invis);
+	inline uint8 GetInnateSeeInvisible(uint16 in_see_invis);
 
-	inline int16 GetInvisibleLevel() const { return invisible; }
+	inline uint8 GetInvisibleLevel() const { return invisible; }
 	inline void SetInvisibleLevel(int16 val) { invisible = val; }
 
 	void BreakInvisibleSpells();
@@ -265,7 +265,14 @@ public:
 	inline bool SeeHide() const { return see_hide; }
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
-	inline int16 SeeInvisible() const { return see_invis; }
+	inline uint8 SeeInvisible() const { return see_invis; }
+
+	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
+	uint8 invisible, nobuff_invisible;
+	uint8 see_invis, innate_see_invis;
+
+	bool invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
+	bool see_invis_undead, see_hide, see_improved_hide;
 
 
 	/**
@@ -986,11 +993,7 @@ public:
 	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
 	void SetBodyType(bodyType new_body, bool overwrite_orig);
 
-	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	int16 invisible, escape_invisible;
-	int16 see_invis, innate_see_invis;
-	bool invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
-	bool see_invis_undead, see_hide, see_improved_hide;
+	bool invulnerable;
 	bool qglobal;
 
 	virtual void SetAttackTimer();
