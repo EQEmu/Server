@@ -596,22 +596,37 @@ void Mob::CalcSeeInvisibleLevel()
 
 void Mob::CalcInvisibleLevel()
 {
+	bool is_invisible = invisible;
+
 	Shout("CalcInvisibleLevel() %i", invisible);
 	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
 	invisible_undead = spellbonuses.invisibility_verse_undead;
 	invisible_animals = spellbonuses.invisibility_verse_animal;
 	Shout("CalcInvisibleLevel() %i [NON BUFF %i]", invisible, nobuff_invisible);
+
+
+	if (!is_invisible && invisible) {
+		Shout("<<<<<<<<<<<<<<<<<< Set INVIS from bonus");
+		SetInvisible(Invisibility::Invisible, true);
+		return;
+	}
+	
+	if (is_invisible && !invisible) {
+		Shout("<<<<<<<<<<<<<<<<<<<<< REMOVE INVIS from bonus");
+		SetInvisible(Invisibility::Visible, true);
+		return;
+	}
 }
 
 void Mob::SetInvisible(uint8 state, bool from_spell_effect)
 {
-	Shout("SetInvisible %i", invisible);
+	Shout("Mob::SetInvisible :: invisible %i state %i", invisible, state);
 
 	if (state != Invisibility::Special) {
 
 		if (state == Invisibility::Visible) {
 			SendAppearancePacket(AT_Invis, Invisibility::Visible);
-			ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE);
+			ZeroInvisibleVars(InvisType::T_INVISIBLE);
 		}
 		else {
 			/*
@@ -640,16 +655,16 @@ void Mob::ZeroInvisibleVars(uint8 invisible_type)
 {
 	switch (invisible_type) {
 		
-		case InvisibilityType::TYPE_INVISIBLE:
+		case T_INVISIBLE:
 			invisible = 0;
 			nobuff_invisible = 0;
 			break;
 
-		case InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD:
+		case T_INVISIBLE_VERSE_UNDEAD:
 			invisible_undead = 0;
 			break;
 
-		case InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL:
+		case T_INVISIBLE_VERSE_ANIMAL:
 			invisible_animals = 0;
 			break;
 	}

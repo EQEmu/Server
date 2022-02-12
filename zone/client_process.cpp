@@ -1163,9 +1163,9 @@ void Client::BreakInvis()
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
 		hidden = false;
 		improved_hidden = false;
 	}

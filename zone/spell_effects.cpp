@@ -583,36 +583,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
-			case SE_Invisibility:
-			case SE_Invisibility2:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Invisibility");
-#endif
-				SetInvisible(Invisibility::Invisible, true);
-				break;
-			}
-
-			case SE_ImprovedInvisAnimals:
-			case SE_InvisVsAnimals:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
-#endif
-				SetInvisible(Invisibility::Special, true);
-				break;
-			}
-
-			case SE_InvisVsUndead2:
-			case SE_InvisVsUndead:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
-#endif
-				SetInvisible(Invisibility::Special, true);
-				break;
-			}
-
 			case SE_FleshToBone:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -4185,7 +4155,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Invisibility:
 			{
 				Shout("Mob::BuffFadeBySlot INVIS %i", buffs[slot].spellid);
-				SetInvisible(Invisibility::Visible);
+				//SetInvisible(Invisibility::Visible);
 				break;
 			}
 
@@ -9560,17 +9530,17 @@ void Mob::BreakInvisibleSpells()
 	if(invisible) {
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 	}
 	if(invisible_undead) {
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
 	}
 	if(invisible_animals){
 		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsAnimals);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
 	}
 }
 

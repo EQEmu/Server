@@ -5631,19 +5631,19 @@ void Mob::CommonBreakInvisibleFromCombat()
 		LogCombat("Removing invisibility due to melee attack");
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 	}
 	if (invisible_undead) {
 		LogCombat("Removing invisibility vs. undead due to melee attack");
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDEAD);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
 	}
 	if (invisible_animals) {
 		LogCombat("Removing invisibility vs. animals due to melee attack");
 		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsAnimals);
-		ZeroInvisibleVars(InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
 	}
 
 	CancelSneakHide();
