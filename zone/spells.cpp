@@ -2725,6 +2725,8 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 	if (!SpellFinished(spell_id, spell_target, slot, spells[spell_id].mana, 0xFFFFFFFF, spells[spell_id].resist_difficulty)) {
 		return false;
 	}
+
+	return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
