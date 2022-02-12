@@ -561,8 +561,9 @@ std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)
 			return "Mission";
 		case DynamicZoneType::Quest:
 			return "Quest";
+		default:
+			return "Unknown";
 	}
-	return "Unknown";
 }
 
 EQ::Net::DynamicPacket DynamicZoneBase::GetSerializedDzPacket()
