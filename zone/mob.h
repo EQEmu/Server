@@ -263,8 +263,8 @@ public:
 	inline uint8 SeeInvisibleUndead() const { return see_invis_undead; }
 	inline uint8 SeeInvisible() const { return see_invis; }
 
-	inline void SetInnateSeeInvisible(bool val) { innate_see_invis = val; }
-	inline void SetSeeInvisibleUndead(bool val) { see_invis_undead = val; }
+	inline void SetInnateSeeInvisible(uint8 val) { innate_see_invis = val; }
+	inline void SetSeeInvisibleUndead(uint8 val) { see_invis_undead = val; }
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
 	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals; 

@@ -916,6 +916,34 @@ XS(XS_Mob_SetInvisible) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_SetSeeInvisibleLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetSeeInvisibleLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleLevel(THIS, uint8 see_invis_level)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		uint8 see_invis_level = (uint8)SvUV(ST(1));
+		VALIDATE_THIS_IS_MOB;
+		THIS->SetInnateSeeInvisible(see_invis_level);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_SetSeeInvisibleUndeadLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetSeeInvisibleUndeadLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleLevel(THIS, uint8 see_invis_undead_level)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		uint8 see_invis_undead_level = (uint8)SvUV(ST(1));
+		VALIDATE_THIS_IS_MOB;
+		THIS->SetInnateSeeInvisible(see_invis_undead_level);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_FindBuff); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindBuff) {
 	dXSARGS;
@@ -6877,6 +6905,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetRace"), XS_Mob_SetRace, file, "$$");
 	newXSproto(strcpy(buf, "SetRunAnimSpeed"), XS_Mob_SetRunAnimSpeed, file, "$$");
 	newXSproto(strcpy(buf, "SetRunning"), XS_Mob_SetRunning, file, "$$");
+	newXSproto(strcpy(buf, "SetSeeInvisibleLevel"), XS_Mob_SetSeeInvisibleLevel, file, "$$");
+	newXSproto(strcpy(buf, "SetSeeInvisibleUndeadLevel"), XS_Mob_SetSeeInvisibleUndeadLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetSlotTint"), XS_Mob_SetSlotTint, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetSpecialAbility"), XS_Mob_SetSpecialAbility, file, "$$$");
 	newXSproto(strcpy(buf, "SetSpecialAbilityParam"), XS_Mob_SetSpecialAbilityParam, file, "$$$$");
