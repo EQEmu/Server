@@ -618,26 +618,23 @@ void Mob::CalcInvisibleLevel()
 	}
 }
 
-void Mob::SetInvisible(uint8 state, bool from_spell_effect)
+void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 {
 	Shout("Mob::SetInvisible :: invisible %i state %i", invisible, state);
 
-	if (state != Invisibility::Special) {
-
-		if (state == Invisibility::Visible) {
-			SendAppearancePacket(AT_Invis, Invisibility::Visible);
-			ZeroInvisibleVars(InvisType::T_INVISIBLE);
+	if (state == Invisibility::Visible) {
+		SendAppearancePacket(AT_Invis, Invisibility::Visible);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
+	}
+	else {
+		/*
+			if your setting invisible from a script, or escape/fading memories effect then 
+			we use the internal invis variable which allows invisible without a buff on mob.
+		*/
+		if (!set_on_bonus_calc) {
+			nobuff_invisible = state;
 		}
-		else {
-			/*
-				if your setting invisible from a script, or escape/fading memories effect then 
-				we use the internal invis variable which allows invisible without a buff on mob.
-			*/
-			if (!from_spell_effect) {
-				nobuff_invisible = state;
-			}
-			SendAppearancePacket(AT_Invis, Invisibility::Invisible);
-		}
+		SendAppearancePacket(AT_Invis, Invisibility::Invisible);
 	}
 
 	// Invis and hide breaks charms
@@ -646,7 +643,6 @@ void Mob::SetInvisible(uint8 state, bool from_spell_effect)
 		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
 			pet->BuffFadeByEffect(SE_Charm);
 		}
-
 		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]", GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
 	}
 }

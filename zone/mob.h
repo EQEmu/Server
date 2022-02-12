@@ -245,7 +245,7 @@ public:
 	//invisible
 	//bool IsInvisible(Mob* other = 0) const;
 	bool IsInvisible(Mob* other = 0);
-	void SetInvisible(uint8 state, bool from_spell_effect = false);
+	void SetInvisible(uint8 state, bool set_on_bonus_calc = false);
 	
 	void CalcSeeInvisibleLevel();
 	void CalcInvisibleLevel();
