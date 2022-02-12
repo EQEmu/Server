@@ -591,14 +591,14 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 void Mob::CalcSeeInvisibleLevel()
 {
 	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis });
-	Shout("CalcSeeInvisibleLevel() %i", see_invis);
+	Shout("CalcSeeInvisibleLevel() %i [INNATE %i Spell %i]", see_invis, innate_see_invis, spellbonuses.SeeInvis);
 }
 
 void Mob::CalcInvisibleLevel()
 {
 	Shout("CalcInvisibleLevel() %i", invisible);
 	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
-	Shout("CalcInvisibleLevel() %i", invisible);
+	Shout("CalcInvisibleLevel() %i [NON BUFF %i]", invisible, nobuff_invisible);
 }
 
 void Mob::SetInvisibleAppearance(uint8 state, bool from_spell_effect)

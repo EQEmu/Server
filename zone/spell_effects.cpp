@@ -593,6 +593,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_ImprovedInvisAnimals:
 			case SE_InvisVsAnimals:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -3939,6 +3940,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 				}
 			}
 		}
+		case SE_ImprovedInvisAnimals:
 		case SE_Invisibility2:
 		case SE_InvisVsUndead2: {
 			if (!IsBardSong(buff.spellid)) {
@@ -4184,7 +4186,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Invisibility2:
 			case SE_Invisibility:
 			{
-				Shout("Drop INVS %i", buffs[slot].spellid);
+				Shout("Mob::BuffFadeBySlot INVIS %i", buffs[slot].spellid);
 				SetInvisibleAppearance(Invisibility::Visible);
 				break;
 			}
@@ -4196,15 +4198,10 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				break;
 			}
 
+			case SE_ImprovedInvisAnimals:
 			case SE_InvisVsAnimals:
 			{
 				invisible_animals = false;
-				break;
-			}
-
-			case SE_SeeInvis:
-			{
-				see_invis = innate_see_invis;
 				break;
 			}
 
@@ -9587,6 +9584,7 @@ void Mob::BreakInvisibleSpells()
 		invisible_undead = false;
 	}
 	if(invisible_animals){
+		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsAnimals);
 		invisible_animals = false;
 	}

@@ -1047,7 +1047,7 @@ typedef enum {
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
 #define SE_InvisVsUndead2				315 // implemented - fixed duration ITU
-//#define SE_ImprovedInvisAnimals		316	// not used
+#define SE_ImprovedInvisAnimals			316	// implemented
 #define SE_ItemHPRegenCapIncrease		317	// implemented[AA] - increases amount of health regen gained via items
 #define SE_ItemManaRegenCapIncrease		318 // implemented - increases amount of mana regen you can gain via items
 #define SE_CriticalHealOverTime			319 // implemented

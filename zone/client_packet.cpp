@@ -713,6 +713,7 @@ void Client::CompleteConnect()
 				invisible_undead = true;
 				break;
 			}
+			case SE_ImprovedInvisAnimals:
 			case SE_InvisVsAnimals:
 			{
 				invisible_animals = true;
@@ -4007,6 +4008,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	// Hack for broken RoF2 which allows casting after a zoned IVU/IVA
 	if (invisible_undead || invisible_animals) {
 		BuffFadeByEffect(SE_InvisVsAnimals);
+		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
 	}
