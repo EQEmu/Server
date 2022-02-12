@@ -148,7 +148,7 @@ public:
 		EQ::TintProfile in_armor_tint,
 		uint8 in_aa_title,
 		uint16 in_see_invis, // see through invis
-		uint8 in_see_invis_undead, // see through invis vs. undead
+		uint16 in_see_invis_undead, // see through invis vs. undead
 		uint8 in_see_hide,
 		uint8 in_see_improved_hide,
 		int32 in_hp_regen,
@@ -268,11 +268,11 @@ public:
 	inline uint8 SeeInvisible() const { return see_invis; }
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	uint8 invisible, nobuff_invisible;
-	uint8 see_invis, innate_see_invis;
+	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals; //NOTE: NO see invis for animals.
+	uint8 see_invis, innate_see_invis, see_invis_undead;
 
-	bool invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
-	bool see_invis_undead, see_hide, see_improved_hide;
+	bool sneaking, hidden, improved_hidden;
+	bool see_hide, see_improved_hide;
 
 
 	/**

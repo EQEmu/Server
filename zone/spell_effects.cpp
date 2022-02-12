@@ -599,7 +599,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
 #endif
-				invisible_animals = true;
 				SetInvisibleAppearance(Invisibility::Special, true);
 				break;
 			}
@@ -610,7 +609,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
 #endif
-				invisible_undead = true;
 				SetInvisibleAppearance(Invisibility::Special, true);
 				break;
 			}
@@ -4188,20 +4186,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				Shout("Mob::BuffFadeBySlot INVIS %i", buffs[slot].spellid);
 				SetInvisibleAppearance(Invisibility::Visible);
-				break;
-			}
-
-			case SE_InvisVsUndead2:
-			case SE_InvisVsUndead:
-			{
-				invisible_undead = false;	// Mongrel: No longer IVU
-				break;
-			}
-
-			case SE_ImprovedInvisAnimals:
-			case SE_InvisVsAnimals:
-			{
-				invisible_animals = false;
 				break;
 			}
 
@@ -9576,17 +9560,17 @@ void Mob::BreakInvisibleSpells()
 	if(invisible) {
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
-		invisible = false;
+		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE);
 	}
 	if(invisible_undead) {
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		invisible_undead = false;
+		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD);
 	}
 	if(invisible_animals){
 		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsAnimals);
-		invisible_animals = false;
+		RemoveInvisible(InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL);
 	}
 }
 
@@ -9595,22 +9579,20 @@ void Client::BreakSneakWhenCastOn(Mob *caster, bool IsResisted)
 	bool IsCastersTarget = false; // Chance to avoid only applies to AOE spells when not targeted.
 	if (hidden || improved_hidden) {
 		if (caster) {
-			Mob *target = nullptr;
-			target = caster->GetTarget();
-			IsCastersTarget = target && target == this;
+			Mob *spell_target = caster->GetTarget();
+			if (spell_target && spell_target == this) {
+				IsCastersTarget = true;
+			}
 		}
-
 		if (!IsCastersTarget) {
-			int chance =
-			    spellbonuses.NoBreakAESneak + itembonuses.NoBreakAESneak + aabonuses.NoBreakAESneak;
-
-			if (IsResisted)
+			int chance = spellbonuses.NoBreakAESneak + itembonuses.NoBreakAESneak + aabonuses.NoBreakAESneak;
+			if (IsResisted) {
 				chance *= 2;
-
-			if (chance && zone->random.Roll(chance))
+			}
+			if (chance && zone->random.Roll(chance)) {
 				return; // Do not drop Sneak/Hide
+			}
 		}
-
 		CancelSneakHide();
 	}
 }

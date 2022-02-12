@@ -82,7 +82,7 @@ Mob::Mob(
 	EQ::TintProfile in_armor_tint,
 	uint8 in_aa_title,
 	uint16 in_see_invis, // see through invis/ivu
-	uint8 in_see_invis_undead,
+	uint16 in_see_invis_undead,
 	uint8 in_see_hide,
 	uint8 in_see_improved_hide,
 	int32 in_hp_regen,
@@ -269,8 +269,8 @@ Mob::Mob(
 	maxlevel          = in_maxlevel;
 	scalerate         = in_scalerate;
 	invisible         = 0;
-	invisible_undead  = false;
-	invisible_animals = false;
+	invisible_undead  = 0;
+	invisible_animals = 0;
 	sneaking          = false;
 	hidden            = false;
 	improved_hidden   = false;
@@ -598,6 +598,8 @@ void Mob::CalcInvisibleLevel()
 {
 	Shout("CalcInvisibleLevel() %i", invisible);
 	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
+	invisible_undead = spellbonuses.invisibility_verse_undead;
+	invisible_animals = spellbonuses.invisibility_verse_animal;
 	Shout("CalcInvisibleLevel() %i [NON BUFF %i]", invisible, nobuff_invisible);
 }
 
@@ -634,20 +636,23 @@ void Mob::SetInvisibleAppearance(uint8 state, bool from_spell_effect)
 	}
 }
 
-void Mob::RemoveInvisible(uint8 invisible_type) {
+void Mob::RemoveInvisible(uint8 invisible_type) 
+{
 
-	if (InvisibilityType::TYPE_INVISIBLE) {
-		invisible = 0;
-		nobuff_invisible = 0;
-	}
-
-	if (InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD) {
-		invisible_undead = 0;
+	switch (invisible_type) {
 		
-	}
+		case InvisibilityType::TYPE_INVISIBLE:
+			invisible = 0;
+			nobuff_invisible = 0;
+			break;
 
-	if (InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL) {
-		invisible_animals = 0;
+		case InvisibilityType::TYPE_INVISIBLE_VERSE_UNDAEAD:
+			invisible_undead = 0;
+			break;
+
+		case InvisibilityType::TYPE_INVISIBLE_VERSE_ANIMAL:
+			invisible_animals = 0;
+			break;
 	}
 }
 

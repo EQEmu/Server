@@ -682,8 +682,7 @@ void Client::CompleteConnect()
 			case SE_Invisibility2:
 			case SE_Invisibility:
 			{
-				invisible = true;
-				SendAppearancePacket(AT_Invis, 1);
+				SendAppearancePacket(AT_Invis, Invisibility::Invisible);
 				break;
 			}
 			case SE_Levitate:
@@ -705,18 +704,6 @@ void Client::CompleteConnect()
 						SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::Levitating, true, true);
 					}
 				}
-				break;
-			}
-			case SE_InvisVsUndead2:
-			case SE_InvisVsUndead:
-			{
-				invisible_undead = true;
-				break;
-			}
-			case SE_ImprovedInvisAnimals:
-			case SE_InvisVsAnimals:
-			{
-				invisible_animals = true;
 				break;
 			}
 			case SE_AddMeleeProc:
