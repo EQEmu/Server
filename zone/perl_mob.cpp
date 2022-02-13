@@ -935,7 +935,7 @@ XS(XS_Mob_SetSeeInvisibleUndeadLevel); /* prototype to pass -Wmissing-prototypes
 XS(XS_Mob_SetSeeInvisibleUndeadLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleLevel(THIS, uint8 see_invis_undead_level)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleUndeadLevel(THIS, uint8 see_invis_undead_level)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint8 see_invis_undead_level = (uint8)SvUV(ST(1));
