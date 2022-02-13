@@ -3700,7 +3700,8 @@ void Mob::BuffProcess()
 
 			// DF_Permanent uses -1 DF_Aura uses -4 but we need to check negatives for some spells for some reason?
 			if (spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Permanent &&
-			    spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Aura) {
+			    spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Aura &&
+				buffs[buffs_i].ticsremaining != PERMENANT_BUFF_DURATION) {
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
 					--buffs[buffs_i].ticsremaining;
@@ -10281,9 +10282,12 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 		adjust_all_buffs = true;
 	}
 
-	if (!adjust_all_buffs && !IsValidSpell(spell_id) ||
-		duration < 0) {
+	if (!adjust_all_buffs && !IsValidSpell(spell_id)){
 		return;
+	}
+
+	if (duration < -1) {
+		duration = -1;
 	}
 
 	int buff_count = GetMaxBuffSlots();

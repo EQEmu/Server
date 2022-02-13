@@ -1255,8 +1255,9 @@ typedef enum {
 // LAST
 
 
-#define DF_Permanent			50
-#define DF_Aura					51
+#define DF_Permanent				50
+#define DF_Aura						51
+#define PERMENANT_BUFF_DURATION 	-1000 //this is arbitrary used when overriding spells regular buff duration.
 
 // note this struct is historical, we don't actually need it to be
 // aligned to anything, but for maintaining it it is kept in the order that
