@@ -3367,6 +3367,14 @@ std::string lua_get_body_type_name(uint32 bodytype_id) {
 	return quest_manager.getbodytypename(bodytype_id);
 }
 
+std::string lua_get_consider_level_name(uint8 consider_level) {
+	return quest_manager.getconsiderlevelname(consider_level);
+}
+
+std::string lua_get_environmental_damage_name(uint8 damage_type) {
+	return quest_manager.getenvironmentaldamagename(damage_type);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3814,6 +3822,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_faction_name", &lua_get_faction_name),
 		luabind::def("get_language_name", &lua_get_language_name),
 		luabind::def("get_body_type_name", &lua_get_body_type_name),
+		luabind::def("get_consider_level_name", &lua_get_consider_level_name),
+		luabind::def("get_environmental_damage_name", &lua_get_environmental_damage_name),
 
 		/*
 			Cross Zone

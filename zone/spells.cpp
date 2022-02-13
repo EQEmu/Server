@@ -206,55 +206,11 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
-	if(item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
+	if (item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(item_slot);
-		int bitmask = 1;
-		bitmask = bitmask << (CastToClient()->GetClass() - 1);
-		if( itm && itm->GetItem()->Classes != 65535 ) {
-			if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
-					// They are casting a spell from an item that requires equipping but shouldn't let them equip it
-					LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) which they shouldn't be able to equip!",
-						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
-					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item with an invalid class");
-				}
-				else {
-					MessageString(Chat::Red, MUST_EQUIP_ITEM);
-				}
-				return(false);
-			}
-			if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectClick2) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
-					// They are casting a spell from an item that they don't meet the race/class requirements to cast
-					LogError("HACKER: [{}] (account: [{}]) attempted to click a race/class restricted effect on item [{}] (id: [{}]) which they shouldn't be able to click!",
-						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
-					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
-				}
-				else {
-					if (CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::RoF)
-					{
-						// Line 181 in eqstr_us.txt was changed in RoF+
-						Message(Chat::Yellow, "Your race, class, or deity cannot use this item.");
-					}
-					else
-					{
-						MessageString(Chat::Red, CANNOT_USE_ITEM);
-					}
-				}
-				return(false);
-			}
-		}
-		if (itm && (itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && item_slot > EQ::invslot::EQUIPMENT_END){
-			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
-				// They are attempting to cast a must equip clicky without having it equipped
-				LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
-				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
-			}
-			else {
-				MessageString(Chat::Red, MUST_EQUIP_ITEM);
-			}
-			return(false);
+		if (!CheckItemRaceClassDietyRestrictionsOnCast(item_slot)) {
+			StopCastSpell(spell_id, send_spellbar_enable);
+			return false;
 		}
 	}
 
@@ -741,23 +697,30 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		Always check again on SpellOnTarget to account for AE checks.
 	*/
 
-
+	bool ignore_on_casting = false;
 	bool ignore_if_npc_or_gm = false;
 	if (!IsClient() || (IsClient() && CastToClient()->GetGM())) {
 		ignore_if_npc_or_gm = true;
 	}
 
-	if (check_on_casting && !spell_target){
+	if (check_on_casting){
 		
-		if (IsGroupSpell(spell_id) ||
-			spells[spell_id].target_type == ST_AEClientV1 ||
-			spells[spell_id].target_type == ST_AECaster ||
-			spells[spell_id].target_type == ST_Ring ||
-			spells[spell_id].target_type == ST_Beam){
-			return true;
+		if (!spell_target) {
+			if (IsGroupSpell(spell_id) ||
+				spells[spell_id].target_type == ST_AEClientV1 ||
+				spells[spell_id].target_type == ST_AECaster ||
+				spells[spell_id].target_type == ST_Ring ||
+				spells[spell_id].target_type == ST_Beam) {
+				return true;
+			}
+			else if (spells[spell_id].target_type == ST_Self) {
+				spell_target = this;
+			}
 		}
-		else if (spells[spell_id].target_type == ST_Self) {
-			spell_target = this;
+		else {
+			if (IsGroupSpell(spell_id) && spell_target != this) {
+				ignore_on_casting = true;
+			}
 		}
 	}
 
@@ -817,13 +780,20 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		Prevents buff from being cast based on tareget ing PC OR NPC (1 = PCs, 2 = NPCs)
 		These target types skip pcnpc only check (according to dev quotes)
 	*/
-	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList &&
-		spells[spell_id].target_type != ST_HateList) {
-		if (spells[spell_id].pcnpc_only_flag == 1 && !spell_target->IsClient() && !spell_target->IsMerc() && !spell_target->IsBot()) {
-			return false;
-		}
-		else if (spells[spell_id].pcnpc_only_flag == 2 && (spell_target->IsClient() || spell_target->IsMerc() || spell_target->IsBot())) {
-			return false;
+	if (!ignore_on_casting) {
+		if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList && spells[spell_id].target_type != ST_HateList) {
+			if (spells[spell_id].pcnpc_only_flag == 1 && !spell_target->IsClient() && !spell_target->IsMerc() && !spell_target->IsBot()) {
+				if (check_on_casting) {
+					Message(Chat::SpellFailure, "This spell only works on other PCs");
+				}
+				return false;
+			}
+			else if (spells[spell_id].pcnpc_only_flag == 2 && (spell_target->IsClient() || spell_target->IsMerc() || spell_target->IsBot())) {
+				if (check_on_casting) {
+					Message(Chat::SpellFailure, "This spell only works on NPCs.");
+				}
+				return false;
+			}
 		}
 	}
 	/*
@@ -1316,7 +1286,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		item  = CastToClient()->GetInv().GetItem(inventory_slot); //checked for in reagents and charges.
 		if (CastToClient()->HasItemRecastTimer(spell_id, inventory_slot)) {
 			MessageString(Chat::Red, SPELL_RECAST);
-			LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+			LogSpells("Casting of [{}] canceled: item or augment spell reuse timer not expired", spell_id);
 			StopCasting();
 			return;
 		}
@@ -1627,61 +1597,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
-		bool fromaug = false;
-		EQ::ItemData* augitem = nullptr;
-		uint32 recastdelay = 0;
-		int recasttype = 0;
-
-		while (true) {
-			if (item == nullptr)
-				break;
-
-			for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
-				const EQ::ItemInstance* aug_i = item->GetAugment(r);
-
-				if (!aug_i)
-					continue;
-				const EQ::ItemData* aug = aug_i->GetItem();
-				if (!aug)
-					continue;
-
-				if (aug->Click.Effect == spell_id)
-				{
-					recastdelay = aug_i->GetItem()->RecastDelay;
-					recasttype = aug_i->GetItem()->RecastType;
-					fromaug = true;
-					break;
-				}
-			}
-
-			break;
-		}
-
-		if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug)
-		{
-			//const ItemData* item = item->GetItem();
-			int16 charges = item->GetItem()->MaxCharges;
-
-			if(fromaug) { charges = -1; } //Don't destroy the parent item
-
-			if(charges > -1) {	// charged item, expend a charge
-				LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
-				DeleteChargeFromSlot = inventory_slot;
-			} else {
-				LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
-			}
-		}
-		else
-		{
-			LogSpells("Item used to cast spell [{}] was missing from inventory slot [{}] after casting!", spell_id, inventory_slot);
-			Message(Chat::Red, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
-			InterruptSpell();
-			return;
-		}
+		DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, inventory_slot);
 	}
 
 	// we're done casting, now try to apply the spell
-	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, true))
+	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
 	{
 		LogSpells("Casting of [{}] canceled: SpellFinished returned false", spell_id);
 		// most of the cases we return false have a message already or are logic errors that shouldn't happen
@@ -1699,8 +1619,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 
-	if(DeleteChargeFromSlot >= 0)
+	if (DeleteChargeFromSlot >= 0) {
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
+	}
 
 	//
 	// at this point the spell has successfully been cast
@@ -2300,7 +2221,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override,
-						bool from_casted_spell, uint32 aa_id)
+						uint32 timer, uint32 timer_duration, bool from_casted_spell, uint32 aa_id)
 {
 	Mob *ae_center = nullptr;
 
@@ -2674,54 +2595,43 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if (mgb) {
 		SetMGB(false);
 	}
-
-	//all spell triggers use Item slot, but don't have an item associated. We don't need to check recast timers on these.
-	bool is_triggered_spell = false;
-	if (slot == CastingSlot::Item && inventory_slot == 0xFFFFFFFF) {
-		is_triggered_spell = true;
-	}
-
-	if (IsClient() && !isproc && !is_triggered_spell)
+	/*
+		Set Recast Timer on spells.
+	*/
+	if(IsClient() && !isproc)
 	{
-		//Set Item or Augment Click Recast Timer
-		if (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt) {
-			CastToClient()->SetItemRecastTimer(spell_id, inventory_slot);
-		}
-		//Set Discipline Recast Timer
-		else if (slot == CastingSlot::Discipline) {
-			if (spell_id == casting_spell_id || (GetClass() == BARD && spells[spell_id].cast_time == 0 && spell_id != casting_spell_id)) {
-				CastToClient()->SetDisciplineRecastTimer(spell_id);
+		if (slot == CastingSlot::AltAbility) {
+			if (!aa_id) {
+				aa_id = casting_spell_aa_id;
+			}
+			if (aa_id) {
+				AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
+				//handle expendable AA's
+				if (rank && rank->base_ability) {
+					ExpendAlternateAdvancementCharge(rank->base_ability->id);
+				}
+				//set AA recast timer
+				CastToClient()->SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 			}
 		}
-		//Set AA Recast Timer.
-		else if (slot == CastingSlot::AltAbility){
-			uint32 active_aa_id = 0;
-			//aa_id is only passed directly into spellfinished when a bard is using AA while casting, this supports casting an AA while clicking an instant AA.
-			if (GetClass() == BARD && spells[spell_id].cast_time == 0 && aa_id) {
-				active_aa_id = aa_id;
-			}
-			else {
-				active_aa_id = casting_spell_aa_id;
-			}
-					   
-			AA::Rank *rank = zone->GetAlternateAdvancementRank(active_aa_id);
-
-			CastToClient()->SetAARecastTimer(rank, spell_id);
-
-			if (rank && rank->base_ability) {
-				ExpendAlternateAdvancementCharge(rank->base_ability->id);
-			}
+		//handle bard AA and Discipline recast timers when singing
+		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+			CastToClient()->GetPTimers().Start(timer, timer_duration);
+			LogSpells("Spell [{}]: Setting BARD custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
-		//Set Custom Recast Timer
+		//handles AA and Discipline recast timers
 		else if (spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
-			//aa new todo: aa expendable charges here
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
-		//Set Spell Recast Timer
-		else if (spells[spell_id].recast_time > 1000 && !spells[spell_id].is_discipline) {
-			int recast = spells[spell_id].recast_time / 1000;
+		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
+		{
+			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
+			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
+		}
+		else if(spells[spell_id].recast_time > 1000 && !spells[spell_id].is_discipline) {
+			int recast = spells[spell_id].recast_time/1000;
 			if (spell_id == SPELL_LAY_ON_HANDS)	//lay on hands
 			{
 				recast -= GetAA(aaFervrentBlessing) * 420;
@@ -2741,13 +2651,19 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				}
 				recast = std::max(recast, 0);
 			}
-
+			
 			LogSpells("Spell [{}]: Setting long reuse timer to [{}] s (orig [{}])", spell_id, recast, spells[spell_id].recast_time);
-
+			
 			if (recast > 0) {
 				CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
 			}
 		}
+	}
+	/*
+		Set Recast Timer on item clicks, including augmenets.	
+	*/
+	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)){
+		CastToClient()->SetItemRecastTimer(spell_id, inventory_slot);
 	}
 
 	if (IsNPC()) {
@@ -3574,10 +3490,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
-	if (!DoCastingChecksOnTarget(false, spell_id, spelltar)) {
-		return false;
-	}
-
 	EQApplicationPacket *action_packet = nullptr, *message_packet = nullptr;
 	float spell_effectiveness;
 
@@ -3670,6 +3582,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	}
 
 	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);
+
+	if (!DoCastingChecksOnTarget(false, spell_id, spelltar)) {
+		safe_delete(action_packet);
+		return false;
+	}
 
 	// now check if the spell is allowed to land
 	if (RuleB(Spells, EnableBlockedBuffs)) {
@@ -6288,53 +6205,25 @@ bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 			}
 
 			if (aug->Click.Effect == spell_id) {
-				recast_delay = aug_i->GetItem()->RecastDelay;
-				recast_type = aug_i->GetItem()->RecastType;
+				if (aug_i->GetItem() && aug_i->GetItem()->RecastDelay > 0) {
+					recast_delay = aug_i->GetItem()->RecastDelay;
+					recast_type = aug_i->GetItem()->RecastType;
+				}
 				break;
 			}
 		}
 	}
-	
+	//do not check if item has no recast delay.
+	if (!recast_delay) {
+		return false;
+	}
+	//if time is not expired, then it exists and therefore we have a recast on this item.
 	if (!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
 		return true;
 	}
 
 	return false;
 }
-
-void Client::SetDisciplineRecastTimer(int32 spell_id) {
-
-	if (!IsValidSpell(spell_id)) {
-		return;
-	}
-
-	if (spells[spell_id].recast_time == 0) {
-		return;
-	}
-
-	pTimerType DiscTimer = pTimerDisciplineReuseStart + spells[spell_id].timer_id;
-	uint32 timer_duration = spells[spell_id].recast_time / 1000;
-	auto focus = GetFocusEffect(focusReduceRecastTime, spell_id);
-
-	if (focus > timer_duration) {
-		timer_duration = 0;
-		if (GetPTimers().Enabled((uint32)DiscTimer)) {
-			GetPTimers().Clear(&database, (uint32)DiscTimer);
-		}
-		else {
-			timer_duration -= focus;
-		}
-	}
-
-	if (timer_duration <= 0) {
-		return;
-	}
-
-	CastToClient()->GetPTimers().Start((uint32)DiscTimer, timer_duration);
-	CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, timer_duration);
-	LogSpells("Spell [{}]: Setting disciple reuse timer [{}] to [{}]", spell_id, spells[spell_id].timer_id, timer_duration);
-}
-
 
 void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ)
 {
@@ -6639,7 +6528,130 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 		CastSpell(spell_id, target_id, CastingSlot::Item, cast_time, 0, 0, item_slot);
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
-	else if (DoCastingChecksOnCaster(spell_id)) {
-		SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot);
+	else if (CheckItemRaceClassDietyRestrictionsOnCast(item_slot) && DoCastingChecksOnCaster(spell_id)) {
+		int16 DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, item_slot);
+		if (SpellFinished(spell_id, entity_list.GetMob(target_id), CastingSlot::Item, 0, item_slot)) {
+			if (IsClient() && DeleteChargeFromSlot >= 0) {
+				CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
+			}
+		}
 	}
+}
+
+int16 Mob::GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot)
+{
+	int16 DeleteChargeFromSlot = -1;
+
+	if (!IsClient() || inventory_slot == 0xFFFFFFFF) {
+		return DeleteChargeFromSlot;
+	}
+
+	EQ::ItemInstance *item = nullptr;
+	item = CastToClient()->GetInv().GetItem(inventory_slot);
+
+	bool fromaug = false;
+	EQ::ItemData* augitem = nullptr;
+
+	while (true) {
+		if (item == nullptr)
+			break;
+
+		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+			const EQ::ItemInstance* aug_i = item->GetAugment(r);
+
+			if (!aug_i) {
+				continue;
+			}
+			const EQ::ItemData* aug = aug_i->GetItem();
+			if (!aug) {
+				continue;
+			}
+			if (aug->Click.Effect == spell_id){
+				fromaug = true;
+				break;
+			}
+		}
+
+		break;
+	}
+
+	if (item && item->IsClassCommon() && (item->GetItem()->Click.Effect == spell_id) && item->GetCharges() || fromaug){
+		int16 charges = item->GetItem()->MaxCharges;
+
+		if (fromaug) { charges = -1; } //Don't destroy the parent item
+
+		if (charges > -1) {	// charged item, expend a charge
+			LogSpells("Spell [{}]: Consuming a charge from item [{}] ([{}]) which had [{}]/[{}] charges", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetCharges(), item->GetItem()->MaxCharges);
+			DeleteChargeFromSlot = inventory_slot;
+		}
+		else {
+			LogSpells("Spell [{}]: Cast from unlimited charge item [{}] ([{}]) ([{}] charges)", spell_id, item->GetItem()->Name, item->GetItem()->ID, item->GetItem()->MaxCharges);
+		}
+	}
+	else{
+		LogSpells("Item used to cast spell [{}] was missing from inventory slot [{}] after casting!", spell_id, inventory_slot);
+		Message(Chat::Red, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
+		InterruptSpell();
+		return DeleteChargeFromSlot;
+	}
+	return DeleteChargeFromSlot;
+}
+
+bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
+
+	if (inventory_slot == 0xFFFFFFFF) {
+		return false;
+	}
+
+	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
+	EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+	int bitmask = 1;
+	bitmask = bitmask << (CastToClient()->GetClass() - 1);
+	if (itm && itm->GetItem()->Classes != 65535) {
+		if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && !(itm->GetItem()->Classes & bitmask)) {
+			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+				// They are casting a spell from an item that requires equipping but shouldn't let them equip it
+				LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) which they shouldn't be able to equip!",
+					CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item with an invalid class");
+			}
+			else {
+				MessageString(Chat::Red, MUST_EQUIP_ITEM);
+			}
+			return(false);
+		}
+		if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectClick2) && !(itm->GetItem()->Classes & bitmask)) {
+			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+				// They are casting a spell from an item that they don't meet the race/class requirements to cast
+				LogError("HACKER: [{}] (account: [{}]) attempted to click a race/class restricted effect on item [{}] (id: [{}]) which they shouldn't be able to click!",
+					CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
+			}
+			else {
+				if (CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::RoF)
+				{
+					// Line 181 in eqstr_us.txt was changed in RoF+
+					Message(Chat::Yellow, "Your race, class, or deity cannot use this item.");
+				}
+				else
+				{
+					MessageString(Chat::Red, CANNOT_USE_ITEM);
+				}
+			}
+			return(false);
+		}
+	}
+	if (itm && (itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && inventory_slot > EQ::invslot::EQUIPMENT_END) {
+		if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+			// They are attempting to cast a must equip clicky without having it equipped
+			LogError("HACKER: [{}] (account: [{}]) attempted to click an equip-only effect on item [{}] (id: [{}]) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
+			database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
+		}
+		else {
+			MessageString(Chat::Red, MUST_EQUIP_ITEM);
+		}
+		return(false);
+	}
+
+	return true;
 }

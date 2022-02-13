@@ -800,15 +800,50 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return false;
 	}
 
-	if (GetClass() == BARD && IsCasting() && spells[spell_id].cast_time == 0) {
-		if (DoCastingChecksOnCaster(spell_id)) {
-			SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline);
+	bool instant_recast = true;
+
+	if (spell.recast_time > 0) {
+		uint32 reduced_recast = spell.recast_time / 1000;
+		auto focus = GetFocusEffect(focusReduceRecastTime, spell_id);
+		// do stupid stuff because custom servers.
+		// we really should be able to just do the -= focus but since custom servers could have shorter reuse timers
+		// we have to make sure we don't underflow the uint32 ...
+		// and yes, the focus effect can be used to increase the durations (spell 38944)
+		if (focus > reduced_recast) {
+			reduced_recast = 0;
+			if (GetPTimers().Enabled((uint32)DiscTimer))
+				GetPTimers().Clear(&database, (uint32)DiscTimer);
+		}
+		else {
+			reduced_recast -= focus;
+		}
+
+		if (reduced_recast > 0) {
+			instant_recast = false;
+
+			if (GetClass() == BARD && IsCasting() && spells[spell_id].cast_time == 0) {
+				if (DoCastingChecksOnCaster(spell_id)) {
+					SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline, 0, -1, spells[spell_id].resist_difficulty, false, -1, (uint32)DiscTimer, reduced_recast, false);
+				}
+			}
+			else {
+				CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
+			}
+
+			SendDisciplineTimer(spells[spell_id].timer_id, reduced_recast);
 		}
 	}
-	else {
-		CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
-	}
 
+	if (instant_recast) {
+		if (GetClass() == BARD && IsCasting() && spells[spell_id].cast_time == 0) {
+			if (DoCastingChecksOnCaster(spell_id)) {
+				SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline, 0, -1, spells[spell_id].resist_difficulty, false, -1, 0xFFFFFFFF, 0, false);
+			}
+		}
+		else {
+			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
+		}
+	}
 	return(true);
 }
 

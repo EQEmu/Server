@@ -192,6 +192,7 @@ RULE_INT(Character, MagicianTrackingDistanceMultiplier, 0, "If you want magician
 RULE_INT(Character, EnchanterTrackingDistanceMultiplier, 0, "If you want enchanters to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_INT(Character, BeastlordTrackingDistanceMultiplier, 0, "If you want beastlords to be able to track, increase this above 0.  0 disables tracking packets.")
 RULE_INT(Character, BerserkerTrackingDistanceMultiplier, 0, "If you want berserkers to be able to track, increase this above 0.  0 disables tracking packets.")
+RULE_BOOL(Character, OnInviteReceiveAlreadyinGroupMessage, true, "If you want clients to receive a message when trying to invite a player into a group that is currently in another group.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -410,6 +411,7 @@ RULE_INT(Spells, ClericInnateHealFocus, 5, "Clerics on live get a 5 pct innate h
 RULE_BOOL(Spells, DOTsScaleWithSpellDmg, false, "Allow SpellDmg stat to affect DoT spells")
 RULE_BOOL(Spells, HOTsScaleWithHealAmt, false, "Allow HealAmt stat to affect HoT spells")
 RULE_BOOL(Spells, CompoundLifetapHeals, true, "True: Lifetap heals calculate damage bonuses and then heal bonuses.  False:  Lifetaps heal using the amount damaged to mob.")
+RULE_BOOL(Spells, UseFadingMemoriesMaxLevel, false, "Enables to limit field in spell data to set the max level that over which an NPC will ignore fading memories effect and not lose aggro.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

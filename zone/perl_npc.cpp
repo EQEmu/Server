@@ -1849,14 +1849,14 @@ XS(XS_NPC_AddAISpellEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddAISpellEffect) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: NPC::AddAISpellEffect(THIS, spell_effect id, base_value, limit_value, max_value)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: NPC::AddAISpellEffect(THIS, int spell_effect_id, int base_value, int limit_value, int max_value)"); // @categories Spells and Disciplines
 	{
 		NPC *THIS;
 
-		int spell_effect_id = (int)SvIV(ST(1));
-		int base_value		= (int)SvIV(ST(2));
-		int limit_value		= (int)SvIV(ST(3));
-		int max_value		= (int)SvIV(ST(4));
+		int spell_effect_id = (int) SvIV(ST(1));
+		int base_value = (int) SvIV(ST(2));
+		int limit_value = (int) SvIV(ST(3));
+		int max_value = (int) SvIV(ST(4));
 
 		VALIDATE_THIS_IS_NPC;
 		THIS->AddSpellEffectToNPCList(spell_effect_id, base_value, limit_value, max_value, true);
@@ -1868,16 +1868,32 @@ XS(XS_NPC_RemoveAISpellEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RemoveAISpellEffect) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpellEffect(THIS, int spelleffect_id)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpellEffect(THIS, int spell_effect_id)"); // @categories Spells and Disciplines
 	{
 		NPC *THIS;
-		int spell_effect_id = (int)SvIV(ST(1));
+		int spell_effect_id = (int) SvIV(ST(1));
 		VALIDATE_THIS_IS_NPC;
 		THIS->RemoveSpellEffectFromNPCList(spell_effect_id, true);
 	}
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_HasAISpellEffect); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_HasAISpellEffect) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::HasAISpellEffect(THIS, int spell_effect_id)"); // @categories Spells and Disciplines
+	{
+		NPC *THIS;
+		bool has_spell_effect = false;
+		int spell_effect_id = (int) SvIV(ST(1));
+		VALIDATE_THIS_IS_NPC;
+		has_spell_effect = THIS->HasAISpellEffect(spell_effect_id);
+		ST(0) = boolSV(has_spell_effect);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -1959,6 +1975,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "GetSwarmOwner"), XS_NPC_GetSwarmOwner, file, "$");
 	newXSproto(strcpy(buf, "GetSwarmTarget"), XS_NPC_GetSwarmTarget, file, "$");
 	newXSproto(strcpy(buf, "GetWaypointMax"), XS_NPC_GetWaypointMax, file, "$");
+	newXSproto(strcpy(buf, "HasAISpellEffect"), XS_NPC_HasAISpellEffect, file, "$$");
 	newXSproto(strcpy(buf, "HasItem"), XS_NPC_HasItem, file, "$$");
 	newXSproto(strcpy(buf, "IsAnimal"), XS_NPC_IsAnimal, file, "$");
 	newXSproto(strcpy(buf, "IsGuarding"), XS_NPC_IsGuarding, file, "$");

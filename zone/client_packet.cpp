@@ -5784,8 +5784,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 {
-	if (!ClientFinishedLoading())
-	{
+	if (!ClientFinishedLoading()) {
 		SetHP(GetHP() - 1);
 		return;
 	}
@@ -5795,38 +5794,46 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
 	EnvDamage2_Struct* ed = (EnvDamage2_Struct*)app->pBuffer;
-
-	int damage = ed->damage;
-
-	if (ed->dmgtype == 252) {
-
-		int mod = spellbonuses.ReduceFallDamage + itembonuses.ReduceFallDamage + aabonuses.ReduceFallDamage;
-
+	auto damage = ed->damage;
+	if (ed->dmgtype == EQ::constants::EnvironmentalDamage::Falling) {
+		uint32 mod = spellbonuses.ReduceFallDamage + itembonuses.ReduceFallDamage + aabonuses.ReduceFallDamage;
 		damage -= damage * mod / 100;
 	}
 
-	if (damage < 0)
+	if (damage < 0) {
 		damage = 31337;
+	}
 
 	if (admin >= minStatusToAvoidFalling && GetGM()) {
-		Message(Chat::Red, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Your GM status protects you from {} points of {} (Type {}) damage.",
+				ed->damage,
+				EQ::constants::GetEnvironmentalDamageName(ed->dmgtype),
+				ed->dmgtype
+			).c_str()
+		);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
-	}
-	else if (GetInvul()) {
-		Message(Chat::Red, "Your invuln status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
+	} else if (GetInvul()) {
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Your invulnerability protects you from {} points of {} (Type {}) damage.",
+				ed->damage,
+				EQ::constants::GetEnvironmentalDamageName(ed->dmgtype),
+				ed->dmgtype
+			).c_str()
+		);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
-	}
-	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184) {
-		// Hard coded tutorial and load zones for no fall damage
+	} else if (zone->GetZoneID() == Zones::TUTORIAL || zone->GetZoneID() == Zones::LOAD) { // Hard coded tutorial and load zones for no fall damage
 		return;
-	}
-	else {
+	} else {
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
-
-		/* EVENT_ENVIRONMENTAL_DAMAGE */
 		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
 		std::string export_string = fmt::format(
 			"{} {} {}",
@@ -6951,6 +6958,13 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 				{
 					//The correct opcode, no reason to bother wasting time reconstructing the packet
 					Invitee->CastToClient()->QueuePacket(app);
+				}
+			}
+			else {
+				if (RuleB(Character, OnInviteReceiveAlreadyinGroupMessage)) {
+					if (!Invitee->CastToClient()->MercOnlyOrNoGroup()) {
+						Message(Chat::LightGray, "%s is already in another group.", Invitee->GetCleanName());
+					}
 				}
 			}
 		}
@@ -8792,38 +8806,40 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	spell_id = item->Click.Effect;
 	bool is_casting_bard_song = false;
 
-	if
-		(
-			spell_id > 0 &&
-			(
-				!IsValidSpell(spell_id) ||
-				casting_spell_id ||
-				delaytimer ||
-				spellend_timer.Enabled() ||
-				IsStunned() ||
-				IsFeared() ||
-				IsMezzed() ||
-				DivineAura() ||
-				(spells[spell_id].target_type == ST_Ring) ||
-				(IsSilenced() && !IsDiscipline(spell_id)) ||
-				(IsAmnesiad() && IsDiscipline(spell_id)) ||
-				(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) ||
-				(inst->IsScaling() && inst->GetExp() <= 0) // charms don't have spells when less than 0
-			)
-		)
-	{
-		/*
-			Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast. 
-			Can not click while casting other items.
-		*/
-		if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
-		{
-			is_casting_bard_song = true;
-		}
-		else
-		{
+	if (spell_id > 0) {
+
+		if (!IsValidSpell(spell_id) ||
+			IsStunned() ||
+			IsFeared() ||
+			IsMezzed() ||
+			DivineAura() ||
+			(spells[spell_id].target_type == ST_Ring) ||
+			(IsSilenced() && !IsDiscipline(spell_id)) ||
+			(IsAmnesiad() && IsDiscipline(spell_id)) ||
+			(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) ||
+			(inst->IsScaling() && inst->GetExp() <= 0)) { // charms don't have spells when less than 0
+
 			SendSpellBarEnable(spell_id);
 			return;
+		}
+
+		if (casting_spell_id ||
+			delaytimer ||
+			spellend_timer.Enabled()) {
+
+			/*
+				Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast.
+				Can not click while casting other items.
+			*/
+			if (GetClass() == BARD && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
+			{
+				is_casting_bard_song = true;
+			}
+			else
+			{
+				SendSpellBarEnable(spell_id);
+				return;
+			}
 		}
 	}
 	// Modern clients don't require pet targeted for item clicks that are ST_Pet

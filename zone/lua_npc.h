@@ -149,6 +149,9 @@ public:
 	float GetHealScale();
 	float GetSpellScale();
 	Lua_NPC_Loot_List GetLootList(lua_State* L);
+	void AddAISpellEffect(int spell_effect_id, int base_value, int limit_value, int max_value);
+	void RemoveAISpellEffect(int spell_effect_id);
+	bool HasAISpellEffect(int spell_effect_id);
 };
 
 #endif

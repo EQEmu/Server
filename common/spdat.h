@@ -916,8 +916,8 @@ typedef enum {
 #define SE_EndurancePool				190	// implemented
 #define SE_Amnesia						191	// implemented - Silence vs Melee Effect
 #define SE_Hate							192	// implemented - Instant and hate over time.
-#define SE_SkillAttack					193	// implemented
-#define SE_FadingMemories				194	// implemented
+#define SE_SkillAttack					193	// implemented,  
+#define SE_FadingMemories				194	// implemented, @Aggro, Remove from hate lists and make invisible. Can set max level of NPCs that can be affected. base: success chance, limit: max level (ROF2), max: max level (modern client), Note: Support for max level requires Rule (Spells, UseFadingMemoriesMaxLevel) to be true. If used from limit field, then it set as the level, ie. max level of 75 would use limit value of 75. If set from max field, max level 75 would use max value of 1075, if you want to set it so it checks a level range above the spell target then for it to only work on mobs 5 levels or below you set max value to 5.
 #define SE_StunResist					195	// implemented
 #define SE_StrikeThrough				196	// implemented
 #define SE_SkillDamageTaken				197	// implemented

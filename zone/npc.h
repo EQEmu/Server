@@ -452,6 +452,7 @@ public:
 	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value, bool apply_bonus = false);
 	void RemoveSpellFromNPCList(uint16 spell_id);
 	void RemoveSpellEffectFromNPCList(uint16 iSpellEffectID, bool apply_bonus = false);
+	bool HasAISpellEffect(uint16 spell_effect_id);
 	Timer *GetRefaceTimer() const { return reface_timer; }
 	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
 
