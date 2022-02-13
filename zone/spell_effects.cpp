@@ -8248,8 +8248,6 @@ void Mob::SendCastRestrictionMessage(int requirement_id, bool target_requirement
 
 	*/
 
-	//const char *msg = "";
-
 	std::string msg = "";
 
 	if (target_requirement) {
