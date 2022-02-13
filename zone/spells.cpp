@@ -2418,15 +2418,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		case AECaster:
 		case AETarget:
 		{
-#ifdef BOTS
-			if(IsBot()) {
-				bool StopLogic = false;
-				if(!this->CastToBot()->DoFinishedSpellAETarget(spell_id, spell_target, slot, StopLogic))
-					return false;
-				if(StopLogic)
-					break;
-			}
-#endif //BOTS
+//#ifdef BOTS
+//			if(IsBot()) {
+//				bool StopLogic = false;
+//				if(!this->CastToBot()->DoFinishedSpellAETarget(spell_id, spell_target, slot, StopLogic))
+//					return false;
+//				if(StopLogic)
+//					break;
+//			}
+//#endif //BOTS
 
 			// we can't cast an AE spell without something to center it on
 			assert(ae_center != nullptr);
@@ -3332,7 +3332,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	}
 
 	// now add buff at emptyslot
-	assert(buffs[emptyslot].spellid == SPELL_UNKNOWN);	// sanity check
+	//assert(buffs[emptyslot].spellid == SPELL_UNKNOWN);	// sanity check
 
 	buffs[emptyslot].spellid = spell_id;
 	buffs[emptyslot].casterlevel = caster_level;
