@@ -130,11 +130,11 @@ public:
 		for (int spell_id = 2; spell_id < SPDAT_RECORDS; ++spell_id) {
 			if (spells[spell_id].player_1[0] == '\0')
 				continue;
-			if (spells[spell_id].targettype != ST_Target && spells[spell_id].CastRestriction != 0) // watch
+			if (spells[spell_id].target_type != ST_Target && spells[spell_id].cast_restriction != 0) // watch
 				continue;
 
 			auto target_type = BCEnum::TT_None;
-			switch (spells[spell_id].targettype) {
+			switch (spells[spell_id].target_type) {
 			case ST_GroupTeleport:
 				target_type = BCEnum::TT_GroupV1;
 				break;
@@ -147,7 +147,7 @@ public:
 				//target_type = BCEnum::TT_AEBard;
 				break;
 			case ST_Target:
-				switch (spells[spell_id].CastRestriction) {
+				switch (spells[spell_id].cast_restriction) {
 				case 0:
 					target_type = BCEnum::TT_Single;
 					break;
@@ -213,15 +213,15 @@ public:
 
 			STBaseEntry* entry_prototype = nullptr;
 			while (true) {
-				switch (spells[spell_id].effectid[EFFECTIDTOINDEX(1)]) {
+				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(1)]) {
 				case SE_BindAffinity:
 					entry_prototype = new STBaseEntry(BCEnum::SpT_BindAffinity);
 					break;
 				case SE_Charm:
-					if (spells[spell_id].SpellAffectIndex != 12)
+					if (spells[spell_id].spell_affect_index != 12)
 						break;
 					entry_prototype = new STCharmEntry();
-					if (spells[spell_id].ResistDiff <= -1000)
+					if (spells[spell_id].resist_difficulty <= -1000)
 						entry_prototype->SafeCastToCharm()->dire = true;
 					break;
 				case SE_Teleport:
@@ -248,11 +248,11 @@ public:
 					}
 					break;
 				case SE_ModelSize:
-					if (spells[spell_id].base[EFFECTIDTOINDEX(1)] > 100) {
+					if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 100) {
 						entry_prototype = new STSizeEntry;
 						entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Enlarge;
 					}
-					else if (spells[spell_id].base[EFFECTIDTOINDEX(1)] > 0 && spells[spell_id].base[EFFECTIDTOINDEX(1)] < 100) {
+					else if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 0 && spells[spell_id].base_value[EFFECTIDTOINDEX(1)] < 100) {
 						entry_prototype = new STSizeEntry;
 						entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Reduce;
 					}
@@ -261,42 +261,42 @@ public:
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Identify);
 					break;
 				case SE_Invisibility:
-					if (spells[spell_id].SpellAffectIndex != 9)
+					if (spells[spell_id].spell_affect_index != 9)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Living;
 					break;
 				case SE_SeeInvis:
-					if (spells[spell_id].SpellAffectIndex != 5)
+					if (spells[spell_id].spell_affect_index != 5)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_See;
 					break;
 				case SE_InvisVsUndead:
-					if (spells[spell_id].SpellAffectIndex != 9)
+					if (spells[spell_id].spell_affect_index != 9)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Undead;
 					break;
 				case SE_InvisVsAnimals:
-					if (spells[spell_id].SpellAffectIndex != 9)
+					if (spells[spell_id].spell_affect_index != 9)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Animal;
 					break;
 				case SE_Mez:
-					if (spells[spell_id].SpellAffectIndex != 12)
+					if (spells[spell_id].spell_affect_index != 12)
 						break;
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Mesmerize);
 					break;
 				case SE_Revive:
-					if (spells[spell_id].SpellAffectIndex != 1)
+					if (spells[spell_id].spell_affect_index != 1)
 						break;
 					entry_prototype = new STResurrectEntry();
 					entry_prototype->SafeCastToResurrect()->aoe = BCSpells::IsCasterCentered(target_type);
 					break;
 				case SE_Rune:
-					if (spells[spell_id].SpellAffectIndex != 2)
+					if (spells[spell_id].spell_affect_index != 2)
 						break;
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Rune);
 					break;
@@ -312,7 +312,7 @@ public:
 				if (entry_prototype)
 					break;
 
-				switch (spells[spell_id].effectid[EFFECTIDTOINDEX(2)]) {
+				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(2)]) {
 				case SE_Succor:
 					entry_prototype = new STEscapeEntry;
 					std::string is_lesser = spells[spell_id].name;
@@ -323,7 +323,7 @@ public:
 				if (entry_prototype)
 					break;
 
-				switch (spells[spell_id].effectid[EFFECTIDTOINDEX(3)]) {
+				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(3)]) {
 				case SE_Lull:
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Lull);
 					break;
@@ -336,8 +336,8 @@ public:
 				if (entry_prototype)
 					break;
 
-				while (spells[spell_id].typedescnum == 27) {
-					if (!spells[spell_id].goodEffect)
+				while (spells[spell_id].type_description_id == 27) {
+					if (!spells[spell_id].good_effect)
 						break;
 					if (spells[spell_id].skill != EQ::skills::SkillOffense && spells[spell_id].skill != EQ::skills::SkillDefense)
 						break;
@@ -353,38 +353,38 @@ public:
 				if (entry_prototype)
 					break;
 
-				switch (spells[spell_id].SpellAffectIndex) {
+				switch (spells[spell_id].spell_affect_index) {
 				case 1: {
 					bool valid_spell = false;
 					entry_prototype = new STCureEntry;
 
 					for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
 						int effect_index = EFFECTIDTOINDEX(i);
-						if (spells[spell_id].effectid[effect_index] != SE_Blind && spells[spell_id].base[effect_index] >= 0)
+						if (spells[spell_id].effect_id[effect_index] != SE_Blind && spells[spell_id].base_value[effect_index] >= 0)
 							continue;
-						else if (spells[spell_id].effectid[effect_index] == SE_Blind && !spells[spell_id].goodEffect)
+						else if (spells[spell_id].effect_id[effect_index] == SE_Blind && !spells[spell_id].good_effect)
 							continue;
 
-						switch (spells[spell_id].effectid[effect_index]) {
+						switch (spells[spell_id].effect_id[effect_index]) {
 						case SE_Blind:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Blindness)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Blindness)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_DiseaseCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Disease)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Disease)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_PoisonCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Poison)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Poison)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_CurseCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Curse)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Curse)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_CorruptionCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Corruption)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Corruption)] += spells[spell_id].base_value[effect_index];
 							break;
 						default:
 							continue;
 						}
-						entry_prototype->SafeCastToCure()->cure_total += spells[spell_id].base[effect_index];
+						entry_prototype->SafeCastToCure()->cure_total += spells[spell_id].base_value[effect_index];
 						valid_spell = true;
 					}
 					if (!valid_spell) {
@@ -400,32 +400,32 @@ public:
 
 					for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
 						int effect_index = EFFECTIDTOINDEX(i);
-						if (spells[spell_id].base[effect_index] <= 0)
+						if (spells[spell_id].base_value[effect_index] <= 0)
 							continue;
 
-						switch (spells[spell_id].effectid[effect_index]) {
+						switch (spells[spell_id].effect_id[effect_index]) {
 						case SE_ResistFire:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Fire)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Fire)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistCold:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Cold)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Cold)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistPoison:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Poison)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Poison)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistDisease:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Disease)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Disease)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistMagic:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Magic)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Magic)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistCorruption:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Corruption)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Corruption)] += spells[spell_id].base_value[effect_index];
 							break;
 						default:
 							continue;
 						}
-						entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].base[effect_index];
+						entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].base_value[effect_index];
 						valid_spell = true;
 					}
 					if (!valid_spell) {
@@ -437,7 +437,7 @@ public:
 				}
 				case 7:
 				case 10:
-					if (spells[spell_id].effectdescnum != 65)
+					if (spells[spell_id].effect_description_id != 65)
 						break;
 					if (IsEffectInSpell(spell_id, SE_NegateIfCombat))
 						break;
@@ -622,18 +622,18 @@ private:
 
 			if (RuleI(Bots, CommandSpellRank) == 1) {
 				spells_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (spells[l->spell_id].spellgroup < spells[r->spell_id].spellgroup)
+					if (spells[l->spell_id].spell_group < spells[r->spell_id].spell_group)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class < r->caster_class)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class < r->caster_class)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank)
 						return true;
 
 					return false;
 				});
 				spells_list->unique([removed_spells_list](STBaseEntry* l, STBaseEntry* r) {
 					std::string r_name = spells[r->spell_id].name;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank) {
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank) {
 						removed_spells_list->push_back(r);
 						return true;
 					}
@@ -673,18 +673,18 @@ private:
 			// needs rework
 			if (RuleI(Bots, CommandSpellRank) == 2 || RuleI(Bots, CommandSpellRank) == 3) {
 				spells_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (spells[l->spell_id].spellgroup < spells[r->spell_id].spellgroup)
+					if (spells[l->spell_id].spell_group < spells[r->spell_id].spell_group)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class < r->caster_class)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class < r->caster_class)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank)
 						return true;
 
 					return false;
 				});
 				spells_list->unique([removed_spells_list](STBaseEntry* l, STBaseEntry* r) {
 					std::string l_name = spells[l->spell_id].name;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank) {
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank) {
 						removed_spells_list->push_back(r);
 						return true;
 					}
@@ -786,15 +786,15 @@ private:
 				continue;
 			case BCEnum::SpT_Charm:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_SPELLS(l, r, ResistDiff))
+					if (LT_SPELLS(l, r, resist_difficulty))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 1))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -883,11 +883,11 @@ private:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
 					if (LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && LT_SPELLS(l, r, zonetype))
+					if (EQ_STBASE(l, r, target_type) && LT_SPELLS(l, r, zone_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zonetype) && GT_STBASE(l, r, spell_level))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zone_type) && GT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zonetype) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zone_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -895,15 +895,15 @@ private:
 				continue;
 			case BCEnum::SpT_Lull:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_SPELLS(l, r, ResistDiff))
+					if (LT_SPELLS(l, r, resist_difficulty))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 3))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 3))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 3) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 3) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 3) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 3) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -911,15 +911,15 @@ private:
 				continue;
 			case BCEnum::SpT_Mesmerize:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS(l, r, ResistDiff))
+					if (GT_SPELLS(l, r, resist_difficulty))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 1))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && GT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && GT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -929,11 +929,11 @@ private:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
 					if (LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base, 2))
+					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base_value, 2))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 2) && LT_STBASE(l, r, spell_level))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 2) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 2) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 2) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -951,13 +951,13 @@ private:
 				continue;
 			case BCEnum::SpT_Resurrect:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS_EFFECT_ID(l, r, base, 1))
+					if (GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -967,11 +967,11 @@ private:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
 					if (LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 1))
+					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && LT_STBASE(l, r, spell_level))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -999,19 +999,19 @@ private:
 					if (l_size_type < r_size_type)
 						return true;
 					if (l_size_type == BCEnum::SzT_Enlarge && r_size_type == BCEnum::SzT_Enlarge) {
-						if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base, 1))
+						if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && GT_STBASE(l, r, spell_level))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && GT_STBASE(l, r, spell_level))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 							return true;
 					}
 					if (l_size_type == BCEnum::SzT_Reduce && r_size_type == BCEnum::SzT_Reduce) {
-						if (EQ_STBASE(l, r, target_type) && LT_SPELLS_EFFECT_ID(l, r, base, 1))
+						if (EQ_STBASE(l, r, target_type) && LT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && GT_STBASE(l, r, spell_level))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && GT_STBASE(l, r, spell_level))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 							return true;
 					}
 
@@ -1028,11 +1028,11 @@ private:
 				continue;
 			case BCEnum::SpT_SummonCorpse:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS_EFFECT_ID(l, r, base, 1))
+					if (GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && EQ_STBASE(l, r, caster_class))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && EQ_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -1119,7 +1119,7 @@ private:
 			for (bcst_levels::iterator levels_iter = bot_levels.begin(); levels_iter != bot_levels.end(); ++levels_iter) {
 				if (levels_iter->second < test_iter->second)
 					test_iter = levels_iter;
-				if (strcasecmp(Bot::ClassIdToString(levels_iter->first).c_str(), Bot::ClassIdToString(test_iter->first).c_str()) < 0 && levels_iter->second <= test_iter->second)
+				if (strcasecmp(GetClassIDName(levels_iter->first), GetClassIDName(test_iter->first)) < 0 && levels_iter->second <= test_iter->second)
 					test_iter = levels_iter;
 			}
 
@@ -1131,8 +1131,8 @@ private:
 			else
 				bot_segment = " or %s(%u)";
 
-			required_bots_map[type_index].append(StringFormat(bot_segment.c_str(), Bot::ClassIdToString(test_iter->first).c_str(), test_iter->second));
-			required_bots_map_by_class[type_index][test_iter->first] = StringFormat("%s(%u)", Bot::ClassIdToString(test_iter->first).c_str(), test_iter->second);
+			required_bots_map[type_index].append(StringFormat(bot_segment.c_str(), GetClassIDName(test_iter->first), test_iter->second));
+			required_bots_map_by_class[type_index][test_iter->first] = StringFormat("%s(%u)", GetClassIDName(test_iter->first), test_iter->second);
 			bot_levels.erase(test_iter);
 		}
 	}
@@ -1167,18 +1167,18 @@ private:
 
 				spell_dump << StringFormat(" /mn:%05u/RD:%06i/zt:%02i/d#:%06i/td#:%05i/ed#:%05i/SAI:%03u",
 					spells[spell_id].mana,
-					spells[spell_id].ResistDiff,
-					spells[spell_id].zonetype,
-					spells[spell_id].descnum,
-					spells[spell_id].typedescnum,
-					spells[spell_id].effectdescnum,
-					spells[spell_id].SpellAffectIndex
+					spells[spell_id].resist_difficulty,
+					spells[spell_id].zone_type,
+					spells[spell_id].description_id,
+					spells[spell_id].type_description_id,
+					spells[spell_id].effect_description_id,
+					spells[spell_id].spell_affect_index
 				);
 
 				for (int i = EffectIDFirst; i <= 3/*EffectIDLast*/; ++i) {
 					int effect_index = EFFECTIDTOINDEX(i);
 					spell_dump << StringFormat(" /e%02i:%04i/b%02i:%06i/m%02i:%06i",
-						i, spells[spell_id].effectid[effect_index], i, spells[spell_id].base[effect_index], i, spells[spell_id].max[effect_index]);
+						i, spells[spell_id].effect_id[effect_index], i, spells[spell_id].base_value[effect_index], i, spells[spell_id].max_value[effect_index]);
 				}
 
 				switch (list_entry->BCST()) {
@@ -1428,6 +1428,7 @@ int bot_command_init(void)
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", 0, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", 0, bot_command_taunt) ||
 		bot_command_add("track", "Orders a capable bot to track enemies", 0, bot_command_track) ||
+		bot_command_add("viewcombos", "Views bot race class combinations", 0, bot_command_view_combos) ||
 		bot_command_add("waterbreathing", "Orders a bot to cast a water breathing spell", 0, bot_command_water_breathing)
 	) {
 		bot_command_deinit();
@@ -1651,47 +1652,68 @@ int bot_command_real_dispatch(Client *c, const char *message)
 
 void bot_command_log_command(Client *c, const char *message)
 {
-	int admin = c->Admin();
+int admin = c->Admin();
 
 	bool continueevents = false;
-	switch (zone->loglevelvar) { //catch failsafe
-	case 9: // log only LeadGM
-		if ((admin >= 150) && (admin <200))
+	switch (zone->loglevelvar){ //catch failsafe
+		case 9: { // log only LeadGM
+			if (
+				admin >= AccountStatus::GMLeadAdmin &&
+				admin < AccountStatus::GMMgmt
+			) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 8: { // log only GM
+			if (
+				admin >= AccountStatus::GMAdmin &&
+				admin < AccountStatus::GMLeadAdmin
+			) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 1: {
+			if (admin >= AccountStatus::GMMgmt) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 2: {
+			if (admin >= AccountStatus::GMLeadAdmin) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 3: {
+			if (admin >= AccountStatus::GMAdmin) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 4: {
+			if (admin >= AccountStatus::QuestTroupe) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 5: {
+			if (admin >= AccountStatus::ApprenticeGuide) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 6: {
+			if (admin >= AccountStatus::Steward) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 7: {
 			continueevents = true;
-		break;
-	case 8: // log only GM
-		if ((admin >= 100) && (admin <150))
-			continueevents = true;
-		break;
-	case 1:
-		if ((admin >= 200))
-			continueevents = true;
-		break;
-	case 2:
-		if ((admin >= 150))
-			continueevents = true;
-		break;
-	case 3:
-		if ((admin >= 100))
-			continueevents = true;
-		break;
-	case 4:
-		if ((admin >= 80))
-			continueevents = true;
-		break;
-	case 5:
-		if ((admin >= 20))
-			continueevents = true;
-		break;
-	case 6:
-		if ((admin >= 10))
-			continueevents = true;
-		break;
-	case 7:
-		continueevents = true;
-		break;
-	default:
-		break;
+			break;
+		}
 	}
 
 	if (continueevents)
@@ -2934,7 +2956,7 @@ void bot_command_charm(Client *c, const Seperator *sep)
 			return;
 		}
 
-		if (spells[local_entry->spell_id].max[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
+		if (spells[local_entry->spell_id].max_value[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
 			continue;
 
 		my_bot = ActionableBots::Select_ByMinLevelAndClass(c, local_entry->target_type, sbl, local_entry->spell_level, local_entry->caster_class, target_mob, true);
@@ -3381,7 +3403,7 @@ void bot_command_heal_rotation(Client *c, const Seperator *sep)
 		return;
 
 #if (EQDEBUG >= 12)
-	while (c->Admin() >= 250) {
+	while (c->Admin() >= AccountStatus::GMImpossible) {
 		if (strcasecmp(sep->arg[1], "shone")) { break; }
 		Bot* my_bot = ActionableBots::AsTarget_ByBot(c);
 		if (!my_bot || !(my_bot->IsHealRotationMember())) { break; }
@@ -3789,7 +3811,7 @@ void bot_command_mesmerize(Client *c, const Seperator *sep)
 		if (!target_mob)
 			continue;
 
-		if (spells[local_entry->spell_id].max[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
+		if (spells[local_entry->spell_id].max_value[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
 			continue;
 
 		my_bot = ActionableBots::Select_ByMinLevelAndClass(c, local_entry->target_type, sbl, local_entry->spell_level, local_entry->caster_class, target_mob);
@@ -4704,7 +4726,7 @@ void bot_command_summon_corpse(Client *c, const Seperator *sep)
 		if (!target_mob)
 			continue;
 
-		if (spells[local_entry->spell_id].base[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
+		if (spells[local_entry->spell_id].base_value[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
 			continue;
 
 		my_bot = ActionableBots::Select_ByMinLevelAndClass(c, local_entry->target_type, sbl, local_entry->spell_level, local_entry->caster_class, target_mob);
@@ -4788,12 +4810,25 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 
 		++taunting_count;
 	}
+	for (auto bot_iter : sbl) {
+		if (!bot_iter->HasPet())
+			continue;
+		if (!bot_iter->GetPet()->GetSkill(EQ::skills::SkillTaunt))
+			continue;
+		if (toggle_taunt)
+			bot_iter->GetPet()->CastToNPC()->SetTaunting(!bot_iter->GetPet()->CastToNPC()->IsTaunting());
+		else
+			bot_iter->GetPet()->CastToNPC()->SetTaunting(taunt_state);
+		if (sbl.size() == 1)
+			Bot::BotGroupSay(bot_iter, "My Pet is %s taunting", bot_iter->GetPet()->CastToNPC()->IsTaunting() ? "now" : "no longer");
+		++taunting_count;
+	}
 
 	if (taunting_count) {
 		if (toggle_taunt)
-			c->Message(m_action, "%i of your bots %s toggled their taunting state", taunting_count, ((taunting_count != 1) ? ("have") : ("has")));
+			c->Message(m_action, "%i of your bots and their pets %s toggled their taunting state", taunting_count, ((taunting_count != 1) ? ("have") : ("has")));
 		else
-			c->Message(m_action, "%i of your bots %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
+			c->Message(m_action, "%i of your bots and their pets %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
 	}
 	else {
 		c->Message(m_fail, "None of your bots are capable of taunting");
@@ -5107,6 +5142,68 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	c->Message(m_action, "Bot '%s' was successfully cloned to bot '%s'", my_bot->GetCleanName(), bot_name.c_str());
 }
 
+void bot_command_view_combos(Client *c, const Seperator *sep)
+{	
+	const std::string class_substrs[17] = { "",
+		"%u (WAR)", "%u (CLR)", "%u (PAL)", "%u (RNG)",
+		"%u (SHD)", "%u (DRU)", "%u (MNK)", "%u (BRD)",
+		"%u (ROG)", "%u (SHM)", "%u (NEC)", "%u (WIZ)",
+		"%u (MAG)", "%u (ENC)", "%u (BST)", "%u (BER)"
+	};
+
+	const std::string race_substrs[17] = { "",
+		"%u (HUM)", "%u (BAR)", "%u (ERU)", "%u (ELF)",
+		"%u (HIE)", "%u (DEF)", "%u (HEF)", "%u (DWF)",
+		"%u (TRL)", "%u (OGR)", "%u (HFL)", "%u (GNM)",
+		"%u (IKS)", "%u (VAH)", "%u (FRG)", "%u (DRK)"
+	};
+
+	const uint16 race_values[17] = { 0,
+		HUMAN, BARBARIAN, ERUDITE, WOOD_ELF,
+		HIGH_ELF, DARK_ELF, HALF_ELF, DWARF,
+		TROLL, OGRE, HALFLING, GNOME,
+		IKSAR, VAHSHIR, FROGLOK, DRAKKIN
+	};
+	if (helper_command_alias_fail(c, "bot_command_view_combos", sep->arg[0], "viewcombos"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		std::string window_title = "Bot Races";
+		std::string window_text;
+		std::string message_separator = " ";
+		c->Message(m_usage, "Usage: %s [bot_race]", sep->arg[0]);
+		window_text.append("<c \"#FFFFFF\">Races:<c \"#FFFF\">");
+		for (int race_id = 0; race_id <= 15; ++race_id) {
+			window_text.append(message_separator);
+			window_text.append(StringFormat(race_substrs[race_id + 1].c_str(), race_values[race_id + 1]));
+			message_separator = ", ";
+		}
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+		return;
+	}
+
+	if (sep->arg[1][0] == '\0' || !sep->IsNumber(1)) {
+		c->Message(m_fail, "Invalid Race!");
+		return;
+	}
+	uint16 bot_race = atoi(sep->arg[1]);
+	auto classes_bitmask = database.botdb.GetRaceClassBitmask(bot_race);
+	auto race_name = GetRaceIDName(bot_race);
+	std::string window_title = "Bot Classes";
+	std::string window_text;
+	std::string message_separator = " ";
+	c->Message(m_usage, "%s can be these classes.", race_name);
+	window_text.append("<c \"#FFFFFF\">Classes:<c \"#FFFF\">");
+	for (int class_id = 0; class_id <= 15; ++class_id) {
+		if (classes_bitmask & GetPlayerClassBit(class_id)) {
+			window_text.append(message_separator);
+			window_text.append(StringFormat(class_substrs[class_id].c_str(), class_id));
+			message_separator = ", ";
+		}
+	}
+	c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+	return;
+}
+
 void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 {
 	const std::string class_substrs[17] = { "",
@@ -5148,10 +5245,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		message_separator = " ";
 		object_count = 1;
 		for (int i = 0; i <= 15; ++i) {
-			if (((1 << i) & RuleI(Bots, AllowedClasses)) == 0)
-				continue;
-
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			if (object_count >= object_max) {
 				window_text.append("<br>");
 				object_count = 0;
@@ -5166,10 +5260,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		message_separator = " ";
 		object_count = 1;
 		for (int i = 0; i <= 15; ++i) {
-			if (((1 << i) & RuleI(Bots, AllowedRaces)) == 0)
-				continue;
-
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			if (object_count >= object_max) {
 				window_text.append("<br>");
 				object_count = 0;
@@ -5183,12 +5274,8 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		window_text.append("<c \"#FFFFFF\">Genders:<c \"#FFFF\">");
 		message_separator = " ";
 		for (int i = 0; i <= 1; ++i) {
-			if (((1 << i) & RuleI(Bots, AllowedGenders)) == 0)
-				continue;
-
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			window_text.append(StringFormat(gender_substrs[i].c_str(), i));
-
 			message_separator = ", ";
 		}
 
@@ -5802,9 +5889,9 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "[%s] is a level %u %s %s %s who is owned by %s",
 			((c->CharacterID() == bots_iter.Owner_ID) && (!botCheckNotOnline) ? (EQ::SayLinkEngine::GenerateQuestSaylink(botspawn_saylink, false, bots_iter.Name).c_str()) : (bots_iter.Name)),
 			bots_iter.Level,
-			Bot::RaceIdToString(bots_iter.Race).c_str(),
+			GetRaceIDName(bots_iter.Race),
 			((bots_iter.Gender == FEMALE) ? ("Female") : ((bots_iter.Gender == MALE) ? ("Male") : ("Neuter"))),
-			Bot::ClassIdToString(bots_iter.Class).c_str(),
+			GetClassIDName(bots_iter.Class),
 			bots_iter.Owner
 		);
 		if (c->CharacterID() == bots_iter.Owner_ID) { ++bots_owned; }
@@ -5977,7 +6064,7 @@ void bot_subcommand_bot_report(Client *c, const Seperator *sep)
 		if (!bot_iter)
 			continue;
 
-		std::string report_msg = StringFormat("%s %s reports", Bot::ClassIdToString(bot_iter->GetClass()).c_str(), bot_iter->GetCleanName());
+		std::string report_msg = StringFormat("%s %s reports", GetClassIDName(bot_iter->GetClass()), bot_iter->GetCleanName());
 		report_msg.append(StringFormat(": %3.1f%% health", bot_iter->GetHPRatio()));
 		if (!IsNonSpellFighterClass(bot_iter->GetClass()))
 			report_msg.append(StringFormat(": %3.1f%% mana", bot_iter->GetManaRatio()));
@@ -8672,33 +8759,25 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	auto class_bit = GetPlayerClassBit(bot_class);
-	if ((class_bit & RuleI(Bots, AllowedClasses)) == PLAYER_CLASS_UNKNOWN_BIT) {
-		bot_owner->Message(m_fail, "Class '%s' bots are not allowed on this server", GetPlayerClassName(bot_class));
-		return bot_id;
-	}
-
-	auto race_bit = GetPlayerRaceBit(bot_race);
-	if ((race_bit & RuleI(Bots, AllowedRaces)) == PLAYER_RACE_UNKNOWN_BIT) {
-		bot_owner->Message(m_fail, "Race '%s' bots are not allowed on this server", GetPlayerRaceName(bot_class));
-		return bot_id;
-	}
-
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
-		bot_owner->Message(m_fail, "'%s'(%u):'%s'(%u) is an invalid race-class combination",
-			Bot::RaceIdToString(bot_race).c_str(), bot_race, Bot::ClassIdToString(bot_class).c_str(), bot_class);
+		const char* bot_race_name = GetRaceIDName(bot_race);
+		const char* bot_class_name = GetClassIDName(bot_class);
+		std::string view_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format("^viewcombos {}", bot_race), false, "view");
+		bot_owner->Message(
+			m_fail,
+			fmt::format(
+				"{} {} is an invalid race-class combination, would you like to {} proper combinations for {}?",
+				bot_race_name,
+				bot_class_name,
+				view_saylink,
+				bot_race_name
+			).c_str()
+		);
 		return bot_id;
 	}
 
-	if (bot_gender > FEMALE || (((1 << bot_gender) & RuleI(Bots, AllowedGenders)) == 0)) {
-		if (RuleI(Bots, AllowedGenders) == 3)
-			bot_owner->Message(m_fail, "gender: %u(M), %u(F)", MALE, FEMALE);
-		else if (RuleI(Bots, AllowedGenders) == 2)
-			bot_owner->Message(m_fail, "gender: %u(F)", FEMALE);
-		else if (RuleI(Bots, AllowedGenders) == 1)
-			bot_owner->Message(m_fail, "gender: %u(M)", MALE);
-		else
-			bot_owner->Message(m_fail, "gender: ERROR - No valid genders exist");
+	if (bot_gender > FEMALE) {
+		bot_owner->Message(m_fail, "gender: %u (M), %u (F)", MALE, FEMALE);
 		return bot_id;
 	}
 
@@ -8710,7 +8789,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 	if (bot_count >= max_bot_count) {
-		bot_owner->Message(m_fail, "You have reached the maximum limit of %i bots", max_bot_count);
+		bot_owner->Message(m_fail, "You have reached the maximum limit of %i bots.", max_bot_count);
 		return bot_id;
 	}
 
@@ -8971,7 +9050,7 @@ bool helper_spell_check_fail(STBaseEntry* local_entry)
 {
 	if (!local_entry)
 		return true;
-	if (spells[local_entry->spell_id].zonetype && zone->GetZoneType() && !(spells[local_entry->spell_id].zonetype & zone->GetZoneType()))
+	if (spells[local_entry->spell_id].zone_type && zone->GetZoneType() && !(spells[local_entry->spell_id].zone_type & zone->GetZoneType()))
 		return true;
 
 	return false;

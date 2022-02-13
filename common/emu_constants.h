@@ -22,6 +22,7 @@
 
 #include "eq_limits.h"
 #include "emu_versions.h"
+#include "bodytypes.h"
 
 #include <string.h>
 
@@ -220,8 +221,45 @@ namespace EQ
 			stanceBurnAE
 		};
 
+		enum GravityBehavior : uint8 {
+			Ground,
+			Flying,
+			Levitating,
+			Water,
+			Floating,
+			LevitateWhileRunning
+		};
+
+		enum EnvironmentalDamage : uint8 {
+			Lava = 250,
+			Drowning,
+			Falling,
+			Trap
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
+
+		extern const std::map<int, std::string>& GetLanguageMap();
+		std::string GetLanguageName(int language_id);
+
+		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
+		std::string GetLDoNThemeName(uint32 theme_id);
+    
+		extern const std::map<uint8, std::string>& GetFlyModeMap();
+		std::string GetFlyModeName(uint8 flymode_id);
+
+		extern const std::map<bodyType, std::string>& GetBodyTypeMap();
+		std::string GetBodyTypeName(bodyType bodytype_id);
+
+		extern const std::map<uint8, std::string>& GetAccountStatusMap();
+		std::string GetAccountStatusName(uint8 account_status);
+
+		extern const std::map<uint8, std::string>& GetConsiderLevelMap();
+		std::string GetConsiderLevelName(uint8 consider_level);
+
+		extern const std::map<uint8, std::string>& GetEnvironmentalDamageMap();
+		std::string GetEnvironmentalDamageName(uint8 damage_type);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
@@ -325,13 +363,57 @@ namespace EQ
 			Guild
 		};
 	}; // namespace consent
-
 } /*EQEmu*/
 
+enum ServerLockType : int {
+	List,
+	Lock,
+	Unlock
+};
+
+enum AccountStatus : uint8 {
+	Player = 0,
+	Steward = 10,
+	ApprenticeGuide = 20,
+	Guide = 50,
+	QuestTroupe = 80,
+	SeniorGuide = 81,
+	GMTester = 85,
+	EQSupport = 90,
+	GMStaff = 95,
+	GMAdmin = 100,
+	GMLeadAdmin = 150,
+	QuestMaster = 160,
+	GMAreas = 170,
+	GMCoder = 180,
+	GMMgmt = 200,
+	GMImpossible = 250,
+	Max = 255
+};
+
+enum Invisibility : uint8 {
+	Visible,
+	Invisible,
+	Special = 255
+};
+
+enum AugmentActions : int {
+	Insert,
+	Remove,
+	Swap,
+	Destroy
+};
+
+enum ConsiderLevel : uint8 {
+	Ally = 1,
+	Warmly,
+	Kindly,
+	Amiably,
+	Indifferently,
+	Apprehensively,
+	Dubiously,
+	Threateningly,
+	Scowls
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/
-
-/*	hack list to prevent circular references
-	
-	eq_limits.h:EQ::inventory::LookupEntry::InventoryTypeSize[n];
-
-*/

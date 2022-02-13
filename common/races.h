@@ -851,6 +851,7 @@
 
 const char* GetRaceIDName(uint16 race_id);
 const char* GetPlayerRaceName(uint32 player_race_value);
+const char* GetGenderName(uint32 gender_id);
 
 uint32 GetPlayerRaceValue(uint16 race_id);
 uint32 GetPlayerRaceBit(uint16 race_id);
@@ -859,7 +860,6 @@ uint16 GetRaceIDFromPlayerRaceValue(uint32 player_race_value);
 uint16 GetRaceIDFromPlayerRaceBit(uint32 player_race_bit);
 
 float GetRaceGenderDefaultHeight(int race, int gender);
-
 
 // player race-/gender-based model feature validators
 namespace PlayerAppearance
@@ -1603,6 +1603,14 @@ namespace PlayerAppearance
 #define RACE_FALLEN_KNIGHT_722 722
 #define RACE_SERVANT_OF_SHADOW_723 723
 #define RACE_LUCLIN_724 724
+#define RACE_XARIC_725 725
+#define RACE_DERVISH_726 726
+#define RACE_DERVISH_727 727
+#define RACE_LUCLIN_728 728
+#define RACE_LUCLIN_729 729
+#define RACE_ORB_730 730
+#define RACE_LUCLIN_731 731
+#define RACE_PEGASUS_732 732
 #define RACE_INTERACTIVE_OBJECT_2250 2250
 
 #endif

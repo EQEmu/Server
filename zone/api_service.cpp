@@ -436,7 +436,6 @@ Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["cwp"]                        = mob->GetCWP();
 		row["cwpp"]                       = mob->GetCWPP();
 		row["divine_aura"]                = mob->DivineAura();
-		row["do_casting_checks"]          = mob->DoCastingChecks();
 		row["dont_buff_me_before"]        = mob->DontBuffMeBefore();
 		row["dont_cure_me_before"]        = mob->DontCureMeBefore();
 		row["dont_dot_me_before"]         = mob->DontDotMeBefore();
@@ -478,7 +477,6 @@ Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["has_temp_pets_active"]       = mob->HasTempPetsActive();
 		row["has_two_hand_blunt_equiped"] = mob->HasTwoHandBluntEquiped();
 		row["has_two_hander_equipped"]    = mob->HasTwoHanderEquipped();
-		row["has_virus"]                  = mob->HasVirus();
 		row["hate_summon"]                = mob->HateSummon();
 		row["helm_texture"]               = mob->GetHelmTexture();
 		row["hp"]                         = mob->GetHP();

@@ -772,13 +772,13 @@ namespace RoF
 
 	ENCODE(OP_DzExpeditionInfo)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionInfo_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionInfo_Struct, structs::ExpeditionInfo_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneInfo_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneInfo_Struct, structs::DynamicZoneInfo_Struct);
 
 		OUT(client_id);
 		OUT(assigned);
 		OUT(max_players);
-		strn0cpy(eq->expedition_name, emu->expedition_name, sizeof(eq->expedition_name));
+		strn0cpy(eq->dz_name, emu->dz_name, sizeof(eq->dz_name));
 		strn0cpy(eq->leader_name, emu->leader_name, sizeof(eq->leader_name));
 
 		FINISH_ENCODE();
@@ -824,8 +824,8 @@ namespace RoF
 
 	ENCODE(OP_DzSetLeaderName)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionSetLeaderName_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionSetLeaderName_Struct, structs::ExpeditionSetLeaderName_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneLeaderName_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneLeaderName_Struct, structs::DynamicZoneLeaderName_Struct);
 
 		OUT(client_id);
 		strn0cpy(eq->leader_name, emu->leader_name, sizeof(eq->leader_name));
@@ -835,7 +835,7 @@ namespace RoF
 
 	ENCODE(OP_DzMemberList)
 	{
-		SETUP_VAR_ENCODE(ExpeditionMemberList_Struct);
+		SETUP_VAR_ENCODE(DynamicZoneMemberList_Struct);
 
 		SerializeBuffer buf;
 		buf.WriteUInt32(emu->client_id);
@@ -843,7 +843,7 @@ namespace RoF
 		for (uint32 i = 0; i < emu->member_count; ++i)
 		{
 			buf.WriteString(emu->members[i].name);
-			buf.WriteUInt8(emu->members[i].expedition_status);
+			buf.WriteUInt8(emu->members[i].online_status);
 		}
 
 		__packet->size = buf.size();
@@ -855,8 +855,8 @@ namespace RoF
 
 	ENCODE(OP_DzMemberListName)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionMemberListName_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionMemberListName_Struct, structs::ExpeditionMemberListName_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneMemberListName_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneMemberListName_Struct, structs::DynamicZoneMemberListName_Struct);
 
 		OUT(client_id);
 		OUT(add_name);
@@ -867,7 +867,7 @@ namespace RoF
 
 	ENCODE(OP_DzMemberListStatus)
 	{
-		auto emu = reinterpret_cast<ExpeditionMemberList_Struct*>((*p)->pBuffer);
+		auto emu = reinterpret_cast<DynamicZoneMemberList_Struct*>((*p)->pBuffer);
 		if (emu->member_count == 1)
 		{
 			ENCODE_FORWARD(OP_DzMemberList);
@@ -1634,20 +1634,6 @@ namespace RoF
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_ManaChange)
-	{
-		ENCODE_LENGTH_EXACT(ManaChange_Struct);
-		SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
-
-		OUT(new_mana);
-		OUT(stamina);
-		OUT(spell_id);
-		OUT(keepcasting);
-		eq->slot = -1; // this is spell gem slot. It's -1 in normal operation
-
-		FINISH_ENCODE();
-	}
-
 	ENCODE(OP_MercenaryDataResponse)
 	{
 		//consume the packet
@@ -1863,8 +1849,8 @@ namespace RoF
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown800 = -1;
 		eq->unknown844 = 600;
-		eq->unknown880 = 50;
-		eq->unknown884 = 10;
+		OUT(LavaDamage);
+		OUT(MinLavaDamage);
 		eq->unknown888 = 1;
 		eq->unknown889 = 0;
 		eq->unknown890 = 1;
@@ -1968,7 +1954,7 @@ namespace RoF
 
 		for (int r = 0; r < 5; r++)
 		{
-			outapp->WriteUInt32(emu->binds[r].zoneId);
+			outapp->WriteUInt32(emu->binds[r].zone_id);
 			outapp->WriteFloat(emu->binds[r].x);
 			outapp->WriteFloat(emu->binds[r].y);
 			outapp->WriteFloat(emu->binds[r].z);

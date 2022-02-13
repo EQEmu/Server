@@ -30,66 +30,33 @@
 
 class Expedition;
 class ExpeditionLockoutTimer;
-struct ExpeditionMember;
+struct DynamicZoneMember;
 class MySQLRequestResult;
 
 namespace ExpeditionDatabase
 {
-	uint32_t InsertExpedition(
-		const std::string& uuid, uint32_t instance_id, const std::string& expedition_name,
-		uint32_t leader_id, uint32_t min_players, uint32_t max_players);
-	std::string LoadExpeditionsSelectQuery();
-	MySQLRequestResult LoadExpedition(uint32_t expedition_id);
-	MySQLRequestResult LoadAllExpeditions();
+	uint32_t InsertExpedition(uint32_t dz_id);
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id);
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id,
 		const std::string& expedition_name);
-	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>>
-		LoadMultipleExpeditionLockouts(const std::vector<uint32_t>& expedition_ids);
-	void DeleteAllMembers(uint32_t expedition_id);
-	void DeleteMember(uint32_t expedition_id, uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
 	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name,
 		const std::string& event_name);
 	void DeleteLockout(uint32_t expedition_id, const std::string& event_name);
-	void DeleteMembersLockout(const std::vector<ExpeditionMember>& members,
+	void DeleteMembersLockout(const std::vector<DynamicZoneMember>& members,
 		const std::string& expedition_name, const std::string& event_name);
-	uint32_t GetExpeditionIDFromCharacterID(uint32_t character_id);
-	uint32_t GetMemberCount(uint32_t expedition_id);
-	bool HasMember(uint32_t expedition_id, uint32_t character_id);
 	void InsertCharacterLockouts(uint32_t character_id,
 		const std::vector<ExpeditionLockoutTimer>& lockouts);
-	void InsertMembersLockout(const std::vector<ExpeditionMember>& members,
+	void InsertMembersLockout(const std::vector<DynamicZoneMember>& members,
 		const ExpeditionLockoutTimer& lockout);
 	void InsertLockout(uint32_t expedition_id, const ExpeditionLockoutTimer& lockout);
 	void InsertLockouts(uint32_t expedition_id,
 		const std::unordered_map<std::string, ExpeditionLockoutTimer>& lockouts);
-	void InsertMember(uint32_t expedition_id, uint32_t character_id);
-	void InsertMembers(uint32_t expedition_id, const std::vector<ExpeditionMember>& members);
 	void UpdateLockState(uint32_t expedition_id, bool is_locked);
 	void UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join);
-	void AddLockoutDuration(const std::vector<ExpeditionMember>& members,
+	void AddLockoutDuration(const std::vector<DynamicZoneMember>& members,
 		const ExpeditionLockoutTimer& lockout, int seconds);
-};
-
-namespace LoadExpeditionColumns
-{
-	enum eLoadExpeditionColumns
-	{
-		id = 0,
-		uuid,
-		dz_id,
-		expedition_name,
-		leader_id,
-		min_players,
-		max_players,
-		add_replay_on_join,
-		is_locked,
-		leader_name,
-		member_id,
-		member_name
-	};
 };
 
 #endif

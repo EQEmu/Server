@@ -20,31 +20,31 @@
 #include "races.h"
 #include "rulesys.h"
 
-const char *FactionValueToString(FACTION_VALUE fv)
+const char *FactionValueToString(FACTION_VALUE faction_value)
 {
-	switch (fv) {
+	switch (faction_value) {
 		case FACTION_ALLY:
-			return ("Ally");
+			return "Ally";
 		case FACTION_WARMLY:
-			return ("Warmly");
+			return "Warmly";
 		case FACTION_KINDLY:
-			return ("Kindly");
-		case FACTION_AMIABLE:
-			return ("Amiable");
-		case FACTION_INDIFFERENT:
-			return ("Indifferent");
-		case FACTION_APPREHENSIVE:
-			return ("Apprehensive");
-		case FACTION_DUBIOUS:
-			return ("Dubious");
-		case FACTION_THREATENLY:
-			return ("Threatenly");
+			return "Kindly";
+		case FACTION_AMIABLY:
+			return "Amiably";
+		case FACTION_INDIFFERENTLY:
+			return "Indifferently";
+		case FACTION_APPREHENSIVELY:
+			return "Apprehensively";
+		case FACTION_DUBIOUSLY:
+			return "Dubiously";
+		case FACTION_THREATENINGLY:
+			return "Threateningly";
 		case FACTION_SCOWLS:
-			return ("Scowls, ready to attack.");
+			return "Scowls";
 		default:
 			break;
 	}
-	return ("Unknown Faction Con");
+	return "Unknown";
 }
 
 
@@ -70,19 +70,19 @@ FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value)
 		return FACTION_KINDLY;
 	}
 	if (character_value >= RuleI(Faction, AmiablyFactionMinimum)) {
-		return FACTION_AMIABLE;
+		return FACTION_AMIABLY;
 	}
 	if (character_value >= RuleI(Faction, IndifferentlyFactionMinimum)) {
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	}
 	if (character_value >= RuleI(Faction, ApprehensivelyFactionMinimum)) {
-		return FACTION_APPREHENSIVE;
+		return FACTION_APPREHENSIVELY;
 	}
 	if (character_value >= RuleI(Faction, DubiouslyFactionMinimum)) {
-		return FACTION_DUBIOUS;
+		return FACTION_DUBIOUSLY;
 	}
 	if (character_value >= RuleI(Faction, ThreateninglyFactionMinimum)) {
-		return FACTION_THREATENLY;
+		return FACTION_THREATENINGLY;
 	}
 	return FACTION_SCOWLS;
 }

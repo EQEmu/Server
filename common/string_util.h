@@ -39,13 +39,17 @@
 const std::string str_tolower(std::string s);
 const std::string str_toupper(std::string s);
 const std::string ucfirst(std::string s);
-std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::vector<std::string> wrap(std::vector<std::string> &src, std::string character);
 std::string implode(std::string glue, std::vector<std::string> src);
 std::string convert2digit(int n, std::string suffix);
 std::string numberToWords(unsigned long long int n);
+std::string ConvertMoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
+std::string ConvertSecondsToTime(int duration, bool is_milliseconds = false);
+inline std::string ConvertMillisecondsToTime(int duration) {
+  return ConvertSecondsToTime(duration, true);
+}
 
 // For converstion of numerics into English
 // Used for grid nodes, as NPC names remove numerals.
@@ -177,7 +181,9 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 	return output;
 }
 
-std::vector<std::string> SplitString(const std::string &s, char delim);
+std::vector<std::string> SplitString(const std::string &s, const char delim = ',');
+std::vector<std::string> split_string(std::string s, std::string delimiter);
+std::string get_between(const std::string &s, std::string start_delim, std::string stop_delim);
 std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);
@@ -186,6 +192,7 @@ void ToLowerString(std::string &s);
 void ToUpperString(std::string &s);
 std::string JoinString(const std::vector<std::string>& ar, const std::string &delim);
 void find_replace(std::string& string_subject, const std::string& search_string, const std::string& replace_string);
+std::string replace_string(std::string subject, const std::string &search, const std::string &replace);
 void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
 
 //const char based
@@ -206,5 +213,23 @@ void RemoveApostrophes(std::string &s);
 std::string convert2digit(int n, std::string suffix);
 std::string numberToWords(unsigned long long int n);
 std::string FormatName(const std::string& char_name);
+bool IsAllowedWorldServerCharacterList(char c);
+void SanitizeWorldServerName(char *name);
+std::string SanitizeWorldServerName(std::string server_long_name);
+std::string repeat(std::string s, int n);
+std::vector<std::string> GetBadWords();
+
+template<typename InputIterator, typename OutputIterator>
+auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)
+{
+    for (; first != last; ++first) {
+        if(*first == '_') {
+            *result = ' ';
+        } else if (isalpha(*first) || *first == '`') {
+            *result = *first;
+        }
+    }
+    return result;
+}
 
 #endif

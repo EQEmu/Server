@@ -115,11 +115,11 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 			// should probably match that eventually. This should be good enough for now I guess ....
 			if (
 				(
-				 (spells[AIspells[i].spellid].targettype == ST_HateList || spells[AIspells[i].spellid].targettype == ST_AETargetHateList) ||
+				 (spells[AIspells[i].spellid].target_type == ST_HateList || spells[AIspells[i].spellid].target_type == ST_AETargetHateList) ||
 				 (
 				  // note: I think this check is actually wrong and we should be checking range instead in all cases, BUT if range is 0, range check is skipped? Works for now
-				  (spells[AIspells[i].spellid].targettype==ST_AECaster || spells[AIspells[i].spellid].targettype==ST_AEBard || spells[AIspells[i].spellid].targettype==ST_AEClientV1)
-				  && dist2 <= spells[AIspells[i].spellid].aoerange*spells[AIspells[i].spellid].aoerange
+				  (spells[AIspells[i].spellid].target_type==ST_AECaster || spells[AIspells[i].spellid].target_type==ST_AEBard || spells[AIspells[i].spellid].target_type==ST_AEClientV1)
+				  && dist2 <= spells[AIspells[i].spellid].aoe_range*spells[AIspells[i].spellid].aoe_range
 				 ) ||
 				 dist2 <= spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range
 				 )
@@ -135,7 +135,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 				switch (AIspells[i].type) {
 					case SpellType_Heal: {
 						if (
-							(spells[AIspells[i].spellid].targettype == ST_Target || tar == this)
+							(spells[AIspells[i].spellid].target_type == ST_Target || tar == this)
 							&& tar->DontHealMeBefore() < Timer::GetCurrentTime()
 							&& !(tar->IsPet() && tar->GetOwner()->IsClient())	//no buffing PC's pets
 							) {
@@ -174,7 +174,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 					}
 					case SpellType_Buff: {
 						if (
-							(spells[AIspells[i].spellid].targettype == ST_Target || tar == this)
+							(spells[AIspells[i].spellid].target_type == ST_Target || tar == this)
 							&& tar->DontBuffMeBefore() < Timer::GetCurrentTime()
 							&& !tar->IsImmuneToSpell(AIspells[i].spellid, this)
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
@@ -838,20 +838,21 @@ void Client::AI_Process()
 	else
 	{
 		if(AI_feign_remember_timer->Check()) {
-			std::set<uint32>::iterator RememberedCharID;
-			RememberedCharID = feign_memory_list.begin();
-			while (RememberedCharID != feign_memory_list.end()) {
-				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if (remember_client == nullptr) {
+			std::set<uint32>::iterator remembered_feigned_mobid;
+			remembered_feigned_mobid = feign_memory_list.begin();
+			while (remembered_feigned_mobid != feign_memory_list.end()) {
+				
+				Mob* remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
+				if (remembered_mob == nullptr || remembered_mob->IsCorpse()) {
 					//they are gone now...
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
-				} else if (!remember_client->GetFeigned()) {
-					AddToHateList(remember_client->CastToMob(),1);
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
+				} else if (!remembered_mob->GetFeigned()) {
+					AddToHateList(remembered_mob,1);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 					break;
 				} else {
 					//they are still feigned, carry on...
-					++RememberedCharID;
+					++remembered_feigned_mobid;
 				}
 			}
 		}
@@ -1000,6 +1001,14 @@ void Mob::AI_Process() {
 					continue;
 				}
 
+				if (door->GetTriggerDoorID() > 0) {
+					continue;
+				}
+
+				if (door->GetDoorParam() > 0) {
+					continue;
+				}
+
 				float distance                = DistanceSquared(m_Position, door->GetPosition());
 				float distance_scan_door_open = 20;
 
@@ -1125,6 +1134,10 @@ void Mob::AI_Process() {
 
 		ProjectileAttack();
 
+		if (shield_timer.Check()) {
+			ShieldAbilityFinish();
+		}
+
 		auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
 		if (GetSpecialAbility(TETHER)) {
 			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
@@ -1218,16 +1231,15 @@ void Mob::AI_Process() {
 						}
 					}
 
+
+					//SE_PC_Pet_Rampage SPA 464 on pet, chance modifier
 					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
-						if (spellbonuses.PC_Pet_Rampage[0] || itembonuses.PC_Pet_Rampage[0] ||
-							aabonuses.PC_Pet_Rampage[0]) {
-							int chance = spellbonuses.PC_Pet_Rampage[0] + itembonuses.PC_Pet_Rampage[0] +
-										 aabonuses.PC_Pet_Rampage[0];
-							if (zone->random.Roll(chance)) {
-								Rampage(nullptr);
-							}
+						int chance = spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
+						if (chance && zone->random.Roll(chance)) {
+							Rampage(nullptr);
 						}
 					}
+
 
 					if (GetSpecialAbility(SPECATK_RAMPAGE) && !specialed) {
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_RAMPAGE, 0);
@@ -1260,6 +1272,14 @@ void Mob::AI_Process() {
 							}
 							Rampage(&opts);
 							specialed = true;
+						}
+					}
+
+					//SE_PC_Pet_Rampage SPA 465 on pet, chance modifier
+					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+						int chance = spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE] + aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_CHANCE];
+						if (chance && zone->random.Roll(chance)) {
+							Rampage(nullptr);
 						}
 					}
 
@@ -1329,7 +1349,7 @@ void Mob::AI_Process() {
 				}
 				// mob/npc waits until call for help complete, others can move
 				else if (AI_movement_timer->Check() && target &&
-						(GetOwnerID() || IsBot() ||
+						(GetOwnerID() || IsBot() || IsTempPet() ||
 						CastToNPC()->GetCombatEvent())) {
 					if (!IsRooted()) {
 						LogAI("Pursuing [{}] while engaged", target->GetName());
@@ -1354,22 +1374,22 @@ void Mob::AI_Process() {
 			// 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
-			std::set<uint32>::iterator RememberedCharID;
-			RememberedCharID = feign_memory_list.begin();
-			while (RememberedCharID != feign_memory_list.end()) {
-				Client *remember_client = entity_list.GetClientByCharID(*RememberedCharID);
-				if (remember_client == nullptr) {
+			std::set<uint32>::iterator remembered_feigned_mobid;
+			remembered_feigned_mobid = feign_memory_list.begin();
+			while (remembered_feigned_mobid != feign_memory_list.end()) {
+				Mob *remembered_mob = entity_list.GetMob(*remembered_feigned_mobid);
+				if (remembered_mob == nullptr || remembered_mob->IsCorpse()) {
 					//they are gone now...
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 				}
-				else if (!remember_client->GetFeigned()) {
-					AddToHateList(remember_client->CastToMob(), 1);
-					RememberedCharID = feign_memory_list.erase(RememberedCharID);
+				else if (!remembered_mob->GetFeigned()) {
+					AddToHateList(remembered_mob, 1);
+					remembered_feigned_mobid = feign_memory_list.erase(remembered_feigned_mobid);
 					break;
 				}
 				else {
 					//they are still feigned, carry on...
-					++RememberedCharID;
+					++remembered_feigned_mobid;
 				}
 			}
 		}
@@ -1466,6 +1486,10 @@ void Mob::AI_Process() {
 						}
 						break;
 					}
+					case SPO_FeignDeath: {
+						SetAppearance(eaDead, false);
+						break;
+					}
 				}
 				if (IsPetRegroup()) {
 					return;
@@ -1536,6 +1560,11 @@ void Mob::AI_Process() {
 				}
 			}
 		}
+	}
+
+	if (forget_timer.Check()) {
+		forget_timer.Disable();
+		entity_list.ClearZoneFeignAggro(this);
 	}
 
 	//Do Ranged attack here
@@ -1752,9 +1781,8 @@ void NPC::AI_DoMovement() {
 					}
 
 					//kick off event_waypoint arrive
-					char temp[16];
-					sprintf(temp, "%d", cur_wp);
-					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, temp, 0);
+					std::string buf = fmt::format("{}", cur_wp);
+					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, buf.c_str(), 0);
 					// No need to move as we are there.  Next loop will
 					// take care of normal grids, even at pause 0.
 					// We do need to call and setup a wp if we're cur_wp=-2
@@ -1871,9 +1899,8 @@ void NPC::AI_SetupNextWaypoint() {
 
 		if (!DistractedFromGrid) {
 			//kick off event_waypoint depart
-			char temp[16];
-			sprintf(temp, "%d", cur_wp);
-			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, temp, 0);
+			std::string buf = fmt::format("{}", cur_wp);
+			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, buf.c_str(), 0);
 
 			//setup our next waypoint, if we are still on our normal grid
 			//remember that the quest event above could have done anything it wanted with our grid
@@ -2456,10 +2483,8 @@ void NPC::CheckSignal() {
 	if (!signal_q.empty()) {
 		int signal_id = signal_q.front();
 		signal_q.pop_front();
-		char buf[32];
-		snprintf(buf, 31, "%d", signal_id);
-		buf[31] = '\0';
-		parse->EventNPC(EVENT_SIGNAL, this, nullptr, buf, 0);
+		std::string buf = fmt::format("{}", signal_id);
+		parse->EventNPC(EVENT_SIGNAL, this, nullptr, buf.c_str(), 0);
 	}
 }
 
@@ -2490,7 +2515,7 @@ create table npc_spells_entries (
 */
 
 bool IsSpellInList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
-bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
+bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value);
 
 bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
@@ -2701,12 +2726,12 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	if (parentlist) {
 		for (i=0; i<parentlist->numentries; i++) {
 			if (GetLevel() >= parentlist->entries[i].minlevel && GetLevel() <= parentlist->entries[i].maxlevel && parentlist->entries[i].spelleffectid > 0) {
-				if (!IsSpellEffectInList(spell_effects_list, parentlist->entries[i].spelleffectid, parentlist->entries[i].base,
-					parentlist->entries[i].limit, parentlist->entries[i].max))
+				if (!IsSpellEffectInList(spell_effects_list, parentlist->entries[i].spelleffectid, parentlist->entries[i].base_value,
+					parentlist->entries[i].limit, parentlist->entries[i].max_value))
 				{
 				AddSpellEffectToNPCList(parentlist->entries[i].spelleffectid,
-						parentlist->entries[i].base, parentlist->entries[i].limit,
-						parentlist->entries[i].max);
+						parentlist->entries[i].base_value, parentlist->entries[i].limit,
+						parentlist->entries[i].max_value);
 				}
 			}
 		}
@@ -2715,8 +2740,8 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	for (i=0; i<spell_effects_list->numentries; i++) {
 		if (GetLevel() >= spell_effects_list->entries[i].minlevel && GetLevel() <= spell_effects_list->entries[i].maxlevel && spell_effects_list->entries[i].spelleffectid > 0) {
 			AddSpellEffectToNPCList(spell_effects_list->entries[i].spelleffectid,
-				spell_effects_list->entries[i].base, spell_effects_list->entries[i].limit,
-				spell_effects_list->entries[i].max);
+				spell_effects_list->entries[i].base_value, spell_effects_list->entries[i].limit,
+				spell_effects_list->entries[i].max_value);
 		}
 	}
 
@@ -2730,15 +2755,14 @@ void NPC::ApplyAISpellEffects(StatBonuses* newbon)
 
 	for (int i = 0; i < AIspellsEffects.size(); i++)
 		ApplySpellsBonuses(0, 0, newbon, 0, 0, 0, -1, 10, true, AIspellsEffects[i].spelleffectid,
-				   AIspellsEffects[i].base, AIspellsEffects[i].limit, AIspellsEffects[i].max);
+				   AIspellsEffects[i].base_value, AIspellsEffects[i].limit, AIspellsEffects[i].max_value);
 
 	return;
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max)
+void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value, bool apply_bonus)
 {
-
 	if(!iSpellEffectID)
 		return;
 
@@ -2746,16 +2770,50 @@ void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit
 	AISpellsEffects_Struct t;
 
 	t.spelleffectid = iSpellEffectID;
-	t.base = base;
+	t.base_value = base_value;
 	t.limit = limit;
-	t.max = max;
+	t.max_value = max_value;
 	AIspellsEffects.push_back(t);
+
+	//we recalculate if applied from quest script.
+	if (apply_bonus) {
+		CalcBonuses();
+	}
 }
 
-bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max) {
+void NPC::RemoveSpellEffectFromNPCList(uint16 iSpellEffectID, bool apply_bonus)
+{
+	auto iter = AIspellsEffects.begin();
+	while (iter != AIspellsEffects.end())
+	{
+		if ((*iter).spelleffectid == iSpellEffectID)
+		{
+			iter = AIspellsEffects.erase(iter);
+			continue;
+		}
+		++iter;
+	}
+
+	if (apply_bonus) {
+		CalcBonuses();
+	}
+}
+
+bool NPC::HasAISpellEffect(uint16 spell_effect_id)
+{
+	for (const auto& spell_effect : AIspellsEffects) {
+		if (spell_effect.spelleffectid == spell_effect_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value) {
 	for (uint32 i=0; i < spelleffect_list->numentries; i++) {
-		if (spelleffect_list->entries[i].spelleffectid == iSpellEffectID &&  spelleffect_list->entries[i].base == base
-			&& spelleffect_list->entries[i].limit == limit && spelleffect_list->entries[i].max == max)
+		if (spelleffect_list->entries[i].spelleffectid == iSpellEffectID &&  spelleffect_list->entries[i].base_value == base_value
+			&& spelleffect_list->entries[i].limit == limit && spelleffect_list->entries[i].max_value == max_value)
 			return true;
 	}
 	return false;
@@ -2811,12 +2869,90 @@ void NPC::RemoveSpellFromNPCList(uint16 spell_id)
 
 void NPC::AISpellsList(Client *c)
 {
-	if (!c)
+	if (!c) {
 		return;
+	}
 
-	for (auto it = AIspells.begin(); it != AIspells.end(); ++it)
-		c->Message(Chat::White, "%s (%d): Type %d, Priority %d, Recast Delay %d, Resist Adjust %d, Min HP %d, Max HP %d",
-				spells[it->spellid].name, it->spellid, it->type, it->priority, it->recast_delay, it->resist_adjust, it->min_hp, it->max_hp);
+	if (AIspells.size() > 0) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} has {} AI spells.",
+				GetCleanName(),
+				AIspells.size()
+			).c_str()
+		);
+
+		int spell_slot = 1;
+		for (const auto& ai_spell : AIspells) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Spell {} | Name: {} ({}) Type: {} Mana Cost: {}",
+					spell_slot,
+					GetSpellName(ai_spell.spellid),
+					ai_spell.spellid,
+					ai_spell.type,
+					ai_spell.manacost
+				).c_str()
+			);
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Spell {} | Priority: {} Recast Delay: {}",
+					spell_slot,
+					ai_spell.priority,
+					ai_spell.recast_delay
+				).c_str()
+			);
+
+			if (ai_spell.time_cancast) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Spell {} | Time Can Cast : {}",
+						spell_slot,
+						ai_spell.time_cancast
+					).c_str()
+				);
+			}
+
+			if (ai_spell.resist_adjust) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Spell {} | Resist Adjust : {}",
+						spell_slot,
+						ai_spell.resist_adjust
+					).c_str()
+				);
+			}
+
+			if (ai_spell.min_hp || ai_spell.max_hp) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Spell {} | Min HP: {} Max HP: {}",
+						spell_slot,
+						ai_spell.min_hp,
+						ai_spell.max_hp
+					).c_str()
+				);
+			}
+
+			spell_slot++;
+		}
+	}
+	else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} has no AI spells.",
+				GetCleanName()
+			).c_str()
+		);
+	}
 
 	return;
 }
@@ -2915,7 +3051,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			if (row[9])
 				entry.resist_adjust = atoi(row[9]);
 			else if (IsValidSpell(spell_id))
-				entry.resist_adjust = spells[spell_id].ResistDiff;
+				entry.resist_adjust = spells[spell_id].resist_difficulty;
 
 			spell_set.entries.push_back(entry);
 		}
@@ -3008,9 +3144,9 @@ DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid = spell_effect_id;
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base_value = atoi(row[3]);
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max_value = atoi(row[5]);
 	}
 
 	return npc_spellseffects_cache[iDBSpellsEffectsID];

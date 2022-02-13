@@ -21,107 +21,72 @@
 #ifndef DYNAMIC_ZONE_H
 #define DYNAMIC_ZONE_H
 
-#include <chrono>
+#include "../common/dynamic_zone_base.h"
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-class MySQLRequestRow;
+class Client;
+class Database;
+class EQApplicationPacket;
 class ServerPacket;
 
-enum class DynamicZoneType : uint8_t
-{
-	None = 0,
-	Expedition,
-	Tutorial,
-	Task,
-	Mission, // Shared Task
-	Quest
-};
+extern const char* const CREATE_NOT_ALL_ADDED;
 
-struct DynamicZoneLocation
-{
-	uint32_t zone_id = 0;
-	float x = 0.0f;
-	float y = 0.0f;
-	float z = 0.0f;
-	float heading = 0.0f;
-
-	DynamicZoneLocation() = default;
-	DynamicZoneLocation(uint32_t zone_id_, float x_, float y_, float z_, float heading_)
-		: zone_id(zone_id_), x(x_), y(y_), z(z_), heading(heading_) {}
-};
-
-class DynamicZone
+class DynamicZone : public DynamicZoneBase
 {
 public:
+	using DynamicZoneBase::DynamicZoneBase; // inherit base constructors
+
 	DynamicZone() = default;
 	DynamicZone(uint32_t zone_id, uint32_t version, uint32_t duration, DynamicZoneType type);
-	DynamicZone(std::string zone_shortname, uint32_t version, uint32_t duration, DynamicZoneType type);
-	DynamicZone(uint32_t dz_id) : m_id(dz_id) {}
-	DynamicZone(DynamicZoneType type) : m_type(type) {}
 
-	static std::unordered_map<uint32_t, DynamicZone> LoadMultipleDzFromDatabase(
-		const std::vector<uint32_t>& dynamic_zone_ids);
+	static void CacheAllFromDatabase();
+	static void CacheNewDynamicZone(ServerPacket* pack);
+	static DynamicZone* CreateNew(DynamicZone& dz_details, const std::vector<DynamicZoneMember>& members);
+	static DynamicZone* FindDynamicZoneByID(uint32_t dz_id);
 	static void HandleWorldMessage(ServerPacket* pack);
 
-	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
-	uint32_t GetID() const { return m_id; }
-	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); }
-	uint32_t GetSecondsRemaining() const;
-	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_zone_id); }
-	uint32_t GetZoneIndex() const { return (m_instance_id << 16) | (m_zone_id & 0xffff); }
-	uint32_t GetZoneVersion() const { return m_version; }
-	const std::string& GetLeaderName() const { return m_leader_name; }
-	const std::string& GetName() const { return m_name; }
-	DynamicZoneType GetType() const { return m_type; }
-	DynamicZoneLocation GetCompassLocation() const { return m_compass; }
-	DynamicZoneLocation GetSafeReturnLocation() const { return m_safereturn; }
-	DynamicZoneLocation GetZoneInLocation() const { return m_zonein; }
+	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
-	void     AddCharacter(uint32_t character_id);
-	uint32_t Create();
-	uint32_t CreateInstance();
-	bool     HasZoneInLocation() const { return m_has_zonein; }
-	bool     IsCurrentZoneDzInstance() const;
-	bool     IsInstanceID(uint32_t instance_id) const;
-	bool     IsValid() const { return m_instance_id != 0; }
-	bool     IsSameDz(uint32_t zone_id, uint32_t instance_id) const;
-	void     RemoveAllCharacters(bool enable_removal_timers = true);
-	void     RemoveCharacter(uint32_t character_id);
-	void     SaveInstanceMembersToDatabase(const std::vector<uint32_t>& character_ids);
-	void     SendInstanceCharacterChange(uint32_t character_id, bool removed);
-	void     SetCompass(const DynamicZoneLocation& location, bool update_db = false);
-	void     SetLeaderName(const std::string& leader_name) { m_leader_name = leader_name; }
-	void     SetName(const std::string& name) { m_name = name; }
-	void     SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
-	void     SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
-	void     SetUpdatedDuration(uint32_t seconds);
+	void DoAsyncZoneMemberUpdates();
+	bool CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t entity_id);
+	bool IsCurrentZoneDzInstance() const;
+	void RegisterOnClientAddRemove(std::function<void(Client* client, bool removed, bool silent)> on_client_addremove);
+	void SendClientWindowUpdate(Client* client);
+	void SendLeaderNameToZoneMembers();
+	void SendMemberListToZoneMembers();
+	void SendMemberListNameToZoneMembers(const std::string& char_name, bool remove);
+	void SendMemberListStatusToZoneMembers(const DynamicZoneMember& member);
+	void SendRemoveAllMembersToZoneMembers(bool silent) { ProcessRemoveAllMembers(silent); }
+
+	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
+	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
+	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
+	std::unique_ptr<EQApplicationPacket> CreateMemberListPacket(bool clear = false);
+	std::unique_ptr<EQApplicationPacket> CreateMemberListNamePacket(const std::string& name, bool remove_name);
+	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, DynamicZoneMemberStatus status);
+
+protected:
+	uint16_t GetCurrentInstanceID() override;
+	uint16_t GetCurrentZoneID() override;
+	Database& GetDatabase() override;
+	void ProcessCompassChange(const DynamicZoneLocation& location) override;
+	void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed) override;
+	bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status) override;
+	void ProcessRemoveAllMembers(bool silent = false) override;
+	bool SendServerPacket(ServerPacket* packet) override;
 
 private:
-	static std::string DynamicZoneSelectQuery();
-	void LoadDatabaseResult(MySQLRequestRow& row);
-	void SaveCompassToDatabase();
-	void SaveSafeReturnToDatabase();
-	void SaveZoneInLocationToDatabase();
-	uint32_t SaveToDatabase();
+	static void StartAllClientRemovalTimers();
+	void ProcessLeaderChanged(uint32_t new_leader_id);
+	void SendCompassUpdateToZoneMembers();
+	void SendMembersExpireWarning(uint32_t minutes);
+	void SendUpdatesToZoneMembers(bool removing_all = false, bool silent = true);
+	void SetUpdatedDuration(uint32_t seconds);
 
-	uint32_t m_id            = 0;
-	uint32_t m_zone_id       = 0;
-	uint32_t m_instance_id   = 0;
-	uint32_t m_version       = 0;
-	bool     m_never_expires = false;
-	bool     m_has_zonein    = false;
-	std::string m_name;
-	std::string m_leader_name;
-	DynamicZoneType m_type{ DynamicZoneType::None };
-	DynamicZoneLocation m_compass;
-	DynamicZoneLocation m_safereturn;
-	DynamicZoneLocation m_zonein;
-	std::chrono::seconds m_duration;
-	std::chrono::time_point<std::chrono::system_clock> m_start_time;
-	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
+	std::function<void(Client*, bool, bool)> m_on_client_addremove;
 };
 
 #endif

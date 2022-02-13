@@ -410,21 +410,21 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, EQ::ItemI
 	return 0;
 }
 
-int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 									  std::vector<EQ::Any> *extra_pointers) {
 	auto iter = _spell_quest_status.find(spell_id);
 	if(iter != _spell_quest_status.end()) {
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			auto qiter = _interfaces.find(iter->second);
-			int ret = DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
-			int i = qiter->second->EventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
+			int ret = DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
+			int i = qiter->second->EventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
             if(i != 0) {
                 ret = i;
             }
 			return ret;
 		}
-		return DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
+		return DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
 	} 
 	else if (_spell_quest_status[spell_id] != QuestFailedToLoad) {
 		std::string filename;
@@ -432,8 +432,8 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 		if (qi) {
 			_spell_quest_status[spell_id] = qi->GetIdentifier();
 			qi->LoadSpellScript(filename, spell_id);
-			int ret = DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
-			int i = qi->EventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
+			int ret = DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
+			int i = qi->EventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
 			if (i != 0) {
 				ret = i;
 			}
@@ -441,7 +441,7 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 		}
 		else {
 			_spell_quest_status[spell_id] = QuestFailedToLoad;
-			return DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
+			return DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
 		}
 	}
 	return 0;
@@ -1042,12 +1042,12 @@ int QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, E
     return ret;
 }
 
-int QuestParserCollection::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+int QuestParserCollection::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 											   std::vector<EQ::Any> *extra_pointers) {
     int ret = 0;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
-		int i = (*iter)->DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
+		int i = (*iter)->DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
         if(i != 0) {
             ret = i;
         }

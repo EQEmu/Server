@@ -95,6 +95,7 @@ class Corpse : public Mob {
 	int32	GetPlayerKillItem() { return player_kill_item; }
 	void	RemoveItem(uint16 lootslot);
 	void	RemoveItem(ServerLootItem_Struct* item_data);
+	void	RemoveItemByID(uint32 item_id, int quantity = 1);
 	void	AddItem(uint32 itemnum, uint16 charges, int16 slot = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
 	
 	/* Corpse: Coin */
@@ -113,6 +114,11 @@ class Corpse : public Mob {
 
 	/* Corpse: Loot */
 	void	QueryLoot(Client* to);
+	bool	HasItem(uint32 item_id);
+	uint16	CountItem(uint32 item_id);
+	uint32	GetItemIDBySlot(uint16 loot_slot);
+	uint16	GetFirstSlotByItemID(uint32 item_id);
+	std::vector<int> GetLootList();
 	void	LootItem(Client* client, const EQApplicationPacket* app);
 	void	EndLoot(Client* client, const EQApplicationPacket* app);
 	void	MakeLootRequestPackets(Client* client, const EQApplicationPacket* app);

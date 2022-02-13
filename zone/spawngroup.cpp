@@ -244,8 +244,11 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 				AND
 				spawnentry.spawngroupID = spawn2.spawngroupID
 				AND
-				zone = '{}'),
-		zone_name
+				zone = '{}'
+				{}
+					),
+		zone_name,
+		ContentFilterCriteria::apply("spawnentry")
 	);
 
 	results = QueryDatabase(query);

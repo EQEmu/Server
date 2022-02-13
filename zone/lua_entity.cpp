@@ -12,6 +12,10 @@
 #include "lua_object.h"
 #include "lua_door.h"
 
+#ifdef BOTS
+#include "lua_bot.h"
+#endif
+
 bool Lua_Entity::IsClient() {
 	Lua_Safe_Call_Bool();
 	return self->IsClient();
@@ -118,31 +122,42 @@ Lua_Door Lua_Entity::CastToDoor() {
 	return Lua_Door(m);
 }
 
+#ifdef BOTS
+Lua_Bot Lua_Entity::CastToBot() {
+	void *d = GetLuaPtrData();
+	Bot *b = reinterpret_cast<Bot*>(d);
+	return Lua_Bot(b);
+}
+#endif
+
 luabind::scope lua_register_entity() {
 	return luabind::class_<Lua_Entity>("Entity")
-		.def(luabind::constructor<>())
-		.property("null", &Lua_Entity::Null)
-		.property("valid", &Lua_Entity::Valid)
-		.def("IsClient", &Lua_Entity::IsClient)
-		.def("IsNPC", &Lua_Entity::IsNPC)
-		.def("IsMob", &Lua_Entity::IsMob)
-		.def("IsMerc", &Lua_Entity::IsMerc)
-		.def("IsCorpse", &Lua_Entity::IsCorpse)
-		.def("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
-		.def("IsNPCCorpse", &Lua_Entity::IsNPCCorpse)
-		.def("IsObject", &Lua_Entity::IsObject)
-		.def("IsDoor", &Lua_Entity::IsDoor)
-		.def("IsTrap", &Lua_Entity::IsTrap)
-		.def("IsBeacon", &Lua_Entity::IsBeacon)
-		.def("IsEncounter", &Lua_Entity::IsEncounter)
-		.def("IsBot", &Lua_Entity::IsBot)
-		.def("GetID", &Lua_Entity::GetID)
-		.def("CastToClient", &Lua_Entity::CastToClient)
-		.def("CastToNPC", &Lua_Entity::CastToNPC)
-		.def("CastToMob", &Lua_Entity::CastToMob)
-		.def("CastToCorpse", &Lua_Entity::CastToCorpse)
-		.def("CastToObject", &Lua_Entity::CastToObject)
-		.def("CastToDoor", &Lua_Entity::CastToDoor);
+	.def(luabind::constructor<>())
+	.property("null", &Lua_Entity::Null)
+	.property("valid", &Lua_Entity::Valid)
+#ifdef BOTS
+	.def("CastToBot", &Lua_Entity::CastToBot)
+#endif
+	.def("CastToClient", &Lua_Entity::CastToClient)
+	.def("CastToCorpse", &Lua_Entity::CastToCorpse)
+	.def("CastToDoor", &Lua_Entity::CastToDoor)
+	.def("CastToMob", &Lua_Entity::CastToMob)
+	.def("CastToNPC", &Lua_Entity::CastToNPC)
+	.def("CastToObject", &Lua_Entity::CastToObject)
+	.def("GetID", &Lua_Entity::GetID)
+	.def("IsBeacon", &Lua_Entity::IsBeacon)
+	.def("IsBot", &Lua_Entity::IsBot)
+	.def("IsClient", &Lua_Entity::IsClient)
+	.def("IsCorpse", &Lua_Entity::IsCorpse)
+	.def("IsDoor", &Lua_Entity::IsDoor)
+	.def("IsEncounter", &Lua_Entity::IsEncounter)
+	.def("IsMerc", &Lua_Entity::IsMerc)
+	.def("IsMob", &Lua_Entity::IsMob)
+	.def("IsNPC", &Lua_Entity::IsNPC)
+	.def("IsNPCCorpse", &Lua_Entity::IsNPCCorpse)
+	.def("IsObject", &Lua_Entity::IsObject)
+	.def("IsPlayerCorpse", &Lua_Entity::IsPlayerCorpse)
+	.def("IsTrap", &Lua_Entity::IsTrap);
 }
 
 #endif

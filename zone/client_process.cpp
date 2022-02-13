@@ -119,8 +119,9 @@ bool Client::Process() {
 
 		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
 		// since the function will anyways
-		if (hpupdate_timer.Check(false))
+		if (hpupdate_timer.Check(false)) {
 			SendHPUpdate();
+		}
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
 		if (!is_client_moving && position_update_timer.Check()) {
@@ -131,9 +132,9 @@ bool Client::Process() {
 			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
-			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zoneId);
+			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zone_id);
 
-			m_pp.zone_id = m_pp.binds[0].zoneId;
+			m_pp.zone_id = m_pp.binds[0].zone_id;
 			m_pp.zoneInstance = m_pp.binds[0].instance_id;
 			m_pp.x = m_pp.binds[0].x;
 			m_pp.y = m_pp.binds[0].y;
@@ -180,11 +181,9 @@ bool Client::Process() {
 				myraid->MemberZoned(this);
 			}
 
-			Expedition* expedition = GetExpedition();
-			if (expedition)
-			{
-				expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
-			}
+			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
+
+			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 
 			return false; //delete client
 		}
@@ -200,8 +199,29 @@ bool Client::Process() {
 			instalog = true;
 		}
 
+		if (heroforge_wearchange_timer.Check()) {
+			/*
+				This addresses bug where on zone in heroforge models would not be sent to other clients when this was
+				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue. 
+				Unclear the underlying reason for this, if a better solution can be found then can move this back.
+			*/
+			if (queue_wearchange_slot >= 0) { //Resend slot from Client::SwapItem if heroforge item is swapped.
+				SendWearChange(static_cast<uint8>(queue_wearchange_slot));
+			}
+			else { //Send from Client::CompleteConnect()
+				SendWearChangeAndLighting(EQ::textures::LastTexture);
+				Mob *pet = GetPet();
+				if (pet) {
+					pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
+				}
+			}
+			heroforge_wearchange_timer.Disable();
+		}
+
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
+
+		cheat_manager.ClientProcess();
 
 		if (bardsong_timer.Check() && bardsong != 0) {
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
@@ -218,9 +238,9 @@ bool Client::Process() {
 				InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 			}
 			else {
-				if (!ApplyNextBardPulse(bardsong, song_target, bardsong_slot))
+				if (!ApplyBardPulse(bardsong, song_target, bardsong_slot)) {
 					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-				//SpellFinished(bardsong, bardsong_target, bardsong_slot, spells[bardsong].mana);
+				}
 			}
 		}
 
@@ -301,6 +321,10 @@ bool Client::Process() {
 		}
 
 		if (AutoFireEnabled()) {
+			if (GetTarget() == this) {
+				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+				auto_fire = false;
+			}
 			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
 			if (ranged)
 			{
@@ -390,12 +414,17 @@ bool Client::Process() {
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
 				EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotPrimary);
-				TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotPrimary);
+				TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotPrimary);
 				TriggerDefensiveProcs(auto_attack_target, EQ::invslot::slotPrimary, false);
 
 				DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
+
+				if (TryDoubleMeleeRoundEffect()) {
+					DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
+				}
+
 				if (CheckAATimer(aaTimerRampage)) {
-					entity_list.AEAttack(this, 30);
+					entity_list.AEAttack(this, 40);
 				}
 			}
 		}
@@ -431,26 +460,15 @@ bool Client::Process() {
 				CheckIncreaseSkill(EQ::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
 					EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotSecondary);
-					TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotSecondary);
+					TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotSecondary);
 
 					DoAttackRounds(auto_attack_target, EQ::invslot::slotSecondary);
 				}
 			}
 		}
 
-		if (HasVirus()) {
-			if (viral_timer.Check()) {
-				viral_timer_counter++;
-				for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i += 2) {
-					if (viral_spells[i]) {
-						if (viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
-							SpreadVirus(viral_spells[i], viral_spells[i + 1]);
-						}
-					}
-				}
-			}
-			if (viral_timer_counter > 999)
-				viral_timer_counter = 0;
+		if (viral_timer.Check() && !dead) {
+			VirusEffectProcess();
 		}
 
 		ProjectileAttack();
@@ -460,32 +478,8 @@ bool Client::Process() {
 				DoGravityEffect();
 		}
 
-		if (shield_timer.Check())
-		{
-			if (shield_target)
-			{
-				if (!CombatRange(shield_target))
-				{
-					entity_list.MessageCloseString(
-						this, false, 100, 0,
-						END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
-					for (int y = 0; y < 2; y++)
-					{
-						if (shield_target->shielder[y].shielder_id == GetID())
-						{
-							shield_target->shielder[y].shielder_id = 0;
-							shield_target->shielder[y].shielder_bonus = 0;
-						}
-					}
-					shield_target = 0;
-					shield_timer.Disable();
-				}
-			}
-			else
-			{
-				shield_target = 0;
-				shield_timer.Disable();
-			}
+		if (shield_timer.Check()) {
+			ShieldAbilityFinish();
 		}
 
 		SpellProcess();
@@ -562,7 +556,7 @@ bool Client::Process() {
 		OnDisconnect(true);
 		LogInfo("Client linkdead: {}", name);
 
-		if (Admin() > 100) {
+		if (Admin() > AccountStatus::GMAdmin) {
 			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
@@ -575,11 +569,7 @@ bool Client::Process() {
 			AI_Start(CLIENT_LD_TIMEOUT);
 			SendAppearancePacket(AT_Linkdead, 1);
 
-			Expedition* expedition = GetExpedition();
-			if (expedition)
-			{
-				expedition->SetMemberStatus(this, ExpeditionMemberStatus::LinkDead);
-			}
+			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 		}
 	}
 
@@ -711,10 +701,9 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		}
 	}
 
-	Expedition* expedition = GetExpedition();
-	if (expedition && !bZoning)
+	if (!bZoning)
 	{
-		expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
+		SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();
@@ -1012,31 +1001,38 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		// corpse is in has shutdown since the rez spell was cast.
 		database.MarkCorpseAsRezzed(PendingRezzDBID);
 		LogSpells("Player [{}] got a [{}] Rezz, spellid [{}] in zone[{}], instance id [{}]",
-				this->name, (uint16)spells[SpellID].base[0],
+				this->name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
-		this->BuffFadeNonPersistDeath();
+		BuffFadeNonPersistDeath();
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
-		if((SpellEffectDescNum == 82) || (SpellEffectDescNum == 39067)) {
+		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
+			SetHP(GetMaxHP() / 5);
 			SetMana(0);
-			SetHP(GetMaxHP()/5);
-			int rez_eff = 756;
-			if (RuleB(Character, UseOldRaceRezEffects) &&
-			    (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE))
-				rez_eff = 757;
-			SpellOnTarget(rez_eff, this); // Rezz effects
+			int resurrection_sickness_spell_id = (
+				RuleB(Character, UseOldRaceRezEffects) &&
+			    (
+					GetRace() == BARBARIAN ||
+					GetRace() == DWARF ||
+					GetRace() == TROLL ||
+					GetRace() == OGRE
+				) ? 
+				RuleI(Character, OldResurrectionSicknessSpellID) :
+				RuleI(Character, ResurrectionSicknessSpellID)
+			);
+			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
 		}
 		else {
-			SetMana(GetMaxMana());
 			SetHP(GetMaxHP());
+			SetMana(GetMaxMana());
 		}
-		if(spells[SpellID].base[0] < 100 && spells[SpellID].base[0] > 0 && PendingRezzXP > 0)
+		if(spells[SpellID].base_value[0] < 100 && spells[SpellID].base_value[0] > 0 && PendingRezzXP > 0)
 		{
-				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base[0])))),
+				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))),
 						GetAAXP(),true);
 		}
-		else if (spells[SpellID].base[0] == 100 && PendingRezzXP > 0) {
+		else if (spells[SpellID].base_value[0] == 100 && PendingRezzXP > 0) {
 			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
 		}
 
@@ -1053,6 +1049,11 @@ void Client::OPTGB(const EQApplicationPacket *app)
 {
 	if(!app) return;
 	if(!app->pBuffer) return;
+	
+	if(!RuleB(Character, EnableTGB))
+	{
+		return;
+	}
 
 	uint32 tgb_flag = *(uint32 *)app->pBuffer;
 	if(tgb_flag == 2)
@@ -1450,7 +1451,12 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		}
 		else{
 			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared){
-				this->Message(Chat::Red, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE");
+				this->SendPopupToClient(
+					"Shared Bank Warning",
+					"<c \"#F62217\">::: WARNING! :::<br>"
+					"SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE!</c>"
+				);
+				this->Message(Chat::Red, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE!");
 			}
 		}
 	}
@@ -1746,7 +1752,7 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 	}
 	else
 	{
-		if(admin < 80)
+		if(admin < AccountStatus::QuestTroupe)
 		{
 			return;
 		}
@@ -1861,7 +1867,7 @@ void Client::DoEnduranceUpkeep() {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
-			int upkeep = spells[buffs[buffs_i].spellid].EndurUpkeep;
+			int upkeep = spells[buffs[buffs_i].spellid].endurance_upkeep;
 			if(upkeep > 0) {
 				has_effect = true;
 				if(cost_redux > 0) {
@@ -1881,7 +1887,7 @@ void Client::DoEnduranceUpkeep() {
 
 	if(upkeep_sum != 0){
 		SetEndurance(GetEndurance() - upkeep_sum);
-		TryTriggerOnValueAmount(false, false, true);
+		TryTriggerOnCastRequirement();
 	}
 
 	if (!has_effect)
@@ -1996,7 +2002,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		BindStruct* b = &m_pp.binds[0];
 		default_to_bind = new RespawnOption;
 		default_to_bind->name = "Bind Location";
-		default_to_bind->zone_id = b->zoneId;
+		default_to_bind->zone_id = b->zone_id;
 		default_to_bind->instance_id = b->instance_id;
 		default_to_bind->x = b->x;
 		default_to_bind->y = b->y;
@@ -2089,7 +2095,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		}
 
 		//After they've respawned into the same zone, trigger EVENT_RESPAWN
-		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_rez ? 1 : 0);
+		std::string export_string = fmt::format("{}", Option);
+		parse->EventPlayer(EVENT_RESPAWN, this, export_string, is_rez ? 1 : 0);
 
 		//Pop Rez option from the respawn options list;
 		//easiest way to make sure it stays at the end and

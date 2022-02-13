@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -148,7 +148,7 @@ public:
 		entry.zone_in_time      = 1800;
 		entry.win_points        = 0;
 		entry.lose_points       = 0;
-		entry.theme             = 1;
+		entry.theme             = LDoNThemes::GUK;
 		entry.zone_in_zone_id   = 0;
 		entry.zone_in_x         = 0;
 		entry.zone_in_y         = 0;

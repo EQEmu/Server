@@ -61,7 +61,7 @@ bool Client::mod_client_message(char* message, uint8 chan_num) { return(true); }
 bool Client::mod_can_increase_skill(EQ::skills::SkillType skillid, Mob* against_who) { return(false); }
 
 //chance of general skill increase, rolled against 0-99 where higher chance is better.
-int16 Client::mod_increase_skill_chance(int16 chance, Mob* against_who) { return(chance); }
+double Client::mod_increase_skill_chance(double chance, Mob* against_who) { return(chance); }
 
 //Max percent of health you can bind wound starting with default value for class, item, and AA bonuses
 int Client::mod_bindwound_percent(int max_percent, Mob* bindmob) { return(max_percent); }
@@ -151,7 +151,7 @@ int32 Mob::mod_monk_special_damage(int32 ndamage, EQ::skills::SkillType skill_ty
 //ndamage - Backstab damage as calculated by default formulas
 int32 Mob::mod_backstab_damage(int32 ndamage) { return(ndamage); }
 
-//Chance for 50+ archery bonus damage if Combat:UseArcheryBonusRoll is true.  Base is Combat:ArcheryBonusChance
+//Chance for 50+ archery bonus damage if Combat:UseArcheryBonusRoll is true.
 int Mob::mod_archery_bonus_chance(int bonuschance, const EQ::ItemInstance* RangeWeapon) { return(bonuschance); }
 
 //Archery bonus damage

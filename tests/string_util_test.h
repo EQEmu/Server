@@ -30,6 +30,7 @@ public:
 		TEST_ADD(StringUtilTest::EscapeStringTest);
 		TEST_ADD(StringUtilTest::EscapeStringMemoryTest);
 		TEST_ADD(StringUtilTest::SearchDeliminatedStringTest);
+		TEST_ADD(StringUtilTest::SplitStringTest);
 	}
 
 	~StringUtilTest() {
@@ -107,6 +108,15 @@ public:
 		TEST_ASSERT(search_deliminated_string(h, "air") == std::string::npos);
 		TEST_ASSERT(search_deliminated_string(h, "bef") == std::string::npos);
 		TEST_ASSERT(search_deliminated_string(h, "wwi") == std::string::npos);
+	}
+
+	void SplitStringTest() {
+		std::string s = "123,456,789,";
+		auto v = SplitString(s, ',');
+		TEST_ASSERT(v.size() == 3);
+		TEST_ASSERT(v[0] == "123");
+		TEST_ASSERT(v[1] == "456");
+		TEST_ASSERT(v[2] == "789");
 	}
 };
 

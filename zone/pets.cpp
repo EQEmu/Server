@@ -273,6 +273,8 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
+		EntityList::RemoveNumbers(npc_type->name);
+		entity_list.MakeNameUnique(npc_type->name);
 	} else if (record.petnaming == 0) {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
@@ -299,39 +301,16 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		strcat(npc_type->name, "`s_pet");
 	}
 
-	//handle beastlord pet appearance
-	if(record.petnaming == 2)
-	{
-		switch(GetBaseRace())
-		{
-		case VAHSHIR:
-			npc_type->race = TIGER;
-			npc_type->size *= 0.8f;
-			break;
-		case TROLL:
-			npc_type->race = ALLIGATOR;
-			npc_type->size *= 2.5f;
-			break;
-		case OGRE:
-			npc_type->race = BEAR;
-			npc_type->texture = 3;
-			npc_type->gender = 2;
-			break;
-		case BARBARIAN:
-			npc_type->race = WOLF;
-			npc_type->texture = 2;
-			break;
-		case IKSAR:
-			npc_type->race = WOLF;
-			npc_type->texture = 0;
-			npc_type->gender = 1;
-			npc_type->size *= 2.0f;
-			npc_type->luclinface = 0;
-			break;
-		default:
-			npc_type->race = WOLF;
-			npc_type->texture = 0;
-		}
+	// Beastlord Pets
+	if(record.petnaming == 2) {
+		uint16 race_id = GetBaseRace();
+		auto beastlord_pet_data = content_db.GetBeastlordPetData(race_id);
+		npc_type->race = beastlord_pet_data.race_id;
+		npc_type->texture = beastlord_pet_data.texture;
+		npc_type->helmtexture = beastlord_pet_data.helm_texture;
+		npc_type->gender = beastlord_pet_data.gender;
+		npc_type->size *= beastlord_pet_data.size_modifier;
+		npc_type->luclinface = beastlord_pet_data.face;
 	}
 
 	// handle monster summoning pet appearance
@@ -408,20 +387,64 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	SetPetID(npc->GetID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
-
 	if (record.petcontrol == petTargetLock)
 	{
-		Mob* target = GetTarget();
+		Mob* m_target = GetTarget();
 
-		if (target){
-			npc->AddToHateList(target, 1);
-			npc->SetPetTargetLockID(target->GetID());
+		bool activiate_pet = false;
+		if (m_target && m_target->GetID() != GetID()) {
+
+			if (spells[spell_id].target_type == ST_Self) {
+				float distance = CalculateDistance(m_target->GetX(), m_target->GetY(), m_target->GetZ());
+				if (distance <= 200) { //Live distance on targetlock pets that self cast. No message is given if not in range.
+					activiate_pet = true;
+				}
+			}
+			else {
+				activiate_pet = true;
+			}
+		}
+		
+		if (activiate_pet){
+			npc->AddToHateList(m_target, 1);
+			npc->SetPetTargetLockID(m_target->GetID());
 			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
 		}
-		else
-			npc->Kill(); //On live casts spell 892 Unsummon (Kayen - Too limiting to use that for emu since pet can have more than 20k HP)
+		else {
+			npc->CastSpell(SPELL_UNSUMMON_SELF, npc->GetID()); //Live like behavior, damages self for 20K
+			if (!npc->HasDied()) {
+				npc->Kill(); //Ensure pet dies if over 20k HP.
+			}
+		}
 	}
 }
+
+void NPC::TryDepopTargetLockedPets(Mob* current_target) {
+
+	if (!current_target || (current_target && (current_target->GetID() != GetPetTargetLockID()) || current_target->IsCorpse())) {
+
+		//Use when swarmpets are set to auto lock from quest or rule
+		if (GetSwarmInfo() && GetSwarmInfo()->target) {
+			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
+			if (owner) {
+				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+			}
+			Depop();
+			return;
+		}
+		//Use when pets are given petype 5
+		if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()) {
+			CastSpell(SPELL_UNSUMMON_SELF, GetID()); //Live like behavior, damages self for 20K
+			if (!HasDied()) {
+				Kill(); //Ensure pet dies if over 20k HP.
+			}
+			return;
+		}
+	}
+}
+
+
+
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
 into walls or objects (+10), this sometimes creates the "ghost" effect. I changed to +2 (as close as I
 could get while it still looked good). I also noticed this can happen if an NPC is spawned on the same spot of another or in a related bad spot.*/
@@ -583,7 +606,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 			buffs[i].casterlevel		= pet_buffs[i].level;
 			buffs[i].casterid			= 0;
 			buffs[i].counters			= pet_buffs[i].counters;
-			buffs[i].numhits			= spells[pet_buffs[i].spellid].numhits;
+			buffs[i].hit_number			= spells[pet_buffs[i].spellid].hit_number;
 			buffs[i].instrument_mod		= pet_buffs[i].bard_modifier;
 		}
 		else {
@@ -598,15 +621,18 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 	for (int j1=0; j1 < GetPetMaxTotalSlots(); j1++) {
 		if (buffs[j1].spellid <= (uint32)SPDAT_RECORDS) {
 			for (int x1=0; x1 < EFFECT_COUNT; x1++) {
-				switch (spells[buffs[j1].spellid].effectid[x1]) {
+				switch (spells[buffs[j1].spellid].effect_id[x1]) {
+					case SE_AddMeleeProc:
 					case SE_WeaponProc:
 						// We need to reapply buff based procs
 						// We need to do this here so suspended pets also regain their procs.
-						if (spells[buffs[j1].spellid].base2[x1] == 0) {
-							AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100, buffs[j1].spellid);
-						} else {
-							AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100+spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
-						}
+						AddProcToWeapon(GetProcID(buffs[j1].spellid,x1), false, 100+spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel, GetProcLimitTimer(buffs[j1].spellid, ProcType::MELEE_PROC));
+						break;
+					case SE_DefensiveProc:
+						AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, ProcType::DEFENSIVE_PROC));
+						break;
+					case SE_RangedProc:
+						AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, GetProcLimitTimer(buffs[j1].spellid, ProcType::RANGED_PROC));
 						break;
 					case SE_Charm:
 					case SE_Rune:
@@ -715,4 +741,30 @@ bool Pet::CheckSpellLevelRestriction(uint16 spell_id)
 	if (owner)
 		return owner->CheckSpellLevelRestriction(spell_id);
 	return true;
+}
+
+BeastlordPetData::PetStruct ZoneDatabase::GetBeastlordPetData(uint16 race_id) {	
+	BeastlordPetData::PetStruct beastlord_pet_data;
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			`pet_race`, `texture`, `helm_texture`, `gender`, `size_modifier`, `face`
+			FROM `pets_beastlord_data`
+			WHERE `player_race` = {}
+		),
+		race_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() != 1) {
+		return beastlord_pet_data;
+	}
+
+	auto row = results.begin();
+	beastlord_pet_data.race_id = atoi(row[0]);
+	beastlord_pet_data.texture = atoi(row[1]);
+	beastlord_pet_data.helm_texture = atoi(row[2]);
+	beastlord_pet_data.gender = atoi(row[3]);
+	beastlord_pet_data.size_modifier = atof(row[4]);
+	beastlord_pet_data.face = atoi(row[5]);
+	return beastlord_pet_data;
 }

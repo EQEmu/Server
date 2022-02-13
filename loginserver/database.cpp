@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "../common/global_define.h"
 
 #include "database.h"
@@ -45,11 +25,6 @@ Database::Database(
 	std::string name
 )
 {
-	this->user = user;
-	this->pass = pass;
-	this->host = host;
-	this->name = name;
-
 	uint32 errnum = 0;
 	char   errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(
@@ -75,8 +50,8 @@ Database::Database(
  */
 Database::~Database()
 {
-	if (database) {
-		mysql_close(database);
+	if (m_database) {
+		mysql_close(m_database);
 	}
 }
 
@@ -355,11 +330,13 @@ void Database::UpdateLoginserverAccountPasswordHash(
 
 /**
  * @param short_name
+ * @param long_name
  * @param login_world_server_admin_id
  * @return
  */
 Database::DbWorldRegistration Database::GetWorldRegistration(
 	const std::string &short_name,
+	const std::string &long_name,
 	uint32 login_world_server_admin_id
 )
 {
@@ -375,45 +352,46 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 		"  login_world_servers AS WSR\n"
 		"  JOIN login_server_list_types AS SLT ON WSR.login_server_list_type_id = SLT.id\n"
 		"WHERE\n"
-		"  WSR.short_name = '{0}' AND WSR.login_server_admin_id = {1} LIMIT 1",
+		"  WSR.short_name = '{}' AND WSR.long_name = '{}' AND WSR.login_server_admin_id = {} LIMIT 1",
 		EscapeString(short_name),
+		EscapeString(long_name),
 		login_world_server_admin_id
 	);
 
-	Database::DbWorldRegistration world_registration{};
+	Database::DbWorldRegistration r{};
 
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() != 1) {
-		return world_registration;
+		return r;
 	}
 
 	auto row = results.begin();
 
-	world_registration.loaded                  = true;
-	world_registration.server_id               = std::stoi(row[0]);
-	world_registration.server_description      = row[1];
-	world_registration.server_list_type        = std::stoi(row[3]);
-	world_registration.is_server_trusted       = std::stoi(row[2]) > 0;
-	world_registration.server_list_description = row[4];
-	world_registration.server_admin_id         = std::stoi(row[5]);
+	r.loaded                  = true;
+	r.server_id               = std::stoi(row[0]);
+	r.server_description      = row[1];
+	r.server_list_type        = std::stoi(row[3]);
+	r.is_server_trusted       = std::stoi(row[2]) > 0;
+	r.server_list_description = row[4];
+	r.server_admin_id         = std::stoi(row[5]);
 
-	if (world_registration.server_admin_id <= 0) {
-		return world_registration;
+	if (r.server_admin_id <= 0) {
+		return r;
 	}
 
 	auto world_registration_query = fmt::format(
 		"SELECT account_name, account_password FROM login_server_admins WHERE id = {0} LIMIT 1",
-		world_registration.server_admin_id
+		r.server_admin_id
 	);
 
 	auto world_registration_results = QueryDatabase(world_registration_query);
 	if (world_registration_results.Success() && world_registration_results.RowCount() == 1) {
 		auto world_registration_row = world_registration_results.begin();
-		world_registration.server_admin_account_name     = world_registration_row[0];
-		world_registration.server_admin_account_password = world_registration_row[1];
+		r.server_admin_account_name     = world_registration_row[0];
+		r.server_admin_account_password = world_registration_row[1];
 	}
 
-	return world_registration;
+	return r;
 }
 
 /**
@@ -599,95 +577,6 @@ MySQLRequestResult Database::GetLoginserverApiTokens()
 }
 
 /**
- * @param log_settings
- */
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
-{
-	std::string query =
-					"SELECT "
-					"log_category_id, "
-					"log_category_description, "
-					"log_to_console, "
-					"log_to_file, "
-					"log_to_gmsay "
-					"FROM "
-					"logsys_categories "
-					"ORDER BY log_category_id";
-
-	auto results         = QueryDatabase(query);
-	int  log_category_id = 0;
-
-	int *categories_in_database = new int[1000];
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		log_category_id = atoi(row[0]);
-		if (log_category_id <= Logs::None || log_category_id >= Logs::MaxCategoryID) {
-			continue;
-		}
-
-		log_settings[log_category_id].log_to_console = static_cast<uint8>(atoi(row[2]));
-		log_settings[log_category_id].log_to_file    = static_cast<uint8>(atoi(row[3]));
-		log_settings[log_category_id].log_to_gmsay   = static_cast<uint8>(atoi(row[4]));
-
-		/**
-		 * Determine if any output method is enabled for the category
-		 * and set it to 1 so it can used to check if category is enabled
-		 */
-		const bool log_to_console      = log_settings[log_category_id].log_to_console > 0;
-		const bool log_to_file         = log_settings[log_category_id].log_to_file > 0;
-		const bool log_to_gmsay        = log_settings[log_category_id].log_to_gmsay > 0;
-		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
-
-		if (is_category_enabled) {
-			log_settings[log_category_id].is_category_enabled = 1;
-		}
-
-		/**
-		 * This determines whether or not the process needs to actually file log anything.
-		 * If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
-		 */
-		if (log_settings[log_category_id].log_to_file > 0) {
-			LogSys.file_logs_enabled = true;
-		}
-
-		categories_in_database[log_category_id] = 1;
-	}
-
-	/**
-	 * Auto inject categories that don't exist in the database...
-	 */
-	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
-		if (categories_in_database[log_index] != 1) {
-
-			LogInfo(
-				"New Log Category [{0}] doesn't exist... Automatically adding to [logsys_categories] table...",
-				Logs::LogCategoryName[log_index]
-			);
-
-			auto inject_query = fmt::format(
-				"INSERT INTO logsys_categories "
-				"(log_category_id, "
-				"log_category_description, "
-				"log_to_console, "
-				"log_to_file, "
-				"log_to_gmsay) "
-				"VALUES "
-				"({0}, '{1}', {2}, {3}, {4})",
-				log_index,
-				EscapeString(Logs::LogCategoryName[log_index]),
-				std::to_string(log_settings[log_index].log_to_console),
-				std::to_string(log_settings[log_index].log_to_file),
-				std::to_string(log_settings[log_index].log_to_gmsay)
-			);
-
-			QueryDatabase(inject_query);
-		}
-	}
-
-	delete[] categories_in_database;
-}
-
-/**
  * @param account_name
  * @param account_password
  * @param first_name
@@ -754,21 +643,21 @@ Database::DbLoginServerAdmin Database::GetLoginServerAdmin(const std::string &ac
 
 	auto results = QueryDatabase(query);
 
-	Database::DbLoginServerAdmin login_server_admin{};
+	Database::DbLoginServerAdmin r{};
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
-		login_server_admin.loaded                  = true;
-		login_server_admin.id                      = std::stoi(row[0]);
-		login_server_admin.account_name            = row[1];
-		login_server_admin.account_password        = row[2];
-		login_server_admin.first_name              = row[3];
-		login_server_admin.last_name               = row[4];
-		login_server_admin.email                   = row[5];
-		login_server_admin.registration_date       = row[7];
-		login_server_admin.registration_ip_address = row[8];
+		r.loaded                  = true;
+		r.id                      = std::stoi(row[0]);
+		r.account_name            = row[1];
+		r.account_password        = row[2];
+		r.first_name              = row[3];
+		r.last_name               = row[4];
+		r.email                   = row[5];
+		r.registration_date       = row[7];
+		r.registration_ip_address = row[8];
 	}
 
-	return login_server_admin;
+	return r;
 }
 
 /**
@@ -790,20 +679,20 @@ Database::DbLoginServerAccount Database::GetLoginServerAccountByAccountName(
 
 	auto results = QueryDatabase(query);
 
-	Database::DbLoginServerAccount login_server_account{};
+	Database::DbLoginServerAccount r{};
 	if (results.RowCount() == 1) {
 		auto row = results.begin();
-		login_server_account.loaded             = true;
-		login_server_account.id                 = std::stoi(row[0]);
-		login_server_account.account_name       = row[1];
-		login_server_account.account_password   = row[2];
-		login_server_account.account_email      = row[3];
-		login_server_account.source_loginserver = row[4];
-		login_server_account.last_ip_address    = row[5];
-		login_server_account.last_login_date    = row[6];
-		login_server_account.created_at         = row[7];
-		login_server_account.updated_at         = row[8];
+		r.loaded             = true;
+		r.id                 = std::stoi(row[0]);
+		r.account_name       = row[1];
+		r.account_password   = row[2];
+		r.account_email      = row[3];
+		r.source_loginserver = row[4];
+		r.last_ip_address    = row[5];
+		r.last_login_date    = row[6];
+		r.created_at         = row[7];
+		r.updated_at         = row[8];
 	}
 
-	return login_server_account;
+	return r;
 }

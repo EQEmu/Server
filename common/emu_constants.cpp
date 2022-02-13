@@ -18,6 +18,9 @@
 */
 
 #include "emu_constants.h"
+#include "languages.h"
+#include "data_verification.h"
+#include "bodytypes.h"
 
 
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
@@ -147,8 +150,235 @@ const char *EQ::constants::GetStanceName(StanceType stance_type) {
 }
 
 int EQ::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
-	if (stance_type >= EQ::constants::stancePassive && stance_type <= EQ::constants::stanceBurnAE)
+	if (EQ::ValueWithin(stance_type, EQ::constants::stancePassive, EQ::constants::stanceBurnAE)) {
 		return (stance_type - EQ::constants::stancePassive);
+	}
 
 	return 0;
+}
+
+const std::map<int, std::string>& EQ::constants::GetLanguageMap()
+{
+	static const std::map<int, std::string> language_map = {
+		{ LANG_COMMON_TONGUE, "Common Tongue" },
+		{ LANG_BARBARIAN, "Barbarian" },
+		{ LANG_ERUDIAN, "Erudian" },
+		{ LANG_ELVISH, "Elvish" },
+		{ LANG_DARK_ELVISH, "Dark Elvish" },
+		{ LANG_DWARVISH, "Dwarvish" },
+		{ LANG_TROLL, "Troll" },
+		{ LANG_OGRE, "Ogre" },
+		{ LANG_GNOMISH, "Gnomish" },
+		{ LANG_HALFLING, "Halfling" },
+		{ LANG_THIEVES_CANT, "Thieves Cant" },
+		{ LANG_OLD_ERUDIAN, "Old Erudian" },
+		{ LANG_ELDER_ELVISH, "Elder Elvish" },
+		{ LANG_FROGLOK, "Froglok" },
+		{ LANG_GOBLIN, "Goblin" },
+		{ LANG_GNOLL, "Gnoll" },
+		{ LANG_COMBINE_TONGUE, "Combine Tongue" },
+		{ LANG_ELDER_TEIRDAL, "Elder Teirdal" },
+		{ LANG_LIZARDMAN, "Lizardman" },
+		{ LANG_ORCISH, "Orcish" },
+		{ LANG_FAERIE, "Faerie" },
+		{ LANG_DRAGON, "Dragon" },
+		{ LANG_ELDER_DRAGON, "Elder Dragon" },
+		{ LANG_DARK_SPEECH, "Dark Speech" },
+		{ LANG_VAH_SHIR, "Vah Shir" },
+		{ LANG_ALARAN, "Alaran" },
+		{ LANG_HADAL, "Hadal" },
+		{ LANG_UNKNOWN, "Unknown" }
+	};
+	return language_map;
+}
+
+std::string EQ::constants::GetLanguageName(int language_id)
+{
+	if (EQ::ValueWithin(language_id, LANG_COMMON_TONGUE, LANG_UNKNOWN)) {
+		auto languages = EQ::constants::GetLanguageMap();
+		return languages[language_id];
+	}
+	return std::string();
+}
+
+const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
+{
+	static const std::map<uint32, std::string> ldon_theme_map = {
+		{ LDoNThemes::Unused, "Unused" },
+		{ LDoNThemes::GUK, "Deepest Guk" },
+		{ LDoNThemes::MIR, "Miragul's Menagerie" },
+		{ LDoNThemes::MMC, "Mistmoore Catacombs" },
+		{ LDoNThemes::RUJ, "Rujarkian Hills" },
+		{ LDoNThemes::TAK, "Takish-Hiz" },
+	};
+	return ldon_theme_map;
+}
+
+std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
+{
+	if (EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
+		auto ldon_themes = EQ::constants::GetLDoNThemeMap();
+		return ldon_themes[theme_id];
+	}
+	return std::string();	
+}
+
+const std::map<uint8, std::string>& EQ::constants::GetFlyModeMap()
+{
+	static const std::map<uint8, std::string> flymode_map = {
+		{ GravityBehavior::Ground, "Ground" },
+		{ GravityBehavior::Flying, "Flying" },
+		{ GravityBehavior::Levitating, "Levitating" },
+		{ GravityBehavior::Water, "Water" },
+		{ GravityBehavior::Floating, "Floating" },
+		{ GravityBehavior::LevitateWhileRunning, "Levitating While Running" },
+	};
+	return flymode_map;
+}
+
+std::string EQ::constants::GetFlyModeName(uint8 flymode_id)
+{
+	if (EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
+		auto flymodes = EQ::constants::GetFlyModeMap();
+		return flymodes[flymode_id];
+	}
+	return std::string();
+}
+
+const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
+{
+	static const std::map<bodyType, std::string> bodytype_map = {
+		{ BT_Humanoid, "Humanoid" },
+		{ BT_Lycanthrope, "Lycanthrope" },
+		{ BT_Undead, "Undead" },
+		{ BT_Giant, "Giant" },
+		{ BT_Construct, "Construct" },
+		{ BT_Extraplanar, "Extraplanar" },
+		{ BT_Magical, "Magical" },
+		{ BT_SummonedUndead, "Summoned Undead" },
+		{ BT_RaidGiant, "Raid Giant" },
+		{ BT_RaidColdain, "Raid Coldain" },
+		{ BT_NoTarget, "Untargetable" },
+		{ BT_Vampire, "Vampire" },
+		{ BT_Atenha_Ra, "Aten Ha Ra" },
+		{ BT_Greater_Akheva, "Greater Akheva" },
+		{ BT_Khati_Sha, "Khati Sha" },
+		{ BT_Seru, "Seru" },
+		{ BT_Grieg_Veneficus, "Grieg Veneficus" },
+		{ BT_Draz_Nurakk, "Draz Nurakk" },
+		{ BT_Zek, "Zek" },
+		{ BT_Luggald, "Luggald" },
+		{ BT_Animal, "Animal" },
+		{ BT_Insect, "Insect" },
+		{ BT_Monster, "Monster" },
+		{ BT_Summoned, "Summoned" },
+		{ BT_Plant, "Plant" },
+		{ BT_Dragon, "Dragon" },
+		{ BT_Summoned2, "Summoned 2" },
+		{ BT_Summoned3, "Summoned 3" },
+		{ BT_Dragon2, "Dragon 2" },
+		{ BT_VeliousDragon, "Velious Dragon" },
+		{ BT_Familiar, "Familiar" },
+		{ BT_Dragon3, "Dragon 3" },
+		{ BT_Boxes, "Boxes" },
+		{ BT_Muramite, "Muramite" },
+		{ BT_NoTarget2, "Untargetable 2" },
+		{ BT_SwarmPet, "Swarm Pet" },
+		{ BT_MonsterSummon, "Monster Summon" },
+		{ BT_InvisMan, "Invisible Man" },
+		{ BT_Special, "Special" },
+	};
+	return bodytype_map;
+}
+
+std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
+{
+	auto bodytypes = EQ::constants::GetBodyTypeMap();
+	if (!bodytypes[bodytype_id].empty()) {
+		return bodytypes[bodytype_id];
+	}
+	return std::string();
+}
+
+const std::map<uint8, std::string>& EQ::constants::GetAccountStatusMap()
+{
+	static const std::map<uint8, std::string> account_status_map = {
+		{ AccountStatus::Player, "Player" },
+		{ AccountStatus::Steward, "Steward" },
+		{ AccountStatus::ApprenticeGuide, "Apprentice Guide" },
+		{ AccountStatus::Guide, "Guide" },
+		{ AccountStatus::QuestTroupe, "Quest Troupe" },
+		{ AccountStatus::SeniorGuide, "Senior Guide" },
+		{ AccountStatus::GMTester, "GM Tester" },
+		{ AccountStatus::EQSupport, "EQ Support" },
+		{ AccountStatus::GMStaff, "GM Staff" },
+		{ AccountStatus::GMAdmin, "GM Admin" },
+		{ AccountStatus::GMLeadAdmin, "GM Lead Admin" },
+		{ AccountStatus::QuestMaster, "Quest Master" },
+		{ AccountStatus::GMAreas, "GM Areas" },
+		{ AccountStatus::GMCoder, "GM Coder" },
+		{ AccountStatus::GMMgmt, "GM Mgmt" },
+		{ AccountStatus::GMImpossible, "GM Impossible" },	
+		{ AccountStatus::Max, "GM Max" }
+	};
+	return account_status_map;
+}
+
+std::string EQ::constants::GetAccountStatusName(uint8 account_status)
+{
+	auto account_statuses = EQ::constants::GetAccountStatusMap();
+	std::string status_name;
+	for (auto status_level = account_statuses.rbegin(); status_level != account_statuses.rend(); ++status_level) {
+		if (account_status >= status_level->first) {
+			status_name = status_level->second;
+			break;
+		}
+	}
+
+	return status_name;
+}
+
+const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
+{
+	static const std::map<uint8, std::string> consider_level_map = {
+		{ ConsiderLevel::Ally, "Ally" },
+		{ ConsiderLevel::Warmly, "Warmly" },
+		{ ConsiderLevel::Kindly, "Kindly" },
+		{ ConsiderLevel::Amiably, "Amiably" },
+		{ ConsiderLevel::Indifferently, "Indifferently" },
+		{ ConsiderLevel::Apprehensively, "Apprehensively" },
+		{ ConsiderLevel::Dubiously, "Dubiously" },
+		{ ConsiderLevel::Threateningly, "Threateningly" },
+		{ ConsiderLevel::Scowls, "Scowls" }
+	};
+	return consider_level_map;
+}
+
+std::string EQ::constants::GetConsiderLevelName(uint8 faction_consider_level)
+{
+	auto consider_levels = EQ::constants::GetConsiderLevelMap();
+	if (!consider_levels[faction_consider_level].empty()) {
+		return consider_levels[faction_consider_level];
+	}
+	return std::string();
+}
+
+const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
+{
+	static const std::map<uint8, std::string> damage_type_map = {
+		{ EnvironmentalDamage::Lava, "Lava" },
+		{ EnvironmentalDamage::Drowning, "Drowning" },
+		{ EnvironmentalDamage::Falling, "Falling" },
+		{ EnvironmentalDamage::Trap, "Trap" }
+	};
+	return damage_type_map;
+}
+
+std::string EQ::constants::GetEnvironmentalDamageName(uint8 damage_type)
+{
+	if (EQ::ValueWithin(damage_type, EnvironmentalDamage::Lava, EnvironmentalDamage::Trap)) {
+		auto damage_types = EQ::constants::GetEnvironmentalDamageMap();
+		return damage_types[damage_type];
+	}
+	return std::string();
 }

@@ -15,7 +15,7 @@ EQ::Net::ConsoleServerConnection::ConsoleServerConnection(ConsoleServer *parent,
 	memset(m_line, 0, MaxConsoleLineLength);
 	m_accept_messages = false;
 	m_user_id = 0;
-	m_admin = 0;
+	m_admin = AccountStatus::Player;
 
 	m_connection->OnRead(std::bind(&ConsoleServerConnection::OnRead, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_connection->OnDisconnect(std::bind(&ConsoleServerConnection::OnDisconnect, this, std::placeholders::_1));
@@ -29,7 +29,7 @@ EQ::Net::ConsoleServerConnection::ConsoleServerConnection(ConsoleServer *parent,
 	if (addr.find("127.0.0.1") != std::string::npos || addr.find("::0") != std::string::npos) {
 		SendLine("Connection established from localhost, assuming admin");
 		m_status = ConsoleStatusLoggedIn;
-		m_admin = 255;
+		m_admin = AccountStatus::Max;
 		SendPrompt();
 	}
 	else {

@@ -5,7 +5,7 @@
 typedef void(*NPCArgumentHandler)(QuestInterface*, lua_State*, NPC*, Mob*, std::string, uint32, std::vector<EQ::Any>*);
 typedef void(*PlayerArgumentHandler)(QuestInterface*, lua_State*, Client*, std::string, uint32, std::vector<EQ::Any>*);
 typedef void(*ItemArgumentHandler)(QuestInterface*, lua_State*, Client*, EQ::ItemInstance*, Mob*, std::string, uint32, std::vector<EQ::Any>*);
-typedef void(*SpellArgumentHandler)(QuestInterface*, lua_State*, NPC*, Client*, uint32, uint32, std::vector<EQ::Any>*);
+typedef void(*SpellArgumentHandler)(QuestInterface*, lua_State*, NPC*, Client*, uint32, std::string, uint32, std::vector<EQ::Any>*);
 typedef void(*EncounterArgumentHandler)(QuestInterface*, lua_State*, Encounter* encounter, std::string, uint32, std::vector<EQ::Any>*);
 
 //NPC
@@ -40,6 +40,8 @@ void handle_npc_cast(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 void handle_npc_area(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<EQ::Any> *extra_pointers);
 void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						  std::vector<EQ::Any> *extra_pointers);
+void handle_npc_loot_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<EQ::Any> *extra_pointers);
 
 //Player
@@ -97,10 +99,20 @@ void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std
 		std::vector<EQ::Any> *extra_pointers);
 void handle_player_use_skill(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
+void handle_test_buff(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<EQ::Any>* extra_pointers);
 void handle_player_combine_validate(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQ::Any>* extra_pointers);
 void handle_player_bot_command(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
+void handle_player_warp(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQ::Any>* extra_pointers);
+void handle_player_quest_combine(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQ::Any>* extra_pointers);
+void handle_player_consider(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQ::Any>* extra_pointers);
+void handle_player_consider_corpse(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQ::Any>* extra_pointers);
 
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQ::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
@@ -123,15 +135,11 @@ void handle_item_null(QuestInterface *parse, lua_State* L, Client* client, EQ::I
 		std::vector<EQ::Any> *extra_pointers);
 
 //Spell
-void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
+void handle_spell_event(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
-void handle_spell_tic(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
+void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
-void handle_spell_fade(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
-void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
-void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
+void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
 
 

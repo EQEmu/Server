@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -154,9 +154,9 @@ public:
 		entry._unknown_value      = 0;
 		entry.bug_report          = "";
 		entry.system_info         = "";
-		entry.report_datetime     = current_timestamp();
+		entry.report_datetime     = "";
 		entry.bug_status          = 0;
-		entry.last_review         = current_timestamp();
+		entry.last_review         = "";
 		entry.last_reviewer       = "None";
 		entry.reviewer_notes      = "";
 

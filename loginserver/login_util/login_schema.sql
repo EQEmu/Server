@@ -5,7 +5,7 @@ CREATE TABLE `login_accounts` (
   `account_password` text NOT NULL,
   `account_email` varchar(100) NOT NULL,
   `source_loginserver` varchar(64) DEFAULT NULL,
-  `last_ip_address` varchar(15) NOT NULL,
+  `last_ip_address` varchar(80) NOT NULL,
   `last_login_date` datetime NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT current_timestamp(),
@@ -22,7 +22,7 @@ CREATE TABLE `login_server_admins` (
   `last_name` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
   `registration_date` datetime NOT NULL,
-  `registration_ip_address` varchar(15) NOT NULL,
+  `registration_ip_address` varchar(80) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 
@@ -45,7 +45,7 @@ CREATE TABLE `login_world_servers` (
   `tag_description` varchar(50) NOT NULL DEFAULT '',
   `login_server_list_type_id` int(11) NOT NULL,
   `last_login_date` datetime DEFAULT NULL,
-  `last_ip_address` varchar(15) DEFAULT NULL,
+  `last_ip_address` varchar(80) DEFAULT NULL,
   `login_server_admin_id` int(11) NOT NULL,
   `is_server_trusted` int(11) NOT NULL,
   `note` varchar(255) DEFAULT NULL,

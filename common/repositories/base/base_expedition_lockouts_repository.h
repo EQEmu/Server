@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -78,7 +78,7 @@ public:
 		entry.id                   = 0;
 		entry.expedition_id        = 0;
 		entry.event_name           = "";
-		entry.expire_time          = current_timestamp();
+		entry.expire_time          = "";
 		entry.duration             = 0;
 		entry.from_expedition_uuid = "";
 

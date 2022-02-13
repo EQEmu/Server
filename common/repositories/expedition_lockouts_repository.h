@@ -65,6 +65,58 @@ public:
 
 	// Custom extended repository methods here
 
+	struct ExpeditionLockoutsWithTimestamp {
+		uint32_t    id;
+		uint32_t    expedition_id;
+		std::string event_name;
+		time_t      expire_time;
+		int         duration;
+		std::string from_expedition_uuid;
+	};
+
+	static std::vector<ExpeditionLockoutsWithTimestamp> GetWithTimestamp(
+		Database& db, const std::vector<uint32_t>& expedition_ids)
+	{
+		if (expedition_ids.empty())
+		{
+			return {};
+		}
+
+		std::vector<ExpeditionLockoutsWithTimestamp> all_entries;
+
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			SELECT
+				id,
+				expedition_id,
+				event_name,
+				UNIX_TIMESTAMP(expire_time),
+				duration,
+				from_expedition_uuid
+			FROM expedition_lockouts
+			WHERE expedition_id IN ({})
+		),
+			fmt::join(expedition_ids, ",")
+		));
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			ExpeditionLockoutsWithTimestamp entry{};
+
+			int col = 0;
+			entry.id                   = strtoul(row[col++], nullptr, 10);
+			entry.expedition_id        = strtoul(row[col++], nullptr, 10);
+			entry.event_name           = row[col++];
+			entry.expire_time          = strtoull(row[col++], nullptr, 10);
+			entry.duration             = strtol(row[col++], nullptr, 10);
+			entry.from_expedition_uuid = row[col++];
+
+			all_entries.emplace_back(std::move(entry));
+		}
+
+		return all_entries;
+	}
 };
 
 #endif //EQEMU_EXPEDITION_LOCKOUTS_REPOSITORY_H

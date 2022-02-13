@@ -49,12 +49,18 @@ public:
 	Mob *GetEscapingEntOnHateList(); // returns first eligble entity
 	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
+#ifdef BOTS
+	Bot* GetRandomBotOnHateList(bool skip_mezzed = false);
+#endif
+	Client* GetRandomClientOnHateList(bool skip_mezzed = false);
+	NPC* GetRandomNPCOnHateList(bool skip_mezzed = false);
+
 	bool IsEntOnHateList(Mob *mob);
 	bool IsHateListEmpty();
 	bool RemoveEntFromHateList(Mob *ent);
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
-	int GetSummonedPetCountOnHateList(Mob *hater);
+	int GetSummonedPetCountOnHateList();
 	int GetHateRatio(Mob *top, Mob *other);
 
 	int32 GetEntHateAmount(Mob *ent, bool in_damage = false);
