@@ -968,8 +968,8 @@ void Bot::AI_Process_Raid()
 					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
 
 					TEST_COMBATANTS();
-					TryWeaponProc(p_item, tar, EQ::invslot::slotPrimary);
-
+					//TryWeaponProc(p_item, tar, EQ::invslot::slotPrimary);
+					TryCombatProcs(p_item, tar, EQ::invslot::slotPrimary);
 					// bool tripleSuccess = false;
 
 					TEST_COMBATANTS();
@@ -1008,7 +1008,10 @@ void Bot::AI_Process_Raid()
 					}
 
 					TEST_COMBATANTS();
-					int32 ExtraAttackChanceBonus = (spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance);
+					//int32 ExtraAttackChanceBonus = (spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance);
+					auto ExtraAttackChanceBonus =
+						(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
+							aabonuses.ExtraAttackChance[0]);
 					if (ExtraAttackChanceBonus) {
 
 						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
@@ -1055,7 +1058,8 @@ void Bot::AI_Process_Raid()
 								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
 								TEST_COMBATANTS();
-								TryWeaponProc(s_item, tar, EQ::invslot::slotSecondary);
+								TryCombatProcs(s_item, tar, EQ::invslot::slotSecondary);
+								//TryWeaponProc(s_item, tar, EQ::invslot::slotSecondary);
 
 								TEST_COMBATANTS();
 								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
@@ -1754,7 +1758,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					break;
 
 				// Can we cast this spell on this target?
-				if (!(spells[botSpell.SpellId].targettype == ST_GroupTeleport || spells[botSpell.SpellId].targettype == ST_Target || tar == this)
+				if (!(spells[botSpell.SpellId].target_type == ST_GroupTeleport || spells[botSpell.SpellId].target_type == ST_Target || tar == this)
 					&& !(tar->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0))
 					break;
 
@@ -1851,14 +1855,14 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					continue;
 
 				// can not cast buffs for your own pet only on another pet that isn't yours
-				if ((spells[selectedBotSpell.SpellId].targettype == ST_Pet) && (tar != this->GetPet()))
+				if ((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != this->GetPet()))
 					continue;
 
 				// Validate target
 
-				if (!((spells[selectedBotSpell.SpellId].targettype == ST_Target || spells[selectedBotSpell.SpellId].targettype == ST_Pet || tar == this ||
-					spells[selectedBotSpell.SpellId].targettype == ST_Group || spells[selectedBotSpell.SpellId].targettype == ST_GroupTeleport ||
-					(botClass == BARD && spells[selectedBotSpell.SpellId].targettype == ST_AEBard))
+				if (!((spells[selectedBotSpell.SpellId].target_type == ST_Target || spells[selectedBotSpell.SpellId].target_type == ST_Pet || tar == this ||
+					spells[selectedBotSpell.SpellId].target_type == ST_Group || spells[selectedBotSpell.SpellId].target_type == ST_GroupTeleport ||
+					(botClass == BARD && spells[selectedBotSpell.SpellId].target_type == ST_AEBard))
 					&& !tar->IsImmuneToSpell(selectedBotSpell.SpellId, this)
 					&& (tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0))) {
 					continue;
@@ -2126,7 +2130,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 				if (CheckSpellRecastTimers(this, itr->SpellIndex))
 				{
-					if (!(!tar->IsImmuneToSpell(selectedBotSpell.SpellId, this) && (spells[selectedBotSpell.SpellId].buffduration < 1 || tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0)))
+					if (!(!tar->IsImmuneToSpell(selectedBotSpell.SpellId, this) && (spells[selectedBotSpell.SpellId].buff_duration < 1 || tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0)))
 						continue;
 
 					//short duration buffs or other buffs only to be cast during combat.
@@ -2164,14 +2168,14 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 							continue;
 
 						// can not cast buffs for your own pet only on another pet that isn't yours
-						if ((spells[selectedBotSpell.SpellId].targettype == ST_Pet) && (tar != this->GetPet()))
+						if ((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != this->GetPet()))
 							continue;
 
 						// Validate target
 
-						if (!((spells[selectedBotSpell.SpellId].targettype == ST_Target || spells[selectedBotSpell.SpellId].targettype == ST_Pet || tar == this ||
-							spells[selectedBotSpell.SpellId].targettype == ST_Group || spells[selectedBotSpell.SpellId].targettype == ST_GroupTeleport ||
-							(botClass == BARD && spells[selectedBotSpell.SpellId].targettype == ST_AEBard))
+						if (!((spells[selectedBotSpell.SpellId].target_type == ST_Target || spells[selectedBotSpell.SpellId].target_type == ST_Pet || tar == this ||
+							spells[selectedBotSpell.SpellId].target_type == ST_Group || spells[selectedBotSpell.SpellId].target_type == ST_GroupTeleport ||
+							(botClass == BARD && spells[selectedBotSpell.SpellId].target_type == ST_AEBard))
 							&& !tar->IsImmuneToSpell(selectedBotSpell.SpellId, this)
 							&& (tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0))) {
 							continue;
@@ -2366,9 +2370,9 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						continue;
 					if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 						continue;
-					if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+					if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zone_type != zone->GetZoneType()) // is this bit or index?
 						continue;
-					if (spells[iter.SpellId].targettype != ST_Target)
+					if (spells[iter.SpellId].target_type != ST_Target)
 						continue;
 					if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 						continue;
@@ -2388,7 +2392,7 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 			case BEASTLORD: {
 				botSpell = GetBestBotSpellForDiseaseBasedSlow(this);
 
-				if (botSpell.SpellId == 0 || ((tar->GetMR() - 50) < (tar->GetDR() + spells[botSpell.SpellId].ResistDiff)))
+				if (botSpell.SpellId == 0 || ((tar->GetMR() - 50) < (tar->GetDR() + spells[botSpell.SpellId].resist_difficulty)))
 					botSpell = GetBestBotSpellForMagicBasedSlow(this);
 				break;
 			}
@@ -2479,9 +2483,9 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					continue;
 				if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 					continue;
-				if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+				if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zone_type != zone->GetZoneType()) // is this bit or index?
 					continue;
-				if (spells[iter.SpellId].targettype != ST_Target)
+				if (spells[iter.SpellId].target_type != ST_Target)
 					continue;
 				if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
 					continue;
@@ -2506,9 +2510,9 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				continue;
 			if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 				continue;
-			if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+			if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zone_type != zone->GetZoneType()) // is this bit or index?
 				continue;
-			switch (spells[iter.SpellId].targettype) {
+			switch (spells[iter.SpellId].target_type) {
 			case ST_AEBard:
 			case ST_AECaster:
 			case ST_GroupTeleport:
@@ -2538,9 +2542,9 @@ bool Bot::AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				continue;
 			if (!CheckSpellRecastTimers(this, iter.SpellIndex))
 				continue;
-			if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+			if (spells[iter.SpellId].zone_type != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zone_type != zone->GetZoneType()) // is this bit or index?
 				continue;
-			switch (spells[iter.SpellId].targettype) {
+			switch (spells[iter.SpellId].target_type) {
 			case ST_AEBard:
 			case ST_AECaster:
 			case ST_GroupTeleport:
