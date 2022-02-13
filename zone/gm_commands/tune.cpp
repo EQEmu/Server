@@ -3,9 +3,6 @@
 void command_tune(Client *c, const Seperator *sep)
 {
 	//Work in progress - Kayen
-	Mob* mytarget = c->GetTarget();
-	mytarget->Shout("See Invis Level %i", mytarget->SeeInvisible());
-	mytarget->Shout("Invisible %i", mytarget->GetInvisibleLevel());
 
 	if (sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(Chat::White, "Syntax: #tune [subcommand].");
