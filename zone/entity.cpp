@@ -2088,17 +2088,17 @@ Raid *EntityList::GetRaidByID(uint32 id)
 	return nullptr;
 }
 
-Raid *EntityList::GetRaidByClient(Client* client)
+Raid* EntityList::GetRaidByClient(Client* client)
 {
 	if (client->p_raid_instance) {
 		return client->p_raid_instance;
 	}
 
-	std::list<Raid *>::iterator iterator;
+	std::list<Raid*>::iterator iterator;
 	iterator = raid_list.begin();
 
 	while (iterator != raid_list.end()) {
-		for (auto &member : (*iterator)->members) {
+		for (auto& member : (*iterator)->members) {
 			if (member.member) {
 				if (member.member == client) {
 					client->p_raid_instance = *iterator;
@@ -2112,6 +2112,48 @@ Raid *EntityList::GetRaidByClient(Client* client)
 
 	return nullptr;
 }
+
+Raid* EntityList::GetRaidByBotName(const char* name)
+{
+
+	std::list<Raid*>::iterator iterator;
+	iterator = raid_list.begin();
+
+	while (iterator != raid_list.end()) {
+		for (auto& member : (*iterator)->members) {
+			if (member.membername) {
+				if (strcmp(member.membername, name) == 0) {
+					//client->p_raid_instance = *iterator;
+					return *iterator;
+				}
+			}
+		}
+
+		++iterator;
+	}
+
+	return nullptr;
+}
+
+Raid* EntityList::GetRaidByBot(Bot* bot)
+{
+
+	std::list<Raid*>::iterator iterator;
+	iterator = raid_list.begin();
+
+	while (iterator != raid_list.end()) {
+		for (auto& member : (*iterator)->members) {
+			if (member.member && member.member->CastToBot() == bot) {
+				bot->p_raid_instance = *iterator;
+				return *iterator;
+			}
+		}
+		++iterator;
+	}
+	return nullptr;
+}
+
+
 
 Raid *EntityList::GetRaidByMob(Mob *mob)
 {

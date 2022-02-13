@@ -3928,8 +3928,24 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 					spelltar->MessageString(Chat::SpellFailure, YOU_RESIST, spells[spell_id].name);
 				}
 				else {
+#ifndef BOTS
 					MessageString(Chat::SpellFailure, TARGET_RESISTED, spells[spell_id].name);
 					spelltar->MessageString(Chat::SpellFailure, YOU_RESIST, spells[spell_id].name);
+#endif
+#ifdef BOTS
+					if (this->IsBot() && IsHarmonySpell(spell_id)) {
+						if (IsGrouped() && this->GetGroup()->GetLeader()->IsClient()) {
+							Bot::BotGroupSay(this, "Your target RESISTED %s", spells[spell_id].name);
+						}
+						else {
+							this->CastToBot()->GetBotOwner()->MessageString(Chat::SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+						}
+					}
+					else {
+						MessageString(Chat::SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+						spelltar->MessageString(Chat::SpellFailure, YOU_RESIST, spells[spell_id].name);
+					}
+#endif
 				}
 
 				if (spelltar->IsAIControlled()) {
@@ -3957,7 +3973,16 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 				return false;
 			}
 		}
-
+#ifdef BOTS		//Added to display when a HarmonySpell was successful from a bot
+		if (this->IsBot() && IsHarmonySpell(spell_id)) {
+			if (IsGrouped() && this->GetGroup()->GetLeader()->IsClient()) {
+				Bot::BotGroupSay(this, "Your spell was mostly successful.");
+			}
+			else {
+				this->CastToBot()->GetBotOwner()->MessageString(Chat::SpellFailure, SLOW_MOSTLY_SUCCESSFUL);
+			}
+		}
+#endif
 		if (spelltar->IsClient()){
 			spelltar->CastToClient()->BreakSneakWhenCastOn(this, false);
 			spelltar->CastToClient()->BreakFeignDeathWhenCastOn(false);

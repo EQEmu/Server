@@ -88,6 +88,7 @@ volatile bool RunLoops = true;
 #endif
 
 extern volatile bool is_zone_loaded;
+extern bool Critical = false;
 
 EntityList entity_list;
 WorldServer worldserver;
