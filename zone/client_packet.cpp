@@ -3828,8 +3828,6 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 		QueuePacket(app);
 	}
 	else {
-		Shout("Bonuses %i", spellbonuses.invisibility);
-		Shout("Handle_OP_Buff Fade buff %i", spid);
 		BuffFadeBySpellID(spid);
 	}
 
