@@ -3229,10 +3229,6 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	else
 		caster_level = caster ? caster->GetCasterLevel(spell_id) : GetCasterLevel(spell_id);
 
-	if (duration < 0) {
-		duration = PERMENANT_BUFF_DURATION;
-	}
-	
 	if (duration == 0) {
 		duration = CalcBuffDuration(caster, this, spell_id);
 

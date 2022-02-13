@@ -10287,7 +10287,7 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 	}
 
 	if (duration < -1) {
-		duration = -1;
+		duration = PERMENANT_BUFF_DURATION;
 	}
 
 	int buff_count = GetMaxBuffSlots();
@@ -10319,5 +10319,10 @@ void Mob::ApplySpellBuff(int32 spell_id, int32 duration)
 	if (!spells[spell_id].buff_duration) {
 		return;
 	}
+	
+	if (duration < -1) {
+		duration = PERMENANT_BUFF_DURATION;
+	}
+
 	SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
 }
