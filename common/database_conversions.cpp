@@ -476,7 +476,7 @@ bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertCorpseDeblob();
 
 	/* Run EQEmu Server script (Checks for database updates) */
-	if(system("perl eqemu_server.pl ran_from_world"));
+	system("perl eqemu_server.pl ran_from_world");
 
 	return true;
 }

@@ -80,7 +80,6 @@ SET(zone_sources
     fearpath.cpp
     forage.cpp
     global_loot_manager.cpp
-    gm_commands/door_manipulation.cpp
     groups.cpp
     guild.cpp
     guild_mgr.cpp
@@ -200,7 +199,6 @@ SET(zone_headers
     fastmath.h
     forage.h
     global_loot_manager.h
-    gm_commands/door_manipulation.h
     groups.h
     guild_mgr.h
     hate_list.h
@@ -327,6 +325,8 @@ SET(gm_commands
     gm_commands/distance.cpp
     gm_commands/doanim.cpp
     gm_commands/door.cpp
+    gm_commands/door_manipulation.cpp
+    gm_commands/door_manipulation.h
     gm_commands/dye.cpp
     gm_commands/dz.cpp
     gm_commands/dzkickplayers.cpp
@@ -578,6 +578,10 @@ SET(gm_commands
     gm_commands/zsky.cpp
     gm_commands/zstats.cpp
     gm_commands/zunderworld.cpp
+)
+
+SOURCE_GROUP(gm_commands FILES
+    ${gm_commands}
 )
 
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers} ${gm_commands})
