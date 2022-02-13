@@ -119,7 +119,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 			else
 			{
-				buffslot = AddBuff(caster, spell_id, duration_override, disable_buff_overrwrite);
+				buffslot = AddBuff(caster, spell_id, duration_override, -1, disable_buff_overrwrite);
 			}
 			if(buffslot == -1)	// stacking failure
 				return false;
@@ -10286,41 +10286,28 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 		
 		if (!adjust_all_buffs) {
 			if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
-				if (duration == 0) {
-					duration = CalcBuffDuration(this, this, spell_id);
-
-					if (duration > 0) {
-						duration = GetActSpellDuration(spell_id, duration);
-					}
-				}
-				Shout("Cast spell %i", buffs[slot].spellid);
+				Shout("Cast spell %i duration %i", buffs[slot].spellid, duration);
 				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 				return;
 			}
 		}
 		else {
 			if (buffs[slot].spellid != SPELL_UNKNOWN) {
-				if (duration == 0) {
-					duration = CalcBuffDuration(this, this, spell_id);
-
-					if (duration > 0) {
-						duration = GetActSpellDuration(spell_id, duration);
-					}
-				}
 				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 			}
 		}
 	}
 }
 
-void Mob::AddBuffToTarget(Mob *spell_target, int32 spell_id, int32 duration)
+void Mob::ApplySpellBuff(int32 spell_id, int32 duration)
 {
-	if (!spell_target ||
-		!IsValidSpell(spell_id) ||
-		duration < 0 ||
-		!spells[spell_id].buff_duration) {
+	//used for quest command to apply a new buff with custom duration.
+	if (!IsValidSpell(spell_id)) {
 		return;
 	}
-
-	SpellOnTarget(spell_id, spell_target, 0, false, 0, false, -1, duration);
+	if (!spells[spell_id].buff_duration) {
+		return;
+	}
+	
+	SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
 }
