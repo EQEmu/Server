@@ -339,7 +339,7 @@ int command_init(void)
 		command_add("setpass", "[accountname] [password] - Set local password for accountname", AccountStatus::GMLeadAdmin, command_setpass) ||
 		command_add("setpvppoints", "[Amount] - Set your or your player target's PVP points", AccountStatus::GMAdmin, command_setpvppoints) ||
 		command_add("setskill", "[skillnum] [value] - Set your target's skill skillnum to value", AccountStatus::Guide, command_setskill) ||
-		command_add("setskillall", "[value] - Set all of your target's skills to value", AccountStatus::Guide, command_setskillall) ||
+		command_add("setskillall", "[Skill Level] - Set all of your or your target's skills to the specified skill level", AccountStatus::Guide, command_setskillall) ||
 		command_add("setstartzone", "[Zone ID|Zone Short Name] - Sets your or your target's starting zone (Use '0' or 'Reset' to allow the player use of /setstartcity)", AccountStatus::QuestTroupe, command_setstartzone) ||
 		command_add("setstat", "- Sets the stats to a specific value.", AccountStatus::Max, command_setstat) ||
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
