@@ -3209,7 +3209,6 @@ bool Mob::HasDiscBuff()
 // the level of the mob
 int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_override, bool disable_buff_overrwrite)
 {
-	Shout("Buff duration %i", duration);
 	int buffslot, ret, caster_level, emptyslot = -1;
 	bool will_overwrite = false;
 	std::vector<int> overwrite_slots;
@@ -3304,7 +3303,6 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	// at this point we know that this buff will stick, but we have
 	// to remove some other buffs already worn if will_overwrite is true
-	Shout("[%s] willoverride %i disable override %i emptyslot %i duration %i", spells[spell_id].name, will_overwrite, disable_buff_overrwrite, emptyslot, duration);
 	if (will_overwrite && !disable_buff_overrwrite) {
 		std::vector<int>::iterator cur, end;
 		cur = overwrite_slots.begin();
