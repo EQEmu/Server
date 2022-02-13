@@ -2598,7 +2598,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	/*
 		Set Recast Timer on spells.
 	*/
-	if(IsClient() && !isproc)
+	Shout("SPELL %s IsTriggered %i", spells[spell_id].name, IsFromTriggeredSpell(slot, inventory_slot));
+	if(IsClient() && !isproc && !IsFromTriggeredSpell(slot, inventory_slot))
 	{
 		if (slot == CastingSlot::AltAbility) {
 			if (!aa_id) {
@@ -6653,4 +6654,13 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 	}
 
 	return true;
+}
+
+bool Mob::IsFromTriggeredSpell(CastingSlot slot, uint32 item_slot) {
+	//spells triggered using spells finished use item slot, but there is no item set.
+	if ((slot == CastingSlot::Item) && (item_slot == 0xFFFFFFFF)) {
+		Shout("Mob::IsFromTriggeredSpell");
+		return true;
+	}
+	return false;
 }
