@@ -6505,14 +6505,39 @@ XS(XS_Mob_GetHateRandomNPC) {
 XS(XS_Mob_SetBuffDuration); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetBuffDuration) {
 	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, spell_id, duration)"); // // @categories Script Utility
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, spell_id, [int duration = 0])"); // // @categories Script Utility
 	{
 		Mob *THIS;
 		int spell_id = (int)SvIV(ST(1));
 		int duration = (int)SvIV(ST(2));
 		VALIDATE_THIS_IS_MOB;
+
+		if (items < 3) {
+			duration = 0;
+		}
+
 		THIS->SetBuffDuration(spell_id, duration);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_ApplySpellBuff); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_ApplySpellBuff) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: Mob::ApplySpellBuff(THIS, spell_id, [int duration = 0])"); // // @categories Script Utility
+	{
+		Mob *THIS;
+		int spell_id = (int)SvIV(ST(1));
+		int duration = (int)SvIV(ST(2));
+		VALIDATE_THIS_IS_MOB;
+
+		if (items < 3) {
+			duration = 0;
+		}
+
+		THIS->ApplySpellBuff(spell_id, duration);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6572,6 +6597,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "AddFeignMemory"), XS_Mob_AddFeignMemory, file, "$$");
 	newXSproto(strcpy(buf, "AddNimbusEffect"), XS_Mob_AddNimbusEffect, file, "$$");
 	newXSproto(strcpy(buf, "AddToHateList"), XS_Mob_AddToHateList, file, "$$;$$$$$");
+	newXSproto(strcpy(buf, "ApplySpellBuff"), XS_Mob_ApplySpellBuff, file, "$$$");
 	newXSproto(strcpy(buf, "Attack"), XS_Mob_Attack, file, "$$;$$");
 	newXSproto(strcpy(buf, "BehindMob"), XS_Mob_BehindMob, file, "$;$$$");
 	newXSproto(strcpy(buf, "BuffCount"), XS_Mob_BuffCount, file, "$");

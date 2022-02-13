@@ -10268,7 +10268,12 @@ bool Mob::HasPersistDeathIllusion(int32 spell_id) {
 }
 
 void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
-	Shout("Test %i %i", spell_id, duration);
+
+	/*
+		Will refresh the buff with specified spell_id to the specified duration
+		If spell is -1, then all spells will be set to the specified duration
+		If duration 0, then will set duration to buffs normal max duration.
+	*/
 
 	bool adjust_all_buffs = false;
 
@@ -10286,7 +10291,6 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 		
 		if (!adjust_all_buffs) {
 			if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
-				Shout("Cast spell %i duration %i", buffs[slot].spellid, duration);
 				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
 				return;
 			}
@@ -10301,13 +10305,15 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 
 void Mob::ApplySpellBuff(int32 spell_id, int32 duration)
 {
-	//used for quest command to apply a new buff with custom duration.
+	/*
+		Used for quest command to apply a new buff with custom duration.
+		Duration set to 0 will apply with normal duration.
+	*/
 	if (!IsValidSpell(spell_id)) {
 		return;
 	}
 	if (!spells[spell_id].buff_duration) {
 		return;
 	}
-	
 	SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
 }
