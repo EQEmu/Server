@@ -926,6 +926,7 @@ XS(XS_Mob_SetSeeInvisibleLevel) {
 		uint8 see_invis_level = (uint8)SvUV(ST(1));
 		VALIDATE_THIS_IS_MOB;
 		THIS->SetInnateSeeInvisible(see_invis_level);
+		THIS->CalcSeeInvisibleLevel();
 	}
 	XSRETURN_EMPTY;
 }
@@ -5805,6 +5806,41 @@ XS(XS_Mob_IsBlind) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetInvisibleLevel);
+XS(XS_Mob_GetInvisibleLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetInvisibleLevel(THIS)"); // @categories Stats and Attributes
+	{
+		Mob *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetInvisibleLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetInvisibleUndeadLevel);
+XS(XS_Mob_GetInvisibleUndeadLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetInvisibleUndeadLevel(THIS)"); // @categories Stats and Attributes
+	{
+		Mob *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetInvisibleUndeadLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
 XS(XS_Mob_SeeInvisible);
 XS(XS_Mob_SeeInvisible) {
 	dXSARGS;
@@ -6727,6 +6763,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetHerosForgeModel"), XS_Mob_GetHerosForgeModel, file, "$$");
 	newXSproto(strcpy(buf, "GetID"), XS_Mob_GetID, file, "$");
 	newXSproto(strcpy(buf, "GetINT"), XS_Mob_GetINT, file, "$");
+	newXSproto(strcpy(buf, "GetInvisibleLevel"), XS_Mob_GetInvisibleLevel, file, "$");
+	newXSproto(strcpy(buf, "GetInvisibleUndeadLevel"), XS_Mob_GetInvisibleUndeadLevel, file, "$");
 	newXSproto(strcpy(buf, "GetInvul"), XS_Mob_GetInvul, file, "$");
 	newXSproto(strcpy(buf, "GetItemHPBonuses"), XS_Mob_GetItemHPBonuses, file, "$");
 	newXSproto(strcpy(buf, "GetItemStat"), XS_Mob_GetItemStat, file, "$$$");

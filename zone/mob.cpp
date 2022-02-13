@@ -443,10 +443,10 @@ Mob::Mob(
 	nobuff_invisible = 0;
 	see_invis = 0;
 
-	innate_see_invis  = GetInnateSeeInvisibleLevel(in_see_invis);
-	see_invis_undead  = GetInnateSeeInvisibleLevel(in_see_invis_undead);
-	see_hide          = GetInnateSeeInvisibleLevel(in_see_hide);
-	see_improved_hide = GetInnateSeeInvisibleLevel(in_see_improved_hide);
+	innate_see_invis  = GetSeeInvisibleLevelFromNPCStat(in_see_invis);
+	see_invis_undead  = GetSeeInvisibleLevelFromNPCStat(in_see_invis_undead);
+	see_hide          = GetSeeInvisibleLevelFromNPCStat(in_see_hide);
+	see_improved_hide = GetSeeInvisibleLevelFromNPCStat(in_see_improved_hide);
 
 	qglobal = in_qglobal != 0;
 
@@ -591,7 +591,6 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 void Mob::CalcSeeInvisibleLevel()
 {
 	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis });
-	Shout("CalcSeeInvisibleLevel() %i [INNATE %i Spell %i]", see_invis, innate_see_invis, spellbonuses.SeeInvis);
 }
 
 void Mob::CalcInvisibleLevel()
@@ -608,13 +607,19 @@ void Mob::CalcInvisibleLevel()
 	}
 	
 	if (is_invisible && !invisible) {
-		SetInvisible(Invisibility::Visible, true);
+		SetInvisible(invisible, true);
 		return;
 	}
 }
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 {
+	/*
+		If you set an NPC to invisible you will only be able to see it on
+		your client if your see invisible level is greater than equal to the invisible level.
+		Note, the clients spell file must match the servers see invisible level on the spell.
+	*/
+
 	if (state == Invisibility::Visible) {
 		SendAppearancePacket(AT_Invis, Invisibility::Visible);
 		ZeroInvisibleVars(InvisType::T_INVISIBLE);
@@ -626,8 +631,9 @@ void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 		*/
 		if (!set_on_bonus_calc) {
 			nobuff_invisible = state;
+			CalcInvisibleLevel();
 		}
-		SendAppearancePacket(AT_Invis, Invisibility::Invisible);
+		SendAppearancePacket(AT_Invis, invisible);
 	}
 
 	// Invis and hide breaks charms
@@ -6168,13 +6174,14 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 	return CalculateHeadingAngleBetweenPositions(this_x, this_y, other_x, other_y);
 }
 
-uint8 Mob::GetInnateSeeInvisibleLevel(uint16 in_see_invis)
+uint8 Mob::GetSeeInvisibleLevelFromNPCStat(uint16 in_see_invis)
 {
 	/*
 		Returns the NPC's see invisible level based on 'see_invs' value in npc_types.
 		1 = See Invs Level 1, 2-99 will gives a random roll to apply see invs level 1
 		100 = See Invs Level 2, where 101-199 gives a random roll to apply see invs 2, if fails get see invs 1
 		ect... for higher levels, 200,300 ect.
+		MAX 25499, which can give you level 254.
 	*/
 
 	//npc does not have see invis
@@ -6200,14 +6207,14 @@ uint8 Mob::GetInnateSeeInvisibleLevel(uint16 in_see_invis)
 
 	//has enhanced see invis level
 	if (see_invis_chance == 0) {
-		return std::min(see_invis_level, 254);
+		return std::min(see_invis_level, MAX_INVISIBILTY_LEVEL);
 	}
 	//has chance for enhanced see invis level
 	if (zone->random.Int(0, 99) < see_invis_chance) {
-		return std::min(see_invis_level, 254);
+		return std::min(see_invis_level, MAX_INVISIBILTY_LEVEL);
 	}
 	//failed chance at attempted enhanced see invs level, use previous level.
-	return std::min((see_invis_level - 1), 254);
+	return std::min((see_invis_level - 1), MAX_INVISIBILTY_LEVEL);
 }
 
 int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
