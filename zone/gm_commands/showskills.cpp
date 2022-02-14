@@ -72,7 +72,7 @@ void command_showskills(Client *c, const Seperator *sep)
 			EQ::skills::GetSkillName((EQ::skills::SkillType) max_skill_id),
 			max_skill_id,
 			c == target ?
-			"Yourself" :
+			"yourself" :
 			fmt::format(
 				"{} ({})",
 				target->GetCleanName(),
