@@ -3701,7 +3701,7 @@ void Mob::BuffProcess()
 			// DF_Permanent uses -1 DF_Aura uses -4 but we need to check negatives for some spells for some reason?
 			if (spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Permanent &&
 			    spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Aura &&
-				buffs[buffs_i].ticsremaining != PERMENANT_BUFF_DURATION) {
+				buffs[buffs_i].ticsremaining != PERMANENT_BUFF_DURATION) {
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
 					--buffs[buffs_i].ticsremaining;
@@ -10287,7 +10287,7 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 	}
 
 	if (duration < -1) {
-		duration = PERMENANT_BUFF_DURATION;
+		duration = PERMANENT_BUFF_DURATION;
 	}
 
 	int buff_count = GetMaxBuffSlots();
@@ -10321,7 +10321,7 @@ void Mob::ApplySpellBuff(int32 spell_id, int32 duration)
 	}
 	
 	if (duration < -1) {
-		duration = PERMENANT_BUFF_DURATION;
+		duration = PERMANENT_BUFF_DURATION;
 	}
 
 	SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
@@ -10336,8 +10336,9 @@ int Mob::GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier)
 	if (!stat_identifier) {
 		return 0;
 	}
+	
+	std::string id = str_tolower(stat_identifier);
 
-	std::string id = stat_identifier;
 	for (uint32 i = 0; i < id.length(); ++i) {
 		id[i] = tolower(id[i]);
 	}
@@ -10361,7 +10362,8 @@ int Mob::GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier)
 		return 0;
 	}
 
-	std::string id = stat_identifier;
+	std::string id = str_tolower(stat_identifier);
+
 	for (uint32 i = 0; i < id.length(); ++i) {
 		id[i] = tolower(id[i]);
 	}
