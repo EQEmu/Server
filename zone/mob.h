@@ -442,6 +442,8 @@ public:
 	void SendSavedAppearenceEffects(Client *receiver);
 	void SetBuffDuration(int32 spell_id, int32 duration);
 	void ApplySpellBuff(int32 spell_id, int32 duration);
+	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
+	int GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier);
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }

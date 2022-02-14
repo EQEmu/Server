@@ -5633,6 +5633,46 @@ XS(XS_Mob_GetSpellStat) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetBuffStatValueBySpell); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetBuffStatValueBySpell) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySpell(THIS, int32 spell_id, string stat)"); // @categories Spells and Disciplines
+	{
+		Mob *THIS;
+		int32  RETVAL;
+		int32  spellid = (int32)SvIV(ST(1));
+		Const_char *stat = (Const_char *)SvPV_nolen(ST(2));
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+	
+		RETVAL = THIS->GetBuffStatValueBySpell(spellid, stat);
+		XSprePUSH;
+		PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetBuffStatValueBySlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetBuffStatValueBySlot) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySpell(THIS, uint8 slot, string stat)"); // @categories Spells and Disciplines
+	{
+		Mob *THIS;
+		int32  RETVAL;
+		uint8 slot = (uint8)SvUV(ST(1));
+		Const_char *stat = (Const_char *)SvPV_nolen(ST(2));
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+
+		RETVAL = THIS->GetBuffStatValueBySlot(slot, stat);
+		XSprePUSH;
+		PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Mob_GetSpecialAbility); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpecialAbility) {
 	dXSARGS;
@@ -6688,6 +6728,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetBucketKey"), XS_Mob_GetBucketKey, file, "$");
 	newXSproto(strcpy(buf, "GetBucketRemaining"), XS_Mob_GetBucketRemaining, file, "$$");
 	newXSproto(strcpy(buf, "GetBuffSlotFromType"), XS_Mob_GetBuffSlotFromType, file, "$$");
+	newXSproto(strcpy(buf, "GetBuffStatValueBySpell"), XS_Mob_GetBuffStatValueBySpell, file, "$$$");
+	newXSproto(strcpy(buf, "GetBuffStatValueBySlot"), XS_Mob_GetBuffStatValueBySlot, file, "$$$");
 	newXSproto(strcpy(buf, "GetCHA"), XS_Mob_GetCHA, file, "$");
 	newXSproto(strcpy(buf, "GetCR"), XS_Mob_GetCR, file, "$");
 	newXSproto(strcpy(buf, "GetCasterLevel"), XS_Mob_GetCasterLevel, file, "$$");
