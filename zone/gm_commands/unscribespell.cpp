@@ -5,7 +5,7 @@ void command_unscribespell(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (!arguments || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "FORMAT: #unscribespell [Spell ID] - Unscribe a spell from your or your target's spell book by Spell ID");
+		c->Message(Chat::White, "Usage: #unscribespell [Spell ID] - Unscribe a spell from your or your target's spell book by Spell ID");
 		return;
 	}
 
