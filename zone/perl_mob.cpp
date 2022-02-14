@@ -6550,11 +6550,11 @@ XS(XS_Mob_SetBuffDuration) {
 	{
 		Mob *THIS;
 		int spell_id = (int)SvIV(ST(1));
-		int duration = (int)SvIV(ST(2));
+		int duration = 0;
 		VALIDATE_THIS_IS_MOB;
 
-		if (items < 3) {
-			duration = 0;
+		if (items == 3) {
+			duration = (int)SvIV(ST(2));
 		}
 
 		THIS->SetBuffDuration(spell_id, duration);
@@ -6570,11 +6570,11 @@ XS(XS_Mob_ApplySpellBuff) {
 	{
 		Mob *THIS;
 		int spell_id = (int)SvIV(ST(1));
-		int duration = (int)SvIV(ST(2));
+		int duration = 0;
 		VALIDATE_THIS_IS_MOB;
 
-		if (items < 3) {
-			duration = 0;
+		if (items == 3) {
+			duration = (int)SvIV(ST(2));
 		}
 
 		THIS->ApplySpellBuff(spell_id, duration);
@@ -6637,7 +6637,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "AddFeignMemory"), XS_Mob_AddFeignMemory, file, "$$");
 	newXSproto(strcpy(buf, "AddNimbusEffect"), XS_Mob_AddNimbusEffect, file, "$$");
 	newXSproto(strcpy(buf, "AddToHateList"), XS_Mob_AddToHateList, file, "$$;$$$$$");
-	newXSproto(strcpy(buf, "ApplySpellBuff"), XS_Mob_ApplySpellBuff, file, "$$$");
+	newXSproto(strcpy(buf, "ApplySpellBuff"), XS_Mob_ApplySpellBuff, file, "$$;$");
 	newXSproto(strcpy(buf, "Attack"), XS_Mob_Attack, file, "$$;$$");
 	newXSproto(strcpy(buf, "BehindMob"), XS_Mob_BehindMob, file, "$;$$$");
 	newXSproto(strcpy(buf, "BuffCount"), XS_Mob_BuffCount, file, "$");
@@ -6933,7 +6933,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetAppearance"), XS_Mob_SetAppearance, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBodyType"), XS_Mob_SetBodyType, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBucket"), XS_Mob_SetBucket, file, "$$$;$");
-	newXSproto(strcpy(buf, "SetBuffDuration"), XS_Mob_SetBuffDuration, file, "$$$");
+	newXSproto(strcpy(buf, "SetBuffDuration"), XS_Mob_SetBuffDuration, file, "$$;$");
 	newXSproto(strcpy(buf, "SetCurrentWP"), XS_Mob_SetCurrentWP, file, "$$");
 	newXSproto(strcpy(buf, "SetDeltas"), XS_Mob_SetDeltas, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetDisableMelee"), XS_Mob_SetDisableMelee, file, "$$");
