@@ -108,10 +108,7 @@ void command_showzonepoints(Client *c, const Seperator *sep)
 		found_zone_points++;
 	}
 
-	LinkedListIterator<ZonePoint *> iterator(zone->zone_point_list);
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		ZonePoint   *zone_point    = iterator.GetData();
+	for (auto& zone_point : zone->zone_point_list) {
 		std::string zone_long_name = ZoneLongName(zone_point->target_zone_id);
 		std::string node_name      = fmt::format("ZonePoint To [{}]", zone_long_name);
 
@@ -141,8 +138,6 @@ void command_showzonepoints(Client *c, const Seperator *sep)
 				zone_point->target_heading
 			).c_str()
 		);
-
-		iterator.Advance();
 
 		found_zone_points++;
 	}

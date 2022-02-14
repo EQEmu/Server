@@ -6178,16 +6178,10 @@ void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 coun
 void Client::SendZonePoints()
 {
 	int                             count = 0;
-	LinkedListIterator<ZonePoint *> iterator(zone->zone_point_list);
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		ZonePoint *data = iterator.GetData();
-
+	for (auto& data : zone->zone_point_list) {
 		if (ClientVersionBit() & data->client_version_mask) {
 			count++;
 		}
-
-		iterator.Advance();
 	}
 
 	uint32 zpsize = sizeof(ZonePoints) + ((count + 1) * sizeof(ZonePoint_Entry));
@@ -6196,11 +6190,7 @@ void Client::SendZonePoints()
 	zp->count = count;
 
 	int i = 0;
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		ZonePoint* data = iterator.GetData();
-
+	for (auto& data : zone->zone_point_list) {
 		LogZonePoints(
 			"Sending zone point to client [{}] mask [{}] x [{}] y [{}] z [{}] number [{}]",
 			GetCleanName(),
@@ -6222,7 +6212,6 @@ void Client::SendZonePoints()
 			zp->zpe[i].zoneinstance = data->target_zone_instance;
 			i++;
 		}
-		iterator.Advance();
 	}
 
 	FastQueuePacket(&outapp);

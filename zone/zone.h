@@ -184,7 +184,7 @@ public:
 	IPathfinder                                   *pathing;
 	LinkedList<NPC_Emote_Struct *>                NPCEmoteList;
 	LinkedList<Spawn2 *>                          spawn2_list;
-	LinkedList<ZonePoint *>                       zone_point_list;
+	std::list<std::unique_ptr<ZonePoint>> zone_point_list;
 	std::vector<ZonePointsRepository::ZonePoints> virtual_zone_point_list;
 
 	Map                            *zonemap;

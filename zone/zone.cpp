@@ -1061,7 +1061,7 @@ Zone::~Zone() {
 	safe_delete_array(long_name);
 	safe_delete(Weather_Timer);
 	NPCEmoteList.Clear();
-	zone_point_list.Clear();
+	zone_point_list.clear();
 	entity_list.Clear();
 	ClearBlockedSpells();
 
@@ -1103,7 +1103,7 @@ bool Zone::Init(bool iStaticZone) {
 	}
 
 	LogInfo("Loading static zone points");
-	if (!content_db.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
+	if (!content_db.LoadStaticZonePoints(zone_point_list, short_name, GetInstanceVersion())) {
 		LogError("Loading static zone points failed");
 		return false;
 	}
@@ -1213,8 +1213,8 @@ void Zone::ReloadStaticData() {
 	LogInfo("Reloading Zone Static Data");
 
 	LogInfo("Reloading static zone points");
-	zone_point_list.Clear();
-	if (!content_db.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
+	zone_point_list.clear();
+	if (!content_db.LoadStaticZonePoints(zone_point_list, GetShortName(), GetInstanceVersion())) {
 		LogError("Loading static zone points failed");
 	}
 
@@ -1884,33 +1884,27 @@ void Zone::SetTime(uint8 hour, uint8 minute, bool update_world /*= true*/)
 }
 
 ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Client* client, float max_distance) {
-	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
 	ZonePoint* closest_zp = nullptr;
 	float closest_dist = FLT_MAX;
 	float max_distance2 = max_distance * max_distance;
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		ZonePoint* zp = iterator.GetData();
+	for (auto& zp : zone_point_list) {
 		uint32 mask_test = client->ClientVersionBit();
 		if (!(zp->client_version_mask & mask_test)) {
-			iterator.Advance();
 			continue;
 		}
-
+		
 		if (zp->target_zone_id == to)
 		{
-            auto dist = Distance(glm::vec2(zp->x, zp->y), glm::vec2(location));
+		      auto dist = Distance(glm::vec2(zp->x, zp->y), glm::vec2(location));
 			if ((zp->x == 999999 || zp->x == -999999) && (zp->y == 999999 || zp->y == -999999))
 				dist = 0;
-
+		
 			if (dist < closest_dist)
 			{
-				closest_zp = zp;
+				closest_zp = zp.get();
 				closest_dist = dist;
 			}
 		}
-		iterator.Advance();
 	}
 
 	// if we have a water map and it says we're in a zoneline, lets assume it's just a really big zone line
@@ -1942,19 +1936,15 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, const char* to_n
 }
 
 ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Client* client, float max_distance) {
-	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
 	ZonePoint* closest_zp = nullptr;
 	float closest_dist = FLT_MAX;
 	float max_distance2 = max_distance*max_distance;
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		ZonePoint* zp = iterator.GetData();
+
+	for (auto& zp : zone_point_list) {
 		uint32 mask_test = client->ClientVersionBit();
 
-		if(!(zp->client_version_mask & mask_test))
+		if (!(zp->client_version_mask & mask_test))
 		{
-			iterator.Advance();
 			continue;
 		}
 
@@ -1964,24 +1954,24 @@ ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Clien
 			delta_x = 0;
 		if(zp->y == 999999 || zp->y == -999999)
 			delta_y = 0;
-
-		float dist = delta_x*delta_x+delta_y*delta_y;///*+(zp->z-z)*(zp->z-z)*/;
+		
+		float dist = delta_x*delta_x+delta_y*delta_y;
 		if (dist < closest_dist)
 		{
-			closest_zp = zp;
+			closest_zp = zp.get();
 			closest_dist = dist;
 		}
-		iterator.Advance();
 	}
+
 	if(closest_dist > max_distance2)
 		closest_zp = nullptr;
-
+	
 	return closest_zp;
 }
 
-bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list, const char *zonename, uint32 version)
+bool ZoneDatabase::LoadStaticZonePoints(std::list<std::unique_ptr<ZonePoint>> &zone_point_list, const char *zonename, uint32 version)
 {
-	zone_point_list->Clear();
+	zone_point_list.clear();
 	zone->numzonepoints = 0;
 	zone->virtual_zone_point_list.clear();
 
@@ -2036,7 +2026,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 			continue;
 		}
 
-		zone_point_list->Insert(zp);
+		zone_point_list.push_back(std::unique_ptr<ZonePoint>(zp));
 		zone->numzonepoints++;
 	}
 
