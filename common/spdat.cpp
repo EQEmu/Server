@@ -363,10 +363,19 @@ bool IsImprovedDamageSpell(uint16 spell_id)
 
 bool IsAEDurationSpell(uint16 spell_id)
 {
-	if (IsValidSpell(spell_id) &&
-			(spells[spell_id].target_type == ST_AETarget || spells[spell_id].target_type == ST_UndeadAE) &&
-			spells[spell_id].aoe_duration != 0)
+	/*
+		There are plenty of spells with aoe_duration set at single digit numbers, but these
+		do not act as duration effects.
+	*/
+	if (IsValidSpell(spell_id) && 
+		spells[spell_id].aoe_duration >= 2500 &&
+		(	spells[spell_id].target_type == ST_AETarget || 
+			spells[spell_id].target_type == ST_UndeadAE ||
+			spells[spell_id].target_type == ST_AECaster ||
+			spells[spell_id].target_type == ST_Ring)
+		) {
 		return true;
+	}
 
 	return false;
 }

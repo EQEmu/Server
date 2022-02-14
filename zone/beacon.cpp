@@ -69,7 +69,7 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 	spell_iterations = 0;
 	caster_id = 0;
 	max_targets = 4; // default
-
+	
 	if(lifetime)
 		remove_timer.Start();
 }
@@ -121,16 +121,23 @@ bool Beacon::Process()
 
 void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adjust)
 {
-	if(!IsValidSpell(cast_spell_id) || !caster)
+	if (!IsValidSpell(cast_spell_id) || !caster) {
 		return;
+	}
 
 	caster_id = caster->GetID();
 	spell_id = cast_spell_id;
 	this->resist_adjust = resist_adjust;
 	spell_iterations = spells[spell_id].aoe_duration / 2500;
 	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
-	if (spells[spell_id].aoe_max_targets)
+	if (spells[spell_id].aoe_max_targets) {
 		max_targets = spells[spell_id].aoe_max_targets;
+	}
+
+	if (spells[cast_spell_id].target_type == ST_Ring) {
+		GMMove(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ());
+	}
+
 	spell_timer.Start(2500);
 	spell_timer.Trigger();
 }

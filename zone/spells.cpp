@@ -704,13 +704,16 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	}
 
 	if (check_on_casting){
-		
+
+		if (spells[spell_id].target_type == ST_AEClientV1 ||
+			spells[spell_id].target_type == ST_AECaster ||
+			spells[spell_id].target_type == ST_Ring ||
+			spells[spell_id].target_type == ST_Beam) {
+			return true;
+		}
+
 		if (!spell_target) {
-			if (IsGroupSpell(spell_id) ||
-				spells[spell_id].target_type == ST_AEClientV1 ||
-				spells[spell_id].target_type == ST_AECaster ||
-				spells[spell_id].target_type == ST_Ring ||
-				spells[spell_id].target_type == ST_Beam) {
+			if (IsGroupSpell(spell_id)){
 				return true;
 			}
 			else if (spells[spell_id].target_type == ST_Self) {
@@ -728,7 +731,6 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	if (!spell_target){
 		return false;
 	}
-
 	/*
 		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
 		[Insufficient mana first]
