@@ -5355,14 +5355,14 @@ void Client::UnscribeSpell(int slot, bool update_client, bool defer_save)
 	m_pp.spell_book[slot] = 0xFFFFFFFF;
 
 	if (!defer_save) {
-		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot);
+		database.DeleteCharacterSpell(CharacterID(), m_pp.spell_book[slot], slot);
 	}
 
 	if (update_client && slot < EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize) {
-		auto               outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
-		DeleteSpell_Struct *del   = (DeleteSpell_Struct *) outapp->pBuffer;
+		auto outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
+		DeleteSpell_Struct *del = (DeleteSpell_Struct *) outapp->pBuffer;
 		del->spell_slot = slot;
-		del->success    = 1;
+		del->success = 1;
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
@@ -5378,6 +5378,16 @@ void Client::UnscribeSpellAll(bool update_client)
 
 	// bulk save at end (this will only delete)
 	SaveSpells();
+}
+
+void Client::UnscribeSpellBySpellID(uint16 spell_id, bool update_client)
+{
+	for (int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
+		if (IsValidSpell(m_pp.spell_book[index]) && m_pp.spell_book[index] == spell_id) {
+			UnscribeSpell(index, update_client, true);
+			break;
+		}
+	}
 }
 
 void Client::UntrainDisc(int slot, bool update_client, bool defer_save)

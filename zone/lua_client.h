@@ -183,6 +183,8 @@ public:
 	void UnscribeSpell(int slot, bool update_client);
 	void UnscribeSpellAll();
 	void UnscribeSpellAll(bool update_client);
+	void UnscribeSpellBySpellID(uint16 spell_id);
+	void UnscribeSpellBySpellID(uint16 spell_id, bool update_client);
 	void TrainDisc(int itemid);
 	uint16 LearnDisciplines(uint8 min_level, uint8 max_level);
 	void TrainDiscBySpellID(int32 spell_id);
