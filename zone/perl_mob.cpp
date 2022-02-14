@@ -5657,7 +5657,7 @@ XS(XS_Mob_GetBuffStatValueBySlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBuffStatValueBySlot) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySpell(THIS, uint8 slot, string stat)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySpell(THIS, uint8 slot, string stat)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -6546,7 +6546,7 @@ XS(XS_Mob_SetBuffDuration); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetBuffDuration) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, spell_id, [int duration = 0])"); // // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, spell_id, [int duration = 0])"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		int spell_id = (int)SvIV(ST(1));
@@ -6566,7 +6566,7 @@ XS(XS_Mob_ApplySpellBuff); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ApplySpellBuff) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::ApplySpellBuff(THIS, spell_id, [int duration = 0])"); // // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::ApplySpellBuff(THIS, spell_id, [int duration = 0])"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		int spell_id = (int)SvIV(ST(1));
