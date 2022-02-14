@@ -6459,7 +6459,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 	}
 
 	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(shielder_max_distance)) {
-		MessageString(Chat::Blue, TARGET_TOO_FAR);
+		MessageString(Chat::TooFarAway, TARGET_TOO_FAR);
 		return false; 
 	}
 
