@@ -69,7 +69,7 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 	spell_iterations = 0;
 	caster_id = 0;
 	max_targets = 4; // default
-	
+
 	if(lifetime)
 		remove_timer.Start();
 }
