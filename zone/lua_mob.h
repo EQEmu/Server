@@ -457,6 +457,12 @@ public:
 	bool IsHorse();
 	bool CanClassEquipItem(uint32 item_id);
 	bool CanRaceEquipItem(uint32 item_id);
+	void ApplySpellBuff(int spell_id);
+	void ApplySpellBuff(int spell_id, int duration);
+	int GetBuffStatValueBySlot(uint8 slot, const char* identifier);
+	int GetBuffStatValueBySpell(int spell_id, const char* identifier);
+	void SetBuffDuration(int spell_id);
+	void SetBuffDuration(int spell_id, int duration);
 };
 
 #endif

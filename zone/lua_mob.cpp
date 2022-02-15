@@ -2448,6 +2448,36 @@ void Lua_Mob::SetSeeInvisibleUndeadLevel(uint8 invisible_level)
 	self->SetSeeInvisibleUndead(invisible_level);
 }
 
+void Lua_Mob::ApplySpellBuff(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->ApplySpellBuff(spell_id, 0);
+}
+
+void Lua_Mob::ApplySpellBuff(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->ApplySpellBuff(spell_id, duration);
+}
+
+int Lua_Mob::GetBuffStatValueBySlot(uint8 slot, const char* identifier) {
+	Lua_Safe_Call_Int();
+	return self->GetBuffStatValueBySlot(slot, identifier);
+}
+
+int Lua_Mob::GetBuffStatValueBySpell(int spell_id, const char* identifier) {
+	Lua_Safe_Call_Int();
+	return self->GetBuffStatValueBySpell(spell_id, identifier);
+}
+
+void Lua_Mob::SetBuffDuration(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->SetBuffDuration(spell_id, 0);
+}
+
+void Lua_Mob::SetBuffDuration(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->SetBuffDuration(spell_id, duration);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -2458,6 +2488,8 @@ luabind::scope lua_register_mob() {
 	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool))&Lua_Mob::AddToHateList)
 	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool,bool))&Lua_Mob::AddToHateList)
 	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool,bool,bool))&Lua_Mob::AddToHateList)
+	.def("ApplySpellBuff", (void(Lua_Mob::*)(int))&Lua_Mob::ApplySpellBuff)
+	.def("ApplySpellBuff", (void(Lua_Mob::*)(int, int))&Lua_Mob::ApplySpellBuff)
 	.def("Attack", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::Attack)
 	.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::Attack)
 	.def("Attack", (bool(Lua_Mob::*)(Lua_Mob,int,bool))&Lua_Mob::Attack)
@@ -2595,6 +2627,8 @@ luabind::scope lua_register_mob() {
 	.def("GetBucketKey", (std::string(Lua_Mob::*)(void))&Lua_Mob::GetBucketKey)
 	.def("GetBucketRemaining", (std::string(Lua_Mob::*)(std::string))&Lua_Mob::GetBucketRemaining)
 	.def("GetBuffSlotFromType", &Lua_Mob::GetBuffSlotFromType)
+	.def("GetBuffStatValueBySlot", (void(Lua_Mob::*)(uint8, const char*))& Lua_Mob::GetBuffStatValueBySlot)
+	.def("GetBuffStatValueBySpell", (void(Lua_Mob::*)(int, const char*))&Lua_Mob::GetBuffStatValueBySpell)
 	.def("GetCHA", &Lua_Mob::GetCHA)
 	.def("GetCR", &Lua_Mob::GetCR)
 	.def("GetCasterLevel", &Lua_Mob::GetCasterLevel)
@@ -2810,6 +2844,8 @@ luabind::scope lua_register_mob() {
 	.def("SetBodyType", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetBodyType)
 	.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string))&Lua_Mob::SetBucket)
 	.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket)
+	.def("SetBuffDuration", (void(Lua_Mob::*)(int))&Lua_Mob::SetBuffDuration)
+	.def("SetBuffDuration", (void(Lua_Mob::*)(int, int))&Lua_Mob::SetBuffDuration)
 	.def("SetCurrentWP", &Lua_Mob::SetCurrentWP)
 	.def("SetDestructibleObject", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDestructibleObject)
 	.def("SetDisableMelee", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDisableMelee)
