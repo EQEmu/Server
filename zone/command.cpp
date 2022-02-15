@@ -347,7 +347,7 @@ int command_init(void)
 		command_add("showbuffs", "- List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
 		command_add("shownumhits",  "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
 		command_add("shownpcgloballoot", "Show GlobalLoot entires on this npc", AccountStatus::Guide, command_shownpcgloballoot) ||
-		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as third argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
+		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as second argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
 		command_add("showspellslist", "Shows spell list of targeted NPC", AccountStatus::GMAdmin, command_showspellslist) ||
 		command_add("showstats", "- Show details about you or your target", AccountStatus::Guide, command_showstats) ||
 		command_add("showzonegloballoot", "Show GlobalLoot entires on this zone", AccountStatus::Guide, command_showzonegloballoot) ||
