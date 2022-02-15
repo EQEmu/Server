@@ -3622,7 +3622,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 
 	// Prevent double invising, which made you uninvised
 	// Not sure if all 3 should be stacking
-
+	//This is not live like behavior (~Kayen confirmed 2/2/22)
 	if (!RuleB(Spells, AllowDoubleInvis)) {
 		if (IsEffectInSpell(spell_id, SE_Invisibility))
 		{

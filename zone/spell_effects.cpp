@@ -583,45 +583,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
-			case SE_Invisibility:
-			case SE_Invisibility2:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Invisibility");
-#endif
-				SetInvisible(spell.base_value[i]);
-				break;
-			}
-
-			case SE_InvisVsAnimals:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Invisibility to Animals");
-#endif
-				invisible_animals = true;
-				SetInvisible(Invisibility::Special);
-				break;
-			}
-
-			case SE_InvisVsUndead2:
-			case SE_InvisVsUndead:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Invisibility to Undead");
-#endif
-				invisible_undead = true;
-				SetInvisible(Invisibility::Special);
-				break;
-			}
-			case SE_SeeInvis:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "See Invisible");
-#endif
-				see_invis = spell.base_value[i];
-				break;
-			}
-
 			case SE_FleshToBone:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -3277,6 +3238,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Proc_Timer_Modifier:
 			case SE_FFItemClass:
 			case SE_SpellEffectResistChance:
+			case SE_SeeInvis:
 			{
 				break;
 			}
@@ -3946,10 +3908,13 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 				}
 			}
 		}
+		case SE_ImprovedInvisAnimals:
 		case SE_Invisibility2:
 		case SE_InvisVsUndead2: {
-			if (buff.ticsremaining <= 3 && buff.ticsremaining > 1) {
-				MessageString(Chat::Spells, INVIS_BEGIN_BREAK);
+			if (!IsBardSong(buff.spellid)) {
+				if (buff.ticsremaining <= 3 && buff.ticsremaining > 1) {
+					MessageString(Chat::Spells, INVIS_BEGIN_BREAK);
+				}
 			}
 			break;
 		}
@@ -4183,32 +4148,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				if (!AffectedBySpellExcludingSlot(slot, SE_Levitate))
 					SendAppearancePacket(AT_Levitate, 0);
-				break;
-			}
-
-			case SE_Invisibility2:
-			case SE_Invisibility:
-			{
-				SetInvisible(Invisibility::Visible);
-				break;
-			}
-
-			case SE_InvisVsUndead2:
-			case SE_InvisVsUndead:
-			{
-				invisible_undead = false;	// Mongrel: No longer IVU
-				break;
-			}
-
-			case SE_InvisVsAnimals:
-			{
-				invisible_animals = false;
-				break;
-			}
-
-			case SE_SeeInvis:
-			{
-				see_invis = 0;
 				break;
 			}
 
@@ -9580,18 +9519,19 @@ void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 void Mob::BreakInvisibleSpells()
 {
 	if(invisible) {
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 		BuffFadeByEffect(SE_Invisibility);
 		BuffFadeByEffect(SE_Invisibility2);
-		invisible = false;
 	}
 	if(invisible_undead) {
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
 		BuffFadeByEffect(SE_InvisVsUndead);
 		BuffFadeByEffect(SE_InvisVsUndead2);
-		invisible_undead = false;
 	}
 	if(invisible_animals){
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
+		BuffFadeByEffect(SE_ImprovedInvisAnimals);
 		BuffFadeByEffect(SE_InvisVsAnimals);
-		invisible_animals = false;
 	}
 }
 
@@ -9600,22 +9540,20 @@ void Client::BreakSneakWhenCastOn(Mob *caster, bool IsResisted)
 	bool IsCastersTarget = false; // Chance to avoid only applies to AOE spells when not targeted.
 	if (hidden || improved_hidden) {
 		if (caster) {
-			Mob *target = nullptr;
-			target = caster->GetTarget();
-			IsCastersTarget = target && target == this;
+			Mob *spell_target = caster->GetTarget();
+			if (spell_target && spell_target == this) {
+				IsCastersTarget = true;
+			}
 		}
-
 		if (!IsCastersTarget) {
-			int chance =
-			    spellbonuses.NoBreakAESneak + itembonuses.NoBreakAESneak + aabonuses.NoBreakAESneak;
-
-			if (IsResisted)
+			int chance = spellbonuses.NoBreakAESneak + itembonuses.NoBreakAESneak + aabonuses.NoBreakAESneak;
+			if (IsResisted) {
 				chance *= 2;
-
-			if (chance && zone->random.Roll(chance))
+			}
+			if (chance && zone->random.Roll(chance)) {
 				return; // Do not drop Sneak/Hide
+			}
 		}
-
 		CancelSneakHide();
 	}
 }

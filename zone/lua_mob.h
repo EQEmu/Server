@@ -86,6 +86,10 @@ public:
 	bool IsInvisible();
 	bool IsInvisible(Lua_Mob other);
     void SetInvisible(int state);
+	uint8 GetInvisibleLevel();
+	uint8 GetInvisibleUndeadLevel();
+	void SetSeeInvisibleLevel(uint8 invisible_level);
+	void SetSeeInvisibleUndeadLevel(uint8 invisible_level);
 	bool FindBuff(int spell_id);
 	uint16 FindBuffBySlot(int slot);
 	uint32 BuffCount();
@@ -406,7 +410,7 @@ public:
 	int CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite);
 	void SetPseudoRoot(bool in);
 	uint8 SeeInvisible();
-	bool SeeInvisibleUndead();
+	uint8 SeeInvisibleUndead();
 	bool SeeHide();
 	bool SeeImprovedHide();
 	uint8 GetNimbusEffect1();
