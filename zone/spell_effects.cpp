@@ -3239,6 +3239,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_FFItemClass:
 			case SE_SpellEffectResistChance:
 			case SE_SeeInvis:
+			case SE_Invisibility:
+			case SE_Invisibility2:
+			case SE_InvisVsAnimals:
+			case SE_ImprovedInvisAnimals:
+			case SE_InvisVsUndead:
+			case SE_InvisVsUndead2:
 			{
 				break;
 			}

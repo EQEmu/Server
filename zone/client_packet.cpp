@@ -3983,21 +3983,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (invisible) {
-		ZeroInvisibleVars(InvisType::T_INVISIBLE);
-		BuffFadeByEffect(SE_Invisibility);
-		BuffFadeByEffect(SE_Invisibility2);
-	}
-
-	// Hack for broken RoF2 which allows casting after a zoned IVU/IVA
-	if (invisible_undead) {
-		BuffFadeByEffect(SE_InvisVsUndead);
-		BuffFadeByEffect(SE_InvisVsUndead2);
-	}
-	if (invisible_animals) {
-		BuffFadeByEffect(SE_InvisVsAnimals);
-		BuffFadeByEffect(SE_ImprovedInvisAnimals);
-	}
+	BreakInvisibleSpells();
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
