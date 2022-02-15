@@ -410,7 +410,7 @@ public:
 	int CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite);
 	void SetPseudoRoot(bool in);
 	uint8 SeeInvisible();
-	bool SeeInvisibleUndead();
+	uint8 SeeInvisibleUndead();
 	bool SeeHide();
 	bool SeeImprovedHide();
 	uint8 GetNimbusEffect1();
