@@ -52,10 +52,10 @@ extern Zone* zone;
 
 // if lifetime is 0 this is a permanent beacon.. not sure if that'll be
 // useful for anything
-Beacon::Beacon(Mob *at_mob, int lifetime)
+Beacon::Beacon(const glm::vec4 &in_pos, int lifetime)
 :Mob
 (
-	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, at_mob->GetPosition(), 0, 0, 0,
+	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, in_pos, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, EQ::TintProfile(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false
 ),
 		remove_timer(lifetime),
@@ -132,10 +132,6 @@ void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adj
 	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
 	if (spells[spell_id].aoe_max_targets) {
 		max_targets = spells[spell_id].aoe_max_targets;
-	}
-
-	if (spells[cast_spell_id].target_type == ST_Ring) {
-		GMMove(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ());
 	}
 
 	spell_timer.Start(2500);
