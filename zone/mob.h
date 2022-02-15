@@ -349,8 +349,8 @@ public:
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1, uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, bool from_casted_spell = false, uint32 aa_id = 0);
 	void SendBeginCast(uint16 spell_id, uint32 casttime);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, int reflect_effectiveness = 0,
-		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1, int32 duration_override = 0);
-	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1, int reflect_effectiveness = 0, int32 duration_override = 0);
+		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1, int32 duration_override = 0, bool disable_buff_overrwrite = false);
+	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1, int reflect_effectiveness = 0, int32 duration_override = 0, bool disable_buff_overrwrite = false);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction, EQ::spells::CastingSlot slot, bool isproc = false);
 	bool DoCastingChecksOnCaster(int32 spell_id);
@@ -406,7 +406,7 @@ public:
 	bool IsAffectedByBuff(uint16 spell_id);
 	bool IsAffectedByBuffByGlobalGroup(GlobalGroup group);
 	void BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration);
-	int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1);
+	int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1, bool disable_buff_overrwrite = false);
 	int CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite = false);
 	int CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caster_level_override = -1);
 	void SendPetBuffsToClient();
@@ -461,6 +461,10 @@ public:
 	void GetAppearenceEffects();
 	void ClearAppearenceEffects();
 	void SendSavedAppearenceEffects(Client *receiver);
+	void SetBuffDuration(int32 spell_id, int32 duration);
+	void ApplySpellBuff(int32 spell_id, int32 duration);
+	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
+	int GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier);
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }

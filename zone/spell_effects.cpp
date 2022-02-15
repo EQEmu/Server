@@ -46,7 +46,7 @@ extern WorldServer worldserver;
 
 // the spell can still fail here, if the buff can't stack
 // in this case false will be returned, true otherwise
-bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int reflect_effectiveness, int32 duration_override)
+bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int reflect_effectiveness, int32 duration_override, bool disable_buff_overrwrite)
 {
 	int caster_level, buffslot, effect, effect_value, i;
 	EQ::ItemInstance *SummonedItem=nullptr;
@@ -119,7 +119,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 			else
 			{
-				buffslot = AddBuff(caster, spell_id, duration_override);
+				buffslot = AddBuff(caster, spell_id, duration_override, -1, disable_buff_overrwrite);
 			}
 			if(buffslot == -1)	// stacking failure
 				return false;
@@ -3662,7 +3662,8 @@ void Mob::BuffProcess()
 
 			// DF_Permanent uses -1 DF_Aura uses -4 but we need to check negatives for some spells for some reason?
 			if (spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Permanent &&
-			    spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Aura) {
+			    spells[buffs[buffs_i].spellid].buff_duration_formula != DF_Aura &&
+				buffs[buffs_i].ticsremaining != PERMANENT_BUFF_DURATION) {
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
 					--buffs[buffs_i].ticsremaining;
@@ -10203,4 +10204,117 @@ bool Mob::HasPersistDeathIllusion(int32 spell_id) {
 		}
 	}
 	return false;
+}
+
+void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
+
+	/*
+		Will refresh the buff with specified spell_id to the specified duration
+		If spell is -1, then all spells will be set to the specified duration
+		If duration 0, then will set duration to buffs normal max duration.
+	*/
+
+	bool adjust_all_buffs = false;
+
+	if (spell_id == -1) {
+		adjust_all_buffs = true;
+	}
+
+	if (!adjust_all_buffs && !IsValidSpell(spell_id)){
+		return;
+	}
+
+	if (duration < -1) {
+		duration = PERMANENT_BUFF_DURATION;
+	}
+
+	int buff_count = GetMaxBuffSlots();
+	for (int slot = 0; slot < buff_count; slot++) {
+		
+		if (!adjust_all_buffs) {
+			if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
+				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
+				return;
+			}
+		}
+		else {
+			if (buffs[slot].spellid != SPELL_UNKNOWN) {
+				SpellOnTarget(buffs[slot].spellid, this, 0, false, 0, false, -1, duration, true);
+			}
+		}
+	}
+}
+
+void Mob::ApplySpellBuff(int32 spell_id, int32 duration)
+{
+	/*
+		Used for quest command to apply a new buff with custom duration.
+		Duration set to 0 will apply with normal duration.
+	*/
+	if (!IsValidSpell(spell_id)) {
+		return;
+	}
+	if (!spells[spell_id].buff_duration) {
+		return;
+	}
+	
+	if (duration < -1) {
+		duration = PERMANENT_BUFF_DURATION;
+	}
+
+	SpellOnTarget(spell_id, this, 0, false, 0, false, -1, duration);
+}
+
+int Mob::GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier)
+{
+	if (!IsValidSpell(spell_id)) {
+		return 0;
+	}
+
+	if (!stat_identifier) {
+		return 0;
+	}
+	
+	std::string id = str_tolower(stat_identifier);
+
+	int buff_count = GetMaxBuffSlots();
+	for (int slot = 0; slot < buff_count; slot++) {
+		if (buffs[slot].spellid != SPELL_UNKNOWN && buffs[slot].spellid == spell_id) {
+			return GetBuffStatValueBySlot(slot, stat_identifier);
+		}
+	}
+	return 0;
+}
+
+int Mob::GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier) 
+{
+	if (slot > GetMaxBuffSlots()) {
+		return 0;
+	}
+
+	if (!stat_identifier) {
+		return 0;
+	}
+
+	std::string id = str_tolower(stat_identifier);
+
+	if (id == "caster_level") { return buffs[slot].casterlevel; }
+	else if (id == "spell_id") { return buffs[slot].spellid; }
+	else if (id == "caster_id") { return buffs[slot].spellid;; }
+	else if (id == "ticsremaining") { return buffs[slot].ticsremaining; }
+	else if (id == "counters") { return buffs[slot].counters; }
+	else if (id == "hit_number") { return  buffs[slot].hit_number; }
+	else if (id == "melee_rune") { return  buffs[slot].melee_rune; }
+	else if (id == "magic_rune") { return  buffs[slot].magic_rune; }
+	else if (id == "dot_rune") { return  buffs[slot].dot_rune; }
+	else if (id == "caston_x") { return  buffs[slot].caston_x; }
+	else if (id == "caston_y") { return buffs[slot].caston_y; }
+	else if (id == "caston_z") { return  buffs[slot].caston_z; }
+	else if (id == "instrument_mod") { return  buffs[slot].instrument_mod; }
+	else if (id == "persistant_buff") { return  buffs[slot].persistant_buff; }
+	else if (id == "client") { return  buffs[slot].client; }
+	else if (id == "extra_di_chance") { return  buffs[slot].ExtraDIChance; }
+	else if (id == "root_break_chance") { return  buffs[slot].RootBreakChance; }
+	else if (id == "virus_spread_time") { return  buffs[slot].virus_spread_time; }
+	return 0;
 }
