@@ -5657,7 +5657,7 @@ XS(XS_Mob_GetBuffStatValueBySlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBuffStatValueBySlot) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySpell(THIS, uint8 slot, string stat)"); // @categories Script Utility, Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySlot(THIS, uint8 slot, string stat)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
