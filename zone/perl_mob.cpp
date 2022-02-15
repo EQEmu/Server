@@ -916,6 +916,35 @@ XS(XS_Mob_SetInvisible) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_SetSeeInvisibleLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetSeeInvisibleLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleLevel(THIS, uint8 see_invis_level)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		uint8 see_invis_level = (uint8)SvUV(ST(1));
+		VALIDATE_THIS_IS_MOB;
+		THIS->SetInnateSeeInvisible(see_invis_level);
+		THIS->CalcSeeInvisibleLevel();
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_SetSeeInvisibleUndeadLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetSeeInvisibleUndeadLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleUndeadLevel(THIS, uint8 see_invis_undead_level)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		uint8 see_invis_undead_level = (uint8)SvUV(ST(1));
+		VALIDATE_THIS_IS_MOB;
+		THIS->SetSeeInvisibleUndead(see_invis_undead_level);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_FindBuff); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindBuff) {
 	dXSARGS;
@@ -5817,6 +5846,41 @@ XS(XS_Mob_IsBlind) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetInvisibleLevel);
+XS(XS_Mob_GetInvisibleLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetInvisibleLevel(THIS)"); // @categories Stats and Attributes
+	{
+		Mob *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetInvisibleLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetInvisibleUndeadLevel);
+XS(XS_Mob_GetInvisibleUndeadLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetInvisibleUndeadLevel(THIS)"); // @categories Stats and Attributes
+	{
+		Mob *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetInvisibleUndeadLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
 XS(XS_Mob_SeeInvisible);
 XS(XS_Mob_SeeInvisible) {
 	dXSARGS;
@@ -5841,11 +5905,12 @@ XS(XS_Mob_SeeInvisibleUndead) {
 		Perl_croak(aTHX_ "Usage: Mob::SeeInvisibleUndead(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		bool RETVAL;
+		uint8 RETVAL;
+		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->SeeInvisibleUndead();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -6781,6 +6846,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetHerosForgeModel"), XS_Mob_GetHerosForgeModel, file, "$$");
 	newXSproto(strcpy(buf, "GetID"), XS_Mob_GetID, file, "$");
 	newXSproto(strcpy(buf, "GetINT"), XS_Mob_GetINT, file, "$");
+	newXSproto(strcpy(buf, "GetInvisibleLevel"), XS_Mob_GetInvisibleLevel, file, "$");
+	newXSproto(strcpy(buf, "GetInvisibleUndeadLevel"), XS_Mob_GetInvisibleUndeadLevel, file, "$");
 	newXSproto(strcpy(buf, "GetInvul"), XS_Mob_GetInvul, file, "$");
 	newXSproto(strcpy(buf, "GetItemHPBonuses"), XS_Mob_GetItemHPBonuses, file, "$");
 	newXSproto(strcpy(buf, "GetItemStat"), XS_Mob_GetItemStat, file, "$$$");
@@ -6961,6 +7028,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetRace"), XS_Mob_SetRace, file, "$$");
 	newXSproto(strcpy(buf, "SetRunAnimSpeed"), XS_Mob_SetRunAnimSpeed, file, "$$");
 	newXSproto(strcpy(buf, "SetRunning"), XS_Mob_SetRunning, file, "$$");
+	newXSproto(strcpy(buf, "SetSeeInvisibleLevel"), XS_Mob_SetSeeInvisibleLevel, file, "$$");
+	newXSproto(strcpy(buf, "SetSeeInvisibleUndeadLevel"), XS_Mob_SetSeeInvisibleUndeadLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetSlotTint"), XS_Mob_SetSlotTint, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetSpecialAbility"), XS_Mob_SetSpecialAbility, file, "$$$");
 	newXSproto(strcpy(buf, "SetSpecialAbilityParam"), XS_Mob_SetSpecialAbilityParam, file, "$$$$");

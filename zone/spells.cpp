@@ -2395,9 +2395,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 				else if(!SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, false, level_override)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
-						// Prevent mana usage/timers being set for beneficial buffs
-						if(casting_spell_aa_id)
-							InterruptSpell();
 						return false;
 					}
 				}
@@ -2588,7 +2585,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	/*
 		Set Recast Timer on spells.
 	*/
-	if(IsClient() && !isproc)
+
+	if(IsClient() && !isproc && !IsFromTriggeredSpell(slot, inventory_slot))
 	{
 		if (slot == CastingSlot::AltAbility) {
 			if (!aa_id) {
@@ -2611,11 +2609,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 		//handles AA and Discipline recast timers
 		else if (spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
-		{
-			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
-			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
-		}
-		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			LogSpells("Spell [{}]: Setting custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
@@ -3625,7 +3618,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 
 	// Prevent double invising, which made you uninvised
 	// Not sure if all 3 should be stacking
-
+	//This is not live like behavior (~Kayen confirmed 2/2/22)
 	if (!RuleB(Spells, AllowDoubleInvis)) {
 		if (IsEffectInSpell(spell_id, SE_Invisibility))
 		{
@@ -4002,8 +3995,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.
 		LogSpells("Spell [{}] could not apply its effects [{}] -> [{}]\n", spell_id, GetName(), spelltar->GetName());
-		if(casting_spell_aa_id)
+		if (casting_spell_aa_id) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
+		}
 		safe_delete(action_packet);
 		return false;
 	}
@@ -6639,4 +6633,12 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 	}
 
 	return true;
+}
+
+bool Mob::IsFromTriggeredSpell(CastingSlot slot, uint32 item_slot) {
+	//spells triggered using spells finished use item slot, but there is no item set.
+	if ((slot == CastingSlot::Item) && (item_slot == 0xFFFFFFFF)) {
+		return true;
+	}
+	return false;
 }

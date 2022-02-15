@@ -535,8 +535,8 @@ struct StatBonuses {
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
 	int32   FactionModPct;						// Modifies amount of faction gained.
 	bool	LimitToSkill[EQ::skills::HIGHEST_SKILL + 3];		// Determines if we need to search for a skill proc.
-	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
-	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
+	int32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
+	int32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 	int32   SpellProc[MAX_AA_PROCS];		// Max number of spells containing melee spell procs.
 	int32   RangedProc[MAX_AA_PROCS];	    // Max number of spells containing ranged spell procs.
 	int32   DefensiveProc[MAX_AA_PROCS];	// Max number of spells containing defensive spell procs.
@@ -561,6 +561,9 @@ struct StatBonuses {
 	bool	ZoneSuspendMinion;					// base 1 allows suspended minions to zone
 	bool	CompleteHealBuffBlocker;			// Use in SPA 101 to prevent recast of complete heal from this effect till blocker buff is removed.
 	int32	Illusion;							// illusion spell id
+	uint8	invisibility;						// invisibility level
+	uint8	invisibility_verse_undead;			// IVU level
+	uint8	invisibility_verse_animal;			// IVA level
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.

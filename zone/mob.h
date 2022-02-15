@@ -147,8 +147,8 @@ public:
 		uint32 in_drakkin_details,
 		EQ::TintProfile in_armor_tint,
 		uint8 in_aa_title,
-		uint8 in_see_invis, // see through invis
-		uint8 in_see_invis_undead, // see through invis vs. undead
+		uint16 in_see_invis, // see through invis
+		uint16 in_see_invis_undead, // see through invis vs. undead
 		uint8 in_see_hide,
 		uint8 in_see_improved_hide,
 		int32 in_hp_regen,
@@ -226,10 +226,6 @@ public:
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
 	void CommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
-	void BreakInvisibleSpells();
-	virtual void CancelSneakHide();
-	void CommonBreakInvisible();
-	void CommonBreakInvisibleFromCombat();
 	bool HasDied();
 	virtual bool CheckDualWield();
 	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
@@ -246,6 +242,39 @@ public:
 		return;
 	}
 
+	//Invisible
+	bool IsInvisible(Mob* other = 0) const;
+	void SetInvisible(uint8 state, bool set_on_bonus_calc = false);
+	
+	void CalcSeeInvisibleLevel();
+	void CalcInvisibleLevel();
+	void ZeroInvisibleVars(uint8 invisible_type);
+	
+	inline uint8 GetSeeInvisibleLevelFromNPCStat(uint16 in_see_invis);
+
+	void BreakInvisibleSpells();
+	virtual void CancelSneakHide();
+	void CommonBreakInvisible();
+	void CommonBreakInvisibleFromCombat();
+
+	inline uint8 GetInvisibleLevel() const { return invisible; }
+	inline uint8 GetInvisibleUndeadLevel() const { return invisible_undead; }
+
+	inline bool SeeHide() const { return see_hide; }
+	inline bool SeeImprovedHide() const { return see_improved_hide; }
+	inline uint8 SeeInvisibleUndead() const { return see_invis_undead; }
+	inline uint8 SeeInvisible() const { return see_invis; }
+
+	inline void SetInnateSeeInvisible(uint8 val) { innate_see_invis = val; }
+	inline void SetSeeInvisibleUndead(uint8 val) { see_invis_undead = val; }
+
+	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
+	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals; 
+	uint8 see_invis, innate_see_invis, see_invis_undead; //TODO: do we need a see_invis_animal ?
+
+	bool sneaking, hidden, improved_hidden;
+	bool see_hide, see_improved_hide;
+
 	/**
 	 ************************************************
 	 * Appearance
@@ -254,15 +283,7 @@ public:
 
 	EQ::InternalTextureProfile mob_texture_profile = {};
 
-	bool IsInvisible(Mob* other = 0) const;
-
 	EQ::skills::SkillType AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
-
-	inline bool GetSeeInvisible(uint8 see_invis);
-	inline bool SeeHide() const { return see_hide; }
-	inline bool SeeImprovedHide() const { return see_improved_hide; }
-	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
-	inline uint8 SeeInvisible() const { return see_invis; }
 
 	int32 GetTextureProfileMaterial(uint8 material_slot) const;
 	int32 GetTextureProfileColor(uint8 material_slot) const;
@@ -282,7 +303,6 @@ public:
 	void SendLevelAppearance();
 	void SendStunAppearance();
 	void SendTargetable(bool on, Client *specific_target = nullptr);
-	void SetInvisible(uint8 state);
 	void SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color = 0, uint32 hero_forge_model = 0);
 
 	//Spell
@@ -359,6 +379,7 @@ public:
 	void SendIllusionWearChange(Client* c);
 	int16 GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot);
 	bool CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot);
+	bool IsFromTriggeredSpell(EQ::spells::CastingSlot slot, uint32 item_slot = 0xFFFFFFFF);
 	
 	//Bard 
 	bool ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);
@@ -977,10 +998,7 @@ public:
 	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
 	void SetBodyType(bodyType new_body, bool overwrite_orig);
 
-	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	uint8 invisible, see_invis;
-	bool invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
-	bool see_invis_undead, see_hide, see_improved_hide;
+	bool invulnerable;
 	bool qglobal;
 
 	virtual void SetAttackTimer();

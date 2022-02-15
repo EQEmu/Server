@@ -109,7 +109,7 @@ public:
 	} AType;
 	static const int AilmentTypeCount = 5;
 
-	typedef enum InvisibilityType {
+	typedef enum InvisType {
 		IT_None = 0,
 		IT_Animal,
 		IT_Undead,
