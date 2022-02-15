@@ -5603,7 +5603,6 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 				case SE_SkillProcAttempt: {
 					for (int e = 0; e < MAX_SKILL_PROCS; e++)
 					{
-						Shout("Fail NEGATE");
 						if (negate_spellbonus) { spellbonuses.SkillProc[e] = effect_value; }
 						if (negate_itembonus) { itembonuses.SkillProc[e] = effect_value; }
 						if (negate_aabonus) { aabonuses.SkillProc[e] = effect_value; }
