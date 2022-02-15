@@ -5095,7 +5095,6 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 
 void Mob::TrySkillProc(Mob *on, EQ::skills::SkillType skill, uint16 ReuseTime, bool Success, uint16 hand, bool IsDefensive)
 {
-
 	if (!on) {
 		SetTarget(nullptr);
 		LogError("A null Mob object was passed to Mob::TrySkillProc for evaluation!");
@@ -5122,10 +5121,12 @@ void Mob::TrySkillProc(Mob *on, EQ::skills::SkillType skill, uint16 ReuseTime, b
 	float ProcMod = 0;
 	float chance = 0;
 
-	if (IsDefensive)
+	if (IsDefensive) {
 		chance = on->GetSkillProcChances(ReuseTime, hand);
-	else
+	}
+	else {
 		chance = GetSkillProcChances(ReuseTime, hand);
+	}
 
 	if (spellbonuses.LimitToSkill[skill]) {
 
@@ -5150,9 +5151,8 @@ void Mob::TrySkillProc(Mob *on, EQ::skills::SkillType skill, uint16 ReuseTime, b
 						proc_spell_id = spells[base_spell_id].base_value[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].limit_value[i]);
 					}
-
+					
 					else if (spells[base_spell_id].effect_id[i] == SE_LimitToSkill && spells[base_spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
-
 						if (CanProc && spells[base_spell_id].base_value[i] == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
 							if (zone->random.Roll(final_chance)) {

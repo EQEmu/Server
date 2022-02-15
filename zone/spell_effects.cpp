@@ -9702,7 +9702,7 @@ bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc
 	bool match_proc_type = false;
 	bool has_limit_check = false;
 
-	if (!aa_id && spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+	if (!aa_id && spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 2]) {
 
 		if (spell_id == SPELL_UNKNOWN) {
 			return false;
@@ -9721,7 +9721,7 @@ bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc
 			}
 		}
 	}
-	else if (aabonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+	else if (aabonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 2]) {
 
 		int rank_id = 1;
 		AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);

@@ -1476,7 +1476,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 			if (base_value <= EQ::skills::HIGHEST_SKILL) {
 				newbon->LimitToSkill[base_value] = true;
-				newbon->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
+				newbon->LimitToSkill[EQ::skills::HIGHEST_SKILL + 2] = true; //Used as a general exists check
 			}
 			break;
 		}
@@ -3553,15 +3553,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->IllusionPersistence = effect_value;
 				break;
 
-			case SE_LimitToSkill:{
+			case SE_LimitToSkill: {
 				// Bad data or unsupported new skill
 				if (effect_value > EQ::skills::HIGHEST_SKILL) {
 					break;
 				}
 				if (effect_value <= EQ::skills::HIGHEST_SKILL){
 					new_bonus->LimitToSkill[effect_value] = true;
-					new_bonus->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
-				}
+					new_bonus->LimitToSkill[EQ::skills::HIGHEST_SKILL + 2] = true; //Used as a general exists check
+					}
 				break;
 			}
 
@@ -3569,11 +3569,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
-					if(new_bonus->SkillProc[e] && new_bonus->SkillProc[e] == spell_id)
+					if (new_bonus->SkillProc[e] && new_bonus->SkillProc[e] == spell_id) {
 						break; //Do not use the same spell id more than once.
-
+					}
 					else if(!new_bonus->SkillProc[e]){
 						new_bonus->SkillProc[e] = spell_id;
+						HasSkillProcs();//This returns it correctly as debug
 						break;
 					}
 				}
@@ -5568,6 +5569,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 				case SE_SkillProcAttempt: {
 					for (int e = 0; e < MAX_SKILL_PROCS; e++)
 					{
+						Shout("Fail NEGATE");
 						if (negate_spellbonus) { spellbonuses.SkillProc[e] = effect_value; }
 						if (negate_itembonus) { itembonuses.SkillProc[e] = effect_value; }
 						if (negate_aabonus) { aabonuses.SkillProc[e] = effect_value; }
