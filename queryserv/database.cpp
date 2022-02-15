@@ -259,6 +259,8 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
 			QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
 			QS->items[i].aug_5
 		);
+		auto results = QueryDatabase(query);
+
 		if (!results.Success()) {
 			LogInfo("Failed Handin Log Record Entry Insert: [{}]", results.ErrorMessage().c_str());
 			LogInfo("[{}]", query.c_str());
