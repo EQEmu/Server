@@ -704,13 +704,16 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	}
 
 	if (check_on_casting){
-		
+
+		if (spells[spell_id].target_type == ST_AEClientV1 ||
+			spells[spell_id].target_type == ST_AECaster ||
+			spells[spell_id].target_type == ST_Ring ||
+			spells[spell_id].target_type == ST_Beam) {
+			return true;
+		}
+
 		if (!spell_target) {
-			if (IsGroupSpell(spell_id) ||
-				spells[spell_id].target_type == ST_AEClientV1 ||
-				spells[spell_id].target_type == ST_AECaster ||
-				spells[spell_id].target_type == ST_Ring ||
-				spells[spell_id].target_type == ST_Beam) {
+			if (IsGroupSpell(spell_id)){
 				return true;
 			}
 			else if (spells[spell_id].target_type == ST_Self) {
@@ -728,7 +731,6 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 	if (!spell_target){
 		return false;
 	}
-
 	/*
 		Spells that use caster_restriction field which requires specific conditions on target to be met before casting.
 		[Insufficient mana first]
@@ -2278,12 +2280,25 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	LogSpells("Spell [{}]: target type [{}], target [{}], AE center [{}]", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
 
 	// if a spell has the AEDuration flag, it becomes an AE on target
-	// spell that's recast every 2500 msec for AEDuration msec. There are
-	// spells of all kinds of target types that do this, strangely enough
-	// TODO: finish this
+	// spell that's recast every 2500 msec for AEDuration msec. 
 	if(IsAEDurationSpell(spell_id)) {
 		// the spells are AE target, but we aim them on a beacon
-		Mob *beacon_loc = spell_target ? spell_target : this;
+		glm::vec4 beacon_loc;
+		if (spells[spell_id].target_type == ST_Ring) {
+			beacon_loc = glm::vec4{ GetTargetRingX(),GetTargetRingY(), GetTargetRingZ(), GetHeading()};
+		}
+		else {
+			if (spell_target) {
+				beacon_loc = spell_target->GetPosition();
+			}
+			else {
+				beacon_loc = GetPosition();
+			}
+		}
+		// live has a bug where the heading is always north
+		if (!RuleB(Spells, FixBeaconHeading)) {
+			beacon_loc.w = 0.0f;
+		}
 		auto beacon = new Beacon(beacon_loc, spells[spell_id].aoe_duration);
 		entity_list.AddBeacon(beacon);
 		LogSpells("Spell [{}]: AE duration beacon created, entity id [{}]", spell_id, beacon->GetName());
