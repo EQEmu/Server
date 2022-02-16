@@ -384,7 +384,7 @@ int command_init(void)
 		command_add("unlock", "- Unlock the worldserver", AccountStatus::GMLeadAdmin, command_unlock) ||
 		command_add("unmemspell", "[Spell ID] - Unmemorize a Spell by ID for you or your target", AccountStatus::Guide, command_unmemspell) ||
 		command_add("unmemspells", " - Unmemorize all spells for you or your target", AccountStatus::Guide, command_unmemspells) ||
-		command_add("unscribespell", "[spellid] - Unscribe specified spell from your target's spell book.", AccountStatus::GMCoder, command_unscribespell) ||
+		command_add("unscribespell", "[Spell ID] - Unscribe a spell from your or your target's spell book by Spell ID", AccountStatus::GMCoder, command_unscribespell) ||
 		command_add("unscribespells", "- Clear out your or your player target's spell book.", AccountStatus::GMCoder, command_unscribespells) ||
 		command_add("untraindisc", "[Spell ID] - Untrain your or your target's discipline by Spell ID", AccountStatus::GMCoder, command_untraindisc) ||
 		command_add("untraindiscs", "- Untrains all disciplines from your target.", AccountStatus::GMCoder, command_untraindiscs) ||

@@ -2336,6 +2336,16 @@ void Lua_Client::ResetCastbarCooldownBySpellID(uint32 spell_id) {
 	self->ResetCastbarCooldownBySpellID(spell_id);
 }
 
+void Lua_Client::UnscribeSpellBySpellID(uint16 spell_id) {
+	Lua_Safe_Call_Void();
+	self->UnscribeSpellBySpellID(spell_id);
+}
+
+void Lua_Client::UnscribeSpellBySpellID(uint16 spell_id, bool update_client) {
+	Lua_Safe_Call_Void();
+	self->UnscribeSpellBySpellID(spell_id, update_client);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2717,6 +2727,8 @@ luabind::scope lua_register_client() {
 	.def("UnscribeSpell", (void(Lua_Client::*)(int,bool))&Lua_Client::UnscribeSpell)
 	.def("UnscribeSpellAll", (void(Lua_Client::*)(bool))&Lua_Client::UnscribeSpellAll)
 	.def("UnscribeSpellAll", (void(Lua_Client::*)(void))&Lua_Client::UnscribeSpellAll)
+	.def("UnscribeSpellBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UnscribeSpellBySpellID)
+	.def("UnscribeSpellBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UnscribeSpellBySpellID)
 	.def("UntrainDisc", (void(Lua_Client::*)(int))&Lua_Client::UntrainDisc)
 	.def("UntrainDisc", (void(Lua_Client::*)(int,bool))&Lua_Client::UntrainDisc)
 	.def("UntrainDiscAll", (void(Lua_Client::*)(bool))&Lua_Client::UntrainDiscAll)
