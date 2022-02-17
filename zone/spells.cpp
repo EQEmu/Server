@@ -206,7 +206,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
-	if (item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
+	if (item_slot != 0xFFFFFFFF && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		if (!CheckItemRaceClassDietyRestrictionsOnCast(item_slot)) {
 			StopCastSpell(spell_id, send_spellbar_enable);
