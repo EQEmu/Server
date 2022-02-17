@@ -50,7 +50,7 @@ void command_logs(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (is_list) {
+	if (is_list || (is_set && !sep->IsNumber(3))) {
 		uint32 start_category_id = 1;
 		if (sep->IsNumber(2)) {
 			start_category_id = std::stoul(sep->arg[2]);
@@ -137,13 +137,13 @@ void command_logs(Client *c, const Seperator *sep)
 			"Reloaded log settings worldwide."
 		);
 		safe_delete(pack);
-	} else if (is_set) {
+	} else if (is_set && sep->IsNumber(3)) {
 		auto logs_set = false;
 		bool is_console = !strcasecmp(sep->arg[2], "console");
 		bool is_file = !strcasecmp(sep->arg[2], "file");
 		bool is_gmsay = !strcasecmp(sep->arg[2], "gmsay");
 
-		if (!is_console && !is_file && !is_gmsay) {
+		if (!sep->IsNumber(4) || (!is_console && !is_file && !is_gmsay)) {
 			c->Message(
 				Chat::White,
 				"#logs set [console|file|gmsay] [Category ID] [Debug Level (1-3)] - Sets log settings during the lifetime of the zone"
