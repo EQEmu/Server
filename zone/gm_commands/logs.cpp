@@ -50,7 +50,7 @@ void command_logs(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (is_list) {
+	if (is_list || (is_set && !sep->IsNumber(3))) {
 		uint32 start_category_id = 1;
 		if (sep->IsNumber(2)) {
 			start_category_id = std::stoul(sep->arg[2]);
@@ -137,13 +137,13 @@ void command_logs(Client *c, const Seperator *sep)
 			"Reloaded log settings worldwide."
 		);
 		safe_delete(pack);
-	} else if (is_set) {
+	} else if (is_set && sep->IsNumber(3)) {
 		auto logs_set = false;
 		bool is_console = !strcasecmp(sep->arg[2], "console");
 		bool is_file = !strcasecmp(sep->arg[2], "file");
 		bool is_gmsay = !strcasecmp(sep->arg[2], "gmsay");
 
-		if (!is_console && !is_file && !is_gmsay) {
+		if (!sep->IsNumber(4) || (!is_console && !is_file && !is_gmsay)) {
 			c->Message(
 				Chat::White,
 				"#logs set [console|file|gmsay] [Category ID] [Debug Level (1-3)] - Sets log settings during the lifetime of the zone"
@@ -166,33 +166,15 @@ void command_logs(Client *c, const Seperator *sep)
 		}
 
 		if (logs_set) {
-			std::string popup_text = "<table>";
-
-			popup_text += fmt::format(
-				"<tr><td>ID</td><td>{}</td><tr>",
-				category_id
-			);
-
-			popup_text += fmt::format(
-				"<tr><td>Category</td><td>{}</td><tr>",
-				Logs::LogCategoryName[category_id]
-			);
-
-			popup_text += fmt::format(
-				"<tr><td>Method</td><td>{}</td></tr>",
-				sep->arg[2]
-			);
-
-			popup_text += fmt::format(
-				"<tr><td>Setting</td><td>{}</td></tr>",
-				setting
-			);
-
-			popup_text += "</table>";
-
-			c->SendPopupToClient(
-				"Log Settings Applied",
-				popup_text.c_str()
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) is now set to Debug Level {} for {}.",
+					Logs::LogCategoryName[category_id],
+					category_id,
+					setting,
+					sep->arg[2]
+				).c_str()
 			);
 		}
 
