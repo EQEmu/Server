@@ -166,6 +166,8 @@ public:
 	int GetSpecializeSkillValue(int spell_id);
 	int GetNPCTypeID();
 	bool IsTargeted();
+	bool IsTargetClient();
+	bool IsTargetNPC();
 	double GetX();
 	double GetY();
 	double GetZ();

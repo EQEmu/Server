@@ -6647,6 +6647,38 @@ XS(XS_Mob_ApplySpellBuff) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_IsTargetClient);
+XS(XS_Mob_IsTargetClient) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::IsTargetClient(THIS)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		bool RETVAL;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->IsTargetClient();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_IsTargetNPC);
+XS(XS_Mob_IsTargetNPC) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::IsTargetNPC(THIS)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		bool RETVAL;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->IsTargetNPC();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 #ifdef BOTS
 XS(XS_Mob_CastToBot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToBot)
@@ -6959,6 +6991,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "IsStunned"), XS_Mob_IsStunned, file, "$");
 	newXSproto(strcpy(buf, "IsTargetable"), XS_Mob_IsTargetable, file, "$");
 	newXSproto(strcpy(buf, "IsTargeted"), XS_Mob_IsTargeted, file, "$");
+	newXSproto(strcpy(buf, "IsTargetClient"), XS_Mob_IsTargetClient, file, "$");
+	newXSproto(strcpy(buf, "IsTargetNPC"), XS_Mob_IsTargetNPC, file, "$");
 	newXSproto(strcpy(buf, "IsTrap"), XS_Mob_IsTrap, file, "$");
 	newXSproto(strcpy(buf, "IsWarriorClass"), XS_Mob_IsWarriorClass, file, "$");
 	newXSproto(strcpy(buf, "Kill"), XS_Mob_Kill, file, "$");
