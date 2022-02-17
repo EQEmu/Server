@@ -166,33 +166,15 @@ void command_logs(Client *c, const Seperator *sep)
 		}
 
 		if (logs_set) {
-			std::string popup_text = "<table>";
-
-			popup_text += fmt::format(
-				"<tr><td>ID</td><td>{}</td><tr>",
-				category_id
-			);
-
-			popup_text += fmt::format(
-				"<tr><td>Category</td><td>{}</td><tr>",
-				Logs::LogCategoryName[category_id]
-			);
-
-			popup_text += fmt::format(
-				"<tr><td>Method</td><td>{}</td></tr>",
-				sep->arg[2]
-			);
-
-			popup_text += fmt::format(
-				"<tr><td>Setting</td><td>{}</td></tr>",
-				setting
-			);
-
-			popup_text += "</table>";
-
-			c->SendPopupToClient(
-				"Log Settings Applied",
-				popup_text.c_str()
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) is now set to Debug Level {} for {}.",
+					Logs::LogCategoryName[category_id],
+					category_id,
+					setting,
+					sep->arg[2]
+				).c_str()
 			);
 		}
 
