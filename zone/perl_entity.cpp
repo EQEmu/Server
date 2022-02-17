@@ -1215,24 +1215,26 @@ XS(XS_EntityList_MessageGroup) {
 XS(XS_EntityList_GetRandomClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetRandomClient) {
 	dXSARGS;
-	if ((items < 5) || (items > 6))
+	if (items < 5 || items > 6)
 		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, float x, float y, float z, float distance, [Client* exclude_client = nullptr])"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
-		Client     *RETVAL, *c = nullptr;
-		float      x           = (float) SvNV(ST(1));
-		float      y           = (float) SvNV(ST(2));
-		float      z           = (float) SvNV(ST(3));
-		float      d           = (float) SvNV(ST(4));
+		Client *RETVAL, *exclude_client = nullptr;
+		float x = (float) SvNV(ST(1));
+		float y = (float) SvNV(ST(2));
+		float z = (float) SvNV(ST(3));
+		float distance = (float) SvNV(ST(4));
 		VALIDATE_THIS_IS_ENTITY;
+
 		if (items == 6) {
 			if (sv_derived_from(ST(5), "Client")) {
 				IV tmp = SvIV((SV *) SvRV(ST(5)));
-				c = INT2PTR(Client *, tmp);
+				exclude_client = INT2PTR(Client *, tmp);
 			}
 		}
-		RETVAL                 = entity_list.GetRandomClient(glm::vec3(x, y, z), d * d, c);
-		ST(0)                  = sv_newmortal();
+		
+		RETVAL = entity_list.GetRandomClient(glm::vec3(x, y, z), (distance * distance), exclude_client);
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -1460,6 +1462,62 @@ XS(XS_EntityList_SignalAllClients) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_EntityList_GetRandomMob); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EntityList_GetRandomMob) {
+	dXSARGS;
+	if (items < 5 || items > 6)
+		Perl_croak(aTHX_ "Usage: EntityList::GetRandomMob(THIS, float x, float y, float z, float distance, [Mob* exclude_mob = nullptr])"); // @categories Account and Character, Script Utility
+	{
+		EntityList *THIS;
+		Mob *RETVAL, *exclude_mob = nullptr;
+		float x = (float) SvNV(ST(1));
+		float y = (float) SvNV(ST(2));
+		float z = (float) SvNV(ST(3));
+		float distance = (float) SvNV(ST(4));
+		VALIDATE_THIS_IS_ENTITY;
+
+		if (items == 6) {
+			if (sv_derived_from(ST(5), "Mob")) {
+				IV tmp = SvIV((SV *) SvRV(ST(5)));
+				exclude_mob = INT2PTR(Mob*, tmp);
+			}
+		}
+
+		RETVAL = entity_list.GetRandomMob(glm::vec3(x, y, z), (distance * distance), exclude_mob);
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_EntityList_GetRandomNPC); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EntityList_GetRandomNPC) {
+	dXSARGS;
+	if (items < 5 || items > 6)
+		Perl_croak(aTHX_ "Usage: EntityList::GetRandomNPC(THIS, float x, float y, float z, float distance, [NPC* exclude_npc = nullptr])"); // @categories Account and Character, Script Utility
+	{
+		EntityList *THIS;
+		NPC *RETVAL, *exclude_npc = nullptr;
+		float x = (float) SvNV(ST(1));
+		float y = (float) SvNV(ST(2));
+		float z = (float) SvNV(ST(3));
+		float distance = (float) SvNV(ST(4));
+		VALIDATE_THIS_IS_ENTITY;
+
+		if (items == 6) {
+			if (sv_derived_from(ST(5), "NPC")) {
+				IV tmp = SvIV((SV *) SvRV(ST(5)));
+				exclude_npc = INT2PTR(NPC*, tmp);
+			}
+		}
+
+		RETVAL = entity_list.GetRandomNPC(glm::vec3(x, y, z), (distance * distance), exclude_npc);
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1524,6 +1582,8 @@ XS(boot_EntityList) {
 	newXSproto(strcpy(buf, "GetRaidByClient"), XS_EntityList_GetRaidByClient, file, "$$");
 	newXSproto(strcpy(buf, "GetRaidByID"), XS_EntityList_GetRaidByID, file, "$$");
 	newXSproto(strcpy(buf, "GetRandomClient"), XS_EntityList_GetRandomClient, file, "$$$$$;$");
+	newXSproto(strcpy(buf, "GetRandomMob"), XS_EntityList_GetRandomMob, file, "$$$$$;$");
+	newXSproto(strcpy(buf, "GetRandomNPC"), XS_EntityList_GetRandomNPC, file, "$$$$$;$");
 	newXSproto(strcpy(buf, "HalveAggro"), XS_EntityList_HalveAggro, file, "$$");
 	newXSproto(strcpy(buf, "IsMobSpawnedByNpcTypeID"), XS_EntityList_IsMobSpawnedByNpcTypeID, file, "$$");
 	newXSproto(strcpy(buf, "MakeNameUnique"), XS_EntityList_MakeNameUnique, file, "$$");

@@ -1867,19 +1867,64 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 	return nullptr;
 }
 
-Client *EntityList::GetRandomClient(const glm::vec3& location, float Distance, Client *ExcludeClient)
+Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, Client *exclude_client)
 {
-	std::vector<Client *> ClientsInRange;
+	std::vector<Client*> clients_in_range;
 
+	for (const auto& client : client_list) {
+		if (
+			client.second != exclude_client &&
+			DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance
+		) {
+			clients_in_range.push_back(client.second);
+		}
+	}
 
-	for (auto it = client_list.begin();it != client_list.end(); ++it)
-		if ((it->second != ExcludeClient) && (DistanceSquared(static_cast<glm::vec3>(it->second->GetPosition()), location) <= Distance))
-			ClientsInRange.push_back(it->second);
-
-	if (ClientsInRange.empty())
+	if (clients_in_range.empty()) {
 		return nullptr;
+	}
 
-	return ClientsInRange[zone->random.Int(0, ClientsInRange.size() - 1)];
+	return clients_in_range[zone->random.Int(0, clients_in_range.size() - 1)];
+}
+
+NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc)
+{
+	std::vector<NPC*> npcs_in_range;
+
+	for (const auto& npc : npc_list) {
+		if (
+			npc.second != exclude_npc &&
+			DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance
+		) {
+			npcs_in_range.push_back(npc.second);
+		}
+	}
+
+	if (npcs_in_range.empty()) {
+		return nullptr;
+	}
+
+	return npcs_in_range[zone->random.Int(0, npcs_in_range.size() - 1)];
+}
+
+Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob)
+{
+	std::vector<Mob*> mobs_in_range;
+
+	for (const auto& mob : mob_list) {
+		if (
+			mob.second != exclude_mob &&
+			DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance
+		) {
+			mobs_in_range.push_back(mob.second);
+		}
+	}
+
+	if (mobs_in_range.empty()) {
+		return nullptr;
+	}
+
+	return mobs_in_range[zone->random.Int(0, mobs_in_range.size() - 1)];
 }
 
 Corpse *EntityList::GetCorpseByOwner(Client *client)
