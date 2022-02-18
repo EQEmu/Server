@@ -2637,6 +2637,142 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 	}
 }
 
+float NPC::GetNPCStat(const char *identifier)
+{
+	std::string id = str_tolower(identifier);
+
+	if (id == "ac") {
+		return AC;
+	}
+	else if (id == "str") {
+		return STR;
+	}
+	else if (id == "sta") {
+		return STA;
+	}
+	else if (id == "agi") {
+		return AGI;
+	}
+	else if (id == "dex") {
+		return DEX;
+	}
+	else if (id == "wis") {
+		return WIS;
+	}
+	else if (id == "int" || id == "_int") {
+		return INT;
+	}
+	else if (id == "cha") {
+		return CHA;
+	}
+	else if (id == "max_hp") {
+		return base_hp;
+	}
+	else if (id == "max_mana") {
+		return npc_mana;
+	}
+	else if (id == "mr") {
+		return MR;
+	}
+	else if (id == "fr") {
+		return FR;
+	}
+	else if (id == "cr") {
+		return CR;
+	}
+	else if (id == "cor") {
+		return Corrup;
+	}
+	else if (id == "phr") {
+		return PhR;
+	}
+	else if (id == "pr") {
+		return PR;
+	}
+	else if (id == "dr") {
+		return DR;
+	}
+	else if (id == "phr") {
+		return PhR;
+	}
+	else if (id == "runspeed") {
+		return runspeed;
+	}
+
+	else if (id == "attack_speed") {
+		return attack_speed;
+	}
+	else if (id == "attack_delay") {
+		return attack_delay;
+	}
+	else if (id == "atk") {
+		return ATK;
+	}
+	else if (id == "accuracy") {
+		return accuracy_rating;
+	}
+	else if (id == "avoidance") {
+		return avoidance_rating;
+	}
+	else if (id == "trackable") {
+		return trackable;
+	}
+	else if (id == "min_hit") {
+		return min_dmg;
+	}
+	else if (id == "max_hit") {
+		return max_dmg;
+	}
+	else if (id == "attack_count") {
+		return attack_count;
+	}
+	else if (id == "see_invis") {
+		return see_invis;
+	}
+	else if (id == "see_invis_undead") {
+		return see_invis_undead;
+	}
+	else if (id == "see_hide") {
+		return see_hide;
+	}
+	else if (id == "see_improved_hide") {
+		return see_improved_hide;
+	}
+	else if (id == "hp_regen") {
+		return hp_regen;
+	}
+	else if (id == "mana_regen") {
+		return mana_regen;
+	}
+	else if (id == "level") {
+		return GetOrigLevel();
+	}
+	else if (id == "aggro") {
+		return pAggroRange;
+	}
+	else if (id == "assist") {
+		return pAssistRange;
+	}
+	else if (id == "slow_mitigation") {
+		return slow_mitigation;
+	}
+	else if (id == "loottable_id") {
+		return loottable_id;
+	}
+	else if (id == "healscale") {
+		return healscale;
+	}
+	else if (id == "spellscale") {
+		return spellscale;
+	}
+	else if (id == "npc_spells_id") {
+		return npc_spells_id;
+	}
+	else if (id == "npc_spells_effects_id") {
+		return npc_spells_effects_id;
+	}
+}
+
 void NPC::LevelScale() {
 
 	uint8 random_level = (zone->random.Int(level, maxlevel));
