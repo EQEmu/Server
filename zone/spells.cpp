@@ -1525,7 +1525,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 				// handle the components for traditional casters
 				else {
-					if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SE_SummonPet) || IsEffectInSpell(spell_id, SE_NecPet))) {
+					if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SE_SummonPet) || IsEffectInSpell(spell_id, SE_NecPet)) ||
+						(IsBardSong(spell_id) && (slot == CastingSlot::Item|| slot == CastingSlot::PotionBelt))) {
 						//bypass reagent cost
 					}
 					else if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
