@@ -1274,15 +1274,15 @@ XS(XS_NPC_GetNPCStat) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: NPC::GetNPCStat(THIS, string key)"); // @categories Stats and Attributes
 	{
-		NPC        *THIS;
-		float		RETVAL;
+		NPC		*THIS;
+		float	RETVAL;
 		Const_char *identifier = (Const_char *)SvPV_nolen(ST(1));
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
 
 		RETVAL = THIS->GetNPCStat(identifier);
 		XSprePUSH;
-		PUSHi((double)RETVAL);
+		PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
 }
