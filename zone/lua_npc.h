@@ -152,6 +152,7 @@ public:
 	void AddAISpellEffect(int spell_effect_id, int base_value, int limit_value, int max_value);
 	void RemoveAISpellEffect(int spell_effect_id);
 	bool HasAISpellEffect(int spell_effect_id);
+	float GetNPCStat(const char* identifier);
 };
 
 #endif
