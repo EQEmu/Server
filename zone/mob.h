@@ -353,7 +353,7 @@ public:
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1, int reflect_effectiveness = 0, int32 duration_override = 0, bool disable_buff_overrwrite = false);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction, EQ::spells::CastingSlot slot, bool isproc = false);
-	bool DoCastingChecksOnCaster(int32 spell_id);
+	bool DoCastingChecksOnCaster(int32 spell_id, EQ::spells::CastingSlot slot);
 	bool DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id);
 	bool DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob* spell_target);
 	virtual bool CheckFizzle(uint16 spell_id);
