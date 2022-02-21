@@ -2205,20 +2205,52 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		if (src_slot_id <= EQ::invslot::EQUIPMENT_END) {
 			if(src_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+					src_slot_id
+				);
+
+				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
 			}
 
 			if(dst_inst) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, dst_inst, nullptr, "", src_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+					src_slot_id
+				);
+				
+				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
 			}
 		}
 
 		if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {
 			if(dst_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+					dst_slot_id
+				);
+
+				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
 			}
 
 			if(src_inst) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+					dst_slot_id
+				);
+
+				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
 			}
 		}
 	}
