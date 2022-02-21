@@ -2608,7 +2608,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			if (client) {
 				switch (update_subtype) {
 					case CZSpellUpdateSubtype_Cast:
-						client->SpellFinished(spell_id, client);
+						client->ApplySpellBuff(spell_id);
 						break;
 					case CZSpellUpdateSubtype_Remove:
 						client->BuffFadeBySpellID(spell_id);
@@ -2623,7 +2623,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						auto group_member = client_group->members[member_index]->CastToClient();
 						switch (update_subtype) {
 							case CZSpellUpdateSubtype_Cast:
-								group_member->SpellFinished(spell_id, group_member);
+								group_member->ApplySpellBuff(spell_id);
 								break;
 							case CZSpellUpdateSubtype_Remove:
 								group_member->BuffFadeBySpellID(spell_id);
@@ -2640,7 +2640,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						auto raid_member = client_raid->members[member_index].member->CastToClient();
 						switch (update_subtype) {
 							case CZSpellUpdateSubtype_Cast:
-								raid_member->SpellFinished(spell_id, raid_member);
+								raid_member->ApplySpellBuff(spell_id);
 								break;
 							case CZSpellUpdateSubtype_Remove:
 								raid_member->BuffFadeBySpellID(spell_id);
@@ -2654,7 +2654,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
 					switch (update_subtype) {
 						case CZSpellUpdateSubtype_Cast:
-							client.second->SpellFinished(spell_id, client.second);
+							client.second->ApplySpellBuff(spell_id);
 							break;
 						case CZSpellUpdateSubtype_Remove:
 							client.second->BuffFadeBySpellID(spell_id);
@@ -2667,7 +2667,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					switch (update_subtype) {
 						case CZSpellUpdateSubtype_Cast:
-							client.second->SpellFinished(spell_id, client.second);
+							client.second->ApplySpellBuff(spell_id);
 							break;
 						case CZSpellUpdateSubtype_Remove:
 							client.second->BuffFadeBySpellID(spell_id);
@@ -2680,7 +2680,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			if (client) {
 				switch (update_subtype) {
 					case CZSpellUpdateSubtype_Cast:
-						client->SpellFinished(spell_id, client);
+						client->ApplySpellBuff(spell_id);
 						break;
 					case CZSpellUpdateSubtype_Remove:
 						client->BuffFadeBySpellID(spell_id);
@@ -3038,7 +3038,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (update_type == WWSpellUpdateType_Cast) {
 			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
-					client.second->SpellFinished(spell_id, client.second);
+					client.second->ApplySpellBuff(spell_id);
 				}
 			}
 		} else if (update_type == WWSpellUpdateType_Remove) {
