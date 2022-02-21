@@ -3,9 +3,7 @@
 void command_zclip(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-	if (
-		arguments <= 3
-		) {
+	if (arguments <= 3) {
 		c->Message(
 			Chat::White,
 			"Usage: #zclip [Minimum Clip] [Maximum Clip] [Fog Minimum Clip] [Fog Maximum Clip] [Permanent (0 = False, 1 = True)]"
