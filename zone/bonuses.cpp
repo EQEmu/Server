@@ -47,6 +47,8 @@ void Mob::CalcBonuses()
 	CalcMaxMana();
 	SetAttackTimer();
 	CalcAC();
+	CalcSeeInvisibleLevel();
+	CalcInvisibleLevel();
 
 	/* Fast walking NPC's are prone to disappear into walls/hills
 		We set this here because NPC's can cast spells to change walkspeed/runspeed
@@ -80,6 +82,9 @@ void Client::CalcBonuses()
 	CalcEdibleBonuses(&itembonuses);
 	CalcSpellBonuses(&spellbonuses);
 	CalcAABonuses(&aabonuses);
+
+	CalcSeeInvisibleLevel();
+	CalcInvisibleLevel();
 
 	ProcessItemCaps(); // caps that depend on spell/aa bonuses
 
@@ -867,7 +872,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->MaxBindWound += base_value;
 			break;
 		case SE_SeeInvis:
-			newbon->SeeInvis = base_value;
+			base_value = std::min({ base_value, MAX_INVISIBILTY_LEVEL });
+			if (newbon->SeeInvis < base_value) {
+				newbon->SeeInvis = base_value;
+			}
 			break;
 		case SE_BaseMovementSpeed:
 			newbon->BaseMovementSpeed += base_value;
@@ -1476,7 +1484,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 			if (base_value <= EQ::skills::HIGHEST_SKILL) {
 				newbon->LimitToSkill[base_value] = true;
-				newbon->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
+				newbon->LimitToSkill[EQ::skills::HIGHEST_SKILL + 2] = true; //Used as a general exists check
 			}
 			break;
 		}
@@ -3553,15 +3561,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->IllusionPersistence = effect_value;
 				break;
 
-			case SE_LimitToSkill:{
+			case SE_LimitToSkill: {
 				// Bad data or unsupported new skill
 				if (effect_value > EQ::skills::HIGHEST_SKILL) {
 					break;
 				}
 				if (effect_value <= EQ::skills::HIGHEST_SKILL){
 					new_bonus->LimitToSkill[effect_value] = true;
-					new_bonus->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
-				}
+					new_bonus->LimitToSkill[EQ::skills::HIGHEST_SKILL + 2] = true; //Used as a general exists check
+					}
 				break;
 			}
 
@@ -3569,11 +3577,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
-					if(new_bonus->SkillProc[e] && new_bonus->SkillProc[e] == spell_id)
+					if (new_bonus->SkillProc[e] && new_bonus->SkillProc[e] == spell_id) {
 						break; //Do not use the same spell id more than once.
-
+					}
 					else if(!new_bonus->SkillProc[e]){
 						new_bonus->SkillProc[e] = spell_id;
+						HasSkillProcs();//This returns it correctly as debug
 						break;
 					}
 				}
@@ -3823,6 +3832,32 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				}
 				break;
 			}
+
+			case SE_Invisibility:
+			case SE_Invisibility2:
+				effect_value = std::min({ effect_value, MAX_INVISIBILTY_LEVEL });
+				if (new_bonus->invisibility < effect_value)
+					new_bonus->invisibility = effect_value;
+				break;
+
+			case SE_InvisVsUndead:
+			case SE_InvisVsUndead2:
+				if (new_bonus->invisibility_verse_undead < effect_value)
+					new_bonus->invisibility_verse_undead = effect_value;
+				break;
+
+			case SE_InvisVsAnimals:
+				effect_value = std::min({ effect_value, MAX_INVISIBILTY_LEVEL });
+				if (new_bonus->invisibility_verse_animal < effect_value)
+					new_bonus->invisibility_verse_animal = effect_value;
+				break;
+
+			case SE_SeeInvis:
+				effect_value = std::min({ effect_value, MAX_INVISIBILTY_LEVEL });
+				if (new_bonus->SeeInvis < effect_value) {
+					new_bonus->SeeInvis = effect_value;
+				}
+				break;
 
 			case SE_ZoneSuspendMinion:
 				new_bonus->ZoneSuspendMinion = effect_value;

@@ -653,6 +653,12 @@ bool Lua_NPC::HasAISpellEffect(int spell_effect_id)
 	return self->HasAISpellEffect(spell_effect_id);
 }
 
+float Lua_NPC::GetNPCStat(const char* identifier)
+{
+	Lua_Safe_Call_Real();
+	return self->GetNPCStat(identifier);
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")	
 	.def(luabind::constructor<>())
@@ -708,6 +714,7 @@ luabind::scope lua_register_npc() {
 	.def("GetNPCHate", (int(Lua_NPC::*)(Lua_Mob))&Lua_NPC::GetNPCHate)
 	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
+	.def("GetNPCStat", (float(Lua_NPC::*)(const char*))&Lua_NPC::GetNPCStat)
 	.def("GetPetSpellID", (int(Lua_NPC::*)(void))&Lua_NPC::GetPetSpellID)
 	.def("GetPlatinum", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetPlatinum)
 	.def("GetPrimSkill", (int(Lua_NPC::*)(void))&Lua_NPC::GetPrimSkill)

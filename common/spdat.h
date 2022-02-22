@@ -191,6 +191,8 @@
 #define MAX_APPEARANCE_EFFECTS 20 //Up to 20 Appearance Effects can be saved to a mobs appearance effect array, these will be sent to other clients when they enter a zone (This is arbitrary)
 #define MAX_CAST_ON_SKILL_USE 36 //Actual amount is MAX/3
 
+#define MAX_INVISIBILTY_LEVEL 254
+
 //instrument item id's used as song components
 #define INSTRUMENT_HAND_DRUM 13000
 #define INSTRUMENT_WOODEN_FLUTE 13001
@@ -540,6 +542,13 @@ enum ReflectSpellType
 	RELFECT_ALL_SINGLE_TARGET_SPELLS  = 3,
 	REFLECT_ALL_SPELLS                = 4,
 };
+
+enum InvisType {
+	T_INVISIBLE						= 0,
+	T_INVISIBLE_VERSE_UNDEAD		= 1,
+	T_INVISIBLE_VERSE_ANIMAL		= 2,
+};
+
 //For better organizing in proc effects, not used in spells.
 enum ProcType
 {
@@ -1039,7 +1048,7 @@ typedef enum {
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
 #define SE_InvisVsUndead2				315 // implemented - fixed duration ITU
-//#define SE_ImprovedInvisAnimals		316	// not used
+#define SE_ImprovedInvisAnimals			316	// implemented
 #define SE_ItemHPRegenCapIncrease		317	// implemented[AA] - increases amount of health regen gained via items
 #define SE_ItemManaRegenCapIncrease		318 // implemented - increases amount of mana regen you can gain via items
 #define SE_CriticalHealOverTime			319 // implemented
@@ -1255,8 +1264,9 @@ typedef enum {
 // LAST
 
 
-#define DF_Permanent			50
-#define DF_Aura					51
+#define DF_Permanent				50
+#define DF_Aura						51
+#define PERMANENT_BUFF_DURATION 	-1000 //this is arbitrary used when overriding spells regular buff duration to set it as permenant
 
 // note this struct is historical, we don't actually need it to be
 // aligned to anything, but for maintaining it it is kept in the order that

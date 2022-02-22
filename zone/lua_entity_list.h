@@ -108,8 +108,12 @@ public:
 	void RemoveFromHateLists(Lua_Mob who);
 	void RemoveFromHateLists(Lua_Mob who, bool set_to_one);
 	void MessageGroup(Lua_Mob who, bool skip_close, uint32 type, const char *message);
-	Lua_Client GetRandomClient(float x, float y, float z, float dist);
-	Lua_Client GetRandomClient(float x, float y, float z, float dist, Lua_Client exclude);
+	Lua_Client GetRandomClient(float x, float y, float z, float distance);
+	Lua_Client GetRandomClient(float x, float y, float z, float distance, Lua_Client exclude_client);
+	Lua_Mob GetRandomMob(float x, float y, float z, float distance);
+	Lua_Mob GetRandomMob(float x, float y, float z, float distance, Lua_Mob exclude_mob);
+	Lua_NPC GetRandomNPC(float x, float y, float z, float distance);
+	Lua_NPC GetRandomNPC(float x, float y, float z, float distance, Lua_NPC exclude_npc);
 	Lua_Mob_List GetMobList();
 	Lua_Client_List GetClientList();
 	Lua_Client_List GetShuffledClientList();

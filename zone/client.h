@@ -818,6 +818,7 @@ public:
 	// defer save used when bulk saving
 	void UnscribeSpell(int slot, bool update_client = true, bool defer_save = false);
 	void UnscribeSpellAll(bool update_client = true);
+	void UnscribeSpellBySpellID(uint16 spell_id, bool update_client = true);
 	void UntrainDisc(int slot, bool update_client = true, bool defer_save = false);
 	void UntrainDiscAll(bool update_client = true);
 	void UntrainDiscBySpellID(uint16 spell_id, bool update_client = true);

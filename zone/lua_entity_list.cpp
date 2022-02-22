@@ -322,14 +322,14 @@ void Lua_EntityList::MessageGroup(Lua_Mob who, bool skip_close, uint32 type, con
 	self->MessageGroup(who, skip_close, type, message);
 }
 
-Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist) {
+Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float distance) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return self->GetRandomClient(glm::vec3(x, y, z), dist);
+	return self->GetRandomClient(glm::vec3(x, y, z), distance);
 }
 
-Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist, Lua_Client exclude) {
+Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float distance, Lua_Client exclude_client) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return self->GetRandomClient(glm::vec3(x, y, z), dist, exclude);
+	return self->GetRandomClient(glm::vec3(x, y, z), distance, exclude_client);
 }
 
 Lua_Mob_List Lua_EntityList::GetMobList() {
@@ -480,6 +480,26 @@ void Lua_EntityList::ChannelMessage(Lua_Mob from, int channel_num, int language,
 	self->ChannelMessage(from, channel_num, language, message);
 }
 
+Lua_Mob Lua_EntityList::GetRandomMob(float x, float y, float z, float distance) {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return self->GetRandomMob(glm::vec3(x, y, z), distance);
+}
+
+Lua_Mob Lua_EntityList::GetRandomMob(float x, float y, float z, float distance, Lua_Mob exclude_mob) {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return self->GetRandomMob(glm::vec3(x, y, z), distance, exclude_mob);
+}
+
+Lua_NPC Lua_EntityList::GetRandomNPC(float x, float y, float z, float distance) {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance);
+}
+
+Lua_NPC Lua_EntityList::GetRandomNPC(float x, float y, float z, float distance, Lua_NPC exclude_npc) {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance, exclude_npc);
+}
+
 luabind::scope lua_register_entity_list() {
 	return luabind::class_<Lua_EntityList>("EntityList")
 	.def(luabind::constructor<>())
@@ -534,6 +554,10 @@ luabind::scope lua_register_entity_list() {
 	.def("GetRaidByID", (Lua_Raid(Lua_EntityList::*)(int))&Lua_EntityList::GetRaidByID)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float, float, float, float))&Lua_EntityList::GetRandomClient)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float, float, float, float, Lua_Client))&Lua_EntityList::GetRandomClient)
+	.def("GetRandomMob", (Lua_Mob(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomMob)
+	.def("GetRandomMob", (Lua_Mob(Lua_EntityList::*)(float,float,float,float,Lua_Mob))&Lua_EntityList::GetRandomMob)
+	.def("GetRandomNPC", (Lua_NPC(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomNPC)
+	.def("GetRandomNPC", (Lua_NPC(Lua_EntityList::*)(float,float,float,float,Lua_NPC))&Lua_EntityList::GetRandomNPC)
 	.def("GetShuffledClientList", (Lua_Client_List(Lua_EntityList::*)(void))&Lua_EntityList::GetShuffledClientList)
 	.def("GetSpawnByID", (Lua_Spawn(Lua_EntityList::*)(uint32))&Lua_EntityList::GetSpawnByID)
 	.def("GetSpawnList", (Lua_Spawn_List(Lua_EntityList::*)(void))&Lua_EntityList::GetSpawnList)

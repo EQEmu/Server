@@ -81,8 +81,8 @@ Mob::Mob(
 	uint32 in_drakkin_details,
 	EQ::TintProfile in_armor_tint,
 	uint8 in_aa_title,
-	uint8 in_see_invis, // see through invis/ivu
-	uint8 in_see_invis_undead,
+	uint16 in_see_invis, // see through invis/ivu
+	uint16 in_see_invis_undead,
 	uint8 in_see_hide,
 	uint8 in_see_improved_hide,
 	int32 in_hp_regen,
@@ -269,8 +269,8 @@ Mob::Mob(
 	maxlevel          = in_maxlevel;
 	scalerate         = in_scalerate;
 	invisible         = 0;
-	invisible_undead  = false;
-	invisible_animals = false;
+	invisible_undead  = 0;
+	invisible_animals = 0;
 	sneaking          = false;
 	hidden            = false;
 	improved_hidden   = false;
@@ -440,10 +440,13 @@ Mob::Mob(
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;
 
-	see_invis         = GetSeeInvisible(in_see_invis);
-	see_invis_undead  = GetSeeInvisible(in_see_invis_undead);
-	see_hide          = GetSeeInvisible(in_see_hide);
-	see_improved_hide = GetSeeInvisible(in_see_improved_hide);
+	nobuff_invisible = 0;
+	see_invis = 0;
+
+	innate_see_invis  = GetSeeInvisibleLevelFromNPCStat(in_see_invis);
+	see_invis_undead  = GetSeeInvisibleLevelFromNPCStat(in_see_invis_undead);
+	see_hide          = GetSeeInvisibleLevelFromNPCStat(in_see_hide);
+	see_improved_hide = GetSeeInvisibleLevelFromNPCStat(in_see_improved_hide);
 
 	qglobal = in_qglobal != 0;
 
@@ -584,10 +587,52 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	return(ANIM_STAND);
 }
 
-void Mob::SetInvisible(uint8 state)
+
+void Mob::CalcSeeInvisibleLevel()
 {
-	if (state != Invisibility::Special) {
-		invisible = state;
+	see_invis = std::max({ spellbonuses.SeeInvis, itembonuses.SeeInvis, aabonuses.SeeInvis, innate_see_invis });
+}
+
+void Mob::CalcInvisibleLevel()
+{
+	bool is_invisible = invisible;
+
+	invisible = std::max({ spellbonuses.invisibility, nobuff_invisible });
+	invisible_undead = spellbonuses.invisibility_verse_undead;
+	invisible_animals = spellbonuses.invisibility_verse_animal;
+
+	if (!is_invisible && invisible) {
+		SetInvisible(Invisibility::Invisible, true);
+		return;
+	}
+	
+	if (is_invisible && !invisible) {
+		SetInvisible(invisible, true);
+		return;
+	}
+}
+
+void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
+{
+	/*
+		If you set an NPC to invisible you will only be able to see it on
+		your client if your see invisible level is greater than equal to the invisible level.
+		Note, the clients spell file must match the servers see invisible level on the spell.
+	*/
+
+	if (state == Invisibility::Visible) {
+		SendAppearancePacket(AT_Invis, Invisibility::Visible);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
+	}
+	else {
+		/*
+			if your setting invisible from a script, or escape/fading memories effect then 
+			we use the internal invis variable which allows invisible without a buff on mob.
+		*/
+		if (!set_on_bonus_calc) {
+			nobuff_invisible = state;
+			CalcInvisibleLevel();
+		}
 		SendAppearancePacket(AT_Invis, invisible);
 	}
 
@@ -597,35 +642,53 @@ void Mob::SetInvisible(uint8 state)
 		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
 			pet->BuffFadeByEffect(SE_Charm);
 		}
-
 		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]", GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
+	}
+}
+
+void Mob::ZeroInvisibleVars(uint8 invisible_type) 
+{
+	switch (invisible_type) {
+		
+		case T_INVISIBLE:
+			invisible = 0;
+			nobuff_invisible = 0;
+			break;
+
+		case T_INVISIBLE_VERSE_UNDEAD:
+			invisible_undead = 0;
+			break;
+
+		case T_INVISIBLE_VERSE_ANIMAL:
+			invisible_animals = 0;
+			break;
 	}
 }
 
 //check to see if `this` is invisible to `other`
 bool Mob::IsInvisible(Mob* other) const
 {
-	if(!other)
+	if (!other) {
 		return(false);
-
-	uint8 SeeInvisBonus = 0;
-	if (IsClient())
-		SeeInvisBonus = aabonuses.SeeInvis;
+	}
 
 	//check regular invisibility
-	if (invisible && invisible > (other->SeeInvisible()))
+	if (invisible && (invisible > other->SeeInvisible())) {
 		return true;
+	}
 
 	//check invis vs. undead
 	if (other->GetBodyType() == BT_Undead || other->GetBodyType() == BT_SummonedUndead) {
-		if(invisible_undead && !other->SeeInvisibleUndead())
+		if (invisible_undead && (invisible_undead > other->SeeInvisibleUndead())) {
 			return true;
+		}
 	}
 
-	//check invis vs. animals...
+	//check invis vs. animals. //TODO: should we have a specific see invisible animal stat or this how live does it?
 	if (other->GetBodyType() == BT_Animal){
-		if(invisible_animals && !other->SeeInvisible())
+		if (invisible_animals && (invisible_animals > other->SeeInvisible())) {
 			return true;
+		}
 	}
 
 	if(hidden){
@@ -642,8 +705,9 @@ bool Mob::IsInvisible(Mob* other) const
 
 	//handle sneaking
 	if(sneaking) {
-		if(BehindMob(other, GetX(), GetY()) )
+		if (BehindMob(other, GetX(), GetY())) {
 			return true;
+		}
 	}
 
 	return(false);
@@ -4261,7 +4325,7 @@ void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int da
 
 		TryCastOnSkillUse(on, skillinuse);
 
-		if (on->HasSkillProcs()) {
+		if (on && on->HasSkillProcs()) {
 			on->TrySkillProc(this, skillinuse, 0, false, hand, true);
 		}
 
@@ -6110,19 +6174,47 @@ float Mob::HeadingAngleToMob(float other_x, float other_y)
 	return CalculateHeadingAngleBetweenPositions(this_x, this_y, other_x, other_y);
 }
 
-bool Mob::GetSeeInvisible(uint8 see_invis)
+uint8 Mob::GetSeeInvisibleLevelFromNPCStat(uint16 in_see_invis)
 {
-	if(see_invis > 0)
-	{
-		if(see_invis == 1)
-			return true;
-		else
-		{
-			if (zone->random.Int(0, 99) < see_invis)
-				return true;
+	/*
+		Returns the NPC's see invisible level based on 'see_invs' value in npc_types.
+		1 = See Invs Level 1, 2-99 will gives a random roll to apply see invs level 1
+		100 = See Invs Level 2, where 101-199 gives a random roll to apply see invs 2, if fails get see invs 1
+		ect... for higher levels, 200,300 ect.
+		MAX 25499, which can give you level 254.
+	*/
+
+	//npc does not have see invis
+	if (!in_see_invis) {
+		return 0;
+	}
+	//npc has basic see invis
+	if (in_see_invis == 1) {
+		return 1;
+	}
+	
+	//random chance to apply standard level 1 see invs
+	if (in_see_invis > 1 && in_see_invis < 100) {
+		if (zone->random.Int(0, 99) < in_see_invis) {
+			return 1;
 		}
 	}
-	return false;
+	//covers npcs with see invis levels beyond level 1, max calculated level allowed is 254
+	int see_invis_level = 1;
+	see_invis_level += (in_see_invis / 100);
+
+	int see_invis_chance = in_see_invis % 100;
+
+	//has enhanced see invis level
+	if (see_invis_chance == 0) {
+		return std::min(see_invis_level, MAX_INVISIBILTY_LEVEL);
+	}
+	//has chance for enhanced see invis level
+	if (zone->random.Int(0, 99) < see_invis_chance) {
+		return std::min(see_invis_level, MAX_INVISIBILTY_LEVEL);
+	}
+	//failed chance at attempted enhanced see invs level, use previous level.
+	return std::min((see_invis_level - 1), MAX_INVISIBILTY_LEVEL);
 }
 
 int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
@@ -6459,7 +6551,8 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 	}
 
 	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(shielder_max_distance)) {
-		return false; //Live does not give a message when out of range.
+		MessageString(Chat::Blue, TARGET_TOO_FAR);
+		return false; 
 	}
 
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());

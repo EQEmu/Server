@@ -1268,6 +1268,25 @@ XS(XS_NPC_ModifyNPCStat) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_GetNPCStat); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetNPCStat) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::GetNPCStat(THIS, string key)"); // @categories Stats and Attributes
+	{
+		NPC		*THIS;
+		float	RETVAL;
+		Const_char *identifier = (Const_char *)SvPV_nolen(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_NPC;
+
+		RETVAL = THIS->GetNPCStat(identifier);
+		XSprePUSH;
+		PUSHn((double)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_NPC_AddSpellToNPCList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddSpellToNPCList) {
 	dXSARGS;
@@ -1954,6 +1973,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "GetNPCFactionID"), XS_NPC_GetNPCFactionID, file, "$");
 	newXSproto(strcpy(buf, "GetNPCHate"), XS_NPC_GetNPCHate, file, "$$");
 	newXSproto(strcpy(buf, "GetNPCSpellsID"), XS_NPC_GetNPCSpellsID, file, "$");
+	newXSproto(strcpy(buf, "GetNPCStat"), XS_NPC_GetNPCStat, file, "$$");
 	newXSproto(strcpy(buf, "GetPetSpellID"), XS_NPC_GetPetSpellID, file, "$");
 	newXSproto(strcpy(buf, "GetPlatinum"), XS_NPC_GetPlatinum, file, "$");
 	newXSproto(strcpy(buf, "GetPrimSkill"), XS_NPC_GetPrimSkill, file, "$");

@@ -30,7 +30,7 @@ struct ExtraAttackOptions;
 class Beacon : public Mob
 {
 public:
-	Beacon(Mob *at_mob, int lifetime);
+	Beacon(const glm::vec4 &in_pos, int lifetime);
 	~Beacon();
 
 	//abstract virtual function implementations requird by base abstract class

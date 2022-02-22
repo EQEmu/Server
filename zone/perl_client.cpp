@@ -5976,6 +5976,26 @@ XS(XS_Client_ResetCastbarCooldownBySpellID) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_UnscribeSpellBySpellID);
+XS(XS_Client_UnscribeSpellBySpellID) {
+	dXSARGS;
+	if (items != 2 && items != 3)
+		Perl_croak(aTHX_ "Usage: Client::UnscribeSpellBySpellID(THIS, uint16 spell_id, [bool update_client = true])");
+	{
+		Client* THIS;
+		uint16 spell_id = (uint16) SvUV(ST(1));
+		bool update_client = true;
+		VALIDATE_THIS_IS_CLIENT;
+
+		if (items == 3) {
+			update_client = (bool) SvTRUE(ST(2));
+		}
+
+		THIS->UnscribeSpellBySpellID(spell_id, update_client);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6292,6 +6312,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "UnmemSpellBySpellID"), XS_Client_UnmemSpellBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "UnscribeSpell"), XS_Client_UnscribeSpell, file, "$$;$");
 	newXSproto(strcpy(buf, "UnscribeSpellAll"), XS_Client_UnscribeSpellAll, file, "$;$");
+	newXSproto(strcpy(buf, "UnscribeSpellBySpellID"), XS_Client_UnscribeSpellBySpellID, file, "$$;$");
 	newXSproto(strcpy(buf, "UntrainDisc"), XS_Client_UntrainDisc, file, "$$;$");
 	newXSproto(strcpy(buf, "UntrainDiscAll"), XS_Client_UntrainDiscAll, file, "$;$");
 	newXSproto(strcpy(buf, "UntrainDiscBySpellID"), XS_Client_UntrainDiscBySpellID, file, "$$;$");

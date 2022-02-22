@@ -682,8 +682,7 @@ void Client::CompleteConnect()
 			case SE_Invisibility2:
 			case SE_Invisibility:
 			{
-				invisible = true;
-				SendAppearancePacket(AT_Invis, 1);
+				SendAppearancePacket(AT_Invis, Invisibility::Invisible);
 				break;
 			}
 			case SE_Levitate:
@@ -705,17 +704,6 @@ void Client::CompleteConnect()
 						SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::Levitating, true, true);
 					}
 				}
-				break;
-			}
-			case SE_InvisVsUndead2:
-			case SE_InvisVsUndead:
-			{
-				invisible_undead = true;
-				break;
-			}
-			case SE_InvisVsAnimals:
-			{
-				invisible_animals = true;
 				break;
 			}
 			case SE_AddMeleeProc:
@@ -3819,6 +3807,9 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 {
+	/*
+		Note: if invisibility is on client, this will force it to drop.
+	*/
 	if (app->size != sizeof(SpellBuffPacket_Struct))
 	{
 		LogError("Size mismatch in OP_Buff. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
@@ -3833,10 +3824,12 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 	//something about IsDetrimentalSpell() crashes this portion of code..
 	//tbh we shouldn't use it anyway since this is a simple red vs blue buff check and
 	//isdetrimentalspell() is much more complex
-	if (spid == 0xFFFF || (IsValidSpell(spid) && (spells[spid].good_effect == 0)))
+	if (spid == 0xFFFF || (IsValidSpell(spid) && (spells[spid].good_effect == 0))) {
 		QueuePacket(app);
-	else
+	}
+	else {
 		BuffFadeBySpellID(spid);
+	}
 
 	return;
 }
@@ -3990,13 +3983,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		return;
 	}
 
-	// Hack for broken RoF2 which allows casting after a zoned IVU/IVA
-	if (invisible_undead || invisible_animals) {
-		BuffFadeByEffect(SE_InvisVsAnimals);
-		BuffFadeByEffect(SE_InvisVsUndead);
-		BuffFadeByEffect(SE_InvisVsUndead2);
-		BuffFadeByEffect(SE_Invisibility);  // Included per JJ for completeness - client handles this one atm
-	}
+	BreakInvisibleSpells();
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
@@ -4826,7 +4813,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 
 	// this could be done better, but this is only called when you con so w/e
 	// Shroud of Stealth has a special message
-	if (improved_hidden && (!tmob->see_improved_hide && (tmob->see_invis || tmob->see_hide)))
+	if (improved_hidden && (!tmob->see_improved_hide && (tmob->SeeInvisible() || tmob->see_hide)))
 		MessageString(Chat::NPCQuestSay, SOS_KEEPS_HIDDEN);
 	// we are trying to hide but they can see us
 	else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(tmob))
@@ -13565,7 +13552,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			}
 			return;
 		}
-		invisible = false;
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 		hidden = false;
 		improved_hidden = false;
 		entity_list.QueueClients(this, app, true);

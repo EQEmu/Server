@@ -189,7 +189,9 @@ public:
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClientByLSID(uint32 iLSID);
 	Client *GetClient(uint32 ip, uint16 port);
-	Client *GetRandomClient(const glm::vec3& location, float Distance, Client *ExcludeClient = nullptr);
+	Client* GetRandomClient(const glm::vec3& location, float distance, Client* exclude_client = nullptr);
+	NPC* GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc = nullptr);
+	Mob* GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob = nullptr);
 	Group *GetGroupByMob(Mob* mob);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);

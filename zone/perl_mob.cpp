@@ -916,6 +916,35 @@ XS(XS_Mob_SetInvisible) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_SetSeeInvisibleLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetSeeInvisibleLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleLevel(THIS, uint8 see_invis_level)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		uint8 see_invis_level = (uint8)SvUV(ST(1));
+		VALIDATE_THIS_IS_MOB;
+		THIS->SetInnateSeeInvisible(see_invis_level);
+		THIS->CalcSeeInvisibleLevel();
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_SetSeeInvisibleUndeadLevel); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetSeeInvisibleUndeadLevel) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetSeeInvisibleUndeadLevel(THIS, uint8 see_invis_undead_level)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		uint8 see_invis_undead_level = (uint8)SvUV(ST(1));
+		VALIDATE_THIS_IS_MOB;
+		THIS->SetSeeInvisibleUndead(see_invis_undead_level);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_FindBuff); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindBuff) {
 	dXSARGS;
@@ -5633,6 +5662,46 @@ XS(XS_Mob_GetSpellStat) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetBuffStatValueBySpell); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetBuffStatValueBySpell) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySpell(THIS, int32 spell_id, string stat)"); // @categories Spells and Disciplines
+	{
+		Mob *THIS;
+		int32  RETVAL;
+		int32  spellid = (int32)SvIV(ST(1));
+		Const_char *stat = (Const_char *)SvPV_nolen(ST(2));
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+	
+		RETVAL = THIS->GetBuffStatValueBySpell(spellid, stat);
+		XSprePUSH;
+		PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetBuffStatValueBySlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetBuffStatValueBySlot) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffStatValueBySlot(THIS, uint8 slot, string stat)"); // @categories Script Utility, Spells and Disciplines
+	{
+		Mob *THIS;
+		int32  RETVAL;
+		uint8 slot = (uint8)SvUV(ST(1));
+		Const_char *stat = (Const_char *)SvPV_nolen(ST(2));
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+
+		RETVAL = THIS->GetBuffStatValueBySlot(slot, stat);
+		XSprePUSH;
+		PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Mob_GetSpecialAbility); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpecialAbility) {
 	dXSARGS;
@@ -5777,6 +5846,41 @@ XS(XS_Mob_IsBlind) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetInvisibleLevel);
+XS(XS_Mob_GetInvisibleLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetInvisibleLevel(THIS)"); // @categories Stats and Attributes
+	{
+		Mob *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetInvisibleLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetInvisibleUndeadLevel);
+XS(XS_Mob_GetInvisibleUndeadLevel) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetInvisibleUndeadLevel(THIS)"); // @categories Stats and Attributes
+	{
+		Mob *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetInvisibleUndeadLevel();
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
 XS(XS_Mob_SeeInvisible);
 XS(XS_Mob_SeeInvisible) {
 	dXSARGS;
@@ -5801,11 +5905,12 @@ XS(XS_Mob_SeeInvisibleUndead) {
 		Perl_croak(aTHX_ "Usage: Mob::SeeInvisibleUndead(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		bool RETVAL;
+		uint8 RETVAL;
+		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->SeeInvisibleUndead();
-		ST(0) = boolSV(RETVAL);
-		sv_2mortal(ST(0));
+		XSprePUSH;
+		PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -6502,6 +6607,46 @@ XS(XS_Mob_GetHateRandomNPC) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_SetBuffDuration); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetBuffDuration) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: Mob::SetBuffDuration(THIS, spell_id, [int duration = 0])"); // @categories Script Utility, Spells and Disciplines
+	{
+		Mob *THIS;
+		int spell_id = (int)SvIV(ST(1));
+		int duration = 0;
+		VALIDATE_THIS_IS_MOB;
+
+		if (items == 3) {
+			duration = (int)SvIV(ST(2));
+		}
+
+		THIS->SetBuffDuration(spell_id, duration);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_ApplySpellBuff); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_ApplySpellBuff) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: Mob::ApplySpellBuff(THIS, spell_id, [int duration = 0])"); // @categories Script Utility, Spells and Disciplines
+	{
+		Mob *THIS;
+		int spell_id = (int)SvIV(ST(1));
+		int duration = 0;
+		VALIDATE_THIS_IS_MOB;
+
+		if (items == 3) {
+			duration = (int)SvIV(ST(2));
+		}
+
+		THIS->ApplySpellBuff(spell_id, duration);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef BOTS
 XS(XS_Mob_CastToBot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToBot)
@@ -6557,6 +6702,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "AddFeignMemory"), XS_Mob_AddFeignMemory, file, "$$");
 	newXSproto(strcpy(buf, "AddNimbusEffect"), XS_Mob_AddNimbusEffect, file, "$$");
 	newXSproto(strcpy(buf, "AddToHateList"), XS_Mob_AddToHateList, file, "$$;$$$$$");
+	newXSproto(strcpy(buf, "ApplySpellBuff"), XS_Mob_ApplySpellBuff, file, "$$;$");
 	newXSproto(strcpy(buf, "Attack"), XS_Mob_Attack, file, "$$;$$");
 	newXSproto(strcpy(buf, "BehindMob"), XS_Mob_BehindMob, file, "$;$$$");
 	newXSproto(strcpy(buf, "BuffCount"), XS_Mob_BuffCount, file, "$");
@@ -6647,6 +6793,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetBucketKey"), XS_Mob_GetBucketKey, file, "$");
 	newXSproto(strcpy(buf, "GetBucketRemaining"), XS_Mob_GetBucketRemaining, file, "$$");
 	newXSproto(strcpy(buf, "GetBuffSlotFromType"), XS_Mob_GetBuffSlotFromType, file, "$$");
+	newXSproto(strcpy(buf, "GetBuffStatValueBySpell"), XS_Mob_GetBuffStatValueBySpell, file, "$$$");
+	newXSproto(strcpy(buf, "GetBuffStatValueBySlot"), XS_Mob_GetBuffStatValueBySlot, file, "$$$");
 	newXSproto(strcpy(buf, "GetCHA"), XS_Mob_GetCHA, file, "$");
 	newXSproto(strcpy(buf, "GetCR"), XS_Mob_GetCR, file, "$");
 	newXSproto(strcpy(buf, "GetCasterLevel"), XS_Mob_GetCasterLevel, file, "$$");
@@ -6698,6 +6846,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetHerosForgeModel"), XS_Mob_GetHerosForgeModel, file, "$$");
 	newXSproto(strcpy(buf, "GetID"), XS_Mob_GetID, file, "$");
 	newXSproto(strcpy(buf, "GetINT"), XS_Mob_GetINT, file, "$");
+	newXSproto(strcpy(buf, "GetInvisibleLevel"), XS_Mob_GetInvisibleLevel, file, "$");
+	newXSproto(strcpy(buf, "GetInvisibleUndeadLevel"), XS_Mob_GetInvisibleUndeadLevel, file, "$");
 	newXSproto(strcpy(buf, "GetInvul"), XS_Mob_GetInvul, file, "$");
 	newXSproto(strcpy(buf, "GetItemHPBonuses"), XS_Mob_GetItemHPBonuses, file, "$");
 	newXSproto(strcpy(buf, "GetItemStat"), XS_Mob_GetItemStat, file, "$$$");
@@ -6850,6 +7000,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetAppearance"), XS_Mob_SetAppearance, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBodyType"), XS_Mob_SetBodyType, file, "$$;$");
 	newXSproto(strcpy(buf, "SetBucket"), XS_Mob_SetBucket, file, "$$$;$");
+	newXSproto(strcpy(buf, "SetBuffDuration"), XS_Mob_SetBuffDuration, file, "$$;$");
 	newXSproto(strcpy(buf, "SetCurrentWP"), XS_Mob_SetCurrentWP, file, "$$");
 	newXSproto(strcpy(buf, "SetDeltas"), XS_Mob_SetDeltas, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetDisableMelee"), XS_Mob_SetDisableMelee, file, "$$");
@@ -6877,6 +7028,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetRace"), XS_Mob_SetRace, file, "$$");
 	newXSproto(strcpy(buf, "SetRunAnimSpeed"), XS_Mob_SetRunAnimSpeed, file, "$$");
 	newXSproto(strcpy(buf, "SetRunning"), XS_Mob_SetRunning, file, "$$");
+	newXSproto(strcpy(buf, "SetSeeInvisibleLevel"), XS_Mob_SetSeeInvisibleLevel, file, "$$");
+	newXSproto(strcpy(buf, "SetSeeInvisibleUndeadLevel"), XS_Mob_SetSeeInvisibleUndeadLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetSlotTint"), XS_Mob_SetSlotTint, file, "$$$$$");
 	newXSproto(strcpy(buf, "SetSpecialAbility"), XS_Mob_SetSpecialAbility, file, "$$$");
 	newXSproto(strcpy(buf, "SetSpecialAbilityParam"), XS_Mob_SetSpecialAbilityParam, file, "$$$$");

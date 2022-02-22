@@ -1,62 +1,68 @@
 #include "../client.h"
+#include "../../common/data_verification.h"
 
 void command_unscribespell(Client *c, const Seperator *sep)
 {
-	uint16 spell_id  = 0;
-	uint16 book_slot = -1;
-	Client *t        = c;
-
-	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
-		t = c->GetTarget()->CastToClient();
-	}
-
-	if (!sep->arg[1][0]) {
-		c->Message(Chat::White, "FORMAT: #unscribespell <spellid>");
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Usage: #unscribespell [Spell ID] - Unscribe a spell from your or your target's spell book by Spell ID");
 		return;
 	}
 
-	spell_id = atoi(sep->arg[1]);
+	auto target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if (IsValidSpell(spell_id)) {
-		book_slot = t->FindSpellBookSlotBySpellID(spell_id);
+	uint16 spell_id = EQ::Clamp(std::stoi(sep->arg[1]), 0, 65535);
 
-		if (book_slot >= 0) {
-			t->UnscribeSpell(book_slot);
-
-			t->Message(Chat::White, "Unscribing spell: %s (%i) from spellbook.", spells[spell_id].name, spell_id);
-
-			if (t != c) {
-				c->Message(
-					Chat::White,
-					"Unscribing spell: %s (%i) for %s.",
-					spells[spell_id].name,
-					spell_id,
-					t->GetName());
-			}
-
-			LogInfo("Unscribe spell: [{}] ([{}]) request for [{}] from [{}]",
-					spells[spell_id].name,
-					spell_id,
-					t->GetName(),
-					c->GetName());
-		}
-		else {
-			t->Message(
-				Chat::Red,
-				"Unable to unscribe spell: %s (%i) from your spellbook. This spell is not scribed.",
-				spells[spell_id].name,
+	if (!IsValidSpell(spell_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spell ID {} could not be found.",
 				spell_id
-			);
+			).c_str()
+		);
+		return;
+	}
 
-			if (t != c) {
-				c->Message(
-					Chat::Red,
-					"Unable to unscribe spell: %s (%i) for %s due to spell not scribed.",
-					spells[spell_id].name,
-					spell_id,
-					t->GetName());
-			}
-		}
+	auto spell_name = GetSpellName(spell_id);
+	
+	if (target->HasSpellScribed(spell_id)) {
+		target->UnscribeSpellBySpellID(spell_id);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Unscribing {} ({}) for {}.",
+				spell_name,
+				spell_id,
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			).c_str()
+		);
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} not have {} ({}) scribed.",
+				c == target ?
+				"You do" :
+				fmt::format(
+					"{} ({}) does",
+					target->GetCleanName(),
+					target->GetID()
+				),
+				spell_name,
+				spell_id
+			).c_str()
+		);
 	}
 }
 
