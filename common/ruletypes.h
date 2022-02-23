@@ -396,7 +396,7 @@ RULE_BOOL(Spells, UseAdditiveFocusFromWornSlot, false, "Allows an additive focus
 RULE_BOOL(Spells, AlwaysSendTargetsBuffs, false, "Ignore Leadership Alternate Abilities level if true")
 RULE_BOOL(Spells, FlatItemExtraSpellAmt, false, "Allow SpellDmg stat to affect all spells, regardless of cast time/cooldown/etc")
 RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false, "Ignore the 5 level spread on applying SpellDmg")
-RULE_BOOL(Spells, PctSpellMod, false, "Apply Spell Dmg and Heal Amount as Percentage-based modifiers flat additions")
+RULE_BOOL(Spells, ItemExtraSpellAmtCalcAsPercent, false, "Apply the Item stats Spell Dmg and Heal Amount as Percentage-based modifiers instead of flat additions")
 RULE_BOOL(Spells, AllowItemTGB, false, "Target group buff (/tgb) doesn't work with items on live, custom servers want it though")
 RULE_BOOL(Spells, NPCInnateProcOverride, true, "NPC innate procs override the target type to single target")
 RULE_BOOL(Spells, OldRainTargets, false, "Use old incorrectly implemented maximum targets for rains")
