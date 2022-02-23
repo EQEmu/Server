@@ -347,10 +347,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 					else if (dmg > 0) {
-						if (caster) {
-							dmg = caster->GetActSpellHealing(spell_id, dmg, this);
-						}
-
+						//unable to confirm behavior of focus/critical on heals, you can not critical on spells with buffs. (~Kayen 2-22)
 						HealDamage(dmg, caster);
 					}
 				}
