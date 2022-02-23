@@ -324,8 +324,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				//normal effects
 				else {
-					if (dmg < 0)
-					{
+					if (dmg < 0){
 						dmg = (int32)(dmg * partial / 100);
 
 						if (caster) {
@@ -347,7 +346,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 					else if (dmg > 0) {
-						//unable to confirm behavior of focus/critical on heals, you can not critical on spells with buffs. (~Kayen 2-22)
+						//do not apply focus/critical to buff spells
+						if (caster && !IsEffectInSpell(spell_id, SE_TotalHP)) {
+							dmg = caster->GetActSpellHealing(spell_id, dmg, this);
+						}
 						HealDamage(dmg, caster);
 					}
 				}
