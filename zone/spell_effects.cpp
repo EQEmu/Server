@@ -289,36 +289,73 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Current Hitpoints Once: %+i", effect_value);
 #endif
-
-				int32 dmg = effect_value;
-				if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
-				{
-					dmg = caster->GetMana()*-3;
-					caster->SetMana(0);
-				} else if (spell_id == SPELL_LIFE_BURN && caster) //Lifeburn
-				{
-					dmg = caster->GetHP(); // just your current HP
-					caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
-					dmg = -dmg;
+				if (spells[spell_id].limit_value[i] && !PassCastRestriction(spells[spell_id].limit_value[i])) {
+					break; //no messages are given on live if this fails.
 				}
 
 				// hack fix for client health not reflecting server value
 				last_hp = 0;
 
-				if (spells[spell_id].limit_value[i] && !PassCastRestriction(spells[spell_id].limit_value[i])) {
+				int32 dmg = effect_value;
+
+				//hardcoded for manaburn and life burn
+				if (spell_id == SPELL_MANA_BURN || spell_id == SPELL_LIFE_BURN)
+				{
+					if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
+					{
+						dmg = caster->GetMana()*-3;
+						caster->SetMana(0);
+					}
+					else if (spell_id == SPELL_LIFE_BURN && caster) //Lifeburn
+					{
+						dmg = caster->GetHP(); // just your current HP
+						caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
+						dmg = -dmg;
+					}
+
+					if (dmg < 0) {
+						dmg = -dmg;
+						Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+					}
+					else {
+						HealDamage(dmg, caster);
+					}
 					break;
 				}
+				//normal effects
+				else {
+					if (dmg < 0)
+					{
+						dmg = (int32)(dmg * partial / 100);
 
-				//do any AAs apply to these spells?
-				if(dmg < 0) {
-					dmg = -dmg;
-					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
-				} else {
-					HealDamage(dmg, caster);
+						if (caster) {
+							if (reflect_effectiveness) {
+								dmg = caster->GetActReflectedSpellDamage(spell_id, (int32)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
+							}
+							else {
+								dmg = caster->GetActSpellDamage(spell_id, dmg, this);
+							}
+							caster->ResourceTap(-dmg, spell_id);
+						}
+
+						if (dmg <= 0) {
+							dmg = -dmg;
+							Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+						}
+						else {
+							HealDamage(dmg, caster);
+						}
+					}
+					else if (dmg > 0) {
+						if (caster) {
+							dmg = caster->GetActSpellHealing(spell_id, dmg, this);
+						}
+
+						HealDamage(dmg, caster);
+					}
 				}
 				break;
 			}
-
 
 			case SE_PercentalHeal:
 			{
