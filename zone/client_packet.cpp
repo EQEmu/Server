@@ -11455,7 +11455,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 	case RaidCommandInviteIntoExisting:
 	case RaidCommandInvite: {
 
-#ifdef BOTS //Mitch
+#ifdef BOTS
 
 		Bot* player_to_invite = nullptr;
 		Client* player_to_invite_owner = nullptr;
@@ -11532,7 +11532,9 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 
 				break;
 			}
+#ifdef BOTS
 		}
+#endif
 
 	case RaidCommandAcceptInvite: {
 		Client* player_accepting_invite = entity_list.GetClientByName(raid_command_packet->player_name);
@@ -11581,7 +11583,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			Bot::ProcessRaidInvite(invitee, invitor);  //two clients with one or both having groups with bots
 			break;
 		}
-		else if (invitee->IsBot())
+		else if (invitee && invitee->IsBot())
 		{
 			Bot::ProcessRaidInvite(b, player_accepting_invite); //client inviting a bot
 			break;
@@ -11859,13 +11861,15 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		Raid* raid = entity_list.GetRaidByClient(this);
 		Client* c_to_disband = entity_list.GetClientByName(raid_command_packet->leader_name);
 		Client* c_doing_disband = entity_list.GetClientByName(raid_command_packet->player_name);
+#ifdef BOTS
 		Bot* b_to_disband = entity_list.GetBotByBotName(raid_command_packet->leader_name);
-		
+#endif
+
 		if (raid) {
 			uint32 group = raid->GetGroup(raid_command_packet->leader_name);
 
 #ifdef BOTS
-			//Mitch added to remove all bots if the Bot_Owner is removed from the Raid
+			//Added to remove all bots if the Bot_Owner is removed from the Raid
 			//Does not camp the Bots, just removes from the raid
 			std::vector<Bot*> raid_members_bots;
 			if (c_to_disband)
@@ -11917,8 +11921,6 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 					if (raid->IsGroupLeader(b_to_disband->GetName()))
 					{
 						// Remove the entire BOT group in this case
-						//uint32 gid = raid->GetGroup(b_to_disband->GetName());
-						//std::vector<RaidMember> r_group_members = raid->GetRaidGroupMembers(gid);
 						Group* group_inst = new Group(b_to_disband);
 						entity_list.AddGroup(group_inst);
 						database.SetGroupID(b_to_disband->GetCleanName(), group_inst->GetID(), b_to_disband->GetBotID());

@@ -27,7 +27,9 @@ public:
 		int         isgroupleader;
 		int         israidleader;
 		int         islooter;
+#ifdef BOTS
 		int			isbot;
+#endif
 	};
 
 	static std::string PrimaryKey()
@@ -47,7 +49,9 @@ public:
 			"isgroupleader",
 			"israidleader",
 			"islooter",
+#ifdef BOTS
 			"isbot",
+#endif
 		};
 	}
 
@@ -92,7 +96,9 @@ public:
 		entry.isgroupleader = 0;
 		entry.israidleader  = 0;
 		entry.islooter      = 0;
+#ifdef BOTS
 		entry.isbot			= 0;
+#endif
 
 		return entry;
 	}
@@ -137,7 +143,9 @@ public:
 			entry.isgroupleader = atoi(row[6]);
 			entry.israidleader  = atoi(row[7]);
 			entry.islooter		= atoi(row[8]);
+#ifdef BOTS
 			entry.isbot			= atoi(row[9]);
+#endif
 
 			return entry;
 		}
@@ -180,7 +188,9 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(raid_members_entry.isgroupleader));
 		update_values.push_back(columns[7] + " = " + std::to_string(raid_members_entry.israidleader));
 		update_values.push_back(columns[8] + " = " + std::to_string(raid_members_entry.islooter));
-		update_values.push_back(columns[9] + " = " + std::to_string(raid_members_entry.isbot)); //Mitch
+#ifdef BOTS
+		update_values.push_back(columns[9] + " = " + std::to_string(raid_members_entry.isbot));
+#endif
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -211,8 +221,9 @@ public:
 		insert_values.push_back(std::to_string(raid_members_entry.isgroupleader));
 		insert_values.push_back(std::to_string(raid_members_entry.israidleader));
 		insert_values.push_back(std::to_string(raid_members_entry.islooter));
+#ifdef BOTS
 		insert_values.push_back(std::to_string(raid_members_entry.isbot));
-
+#endif
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
@@ -250,8 +261,9 @@ public:
 			insert_values.push_back(std::to_string(raid_members_entry.isgroupleader));
 			insert_values.push_back(std::to_string(raid_members_entry.israidleader));
 			insert_values.push_back(std::to_string(raid_members_entry.islooter));
+#ifdef BOTS
 			insert_values.push_back(std::to_string(raid_members_entry.isbot));
-
+#endif
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
 
@@ -293,8 +305,9 @@ public:
 			entry.isgroupleader = atoi(row[6]);
 			entry.israidleader  = atoi(row[7]);
 			entry.islooter      = atoi(row[8]);
+#ifdef BOTS
 			entry.isbot			= atoi(row[9]);
-
+#endif
 			all_entries.push_back(entry);
 		}
 
@@ -327,8 +340,9 @@ public:
 			entry.isgroupleader = atoi(row[6]);
 			entry.israidleader  = atoi(row[7]);
 			entry.islooter      = atoi(row[8]);
+#ifdef BOTS
 			entry.isbot			= atoi(row[9]);
-
+#endif
 			all_entries.push_back(entry);
 		}
 

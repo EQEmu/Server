@@ -1248,10 +1248,7 @@ void Group::VerifyGroup() {
 			members[i] = nullptr;
 			continue;
 		}
-		//if (them == nullptr && members[i] == nullptr) {	//fixes a group bug with bots Mitch added Jan 1 2022
-		//	membername[i][0] = '\0';
-		//	continue;
-		//}
+
 
 		if(them != nullptr && members[i] != them) {	//our pointer is out of date... not so good.
 #if EQDEBUG >= 5

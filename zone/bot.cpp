@@ -8370,9 +8370,8 @@ Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
 
 void Bot::ProcessBotGroupInvite(Client* c, std::string botName) {
 	if(c) {
-//		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(entity_list.GetBotByBotName(botName)->GetOwner()->CastToClient(), botName);
 		Bot* invitedBot = GetBotByBotClientOwnerAndBotName(c, botName);
-		//Mitch changed entity from c
+
 		if(invitedBot && !invitedBot->HasGroup()) {
 			if(!c->IsGrouped()) {
 				Group *g = new Group(c);
@@ -10402,8 +10401,7 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 							raid->SendRaidCreate(c);
 							raid->AddMember(c, 0, true, true, true);
 							raid->SendMakeLeaderPacketTo(raid->leadername, c);
-							//raid->SetGroupLeader(c->GetName()); //Mitch Jan 18
-							//raid->GroupUpdate(0, true);
+
 							if (raid->IsLocked()) {
 								raid->SendRaidLockTo(c);
 							}
@@ -10479,13 +10477,8 @@ void Bot::ProcessRaidInvite(Bot* invitee, Client* invitor) {
 			else
 			{
 				//Third, no group so add the single client
-				//raid->SendRaidCreate(invitee);
-				//raid->SendMakeLeaderPacketTo(raid->leadername, invitee);
 				raid->AddBot(invitee);
-				//				raid->SendBulkRaid(invitee);
-				//if (raid->IsLocked()) {
-				//	raid->SendRaidLockTo(invitee);
-				//}
+
 			}
 		}
 		else

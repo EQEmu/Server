@@ -90,13 +90,7 @@ struct RaidMember{
 	bool IsLooter;
 #ifdef BOTS
 	bool IsBot = false;
-	bool IsGroupHealer;
-	bool IsRaidSlower;
-	bool IsRaidMainAssistOne;
-	bool IsRaidMainAssistTwo;
-	bool IsRaidMainTank;
-	bool IsRaidOffTankOne;
-	bool IsRaidOffTankTwo;
+	bool IsRaidMainAssistOne = false;
 #endif
 };
 
@@ -123,10 +117,9 @@ public:
 
 	void	AddMember(Client *c, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false);
 #ifdef BOTS
-	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false); //Mitch
-	void    RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char* msg, ...); //Mitch
-	static Mob* GetRaidMainAssistOneByName(const char* name);
-	bool	IsRaidMemberBot(Client* client);
+	void	AddBot(Bot* b, uint32 group = 0xFFFFFFFF, bool rleader=false, bool groupleader=false, bool looter=false); 
+	void    RaidBotGroupSay(Bot* b, uint8 language, uint8 lang_skill, const char* msg, ...); //Not yet implemented
+	Mob* GetRaidMainAssistOneByName(const char* name);
 #endif
 	void	RemoveMember(const char *c);
 	void	DisbandRaid();

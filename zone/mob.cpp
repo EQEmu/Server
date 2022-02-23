@@ -3855,7 +3855,7 @@ void Mob::QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::O
 
 const char *Mob::GetCleanName()
 {
-	if (clean_name != NULL && !strlen(clean_name)) { //extra check added for crash condition.  Mitch
+	if (!strlen(clean_name)) { 
 		CleanMobName(GetName(), clean_name);
 	}
 
