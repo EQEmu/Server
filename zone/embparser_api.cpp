@@ -3350,18 +3350,18 @@ XS(XS__MovePCInstance) {
 	if (items != 5 && items != 6)
 		Perl_croak(aTHX_ "Usage: quest::MovePCInstance(int zone_id, int instance_id, float x, float y, float z, [float heading])");
 
-	int   zone_id    = (int) SvIV(ST(0));
-	int   instanceid = (int) SvIV(ST(1));
-	float x          = (float) SvNV(ST(2));
-	float y          = (float) SvNV(ST(3));
-	float z          = (float) SvNV(ST(4));
+	int zone_id = (int) SvIV(ST(0));
+	int instance_id = (int) SvIV(ST(1));
+	float x = (float) SvNV(ST(2));
+	float y = (float) SvNV(ST(3));
+	float z = (float) SvNV(ST(4));
+	float heading = 0.0f;
 
-	if (items == 4) {
-		quest_manager.MovePCInstance(zone_id, instanceid, glm::vec4(x, y, z, 0.0f));
-	} else {
-		float heading = (float) SvNV(ST(5));
-		quest_manager.MovePCInstance(zone_id, instanceid, glm::vec4(x, y, z, heading));
+	if (items == 6) {
+		heading = (float) SvNV(ST(5));
 	}
+
+	quest_manager.MovePCInstance(zone_id, instance_id, glm::vec4(x, y, z, heading));
 
 	XSRETURN_EMPTY;
 }
