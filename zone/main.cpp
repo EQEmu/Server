@@ -579,7 +579,7 @@ int main(int argc, char** argv) {
 
 	EQ::Timer process_timer(loop_fn);
 	process_timer.Start(32, true);
-
+	
 	EQ::EventLoop::Get().Run();
 
 	entity_list.Clear();

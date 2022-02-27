@@ -24,9 +24,10 @@ void command_repop(Client *c, const Seperator *sep)
 
 	if (!sep->IsNumber(timearg)) {
 		c->Message(Chat::White, "Zone depopped - repopping now.");
-
+		
+		zone->spawn2_timer.Disable();
 		zone->Repop();
-
+		zone->spawn2_timer.Enable();
 		/* Force a spawn2 timer trigger so we don't delay actually spawning the NPC's */
 		zone->spawn2_timer.Trigger();
 		return;
