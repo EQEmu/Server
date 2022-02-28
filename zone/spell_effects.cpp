@@ -235,6 +235,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				// SE_CurrentHP is calculated at first tick if its a dot/buff
 				if (buffslot >= 0) {
+					//This is here so dots with hit counters tic down on initial cast.
 					if (effect_value < 0) {
 						caster->GetActDoTDamage(spell_id, effect_value, this, false);
 					}
@@ -2992,6 +2993,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 
 			case SE_HealOverTime: {
+				//This is here so buffs with hit counters tic down on initial cast.
 				caster->GetActSpellHealing(spell_id, effect_value, nullptr, false);
 			}
 
