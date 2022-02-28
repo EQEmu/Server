@@ -6784,31 +6784,9 @@ void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 			} else if (IsClient()) { // still have numhits and client, update
 				CastToClient()->SendBuffNumHitPacket(buffs[buff_slot], buff_slot);
 			}
-		} else {
-			for (int d = 0; d < buff_max; d++) {
-				if (!m_spellHitsLeft[d])
-					continue;
-
-				if (IsValidSpell(buffs[d].spellid) && m_spellHitsLeft[d] == buffs[d].spellid) {
-
-#ifdef BOTS
-					buff_name = spells[buffs[d].spellid].name;
-					buff_counter = (buffs[d].hit_number - 1);
-					buff_update = true;
-#endif
-
-					if (--buffs[d].hit_number == 0) {
-						CastOnNumHitFade(buffs[d].spellid);
-						m_spellHitsLeft[d] = 0;
-						if (!TryFadeEffect(d))
-							BuffFadeBySlot(d, true);
-					} else if (IsClient()) { // still have numhits and client, update
-						CastToClient()->SendBuffNumHitPacket(buffs[d], d);
-					}
-				}
-			}
-		}
-	} else {
+		} 
+	} 
+	else {
 		for (int d = 0; d < buff_max; d++) {
 			if (IsValidSpell(buffs[d].spellid) && buffs[d].hit_number > 0 &&
 			    spells[buffs[d].spellid].hit_number_type == static_cast<int>(type)) {

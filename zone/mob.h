@@ -1738,8 +1738,6 @@ protected:
 
 	glm::vec3 m_TargetRing;
 
-	// we might want to do this differently, we gotta do max NPC buffs ... which is 97
-	uint32 m_spellHitsLeft[EQ::spells::TOTAL_BUFFS]; // Used to track which spells will have their numhits incremented when spell finishes casting
 	GravityBehavior flymode;
 	bool m_targetable;
 	int QGVarDuration(const char *fmt);
