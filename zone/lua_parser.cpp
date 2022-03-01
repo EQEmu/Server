@@ -229,6 +229,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_WARP] = handle_player_warp;
 	PlayerArgumentDispatch[EVENT_COMBINE] = handle_player_quest_combine;
 	PlayerArgumentDispatch[EVENT_CONSIDER] = handle_player_consider;
+	PlayerArgumentDispatch[EVENT_CONSIDER_CORPSE] = handle_player_consider_corpse;
 	PlayerArgumentDispatch[EVENT_EQUIP_ITEM_CLIENT] = handle_player_equip_item;
 	PlayerArgumentDispatch[EVENT_UNEQUIP_ITEM_CLIENT] = handle_player_equip_item;
 
