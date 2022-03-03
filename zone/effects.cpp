@@ -192,7 +192,7 @@ int32 Mob::GetActReflectedSpellDamage(int32 spell_id, int32 value, int effective
 	return value;
 }
 
-int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
+int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_buff_tic) {
 
 	if (target == nullptr)
 		return value;
@@ -216,16 +216,16 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		int32 ratio = 200;
 		ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
 		value = base_value*ratio/100;
-		value += int(base_value*GetFocusEffect(focusImprovedDamage, spell_id)/100)*ratio/100;
-		value += int(base_value*GetFocusEffect(focusImprovedDamage2, spell_id)/100)*ratio/100;
-		value += int(base_value*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
-		value += int(base_value*GetFocusEffect(focusFcAmplifyMod, spell_id) / 100)*ratio/100;
-		value += int(base_value*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
-		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) +
-					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
-					GetFocusEffect(focusFcDamageAmt, spell_id) +
-					GetFocusEffect(focusFcDamageAmt2, spell_id) +
-					GetFocusEffect(focusFcAmplifyAmt, spell_id);
+		value += int(base_value*GetFocusEffect(focusImprovedDamage, spell_id, nullptr, from_buff_tic)/100)*ratio/100;
+		value += int(base_value*GetFocusEffect(focusImprovedDamage2, spell_id, nullptr, from_buff_tic)/100)*ratio/100;
+		value += int(base_value*GetFocusEffect(focusFcDamagePctCrit, spell_id, nullptr, from_buff_tic)/100)*ratio/100;
+		value += int(base_value*GetFocusEffect(focusFcAmplifyMod, spell_id, nullptr, from_buff_tic) / 100)*ratio/100;
+		value += int(base_value*target->GetVulnerability(this, spell_id, 0, from_buff_tic)/100)*ratio/100;
+		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id, from_buff_tic) +
+					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id, nullptr, from_buff_tic)*ratio/100) +
+					GetFocusEffect(focusFcDamageAmt, spell_id, nullptr, from_buff_tic) +
+					GetFocusEffect(focusFcDamageAmt2, spell_id, nullptr, from_buff_tic) +
+					GetFocusEffect(focusFcAmplifyAmt, spell_id, nullptr, from_buff_tic);
 					
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
 			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
@@ -247,16 +247,16 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 	else {
 
 		value = base_value;
-		value += base_value*GetFocusEffect(focusImprovedDamage, spell_id)/100;
-		value += base_value*GetFocusEffect(focusImprovedDamage2, spell_id)/100;
-		value += base_value*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
-		value += base_value*GetFocusEffect(focusFcAmplifyMod, spell_id)/100;
-		value += base_value*target->GetVulnerability(this, spell_id, 0)/100;
-		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) +
-					GetFocusEffect(focusFcDamageAmtCrit, spell_id) +
-					GetFocusEffect(focusFcDamageAmt, spell_id) +
-					GetFocusEffect(focusFcDamageAmt2, spell_id) +
-					GetFocusEffect(focusFcAmplifyAmt, spell_id);
+		value += base_value*GetFocusEffect(focusImprovedDamage, spell_id, nullptr, from_buff_tic)/100;
+		value += base_value*GetFocusEffect(focusImprovedDamage2, spell_id, nullptr, from_buff_tic)/100;
+		value += base_value*GetFocusEffect(focusFcDamagePctCrit, spell_id, nullptr, from_buff_tic)/100;
+		value += base_value*GetFocusEffect(focusFcAmplifyMod, spell_id, nullptr, from_buff_tic)/100;
+		value += base_value*target->GetVulnerability(this, spell_id, 0, from_buff_tic)/100;
+		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id, from_buff_tic) +
+					GetFocusEffect(focusFcDamageAmtCrit, spell_id, nullptr, from_buff_tic) +
+					GetFocusEffect(focusFcDamageAmt, spell_id, nullptr, from_buff_tic) +
+					GetFocusEffect(focusFcDamageAmt2, spell_id, nullptr, from_buff_tic) +
+					GetFocusEffect(focusFcAmplifyAmt, spell_id, nullptr, from_buff_tic);
 					
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
 			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
@@ -316,7 +316,7 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 	return extra_spell_amt;
 }
 
-int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
+int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target, bool from_buff_tic) {
 
 
 	if (IsNPC()) {
@@ -356,8 +356,8 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	if (GetClass() == CLERIC) {
 		value += int(base_value*RuleI(Spells, ClericInnateHealFocus) / 100);  //confirmed on live parsing clerics get an innate 5 pct heal focus
 	}
-	value += int(base_value*GetFocusEffect(focusImprovedHeal, spell_id) / 100);
-	value += int(base_value*GetFocusEffect(focusFcAmplifyMod, spell_id) / 100);
+	value += int(base_value*GetFocusEffect(focusImprovedHeal, spell_id, nullptr, from_buff_tic) / 100);
+	value += int(base_value*GetFocusEffect(focusFcAmplifyMod, spell_id, nullptr, from_buff_tic) / 100);
 
 	// Instant Heals
 	if (spells[spell_id].buff_duration < 1) {

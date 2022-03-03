@@ -317,8 +317,8 @@ public:
 	bool NegateSpellEffect(uint16 spell_id, int effect_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
 	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	virtual int32 GetActDoTDamage(uint16 spell_id, int32 value, Mob* target);
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
+	virtual int32 GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_buff_tic = true);
+	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr, bool from_buff_tic = false);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost){ return cost;}
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
@@ -851,8 +851,8 @@ public:
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
 	bool TryFadeEffect(int slot);
 	uint16 GetSpellEffectResistChance(uint16 spell_id);
-	int32 GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining);
-	int32 GetFcDamageAmtIncoming(Mob *caster, int32 spell_id);
+	int32 GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, bool from_buff_tic = false);
+	int32 GetFcDamageAmtIncoming(Mob *caster, int32 spell_id, bool from_buff_tic = false);
 	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id); //**** This can be removed when bot healing focus code is updated ****
 	int32 GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
 	int32 GetPositionalDmgTaken(Mob *attacker);
@@ -1502,7 +1502,7 @@ protected:
 	virtual
 #endif
 	int GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target = nullptr);
-	virtual int32 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr) { return 0; }
+	virtual int32 GetFocusEffect(focusType type, uint16 spell_id, Mob *caster = nullptr, bool from_buff_tic = false) { return 0; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	float FindDestGroundZ(glm::vec3 dest, float z_offset=0.0);
@@ -1738,8 +1738,6 @@ protected:
 
 	glm::vec3 m_TargetRing;
 
-	// we might want to do this differently, we gotta do max NPC buffs ... which is 97
-	uint32 m_spellHitsLeft[EQ::spells::TOTAL_BUFFS]; // Used to track which spells will have their numhits incremented when spell finishes casting
 	GravityBehavior flymode;
 	bool m_targetable;
 	int QGVarDuration(const char *fmt);

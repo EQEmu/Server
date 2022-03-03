@@ -5275,7 +5275,7 @@ int32 Bot::CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 sp
 	return (value * lvlModifier / 100);
 }
 
-int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id) {
+int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_tic) {
 	if (IsBardSong(spell_id) && bottype != focusFcBaseEffects)
 		return 0;
 
@@ -5390,9 +5390,9 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id) {
 		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
 			realTotal2 = CalcBotFocusEffect(bottype, focusspell_tracker, spell_id);
 
-		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
-		if(buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0)
-			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
+		if (!from_buff_tic && buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
+			CheckNumHitsRemaining(NumHit::MatchingSpells, buff_tracker);
+		}
 	}
 
 	// AA Focus

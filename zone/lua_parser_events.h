@@ -113,6 +113,8 @@ void handle_player_consider(QuestInterface* parse, lua_State* L, Client* client,
 	std::vector<EQ::Any>* extra_pointers);
 void handle_player_consider_corpse(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 	std::vector<EQ::Any>* extra_pointers);
+void handle_player_equip_item(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<EQ::Any>* extra_pointers);
 
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQ::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,

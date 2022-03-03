@@ -2552,7 +2552,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	return false;
 }
 
-int32 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
+int32 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) {
 
 	int32 realTotal = 0;
 	int32 realTotal2 = 0;
@@ -2666,9 +2666,8 @@ int32 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
 			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id);
 
-		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
-		if(buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
-			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
+		if (!from_buff_tic && buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
+			CheckNumHitsRemaining(NumHit::MatchingSpells, buff_tracker);
 		}
 	}
 

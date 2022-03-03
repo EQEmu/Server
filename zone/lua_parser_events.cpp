@@ -760,6 +760,24 @@ void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Cl
 	lua_setfield(L, -2, "target");
 }
 
+void handle_player_equip_item(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<EQ::Any> *extra_pointers) {
+	lua_pushnumber(L, extra_data);
+	lua_setfield(L, -2, "item_id");
+
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "item_quantity");
+
+	lua_pushnumber(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "slot_id");
+	
+	Lua_ItemInst l_item(extra_data);
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+}
+
 void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, std::string data, uint32 extra_data, std::vector<EQ::Any> *extra_pointers) { }
 
 void handle_encounter_timer(QuestInterface *parse, lua_State* L, Encounter* encounter, std::string data, uint32 extra_data,

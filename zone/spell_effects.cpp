@@ -234,8 +234,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Current Hitpoints: %+i", effect_value);
 #endif
 				// SE_CurrentHP is calculated at first tick if its a dot/buff
-				if (buffslot >= 0)
+				if (buffslot >= 0) {
+					//This is here so dots with hit counters tic down on initial cast.
+					if (effect_value < 0) {
+						caster->GetActDoTDamage(spell_id, effect_value, this, false);
+					}
 					break;
+				}
 
 				if (spells[spell_id].limit_value[i] && !PassCastRestriction(spells[spell_id].limit_value[i])) {
 					break; //no messages are given on live if this fails.
@@ -289,36 +294,72 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Current Hitpoints Once: %+i", effect_value);
 #endif
-
-				int32 dmg = effect_value;
-				if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
-				{
-					dmg = caster->GetMana()*-3;
-					caster->SetMana(0);
-				} else if (spell_id == SPELL_LIFE_BURN && caster) //Lifeburn
-				{
-					dmg = caster->GetHP(); // just your current HP
-					caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
-					dmg = -dmg;
+				if (spells[spell_id].limit_value[i] && !PassCastRestriction(spells[spell_id].limit_value[i])) {
+					break; //no messages are given on live if this fails.
 				}
 
 				// hack fix for client health not reflecting server value
 				last_hp = 0;
 
-				if (spells[spell_id].limit_value[i] && !PassCastRestriction(spells[spell_id].limit_value[i])) {
+				int32 dmg = effect_value;
+
+				//hardcoded for manaburn and life burn
+				if (spell_id == SPELL_MANA_BURN || spell_id == SPELL_LIFE_BURN)
+				{
+					if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
+					{
+						dmg = caster->GetMana()*-3;
+						caster->SetMana(0);
+					}
+					else if (spell_id == SPELL_LIFE_BURN && caster) //Lifeburn
+					{
+						dmg = caster->GetHP(); // just your current HP
+						caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
+						dmg = -dmg;
+					}
+
+					if (dmg < 0) {
+						dmg = -dmg;
+						Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+					}
+					else {
+						HealDamage(dmg, caster);
+					}
 					break;
 				}
+				//normal effects
+				else {
+					if (dmg < 0){
+						dmg = (int32)(dmg * partial / 100);
 
-				//do any AAs apply to these spells?
-				if(dmg < 0) {
-					dmg = -dmg;
-					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
-				} else {
-					HealDamage(dmg, caster);
+						if (caster) {
+							if (reflect_effectiveness) {
+								dmg = caster->GetActReflectedSpellDamage(spell_id, (int32)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
+							}
+							else {
+								dmg = caster->GetActSpellDamage(spell_id, dmg, this);
+							}
+							caster->ResourceTap(-dmg, spell_id);
+						}
+
+						if (dmg <= 0) {
+							dmg = -dmg;
+							Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+						}
+						else {
+							HealDamage(dmg, caster);
+						}
+					}
+					else if (dmg > 0) {
+						//do not apply focus/critical to buff spells
+						if (caster && !IsEffectInSpell(spell_id, SE_TotalHP)) {
+							dmg = caster->GetActSpellHealing(spell_id, dmg, this);
+						}
+						HealDamage(dmg, caster);
+					}
 				}
 				break;
 			}
-
 
 			case SE_PercentalHeal:
 			{
@@ -2951,6 +2992,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_HealOverTime: {
+				//This is here so buffs with hit counters tic down on initial cast.
+				caster->GetActSpellHealing(spell_id, effect_value, nullptr, false);
+			}
+
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3035,7 +3081,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_TrueNorth:
 			case SE_WaterBreathing:
 			case SE_MovementSpeed:
-			case SE_HealOverTime:
 			case SE_PercentXPIncrease:
 			case SE_DivineSave:
 			case SE_Accuracy:
@@ -3772,8 +3817,9 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 		case SE_HealOverTime: {
 			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod);
-			if (caster)
-				effect_value = caster->GetActSpellHealing(buff.spellid, effect_value);
+			if (caster) {
+				effect_value = caster->GetActSpellHealing(buff.spellid, effect_value, nullptr, true);
+			}
 
 			HealDamage(effect_value, caster, buff.spellid);
 			// healing aggro would go here; removed for now
@@ -6271,7 +6317,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int32 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster)
+int32 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool from_buff_tic)
 {
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime) {
 		return 0;
@@ -6506,12 +6552,10 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster)
 		if(focusspell_tracker && rand_effectiveness && focus_max_real2 != 0)
 			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id, false, original_caster_id, caster);
 
-		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
-		if(buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
-			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
+		if(!from_buff_tic && buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
+			CheckNumHitsRemaining(NumHit::MatchingSpells, buff_tracker);
 		}
 	}
-
 
 	// AA Focus
 	if (aabonuses.FocusEffects[type]){
@@ -6553,7 +6597,7 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster)
 	return realTotal + realTotal2 + realTotal3 + worneffect_bonus;
 }
 
-int32 NPC::GetFocusEffect(focusType type, uint16 spell_id, Mob* caster) {
+int32 NPC::GetFocusEffect(focusType type, uint16 spell_id, Mob* caster, bool from_buff_tic) {
 
 	int32 realTotal = 0;
 	int32 realTotal2 = 0;
@@ -6668,9 +6712,8 @@ int32 NPC::GetFocusEffect(focusType type, uint16 spell_id, Mob* caster) {
 			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id, false, original_caster_id, caster);
 		}
 
-		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
-		if(buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
-			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
+		if(!from_buff_tic && buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
+			CheckNumHitsRemaining(NumHit::MatchingSpells, buff_tracker);
 		}
 	}
 
@@ -6743,31 +6786,9 @@ void Mob::CheckNumHitsRemaining(NumHit type, int32 buff_slot, uint16 spell_id)
 			} else if (IsClient()) { // still have numhits and client, update
 				CastToClient()->SendBuffNumHitPacket(buffs[buff_slot], buff_slot);
 			}
-		} else {
-			for (int d = 0; d < buff_max; d++) {
-				if (!m_spellHitsLeft[d])
-					continue;
-
-				if (IsValidSpell(buffs[d].spellid) && m_spellHitsLeft[d] == buffs[d].spellid) {
-
-#ifdef BOTS
-					buff_name = spells[buffs[d].spellid].name;
-					buff_counter = (buffs[d].hit_number - 1);
-					buff_update = true;
-#endif
-
-					if (--buffs[d].hit_number == 0) {
-						CastOnNumHitFade(buffs[d].spellid);
-						m_spellHitsLeft[d] = 0;
-						if (!TryFadeEffect(d))
-							BuffFadeBySlot(d, true);
-					} else if (IsClient()) { // still have numhits and client, update
-						CastToClient()->SendBuffNumHitPacket(buffs[d], d);
-					}
-				}
-			}
-		}
-	} else {
+		} 
+	} 
+	else {
 		for (int d = 0; d < buff_max; d++) {
 			if (IsValidSpell(buffs[d].spellid) && buffs[d].hit_number > 0 &&
 			    spells[buffs[d].spellid].hit_number_type == static_cast<int>(type)) {
@@ -7059,12 +7080,12 @@ bool Mob::DoHPToManaCovert(uint16 mana_cost)
 	return false;
 }
 
-int32 Mob::GetFcDamageAmtIncoming(Mob *caster, int32 spell_id)
+int32 Mob::GetFcDamageAmtIncoming(Mob *caster, int32 spell_id, bool from_buff_tic)
 {
 	//THIS is target of spell cast
 	int32 dmg = 0;
-	dmg += GetFocusEffect(focusFcDamageAmtIncoming, spell_id, caster); //SPA 297 SE_FcDamageAmtIncoming
-	dmg += GetFocusEffect(focusFcSpellDamageAmtIncomingPC, spell_id, caster); //SPA 484 SE_Fc_Spell_Damage_Amt_IncomingPC
+	dmg += GetFocusEffect(focusFcDamageAmtIncoming, spell_id, caster, from_buff_tic); //SPA 297 SE_FcDamageAmtIncoming
+	dmg += GetFocusEffect(focusFcSpellDamageAmtIncomingPC, spell_id, caster, from_buff_tic); //SPA 484 SE_Fc_Spell_Damage_Amt_IncomingPC
 	return dmg;
 }
 

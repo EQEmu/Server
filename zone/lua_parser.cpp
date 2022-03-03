@@ -136,7 +136,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_combine",
 	"event_consider",
 	"event_consider_corpse",
-	"event_loot_zone"
+	"event_loot_zone",
+	"event_equip_item_client",
+	"event_unequip_item_client"
 };
 
 extern Zone *zone;
@@ -228,6 +230,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_COMBINE] = handle_player_quest_combine;
 	PlayerArgumentDispatch[EVENT_CONSIDER] = handle_player_consider;
 	PlayerArgumentDispatch[EVENT_CONSIDER_CORPSE] = handle_player_consider_corpse;
+	PlayerArgumentDispatch[EVENT_EQUIP_ITEM_CLIENT] = handle_player_equip_item;
+	PlayerArgumentDispatch[EVENT_UNEQUIP_ITEM_CLIENT] = handle_player_equip_item;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
