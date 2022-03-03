@@ -6735,9 +6735,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= GetBotFocusEffect(focusFcDamageAmt, spell_id);
 			value -= GetBotFocusEffect(focusFcDamageAmt2, spell_id);
 			
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && itembonuses.SpellDmg)
-				value += (GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value) * ratio / 100);
-			else if (itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
+			if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && itembonuses.SpellDmg)
 				value += (GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value) * ratio / 100);
 
 			entity_list.MessageClose(this, false, 100, Chat::SpellCrit, "%s delivers a critical blast! (%d)", GetName(), -value);
@@ -6759,9 +6757,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	value -= GetBotFocusEffect(focusFcDamageAmt, spell_id);
 	value -= GetBotFocusEffect(focusFcDamageAmt2, spell_id);
 	
-	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction)&& itembonuses.SpellDmg)
-		value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
-	else if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
+	if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && itembonuses.SpellDmg)
 		value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	return value;
@@ -6795,13 +6791,8 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
 		
 		//Using IgnoreSpellDmgLvlRestriction
-		if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && itembonuses.HealAmt) {
+		if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && itembonuses.HealAmt)
 			value += (GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier);
-		}
-		else if (itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-			value += (GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier);
-		}
-
 		value += (value * target->GetHealRate() / 100);
 		if (Critical)
 			entity_list.MessageClose(this, false, 100, Chat::SpellCrit, "%s performs an exceptional heal! (%d)", GetName(), value);
@@ -6811,12 +6802,8 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		int32 extra_heal = 0;
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
 		if (RuleB(Spells, HOTsScaleWithHealAmt)) {
-			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
-				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value);
-			}
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value);
-			}
+			if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && itembonuses.HealAmt)
+				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value);			
 		}
 		
 		if (extra_heal) {
