@@ -2995,6 +2995,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_HealOverTime: {
 				//This is here so buffs with hit counters tic down on initial cast.
 				caster->GetActSpellHealing(spell_id, effect_value, nullptr, false);
+				break;
 			}
 
 			case SE_PersistentEffect:
