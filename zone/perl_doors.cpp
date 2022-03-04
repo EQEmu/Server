@@ -233,7 +233,7 @@ XS(XS_Doors_GetSize); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Doors_GetSize) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Doors::GetIncline(THIS)");
+		Perl_croak(aTHX_ "Usage: Doors::GetSize(THIS)"); // @categories Doors
 	{
 		Doors *THIS;
 		uint32 RETVAL;
