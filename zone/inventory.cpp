@@ -3332,6 +3332,10 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
 				if (m_inv.GetItem(EQ::invslot::slotCursor)) {
+					// Below used to check charges but for some reason
+					// m_inv.GetItem(EQ::invslot::slotCursor)->GetCharges()
+					// is returning 0.  We know it exists, so removed check.
+					// TODO: Why is 0 being returned for slotCursor.
 					if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 						slot = EQ::invslot::slotCursor;
 					}
