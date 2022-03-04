@@ -666,7 +666,7 @@ XS(XS_Object_GetTiltX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetTiltX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetTiltX(THIS)"); // @categories Objects
 	{
 		Object *THIS;
 		float  RETVAL;
@@ -683,7 +683,7 @@ XS(XS_Object_GetTiltY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetTiltY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetTiltY(THIS)"); // @categories Objects
 	{
 		Object *THIS;
 		float  RETVAL;
