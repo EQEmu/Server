@@ -195,10 +195,11 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 					}
 
 					case SpellType_InCombatBuff: {
-						if(bInnates || zone->random.Roll(50))
-						{
-							AIDoSpellCast(i, tar, mana_cost);
-							return true;
+						if(bInnates || zone->random.Roll(50)) {
+							if (tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0) {
+								AIDoSpellCast(i, tar, mana_cost);
+								return true;
+							}
 						}
 						break;
 					}
