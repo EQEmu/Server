@@ -598,7 +598,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 			}
 		}
 
-		if (pet_buffs[i].spellid <= (uint32)SPDAT_RECORDS && pet_buffs[i].spellid != 0 && pet_buffs[i].duration > 0) {
+		if (pet_buffs[i].spellid <= (uint32)SPDAT_RECORDS && pet_buffs[i].spellid != 0 && (pet_buffs[i].duration > 0 || pet_buffs[i].duration == -1)) {
 			if(pet_buffs[i].level == 0 || pet_buffs[i].level > 100)
 				pet_buffs[i].level = 1;
 			buffs[i].spellid			= pet_buffs[i].spellid;
