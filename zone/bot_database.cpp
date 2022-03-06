@@ -2634,11 +2634,17 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 		return false;
 
 	query = StringFormat(
-		"SELECT `mob_id` FROM `vw_groups` "
-		"WHERE `group_id` = '%u' "
-		"AND `mob_type`='B' "
-		"AND `mob_id` IN (SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u');"
-		, group_id, owner_id);
+		"SELECT `charid`"
+		" FROM `group_id`"
+		" WHERE `groupid` = '%u'"
+		" AND `name` IN ("
+		"  SELECT `name`"
+		"  FROM `bot_data`"
+		"  WHERE `owner_id` = '%u'"
+		"  )",
+		group_id,
+		owner_id
+	);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
