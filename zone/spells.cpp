@@ -182,7 +182,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	//Goal of Spells:UseSpellImpliedTargeting is to replicate the EQ2 feature where spells will 'pass through' invalid targets to target's target to try to find a valid target.
         if (RuleB(Spells,UseSpellImpliedTargeting) && IsClient()) {
                 Mob* spell_target = entity_list.GetMobID(target_id);
-                if (spell_target) {
+                if (spell_target && spell_target->GetTarget()) {
                         // If either this is beneficial and the target is not a player or player's pet or vis versa
                         if ((IsBeneficialSpell(spell_id) && (!(spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient()))))
                         ||  (IsDetrimentalSpell(spell_id) && (spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient())))) {
