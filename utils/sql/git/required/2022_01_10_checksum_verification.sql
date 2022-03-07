@@ -7,4 +7,4 @@ ALTER TABLE `account`
 	ADD COLUMN `crc_skillcaps` TEXT NULL AFTER `crc_eqgame`,
 	ADD COLUMN `crc_basedata` TEXT NULL AFTER `crc_skillcaps`;
 
-ALTER TABLE account` CHANGE `suspendeduntil` `suspendeduntil` datetime  NULL  COMMENT '';
+ALTER TABLE `account` CHANGE `suspendeduntil` `suspendeduntil` datetime  NULL  COMMENT '';
