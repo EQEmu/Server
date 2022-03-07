@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseLoginServerAdminsRepository {
 public:
@@ -24,7 +25,7 @@ public:
 		std::string first_name;
 		std::string last_name;
 		std::string email;
-		std::string registration_date;
+		time_t      registration_date;
 		std::string registration_ip_address;
 	};
 
@@ -47,9 +48,28 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"account_name",
+			"account_password",
+			"first_name",
+			"last_name",
+			"email",
+			"UNIX_TIMESTAMP(registration_date)",
+			"registration_ip_address",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -61,7 +81,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -85,7 +105,7 @@ public:
 		entry.first_name              = "";
 		entry.last_name               = "";
 		entry.email                   = "";
-		entry.registration_date       = "";
+		entry.registration_date       = 0;
 		entry.registration_ip_address = "";
 
 		return entry;
@@ -128,7 +148,7 @@ public:
 			entry.first_name              = row[3] ? row[3] : "";
 			entry.last_name               = row[4] ? row[4] : "";
 			entry.email                   = row[5] ? row[5] : "";
-			entry.registration_date       = row[6] ? row[6] : "";
+			entry.registration_date       = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
 			entry.registration_ip_address = row[7] ? row[7] : "";
 
 			return entry;
@@ -168,7 +188,7 @@ public:
 		update_values.push_back(columns[3] + " = '" + EscapeString(login_server_admins_entry.first_name) + "'");
 		update_values.push_back(columns[4] + " = '" + EscapeString(login_server_admins_entry.last_name) + "'");
 		update_values.push_back(columns[5] + " = '" + EscapeString(login_server_admins_entry.email) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(login_server_admins_entry.registration_date) + "'");
+		update_values.push_back(columns[6] + " = FROM_UNIXTIME(" + (login_server_admins_entry.registration_date > 0 ? std::to_string(login_server_admins_entry.registration_date) : "null") + ")");
 		update_values.push_back(columns[7] + " = '" + EscapeString(login_server_admins_entry.registration_ip_address) + "'");
 
 		auto results = db.QueryDatabase(
@@ -197,7 +217,7 @@ public:
 		insert_values.push_back("'" + EscapeString(login_server_admins_entry.first_name) + "'");
 		insert_values.push_back("'" + EscapeString(login_server_admins_entry.last_name) + "'");
 		insert_values.push_back("'" + EscapeString(login_server_admins_entry.email) + "'");
-		insert_values.push_back("'" + EscapeString(login_server_admins_entry.registration_date) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (login_server_admins_entry.registration_date > 0 ? std::to_string(login_server_admins_entry.registration_date) : "null") + ")");
 		insert_values.push_back("'" + EscapeString(login_server_admins_entry.registration_ip_address) + "'");
 
 		auto results = db.QueryDatabase(
@@ -234,7 +254,7 @@ public:
 			insert_values.push_back("'" + EscapeString(login_server_admins_entry.first_name) + "'");
 			insert_values.push_back("'" + EscapeString(login_server_admins_entry.last_name) + "'");
 			insert_values.push_back("'" + EscapeString(login_server_admins_entry.email) + "'");
-			insert_values.push_back("'" + EscapeString(login_server_admins_entry.registration_date) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (login_server_admins_entry.registration_date > 0 ? std::to_string(login_server_admins_entry.registration_date) : "null") + ")");
 			insert_values.push_back("'" + EscapeString(login_server_admins_entry.registration_ip_address) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
@@ -275,7 +295,7 @@ public:
 			entry.first_name              = row[3] ? row[3] : "";
 			entry.last_name               = row[4] ? row[4] : "";
 			entry.email                   = row[5] ? row[5] : "";
-			entry.registration_date       = row[6] ? row[6] : "";
+			entry.registration_date       = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
 			entry.registration_ip_address = row[7] ? row[7] : "";
 
 			all_entries.push_back(entry);
@@ -307,7 +327,7 @@ public:
 			entry.first_name              = row[3] ? row[3] : "";
 			entry.last_name               = row[4] ? row[4] : "";
 			entry.email                   = row[5] ? row[5] : "";
-			entry.registration_date       = row[6] ? row[6] : "";
+			entry.registration_date       = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
 			entry.registration_ip_address = row[7] ? row[7] : "";
 
 			all_entries.push_back(entry);

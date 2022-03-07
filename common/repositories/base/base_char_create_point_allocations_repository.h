@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseCharCreatePointAllocationsRepository {
 public:
@@ -61,9 +62,35 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"base_str",
+			"base_sta",
+			"base_dex",
+			"base_agi",
+			"base_int",
+			"base_wis",
+			"base_cha",
+			"alloc_str",
+			"alloc_sta",
+			"alloc_dex",
+			"alloc_agi",
+			"alloc_int",
+			"alloc_wis",
+			"alloc_cha",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -75,7 +102,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

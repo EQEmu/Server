@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseEventlogRepository {
 public:
@@ -51,9 +52,30 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"accountname",
+			"accountid",
+			"status",
+			"charname",
+			"target",
+			"time",
+			"descriptiontype",
+			"description",
+			"event_nid",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -65,7 +87,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -89,7 +111,7 @@ public:
 		entry.status          = 0;
 		entry.charname        = "";
 		entry.target          = "None";
-		entry.time            = "";
+		entry.time            = std::time(nullptr);
 		entry.descriptiontype = "";
 		entry.description     = "";
 		entry.event_nid       = 0;

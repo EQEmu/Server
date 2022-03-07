@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseSpellBucketsRepository {
 public:
@@ -37,9 +38,23 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"spellid",
+			"key",
+			"value",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -51,7 +66,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -107,7 +122,7 @@ public:
 		if (results.RowCount() == 1) {
 			SpellBuckets entry{};
 
-			entry.spellid = strtoll(row[0], NULL, 10);
+			entry.spellid = strtoll(row[0], nullptr, 10);
 			entry.key     = row[1] ? row[1] : "";
 			entry.value   = row[2] ? row[2] : "";
 
@@ -235,7 +250,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellBuckets entry{};
 
-			entry.spellid = strtoll(row[0], NULL, 10);
+			entry.spellid = strtoll(row[0], nullptr, 10);
 			entry.key     = row[1] ? row[1] : "";
 			entry.value   = row[2] ? row[2] : "";
 
@@ -262,7 +277,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellBuckets entry{};
 
-			entry.spellid = strtoll(row[0], NULL, 10);
+			entry.spellid = strtoll(row[0], nullptr, 10);
 			entry.key     = row[1] ? row[1] : "";
 			entry.value   = row[2] ? row[2] : "";
 

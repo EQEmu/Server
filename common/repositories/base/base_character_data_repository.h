@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseCharacterDataRepository {
 public:
@@ -119,7 +120,7 @@ public:
 		int         aa_points_spent_old;
 		int         aa_points_old;
 		int         e_last_invsnapshot;
-		std::string deleted_at;
+		time_t      deleted_at;
 	};
 
 	static std::string PrimaryKey()
@@ -235,9 +236,122 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"account_id",
+			"name",
+			"last_name",
+			"title",
+			"suffix",
+			"zone_id",
+			"zone_instance",
+			"y",
+			"x",
+			"z",
+			"heading",
+			"gender",
+			"race",
+			"`class`",
+			"level",
+			"deity",
+			"birthday",
+			"last_login",
+			"time_played",
+			"level2",
+			"anon",
+			"gm",
+			"face",
+			"hair_color",
+			"hair_style",
+			"beard",
+			"beard_color",
+			"eye_color_1",
+			"eye_color_2",
+			"drakkin_heritage",
+			"drakkin_tattoo",
+			"drakkin_details",
+			"ability_time_seconds",
+			"ability_number",
+			"ability_time_minutes",
+			"ability_time_hours",
+			"exp",
+			"aa_points_spent",
+			"aa_exp",
+			"aa_points",
+			"group_leadership_exp",
+			"raid_leadership_exp",
+			"group_leadership_points",
+			"raid_leadership_points",
+			"points",
+			"cur_hp",
+			"mana",
+			"endurance",
+			"intoxication",
+			"str",
+			"sta",
+			"cha",
+			"dex",
+			"`int`",
+			"agi",
+			"wis",
+			"zone_change_count",
+			"toxicity",
+			"hunger_level",
+			"thirst_level",
+			"ability_up",
+			"ldon_points_guk",
+			"ldon_points_mir",
+			"ldon_points_mmc",
+			"ldon_points_ruj",
+			"ldon_points_tak",
+			"ldon_points_available",
+			"tribute_time_remaining",
+			"career_tribute_points",
+			"tribute_points",
+			"tribute_active",
+			"pvp_status",
+			"pvp_kills",
+			"pvp_deaths",
+			"pvp_current_points",
+			"pvp_career_points",
+			"pvp_best_kill_streak",
+			"pvp_worst_death_streak",
+			"pvp_current_kill_streak",
+			"pvp2",
+			"pvp_type",
+			"show_helm",
+			"group_auto_consent",
+			"raid_auto_consent",
+			"guild_auto_consent",
+			"leadership_exp_on",
+			"RestTimer",
+			"air_remaining",
+			"autosplit_enabled",
+			"lfp",
+			"lfg",
+			"mailkey",
+			"xtargets",
+			"firstlogon",
+			"e_aa_effects",
+			"e_percent_to_aa",
+			"e_expended_aa_spent",
+			"aa_points_spent_old",
+			"aa_points_old",
+			"e_last_invsnapshot",
+			"UNIX_TIMESTAMP(deleted_at)",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -249,7 +363,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -368,7 +482,7 @@ public:
 		entry.aa_points_spent_old     = 0;
 		entry.aa_points_old           = 0;
 		entry.e_last_invsnapshot      = 0;
-		entry.deleted_at              = "";
+		entry.deleted_at              = 0;
 
 		return entry;
 	}
@@ -505,7 +619,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.deleted_at              = strtoll(row[101] ? row[101] : "-1", nullptr, 10);
 
 			return entry;
 		}
@@ -639,7 +753,7 @@ public:
 		update_values.push_back(columns[98] + " = " + std::to_string(character_data_entry.aa_points_spent_old));
 		update_values.push_back(columns[99] + " = " + std::to_string(character_data_entry.aa_points_old));
 		update_values.push_back(columns[100] + " = " + std::to_string(character_data_entry.e_last_invsnapshot));
-		update_values.push_back(columns[101] + " = '" + EscapeString(character_data_entry.deleted_at) + "'");
+		update_values.push_back(columns[101] + " = FROM_UNIXTIME(" + (character_data_entry.deleted_at > 0 ? std::to_string(character_data_entry.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -762,7 +876,7 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.aa_points_spent_old));
 		insert_values.push_back(std::to_string(character_data_entry.aa_points_old));
 		insert_values.push_back(std::to_string(character_data_entry.e_last_invsnapshot));
-		insert_values.push_back("'" + EscapeString(character_data_entry.deleted_at) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (character_data_entry.deleted_at > 0 ? std::to_string(character_data_entry.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -893,7 +1007,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.aa_points_spent_old));
 			insert_values.push_back(std::to_string(character_data_entry.aa_points_old));
 			insert_values.push_back(std::to_string(character_data_entry.e_last_invsnapshot));
-			insert_values.push_back("'" + EscapeString(character_data_entry.deleted_at) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (character_data_entry.deleted_at > 0 ? std::to_string(character_data_entry.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -1028,7 +1142,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.deleted_at              = strtoll(row[101] ? row[101] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -1154,7 +1268,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.deleted_at              = strtoll(row[101] ? row[101] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}

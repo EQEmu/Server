@@ -18,14 +18,14 @@
  *
  */
 
-#ifndef EQEMU_HORSES_REPOSITORY_H
-#define EQEMU_HORSES_REPOSITORY_H
+#ifndef EQEMU_PETS_BEASTLORD_DATA_REPOSITORY_H
+#define EQEMU_PETS_BEASTLORD_DATA_REPOSITORY_H
 
 #include "../database.h"
 #include "../string_util.h"
-#include "base/base_horses_repository.h"
+#include "base/base_pets_beastlord_data_repository.h"
 
-class HorsesRepository: public BaseHorsesRepository {
+class PetsBeastlordDataRepository: public BasePetsBeastlordDataRepository {
 public:
 
     /**
@@ -52,10 +52,10 @@ public:
      *
      * Example custom methods in a repository
      *
-     * HorsesRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * HorsesRepository::GetWhereNeverExpires()
-     * HorsesRepository::GetWhereXAndY()
-     * HorsesRepository::DeleteWhereXAndY()
+     * PetsBeastlordDataRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * PetsBeastlordDataRepository::GetWhereNeverExpires()
+     * PetsBeastlordDataRepository::GetWhereXAndY()
+     * PetsBeastlordDataRepository::DeleteWhereXAndY()
      *
      * Most of the above could be covered by base methods, but if you as a developer
      * find yourself re-using logic for other parts of the code, its best to just make a
@@ -67,4 +67,4 @@ public:
 
 };
 
-#endif //EQEMU_HORSES_REPOSITORY_H
+#endif //EQEMU_PETS_BEASTLORD_DATA_REPOSITORY_H

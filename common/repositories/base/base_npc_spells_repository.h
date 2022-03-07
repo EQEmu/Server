@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseNpcSpellsRepository {
 public:
@@ -73,9 +74,41 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"name",
+			"parent_list",
+			"attack_proc",
+			"proc_chance",
+			"range_proc",
+			"rproc_chance",
+			"defensive_proc",
+			"dproc_chance",
+			"fail_recast",
+			"engaged_no_sp_recast_min",
+			"engaged_no_sp_recast_max",
+			"engaged_b_self_chance",
+			"engaged_b_other_chance",
+			"engaged_d_chance",
+			"pursue_no_sp_recast_min",
+			"pursue_no_sp_recast_max",
+			"pursue_d_chance",
+			"idle_no_sp_recast_min",
+			"idle_no_sp_recast_max",
+			"idle_b_chance",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -87,7 +120,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

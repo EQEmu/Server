@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseServerScheduledEventsRepository {
 public:
@@ -33,8 +34,8 @@ public:
 		int         month_end;
 		int         year_end;
 		std::string cron_expression;
-		std::string created_at;
-		std::string deleted_at;
+		time_t      created_at;
+		time_t      deleted_at;
 	};
 
 	static std::string PrimaryKey()
@@ -65,9 +66,37 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"description",
+			"event_type",
+			"event_data",
+			"minute_start",
+			"hour_start",
+			"day_start",
+			"month_start",
+			"year_start",
+			"minute_end",
+			"hour_end",
+			"day_end",
+			"month_end",
+			"year_end",
+			"cron_expression",
+			"UNIX_TIMESTAMP(created_at)",
+			"UNIX_TIMESTAMP(deleted_at)",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -79,7 +108,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -112,8 +141,8 @@ public:
 		entry.month_end       = 0;
 		entry.year_end        = 0;
 		entry.cron_expression = "";
-		entry.created_at      = "";
-		entry.deleted_at      = "";
+		entry.created_at      = 0;
+		entry.deleted_at      = 0;
 
 		return entry;
 	}
@@ -164,8 +193,8 @@ public:
 			entry.month_end       = atoi(row[12]);
 			entry.year_end        = atoi(row[13]);
 			entry.cron_expression = row[14] ? row[14] : "";
-			entry.created_at      = row[15] ? row[15] : "";
-			entry.deleted_at      = row[16] ? row[16] : "";
+			entry.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
+			entry.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
 
 			return entry;
 		}
@@ -213,8 +242,8 @@ public:
 		update_values.push_back(columns[12] + " = " + std::to_string(server_scheduled_events_entry.month_end));
 		update_values.push_back(columns[13] + " = " + std::to_string(server_scheduled_events_entry.year_end));
 		update_values.push_back(columns[14] + " = '" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
-		update_values.push_back(columns[15] + " = '" + EscapeString(server_scheduled_events_entry.created_at) + "'");
-		update_values.push_back(columns[16] + " = '" + EscapeString(server_scheduled_events_entry.deleted_at) + "'");
+		update_values.push_back(columns[15] + " = FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
+		update_values.push_back(columns[16] + " = FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -251,8 +280,8 @@ public:
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.month_end));
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.year_end));
 		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.created_at) + "'");
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.deleted_at) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -297,8 +326,8 @@ public:
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.month_end));
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.year_end));
 			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.created_at) + "'");
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.deleted_at) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -347,8 +376,8 @@ public:
 			entry.month_end       = atoi(row[12]);
 			entry.year_end        = atoi(row[13]);
 			entry.cron_expression = row[14] ? row[14] : "";
-			entry.created_at      = row[15] ? row[15] : "";
-			entry.deleted_at      = row[16] ? row[16] : "";
+			entry.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
+			entry.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -388,8 +417,8 @@ public:
 			entry.month_end       = atoi(row[12]);
 			entry.year_end        = atoi(row[13]);
 			entry.cron_expression = row[14] ? row[14] : "";
-			entry.created_at      = row[15] ? row[15] : "";
-			entry.deleted_at      = row[16] ? row[16] : "";
+			entry.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
+			entry.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}

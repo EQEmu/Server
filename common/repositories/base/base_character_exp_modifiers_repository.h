@@ -9,41 +9,44 @@
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
 
-#ifndef EQEMU_BASE_SHARED_TASK_MEMBERS_REPOSITORY_H
-#define EQEMU_BASE_SHARED_TASK_MEMBERS_REPOSITORY_H
+#ifndef EQEMU_BASE_CHARACTER_EXP_MODIFIERS_REPOSITORY_H
+#define EQEMU_BASE_CHARACTER_EXP_MODIFIERS_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../string_util.h"
 #include <ctime>
 
-class BaseSharedTaskMembersRepository {
+class BaseCharacterExpModifiersRepository {
 public:
-	struct SharedTaskMembers {
-		int64 shared_task_id;
-		int64 character_id;
-		int   is_leader;
+	struct CharacterExpModifiers {
+		int   character_id;
+		int   zone_id;
+		float aa_modifier;
+		float exp_modifier;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("shared_task_id");
+		return std::string("character_id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"shared_task_id",
 			"character_id",
-			"is_leader",
+			"zone_id",
+			"aa_modifier",
+			"exp_modifier",
 		};
 	}
 
 	static std::vector<std::string> SelectColumns()
 	{
 		return {
-			"shared_task_id",
 			"character_id",
-			"is_leader",
+			"zone_id",
+			"aa_modifier",
+			"exp_modifier",
 		};
 	}
 
@@ -59,7 +62,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("shared_task_members");
+		return std::string("character_exp_modifiers");
 	}
 
 	static std::string BaseSelect()
@@ -80,51 +83,53 @@ public:
 		);
 	}
 
-	static SharedTaskMembers NewEntity()
+	static CharacterExpModifiers NewEntity()
 	{
-		SharedTaskMembers entry{};
+		CharacterExpModifiers entry{};
 
-		entry.shared_task_id = 0;
-		entry.character_id   = 0;
-		entry.is_leader      = 0;
+		entry.character_id = 0;
+		entry.zone_id      = 0;
+		entry.aa_modifier  = 0;
+		entry.exp_modifier = 0;
 
 		return entry;
 	}
 
-	static SharedTaskMembers GetSharedTaskMembersEntry(
-		const std::vector<SharedTaskMembers> &shared_task_memberss,
-		int shared_task_members_id
+	static CharacterExpModifiers GetCharacterExpModifiersEntry(
+		const std::vector<CharacterExpModifiers> &character_exp_modifierss,
+		int character_exp_modifiers_id
 	)
 	{
-		for (auto &shared_task_members : shared_task_memberss) {
-			if (shared_task_members.shared_task_id == shared_task_members_id) {
-				return shared_task_members;
+		for (auto &character_exp_modifiers : character_exp_modifierss) {
+			if (character_exp_modifiers.character_id == character_exp_modifiers_id) {
+				return character_exp_modifiers;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static SharedTaskMembers FindOne(
+	static CharacterExpModifiers FindOne(
 		Database& db,
-		int shared_task_members_id
+		int character_exp_modifiers_id
 	)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				shared_task_members_id
+				character_exp_modifiers_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SharedTaskMembers entry{};
+			CharacterExpModifiers entry{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.character_id   = strtoll(row[1], nullptr, 10);
-			entry.is_leader      = atoi(row[2]);
+			entry.character_id = atoi(row[0]);
+			entry.zone_id      = atoi(row[1]);
+			entry.aa_modifier  = static_cast<float>(atof(row[2]));
+			entry.exp_modifier = static_cast<float>(atof(row[3]));
 
 			return entry;
 		}
@@ -134,7 +139,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int shared_task_members_id
+		int character_exp_modifiers_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -142,7 +147,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				shared_task_members_id
+				character_exp_modifiers_id
 			)
 		);
 
@@ -151,16 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SharedTaskMembers shared_task_members_entry
+		CharacterExpModifiers character_exp_modifiers_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(shared_task_members_entry.shared_task_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_members_entry.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(shared_task_members_entry.is_leader));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_exp_modifiers_entry.character_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_exp_modifiers_entry.zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_exp_modifiers_entry.aa_modifier));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_exp_modifiers_entry.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,23 +174,24 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				shared_task_members_entry.shared_task_id
+				character_exp_modifiers_entry.character_id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static SharedTaskMembers InsertOne(
+	static CharacterExpModifiers InsertOne(
 		Database& db,
-		SharedTaskMembers shared_task_members_entry
+		CharacterExpModifiers character_exp_modifiers_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(shared_task_members_entry.shared_task_id));
-		insert_values.push_back(std::to_string(shared_task_members_entry.character_id));
-		insert_values.push_back(std::to_string(shared_task_members_entry.is_leader));
+		insert_values.push_back(std::to_string(character_exp_modifiers_entry.character_id));
+		insert_values.push_back(std::to_string(character_exp_modifiers_entry.zone_id));
+		insert_values.push_back(std::to_string(character_exp_modifiers_entry.aa_modifier));
+		insert_values.push_back(std::to_string(character_exp_modifiers_entry.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			shared_task_members_entry.shared_task_id = results.LastInsertedID();
-			return shared_task_members_entry;
+			character_exp_modifiers_entry.character_id = results.LastInsertedID();
+			return character_exp_modifiers_entry;
 		}
 
-		shared_task_members_entry = NewEntity();
+		character_exp_modifiers_entry = NewEntity();
 
-		return shared_task_members_entry;
+		return character_exp_modifiers_entry;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SharedTaskMembers> shared_task_members_entries
+		std::vector<CharacterExpModifiers> character_exp_modifiers_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &shared_task_members_entry: shared_task_members_entries) {
+		for (auto &character_exp_modifiers_entry: character_exp_modifiers_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(shared_task_members_entry.shared_task_id));
-			insert_values.push_back(std::to_string(shared_task_members_entry.character_id));
-			insert_values.push_back(std::to_string(shared_task_members_entry.is_leader));
+			insert_values.push_back(std::to_string(character_exp_modifiers_entry.character_id));
+			insert_values.push_back(std::to_string(character_exp_modifiers_entry.zone_id));
+			insert_values.push_back(std::to_string(character_exp_modifiers_entry.aa_modifier));
+			insert_values.push_back(std::to_string(character_exp_modifiers_entry.exp_modifier));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -234,9 +242,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<SharedTaskMembers> All(Database& db)
+	static std::vector<CharacterExpModifiers> All(Database& db)
 	{
-		std::vector<SharedTaskMembers> all_entries;
+		std::vector<CharacterExpModifiers> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -248,11 +256,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTaskMembers entry{};
+			CharacterExpModifiers entry{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.character_id   = strtoll(row[1], nullptr, 10);
-			entry.is_leader      = atoi(row[2]);
+			entry.character_id = atoi(row[0]);
+			entry.zone_id      = atoi(row[1]);
+			entry.aa_modifier  = static_cast<float>(atof(row[2]));
+			entry.exp_modifier = static_cast<float>(atof(row[3]));
 
 			all_entries.push_back(entry);
 		}
@@ -260,9 +269,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<SharedTaskMembers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterExpModifiers> GetWhere(Database& db, std::string where_filter)
 	{
-		std::vector<SharedTaskMembers> all_entries;
+		std::vector<CharacterExpModifiers> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -275,11 +284,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTaskMembers entry{};
+			CharacterExpModifiers entry{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.character_id   = strtoll(row[1], nullptr, 10);
-			entry.is_leader      = atoi(row[2]);
+			entry.character_id = atoi(row[0]);
+			entry.zone_id      = atoi(row[1]);
+			entry.aa_modifier  = static_cast<float>(atof(row[2]));
+			entry.exp_modifier = static_cast<float>(atof(row[3]));
 
 			all_entries.push_back(entry);
 		}
@@ -314,4 +324,4 @@ public:
 
 };
 
-#endif //EQEMU_BASE_SHARED_TASK_MEMBERS_REPOSITORY_H
+#endif //EQEMU_BASE_CHARACTER_EXP_MODIFIERS_REPOSITORY_H
