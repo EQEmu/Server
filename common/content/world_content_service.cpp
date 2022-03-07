@@ -155,29 +155,30 @@ bool WorldContentService::IsContentFlagDisabled(const std::string &content_flag)
 	return false;
 }
 
-bool WorldContentService::DoesPassContentFiltering(const ContentFlags &content_flags)
+bool WorldContentService::DoesPassContentFiltering(const ContentFlags &f)
 {
-	if (content_flags.min_expansion > Expansion::EXPANSION_ALL && current_expansion < content_flags.min_expansion) {
-		return false;
+	// if min or max expansion is -1 we're clear
+	// if both min and max expansion are set, we need to properly filter by both
+	if ((f.min_expansion == Expansion::EXPANSION_ALL && f.max_expansion == Expansion::EXPANSION_ALL) ||
+		(f.min_expansion > Expansion::EXPANSION_ALL && current_expansion >= f.min_expansion &&
+		 f.max_expansion > Expansion::EXPANSION_ALL && current_expansion <= f.max_expansion
+		)) {
+		return true;
 	}
 
-	if (content_flags.max_expansion > Expansion::EXPANSION_ALL && current_expansion > content_flags.max_expansion) {
-		return false;
-	}
-
-	for (const auto& content_flag: SplitString(content_flags.content_flags)) {
-		if (!contains(GetContentFlagsEnabled(), content_flag)) {
-			return false;
+	for (const auto &content_flag: SplitString(f.content_flags)) {
+		if (contains(GetContentFlagsEnabled(), content_flag)) {
+			return true;
 		}
 	}
 
-	for (const auto& content_flag: SplitString(content_flags.content_flags_disabled)) {
-		if (!contains(GetContentFlagsDisabled(), content_flag)) {
-			return false;
+	for (const auto &content_flag: SplitString(f.content_flags_disabled)) {
+		if (contains(GetContentFlagsDisabled(), content_flag)) {
+			return true;
 		}
 	}
 
-	return true;
+	return false;
 }
 
 void WorldContentService::ReloadContentFlags()

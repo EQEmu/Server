@@ -171,7 +171,7 @@ public:
 	void ReloadContentFlags();
 	WorldContentService * SetExpansionContext();
 
-	bool DoesPassContentFiltering(const ContentFlags& content_flags);
+	bool DoesPassContentFiltering(const ContentFlags& f);
 
 	WorldContentService * SetDatabase(Database *database);
 	Database *GetDatabase() const;
