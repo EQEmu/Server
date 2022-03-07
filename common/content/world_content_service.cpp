@@ -166,12 +166,14 @@ bool WorldContentService::DoesPassContentFiltering(const ContentFlags &f)
 		return true;
 	}
 
+	// if we have any enabled flag in enabled flags, we pass
 	for (const auto &content_flag: SplitString(f.content_flags)) {
 		if (contains(GetContentFlagsEnabled(), content_flag)) {
 			return true;
 		}
 	}
 
+	// if we have any disabled flag in disabled flags, we pass
 	for (const auto &content_flag: SplitString(f.content_flags_disabled)) {
 		if (contains(GetContentFlagsDisabled(), content_flag)) {
 			return true;
