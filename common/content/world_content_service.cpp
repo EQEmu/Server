@@ -157,11 +157,11 @@ bool WorldContentService::IsContentFlagDisabled(const std::string &content_flag)
 
 bool WorldContentService::DoesPassContentFiltering(const ContentFlags &content_flags)
 {
-	if (content_flags.min_expansion >= 0 && current_expansion < content_flags.min_expansion) {
+	if (content_flags.min_expansion > Expansion::EXPANSION_ALL && current_expansion <= content_flags.min_expansion) {
 		return false;
 	}
 
-	if (content_flags.max_expansion >= 0 && current_expansion > content_flags.max_expansion) {
+	if (content_flags.max_expansion > Expansion::EXPANSION_ALL && current_expansion >= content_flags.max_expansion) {
 		return false;
 	}
 
