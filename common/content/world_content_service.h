@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include "../loottable.h"
 #include "../repositories/content_flags_repository.h"
 
 class Database;
@@ -165,9 +166,12 @@ public:
 	std::vector<std::string> GetContentFlagsEnabled();
 	std::vector<std::string> GetContentFlagsDisabled();
 	bool IsContentFlagEnabled(const std::string& content_flag);
+	bool IsContentFlagDisabled(const std::string& content_flag);
 	void SetContentFlags(std::vector<ContentFlagsRepository::ContentFlags> content_flags);
 	void ReloadContentFlags();
 	WorldContentService * SetExpansionContext();
+
+	bool DoesPassContentFiltering(const ContentFlags& f);
 
 	WorldContentService * SetDatabase(Database *database);
 	Database *GetDatabase() const;

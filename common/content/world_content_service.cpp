@@ -22,6 +22,7 @@
 #include "../database.h"
 #include "../rulesys.h"
 #include "../eqemu_logsys.h"
+#include "../loottable.h"
 #include "../repositories/content_flags_repository.h"
 
 
@@ -137,6 +138,50 @@ bool WorldContentService::IsContentFlagEnabled(const std::string &content_flag)
 	}
 
 	return false;
+}
+
+/**
+ * @param content_flag
+ * @return
+ */
+bool WorldContentService::IsContentFlagDisabled(const std::string &content_flag)
+{
+	for (auto &f: GetContentFlags()) {
+		if (f.flag_name == content_flag && f.enabled == false) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool WorldContentService::DoesPassContentFiltering(const ContentFlags &f)
+{
+	// if we're not set to (-1 All) then fail when we aren't within minimum expansion
+	if (f.min_expansion > Expansion::EXPANSION_ALL && current_expansion < f.min_expansion) {
+		return false;
+	}
+
+	// if we're not set to (-1 All) then fail when we aren't within max expansion
+	if (f.max_expansion > Expansion::EXPANSION_ALL && current_expansion > f.max_expansion) {
+		return false;
+	}
+
+	// if we don't have any enabled flag in enabled flags, we fail
+	for (const auto& flag: SplitString(f.content_flags)) {
+		if (!contains(GetContentFlagsEnabled(), flag)) {
+			return false;
+		}
+	}
+
+	// if we don't have any disabled flag in disabled flags, we fail
+	for (const auto& flag: SplitString(f.content_flags_disabled)) {
+		if (!contains(GetContentFlagsDisabled(), flag)) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void WorldContentService::ReloadContentFlags()
