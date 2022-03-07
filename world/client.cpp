@@ -47,6 +47,7 @@
 #include "wguild_mgr.h"
 #include "sof_char_create_data.h"
 #include "world_store.h"
+#include "../common/repositories/account_repository.h"
 
 #include <iostream>
 #include <iomanip>
@@ -1147,139 +1148,141 @@ bool Client::Process() {
 
 bool Client::HandleChecksumPacket(const EQApplicationPacket *app)
 {
-
 	// Is checksum verification turned on
-	if(!RuleB(World, EnableChecksumVerification))
-	{
+	if (!RuleB(World, EnableChecksumVerification)) {
 		return true;
 	}
-	
+
 	// Get packet structure
-	Checksum_Struct *cs = (Checksum_Struct *)app->pBuffer;
-	
+	auto *cs = (Checksum_Struct *)app->pBuffer;
+
 	// Determine which checksum to process
-	EmuOpcode opcode = app->GetOpcode();
-	switch(opcode)
-	{
+	switch (app->GetOpcode()) {
 		case OP_World_Client_CRC1: // eqgame.exe
 		{
-			LogDebug("ChecksumVerificationCRC1EQGame Checksum: [{}]", cs->checksum);
-			if(ChecksumVerificationCRC1EQGame(cs->checksum) || (GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification)))
-			{
-				LogDebug("ChecksumVerificationCRC1EQGame Verification: PASSED.");
-				return true;
-			}
-			else {
-				LogDebug("ChecksumVerificationCRC1EQGame Verification: FAILED.");
-			}
+			bool passes_checksum_validation = (
+				ChecksumVerificationCRCEQGame(cs->checksum) ||
+				(GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification))
+			);
+
+			LogChecksumVerification(
+				"eqgame.exe validation [{}] client [{}] ({}) has [{}] status [{}]",
+				passes_checksum_validation ? "Passed" : "Failed",
+				GetAccountName(),
+				GetAccountID(),
+				cs->checksum,
+				GetAdmin()
+			);
+
+			return passes_checksum_validation;
 		}
 		case OP_World_Client_CRC2: // SkillCaps.txt
 		{
-			LogDebug("ChecksumVerificationCRC2SkillCaps Checksum: [{}]", cs->checksum);
-			if(ChecksumVerificationCRC2SkillCaps(cs->checksum) || (GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification)))
-			{
-				LogDebug("ChecksumVerificationCRC2SkillCaps Verification: PASSED.");
-				return true;
-			}
-			else {
-				LogDebug("ChecksumVerificationCRC2SkillCaps Verification: FAILED.");
-			}
+			bool passes_checksum_validation = (
+				ChecksumVerificationCRCSkillCaps(cs->checksum) ||
+				(GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification))
+			);
+
+			LogChecksumVerification(
+				"SkillCaps.txt validation [{}] client [{}] ({}) has [{}] status [{}]",
+				passes_checksum_validation ? "Passed" : "Failed",
+				GetAccountName(),
+				GetAccountID(),
+				cs->checksum,
+				GetAdmin()
+			);
+
+			return passes_checksum_validation;
 		}
 		case OP_World_Client_CRC3: // BaseData.txt
 		{
-			LogDebug("ChecksumVerificationCRC3BaseData Checksum: [{}]", cs->checksum);
-			if(ChecksumVerificationCRC3BaseData(cs->checksum) || (GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification)))
-			{
-				LogDebug("ChecksumVerificationCRC3BaseData Verification: PASSED.");
-				return true;
-			}
-			else {
-				LogDebug("ChecksumVerificationCRC3BaseData Verification: FAILED.");
-			}
+			bool passes_checksum_validation = (
+				ChecksumVerificationCRCBaseData(cs->checksum) ||
+				(GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification))
+			);
+
+			LogChecksumVerification(
+				"BaseData.txt validation [{}] client [{}] ({}) has [{}] status [{}]",
+				passes_checksum_validation ? "Passed" : "Failed",
+				GetAccountName(),
+				GetAccountID(),
+				cs->checksum,
+				GetAdmin()
+			);
+
+			return passes_checksum_validation;
 		}
 	}
 
 	return false;
 }
 
-bool Client::ChecksumVerificationCRC1EQGame(uint64 checksum)
+bool Client::ChecksumVerificationCRCEQGame(uint64 checksum)
 {
-	// Add Checksum CRC1 to owners account
-	database.SetAccountCRC1EQGame(GetAccountID(), checksum);
+	database.SetAccountCRCField(GetAccountID(), "crc_eqgame", checksum);
 
 	// Get checksum variable for eqgame.exe
 	std::string checksumvar;
-	uint64_t checksumint;
-	if (database.GetVariable("checksum_crc1_eqgame", checksumvar))
-	{
+	uint64_t    checksumint;
+	if (database.GetVariable("crc_eqgame", checksumvar)) {
 		checksumint = atoll(checksumvar.c_str());
-	} else {
-		
-		// If checksum_crc1_eqgame not set exit function and return true because we have nothing to verify against
-		LogDebug("Checksum Verification: checksum_crc1_eqgame variable not set in variables table.");
+	}
+	else {
+		LogChecksumVerification("[checksum_crc1_eqgame] variable not set in variables table.");
 		return true;
 	}
-	
+
 	// Verify checksums match
-	if(checksumint == checksum)
-	{
+	if (checksumint == checksum) {
 		return true;
 	}
-		
+
 	return false;
 }
 
-bool Client::ChecksumVerificationCRC2SkillCaps(uint64 checksum)
+bool Client::ChecksumVerificationCRCSkillCaps(uint64 checksum)
 {
-	// Add Checksum CRC2 to owners account
-	database.SetAccountCRC2SkillCaps(GetAccountID(), checksum);
+	database.SetAccountCRCField(GetAccountID(), "crc_skillcaps", checksum);
 
 	// Get checksum variable for eqgame.exe
 	std::string checksumvar;
-	uint64_t checksumint;
-	if (database.GetVariable("checksum_crc2_skillcaps", checksumvar))
-	{
+	uint64_t    checksumint;
+	if (database.GetVariable("crc_skillcaps", checksumvar)) {
 		checksumint = atoll(checksumvar.c_str());
-	} else {
-		
-		// If checksum_crc2_skillcaps not set exit function and return true because we have nothing to verify against
-		LogDebug("Checksum Verification: checksum_crc2_skillcaps variable not set in variables table.");
+	}
+	else {
+		LogChecksumVerification("[checksum_crc2_skillcaps] variable not set in variables table.");
 		return true;
 	}
-	
+
 	// Verify checksums match
-	if(checksumint == checksum)
-	{
+	if (checksumint == checksum) {
 		return true;
 	}
-		
+
 	return false;
 }
 
-bool Client::ChecksumVerificationCRC3BaseData(uint64 checksum)
+bool Client::ChecksumVerificationCRCBaseData(uint64 checksum)
 {
-	// Add Checksum CRC1 to owners account
-	database.SetAccountCRC3BaseData(GetAccountID(), checksum);
+	database.SetAccountCRCField(GetAccountID(), "crc_basedata", checksum);
 
 	// Get checksum variable for skill_caps.txt
 	std::string checksumvar;
-	uint64_t checksumint;
-	if (database.GetVariable("checksum_crc3_basedata", checksumvar))
-	{
+	uint64_t    checksumint;
+	if (database.GetVariable("crc_basedata", checksumvar)) {
 		checksumint = atoll(checksumvar.c_str());
-	} else {
-		
-		// If checksum_crc3_basedata not set exit function and return true because we have nothing to verify against
-		LogDebug("Checksum Verification: checksum_crc3_basedata variable not set in variables table.");
+	}
+	else {
+		LogChecksumVerification("[checksum_crc3_basedata] variable not set in variables table.");
 		return true;
 	}
-	
+
 	// Verify checksums match
-	if(checksumint == checksum)
-	{
+	if (checksumint == checksum) {
 		return true;
 	}
-		
+
 	return false;
 }
 

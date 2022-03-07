@@ -249,6 +249,11 @@ foreach my $table_to_generate (@tables) {
             $default_value = '""';
         }
 
+        # for datetime values that set default value all zeroed out
+        if ($default_value =~ /0000-00-00 00:00:00/i) {
+            $default_value = 0;
+        }
+
         my $struct_data_type = translate_mysql_data_type_to_c($data_type);
 
         # struct

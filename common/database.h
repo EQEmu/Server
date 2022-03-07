@@ -190,12 +190,7 @@ public:
 
 	int16	CheckStatus(uint32 account_id);
 
-	uint64  GetAccountCRC1EQGame(uint32 accid);
-	uint64  GetAccountCRC2SkillCaps(uint32 accid);
-	uint64  GetAccountCRC3BaseData(uint32 accid);
-	void	SetAccountCRC1EQGame(uint32 accid, uint64 checksum);
-	void	SetAccountCRC2SkillCaps(uint32 accid, uint64 checksum);
-	void	SetAccountCRC3BaseData(uint32 accid, uint64 checksum);
+	void	SetAccountCRCField(uint32 account_id, std::string field_name, uint64 checksum);
 
 	uint32	CheckLogin(const char* name, const char* password, const char *loginserver, int16* oStatus = 0);
 	uint32	CreateAccount(const char* name, const char* password, int16 status, const char* loginserver, uint32 lsaccount_id);
