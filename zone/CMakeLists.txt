@@ -548,6 +548,7 @@ SET(gm_commands
     gm_commands/unmemspells.cpp
     gm_commands/unscribespell.cpp
     gm_commands/unscribespells.cpp
+    gm_commands/updatechecksum.cpp
     gm_commands/untraindisc.cpp
     gm_commands/untraindiscs.cpp
     gm_commands/uptime.cpp

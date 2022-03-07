@@ -997,6 +997,18 @@ bool Database::SetVariable(const std::string varname, const std::string &varvalu
 	return true;
 }
 
+void Database::SetAccountCRCField(uint32 account_id, std::string field_name, uint64 checksum)
+{
+	QueryDatabase(
+		fmt::format(
+			"UPDATE `account` SET `{}` = '{}' WHERE `id` = {}",
+			field_name,
+			checksum,
+			account_id
+		)
+	);
+}
+
 // Get zone starting points from DB
 bool Database::GetSafePoints(const char* zone_short_name, uint32 instance_version, float* safe_x, float* safe_y, float* safe_z, float* safe_heading, int16* min_status, uint8* min_level, char *flag_needed) {
 
@@ -2285,7 +2297,7 @@ void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
 		auto row = results.begin();
 		exemption_id = atoi(row[0]);
 	}
-	
+
 	query = fmt::format(
 		"INSERT INTO `ip_exemptions` (`exemption_ip`, `exemption_amount`) VALUES ('{}', {})",
 		account_ip,

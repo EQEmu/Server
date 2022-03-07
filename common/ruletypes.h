@@ -242,6 +242,7 @@ RULE_INT(GM, MinStatusToSummonItem, 250, "Minimum required status to summon item
 RULE_INT(GM, MinStatusToZoneAnywhere, 250, "Minimum required status to zone anywhere")
 RULE_INT(GM, MinStatusToLevelTarget, 100, "Minimum required status to set the level of a player")
 RULE_INT(GM, MinStatusToBypassLockedServer, 100, "Players >= this status can log in to the server even when it is locked")
+RULE_INT(GM, MinStatusToBypassCheckSumVerification, 100, "Players >= this status can bypass the eqgame.exe and spells_us.txt checksum verification")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(World)
@@ -275,6 +276,7 @@ RULE_INT (World, TellQueueSize, 20, "Maximum tell queue size")
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true, "Should the start zone always be the same location as your bind?")
 RULE_BOOL(World, EnforceCharacterLimitAtLogin, false, "Enforce the limit for characters that are online at login")
 RULE_BOOL(World, EnableDevTools, true, "Enable or Disable the Developer Tools globally (Most of the time you want this enabled)")
+RULE_BOOL(World, EnableChecksumVerification, false, "Enable or Disable the Checksum Verification for eqgame.exe and spells_us.txt")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)

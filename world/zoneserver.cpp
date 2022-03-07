@@ -879,6 +879,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		RuleManager::Instance()->LoadRules(&database, "default", true);
 		break;
 	}
+	case ServerOP_ReloadVariablesWorld:
+	{
+		database.LoadVariables();
+		break;
+	}
 	case ServerOP_ReloadPerlExportSettings:
 	{
 		zoneserver_list.SendPacket(pack);

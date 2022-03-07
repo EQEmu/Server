@@ -5582,6 +5582,11 @@ struct SayLinkBodyFrame_Struct {
 /*056*/
 };
 
+struct Checksum_Struct {
+    uint64 checksum;
+    uint8  data[2048];
+};
+
 struct UpdateMovementEntry {
 	/* 00 */	float Y;
 	/* 04 */	float X;
