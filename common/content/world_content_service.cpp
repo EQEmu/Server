@@ -157,30 +157,31 @@ bool WorldContentService::IsContentFlagDisabled(const std::string &content_flag)
 
 bool WorldContentService::DoesPassContentFiltering(const ContentFlags &f)
 {
-	// if min or max expansion is -1 we're clear
-	// if both min and max expansion are set, we need to properly filter by both
-	if ((f.min_expansion == Expansion::EXPANSION_ALL && f.max_expansion == Expansion::EXPANSION_ALL) ||
-		(f.min_expansion > Expansion::EXPANSION_ALL && current_expansion >= f.min_expansion &&
-		 f.max_expansion > Expansion::EXPANSION_ALL && current_expansion <= f.max_expansion
-		)) {
-		return true;
+	// if we're not set to (-1 All) then fail when we aren't within minimum expansion
+	if (f.min_expansion > Expansion::EXPANSION_ALL && current_expansion < f.min_expansion) {
+		return false;
 	}
 
-	// if we have any enabled flag in enabled flags, we pass
-	for (const auto &content_flag: SplitString(f.content_flags)) {
-		if (contains(GetContentFlagsEnabled(), content_flag)) {
-			return true;
+	// if we're not set to (-1 All) then fail when we aren't within max expansion
+	if (f.max_expansion > Expansion::EXPANSION_ALL && current_expansion > f.max_expansion) {
+		return false;
+	}
+
+	// if we don't have any enabled flag in enabled flags, we fail
+	for (const auto& flag: SplitString(f.content_flags)) {
+		if (!contains(GetContentFlagsEnabled(), flag)) {
+			return false;
 		}
 	}
 
-	// if we have any disabled flag in disabled flags, we pass
-	for (const auto &content_flag: SplitString(f.content_flags_disabled)) {
-		if (contains(GetContentFlagsDisabled(), content_flag)) {
-			return true;
+	// if we don't have any disabled flag in disabled flags, we fail
+	for (const auto& flag: SplitString(f.content_flags_disabled)) {
+		if (!contains(GetContentFlagsDisabled(), flag)) {
+			return false;
 		}
 	}
 
-	return false;
+	return true;
 }
 
 void WorldContentService::ReloadContentFlags()
