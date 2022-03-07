@@ -51,11 +51,13 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 	}
 
 	lts = database.GetLootTable(loottable_id);
-	if (!lts)
+	if (!lts) {
 		return;
+	}
 
-	if(!content_service.DoesPassContentFiltering(lts->content_flags))
+	if (!content_service.DoesPassContentFiltering(lts->content_flags)) {
 		return;
+	}
 
 	uint32 min_cash = lts->mincash;
 	uint32 max_cash = lts->maxcash;
@@ -131,8 +133,9 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		return;
 	}
 
-	if(!content_service.DoesPassContentFiltering(loot_drop->content_flags))
+	if (!content_service.DoesPassContentFiltering(loot_drop->content_flags)) {
 		return;
+	}
 
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (droplimit == 0 && mindrop == 0) {

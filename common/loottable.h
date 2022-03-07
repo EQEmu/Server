@@ -30,19 +30,19 @@ struct LootTableEntries_Struct {
 	float	probability;
 };
 
-struct ContentFlags_Struct {
+struct ContentFlags {
 	int16 min_expansion;
 	int16 max_expansion;
-	char content_flags[100];
-	char content_flags_disabled[100];
+	char  content_flags[100];
+	char  content_flags_disabled[100];
 };
 
 struct LootTable_Struct {
-	uint32	mincash;
-	uint32	maxcash;
-	uint32	avgcoin;
-	uint32	NumEntries;
-	ContentFlags_Struct content_flags;
+	uint32                  mincash;
+	uint32                  maxcash;
+	uint32                  avgcoin;
+	uint32                  NumEntries;
+	ContentFlags            content_flags;
 	LootTableEntries_Struct Entries[0];
 };
 
@@ -59,8 +59,8 @@ struct LootDropEntries_Struct {
 };
 
 struct LootDrop_Struct {
-	uint32	NumEntries;
-	ContentFlags_Struct content_flags;
+	uint32                 NumEntries;
+	ContentFlags           content_flags;
 	LootDropEntries_Struct Entries[0];
 };
 #pragma pack()
