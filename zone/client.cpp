@@ -353,6 +353,7 @@ Client::Client(EQStreamInterface* ieqs)
 	temp_pvp = false;
 	is_client_moving = false;
 
+	environmental_damage_modifier = 0;
 	invulnerable_enviromental_damage = false;
 
 	// rate limiter

@@ -5996,6 +5996,37 @@ XS(XS_Client_UnscribeSpellBySpellID) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetEnviromentalDamageModifier); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetEnviromentalDamageModifier) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetEnviromentalDamageModifier(THIS)"); // @categories Script Utility
+	{
+		Client* THIS;
+		int32 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->GetInvulnerableEnviromentalDamage();
+		XSprePUSH;
+		PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_SetEnviromentalDamageModifier); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetEnviromentalDamageModifier) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetOwnerID(THIS, uint16 new_owner_id)"); //  @categories Script Utility
+	{
+		Client* THIS;
+		int32 modifier = (int32)SvIV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetEnviromentalDamageModifier(modifier);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_GetInvulnerableEnviromentalDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetInvulnerableEnviromentalDamage) {
 	dXSARGS;
@@ -6134,7 +6165,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetDiscSlotBySpellID"), XS_Client_GetDiscSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetDisciplineTimer"), XS_Client_GetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "GetDuelTarget"), XS_Client_GetDuelTarget, file, "$");
-	newXSproto(strcpy(buf, "GetInvulnerableEnviromentalDamage"), XS_Client_GetInvulnerableEnviromentalDamage, file, "$");
+	newXSproto(strcpy(buf, "GetEnviromentalDamageModifier"), XS_Client_GetEnviromentalDamageModifier, file, "$");
 	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
 	newXSproto(strcpy(buf, "GetEXPModifier"), XS_Client_GetEXPModifier, file, "$$");
 	newXSproto(strcpy(buf, "GetEbonCrystals"), XS_Client_GetEbonCrystals, file, "$");
@@ -6158,6 +6189,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
 	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
 	newXSproto(strcpy(buf, "GetInventory"), XS_Client_GetInventory, file, "$");
+	newXSproto(strcpy(buf, "GetInvulnerableEnviromentalDamage"), XS_Client_GetEnviromentalDamageModifier, file, "$");
 	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemInInventory"), XS_Client_GetItemInInventory, file, "$$");
@@ -6303,7 +6335,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetEXPModifier"), XS_Client_SetEXPModifier, file, "$$$");
 	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
-	newXSproto(strcpy(buf, "SetInvulnerableEnviromentalDamage"), XS_Client_SetInvulnerableEnviromentalDamage, file, "$$");
+	newXSproto(strcpy(buf, "SetEnviromentalDamageModifier"), XS_Client_SetEnviromentalDamageModifier, file, "$$");
 	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
 	newXSproto(strcpy(buf, "SetFactionLevel2"), XS_Client_SetFactionLevel2, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
@@ -6313,6 +6345,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetHorseId"), XS_Client_SetHorseId, file, "$$");
 	newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
 	newXSproto(strcpy(buf, "SetIPExemption"), XS_Client_SetIPExemption, file, "$$");
+	newXSproto(strcpy(buf, "SetInvulnerableEnviromentalDamage"), XS_Client_GetEnviromentalDamageModifier, file, "$$");
 	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");

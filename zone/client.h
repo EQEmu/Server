@@ -1589,8 +1589,11 @@ public:
 	int mod_consume(EQ::ItemData *item, EQ::item::ItemType type, int change);
 	int mod_food_value(const EQ::ItemData *item, int change);
 	int mod_drink_value(const EQ::ItemData *item, int change);
+
+	inline int32 GetEnviromentalDamageModifier() const { return environmental_damage_modifier; }
+	void SetEnviromentalDamageModifier(int32 val) { environmental_damage_modifier = val; }
 	inline bool GetInvulnerableEnviromentalDamage() const { return invulnerable_enviromental_damage; }
-	void SetInvulnerableEnviromentalDamage(bool mod) { invulnerable_enviromental_damage = mod; }
+	void SetInvulnerableEnviromentalDamage(bool val) { invulnerable_enviromental_damage = val; }
 
 	void ShowNumHits(); // work around function for numhits not showing on buffs
 
@@ -1791,6 +1794,7 @@ private:
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
+	int32 environmental_damage_modifier;
 	bool invulnerable_enviromental_damage;
 
 	// dev tools
