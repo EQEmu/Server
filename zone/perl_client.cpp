@@ -6006,7 +6006,7 @@ XS(XS_Client_GetEnviromentalDamageModifier) {
 		int32 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetInvulnerableEnviromentalDamage();
+		RETVAL = THIS->GetEnviromentalDamageModifier();
 		XSprePUSH;
 		PUSHi((IV)RETVAL);
 	}
@@ -6189,7 +6189,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
 	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
 	newXSproto(strcpy(buf, "GetInventory"), XS_Client_GetInventory, file, "$");
-	newXSproto(strcpy(buf, "GetInvulnerableEnviromentalDamage"), XS_Client_GetEnviromentalDamageModifier, file, "$");
+	newXSproto(strcpy(buf, "GetInvulnerableEnviromentalDamage"), XS_Client_GetInvulnerableEnviromentalDamage, file, "$");
 	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemInInventory"), XS_Client_GetItemInInventory, file, "$$");
@@ -6345,7 +6345,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetHorseId"), XS_Client_SetHorseId, file, "$$");
 	newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
 	newXSproto(strcpy(buf, "SetIPExemption"), XS_Client_SetIPExemption, file, "$$");
-	newXSproto(strcpy(buf, "SetInvulnerableEnviromentalDamage"), XS_Client_GetEnviromentalDamageModifier, file, "$$");
+	newXSproto(strcpy(buf, "SetInvulnerableEnviromentalDamage"), XS_Client_SetInvulnerableEnviromentalDamage, file, "$$");
 	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");
