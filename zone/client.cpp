@@ -353,6 +353,8 @@ Client::Client(EQStreamInterface* ieqs)
 	temp_pvp = false;
 	is_client_moving = false;
 
+	invulnerable_enviromental_damage = false;
+
 	// rate limiter
 	m_list_task_timers_rate_limit.Start(1000);
 

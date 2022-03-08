@@ -5996,6 +5996,36 @@ XS(XS_Client_UnscribeSpellBySpellID) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetInvulnerableEnviromentalDamage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetInvulnerableEnviromentalDamage) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::InvulnerableEnviromentalDamage(THIS)"); // @categories Script Utility
+	{
+		Client* THIS;
+		bool RETVAL;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->GetInvulnerableEnviromentalDamage();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_SetInvulnerableEnviromentalDamage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetInvulnerableEnviromentalDamage) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::SetInvulnerableEnviromentalDamage(THIS, bool invulnerable)"); //  @categories Script Utility
+	{
+		Client *THIS;
+		bool invul = (bool)SvTRUE(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetInvulnerableEnviromentalDamage(invul);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6104,6 +6134,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetDiscSlotBySpellID"), XS_Client_GetDiscSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetDisciplineTimer"), XS_Client_GetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "GetDuelTarget"), XS_Client_GetDuelTarget, file, "$");
+	newXSproto(strcpy(buf, "GetInvulnerableEnviromentalDamage"), XS_Client_GetInvulnerableEnviromentalDamage, file, "$");
 	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
 	newXSproto(strcpy(buf, "GetEXPModifier"), XS_Client_GetEXPModifier, file, "$$");
 	newXSproto(strcpy(buf, "GetEbonCrystals"), XS_Client_GetEbonCrystals, file, "$");
@@ -6272,6 +6303,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetEXPModifier"), XS_Client_SetEXPModifier, file, "$$$");
 	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
+	newXSproto(strcpy(buf, "SetInvulnerableEnviromentalDamage"), XS_Client_SetInvulnerableEnviromentalDamage, file, "$$");
 	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
 	newXSproto(strcpy(buf, "SetFactionLevel2"), XS_Client_SetFactionLevel2, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
