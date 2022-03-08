@@ -101,6 +101,12 @@ void Mob::TuneGetStats(Mob* defender, Mob *attacker)
 	Message(0, "[#Tune] Parry Chance: %.0f pct ", round(TuneGetAvoidMeleeChance(defender, attacker, DMG_PARRIED)));
 	Message(0, "[#Tune] Dodge Chance: %.0f pct ", round(TuneGetAvoidMeleeChance(defender, attacker, DMG_DODGED)));
 
+	if (defender->IsNPC())
+	{
+		Message(0, "[#Tune] NPC STAT AC: %i ", static_cast<int>(defender->CastToNPC()->GetNPCStat("ac")));
+		Message(0, "[#Tune] NPC STAT Avoidance: %i ", static_cast<int>(defender->CastToNPC()->GetNPCStat("avoidance")));
+	}
+
 	Message(0, "################################################");
 	Message(0, "[#Tune] Attacker Statistics vs Defender");
 	Message(0, "[#Tune] Attacker Name: %s", attacker->GetCleanName());
@@ -109,8 +115,13 @@ void Mob::TuneGetStats(Mob* defender, Mob *attacker)
 		Message(0, "[#Tune] Max Damage %i Min Damage %i", max_damage, min_damage);
 		Message(0, "[#Tune] Total Offense: %i ", TuneGetOffense(defender, attacker));
 		Message(0, "[#Tune] Chance to hit:  %.0f pct", round(hit_chance));
-		Message(0, "[#Tune] Accuracy: %i ", TuneGetAccuracy( defender,attacker));
-
+		Message(0, "[#Tune] Total Accuracy: %i ", TuneGetAccuracy( defender,attacker));
+		
+		if (attacker->IsNPC())
+		{
+			Message(0, "[#Tune] NPC STAT ATK: %i ", static_cast<int>(attacker->CastToNPC()->GetNPCStat("atk")));
+			Message(0, "[#Tune] NPC STAT Accuracy: %i ", static_cast<int>(attacker->CastToNPC()->GetNPCStat("accuracy")));
+		}
 	}
 	else{
 		Message(0, "[#Tune] Can not melee this target");
@@ -988,7 +999,7 @@ void Mob::TuneDoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts,
 			other->TuneMeleeMitigation(this, hit, ac_override, add_ac);
 			if (hit.damage_done > 0) {
 				ApplyDamageTable(hit);
-				CommonOutgoingHitSuccess(other, hit, opts);
+				TuneCommonOutgoingHitSuccess(other, hit, opts);
 			}
 			LogCombat("Final damage after all reductions: [{}]", hit.damage_done);
 		}
@@ -1022,8 +1033,12 @@ int Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 	ac += itembonuses.AC; // items + food + tribute
 
 	if (IsClient()) {
-		ac = ac_override;
-		ac += add_ac;
+		if (ac_override) {
+			ac = ac_override;
+		}
+		if (add_ac) {
+			ac += add_ac;
+		}
 	}
 
 	int shield_ac = 0;
@@ -1040,10 +1055,12 @@ int Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 	}
 	// EQ math
 	ac = (ac * 4) / 3;
+
 	// anti-twink
 	if (!skip_caps && IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
 		ac = std::min(ac, 25 + 6 * GetLevel());
 	ac = std::max(0, ac + GetClassRaceACBonus());
+
 	if (IsNPC()) {
 		// This is the developer tweaked number
 		// for the VAST amount of NPCs in EQ this number didn't exceed 600 until recently (PoWar)
@@ -1092,7 +1109,6 @@ int Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 			ac = softcap + (over_cap * returns);
 		}
 	}
-
 	return ac;
 }
 
@@ -1400,4 +1416,129 @@ bool Mob::TuneCheckHitChance(Mob* other, DamageHitInfo &hit, int avoidance_overr
 	if (tohit_roll == avoid_roll)
 		return zone->random.Roll(50);
 	return tohit_roll > avoid_roll;
+}
+
+void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttackOptions *opts)
+{
+	if (!defender)
+		return;
+
+#ifdef LUA_EQEMU
+	bool ignoreDefault = false;
+	LuaParser::Instance()->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
+
+	if (ignoreDefault) {
+		return;
+	}
+#endif
+
+	// BER weren't parsing the halving
+	if (hit.skill == EQ::skills::SkillArchery ||
+		(hit.skill == EQ::skills::SkillThrowing && GetClass() != BERSERKER))
+		hit.damage_done /= 2;
+
+	if (hit.damage_done < 1)
+		hit.damage_done = 1;
+
+	if (hit.skill == EQ::skills::SkillArchery) {
+		int bonus = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
+		hit.damage_done += hit.damage_done * bonus / 100;
+		int headshot = TryHeadShot(defender, hit.skill);
+		if (headshot > 0) {
+			hit.damage_done = headshot;
+		}
+		else if (GetClass() == RANGER && GetLevel() > 50) { // no double dmg on headshot
+			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
+				hit.damage_done *= 2;
+				MessageString(Chat::MeleeCrit, BOW_DOUBLE_DAMAGE);
+			}
+		}
+	}
+
+	int extra_mincap = 0;
+	int min_mod = hit.base_damage * GetMeleeMinDamageMod_SE(hit.skill) / 100;
+	if (hit.skill == EQ::skills::SkillBackstab) {
+		extra_mincap = GetLevel() < 7 ? 7 : GetLevel();
+		if (GetLevel() >= 60)
+			extra_mincap = GetLevel() * 2;
+		else if (GetLevel() > 50)
+			extra_mincap = GetLevel() * 3 / 2;
+		if (IsSpecialAttack(eSpecialAttacks::ChaoticStab)) {
+			hit.damage_done = extra_mincap;
+		}
+		else {
+			int ass = TryAssassinate(defender, hit.skill);
+			if (ass > 0)
+				hit.damage_done = ass;
+		}
+	}
+	else if (hit.skill == EQ::skills::SkillFrenzy && GetClass() == BERSERKER && GetLevel() > 50) {
+		extra_mincap = 4 * GetLevel() / 5;
+	}
+
+	// this has some weird ordering
+	// Seems the crit message is generated before some of them :P
+
+	// worn item +skill dmg, SPA 220, 418. Live has a normalized version that should be here too
+	hit.min_damage += GetSkillDmgAmt(hit.skill) + GetPositionalDmgAmt(defender);
+
+	// shielding mod2
+	if (defender->itembonuses.MeleeMitigation)
+		hit.min_damage -= hit.min_damage * defender->itembonuses.MeleeMitigation / 100;
+
+	ApplyMeleeDamageMods(hit.skill, hit.damage_done, defender, opts);
+	min_mod = std::max(min_mod, extra_mincap);
+	if (min_mod && hit.damage_done < min_mod) // SPA 186
+		hit.damage_done = min_mod;
+
+	hit.damage_done += hit.min_damage;
+	if (IsClient()) {
+		int extra = 0;
+		switch (hit.skill) {
+		case EQ::skills::SkillThrowing:
+		case EQ::skills::SkillArchery:
+			extra = CastToClient()->GetHeroicDEX() / 10;
+			break;
+		default:
+			extra = CastToClient()->GetHeroicSTR() / 10;
+			break;
+		}
+		hit.damage_done += extra;
+	}
+
+	// this appears where they do special attack dmg mods
+	int spec_mod = 0;
+	if (IsSpecialAttack(eSpecialAttacks::Rampage)) {
+		int mod = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
+		if (mod > 0)
+			spec_mod = mod;
+		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+			//SE_PC_Pet_Rampage SPA 464 on pet, damage modifier
+			int spell_mod = spellbonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD];
+			if (spell_mod > spec_mod)
+				spec_mod = spell_mod;
+		}
+	}
+	else if (IsSpecialAttack(eSpecialAttacks::AERampage)) {
+		int mod = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
+		if (mod > 0)
+			spec_mod = mod;
+		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+			//SE_PC_Pet_AE_Rampage SPA 465 on pet, damage modifier
+			int spell_mod = spellbonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_AE_Rampage[SBIndex::PET_RAMPAGE_DMG_MOD];
+			if (spell_mod > spec_mod)
+				spec_mod = spell_mod;
+		}
+	}
+	if (spec_mod > 0)
+		hit.damage_done = (hit.damage_done * spec_mod) / 100;
+
+	int pct_damage_reduction = defender->GetSkillDmgTaken(hit.skill, opts) + defender->GetPositionalDmgTaken(this);
+
+	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + defender->GetPositionalDmgTakenAmt(this);
+
+	if (defender->GetShielderID()) {
+		DoShieldDamageOnShielder(defender, hit.damage_done, hit.skill);
+		hit.damage_done -= hit.damage_done * defender->GetShieldTargetMitigation() / 100; //Default shielded takes 50 pct damage
+	}
 }
