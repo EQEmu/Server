@@ -6017,7 +6017,7 @@ XS(XS_Client_SetEnvironmentDamageModifier); /* prototype to pass -Wmissing-proto
 XS(XS_Client_SetEnvironmentDamageModifier) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::_SetEnvironmentDamageModifier(THIS, int32 modifier)"); //  @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Client::SetEnvironmentDamageModifier(THIS, int32 modifier)"); //  @categories Script Utility
 	{
 		Client* THIS;
 		int32 modifier = (int32)SvIV(ST(1));
@@ -6047,7 +6047,7 @@ XS(XS_Client_SetInvulnerableEnvironmentDamage); /* prototype to pass -Wmissing-p
 XS(XS_Client_SetInvulnerableEnvironmentDamage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetInvulnerableEnvironmentDamage(THIS, bool invulnerable)"); //  @categories Script Utility
+		Perl_croak(aTHX_ "Usage:Client::SetInvulnerableEnvironmentDamage(THIS, bool invulnerable)"); //  @categories Script Utility
 	{
 		Client *THIS;
 		bool invul = (bool)SvTRUE(ST(1));
