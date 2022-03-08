@@ -1709,7 +1709,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		return false;
 	}
 
-	if (killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
+	if (killerMob && (killerMob->IsClient() || killerMob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
 		char val1[20] = { 0 };
 
 		entity_list.MessageCloseString(
@@ -2293,7 +2293,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 			return false;
 		}
 
-		if (killer_mob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
+		if ((killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
 			char val1[20] = { 0 };
 
 			entity_list.MessageCloseString(
@@ -3937,7 +3937,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 			//attacker is not a pet, send to the attacker
 
 			//if the attacker is a client, try them with the correct filter
-			if (attacker && attacker->IsClient()) {
+			if (attacker && (attacker->IsClient() || attacker->IsBot())) {
 				if ((spell_id != SPELL_UNKNOWN || FromDamageShield) && damage > 0) {
 					//special crap for spell damage, looks hackish to me
 					char val1[20] = { 0 };
