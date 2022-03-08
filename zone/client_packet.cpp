@@ -5785,8 +5785,8 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	EnvDamage2_Struct* ed = (EnvDamage2_Struct*)app->pBuffer;
 	auto damage = ed->damage;
 
-	if (GetEnviromentalDamageModifier()) {
-		damage = static_cast<int32>(damage) + (static_cast<int32>(damage) * GetEnviromentalDamageModifier() / 100);
+	if (GetEnvironmentDamageModifier()) {
+		damage = static_cast<int32>(damage) + (static_cast<int32>(damage) * GetEnvironmentDamageModifier() / 100);
 	}
 
 	if (ed->dmgtype == EQ::constants::EnvironmentalDamage::Falling) {
@@ -5823,7 +5823,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
 	}
-	else if (GetInvulnerableEnviromentalDamage()) {
+	else if (GetInvulnerableEnvironmentDamage()) {
 		SetHP(GetHP() - 1);
 		return;
 	} else if (zone->GetZoneID() == Zones::TUTORIAL || zone->GetZoneID() == Zones::LOAD) { // Hard coded tutorial and load zones for no fall damage

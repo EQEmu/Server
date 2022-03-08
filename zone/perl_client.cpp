@@ -5996,63 +5996,63 @@ XS(XS_Client_UnscribeSpellBySpellID) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_GetEnviromentalDamageModifier); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetEnviromentalDamageModifier) {
+XS(XS_Client_GetEnvironmentDamageModifier); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetEnvironmentDamageModifier) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEnviromentalDamageModifier(THIS)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Client::GetEnvironmentDamageModifier(THIS)"); // @categories Script Utility
 	{
 		Client* THIS;
 		int32 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetEnviromentalDamageModifier();
+		RETVAL = THIS->GetEnvironmentDamageModifier();
 		XSprePUSH;
 		PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
 }
 
-XS(XS_Client_SetEnviromentalDamageModifier); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetEnviromentalDamageModifier) {
+XS(XS_Client_SetEnvironmentDamageModifier); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetEnvironmentDamageModifier) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetOwnerID(THIS, uint16 new_owner_id)"); //  @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::_SetEnvironmentDamageModifier(THIS, int32 modifier)"); //  @categories Script Utility
 	{
 		Client* THIS;
 		int32 modifier = (int32)SvIV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetEnviromentalDamageModifier(modifier);
+		THIS->SetEnvironmentDamageModifier(modifier);
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_GetInvulnerableEnviromentalDamage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetInvulnerableEnviromentalDamage) {
+XS(XS_Client_GetInvulnerableEnvironmentDamage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetInvulnerableEnvironmentDamage) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::InvulnerableEnviromentalDamage(THIS)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Client::InvulnerableEnvironmentDamage(THIS)"); // @categories Script Utility
 	{
 		Client* THIS;
 		bool RETVAL;
 		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->GetInvulnerableEnviromentalDamage();
+		RETVAL = THIS->GetInvulnerableEnvironmentDamage();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
 }
 
-XS(XS_Client_SetInvulnerableEnviromentalDamage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetInvulnerableEnviromentalDamage) {
+XS(XS_Client_SetInvulnerableEnvironmentDamage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetInvulnerableEnvironmentDamage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetInvulnerableEnviromentalDamage(THIS, bool invulnerable)"); //  @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::SetInvulnerableEnvironmentDamage(THIS, bool invulnerable)"); //  @categories Script Utility
 	{
 		Client *THIS;
 		bool invul = (bool)SvTRUE(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetInvulnerableEnviromentalDamage(invul);
+		THIS->SetInvulnerableEnvironmentDamage(invul);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6165,7 +6165,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetDiscSlotBySpellID"), XS_Client_GetDiscSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetDisciplineTimer"), XS_Client_GetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "GetDuelTarget"), XS_Client_GetDuelTarget, file, "$");
-	newXSproto(strcpy(buf, "GetEnviromentalDamageModifier"), XS_Client_GetEnviromentalDamageModifier, file, "$");
+	newXSproto(strcpy(buf, "GetEnvironmentDamageModifier"), XS_Client_GetEnvironmentDamageModifier, file, "$");
 	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
 	newXSproto(strcpy(buf, "GetEXPModifier"), XS_Client_GetEXPModifier, file, "$$");
 	newXSproto(strcpy(buf, "GetEbonCrystals"), XS_Client_GetEbonCrystals, file, "$");
@@ -6189,7 +6189,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
 	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
 	newXSproto(strcpy(buf, "GetInventory"), XS_Client_GetInventory, file, "$");
-	newXSproto(strcpy(buf, "GetInvulnerableEnviromentalDamage"), XS_Client_GetInvulnerableEnviromentalDamage, file, "$");
+	newXSproto(strcpy(buf, "GetInvulnerableEnvironmentDamage"), XS_Client_GetInvulnerableEnvironmentDamage, file, "$");
 	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemInInventory"), XS_Client_GetItemInInventory, file, "$$");
@@ -6335,7 +6335,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetEXPModifier"), XS_Client_SetEXPModifier, file, "$$$");
 	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
-	newXSproto(strcpy(buf, "SetEnviromentalDamageModifier"), XS_Client_SetEnviromentalDamageModifier, file, "$$");
+	newXSproto(strcpy(buf, "SetEnvironmentDamageModifier"), XS_Client_SetEnvironmentDamageModifier, file, "$$");
 	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
 	newXSproto(strcpy(buf, "SetFactionLevel2"), XS_Client_SetFactionLevel2, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
@@ -6345,7 +6345,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetHorseId"), XS_Client_SetHorseId, file, "$$");
 	newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
 	newXSproto(strcpy(buf, "SetIPExemption"), XS_Client_SetIPExemption, file, "$$");
-	newXSproto(strcpy(buf, "SetInvulnerableEnviromentalDamage"), XS_Client_SetInvulnerableEnviromentalDamage, file, "$$");
+	newXSproto(strcpy(buf, "SetInvulnerableEnvironmentDamage"), XS_Client_SetInvulnerableEnvironmentDamage, file, "$$");
 	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");

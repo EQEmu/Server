@@ -1590,10 +1590,10 @@ public:
 	int mod_food_value(const EQ::ItemData *item, int change);
 	int mod_drink_value(const EQ::ItemData *item, int change);
 
-	inline int32 GetEnviromentalDamageModifier() const { return environmental_damage_modifier; }
-	void SetEnviromentalDamageModifier(int32 val) { environmental_damage_modifier = val; }
-	inline bool GetInvulnerableEnviromentalDamage() const { return invulnerable_enviromental_damage; }
-	void SetInvulnerableEnviromentalDamage(bool val) { invulnerable_enviromental_damage = val; }
+	inline int32 GetEnvironmentDamageModifier() const { return environmental_damage_modifier; }
+	void SetEnvironmentDamageModifier(int32 val) { environmental_damage_modifier = val; }
+	inline bool GetInvulnerableEnvironmentDamage() const { return invulnerable_environmental_damage; }
+	void SetInvulnerableEnvironmentDamage(bool val) { invulnerable_environmental_damage = val; }
 
 	void ShowNumHits(); // work around function for numhits not showing on buffs
 
@@ -1795,7 +1795,7 @@ private:
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
 	int32 environmental_damage_modifier;
-	bool invulnerable_enviromental_damage;
+	bool invulnerable_environmental_damage;
 
 	// dev tools
 	bool display_mob_info_window;
