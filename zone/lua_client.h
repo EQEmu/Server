@@ -393,6 +393,11 @@ public:
 	void RemoveItem(uint32 item_id, uint32 quantity);
 	void SetGMStatus(uint32 newStatus);
 
+	int GetEnvironmentDamageModifier();
+	void SetEnvironmentDamageModifier(int value);
+	bool GetInvulnerableEnvironmentDamage();
+	void SetInvulnerableEnvironmentDamage(bool value);
+
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
