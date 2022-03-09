@@ -6788,7 +6788,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	value -= GetBotFocusEffect(focusFcAmplifyAmt, spell_id);
 
 	if ((RuleB(Spells, IgnoreSpellDmgLvlRestriction) || spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
 
 	return value;
 }
