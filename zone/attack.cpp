@@ -3932,7 +3932,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				}
 			}
 			skip = owner;
-		}	
+		}
 		else {
 			//attacker is not a pet, send to the attacker
 			//if the attacker is a client, try them with the correct filter
