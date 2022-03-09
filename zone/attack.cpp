@@ -3932,10 +3932,9 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				}
 			}
 			skip = owner;
-		}
+		}	
 		else {
 			//attacker is not a pet, send to the attacker
-
 			//if the attacker is a client, try them with the correct filter
 			if (attacker && (attacker->IsClient() || attacker->IsBot())) {
 				if ((spell_id != SPELL_UNKNOWN || FromDamageShield) && damage > 0) {
@@ -3958,7 +3957,8 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 						);
 					}
 				}
-				else {
+				// Only try to queue these packets to a client
+				else if (attacker && (attacker->IsClient())) {
 					if (damage > 0) {
 						if (spell_id != SPELL_UNKNOWN)
 							filter = iBuffTic ? FilterDOT : FilterSpellDamage;
