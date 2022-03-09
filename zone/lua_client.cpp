@@ -2346,6 +2346,26 @@ void Lua_Client::UnscribeSpellBySpellID(uint16 spell_id, bool update_client) {
 	self->UnscribeSpellBySpellID(spell_id, update_client);
 }
 
+int Lua_Client::GetEnvironmentDamageModifier() {
+	Lua_Safe_Call_Int();
+	return self->GetEnvironmentDamageModifier();
+}
+
+void Lua_Client::SetEnvironmentDamageModifier(int value) {
+	Lua_Safe_Call_Void();
+	self->SetEnvironmentDamageModifier(value);
+}
+
+bool Lua_Client::GetInvulnerableEnvironmentDamage() {
+	Lua_Safe_Call_Bool();
+	return self->GetInvulnerableEnvironmentDamage();
+}
+
+void Lua_Client::SetInvulnerableEnvironmentDamage(bool value) {
+	Lua_Safe_Call_Void();
+	self->SetInvulnerableEnvironmentDamage(value);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2470,6 +2490,7 @@ luabind::scope lua_register_client() {
 	.def("GetEbonCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetEbonCrystals)
 	.def("GetEndurance", (int(Lua_Client::*)(void))&Lua_Client::GetEndurance)
 	.def("GetEndurancePercent", (int(Lua_Client::*)(void))&Lua_Client::GetEndurancePercent)
+	.def("GetEnvironmentDamageModifier", (int(Lua_Client::*)(void))&Lua_Client::GetEnvironmentDamageModifier)
 	.def("GetExpedition", (Lua_Expedition(Lua_Client::*)(void))&Lua_Client::GetExpedition)
 	.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetExpeditionLockouts)
 	.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L, std::string))&Lua_Client::GetExpeditionLockouts)
@@ -2486,6 +2507,7 @@ luabind::scope lua_register_client() {
 	.def("GetIPString", (std::string(Lua_Client::*)(void))&Lua_Client::GetIPString)
 	.def("GetInstrumentMod", (int(Lua_Client::*)(int))&Lua_Client::GetInstrumentMod)
 	.def("GetInventory", (Lua_Inventory(Lua_Client::*)(void))&Lua_Client::GetInventory)
+	.def("GetInvulnerableEnvironmentDamage", (bool(Lua_Client::*)(void))&Lua_Client::GetInvulnerableEnvironmentDamage)
 	.def("GetItemIDAt", (int(Lua_Client::*)(int))&Lua_Client::GetItemIDAt)
 	.def("GetLDoNLosses", (int(Lua_Client::*)(void))&Lua_Client::GetLDoNLosses)
 	.def("GetLDoNLossesTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNLossesTheme)
@@ -2671,6 +2693,7 @@ luabind::scope lua_register_client() {
 	.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier)
 	.def("SetEbonCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::SetEbonCrystals)
 	.def("SetEndurance", (void(Lua_Client::*)(int))&Lua_Client::SetEndurance)
+	.def("SetEnvironmentDamageModifier", (void(Lua_Client::*)(int))&Lua_Client::SetEnvironmentDamageModifier)
 	.def("SetFactionLevel", (void(Lua_Client::*)(uint32,uint32,int,int,int))&Lua_Client::SetFactionLevel)
 	.def("SetFactionLevel2", (void(Lua_Client::*)(uint32,int,int,int,int,int,int))&Lua_Client::SetFactionLevel2)
 	.def("SetFeigned", (void(Lua_Client::*)(bool))&Lua_Client::SetFeigned)
@@ -2679,6 +2702,7 @@ luabind::scope lua_register_client() {
 	.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe)
 	.def("SetHorseId", (void(Lua_Client::*)(int))&Lua_Client::SetHorseId)
 	.def("SetHunger", (void(Lua_Client::*)(int))&Lua_Client::SetHunger)
+	.def("SetInvulnerableEnvironmentDamage", (void(Lua_Client::*)(int))&Lua_Client::SetInvulnerableEnvironmentDamage)
 	.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption)
 	.def("SetLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::SetLanguageSkill)
 	.def("SetMaterial", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetMaterial)

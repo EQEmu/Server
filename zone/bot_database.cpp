@@ -2637,8 +2637,8 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 		"SELECT `charid`"
 		" FROM `group_id`"
 		" WHERE `groupid` = '%u'"
-		" AND `charid` IN ("
-		"  SELECT `bot_id`"
+		" AND `name` IN ("
+		"  SELECT `name`"
 		"  FROM `bot_data`"
 		"  WHERE `owner_id` = '%u'"
 		"  )",

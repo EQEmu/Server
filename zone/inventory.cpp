@@ -1329,7 +1329,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 	int16 i;
 	uint32 item_id = item->GetItem()->ID;
 	for (i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		EQ::ItemInstance* tmp_inst = m_inv.GetItem(i);
@@ -1343,7 +1343,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 		}
 	}
 	for (i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
@@ -1371,7 +1371,7 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 	// #1: Try to auto equip
 	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel <= level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != EQ::item::ItemTypeAugmentation) {
 		for (int16 i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++) {
-			if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
 
 			if (!m_inv[i]) {
@@ -2548,7 +2548,7 @@ bool Client::DecreaseByID(uint32 type, int16 quantity) {
 	for (x = EQ::invslot::POSSESSIONS_BEGIN; x <= EQ::invslot::POSSESSIONS_END; ++x) {
 		if (num >= quantity)
 			break;
-		if (((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		TempItem = nullptr;
@@ -2592,7 +2592,7 @@ bool Client::DecreaseByID(uint32 type, int16 quantity) {
 	for (x = EQ::invslot::POSSESSIONS_BEGIN; x <= EQ::invslot::POSSESSIONS_END; ++x) {
 		if (quantity < 1)
 			break;
-		if (((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		TempItem = nullptr;
@@ -2732,7 +2732,7 @@ static bool CopyBagContents(EQ::ItemInstance* new_bag, const EQ::ItemInstance* o
 void Client::DisenchantSummonedBags(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue; // not usable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
 
 		auto inst = m_inv[slot_id];
@@ -2849,7 +2849,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 void Client::RemoveNoRent(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2860,7 +2860,7 @@ void Client::RemoveNoRent(bool client_update)
 	}
 
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2952,7 +2952,7 @@ void Client::RemoveNoRent(bool client_update)
 void Client::RemoveDuplicateLore(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -2968,7 +2968,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 	}
 
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -3332,8 +3332,11 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
 				if (m_inv.GetItem(EQ::invslot::slotCursor)) {
-					if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
-						m_inv.GetItem(EQ::invslot::slotCursor)->GetCharges() >= 1) { // '> 0' the same, but this matches Inventory::_HasItem conditional check
+					// Below used to check charges but for some reason
+					// m_inv.GetItem(EQ::invslot::slotCursor)->GetCharges()
+					// is returning 0.  We know it exists, so removed check.
+					// TODO: Why is 0 being returned for slotCursor.
+					if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 						slot = EQ::invslot::slotCursor;
 					}
 					else if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ItemClass == 1) {
@@ -3484,7 +3487,7 @@ bool Client::MoveItemToInventory(EQ::ItemInstance *ItemToReturn, bool UpdateClie
 	if(ItemToReturn->IsStackable()) {
 
 		for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::slotCursor; i++) { // changed slot max to 30 from 29. client will stack into slot 30 (bags too) before moving.
-			if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
 
 			EQ::ItemInstance* InvItem = m_inv.GetItem(i);
@@ -3545,7 +3548,7 @@ bool Client::MoveItemToInventory(EQ::ItemInstance *ItemToReturn, bool UpdateClie
 	// We have tried stacking items, now just try and find an empty slot.
 
 	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::slotCursor; i++) { // changed slot max to 30 from 29. client will move into slot 30 (bags too) before pushing onto cursor.
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		EQ::ItemInstance* InvItem = m_inv.GetItem(i);

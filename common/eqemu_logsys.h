@@ -127,6 +127,7 @@ namespace Logs {
 		DiaWind,
 		HTTP,
 		Saylink,
+		ChecksumVerification,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -212,6 +213,7 @@ namespace Logs {
 		"DialogueWindow",
 		"HTTP",
 		"Saylink",
+		"ChecksumVerification",
 	};
 }
 

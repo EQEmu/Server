@@ -2079,7 +2079,11 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 			  loottable_entries.multiplier,
 			  loottable_entries.droplimit,
 			  loottable_entries.mindrop,
-			  loottable_entries.probability
+			  loottable_entries.probability,
+			  loottable.min_expansion,
+			  loottable.max_expansion,
+			  loottable.content_flags,
+			  loottable.content_flags_disabled
 			FROM
 			  loottable
 			  LEFT JOIN loottable_entries ON loottable.id = loottable_entries.loottable_id
@@ -2114,6 +2118,12 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 			lt->mincash = static_cast<uint32>(atoul(row[1]));
 			lt->maxcash = static_cast<uint32>(atoul(row[2]));
 			lt->avgcoin = static_cast<uint32>(atoul(row[3]));
+
+			lt->content_flags.min_expansion = static_cast<int16>(atoi(row[9]));
+			lt->content_flags.max_expansion = static_cast<int16>(atoi(row[10]));
+
+			strn0cpy(lt->content_flags.content_flags,          row[11], sizeof(lt->content_flags.content_flags));
+			strn0cpy(lt->content_flags.content_flags_disabled, row[12],  sizeof(lt->content_flags.content_flags_disabled));
 		}
 
 		if (current_entry > 128) {
@@ -2162,7 +2172,11 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			  lootdrop_entries.trivial_max_level,
 			  lootdrop_entries.npc_min_level,
 			  lootdrop_entries.npc_max_level,
-			  lootdrop_entries.multiplier
+			  lootdrop_entries.multiplier,
+			  lootdrop.min_expansion,
+			  lootdrop.max_expansion,
+			  lootdrop.content_flags,
+			  lootdrop.content_flags_disabled
 			FROM
 			  lootdrop
 			  JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
@@ -2195,6 +2209,12 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			memset(loot_drop, 0, sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260));
 			current_entry = 0;
 			current_id    = id;
+
+			p_loot_drop_struct->content_flags.min_expansion = static_cast<int16>(atoi(row[10]));
+			p_loot_drop_struct->content_flags.max_expansion = static_cast<int16>(atoi(row[11]));
+
+			strn0cpy(p_loot_drop_struct->content_flags.content_flags,          row[12], sizeof(p_loot_drop_struct->content_flags.content_flags));
+			strn0cpy(p_loot_drop_struct->content_flags.content_flags_disabled, row[13], sizeof(p_loot_drop_struct->content_flags.content_flags_disabled));
 		}
 
 		if (current_entry >= 1260) {

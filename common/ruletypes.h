@@ -243,6 +243,7 @@ RULE_INT(GM, MinStatusToSummonItem, 250, "Minimum required status to summon item
 RULE_INT(GM, MinStatusToZoneAnywhere, 250, "Minimum required status to zone anywhere")
 RULE_INT(GM, MinStatusToLevelTarget, 100, "Minimum required status to set the level of a player")
 RULE_INT(GM, MinStatusToBypassLockedServer, 100, "Players >= this status can log in to the server even when it is locked")
+RULE_INT(GM, MinStatusToBypassCheckSumVerification, 100, "Players >= this status can bypass the eqgame.exe and spells_us.txt checksum verification")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(World)
@@ -276,6 +277,7 @@ RULE_INT (World, TellQueueSize, 20, "Maximum tell queue size")
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true, "Should the start zone always be the same location as your bind?")
 RULE_BOOL(World, EnforceCharacterLimitAtLogin, false, "Enforce the limit for characters that are online at login")
 RULE_BOOL(World, EnableDevTools, true, "Enable or Disable the Developer Tools globally (Most of the time you want this enabled)")
+RULE_BOOL(World, EnableChecksumVerification, false, "Enable or Disable the Checksum Verification for eqgame.exe and spells_us.txt")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -415,6 +417,7 @@ RULE_BOOL(Spells, HOTsScaleWithHealAmt, false, "Allow HealAmt stat to affect HoT
 RULE_BOOL(Spells, CompoundLifetapHeals, true, "True: Lifetap heals calculate damage bonuses and then heal bonuses.  False:  Lifetaps heal using the amount damaged to mob.")
 RULE_BOOL(Spells, UseFadingMemoriesMaxLevel, false, "Enables to limit field in spell data to set the max level that over which an NPC will ignore fading memories effect and not lose aggro.")
 RULE_BOOL(Spells, FixBeaconHeading, false, "Beacon spells use casters heading to fix live bug.  False: Live like heading always 0.")
+RULE_BOOL(Spells, UseSpellImpliedTargeting, false, "Replicates EQ2-style targeting behavior for spells. Spells will 'pass through' inappropriate targets to target's target if it is appropriate.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

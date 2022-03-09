@@ -218,6 +218,7 @@ void SanitizeWorldServerName(char *name);
 std::string SanitizeWorldServerName(std::string server_long_name);
 std::string repeat(std::string s, int n);
 std::vector<std::string> GetBadWords();
+bool contains(std::vector<std::string> container, std::string element);
 
 template<typename InputIterator, typename OutputIterator>
 auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)
