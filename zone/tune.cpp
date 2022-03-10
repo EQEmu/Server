@@ -546,6 +546,7 @@ void Mob::TuneGetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_cha
 
 	for (int j = 0; j < max_loop; j++)
 	{
+		tmp_hit_chance = TuneGetHitChance(defender, attacker, avoidance_override, 0, 0, loop_add_accuracy);
 
 		if (Msg >= 3)
 		{
@@ -570,20 +571,20 @@ void Mob::TuneGetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_cha
 				Message(0, "[#Tune] AVOIDANCE STAT OVERRRIDE. This is the amount of ACCURACY adjustment needed if this defender had ( %i ) raw AVOIDANCE stat", avoidance_override);
 			}
 
-			if (defender->IsNPC()) {
-				Message(0, "[#Tune] Recommended NPC ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
-				Message(0, "[#Tune] SET NPC 'ACCURACY' stat value = [ %i ]", loop_add_accuracy + defender->CastToNPC()->GetAccuracyRating());
+			if (attacker->IsNPC()) {
+				Message(0, "[#Tune] Recommended NPC ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, attacker->GetCleanName(), hit_chance, defender->GetCleanName());
+				Message(0, "[#Tune] SET NPC 'ACCURACY' stat value = [ %i ]", loop_add_accuracy + attacker->CastToNPC()->GetAccuracyRating());
 				Message(0, "###################COMPLETE###################");
 			}
-			else if (defender->IsClient()) {
-				Message(0, "[#Tune] Recommended CLIENT AVOIDANCE ADJUSTMENT of ( %i ) on  %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+			else if (attacker->IsClient()) {
+				Message(0, "[#Tune] Recommended CLIENT ACCURACY ADJUSTMENT of ( %i ) on  %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, attacker->GetCleanName(), hit_chance, defender->GetCleanName());
 
 				if (loop_add_accuracy >= 0) {
-					Message(0, "[#Tune] OPTION1: MODIFY Client Avoidance Mod2 stat or SPA 216 Melee Accuracy (spells/items/aa) [+ %i ]", loop_add_accuracy);
+					Message(0, "[#Tune] MODIFY Client Accuracy Mod2 stat or SPA 216 Melee Accuracy (spells/items/aa) [+ %i ]", loop_add_accuracy);
 
 				}
 				else {
-					Message(0, "[#Tune] OPTION1: MODIFY Client Avoidance Mod2 stat or SPA 216 Melee Accuracy (spells/items/aa) [ %i ]", loop_add_accuracy);
+					Message(0, "[#Tune] Give Client Accuracy Mod2 stat or SPA 216 Melee Accuracy (spells/items/aa) of [ %i ]", loop_add_accuracy);
 				}
 
 				Message(0, "###################COMPLETE###################");
@@ -597,7 +598,7 @@ void Mob::TuneGetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_cha
 
 	Message(0, "###################ABORT#######################");
 	Message(0, "[#Tune] Error: Unable to find desired result for ( %.0f pct) - Increase interval (%i) AND/OR max loop value (%i) and run again.", hit_chance, interval, max_loop);
-	Message(0, "[#Tune] Parse ended at ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+	Message(0, "[#Tune] Parse ended at ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, attacker->GetCleanName(), hit_chance, defender->GetCleanName());
 	Message(0, "###################COMPLETE###################");
 }
 
@@ -782,11 +783,11 @@ int Mob::TuneCalcEvasionBonus(int final_avoidance, int base_avoidance) {
 	return eb;
 	*/
 
-	int loop_max = 3000;
+	int loop_max = 5000;
 	int evasion_bonus = 10;
 	int current_avoidance = 0;
 
-	int interval = 5;
+	int interval = 1;
 
 	if (base_avoidance > final_avoidance)
 	{
