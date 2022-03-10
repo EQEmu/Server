@@ -49,7 +49,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					position1.y,
 					position1.z
 				);
-				parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
+				//We don't want potentially false positives.
+				//parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		case MQWarpAbsolute:
@@ -156,6 +157,13 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					zone->GetShortName()
 				);
 				LogCheat(message);
+				std::string export_string = fmt::format(
+                                        "{} {} {}",
+                                        position1.x,
+                                        position1.y,
+                                        position1.z
+                                );
+                                parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		case MQZoneUnknownDest:
@@ -174,6 +182,13 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					zone->GetShortName()
 				);
 				LogCheat(message);
+				std::string export_string = fmt::format(
+                                        "{} {} {}",
+                                        position1.x,
+                                        position1.y,
+                                        position1.z
+                                );
+                                parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		case MQGate:
@@ -192,6 +207,13 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					zone->GetShortName()
 				);
 				LogCheat(message);
+				std::string export_string = fmt::format(
+                                        "{} {} {}",
+                                        position1.x,
+                                        position1.y,
+                                        position1.z
+                                );
+                                parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		case MQGhost:
@@ -210,6 +232,13 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					m_target->AccountName(),
 					m_target->GetName()
 				);
+				std::string export_string = fmt::format(
+                                        "{} {} {}",
+                                        position1.x,
+                                        position1.y,
+                                        position1.z
+                                );
+                                parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		case MQFastMem:
@@ -229,6 +258,13 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					zone->GetShortName()
 				);
 				LogCheat(message);
+				std::string export_string = fmt::format(
+                                        "{} {} {}",
+                                        position1.x,
+                                        position1.y,
+                                        position1.z
+                                );
+                                parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		default:
@@ -245,6 +281,13 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 				zone->GetShortName()
 			);
 			LogCheat(message);
+			std::string export_string = fmt::format(
+                                        "{} {} {}",
+                                        position1.x,
+                                        position1.y,
+                                        position1.z
+                        );
+                        parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			break;
 	}
 }
