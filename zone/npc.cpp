@@ -2784,9 +2784,6 @@ float NPC::GetNPCStat(const char *identifier)
 	else if (id == "default_attack_delay") {
 		return default_attack_delay;
 	}
-	else if (id == "default_attack_delay") {
-		return default_attack_delay;
-	}
 	else if (id == "default_accuracy_rating") {
 		return default_accuracy_rating;
 	}
