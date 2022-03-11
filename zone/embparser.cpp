@@ -1450,7 +1450,10 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_CAST_ON:
 		case EVENT_CAST:
 		case EVENT_CAST_BEGIN: {
-			ExportVar(package_name.c_str(), "spell_id", data);
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "spell_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "caster_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "caster_level", sep.arg[2]);
 			break;
 		}
 

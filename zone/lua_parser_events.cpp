@@ -376,7 +376,9 @@ void handle_player_pick_up(QuestInterface *parse, lua_State* L, Client* client, 
 
 void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<EQ::Any> *extra_pointers) {
-	int spell_id = std::stoi(data);
+	Seperator sep(data.c_str());
+
+	int spell_id = std::stoi(sep.arg[0]);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
@@ -388,6 +390,12 @@ void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std
 	}
 
 	lua_setfield(L, -2, "spell");
+	
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "caster_id");
+	
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "caster_level");
 }
 
 void handle_player_task_fail(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
