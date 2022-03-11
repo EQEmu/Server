@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseNpcTypesTintRepository {
 public:
@@ -89,9 +90,49 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"tint_set_name",
+			"red1h",
+			"grn1h",
+			"blu1h",
+			"red2c",
+			"grn2c",
+			"blu2c",
+			"red3a",
+			"grn3a",
+			"blu3a",
+			"red4b",
+			"grn4b",
+			"blu4b",
+			"red5g",
+			"grn5g",
+			"blu5g",
+			"red6l",
+			"grn6l",
+			"blu6l",
+			"red7f",
+			"grn7f",
+			"blu7f",
+			"red8x",
+			"grn8x",
+			"blu8x",
+			"red9x",
+			"grn9x",
+			"blu9x",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -103,7 +144,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

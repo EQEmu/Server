@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseZonePointsRepository {
 public:
@@ -79,9 +80,44 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"zone",
+			"version",
+			"number",
+			"y",
+			"x",
+			"z",
+			"heading",
+			"target_y",
+			"target_x",
+			"target_z",
+			"target_heading",
+			"zoneinst",
+			"target_zone_id",
+			"target_instance",
+			"buffer",
+			"client_version_mask",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
+			"is_virtual",
+			"height",
+			"width",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -93,7 +129,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -128,8 +164,8 @@ public:
 		entry.target_instance        = 0;
 		entry.buffer                 = 0;
 		entry.client_version_mask    = 4294967295;
-		entry.min_expansion          = 0;
-		entry.max_expansion          = 0;
+		entry.min_expansion          = -1;
+		entry.max_expansion          = -1;
 		entry.content_flags          = "";
 		entry.content_flags_disabled = "";
 		entry.is_virtual             = 0;

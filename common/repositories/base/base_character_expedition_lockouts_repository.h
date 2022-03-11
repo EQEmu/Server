@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseCharacterExpeditionLockoutsRepository {
 public:
@@ -22,7 +23,7 @@ public:
 		int         character_id;
 		std::string expedition_name;
 		std::string event_name;
-		std::string expire_time;
+		time_t      expire_time;
 		int         duration;
 		std::string from_expedition_uuid;
 	};
@@ -45,9 +46,27 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"character_id",
+			"expedition_name",
+			"event_name",
+			"UNIX_TIMESTAMP(expire_time)",
+			"duration",
+			"from_expedition_uuid",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -59,7 +78,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -81,7 +100,7 @@ public:
 		entry.character_id         = 0;
 		entry.expedition_name      = "";
 		entry.event_name           = "";
-		entry.expire_time          = "";
+		entry.expire_time          = std::time(nullptr);
 		entry.duration             = 0;
 		entry.from_expedition_uuid = "";
 
@@ -123,7 +142,7 @@ public:
 			entry.character_id         = atoi(row[1]);
 			entry.expedition_name      = row[2] ? row[2] : "";
 			entry.event_name           = row[3] ? row[3] : "";
-			entry.expire_time          = row[4] ? row[4] : "";
+			entry.expire_time          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			entry.duration             = atoi(row[5]);
 			entry.from_expedition_uuid = row[6] ? row[6] : "";
 
@@ -162,7 +181,7 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(character_expedition_lockouts_entry.character_id));
 		update_values.push_back(columns[2] + " = '" + EscapeString(character_expedition_lockouts_entry.expedition_name) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(character_expedition_lockouts_entry.event_name) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(character_expedition_lockouts_entry.expire_time) + "'");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (character_expedition_lockouts_entry.expire_time > 0 ? std::to_string(character_expedition_lockouts_entry.expire_time) : "null") + ")");
 		update_values.push_back(columns[5] + " = " + std::to_string(character_expedition_lockouts_entry.duration));
 		update_values.push_back(columns[6] + " = '" + EscapeString(character_expedition_lockouts_entry.from_expedition_uuid) + "'");
 
@@ -190,7 +209,7 @@ public:
 		insert_values.push_back(std::to_string(character_expedition_lockouts_entry.character_id));
 		insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.expedition_name) + "'");
 		insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.event_name) + "'");
-		insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.expire_time) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (character_expedition_lockouts_entry.expire_time > 0 ? std::to_string(character_expedition_lockouts_entry.expire_time) : "null") + ")");
 		insert_values.push_back(std::to_string(character_expedition_lockouts_entry.duration));
 		insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.from_expedition_uuid) + "'");
 
@@ -226,7 +245,7 @@ public:
 			insert_values.push_back(std::to_string(character_expedition_lockouts_entry.character_id));
 			insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.expedition_name) + "'");
 			insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.event_name) + "'");
-			insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.expire_time) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (character_expedition_lockouts_entry.expire_time > 0 ? std::to_string(character_expedition_lockouts_entry.expire_time) : "null") + ")");
 			insert_values.push_back(std::to_string(character_expedition_lockouts_entry.duration));
 			insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.from_expedition_uuid) + "'");
 
@@ -266,7 +285,7 @@ public:
 			entry.character_id         = atoi(row[1]);
 			entry.expedition_name      = row[2] ? row[2] : "";
 			entry.event_name           = row[3] ? row[3] : "";
-			entry.expire_time          = row[4] ? row[4] : "";
+			entry.expire_time          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			entry.duration             = atoi(row[5]);
 			entry.from_expedition_uuid = row[6] ? row[6] : "";
 
@@ -297,7 +316,7 @@ public:
 			entry.character_id         = atoi(row[1]);
 			entry.expedition_name      = row[2] ? row[2] : "";
 			entry.event_name           = row[3] ? row[3] : "";
-			entry.expire_time          = row[4] ? row[4] : "";
+			entry.expire_time          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			entry.duration             = atoi(row[5]);
 			entry.from_expedition_uuid = row[6] ? row[6] : "";
 

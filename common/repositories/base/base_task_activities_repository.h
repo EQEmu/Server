@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseTaskActivitiesRepository {
 public:
@@ -61,9 +62,35 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"taskid",
+			"activityid",
+			"step",
+			"activitytype",
+			"target_name",
+			"item_list",
+			"skill_list",
+			"spell_list",
+			"description_override",
+			"goalid",
+			"goalmethod",
+			"goalcount",
+			"delivertonpc",
+			"zones",
+			"optional",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -75,7 +102,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

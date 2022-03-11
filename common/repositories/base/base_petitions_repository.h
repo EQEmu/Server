@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BasePetitionsRepository {
 public:
@@ -63,9 +64,36 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"dib",
+			"petid",
+			"charname",
+			"accountname",
+			"lastgm",
+			"petitiontext",
+			"gmtext",
+			"zone",
+			"urgency",
+			"charclass",
+			"charrace",
+			"charlevel",
+			"checkouts",
+			"unavailables",
+			"ischeckedout",
+			"senttime",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -77,7 +105,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -161,7 +189,7 @@ public:
 			entry.checkouts    = atoi(row[12]);
 			entry.unavailables = atoi(row[13]);
 			entry.ischeckedout = atoi(row[14]);
-			entry.senttime     = strtoll(row[15], NULL, 10);
+			entry.senttime     = strtoll(row[15], nullptr, 10);
 
 			return entry;
 		}
@@ -340,7 +368,7 @@ public:
 			entry.checkouts    = atoi(row[12]);
 			entry.unavailables = atoi(row[13]);
 			entry.ischeckedout = atoi(row[14]);
-			entry.senttime     = strtoll(row[15], NULL, 10);
+			entry.senttime     = strtoll(row[15], nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -380,7 +408,7 @@ public:
 			entry.checkouts    = atoi(row[12]);
 			entry.unavailables = atoi(row[13]);
 			entry.ischeckedout = atoi(row[14]);
-			entry.senttime     = strtoll(row[15], NULL, 10);
+			entry.senttime     = strtoll(row[15], nullptr, 10);
 
 			all_entries.push_back(entry);
 		}

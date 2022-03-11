@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseStartZonesRepository {
 public:
@@ -69,9 +70,39 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"x",
+			"y",
+			"z",
+			"heading",
+			"zone_id",
+			"bind_id",
+			"player_choice",
+			"player_class",
+			"player_deity",
+			"player_race",
+			"start_zone",
+			"bind_x",
+			"bind_y",
+			"bind_z",
+			"select_rank",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -83,7 +114,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -116,8 +147,8 @@ public:
 		entry.bind_y                 = 0;
 		entry.bind_z                 = 0;
 		entry.select_rank            = 50;
-		entry.min_expansion          = 0;
-		entry.max_expansion          = 0;
+		entry.min_expansion          = -1;
+		entry.max_expansion          = -1;
 		entry.content_flags          = "";
 		entry.content_flags_disabled = "";
 

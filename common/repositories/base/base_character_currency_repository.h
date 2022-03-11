@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseCharacterCurrencyRepository {
 public:
@@ -65,9 +66,37 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"platinum",
+			"gold",
+			"silver",
+			"copper",
+			"platinum_bank",
+			"gold_bank",
+			"silver_bank",
+			"copper_bank",
+			"platinum_cursor",
+			"gold_cursor",
+			"silver_cursor",
+			"copper_cursor",
+			"radiant_crystals",
+			"career_radiant_crystals",
+			"ebon_crystals",
+			"career_ebon_crystals",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -79,7 +108,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

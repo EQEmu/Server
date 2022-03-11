@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseMerchantlistRepository {
 public:
@@ -55,9 +56,32 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"merchantid",
+			"slot",
+			"item",
+			"faction_required",
+			"level_required",
+			"alt_currency_cost",
+			"classes_required",
+			"probability",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -69,7 +93,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -95,8 +119,8 @@ public:
 		entry.alt_currency_cost      = 0;
 		entry.classes_required       = 65535;
 		entry.probability            = 100;
-		entry.min_expansion          = 0;
-		entry.max_expansion          = 0;
+		entry.min_expansion          = -1;
+		entry.max_expansion          = -1;
 		entry.content_flags          = "";
 		entry.content_flags_disabled = "";
 

@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseCharacterCorpsesRepository {
 public:
@@ -27,7 +28,7 @@ public:
 		float       y;
 		float       z;
 		float       heading;
-		std::string time_of_death;
+		time_t      time_of_death;
 		int         guild_consent_id;
 		int         is_rezzed;
 		int         is_buried;
@@ -125,9 +126,67 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"charid",
+			"charname",
+			"zone_id",
+			"instance_id",
+			"x",
+			"y",
+			"z",
+			"heading",
+			"UNIX_TIMESTAMP(time_of_death)",
+			"guild_consent_id",
+			"is_rezzed",
+			"is_buried",
+			"was_at_graveyard",
+			"is_locked",
+			"exp",
+			"size",
+			"level",
+			"race",
+			"gender",
+			"`class`",
+			"deity",
+			"texture",
+			"helm_texture",
+			"copper",
+			"silver",
+			"gold",
+			"platinum",
+			"hair_color",
+			"beard_color",
+			"eye_color_1",
+			"eye_color_2",
+			"hair_style",
+			"face",
+			"beard",
+			"drakkin_heritage",
+			"drakkin_tattoo",
+			"drakkin_details",
+			"wc_1",
+			"wc_2",
+			"wc_3",
+			"wc_4",
+			"wc_5",
+			"wc_6",
+			"wc_7",
+			"wc_8",
+			"wc_9",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -139,7 +198,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -166,7 +225,7 @@ public:
 		entry.y                = 0;
 		entry.z                = 0;
 		entry.heading          = 0;
-		entry.time_of_death    = "0000-00-00 00:00:00";
+		entry.time_of_death    = 0;
 		entry.guild_consent_id = 0;
 		entry.is_rezzed        = 0;
 		entry.is_buried        = 0;
@@ -248,7 +307,7 @@ public:
 			entry.y                = static_cast<float>(atof(row[6]));
 			entry.z                = static_cast<float>(atof(row[7]));
 			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = row[9] ? row[9] : "";
+			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);
@@ -327,7 +386,7 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(character_corpses_entry.y));
 		update_values.push_back(columns[7] + " = " + std::to_string(character_corpses_entry.z));
 		update_values.push_back(columns[8] + " = " + std::to_string(character_corpses_entry.heading));
-		update_values.push_back(columns[9] + " = '" + EscapeString(character_corpses_entry.time_of_death) + "'");
+		update_values.push_back(columns[9] + " = FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
 		update_values.push_back(columns[10] + " = " + std::to_string(character_corpses_entry.guild_consent_id));
 		update_values.push_back(columns[11] + " = " + std::to_string(character_corpses_entry.is_rezzed));
 		update_values.push_back(columns[12] + " = " + std::to_string(character_corpses_entry.is_buried));
@@ -395,7 +454,7 @@ public:
 		insert_values.push_back(std::to_string(character_corpses_entry.y));
 		insert_values.push_back(std::to_string(character_corpses_entry.z));
 		insert_values.push_back(std::to_string(character_corpses_entry.heading));
-		insert_values.push_back("'" + EscapeString(character_corpses_entry.time_of_death) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
 		insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
 		insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
 		insert_values.push_back(std::to_string(character_corpses_entry.is_buried));
@@ -471,7 +530,7 @@ public:
 			insert_values.push_back(std::to_string(character_corpses_entry.y));
 			insert_values.push_back(std::to_string(character_corpses_entry.z));
 			insert_values.push_back(std::to_string(character_corpses_entry.heading));
-			insert_values.push_back("'" + EscapeString(character_corpses_entry.time_of_death) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
 			insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
 			insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
 			insert_values.push_back(std::to_string(character_corpses_entry.is_buried));
@@ -551,7 +610,7 @@ public:
 			entry.y                = static_cast<float>(atof(row[6]));
 			entry.z                = static_cast<float>(atof(row[7]));
 			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = row[9] ? row[9] : "";
+			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);
@@ -622,7 +681,7 @@ public:
 			entry.y                = static_cast<float>(atof(row[6]));
 			entry.z                = static_cast<float>(atof(row[7]));
 			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = row[9] ? row[9] : "";
+			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);

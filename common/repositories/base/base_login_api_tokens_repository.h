@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseLoginApiTokensRepository {
 public:
@@ -22,8 +23,8 @@ public:
 		std::string token;
 		int         can_write;
 		int         can_read;
-		std::string created_at;
-		std::string updated_at;
+		time_t      created_at;
+		time_t      updated_at;
 	};
 
 	static std::string PrimaryKey()
@@ -43,9 +44,26 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"token",
+			"can_write",
+			"can_read",
+			"UNIX_TIMESTAMP(created_at)",
+			"UNIX_TIMESTAMP(updated_at)",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -57,7 +75,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -79,8 +97,8 @@ public:
 		entry.token      = "";
 		entry.can_write  = 0;
 		entry.can_read   = 0;
-		entry.created_at = "";
-		entry.updated_at = "";
+		entry.created_at = 0;
+		entry.updated_at = std::time(nullptr);
 
 		return entry;
 	}
@@ -120,8 +138,8 @@ public:
 			entry.token      = row[1] ? row[1] : "";
 			entry.can_write  = atoi(row[2]);
 			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4] ? row[4] : "";
-			entry.updated_at = row[5] ? row[5] : "";
+			entry.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			return entry;
 		}
@@ -158,8 +176,8 @@ public:
 		update_values.push_back(columns[1] + " = '" + EscapeString(login_api_tokens_entry.token) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_entry.can_write));
 		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_entry.can_read));
-		update_values.push_back(columns[4] + " = '" + EscapeString(login_api_tokens_entry.created_at) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(login_api_tokens_entry.updated_at) + "'");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (login_api_tokens_entry.updated_at > 0 ? std::to_string(login_api_tokens_entry.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,8 +203,8 @@ public:
 		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
 		insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
 		insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
-		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.created_at) + "'");
-		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.updated_at) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.updated_at > 0 ? std::to_string(login_api_tokens_entry.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -220,8 +238,8 @@ public:
 			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
 			insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
 			insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
-			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.created_at) + "'");
-			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.updated_at) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.updated_at > 0 ? std::to_string(login_api_tokens_entry.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -259,8 +277,8 @@ public:
 			entry.token      = row[1] ? row[1] : "";
 			entry.can_write  = atoi(row[2]);
 			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4] ? row[4] : "";
-			entry.updated_at = row[5] ? row[5] : "";
+			entry.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -289,8 +307,8 @@ public:
 			entry.token      = row[1] ? row[1] : "";
 			entry.can_write  = atoi(row[2]);
 			entry.can_read   = atoi(row[3]);
-			entry.created_at = row[4] ? row[4] : "";
-			entry.updated_at = row[5] ? row[5] : "";
+			entry.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}

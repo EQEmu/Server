@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseNpcScaleGlobalBaseRepository {
 public:
@@ -87,9 +88,48 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"type",
+			"level",
+			"ac",
+			"hp",
+			"accuracy",
+			"slow_mitigation",
+			"attack",
+			"strength",
+			"stamina",
+			"dexterity",
+			"agility",
+			"intelligence",
+			"wisdom",
+			"charisma",
+			"magic_resist",
+			"cold_resist",
+			"fire_resist",
+			"poison_resist",
+			"disease_resist",
+			"corruption_resist",
+			"physical_resist",
+			"min_dmg",
+			"max_dmg",
+			"hp_regen_rate",
+			"attack_delay",
+			"spell_scale",
+			"heal_scale",
+			"special_abilities",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -101,7 +141,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

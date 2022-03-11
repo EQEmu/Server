@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseDynamicZonesRepository {
 public:
@@ -75,9 +76,42 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"instance_id",
+			"type",
+			"uuid",
+			"name",
+			"leader_id",
+			"min_players",
+			"max_players",
+			"compass_zone_id",
+			"compass_x",
+			"compass_y",
+			"compass_z",
+			"safe_return_zone_id",
+			"safe_return_x",
+			"safe_return_y",
+			"safe_return_z",
+			"safe_return_heading",
+			"zone_in_x",
+			"zone_in_y",
+			"zone_in_z",
+			"zone_in_heading",
+			"has_zone_in",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -89,7 +123,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
