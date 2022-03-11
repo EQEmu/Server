@@ -5453,7 +5453,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 
 	return damage;
 }
-
+//SYNC WITH: tune.cpp, mob.h TuneCommonOutgoingHitSucces
 void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
 	if (!defender)
