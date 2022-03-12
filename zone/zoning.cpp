@@ -202,8 +202,15 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		return;
 	}
 
-	std::string export_string = fmt::format("{}", target_zone_id);
-	parse->EventPlayer(EVENT_ZONE, this, export_string, 0);
+	std::string export_string = fmt::format(
+		"{} {}",
+		zone->GetZoneID(),
+		target_zone_id
+	);
+	if (parse->EventPlayer(EVENT_ZONE, this, export_string, 0) != 0) {
+		SendZoneCancel(zc);
+		return;
+	}
 
 	//handle circumvention of zone restrictions
 	//we need the value when creating the outgoing packet as well.
