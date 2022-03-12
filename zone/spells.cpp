@@ -3589,8 +3589,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	);
 
 	/* Send the EVENT_CAST_ON event */
-	std::string export_string = fmt::format("{}", spell_id);
-	if(spelltar->IsNPC()) {
+	std::string export_string = fmt::format(
+		"{} {} {}",
+		spell_id,
+		GetID(),
+		caster_level
+	);
+	if (spelltar->IsNPC()) {
 		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0);
 	} else if (spelltar->IsClient()) {
 		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0);

@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseInventorySnapshotsRepository {
 public:
@@ -65,9 +66,37 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"time_index",
+			"charid",
+			"slotid",
+			"itemid",
+			"charges",
+			"color",
+			"augslot1",
+			"augslot2",
+			"augslot3",
+			"augslot4",
+			"augslot5",
+			"augslot6",
+			"instnodrop",
+			"custom_data",
+			"ornamenticon",
+			"ornamentidfile",
+			"ornament_hero_model",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -79,7 +108,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseItemsRepository {
 public:
@@ -152,7 +153,7 @@ public:
 		int         UNK124;
 		int         attuneable;
 		int         nopet;
-		std::string updated;
+		time_t      updated;
 		std::string comment;
 		int         UNK127;
 		int         pointtype;
@@ -182,8 +183,8 @@ public:
 		int         scrolllevel2;
 		int         scrolllevel;
 		int         UNK157;
-		std::string serialized;
-		std::string verified;
+		time_t      serialized;
+		time_t      verified;
 		std::string serialization;
 		std::string source;
 		int         UNK033;
@@ -601,9 +602,305 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"minstatus",
+			"Name",
+			"aagi",
+			"ac",
+			"accuracy",
+			"acha",
+			"adex",
+			"aint",
+			"artifactflag",
+			"asta",
+			"astr",
+			"attack",
+			"augrestrict",
+			"augslot1type",
+			"augslot1visible",
+			"augslot2type",
+			"augslot2visible",
+			"augslot3type",
+			"augslot3visible",
+			"augslot4type",
+			"augslot4visible",
+			"augslot5type",
+			"augslot5visible",
+			"augslot6type",
+			"augslot6visible",
+			"augtype",
+			"avoidance",
+			"awis",
+			"bagsize",
+			"bagslots",
+			"bagtype",
+			"bagwr",
+			"banedmgamt",
+			"banedmgraceamt",
+			"banedmgbody",
+			"banedmgrace",
+			"bardtype",
+			"bardvalue",
+			"book",
+			"casttime",
+			"casttime_",
+			"charmfile",
+			"charmfileid",
+			"classes",
+			"color",
+			"combateffects",
+			"extradmgskill",
+			"extradmgamt",
+			"price",
+			"cr",
+			"damage",
+			"damageshield",
+			"deity",
+			"delay",
+			"augdistiller",
+			"dotshielding",
+			"dr",
+			"clicktype",
+			"clicklevel2",
+			"elemdmgtype",
+			"elemdmgamt",
+			"endur",
+			"factionamt1",
+			"factionamt2",
+			"factionamt3",
+			"factionamt4",
+			"factionmod1",
+			"factionmod2",
+			"factionmod3",
+			"factionmod4",
+			"filename",
+			"focuseffect",
+			"fr",
+			"fvnodrop",
+			"haste",
+			"clicklevel",
+			"hp",
+			"regen",
+			"icon",
+			"idfile",
+			"itemclass",
+			"itemtype",
+			"ldonprice",
+			"ldontheme",
+			"ldonsold",
+			"light",
+			"lore",
+			"loregroup",
+			"magic",
+			"mana",
+			"manaregen",
+			"enduranceregen",
+			"material",
+			"herosforgemodel",
+			"maxcharges",
+			"mr",
+			"nodrop",
+			"norent",
+			"pendingloreflag",
+			"pr",
+			"procrate",
+			"races",
+			"range",
+			"reclevel",
+			"recskill",
+			"reqlevel",
+			"sellrate",
+			"shielding",
+			"size",
+			"skillmodtype",
+			"skillmodvalue",
+			"slots",
+			"clickeffect",
+			"spellshield",
+			"strikethrough",
+			"stunresist",
+			"summonedflag",
+			"tradeskills",
+			"favor",
+			"weight",
+			"UNK012",
+			"UNK013",
+			"benefitflag",
+			"UNK054",
+			"UNK059",
+			"booktype",
+			"recastdelay",
+			"recasttype",
+			"guildfavor",
+			"UNK123",
+			"UNK124",
+			"attuneable",
+			"nopet",
+			"UNIX_TIMESTAMP(updated)",
+			"comment",
+			"UNK127",
+			"pointtype",
+			"potionbelt",
+			"potionbeltslots",
+			"stacksize",
+			"notransfer",
+			"stackable",
+			"UNK134",
+			"UNK137",
+			"proceffect",
+			"proctype",
+			"proclevel2",
+			"proclevel",
+			"UNK142",
+			"worneffect",
+			"worntype",
+			"wornlevel2",
+			"wornlevel",
+			"UNK147",
+			"focustype",
+			"focuslevel2",
+			"focuslevel",
+			"UNK152",
+			"scrolleffect",
+			"scrolltype",
+			"scrolllevel2",
+			"scrolllevel",
+			"UNK157",
+			"UNIX_TIMESTAMP(serialized)",
+			"UNIX_TIMESTAMP(verified)",
+			"serialization",
+			"source",
+			"UNK033",
+			"lorefile",
+			"UNK014",
+			"svcorruption",
+			"skillmodmax",
+			"UNK060",
+			"augslot1unk2",
+			"augslot2unk2",
+			"augslot3unk2",
+			"augslot4unk2",
+			"augslot5unk2",
+			"augslot6unk2",
+			"UNK120",
+			"UNK121",
+			"questitemflag",
+			"UNK132",
+			"clickunk5",
+			"clickunk6",
+			"clickunk7",
+			"procunk1",
+			"procunk2",
+			"procunk3",
+			"procunk4",
+			"procunk6",
+			"procunk7",
+			"wornunk1",
+			"wornunk2",
+			"wornunk3",
+			"wornunk4",
+			"wornunk5",
+			"wornunk6",
+			"wornunk7",
+			"focusunk1",
+			"focusunk2",
+			"focusunk3",
+			"focusunk4",
+			"focusunk5",
+			"focusunk6",
+			"focusunk7",
+			"scrollunk1",
+			"scrollunk2",
+			"scrollunk3",
+			"scrollunk4",
+			"scrollunk5",
+			"scrollunk6",
+			"scrollunk7",
+			"UNK193",
+			"purity",
+			"evoitem",
+			"evoid",
+			"evolvinglevel",
+			"evomax",
+			"clickname",
+			"procname",
+			"wornname",
+			"focusname",
+			"scrollname",
+			"dsmitigation",
+			"heroic_str",
+			"heroic_int",
+			"heroic_wis",
+			"heroic_agi",
+			"heroic_dex",
+			"heroic_sta",
+			"heroic_cha",
+			"heroic_pr",
+			"heroic_dr",
+			"heroic_fr",
+			"heroic_cr",
+			"heroic_mr",
+			"heroic_svcorrup",
+			"healamt",
+			"spelldmg",
+			"clairvoyance",
+			"backstabdmg",
+			"created",
+			"elitematerial",
+			"ldonsellbackrate",
+			"scriptfileid",
+			"expendablearrow",
+			"powersourcecapacity",
+			"bardeffect",
+			"bardeffecttype",
+			"bardlevel2",
+			"bardlevel",
+			"bardunk1",
+			"bardunk2",
+			"bardunk3",
+			"bardunk4",
+			"bardunk5",
+			"bardname",
+			"bardunk7",
+			"UNK214",
+			"subtype",
+			"UNK220",
+			"UNK221",
+			"heirloom",
+			"UNK223",
+			"UNK224",
+			"UNK225",
+			"UNK226",
+			"UNK227",
+			"UNK228",
+			"UNK229",
+			"UNK230",
+			"UNK231",
+			"UNK232",
+			"UNK233",
+			"UNK234",
+			"placeable",
+			"UNK236",
+			"UNK237",
+			"UNK238",
+			"UNK239",
+			"UNK240",
+			"UNK241",
+			"epicitem",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -615,7 +912,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -717,7 +1014,7 @@ public:
 		entry.itemclass           = 0;
 		entry.itemtype            = 0;
 		entry.ldonprice           = 0;
-		entry.ldontheme           = LDoNThemes::Unused;
+		entry.ldontheme           = 0;
 		entry.ldonsold            = 0;
 		entry.light               = 0;
 		entry.lore                = "";
@@ -767,7 +1064,7 @@ public:
 		entry.UNK124              = 0;
 		entry.attuneable          = 0;
 		entry.nopet               = 0;
-		entry.updated             = "0000-00-00 00:00:00";
+		entry.updated             = 0;
 		entry.comment             = "";
 		entry.UNK127              = 0;
 		entry.pointtype           = 0;
@@ -797,8 +1094,8 @@ public:
 		entry.scrolllevel2        = 0;
 		entry.scrolllevel         = 0;
 		entry.UNK157              = 0;
-		entry.serialized          = "";
-		entry.verified            = "";
+		entry.serialized          = 0;
+		entry.verified            = 0;
 		entry.serialization       = "";
 		entry.source              = "";
 		entry.UNK033              = 0;
@@ -1087,7 +1384,7 @@ public:
 			entry.UNK124              = atoi(row[131]);
 			entry.attuneable          = atoi(row[132]);
 			entry.nopet               = atoi(row[133]);
-			entry.updated             = row[134] ? row[134] : "";
+			entry.updated             = strtoll(row[134] ? row[134] : "-1", nullptr, 10);
 			entry.comment             = row[135] ? row[135] : "";
 			entry.UNK127              = atoi(row[136]);
 			entry.pointtype           = atoi(row[137]);
@@ -1117,8 +1414,8 @@ public:
 			entry.scrolllevel2        = atoi(row[161]);
 			entry.scrolllevel         = atoi(row[162]);
 			entry.UNK157              = atoi(row[163]);
-			entry.serialized          = row[164] ? row[164] : "";
-			entry.verified            = row[165] ? row[165] : "";
+			entry.serialized          = strtoll(row[164] ? row[164] : "-1", nullptr, 10);
+			entry.verified            = strtoll(row[165] ? row[165] : "-1", nullptr, 10);
 			entry.serialization       = row[166] ? row[166] : "";
 			entry.source              = row[167] ? row[167] : "";
 			entry.UNK033              = atoi(row[168]);
@@ -1405,7 +1702,7 @@ public:
 		update_values.push_back(columns[131] + " = " + std::to_string(items_entry.UNK124));
 		update_values.push_back(columns[132] + " = " + std::to_string(items_entry.attuneable));
 		update_values.push_back(columns[133] + " = " + std::to_string(items_entry.nopet));
-		update_values.push_back(columns[134] + " = '" + EscapeString(items_entry.updated) + "'");
+		update_values.push_back(columns[134] + " = FROM_UNIXTIME(" + (items_entry.updated > 0 ? std::to_string(items_entry.updated) : "null") + ")");
 		update_values.push_back(columns[135] + " = '" + EscapeString(items_entry.comment) + "'");
 		update_values.push_back(columns[136] + " = " + std::to_string(items_entry.UNK127));
 		update_values.push_back(columns[137] + " = " + std::to_string(items_entry.pointtype));
@@ -1435,8 +1732,8 @@ public:
 		update_values.push_back(columns[161] + " = " + std::to_string(items_entry.scrolllevel2));
 		update_values.push_back(columns[162] + " = " + std::to_string(items_entry.scrolllevel));
 		update_values.push_back(columns[163] + " = " + std::to_string(items_entry.UNK157));
-		update_values.push_back(columns[164] + " = '" + EscapeString(items_entry.serialized) + "'");
-		update_values.push_back(columns[165] + " = '" + EscapeString(items_entry.verified) + "'");
+		update_values.push_back(columns[164] + " = FROM_UNIXTIME(" + (items_entry.serialized > 0 ? std::to_string(items_entry.serialized) : "null") + ")");
+		update_values.push_back(columns[165] + " = FROM_UNIXTIME(" + (items_entry.verified > 0 ? std::to_string(items_entry.verified) : "null") + ")");
 		update_values.push_back(columns[166] + " = '" + EscapeString(items_entry.serialization) + "'");
 		update_values.push_back(columns[167] + " = '" + EscapeString(items_entry.source) + "'");
 		update_values.push_back(columns[168] + " = " + std::to_string(items_entry.UNK033));
@@ -1711,7 +2008,7 @@ public:
 		insert_values.push_back(std::to_string(items_entry.UNK124));
 		insert_values.push_back(std::to_string(items_entry.attuneable));
 		insert_values.push_back(std::to_string(items_entry.nopet));
-		insert_values.push_back("'" + EscapeString(items_entry.updated) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (items_entry.updated > 0 ? std::to_string(items_entry.updated) : "null") + ")");
 		insert_values.push_back("'" + EscapeString(items_entry.comment) + "'");
 		insert_values.push_back(std::to_string(items_entry.UNK127));
 		insert_values.push_back(std::to_string(items_entry.pointtype));
@@ -1741,8 +2038,8 @@ public:
 		insert_values.push_back(std::to_string(items_entry.scrolllevel2));
 		insert_values.push_back(std::to_string(items_entry.scrolllevel));
 		insert_values.push_back(std::to_string(items_entry.UNK157));
-		insert_values.push_back("'" + EscapeString(items_entry.serialized) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.verified) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (items_entry.serialized > 0 ? std::to_string(items_entry.serialized) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (items_entry.verified > 0 ? std::to_string(items_entry.verified) : "null") + ")");
 		insert_values.push_back("'" + EscapeString(items_entry.serialization) + "'");
 		insert_values.push_back("'" + EscapeString(items_entry.source) + "'");
 		insert_values.push_back(std::to_string(items_entry.UNK033));
@@ -2025,7 +2322,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.UNK124));
 			insert_values.push_back(std::to_string(items_entry.attuneable));
 			insert_values.push_back(std::to_string(items_entry.nopet));
-			insert_values.push_back("'" + EscapeString(items_entry.updated) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (items_entry.updated > 0 ? std::to_string(items_entry.updated) : "null") + ")");
 			insert_values.push_back("'" + EscapeString(items_entry.comment) + "'");
 			insert_values.push_back(std::to_string(items_entry.UNK127));
 			insert_values.push_back(std::to_string(items_entry.pointtype));
@@ -2055,8 +2352,8 @@ public:
 			insert_values.push_back(std::to_string(items_entry.scrolllevel2));
 			insert_values.push_back(std::to_string(items_entry.scrolllevel));
 			insert_values.push_back(std::to_string(items_entry.UNK157));
-			insert_values.push_back("'" + EscapeString(items_entry.serialized) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.verified) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (items_entry.serialized > 0 ? std::to_string(items_entry.serialized) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (items_entry.verified > 0 ? std::to_string(items_entry.verified) : "null") + ")");
 			insert_values.push_back("'" + EscapeString(items_entry.serialization) + "'");
 			insert_values.push_back("'" + EscapeString(items_entry.source) + "'");
 			insert_values.push_back(std::to_string(items_entry.UNK033));
@@ -2343,7 +2640,7 @@ public:
 			entry.UNK124              = atoi(row[131]);
 			entry.attuneable          = atoi(row[132]);
 			entry.nopet               = atoi(row[133]);
-			entry.updated             = row[134] ? row[134] : "";
+			entry.updated             = strtoll(row[134] ? row[134] : "-1", nullptr, 10);
 			entry.comment             = row[135] ? row[135] : "";
 			entry.UNK127              = atoi(row[136]);
 			entry.pointtype           = atoi(row[137]);
@@ -2373,8 +2670,8 @@ public:
 			entry.scrolllevel2        = atoi(row[161]);
 			entry.scrolllevel         = atoi(row[162]);
 			entry.UNK157              = atoi(row[163]);
-			entry.serialized          = row[164] ? row[164] : "";
-			entry.verified            = row[165] ? row[165] : "";
+			entry.serialized          = strtoll(row[164] ? row[164] : "-1", nullptr, 10);
+			entry.verified            = strtoll(row[165] ? row[165] : "-1", nullptr, 10);
 			entry.serialization       = row[166] ? row[166] : "";
 			entry.source              = row[167] ? row[167] : "";
 			entry.UNK033              = atoi(row[168]);
@@ -2652,7 +2949,7 @@ public:
 			entry.UNK124              = atoi(row[131]);
 			entry.attuneable          = atoi(row[132]);
 			entry.nopet               = atoi(row[133]);
-			entry.updated             = row[134] ? row[134] : "";
+			entry.updated             = strtoll(row[134] ? row[134] : "-1", nullptr, 10);
 			entry.comment             = row[135] ? row[135] : "";
 			entry.UNK127              = atoi(row[136]);
 			entry.pointtype           = atoi(row[137]);
@@ -2682,8 +2979,8 @@ public:
 			entry.scrolllevel2        = atoi(row[161]);
 			entry.scrolllevel         = atoi(row[162]);
 			entry.UNK157              = atoi(row[163]);
-			entry.serialized          = row[164] ? row[164] : "";
-			entry.verified            = row[165] ? row[165] : "";
+			entry.serialized          = strtoll(row[164] ? row[164] : "-1", nullptr, 10);
+			entry.verified            = strtoll(row[165] ? row[165] : "-1", nullptr, 10);
 			entry.serialization       = row[166] ? row[166] : "";
 			entry.source              = row[167] ? row[167] : "";
 			entry.UNK033              = atoi(row[168]);

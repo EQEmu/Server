@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseAdventureTemplateRepository {
 public:
@@ -97,9 +98,53 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"zone",
+			"zone_version",
+			"is_hard",
+			"is_raid",
+			"min_level",
+			"max_level",
+			"type",
+			"type_data",
+			"type_count",
+			"assa_x",
+			"assa_y",
+			"assa_z",
+			"assa_h",
+			"text",
+			"duration",
+			"zone_in_time",
+			"win_points",
+			"lose_points",
+			"theme",
+			"zone_in_zone_id",
+			"zone_in_x",
+			"zone_in_y",
+			"zone_in_object_id",
+			"dest_x",
+			"dest_y",
+			"dest_z",
+			"dest_h",
+			"graveyard_zone_id",
+			"graveyard_x",
+			"graveyard_y",
+			"graveyard_z",
+			"graveyard_radius",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -111,7 +156,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -148,7 +193,7 @@ public:
 		entry.zone_in_time      = 1800;
 		entry.win_points        = 0;
 		entry.lose_points       = 0;
-		entry.theme             = LDoNThemes::GUK;
+		entry.theme             = 1;
 		entry.zone_in_zone_id   = 0;
 		entry.zone_in_x         = 0;
 		entry.zone_in_y         = 0;

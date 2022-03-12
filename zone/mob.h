@@ -1303,6 +1303,7 @@ public:
 	int Tunecompute_defense(int avoidance_override = 0, int add_avoidance = 0);
 	bool TuneCheckHitChance(Mob* other, DamageHitInfo &hit, int avoidance_override = 0, int add_avoidance = 0);
 	EQ::skills::SkillType TuneAttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
+	void TuneCommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 
 	//aa new
 	uint32 GetAA(uint32 rank_id, uint32 *charges = nullptr) const;

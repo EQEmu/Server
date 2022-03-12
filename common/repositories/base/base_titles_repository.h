@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseTitlesRepository {
 public:
@@ -59,9 +60,34 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"skill_id",
+			"min_skill_value",
+			"max_skill_value",
+			"min_aa_points",
+			"max_aa_points",
+			"`class`",
+			"gender",
+			"char_id",
+			"status",
+			"item_id",
+			"prefix",
+			"suffix",
+			"title_set",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -73,7 +99,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

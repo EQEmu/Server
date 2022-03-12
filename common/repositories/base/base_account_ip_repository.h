@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseAccountIpRepository {
 public:
@@ -39,9 +40,24 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"accid",
+			"ip",
+			"count",
+			"lastused",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -53,7 +69,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -74,7 +90,7 @@ public:
 		entry.accid    = 0;
 		entry.ip       = "";
 		entry.count    = 1;
-		entry.lastused = "";
+		entry.lastused = std::time(nullptr);
 
 		return entry;
 	}
