@@ -264,7 +264,6 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
                                         position1.y,
                                         position1.z
                                 );
-                                parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
 			}
 			break;
 		default:
@@ -287,8 +286,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
                                         position1.y,
                                         position1.z
                         );
-                        parse->EventPlayer(EVENT_WARP, m_target, export_string, 0);
-			break;
+                        break;
 	}
 }
 
