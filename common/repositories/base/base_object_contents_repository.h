@@ -14,22 +14,23 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseObjectContentsRepository {
 public:
 	struct ObjectContents {
-		int         zoneid;
-		int         parentid;
-		int         bagidx;
-		int         itemid;
-		int         charges;
-		std::string droptime;
-		int         augslot1;
-		int         augslot2;
-		int         augslot3;
-		int         augslot4;
-		int         augslot5;
-		int         augslot6;
+		int    zoneid;
+		int    parentid;
+		int    bagidx;
+		int    itemid;
+		int    charges;
+		time_t droptime;
+		int    augslot1;
+		int    augslot2;
+		int    augslot3;
+		int    augslot4;
+		int    augslot5;
+		int    augslot6;
 	};
 
 	static std::string PrimaryKey()
@@ -55,9 +56,32 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"zoneid",
+			"parentid",
+			"bagidx",
+			"itemid",
+			"charges",
+			"UNIX_TIMESTAMP(droptime)",
+			"augslot1",
+			"augslot2",
+			"augslot3",
+			"augslot4",
+			"augslot5",
+			"augslot6",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -69,7 +93,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -92,7 +116,7 @@ public:
 		entry.bagidx   = 0;
 		entry.itemid   = 0;
 		entry.charges  = 0;
-		entry.droptime = "0000-00-00 00:00:00";
+		entry.droptime = 0;
 		entry.augslot1 = 0;
 		entry.augslot2 = 0;
 		entry.augslot3 = 0;
@@ -139,7 +163,7 @@ public:
 			entry.bagidx   = atoi(row[2]);
 			entry.itemid   = atoi(row[3]);
 			entry.charges  = atoi(row[4]);
-			entry.droptime = row[5] ? row[5] : "";
+			entry.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			entry.augslot1 = atoi(row[6]);
 			entry.augslot2 = atoi(row[7]);
 			entry.augslot3 = atoi(row[8]);
@@ -184,7 +208,7 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(object_contents_entry.bagidx));
 		update_values.push_back(columns[3] + " = " + std::to_string(object_contents_entry.itemid));
 		update_values.push_back(columns[4] + " = " + std::to_string(object_contents_entry.charges));
-		update_values.push_back(columns[5] + " = '" + EscapeString(object_contents_entry.droptime) + "'");
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (object_contents_entry.droptime > 0 ? std::to_string(object_contents_entry.droptime) : "null") + ")");
 		update_values.push_back(columns[6] + " = " + std::to_string(object_contents_entry.augslot1));
 		update_values.push_back(columns[7] + " = " + std::to_string(object_contents_entry.augslot2));
 		update_values.push_back(columns[8] + " = " + std::to_string(object_contents_entry.augslot3));
@@ -217,7 +241,7 @@ public:
 		insert_values.push_back(std::to_string(object_contents_entry.bagidx));
 		insert_values.push_back(std::to_string(object_contents_entry.itemid));
 		insert_values.push_back(std::to_string(object_contents_entry.charges));
-		insert_values.push_back("'" + EscapeString(object_contents_entry.droptime) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (object_contents_entry.droptime > 0 ? std::to_string(object_contents_entry.droptime) : "null") + ")");
 		insert_values.push_back(std::to_string(object_contents_entry.augslot1));
 		insert_values.push_back(std::to_string(object_contents_entry.augslot2));
 		insert_values.push_back(std::to_string(object_contents_entry.augslot3));
@@ -258,7 +282,7 @@ public:
 			insert_values.push_back(std::to_string(object_contents_entry.bagidx));
 			insert_values.push_back(std::to_string(object_contents_entry.itemid));
 			insert_values.push_back(std::to_string(object_contents_entry.charges));
-			insert_values.push_back("'" + EscapeString(object_contents_entry.droptime) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (object_contents_entry.droptime > 0 ? std::to_string(object_contents_entry.droptime) : "null") + ")");
 			insert_values.push_back(std::to_string(object_contents_entry.augslot1));
 			insert_values.push_back(std::to_string(object_contents_entry.augslot2));
 			insert_values.push_back(std::to_string(object_contents_entry.augslot3));
@@ -303,7 +327,7 @@ public:
 			entry.bagidx   = atoi(row[2]);
 			entry.itemid   = atoi(row[3]);
 			entry.charges  = atoi(row[4]);
-			entry.droptime = row[5] ? row[5] : "";
+			entry.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			entry.augslot1 = atoi(row[6]);
 			entry.augslot2 = atoi(row[7]);
 			entry.augslot3 = atoi(row[8]);
@@ -339,7 +363,7 @@ public:
 			entry.bagidx   = atoi(row[2]);
 			entry.itemid   = atoi(row[3]);
 			entry.charges  = atoi(row[4]);
-			entry.droptime = row[5] ? row[5] : "";
+			entry.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			entry.augslot1 = atoi(row[6]);
 			entry.augslot2 = atoi(row[7]);
 			entry.augslot3 = atoi(row[8]);

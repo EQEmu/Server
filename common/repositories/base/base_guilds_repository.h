@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseGuildsRepository {
 public:
@@ -49,9 +50,29 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"name",
+			"leader",
+			"minstatus",
+			"motd",
+			"tribute",
+			"motd_setter",
+			"channel",
+			"url",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -63,7 +84,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}

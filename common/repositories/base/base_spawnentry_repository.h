@@ -14,14 +14,19 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseSpawnentryRepository {
 public:
 	struct Spawnentry {
-		int spawngroupID;
-		int npcID;
-		int chance;
-		int condition_value_filter;
+		int         spawngroupID;
+		int         npcID;
+		int         chance;
+		int         condition_value_filter;
+		int         min_expansion;
+		int         max_expansion;
+		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -36,12 +41,35 @@ public:
 			"npcID",
 			"chance",
 			"condition_value_filter",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"spawngroupID",
+			"npcID",
+			"chance",
+			"condition_value_filter",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -53,7 +81,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -75,6 +103,10 @@ public:
 		entry.npcID                  = 0;
 		entry.chance                 = 0;
 		entry.condition_value_filter = 1;
+		entry.min_expansion          = -1;
+		entry.max_expansion          = -1;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -114,6 +146,10 @@ public:
 			entry.npcID                  = atoi(row[1]);
 			entry.chance                 = atoi(row[2]);
 			entry.condition_value_filter = atoi(row[3]);
+			entry.min_expansion          = atoi(row[4]);
+			entry.max_expansion          = atoi(row[5]);
+			entry.content_flags          = row[6] ? row[6] : "";
+			entry.content_flags_disabled = row[7] ? row[7] : "";
 
 			return entry;
 		}
@@ -151,6 +187,10 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(spawnentry_entry.npcID));
 		update_values.push_back(columns[2] + " = " + std::to_string(spawnentry_entry.chance));
 		update_values.push_back(columns[3] + " = " + std::to_string(spawnentry_entry.condition_value_filter));
+		update_values.push_back(columns[4] + " = " + std::to_string(spawnentry_entry.min_expansion));
+		update_values.push_back(columns[5] + " = " + std::to_string(spawnentry_entry.max_expansion));
+		update_values.push_back(columns[6] + " = '" + EscapeString(spawnentry_entry.content_flags) + "'");
+		update_values.push_back(columns[7] + " = '" + EscapeString(spawnentry_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -176,6 +216,10 @@ public:
 		insert_values.push_back(std::to_string(spawnentry_entry.npcID));
 		insert_values.push_back(std::to_string(spawnentry_entry.chance));
 		insert_values.push_back(std::to_string(spawnentry_entry.condition_value_filter));
+		insert_values.push_back(std::to_string(spawnentry_entry.min_expansion));
+		insert_values.push_back(std::to_string(spawnentry_entry.max_expansion));
+		insert_values.push_back("'" + EscapeString(spawnentry_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(spawnentry_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,6 +253,10 @@ public:
 			insert_values.push_back(std::to_string(spawnentry_entry.npcID));
 			insert_values.push_back(std::to_string(spawnentry_entry.chance));
 			insert_values.push_back(std::to_string(spawnentry_entry.condition_value_filter));
+			insert_values.push_back(std::to_string(spawnentry_entry.min_expansion));
+			insert_values.push_back(std::to_string(spawnentry_entry.max_expansion));
+			insert_values.push_back("'" + EscapeString(spawnentry_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(spawnentry_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -246,6 +294,10 @@ public:
 			entry.npcID                  = atoi(row[1]);
 			entry.chance                 = atoi(row[2]);
 			entry.condition_value_filter = atoi(row[3]);
+			entry.min_expansion          = atoi(row[4]);
+			entry.max_expansion          = atoi(row[5]);
+			entry.content_flags          = row[6] ? row[6] : "";
+			entry.content_flags_disabled = row[7] ? row[7] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -274,6 +326,10 @@ public:
 			entry.npcID                  = atoi(row[1]);
 			entry.chance                 = atoi(row[2]);
 			entry.condition_value_filter = atoi(row[3]);
+			entry.min_expansion          = atoi(row[4]);
+			entry.max_expansion          = atoi(row[5]);
+			entry.content_flags          = row[6] ? row[6] : "";
+			entry.content_flags_disabled = row[7] ? row[7] : "";
 
 			all_entries.push_back(entry);
 		}

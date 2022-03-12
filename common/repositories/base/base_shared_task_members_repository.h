@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseSharedTaskMembersRepository {
 public:
@@ -37,9 +38,23 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"shared_task_id",
+			"character_id",
+			"is_leader",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -51,7 +66,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -107,8 +122,8 @@ public:
 		if (results.RowCount() == 1) {
 			SharedTaskMembers entry{};
 
-			entry.shared_task_id = strtoll(row[0], NULL, 10);
-			entry.character_id   = strtoll(row[1], NULL, 10);
+			entry.shared_task_id = strtoll(row[0], nullptr, 10);
+			entry.character_id   = strtoll(row[1], nullptr, 10);
 			entry.is_leader      = atoi(row[2]);
 
 			return entry;
@@ -235,8 +250,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskMembers entry{};
 
-			entry.shared_task_id = strtoll(row[0], NULL, 10);
-			entry.character_id   = strtoll(row[1], NULL, 10);
+			entry.shared_task_id = strtoll(row[0], nullptr, 10);
+			entry.character_id   = strtoll(row[1], nullptr, 10);
 			entry.is_leader      = atoi(row[2]);
 
 			all_entries.push_back(entry);
@@ -262,8 +277,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskMembers entry{};
 
-			entry.shared_task_id = strtoll(row[0], NULL, 10);
-			entry.character_id   = strtoll(row[1], NULL, 10);
+			entry.shared_task_id = strtoll(row[0], nullptr, 10);
+			entry.character_id   = strtoll(row[1], nullptr, 10);
 			entry.is_leader      = atoi(row[2]);
 
 			all_entries.push_back(entry);

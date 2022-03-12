@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseSharedTaskDynamicZonesRepository {
 public:
@@ -35,9 +36,22 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"shared_task_id",
+			"dynamic_zone_id",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -49,7 +63,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -104,7 +118,7 @@ public:
 		if (results.RowCount() == 1) {
 			SharedTaskDynamicZones entry{};
 
-			entry.shared_task_id  = strtoll(row[0], NULL, 10);
+			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
 			entry.dynamic_zone_id = atoi(row[1]);
 
 			return entry;
@@ -228,7 +242,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskDynamicZones entry{};
 
-			entry.shared_task_id  = strtoll(row[0], NULL, 10);
+			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
 			entry.dynamic_zone_id = atoi(row[1]);
 
 			all_entries.push_back(entry);
@@ -254,7 +268,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskDynamicZones entry{};
 
-			entry.shared_task_id  = strtoll(row[0], NULL, 10);
+			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
 			entry.dynamic_zone_id = atoi(row[1]);
 
 			all_entries.push_back(entry);

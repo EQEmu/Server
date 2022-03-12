@@ -134,7 +134,7 @@ public:
 			entry.character_id = atoi(row[1]);
 			entry.task_id      = atoi(row[2]);
 			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4], nullptr, 10);
+			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			return entry;
 		}
@@ -171,7 +171,7 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(character_task_timers_entry.character_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_task_timers_entry.task_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_task_timers_entry.timer_type));
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + std::to_string(character_task_timers_entry.expire_time) + ")");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 		insert_values.push_back(std::to_string(character_task_timers_entry.character_id));
 		insert_values.push_back(std::to_string(character_task_timers_entry.task_id));
 		insert_values.push_back(std::to_string(character_task_timers_entry.timer_type));
-		insert_values.push_back("FROM_UNIXTIME(" + std::to_string(character_task_timers_entry.expire_time) + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -231,7 +231,7 @@ public:
 			insert_values.push_back(std::to_string(character_task_timers_entry.character_id));
 			insert_values.push_back(std::to_string(character_task_timers_entry.task_id));
 			insert_values.push_back(std::to_string(character_task_timers_entry.timer_type));
-			insert_values.push_back("FROM_UNIXTIME(" + std::to_string(character_task_timers_entry.expire_time) + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -269,7 +269,7 @@ public:
 			entry.character_id = atoi(row[1]);
 			entry.task_id      = atoi(row[2]);
 			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4], nullptr, 10);
+			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -298,7 +298,7 @@ public:
 			entry.character_id = atoi(row[1]);
 			entry.task_id      = atoi(row[2]);
 			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4], nullptr, 10);
+			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
