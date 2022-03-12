@@ -165,10 +165,10 @@ void NPC::ResumeWandering()
 
 		if (m_CurrentWayPoint.x == GetX() && m_CurrentWayPoint.y == GetY())
 		{	// are we we at a waypoint? if so, trigger event and start to next
-			std::string buf = fmt::format("{}", cur_wp);
+			std::string export_string = fmt::format("{}", cur_wp);
 			CalculateNewWaypoint();
 			SetAppearance(eaStanding, false);
-			parse->EventNPC(EVENT_WAYPOINT_DEPART, this, nullptr, buf.c_str(), 0);
+			parse->EventNPC(EVENT_WAYPOINT_DEPART, this, nullptr, export_string, 0);
 		}	// if not currently at a waypoint, we continue on to the one we were headed to before the stop
 	}
 	else

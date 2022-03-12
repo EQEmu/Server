@@ -1636,6 +1636,10 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
 			ExportVar(package_name.c_str(), "killed_npc_id", sep.arg[4]);
+			ExportVar(package_name.c_str(), "killed_x", sep.arg[5]);
+			ExportVar(package_name.c_str(), "killed_y", sep.arg[6]);
+			ExportVar(package_name.c_str(), "killed_z", sep.arg[7]);
+			ExportVar(package_name.c_str(), "killed_h", sep.arg[8]);
 			break;
 		}
 		case EVENT_USE_SKILL: {

@@ -161,7 +161,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	std::string buf = fmt::format(
+	std::string export_string = fmt::format(
 		"{} {} {} {}",
 		caster ? caster->GetID() : 0,
 		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
@@ -170,12 +170,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 	);
 
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, buf, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, export_string, 0) != 0) {
 			CalcBonuses();
 			return true;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, buf, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, export_string, 0) != 0) {
 			CalcBonuses();
 			return true;
 		}
@@ -3759,7 +3759,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 	const SPDat_Spell_Struct &spell = spells[buff.spellid];
 
-	std::string buf = fmt::format(
+	std::string export_string = fmt::format(
 		"{} {} {} {}",
 		caster ? caster->GetID() : 0,
 		buffs[slot].ticsremaining,
@@ -3768,11 +3768,11 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 	);
 
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid, buf, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid, export_string, 0) != 0) {
 			return;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, buff.spellid, buf, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, buff.spellid, export_string, 0) != 0) {
 			return;
 		}
 	}
@@ -4106,7 +4106,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
-	std::string buf = fmt::format(
+	std::string export_string = fmt::format(
 		"{} {} {} {}",
 		buffs[slot].casterid,
 		buffs[slot].ticsremaining,
@@ -4115,11 +4115,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	);
 
 	if (IsClient()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, buf, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, export_string, 0) != 0) {
 			return;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, CastToNPC(), nullptr, buffs[slot].spellid, buf, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, CastToNPC(), nullptr, buffs[slot].spellid, export_string, 0) != 0) {
 			return;
 		}
 	}

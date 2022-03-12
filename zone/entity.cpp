@@ -733,8 +733,12 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	if (RuleB(Zone, UseZoneController)) {
 		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
 		if (controller && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
-			std::string data_pass = fmt::format("{} {}", npc->GetID(), npc->GetNPCTypeID());
-			parse->EventNPC(EVENT_SPAWN_ZONE, controller, nullptr, data_pass.c_str(), 0);
+			std::string export_string = fmt::format(
+				"{} {}",
+				npc->GetID(),
+				npc->GetNPCTypeID()
+			);
+			parse->EventNPC(EVENT_SPAWN_ZONE, controller, nullptr, export_string, 0);
 		}
 	}
 
