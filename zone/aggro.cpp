@@ -443,7 +443,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return false;
 	}
 	
-	if (this->IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(IMMUNE_AGGRO_NPC)) {
+	if (IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(IMMUNE_AGGRO_NPC)) {
 		return false;
 	}
 
