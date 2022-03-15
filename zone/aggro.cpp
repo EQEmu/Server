@@ -436,9 +436,9 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		pet_owner->IsClient() &&
 		(
 			!RuleB(Aggro, AggroPlayerPets) ||
-			pet_owner->CastToClient()->GetGM()
+			pet_owner->CastToClient()->GetGM() ||
+			mob->GetSpecialAbility(IMMUNE_AGGRO)
 		)
-		&& !mob->GetSpecialAbility(IMMUNE_AGGRO)
 	) {
 		return false;
 	}
