@@ -455,6 +455,23 @@ XS(XS_Client_GetSpellDmg) {
         XSRETURN(1);
 }
 
+XS(XS_Client_GetHealAmt); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetHealAmt) {
+        dXSARGS;
+        if (items != 1)
+                Perl_croak(aTHX_ "Usage: Client::GetHealAmt(THIS)"); // @categories Stats and Attributes
+        {
+                Client *THIS;
+                uint8 RETVAL;
+                dXSTARG;
+                VALIDATE_THIS_IS_CLIENT;
+                RETVAL = THIS->GetHealAmt();
+                XSprePUSH;
+                PUSHu((UV) RETVAL);
+        }
+        XSRETURN(1);
+}
+
 XS(XS_Client_GetBaseSTR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseSTR) {
 	dXSARGS;
@@ -6223,6 +6240,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetBaseSTR"), XS_Client_GetBaseSTR, file, "$");
 	newXSproto(strcpy(buf, "GetBaseWIS"), XS_Client_GetBaseWIS, file, "$");
 	newXSproto(strcpy(buf, "GetSpellDmg"), XS_Client_GetSpellDmg, file, "$");
+        newXSproto(strcpy(buf, "GetHealAmt"), XS_Client_GetHealAmt, file, "$");
 	newXSproto(strcpy(buf, "GetBecomeNPCLevel"), XS_Client_GetBecomeNPCLevel, file, "$");
 	newXSproto(strcpy(buf, "GetBindHeading"), XS_Client_GetBindHeading, file, "$$");
 	newXSproto(strcpy(buf, "GetBindX"), XS_Client_GetBindX, file, "$$");
