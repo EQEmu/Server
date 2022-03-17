@@ -2285,8 +2285,14 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	Mob *oos = nullptr;
 	if (killer_mob) {
 		oos = killer_mob->GetOwnerOrSelf();
-		std::string buffer = fmt::format("{} {} {} {}", killer_mob->GetID(), damage, spell, static_cast<int>(attack_skill));
-		if (parse->EventNPC(EVENT_DEATH, this, oos, buffer.c_str(), 0) != 0) {
+		std::string export_string = fmt::format(
+			"{} {} {} {}",
+			killer_mob->GetID(),
+			damage,
+			spell,
+			static_cast<int>(attack_skill)
+		);
+		if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
 			if (GetHP() < 0) {
 				SetHP(0);
 			}
@@ -2309,8 +2315,14 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 	else {
-		std::string buffer = fmt::format("{} {} {} {}", 0, damage, spell, static_cast<int>(attack_skill));
-		if (parse->EventNPC(EVENT_DEATH, this, nullptr, buffer.c_str(), 0) != 0) {
+		std::string export_string = fmt::format(
+			"{} {} {} {}",
+			0,
+			damage,
+			spell,
+			static_cast<int>(attack_skill)
+		);
+		if (parse->EventNPC(EVENT_DEATH, this, nullptr, export_string, 0) != 0) {
 			if (GetHP() < 0) {
 				SetHP(0);
 			}
@@ -2704,15 +2716,32 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 	entity_list.UpdateFindableNPCState(this, true);
 
-	std::string buffer = fmt::format("{} {} {} {}", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
-	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, buffer.c_str(), 0);
+	std::string export_string = fmt::format(
+		"{} {} {} {}",
+		killer_mob ? killer_mob->GetID() : 0,
+		damage,
+		spell,
+		static_cast<int>(attack_skill)
+	);
+	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0);
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 	if (RuleB(Zone, UseZoneController)) {
 		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
 		if (controller && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID) {
-			std::string data_pass = fmt::format("{} {} {} {} {}", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), GetNPCTypeID());
-			parse->EventNPC(EVENT_DEATH_ZONE, controller, nullptr, data_pass.c_str(), 0);
+			export_string = fmt::format(
+				"{} {} {} {} {} {:.2f} {:.2f} {:.2f} {:.2f}",
+				killer_mob ? killer_mob->GetID() : 0,
+				damage,
+				spell,
+				static_cast<int>(attack_skill),
+				GetNPCTypeID(),
+				GetX(),
+				GetY(),
+				GetZ(),
+				GetHeading()
+			);
+			parse->EventNPC(EVENT_DEATH_ZONE, controller, nullptr, export_string, 0);
 		}
 	}
 

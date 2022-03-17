@@ -2439,11 +2439,11 @@ void ClientTaskState::AcceptNewTask(
 	client->MessageString(Chat::White, YOU_ASSIGNED_TASK, task->title.c_str());
 
 	task_manager->SaveClientState(client, this);
-	std::string buf = std::to_string(task_id);
+	std::string export_string = std::to_string(task_id);
 
 	NPC *npc = entity_list.GetID(npc_type_id)->CastToNPC();
 	if (npc) {
-		parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, buf.c_str(), 0);
+		parse->EventNPC(EVENT_TASK_ACCEPTED, npc, client, export_string, 0);
 	}
 }
 

@@ -406,7 +406,12 @@ void handle_player_task_fail(QuestInterface *parse, lua_State* L, Client* client
 
 void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<EQ::Any> *extra_pointers) {
-	lua_pushinteger(L, std::stoi(data));
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "from_zone_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
 	lua_setfield(L, -2, "zone_id");
 }
 
