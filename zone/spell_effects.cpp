@@ -1326,6 +1326,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
+				if (RuleB(Spells, RuneUseHealAmt) && (IsClient() || IsBot()))
+					effect_value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, effect_value);
+
 				buffs[buffslot].melee_rune = effect_value;
 				break;
 			}
@@ -1335,6 +1338,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Spell Absorb Rune: %+i", effect_value);
 #endif
+				if (RuleB(Spells, RuneUseHealAmt) && (IsClient() || IsBot()))
+                                        effect_value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, effect_value);
+
 				if(effect_value > 0)
 					buffs[buffslot].magic_rune = effect_value;
 
@@ -1343,31 +1349,61 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_MitigateMeleeDamage:
 			{
-				buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+				if (RuleB(Spells, RuneUseHealAmt) && (IsClient() || IsBot())) {
+					int mv = spells[spell_id].max_value[i];
+                                        mv += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, mv);
+					buffs[buffslot].melee_rune = mv;
+				} else {
+					buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+				}
 				break;
 			}
 
 			case SE_MeleeThresholdGuard:
 			{
-				buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+				if (RuleB(Spells, RuneUseHealAmt) && (IsClient() || IsBot())) {
+                                        int mv = spells[spell_id].max_value[i];
+                                        mv += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, mv);
+                                        buffs[buffslot].melee_rune = mv;
+                                } else {
+                                        buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+                                }
 				break;
 			}
 
 			case SE_SpellThresholdGuard:
 			{
-				buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+				if (RuleB(Spells, RuneUseHealAmt) && (IsClient() || IsBot())) {
+                                        int mv = spells[spell_id].max_value[i];
+                                        mv += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, mv);
+                                        buffs[buffslot].magic_rune = mv;
+                                } else {
+                                        buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+                                }
 				break;
 			}
 
 			case SE_MitigateSpellDamage:
 			{
-				buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+				if (RuleB(Spells, RuneUseHealAmt) && (IsClient() || IsBot())) {
+                                        int mv = spells[spell_id].max_value[i];
+                                        mv += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, mv);
+                                        buffs[buffslot].magic_rune = mv;
+                                } else {
+                                        buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+                                }
 				break;
 			}
 
 			case SE_MitigateDotDamage:
 			{
-				buffs[buffslot].dot_rune = spells[spell_id].max_value[i];
+				if (RuleB(Spells, RuneUseHealAmt) && (IsClient() || IsBot())) {
+                                        int mv = spells[spell_id].max_value[i];
+                                        mv += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, mv);
+                                        buffs[buffslot].dot_rune = mv;
+                                } else {
+                                        buffs[buffslot].dot_rune = spells[spell_id].max_value[i];
+                                }
 				break;
 			}
 
