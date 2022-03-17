@@ -3234,15 +3234,15 @@ int32 QuestManager::GetZoneID(const char *zone) {
 
 std::string QuestManager::GetZoneLongName(std::string zone_short_name)
 {
-	return ZoneLongName(ZoneID(zone_short_name));
+	return ZoneLongName(ZoneID(zone_short_name), true);
 }
 
 std::string QuestManager::GetZoneLongNameByID(uint32 zone_id) {
-	return ZoneLongName(zone_id);
+	return ZoneLongName(zone_id, true);
 }
 
 std::string QuestManager::GetZoneShortName(uint32 zone_id) {
-	return ZoneName(zone_id);
+	return ZoneName(zone_id, true);
 }
 
 bool QuestManager::EnableRecipe(uint32 recipe_id)

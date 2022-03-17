@@ -6057,6 +6057,64 @@ XS(XS_Client_SetInvulnerableEnvironmentDamage) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_AddItem);
+XS(XS_Client_AddItem) {
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: Client::AddItem(THIS, HASHREF item_table)");
+	}
+
+	Client *THIS;
+	VALIDATE_THIS_IS_CLIENT;
+
+	SV* item_table = ST(1);
+	if (!item_table || !SvROK(item_table)) {
+		Perl_croak(aTHX_ "Client::AddItem argument is not a reference type");
+	}
+
+	HV* item_table_hash = (HV*)SvRV(item_table);
+	if (SvTYPE(item_table_hash) != SVt_PVHV) {
+		Perl_croak(aTHX_ "Client::AddItem reference argument is not to a hash type");
+	}
+
+	SV** item_id_ptr = hv_fetchs(item_table_hash, "item_id", false);
+	SV** item_charges_ptr = hv_fetchs(item_table_hash, "charges", false);
+	SV** augment_one_ptr = hv_fetchs(item_table_hash, "augment_one", false);
+	SV** augment_two_ptr = hv_fetchs(item_table_hash, "augment_two", false);
+	SV** augment_three_ptr = hv_fetchs(item_table_hash, "augment_three", false);
+	SV** augment_four_ptr = hv_fetchs(item_table_hash, "augment_four", false);
+	SV** augment_five_ptr = hv_fetchs(item_table_hash, "augment_five", false);
+	SV** augment_six_ptr = hv_fetchs(item_table_hash, "augment_six", false);
+	SV** attuned_ptr = hv_fetchs(item_table_hash, "attuned", false);
+	SV** slot_id_ptr = hv_fetchs(item_table_hash, "slot_id", false);
+	if (item_id_ptr && item_charges_ptr) {
+		uint32 item_id = static_cast<uint32>(SvUV(*item_id_ptr));
+		int16 charges = static_cast<int16>(SvIV(*item_charges_ptr));
+		uint32 augment_one = augment_one_ptr ? static_cast<uint32>(SvUV(*augment_one_ptr)) : 0;
+		uint32 augment_two = augment_two_ptr ? static_cast<uint32>(SvUV(*augment_two_ptr)) : 0;
+		uint32 augment_three = augment_three_ptr ? static_cast<uint32>(SvUV(*augment_three_ptr)) : 0;
+		uint32 augment_four = augment_four_ptr ? static_cast<uint32>(SvUV(*augment_four_ptr)) : 0;
+		uint32 augment_five = augment_five_ptr ? static_cast<uint32>(SvUV(*augment_five_ptr)) : 0;
+		uint32 augment_six = augment_six_ptr ? static_cast<uint32>(SvUV(*augment_six_ptr)) : 0;
+		bool attuned = attuned_ptr ? static_cast<bool>(SvTRUE(*attuned_ptr)) : false;
+		uint16 slot_id = slot_id_ptr ? static_cast<uint16>(SvUV(*slot_id_ptr)) : EQ::invslot::slotCursor;
+		THIS->SummonItem(
+			item_id,
+			charges,
+			augment_one,
+			augment_two,
+			augment_three,
+			augment_four,
+			augment_five,
+			augment_six,
+			attuned,
+			slot_id
+		);
+	}
+	
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6082,6 +6140,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddExpeditionLockout"), XS_Client_AddExpeditionLockout, file, "$$$$;$");
 	newXSproto(strcpy(buf, "AddExpeditionLockoutDuration"), XS_Client_AddExpeditionLockoutDuration, file, "$$$$;$");
+	newXSproto(strcpy(buf, "AddItem"), XS_Client_AddItem, file, "$$");
 	newXSproto(strcpy(buf, "AddLDoNLoss"), XS_Client_AddLDoNLoss, file, "$$");
 	newXSproto(strcpy(buf, "AddLDoNWin"), XS_Client_AddLDoNWin, file, "$$");
 	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");

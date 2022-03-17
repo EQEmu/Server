@@ -237,7 +237,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	std::string export_string = fmt::format("{}", spell_id);
+	std::string export_string = fmt::format(
+		"{} {} {}",
+		spell_id,
+		GetID(),
+		GetCasterLevel(spell_id)
+	);
 	if(IsClient()) {
 		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), export_string, 0) != 0) {
 			if (IsDiscipline(spell_id)) {
@@ -1651,7 +1656,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// at this point the spell has successfully been cast
 	//
 
-	std::string export_string = fmt::format("{}", spell_id);
+	std::string export_string = fmt::format(
+		"{} {} {}",
+		spell_id,
+		GetID(),
+		GetCasterLevel(spell_id)
+	);
 	if(IsClient()) {
 		parse->EventPlayer(EVENT_CAST, CastToClient(), export_string, 0);
 	} else if(IsNPC()) {
