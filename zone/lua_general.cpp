@@ -365,11 +365,11 @@ bool lua_has_timer(const char *timer) {
 	return quest_manager.hastimer(timer);
 }
 
-bool lua_get_remaining_time(const char *timer) {
+uint32 lua_get_remaining_time(const char *timer) {
 	return quest_manager.getremainingtimeMS(timer);
 }
 
-bool lua_get_timer_duration(const char *timer) {
+uint32 lua_get_timer_duration(const char *timer) {
 	return quest_manager.gettimerdurationMS(timer);
 }
 
