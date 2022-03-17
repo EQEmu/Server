@@ -748,17 +748,54 @@ bool QuestManager::hastimer(const char *timer_name) {
 	{
 		if (cur->mob && cur->mob == owner && cur->name == timer_name)
 		{
-			entity_list.Message(0, 15, "Check %i Remain Time %i .. GetTimeSec %i ... Duration %i", cur->Timer_.Enabled(), cur->Timer_.GetRemainingTime(), cur->Timer_.GetTimeSeconds(), cur->Timer_.GetDuration());
 			if (cur->Timer_.Enabled())
 			{
-				entity_list.Message(0, 15, "Pass");
 				return true;
 			}
 		}
 		++cur;
 	}
-	entity_list.Message(0, 15, "FAIL");
 	return false;
+}
+
+uint32 QuestManager::getremainingtimeMS(const char *timer_name) {
+	QuestManagerCurrentQuestVars();
+
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end)
+	{
+		if (cur->mob && cur->mob == owner && cur->name == timer_name)
+		{
+			if (cur->Timer_.Enabled())
+			{
+				return cur->Timer_.GetRemainingTime();
+			}
+		}
+		++cur;
+	}
+	return 0;
+}
+
+uint32 QuestManager::gettimerdurationMS(const char *timer_name) {
+	QuestManagerCurrentQuestVars();
+
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end)
+	{
+		if (cur->mob && cur->mob == owner && cur->name == timer_name)
+		{
+			if (cur->Timer_.Enabled())
+			{
+				return cur->Timer_.GetDuration();
+			}
+		}
+		++cur;
+	}
+	return 0;
 }
 
 void QuestManager::emote(const char *str) {
