@@ -590,6 +590,22 @@ XS(XS__zoneraid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__hastimer);
+XS(XS__hastimer) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::hastimer(string timer_name)");
+
+	bool RETVAL;
+	char *timer_name = (char *)SvPV_nolen(ST(0));
+
+	RETVAL = quest_manager.hastimer(timer_name);
+
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
+	XSRETURN(1);
+}
+
 XS(XS__settimer);
 XS(XS__settimer) {
 	dXSARGS;
@@ -8454,6 +8470,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
 	newXS(strcpy(buf, "gmsay"), XS__gmsay, file);
 	newXS(strcpy(buf, "has_zone_flag"), XS__has_zone_flag, file);
+	newXS(strcpy(buf, "hastimer"), XS__hastimer, file);
 	newXS(strcpy(buf, "incstat"), XS__incstat, file);
 	newXS(strcpy(buf, "isdisctome"), XS__isdisctome, file);
 	newXS(strcpy(buf, "isdooropen"), XS__isdooropen, file);

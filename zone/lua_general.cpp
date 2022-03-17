@@ -361,6 +361,10 @@ bool lua_is_paused_timer(const char *timer) {
 	return quest_manager.ispausedtimer(timer);
 }
 
+bool lua_has_timer(const char *timer) {
+	return quest_manager.hastimer(timer);
+}
+
 void lua_depop() {
 	quest_manager.depop(0);
 }
