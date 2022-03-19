@@ -106,5 +106,5 @@ void command_peqzone(Client *c, const Seperator *sep)
 		c->GetPTimers().Start(pTimerPeqzoneReuse, reuse_timer);
 	}
 
-	c->MovePC(zone_id, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+	c->MoveZone(zone_short_name);
 }
