@@ -397,7 +397,7 @@ void QuestManager::Zone(const char *zone_name) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
 	{
-		initiator->ProcessMovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+		initiator->MovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
 	}
 }
 
@@ -405,13 +405,13 @@ void QuestManager::ZoneGroup(const char *zone_name) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient()) {
 		if (!initiator->GetGroup()) {
-			initiator->ProcessMovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+			initiator->MovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
 		} else {
 			auto client_group = initiator->GetGroup();
 			for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 				if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 					auto group_member = client_group->members[member_index]->CastToClient();
-					group_member->ProcessMovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+					group_member->MovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
 				}
 			}
 		}
@@ -422,13 +422,13 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient()) {
 		if (!initiator->GetRaid()) {
-			initiator->ProcessMovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+			initiator->MovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
 		} else {
 			auto client_raid = initiator->GetRaid();
 			for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 				if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
 					auto raid_member = client_raid->members[member_index].member->CastToClient();
-					raid_member->ProcessMovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+					raid_member->MovePC(ZoneID(zone_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
 				}
 			}
 		}
