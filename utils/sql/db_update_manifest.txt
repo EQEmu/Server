@@ -429,7 +429,7 @@
 9173|2021_09_14_zone_lava_damage.sql|SHOW COLUMNS FROM `zone` LIKE 'lava_damage'|empty|
 9174|2021_10_09_not_null_door_columns.sql|SELECT * FROM db_version WHERE version >= 9174|empty|
 9175|2022_01_02_expansion_default_value_all.sql|SHOW COLUMNS FROM `forage` LIKE 'min_expansion'|contains|unsigned
-9176|2022_01_10_checksum_verification.sql|SHOW COLUMNS FROM `account` LIKE 'checksum_crc1_eqgame'|empty|
+9176|2022_01_10_checksum_verification.sql|SHOW COLUMNS FROM `account` LIKE 'crc_eqgame'|empty|
 9177|2022_03_06_table_structure_changes.sql|SHOW COLUMNS FROM `pets` LIKE 'id'|empty|
 9178|2022_03_07_saylink_collation.sql|SELECT * FROM db_version WHERE version >= 9178|empty|
 
