@@ -1346,6 +1346,34 @@ XS(XS_EntityList_GetBotList) {
 	}
 	XSRETURN(bot_count);
 }
+
+XS(XS_EntityList_GetBotListByClientName);
+XS(XS_EntityList_GetBotListByClientName) {
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: EntityList::GetBotListByClientName(THIS, string client_name)"); // @categories Script Utility, Bot
+	}
+
+	EntityList *THIS;
+	std::string client_name = (std::string) SvPV_nolen(ST(1));
+	VALIDATE_THIS_IS_ENTITY;
+
+	auto current_bot_list = THIS->GetBotListByClientName(client_name);
+	auto bot_count = current_bot_list.size();
+
+    if (bot_count > 0) {
+        EXTEND(sp, bot_count);
+        for (int index = 0; index < bot_count; ++index) {
+            ST(index) = sv_newmortal();
+			sv_setref_pv(ST(index), "Bot", (void *) current_bot_list[index]);
+			XPUSHs(ST(index));
+        }
+        XSRETURN(bot_count);
+    }
+    SV* return_value = &PL_sv_undef;
+    ST(0) = return_value;
+    XSRETURN(1);
+}
 #endif
 
 XS(XS_EntityList_GetNPCList); /* prototype to pass -Wmissing-prototypes */
@@ -1548,6 +1576,7 @@ XS(boot_EntityList) {
 	newXSproto(strcpy(buf, "GetBotByID"), XS_EntityList_GetBotByID, file, "$$");
 	newXSproto(strcpy(buf, "GetBotByName"), XS_EntityList_GetBotByName, file, "$$");
 	newXSproto(strcpy(buf, "GetBotList"), XS_EntityList_GetBotList, file, "$");
+	newXSproto(strcpy(buf, "GetBotListByClientName"), XS_EntityList_GetBotListByClientName, file, "$$");
 #endif
 	newXSproto(strcpy(buf, "GetClientByAccID"), XS_EntityList_GetClientByAccID, file, "$$");
 	newXSproto(strcpy(buf, "GetClientByCharID"), XS_EntityList_GetClientByCharID, file, "$$");
