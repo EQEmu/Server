@@ -526,6 +526,7 @@ public:
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
 #ifdef BOTS
 	inline const std::list<Bot *> &GetBotList() { return bot_list; }
+	std::vector<Bot *> GetBotListByClientName(std::string client_name);
 #endif
 	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
