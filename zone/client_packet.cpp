@@ -3004,6 +3004,11 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						return;
 					}
 
+					if (user_inv.HasAugmentEquippedByID(new_aug->GetID()) && (in_augment->container_slot > EQ::invslot::EQUIPMENT_BEGIN && in_augment->container_slot < EQ::invslot::EQUIPMENT_END)) {
+						Message(Chat::Red, "You already have an augmentation of that type equipped");
+						return;
+					}
+
 					if (
 						((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) != -1) &&
 						tobe_auged->AvailableWearSlot(new_aug->GetItem()->Slots)

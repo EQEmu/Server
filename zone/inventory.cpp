@@ -2193,7 +2193,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				fail_message = "Your class, deity and/or race may not equip that item.";
 			else if (fail_state == EQ::InventoryProfile::swapLevel)
 				fail_message = "You are not sufficient level to use this item.";
-
+			else if (fail_state == EQ::InventoryProfile::swapItemLore)
+				fail_message = "You already have a version of this item equipped.";
+			else if (fail_state == EQ::InventoryProfile::swapAugLore)
+                                fail_message = "You already have a version of one of the augmentations slotted in this item equipped.";
 			if (fail_message)
 				Message(Chat::Red, "%s", fail_message);
 
@@ -2301,7 +2304,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	// resync the 'from' and 'to' slots on an as-needed basis
 	// Not as effective as the full process, but less intrusive to gameplay
 	LogInventory("Inventory desyncronization. (charname: [{}], source: [{}], destination: [{}])", GetName(), move_slots->from_slot, move_slots->to_slot);
-	Message(Chat::Yellow, "Inventory Desyncronization detected: Resending slot data...");
+	//Message(Chat::Yellow, "Inventory Desyncronization detected: Resending slot data...");
 
 	if (move_slots->from_slot >= EQ::invslot::EQUIPMENT_BEGIN && move_slots->from_slot <= EQ::invbag::CURSOR_BAG_END) {
 		int16 resync_slot = (EQ::InventoryProfile::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : EQ::InventoryProfile::CalcSlotId(move_slots->from_slot);
@@ -2324,7 +2327,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				safe_delete(outapp);
 			}
 			safe_delete(token_inst);
-			Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
+			//Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
 		}
 		else { Message(Chat::Red, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 	}
@@ -2339,7 +2342,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
 
 				safe_delete(token_inst);
-				Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
+				//Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
 			}
 			else { Message(Chat::Red, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 		}
@@ -2366,7 +2369,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				safe_delete(outapp);
 			}
 			safe_delete(token_inst);
-			Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
+			//Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
 		}
 		else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 	}
@@ -2381,7 +2384,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
 
 				safe_delete(token_inst);
-				Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
+				//Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
 			}
 			else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 		}

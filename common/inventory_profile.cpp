@@ -361,6 +361,20 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapLevel;
 				return false;
 			}
+			if (HasItemEquippedByID(source_item->ID)) {
+				fail_state = swapItemLore;
+				return false;
+			}
+			if (source_item_instance->IsAugmented()) {
+				for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
+					if (source_item_instance->GetAugment(i)) {
+						if (HasAugmentEquippedByID(source_item_instance->GetAugment(i)->GetID())) {
+							fail_state = swapAugLore;
+							return false;
+						}
+					}
+				}
+			}
 		}
 	}
 
