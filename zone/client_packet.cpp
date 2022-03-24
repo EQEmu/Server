@@ -3004,7 +3004,8 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						return;
 					}
 
-					if (user_inv.HasAugmentEquippedByID(new_aug->GetID()) && (in_augment->container_slot > EQ::invslot::EQUIPMENT_BEGIN && in_augment->container_slot < EQ::invslot::EQUIPMENT_END)) {
+					if (RuleB(Inventory,AllowOnlyOneInstanceEquipped) &&
+					    user_inv.HasAugmentEquippedByID(new_aug->GetID()) && (in_augment->container_slot > EQ::invslot::EQUIPMENT_BEGIN && in_augment->container_slot < EQ::invslot::EQUIPMENT_END)) {
 						Message(Chat::Red, "You already have an augmentation of that type equipped");
 						return;
 					}
