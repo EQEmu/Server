@@ -23,7 +23,7 @@
 //#include "global_define.h"
 //#include "item_instance.h"
 //#include "races.h"
-//#include "rulesys.h"
+#include "rulesys.h"
 //#include "shareddb.h"
 #include "string_util.h"
 
@@ -600,6 +600,24 @@ bool EQ::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Quan
 	return false;
 
 }
+
+// Returns the slotid for the item containing the specified augment ID
+int EQ::InventoryProfile::GetEquipByAugmentID(uint32 item_id)
+{
+        int has_equipped = 0;
+        ItemInstance* item = nullptr;
+
+        for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+                item = GetItem(slot_id);
+                if (item && item->ContainsAugmentByID(item_id)) {
+                        has_equipped = slot_id;
+                        break;
+                }
+        }
+
+        return has_equipped;
+}
+
 
 // Checks that user has at least 'quantity' number of items in a given inventory slot
 // Returns first slot it was found in, or SLOT_INVALID if not found

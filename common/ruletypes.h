@@ -756,7 +756,7 @@ RULE_BOOL(Inventory, DeleteTransformationMold, true, "False if you want mold to 
 RULE_BOOL(Inventory, AllowAnyWeaponTransformation, false, "Weapons can use any weapon transformation")
 RULE_BOOL(Inventory, TransformSummonedBags, false, "Transforms summoned bags into disenchanted ones instead of deleting")
 RULE_BOOL(Inventory, AllowMultipleOfSameAugment, false, "Allows multiple of the same augment to be placed in an item via #augmentitem or MQ2, set to true to allow")
-RULE_BOOL(Inventory, AllowOnlyOneInstanceEquipped, false "Allows players to only equip one example of any given item or augment. If IgnoreLoreFlags is true, players will only be allowed to equip one item from any given Lore Group. If CloneItemIDOffset is set, matching items will be regarded as 'the same' as their parent item.")
+RULE_BOOL(Inventory, AllowOnlyOneInstanceEquipped, false, "Allows players to only equip one example of any given item or augment. If IgnoreLoreFlags is true, players will only be allowed to equip one item from any given Lore Group. If CloneItemIDOffset is set, matching items will be regarded as 'the same' as their parent item.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)

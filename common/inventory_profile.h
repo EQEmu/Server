@@ -152,6 +152,9 @@ namespace EQ
 		// Check how many of a specific augment the player has equipped by Item ID
 		int CountAugmentEquippedByID(uint32 item_id);
 
+		// Return SlotID of the Item containing this augment ID
+		int GetEquipByAugmentID(uint32 item_id);
+
 		// Check whether there is space for the specified number of the specified item.
 		bool HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity);
 
