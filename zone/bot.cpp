@@ -4269,7 +4269,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		int16 toBotSlot;
 		int adjustStackSize;
 		std::string acceptedItemName;
-		
+
 		ClientTrade(const ItemInstance* item, int16 from, const char* name = "") : tradeItemInstance(item), fromClientSlot(from), toBotSlot(invslot::SLOT_INVALID), adjustStackSize(0), acceptedItemName(name) { }
 	};
 
@@ -4279,7 +4279,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		int16 toClientSlot;
 		int adjustStackSize;
 		std::string failedItemName;
-		
+
 		ClientReturn(const ItemInstance* item, int16 from, const char* name = "") : returnItemInstance(item), fromBotSlot(from), toClientSlot(invslot::SLOT_INVALID), adjustStackSize(0), failedItemName(name) { }
 	};
 
@@ -4293,7 +4293,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	};
 
 	enum { stageStackable = 0, stageEmpty, stageReplaceable };
-	
+
 	if (!client) {
 		Emote("NO CLIENT");
 		return;
@@ -4361,6 +4361,23 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			client->ResetTrade();
 			return;
 		}
+
+		if (RuleB(Inventory,AllowOnlyOneInstanceEquipped)) {
+			if (m_inv.HasItemEquippedByID(trade_instance->GetID())) {
+				client->Message(Chat::Yellow, "This bot already has a version of this item equipped.");
+				return;
+			}
+
+			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
+				if (trade_instance->GetAugment(i)) {
+					if (m_inv.HasAugmentEquippedByID(trade_instance->GetAugment(i)->GetID())) {
+						client->Message(Chat::Yellow, "This bot already has a version of this agument equipped.");
+						return;
+					}
+				}
+			}
+		}
+
 
 		if (!trade_instance->IsType(item::ItemClassCommon)) {
 			client_return.push_back(ClientReturn(trade_instance, trade_index, trade_instance->GetItem()->Name));
