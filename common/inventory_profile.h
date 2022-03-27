@@ -128,7 +128,7 @@ namespace EQ
 		ItemInstance* GetCursorItem();
 
 		// Swap items in inventory
-		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel };
+		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel, swapItemLore, swapAugLore };
 		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
 
 		// Remove item from inventory
@@ -151,6 +151,9 @@ namespace EQ
 
 		// Check how many of a specific augment the player has equipped by Item ID
 		int CountAugmentEquippedByID(uint32 item_id);
+
+		// Return SlotID of the Item containing this augment ID
+		int GetEquipByAugmentID(uint32 item_id);
 
 		// Check whether there is space for the specified number of the specified item.
 		bool HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity);
