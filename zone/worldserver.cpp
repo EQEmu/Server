@@ -3369,7 +3369,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 	uint16 player_race = GetPlayerRaceValue(From->GetRace());
 
 	if (player_race == PLAYER_RACE_UNKNOWN) {
-		player_race = From->GetRace();
+		player_race = From->GetBaseRace();
 	}
 
 	svm->Voice = (player_race * 2) + From->GetGender();
