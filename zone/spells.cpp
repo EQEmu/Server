@@ -4137,7 +4137,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 				Mob::CLIENT_CONNECTINGALL, FilterPCSpells);
 		}
 		// Show the "you feel your life force drain away" on target client...
-		if (spelltar->IsClient()) {
+		if (IsLifetapSpell(spell_id) && spelltar->IsClient()) {
 			spelltar->CastToClient()->QueuePacket(message_packet, true,
 				Mob::CLIENT_CONNECTINGALL,
 				(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells));
