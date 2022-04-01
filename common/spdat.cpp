@@ -1473,6 +1473,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_ImprovedInvisAnimals:
 		case SE_SeeInvis:
 		case SE_Levitate:
+		case SE_WaterBreathing:
 			return false;
 		default:
 			return true;
