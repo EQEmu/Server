@@ -1465,6 +1465,14 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_BardSongRange:
 		case SE_TemporaryPets:
 		case SE_SpellOnDeath:
+		case SE_Invisibility:
+		case SE_Invisibility2:
+		case SE_InvisVsUndead:
+		case SE_InvisVsUndead2:
+		case SE_InvisVsAnimals:
+		case SE_ImprovedInvisAnimals:
+		case SE_SeeInvis:
+		case SE_Levitate:
 			return false;
 		default:
 			return true;
