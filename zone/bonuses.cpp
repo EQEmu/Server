@@ -3847,6 +3847,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_InvisVsAnimals:
+			case SE_ImprovedInvisAnimals:
 				effect_value = std::min({ effect_value, MAX_INVISIBILTY_LEVEL });
 				if (new_bonus->invisibility_verse_animal < effect_value)
 					new_bonus->invisibility_verse_animal = effect_value;
