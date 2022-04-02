@@ -12877,11 +12877,20 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 
 	SetTitle_Struct *sts = (SetTitle_Struct *)app->pBuffer;
 
-	if (!title_manager.HasTitle(this, sts->title_id)) {
+	if (sts->title_id && !title_manager.HasTitle(this, sts->title_id)) {
 		return;
 	}
 
-	std::string title = !sts->is_suffix ? title_manager.GetPrefix(sts->title_id) : title_manager.GetSuffix(sts->title_id);
+	std::string title = (
+		sts->title_id ?
+		(
+			!sts->is_suffix ?
+			title_manager.GetPrefix(sts->title_id) :
+			title_manager.GetSuffix(sts->title_id)
+		) :
+		""
+	);
+
 	if (!sts->is_suffix) {
 		SetAATitle(title.c_str());
 	} else {
