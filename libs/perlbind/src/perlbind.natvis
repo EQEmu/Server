@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="perlbind::scalar">
+    <AlternativeType Name="perlbind::reference" />
+    <DisplayString>{{ m_sv={(void*)m_sv} refcnt={m_sv->sv_refcnt,d} type={(svtype)(m_sv->sv_flags &amp; 0xff),d} }}</DisplayString>
+    <Expand>
+      <ExpandedItem>m_sv</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="perlbind::array">
+    <DisplayString Condition="m_av != nullptr">{{ size={(m_av->sv_any)->xav_fill + 1,d} refcnt={m_av->sv_refcnt,d} }</DisplayString>
+    <Expand>
+      <ExpandedItem>m_av</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="perlbind::hash">
+    <DisplayString Condition="m_hv != nullptr">{{ size={(m_hv->sv_any)->xhv_keys,d} refcnt={m_hv->sv_refcnt,d} }}</DisplayString>
+    <Expand>
+      <ExpandedItem>m_hv</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="sv">
+    <AlternativeType Name="cv" />
+    <DisplayString>{{ refcnt={sv_refcnt,d} type={(svtype)(sv_flags &amp; 0xff),d} }}</DisplayString>
+    <Expand>
+      <Item Name="[refcnt]">sv_refcnt,d</Item>
+      <Item Name="[type]">(svtype)(sv_flags &amp; 0xff),d</Item>
+      <Item Name="[reference]" Condition="(sv_flags &amp; 0x00000800)">sv_u.svu_rv</Item>
+      <!-- SVt_PVAV -->
+      <Item Name="[array]" Condition="((svtype)(sv_flags &amp; 0xff)) == 11">(av*)this</Item>
+      <!-- SVt_PVHV -->
+      <Item Name="[hash]" Condition="((svtype)(sv_flags &amp; 0xff)) == 12">(hv*)this</Item>
+      <!-- SVt_PVGV -->
+      <Item Name="[glob]" Condition="((svtype)(sv_flags &amp; 0xff)) == 9">(gv*)this</Item>
+      <!-- SVt_PVMG -->
+      <Item Name="[magic]" Condition="((svtype)(sv_flags &amp; 0xff)) == 7">((XPVMG*)(sv_any))</Item>
+      <!--<ExpandedItem>sv_u</ExpandedItem>-->
+      <Item Name="svu_pv">sv_u.svu_pv,na</Item>
+      <Item Name="svu_iv">sv_u.svu_iv,i</Item>
+      <Item Name="svu_uv">sv_u.svu_uv</Item>
+      <Item Name="svu_nv">sv_u.svu_nv,f</Item>
+      <Item Name="svu_rv">sv_u.svu_rv</Item>
+    </Expand>
+  </Type>
+  <Type Name="av">
+    <!--
+    These might be dependent on perl version
+    #define AvARRAY(av)	((av)->sv_u.svu_array)
+    #define AvALLOC(av)	((XPVAV*)  SvANY(av))->xav_alloc
+    #define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
+    #define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill
+    -->
+    <DisplayString>{{ size={(sv_any)->xav_fill + 1,d} refcnt={sv_refcnt,d} type={(svtype)(sv_flags &amp; 0xff),d} }</DisplayString>
+    <Expand>
+      <Item Name="[refcnt]">sv_refcnt,d</Item>
+      <Item Name="[size]">(sv_any)->xav_fill + 1</Item>
+      <Item Name="[capacity]">(sv_any)->xav_max</Item>
+      <ArrayItems>
+        <Size>(sv_any)->xav_fill + 1</Size>
+        <ValuePointer>(sv_u).svu_array</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="hv">
+    <!--
+    These might be dependent on perl version
+    SvANY(hv): (m_hv->sv_any)
+    HvMAX(hv): ((m_hv->sv_any)->xhv_max
+    HvARRAY(hv): ((m_hv->sv_u).svu_hash
+    HvAUX(hv): (xpvhv_aux*)&(((m_hv->sv_u)->svu_hash)[((m_hv->sv_any)->xhv_max + 1]
+    -->
+    <DisplayString>{{ size={(sv_any)->xhv_keys,d} refcnt={sv_refcnt,d} type={(svtype)(sv_flags &amp; 0xff),d} }}</DisplayString>
+    <Expand>
+      <Item Name="[refcnt]">sv_refcnt,d</Item>
+      <Item Name="[size]">(sv_any)->xhv_keys</Item>
+      <Item Name="[capacity]">(sv_any)->xhv_max</Item>
+      <CustomListItems MaxItemsPerView="5000">
+        <Variable Name="index" InitialValue="0"/>
+        <Variable Name="bucket_inc" InitialValue="0"/>
+        <Variable Name="max_index" InitialValue="(sv_any)->xhv_max"/>
+        <Variable Name="bucket_array" InitialValue="(sv_u).svu_hash"/>
+        <Variable Name="entry" InitialValue="(sv_u).svu_hash[0]"/>
+
+        <Loop>
+          <If Condition="entry == nullptr">
+            <Exec>index++</Exec>
+            <Exec>bucket_inc = __findnonnull(bucket_array + index, max_index - index)</Exec>
+            <Break Condition="bucket_inc == -1" />
+            <Exec>index += bucket_inc</Exec>
+            <Exec>entry = bucket_array[index]</Exec>
+          </If>
+          <Item Name="[{ (entry->hent_hek)->hek_key,na }]">(entry->he_valu).hent_val</Item>
+          <Exec>entry = entry->hent_next</Exec>
+        </Loop>
+
+      </CustomListItems>
+    </Expand>
+  </Type>
+  <Type Name="gv">
+    <DisplayString>{{ refcnt={sv_refcnt,d} type={(svtype)(sv_flags &amp; 0xff),d} }}</DisplayString>
+    <Expand>
+      <Item Name="[refcnt]">sv_refcnt,d</Item>
+      <Item Name="[type]">(svtype)(sv_flags &amp; 0xff),d</Item>
+      <Item Name="[sv]" Condition="(sv_u.svu_gp)->gp_sv != nullptr">(sv_u.svu_gp)->gp_sv</Item>
+      <Item Name="[cv]" Condition="(sv_u.svu_gp)->gp_cv != nullptr">(sv_u.svu_gp)->gp_cv</Item>
+      <Item Name="[array]" Condition="(sv_u.svu_gp)->gp_av != nullptr">(sv_u.svu_gp)->gp_av</Item>
+      <Item Name="[hash]" Condition="(sv_u.svu_gp)->gp_hv != nullptr">(sv_u.svu_gp)->gp_hv</Item>
+      <Item Name="svu_gp">(sv_u.svu_gp)</Item>
+    </Expand>
+  </Type>
+</AutoVisualizer>
