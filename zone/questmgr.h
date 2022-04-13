@@ -94,6 +94,9 @@ public:
 	void pausetimer(const char *timer_name);
 	void resumetimer(const char *timer_name);
 	bool ispausedtimer(const char *timer_name);
+	bool hastimer(const char *timer_name);
+	uint32 getremainingtimeMS(const char *timer_name);
+	uint32 gettimerdurationMS(const char *timer_name);
 	void emote(const char *str);
 	void shout(const char *str);
 	void shout2(const char *str);

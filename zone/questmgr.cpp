@@ -683,6 +683,66 @@ bool QuestManager::ispausedtimer(const char *timer_name) {
 	return false;
 }
 
+bool QuestManager::hastimer(const char *timer_name) {
+	QuestManagerCurrentQuestVars();
+
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end)
+	{
+		if (cur->mob && cur->mob == owner && cur->name == timer_name)
+		{
+			if (cur->Timer_.Enabled())
+			{
+				return true;
+			}
+		}
+		++cur;
+	}
+	return false;
+}
+
+uint32 QuestManager::getremainingtimeMS(const char *timer_name) {
+	QuestManagerCurrentQuestVars();
+
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end)
+	{
+		if (cur->mob && cur->mob == owner && cur->name == timer_name)
+		{
+			if (cur->Timer_.Enabled())
+			{
+				return cur->Timer_.GetRemainingTime();
+			}
+		}
+		++cur;
+	}
+	return 0;
+}
+
+uint32 QuestManager::gettimerdurationMS(const char *timer_name) {
+	QuestManagerCurrentQuestVars();
+
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end)
+	{
+		if (cur->mob && cur->mob == owner && cur->name == timer_name)
+		{
+			if (cur->Timer_.Enabled())
+			{
+				return cur->Timer_.GetDuration();
+			}
+		}
+		++cur;
+	}
+	return 0;
+}
+
 void QuestManager::emote(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!owner) {
