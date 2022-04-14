@@ -1682,22 +1682,27 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 
 	c->Message(Chat::White, "------------------------------------------------");
 	c->Message(
-		Chat::White, "# [%s] | task_id [%i] title [%s] slot (%i)",
-		Tasks::GetTaskTypeDescription(task_data->type).c_str(),
-		task->task_id,
-		task_data->title.c_str(),
-		task->slot
+		Chat::White,
+		fmt::format(
+			"Task {} | Title: {} ID: {} Type: {}",
+			task->slot,
+			task_data->title,
+			task->task_id,
+			Tasks::GetTaskTypeDescription(task_data->type)
+		).c_str()
 	);
 	c->Message(Chat::White, "------------------------------------------------");
 	c->Message(
 		Chat::White,
-		" -- Description [%s]\n",
-		task_data->description.c_str()
+		fmt::format(
+			"Description | {}",
+			task_data->description
+		).c_str()
 	);
 
 	for (int activity_id = 0; activity_id < task_manager->GetActivityCount(task->task_id); activity_id++) {
-		std::vector<std::string> update_increments = {"1", "5", "50"};
-		std::string              update_saylinks;
+		std::vector<std::string> update_increments = { "1", "5", "10", "20", "50" };
+		std::vector<std::string> update_saylinks;
 
 		for (auto &increment: update_increments) {
 			auto task_update_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
@@ -1711,17 +1716,19 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 				increment
 			);
 
-			update_saylinks += "[" + task_update_saylink + "] ";
+			update_saylinks.push_back(task_update_saylink);
 		}
 
 		c->Message(
 			Chat::White,
-			" --- Update %s activity_id [%i] done_count [%i] state [%d] (%s)",
-			update_saylinks.c_str(),
-			task->activity[activity_id].activity_id,
-			task->activity[activity_id].done_count,
-			task->activity[activity_id].activity_state,
-			Tasks::GetActivityStateDescription(task->activity[activity_id].activity_state).c_str()
+			fmt::format(
+				"Activity {} | Count: {} State: {} ({}) [{}]",
+				task->activity[activity_id].activity_id,
+				task->activity[activity_id].done_count,
+				task->activity[activity_id].activity_state,
+				Tasks::GetActivityStateDescription(task->activity[activity_id].activity_state),
+				implode(" | ", update_saylinks)
+			).c_str()
 		);
 	}
 }
@@ -1729,8 +1736,15 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 void ClientTaskState::ShowClientTasks(Client *client)
 {
 	client->Message(Chat::White, "------------------------------------------------");
-	client->Message(Chat::White, "# Task Information | Client [%s]", client->GetCleanName());
-//	client->Message(Chat::White, "------------------------------------------------");
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"Task Information for {} ({})",
+			client->GetCleanName(),
+			client->GetID()
+		).c_str()
+	);
+
 	if (m_active_task.task_id != TASKSLOTEMPTY) {
 		ShowClientTaskInfoMessage(&m_active_task, client);
 	}
