@@ -139,11 +139,13 @@ bool IsEvacSpell(uint16 spellid)
 
 bool IsDamageSpell(uint16 spellid)
 {
+	if (spells[spellid].target_type == ST_Tap)
+		return false;
+
 	for (int o = 0; o < EFFECT_COUNT; o++) {
 		uint32 tid = spells[spellid].effect_id[o];
-		if ((tid == SE_CurrentHPOnce || tid == SE_CurrentHP) &&
-				spells[spellid].target_type != ST_Tap && spells[spellid].buff_duration < 1 &&
-				spells[spellid].base_value[o] < 0)
+		if (spells[spellid].base_value[o] < 0 &&
+			((tid == SE_CurrentHPOnce) || (tid == SE_CurrentHP && spells[spellid].buff_duration < 1)))
 			return true;
 	}
 
@@ -1465,6 +1467,17 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_BardSongRange:
 		case SE_TemporaryPets:
 		case SE_SpellOnDeath:
+		case SE_Invisibility:
+		case SE_Invisibility2:
+		case SE_InvisVsUndead:
+		case SE_InvisVsUndead2:
+		case SE_InvisVsAnimals:
+		case SE_ImprovedInvisAnimals:
+		case SE_SeeInvis:
+		case SE_Levitate:
+		case SE_WaterBreathing:
+		case SE_ModelSize:
+		case SE_ChangeHeight:
 			return false;
 		default:
 			return true;

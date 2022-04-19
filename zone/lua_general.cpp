@@ -361,6 +361,18 @@ bool lua_is_paused_timer(const char *timer) {
 	return quest_manager.ispausedtimer(timer);
 }
 
+bool lua_has_timer(const char *timer) {
+	return quest_manager.hastimer(timer);
+}
+
+uint32 lua_get_remaining_time(const char *timer) {
+	return quest_manager.getremainingtimeMS(timer);
+}
+
+uint32 lua_get_timer_duration(const char *timer) {
+	return quest_manager.gettimerdurationMS(timer);
+}
+
 void lua_depop() {
 	quest_manager.depop(0);
 }
@@ -3583,6 +3595,9 @@ luabind::scope lua_register_general() {
 		luabind::def("spawn_from_spawn2", (Lua_Mob(*)(uint32))&lua_spawn_from_spawn2),
 		luabind::def("enable_spawn2", &lua_enable_spawn2),
 		luabind::def("disable_spawn2", &lua_disable_spawn2),
+		luabind::def("has_timer", (bool(*)(const char*))&lua_has_timer),
+		luabind::def("get_remaining_time", (uint32(*)(const char*))&lua_get_remaining_time),
+		luabind::def("get_timer_duration", (uint32(*)(const char*))&lua_get_timer_duration),
 		luabind::def("set_timer", (void(*)(const char*, int))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob))&lua_set_timer),
