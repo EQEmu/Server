@@ -2163,31 +2163,31 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	const std::string query = fmt::format(
 		SQL(
 			SELECT
-			  lootdrop.id,
-			  lootdrop_entries.item_id,
-			  lootdrop_entries.item_charges,
-			  lootdrop_entries.equip_item,
-			  lootdrop_entries.chance,
-			  lootdrop_entries.trivial_min_level,
-			  lootdrop_entries.trivial_max_level,
-			  lootdrop_entries.npc_min_level,
-			  lootdrop_entries.npc_max_level,
-			  lootdrop_entries.multiplier,
-			  lootdrop.min_expansion,
-			  lootdrop.max_expansion,
-			  lootdrop.content_flags,
-			  lootdrop.content_flags_disabled,
-        lootdrop_entries.min_expansion,
-			  lootdrop_entries.max_expansion,
-			  lootdrop_entries.content_flags,
-			  lootdrop_entries.content_flags_disabled
+                lootdrop.id,
+                lootdrop_entries.item_id,
+                lootdrop_entries.item_charges,
+                lootdrop_entries.equip_item,
+                lootdrop_entries.chance,
+                lootdrop_entries.trivial_min_level,
+                lootdrop_entries.trivial_max_level,
+                lootdrop_entries.npc_min_level,
+                lootdrop_entries.npc_max_level,
+                lootdrop_entries.multiplier,
+                lootdrop.min_expansion,
+                lootdrop.max_expansion,
+                lootdrop.content_flags,
+                lootdrop.content_flags_disabled,
+                lootdrop_entries.min_expansion,
+                lootdrop_entries.max_expansion,
+                lootdrop_entries.content_flags,
+                lootdrop_entries.content_flags_disabled
 			FROM
-			  lootdrop
-			  JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
+                lootdrop
+                JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
 			WHERE
-			  TRUE {} {}
+                TRUE {} {}
 			ORDER BY
-			  lootdrop_id
+                lootdrop_id
 		),
 		ContentFilterCriteria::apply("lootdrop"),
 		ContentFilterCriteria::apply("lootdrop_entries")
