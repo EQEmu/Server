@@ -2176,16 +2176,21 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			  lootdrop.min_expansion,
 			  lootdrop.max_expansion,
 			  lootdrop.content_flags,
-			  lootdrop.content_flags_disabled
+			  lootdrop.content_flags_disabled,
+        lootdrop_entries.min_expansion,
+			  lootdrop_entries.max_expansion,
+			  lootdrop_entries.content_flags,
+			  lootdrop_entries.content_flags_disabled
 			FROM
 			  lootdrop
 			  JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
 			WHERE
-			  TRUE {}
+			  TRUE {} {}
 			ORDER BY
 			  lootdrop_id
 		),
-		ContentFilterCriteria::apply()
+		ContentFilterCriteria::apply("lootdrop"),
+		ContentFilterCriteria::apply("lootdrop_entries")
 	);
 
     auto results = QueryDatabase(query);
@@ -2230,6 +2235,11 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 		p_loot_drop_struct->Entries[current_entry].npc_min_level     = static_cast<uint16>(atoi(row[7]));
 		p_loot_drop_struct->Entries[current_entry].npc_max_level     = static_cast<uint16>(atoi(row[8]));
 		p_loot_drop_struct->Entries[current_entry].multiplier        = static_cast<uint8>(atoi(row[9]));
+
+		p_loot_drop_struct->Entries[current_entry].content_flags.min_expansion = static_cast<int16>(atoi(row[14]));
+		p_loot_drop_struct->Entries[current_entry].content_flags.max_expansion = static_cast<int16>(atoi(row[15]));
+		strn0cpy(p_loot_drop_struct->Entries[current_entry].content_flags.content_flags,          row[16], sizeof(p_loot_drop_struct->Entries[current_entry].content_flags.content_flags));
+		strn0cpy(p_loot_drop_struct->Entries[current_entry].content_flags.content_flags_disabled, row[17], sizeof(p_loot_drop_struct->Entries[current_entry].content_flags.content_flags_disabled));
 
 		++(p_loot_drop_struct->NumEntries);
 		++current_entry;

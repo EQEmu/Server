@@ -140,16 +140,18 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (droplimit == 0 && mindrop == 0) {
 		for (uint32 i = 0; i < loot_drop->NumEntries; ++i) {
-			int      charges = loot_drop->Entries[i].multiplier;
-			for (int j       = 0; j < charges; ++j) {
-				if (zone->random.Real(0.0, 100.0) <= loot_drop->Entries[i].chance &&
-					npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i], true)) {
-					const EQ::ItemData *database_item = GetItem(loot_drop->Entries[i].item_id);
-					npc->AddLootDrop(
-						database_item,
-						item_list,
-						loot_drop->Entries[i]
-					);
+			if(content_service.DoesPassContentFiltering(loot_drop->Entries[i].content_flags)) {
+				int      charges = loot_drop->Entries[i].multiplier;
+				for (int j       = 0; j < charges; ++j) {
+					if (zone->random.Real(0.0, 100.0) <= loot_drop->Entries[i].chance &&
+						npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i], true)) {
+						const EQ::ItemData *database_item = GetItem(loot_drop->Entries[i].item_id);
+						npc->AddLootDrop(
+							database_item,
+							item_list,
+							loot_drop->Entries[i]
+						);
+					}
 				}
 			}
 		}
@@ -168,7 +170,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	bool        active_item_list = false;
 	for (uint32 i                = 0; i < loot_drop->NumEntries; ++i) {
 		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
-		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
+		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i]) && content_service.DoesPassContentFiltering(loot_drop->Entries[i].content_flags)) {
 			roll_t += loot_drop->Entries[i].chance;
 			active_item_list = true;
 		}
@@ -191,6 +193,10 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 				// if it doesn't meet the requirements do nothing
 				if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j]))
 					continue;
+
+				if(!content_service.DoesPassContentFiltering(loot_drop->Entries[j].content_flags))
+					continue;
+
 
 				if (roll < loot_drop->Entries[j].chance) {
 					npc->AddLootDrop(
@@ -242,7 +248,8 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 
 		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
 		if (db_item &&
-			npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
+        npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j]) &&
+        content_service.DoesPassContentFiltering(loot_drop->Entries[j].content_flags)) {
 
 			float iroll = (float) zone->random.Real(0.0, 100.0);
 
