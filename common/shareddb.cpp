@@ -2162,7 +2162,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 
 	const std::string query = fmt::format(
 		SQL(
-			SELECT
+            SELECT
                 lootdrop.id,
                 lootdrop_entries.item_id,
                 lootdrop_entries.item_charges,
@@ -2181,12 +2181,12 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
                 lootdrop_entries.max_expansion,
                 lootdrop_entries.content_flags,
                 lootdrop_entries.content_flags_disabled
-			FROM
+            FROM
                 lootdrop
                 JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
-			WHERE
+            WHERE
                 TRUE {} {}
-			ORDER BY
+            ORDER BY
                 lootdrop_id
 		),
 		ContentFilterCriteria::apply("lootdrop"),
