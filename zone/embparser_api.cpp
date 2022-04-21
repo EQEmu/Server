@@ -590,6 +590,56 @@ XS(XS__zoneraid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__hastimer);
+XS(XS__hastimer) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::hastimer(string timer_name)");
+
+	bool RETVAL;
+	char *timer_name = (char *)SvPV_nolen(ST(0));
+
+	RETVAL = quest_manager.hastimer(timer_name);
+
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
+	XSRETURN(1);
+}
+
+XS(XS__getremainingtimeMS);
+XS(XS__getremainingtimeMS) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getremainingtimeMS(string timer_name)");
+
+	uint32 RETVAL;
+	dXSTARG;
+	char *timer_name = (char *)SvPV_nolen(ST(0));
+
+	RETVAL = quest_manager.getremainingtimeMS(timer_name);
+
+	XSprePUSH;
+	PUSHu((IV)RETVAL);
+	XSRETURN(1);
+}
+
+XS(XS__gettimerdurationMS);
+XS(XS__gettimerdurationMS) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::gettimerdurationMS(string timer_name)");
+
+	uint32 RETVAL;
+	dXSTARG;
+	char *timer_name = (char *)SvPV_nolen(ST(0));
+
+	RETVAL = quest_manager.gettimerdurationMS(timer_name);
+
+	XSprePUSH;
+	PUSHu((IV)RETVAL);
+	XSRETURN(1);
+}
+
 XS(XS__settimer);
 XS(XS__settimer) {
 	dXSARGS;
@@ -8439,6 +8489,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getinventoryslotname"), XS__getinventoryslotname, file);
 	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
 	newXS(strcpy(buf, "getracename"), XS__getracename, file);
+	newXS(strcpy(buf, "getremainingtimeMS"), XS__getremainingtimeMS, file);
 	newXS(strcpy(buf, "getspell"), XS__getspell, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
 	newXS(strcpy(buf, "get_spell_level"), XS__get_spell_level, file);
@@ -8450,10 +8501,12 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getplayercorpsecountbyzoneid"), XS__getplayercorpsecountbyzoneid, file);
 	newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
 	newXS(strcpy(buf, "gettaskname"), XS__gettaskname, file);
+	newXS(strcpy(buf, "gettimerdurationMS"), XS__gettimerdurationMS, file);
 	newXS(strcpy(buf, "givecash"), XS__givecash, file);
 	newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
 	newXS(strcpy(buf, "gmsay"), XS__gmsay, file);
 	newXS(strcpy(buf, "has_zone_flag"), XS__has_zone_flag, file);
+	newXS(strcpy(buf, "hastimer"), XS__hastimer, file);
 	newXS(strcpy(buf, "incstat"), XS__incstat, file);
 	newXS(strcpy(buf, "isdisctome"), XS__isdisctome, file);
 	newXS(strcpy(buf, "isdooropen"), XS__isdooropen, file);
