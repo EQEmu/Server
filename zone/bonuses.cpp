@@ -2256,7 +2256,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->DamageShieldSpellID = spell_id;
 
 				if (RuleB(Spells,ScaleDSWithSpellDmg)) {
-					new_bonus->DamageShield += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, effect_value);
+					new_bonus->DamageShield -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, effect_value);
 				}
 
 				//When using npc_spells_effects MAX value can be set to determine DS Type
