@@ -4365,6 +4365,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		if (RuleB(Inventory,AllowOnlyOneInstanceEquipped)) {
 			if (m_inv.HasItemEquippedByID(trade_instance->GetID())) {
 				client->Message(Chat::Yellow, "This bot already has a version of this item equipped.");
+				client->ResetTrade();
 				return;
 			}
 
@@ -4372,6 +4373,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				if (trade_instance->GetAugment(i)) {
 					if (m_inv.HasAugmentEquippedByID(trade_instance->GetAugment(i)->GetID())) {
 						client->Message(Chat::Yellow, "This bot already has a version of this agument equipped.");
+						client->ResetTrade();
 						return;
 					}
 				}
