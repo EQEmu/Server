@@ -1148,6 +1148,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 
 	if(!CanIncreaseTradeskill(tradeskill))
 		return;	//not allowed to go higher.
+	uint16 maxskill = MaxSkill(tradeskill);
 
 	float chance_stage2 = 0;
 
@@ -1176,7 +1177,14 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	if (chance_stage2 > zone->random.Real(0, 99)) {
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);
-
+		std::string export_string = fmt::format(
+			"{} {} {} {}",
+			tradeskill,
+			current_raw_skill + 1,
+			maxskill,
+			1
+		);
+		parse->EventPlayer(EVENT_SKILL_UP, this, export_string, 0);
 		if(title_manager.IsNewTradeSkillTitleAvailable(tradeskill, current_raw_skill + 1))
 			NotifyNewTitlesAvailable();
 	}
