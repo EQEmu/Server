@@ -393,6 +393,10 @@ public:
 	void RemoveItem(uint32 item_id, uint32 quantity);
 	void SetGMStatus(uint32 newStatus);
 	void AddItem(luabind::object item_table);
+	int CountAugmentEquippedByID(uint32 item_id);
+	int CountItemEquippedByID(uint32 item_id);
+	bool HasAugmentEquippedByID(uint32 item_id);
+	bool HasItemEquippedByID(uint32 item_id);
 
 	int GetEnvironmentDamageModifier();
 	void SetEnvironmentDamageModifier(int value);

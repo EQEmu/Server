@@ -6115,6 +6115,76 @@ XS(XS_Client_AddItem) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_HasAugmentEquippedByID);
+XS(XS_Client_HasAugmentEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::HasAugmentEquippedByID(THIS, uint32 item_id)");
+	{
+		Client *THIS;
+		bool has_equipped = false;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		has_equipped = THIS->GetInv().HasAugmentEquippedByID(item_id);
+		ST(0) = boolSV(has_equipped);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_CountAugmentEquippedByID);
+XS(XS_Client_CountAugmentEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::CountAugmentEquippedByID(THIS, uint32 item_id)");
+	{
+		Client *THIS;
+		int quantity = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		quantity = THIS->GetInv().CountAugmentEquippedByID(item_id);
+		XSprePUSH;
+		PUSHi((IV)quantity);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_HasItemEquippedByID);
+XS(XS_Client_HasItemEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::HasItemEquippedByID(THIS, uint32 item_id)");
+	{
+		Client *THIS;
+		bool has_equipped = false;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		has_equipped = THIS->GetInv().HasItemEquippedByID(item_id);
+		ST(0) = boolSV(has_equipped);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_CountItemEquippedByID);
+XS(XS_Client_CountItemEquippedByID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::CountItemEquippedByID(THIS, uint32 item_id)");
+	{
+		Client *THIS;
+		int quantity = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		quantity = THIS->GetInv().CountItemEquippedByID(item_id);
+		XSprePUSH;
+		PUSHi((IV)quantity);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6162,7 +6232,9 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
 	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
+	newXSproto(strcpy(buf, "CountAugmentEquippedByID"), XS_Client_CountAugmentEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "CountItem"), XS_Client_CountItem, file, "$$");
+	newXSproto(strcpy(buf, "CountItemEquippedByID"), XS_Client_CountItemEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "CreateExpedition"), XS_Client_CreateExpedition, file, "$$$$$$$;$");
 	newXSproto(strcpy(buf, "CreateTaskDynamicZone"), XS_Client_CreateTaskDynamicZone, file, "$$");
 	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
@@ -6291,8 +6363,10 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$;$");
 	newXSproto(strcpy(buf, "GuildID"), XS_Client_GuildID, file, "$");
 	newXSproto(strcpy(buf, "GuildRank"), XS_Client_GuildRank, file, "$");
+	newXSproto(strcpy(buf, "HasAugmentEquippedByID"), XS_Client_HasAugmentEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "HasDisciplineLearned"), XS_Client_HasDisciplineLearned, file, "$$");
 	newXSproto(strcpy(buf, "HasExpeditionLockout"), XS_Client_HasExpeditionLockout, file, "$$$");
+	newXSproto(strcpy(buf, "HasItemEquippedByID"), XS_Client_HasItemEquippedByID, file, "$$");
 	newXSproto(strcpy(buf, "HasSkill"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasZoneFlag"), XS_Client_HasZoneFlag, file, "$$");
