@@ -130,9 +130,14 @@ public:
 	int GuildRank();
 	uint32 GuildID();
 	int GetFace();
+	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
+	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client);
+	void AddPlatinum(uint32 platinum);
+	void AddPlatinum(uint32 platinum, bool update_client);
 	bool TakeMoneyFromPP(uint64 copper);
 	bool TakeMoneyFromPP(uint64 copper, bool update_client);
-	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client);
+	bool TakePlatinum(uint32 platinum);
+	bool TakePlatinum(uint32 platinum, bool update_client);
 	bool TGB();
 	int GetSkillPoints();
 	void SetSkillPoints(int skill);
@@ -328,6 +333,7 @@ public:
 	void UnFreeze();
 	int GetAggroCount();
 	uint64 GetCarriedMoney();
+	uint32 GetCarriedPlatinum();
 	uint64 GetAllMoney();
 	uint32 GetMoney(uint8 type, uint8 subtype);
 	void OpenLFGuildWindow();

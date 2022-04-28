@@ -2180,68 +2180,84 @@ void Client::SendClientMoneyUpdate(uint8 type,uint32 amount){
 	safe_delete(outapp);
 }
 
-bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
-	int64 copperpp,silver,gold,platinum;
-	copperpp = m_pp.copper;
+uint32 Client::GetCarriedPlatinum() {
+	return (
+		GetMoney(3, 0) +
+		(GetMoney(2, 0) / 10) +
+		(GetMoney(1, 0) / 100) +
+		(GetMoney(0, 0) / 1000)
+	);
+}
+
+bool Client::TakePlatinum(uint32 platinum, bool update_client) {
+	if (GetCarriedPlatinum() >= platinum) {
+		auto copper = static_cast<uint64>(platinum * 1000);
+		return TakeMoneyFromPP(copper, update_client);
+	}
+
+	return false;
+}
+
+bool Client::TakeMoneyFromPP(uint64 copper, bool update_client) {
+	int64 player_copper, silver, gold, platinum;
+	player_copper = m_pp.copper;
 	silver = static_cast<int64>(m_pp.silver) * 10;
 	gold = static_cast<int64>(m_pp.gold) * 100;
 	platinum = static_cast<int64>(m_pp.platinum) * 1000;
 
-	int64 clienttotal = copperpp + silver + gold + platinum;
+	int64 client_total = player_copper + silver + gold + platinum;
 
-	clienttotal -= copper;
-	if(clienttotal < 0)
-	{
+	client_total -= copper;
+	if (client_total < 0) {
 		return false; // Not enough money!
-	}
-	else
-	{
-		copperpp -= copper;
-		if(copperpp <= 0)
-		{
-			copper = std::abs(copperpp);
+	} else {
+		player_copper -= copper;
+		if(player_copper <= 0) {
+			copper = std::abs(player_copper);
 			m_pp.copper = 0;
-		}
-		else
-		{
-			m_pp.copper = copperpp;
-			if(updateclient)
+		} else {
+			m_pp.copper = player_copper;
+
+			if(update_client) {
 				SendMoneyUpdate();
+			}
+
 			SaveCurrency();
 			return true;
 		}
+
 		silver -= copper;
-		if(silver <= 0)
-		{
+		if (silver <= 0) {
 			copper = std::abs(silver);
 			m_pp.silver = 0;
-		}
-		else
-		{
+		} else {
 			m_pp.silver = silver/10;
 			m_pp.copper += (silver-(m_pp.silver*10));
-			if(updateclient)
+
+			if(update_client) {
 				SendMoneyUpdate();
+			}
+
 			SaveCurrency();
 			return true;
 		}
 
 		gold -=copper;
 
-		if(gold <= 0)
-		{
+		if (gold <= 0) {
 			copper = std::abs(gold);
 			m_pp.gold = 0;
-		}
-		else
-		{
-			m_pp.gold = gold/100;
-			uint64 silvertest = (gold-(static_cast<uint64>(m_pp.gold)*100))/10;
-			m_pp.silver += silvertest;
-			uint64 coppertest = (gold-(static_cast<uint64>(m_pp.gold)*100+silvertest*10));
-			m_pp.copper += coppertest;
-			if(updateclient)
+		} else {
+			m_pp.gold = gold / 100;
+			uint64 silver_test = (gold - (static_cast<uint64>(m_pp.gold) * 100)) / 10;
+			m_pp.silver += silver_test;
+			uint64 copper_test = (gold-(static_cast<uint64>(m_pp.gold) * 100 + silver_test * 10));
+			m_pp.copper += copper_test;
+
+			if(update_client) {
 				SendMoneyUpdate();
+			}
+
 			SaveCurrency();
 			return true;
 		}
@@ -2250,74 +2266,84 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 
 		//Impossible for plat to be negative, already checked above
 
-		m_pp.platinum = platinum/1000;
-		uint64 goldtest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000))/100;
-		m_pp.gold += goldtest;
-		uint64 silvertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100))/10;
-		m_pp.silver += silvertest;
-		uint64 coppertest = (platinum-(static_cast<uint64>(m_pp.platinum)*1000+goldtest*100+silvertest*10));
-		m_pp.copper = coppertest;
-		if(updateclient)
+		m_pp.platinum = platinum / 1000;
+		uint64 gold_test = (platinum - (static_cast<uint64>(m_pp.platinum) * 1000)) / 100;
+		m_pp.gold += gold_test;
+		uint64 silver_test = (platinum - (static_cast<uint64>(m_pp.platinum) * 1000 + gold_test * 100)) / 10;
+		m_pp.silver += silver_test;
+		uint64 copper_test = (platinum - (static_cast<uint64>(m_pp.platinum) * 1000 + gold_test * 100 + silver_test * 10));
+		m_pp.copper = copper_test;
+
+		if(update_client) {
 			SendMoneyUpdate();
+		}
+
 		RecalcWeight();
 		SaveCurrency();
 		return true;
 	}
 }
 
-void Client::AddMoneyToPP(uint64 copper, bool updateclient){
-	uint64 tmp;
-	uint64 tmp2;
-	tmp = copper;
+void Client::AddPlatinum(uint32 platinum, bool update_client) {
+	auto copper = static_cast<uint64>(platinum * 1000);
+	AddMoneyToPP(copper, update_client);
+}
+
+void Client::AddMoneyToPP(uint64 copper, bool update_client){
+	uint64 temporary_copper;
+	uint64 temporary_copper_two;
+	temporary_copper = copper;
 
 	/* Add Amount of Platinum */
-	tmp2 = tmp/1000;
-	int32 new_val = m_pp.platinum + tmp2;
-	if(new_val < 0) { m_pp.platinum = 0; }
-	else { m_pp.platinum = m_pp.platinum + tmp2; }
-	tmp-=tmp2*1000;
+	temporary_copper_two = temporary_copper / 1000;
+	int32 new_val = m_pp.platinum + temporary_copper_two;
 
-	//if (updateclient)
-	//	SendClientMoneyUpdate(3,tmp2);
+	if (new_val < 0) {
+		m_pp.platinum = 0;
+	} else {
+		m_pp.platinum = m_pp.platinum + temporary_copper_two;
+	}
+
+	temporary_copper -= temporary_copper_two * 1000;
 
 	/* Add Amount of Gold */
-	tmp2 = tmp/100;
-	new_val = m_pp.gold + tmp2;
-	if(new_val < 0) { m_pp.gold = 0; }
-	else { m_pp.gold = m_pp.gold + tmp2; }
+	temporary_copper_two = temporary_copper / 100;
+	new_val = m_pp.gold + temporary_copper_two;
 
-	tmp-=tmp2*100;
-	//if (updateclient)
-	//	SendClientMoneyUpdate(2,tmp2);
+	if (new_val < 0) {
+		m_pp.gold = 0;
+	} else {
+		m_pp.gold = m_pp.gold + temporary_copper_two;
+	}
+
+	temporary_copper -= temporary_copper_two * 100;
 
 	/* Add Amount of Silver */
-	tmp2 = tmp/10;
-	new_val = m_pp.silver + tmp2;
-	if(new_val < 0) {
+	temporary_copper_two = temporary_copper / 10;
+	new_val = m_pp.silver + temporary_copper_two;
+
+	if (new_val < 0) {
 		m_pp.silver = 0;
 	} else {
-		m_pp.silver = m_pp.silver + tmp2;
+		m_pp.silver = m_pp.silver + temporary_copper_two;
 	}
-	tmp-=tmp2*10;
-	//if (updateclient)
-	//	SendClientMoneyUpdate(1,tmp2);
 
-	// Add Copper
-	//tmp	= tmp - (tmp2* 10);
-	//if (updateclient)
-	//	SendClientMoneyUpdate(0,tmp);
-	tmp2 = tmp;
-	new_val = m_pp.copper + tmp2;
-	if(new_val < 0) {
+	temporary_copper-=temporary_copper_two*10;
+
+	/* Add Amount of Copper */
+	temporary_copper_two = temporary_copper;
+	new_val = m_pp.copper + temporary_copper_two;
+
+	if (new_val < 0) {
 		m_pp.copper = 0;
 	} else {
-		m_pp.copper = m_pp.copper + tmp2;
+		m_pp.copper = m_pp.copper + temporary_copper_two;
 	}
 
-
 	//send them all at once, since the above code stopped working.
-	if(updateclient)
+	if (update_client) {
 		SendMoneyUpdate();
+	}
 
 	RecalcWeight();
 
@@ -2337,27 +2363,32 @@ void Client::EVENT_ITEM_ScriptStopReturn(){
 	this->SetEntityVariable("Stop_Return", buffer);
 }
 
-void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool updateclient){
-	this->EVENT_ITEM_ScriptStopReturn();
+void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client){
+	EVENT_ITEM_ScriptStopReturn();
 
 	int32 new_value = m_pp.platinum + platinum;
-	if(new_value >= 0 && new_value > m_pp.platinum)
+	if (new_value >= 0 && new_value > m_pp.platinum) {
 		m_pp.platinum += platinum;
+	}
 
 	new_value = m_pp.gold + gold;
-	if(new_value >= 0 && new_value > m_pp.gold)
+	if (new_value >= 0 && new_value > m_pp.gold) {
 		m_pp.gold += gold;
+	}
 
 	new_value = m_pp.silver + silver;
-	if(new_value >= 0 && new_value > m_pp.silver)
+	if (new_value >= 0 && new_value > m_pp.silver) {
 		m_pp.silver += silver;
+	}
 
 	new_value = m_pp.copper + copper;
-	if(new_value >= 0 && new_value > m_pp.copper)
+	if (new_value >= 0 && new_value > m_pp.copper) {
 		m_pp.copper += copper;
+	}
 
-	if(updateclient)
+	if (update_client) {
 		SendMoneyUpdate();
+	}
 
 	RecalcWeight();
 	SaveCurrency();
@@ -2380,41 +2411,55 @@ void Client::SendMoneyUpdate() {
 	FastQueuePacket(&outapp);
 }
 
-bool Client::HasMoney(uint64 Copper) {
+bool Client::HasMoney(uint64 copper) {
 
-	if ((static_cast<uint64>(m_pp.copper) +
+	if (
+		(static_cast<uint64>(m_pp.copper) +
 		(static_cast<uint64>(m_pp.silver) * 10) +
 		(static_cast<uint64>(m_pp.gold) * 100) +
-		(static_cast<uint64>(m_pp.platinum) * 1000)) >= Copper)
+		(static_cast<uint64>(m_pp.platinum) * 1000)) >= copper
+	) {
 		return true;
+	}
 
 	return false;
 }
 
 uint64 Client::GetCarriedMoney() {
 
-	return ((static_cast<uint64>(m_pp.copper) +
-		(static_cast<uint64>(m_pp.silver) * 10) +
-		(static_cast<uint64>(m_pp.gold) * 100) +
-		(static_cast<uint64>(m_pp.platinum) * 1000)));
+	return (
+		(
+			static_cast<uint64>(m_pp.copper) +
+			(static_cast<uint64>(m_pp.silver) * 10) +
+			(static_cast<uint64>(m_pp.gold) * 100) +
+			(static_cast<uint64>(m_pp.platinum) * 1000)
+		)
+	);
 }
 
 uint64 Client::GetAllMoney() {
 
 	return (
-		(static_cast<uint64>(m_pp.copper) +
-		(static_cast<uint64>(m_pp.silver) * 10) +
-		(static_cast<uint64>(m_pp.gold) * 100) +
-		(static_cast<uint64>(m_pp.platinum) * 1000) +
-		(static_cast<uint64>(m_pp.copper_bank) +
-		(static_cast<uint64>(m_pp.silver_bank) * 10) +
-		(static_cast<uint64>(m_pp.gold_bank) * 100) +
-		(static_cast<uint64>(m_pp.platinum_bank) * 1000) +
-		(static_cast<uint64>(m_pp.copper_cursor) +
-		(static_cast<uint64>(m_pp.silver_cursor) * 10) +
-		(static_cast<uint64>(m_pp.gold_cursor) * 100) +
-		(static_cast<uint64>(m_pp.platinum_cursor) * 1000) +
-		(static_cast<uint64>(m_pp.platinum_shared) * 1000)))));
+		(
+			static_cast<uint64>(m_pp.copper) +
+			(static_cast<uint64>(m_pp.silver) * 10) +
+			(static_cast<uint64>(m_pp.gold) * 100) +
+			(static_cast<uint64>(m_pp.platinum) * 1000) +
+			(
+				static_cast<uint64>(m_pp.copper_bank) +
+				(static_cast<uint64>(m_pp.silver_bank) * 10) +
+				(static_cast<uint64>(m_pp.gold_bank) * 100) +
+				(static_cast<uint64>(m_pp.platinum_bank) * 1000) +
+				(
+					static_cast<uint64>(m_pp.copper_cursor) +
+					(static_cast<uint64>(m_pp.silver_cursor) * 10) +
+					(static_cast<uint64>(m_pp.gold_cursor) * 100) +
+					(static_cast<uint64>(m_pp.platinum_cursor) * 1000) +
+					(static_cast<uint64>(m_pp.platinum_shared) * 1000)
+				)
+			)
+		)
+	);
 }
 
 bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who, int chancemodi) {
@@ -8692,7 +8737,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	qr->exp_reward = exp;
 
 	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0)
-		AddMoneyToPP(copper, silver, gold, platinum, false);
+		AddMoneyToPP(copper, silver, gold, platinum);
 
 	if (itemid > 0)
 		SummonItem(itemid, -1, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
@@ -8727,7 +8772,7 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
 
 	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0)
-		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum, false);
+		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum);
 
 	for (int i = 0; i < QUESTREWARD_COUNT; ++i)
 		if (reward.item_id[i] > 0)
