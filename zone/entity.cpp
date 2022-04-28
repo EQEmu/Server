@@ -5457,6 +5457,15 @@ void EntityList::GetTargetsForConeArea(Mob *start, float min_radius, float radiu
 			++it;
 			continue;
 		}
+		if (ptr->IsClient() && !ptr->CastToClient()->ClientFinishedLoading()) {
+			++it;
+			continue;
+		}
+		if (ptr->IsAura() || ptr->IsTrap()) {
+			++it;
+			continue;
+		}
+
 		float x_diff = ptr->GetX() - start->GetX();
 		float y_diff = ptr->GetY() - start->GetY();
 		float z_diff = ptr->GetZ() - start->GetZ();
