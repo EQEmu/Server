@@ -22,30 +22,6 @@ Eglin
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
 #endif
 
-#ifdef EMBPERL_XS
-EXTERN_C XS(boot_quest);
-#ifdef EMBPERL_XS_CLASSES
-EXTERN_C XS(boot_Mob);
-EXTERN_C XS(boot_NPC);
-EXTERN_C XS(boot_Client);
-EXTERN_C XS(boot_Corpse);
-EXTERN_C XS(boot_EntityList);
-EXTERN_C XS(boot_Group);
-EXTERN_C XS(boot_Raid);
-EXTERN_C XS(boot_Inventory);
-EXTERN_C XS(boot_QuestItem);
-EXTERN_C XS(boot_Spell);
-EXTERN_C XS(boot_HateEntry);
-EXTERN_C XS(boot_Object);
-EXTERN_C XS(boot_Doors);
-EXTERN_C XS(boot_PerlPacket);
-EXTERN_C XS(boot_Expedition);
-#ifdef BOTS
-EXTERN_C XS(boot_Bot);
-#endif
-#endif
-#endif
-
 #ifdef EMBPERL_IO_CAPTURE
 XS(XS_EQEmuIO_PRINT);
 #endif //EMBPERL_IO_CAPTURE
@@ -74,36 +50,6 @@ EXTERN_C void xs_init(pTHX)
 	//add the strcpy stuff to get rid of const warnings....
 
 	newXS(strcpy(buf, "DynaLoader::boot_DynaLoader"), boot_DynaLoader, file);
-	newXS(strcpy(buf, "quest::boot_qc"), boot_qc, file);
-#ifdef EMBPERL_XS
-	newXS(strcpy(buf, "quest::boot_quest"), boot_quest, file);
-#ifdef EMBPERL_XS_CLASSES
-	newXS(strcpy(buf, "Mob::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "NPC::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "NPC::boot_NPC"), boot_NPC, file);
-	newXS(strcpy(buf, "Corpse::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Corpse::boot_Corpse"), boot_Corpse, file);
-	newXS(strcpy(buf, "Client::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Client::boot_Client"), boot_Client, file);
-	newXS(strcpy(buf, "EntityList::boot_EntityList"), boot_EntityList, file);
-	newXS(strcpy(buf, "PerlPacket::boot_PerlPacket"), boot_PerlPacket, file);
-	newXS(strcpy(buf, "Group::boot_Group"), boot_Group, file);
-	newXS(strcpy(buf, "Raid::boot_Raid"), boot_Raid, file);
-	newXS(strcpy(buf, "Inventory::boot_Inventory"), boot_Inventory, file);
-	newXS(strcpy(buf, "QuestItem::boot_QuestItem"), boot_QuestItem, file);
-	newXS(strcpy(buf, "Spell::boot_Spell"), boot_Spell, file);
-	newXS(strcpy(buf, "HateEntry::boot_HateEntry"), boot_HateEntry, file);
-	newXS(strcpy(buf, "Object::boot_Object"), boot_Object, file);
-	newXS(strcpy(buf, "Doors::boot_Doors"), boot_Doors, file);
-	newXS(strcpy(buf, "Expedition::boot_Expedition"), boot_Expedition, file);
-#ifdef BOTS
-	newXS(strcpy(buf, "Bot::boot_Mob"), boot_Mob, file);
-	newXS(strcpy(buf, "Bot::boot_NPC"), boot_NPC, file);
-	newXS(strcpy(buf, "Bot::boot_Bot"), boot_Bot, file);
-#endif
-;
-#endif
-#endif
 #ifdef EMBPERL_IO_CAPTURE
 	newXS(strcpy(buf, "EQEmuIO::PRINT"), XS_EQEmuIO_PRINT, file);
 #endif
