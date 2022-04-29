@@ -5408,7 +5408,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 				sep->arg[0]
 			).c_str()
 		);
-		c->Message(Chat::Grey, material_slot_message.c_str());
+		c->Message(Chat::Gray, material_slot_message.c_str());
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
