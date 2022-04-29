@@ -5385,14 +5385,30 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 {
 	// TODO: Trouble-shoot model update issue
 
-	const std::string msg_matslot = StringFormat("mat_slot: %c(All), %i(Head), %i(Chest), %i(Arms), %i(Wrists), %i(Hands), %i(Legs), %i(Feet)",
-		'*', EQ::textures::armorHead, EQ::textures::armorChest, EQ::textures::armorArms, EQ::textures::armorWrist, EQ::textures::armorHands, EQ::textures::armorLegs, EQ::textures::armorFeet);
+	const std::string material_slot_message = fmt::format(
+		"Material Slots: * (All), {} (Head), {} (Chest), {} (Arms), {} (Wrists), {} (Hands), {} (Legs), {} (Feet)",
+		EQ::textures::armorHead,
+		EQ::textures::armorChest,
+		EQ::textures::armorArms,
+		EQ::textures::armorWrist,
+		EQ::textures::armorHands,
+		EQ::textures::armorLegs,
+		EQ::textures::armorFeet
+	);
 	
-	if (helper_command_alias_fail(c, "bot_subcommand_bot_dye_armor", sep->arg[0], "botdyearmor"))
+	if (helper_command_alias_fail(c, "bot_subcommand_bot_dye_armor", sep->arg[0], "botdyearmor")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: %s [mat_slot] [red: 0-255] [green: 0-255] [blue: 0-255] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(m_note, msg_matslot.c_str());
+		c->Message(
+			Chat::Cyan,
+			fmt::format(
+				"Usage: {} [Material Slot] [Red: 0-255] [Green: 0-255] [Blue: 0-255] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
+				sep->arg[0]
+			).c_str()
+		);
+		c->Message(Chat::Grey, material_slot_message.c_str());
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -5402,62 +5418,92 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 
 	bool dye_all = (sep->arg[1][0] == '*');
 	if (!dye_all) {
-		material_slot = atoi(sep->arg[1]);
+		material_slot = std::stoi(sep->arg[1]);
 		slot_id = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
 		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQ::textures::LastTintableTexture) {
-			c->Message(m_fail, "Valid [mat_slot]s for this command are:");
-			c->Message(m_fail, msg_matslot.c_str());
+			c->Message(Chat::Red, "Valid material slots for this command are:");
+			c->Message(Chat::Red, material_slot_message.c_str());
 			return;
 		}
 	}
 
-	uint32 red_value = atoi(sep->arg[2]);
-	if (!sep->IsNumber(2) || red_value > 255) {
-		c->Message(m_fail, "Valid [red] values for this command are [0-255]");
+	if (!sep->IsNumber(2)) {
+		c->Message(Chat::Red, "Valid Red values for this command are 0 to 255.");
 		return;
 	}
 
-	uint32 green_value = atoi(sep->arg[3]);
-	if (!sep->IsNumber(3) || green_value > 255) {
-		c->Message(m_fail, "Valid [green] values for this command are [0-255]");
+	uint32 red_value = std::stoul(sep->arg[2]);
+	if (red_value > 255) {
+		red_value = 255;
+	}
+
+	if (!sep->IsNumber(3)) {
+		c->Message(Chat::Red, "Valid Green values for this command are 0 to 255.");
 		return;
 	}
 
-	uint32 blue_value = atoi(sep->arg[4]);
-	if (!sep->IsNumber(4) || blue_value > 255) {
-		c->Message(m_fail, "Valid [blue] values for this command are [0-255]");
+	uint32 green_value = std::stoul(sep->arg[3]);
+	if (green_value > 255) {
+		green_value = 255;
+	}
+
+	if (!sep->IsNumber(4)) {
+		c->Message(Chat::Red, "Valid Blue values for this command are 0 to 255.");
 		return;
 	}
 
-	uint32 rgb_value = ((0xFF) | (red_value << 16) | (green_value << 8) | (blue_value)); // watch the leading '(0xFF) | '
+	uint32 blue_value = std::stoul(sep->arg[4]);
+	if (blue_value > 255) {
+		blue_value = 255;
+	}
+
+	uint32 rgb_value = ((uint32)red_value << 16) | ((uint32)green_value << 8) | ((uint32)blue_value);
 
 	std::list<Bot*> sbl;
 	auto ab_type = ActionableBots::PopulateSBL(c, sep->arg[5], sbl, ab_mask);
-	if (ab_type == ActionableBots::ABT_None)
+	if (ab_type == ActionableBots::ABT_None) {
 		return;
+	}
 
 	for (auto bot_iter : sbl) {
-		if (!bot_iter)
+		if (!bot_iter) {
 			continue;
-
-		if (!bot_iter->DyeArmor(slot_id, rgb_value, dye_all, (ab_type != ActionableBots::ABT_All))) {
-			c->Message(m_fail, "Failed to change armor color for '%s' due to unknown cause", bot_iter->GetCleanName());
-			return;
 		}
 
-		//if (dye_all)
-		//	helper_bot_appearance_form_update(bot_iter);
+		if (!bot_iter->DyeArmor(slot_id, rgb_value, dye_all, (ab_type != ActionableBots::ABT_All))) {
+			c->Message(
+				Chat::Red,
+				fmt::format(
+					"Failed to change armor color for {} due to unknown cause.",
+					bot_iter->GetCleanName()
+				).c_str()
+			);
+			return;
+		}
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
 		if (dye_all) {
-			if (!database.botdb.SaveAllArmorColors(c->CharacterID(), rgb_value))
-				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllArmorColors());
-		}
-		else {
-			if (!database.botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value))
-				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllArmorColorBySlot());
+			if (!database.botdb.SaveAllArmorColors(c->CharacterID(), rgb_value)) {
+				c->Message(
+					Chat::Red,
+					fmt::format(
+						"{}",
+						BotDatabase::fail::SaveAllArmorColors()
+					).c_str()
+				);
+			}
+		} else {
+			if (!database.botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value)) {
+				c->Message(
+					Chat::Red,
+					fmt::format(
+						"{}",
+						BotDatabase::fail::SaveAllArmorColorBySlot()
+					).c_str()
+				);
+			}
 		}
 	}
 }
