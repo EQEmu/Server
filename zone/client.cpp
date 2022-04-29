@@ -2170,16 +2170,6 @@ void Client::QuestReadBook(const char* text, uint8 type) {
 	}
 }
 
-void Client::SendClientMoneyUpdate(uint8 type,uint32 amount){
-	auto outapp = new EQApplicationPacket(OP_TradeMoneyUpdate, sizeof(TradeMoneyUpdate_Struct));
-	TradeMoneyUpdate_Struct* mus= (TradeMoneyUpdate_Struct*)outapp->pBuffer;
-	mus->amount=amount;
-	mus->trader=0;
-	mus->type=type;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 uint32 Client::GetCarriedPlatinum() {
 	return (
 		GetMoney(3, 0) +
@@ -2218,7 +2208,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool update_client) {
 		} else {
 			m_pp.copper = player_copper;
 
-			if(update_client) {
+			if (update_client) {
 				SendMoneyUpdate();
 			}
 
@@ -2231,10 +2221,10 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool update_client) {
 			copper = std::abs(silver);
 			m_pp.silver = 0;
 		} else {
-			m_pp.silver = silver/10;
-			m_pp.copper += (silver-(m_pp.silver*10));
+			m_pp.silver = silver / 10;
+			m_pp.copper += (silver - (m_pp.silver * 10));
 
-			if(update_client) {
+			if (update_client) {
 				SendMoneyUpdate();
 			}
 
@@ -2251,10 +2241,10 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool update_client) {
 			m_pp.gold = gold / 100;
 			uint64 silver_test = (gold - (static_cast<uint64>(m_pp.gold) * 100)) / 10;
 			m_pp.silver += silver_test;
-			uint64 copper_test = (gold-(static_cast<uint64>(m_pp.gold) * 100 + silver_test * 10));
+			uint64 copper_test = (gold - (static_cast<uint64>(m_pp.gold) * 100 + silver_test * 10));
 			m_pp.copper += copper_test;
 
-			if(update_client) {
+			if (update_client) {
 				SendMoneyUpdate();
 			}
 
@@ -2274,7 +2264,7 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool update_client) {
 		uint64 copper_test = (platinum - (static_cast<uint64>(m_pp.platinum) * 1000 + gold_test * 100 + silver_test * 10));
 		m_pp.copper = copper_test;
 
-		if(update_client) {
+		if (update_client) {
 			SendMoneyUpdate();
 		}
 
@@ -2296,9 +2286,9 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	/* Add Amount of Platinum */
 	temporary_copper_two = temporary_copper / 1000;
-	int32 new_val = m_pp.platinum + temporary_copper_two;
+	int32 new_value = m_pp.platinum + temporary_copper_two;
 
-	if (new_val < 0) {
+	if (new_value < 0) {
 		m_pp.platinum = 0;
 	} else {
 		m_pp.platinum = m_pp.platinum + temporary_copper_two;
@@ -2308,9 +2298,9 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	/* Add Amount of Gold */
 	temporary_copper_two = temporary_copper / 100;
-	new_val = m_pp.gold + temporary_copper_two;
+	new_value = m_pp.gold + temporary_copper_two;
 
-	if (new_val < 0) {
+	if (new_value < 0) {
 		m_pp.gold = 0;
 	} else {
 		m_pp.gold = m_pp.gold + temporary_copper_two;
@@ -2320,21 +2310,21 @@ void Client::AddMoneyToPP(uint64 copper, bool update_client){
 
 	/* Add Amount of Silver */
 	temporary_copper_two = temporary_copper / 10;
-	new_val = m_pp.silver + temporary_copper_two;
+	new_value = m_pp.silver + temporary_copper_two;
 
-	if (new_val < 0) {
+	if (new_value < 0) {
 		m_pp.silver = 0;
 	} else {
 		m_pp.silver = m_pp.silver + temporary_copper_two;
 	}
 
-	temporary_copper-=temporary_copper_two*10;
+	temporary_copper -= temporary_copper_two * 10;
 
 	/* Add Amount of Copper */
 	temporary_copper_two = temporary_copper;
-	new_val = m_pp.copper + temporary_copper_two;
+	new_value = m_pp.copper + temporary_copper_two;
 
-	if (new_val < 0) {
+	if (new_value < 0) {
 		m_pp.copper = 0;
 	} else {
 		m_pp.copper = m_pp.copper + temporary_copper_two;

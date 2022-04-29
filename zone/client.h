@@ -733,7 +733,6 @@ public:
 	void ReadBook(BookRequest_Struct *book);
 	void ReadBookByName(std::string book_name, uint8 book_type);
 	void QuestReadBook(const char* text, uint8 type);
-	void SendClientMoneyUpdate(uint8 type,uint32 amount);
 	void SendMoneyUpdate();
 	bool TakeMoneyFromPP(uint64 copper, bool update_client = false);
 	bool TakePlatinum(uint32 platinum, bool update_client = false);
