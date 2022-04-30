@@ -2401,6 +2401,26 @@ void Lua_Client::AddItem(luabind::object item_table) {
 	);
 }
 
+int Lua_Client::CountAugmentEquippedByID(uint32 item_id) {
+	Lua_Safe_Call_Int();
+	return self->GetInv().CountAugmentEquippedByID(item_id);
+}
+
+bool Lua_Client::HasAugmentEquippedByID(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->GetInv().HasAugmentEquippedByID(item_id);
+}
+
+int Lua_Client::CountItemEquippedByID(uint32 item_id) {
+	Lua_Safe_Call_Int();
+	return self->GetInv().CountItemEquippedByID(item_id);
+}
+
+bool Lua_Client::HasItemEquippedByID(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->GetInv().HasItemEquippedByID(item_id);
+}
+
 void Lua_Client::AddPlatinum(uint32 platinum) {
 	Lua_Safe_Call_Void();
 	self->AddPlatinum(platinum);
@@ -2471,7 +2491,9 @@ luabind::scope lua_register_client() {
 	.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
 	.def("ClearZoneFlag", (void(Lua_Client::*)(int))&Lua_Client::ClearZoneFlag)
 	.def("Connected", (bool(Lua_Client::*)(void))&Lua_Client::Connected)
+	.def("CountAugmentEquippedByID", (int(Lua_Client::*)(uint32))&Lua_Client::CountAugmentEquippedByID)
 	.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
+	.def("CountItemEquippedByID", (int(Lua_Client::*)(uint32))&Lua_Client::CountItemEquippedByID)
 	.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(luabind::object))&Lua_Client::CreateExpedition)
 	.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32))&Lua_Client::CreateExpedition)
 	.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool))&Lua_Client::CreateExpedition)
@@ -2620,8 +2642,10 @@ luabind::scope lua_register_client() {
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
 	.def("GuildID", (uint32(Lua_Client::*)(void))&Lua_Client::GuildID)
 	.def("GuildRank", (int(Lua_Client::*)(void))&Lua_Client::GuildRank)
+	.def("HasAugmentEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasAugmentEquippedByID)
 	.def("HasDisciplineLearned", (bool(Lua_Client::*)(uint16))&Lua_Client::HasDisciplineLearned)
 	.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
+	.def("HasItemEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemEquippedByID)
 	.def("HasSkill", (bool(Lua_Client::*)(int))&Lua_Client::HasSkill)
 	.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 	.def("HasZoneFlag", (bool(Lua_Client::*)(int))&Lua_Client::HasZoneFlag)
