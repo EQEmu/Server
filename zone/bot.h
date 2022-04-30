@@ -604,7 +604,7 @@ protected:
 	virtual int32 GetBotFocusEffect(focusType bottype, uint16 spell_id, bool from_buff_tic = false);
 	virtual int32 CalcBotFocusEffect(focusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
 	virtual int32 CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
-	virtual void PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client);
+	virtual void PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 
 	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
