@@ -2261,36 +2261,6 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-void Bot::ApplySpecialAttackMod(EQ::skills::SkillType skill, int32 &dmg, int32 &mindmg) {
-	int item_slot = -1;
-	//1: Apply bonus from AC (BOOT/SHIELD/HANDS) est. 40AC=6dmg
-	switch (skill) {
-	case EQ::skills::SkillFlyingKick:
-	case EQ::skills::SkillRoundKick:
-	case EQ::skills::SkillKick:
-		item_slot = EQ::invslot::slotFeet;
-		break;
-	case EQ::skills::SkillBash:
-		item_slot = EQ::invslot::slotSecondary;
-		break;
-	case EQ::skills::SkillDragonPunch:
-	case EQ::skills::SkillEagleStrike:
-	case EQ::skills::SkillTigerClaw:
-		item_slot = EQ::invslot::slotHands;
-		break;
-	}
-
-	if (item_slot >= EQ::invslot::EQUIPMENT_BEGIN){
-		const EQ::ItemInstance* inst = GetBotItem(item_slot);
-		const EQ::ItemData* botweapon = nullptr;
-		if(inst)
-			botweapon = inst->GetItem();
-
-		if(botweapon)
-			dmg += botweapon->AC * (RuleI(Combat, SpecialAttackACBonus))/100;
-	}
-}
-
 bool Bot::CanDoSpecialAttack(Mob *other) {
 	//Make sure everything is valid before doing any attacks.
 	if (!other) {
@@ -4148,29 +4118,6 @@ void Bot::BotRemoveEquipItem(int16 slot)
 	UpdateEquipmentLight();
 	if (UpdateActiveLight())
 		SendAppearancePacket(AT_Light, GetActiveLightType());
-}
-
-void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQ::ItemInstance* inst, const EQ::ItemInstance* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap) {
-
-	if(!errorMessage->empty())
-		return;
-
-	client->PushItemOnCursor(*inst_swap, true);
-
-	// Remove the item from the bot and from the bot's database records
-	RemoveBotItemBySlot(lootSlot, errorMessage);
-
-	if(!errorMessage->empty())
-		return;
-
-	this->BotRemoveEquipItem(lootSlot);
-
-	if(swap) {
-		BotTradeAddItem(inst->GetItem()->ID, inst, inst->GetCharges(), equipableSlots, lootSlot, errorMessage);
-
-		if(!errorMessage->empty())
-			return;
-	}
 }
 
 void Bot::BotTradeAddItem(uint32 id, const EQ::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb)
