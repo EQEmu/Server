@@ -3652,12 +3652,12 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 		if (CurrentSkill < 50)
 		{
 			brs->Result = 4;	// Copper
-			AddMoneyToPP(brs->Amount, false);
+			AddMoneyToPP(brs->Amount);
 		}
 		else
 		{
 			brs->Result = 3;	// Silver
-			AddMoneyToPP(brs->Amount * 10, false);
+			AddMoneyToPP(brs->Amount * 10);
 		}
 
 	}
@@ -13295,7 +13295,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		}
 	}
 
-	AddMoneyToPP(price, false);
+	AddMoneyToPP(price);
 
 	if (inst->IsStackable() || inst->IsCharged())
 	{
