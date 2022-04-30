@@ -2800,7 +2800,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 	Buyer->TakeMoneyFromPP(Quantity * Price);
 
-	AddMoneyToPP(Quantity * Price, false);
+	AddMoneyToPP(Quantity * Price);
 
 	if(RuleB(Bazaar, AuditTrail))
 		BazaarAuditTrail(GetName(), Buyer->GetName(), ItemName, Quantity, Quantity * Price, 1);

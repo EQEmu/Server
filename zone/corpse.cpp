@@ -1062,7 +1062,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			d->silver = GetSilver();
 			d->gold = GetGold();
 			d->platinum = GetPlatinum();
-			client->AddMoneyToPP(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), false);
+			client->AddMoneyToPP(GetCopper(), GetSilver(), GetGold(), GetPlatinum());
 		}
 
 		RemoveCash();
