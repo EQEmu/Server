@@ -1128,7 +1128,7 @@ void Client::ClearPEQZoneFlag(uint32 zone_id) {
 	peqzone_flags.erase(zone_id);
 
 	auto query = fmt::format(
-		"DELETE FROM character_peqzone_flags WHERE character_id = {} AND zone_id = {}",
+		"DELETE FROM character_peqzone_flags WHERE id = {} AND zone_id = {}",
 		CharacterID(),
 		zone_id
 	);
@@ -1145,7 +1145,7 @@ bool Client::HasPEQZoneFlag(uint32 zone_id) const {
 
 void Client::LoadPEQZoneFlags() {
 	std::string query = fmt::format(
-		"SELECT zone_id from character_peqzone_flags WHERE character_id = {}",
+		"SELECT zone_id from character_peqzone_flags WHERE id = {}",
 		CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
@@ -1223,7 +1223,7 @@ void Client::SetPEQZoneFlag(uint32 zone_id) {
 	peqzone_flags.insert(zone_id);
 
 	auto query = fmt::format(
-		"INSERT INTO character_peqzone_flags (character_id, zone_id) VALUES ({}, {})",
+		"INSERT INTO character_peqzone_flags (id, zone_id) VALUES ({}, {})",
 		CharacterID(),
 		zone_id
 	);
