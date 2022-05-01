@@ -192,7 +192,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					else {
 						float hpRatioToCast = 0.0f;
 
-						switch(this->GetBotStance()) {
+						switch(GetBotStance()) {
 						case EQ::constants::stanceEfficient:
 						case EQ::constants::stanceAggressive:
 							hpRatioToCast = isPrimaryHealer?90.0f:50.0f;
@@ -258,8 +258,8 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						}*/
 						if(botClass != BARD) {
 							if(IsGroupSpell(botSpell.SpellId)){
-								if(this->HasGroup()) {
-									Group *g = this->GetGroup();
+								if(HasGroup()) {
+									Group *g = GetGroup();
 
 									if(g) {
 										BotGroupSay(this, "Casting %s.", spells[botSpell.SpellId].name);
@@ -331,7 +331,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						continue;
 
 					// can not cast buffs for your own pet only on another pet that isn't yours
-					if((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != this->GetPet()))
+					if((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != GetPet()))
 						continue;
 
 					// Validate target
@@ -380,7 +380,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					{
 						float manaRatioToCast = 75.0f;
 
-						switch(this->GetBotStance()) {
+						switch(GetBotStance()) {
 						case EQ::constants::stanceEfficient:
 							manaRatioToCast = 90.0f;
 							break;
@@ -399,7 +399,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						}
 
 						//If we're at specified mana % or below, don't rune as enchanter
-						if(this->GetManaRatio() <= manaRatioToCast)
+						if(GetManaRatio() <= manaRatioToCast)
 							break;
 					}
 
@@ -459,7 +459,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				{
 					float manaRatioToCast = 75.0f;
 
-					switch(this->GetBotStance()) {
+					switch(GetBotStance()) {
 					case EQ::constants::stanceEfficient:
 						manaRatioToCast = 90.0f;
 						break;
@@ -480,7 +480,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					}
 
 					//If we're at specified mana % or below, don't nuke as cleric or enchanter
-					if(this->GetManaRatio() <= manaRatioToCast)
+					if(GetManaRatio() <= manaRatioToCast)
 						break;
 				}
 
@@ -622,7 +622,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						break;
 				}
 			}
-			else if(botClass == BARD) { 
+			else if(botClass == BARD) {
 				if (tar->DontBuffMeBefore() < Timer::GetCurrentTime()) {
 					std::list<BotSpell> inCombatBuffList = GetBotSpellsBySpellType(this, SpellType_InCombatBuff);
 
@@ -644,7 +644,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 								continue;
 
 							// can not cast buffs for your own pet only on another pet that isn't yours
-							if((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != this->GetPet()))
+							if((spells[selectedBotSpell.SpellId].target_type == ST_Pet) && (tar != GetPet()))
 								continue;
 
 							// Validate target
@@ -929,8 +929,8 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						if(IsGroupSpell(botSpell.SpellId)){
 							Group *g;
 
-							if(this->HasGroup()) {
-								Group *g = this->GetGroup();
+							if(HasGroup()) {
+								Group *g = GetGroup();
 
 								if(g) {
 									for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
@@ -1162,7 +1162,7 @@ bool Bot::AI_IdleCastCheck() {
 
 	if (AIautocastspell_timer->Check(false)) {
 #if BotAI_DEBUG_Spells >= 25
-		LogAI("Bot Non-Engaged autocast check triggered: [{}]", this->GetCleanName());
+		LogAI("Bot Non-Engaged autocast check triggered: [{}]", GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -1265,7 +1265,7 @@ bool Bot::AI_IdleCastCheck() {
 					}
 				}
 			}
-			
+
 			result = true;
 			break;
 		}

@@ -133,7 +133,7 @@ void ClientListEntry::SetChar(uint32 iCharID, const char *iCharName)
 
 void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
 {
-	if (iZS == this->Server()) {
+	if (iZS == Server()) {
 		SetOnline(iOnline);
 	}
 }

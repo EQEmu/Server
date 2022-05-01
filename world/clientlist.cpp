@@ -467,7 +467,7 @@ void ClientList::SendOnlineGuildMembers(uint32 FromID, uint32 GuildID)
 	int PacketLength = 8;
 
 	uint32 Count = 0;
-	ClientListEntry* from = this->FindCLEByCharacterID(FromID);
+	ClientListEntry* from = FindCLEByCharacterID(FromID);
 
 	if(!from)
 	{
@@ -1125,7 +1125,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 				auto output = fmt::to_string(out);
 				connection->SendEmoteMessageRaw(
 					to,
-					0,					
+					0,
 					AccountStatus::Player,
 					Chat::NPCQuestSay,
 					output.c_str()
@@ -1160,7 +1160,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 	auto output = fmt::to_string(out);
 	connection->SendEmoteMessageRaw(
 		to,
-		0,		
+		0,
 		AccountStatus::Player,
 		Chat::NPCQuestSay,
 		output.c_str()
@@ -1414,7 +1414,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 		Chat::White,
 		fmt::format(
 			"There {} {} Titanium, {} SoF, {} SoD, {} UF, {} RoF, and {} RoF2 Client{} currently connected for a total of {} Client{} and {} Unique IP{} connected.",
-			(total_clients != 1 ? "are" : "is"),		
+			(total_clients != 1 ? "are" : "is"),
 			client_count[EQ::versions::ClientVersion::Titanium],
 			client_count[EQ::versions::ClientVersion::SoF],
 			client_count[EQ::versions::ClientVersion::SoD],

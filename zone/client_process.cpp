@@ -202,7 +202,7 @@ bool Client::Process() {
 		if (heroforge_wearchange_timer.Check()) {
 			/*
 				This addresses bug where on zone in heroforge models would not be sent to other clients when this was
-				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue. 
+				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue.
 				Unclear the underlying reason for this, if a better solution can be found then can move this back.
 			*/
 			if (queue_wearchange_slot >= 0) { //Resend slot from Client::SwapItem if heroforge item is swapped.
@@ -542,7 +542,7 @@ bool Client::Process() {
 	if (client_state == DISCONNECTED) {
 		OnDisconnect(true);
 		std::cout << "Client disconnected (cs=d): " << GetName() << std::endl;
-		database.SetMQDetectionFlag(this->AccountName(), GetName(), "/MQInstantCamp: Possible instant camp disconnect.", zone->GetShortName());
+		database.SetMQDetectionFlag(AccountName(), GetName(), "/MQInstantCamp: Possible instant camp disconnect.", zone->GetShortName());
 		return false;
 	}
 
@@ -696,8 +696,8 @@ void Client::OnDisconnect(bool hard_disconnect) {
 
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
-			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
+			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Connect_State, CharacterID(), event_desc);
 		}
 	}
 
@@ -953,9 +953,9 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		sprintf(handy_id, "%i", greet_id);
 
 		if (greet_id != MERCHANT_GREETING)
-			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName(), handyitem->Name);
+			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, GetName(), handyitem->Name);
 		else
-			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName());
+			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, GetName());
 	}
 
 //		safe_delete_array(cpi);
@@ -1001,7 +1001,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		// corpse is in has shutdown since the rez spell was cast.
 		database.MarkCorpseAsRezzed(PendingRezzDBID);
 		LogSpells("Player [{}] got a [{}] Rezz, spellid [{}] in zone[{}], instance id [{}]",
-				this->name, (uint16)spells[SpellID].base_value[0],
+				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
 		BuffFadeNonPersistDeath();
@@ -1017,7 +1017,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 					GetRace() == DWARF ||
 					GetRace() == TROLL ||
 					GetRace() == OGRE
-				) ? 
+				) ?
 				RuleI(Character, OldResurrectionSicknessSpellID) :
 				RuleI(Character, ResurrectionSicknessSpellID)
 			);
@@ -1049,7 +1049,7 @@ void Client::OPTGB(const EQApplicationPacket *app)
 {
 	if(!app) return;
 	if(!app->pBuffer) return;
-	
+
 	if(!RuleB(Character, EnableTGB))
 	{
 		return;
@@ -1451,12 +1451,12 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		}
 		else{
 			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared){
-				this->SendPopupToClient(
+				SendPopupToClient(
 					"Shared Bank Warning",
 					"<c \"#F62217\">::: WARNING! :::<br>"
 					"SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE!</c>"
 				);
-				this->Message(Chat::Red, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE!");
+				Message(Chat::Red, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE!");
 			}
 		}
 	}
@@ -1759,10 +1759,10 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 		if(st)
 		{
 			Message(0, "Local: Summoning %s to %f, %f, %f", gms->charname, gms->x, gms->y, gms->z);
-			if (st->IsClient() && (st->CastToClient()->GetAnon() != 1 || this->Admin() >= st->CastToClient()->Admin()))
-				st->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), (float)gms->x, (float)gms->y, (float)gms->z, this->GetHeading(), true);
+			if (st->IsClient() && (st->CastToClient()->GetAnon() != 1 || Admin() >= st->CastToClient()->Admin()))
+				st->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), (float)gms->x, (float)gms->y, (float)gms->z, GetHeading(), true);
 			else
-				st->GMMove(this->GetX(), this->GetY(), this->GetZ(),this->GetHeading());
+				st->GMMove(GetX(), GetY(), GetZ(),GetHeading());
 		}
 		else
 		{
@@ -1775,8 +1775,8 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 			{
 				auto pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
 				ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
-				strcpy(szp->adminname, this->GetName());
-				szp->adminrank = this->Admin();
+				strcpy(szp->adminname, GetName());
+				szp->adminrank = Admin();
 				strcpy(szp->name, gms->charname);
 				strcpy(szp->zone, zone->GetShortName());
 				szp->x_pos = (float)gms->x;

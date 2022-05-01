@@ -442,15 +442,15 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	/* QS: PlayerLogZone */
 	if (RuleB(QueryServ, PlayerLogZone)){
-		std::string event_desc = StringFormat("Zoning :: zoneid:%u instid:%u x:%4.2f y:%4.2f z:%4.2f h:%4.2f zonemode:%d from zoneid:%u instid:%i", zone_id, instance_id, dest_x, dest_y, dest_z, dest_h, zone_mode, this->GetZoneID(), this->GetInstanceID());
-		QServ->PlayerLogEvent(Player_Log_Zoning, this->CharacterID(), event_desc);
+		std::string event_desc = StringFormat("Zoning :: zoneid:%u instid:%u x:%4.2f y:%4.2f z:%4.2f h:%4.2f zonemode:%d from zoneid:%u instid:%i", zone_id, instance_id, dest_x, dest_y, dest_z, dest_h, zone_mode, GetZoneID(), GetInstanceID());
+		QServ->PlayerLogEvent(Player_Log_Zoning, CharacterID(), event_desc);
 	}
 
 	/* Dont clear aggro until the zone is successful */
 	entity_list.RemoveFromHateLists(this);
 
-	if(this->GetPet())
-		entity_list.RemoveFromHateLists(this->GetPet());
+	if(GetPet())
+		entity_list.RemoveFromHateLists(GetPet());
 
 	if (GetPendingExpeditionInviteID() != 0)
 	{
@@ -810,9 +810,9 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			// 76 is orignial Plane of Hate
 			// WildcardX 27 January 2008. Tested this for 6.2 and Titanium clients.
 
-			if(this->GetZoneID() == 1)
+			if(GetZoneID() == 1)
 				gmg->zone_id = 2;
-			else if(this->GetZoneID() == 2)
+			else if(GetZoneID() == 2)
 				gmg->zone_id = 1;
 			else
 				gmg->zone_id = 1;
@@ -886,9 +886,9 @@ void Client::GoToSafeCoords(uint16 zone_id, uint16 instance_id) {
 
 void Mob::Gate(uint8 bind_number) {
 	GoToBind(bind_number);
-	if (RuleB(NPC, NPCHealOnGate) && this->IsNPC() && this->GetHPRatio() <= RuleR(NPC, NPCHealOnGateAmount)) {
+	if (RuleB(NPC, NPCHealOnGate) && IsNPC() && GetHPRatio() <= RuleR(NPC, NPCHealOnGateAmount)) {
 		auto HealAmount = (RuleR(NPC, NPCHealOnGateAmount) / 100);
-		SetHP(int(this->GetMaxHP() * HealAmount));
+		SetHP(int(GetMaxHP() * HealAmount));
 	}
 }
 
@@ -920,7 +920,7 @@ void Client::SetBindPoint(int bind_number, int to_zone, int to_instance, const g
 		m_pp.binds[bind_number].y = location.y;
 		m_pp.binds[bind_number].z = location.z;
 	}
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[bind_number], bind_number);
+	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[bind_number], bind_number);
 }
 
 void Client::SetBindPoint2(int bind_number, int to_zone, int to_instance, const glm::vec4 &location)
@@ -943,7 +943,7 @@ void Client::SetBindPoint2(int bind_number, int to_zone, int to_instance, const 
 		m_pp.binds[bind_number].z = location.z;
 		m_pp.binds[bind_number].heading = location.w;
 	}
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[bind_number], bind_number);
+	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[bind_number], bind_number);
 }
 
 void Client::GoToBind(uint8 bind_number) {

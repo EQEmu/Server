@@ -328,7 +328,7 @@ void Client::CalculateStandardAAExp(uint32 &add_aaxp, uint8 conlevel, bool resex
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_aaxp *= GetAAEXPModifier(this->GetZoneID());
+		add_aaxp *= GetAAEXPModifier(GetZoneID());
 	}
 
 	add_aaxp = (uint32)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
@@ -491,7 +491,7 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_exp *= GetEXPModifier(this->GetZoneID());
+		add_exp *= GetEXPModifier(GetZoneID());
 	}
 
 	add_exp = GetEXP() + add_exp;
@@ -499,7 +499,7 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
-	this->EVENT_ITEM_ScriptStopReturn();
+	EVENT_ITEM_ScriptStopReturn();
 
 	uint32 exp = 0;
 	uint32 aaexp = 0;
@@ -552,7 +552,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 }
 
 void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
-	LogDebug("Attempting to Set Exp for [{}] (XP: [{}], AAXP: [{}], Rez: [{}])", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
+	LogDebug("Attempting to Set Exp for [{}] (XP: [{}], AAXP: [{}], Rez: [{}])", GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
 
 	auto max_AAXP = GetRequiredAAExperience();
 	if (max_AAXP == 0 || GetEXPForLevel(GetLevel()) == 0xFFFFFFFF) {
@@ -671,7 +671,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 		//figure out how many AA points we get from the exp were setting
 		m_pp.aapoints = set_aaxp / max_AAXP;
-		LogDebug("Calculating additional AA Points from AAXP for [{}]: [{}] / [{}] = [{}] points", this->GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
+		LogDebug("Calculating additional AA Points from AAXP for [{}]: [{}] / [{}] = [{}] points", GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
 
 		//get remainder exp points, set in PP below
 		set_aaxp = set_aaxp - (max_AAXP * m_pp.aapoints);
@@ -691,7 +691,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 			MessageString(Chat::Experience, GAIN_SINGLE_AA_MULTI_AA, ConvertArray(m_pp.aapoints, val1)); //You have gained an ability point!  You now have %1 ability points.
 		else
 			MessageString(Chat::Experience, GAIN_MULTI_AA_MULTI_AA, ConvertArray(gained, val1), ConvertArray(m_pp.aapoints, val2)); //You have gained %1 ability point(s)!  You now have %2 ability point(s).
-			
+
 		if (RuleB(AA, SoundForAAEarned)) {
 			SendSound();
 		}
@@ -699,7 +699,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		/* QS: PlayerLogAARate */
 		if (RuleB(QueryServ, PlayerLogAARate)){
 			int add_points = (m_pp.aapoints - last_unspentAA);
-			std::string query = StringFormat("INSERT INTO `qs_player_aa_rate_hourly` (char_id, aa_count, hour_time) VALUES (%i, %i, UNIX_TIMESTAMP() - MOD(UNIX_TIMESTAMP(), 3600)) ON DUPLICATE KEY UPDATE `aa_count` = `aa_count` + %i", this->CharacterID(), add_points, add_points);
+			std::string query = StringFormat("INSERT INTO `qs_player_aa_rate_hourly` (char_id, aa_count, hour_time) VALUES (%i, %i, UNIX_TIMESTAMP() - MOD(UNIX_TIMESTAMP(), 3600)) ON DUPLICATE KEY UPDATE `aa_count` = `aa_count` + %i", CharacterID(), add_points, add_points);
 			QServ->SendQuery(query.c_str());
 		}
 
@@ -819,7 +819,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	level = set_level;
 
 	if(IsRaidGrouped()) {
-		Raid *r = this->GetRaid();
+		Raid *r = GetRaid();
 		if(r){
 			r->UpdateLevel(GetName(), set_level);
 		}
@@ -836,15 +836,15 @@ void Client::SetLevel(uint8 set_level, bool command)
 		parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
 		/* QS: PlayerLogLevels */
 		if (RuleB(QueryServ, PlayerLogLevels)){
-			std::string event_desc = StringFormat("Leveled UP :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Levels, this->CharacterID(), event_desc);
+			std::string event_desc = StringFormat("Leveled UP :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Levels, CharacterID(), event_desc);
 		}
 	}
 	else if (set_level < m_pp.level){
 		/* QS: PlayerLogLevels */
 		if (RuleB(QueryServ, PlayerLogLevels)){
-			std::string event_desc = StringFormat("Leveled DOWN :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Levels, this->CharacterID(), event_desc);
+			std::string event_desc = StringFormat("Leveled DOWN :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Levels, CharacterID(), event_desc);
 		}
 	}
 
@@ -860,7 +860,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
+	SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
 	LogInfo("Setting Level for [{}] to [{}]", GetName(), set_level);
 
@@ -1150,13 +1150,13 @@ void Client::SendLeadershipEXPUpdate() {
 
 uint32 Client::GetCharMaxLevelFromQGlobal() {
 	QGlobalCache *char_c = nullptr;
-	char_c = this->GetQGlobals();
+	char_c = GetQGlobals();
 
 	std::list<QGlobal> globalMap;
 	uint32 ntype = 0;
 
 	if(char_c) {
-		QGlobalCache::Combine(globalMap, char_c->GetBucket(), ntype, this->CharacterID(), zone->GetZoneID());
+		QGlobalCache::Combine(globalMap, char_c->GetBucket(), ntype, CharacterID(), zone->GetZoneID());
 	}
 
 	auto iter = globalMap.begin();
@@ -1174,7 +1174,7 @@ uint32 Client::GetCharMaxLevelFromQGlobal() {
 
 uint32 Client::GetCharMaxLevelFromBucket()
 {
-	uint32      char_id = this->CharacterID();
+	uint32      char_id = CharacterID();
 	std::string query   = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-CharMaxLevel'", char_id);
 	auto        results = database.QueryDatabase(query);
 	if (!results.Success()) {

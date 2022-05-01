@@ -996,7 +996,7 @@ void Raid::SendRaidAddAll(const char *who)
 			ram->_class = members[x]._class;
 			ram->level = members[x].level;
 			ram->isGroupLeader = members[x].IsGroupLeader;
-			this->QueuePacket(outapp);
+			QueuePacket(outapp);
 			safe_delete(outapp);
 			return;
 		}
@@ -1555,7 +1555,7 @@ void Raid::SendHPManaEndPacketsTo(Client *client)
 	if(!client)
 		return;
 
-	uint32 group_id = this->GetGroup(client);
+	uint32 group_id = GetGroup(client);
 
 	EQApplicationPacket hp_packet;
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
@@ -1595,7 +1595,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 	uint32 group_id = 0;
 
 	if(mob->IsClient())
-		group_id = this->GetGroup(mob->CastToClient());
+		group_id = GetGroup(mob->CastToClient());
 
 	EQApplicationPacket hpapp;
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
@@ -1631,7 +1631,7 @@ void Raid::SendManaPacketFrom(Mob *mob)
 	uint32 group_id = 0;
 
 	if (mob->IsClient())
-		group_id = this->GetGroup(mob->CastToClient());
+		group_id = GetGroup(mob->CastToClient());
 
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
@@ -1658,7 +1658,7 @@ void Raid::SendEndurancePacketFrom(Mob *mob)
 	uint32 group_id = 0;
 
 	if (mob->IsClient())
-		group_id = this->GetGroup(mob->CastToClient());
+		group_id = GetGroup(mob->CastToClient());
 
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
@@ -1778,7 +1778,7 @@ void Raid::SetDirtyAutoHaters()
 void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required /*= true*/, bool ignore_sender /*= true*/, float distance /*= 0*/, bool group_only /*= true*/) {
 	if (sender && sender->IsClient()) {
 
-		uint32 group_id = this->GetGroup(sender->CastToClient());
+		uint32 group_id = GetGroup(sender->CastToClient());
 
 		/* If this is a group only packet and we're not in a group -- return */
 		if (!group_id == 0xFFFFFFFF && group_only)

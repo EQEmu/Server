@@ -196,7 +196,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_
 
 	if (target == nullptr)
 		return value;
-	
+
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
 	}
@@ -226,7 +226,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_
 					GetFocusEffect(focusFcDamageAmt, spell_id, nullptr, from_buff_tic) +
 					GetFocusEffect(focusFcDamageAmt2, spell_id, nullptr, from_buff_tic) +
 					GetFocusEffect(focusFcAmplifyAmt, spell_id, nullptr, from_buff_tic);
-					
+
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
 			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
 				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
@@ -257,7 +257,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_
 					GetFocusEffect(focusFcDamageAmt, spell_id, nullptr, from_buff_tic) +
 					GetFocusEffect(focusFcDamageAmt2, spell_id, nullptr, from_buff_tic) +
 					GetFocusEffect(focusFcAmplifyAmt, spell_id, nullptr, from_buff_tic);
-					
+
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
 			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
 				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
@@ -422,7 +422,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target, bool fr
 				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);
 			}
 		}
-		
+
 		if (extra_heal) {
 			int duration = CalcBuffDuration(this, target, spell_id);
 			if (duration > 0) {
@@ -602,7 +602,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			return(false);
 		} else if(m_pp.disciplines.values[r] == 0) {
 			m_pp.disciplines.values[r] = spell_id;
-			database.SaveCharacterDisc(this->CharacterID(), r, spell_id);
+			database.SaveCharacterDisc(CharacterID(), r, spell_id);
 			SendDisciplineUpdate();
 			Message(0, "You have learned a new discipline!");
 			return(true);
@@ -702,7 +702,7 @@ void Client::TrainDiscBySpellID(int32 spell_id)
 	for(i = 0; i < MAX_PP_DISCIPLINES; i++) {
 		if(m_pp.disciplines.values[i] == 0) {
 			m_pp.disciplines.values[i] = spell_id;
-			database.SaveCharacterDisc(this->CharacterID(), i, spell_id);
+			database.SaveCharacterDisc(CharacterID(), i, spell_id);
 			SendDisciplineUpdate();
 			Message(Chat::Yellow, "You have learned a new combat ability!");
 			return;
@@ -733,9 +733,9 @@ void Client::SendDisciplineUpdate() {
 bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	// Dont let client waste a reuse timer if they can't use the disc
 	if ((IsStunned() && !IgnoreCastingRestriction(spell_id))||
-		IsFeared() || 
+		IsFeared() ||
 		(IsMezzed() && !IgnoreCastingRestriction(spell_id)) ||
-		IsAmnesiad() || 
+		IsAmnesiad() ||
 		IsPet())
 	{
 		if (IsAmnesiad()) {
