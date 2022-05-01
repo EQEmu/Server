@@ -28,6 +28,7 @@
 #include "aa.h"
 #include "../common/light_source.h"
 #include "../common/emu_constants.h"
+#include "combat_record.h"
 #include <set>
 #include <vector>
 #include <memory>
@@ -494,7 +495,7 @@ public:
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) = 0;
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
-	inline virtual void SetHP(int32 hp) { if (hp >= max_hp) current_hp = max_hp; else current_hp = hp;}
+	virtual void SetHP(int32 hp);
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int32 newoocregen) {ooc_regen = newoocregen;}
 	virtual void Heal();
@@ -1642,6 +1643,8 @@ protected:
 	bool endur_upkeep;
 	bool degenerating_effects; // true if we have a buff that needs to be recalced every tick
 	bool spawned_in_water;
+
+	CombatRecord combat_record{};
 
 public:
 	bool GetWasSpawnedInWater() const;

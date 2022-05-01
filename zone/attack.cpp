@@ -2724,6 +2724,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		static_cast<int>(attack_skill)
 	);
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0);
+	combat_record.Stop();
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 	if (RuleB(Zone, UseZoneController)) {

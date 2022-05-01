@@ -706,6 +706,16 @@
         OutF(LogSys, Logs::Detail, Logs::ChecksumVerification, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogCombatRecord(message, ...) do {\
+    if (LogSys.log_settings[Logs::CombatRecord].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::CombatRecord, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogCombatRecordDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::CombatRecord].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::CombatRecord, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -1136,6 +1146,12 @@
 } while (0)
 
 #define LogChecksumVerificationDetail(message, ...) do {\
+} while (0)
+
+#define LogCombatRecord(message, ...) do {\
+} while (0)
+
+#define LogCombatRecordDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\

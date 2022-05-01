@@ -134,6 +134,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::HTTP].log_to_gmsay                   = static_cast<uint8>(Logs::General);
 	log_settings[Logs::ChecksumVerification].log_to_console = static_cast<uint8>(Logs::General);
 	log_settings[Logs::ChecksumVerification].log_to_gmsay   = static_cast<uint8>(Logs::General);
+	log_settings[Logs::CombatRecord].log_to_gmsay           = static_cast<uint8>(Logs::General);
 
 	/**
 	 * RFC 5424
