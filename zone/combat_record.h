@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <string>
+#include "../common/types.h"
 
 class CombatRecord {
 public:
@@ -15,8 +16,8 @@ private:
 	std::string mob_name;
 	time_t      start_time      = 0;
 	time_t      end_time        = 0;
-	__int64_t   damage_received = 0;
-	__int64_t   heal_received   = 0;
+	int64       damage_received = 0;
+	int64       heal_received   = 0;
 };
 
 #endif //EQEMU_COMBAT_RECORD_H
