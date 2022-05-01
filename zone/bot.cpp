@@ -4206,28 +4206,24 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType)
 }
 
 // Perfoms the actual trade action with a client bot owner
-void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client)
+void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client)
 {
 	using namespace EQ;
 
 	struct ClientTrade {
-		const ItemInstance* tradeItemInstance;
-		int16 fromClientSlot;
-		int16 toBotSlot;
-		int adjustStackSize;
-		std::string acceptedItemName;
-
-		ClientTrade(const ItemInstance* item, int16 from, const char* name = "") : tradeItemInstance(item), fromClientSlot(from), toBotSlot(invslot::SLOT_INVALID), adjustStackSize(0), acceptedItemName(name) { }
+		const ItemInstance* trade_item_instance;
+		int16 from_client_slot;
+		int16 to_bot_slot;
+		
+		ClientTrade(const ItemInstance* item, int16 from) : trade_item_instance(item), from_client_slot(from), to_bot_slot(invslot::SLOT_INVALID) { }
 	};
 
 	struct ClientReturn {
-		const ItemInstance* returnItemInstance;
-		int16 fromBotSlot;
-		int16 toClientSlot;
-		int adjustStackSize;
-		std::string failedItemName;
-
-		ClientReturn(const ItemInstance* item, int16 from, const char* name = "") : returnItemInstance(item), fromBotSlot(from), toClientSlot(invslot::SLOT_INVALID), adjustStackSize(0), failedItemName(name) { }
+		const ItemInstance* return_item_instance;
+		int16 from_bot_slot;
+		int16 to_client_slot;
+		
+		ClientReturn(const ItemInstance* item, int16 from) : return_item_instance(item), from_bot_slot(from), to_client_slot(invslot::SLOT_INVALID) { }
 	};
 
 	static const int16 bot_equip_order[invslot::EQUIPMENT_COUNT] = {
@@ -4247,32 +4243,37 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	}
 
 	if (client != GetOwner()) {
-		client->Message(Chat::Red, "You are not the owner of this bot - Trade Canceled.");
+		client->Message(Chat::Red, "You are not the owner of this bot, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if ((beginSlotID != invslot::TRADE_BEGIN) && (beginSlotID != invslot::slotCursor)) {
-		client->Message(Chat::Red, "Trade request processing from illegal 'begin' slot - Trade Canceled.");
+
+	if (begin_slot_id != invslot::TRADE_BEGIN && begin_slot_id != invslot::slotCursor) {
+		client->Message(Chat::Red, "Trade request processing from illegal 'begin' slot, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if ((endSlotID != invslot::TRADE_END) && (endSlotID != invslot::slotCursor)) {
-		client->Message(Chat::Red, "Trade request processing from illegal 'end' slot - Trade Canceled.");
+
+	if (end_slot_id != invslot::TRADE_END && end_slot_id != invslot::slotCursor) {
+		client->Message(Chat::Red, "Trade request processing from illegal 'end' slot, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if (((beginSlotID == invslot::slotCursor) && (endSlotID != invslot::slotCursor)) || ((beginSlotID != invslot::slotCursor) && (endSlotID == invslot::slotCursor))) {
-		client->Message(Chat::Red, "Trade request processing illegal slot range - Trade Canceled.");
+
+	if ((begin_slot_id == invslot::slotCursor && end_slot_id != invslot::slotCursor) || (begin_slot_id != invslot::slotCursor && end_slot_id == invslot::slotCursor)) {
+		client->Message(Chat::Red, "Trade request processing illegal slot range, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if (endSlotID < beginSlotID) {
-		client->Message(Chat::Red, "Trade request processing in reverse slot order - Trade Canceled.");
+
+	if (end_slot_id < begin_slot_id) {
+		client->Message(Chat::Red, "Trade request processing in reverse slot order, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
+
 	if (client->IsEngaged() || IsEngaged()) {
-		client->Message(Chat::Yellow, "You may not perform a trade while engaged - Trade Canceled!");
+		client->Message(Chat::Yellow, "You may not perform a trade while engaged, the trade has been cancelled!");
 		client->ResetTrade();
 		return;
 	}
@@ -4281,66 +4282,100 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	std::list<ClientReturn> client_return;
 
 	// pre-checks for incoming illegal transfers
-	for (int16 trade_index = beginSlotID; trade_index <= endSlotID; ++trade_index) {
+	for (int16 trade_index = begin_slot_id; trade_index <= end_slot_id; ++trade_index) {
 		auto trade_instance = client->GetInv()[trade_index];
-		if (!trade_instance)
+		if (!trade_instance) {
 			continue;
+		}
 
 		if (!trade_instance->GetItem()) {
-			// TODO: add logging
-			client->Message(Chat::Red, "A server error was encountered while processing client slot %i - Trade Canceled.", trade_index);
+			LogError("Bot::PerformTradeWithClient could not find item from instance in trade for {} with {} in slot {}.", client->GetCleanName(), GetCleanName(), trade_index);
+			client->Message(
+				Chat::Red,
+				fmt::format(
+					"A server error was encountered while processing client slot {}, the trade has been cancelled.",
+					trade_index
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
-		if ((trade_index != invslot::slotCursor) && !trade_instance->IsDroppable()) {
-			// TODO: add logging
-			client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
+
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(trade_instance);
+
+		auto item_link = linker.GenerateLink();
+	
+		if (trade_index != invslot::slotCursor && !trade_instance->IsDroppable()) {
+			LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
+			client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
 			client->ResetTrade();
 			return;
 		}
+
 		if (trade_instance->IsStackable() && (trade_instance->GetCharges() < trade_instance->GetItem()->StackSize)) { // temp until partial stacks are implemented
-			client->Message(Chat::Yellow, "'%s' is only a partially stacked item - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(
+				Chat::Yellow,
+				fmt::format(
+					"{} is only a partially stacked item, the trade has been cancelled!",
+					item_link
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
+
 		if (CheckLoreConflict(trade_instance->GetItem())) {
-			client->Message(Chat::Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(
+				Chat::Yellow,
+				fmt::format(
+					"This bot already has {}, the trade has been cancelled!",
+					item_link
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
 
 		if (!trade_instance->IsType(item::ItemClassCommon)) {
-			client_return.push_back(ClientReturn(trade_instance, trade_index, trade_instance->GetItem()->Name));
-			continue;
-		}
-		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) { // deity checks will be handled within IsEquipable()
-			client_return.push_back(ClientReturn(trade_instance, trade_index, trade_instance->GetItem()->Name));
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
 			continue;
 		}
 
-		client_trade.push_back(ClientTrade(trade_instance, trade_index, trade_instance->GetItem()->Name));
+		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) { // deity checks will be handled within IsEquipable()
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
+		}
+
+		client_trade.push_back(ClientTrade(trade_instance, trade_index));
 	}
 
 	// check for incoming lore hacks
 	for (auto& trade_iterator : client_trade) {
-		if (!trade_iterator.tradeItemInstance->GetItem()->LoreFlag)
+		if (!trade_iterator.trade_item_instance->GetItem()->LoreFlag) {
 			continue;
+		}
 
 		for (const auto& check_iterator : client_trade) {
-			if (check_iterator.fromClientSlot == trade_iterator.fromClientSlot)
+			if (check_iterator.from_client_slot == trade_iterator.from_client_slot) {
 				continue;
-			if (!check_iterator.tradeItemInstance->GetItem()->LoreFlag)
-				continue;
+			}
 
-			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup == -1) && (check_iterator.tradeItemInstance->GetItem()->ID == trade_iterator.tradeItemInstance->GetItem()->ID)) {
-				// TODO: add logging
-				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
+			if (!check_iterator.trade_item_instance->GetItem()->LoreFlag) {
+				continue;
+			}
+
+			if (trade_iterator.trade_item_instance->GetItem()->LoreGroup == -1 && check_iterator.trade_item_instance->GetItem()->ID == trade_iterator.trade_item_instance->GetItem()->ID) {
+				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
+				client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
 				return;
 			}
-			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup > 0) && (check_iterator.tradeItemInstance->GetItem()->LoreGroup == trade_iterator.tradeItemInstance->GetItem()->LoreGroup)) {
-				// TODO: add logging
-				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
+
+			if ((trade_iterator.trade_item_instance->GetItem()->LoreGroup > 0) && (check_iterator.trade_item_instance->GetItem()->LoreGroup == trade_iterator.trade_item_instance->GetItem()->LoreGroup)) {
+				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
+				client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
 				return;
 			}
@@ -4355,16 +4390,18 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	//for (unsigned stage_loop = stageStackable; stage_loop <= stageReplaceable; ++stage_loop) { // awaiting implementation
 	for (unsigned stage_loop = stageEmpty; stage_loop <= stageReplaceable; ++stage_loop) {
 		for (auto& trade_iterator : client_trade) {
-			if (trade_iterator.toBotSlot != invslot::SLOT_INVALID)
+			if (trade_iterator.to_bot_slot != invslot::SLOT_INVALID) {
 				continue;
+			}
 
-			auto trade_instance = trade_iterator.tradeItemInstance;
+			auto trade_instance = trade_iterator.trade_item_instance;
 			//if ((stage_loop == stageStackable) && !trade_instance->IsStackable())
 			//	continue;
 
 			for (auto index : bot_equip_order) {
-				if (!(trade_instance->GetItem()->Slots & (1 << index)))
+				if (!(trade_instance->GetItem()->Slots & (1 << index))) {
 					continue;
+				}
 
 				//if (stage_loop == stageStackable) {
 				//	// TODO: implement
@@ -4372,59 +4409,64 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				//}
 
 				if (stage_loop != stageReplaceable) {
-					if (m_inv[index])
+					if (m_inv[index]) {
 						continue;
+					}
 				}
 
 				bool slot_taken = false;
 				for (const auto& check_iterator : client_trade) {
-					if (check_iterator.fromClientSlot == trade_iterator.fromClientSlot)
+					if (check_iterator.from_client_slot == trade_iterator.from_client_slot) {
 						continue;
+					}
 
-					if (check_iterator.toBotSlot == index) {
+					if (check_iterator.to_bot_slot == index) {
 						slot_taken = true;
 						break;
 					}
 				}
-				if (slot_taken)
+
+				if (slot_taken) {
 					continue;
+				}
 
 				if (index == invslot::slotPrimary) {
 					if (trade_instance->GetItem()->IsType2HWeapon()) {
 						if (!melee_secondary) {
 							melee_2h_weapon = true;
-
 							auto equipped_secondary_weapon = m_inv[invslot::slotSecondary];
-							if (equipped_secondary_weapon)
+							if (equipped_secondary_weapon) {
 								client_return.push_back(ClientReturn(equipped_secondary_weapon, invslot::slotSecondary));
-						}
-						else {
+							}
+						} else {
 							continue;
 						}
 					}
-				}
-				if (index == invslot::slotSecondary) {
+				} else if (index == invslot::slotSecondary) {
 					if (!melee_2h_weapon) {
-						if ((can_dual_wield && trade_instance->GetItem()->IsType1HWeapon()) || trade_instance->GetItem()->IsTypeShield() || !trade_instance->IsWeapon()) {
+						if (
+							(can_dual_wield && trade_instance->GetItem()->IsType1HWeapon()) ||
+							trade_instance->GetItem()->IsTypeShield() ||
+							!trade_instance->IsWeapon()
+						) {
 							melee_secondary = true;
-
 							auto equipped_primary_weapon = m_inv[invslot::slotPrimary];
-							if (equipped_primary_weapon && equipped_primary_weapon->GetItem()->IsType2HWeapon())
+							if (equipped_primary_weapon && equipped_primary_weapon->GetItem()->IsType2HWeapon()) {
 								client_return.push_back(ClientReturn(equipped_primary_weapon, invslot::slotPrimary));
-						}
-						else {
+							}
+						} else {
 							continue;
 						}
-					}
-					else {
+					} else {
 						continue;
 					}
 				}
 
-				trade_iterator.toBotSlot = index;
+				trade_iterator.to_bot_slot = index;
 
-				if (m_inv[index])
+				if (m_inv[index]) {
 					client_return.push_back(ClientReturn(m_inv[index], index));
+				}
 
 				break;
 			}
@@ -4433,8 +4475,8 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 	// move unassignable items from trade list to return list
 	for (std::list<ClientTrade>::iterator trade_iterator = client_trade.begin(); trade_iterator != client_trade.end();) {
-		if (trade_iterator->toBotSlot == invslot::SLOT_INVALID) {
-			client_return.push_back(ClientReturn(trade_iterator->tradeItemInstance, trade_iterator->fromClientSlot, trade_iterator->tradeItemInstance->GetItem()->Name));
+		if (trade_iterator->to_bot_slot == invslot::SLOT_INVALID) {
+			client_return.push_back(ClientReturn(trade_iterator->trade_item_instance, trade_iterator->from_client_slot));
 			trade_iterator = client_trade.erase(trade_iterator);
 			continue;
 		}
@@ -4443,31 +4485,49 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 	// out-going return checks for client
 	for (auto& return_iterator : client_return) {
-		auto return_instance = return_iterator.returnItemInstance;
-		if (!return_instance)
+		auto return_instance = return_iterator.return_item_instance;
+		if (!return_instance) {
 			continue;
+		}
 
 		if (!return_instance->GetItem()) {
-			// TODO: add logging
-			client->Message(Chat::Red, "A server error was encountered while processing bot slot %i - Trade Canceled.", return_iterator.fromBotSlot);
+			LogError("Bot::PerformTradeWithClient error processing bot slot {} for {} in trade with {}.", return_iterator.from_bot_slot, GetCleanName(), client->GetCleanName());
+			client->Message(
+				Chat::Red,
+				fmt::format(
+					"A server error was encountered while processing bot slot {}, the trade has been cancelled.",
+					return_iterator.from_bot_slot
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
+
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(return_instance);
+
+		auto item_link = linker.GenerateLink();
+
 		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
 		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
 		if (client->CheckLoreConflict(return_instance->GetItem())) {
-			client->Message(Chat::Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
+			client->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You already have {}, the trade has been cancelled!",
+					item_link
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
 
-		if (return_iterator.fromBotSlot == invslot::slotCursor) {
-			return_iterator.toClientSlot = invslot::slotCursor;
-		}
-		else {
+		if (return_iterator.from_bot_slot == invslot::slotCursor) {
+			return_iterator.to_client_slot = invslot::slotCursor;
+		} else {
 			int16 client_search_general = invslot::GENERAL_BEGIN;
 			uint8 client_search_bag = invbag::SLOT_BEGIN;
-
 			bool run_search = true;
 			while (run_search) {
 				int16 client_test_slot = client->GetInv().FindFreeSlotForTradeItem(return_instance, client_search_general, client_search_bag);
@@ -4478,23 +4538,23 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 				bool slot_taken = false;
 				for (const auto& check_iterator : client_return) {
-					if (check_iterator.fromBotSlot == return_iterator.fromBotSlot)
+					if (check_iterator.from_bot_slot == return_iterator.from_bot_slot) {
 						continue;
+					}
 
-					if ((check_iterator.toClientSlot == client_test_slot) && (client_test_slot != invslot::slotCursor)) {
+					if (check_iterator.to_client_slot == client_test_slot && client_test_slot != invslot::slotCursor) {
 						slot_taken = true;
 						break;
 					}
 				}
+
 				if (slot_taken) {
-					if ((client_test_slot >= invslot::GENERAL_BEGIN) && (client_test_slot <= invslot::GENERAL_END)) {
+					if (client_test_slot >= invslot::GENERAL_BEGIN && client_test_slot <= invslot::GENERAL_END) {
 						++client_search_general;
 						client_search_bag = invbag::SLOT_BEGIN;
-					}
-					else {
+					} else {
 						client_search_general = InventoryProfile::CalcSlotId(client_test_slot);
 						client_search_bag = InventoryProfile::CalcBagIdx(client_test_slot);
-
 						++client_search_bag;
 						if (client_search_bag >= invbag::SLOT_COUNT) {
 							// incrementing this past legacy::GENERAL_END triggers the (client_test_slot == legacy::SLOT_INVALID) at the beginning of the search loop
@@ -4507,13 +4567,13 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 					continue;
 				}
 
-				return_iterator.toClientSlot = client_test_slot;
+				return_iterator.to_client_slot = client_test_slot;
 				run_search = false;
 			}
 		}
 
-		if (return_iterator.toClientSlot == invslot::SLOT_INVALID) {
-			client->Message(Chat::Yellow, "You do not have room to complete this trade - Trade Canceled!");
+		if (return_iterator.to_client_slot == invslot::SLOT_INVALID) {
+			client->Message(Chat::Yellow, "You do not have room to complete this trade, the trade has been cancelled!");
 			client->ResetTrade();
 			return;
 		}
@@ -4524,70 +4584,105 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	for (auto& return_iterator : client_return) {
 		// TODO: code for stackables
 
-		if (return_iterator.fromBotSlot == invslot::slotCursor) { // failed trade return
+		if (return_iterator.from_bot_slot == invslot::slotCursor) { // failed trade return
 			// no movement action required
-		}
-		else if ((return_iterator.fromBotSlot >= invslot::TRADE_BEGIN) && (return_iterator.fromBotSlot <= invslot::TRADE_END)) { // failed trade returns
-			client->PutItemInInventory(return_iterator.toClientSlot, *return_iterator.returnItemInstance);
-			client->SendItemPacket(return_iterator.toClientSlot, return_iterator.returnItemInstance, ItemPacketTrade);
-			client->DeleteItemInInventory(return_iterator.fromBotSlot);
-		}
-		else { // successful trade returns
-			auto return_instance = m_inv.PopItem(return_iterator.fromBotSlot);
-			//if (*return_instance != *return_iterator.returnItemInstance) {
+		} else if ((return_iterator.from_bot_slot >= invslot::TRADE_BEGIN) && (return_iterator.from_bot_slot <= invslot::TRADE_END)) { // failed trade returns
+			client->PutItemInInventory(return_iterator.to_client_slot, *return_iterator.return_item_instance);
+			client->SendItemPacket(return_iterator.to_client_slot, return_iterator.return_item_instance, ItemPacketTrade);
+			client->DeleteItemInInventory(return_iterator.from_bot_slot);
+		} else { // successful trade returns
+			auto return_instance = m_inv.PopItem(return_iterator.from_bot_slot);
+			//if (*return_instance != *return_iterator.return_item_instance) {
 			//	// TODO: add logging
 			//}
 
-			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
-				client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
+			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.from_bot_slot)) {
+				client->Message(
+					Chat::Red,
+					fmt::format(
+						"Failed to delete item by slot from slot {} for {}.",
+						return_iterator.from_bot_slot,
+						GetCleanName()
+					).c_str()
+				);
+			}
 
-			BotRemoveEquipItem(return_iterator.fromBotSlot);
-			if (return_instance)
-				client->PutItemInInventory(return_iterator.toClientSlot, *return_instance, true);
+			BotRemoveEquipItem(return_iterator.from_bot_slot);
+
+			if (return_instance) {
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+				linker.SetItemInst(return_instance);
+				auto item_link = linker.GenerateLink();
+
+				client->Message(
+					Chat::Tell,
+					fmt::format(
+						"{} tells you, 'I have returned {}.'",
+						GetCleanName(),
+						item_link
+					).c_str()
+				);
+
+				client->PutItemInInventory(return_iterator.to_client_slot, *return_instance, true);
+			}
+
 			InventoryProfile::MarkDirty(return_instance);
 		}
-		return_iterator.returnItemInstance = nullptr;
+		return_iterator.return_item_instance = nullptr;
 	}
 
 	// trades can now go in as empty slot inserts
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
 
-		if (!database.botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
-			client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
+		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {			
+			client->Message(
+				Chat::Red,
+				fmt::format(
+					"Failed to save item by slot to slot {} for {}.",
+					trade_iterator.to_bot_slot,
+					GetCleanName()
+				).c_str()
+			);
+		}
 
-		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
-		BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
-		trade_iterator.tradeItemInstance = nullptr; // actual deletion occurs in client delete below
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(trade_iterator.trade_item_instance);
+		auto item_link = linker.GenerateLink();
 
-		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, (trade_iterator.fromClientSlot == EQ::invslot::slotCursor));
+		client->Message(
+			Chat::Tell,
+			fmt::format(
+				"{} tells you, 'I have accepted {}.'",
+				GetCleanName(),
+				item_link
+			).c_str()
+		);
+
+		m_inv.PutItem(trade_iterator.to_bot_slot, *trade_iterator.trade_item_instance);
+		BotAddEquipItem(trade_iterator.to_bot_slot, (trade_iterator.trade_item_instance ? trade_iterator.trade_item_instance->GetID() : 0));
+		trade_iterator.trade_item_instance = nullptr; // actual deletion occurs in client delete below
+
+		client->DeleteItemInInventory(trade_iterator.from_client_slot, 0, (trade_iterator.from_client_slot == EQ::invslot::slotCursor));
 
 		// database currently has unattuned item saved in inventory..it will be attuned on next bot load
 		// this prevents unattuned item returns in the mean time (TODO: re-work process)
-		if (trade_iterator.toBotSlot >= invslot::EQUIPMENT_BEGIN && trade_iterator.toBotSlot <= invslot::EQUIPMENT_END) {
-			auto attune_item = m_inv.GetItem(trade_iterator.toBotSlot);
-			if (attune_item && attune_item->GetItem()->Attuneable)
+		if (trade_iterator.to_bot_slot >= invslot::EQUIPMENT_BEGIN && trade_iterator.to_bot_slot <= invslot::EQUIPMENT_END) {
+			auto attune_item = m_inv.GetItem(trade_iterator.to_bot_slot);
+			if (attune_item && attune_item->GetItem()->Attuneable) {
 				attune_item->SetAttuned(true);
+			}
 		}
-	}
-
-	// trade messages
-	for (const auto& return_iterator : client_return) {
-		if (return_iterator.failedItemName.size())
-			client->Message(Chat::Tell, "%s tells you, \"%s, I can't use this '%s.'\"", GetCleanName(), client->GetName(), return_iterator.failedItemName.c_str());
-	}
-	for (const auto& trade_iterator : client_trade) {
-		if (trade_iterator.acceptedItemName.size())
-			client->Message(Chat::Tell, "%s tells you, \"Thank you for the '%s,' %s!\"", GetCleanName(), trade_iterator.acceptedItemName.c_str(), client->GetName());
 	}
 
 	size_t accepted_count = client_trade.size();
 	size_t returned_count = client_return.size();
 
-	client->Message(Chat::Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
-
-	if (accepted_count)
+	if (accepted_count) {
 		CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
+	}
 }
 
 bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
