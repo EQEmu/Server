@@ -12,25 +12,25 @@ extern Database database;
 
 PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 Level, uint32 Class, uint32 AACount, uint32 Timezone, uint32 TimePosted)
 {
-	this->Name = Name;
-	this->Comments = Comments;
-	this->Level = Level;
-	this->Class = Class;
-	this->AACount = AACount;
-	this->TimeZone = Timezone;
-	this->TimePosted = TimePosted;
+	Name = Name;
+	Comments = Comments;
+	Level = Level;
+	Class = Class;
+	AACount = AACount;
+	TimeZone = Timezone;
+	TimePosted = TimePosted;
 }
 
 GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Timezone, uint32 TimePosted)
 {
-	this->Name = Name; 
-	this->Comments = Comments;
-	this->FromLevel = FromLevel;
-	this->ToLevel = ToLevel;
-	this->Classes = Classes;
-	this->AACount = AACount;
-	this->TimeZone = Timezone;
-	this->TimePosted = TimePosted;
+	Name = Name;
+	Comments = Comments;
+	FromLevel = FromLevel;
+	ToLevel = ToLevel;
+	Classes = Classes;
+	AACount = AACount;
+	TimeZone = Timezone;
+	TimePosted = TimePosted;
 }
 
 bool LFGuildManager::LoadDatabase()

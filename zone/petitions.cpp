@@ -46,23 +46,23 @@ extern WorldServer worldserver;
 void Petition::SendPetitionToPlayer(Client* clientto) {
 	auto outapp = new EQApplicationPacket(OP_PetitionCheckout, sizeof(Petition_Struct));
 	Petition_Struct* pet = (Petition_Struct*) outapp->pBuffer;
-	strcpy(pet->accountid,this->GetAccountName());
-	strcpy(pet->lastgm,this->GetLastGM());
-	strcpy(pet->charname,this->GetCharName());
-	pet->petnumber = this->petid;
-	pet->charclass = this->GetCharClass();
-	pet->charlevel = this->GetCharLevel();
-	pet->charrace = this->GetCharRace();
-	pet->zone = this->GetZone();
-	//strcpy(pet->zone,this->GetZone());
-	strcpy(pet->petitiontext,this->GetPetitionText());
-	pet->checkouts = this->GetCheckouts();
-	pet->unavail = this->GetUnavails();
-	pet->senttime = this->GetSentTime();
+	strcpy(pet->accountid,GetAccountName());
+	strcpy(pet->lastgm,GetLastGM());
+	strcpy(pet->charname,GetCharName());
+	pet->petnumber = petid;
+	pet->charclass = GetCharClass();
+	pet->charlevel = GetCharLevel();
+	pet->charrace = GetCharRace();
+	pet->zone = GetZone();
+	//strcpy(pet->zone,GetZone());
+	strcpy(pet->petitiontext,GetPetitionText());
+	pet->checkouts = GetCheckouts();
+	pet->unavail = GetUnavails();
+	pet->senttime = GetSentTime();
 	//memset(pet->unknown5, 0, sizeof(pet->unknown5));
 	//pet->unknown5[3] = 0x1f;
-	pet->urgency = this->GetUrgency();
-	strcpy(pet->gmtext, this->GetGMText());
+	pet->urgency = GetUrgency();
+	strcpy(pet->gmtext, GetGMText());
 	clientto->QueuePacket(outapp);
 	safe_delete(outapp);
 	return;
@@ -85,7 +85,7 @@ Petition::Petition(uint32 id)
 	memset(petitiontext, 0, sizeof(petitiontext));
 	memset(gmtext, 0, sizeof(gmtext));
 
-	//memset(this->zone, 0, sizeof(this->zone));
+	//memset(zone, 0, sizeof(zone));
 	zone = 1;
 }
 Petition* PetitionList::GetPetitionByID(uint32 id_in) {

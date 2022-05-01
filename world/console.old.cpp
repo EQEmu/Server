@@ -525,7 +525,7 @@ void Console::ProcessCommand(const char* command) {
 				if (sep.IsNumber(1) && atoi(sep.arg[1]) > 0) {
 					auto pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 					ServerUptime_Struct* sus = (ServerUptime_Struct*) pack->pBuffer;
-					snprintf(sus->adminname, sizeof(sus->adminname), "*%s", this->GetName());
+					snprintf(sus->adminname, sizeof(sus->adminname), "*%s", GetName());
 					sus->zoneserverid = atoi(sep.arg[1]);
 					ZoneServer* zs = zoneserver_list.FindByID(sus->zoneserverid);
 					if (zs)
@@ -544,9 +544,9 @@ void Console::ProcessCommand(const char* command) {
 				SendMessage(1, "MD5: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x", md5[0], md5[1], md5[2], md5[3], md5[4], md5[5], md5[6], md5[7], md5[8], md5[9], md5[10], md5[11], md5[12], md5[13], md5[14], md5[15]);
 			}
 			else if (strcasecmp(sep.arg[0], "whoami") == 0) {
-				SendMessage(1, "You are logged in as '%s'", this->AccountName());
-				SendMessage(1, "You are known as '*%s'", this->AccountName());
-				SendMessage(1, "AccessLevel: %d", this->Admin());
+				SendMessage(1, "You are logged in as '%s'", AccountName());
+				SendMessage(1, "You are known as '*%s'", AccountName());
+				SendMessage(1, "AccessLevel: %d", Admin());
 			}
 			else if (strcasecmp(sep.arg[0], "echo") == 0) {
 				if (strcasecmp(sep.arg[1], "on") == 0)
@@ -628,15 +628,15 @@ void Console::ProcessCommand(const char* command) {
 						SendMessage(1, "Character Does Not Exist");
 				}
 			}
-			else if (strcasecmp(sep.arg[0], "flag") == 0 && this->Admin() >= consoleFlagStatus) {
+			else if (strcasecmp(sep.arg[0], "flag") == 0 && Admin() >= consoleFlagStatus) {
 // SCORPIOUS2K - reversed parameter order for flag
 				if(sep.arg[2][0]==0 || !sep.IsNumber(1))
 					SendMessage(1, "Usage: flag [status] [accountname]");
 				else
 				{
-					if (atoi(sep.arg[1]) > this->Admin())
+					if (atoi(sep.arg[1]) > Admin())
 						SendMessage(1, "You cannot set people's status to higher than your own");
-					else if (atoi(sep.arg[1]) < 0 && this->Admin() < consoleFlagStatus)
+					else if (atoi(sep.arg[1]) < 0 && Admin() < consoleFlagStatus)
 							SendMessage(1, "You have too low of status to change flags");
 					else if (!database.SetAccountStatus(sep.arg[2], atoi(sep.arg[1])))
 							SendMessage(1, "Unable to flag account!");
@@ -655,7 +655,7 @@ void Console::ProcessCommand(const char* command) {
 				ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
 				strcpy(skp->adminname, tmpname);
 				strcpy(skp->name, sep.arg[1]);
-				skp->adminrank = this->Admin();
+				skp->adminrank = Admin();
 				zoneserver_list.SendPacket(pack);
 				delete pack;
 			}

@@ -31,10 +31,10 @@ Adventure::Adventure(AdventureTemplate *t)
 Adventure::Adventure(AdventureTemplate *t, int count, int assassination_count, AdventureStatus status, uint16 instance_id, uint32 time_left)
 {
 	adventure_template = t;
-	this->count = count;
-	this->assassination_count = assassination_count;
-	this->status = status;
-	this->instance_id = instance_id;
+	count = count;
+	assassination_count = assassination_count;
+	status = status;
+	instance_id = instance_id;
 
 	if(status == AS_Finished)
 	{

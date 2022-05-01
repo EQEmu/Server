@@ -199,7 +199,7 @@ void ZoneGuildManager::ListGuilds(Client *c) const {
 				m_guilds.size() != 1 ? "s" : ""
 			).c_str()
 		);
-		
+
 		for (const auto& guild : m_guilds) {
 			auto leader_name = database.GetCharNameByID(guild.second->leader_char_id);
 			c->Message(
@@ -242,7 +242,7 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 
 	const GuildInfo *info = res->second;
 
-	auto leader_name = database.GetCharNameByID(info->leader_char_id);	
+	auto leader_name = database.GetCharNameByID(info->leader_char_id);
 	std::string popup_text = "<table>";
 	popup_text += fmt::format(
 		"<tr><td>Name</td><td>{}</td><td>Guild ID</td><td>{}</td></tr>",
@@ -1481,8 +1481,8 @@ GuildApproval::GuildApproval(const char* guildname, Client* owner,uint32 id)
 	uint8 tmp = atoi(founders.c_str());
 	deletion_timer = new Timer(1800000);
 	strcpy(guild,guildname);
-	this->owner = owner;
-	this->refid = id;
+	owner = owner;
+	refid = id;
 	if(owner)
 		owner->Message(Chat::White,"You can now start getting your guild approved, tell your %i members to #guildapprove %i, you have 30 minutes to create your guild.",tmp,GetID());
 	for(int i=0;i<tmp;i++)
