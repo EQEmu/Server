@@ -60,7 +60,7 @@ struct NPCType
 	uint32	trap_template;
 	uint8	light;
 	uint32	AC;
-	uint32	Mana;	//not loaded from DB
+	uint64	Mana;	//not loaded from DB
 	uint32	ATK;	//not loaded from DB
 	uint32	STR;
 	uint32	STA;

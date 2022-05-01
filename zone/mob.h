@@ -682,14 +682,14 @@ public:
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
 	inline uint32 GetLevelCon(uint8 iOtherLevel) const { return GetLevelCon(GetLevel(), iOtherLevel); }
-	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true,
+	virtual void AddToHateList(Mob* other, uint64 hate = 0, int64 damage = 0, bool iYellForHelp = true,
 		bool bFrenzy = false, bool iBuffTic = false, uint16 spell_id = SPELL_UNKNOWN, bool pet_comand = false);
 	bool RemoveFromHateList(Mob* mob);
-	void SetHateAmountOnEnt(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.SetHateAmountOnEnt(other,hate,damage);}
-	void HalveAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate > 1 ? in_hate / 2 : 1)); }
-	void DoubleAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate ? in_hate * 2 : 1)); }
-	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHateAmount(tmob,is_dam);}
-	uint32 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHateAmount(tmob, true);}
+	void SetHateAmountOnEnt(Mob* other, int64 hate = 0, int64 damage = 0) { hate_list.SetHateAmountOnEnt(other,hate,damage);}
+	void HalveAggro(Mob *other) { uint64 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate > 1 ? in_hate / 2 : 1)); }
+	void DoubleAggro(Mob *other) { uint64 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate ? in_hate * 2 : 1)); }
+	uint64 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHateAmount(tmob,is_dam);}
+	uint64 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHateAmount(tmob, true);}
 	int GetHateRatio(Mob *first, Mob *with) { return hate_list.GetHateRatio(first, with); }
 	Mob* GetHateTop() { return hate_list.GetEntWithMostHateOnList(this);}
 	Mob* GetSecondaryHate(Mob *skip) { return hate_list.GetEntWithMostHateOnList(this, skip); }

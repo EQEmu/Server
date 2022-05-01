@@ -2479,7 +2479,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		return;
 	}
 	else if (id == "max_mana") {
-		npc_mana = atoi(val.c_str());
+		npc_mana = std::stoull(val.c_str());
 		CalcMaxMana();
 		if (current_mana > max_mana) {
 			current_mana = max_mana;
