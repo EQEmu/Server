@@ -442,7 +442,7 @@ public:
 	int AttackAnimation(int Hand, Lua_ItemInst weapon);
 	int GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon);
 	bool IsBerserk();
-	bool TryFinishingBlow(Lua_Mob defender, int &damage);
+	bool TryFinishingBlow(Lua_Mob defender, int64 &damage);
 	int GetBodyType();
 	int GetOrigBodyType();
 	void CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id);

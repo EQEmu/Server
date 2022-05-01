@@ -247,7 +247,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				// for offensive spells check if we have a spell rune on
-				int32 dmg = effect_value;
+				int64 dmg = effect_value;
 				if(dmg < 0)
 				{
 
@@ -301,7 +301,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				// hack fix for client health not reflecting server value
 				last_hp = 0;
 
-				int32 dmg = effect_value;
+				int64 dmg = effect_value;
 
 				//hardcoded for manaburn and life burn
 				if (spell_id == SPELL_MANA_BURN || spell_id == SPELL_LIFE_BURN)
@@ -2395,7 +2395,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					break;
 
 				// for offensive spells check if we have a spell rune on
-				int32 dmg = effect_value;
+				int64 dmg = effect_value;
 				if(dmg < 0)
 				{
 					// take partial damage into account
@@ -2716,7 +2716,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			{
 				int32 max_mana = spell.base_value[i];
 				int ratio = spell.limit_value[i];
-				int32 dmg = 0;
+				int64 dmg = 0;
 
 				if (caster){
 					if (caster->GetMana() <= max_mana){
@@ -7084,7 +7084,7 @@ bool Mob::DoHPToManaCovert(uint16 mana_cost)
 int32 Mob::GetFcDamageAmtIncoming(Mob *caster, int32 spell_id, bool from_buff_tic)
 {
 	//THIS is target of spell cast
-	int32 dmg = 0;
+	int64 dmg = 0;
 	dmg += GetFocusEffect(focusFcDamageAmtIncoming, spell_id, caster, from_buff_tic); //SPA 297 SE_FcDamageAmtIncoming
 	dmg += GetFocusEffect(focusFcSpellDamageAmtIncomingPC, spell_id, caster, from_buff_tic); //SPA 484 SE_Fc_Spell_Damage_Amt_IncomingPC
 	return dmg;
@@ -9402,7 +9402,7 @@ bool Mob::TrySpellProjectile(Mob* spell_target, uint16 spell_id, float speed) {
 	return true;
 }
 
-void Mob::ResourceTap(int32 damage, uint16 spellid)
+void Mob::ResourceTap(int64 damage, uint16 spellid)
 {
 	//'this' = caster
 	if (!IsValidSpell(spellid))
@@ -9434,7 +9434,7 @@ void Mob::ResourceTap(int32 damage, uint16 spellid)
 	}
 }
 
-void Mob::TryTriggerThreshHold(int32 damage, int effect_id,  Mob* attacker){
+void Mob::TryTriggerThreshHold(int64 damage, int effect_id,  Mob* attacker){
 
 	if (damage <= 0)
 		return;

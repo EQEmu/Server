@@ -4440,7 +4440,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					if(zone->random.Int(0, 100) > 25) //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					{
 						DoAnim(animKick, 0, false);
-						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
+						int64 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
 
 						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
 							dmg = DMG_INVULNERABLE;
@@ -4452,7 +4452,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					else
 					{
 						DoAnim(animTailRake, 0, false);
-						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
+						int64 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
 
 						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
 							dmg = DMG_INVULNERABLE;
@@ -4480,7 +4480,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
-void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
+void Merc::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
 {
 	if(IsDead() || IsCorpse())
 		return;
@@ -4521,7 +4521,7 @@ Mob* Merc::GetOwnerOrSelf() {
 	return Result;
 }
 
-bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool Merc::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
 {
 	if(!NPC::Death(killerMob, damage, spell, attack_skill))
 	{

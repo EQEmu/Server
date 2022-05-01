@@ -137,13 +137,13 @@ float Mob::mod_mitigation_rating(float mitigation_rating, Mob* attacker) { retur
 float Mob::mod_attack_rating(float attack_rating, Mob* defender) { return(attack_rating); }
 
 //Kick damage after all other bonuses are applied
-int32 Mob::mod_kick_damage(int32 dmg) { return(dmg); }
+int32 Mob::mod_kick_damage(int64 dmg) { return(dmg); }
 
 //Slam and bash damage after all other bonuses are applied
-int32 Mob::mod_bash_damage(int32 dmg) { return(dmg); }
+int32 Mob::mod_bash_damage(int64 dmg) { return(dmg); }
 
 //Frenzy damage after all other bonuses are applied
-int32 Mob::mod_frenzy_damage(int32 dmg) { return(dmg); }
+int32 Mob::mod_frenzy_damage(int64 dmg) { return(dmg); }
 
 //Special attack damage after all other bonuses are applied.
 int32 Mob::mod_monk_special_damage(int32 ndamage, EQ::skills::SkillType skill_type) { return(ndamage); }

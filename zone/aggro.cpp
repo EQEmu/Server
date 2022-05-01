@@ -108,7 +108,7 @@ void EntityList::DescribeAggro(Client *to_who, NPC *from_who, float d, bool verb
 		}
 
 		if (is_engaged) {
-			uint32 hate_amount = from_who->GetHateAmount(npc);
+			uint64 hate_amount = from_who->GetHateAmount(npc);
 			to_who->Message(
 				Chat::White,
 				fmt::format(

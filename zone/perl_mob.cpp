@@ -607,7 +607,7 @@ XS(XS_Mob_Damage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Damage) {
 	dXSARGS;
 	if (items < 5 || items > 8)
-		Perl_croak(aTHX_ "Usage: Mob::Damage(THIS, Mob* from, int32 damage, uint16 spell_id, int attack_skill, [bool avoidable = true], [int8 buffslot = -1], [bool buff_tic = false])"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::Damage(THIS, Mob* from, int64 damage, uint16 spell_id, int attack_skill, [bool avoidable = true], [int8 buffslot = -1], [bool buff_tic = false])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *from;
@@ -3579,12 +3579,12 @@ XS(XS_Mob_AddToHateList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_AddToHateList) {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::AddToHateList(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0], [bool yell_for_help = true], [bool frenzy = false], [bool buff_tic = false])"); // @categories Hate and Aggro
+		Perl_croak(aTHX_ "Usage: Mob::AddToHateList(THIS, Mob* other, [int32 hate = 0], [int64 damage = 0], [bool yell_for_help = true], [bool frenzy = false], [bool buff_tic = false])"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *other;
 		int32 hate;
-		int32 damage;
+		int64 damage;
 		bool  iYellForHelp;
 		bool  bFrenzy;
 		bool  iBuffTic;
@@ -3636,12 +3636,12 @@ XS(XS_Mob_SetHate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetHate) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0])"); // @categories Hate and Aggro
+		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, Mob* other, [int32 hate = 0], [int64 damage = 0])"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *other;
 		int32 hate;
-		int32 damage;
+		int64 damage;
 		VALIDATE_THIS_IS_MOB;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
@@ -5054,7 +5054,7 @@ XS(XS_Mob_SpellEffect) {
 		}
 		if (items > 8) { caster_id = (uint32)SvUV(ST(8)); }
 		if (items > 9) { target_id = (uint32)SvUV(ST(9)); }
-		
+
 		if (nullclient) {
 			THIS->SendSpellEffect(effect, duration, finish_delay, zone_wide, unk20, perm_effect, 0, caster_id, target_id);
 		}
@@ -5674,7 +5674,7 @@ XS(XS_Mob_GetBuffStatValueBySpell) {
 		Const_char *stat = (Const_char *)SvPV_nolen(ST(2));
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
-	
+
 		RETVAL = THIS->GetBuffStatValueBySpell(spellid, stat);
 		XSprePUSH;
 		PUSHi((IV)RETVAL);

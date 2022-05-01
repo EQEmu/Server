@@ -901,9 +901,9 @@ struct DamageTable {
 struct DamageHitInfo {
 	//uint16 attacker; // id
 	//uint16 defender; // id
-	int base_damage;
-	int min_damage;
-	int damage_done;
+	int64 base_damage;
+	int64 min_damage;
+	int64 damage_done;
 	int offense;
 	int tohit;
 	int hand;

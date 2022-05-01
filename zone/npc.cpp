@@ -1818,7 +1818,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 
 uint32 NPC::GetMaxDamage(uint8 tlevel)
 {
-	uint32 dmg = 0;
+	uint64 dmg = 0;
 	if (tlevel < 40)
 		dmg = tlevel*2+2;
 	else if (tlevel < 50)

@@ -5495,7 +5495,7 @@ int16 Mob::GetPositionalDmgAmt(Mob* defender)
 	return total_amt;
 }
 
-void Mob::MeleeLifeTap(int32 damage) {
+void Mob::MeleeLifeTap(int64 damage) {
 
 	int32 lifetap_amt = 0;
 	int32 melee_lifetap_mod = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap

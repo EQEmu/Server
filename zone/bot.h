@@ -145,8 +145,8 @@ public:
 	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData);
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
+	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
@@ -179,7 +179,7 @@ public:
 	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
 	virtual float GetProcChances(float ProcBonus, uint16 hand);
 	virtual int GetHandToHandDamage(void);
-	virtual bool TryFinishingBlow(Mob *defender, int &damage);
+	virtual bool TryFinishingBlow(Mob *defender, int64 &damage);
 	virtual void DoRiposte(Mob* defender);
 	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(EQ::skills::SkillOffense)) * 9 / 10); }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -217,7 +217,7 @@ public:
 	bool DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	void SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 color);
 	void Camp(bool databaseSave = true);
-	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
+	virtual void AddToHateList(Mob* other, uint64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
 	virtual void SetTarget(Mob* mob);
 	virtual void Zone();
 	std::vector<AISpells_Struct> GetBotSpells() { return AIspells; }

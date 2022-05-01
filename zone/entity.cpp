@@ -3618,7 +3618,7 @@ void EntityList::ClearZoneFeignAggro(Mob *targ)
 	}
 }
 
-void EntityList::AggroZone(Mob *who, uint32 hate)
+void EntityList::AggroZone(Mob *who, uint64 hate)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
@@ -3645,7 +3645,7 @@ bool EntityList::MakeTrackPacket(Client *client)
 	uint32 distance = 0;
 	float MobDistance;
 
-	distance = (client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));	
+	distance = (client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
 
 	if (distance <= 0)
 		return false;
@@ -5509,8 +5509,8 @@ std::vector<Mob*> EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *origi
 	for (auto          &it : entity_list.GetCloseMobList(spreader, range)) {
 		Mob *mob = it.second;
 
-		if (!mob) { 
-			continue; 
+		if (!mob) {
+			continue;
 		}
 
 		if (mob == spreader) {

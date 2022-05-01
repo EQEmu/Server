@@ -51,8 +51,8 @@ class Corpse : public Mob {
 	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id);
 
 	/* Corpse: General */
-	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
-	virtual void	Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
+	virtual bool	Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
+	virtual void	Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
 	virtual bool	Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
 	virtual bool	HasRaid()			{ return false; }
 	virtual bool	HasGroup()			{ return false; }
@@ -97,7 +97,7 @@ class Corpse : public Mob {
 	void	RemoveItem(ServerLootItem_Struct* item_data);
 	void	RemoveItemByID(uint32 item_id, int quantity = 1);
 	void	AddItem(uint32 itemnum, uint16 charges, int16 slot = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-	
+
 	/* Corpse: Coin */
 	void	SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
 	void	RemoveCash();

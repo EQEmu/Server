@@ -4850,7 +4850,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 }
 
-bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
+bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
 	if(!NPC::Death(killerMob, damage, spell_id, attack_skill))
 		return false;
 
@@ -4938,7 +4938,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 	return true;
 }
 
-void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
+void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if(spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -4980,8 +4980,8 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQ::skills::SkillType
 	}
 }
 
-//void Bot::AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false)
-void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic, bool pet_command) {
+//void Bot::AddToHateList(Mob* other, uint64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false)
+void Bot::AddToHateList(Mob* other, uint64 hate, int64 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic, bool pet_command) {
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic, pet_command);
 }
 
@@ -5055,7 +5055,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	uint32 hate = 0;
+	uint64 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 
@@ -6053,7 +6053,7 @@ int Bot::GetHandToHandDamage(void) {
 	return 2;
 }
 
-bool Bot::TryFinishingBlow(Mob *defender, int &damage)
+bool Bot::TryFinishingBlow(Mob *defender, int64 &damage)
 {
 	if (!defender)
 		return false;
@@ -6310,7 +6310,7 @@ void Bot::RogueBackstab(Mob *other, bool min_damage, int ReuseTime)
 		return;
 	}
 
-	uint32 hate = 0;
+	uint64 hate = 0;
 
 	int base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
 	hate = base_damage;

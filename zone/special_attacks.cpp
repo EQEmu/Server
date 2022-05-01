@@ -165,7 +165,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE) && skill != EQ::skills::SkillBackstab)
 		my_hit.damage_done = DMG_INVULNERABLE;
 
-	uint32 hate = my_hit.base_damage;
+	uint64 hate = my_hit.base_damage;
 	if (hate_override > -1)
 		hate = hate_override;
 
@@ -293,7 +293,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	else
 		HasteMod = (100 - ClientHaste); //-100% haste = 1/2 as many attacks
 
-	int32 dmg = 0;
+	int64 dmg = 0;
 
 	int32 skill_reduction = GetSkillReuseTime(ca_atk->m_skill);
 
@@ -609,7 +609,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	if (!other)
 		return;
 
-	uint32 hate = 0;
+	uint64 hate = 0;
 
 	// make sure we can hit (bane, magical, etc)
 	if (IsClient()) {
@@ -1704,7 +1704,7 @@ void NPC::DoClassAttacks(Mob *target) {
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					DoAnim(animKick, 0, false);
-					int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
+					int64 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
 
 					if (GetWeaponDamage(target, boots) <= 0) {
 						dmg = DMG_INVULNERABLE;
@@ -1716,7 +1716,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				}
 				else {
 					DoAnim(animTailRake, 0, false);
-					int32 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
+					int64 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
 
 					if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
 						dmg = DMG_INVULNERABLE;
@@ -1755,7 +1755,7 @@ void NPC::DoClassAttacks(Mob *target) {
 			//kick
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				DoAnim(animKick, 0, false);
-				int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
+				int64 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
 
 				if (GetWeaponDamage(target, boots) <= 0)
 					dmg = DMG_INVULNERABLE;
@@ -1771,7 +1771,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case PALADIN: case PALADINGM:{
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				DoAnim(animTailRake, 0, false);
-				int32 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
+				int64 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
 
 				if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
 					dmg = DMG_INVULNERABLE;
@@ -2223,7 +2223,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		skillinuse = EQ::skills::SkillOffense;
 
 	int damage = 0;
-	uint32 hate = 0;
+	uint64 hate = 0;
 	if (hate == 0 && weapon_damage > 1)
 		hate = weapon_damage;
 

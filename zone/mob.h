@@ -208,11 +208,11 @@ public:
 	bool CheckHitChance(Mob* attacker, DamageHitInfo &hit);
 	void TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	void TryPetCriticalHit(Mob *defender, DamageHitInfo &hit);
-	virtual bool TryFinishingBlow(Mob *defender, int &damage);
+	virtual bool TryFinishingBlow(Mob *defender, int64 &damage);
 	int TryHeadShot(Mob* defender, EQ::skills::SkillType skillInUse);
 	int TryAssassinate(Mob* defender, EQ::skills::SkillType skillInUse);
 	virtual void DoRiposte(Mob* defender);
-	void ApplyMeleeDamageMods(uint16 skill, int &damage, Mob * defender = nullptr, ExtraAttackOptions *opts = nullptr);
+	void ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob * defender = nullptr, ExtraAttackOptions *opts = nullptr);
 	int ACSum(bool skip_caps = false);
 	inline int GetDisplayAC() { return 1000 * (ACSum(true) + compute_defense()) / 847; }
 	int offense(EQ::skills::SkillType skill);
@@ -370,8 +370,8 @@ public:
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier);
 	bool TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed = 1.5f);
-	void ResourceTap(int32 damage, uint16 spell_id);
-	void TryTriggerThreshHold(int32 damage, int effect_id, Mob* attacker);
+	void ResourceTap(int64 damage, uint16 spell_id);
+	void TryTriggerThreshHold(int64 damage, int effect_id, Mob* attacker);
 	void CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ);
 	void BeamDirectional(uint16 spell_id, int16 resist_adjust);
 	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
@@ -429,7 +429,7 @@ public:
 	inline Buffs_Struct* GetBuffs() { return buffs; }
 	void DoGravityEffect();
 	void DamageShield(Mob* other, bool spell_ds = false);
-	int32 RuneAbsorb(int32 damage, uint16 type);
+	int32 RuneAbsorb(int64 damage, uint16 type);
 	bool FindBuff(uint16 spell_id);
 	uint16 FindBuffBySlot(int slot);
 	uint32 BuffCount();
@@ -492,8 +492,8 @@ public:
 	bool CanClassEquipItem(uint32 item_id);
 	bool CanRaceEquipItem(uint32 item_id);
 	bool AffectedBySpellExcludingSlot(int slot, int effect);
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) = 0;
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
+	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) = 0;
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
 	virtual void SetHP(int32 hp);
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
@@ -883,7 +883,7 @@ public:
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect);
 	int32 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
-	void MeleeLifeTap(int32 damage);
+	void MeleeLifeTap(int64 damage);
 	bool PassCastRestriction(int value);
 	void SendCastRestrictionMessage(int requirement_id, bool is_target_requirement = true, bool is_discipline = false);
 	bool ImprovedTaunt();
@@ -1033,9 +1033,9 @@ public:
 	inline bool IsSilenced() const { return silenced; }
 	inline bool IsAmnesiad() const { return amnesiad; }
 
-	int32 ReduceDamage(int32 damage);
-	int32 AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
-	int32 ReduceAllDamage(int32 damage);
+	int32 ReduceDamage(int64 damage);
+	int32 AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
+	int32 ReduceAllDamage(int64 damage);
 
 	void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int base_damage, int min_damage = 0, int32 hate_override = -1, int ReuseTime = 10);
 	virtual void DoThrowingAttackDmg(Mob* other, const EQ::ItemInstance* RangeWeapon = nullptr, const EQ::ItemData* AmmoItem = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, int AmmoSlot = 0, float speed = 4.0f, bool DisableProcs = false);
@@ -1258,9 +1258,9 @@ public:
 	float	mod_monk_weight(float monkweight, Mob* attacker);
 	float	mod_mitigation_rating(float mitigation_rating, Mob* attacker);
 	float	mod_attack_rating(float attack_rating, Mob* defender);
-	int32	mod_kick_damage(int32 dmg);
-	int32	mod_bash_damage(int32 dmg);
-	int32	mod_frenzy_damage(int32 dmg);
+	int32	mod_kick_damage(int64 dmg);
+	int32	mod_bash_damage(int64 dmg);
+	int32	mod_frenzy_damage(int64 dmg);
 	int32	mod_monk_special_damage(int32 ndamage, EQ::skills::SkillType skill_type);
 	int32	mod_backstab_damage(int32 ndamage);
 	int		mod_archery_bonus_chance(int bonuschance, const EQ::ItemInstance* RangeWeapon);
@@ -1327,7 +1327,7 @@ public:
 	void DelAssistCap() { --npc_assist_cap; }
 	void ResetAssistCap() { npc_assist_cap = 0; }
 	int GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item);
-	int GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint32 *hate = nullptr);
+	int GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint64 *hate = nullptr);
 
 	int64 GetHPRegen() const;
 	int64 GetManaRegen() const;
@@ -1366,7 +1366,7 @@ public:
 #endif
 
 protected:
-	void CommonDamage(Mob* other, int &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
+	void CommonDamage(Mob* other, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
 	float _GetMovementSpeed(int mod) const;
 	int _GetWalkSpeed() const;

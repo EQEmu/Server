@@ -7,7 +7,7 @@ void command_aggrozone(Client *c, const Seperator *sep)
 		target = c->GetTarget();
 	}
 
-	uint32 hate = 0;
+	uint64 hate = 0;
 	if (sep->IsNumber(1)) {
 		hate = std::stoul(sep->arg[1]);
 	}
