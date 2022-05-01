@@ -8258,7 +8258,7 @@ int64 Bot::CalcMaxHP() {
 	return max_hp;
 }
 
-int32 Bot::CalcMaxEndurance() {
+int64 Bot::CalcMaxEndurance() {
 	max_end = (CalcBaseEndurance() + spellbonuses.Endurance + itembonuses.Endurance);
 	if (max_end < 0)
 		max_end = 0;
