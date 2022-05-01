@@ -2476,7 +2476,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.model, "
 		"npc_types.flymode, "
 		"npc_types.always_aggro, "
-		"npc_types.exp_mod, ",
+		"npc_types.exp_mod, "
 		"npc_types.hp_regen_per_second "
 
 		"FROM npc_types %s",
@@ -2551,7 +2551,6 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->findable            = atoi(row[45]) == 0 ? false : true;
 		temp_npctype_data->trackable           = atoi(row[46]) == 0 ? false : true;
 		temp_npctype_data->hp_regen            = atoi(row[47]);
-		temp_npctype_data->hp_regen_per_second = atoi(row[114]);
 		temp_npctype_data->mana_regen          = atoi(row[48]);
 
 		// set default value for aggroradius
@@ -2676,14 +2675,14 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->charm_avoidance_rating = atoi(row[105]);
 		temp_npctype_data->charm_atk              = atoi(row[106]);
 
-		temp_npctype_data->skip_global_loot 	= atoi(row[107]) != 0;
-		temp_npctype_data->rare_spawn       	= atoi(row[108]) != 0;
-		temp_npctype_data->stuck_behavior   	= atoi(row[109]);
-		temp_npctype_data->use_model        	= atoi(row[110]);
-		temp_npctype_data->flymode          	= atoi(row[111]);
-		temp_npctype_data->always_aggro	        = atoi(row[112]);
-		temp_npctype_data->exp_mod              = atoi(row[113]);
-		// 114 is used by hp_regen_per_second
+		temp_npctype_data->skip_global_loot    = atoi(row[107]) != 0;
+		temp_npctype_data->rare_spawn          = atoi(row[108]) != 0;
+		temp_npctype_data->stuck_behavior      = atoi(row[109]);
+		temp_npctype_data->use_model           = atoi(row[110]);
+		temp_npctype_data->flymode             = atoi(row[111]);
+		temp_npctype_data->always_aggro        = atoi(row[112]);
+		temp_npctype_data->exp_mod             = atoi(row[113]);
+		temp_npctype_data->hp_regen_per_second = strtoll(row[114], nullptr, 10);
 
 		temp_npctype_data->skip_auto_scale = false; // hardcoded here for now
 

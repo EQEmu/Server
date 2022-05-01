@@ -162,7 +162,8 @@ public:
 		uint8 in_legtexture,
 		uint8 in_feettexture,
 		uint16 in_usemodel,
-		bool in_always_aggros_foes
+		bool in_always_aggros_foes,
+		int64 in_hp_regen_per_second = 0
 	);
 	virtual ~Mob();
 

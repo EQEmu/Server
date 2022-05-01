@@ -114,7 +114,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	npc_type_data->legtexture,
 	npc_type_data->feettexture,
 	npc_type_data->use_model,
-	npc_type_data->always_aggro
+	npc_type_data->always_aggro,
+	npc_type_data->hp_regen_per_second
 ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
