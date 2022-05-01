@@ -2600,6 +2600,10 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		hp_regen = atoi(val.c_str());
 		return;
 	}
+	else if (id == "hp_regen_per_second") {
+		hp_regen_per_second = strtoll(val.c_str(), nullptr, 10);
+		return;
+	}
 	else if (id == "mana_regen") {
 		mana_regen = atoi(val.c_str());
 		return;
@@ -2746,6 +2750,9 @@ float NPC::GetNPCStat(const char *identifier)
 	}
 	else if (id == "hp_regen") {
 		return hp_regen;
+	}
+	else if (id == "hp_regen_per_second") {
+		return hp_regen_per_second;
 	}
 	else if (id == "mana_regen") {
 		return mana_regen;
