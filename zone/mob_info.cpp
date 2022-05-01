@@ -638,11 +638,11 @@ void Mob::DisplayInfo(Mob *mob)
 		return;
 	}
 
-	if (this->IsClient()) {
+	if (IsClient()) {
 
 		std::string window_text = "<c \"#FFFF66\">*Drag window open vertically to see all</c><br>";
 
-		Client *client = this->CastToClient();
+		Client *client = CastToClient();
 
 		if (!client->IsDevToolsEnabled()) {
 			return;

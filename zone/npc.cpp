@@ -825,20 +825,20 @@ bool NPC::Process()
 {
 	if (p_depop)
 	{
-		Mob* owner = entity_list.GetMob(this->ownerid);
+		Mob* owner = entity_list.GetMob(ownerid);
 		if (owner != 0)
 		{
 			//if(GetBodyType() != BT_SwarmPet)
 			// owner->SetPetID(0);
-			this->ownerid = 0;
-			this->petid = 0;
+			ownerid = 0;
+			petid = 0;
 		}
 		return false;
 	}
 
 	if (IsStunned() && stunned_timer.Check()) {
 		Mob::UnStun();
-		this->spun_timer.Disable();
+		spun_timer.Disable();
 	}
 
 	SpellProcess();
@@ -969,7 +969,7 @@ bool NPC::Process()
 	/**
 	 * Send HP updates when engaged
 	 */
-	if (send_hp_update_timer.Check(false) && this->IsEngaged()) {
+	if (send_hp_update_timer.Check(false) && IsEngaged()) {
 		SendHPUpdate();
 	}
 
@@ -1081,9 +1081,9 @@ void NPC::UpdateEquipmentLight()
 }
 
 void NPC::Depop(bool StartSpawnTimer) {
-	uint16 emoteid = this->GetEmoteID();
+	uint16 emoteid = GetEmoteID();
 	if(emoteid != 0)
-		this->DoNPCEmote(ONDESPAWN,emoteid);
+		DoNPCEmote(ONDESPAWN,emoteid);
 	p_depop = true;
 	if (respawn2)
 	{
@@ -1107,7 +1107,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 		}
 		case SE_CurrentHPOnce:
 		case SE_CurrentHP: {
-			if(this->GetHPRatio() < 100 && spells[spell_id].buff_duration == 0)
+			if(GetHPRatio() < 100 && spells[spell_id].buff_duration == 0)
 				return true;
 			else
 				return false;
@@ -1115,7 +1115,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 		}
 
 		case SE_HealOverTime: {
-			if(this->GetHPRatio() < 100)
+			if(GetHPRatio() < 100)
 				return true;
 			else
 				return false;
@@ -1140,7 +1140,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 			break;
 		}
 		default:
-			if(spells[spell_id].good_effect == 1 && !(spells[spell_id].buff_duration == 0 && this->GetHPRatio() == 100) && !IsEngaged())
+			if(spells[spell_id].good_effect == 1 && !(spells[spell_id].buff_duration == 0 && GetHPRatio() == 100) && !IsEngaged())
 				return true;
 			return false;
 		}
@@ -1762,7 +1762,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	int32 texture_profile_material = GetTextureProfileMaterial(material_slot);
 
 	Log(Logs::Detail, Logs::MobAppearance, "NPC::GetEquipmentMaterial [%s] material_slot: %u",
-		this->clean_name,
+		clean_name,
 		material_slot
 	);
 
@@ -1983,7 +1983,7 @@ void NPC::Disarm(Client* client, int chance) {
 					CalcBonuses();
 					if (inst) {
 						// create a ground item
-						Object* object = new Object(inst, this->GetX(), this->GetY(), this->GetZ(), 0.0f, 300000);
+						Object* object = new Object(inst, GetX(), GetY(), GetZ(), 0.0f, 300000);
 						entity_list.AddObject(object, true);
 						object->StartDecay();
 						safe_delete(inst);
@@ -1997,7 +1997,7 @@ void NPC::Disarm(Client* client, int chance) {
 				SendWearChange(matslot);
 			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQ::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
-			client->MessageString(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
+			client->MessageString(Chat::Skills, DISARM_SUCCESS, GetCleanName());
 			if (chance != 1000)
 				client->CheckIncreaseSkill(EQ::skills::SkillDisarm, nullptr, 4);
 			return;
@@ -2151,11 +2151,11 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 		parse++;
 	}
 
-	if(permtag == 1 && this->GetNPCTypeID() > 0)
+	if(permtag == 1 && GetNPCTypeID() > 0)
 	{
-		if(content_db.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
+		if(content_db.SetSpecialAttkFlag(GetNPCTypeID(), orig_parse))
 		{
-			LogInfo("NPCTypeID: [{}] flagged to [{}] for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
+			LogInfo("NPCTypeID: [{}] flagged to [{}] for Special Attacks.\n",GetNPCTypeID(),orig_parse);
 		}
 	}
 }
@@ -2392,9 +2392,9 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
-			else 
+			else
 			{
-				if (entity_list.GetNPCByID(GetOwnerID())) 
+				if (entity_list.GetNPCByID(GetOwnerID()))
 				{
 					SetPetOwnerNPC(true);
 				}
@@ -3026,13 +3026,13 @@ void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
 	if(emoteid == nes->emoteid)
 	{
 		if(nes->type == 1)
-			this->Emote("%s",nes->text);
+			Emote("%s",nes->text);
 		else if(nes->type == 2)
-			this->Shout("%s",nes->text);
+			Shout("%s",nes->text);
 		else if(nes->type == 3)
 			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, nes->text);
 		else
-			this->Say("%s",nes->text);
+			Say("%s",nes->text);
 	}
 }
 
@@ -3578,7 +3578,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 						LogAIYellForHelpDetail(
 							"NPC [{}] is assisting [{}] against target [{}]",
 							mob->GetCleanName(),
-							this->GetCleanName(),
+							GetCleanName(),
 							attacker->GetCleanName()
 						);
 					}
@@ -3666,7 +3666,7 @@ std::vector<int> NPC::GetLootList() {
 		if (std::find(npc_items.begin(), npc_items.end(), loot_item->item_id) != npc_items.end()) {
 			continue;
 		}
-		
+
 		npc_items.push_back(loot_item->item_id);
 	}
 	return npc_items;

@@ -603,7 +603,7 @@ void Mob::CalcInvisibleLevel()
 		SetInvisible(Invisibility::Invisible, true);
 		return;
 	}
-	
+
 	if (is_invisible && !invisible) {
 		SetInvisible(invisible, true);
 		return;
@@ -624,7 +624,7 @@ void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 	}
 	else {
 		/*
-			if your setting invisible from a script, or escape/fading memories effect then 
+			if your setting invisible from a script, or escape/fading memories effect then
 			we use the internal invis variable which allows invisible without a buff on mob.
 		*/
 		if (!set_on_bonus_calc) {
@@ -644,10 +644,10 @@ void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 	}
 }
 
-void Mob::ZeroInvisibleVars(uint8 invisible_type) 
+void Mob::ZeroInvisibleVars(uint8 invisible_type)
 {
 	switch (invisible_type) {
-		
+
 		case T_INVISIBLE:
 			invisible = 0;
 			nobuff_invisible = 0;
@@ -1410,7 +1410,7 @@ void Mob::CreateDespawnPacket(EQApplicationPacket* app, bool Decay)
 
 void Mob::CreateHPPacket(EQApplicationPacket* app)
 {
-	this->IsFullHP=(current_hp>=max_hp);
+	IsFullHP=(current_hp>=max_hp);
 	app->SetOpcode(OP_MobHealth);
 	app->size = sizeof(SpawnHPUpdate_Struct2);
 	app->pBuffer = new uchar[app->size];
@@ -1669,9 +1669,9 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->delta_z = FloatToEQ13(m_Delta.z);
 	spu->heading = FloatToEQ12(m_Position.w);
 #ifdef BOTS
-	if (this->IsClient() || this->IsBot())
+	if (IsClient() || IsBot())
 #else
-	if (this->IsClient())
+	if (IsClient())
 #endif
 		spu->animation = animation;
 	else
@@ -1791,13 +1791,13 @@ void Mob::ShowStats(Client* client)
 				target_name,
 				(
 					!target_last_name.empty() ?
-					fmt::format(" ({})", target_last_name) : 
+					fmt::format(" ({})", target_last_name) :
 					""
 				),
 				target->GetLevel()
 			).c_str()
 		);
-		
+
 		// Race / Class / Gender
 		client->Message(
 			Chat::White,
@@ -1879,7 +1879,7 @@ void Mob::ShowStats(Client* client)
 				target->GetHairColor()
 			).c_str()
 		);
-		
+
 		// Beard
 		client->Message(
 			Chat::White,
@@ -1912,7 +1912,7 @@ void Mob::ShowStats(Client* client)
 				target->GetHelmTexture()
 			).c_str()
 		);
-		
+
 		if (
 			target->GetArmTexture() ||
 			target->GetBracerTexture() ||
@@ -1928,7 +1928,7 @@ void Mob::ShowStats(Client* client)
 				).c_str()
 			);
 		}
-		
+
 		if (
 			target->GetFeetTexture() ||
 			target->GetLegTexture()
@@ -2152,7 +2152,7 @@ void Mob::ShowStats(Client* client)
 				target->GetINT()
 			).c_str()
 		);
-		
+
 		client->Message(
 			Chat::White,
 			fmt::format(
@@ -2182,7 +2182,7 @@ void Mob::ShowStats(Client* client)
 					target->GetCharmedAvoidance()
 				).c_str()
 			);
-			
+
 			client->Message(
 				Chat::White,
 				fmt::format(
@@ -2324,7 +2324,7 @@ void Mob::ShowStats(Client* client)
 					(target->GetProximityMaxX() - target->GetProximityMinX())
 				).c_str()
 			);
-			
+
 			client->Message(
 				Chat::White,
 				fmt::format(
@@ -2334,7 +2334,7 @@ void Mob::ShowStats(Client* client)
 					(target->GetProximityMaxY() - target->GetProximityMinY())
 				).c_str()
 			);
-			
+
 			client->Message(
 				Chat::White,
 				fmt::format(
@@ -2383,7 +2383,7 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter)
 void Mob::ShowBuffs(Client* client) {
 	if(SPDAT_RECORDS <= 0)
 		return;
-	client->Message(Chat::White, "Buffs on: %s", this->GetName());
+	client->Message(Chat::White, "Buffs on: %s", GetName());
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++) {
@@ -2417,7 +2417,7 @@ void Mob::ShowBuffList(Client* client) {
 	if(SPDAT_RECORDS <= 0)
 		return;
 
-	client->Message(Chat::White, "Buffs on: %s", this->GetCleanName());
+	client->Message(Chat::White, "Buffs on: %s", GetCleanName());
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i = 0; i < buff_count; i++) {
@@ -2885,15 +2885,15 @@ void Mob::SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool i
 		return;
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
-	appearance->spawn_id = this->GetID();
+	appearance->spawn_id = GetID();
 	appearance->type = type;
 	appearance->parameter = value;
 	if (WholeZone)
 		entity_list.QueueClients(this, outapp, iIgnoreSelf);
 	else if(specific_target != nullptr)
 		specific_target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-	else if (this->IsClient())
-		this->CastToClient()->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	else if (IsClient())
+		CastToClient()->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
 }
 
@@ -2932,11 +2932,11 @@ void Mob::SendStunAppearance()
 	safe_delete(outapp);
 }
 
-void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target, 
-	uint32 value1slot, uint32 value1ground, uint32 value2slot, uint32 value2ground, uint32 value3slot, uint32 value3ground, 
+void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target,
+	uint32 value1slot, uint32 value1ground, uint32 value2slot, uint32 value2ground, uint32 value3slot, uint32 value3ground,
 	uint32 value4slot, uint32 value4ground, uint32 value5slot, uint32 value5ground){
 	auto outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
-	
+
 	/* Location of the effect from value#slot, this is removed upon mob death/despawn.
 		0 = pelvis1
 		1 = pelvis2
@@ -3014,7 +3014,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	safe_delete(outapp);
 }
 
-void Mob::SetAppearenceEffects(int32 slot, int32 value) 
+void Mob::SetAppearenceEffects(int32 slot, int32 value)
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		if (!appearance_effects_id[i]) {
@@ -3032,7 +3032,7 @@ void Mob::GetAppearenceEffects()
 		Message(Chat::Red, "No Appearance Effects exist on this mob");
 		return;
 	}
-	
+
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		Message(Chat::Red, "ID: %i :: App Effect ID %i :: Slot %i", i, appearance_effects_id[i], appearance_effects_slot[i]);
 	}
@@ -3250,12 +3250,12 @@ void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 	// Size Code
 	if (!bNoRestriction)
 	{
-		if (this->IsClient() || this->petid != 0)
+		if (IsClient() || petid != 0)
 			if (in_size < 3.0)
 				in_size = 3.0;
 
 
-			if (this->IsClient() || this->petid != 0)
+			if (IsClient() || petid != 0)
 				if (in_size > 15.0)
 					in_size = 15.0;
 	}
@@ -3274,12 +3274,12 @@ void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 Mob* Mob::GetOwnerOrSelf() {
 	if (!GetOwnerID())
 		return this;
-	Mob* owner = entity_list.GetMob(this->GetOwnerID());
+	Mob* owner = entity_list.GetMob(GetOwnerID());
 	if (!owner) {
 		SetOwnerID(0);
 		return(this);
 	}
-	if (owner->GetPetID() == this->GetID()) {
+	if (owner->GetPetID() == GetID()) {
 		return owner;
 	}
 	if(IsNPC() && CastToNPC()->GetSwarmInfo()){
@@ -3290,8 +3290,8 @@ Mob* Mob::GetOwnerOrSelf() {
 }
 
 Mob* Mob::GetOwner() {
-	Mob* owner = entity_list.GetMob(this->GetOwnerID());
-	if (owner && owner->GetPetID() == this->GetID()) {
+	Mob* owner = entity_list.GetMob(GetOwnerID());
+	if (owner && owner->GetPetID() == GetID()) {
 
 		return owner;
 	}
@@ -3656,7 +3656,7 @@ bool Mob::HateSummon() {
 		if(summon_level == 1) {
 			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
-			float summoner_zoff = this->GetZOffset();
+			float summoner_zoff = GetZOffset();
 			float summoned_zoff = target->GetZOffset();
 			auto new_pos = m_Position;
 			new_pos.z -= (summoner_zoff - summoned_zoff);
@@ -4041,7 +4041,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			LogSpells("Player [{}], Weapon Procced invalid spell [{}]", this->GetName(), spell_id);
+			LogSpells("Player [{}], Weapon Procced invalid spell [{}]", GetName(), spell_id);
 		}
 		return;
 	}
@@ -4364,7 +4364,7 @@ bool Mob::EntityVariableExists(const char *id)
 
 void Mob::SetFlyMode(GravityBehavior flymode)
 {
-	this->flymode = flymode;
+	flymode = flymode;
 }
 
 void Mob::Teleport(const glm::vec3 &pos)
@@ -4593,7 +4593,7 @@ int32 Mob::GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, 
 
 	fc_spell_vulnerability_mod = GetFocusEffect(focusSpellVulnerability, spell_id, caster, from_buff_tic);
 	fc_spell_damage_pct_incomingPC_mod = GetFocusEffect(focusFcSpellDamagePctIncomingPC, spell_id, caster, from_buff_tic);
-	
+
 	total_mod = fc_spell_vulnerability_mod + fc_spell_damage_pct_incomingPC_mod;
 
 	//Don't let focus derived mods reduce past 99% mitigation. Quest related can, and for custom functionality if negative will give a healing affect instead of damage.
@@ -4708,7 +4708,7 @@ void Mob::SetBottomRampageList()
 		if (mob->IsNPC() && mob->CheckAggro(this)) {
 			for (int i = 0; i < mob->RampageArray.size(); i++) {
 				// Find this mob in the rampage list
-				if (this->GetID() == mob->RampageArray[i]) {
+				if (GetID() == mob->RampageArray[i]) {
 					//Move to bottom of Rampage List
 					auto it = mob->RampageArray.begin() + i;
 					std::rotate(it, it + 1, mob->RampageArray.end());
@@ -4735,7 +4735,7 @@ void Mob::SetTopRampageList()
 		if (mob->IsNPC() && mob->CheckAggro(this)) {
 			for (int i = 0; i < mob->RampageArray.size(); i++) {
 				// Find this mob in the rampage list
-				if (this->GetID() == mob->RampageArray[i]) {
+				if (GetID() == mob->RampageArray[i]) {
 					//Move to Top of Rampage List
 					auto it = mob->RampageArray.begin() + i;
 					std::rotate(it, it + 1, mob->RampageArray.end());
@@ -4836,20 +4836,20 @@ std::string Mob::GetGlobal(const char *varname) {
 	int qgCharid = 0;
 	int qgNpcid = 0;
 
-	if (this->IsNPC())
-		qgNpcid = this->GetNPCTypeID();
+	if (IsNPC())
+		qgNpcid = GetNPCTypeID();
 
-	if (this->IsClient())
-		qgCharid = this->CastToClient()->CharacterID();
+	if (IsClient())
+		qgCharid = CastToClient()->CharacterID();
 
 	QGlobalCache *qglobals = nullptr;
 	std::list<QGlobal> globalMap;
 
-	if (this->IsClient())
-		qglobals = this->CastToClient()->GetQGlobals();
+	if (IsClient())
+		qglobals = CastToClient()->GetQGlobals();
 
-	if (this->IsNPC())
-		qglobals = this->CastToNPC()->GetQGlobals();
+	if (IsNPC())
+		qglobals = CastToNPC()->GetQGlobals();
 
 	if(qglobals)
 		QGlobalCache::Combine(globalMap, qglobals->GetBucket(), qgNpcid, qgCharid, zone->GetZoneID());
@@ -4871,18 +4871,18 @@ void Mob::SetGlobal(const char *varname, const char *newvalue, int options, cons
 	int qgCharid = 0;
 	int qgNpcid = 0;
 
-	if (this->IsNPC())
+	if (IsNPC())
 	{
-		qgNpcid = this->GetNPCTypeID();
+		qgNpcid = GetNPCTypeID();
 	}
 	else if (other && other->IsNPC())
 	{
 		qgNpcid = other->GetNPCTypeID();
 	}
 
-	if (this->IsClient())
+	if (IsClient())
 	{
-		qgCharid = this->CastToClient()->CharacterID();
+		qgCharid = CastToClient()->CharacterID();
 	}
 	else if (other && other->IsClient())
 	{
@@ -4922,11 +4922,11 @@ void Mob::DelGlobal(const char *varname) {
 	int qgCharid=0;
 	int qgNpcid=0;
 
-	if (this->IsNPC())
-		qgNpcid = this->GetNPCTypeID();
+	if (IsNPC())
+		qgNpcid = GetNPCTypeID();
 
-	if (this->IsClient())
-		qgCharid = this->CastToClient()->CharacterID();
+	if (IsClient())
+		qgCharid = CastToClient()->CharacterID();
 	else
 		qgCharid = -qgNpcid;		// make char id negative npc id as a fudge
 
@@ -5344,7 +5344,7 @@ int16 Mob::GetMeleeDmgPositionMod(Mob* defender)
 
 int16 Mob::GetSkillReuseTime(uint16 skill)
 {
-	int skill_reduction = this->itembonuses.SkillReuseTime[skill] + this->spellbonuses.SkillReuseTime[skill] + this->aabonuses.SkillReuseTime[skill];
+	int skill_reduction = itembonuses.SkillReuseTime[skill] + spellbonuses.SkillReuseTime[skill] + aabonuses.SkillReuseTime[skill];
 
 	return skill_reduction;
 }
@@ -5445,7 +5445,7 @@ void Mob::DoGravityEffect()
 					if(casterId)
 						caster = entity_list.GetMob(casterId);
 
-					if(!caster || casterId == this->GetID())
+					if(!caster || casterId == GetID())
 						continue;
 
 					caster_x = caster->GetX();
@@ -5505,9 +5505,9 @@ void Mob::DoGravityEffect()
 		}
 
 		if(IsClient())
-			this->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), cur_x, cur_y, new_ground, GetHeading());
+			CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), cur_x, cur_y, new_ground, GetHeading());
 		else
-			this->GMMove(cur_x, cur_y, new_ground, GetHeading());
+			GMMove(cur_x, cur_y, new_ground, GetHeading());
 	}
 }
 
@@ -5890,7 +5890,7 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 		return FACTION_INDIFFERENTLY;
 
 	iOther = iOther->GetOwnerOrSelf();
-	Mob* self = this->GetOwnerOrSelf();
+	Mob* self = GetOwnerOrSelf();
 
 	bool selfAIcontrolled = self->IsAIControlled();
 	bool iOtherAIControlled = iOther->IsAIControlled();
@@ -6190,7 +6190,7 @@ uint8 Mob::GetSeeInvisibleLevelFromNPCStat(uint16 in_see_invis)
 	if (in_see_invis == 1) {
 		return 1;
 	}
-	
+
 	//random chance to apply standard level 1 see invs
 	if (in_see_invis > 1 && in_see_invis < 100) {
 		if (zone->random.Int(0, 99) < in_see_invis) {
@@ -6550,7 +6550,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 
 	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(shielder_max_distance)) {
 		MessageString(Chat::Blue, TARGET_TOO_FAR);
-		return false; 
+		return false;
 	}
 
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
@@ -6617,7 +6617,7 @@ void Mob::ShieldAbilityClearVariables()
 }
 
 void Mob::SetFeigned(bool in_feigned) {
-	
+
 	if (in_feigned)	{
 		if (IsClient()) {
 			if (RuleB(Character, FeignKillsPet)){

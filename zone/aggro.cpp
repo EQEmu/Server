@@ -76,7 +76,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		if(owner) {
 			faction_id = owner->GetPrimaryFaction();
 		}
-			
+
 		std::string faction_name = (
 			faction_id > 0 ?
 			content_db.GetFactionName(faction_id) :
@@ -147,7 +147,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 	}
 }
 
-void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {	
+void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	//this logic is duplicated from below, try to keep it up to date.
 	float aggro_range = GetAggroRange();
 	float x_range = std::abs(mob->GetX() - GetX());
@@ -356,7 +356,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 				mob->GetPrimaryFaction() != GetPrimaryFaction() &&
 				mob->GetPrimaryFaction() == -4 &&
 				!GetOwner()
-			)			
+			)
 		)
 	) {
 		towho->Message(
@@ -413,7 +413,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			return false;
 		}
 	}
-	
+
 	// We don't want to aggro clients outside of water if we're water only.
 	if (
 		mob->IsClient() &&
@@ -442,7 +442,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	) {
 		return false;
 	}
-	
+
 	if (IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(IMMUNE_AGGRO_NPC)) {
 		return false;
 	}
@@ -453,7 +453,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	// Check if it's not a Interactive NPC
 	// Trumpcard: The 1st 3 checks are low cost calcs to filter out unnessecary distance checks. Leave them at the beginning, they are the most likely occurence.
 	// Image: I moved this up by itself above faction and distance checks because if one of these return true, theres no reason to go through the other information
-	
+
 	float aggro_range = GetAggroRange();
 	float x_range = std::abs(mob->GetX() - GetX());
 	float y_range = std::abs(mob->GetY() - GetY());
@@ -856,7 +856,7 @@ type', in which case, the answer is yes.
 	}
 	while( reverse++ == 0 );
 
-	LogDebug("Mob::IsAttackAllowed: don't have a rule for this - [{}] vs [{}]\n", this->GetName(), target->GetName());
+	LogDebug("Mob::IsAttackAllowed: don't have a rule for this - [{}] vs [{}]\n", GetName(), target->GetName());
 	return false;
 }
 
@@ -881,7 +881,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 
 	// first figure out if we're pets. we always look at the master's flags.
 	// no need to compare pets to anything
-	mob1 = this->GetOwnerID() ? this->GetOwner() : this;
+	mob1 = GetOwnerID() ? GetOwner() : this;
 	mob2 = target->GetOwnerID() ? target->GetOwner() : target;
 
 	// if it's self target or our own pet it's ok
@@ -996,7 +996,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	}
 	while( reverse++ == 0 );
 
-	LogDebug("Mob::IsBeneficialAllowed: don't have a rule for this - [{}] to [{}]\n", this->GetName(), target->GetName());
+	LogDebug("Mob::IsBeneficialAllowed: don't have a rule for this - [{}] to [{}]\n", GetName(), target->GetName());
 	return false;
 }
 

@@ -295,7 +295,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				members[i]->CastToClient()->QueuePacket(outapp);
 
 				//put new member into existing group members' list(s)
-				strcpy(members[i]->CastToClient()->GetPP().groupMembers[this->GroupCount()-1], NewMemberName);
+				strcpy(members[i]->CastToClient()->GetPP().groupMembers[GroupCount()-1], NewMemberName);
 			}
 
 			//put existing group member(s) into the new member's list
@@ -586,7 +586,7 @@ void Group::SendGroupJoinOOZ(Mob* NewMember) {
 	{
 		return;
 	}
-	
+
 	if (!NewMember->HasGroup())
 	{
 		return;
@@ -686,7 +686,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	{
 		for(uint32 nl = 0; nl < MAX_GROUP_MEMBERS; nl++)
 		{
-			if(members[nl]) 
+			if(members[nl])
 			{
 				if (members[nl]->IsClient())
 				{
@@ -696,7 +696,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 			}
 		}
 	}
-	
+
 	if (!GetLeaderName())
 	{
 		DisbandGroup();
@@ -741,14 +741,14 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		if(oldmember->IsClient())
 			oldmember->CastToClient()->QueuePacket(outapp);
 	}
-	
+
 	safe_delete(outapp);
 
 	if(oldmember->IsClient())
 	{
 		database.SetGroupID(oldmember->GetCleanName(), 0, oldmember->CastToClient()->CharacterID(), false);
 	}
-	
+
 	if(oldmember->IsMerc())
 	{
 		Client* owner = oldmember->CastToMerc()->GetMercOwner();
@@ -940,7 +940,7 @@ void Group::DisbandGroup(bool joinraid) {
 			if (!joinraid)
 				members[i]->CastToClient()->LeaveGroupXTargets(this);
 		}
-		
+
 		if (members[i]->IsMerc())
 		{
 			Client* owner = members[i]->CastToMerc()->GetMercOwner();
@@ -1217,7 +1217,7 @@ void Group::GroupMessageString(Mob* sender, uint32 type, uint32 string_id, const
 
 		if(members[i] == sender)
 			continue;
-			
+
 		if(!members[i]->IsClient())
 			continue;
 
@@ -1236,7 +1236,7 @@ void Client::LeaveGroup() {
 		{
 			MemberCount -= 1;
 		}
-		
+
 		if(MemberCount < 3)
 		{
 			g->DisbandGroup();
@@ -2420,7 +2420,7 @@ bool Group::AmIPuller(const char *mob_name)
 {
 	if (!mob_name)
 		return false;
-	
+
 	return !((bool)PullerName.compare(mob_name));
 }
 

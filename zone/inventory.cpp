@@ -178,7 +178,7 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
-	this->EVENT_ITEM_ScriptStopReturn();
+	EVENT_ITEM_ScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
 
@@ -246,10 +246,10 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// check to make sure we are a GM if the item is GM-only
 	/*
-	else if(item->MinStatus && ((this->Admin() < item->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+	else if(item->MinStatus && ((Admin() < item->MinStatus) || (Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 		Message(Chat::Red, "You are not a GM or do not have the status to summon this item.");
 		LogInventory("Player [{}] on account [{}] attempted to create a GM-only item with a status of [{}].\n"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}], MinStatus: [{}])\n",
-			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
+			GetName(), account_name, Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 		return false;
 	}
@@ -341,10 +341,10 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 			// check to make sure we are a GM if the augment is GM-only
 			/*
-			else if(augtest->MinStatus && ((this->Admin() < augtest->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+			else if(augtest->MinStatus && ((Admin() < augtest->MinStatus) || (Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 				Message(Chat::Red, "You are not a GM or do not have the status to summon this augment.");
 				LogInventory("Player [{}] on account [{}] attempted to create a GM-only augment (Aug[{}]) with a status of [{}].\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], MinStatus: [{}])\n",
-					GetName(), account_name, augment_slot, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
+					GetName(), account_name, augment_slot, Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 				return false;
 			}
@@ -840,7 +840,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		}
 		invalid_drop = nullptr;
 
-		database.SetHackerFlag(this->AccountName(), this->GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
+		database.SetHackerFlag(AccountName(), GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
 		GetInv().DeleteItem(slot_id);
 		return;
 	}
@@ -914,12 +914,12 @@ void Client::DropItemQS(EQ::ItemInstance* inst, bool pickup) {
 		std::list<void*> event_details;
 		memset(&qs_audit, 0, sizeof(QSPlayerDropItem_Struct));
 
-		qs_audit.char_id = this->character_id;
+		qs_audit.char_id = character_id;
 		qs_audit.pickup = pickup;
-		qs_audit.zone_id = this->GetZoneID();
-		qs_audit.x = (int) this->GetX();
-		qs_audit.y = (int) this->GetY();
-		qs_audit.z = (int) this->GetZ();
+		qs_audit.zone_id = GetZoneID();
+		qs_audit.x = (int) GetX();
+		qs_audit.y = (int) GetY();
+		qs_audit.z = (int) GetZ();
 
 		if (inst) {
 			auto detail = new QSDropItems_Struct;
@@ -1248,10 +1248,10 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 
 	if (slot_id == EQ::invslot::slotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		return database.SaveCursor(this->CharacterID(), s, e);
+		return database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		return database.SaveInventory(this->CharacterID(), &inst, slot_id);
+		return database.SaveInventory(CharacterID(), &inst, slot_id);
 	}
 
 	CalcBonuses();
@@ -1267,11 +1267,11 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Ser
 	if (slot_id == EQ::invslot::slotCursor) {
 		m_inv.PushCursor(inst);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
 		m_inv.PutItem(slot_id, inst);
-		database.SaveInventory(this->CharacterID(), &inst, slot_id);
+		database.SaveInventory(CharacterID(), &inst, slot_id);
 	}
 
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
@@ -1463,10 +1463,10 @@ void Client::MoveItemCharges(EQ::ItemInstance &from, int16 to_slot, uint8 type)
 		SendLootItemInPacket(tmp_inst, to_slot);
 		if (to_slot == EQ::invslot::slotCursor) {
 			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-			database.SaveCursor(this->CharacterID(), s, e);
+			database.SaveCursor(CharacterID(), s, e);
 		}
 		else {
-			database.SaveInventory(this->CharacterID(), tmp_inst, to_slot);
+			database.SaveInventory(CharacterID(), tmp_inst, to_slot);
 		}
 	}
 }
@@ -1705,12 +1705,12 @@ packet with the item number in it, but I cant seem to find it right now
 	safe_delete(outapp);
 	if (send_to_all==false)
 		return;
-	const char* charname = this->GetName();
+	const char* charname = GetName();
 	outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(itemlink)+14+strlen(charname));
 	char buffer3[150] = {0};
 	sprintf(buffer3,"%c%c%c%c%c%c%c%c%c%c%c%c%6s%c%s",0x00,0x00,0x00,0x00,0xD2,0x01,0x00,0x00,0x00,0x00,0x00,0x00,charname,0x00,itemlink);
 	memcpy(outapp->pBuffer,buffer3,outapp->size);
-	entity_list.QueueCloseClients(this->CastToMob(),outapp,true,200,0,false);
+	entity_list.QueueCloseClients(CastToMob(),outapp,true,200,0,false);
 	safe_delete(outapp);
 }
 
@@ -1905,8 +1905,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		    (dstbagid && dstbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
 		    (srcitemid && src_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
 		    (dstitemid && dst_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)) {
-			this->Trader_EndTrader();
-			this->Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
+			Trader_EndTrader();
+			Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
 		}
 	}
 
@@ -2223,7 +2223,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
 					src_slot_id
 				);
-				
+
 				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
 			}
 		}
@@ -2495,11 +2495,11 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 			if (slot != INVALID_INDEX){
 				DeleteItemInInventory(slot,1,true);
 				uint8 slot2=SlotConvert(i);
-				EQ::ItemInstance* inst = this->m_inv.GetItem(slot2);
+				EQ::ItemInstance* inst = m_inv.GetItem(slot2);
 				if(inst){
 					uint32 armor_color = ((uint32)dye->Slot[i].Red << 16) | ((uint32)dye->Slot[i].Green << 8) | ((uint32)dye->Slot[i].Blue);
 					inst->SetColor(armor_color);
-					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
+					database.SaveCharacterMaterialColor(CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
 					if(dye->Slot[i].UseTint)
 						m_pp.item_tint.Slot[i].UseTint = 0xFF;
@@ -2525,11 +2525,11 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 
 void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
 	uint8 item_slot = SlotConvert(slot);
-	EQ::ItemInstance* item_instance = this->m_inv.GetItem(item_slot);
+	EQ::ItemInstance* item_instance = m_inv.GetItem(item_slot);
 	if (item_instance) {
 		uint32 armor_color = ((uint32)red << 16) | ((uint32)green << 8) | ((uint32)blue);
-		item_instance->SetColor(armor_color); 
-		database.SaveCharacterMaterialColor(this->CharacterID(), slot, armor_color);
+		item_instance->SetColor(armor_color);
+		database.SaveCharacterMaterialColor(CharacterID(), slot, armor_color);
 		database.SaveInventory(CharacterID(), item_instance, item_slot);
 		m_pp.item_tint.Slot[slot].UseTint = (use_tint ? 0xFF : 0x00);
 	}
@@ -2836,7 +2836,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 			local.clear();
 
 			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-			database.SaveCursor(this->CharacterID(), s, e);
+			database.SaveCursor(CharacterID(), s, e);
 		}
 		else {
 			safe_delete(new_inst); // deletes disenchanted bag if not used
@@ -2944,7 +2944,7 @@ void Client::RemoveNoRent(bool client_update)
 		local.clear();
 
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 }
 
@@ -3075,7 +3075,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		local_2.clear();
 
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 }
 
@@ -3274,7 +3274,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 	const EQ::ItemData *BaseItem = nullptr;
 	int16 WeaponSlot = 0;
 
-	database.DeleteCharacterBandolier(this->CharacterID(), bs->Number);
+	database.DeleteCharacterBandolier(CharacterID(), bs->Number);
 
 	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
@@ -3284,7 +3284,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 			LogInventory("Char: [{}] adding item [{}] to slot [{}]", GetName(),BaseItem->Name, WeaponSlot);
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = BaseItem->ID;
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = BaseItem->Icon;
-			database.SaveCharacterBandolier(this->CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
+			database.SaveCharacterBandolier(CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
 		}
 		else {
 			LogInventory("Char: [{}] no item in slot [{}]", GetName(), WeaponSlot);
@@ -3303,7 +3303,7 @@ void Client::RemoveBandolier(const EQApplicationPacket *app)
 		m_pp.bandoliers[bds->Number].Items[i].ID = 0;
 		m_pp.bandoliers[bds->Number].Items[i].Icon = 0;
 	}
-	database.DeleteCharacterBandolier(this->CharacterID(), bds->Number);
+	database.DeleteCharacterBandolier(CharacterID(), bds->Number);
 }
 
 void Client::SetBandolier(const EQApplicationPacket *app)

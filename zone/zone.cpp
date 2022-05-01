@@ -1560,7 +1560,7 @@ bool Zone::Process() {
 	if(Weather_Timer->Check())
 	{
 		Weather_Timer->Disable();
-		this->ChangeWeather();
+		ChangeWeather();
 	}
 
 	if(qGlobals)
@@ -1690,7 +1690,7 @@ void Zone::ChangeWeather()
 	else
 	{
 		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
-		this->weatherSend();
+		weatherSend();
 		if (zone->weather_intensity == 0)
 		{
 			zone->zone_weather = 0;

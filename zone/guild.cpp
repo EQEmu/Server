@@ -124,11 +124,11 @@ void Client::SendGuildRanks()
 				auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,
 								      sizeof(GuildUpdateRanks_Struct));
 				GuildUpdateRanks_Struct *guuacs = (GuildUpdateRanks_Struct*) outapp->pBuffer;
-				//guuacs->Unknown0008 = this->GuildID();
-				strncpy(guuacs->Unknown0012, this->GetCleanName(), 64);
+				//guuacs->Unknown0008 = GuildID();
+				strncpy(guuacs->Unknown0012, GetCleanName(), 64);
 				guuacs->Action = 5;
 				guuacs->RankID = j;
-				guuacs->GuildID = this->GuildID();
+				guuacs->GuildID = GuildID();
 				guuacs->PermissionID = i;
 				guuacs->PermissionVal = 1;
 				guuacs->Unknown0089[0] = 0x2c;
