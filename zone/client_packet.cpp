@@ -536,6 +536,7 @@ void Client::CompleteConnect()
 	SetDueling(false);
 
 	EnteringMessages(this);
+	LoadPEQZoneFlags();
 	LoadZoneFlags();
 
 	/* Sets GM Flag if needed & Sends Petition Queue */

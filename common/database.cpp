@@ -1143,21 +1143,21 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	return true;
 }
 
-uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
-
-	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
+uint8 Database::GetPEQZone(uint32 zone_id, uint32 version){
+	std::string query = fmt::format(
+		"SELECT peqzone FROM zone WHERE zoneidnumber = {} AND (version = {} OR version = 0) ORDER BY version DESC LIMIT 1",
+		zone_id,
+		version
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
 
-	if (results.RowCount() == 0)
-		return 0;
-
 	auto row = results.begin();
 
-	return atoi(row[0]);
+	return static_cast<uint8>(std::stoi(row[0]));
 }
 
 bool Database::CheckNameFilter(const char* name, bool surname)

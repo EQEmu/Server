@@ -992,11 +992,17 @@ public:
 	virtual void ThrowingAttack(Mob* other, bool CanDoubleAttack = false);
 	void DoClassAttacks(Mob *ca_target, uint16 skill = -1, bool IsRiposte=false);
 
-	void SetZoneFlag(uint32 zone_id);
 	void ClearZoneFlag(uint32 zone_id);
 	bool HasZoneFlag(uint32 zone_id) const;
-	void SendZoneFlagInfo(Client *to) const;
 	void LoadZoneFlags();
+	void SendZoneFlagInfo(Client *to) const;
+	void SetZoneFlag(uint32 zone_id);
+
+	void ClearPEQZoneFlag(uint32 zone_id);
+	bool HasPEQZoneFlag(uint32 zone_id) const;
+	void LoadPEQZoneFlags();
+	void SendPEQZoneFlagInfo(Client *to) const;
+	void SetPEQZoneFlag(uint32 zone_id);
 
 	bool CanFish();
 	void GoFish();
@@ -1917,6 +1923,7 @@ private:
 	float AreaEndRegen;
 
 	std::set<uint32> zone_flags;
+	std::set<uint32> peqzone_flags;
 
 	ClientTaskState *task_state;
 	int TotalSecondsPlayed;

@@ -439,6 +439,7 @@ SET(gm_commands
     gm_commands/path.cpp
     gm_commands/peekinv.cpp
     gm_commands/peqzone.cpp
+    gm_commands/peqzone_flags.cpp
     gm_commands/permaclass.cpp
     gm_commands/permagender.cpp
     gm_commands/permarace.cpp

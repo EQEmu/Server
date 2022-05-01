@@ -6252,6 +6252,86 @@ XS(XS_Client_TakePlatinum) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_ClearPEQZoneFlag); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_ClearPEQZoneFlag) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::ClearPEQZoneFlag(THIS, uint32 zone_id)"); // @categories Script Utility
+	{
+		Client *THIS;
+		uint32 zone_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ClearPEQZoneFlag(zone_id);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_HasPEQZoneFlag); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_HasPEQZoneFlag) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::HasPEQZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character
+	{
+		Client *THIS;
+		bool RETVAL;
+		uint32 zone_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->HasPEQZoneFlag(zone_id);
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_LoadPEQZoneFlags); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_LoadPEQZoneFlags) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::LoadPEQZoneFlags(THIS)"); // @categories Zones
+	{
+		Client *THIS;
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->LoadPEQZoneFlags();
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SendPEQZoneFlagInfo); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SendPEQZoneFlagInfo) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SendPEQZoneFlagInfo(THIS, Client* to)"); // @categories Account and Character, Zones
+	{
+		Client *THIS;
+		Client *to;
+		VALIDATE_THIS_IS_CLIENT;
+		if (sv_derived_from(ST(1), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(1)));
+			to = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "to is not of type Client");
+		if (to == nullptr)
+			Perl_croak(aTHX_ "to is nullptr, avoiding crash.");
+
+		THIS->SendPEQZoneFlagInfo(to);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SetPEQZoneFlag); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetPEQZoneFlag) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetPEQZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character, PEQZones
+	{
+		Client *THIS;
+		uint32 zone_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetPEQZoneFlag(zone_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6298,6 +6378,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "CheckIncreaseSkill"), XS_Client_CheckIncreaseSkill, file, "$$;$");
 	newXSproto(strcpy(buf, "CheckSpecializeIncrease"), XS_Client_CheckSpecializeIncrease, file, "$$");
 	newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
+	newXSproto(strcpy(buf, "ClearPEQZoneFlag"), XS_Client_ClearPEQZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
 	newXSproto(strcpy(buf, "CountAugmentEquippedByID"), XS_Client_CountAugmentEquippedByID, file, "$$");
@@ -6436,6 +6517,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "HasDisciplineLearned"), XS_Client_HasDisciplineLearned, file, "$$");
 	newXSproto(strcpy(buf, "HasExpeditionLockout"), XS_Client_HasExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "HasItemEquippedByID"), XS_Client_HasItemEquippedByID, file, "$$");
+	newXSproto(strcpy(buf, "HasPEQZoneFlag"), XS_Client_HasPEQZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "HasSkill"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasZoneFlag"), XS_Client_HasZoneFlag, file, "$$");
@@ -6463,6 +6545,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "LearnDisciplines"), XS_Client_LearnDisciplines, file, "$$$");
 	newXSproto(strcpy(buf, "LearnRecipe"), XS_Client_LearnRecipe, file, "$$");
 	newXSproto(strcpy(buf, "LeaveGroup"), XS_Client_LeaveGroup, file, "$");
+	newXSproto(strcpy(buf, "LoadPEQZoneFlags"), XS_Client_LoadPEQZoneFlags, file, "$");
 	newXSproto(strcpy(buf, "LoadZoneFlags"), XS_Client_LoadZoneFlags, file, "$");
 	newXSproto(strcpy(buf, "MarkCompassLoc"), XS_Client_MarkCompassLoc, file, "$$$$");
 	newXSproto(strcpy(buf, "MaxSkill"), XS_Client_MaxSkill, file, "$$;$$");
@@ -6507,6 +6590,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
 	newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "SendOPTranslocateConfirm"), XS_Client_SendOPTranslocateConfirm, file, "$$$");
+	newXSproto(strcpy(buf, "SendPEQZoneFlagInfo"), XS_Client_SendPEQZoneFlagInfo, file, "$$");
 	newXSproto(strcpy(buf, "SendSound"), XS_Client_SendSound, file, "$");
 	newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
 	newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
@@ -6550,6 +6634,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetInvulnerableEnvironmentDamage"), XS_Client_SetInvulnerableEnvironmentDamage, file, "$$");
 	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
+	newXSproto(strcpy(buf, "SetPEQZoneFlag"), XS_Client_SetPEQZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");
 	newXSproto(strcpy(buf, "SetPrimaryWeaponOrnamentation"), XS_Client_SetPrimaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetRadiantCrystals"), XS_Client_SetRadiantCrystals, file, "$$");
