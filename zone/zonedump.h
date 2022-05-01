@@ -35,9 +35,9 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 struct NPCType
 {
 	char	name[64];
-	char	lastname[70]; 
+	char	lastname[70];
 	int32	current_hp;
-	int32	max_hp; 
+	int32	max_hp;
 	float	size;
 	float	runspeed;
 	uint8	gender;
@@ -105,6 +105,7 @@ struct NPCType
 	uint8	sec_melee_type;
 	uint8	ranged_type;
 	int32	hp_regen;
+	int64	hp_regen_per_second;
 	int32	mana_regen;
 	int32	aggroradius; // added for AI improvement - neotokyo
 	int32	assistradius; // assist radius, defaults to aggroradis if not set
@@ -122,7 +123,7 @@ struct NPCType
 	int		avoidance_rating;	// flat bonus before mods
 	bool	findable;		//can be found with find command
 	bool	trackable;
-	int16	slow_mitigation;	
+	int16	slow_mitigation;
 	uint8	maxlevel;
 	uint32	scalerate;
 	bool	private_corpse;
@@ -164,8 +165,8 @@ namespace player_lootitem {
 		uint32	aug_5;
 		uint32	aug_6;
 		int8	attuned;
-		uint8	min_level;		  // 
-		uint8	max_level;		  // 
+		uint8	min_level;		  //
+		uint8	max_level;		  //
 	};
 }
 

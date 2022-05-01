@@ -116,7 +116,7 @@ void Mob::TuneGetStats(Mob* defender, Mob *attacker)
 		Message(0, "[#Tune] Total Offense: %i ", TuneGetOffense(defender, attacker));
 		Message(0, "[#Tune] Chance to hit:  %.0f pct", round(hit_chance));
 		Message(0, "[#Tune] Total Accuracy: %i ", TuneGetAccuracy( defender,attacker));
-		
+
 		if (attacker->IsNPC())
 		{
 			Message(0, "[#Tune] NPC STAT ATK: %i ", static_cast<int>(attacker->CastToNPC()->GetNPCStat("atk")));
@@ -843,7 +843,7 @@ int Mob::TuneNPCAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_ch
 	OffHandAtk(false);
 
 	uint8 otherlevel = other->GetLevel();
-	uint8 mylevel = this->GetLevel();
+	uint8 mylevel = GetLevel();
 
 	otherlevel = otherlevel ? otherlevel : 1;
 	mylevel = mylevel ? mylevel : 1;

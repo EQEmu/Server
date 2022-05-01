@@ -735,7 +735,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	if (RuleB(World, EnableIPExemptions) || RuleI(World, MaxClientsPerIP) >= 0) {
-		client_list.GetCLEIP(this->GetIP()); //Check current CLE Entry IPs against incoming connection
+		client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
 	}
 
 	EnterWorld_Struct *ew=(EnterWorld_Struct *)app->pBuffer;
@@ -996,9 +996,9 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	}
 
 	// Voidd: Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
-	if (RuleB(World, GMAccountIPList) && this->GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
-		if(!database.CheckGMIPs(long2ip(this->GetIP()).c_str(), this->GetAccountID())) {
-			LogInfo("GM Account not permited from source address [{}] and accountid [{}]", long2ip(this->GetIP()).c_str(), this->GetAccountID());
+	if (RuleB(World, GMAccountIPList) && GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
+		if(!database.CheckGMIPs(long2ip(GetIP()).c_str(), GetAccountID())) {
+			LogInfo("GM Account not permited from source address [{}] and accountid [{}]", long2ip(GetIP()).c_str(), GetAccountID());
 			eqs->Close();
 		}
 	}

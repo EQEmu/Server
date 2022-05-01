@@ -45,7 +45,7 @@ void Mob::SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color
 {
 	Log(Logs::Detail, Logs::MobAppearance,
 		"Mob::SetMobTextureProfile [%s] material_slot: %u texture: %u color: %u hero_forge_model: %u",
-		this->GetCleanName(),
+		GetCleanName(),
 		material_slot,
 		texture,
 		color,
@@ -214,7 +214,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 	Log(Logs::Detail, Logs::MobAppearance,
 		"Mob::GetEquipmentMaterial [%s] material_slot: %u texture_profile_material: %i",
-		this->clean_name,
+		clean_name,
 		material_slot,
 		texture_profile_material
 	);
@@ -235,7 +235,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 				 material_slot == EQ::textures::weaponSecondary;
 
 		if (is_primary_or_secondary_weapon) {
-			if (this->IsClient()) {
+			if (IsClient()) {
 
 				int16 inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 				if (inventory_slot == INVALID_INDEX) {
@@ -408,7 +408,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	auto *wear_change = (WearChange_Struct *) packet->pBuffer;
 
 	Log(Logs::Detail, Logs::MobAppearance, "Mob::SendWearChange [%s]",
-		this->GetCleanName()
+		GetCleanName()
 	);
 
 	wear_change->spawn_id         = GetID();
@@ -467,14 +467,14 @@ void Mob::SendTextureWC(
 	auto outapp       = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	auto *wear_change = (WearChange_Struct *) outapp->pBuffer;
 
-	if (this->IsClient()) {
+	if (IsClient()) {
 		wear_change->color.Color = GetEquipmentColor(slot);
 	}
 	else {
-		wear_change->color.Color = this->GetArmorTint(slot);
+		wear_change->color.Color = GetArmorTint(slot);
 	}
 
-	wear_change->spawn_id         = this->GetID();
+	wear_change->spawn_id         = GetID();
 	wear_change->material         = texture;
 	wear_change->wear_slot_id     = slot;
 	wear_change->unknown06        = unknown06;
@@ -506,7 +506,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	auto outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	auto *wc    = (WearChange_Struct *) outapp->pBuffer;
 
-	wc->spawn_id         = this->GetID();
+	wc->spawn_id         = GetID();
 	wc->material         = GetEquipmentMaterial(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
 	wc->color.Color      = color;
@@ -539,7 +539,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 h
 	auto outapp       = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	auto *wear_change = (WearChange_Struct *) outapp->pBuffer;
 
-	wear_change->spawn_id         = this->GetID();
+	wear_change->spawn_id         = GetID();
 	wear_change->material         = texture;
 	wear_change->hero_forge_model = hero_forge_model;
 	wear_change->color.Color      = color;

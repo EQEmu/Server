@@ -14,6 +14,7 @@
 #include "zone_store.h"
 #include "aura.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/npc_types_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -2346,251 +2347,131 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		return itr->second;
 	}
 
-	std::string where_condition = "";
+	std::string filter = fmt::format("id = {}", npc_type_id);
 
 	if (bulk_load) {
 		LogDebug("Performing bulk NPC Types load");
-		where_condition = StringFormat(
-			"INNER JOIN spawnentry ON npc_types.id = spawnentry.npcID "
-			"INNER JOIN spawn2 ON spawnentry.spawngroupID = spawn2.spawngroupID "
-			"WHERE spawn2.zone = '%s' and spawn2.version = %u GROUP BY npc_types.id",
+
+		filter = fmt::format(
+			SQL(
+				id IN (
+					select npcID from spawnentry where spawngroupID IN (
+						select spawngroupID from spawn2 where `zone` = '{}' and `version` = {}
+					)
+				)
+			),
 			zone->GetShortName(),
-			zone->GetInstanceVersion());
-	}
-	else {
-		where_condition = StringFormat("WHERE id = %u", npc_type_id);
+			zone->GetInstanceVersion()
+		);
 	}
 
-	std::string query = StringFormat(
-		"SELECT "
-		"npc_types.id, "
-		"npc_types.name, "
-		"npc_types.level, "
-		"npc_types.race, "
-		"npc_types.class, "
-		"npc_types.hp, "
-		"npc_types.mana, "
-		"npc_types.gender, "
-		"npc_types.texture, "
-		"npc_types.helmtexture, "
-		"npc_types.herosforgemodel, "
-		"npc_types.size, "
-		"npc_types.loottable_id, "
-		"npc_types.merchant_id, "
-		"npc_types.alt_currency_id, "
-		"npc_types.adventure_template_id, "
-		"npc_types.trap_template, "
-		"npc_types.attack_speed, "
-		"npc_types.STR, "
-		"npc_types.STA, "
-		"npc_types.DEX, "
-		"npc_types.AGI, "
-		"npc_types._INT, "
-		"npc_types.WIS, "
-		"npc_types.CHA, "
-		"npc_types.MR, "
-		"npc_types.CR, "
-		"npc_types.DR, "
-		"npc_types.FR, "
-		"npc_types.PR, "
-		"npc_types.Corrup, "
-		"npc_types.PhR, "
-		"npc_types.mindmg, "
-		"npc_types.maxdmg, "
-		"npc_types.attack_count, "
-		"npc_types.special_abilities, "
-		"npc_types.npc_spells_id, "
-		"npc_types.npc_spells_effects_id, "
-		"npc_types.d_melee_texture1, "
-		"npc_types.d_melee_texture2, "
-		"npc_types.ammo_idfile, "
-		"npc_types.prim_melee_type, "
-		"npc_types.sec_melee_type, "
-		"npc_types.ranged_type, "
-		"npc_types.runspeed, "
-		"npc_types.findable, "
-		"npc_types.trackable, "
-		"npc_types.hp_regen_rate, "
-		"npc_types.mana_regen_rate, "
-		"npc_types.aggroradius, "
-		"npc_types.assistradius, "
-		"npc_types.bodytype, "
-		"npc_types.npc_faction_id, "
-		"npc_types.face, "
-		"npc_types.luclin_hairstyle, "
-		"npc_types.luclin_haircolor, "
-		"npc_types.luclin_eyecolor, "
-		"npc_types.luclin_eyecolor2, "
-		"npc_types.luclin_beardcolor, "
-		"npc_types.luclin_beard, "
-		"npc_types.drakkin_heritage, "
-		"npc_types.drakkin_tattoo, "
-		"npc_types.drakkin_details, "
-		"npc_types.armortint_id, "
-		"npc_types.armortint_red, "
-		"npc_types.armortint_green, "
-		"npc_types.armortint_blue, "
-		"npc_types.see_invis, "
-		"npc_types.see_invis_undead, "
-		"npc_types.lastname, "
-		"npc_types.qglobal, "
-		"npc_types.AC, "
-		"npc_types.npc_aggro, "
-		"npc_types.spawn_limit, "
-		"npc_types.see_hide, "
-		"npc_types.see_improved_hide, "
-		"npc_types.ATK, "
-		"npc_types.Accuracy, "
-		"npc_types.Avoidance, "
-		"npc_types.slow_mitigation, "
-		"npc_types.maxlevel, "
-		"npc_types.scalerate, "
-		"npc_types.private_corpse, "
-		"npc_types.unique_spawn_by_name, "
-		"npc_types.underwater, "
-		"npc_types.emoteid, "
-		"npc_types.spellscale, "
-		"npc_types.healscale, "
-		"npc_types.no_target_hotkey, "
-		"npc_types.raid_target, "
-		"npc_types.attack_delay, "
-		"npc_types.light, "
-		"npc_types.armtexture, "
-		"npc_types.bracertexture, "
-		"npc_types.handtexture, "
-		"npc_types.legtexture, "
-		"npc_types.feettexture, "
-		"npc_types.ignore_despawn, "
-		"npc_types.show_name, "
-		"npc_types.untargetable, "
-		"npc_types.charm_ac, "
-		"npc_types.charm_min_dmg, "
-		"npc_types.charm_max_dmg, "
-		"npc_types.charm_attack_delay, "
-		"npc_types.charm_accuracy_rating, "
-		"npc_types.charm_avoidance_rating, "
-		"npc_types.charm_atk, "
-		"npc_types.skip_global_loot, "
-		"npc_types.rare_spawn, "
-		"npc_types.stuck_behavior, "
-		"npc_types.model, "
-		"npc_types.flymode, "
-		"npc_types.always_aggro, "
-		"npc_types.exp_mod "
-		"FROM npc_types %s",
-		where_condition.c_str()
-	);
+	for (NpcTypesRepository::NpcTypes &n : NpcTypesRepository::GetWhere((Database &) content_db, filter)) {
+		NPCType *t;
+		t = new NPCType;
+		memset(t, 0, sizeof *t);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return nullptr;
-	}
+		t->npc_id = n.id;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		NPCType *temp_npctype_data;
-		temp_npctype_data = new NPCType;
-		memset(temp_npctype_data, 0, sizeof *temp_npctype_data);
+		strn0cpy(t->name, n.name.c_str(), 50);
 
-		temp_npctype_data->npc_id = atoi(row[0]);
+		t->level              = n.level;
+		t->race               = n.race;
+		t->class_             = n.class_;
+		t->max_hp             = n.hp;
+		t->current_hp         = t->max_hp;
+		t->Mana               = n.mana;
+		t->gender             = n.gender;
+		t->texture            = n.texture;
+		t->helmtexture        = n.helmtexture;
+		t->herosforgemodel    = n.herosforgemodel;
+		t->size               = n.size;
+		t->loottable_id       = n.loottable_id;
+		t->merchanttype       = n.merchant_id;
+		t->alt_currency_type  = n.alt_currency_id;
+		t->adventure_template = n.adventure_template_id;
+		t->trap_template      = n.trap_template;
+		t->attack_speed       = n.attack_speed;
+		t->STR                = n.STR;
+		t->STA                = n.STA;
+		t->DEX                = n.DEX;
+		t->AGI                = n.AGI;
+		t->INT                = n._INT;
+		t->WIS                = n.WIS;
+		t->CHA                = n.CHA;
+		t->MR                 = n.MR;
+		t->CR                 = n.CR;
+		t->DR                 = n.DR;
+		t->FR                 = n.FR;
+		t->PR                 = n.PR;
+		t->Corrup             = n.Corrup;
+		t->PhR                = n.PhR;
+		t->min_dmg            = n.mindmg;
+		t->max_dmg            = n.maxdmg;
+		t->attack_count       = n.attack_count;
 
-		strn0cpy(temp_npctype_data->name, row[1], 50);
-
-		temp_npctype_data->level              = atoi(row[2]);
-		temp_npctype_data->race               = atoi(row[3]);
-		temp_npctype_data->class_             = atoi(row[4]);
-		temp_npctype_data->max_hp             = atoi(row[5]);
-		temp_npctype_data->current_hp         = temp_npctype_data->max_hp;
-		temp_npctype_data->Mana               = atoi(row[6]);
-		temp_npctype_data->gender             = atoi(row[7]);
-		temp_npctype_data->texture            = atoi(row[8]);
-		temp_npctype_data->helmtexture        = atoi(row[9]);
-		temp_npctype_data->herosforgemodel    = atoul(row[10]);
-		temp_npctype_data->size               = atof(row[11]);
-		temp_npctype_data->loottable_id       = atoi(row[12]);
-		temp_npctype_data->merchanttype       = atoi(row[13]);
-		temp_npctype_data->alt_currency_type  = atoi(row[14]);
-		temp_npctype_data->adventure_template = atoi(row[15]);
-		temp_npctype_data->trap_template      = atoi(row[16]);
-		temp_npctype_data->attack_speed       = atof(row[17]);
-		temp_npctype_data->STR                = atoi(row[18]);
-		temp_npctype_data->STA                = atoi(row[19]);
-		temp_npctype_data->DEX                = atoi(row[20]);
-		temp_npctype_data->AGI                = atoi(row[21]);
-		temp_npctype_data->INT                = atoi(row[22]);
-		temp_npctype_data->WIS                = atoi(row[23]);
-		temp_npctype_data->CHA                = atoi(row[24]);
-		temp_npctype_data->MR                 = atoi(row[25]);
-		temp_npctype_data->CR                 = atoi(row[26]);
-		temp_npctype_data->DR                 = atoi(row[27]);
-		temp_npctype_data->FR                 = atoi(row[28]);
-		temp_npctype_data->PR                 = atoi(row[29]);
-		temp_npctype_data->Corrup             = atoi(row[30]);
-		temp_npctype_data->PhR                = atoi(row[31]);
-		temp_npctype_data->min_dmg            = atoi(row[32]);
-		temp_npctype_data->max_dmg            = atoi(row[33]);
-		temp_npctype_data->attack_count       = atoi(row[34]);
-
-		if (row[35] != nullptr) {
-			strn0cpy(temp_npctype_data->special_abilities, row[35], 512);
+		if (!n.special_abilities.empty()) {
+			strn0cpy(t->special_abilities, n.special_abilities.c_str(), 512);
 		}
 		else {
-			temp_npctype_data->special_abilities[0] = '\0';
+			t->special_abilities[0] = '\0';
 		}
 
-		temp_npctype_data->npc_spells_id         = atoi(row[36]);
-		temp_npctype_data->npc_spells_effects_id = atoi(row[37]);
-		temp_npctype_data->d_melee_texture1      = atoi(row[38]);
-		temp_npctype_data->d_melee_texture2      = atoi(row[39]);
-		strn0cpy(temp_npctype_data->ammo_idfile, row[40], 30);
-		temp_npctype_data->prim_melee_type = atoi(row[41]);
-		temp_npctype_data->sec_melee_type  = atoi(row[42]);
-		temp_npctype_data->ranged_type     = atoi(row[43]);
-		temp_npctype_data->runspeed        = atof(row[44]);
-		temp_npctype_data->findable        = atoi(row[45]) == 0 ? false : true;
-		temp_npctype_data->trackable       = atoi(row[46]) == 0 ? false : true;
-		temp_npctype_data->hp_regen        = atoi(row[47]);
-		temp_npctype_data->mana_regen      = atoi(row[48]);
+
+		t->npc_spells_id         = n.npc_spells_id;
+		t->npc_spells_effects_id = n.npc_spells_effects_id;
+		t->d_melee_texture1      = n.d_melee_texture1;
+		t->d_melee_texture2      = n.d_melee_texture2;
+		strn0cpy(t->ammo_idfile, n.ammo_idfile.c_str(), 30);
+		t->prim_melee_type = n.prim_melee_type;
+		t->sec_melee_type  = n.sec_melee_type;
+		t->ranged_type     = n.ranged_type;
+		t->runspeed        = n.runspeed;
+		t->findable        = n.findable != 0;
+		t->trackable       = n.trackable != 0;
+		t->hp_regen        = n.hp_regen_rate;
+		t->mana_regen      = n.mana_regen_rate;
 
 		// set default value for aggroradius
-		temp_npctype_data->aggroradius = (int32) atoi(row[49]);
-		if (temp_npctype_data->aggroradius <= 0) {
-			temp_npctype_data->aggroradius = 70;
+		t->aggroradius = (int32) n.aggroradius;
+		if (t->aggroradius <= 0) {
+			t->aggroradius = 70;
 		}
 
-		temp_npctype_data->assistradius = (int32) atoi(row[50]);
-		if (temp_npctype_data->assistradius <= 0) {
-			temp_npctype_data->assistradius = temp_npctype_data->aggroradius;
+		t->assistradius = (int32) n.assistradius;
+		if (t->assistradius <= 0) {
+			t->assistradius = t->aggroradius;
 		}
 
-		if (row[51] && strlen(row[51])) {
-			temp_npctype_data->bodytype = (uint8) atoi(row[51]);
+		if (n.bodytype > 0) {
+			t->bodytype = n.bodytype;
 		}
 		else {
-			temp_npctype_data->bodytype = 0;
+			t->bodytype = 0;
 		}
 
-		temp_npctype_data->npc_faction_id = atoi(row[52]);
+		// facial features
+		t->npc_faction_id   = n.npc_faction_id;
+		t->luclinface       = n.face;
+		t->hairstyle        = n.luclin_hairstyle;
+		t->haircolor        = n.luclin_haircolor;
+		t->eyecolor1        = n.luclin_eyecolor;
+		t->eyecolor2        = n.luclin_eyecolor2;
+		t->beardcolor       = n.luclin_beardcolor;
+		t->beard            = n.luclin_beard;
+		t->drakkin_heritage = n.drakkin_heritage;
+		t->drakkin_tattoo   = n.drakkin_tattoo;
+		t->drakkin_details  = n.drakkin_details;
 
-		temp_npctype_data->luclinface       = atoi(row[53]);
-		temp_npctype_data->hairstyle        = atoi(row[54]);
-		temp_npctype_data->haircolor        = atoi(row[55]);
-		temp_npctype_data->eyecolor1        = atoi(row[56]);
-		temp_npctype_data->eyecolor2        = atoi(row[57]);
-		temp_npctype_data->beardcolor       = atoi(row[58]);
-		temp_npctype_data->beard            = atoi(row[59]);
-		temp_npctype_data->drakkin_heritage = atoi(row[60]);
-		temp_npctype_data->drakkin_tattoo   = atoi(row[61]);
-		temp_npctype_data->drakkin_details  = atoi(row[62]);
-
-		uint32 armor_tint_id = atoi(row[63]);
-
-		temp_npctype_data->armor_tint.Head.Color = (atoi(row[64]) & 0xFF) << 16;
-		temp_npctype_data->armor_tint.Head.Color |= (atoi(row[65]) & 0xFF) << 8;
-		temp_npctype_data->armor_tint.Head.Color |= (atoi(row[66]) & 0xFF);
-		temp_npctype_data->armor_tint.Head.Color |= (temp_npctype_data->armor_tint.Head.Color) ? (0xFF << 24) : 0;
+		// armor tint
+		uint32 armor_tint_id = n.armortint_id;
+		t->armor_tint.Head.Color = (n.armortint_red & 0xFF) << 16;
+		t->armor_tint.Head.Color |= (n.armortint_green & 0xFF) << 8;
+		t->armor_tint.Head.Color |= (n.armortint_blue & 0xFF);
+		t->armor_tint.Head.Color |= (t->armor_tint.Head.Color) ? (0xFF << 24) : 0;
 
 		if (armor_tint_id != 0) {
-			std::string armortint_query   = StringFormat(
+
+			std::string armortint_query = StringFormat(
 				"SELECT red1h, grn1h, blu1h, "
 				"red2c, grn2c, blu2c, "
 				"red3a, grn3a, blu3a, "
@@ -2603,7 +2484,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 				"FROM npc_types_tint WHERE id = %d",
 				armor_tint_id
 			);
-			auto        armortint_results = QueryDatabase(armortint_query);
+
+			auto armortint_results = QueryDatabase(armortint_query);
 			if (!armortint_results.Success() || armortint_results.RowCount() == 0) {
 				armor_tint_id = 0;
 			}
@@ -2611,10 +2493,10 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 				auto armorTint_row = armortint_results.begin();
 
 				for (int index = EQ::textures::textureBegin; index <= EQ::textures::LastTexture; index++) {
-					temp_npctype_data->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
-					temp_npctype_data->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
-					temp_npctype_data->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);
-					temp_npctype_data->armor_tint.Slot[index].Color |= (temp_npctype_data->armor_tint.Slot[index].Color)
+					t->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
+					t->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
+					t->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);
+					t->armor_tint.Slot[index].Color |= (t->armor_tint.Slot[index].Color)
 						? (0xFF << 24) : 0;
 				}
 			}
@@ -2622,77 +2504,74 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		// Try loading npc_types tint fields if armor tint is 0 or query failed to get results
 		if (armor_tint_id == 0) {
 			for (int index = EQ::textures::armorChest; index < EQ::textures::materialCount; index++) {
-				temp_npctype_data->armor_tint.Slot[index].Color = temp_npctype_data->armor_tint.Slot[0].Color; // odd way to 'zero-out' the array...
+				t->armor_tint.Slot[index].Color = t->armor_tint.Slot[0].Color; // odd way to 'zero-out' the array...
 			}
 		}
 
-		temp_npctype_data->see_invis        = atoi(row[67]);
-		temp_npctype_data->see_invis_undead = atoi(row[68]) == 0 ? false : true;    // Set see_invis_undead flag
+		t->see_invis        = n.see_invis != 0;
+		t->see_invis_undead = n.see_invis_undead != 0;    // Set see_invis_undead flag
 
-		if (row[69] != nullptr) {
-			strn0cpy(temp_npctype_data->lastname, row[69], 32);
+		if (!n.lastname.empty()) {
+			strn0cpy(t->lastname, n.lastname.c_str(), 32);
 		}
 
-		temp_npctype_data->qglobal              = atoi(row[70]) == 0 ? false : true;    // qglobal
-		temp_npctype_data->AC                   = atoi(row[71]);
-		temp_npctype_data->npc_aggro            = atoi(row[72]) == 0 ? false : true;
-		temp_npctype_data->spawn_limit          = atoi(row[73]);
-		temp_npctype_data->see_hide             = atoi(row[74]) == 0 ? false : true;
-		temp_npctype_data->see_improved_hide    = atoi(row[75]) == 0 ? false : true;
-		temp_npctype_data->ATK                  = atoi(row[76]);
-		temp_npctype_data->accuracy_rating      = atoi(row[77]);
-		temp_npctype_data->avoidance_rating     = atoi(row[78]);
-		temp_npctype_data->slow_mitigation      = atoi(row[79]);
-		temp_npctype_data->maxlevel             = atoi(row[80]);
-		temp_npctype_data->scalerate            = atoi(row[81]);
-		temp_npctype_data->private_corpse       = atoi(row[82]) == 1 ? true : false;
-		temp_npctype_data->unique_spawn_by_name = atoi(row[83]) == 1 ? true : false;
-		temp_npctype_data->underwater           = atoi(row[84]) == 1 ? true : false;
-		temp_npctype_data->emoteid              = atoi(row[85]);
-		temp_npctype_data->spellscale           = atoi(row[86]);
-		temp_npctype_data->healscale            = atoi(row[87]);
-		temp_npctype_data->no_target_hotkey     = atoi(row[88]) == 1 ? true : false;
-		temp_npctype_data->raid_target          = atoi(row[89]) == 0 ? false : true;
-		temp_npctype_data->attack_delay         = atoi(row[90]) * 100; // TODO: fix DB
-		temp_npctype_data->light                = (atoi(row[91]) & 0x0F);
-
-		temp_npctype_data->armtexture     = atoi(row[92]);
-		temp_npctype_data->bracertexture  = atoi(row[93]);
-		temp_npctype_data->handtexture    = atoi(row[94]);
-		temp_npctype_data->legtexture     = atoi(row[95]);
-		temp_npctype_data->feettexture    = atoi(row[96]);
-		temp_npctype_data->ignore_despawn = atoi(row[97]) == 1 ? true : false;
-		temp_npctype_data->show_name      = atoi(row[98]) != 0 ? true : false;
-		temp_npctype_data->untargetable   = atoi(row[99]) != 0 ? true : false;
-
-		temp_npctype_data->charm_ac               = atoi(row[100]);
-		temp_npctype_data->charm_min_dmg          = atoi(row[101]);
-		temp_npctype_data->charm_max_dmg          = atoi(row[102]);
-		temp_npctype_data->charm_attack_delay     = atoi(row[103]) * 100; // TODO: fix DB
-		temp_npctype_data->charm_accuracy_rating  = atoi(row[104]);
-		temp_npctype_data->charm_avoidance_rating = atoi(row[105]);
-		temp_npctype_data->charm_atk              = atoi(row[106]);
-
-		temp_npctype_data->skip_global_loot 	= atoi(row[107]) != 0;
-		temp_npctype_data->rare_spawn       	= atoi(row[108]) != 0;
-		temp_npctype_data->stuck_behavior   	= atoi(row[109]);
-		temp_npctype_data->use_model        	= atoi(row[110]);
-		temp_npctype_data->flymode          	= atoi(row[111]);
-		temp_npctype_data->always_aggro	        = atoi(row[112]);
-		temp_npctype_data->exp_mod              = atoi(row[113]);
-
-		temp_npctype_data->skip_auto_scale = false; // hardcoded here for now
+		t->qglobal                = n.qglobal != 0;    // qglobal
+		t->AC                     = n.AC;
+		t->npc_aggro              = n.npc_aggro != 0;
+		t->spawn_limit            = n.spawn_limit;
+		t->see_hide               = n.see_hide != 0;
+		t->see_improved_hide      = n.see_improved_hide != 0;
+		t->ATK                    = n.ATK;
+		t->accuracy_rating        = n.Accuracy;
+		t->avoidance_rating       = n.Avoidance;
+		t->slow_mitigation        = n.slow_mitigation;
+		t->maxlevel               = n.maxlevel;
+		t->scalerate              = n.scalerate;
+		t->private_corpse         = n.private_corpse != 0;
+		t->unique_spawn_by_name   = n.unique_spawn_by_name != 0;
+		t->underwater             = n.underwater != 0;
+		t->emoteid                = n.emoteid;
+		t->spellscale             = n.spellscale;
+		t->healscale              = n.healscale;
+		t->no_target_hotkey       = n.no_target_hotkey != 0;
+		t->raid_target            = n.raid_target != 0;
+		t->attack_delay           = n.attack_delay * 100; // TODO: fix DB
+		t->light                  = (n.light & 0x0F);
+		t->armtexture             = n.armtexture;
+		t->bracertexture          = n.bracertexture;
+		t->handtexture            = n.handtexture;
+		t->legtexture             = n.legtexture;
+		t->feettexture            = n.feettexture;
+		t->ignore_despawn         = n.ignore_despawn != 0;
+		t->show_name              = n.show_name != 0;
+		t->untargetable           = n.untargetable != 0;
+		t->charm_ac               = n.charm_ac;
+		t->charm_min_dmg          = n.charm_min_dmg;
+		t->charm_max_dmg          = n.charm_max_dmg;
+		t->charm_attack_delay     = n.charm_attack_delay * 100; // TODO: fix DB
+		t->charm_accuracy_rating  = n.charm_accuracy_rating;
+		t->charm_avoidance_rating = n.charm_avoidance_rating;
+		t->charm_atk              = n.charm_atk;
+		t->skip_global_loot       = n.skip_global_loot != 0;
+		t->rare_spawn             = n.rare_spawn != 0;
+		t->stuck_behavior         = n.stuck_behavior;
+		t->use_model              = n.model;
+		t->flymode                = n.flymode;
+		t->always_aggro           = n.always_aggro != 0;
+		t->exp_mod                = n.exp_mod;
+		t->skip_auto_scale        = false; // hardcoded here for now
+		t->hp_regen_per_second    = n.hp_regen_rate;
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
-		if (zone->npctable.find(temp_npctype_data->npc_id) != zone->npctable.end()) {
-			std::cerr << "Error loading duplicate NPC " << temp_npctype_data->npc_id << std::endl;
-			delete temp_npctype_data;
+		if (zone->npctable.find(t->npc_id) != zone->npctable.end()) {
+			std::cerr << "Error loading duplicate NPC " << t->npc_id << std::endl;
+			delete t;
 			return nullptr;
 		}
 
-		zone->npctable[temp_npctype_data->npc_id] = temp_npctype_data;
-		npc = temp_npctype_data;
+		zone->npctable[t->npc_id] = t;
+		npc = t;
 	}
 
 	return npc;
@@ -3588,7 +3467,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 				remaining_time_string = "Already Expired";
 			}
 		}
-		
+
 		client->Message(
 			Chat::White,
 			fmt::format("Instance {} | Zone: {} ({}){}",
@@ -3860,7 +3739,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
 				"`hp` = %u, `mana` = %u, `size` = %f, `taunting` = %u",
 				client->CharacterID(), pet, petinfo->Name, petinfo->petpower, petinfo->SpellID,
-				petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0, 
+				petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0,
 				// and now the ON DUPLICATE ENTRIES
 				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0);
 		results = database.QueryDatabase(query);

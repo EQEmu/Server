@@ -127,7 +127,7 @@ void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adj
 
 	caster_id = caster->GetID();
 	spell_id = cast_spell_id;
-	this->resist_adjust = resist_adjust;
+	resist_adjust = resist_adjust;
 	spell_iterations = spells[spell_id].aoe_duration / 2500;
 	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
 	if (spells[spell_id].aoe_max_targets) {

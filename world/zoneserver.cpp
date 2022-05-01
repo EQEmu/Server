@@ -84,7 +84,7 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn
 		}
 	});
 
-	this->console = console;
+	console = console;
 }
 
 ZoneServer::~ZoneServer() {
@@ -1567,7 +1567,7 @@ void ZoneServer::TriggerBootup(uint32 iZoneID, uint32 iInstanceID, const char* a
 		strcpy(s->adminname, adminname);
 
 	if (iZoneID == 0)
-		s->zoneid = this->GetZoneID();
+		s->zoneid = GetZoneID();
 	else
 		s->zoneid = iZoneID;
 
