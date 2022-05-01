@@ -6070,12 +6070,12 @@ void Mob::SetSpawnedInWater(bool spawned_in_water) {
 	Mob::spawned_in_water = spawned_in_water;
 }
 
-int32 Mob::GetHPRegen() const
+int64 Mob::GetHPRegen() const
 {
 	return hp_regen;
 }
 
-int32 Mob::GetManaRegen() const
+int64 Mob::GetManaRegen() const
 {
 	return mana_regen;
 }

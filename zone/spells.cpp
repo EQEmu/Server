@@ -2621,7 +2621,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	// lets not consume end for custom items that have disc procs.
 	// One might also want to filter out USE_ITEM_SPELL_SLOT, but DISCIPLINE_SPELL_SLOT are both #defined to the same thing ...
 	if (spells[spell_id].endurance_cost && !isproc) {
-		auto end_cost = spells[spell_id].endurance_cost;
+		auto end_cost = (int64)spells[spell_id].endurance_cost;
 		if (mgb)
 			end_cost *= 2;
 		SetEndurance(GetEndurance() - EQ::ClampUpper(end_cost, GetEndurance()));

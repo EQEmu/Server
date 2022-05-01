@@ -208,10 +208,10 @@ public:
 	virtual Mob* GetOwnerOrSelf();
 	inline virtual bool HasOwner() { return (GetBotOwner() ? true : false); }
 	virtual int32 CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible = 0);
-	virtual int32 CalcMaxMana();
+	virtual int64 CalcMaxMana();
 	virtual void SetAttackTimer();
-	uint32 GetClassHPFactor();
-	virtual int32 CalcMaxHP();
+	uint64 GetClassHPFactor();
+	virtual int64 CalcMaxHP();
 	bool DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
@@ -286,23 +286,23 @@ public:
 	int32	CalcPR();
 	int32	CalcCR();
 	int32	CalcCorrup();
-	int32	CalcHPRegenCap();
-	int32	CalcManaRegenCap();
+	int64	CalcHPRegenCap();
+	int64	CalcManaRegenCap();
 	int32	LevelRegen();
-	int32	CalcHPRegen();
-	int32	CalcManaRegen();
+	int64	CalcHPRegen();
+	int64	CalcManaRegen();
 	uint32	CalcCurrentWeight();
 	int		GroupLeadershipAAHealthEnhancement();
 	int		GroupLeadershipAAManaEnhancement();
 	int	GroupLeadershipAAHealthRegeneration();
 	int		GroupLeadershipAAOffenseEnhancement();
 	void CalcRestState();
-	int32	CalcMaxEndurance();	//This calculates the maximum endurance we can have
-	int32	CalcBaseEndurance();	//Calculates Base End
-	int32	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
-	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
-	int32	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
-	int32	CalcEnduranceRegenCap();
+	int64	CalcMaxEndurance();	//This calculates the maximum endurance we can have
+	int64	CalcBaseEndurance();	//Calculates Base End
+	int64	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
+	int64	GetEndurance()	const {return cur_end;}	//This gets our current endurance
+	int64	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
+	int64	CalcEnduranceRegenCap();
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd);	//This sets the current endurance to the new value
 	void DoEnduranceRegen();	//This Regenerates endurance

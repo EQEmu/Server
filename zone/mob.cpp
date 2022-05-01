@@ -45,8 +45,8 @@ extern WorldServer worldserver;
 Mob::Mob(
 	const char *in_name,
 	const char *in_lastname,
-	int32 in_cur_hp,
-	int32 in_max_hp,
+	int64 in_cur_hp,
+	int64 in_max_hp,
 	uint8 in_gender,
 	uint16 in_race,
 	uint8 in_class,
@@ -85,8 +85,8 @@ Mob::Mob(
 	uint16 in_see_invis_undead,
 	uint8 in_see_hide,
 	uint8 in_see_improved_hide,
-	int32 in_hp_regen,
-	int32 in_mana_regen,
+	int64 in_hp_regen,
+	int64 in_mana_regen,
 	uint8 in_qglobal,
 	uint8 in_maxlevel,
 	uint32 in_scalerate,
@@ -947,7 +947,7 @@ int Mob::_GetFearSpeed() const {
 	return speed_mod;
 }
 
-int32 Mob::CalcMaxMana() {
+int64 Mob::CalcMaxMana() {
 	switch (GetCasterClass()) {
 		case 'I':
 			max_mana = (((GetINT()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
@@ -967,15 +967,15 @@ int32 Mob::CalcMaxMana() {
 	return max_mana;
 }
 
-int32 Mob::CalcMaxHP() {
+int64 Mob::CalcMaxHP() {
 	max_hp = (base_hp + itembonuses.HP + spellbonuses.HP);
 	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
 
 	return max_hp;
 }
 
-int32 Mob::GetItemHPBonuses() {
-	int32 item_hp = 0;
+int64 Mob::GetItemHPBonuses() {
+	int64 item_hp = 0;
 	item_hp = itembonuses.HP;
 	item_hp += item_hp * itembonuses.MaxHPChange / 10000;
 	return item_hp;
@@ -3243,7 +3243,7 @@ void Mob::SetTargetable(bool on) {
 	}
 }
 
-const int32& Mob::SetMana(int32 amount)
+const int64& Mob::SetMana(int64 amount)
 {
 	CalcMaxMana();
 	int32 mmana = GetMaxMana();

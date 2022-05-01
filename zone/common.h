@@ -112,8 +112,8 @@
 typedef enum {	//focus types
 	focusSpellHaste = 1,				//@Fc, SPA: 127, SE_IncreaseSpellHaste,				On Caster, cast time mod pct, base: pct
 	focusSpellDuration,					//@Fc, SPA: 128, SE_IncreaseSpellDuration,			On Caster, spell duration mod pct, base: pct
-	focusRange,							//@Fc, SPA: 129, SE_IncreaseRange,					On Caster, spell range mod pct, base: pct	
-	focusReagentCost,					//@Fc, SPA: 131, SE_ReduceReagentCost,				On Caster, do not consume reagent pct chance, base: min pct, limit: max pct  
+	focusRange,							//@Fc, SPA: 129, SE_IncreaseRange,					On Caster, spell range mod pct, base: pct
+	focusReagentCost,					//@Fc, SPA: 131, SE_ReduceReagentCost,				On Caster, do not consume reagent pct chance, base: min pct, limit: max pct
 	focusManaCost,						//@Fc, SPA: 132, SE_ReduceManaCost,					On Caster, reduce mana cost by pct, base: min pct, limt: max pct
 	focusImprovedHeal,					//@Fc, SPA: 125, SE_ImprovedHeal,					On Caster, spell healing mod pct, base: min pct, limit: max pct
 	focusImprovedDamage,				//@Fc, SPA: 124, SE_ImprovedDamage,					On Caster, spell damage mod pct, base: min pct, limit: max pct
@@ -122,7 +122,7 @@ typedef enum {	//focus types
 	focusPetPower,						//@Fc, SPA: 167, SE_PetPowerIncrease,				On Caster, pet power mod, base: value
 	focusResistRate,					//@Fc, SPA: 126, SE_SpellResistReduction,			On Caster, casted spell resist mod pct, base: min pct, limit: max pct
 	focusSpellHateMod,					//@Fc, SPA: 130, SE_SpellHateMod,					On Caster, spell hate mod pct, base: min pct, limit: max pct
-	focusTriggerOnCast,					//@Fc, SPA: 339, SE_TriggerOnCast,					On Caster, cast on spell use, base: chance pct limit: spellid			
+	focusTriggerOnCast,					//@Fc, SPA: 339, SE_TriggerOnCast,					On Caster, cast on spell use, base: chance pct limit: spellid
 	focusSpellVulnerability,			//@Fc, SPA: 296, SE_FcSpellVulnerability,			On Target, spell damage taken mod pct, base: min pct, limit: max pct
 	focusFcSpellDamagePctIncomingPC,	//@Fc, SPA: 483, SE_Fc_Spell_Damage_Pct_IncomingPC, On Target, spell damage taken mod pct, base: min pct, limit: max pct
 	focusTwincast,						//@Fc, SPA: 399, SE_FcTwincast,						On Caster, chance cast spell twice, base: chance pct
@@ -136,7 +136,7 @@ typedef enum {	//focus types
 	focusBlockNextSpell,				//@Fc, SPA: 335, SE_BlockNextSpellFocus,			On Caster, chance to block next spell, base: chance
 	focusFcHealPctIncoming,				//@Fc, SPA: 393, SE_FcHealPctIncoming,   			On Target, heal received mod pct, base: pct
 	focusFcDamageAmtIncoming,			//@Fc, SPA: 297, SE_FcDamageAmtIncoming,			On Target, damage taken flat amt, base: amt
-	focusFcSpellDamageAmtIncomingPC,	//@Fc, SPA: 484, SE_Fc_Spell_Damage_Amt_IncomingPC,	On Target, damage taken flat amt, base: amt	
+	focusFcSpellDamageAmtIncomingPC,	//@Fc, SPA: 484, SE_Fc_Spell_Damage_Amt_IncomingPC,	On Target, damage taken flat amt, base: amt
 	focusFcCastSpellOnLand,				//@Fc, SPA: 481, SE_Fc_Cast_Spell_On_Land,			On Target, cast spell if hit by spell, base: chance pct, limit: spellid
 	focusFcHealAmtIncoming,				//@Fc, SPA: 394, SE_FcHealAmtIncoming,				On Target, heal received mod flat amt, base: amt
 	focusFcBaseEffects,					//@Fc, SPA: 413, SE_FcBaseEffects,					On Caster, base spell effectiveness mod pct, base: pct
@@ -338,12 +338,12 @@ struct Buffs_Struct {
 
 struct StatBonuses {
 	int32	AC;
-	int32	HP;
-	int32	HPRegen;
-	int32	MaxHP;
-	int32	ManaRegen;
-	int32	EnduranceRegen;
-	int32	Mana;
+	int64	HP;
+	int64	HPRegen;
+	int64	MaxHP;
+	int64	ManaRegen;
+	int64	EnduranceRegen;
+	int64	Mana;
 	int32	Endurance;
 	int32	ATK;
 	//would it be worth it to create a Stat_Struct?
@@ -414,7 +414,7 @@ struct StatBonuses {
 	uint32	stringedMod;
 	uint32	songModCap;
 	int8	hatemod;
-	int32	EnduranceReduction;
+	int64	EnduranceReduction;
 
 	int32	StrikeThrough;						// PoP: Strike Through %
 	int32	MeleeMitigation;					//i = Shielding
@@ -695,10 +695,10 @@ namespace SBIndex {
 	constexpr uint16 REFLECT_CHANCE                         = 0; // SPA 158
 	constexpr uint16 REFLECT_RESISTANCE_MOD                 = 1; // SPA 158
 	constexpr uint16 REFLECT_DMG_EFFECTIVENESS              = 2; // SPA 158
-	constexpr uint16 COMBAT_PROC_ORIGIN_ID                  = 0; // SPA 
-	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA 
-	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA 
-	constexpr uint16 COMBAT_PROC_REUSE_TIMER                = 3; // SPA 
+	constexpr uint16 COMBAT_PROC_ORIGIN_ID                  = 0; // SPA
+	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA
+	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA
+	constexpr uint16 COMBAT_PROC_REUSE_TIMER                = 3; // SPA
 };
 
 

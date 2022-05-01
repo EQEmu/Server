@@ -112,8 +112,8 @@ public:
 	Mob(
 		const char *in_name,
 		const char *in_lastname,
-		int32 in_cur_hp,
-		int32 in_max_hp,
+		int64 in_cur_hp,
+		int64 in_max_hp,
 		uint8 in_gender,
 		uint16 in_race,
 		uint8 in_class,
@@ -152,8 +152,8 @@ public:
 		uint16 in_see_invis_undead, // see through invis vs. undead
 		uint8 in_see_hide,
 		uint8 in_see_improved_hide,
-		int32 in_hp_regen,
-		int32 in_mana_regen,
+		int64 in_hp_regen,
+		int64 in_mana_regen,
 		uint8 in_qglobal,
 		uint8 in_maxlevel,
 		uint32 in_scalerate,
@@ -599,20 +599,20 @@ public:
 	inline virtual int32 GetMaxCR() const { return 255; }
 	inline virtual int32 GetMaxFR() const { return 255; }
 	inline virtual int32 GetDelayDeath() const { return 0; }
-	inline int32 GetHP() const { return current_hp; }
-	inline int32 GetMaxHP() const { return max_hp; }
-	virtual int32 CalcMaxHP();
-	inline int32 GetMaxMana() const { return max_mana; }
-	inline int32 GetMana() const { return current_mana; }
-	virtual int32 GetEndurance() const { return 0; }
-	virtual int32 GetMaxEndurance() const { return 0; }
+	inline int64 GetHP() const { return current_hp; }
+	inline int64 GetMaxHP() const { return max_hp; }
+	virtual int64 CalcMaxHP();
+	inline int64 GetMaxMana() const { return max_mana; }
+	inline int64 GetMana() const { return current_mana; }
+	virtual int64 GetEndurance() const { return 0; }
+	virtual int64 GetMaxEndurance() const { return 0; }
 	virtual void SetEndurance(int32 newEnd) { return; }
-	int32 GetItemHPBonuses();
+	int64 GetItemHPBonuses();
 	int32 GetSpellHPBonuses();
-	virtual const int32& SetMana(int32 amount);
+	virtual const int64& SetMana(int64 amount);
 	inline float GetManaRatio() const { return max_mana == 0 ? 100 :
 		((static_cast<float>(current_mana) / max_mana) * 100); }
-	virtual int32 CalcMaxMana();
+	virtual int64 CalcMaxMana();
 	uint32 GetNPCTypeID() const { return npctype_id; }
 	void SetNPCTypeID(uint32 npctypeid) { npctype_id = npctypeid; }
 	inline const glm::vec4& GetPosition() const { return m_Position; }
@@ -1329,8 +1329,8 @@ public:
 	int GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint32 *hate = nullptr);
 
-	int32 GetHPRegen() const;
-	int32 GetManaRegen() const;
+	int64 GetHPRegen() const;
+	int64 GetManaRegen() const;
 
 	bool CanOpenDoors() const;
 	void SetCanOpenDoors(bool can_open);
@@ -1422,12 +1422,12 @@ protected:
 	int targeted;
 	bool findable;
 	bool trackable;
-	int32 current_hp;
-	int32 max_hp;
-	int32 base_hp;
-	int32 current_mana;
-	int32 max_mana;
-	int32 hp_regen;
+	int64 current_hp;
+	int64 max_hp;
+	int64 base_hp;
+	int64 current_mana;
+	int64 max_mana;
+	int64 hp_regen;
 	int64 hp_regen_per_second;
 	int32 mana_regen;
 	int32 ooc_regen;

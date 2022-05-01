@@ -1840,7 +1840,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 	safe_delete(outapp);
 }
 
-const int32& Client::SetMana(int32 amount) {
+const int64& Client::SetMana(int64 amount) {
 	bool update = false;
 	if (amount < 0)
 		amount = 0;

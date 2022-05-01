@@ -225,7 +225,7 @@ public:
 	inline void	SetPlatinum(uint32 amt)		{ platinum = amt; }
 
 
-	virtual int32 CalcMaxMana();
+	virtual int64 CalcMaxMana();
 	void SetGrid(int32 grid_){ grid=grid_; }
 	void SetSpawnGroupId(uint32 sg2){ spawn_group_id =sg2; }
 	void SetWaypointMax(uint16 wp_){ wp_m=wp_; }

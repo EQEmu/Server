@@ -2469,7 +2469,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		return;
 	}
 	else if (id == "max_hp") {
-		base_hp = atoi(val.c_str());
+		base_hp = std::stoull(val.c_str());
 
 		CalcMaxHP();
 		if (current_hp > max_hp) {
@@ -2843,13 +2843,13 @@ void NPC::LevelScale() {
 		} else {
 			uint8 scale_adjust = 1;
 
-			base_hp += (int)(base_hp * scaling);
-			max_hp += (int)(max_hp * scaling);
+			base_hp += (int64)(base_hp * scaling);
+			max_hp += (int64)(max_hp * scaling);
 			current_hp = max_hp;
 
 			if (max_dmg) {
-				max_dmg += (int)(max_dmg * scaling / scale_adjust);
-				min_dmg += (int)(min_dmg * scaling / scale_adjust);
+				max_dmg += (int64)(max_dmg * scaling / scale_adjust);
+				min_dmg += (int64)(min_dmg * scaling / scale_adjust);
 			}
 
 			STR += (int)(STR * scaling / scale_adjust);
@@ -2884,8 +2884,8 @@ void NPC::LevelScale() {
 
 		AC += (int)(AC * scaling);
 		ATK += (int)(ATK * scaling);
-		base_hp += (int)(base_hp * scaling);
-		max_hp += (int)(max_hp * scaling);
+		base_hp += (int64)(base_hp * scaling);
+		max_hp += (int64)(max_hp * scaling);
 		current_hp = max_hp;
 		STR += (int)(STR * scaling / scale_adjust);
 		STA += (int)(STA * scaling / scale_adjust);
@@ -2907,8 +2907,8 @@ void NPC::LevelScale() {
 
 		if (max_dmg)
 		{
-			max_dmg += (int)(max_dmg * scaling / scale_adjust);
-			min_dmg += (int)(min_dmg * scaling / scale_adjust);
+			max_dmg += (int64)(max_dmg * scaling / scale_adjust);
+			min_dmg += (int64)(min_dmg * scaling / scale_adjust);
 		}
 
 	}
@@ -2965,7 +2965,7 @@ void NPC::SetSwarmTarget(int target_id)
 	return;
 }
 
-int32 NPC::CalcMaxMana()
+int64 NPC::CalcMaxMana()
 {
 	if (npc_mana == 0) {
 		switch (GetCasterClass()) {

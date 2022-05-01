@@ -6814,7 +6814,7 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 	return Result;
 }
 
-int32 Bot::CalcMaxMana() {
+int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
 		case 'W': {
@@ -7762,16 +7762,16 @@ void Bot::CalcBonuses() {
 	end_regen = CalcEnduranceRegen();
 }
 
-int32 Bot::CalcHPRegenCap(){
+int64 Bot::CalcHPRegenCap(){
 	int level = GetLevel();
-	int32 hpregen_cap = 0;
+	int64 hpregen_cap = 0;
 	hpregen_cap = (RuleI(Character, ItemHealthRegenCap) + itembonuses.HeroicSTA / 25);
 	hpregen_cap += (aabonuses.ItemHPRegenCap + spellbonuses.ItemHPRegenCap + itembonuses.ItemHPRegenCap);
 	return (hpregen_cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
-int32 Bot::CalcManaRegenCap(){
-	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
+int64 Bot::CalcManaRegenCap(){
+	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass()) {
 		case 'I':
 			cap += (itembonuses.HeroicINT / 25);
@@ -8167,14 +8167,14 @@ int32 Bot::LevelRegen() {
 	return hp;
 }
 
-int32 Bot::CalcHPRegen() {
+int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
 	return regen;
 }
 
-int32 Bot::CalcManaRegen() {
+int64 Bot::CalcManaRegen() {
 	uint8 level = GetLevel();
 	uint8 botclass = GetClass();
 	int32 regen = 0;
@@ -8205,7 +8205,7 @@ int32 Bot::CalcManaRegen() {
 	return regen;
 }
 
-uint32 Bot::GetClassHPFactor() {
+uint64 Bot::GetClassHPFactor() {
 	uint32 factor;
 	switch(GetClass()) {
 		case BEASTLORD:
@@ -8236,7 +8236,7 @@ uint32 Bot::GetClassHPFactor() {
 	return factor;
 }
 
-int32 Bot::CalcMaxHP() {
+int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
@@ -8276,7 +8276,7 @@ int32 Bot::CalcMaxEndurance() {
 	return max_end;
 }
 
-int32 Bot::CalcBaseEndurance() {
+int64 Bot::CalcBaseEndurance() {
 	int32 base_end = 0;
 	int32 base_endurance = 0;
 	int32 ConvertedStats = 0;
@@ -8331,13 +8331,13 @@ int32 Bot::CalcBaseEndurance() {
 	return base_end;
 }
 
-int32 Bot::CalcEnduranceRegen() {
+int64 Bot::CalcEnduranceRegen() {
 	int32 regen = (int32(GetLevel() * 4 / 10) + 2);
 	regen += (spellbonuses.EnduranceRegen + itembonuses.EnduranceRegen);
 	return (regen * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
-int32 Bot::CalcEnduranceRegenCap() {
+int64 Bot::CalcEnduranceRegenCap() {
 	int cap = (RuleI(Character, ItemEnduranceRegenCap) + itembonuses.HeroicSTR / 25 + itembonuses.HeroicDEX / 25 + itembonuses.HeroicAGI / 25 + itembonuses.HeroicSTA / 25);
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }

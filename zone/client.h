@@ -427,10 +427,10 @@ public:
 	inline const float GetBindHeading(uint32 index = 0) const { return m_pp.binds[index].heading; }
 	inline uint32 GetBindZoneID(uint32 index = 0) const { return m_pp.binds[index].zone_id; }
 	inline uint32 GetBindInstanceID(uint32 index = 0) const { return m_pp.binds[index].instance_id; }
-	int32 CalcMaxMana();
-	int32 CalcBaseMana();
-	const int32& SetMana(int32 amount);
-	int32 CalcManaRegenCap();
+	int64 CalcMaxMana();
+	int64 CalcBaseMana();
+	const int64& SetMana(int64 amount);
+	int64 CalcManaRegenCap();
 
 	// guild pool regen shit. Sends a SpawnAppearance with a value that regens to value * 0.001
 	void EnableAreaHPRegen(int value);
@@ -576,12 +576,12 @@ public:
 
 	/*Endurance and such*/
 	void CalcMaxEndurance(); //This calculates the maximum endurance we can have
-	int32 CalcBaseEndurance(); //Calculates Base End
-	int32 CalcEnduranceRegen(bool bCombat = false); //Calculates endurance regen used in DoEnduranceRegen()
-	int32 GetEndurance() const {return current_endurance;} //This gets our current endurance
-	int32 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
-	int32 CalcEnduranceRegenCap();
-	int32 CalcHPRegenCap();
+	int64 CalcBaseEndurance(); //Calculates Base End
+	int64 CalcEnduranceRegen(bool bCombat = false); //Calculates endurance regen used in DoEnduranceRegen()
+	int64 GetEndurance() const {return current_endurance;} //This gets our current endurance
+	int64 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
+	int64 CalcEnduranceRegenCap();
+	int64 CalcHPRegenCap();
 	inline uint8 GetEndurancePercent() { return (uint8)((float)current_endurance / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd); //This sets the current endurance to the new value
 	void DoEnduranceRegen(); //This Regenerates endurance
@@ -1025,7 +1025,7 @@ public:
 
 	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
 	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
-	
+
 	void ResetCastbarCooldownBySlot(int slot);
 	void ResetAllCastbarCooldowns();
 	void ResetCastbarCooldownBySpellID(uint32 spell_id);
@@ -1728,12 +1728,12 @@ private:
 	int32 CalcPR();
 	int32 CalcCR();
 	int32 CalcCorrup();
-	int32 CalcMaxHP();
-	int32 CalcBaseHP();
-	int32 CalcHPRegen(bool bCombat = false);
-	int32 CalcManaRegen(bool bCombat = false);
-	int32 CalcBaseManaRegen();
-	uint32 GetClassHPFactor();
+	int64 CalcMaxHP();
+	int64 CalcBaseHP();
+	int64 CalcHPRegen(bool bCombat = false);
+	int64 CalcManaRegen(bool bCombat = false);
+	int64 CalcBaseManaRegen();
+	uint64 GetClassHPFactor();
 	void DoHPRegen();
 	void DoManaRegen();
 	void DoStaminaHungerUpdate();
@@ -1894,7 +1894,7 @@ private:
 	Timer pick_lock_timer;
 
 	Timer heroforge_wearchange_timer;
-	
+
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
 

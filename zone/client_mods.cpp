@@ -233,7 +233,7 @@ int32 Client::LevelRegen()
 	return hp;
 }
 
-int32 Client::CalcHPRegen(bool bCombat)
+int64 Client::CalcHPRegen(bool bCombat)
 {
 	int item_regen = itembonuses.HPRegen; // worn spells and +regen, already capped
 	item_regen += GetHeroicSTA() / 20;
@@ -301,7 +301,7 @@ int32 Client::CalcHPRegen(bool bCombat)
 	return (regen * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
-int32 Client::CalcHPRegenCap()
+int64 Client::CalcHPRegenCap()
 {
 	int cap = RuleI(Character, ItemHealthRegenCap);
 	if (GetLevel() > 60)
@@ -312,7 +312,7 @@ int32 Client::CalcHPRegenCap()
 	return (cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
-int32 Client::CalcMaxHP()
+int64 Client::CalcMaxHP()
 {
 	float nd = 10000;
 	max_hp = (CalcBaseHP() + itembonuses.HP);
@@ -328,11 +328,10 @@ int32 Client::CalcMaxHP()
 	if (current_hp > max_hp) {
 		current_hp = max_hp;
 	}
-	int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
+	int64 hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if (hp_perc_cap) {
-		int curHP_cap = (max_hp * hp_perc_cap) / 100;
+		int64 curHP_cap = (max_hp * hp_perc_cap) / 100;
 		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
-
 			current_hp = curHP_cap;
 		}
 	}
@@ -477,7 +476,7 @@ uint32 Mob::GetClassLevelFactor()
 	return multiplier;
 }
 
-int32 Client::CalcBaseHP()
+int64 Client::CalcBaseHP()
 {
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int stats = GetSTA();
@@ -507,7 +506,7 @@ int32 Client::CalcBaseHP()
 }
 
 // This is for calculating Base HPs + STA bonus for SoD or later clients.
-uint32 Client::GetClassHPFactor()
+uint64 Client::GetClassHPFactor()
 {
 	int factor;
 	// Note: Base HP factor under level 41 is equal to factor / 12, and from level 41 to 80 is factor / 6.
@@ -564,7 +563,7 @@ int32 Client::GetRawItemAC()
 	return Total;
 }
 
-int32 Client::CalcMaxMana()
+int64 Client::CalcMaxMana()
 {
 	switch (GetCasterClass()) {
 		case 'I':
@@ -599,7 +598,7 @@ int32 Client::CalcMaxMana()
 	return max_mana;
 }
 
-int32 Client::CalcBaseMana()
+int64 Client::CalcBaseMana()
 {
 	int ConvertedWisInt = 0;
 	int MindLesserFactor, MindFactor;
@@ -688,7 +687,7 @@ int32 Client::CalcBaseMana()
 	return max_m;
 }
 
-int32 Client::CalcBaseManaRegen()
+int64 Client::CalcBaseManaRegen()
 {
 	uint8 clevel = GetLevel();
 	int32 regen = 0;
@@ -706,7 +705,7 @@ int32 Client::CalcBaseManaRegen()
 	return regen;
 }
 
-int32 Client::CalcManaRegen(bool bCombat)
+int64 Client::CalcManaRegen(bool bCombat)
 {
 	int regen = 0;
 	auto level = GetLevel();
@@ -776,9 +775,9 @@ int32 Client::CalcManaRegen(bool bCombat)
 	return (regen * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
-int32 Client::CalcManaRegenCap()
+int64 Client::CalcManaRegenCap()
 {
-	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap + itembonuses.ItemManaRegenCap + spellbonuses.ItemManaRegenCap;
+	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap + itembonuses.ItemManaRegenCap + spellbonuses.ItemManaRegenCap;
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
@@ -1522,7 +1521,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	if (casting_spell_aa_id) {
 		return 10;
 	}
-		
+
 	uint32 effectmod = 10;
 	int effectmodcap = 0;
 	if (RuleB(Character, UseSpellFileSongCap)) {
@@ -1682,9 +1681,9 @@ void Client::CalcMaxEndurance()
 	}
 }
 
-int32 Client::CalcBaseEndurance()
+int64 Client::CalcBaseEndurance()
 {
-	int32 base_end = 0;
+	int64 base_end = 0;
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
 		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
@@ -1719,7 +1718,7 @@ int32 Client::CalcBaseEndurance()
 				HalfBonus800plus = int( (Stats - 800) / 16 );
 			}
 		}
-		int bonus_sum = BonusUpto800 + Bonus400to800 + HalfBonus400to800 + Bonus800plus + HalfBonus800plus;
+		int64 bonus_sum = BonusUpto800 + Bonus400to800 + HalfBonus400to800 + Bonus800plus + HalfBonus800plus;
 		base_end = LevelBase;
 		//take all of the sums from above, then multiply by level*0.075
 		base_end += ( bonus_sum * 3 * GetLevel() ) / 40;
@@ -1727,7 +1726,7 @@ int32 Client::CalcBaseEndurance()
 	return base_end;
 }
 
-int32 Client::CalcEnduranceRegen(bool bCombat)
+int64 Client::CalcEnduranceRegen(bool bCombat)
 {
 	int base = 0;
 	if (!IsStarved()) {
@@ -1808,9 +1807,9 @@ int32 Client::CalcEnduranceRegen(bool bCombat)
 	return (regen * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
-int32 Client::CalcEnduranceRegenCap()
+int64 Client::CalcEnduranceRegenCap()
 {
-	int cap = RuleI(Character, ItemEnduranceRegenCap) + aabonuses.ItemEnduranceRegenCap + itembonuses.ItemEnduranceRegenCap + spellbonuses.ItemEnduranceRegenCap;
+	int64 cap = RuleI(Character, ItemEnduranceRegenCap) + aabonuses.ItemEnduranceRegenCap + itembonuses.ItemEnduranceRegenCap + spellbonuses.ItemEnduranceRegenCap;
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
