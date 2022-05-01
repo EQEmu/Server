@@ -839,7 +839,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	LogCombat("Ranged attack hit [{}]", other->GetName());
 
-	uint32 hate = 0;
+	uint64 hate = 0;
 	int TotalDmg = 0;
 	int WDmg = 0;
 	int ADmg = 0;
