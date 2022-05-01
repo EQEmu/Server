@@ -287,7 +287,6 @@ SET(zone_headers
     zone_store.h
 )
 
-
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)

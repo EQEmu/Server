@@ -1100,17 +1100,17 @@ int Lua_Client::GetCharacterFactionLevel(int faction_id) {
 	return self->GetCharacterFactionLevel(faction_id);
 }
 
-void Lua_Client::SetZoneFlag(int zone_id) {
+void Lua_Client::SetZoneFlag(uint32 zone_id) {
 	Lua_Safe_Call_Void();
 	self->SetZoneFlag(zone_id);
 }
 
-void Lua_Client::ClearZoneFlag(int zone_id) {
+void Lua_Client::ClearZoneFlag(uint32 zone_id) {
 	Lua_Safe_Call_Void();
 	self->ClearZoneFlag(zone_id);
 }
 
-bool Lua_Client::HasZoneFlag(int zone_id) {
+bool Lua_Client::HasZoneFlag(uint32 zone_id) {
 	Lua_Safe_Call_Bool();
 	return self->HasZoneFlag(zone_id);
 }
@@ -2446,6 +2446,36 @@ bool Lua_Client::TakePlatinum(uint32 platinum, bool update_client) {
 	return self->TakePlatinum(platinum, update_client);
 }
 
+void Lua_Client::LoadZoneFlags() {
+	Lua_Safe_Call_Void();
+	self->LoadZoneFlags();
+}
+
+void Lua_Client::ClearPEQZoneFlag(uint32 zone_id) {
+	Lua_Safe_Call_Void();
+	self->ClearPEQZoneFlag(zone_id);
+}
+
+bool Lua_Client::HasPEQZoneFlag(uint32 zone_id) {
+	Lua_Safe_Call_Bool();
+	return self->HasPEQZoneFlag(zone_id);
+}
+
+void Lua_Client::LoadPEQZoneFlags() {
+	Lua_Safe_Call_Void();
+	self->LoadPEQZoneFlags();
+}
+
+void Lua_Client::SendPEQZoneFlagInfo(Lua_Client to) {
+	Lua_Safe_Call_Void();
+	self->SendPEQZoneFlagInfo(to);
+}
+
+void Lua_Client::SetPEQZoneFlag(uint32 zone_id) {
+	Lua_Safe_Call_Void();
+	self->SetPEQZoneFlag(zone_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2489,7 +2519,8 @@ luabind::scope lua_register_client() {
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckSpecializeIncrease", (void(Lua_Client::*)(int))&Lua_Client::CheckSpecializeIncrease)
 	.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
-	.def("ClearZoneFlag", (void(Lua_Client::*)(int))&Lua_Client::ClearZoneFlag)
+	.def("ClearPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearPEQZoneFlag)
+	.def("ClearZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearZoneFlag)
 	.def("Connected", (bool(Lua_Client::*)(void))&Lua_Client::Connected)
 	.def("CountAugmentEquippedByID", (int(Lua_Client::*)(uint32))&Lua_Client::CountAugmentEquippedByID)
 	.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
@@ -2646,9 +2677,10 @@ luabind::scope lua_register_client() {
 	.def("HasDisciplineLearned", (bool(Lua_Client::*)(uint16))&Lua_Client::HasDisciplineLearned)
 	.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
 	.def("HasItemEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemEquippedByID)
+	.def("HasPEQZoneFlag", (bool(Lua_Client::*)(uint32))&Lua_Client::HasPEQZoneFlag)
 	.def("HasSkill", (bool(Lua_Client::*)(int))&Lua_Client::HasSkill)
 	.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
-	.def("HasZoneFlag", (bool(Lua_Client::*)(int))&Lua_Client::HasZoneFlag)
+	.def("HasZoneFlag", (bool(Lua_Client::*)(uint32))&Lua_Client::HasZoneFlag)
 	.def("Hungry", (bool(Lua_Client::*)(void))&Lua_Client::Hungry)
 	.def("InZone", (bool(Lua_Client::*)(void))&Lua_Client::InZone)
 	.def("IncStats", (void(Lua_Client::*)(int,int))&Lua_Client::IncStats)
@@ -2675,6 +2707,8 @@ luabind::scope lua_register_client() {
 	.def("LearnDisciplines", (uint16(Lua_Client::*)(uint8,uint8))&Lua_Client::LearnDisciplines)
 	.def("LearnRecipe", (void(Lua_Client::*)(uint32))&Lua_Client::LearnRecipe)
 	.def("LeaveGroup", (void(Lua_Client::*)(void))&Lua_Client::LeaveGroup)
+	.def("LoadPEQZoneFlags", (void(Lua_Client::*)(void))&Lua_Client::LoadPEQZoneFlags)
+	.def("LoadZoneFlags", (void(Lua_Client::*)(void))&Lua_Client::LoadZoneFlags)
 	.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float))&Lua_Client::MarkSingleCompassLoc)
 	.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float,int))&Lua_Client::MarkSingleCompassLoc)
 	.def("MaxSkill", (int(Lua_Client::*)(int))&Lua_Client::MaxSkill)
@@ -2749,6 +2783,7 @@ luabind::scope lua_register_client() {
 	.def("SendItemScale", (void(Lua_Client::*)(Lua_ItemInst))&Lua_Client::SendItemScale)
 	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("SendOPTranslocateConfirm", (void(Lua_Client::*)(Lua_Mob,int))&Lua_Client::SendOPTranslocateConfirm)
+	.def("SendPEQZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendPEQZoneFlagInfo)
 	.def("SendSound", (void(Lua_Client::*)(void))&Lua_Client::SendSound)
 	.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
 	.def("SendToInstance", (void(Lua_Client::*)(std::string,std::string,uint32,float,float,float,float,std::string,uint32))&Lua_Client::SendToInstance)
@@ -2795,6 +2830,7 @@ luabind::scope lua_register_client() {
 	.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption)
 	.def("SetLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::SetLanguageSkill)
 	.def("SetMaterial", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetMaterial)
+	.def("SetPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetPEQZoneFlag)
 	.def("SetPVP", (void(Lua_Client::*)(bool))&Lua_Client::SetPVP)
 	.def("SetPrimaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetPrimaryWeaponOrnamentation)
 	.def("SetRadiantCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::SetRadiantCrystals)
@@ -2809,7 +2845,7 @@ luabind::scope lua_register_client() {
 	.def("SetThirst", (void(Lua_Client::*)(int))&Lua_Client::SetThirst)
 	.def("SetTint", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetTint)
 	.def("SetTitleSuffix", (void(Lua_Client::*)(const char *))&Lua_Client::SetTitleSuffix)
-	.def("SetZoneFlag", (void(Lua_Client::*)(int))&Lua_Client::SetZoneFlag)
+	.def("SetZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetZoneFlag)
 	.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 	.def("Sit", (void(Lua_Client::*)(void))&Lua_Client::Sit)
 	.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)

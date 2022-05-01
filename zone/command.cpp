@@ -184,7 +184,7 @@ int command_init(void)
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", AccountStatus::QuestTroupe, command_fixmob) ||
 		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", AccountStatus::Player, command_flag) ||
 		command_add("flagedit", "- Edit zone flags on your target. Use #flagedit help for more info.", AccountStatus::GMAdmin, command_flagedit) ||
-		command_add("flags", "- displays the flags of you or your target", AccountStatus::Player, command_flags) ||
+		command_add("flags", "- displays the Zone Flags of you or your target", AccountStatus::Player, command_flags) ||
 		command_add("flymode", "[0/1/2/3/4/5] - Set your or your player target's flymode to ground/flying/levitate/water/floating/levitate_running", AccountStatus::Guide, command_flymode) ||
 		command_add("fov", "- Check wether you're behind or in your target's field of view", AccountStatus::QuestTroupe, command_fov) ||
 		command_add("freeze", "- Freeze your target", AccountStatus::QuestTroupe, command_freeze) ||
@@ -276,6 +276,7 @@ int command_init(void)
 		command_add("path", "- view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
 		command_add("peqzone", "[Zone ID|Zone Short Name] - Teleports you to the specified zone if you meet the requirements.", AccountStatus::Player, command_peqzone) ||
+		command_add("peqzone_flags", "- displays the PEQZone Flags of you or your target", AccountStatus::Player, command_peqzone_flags) ||
 		command_add("permaclass", "[Class ID] - Change your or your player target's class, changed client is disconnected", AccountStatus::QuestTroupe, command_permaclass) ||
 		command_add("permagender", "[Gender ID] - Change your or your player target's gender", AccountStatus::QuestTroupe, command_permagender) ||
 		command_add("permarace", "[Race ID] - Change your or your player target's race", AccountStatus::QuestTroupe, command_permarace) ||
@@ -1331,6 +1332,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/path.cpp"
 #include "gm_commands/peekinv.cpp"
 #include "gm_commands/peqzone.cpp"
+#include "gm_commands/peqzone_flags.cpp"
 #include "gm_commands/permaclass.cpp"
 #include "gm_commands/permagender.cpp"
 #include "gm_commands/permarace.cpp"
