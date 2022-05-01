@@ -96,11 +96,13 @@ Mob::Mob(
 	uint8 in_legtexture,
 	uint8 in_feettexture,
 	uint16 in_usemodel,
-	bool in_always_aggro
+	bool in_always_aggro,
+	int64 in_hp_regen_per_second
 ) :
 	attack_timer(2000),
 	attack_dw_timer(2000),
 	ranged_timer(2000),
+	hp_regen_per_second_timer(1000),
 	tic_timer(6000),
 	mana_timer(2000),
 	spellend_timer(0),
@@ -249,37 +251,38 @@ Mob::Mob(
 		aa_title = 0xFF;
 	}
 
-	AC                = in_ac;
-	ATK               = in_atk;
-	STR               = in_str;
-	STA               = in_sta;
-	DEX               = in_dex;
-	AGI               = in_agi;
-	INT               = in_int;
-	WIS               = in_wis;
-	CHA               = in_cha;
-	MR                = CR = FR = DR = PR = Corrup = PhR = 0;
-	ExtraHaste        = 0;
-	bEnraged          = false;
-	current_mana      = 0;
-	max_mana          = 0;
-	hp_regen          = in_hp_regen;
-	mana_regen        = in_mana_regen;
-	ooc_regen         = RuleI(NPC, OOCRegen); //default Out of Combat Regen
-	maxlevel          = in_maxlevel;
-	scalerate         = in_scalerate;
-	invisible         = 0;
-	invisible_undead  = 0;
-	invisible_animals = 0;
-	sneaking          = false;
-	hidden            = false;
-	improved_hidden   = false;
-	invulnerable      = false;
-	IsFullHP          = (current_hp == max_hp);
-	qglobal           = 0;
-	spawned           = false;
-	rare_spawn        = false;
-	always_aggro      = in_always_aggro;
+	AC                  = in_ac;
+	ATK                 = in_atk;
+	STR                 = in_str;
+	STA                 = in_sta;
+	DEX                 = in_dex;
+	AGI                 = in_agi;
+	INT                 = in_int;
+	WIS                 = in_wis;
+	CHA                 = in_cha;
+	MR                  = CR = FR = DR = PR = Corrup = PhR = 0;
+	ExtraHaste          = 0;
+	bEnraged            = false;
+	current_mana        = 0;
+	max_mana            = 0;
+	hp_regen            = in_hp_regen;
+	hp_regen_per_second = in_hp_regen_per_second;
+	mana_regen          = in_mana_regen;
+	ooc_regen           = RuleI(NPC, OOCRegen); //default Out of Combat Regen
+	maxlevel            = in_maxlevel;
+	scalerate           = in_scalerate;
+	invisible           = 0;
+	invisible_undead    = 0;
+	invisible_animals   = 0;
+	sneaking            = false;
+	hidden              = false;
+	improved_hidden     = false;
+	invulnerable        = false;
+	IsFullHP            = (current_hp == max_hp);
+	qglobal             = 0;
+	spawned             = false;
+	rare_spawn          = false;
+	always_aggro        = in_always_aggro;
 
 	InitializeBuffSlots();
 

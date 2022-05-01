@@ -114,7 +114,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	npc_type_data->legtexture,
 	npc_type_data->feettexture,
 	npc_type_data->use_model,
-	npc_type_data->always_aggro
+	npc_type_data->always_aggro,
+	npc_type_data->hp_regen_per_second
 ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
@@ -867,6 +868,12 @@ bool NPC::Process()
 			LogAIScanCloseDetail("NPC [{}] Restarting with idle timer", GetCleanName());
 			mob_close_scan_timer.Disable();
 			mob_close_scan_timer.Start(npc_mob_close_scan_timer_idle);
+		}
+	}
+
+	if (hp_regen_per_second > 0 && hp_regen_per_second_timer.Check()) {
+		if (GetHP() < GetMaxHP()) {
+			SetHP(GetHP() + hp_regen_per_second);
 		}
 	}
 
@@ -2594,6 +2601,10 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		hp_regen = atoi(val.c_str());
 		return;
 	}
+	else if (id == "hp_regen_per_second") {
+		hp_regen_per_second = strtoll(val.c_str(), nullptr, 10);
+		return;
+	}
 	else if (id == "mana_regen") {
 		mana_regen = atoi(val.c_str());
 		return;
@@ -2740,6 +2751,9 @@ float NPC::GetNPCStat(const char *identifier)
 	}
 	else if (id == "hp_regen") {
 		return hp_regen;
+	}
+	else if (id == "hp_regen_per_second") {
+		return hp_regen_per_second;
 	}
 	else if (id == "mana_regen") {
 		return mana_regen;

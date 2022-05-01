@@ -2476,7 +2476,9 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.model, "
 		"npc_types.flymode, "
 		"npc_types.always_aggro, "
-		"npc_types.exp_mod "
+		"npc_types.exp_mod, "
+		"npc_types.hp_regen_per_second "
+
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2542,14 +2544,14 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->d_melee_texture1      = atoi(row[38]);
 		temp_npctype_data->d_melee_texture2      = atoi(row[39]);
 		strn0cpy(temp_npctype_data->ammo_idfile, row[40], 30);
-		temp_npctype_data->prim_melee_type = atoi(row[41]);
-		temp_npctype_data->sec_melee_type  = atoi(row[42]);
-		temp_npctype_data->ranged_type     = atoi(row[43]);
-		temp_npctype_data->runspeed        = atof(row[44]);
-		temp_npctype_data->findable        = atoi(row[45]) == 0 ? false : true;
-		temp_npctype_data->trackable       = atoi(row[46]) == 0 ? false : true;
-		temp_npctype_data->hp_regen        = atoi(row[47]);
-		temp_npctype_data->mana_regen      = atoi(row[48]);
+		temp_npctype_data->prim_melee_type     = atoi(row[41]);
+		temp_npctype_data->sec_melee_type      = atoi(row[42]);
+		temp_npctype_data->ranged_type         = atoi(row[43]);
+		temp_npctype_data->runspeed            = atof(row[44]);
+		temp_npctype_data->findable            = atoi(row[45]) == 0 ? false : true;
+		temp_npctype_data->trackable           = atoi(row[46]) == 0 ? false : true;
+		temp_npctype_data->hp_regen            = atoi(row[47]);
+		temp_npctype_data->mana_regen          = atoi(row[48]);
 
 		// set default value for aggroradius
 		temp_npctype_data->aggroradius = (int32) atoi(row[49]);
@@ -2673,13 +2675,14 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->charm_avoidance_rating = atoi(row[105]);
 		temp_npctype_data->charm_atk              = atoi(row[106]);
 
-		temp_npctype_data->skip_global_loot 	= atoi(row[107]) != 0;
-		temp_npctype_data->rare_spawn       	= atoi(row[108]) != 0;
-		temp_npctype_data->stuck_behavior   	= atoi(row[109]);
-		temp_npctype_data->use_model        	= atoi(row[110]);
-		temp_npctype_data->flymode          	= atoi(row[111]);
-		temp_npctype_data->always_aggro	        = atoi(row[112]);
-		temp_npctype_data->exp_mod              = atoi(row[113]);
+		temp_npctype_data->skip_global_loot    = atoi(row[107]) != 0;
+		temp_npctype_data->rare_spawn          = atoi(row[108]) != 0;
+		temp_npctype_data->stuck_behavior      = atoi(row[109]);
+		temp_npctype_data->use_model           = atoi(row[110]);
+		temp_npctype_data->flymode             = atoi(row[111]);
+		temp_npctype_data->always_aggro        = atoi(row[112]);
+		temp_npctype_data->exp_mod             = atoi(row[113]);
+		temp_npctype_data->hp_regen_per_second = strtoll(row[114], nullptr, 10);
 
 		temp_npctype_data->skip_auto_scale = false; // hardcoded here for now
 
@@ -3588,7 +3591,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 				remaining_time_string = "Already Expired";
 			}
 		}
-		
+
 		client->Message(
 			Chat::White,
 			fmt::format("Instance {} | Zone: {} ({}){}",
@@ -3860,7 +3863,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
 				"`hp` = %u, `mana` = %u, `size` = %f, `taunting` = %u",
 				client->CharacterID(), pet, petinfo->Name, petinfo->petpower, petinfo->SpellID,
-				petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0, 
+				petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0,
 				// and now the ON DUPLICATE ENTRIES
 				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0);
 		results = database.QueryDatabase(query);
