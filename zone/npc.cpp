@@ -870,6 +870,12 @@ bool NPC::Process()
 		}
 	}
 
+	if (hp_regen_per_second > 0 && hp_regen_per_second_timer.Check()) {
+		if (GetHP() < GetMaxHP()) {
+			SetHP(GetHP() + hp_regen_per_second);
+		}
+	}
+
 	if (tic_timer.Check()) {
 		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		BuffProcess();
@@ -2392,9 +2398,9 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
-			else 
+			else
 			{
-				if (entity_list.GetNPCByID(GetOwnerID())) 
+				if (entity_list.GetNPCByID(GetOwnerID()))
 				{
 					SetPetOwnerNPC(true);
 				}
@@ -3666,7 +3672,7 @@ std::vector<int> NPC::GetLootList() {
 		if (std::find(npc_items.begin(), npc_items.end(), loot_item->item_id) != npc_items.end()) {
 			continue;
 		}
-		
+
 		npc_items.push_back(loot_item->item_id);
 	}
 	return npc_items;

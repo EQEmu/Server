@@ -101,6 +101,7 @@ Mob::Mob(
 	attack_timer(2000),
 	attack_dw_timer(2000),
 	ranged_timer(2000),
+	hp_regen_per_second_timer(1000),
 	tic_timer(6000),
 	mana_timer(2000),
 	spellend_timer(0),
@@ -603,7 +604,7 @@ void Mob::CalcInvisibleLevel()
 		SetInvisible(Invisibility::Invisible, true);
 		return;
 	}
-	
+
 	if (is_invisible && !invisible) {
 		SetInvisible(invisible, true);
 		return;
@@ -624,7 +625,7 @@ void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 	}
 	else {
 		/*
-			if your setting invisible from a script, or escape/fading memories effect then 
+			if your setting invisible from a script, or escape/fading memories effect then
 			we use the internal invis variable which allows invisible without a buff on mob.
 		*/
 		if (!set_on_bonus_calc) {
@@ -644,10 +645,10 @@ void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc)
 	}
 }
 
-void Mob::ZeroInvisibleVars(uint8 invisible_type) 
+void Mob::ZeroInvisibleVars(uint8 invisible_type)
 {
 	switch (invisible_type) {
-		
+
 		case T_INVISIBLE:
 			invisible = 0;
 			nobuff_invisible = 0;
@@ -1791,13 +1792,13 @@ void Mob::ShowStats(Client* client)
 				target_name,
 				(
 					!target_last_name.empty() ?
-					fmt::format(" ({})", target_last_name) : 
+					fmt::format(" ({})", target_last_name) :
 					""
 				),
 				target->GetLevel()
 			).c_str()
 		);
-		
+
 		// Race / Class / Gender
 		client->Message(
 			Chat::White,
@@ -1879,7 +1880,7 @@ void Mob::ShowStats(Client* client)
 				target->GetHairColor()
 			).c_str()
 		);
-		
+
 		// Beard
 		client->Message(
 			Chat::White,
@@ -1912,7 +1913,7 @@ void Mob::ShowStats(Client* client)
 				target->GetHelmTexture()
 			).c_str()
 		);
-		
+
 		if (
 			target->GetArmTexture() ||
 			target->GetBracerTexture() ||
@@ -1928,7 +1929,7 @@ void Mob::ShowStats(Client* client)
 				).c_str()
 			);
 		}
-		
+
 		if (
 			target->GetFeetTexture() ||
 			target->GetLegTexture()
@@ -2152,7 +2153,7 @@ void Mob::ShowStats(Client* client)
 				target->GetINT()
 			).c_str()
 		);
-		
+
 		client->Message(
 			Chat::White,
 			fmt::format(
@@ -2182,7 +2183,7 @@ void Mob::ShowStats(Client* client)
 					target->GetCharmedAvoidance()
 				).c_str()
 			);
-			
+
 			client->Message(
 				Chat::White,
 				fmt::format(
@@ -2324,7 +2325,7 @@ void Mob::ShowStats(Client* client)
 					(target->GetProximityMaxX() - target->GetProximityMinX())
 				).c_str()
 			);
-			
+
 			client->Message(
 				Chat::White,
 				fmt::format(
@@ -2334,7 +2335,7 @@ void Mob::ShowStats(Client* client)
 					(target->GetProximityMaxY() - target->GetProximityMinY())
 				).c_str()
 			);
-			
+
 			client->Message(
 				Chat::White,
 				fmt::format(
@@ -2932,11 +2933,11 @@ void Mob::SendStunAppearance()
 	safe_delete(outapp);
 }
 
-void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target, 
-	uint32 value1slot, uint32 value1ground, uint32 value2slot, uint32 value2ground, uint32 value3slot, uint32 value3ground, 
+void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target,
+	uint32 value1slot, uint32 value1ground, uint32 value2slot, uint32 value2ground, uint32 value3slot, uint32 value3ground,
 	uint32 value4slot, uint32 value4ground, uint32 value5slot, uint32 value5ground){
 	auto outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
-	
+
 	/* Location of the effect from value#slot, this is removed upon mob death/despawn.
 		0 = pelvis1
 		1 = pelvis2
@@ -3014,7 +3015,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	safe_delete(outapp);
 }
 
-void Mob::SetAppearenceEffects(int32 slot, int32 value) 
+void Mob::SetAppearenceEffects(int32 slot, int32 value)
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		if (!appearance_effects_id[i]) {
@@ -3032,7 +3033,7 @@ void Mob::GetAppearenceEffects()
 		Message(Chat::Red, "No Appearance Effects exist on this mob");
 		return;
 	}
-	
+
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		Message(Chat::Red, "ID: %i :: App Effect ID %i :: Slot %i", i, appearance_effects_id[i], appearance_effects_slot[i]);
 	}
@@ -4593,7 +4594,7 @@ int32 Mob::GetVulnerability(Mob *caster, uint32 spell_id, uint32 ticsremaining, 
 
 	fc_spell_vulnerability_mod = GetFocusEffect(focusSpellVulnerability, spell_id, caster, from_buff_tic);
 	fc_spell_damage_pct_incomingPC_mod = GetFocusEffect(focusFcSpellDamagePctIncomingPC, spell_id, caster, from_buff_tic);
-	
+
 	total_mod = fc_spell_vulnerability_mod + fc_spell_damage_pct_incomingPC_mod;
 
 	//Don't let focus derived mods reduce past 99% mitigation. Quest related can, and for custom functionality if negative will give a healing affect instead of damage.
@@ -6190,7 +6191,7 @@ uint8 Mob::GetSeeInvisibleLevelFromNPCStat(uint16 in_see_invis)
 	if (in_see_invis == 1) {
 		return 1;
 	}
-	
+
 	//random chance to apply standard level 1 see invs
 	if (in_see_invis > 1 && in_see_invis < 100) {
 		if (zone->random.Int(0, 99) < in_see_invis) {
@@ -6550,7 +6551,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 
 	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(shielder_max_distance)) {
 		MessageString(Chat::Blue, TARGET_TOO_FAR);
-		return false; 
+		return false;
 	}
 
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
@@ -6617,7 +6618,7 @@ void Mob::ShieldAbilityClearVariables()
 }
 
 void Mob::SetFeigned(bool in_feigned) {
-	
+
 	if (in_feigned)	{
 		if (IsClient()) {
 			if (RuleB(Character, FeignKillsPet)){
