@@ -4259,7 +4259,6 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType)
 }
 
 // Perfoms the actual trade action with a client bot owner
-// Perfoms the actual trade action with a client bot owner
 void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client)
 {
 	using namespace EQ;
