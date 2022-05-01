@@ -102,6 +102,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 #include "mob_movement_manager.h"
 #include "client.h"
+#include "mob.h"
 
 
 extern Zone* zone;
@@ -6772,4 +6773,18 @@ bool Mob::IsFromTriggeredSpell(CastingSlot slot, uint32 item_slot) {
 		return true;
 	}
 	return false;
+}
+
+void Mob::SetHP(int32 hp)
+{
+	if (hp >= max_hp) {
+		current_hp = max_hp;
+		return;
+	}
+
+	if (combat_record.InCombat()) {
+		combat_record.ProcessHPEvent(hp, current_hp);
+	}
+
+	current_hp = hp;
 }

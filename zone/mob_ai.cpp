@@ -1955,6 +1955,8 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 					if (emoteid != 0) {
 						CastToNPC()->DoNPCEmote(ENTERCOMBAT, emoteid);
 					}
+					std::string mob_name = GetCleanName();
+					combat_record.Start(mob_name);
 					CastToNPC()->SetCombatEvent(true);
 				}
 			}
@@ -1976,19 +1978,18 @@ void Mob::AI_Event_NoLongerEngaged() {
 	StopNavigation();
 	ClearRampage();
 
-	if(IsNPC())
-	{
+	if (IsNPC()) {
 		SetPrimaryAggro(false);
 		SetAssistAggro(false);
-		if(CastToNPC()->GetCombatEvent() && GetHP() > 0)
-		{
-			if(entity_list.GetNPCByID(GetID()))
-			{
-			uint16 emoteid = CastToNPC()->GetEmoteID();
-			parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
-			if(emoteid != 0)
-				CastToNPC()->DoNPCEmote(LEAVECOMBAT,emoteid);
-			CastToNPC()->SetCombatEvent(false);
+		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
+			if (entity_list.GetNPCByID(this->GetID())) {
+				uint16 emoteid = CastToNPC()->GetEmoteID();
+				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
+				if (emoteid != 0) {
+					CastToNPC()->DoNPCEmote(LEAVECOMBAT, emoteid);
+				}
+				combat_record.Stop();
+				CastToNPC()->SetCombatEvent(false);
 			}
 		}
 	}
