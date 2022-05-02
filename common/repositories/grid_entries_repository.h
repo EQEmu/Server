@@ -109,10 +109,10 @@ public:
 			entry.gridid      = atoi(row[0]);
 			entry.zoneid      = atoi(row[1]);
 			entry.number      = atoi(row[2]);
-			entry.x           = atof(row[3]);
-			entry.y           = atof(row[4]);
-			entry.z           = atof(row[5]);
-			entry.heading     = atof(row[6]);
+			entry.x           = static_cast<float>(atof(row[3]));
+			entry.y           = static_cast<float>(atof(row[4]));
+			entry.z           = static_cast<float>(atof(row[5]));
+			entry.heading     = static_cast<float>(atof(row[6]));
 			entry.pause       = atoi(row[7]);
 			entry.centerpoint = atoi(row[8]);
 
