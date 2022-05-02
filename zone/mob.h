@@ -318,13 +318,13 @@ public:
 	void NegateSpellEffectBonuses(uint16 spell_id);
 	bool NegateSpellEffect(uint16 spell_id, int effect_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
-	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	virtual int32 GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_buff_tic = true);
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr, bool from_buff_tic = false);
+	virtual int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
+	virtual int64 GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_buff_tic = true);
+	virtual int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr, bool from_buff_tic = false);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost){ return cost;}
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
-	virtual int32 GetActReflectedSpellDamage(int32 spell_id, int32 value, int effectiveness);
+	virtual int64 GetActReflectedSpellDamage(int32 spell_id, int64 value, int effectiveness);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
 		int level_override = -1);
@@ -1170,8 +1170,8 @@ public:
 
 	//uint32 GetInstrumentMod(uint16 spell_id) const;
 	uint32 GetInstrumentMod(uint16 spell_id);
-	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0,uint16 casterid=0);
-	int CalcSpellEffectValue_formula(int formula, int base_value, int max_value, int caster_level, uint16 spell_id, int ticsremaining = 0);
+	int64 CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0,uint16 casterid=0);
+	int64 CalcSpellEffectValue_formula(int formula, int base_value, int max_value, int caster_level, uint16 spell_id, int ticsremaining = 0);
 	virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = nullptr, Mob* caster2 = nullptr, int buffslot = -1);
 	uint32 GetCastedSpellInvSlot() const { return casting_spell_inventory_slot; }
 

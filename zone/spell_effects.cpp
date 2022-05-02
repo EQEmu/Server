@@ -257,7 +257,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					//handles AAs and what not...
 					if(caster) {
 						if (reflect_effectiveness) {
-							dmg = caster->GetActReflectedSpellDamage(spell_id, (int32)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
+							dmg = caster->GetActReflectedSpellDamage(spell_id, (int64)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
 						}
 						else {
 							dmg = caster->GetActSpellDamage(spell_id, dmg, this);
@@ -334,7 +334,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 						if (caster) {
 							if (reflect_effectiveness) {
-								dmg = caster->GetActReflectedSpellDamage(spell_id, (int32)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
+								dmg = caster->GetActReflectedSpellDamage(spell_id, (int64)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
 							}
 							else {
 								dmg = caster->GetActSpellDamage(spell_id, dmg, this);
@@ -3321,7 +3321,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 	return true;
 }
 
-int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
+int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
 	int ticsremaining, uint16 caster_id)
 {
 	if (!IsValidSpell(spell_id) || effect_id < 0 || effect_id >= EFFECT_COUNT)
@@ -3392,7 +3392,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 }
 
 // generic formula calculations
-int Mob::CalcSpellEffectValue_formula(int formula, int base_value, int max_value, int caster_level, uint16 spell_id, int ticsremaining)
+int64 Mob::CalcSpellEffectValue_formula(int formula, int base_value, int max_value, int caster_level, uint16 spell_id, int ticsremaining)
 {
 /*
 i need those formulas checked!!!!

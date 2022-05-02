@@ -4951,7 +4951,7 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 	attacked_timer.Start(CombatEventTimer_expire);
 	// if spell is lifetap add hp to the caster
 	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
-		int healed = GetActSpellHealing(spell_id, damage);
+		int64 healed = GetActSpellHealing(spell_id, damage);
 		LogCombat("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
 		entity_list.MessageClose(this, true, 300, Chat::Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
@@ -6896,7 +6896,7 @@ void Bot::SetAttackTimer() {
 	}
 }
 
-int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
+int64 Bot::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	if (spells[spell_id].target_type == ST_Self)
 		return value;
 
@@ -7001,7 +7001,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	return value;
 }
 
-int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
+int64 Bot::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target) {
 	if (target == nullptr)
 		target = this;
 

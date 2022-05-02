@@ -40,7 +40,7 @@ float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 	return (range * extrange) / 100;
 }
 
-int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
+int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 
 	if (spells[spell_id].target_type == ST_Self)
 		return value;
@@ -49,7 +49,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		value += value*CastToNPC()->GetSpellFocusDMG()/100;
 
 	bool Critical = false;
-	int32 base_value = value;
+	int64 base_value = value;
 	int chance = 0;
 
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
@@ -165,7 +165,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	return value;
 }
 
-int32 Mob::GetActReflectedSpellDamage(int32 spell_id, int32 value, int effectiveness) {
+int64 Mob::GetActReflectedSpellDamage(int32 spell_id, int64 value, int effectiveness) {
 	/*
 		Reflected spells use the spells base damage before any modifiers or formulas applied.
 		That value can then be modifier by the reflect spells 'max' value, defined here as effectiveness
@@ -192,7 +192,7 @@ int32 Mob::GetActReflectedSpellDamage(int32 spell_id, int32 value, int effective
 	return value;
 }
 
-int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_buff_tic) {
+int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_buff_tic) {
 
 	if (target == nullptr)
 		return value;
@@ -201,8 +201,8 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
 	}
 
-	int32 base_value = value;
-	int32 extra_dmg = 0;
+	int64 base_value = value;
+	int64 extra_dmg = 0;
 	int16 chance = 0;
 	chance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
 
@@ -316,14 +316,14 @@ int64 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 	return extra_spell_amt;
 }
 
-int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target, bool from_buff_tic) {
+int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool from_buff_tic) {
 
 
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusHeal() / 100;
 	}
 
-	int32 base_value = value;
+	int64 base_value = value;
 	int16 critical_chance = 0;
 	int8  critical_modifier = 1;
 
@@ -413,7 +413,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target, bool fr
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
-		int32 extra_heal = 0;
+		int64 extra_heal = 0;
 		if (RuleB(Spells, HOTsScaleWithHealAmt)) {
 			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
 				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);

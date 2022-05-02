@@ -1178,13 +1178,13 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 		switch (spells[spell_id].effect_id[o]) {
 			case SE_CurrentHPOnce:
 			case SE_CurrentHP: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if(val < 0)
 					AggroAmount -= val;
 				break;
 			}
 			case SE_MovementSpeed: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if (val < 0)
 					AggroAmount += default_aggro;
 				break;
@@ -1192,7 +1192,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_AttackSpeed:
 			case SE_AttackSpeed2:
 			case SE_AttackSpeed3: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if (val < 100)
 					AggroAmount += default_aggro;
 				break;
@@ -1210,7 +1210,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 				break;
 			case SE_ACv2:
 			case SE_ArmorClass: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if (val < 0)
 					AggroAmount += default_aggro;
 				break;
@@ -1228,19 +1228,19 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_INT:
 			case SE_WIS:
 			case SE_CHA: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if (val < 0)
 					AggroAmount += 10;
 				break;
 			}
 			case SE_ResistAll: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if (val < 0)
 					AggroAmount += 50;
 				break;
 			}
 			case SE_AllStats: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if (val < 0)
 					AggroAmount += 70;
 				break;
@@ -1282,7 +1282,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_ManaRegen_v2:
 			case SE_ManaPool:
 			case SE_CurrentEndurance: {
-				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
 				if (val < 0)
 					AggroAmount -= val * 2;
 				break;
@@ -1344,7 +1344,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 				break;
 			}
 			// hate based on base healing power of the spell
-			int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o],
+			int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o],
 							 spells[spell_id].base_value[o], spells[spell_id].max_value[o], GetLevel(), spell_id);
 			if (val > 0) {
 				if (heal_possible < val)
@@ -1356,7 +1356,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 				else if (target_level <= 50 && val > 800)
 					val = 800; // per live patch notes, capped to 800
 			}
-			AggroAmount += std::max(val, 1);
+			AggroAmount += std::max(val, (int64)1);
 			break;
 		}
 		case SE_Rune:

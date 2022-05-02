@@ -2210,13 +2210,13 @@ XS(XS_Mob_GetActSpellDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellDamage) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDamage(THIS, uint16 spell_id, int32 value)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDamage(THIS, uint16 spell_id, int64 value)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
 		dXSTARG;
 		uint16 spell_id = (uint16) SvUV(ST(1));
-		int32  value    = (int32) SvIV(ST(2));
+		int64  value    = (int64) SvIV(ST(2));
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetActSpellDamage(spell_id, value);
 		XSprePUSH;
@@ -2229,13 +2229,13 @@ XS(XS_Mob_GetActSpellHealing); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellHealing) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellHealing(THIS, uint16 spell_id, int32 value)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellHealing(THIS, uint16 spell_id, int64 value)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
 		dXSTARG;
 		uint16 spell_id = (uint16) SvUV(ST(1));
-		int32  value    = (int32) SvIV(ST(2));
+		int64  value    = (int64) SvIV(ST(2));
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetActSpellHealing(spell_id, value);
 		XSprePUSH;
