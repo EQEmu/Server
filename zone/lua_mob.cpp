@@ -237,7 +237,7 @@ uint32 Lua_Mob::GetLevelCon(int my, int other) {
 	return self->GetLevelCon(my, other);
 }
 
-void Lua_Mob::SetHP(int hp) {
+void Lua_Mob::SetHP(int64 hp) {
 	Lua_Safe_Call_Void();
 	self->SetHP(hp);
 }

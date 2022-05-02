@@ -495,7 +495,7 @@ public:
 	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) = 0;
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
-	virtual void SetHP(int32 hp);
+	virtual void SetHP(int64 hp);
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int32 newoocregen) {ooc_regen = newoocregen;}
 	virtual void Heal();
@@ -1034,7 +1034,7 @@ public:
 	inline bool IsAmnesiad() const { return amnesiad; }
 
 	int32 ReduceDamage(int64 damage);
-	int32 AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
+	int64 AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
 	int32 ReduceAllDamage(int64 damage);
 
 	void DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int base_damage, int min_damage = 0, int32 hate_override = -1, int ReuseTime = 10);

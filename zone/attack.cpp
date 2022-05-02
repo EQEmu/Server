@@ -3319,7 +3319,7 @@ int32 Mob::ReduceDamage(int64 damage)
 	return(damage);
 }
 
-int32 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker)
+int64 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker)
 {
 	if (damage <= 0)
 		return damage;
@@ -3748,7 +3748,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		}
 		else {
-			int32 origdmg = damage;
+			int64 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
 			if (origdmg != damage && attacker && attacker->IsClient()) {
 				if (attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide)
@@ -4070,9 +4070,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 {
-	int32 maxhp = GetMaxHP();
-	int32 curhp = GetHP();
-	uint32 acthealed = 0;
+	int64 maxhp = GetMaxHP();
+	int64 curhp = GetHP();
+	uint64 acthealed = 0;
 
 	if (amount > (maxhp - curhp))
 		acthealed = (maxhp - curhp);
@@ -4936,7 +4936,7 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 
 bool Mob::HasDied() {
 	bool Result = false;
-	int32 hp_below = 0;
+	int64 hp_below = 0;
 
 	hp_below = (GetDelayDeath() * -1);
 

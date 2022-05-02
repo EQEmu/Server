@@ -1165,10 +1165,10 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 	bool dispel = false;
 	bool on_hatelist = target ? target->CheckAggro(this) : false;
 	int proc_cap = RuleI(Aggro, MaxScalingProcAggro);
-	int hate_cap = isproc && proc_cap != -1 ? proc_cap : 1200;
+	int64 hate_cap = isproc && proc_cap != -1 ? proc_cap : 1200;
 
-	int32 target_hp = target ? target->GetMaxHP() : 18000; // default to max
-	int32 default_aggro = 25;
+	int64 target_hp = target ? target->GetMaxHP() : 18000; // default to max
+	int64 default_aggro = 25;
 	if (target_hp >= 18000) // max
 		default_aggro = hate_cap;
 	else if (target_hp >= 390) // min, 390 is the first number with int division that is 26

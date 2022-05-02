@@ -1957,9 +1957,9 @@ void QuestManager::clear_zone_flag(int zone_id) {
 	initiator->ClearZoneFlag(zone_id);
 }
 
-void QuestManager::sethp(int hpperc) {
+void QuestManager::sethp(int64 hpperc) {
 	QuestManagerCurrentQuestVars();
-	int newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
+	int64 newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
 	owner->Damage(owner, newhp, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand, false, 0, false);
 }
 

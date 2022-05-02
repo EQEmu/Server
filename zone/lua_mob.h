@@ -69,7 +69,7 @@ public:
 	void HealDamage(uint32 amount, Lua_Mob other);
 	uint32 GetLevelCon(int other);
 	uint32 GetLevelCon(int my, int other);
-	void SetHP(int hp);
+	void SetHP(int64 hp);
 	void DoAnim(int anim_num);
 	void DoAnim(int anim_num, int type);
 	void DoAnim(int anim_num, int type, bool ackreq);

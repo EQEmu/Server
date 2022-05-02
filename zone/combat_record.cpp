@@ -32,7 +32,7 @@ bool CombatRecord::InCombat()
 	return start_time > 0;
 }
 
-void CombatRecord::ProcessHPEvent(int hp, int current_hp)
+void CombatRecord::ProcessHPEvent(int64 hp, int64 current_hp)
 {
 	// damage
 	if (hp < current_hp) {

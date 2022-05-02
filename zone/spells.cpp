@@ -6775,7 +6775,7 @@ bool Mob::IsFromTriggeredSpell(CastingSlot slot, uint32 item_slot) {
 	return false;
 }
 
-void Mob::SetHP(int32 hp)
+void Mob::SetHP(int64 hp)
 {
 	if (hp >= max_hp) {
 		current_hp = max_hp;

@@ -2904,7 +2904,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 
 						max_percent = mod_bindwound_percent(max_percent, bindmob);
 
-						int max_hp = bindmob->GetMaxHP() * max_percent / 100;
+						int64 max_hp = bindmob->GetMaxHP() * max_percent / 100;
 
 						// send bindmob new hp's
 						if (bindmob->GetHP() < bindmob->GetMaxHP() && bindmob->GetHP() <= (max_hp)-1) {

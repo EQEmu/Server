@@ -770,7 +770,7 @@ XS(XS_Mob_SetHP) {
 		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int32 hp)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int32 hp = (int32) SvIV(ST(1));
+		int64 hp = (int32) SvIV(ST(1));
 		VALIDATE_THIS_IS_MOB;
 		THIS->SetHP(hp);
 	}

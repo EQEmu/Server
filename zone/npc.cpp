@@ -3156,7 +3156,7 @@ int NPC::GetScore()
     int hpcontrib = 0;
     int dmgcontrib = 0;
     int spccontrib = 0;
-    int hp = GetMaxHP();
+    int64 hp = GetMaxHP();
     int mindmg = min_dmg;
     int maxdmg = max_dmg;
     int final;
