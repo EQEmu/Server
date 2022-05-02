@@ -257,7 +257,7 @@ public:
 	virtual void SetAttackTimer();
 	int GetQuiverHaste(int delay);
 	void DoAttackRounds(Mob *target, int hand, bool IsFromSpell = false);
-	int DoDamageCaps(int base_damage);
+	int64 DoDamageCaps(int64 base_damage);
 
 	void AI_Init();
 	void AI_Start(uint32 iMoveDelay = 0);

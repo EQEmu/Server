@@ -181,7 +181,7 @@ int32 Mob::GetActReflectedSpellDamage(int32 spell_id, int32 value, int effective
 		}
 	}
 
-	int32 base_spell_dmg = value;
+	int64 base_spell_dmg = value;
 
 	value = value * effectiveness / 100;
 
@@ -282,7 +282,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target, bool from_
 	return value;
 }
 
-int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
+int64 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
 {
 	if (RuleB(Spells, FlatItemExtraSpellAmt)) {
 		if (RuleB(Spells, ItemExtraSpellAmtCalcAsPercent))

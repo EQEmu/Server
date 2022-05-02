@@ -452,7 +452,7 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 	if (!other)
 		return 0;
 
-	int32 ndamage = 0;
+	int64 ndamage = 0;
 	int32 max_dmg = 0;
 	int32 min_dmg = 0;
 	int reuse = 0;
@@ -941,7 +941,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 }
 
 bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::SkillType skillInUse,
-			      uint16 weapon_dmg, const EQ::ItemInstance *RangeWeapon,
+			      uint64 weapon_dmg, const EQ::ItemInstance *RangeWeapon,
 			      const EQ::ItemInstance *Ammo, int AmmoSlot, float speed, bool DisableProcs)
 {
 	if (!other)

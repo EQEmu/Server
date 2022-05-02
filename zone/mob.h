@@ -882,7 +882,7 @@ public:
 	inline bool CanBlockSpell() const { return(spellbonuses.FocusEffects[focusBlockNextSpell]); }
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect);
-	int32 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
+	int64 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
 	void MeleeLifeTap(int64 damage);
 	bool PassCastRestriction(int value);
 	void SendCastRestrictionMessage(int requirement_id, bool is_target_requirement = true, bool is_discipline = false);
@@ -1041,7 +1041,7 @@ public:
 	virtual void DoThrowingAttackDmg(Mob* other, const EQ::ItemInstance* RangeWeapon = nullptr, const EQ::ItemData* AmmoItem = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, int AmmoSlot = 0, float speed = 4.0f, bool DisableProcs = false);
 	void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQ::skills::SkillType skillinuse, int16 chance_mod = 0, int16 focus = 0, bool CanRiposte = false, int ReuseTime = 0);
 	virtual void DoArcheryAttackDmg(Mob* other, const EQ::ItemInstance* RangeWeapon = nullptr, const EQ::ItemInstance* Ammo = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, uint32 ammo_id = 0, const EQ::ItemData *AmmoItem = nullptr, int AmmoSlot = 0, float speed = 4.0f, bool DisableProcs = false);
-	bool TryProjectileAttack(Mob* other, const EQ::ItemData *item, EQ::skills::SkillType skillInUse, uint16 weapon_dmg, const EQ::ItemInstance* RangeWeapon, const EQ::ItemInstance* Ammo, int AmmoSlot, float speed, bool DisableProcs = false);
+	bool TryProjectileAttack(Mob* other, const EQ::ItemData *item, EQ::skills::SkillType skillInUse, uint64 weapon_dmg, const EQ::ItemInstance* RangeWeapon, const EQ::ItemInstance* Ammo, int AmmoSlot, float speed, bool DisableProcs = false);
 	void ProjectileAttack();
 	inline bool HasProjectileAttack() const { return ActiveProjectileATK; }
 	inline void SetProjectileAttack(bool value) { ActiveProjectileATK = value; }
@@ -1202,7 +1202,7 @@ public:
 	Trade* trade;
 
 	bool ShieldAbility(uint32 target_id, int shielder_max_distance = 15, int shield_duration = 12000, int shield_target_mitigation = 50, int shielder_mitigation = 75, bool use_aa = false, bool can_shield_npc = true);
-	void DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse);
+	void DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ::skills::SkillType skillInUse);
 	void ShieldAbilityFinish();
 	void ShieldAbilityClearVariables();
 	inline uint32 GetShielderID() const { return m_shielder_id; }
@@ -1248,31 +1248,46 @@ public:
 	inline void SetEmoteID(uint16 emote) { emoteid = emote; }
 	inline uint16 GetEmoteID() { return emoteid; }
 
-	bool 	HasSpellEffect(int effect_id);
-	int 	mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster, uint16 caster_id);
-	float 	mod_hit_chance(float chancetohit, EQ::skills::SkillType skillinuse, Mob* attacker);
-	float 	mod_riposte_chance(float ripostchance, Mob* attacker);
-	float	mod_block_chance(float blockchance, Mob* attacker);
-	float	mod_parry_chance(float parrychance, Mob* attacker);
-	float	mod_dodge_chance(float dodgechance, Mob* attacker);
-	float	mod_monk_weight(float monkweight, Mob* attacker);
-	float	mod_mitigation_rating(float mitigation_rating, Mob* attacker);
-	float	mod_attack_rating(float attack_rating, Mob* defender);
-	int32	mod_kick_damage(int64 dmg);
-	int32	mod_bash_damage(int64 dmg);
-	int32	mod_frenzy_damage(int64 dmg);
-	int32	mod_monk_special_damage(int32 ndamage, EQ::skills::SkillType skill_type);
-	int32	mod_backstab_damage(int32 ndamage);
-	int		mod_archery_bonus_chance(int bonuschance, const EQ::ItemInstance* RangeWeapon);
-	uint32	mod_archery_bonus_damage(uint32 MaxDmg, const EQ::ItemInstance* RangeWeapon);
-	int32	mod_archery_damage(int32 TotalDmg, bool hasbonus, const EQ::ItemInstance* RangeWeapon);
-	uint16	mod_throwing_damage(uint16 MaxDmg);
-	int32	mod_cast_time(int32 cast_time);
-	int		mod_buff_duration(int res, Mob* caster, Mob* target, uint16 spell_id);
-	int		mod_spell_stack(uint16 spellid1, int caster_level1, Mob* caster1, uint16 spellid2, int caster_level2, Mob* caster2);
-	int		mod_spell_resist(int resist_chance, int level_mod, int resist_modifier, int target_resist, uint8 resist_type, uint16 spell_id, Mob* caster);
-	void	mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc);
-	bool    mod_will_aggro(Mob *attacker, Mob *on);
+	bool HasSpellEffect(int effect_id);
+	int mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob *caster, uint16 caster_id);
+	float mod_hit_chance(float chancetohit, EQ::skills::SkillType skillinuse, Mob *attacker);
+	float mod_riposte_chance(float ripostchance, Mob *attacker);
+	float mod_block_chance(float blockchance, Mob *attacker);
+	float mod_parry_chance(float parrychance, Mob *attacker);
+	float mod_dodge_chance(float dodgechance, Mob *attacker);
+	float mod_monk_weight(float monkweight, Mob *attacker);
+	float mod_mitigation_rating(float mitigation_rating, Mob *attacker);
+	float mod_attack_rating(float attack_rating, Mob *defender);
+	int64 mod_kick_damage(int64 dmg);
+	int64 mod_bash_damage(int64 dmg);
+	int64 mod_frenzy_damage(int64 dmg);
+	int64 mod_monk_special_damage(int64 ndamage, EQ::skills::SkillType skill_type);
+	int64 mod_backstab_damage(int64 ndamage);
+	int64 mod_archery_bonus_chance(int bonuschance, const EQ::ItemInstance *RangeWeapon);
+	uint64 mod_archery_bonus_damage(uint64 MaxDmg, const EQ::ItemInstance *RangeWeapon);
+	int64 mod_archery_damage(int64 TotalDmg, bool hasbonus, const EQ::ItemInstance *RangeWeapon);
+	uint64 mod_throwing_damage(uint64 MaxDmg);
+	int32 mod_cast_time(int32 cast_time);
+	int mod_buff_duration(int res, Mob *caster, Mob *target, uint16 spell_id);
+	int mod_spell_stack(uint16 spellid1, int caster_level1, Mob *caster1, uint16 spellid2, int caster_level2, Mob *caster2);
+	int mod_spell_resist(
+		int resist_chance,
+		int level_mod,
+		int resist_modifier,
+		int target_resist,
+		uint8 resist_type,
+		uint16 spell_id,
+		Mob *caster
+	);
+	void mod_spell_cast(
+		uint16 spell_id,
+		Mob *spelltar,
+		bool reflect,
+		bool use_resist_adjust,
+		int16 resist_adjust,
+		bool isproc
+	);
+	bool mod_will_aggro(Mob *attacker, Mob *on);
 
 	//Command #Tune functions
 	void TuneGetStats(Mob* defender, Mob *attacker);
@@ -1281,30 +1296,30 @@ public:
 	void TuneGetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int accuracy_override, int Msg);
 	void TuneGetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoidance_override, int Msg);
 	/*support functions*/
-	int TuneClientGetMeanDamage(Mob* other, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0);
-	int TuneClientGetMaxDamage(Mob* other);
-	int TuneClientGetMinDamage(Mob* other, int max_hit);
+	int64 TuneClientGetMeanDamage(Mob* other, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0);
+	int64 TuneClientGetMaxDamage(Mob* other);
+	int64 TuneClientGetMinDamage(Mob* other, int max_hit);
 	float TuneGetACMitigationPct(Mob* defender, Mob *attacker);
-	int TuneGetOffense(Mob* defender, Mob *attacker, int atk_override = 0);
-	int TuneGetAccuracy(Mob* defender, Mob *attacker, int accuracy_override = 0, int add_accuracy = 0);
-	int TuneGetAvoidance(Mob* defender, Mob *attacker, int avoidance_override = 0, int add_avoidance = 0);
+	int64 TuneGetOffense(Mob* defender, Mob *attacker, int atk_override = 0);
+	int64 TuneGetAccuracy(Mob* defender, Mob *attacker, int accuracy_override = 0, int add_accuracy = 0);
+	int64 TuneGetAvoidance(Mob* defender, Mob *attacker, int avoidance_override = 0, int add_avoidance = 0);
 	float TuneGetHitChance(Mob* defender, Mob *attacker, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	float TuneGetAvoidMeleeChance(Mob* defender, Mob *attacker, int type);
-	int TuneCalcEvasionBonus(int final_avoidance, int base_avoidance);
+	int64 TuneCalcEvasionBonus(int final_avoidance, int base_avoidance);
 	/*modified combat code - These SYNC to attack.cpp, relevant changes to these functions in attack.cpp should be changed to the below as well*/
-	int TuneNPCAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
+	int64 TuneNPCAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
 		bool get_offense = false, bool get_accuracy = false, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
-	int TuneClientAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
+	int64 TuneClientAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
 		bool get_offense = false, bool get_accuracy = false, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	void TuneDoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr, bool no_avoid = true, bool no_hit_chance = true, int ac_override = 0, int add_ac = 0,
 		int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	void TuneMeleeMitigation(Mob *attacker, DamageHitInfo &hit, int ac_override, int add_ac);
-	int Tuneoffense(EQ::skills::SkillType skill, int atk_override = 0, int add_atk = 0);
-	int TuneACSum(bool skip_caps=false, int ac_override = 0, int add_ac = 0);
-	int TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int accuracy_override = 0, int add_accurracy = 0); // compute_tohit + spell bonuses
-	int Tunecompute_tohit(EQ::skills::SkillType skillinuse, int accuracy_override = 0, int add_accuracy = 0);
-	int TuneGetTotalDefense(int avoidance_override = 0, int add_avoidance = 0);
-	int Tunecompute_defense(int avoidance_override = 0, int add_avoidance = 0);
+	int64 Tuneoffense(EQ::skills::SkillType skill, int atk_override = 0, int add_atk = 0);
+	int64 TuneACSum(bool skip_caps=false, int ac_override = 0, int add_ac = 0);
+	int64 TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int accuracy_override = 0, int add_accurracy = 0); // compute_tohit + spell bonuses
+	int64 Tunecompute_tohit(EQ::skills::SkillType skillinuse, int accuracy_override = 0, int add_accuracy = 0);
+	int64 TuneGetTotalDefense(int avoidance_override = 0, int add_avoidance = 0);
+	int64 Tunecompute_defense(int avoidance_override = 0, int add_avoidance = 0);
 	bool TuneCheckHitChance(Mob* other, DamageHitInfo &hit, int avoidance_override = 0, int add_avoidance = 0);
 	EQ::skills::SkillType TuneAttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
 	void TuneCommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);

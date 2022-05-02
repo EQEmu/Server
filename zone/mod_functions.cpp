@@ -137,31 +137,31 @@ float Mob::mod_mitigation_rating(float mitigation_rating, Mob* attacker) { retur
 float Mob::mod_attack_rating(float attack_rating, Mob* defender) { return(attack_rating); }
 
 //Kick damage after all other bonuses are applied
-int32 Mob::mod_kick_damage(int64 dmg) { return(dmg); }
+int64 Mob::mod_kick_damage(int64 dmg) { return(dmg); }
 
 //Slam and bash damage after all other bonuses are applied
-int32 Mob::mod_bash_damage(int64 dmg) { return(dmg); }
+int64 Mob::mod_bash_damage(int64 dmg) { return(dmg); }
 
 //Frenzy damage after all other bonuses are applied
-int32 Mob::mod_frenzy_damage(int64 dmg) { return(dmg); }
+int64 Mob::mod_frenzy_damage(int64 dmg) { return(dmg); }
 
 //Special attack damage after all other bonuses are applied.
-int32 Mob::mod_monk_special_damage(int32 ndamage, EQ::skills::SkillType skill_type) { return(ndamage); }
+int64 Mob::mod_monk_special_damage(int64 ndamage, EQ::skills::SkillType skill_type) { return(ndamage); }
 
 //ndamage - Backstab damage as calculated by default formulas
-int32 Mob::mod_backstab_damage(int32 ndamage) { return(ndamage); }
+int64 Mob::mod_backstab_damage(int64 ndamage) { return(ndamage); }
 
 //Chance for 50+ archery bonus damage if Combat:UseArcheryBonusRoll is true.
-int Mob::mod_archery_bonus_chance(int bonuschance, const EQ::ItemInstance* RangeWeapon) { return(bonuschance); }
+int64 Mob::mod_archery_bonus_chance(int bonuschance, const EQ::ItemInstance* RangeWeapon) { return(bonuschance); }
 
 //Archery bonus damage
-uint32 Mob::mod_archery_bonus_damage(uint32 MaxDmg, const EQ::ItemInstance* RangeWeapon) { return(MaxDmg); }
+uint64 Mob::mod_archery_bonus_damage(uint64 MaxDmg, const EQ::ItemInstance* RangeWeapon) { return(MaxDmg); }
 
 //Final archery damage including bonus if it was applied.
-int32 Mob::mod_archery_damage(int32 TotalDmg, bool hasbonus, const EQ::ItemInstance* RangeWeapon) { return(TotalDmg); }
+int64 Mob::mod_archery_damage(int64 TotalDmg, bool hasbonus, const EQ::ItemInstance* RangeWeapon) { return(TotalDmg); }
 
 //Thrown weapon damage after all other calcs
-uint16 Mob::mod_throwing_damage(uint16 MaxDmg) { return(MaxDmg); }
+uint64 Mob::mod_throwing_damage(uint64 MaxDmg) { return(MaxDmg); }
 
 //Spell cast time in milliseconds - will not sync with client cast time bar, but does work.
 int32 Mob::mod_cast_time(int32 cast_time) { return(cast_time); }

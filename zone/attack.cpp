@@ -1268,7 +1268,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, ui
 	return std::max((int64)0, dmg);
 }
 
-int Client::DoDamageCaps(int base_damage)
+int64 Client::DoDamageCaps(int64 base_damage)
 {
 	// this is based on a client function that caps melee base_damage
 	auto level = GetLevel();
@@ -1379,7 +1379,7 @@ int Client::DoDamageCaps(int base_damage)
 		}
 	}
 
-	return std::min(cap, base_damage);
+	return std::min((int64)cap, base_damage);
 }
 
 // other is the defender, this is the attacker
@@ -5613,7 +5613,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
-void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse)
+void Mob::DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ::skills::SkillType skillInUse)
 {
 	if (!shield_target) {
 		return;
