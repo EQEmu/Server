@@ -322,11 +322,11 @@ void command_npcedit(Client *c, const Seperator *sep)
 			fmt::format(
 				"NPC ID {} now regenerates {} HP per second.",
 				npc_id,
-				atoi(sep->arg[2])).c_str()
+				std::strtoll(sep->arg[2], nullptr, 10)).c_str()
 		);
 		std::string query = fmt::format(
 			"UPDATE npc_types SET hp_regen_per_second = {} WHERE id = {}",
-			atoi(sep->arg[2]),
+			std::strtoll(sep->arg[2], nullptr, 10),
 			npc_id
 		);
 		content_db.QueryDatabase(query);
