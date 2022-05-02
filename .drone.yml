@@ -11,7 +11,7 @@ volumes:
   - name: cache
     host:
       path: /var/lib/cache
-    
+
 steps:
   - name: server-build
     # Source build script https://github.com/Akkadius/akk-stack/blob/master/containers/eqemu-server/Dockerfile#L20
@@ -19,7 +19,7 @@ steps:
     commands:
       - sudo chown eqemu:eqemu /drone/src/ * -R
       - sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R
-      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LUA=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O0 -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
     volumes:
       - name: cache
         path: /home/eqemu/.ccache/
