@@ -340,6 +340,11 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		ReuseTime = FrenzyReuseTime - 1 - skill_reduction;
 		ReuseTime = (ReuseTime * HasteMod) / 100;
 
+		auto primaryInUse = GetInv().GetItem(EQ::invslot::slotPrimary);
+		if (primaryInUse && GetWeaponDamage(GetTarget(), primaryInUse) <= 0) {
+			max_dmg = DMG_INVULNERABLE;
+		}
+
 		while (AtkRounds > 0) {
 			if (GetTarget())
 				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, max_dmg, 0, max_dmg, ReuseTime);
