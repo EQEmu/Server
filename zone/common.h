@@ -344,7 +344,7 @@ struct StatBonuses {
 	int64	ManaRegen;
 	int64	EnduranceRegen;
 	int64	Mana;
-	int32	Endurance;
+	int64	Endurance;
 	int32	ATK;
 	//would it be worth it to create a Stat_Struct?
 	int32	STR;

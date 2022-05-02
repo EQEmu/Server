@@ -603,9 +603,9 @@ int64 Client::CalcBaseMana()
 	int ConvertedWisInt = 0;
 	int MindLesserFactor, MindFactor;
 	int WisInt = 0;
-	int base_mana = 0;
+	int64 base_mana = 0;
 	int wisint_mana = 0;
-	int32 max_m = 0;
+	int64 max_m = 0;
 	switch (GetCasterClass()) {
 		case 'I':
 			WisInt = GetINT();
@@ -1728,7 +1728,7 @@ int64 Client::CalcBaseEndurance()
 
 int64 Client::CalcEnduranceRegen(bool bCombat)
 {
-	int base = 0;
+	int64 base = 0;
 	if (!IsStarved()) {
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if (base_data) {
@@ -1793,7 +1793,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 
 	auto aa_regen = aabonuses.EnduranceRegen;
 
-	int regen = base;
+	int64 regen = base;
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_end = GetMaxEndurance();
 		int fast_regen = 6 * (max_end / zone->newzone_data.FastRegenEndurance);
