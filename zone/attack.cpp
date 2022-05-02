@@ -1047,7 +1047,7 @@ void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions 
 //GetWeaponDamage(mob*, const EQ::ItemInstance*) is intended to be used for situations where we have a client inventory item
 int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 	int64 dmg = 0;
-	int banedmg = 0;
+	int64 banedmg = 0;
 
 	//can't hit invulnerable stuff with weapons.
 	if (against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)) {
@@ -3231,7 +3231,7 @@ int Mob::GetHandToHandDelay(void)
 	return 35;
 }
 
-int32 Mob::ReduceDamage(int64 damage)
+int64 Mob::ReduceDamage(int64 damage)
 {
 	if (damage <= 0)
 		return damage;
@@ -3449,13 +3449,13 @@ int64 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTi
 	return damage;
 }
 
-int32 Mob::ReduceAllDamage(int64 damage)
+int64 Mob::ReduceAllDamage(int64 damage)
 {
 	if (damage <= 0)
 		return damage;
 
 	if (spellbonuses.ManaAbsorbPercentDamage) {
-		int32 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage / 100;
+		int64 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage / 100;
 		if (GetMana() >= mana_reduced) {
 			damage -= mana_reduced;
 			SetMana(GetMana() - mana_reduced);
@@ -4068,7 +4068,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 }
 
-void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
+void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 {
 	int64 maxhp = GetMaxHP();
 	int64 curhp = GetHP();
@@ -4816,7 +4816,14 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 {
 	float hp_limit = 10.0f;
-	auto fb_hp_limit = std::max({ aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO], spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO], itembonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] });
+
+	auto fb_hp_limit = std::max(
+		{
+			aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO],
+			spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO],
+			itembonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO]
+		}
+	);
 
 	if (fb_hp_limit) {
 		hp_limit = fb_hp_limit/10.0f;

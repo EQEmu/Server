@@ -217,12 +217,12 @@ void Lua_Mob::Heal() {
 	self->Heal();
 }
 
-void Lua_Mob::HealDamage(uint32 amount) {
+void Lua_Mob::HealDamage(uint64 amount) {
 	Lua_Safe_Call_Void();
 	self->HealDamage(amount);
 }
 
-void Lua_Mob::HealDamage(uint32 amount, Lua_Mob other) {
+void Lua_Mob::HealDamage(uint64 amount, Lua_Mob other) {
 	Lua_Safe_Call_Void();
 	self->HealDamage(amount, other);
 }
@@ -2752,8 +2752,8 @@ luabind::scope lua_register_mob() {
 	.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
 	.def("Heal", &Lua_Mob::Heal)
-	.def("HealDamage", (void(Lua_Mob::*)(uint32))&Lua_Mob::HealDamage)
-	.def("HealDamage", (void(Lua_Mob::*)(uint32,Lua_Mob))&Lua_Mob::HealDamage)
+	.def("HealDamage", (void(Lua_Mob::*)(uint64))&Lua_Mob::HealDamage)
+	.def("HealDamage", (void(Lua_Mob::*)(uint64,Lua_Mob))&Lua_Mob::HealDamage)
 	.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
 	.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 	.def("IsAIControlled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAIControlled)

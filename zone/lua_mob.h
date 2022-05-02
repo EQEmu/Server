@@ -65,8 +65,8 @@ public:
 	void RangedAttack(Lua_Mob other);
 	void ThrowingAttack(Lua_Mob other);
 	void Heal();
-	void HealDamage(uint32 amount);
-	void HealDamage(uint32 amount, Lua_Mob other);
+	void HealDamage(uint64 amount);
+	void HealDamage(uint64 amount, Lua_Mob other);
 	uint32 GetLevelCon(int other);
 	uint32 GetLevelCon(int my, int other);
 	void SetHP(int64 hp);

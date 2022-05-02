@@ -711,10 +711,10 @@ XS(XS_Mob_HealDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_HealDamage) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::HealDamage(THIS, int32 amount, [Mob* caster = 0])"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::HealDamage(THIS, int64 amount, [Mob* caster = 0])"); // @categories Script Utility
 	{
 		Mob *THIS;
-		int32 heal_amt = (int32) SvIV(ST(1));
+		int64 heal_amt = (int64) SvIV(ST(1));
 		Mob *caster = nullptr;
 		VALIDATE_THIS_IS_MOB;
 		if (items == 3) {
