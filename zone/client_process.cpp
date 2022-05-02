@@ -1848,7 +1848,7 @@ void Client::DoStaminaHungerUpdate()
 void Client::DoEnduranceRegen()
 {
 	// endurance has some negative mods that could result in a negative regen when starved
-	int regen = CalcEnduranceRegen();
+	int64 regen = CalcEnduranceRegen();
 
 	if (regen < 0 || (regen > 0 && GetEndurance() < GetMaxEndurance()))
 		SetEndurance(GetEndurance() + regen);

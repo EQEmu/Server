@@ -3583,7 +3583,7 @@ XS(XS_Mob_AddToHateList) {
 	{
 		Mob *THIS;
 		Mob *other;
-		int32 hate;
+		int64 hate;
 		int64 damage;
 		bool  iYellForHelp;
 		bool  bFrenzy;
@@ -3640,7 +3640,7 @@ XS(XS_Mob_SetHate) {
 	{
 		Mob *THIS;
 		Mob *other;
-		int32 hate;
+		int64 hate;
 		int64 damage;
 		VALIDATE_THIS_IS_MOB;
 		if (sv_derived_from(ST(1), "Mob")) {

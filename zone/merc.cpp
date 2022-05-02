@@ -1080,14 +1080,14 @@ int64 Merc::CalcBaseEndurance()
 }
 
 int64 Merc::CalcEnduranceRegen() {
-	int32 regen = int32(GetLevel() * 4 / 10) + 2;
+	int64 regen = int32(GetLevel() * 4 / 10) + 2;
 	regen += aabonuses.EnduranceRegen + spellbonuses.EnduranceRegen + itembonuses.EnduranceRegen;
 
 	return (regen * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
 int64 Merc::CalcEnduranceRegenCap() {
-	int cap = (RuleI(Character, ItemEnduranceRegenCap) + itembonuses.HeroicSTR/25 + itembonuses.HeroicDEX/25 + itembonuses.HeroicAGI/25 + itembonuses.HeroicSTA/25);
+	int64 cap = (RuleI(Character, ItemEnduranceRegenCap) + itembonuses.HeroicSTR/25 + itembonuses.HeroicDEX/25 + itembonuses.HeroicAGI/25 + itembonuses.HeroicSTA/25);
 
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }

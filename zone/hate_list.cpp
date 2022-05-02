@@ -729,7 +729,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	return hit_count;
 }
 
-void HateList::SpellCast(Mob *caster, uint64 spell_id, float range, Mob* ae_center)
+void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_center)
 {
 	if (!caster)
 		return;
@@ -743,7 +743,7 @@ void HateList::SpellCast(Mob *caster, uint64 spell_id, float range, Mob* ae_cent
 	//crashes when people kick the bucket in the middle of this call
 	//that invalidates our iterator but there's no way to know sadly
 	//So keep a list of entity ids and look up after
-	std::list<uint64> id_list;
+	std::list<uint32> id_list;
 	range = range * range;
 	float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 	float dist_targ = 0;

@@ -235,12 +235,12 @@ int32 Client::LevelRegen()
 
 int64 Client::CalcHPRegen(bool bCombat)
 {
-	int item_regen = itembonuses.HPRegen; // worn spells and +regen, already capped
+	int64 item_regen = itembonuses.HPRegen; // worn spells and +regen, already capped
 	item_regen += GetHeroicSTA() / 20;
 
 	item_regen += aabonuses.HPRegen;
 
-	int base = 0;
+	int64 base = 0;
 	auto base_data = database.GetBaseData(GetLevel(), GetClass());
 	if (base_data)
 		base = static_cast<int>(base_data->hp_regen);
@@ -297,7 +297,7 @@ int64 Client::CalcHPRegen(bool bCombat)
 			base = fast_regen;
 	}
 
-	int regen = base + item_regen + spellbonuses.HPRegen; // TODO: client does this in buff tick
+	int64 regen = base + item_regen + spellbonuses.HPRegen; // TODO: client does this in buff tick
 	return (regen * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
