@@ -9,8 +9,9 @@ concurrency:
 
 volumes:
   - name: cache
-    temp: {}
-
+    host:
+      path: /var/lib/cache
+    
 steps:
   - name: server-build
     # Source build script https://github.com/Akkadius/akk-stack/blob/master/containers/eqemu-server/Dockerfile#L20
