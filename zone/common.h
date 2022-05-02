@@ -879,7 +879,7 @@ struct ExtraAttackOptions {
 	{ }
 
 	float damage_percent;
-	int damage_flat;
+	int64 damage_flat;
 	float armor_pen_percent;
 	int armor_pen_flat;
 	float crit_percent;

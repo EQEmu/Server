@@ -3152,7 +3152,7 @@ int NPC::GetScore()
     int lv = std::min(70, (int)GetLevel());
     int basedmg = (lv*2)*(1+(lv / 100)) - (lv / 2);
     int minx = 0;
-    int basehp = 0;
+    int64 basehp = 0;
     int hpcontrib = 0;
     int dmgcontrib = 0;
     int spccontrib = 0;

@@ -1865,7 +1865,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	if(skill_to_use == -1)
 		return;
 
-	int dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
+	int64 dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
 
 	if (skill_to_use == EQ::skills::SkillBash) {
 		if (ca_target!=this) {
@@ -2222,7 +2222,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 	if (skillinuse == EQ::skills::SkillBegging)
 		skillinuse = EQ::skills::SkillOffense;
 
-	int damage = 0;
+	int64 damage = 0;
 	uint64 hate = 0;
 	if (hate == 0 && weapon_damage > 1)
 		hate = weapon_damage;

@@ -214,7 +214,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 				CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
-				int dmg = zone->random.Int(effectvalue, effectvalue2);
+				int64 dmg = zone->random.Int(effectvalue, effectvalue2);
 				trigger->SetHP(trigger->GetHP() - dmg);
 				a->damage = dmg;
 				a->hit_heading = 0.0f;

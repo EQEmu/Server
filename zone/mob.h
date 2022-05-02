@@ -772,7 +772,7 @@ public:
 	inline AuraMgr &GetAuraMgr() { return aura_mgr; } // mainly used for zone db loading/saving
 
 	//Procs
-	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQ::invslot::slotPrimary, bool FromSkillProc = false, int damage = 0);
+	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQ::invslot::slotPrimary, bool FromSkillProc = false, int64 damage = 0);
 	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN, uint32 proc_reuse_time = 0);
 	bool RemoveRangedProc(uint16 spell_id, bool bAll = false);
 	bool HasRangedProcs() const;
@@ -1326,8 +1326,8 @@ public:
 	void AddAssistCap() { ++npc_assist_cap; }
 	void DelAssistCap() { --npc_assist_cap; }
 	void ResetAssistCap() { npc_assist_cap = 0; }
-	int GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item);
-	int GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint64 *hate = nullptr);
+	int64 GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item);
+	int64 GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint64 *hate = nullptr);
 
 	int64 GetHPRegen() const;
 	int64 GetManaRegen() const;

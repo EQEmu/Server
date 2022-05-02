@@ -1309,7 +1309,7 @@ void Group::BalanceHP(int32 penalty, float range, Mob* caster, int32 limit)
 	if (!range)
 		range = 200;
 
-	int dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
+	int64 dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
 
 	float distance;
 	float range2 = range*range;

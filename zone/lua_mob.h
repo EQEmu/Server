@@ -58,10 +58,10 @@ public:
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::adl::object opts);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic);
 	void RangedAttack(Lua_Mob other);
 	void ThrowingAttack(Lua_Mob other);
 	void Heal();

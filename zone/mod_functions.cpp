@@ -29,7 +29,7 @@ void Zone::mod_repop() { return; }
 void NPC::mod_prespawn(Spawn2 *sp) { return; }
 
 //Base damage from NPC::Attack
-int NPC::mod_npc_damage(int damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemData* weapon, Mob* other) { return(damage); }
+int NPC::mod_npc_damage(int64 damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemData* weapon, Mob* other) { return(damage); }
 
 //Mob c has been given credit for a kill.  This is called after the regular EVENT_KILLED_MERIT event.
 void NPC::mod_npc_killed_merit(Mob* c) { return; }
@@ -38,7 +38,7 @@ void NPC::mod_npc_killed_merit(Mob* c) { return; }
 void NPC::mod_npc_killed(Mob* oos) { return; }
 
 //Base damage from Client::Attack - can cover myriad skill types
-int Client::mod_client_damage(int damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemInstance* weapon, Mob* other) { return(damage); }
+int Client::mod_client_damage(int64 damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemInstance* weapon, Mob* other) { return(damage); }
 
 //message is char[4096], don't screw it up. Return true for normal behavior, false to return immediately.
 // Channels:

@@ -767,7 +767,7 @@ XS(XS_Mob_SetHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetHP) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int32 hp)"); // @categories Stats and Attributes
+		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int64 hp)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int64 hp = (int32) SvIV(ST(1));

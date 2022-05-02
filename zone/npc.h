@@ -477,7 +477,7 @@ public:
 	uint32	GetSpawnKillCount();
 	int	GetScore();
 	void	mod_prespawn(Spawn2 *sp);
-	int	mod_npc_damage(int damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemData* weapon, Mob* other);
+	int	mod_npc_damage(int64 damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemData* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
 	void	AISpellsList(Client *c);

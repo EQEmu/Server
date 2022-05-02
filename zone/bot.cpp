@@ -4379,7 +4379,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		const ItemInstance* trade_item_instance;
 		int16 from_client_slot;
 		int16 to_bot_slot;
-		
+
 		ClientTrade(const ItemInstance* item, int16 from) : trade_item_instance(item), from_client_slot(from), to_bot_slot(invslot::SLOT_INVALID) { }
 	};
 
@@ -4387,7 +4387,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		const ItemInstance* return_item_instance;
 		int16 from_bot_slot;
 		int16 to_client_slot;
-		
+
 		ClientReturn(const ItemInstance* item, int16 from) : return_item_instance(item), from_bot_slot(from), to_client_slot(invslot::SLOT_INVALID) { }
 	};
 
@@ -4471,7 +4471,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		linker.SetItemInst(trade_instance);
 
 		auto item_link = linker.GenerateLink();
-	
+
 		if (trade_index != invslot::slotCursor && !trade_instance->IsDroppable()) {
 			LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 			client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
@@ -4801,7 +4801,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
 
-		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {			
+		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {
 			client->Message(
 				Chat::Red,
 				fmt::format(
@@ -6512,7 +6512,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if(skill_to_use == -1)
 		return;
 
-	int dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
+	int64 dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
 
 	if (skill_to_use == EQ::skills::SkillBash) {
 		if (target != this) {
@@ -8122,7 +8122,7 @@ int32 Bot::LevelRegen() {
 	int level = GetLevel();
 	bool bonus = GetPlayerRaceBit(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
 	uint8 multiplier1 = bonus ? 2 : 1;
-	int32 hp = 0;
+	int64 hp = 0;
 	if (level < 51) {
 		if (IsSitting()) {
 			if (level < 20)
