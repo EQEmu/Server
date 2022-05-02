@@ -204,7 +204,7 @@ bool strn0cpyt(char* dest, const char* source, uint32 size);
 char *CleanMobName(const char *in, char *out);
 char *RemoveApostrophes(const char *s);
 char* strn0cpy(char* dest, const char* source, uint32 size);
-const char *ConvertArray(int input, char *returnchar);
+const char *ConvertArray(int64 input, char *returnchar);
 const char *ConvertArrayF(float input, char *returnchar);
 const char *MakeLowerString(const char *source);
 uint32 hextoi(const char* num);

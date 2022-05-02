@@ -2378,7 +2378,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->race               = n.race;
 		t->class_             = n.class_;
 		t->max_hp             = n.hp;
-		t->current_hp         = t->max_hp;
+		t->current_hp         = n.hp;
 		t->Mana               = n.mana;
 		t->gender             = n.gender;
 		t->texture            = n.texture;

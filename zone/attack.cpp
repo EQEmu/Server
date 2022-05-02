@@ -3773,8 +3773,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		//final damage has been determined.
 
-		SetHP(GetHP() - damage);
+		Shout(fmt::format("hp is {} damage is {} combined is {}", GetHP(), damage, int64(GetHP() - damage)).c_str());
 
+		SetHP(int64(GetHP() - damage));
 
 		if (HasDied()) {
 			bool IsSaved = false;

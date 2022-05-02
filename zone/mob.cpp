@@ -3246,7 +3246,7 @@ void Mob::SetTargetable(bool on) {
 const int64& Mob::SetMana(int64 amount)
 {
 	CalcMaxMana();
-	int32 mmana = GetMaxMana();
+	int64 mmana = GetMaxMana();
 	current_mana = amount < 0 ? 0 : (amount > mmana ? mmana : amount);
 /*
 	if(IsClient())

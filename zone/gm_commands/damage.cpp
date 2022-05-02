@@ -13,6 +13,7 @@ void command_damage(Client *c, const Seperator *sep)
 		target = c->GetTarget();
 	}
 
-	int64 damage = static_cast<int>(std::min(std::stoll(sep->arg[1]), (long long) 2000000000));
+	int64 damage = std::stoll(sep->arg[1], nullptr, 10);
+	c->Message(Chat::Yellow, fmt::format("Issuing damage [{}]", damage).c_str());
 	target->Damage(c, damage, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand, false);
 }
