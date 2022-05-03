@@ -130,9 +130,14 @@ public:
 	int GuildRank();
 	uint32 GuildID();
 	int GetFace();
+	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
+	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client);
+	void AddPlatinum(uint32 platinum);
+	void AddPlatinum(uint32 platinum, bool update_client);
 	bool TakeMoneyFromPP(uint64 copper);
 	bool TakeMoneyFromPP(uint64 copper, bool update_client);
-	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client);
+	bool TakePlatinum(uint32 platinum);
+	bool TakePlatinum(uint32 platinum, bool update_client);
 	bool TGB();
 	int GetSkillPoints();
 	void SetSkillPoints(int skill);
@@ -250,10 +255,16 @@ public:
 	bool UseDiscipline(int spell_id, int target_id);
 	bool HasDisciplineLearned(uint16 spell_id);
 	int GetCharacterFactionLevel(int faction_id);
-	void SetZoneFlag(int zone_id);
-	void ClearZoneFlag(int zone_id);
-	bool HasZoneFlag(int zone_id);
+	void ClearZoneFlag(uint32 zone_id);
+	bool HasZoneFlag(uint32 zone_id);
+	void LoadZoneFlags();
 	void SendZoneFlagInfo(Lua_Client to);
+	void SetZoneFlag(uint32 zone_id);
+	void ClearPEQZoneFlag(uint32 zone_id);
+	bool HasPEQZoneFlag(uint32 zone_id);
+	void LoadPEQZoneFlags();
+	void SendPEQZoneFlagInfo(Lua_Client to);
+	void SetPEQZoneFlag(uint32 zone_id);
 	void SetAATitle(const char *title);
 	int GetClientVersion();
 	uint32 GetClientVersionBit();
@@ -328,6 +339,7 @@ public:
 	void UnFreeze();
 	int GetAggroCount();
 	uint64 GetCarriedMoney();
+	uint32 GetCarriedPlatinum();
 	uint64 GetAllMoney();
 	uint32 GetMoney(uint8 type, uint8 subtype);
 	void OpenLFGuildWindow();
@@ -393,6 +405,10 @@ public:
 	void RemoveItem(uint32 item_id, uint32 quantity);
 	void SetGMStatus(uint32 newStatus);
 	void AddItem(luabind::object item_table);
+	int CountAugmentEquippedByID(uint32 item_id);
+	int CountItemEquippedByID(uint32 item_id);
+	bool HasAugmentEquippedByID(uint32 item_id);
+	bool HasItemEquippedByID(uint32 item_id);
 
 	int GetEnvironmentDamageModifier();
 	void SetEnvironmentDamageModifier(int value);

@@ -201,7 +201,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
 	}
-	this->rez_experience = 0;
+	rez_experience = 0;
 
 	UpdateEquipmentLight();
 	UpdateActiveLight();
@@ -529,10 +529,10 @@ false),
 	strcpy(corpse_name, in_charname);
 	strcpy(name, in_charname);
 
-	this->copper = in_copper;
-	this->silver = in_silver;
-	this->gold = in_gold;
-	this->platinum = in_plat;
+	copper = in_copper;
+	silver = in_silver;
+	gold = in_gold;
+	platinum = in_plat;
 
 	rez_experience = in_rezexp;
 
@@ -584,25 +584,25 @@ bool Corpse::Save() {
 	if (!is_corpse_changed)
 		return true;
 
-	uint32 tmp = this->CountItems();
+	uint32 tmp = CountItems();
 	uint32 tmpsize = sizeof(PlayerCorpse_Struct) + (tmp * sizeof(player_lootitem::ServerLootItem_Struct));
 
 	PlayerCorpse_Struct* dbpc = (PlayerCorpse_Struct*) new uchar[tmpsize];
 	memset(dbpc, 0, tmpsize);
 	dbpc->itemcount = tmp;
-	dbpc->size = this->size;
+	dbpc->size = size;
 	dbpc->locked = is_locked;
-	dbpc->copper = this->copper;
-	dbpc->silver = this->silver;
-	dbpc->gold = this->gold;
-	dbpc->plat = this->platinum;
-	dbpc->race = this->race;
+	dbpc->copper = copper;
+	dbpc->silver = silver;
+	dbpc->gold = gold;
+	dbpc->plat = platinum;
+	dbpc->race = race;
 	dbpc->class_ = class_;
 	dbpc->gender = gender;
 	dbpc->deity = deity;
 	dbpc->level = level;
-	dbpc->texture = this->texture;
-	dbpc->helmtexture = this->helmtexture;
+	dbpc->texture = texture;
+	dbpc->helmtexture = helmtexture;
 	dbpc->exp = rez_experience;
 
 	memcpy(&dbpc->item_tint.Slot, &item_tint.Slot, sizeof(dbpc->item_tint));
@@ -831,18 +831,18 @@ void Corpse::RemoveItemByID(uint32 item_id, int quantity) {
 }
 
 void Corpse::SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum) {
-	this->copper = in_copper;
-	this->silver = in_silver;
-	this->gold = in_gold;
-	this->platinum = in_platinum;
+	copper = in_copper;
+	silver = in_silver;
+	gold = in_gold;
+	platinum = in_platinum;
 	is_corpse_changed = true;
 }
 
 void Corpse::RemoveCash() {
-	this->copper = 0;
-	this->silver = 0;
-	this->gold = 0;
-	this->platinum = 0;
+	copper = 0;
+	silver = 0;
+	gold = 0;
+	platinum = 0;
 	is_corpse_changed = true;
 }
 
@@ -892,10 +892,10 @@ bool Corpse::Process() {
 				Save();
 				player_corpse_depop = true;
 				corpse_db_id = 0;
-				LogDebug("Tagged [{}] player corpse has buried", this->GetName());
+				LogDebug("Tagged [{}] player corpse has buried", GetName());
 			}
 			else {
-				LogError("Unable to bury [{}] player corpse", this->GetName());
+				LogError("Unable to bury [{}] player corpse", GetName());
 				return true;
 			}
 		}
@@ -1062,7 +1062,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			d->silver = GetSilver();
 			d->gold = GetGold();
 			d->platinum = GetPlatinum();
-			client->AddMoneyToPP(GetCopper(), GetSilver(), GetGold(), GetPlatinum(), false);
+			client->AddMoneyToPP(GetCopper(), GetSilver(), GetGold(), GetPlatinum());
 		}
 
 		RemoveCash();
@@ -1302,7 +1302,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 				}
 			}
 		}
-		
+
 		if (parse->EventPlayer(EVENT_LOOT, client, export_string, 0, &args) != 0) {
 			prevent_loot = true;
 		}
@@ -1323,14 +1323,14 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (parse->EventItem(EVENT_LOOT, client, inst, this, export_string, 0) != 0) {
 			prevent_loot = true;
 		}
-		
+
 		if (prevent_loot) {
 			lootitem->auto_loot = -1;
 			client->QueuePacket(app);
 			safe_delete(inst);
 			return;
 		}
-		
+
 
 		// safe to ACK now
 		client->QueuePacket(app);
@@ -1366,7 +1366,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (item_data) {
 			/* Delete needs to be before RemoveItem because its deletes the pointer for
 			* item_data/bag_item_data */
-			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot,
+			database.DeleteItemOffCharacterCorpse(corpse_db_id, item_data->equip_slot,
 				item_data->item_id);
 			/* Delete Item Instance */
 			RemoveItem(item_data->lootslot);
@@ -1378,7 +1378,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 				if (bag_item_data[i]) {
 					/* Delete needs to be before RemoveItem because its deletes the pointer for
 					* item_data/bag_item_data */
-					database.DeleteItemOffCharacterCorpse(this->corpse_db_id,
+					database.DeleteItemOffCharacterCorpse(corpse_db_id,
 						bag_item_data[i]->equip_slot,
 						bag_item_data[i]->item_id);
 					/* Delete Item Instance */
@@ -1438,8 +1438,8 @@ void Corpse::EndLoot(Client* client, const EQApplicationPacket* app) {
 	client->QueuePacket(outapp);
 	safe_delete(outapp);
 
-	this->being_looted_by = 0xFFFFFFFF;
-	if (this->IsEmpty())
+	being_looted_by = 0xFFFFFFFF;
+	if (IsEmpty())
 		Delete();
 	else
 		Save();
@@ -1547,7 +1547,7 @@ bool Corpse::HasItem(uint32 item_id) {
 		if (loot_item->item_id == item_id) {
 			return true;
 		}
-	}	
+	}
 	return false;
 }
 
@@ -1599,7 +1599,7 @@ uint16 Corpse::GetFirstSlotByItemID(uint32 item_id) {
 bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 	uint32 dist2 = 10000; // pow(100, 2);
 	if (!spell) {
-		if (this->GetCharID() == client->CharacterID()) {
+		if (GetCharID() == client->CharacterID()) {
 			if (IsLocked() && client->Admin() < AccountStatus::GMAdmin) {
 				client->Message(Chat::Red, "That corpse is locked by a GM.");
 				return false;
@@ -1668,12 +1668,12 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 void Corpse::CompleteResurrection(){
 	rez_experience = 0;
 	is_corpse_changed = true;
-	this->Save();
+	Save();
 }
 
 void Corpse::Spawn() {
 	auto app = new EQApplicationPacket;
-	this->CreateSpawnPacket(app, this);
+	CreateSpawnPacket(app, this);
 	entity_list.QueueClients(this, app);
 	safe_delete(app);
 }
@@ -1833,7 +1833,7 @@ std::vector<int> Corpse::GetLootList() {
 		if (std::find(corpse_items.begin(), corpse_items.end(), loot_item->item_id) != corpse_items.end()) {
 			continue;
 		}
-		
+
 		corpse_items.push_back(loot_item->item_id);
 	}
 	return corpse_items;

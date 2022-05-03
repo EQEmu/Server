@@ -192,6 +192,7 @@ void command_packetprofile(Client *c, const Seperator *sep);
 void command_path(Client *c, const Seperator *sep);
 void command_peekinv(Client *c, const Seperator *sep);
 void command_peqzone(Client *c, const Seperator *sep);
+void command_peqzone_flags(Client *c, const Seperator *sep);
 void command_permaclass(Client *c, const Seperator *sep);
 void command_permagender(Client *c, const Seperator *sep);
 void command_permarace(Client *c, const Seperator *sep);

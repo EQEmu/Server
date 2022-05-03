@@ -2587,7 +2587,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			if (client) {
 				client->Signal(signal);
 			}
-		} else if (update_type = CZUpdateType_NPC) {
+		} else if (update_type == CZUpdateType_NPC) {
 			auto npc = entity_list.GetNPCByNPCTypeID(update_identifier);
 			if (npc) {
 				npc->SignalNPC(signal);

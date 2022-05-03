@@ -31,13 +31,13 @@ extern volatile bool is_zone_loaded;
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
 	GiveNPCTypeData(npcTypeData);
-	
+
 	if(botOwner) {
-		this->SetBotOwner(botOwner);
-		this->_botOwnerCharacterID = botOwner->CharacterID();
+		SetBotOwner(botOwner);
+		_botOwnerCharacterID = botOwner->CharacterID();
 	} else {
-		this->SetBotOwner(0);
-		this->_botOwnerCharacterID = 0;
+		SetBotOwner(0);
+		_botOwnerCharacterID = 0;
 	}
 
 	m_inv.SetInventoryVersion(EQ::versions::MobVersion::Bot);
@@ -116,19 +116,19 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	for (int i = 0; i < MaxTimer; i++)
 		timers[i] = 0;
 
-	strcpy(this->name, this->GetCleanName());
+	strcpy(name, GetCleanName());
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 }
 
 // This constructor is used when the bot is loaded out of the database
-Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData) 
+Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData)
 	: NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1)
 {
 	GiveNPCTypeData(npcTypeData);
-	
-	this->_botOwnerCharacterID = botOwnerCharacterID;
-	if(this->_botOwnerCharacterID > 0)
-		this->SetBotOwner(entity_list.GetClientByCharID(this->_botOwnerCharacterID));
+
+	_botOwnerCharacterID = botOwnerCharacterID;
+	if(_botOwnerCharacterID > 0)
+		SetBotOwner(entity_list.GetClientByCharID(_botOwnerCharacterID));
 
 	auto bot_owner = GetBotOwner();
 
@@ -201,7 +201,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	else
 		SetStopMeleeLevel(255);
 
-	strcpy(this->name, this->GetCleanName());
+	strcpy(name, GetCleanName());
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 	if (!database.botdb.LoadInspectMessage(GetBotID(), _botInspectMessage) && bot_owner)
@@ -209,7 +209,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	if (!database.botdb.LoadGuildMembership(GetBotID(), _guildId, _guildRank, _guildName) && bot_owner)
 		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadGuildMembership(), GetCleanName());
-	
+
 	std::string error_message;
 
 	EquipBot(&error_message);
@@ -384,7 +384,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 			}
 		}
 
-		
+
 	}
 	else {
 		bot_owner->Message(Chat::Red, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
@@ -407,7 +407,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 					GetRace() == DWARF ||
 					GetRace() == TROLL ||
 					GetRace() == OGRE
-				) ? 
+				) ?
 				RuleI(Bots, OldResurrectionSicknessSpell) :
 				RuleI(Bots, ResurrectionSicknessSpell)
 			);
@@ -440,12 +440,12 @@ Bot::~Bot() {
 }
 
 void Bot::SetBotID(uint32 botID) {
-	this->_botID = botID;
-	this->npctype_id = botID;
+	_botID = botID;
+	npctype_id = botID;
 }
 
 void Bot::SetBotSpellID(uint32 newSpellID) {
-	this->npc_spells_id = newSpellID;
+	npc_spells_id = newSpellID;
 }
 
 void  Bot::SetSurname(std::string bot_surname) {
@@ -840,7 +840,7 @@ void Bot::GenerateBaseStats()
 	int32 CorruptionResist = _baseCorrup;
 
 	// pulling fixed values from an auto-increment field is dangerous...
-	switch(this->GetClass()) {
+	switch(GetClass()) {
 		case WARRIOR:
 			BotSpellID = 3001;
 			Strength += 10;
@@ -967,7 +967,7 @@ void Bot::GenerateBaseStats()
 
 	float BotSize = GetSize();
 
-	switch(this->GetRace()) {
+	switch(GetRace()) {
 		case HUMAN: // Humans have no race bonus
 			break;
 		case BARBARIAN:
@@ -1127,33 +1127,33 @@ void Bot::GenerateBaseStats()
 			break;
 	}
 
-	this->STR = Strength;
-	this->STA = Stamina;
-	this->DEX = Dexterity;
-	this->AGI = Agility;
-	this->WIS = Wisdom;
-	this->INT = Intelligence;
-	this->CHA = Charisma;
-	this->ATK = Attack;
-	this->MR = MagicResist;
-	this->FR = FireResist;
-	this->DR = DiseaseResist;
-	this->PR = PoisonResist;
-	this->CR = ColdResist;
-	this->PhR = 0;
-	this->Corrup = CorruptionResist;
+	STR = Strength;
+	STA = Stamina;
+	DEX = Dexterity;
+	AGI = Agility;
+	WIS = Wisdom;
+	INT = Intelligence;
+	CHA = Charisma;
+	ATK = Attack;
+	MR = MagicResist;
+	FR = FireResist;
+	DR = DiseaseResist;
+	PR = PoisonResist;
+	CR = ColdResist;
+	PhR = 0;
+	Corrup = CorruptionResist;
 	SetBotSpellID(BotSpellID);
-	this->size = BotSize;
-	this->pAggroRange = 0;
-	this->pAssistRange = 0;
-	this->raid_target = false;
-	this->deity = 396;
+	size = BotSize;
+	pAggroRange = 0;
+	pAssistRange = 0;
+	raid_target = false;
+	deity = 396;
 }
 
 void Bot::GenerateAppearance() {
 	// Randomize facial appearance
 	int iFace = 0;
-	if(this->GetRace() == 2) // Barbarian w/Tatoo
+	if(GetRace() == 2) // Barbarian w/Tatoo
 		iFace = zone->random.Int(0, 79);
 	else
 		iFace = zone->random.Int(0, 7);
@@ -1161,13 +1161,13 @@ void Bot::GenerateAppearance() {
 	int iHair = 0;
 	int iBeard = 0;
 	int iBeardColor = 1;
-	if(this->GetRace() == 522) {
+	if(GetRace() == 522) {
 		iHair = zone->random.Int(0, 8);
 		iBeard = zone->random.Int(0, 11);
 		iBeardColor = zone->random.Int(0, 3);
-	} else if(this->GetGender()) {
+	} else if(GetGender()) {
 		iHair = zone->random.Int(0, 2);
-		if(this->GetRace() == 8) { // Dwarven Females can have a beard
+		if(GetRace() == 8) { // Dwarven Females can have a beard
 			if(zone->random.Int(1, 100) < 50)
 				iFace += 10;
 		}
@@ -1178,14 +1178,14 @@ void Bot::GenerateAppearance() {
 	}
 
 	int iHairColor = 0;
-	if(this->GetRace() == 522)
+	if(GetRace() == 522)
 		iHairColor = zone->random.Int(0, 3);
 	else
 		iHairColor = zone->random.Int(0, 19);
 
 	uint8 iEyeColor1 = (uint8)zone->random.Int(0, 9);
 	uint8 iEyeColor2 = 0;
-	if(this->GetRace() == 522)
+	if(GetRace() == 522)
 		iEyeColor1 = iEyeColor2 = (uint8)zone->random.Int(0, 11);
 	else if(zone->random.Int(1, 100) > 96)
 		iEyeColor2 = zone->random.Int(0, 9);
@@ -1195,21 +1195,21 @@ void Bot::GenerateAppearance() {
 	int iHeritage = 0;
 	int iTattoo = 0;
 	int iDetails = 0;
-	if(this->GetRace() == 522) {
+	if(GetRace() == 522) {
 		iHeritage = zone->random.Int(0, 6);
 		iTattoo = zone->random.Int(0, 7);
 		iDetails = zone->random.Int(0, 7);
 	}
-	this->luclinface = iFace;
-	this->hairstyle = iHair;
-	this->beard = iBeard;
-	this->beardcolor = iBeardColor;
-	this->haircolor = iHairColor;
-	this->eyecolor1 = iEyeColor1;
-	this->eyecolor2 = iEyeColor2;
-	this->drakkin_heritage = iHeritage;
-	this->drakkin_tattoo = iTattoo;
-	this->drakkin_details = iDetails;
+	luclinface = iFace;
+	hairstyle = iHair;
+	beard = iBeard;
+	beardcolor = iBeardColor;
+	haircolor = iHairColor;
+	eyecolor1 = iEyeColor1;
+	eyecolor2 = iEyeColor2;
+	drakkin_heritage = iHeritage;
+	drakkin_tattoo = iTattoo;
+	drakkin_details = iDetails;
 }
 
 int32 Bot::acmod() {
@@ -1665,12 +1665,12 @@ int32 Bot::GenerateBaseHitPoints() {
 
 		new_base_hp = (5) + (GetLevel() * lm / 10) + (((NormalSTA - Post255) * GetLevel() * lm / 3000)) + ((Post255 * 1) * lm / 6000);
 	}
-	this->base_hp = new_base_hp;
+	base_hp = new_base_hp;
 	return new_base_hp;
 }
 
 void Bot::LoadAAs() {
-	
+
 	aa_ranks.clear();
 
 	int id = 0;
@@ -1689,7 +1689,7 @@ void Bot::LoadAAs() {
 		points = 0;
 
 		AA::Rank *current = ability->first;
-		
+
 		if (current->level_req > GetLevel()) {
 			++iter;
 			continue;
@@ -1730,7 +1730,7 @@ bool Bot::IsValidRaceClassCombo(uint16 bot_race, uint8 bot_class)
 
 bool Bot::IsValidName()
 {
-	std::string name = this->GetCleanName();
+	std::string name = GetCleanName();
 	return Bot::IsValidName(name);
 }
 
@@ -1740,7 +1740,7 @@ bool Bot::IsValidName(std::string& name)
 		return false;
 	if (!isupper(name[0]))
 		return false;
-	
+
 	for (int i = 1; i < name.length(); ++i) {
 		if ((!RuleB(Bots, AllowCamelCaseNames) && !islower(name[i])) && name[i] != '_') {
 			return false;
@@ -1772,7 +1772,7 @@ bool Bot::Save()
 			return false;
 		}
 	}
-	
+
 	// All of these continue to process if any fail
 	if (!database.botdb.SaveBuffs(this))
 		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveBuffs(), GetCleanName());
@@ -1780,10 +1780,10 @@ bool Bot::Save()
 		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveTimers(), GetCleanName());
 	if (!database.botdb.SaveStance(this))
 		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveStance(), GetCleanName());
-	
+
 	if (!SavePet())
 		bot_owner->Message(Chat::Red, "Failed to save pet for '%s'", GetCleanName());
-	
+
 	return true;
 }
 
@@ -1887,7 +1887,7 @@ bool Bot::LoadPet()
 			}
 		}
 	}
-	
+
 	std::string error_message;
 
 	uint32 pet_index = 0;
@@ -1948,7 +1948,7 @@ bool Bot::SavePet()
 {
 	if (!GetPet() || GetPet()->IsFamiliar()) // dead?
 		return true;
-	
+
 	NPC *pet_inst = GetPet()->CastToNPC();
 	if (!pet_inst->GetPetSpellID() || !IsValidSpell(pet_inst->GetPetSpellID()))
 		return false;
@@ -1964,9 +1964,9 @@ bool Bot::SavePet()
 	memset(pet_name, 0, 64);
 	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * PET_BUFF_COUNT));
 	memset(pet_items, 0, (sizeof(uint32) * EQ::invslot::EQUIPMENT_COUNT));
-	
+
 	pet_inst->GetPetState(pet_buffs, pet_items, pet_name);
-	
+
 	std::string pet_name_str = pet_name;
 	safe_delete_array(pet_name);
 
@@ -1976,7 +1976,7 @@ bool Bot::SavePet()
 		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::SavePetStats(), GetCleanName());
 		return false;
 	}
-	
+
 	if (!database.botdb.SavePetBuffs(GetBotID(), pet_buffs))
 		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::SavePetBuffs(), GetCleanName());
 	if (!database.botdb.SavePetItems(GetBotID(), pet_items))
@@ -1990,7 +1990,7 @@ bool Bot::DeletePet()
 	auto bot_owner = GetBotOwner();
 	if (!bot_owner)
 		return false;
-	
+
 	std::string error_message;
 
 	if (!database.botdb.DeletePetItems(GetBotID())) {
@@ -2261,36 +2261,6 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-void Bot::ApplySpecialAttackMod(EQ::skills::SkillType skill, int32 &dmg, int32 &mindmg) {
-	int item_slot = -1;
-	//1: Apply bonus from AC (BOOT/SHIELD/HANDS) est. 40AC=6dmg
-	switch (skill) {
-	case EQ::skills::SkillFlyingKick:
-	case EQ::skills::SkillRoundKick:
-	case EQ::skills::SkillKick:
-		item_slot = EQ::invslot::slotFeet;
-		break;
-	case EQ::skills::SkillBash:
-		item_slot = EQ::invslot::slotSecondary;
-		break;
-	case EQ::skills::SkillDragonPunch:
-	case EQ::skills::SkillEagleStrike:
-	case EQ::skills::SkillTigerClaw:
-		item_slot = EQ::invslot::slotHands;
-		break;
-	}
-
-	if (item_slot >= EQ::invslot::EQUIPMENT_BEGIN){
-		const EQ::ItemInstance* inst = GetBotItem(item_slot);
-		const EQ::ItemData* botweapon = nullptr;
-		if(inst)
-			botweapon = inst->GetItem();
-
-		if(botweapon)
-			dmg += botweapon->AC * (RuleI(Combat, SpecialAttackACBonus))/100;
-	}
-}
-
 bool Bot::CanDoSpecialAttack(Mob *other) {
 	//Make sure everything is valid before doing any attacks.
 	if (!other) {
@@ -2463,7 +2433,7 @@ void Bot::AI_Process()
 			) {
 				InterruptSpell();
 			}
-			
+
 			return;
 		}
 	}
@@ -2562,7 +2532,7 @@ void Bot::AI_Process()
 				SetPullingFlag();
 				bot_owner->SetBotPulling();
 				if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
-					
+
 					GetPet()->WipeHateList();
 					GetPet()->SetTarget(nullptr);
 					m_previous_pet_order = GetPet()->GetPetOrder();
@@ -2577,7 +2547,7 @@ void Bot::AI_Process()
 //#pragma region ALT COMBAT (ACQUIRE HATE)
 
 	else if (bo_alt_combat && m_alt_combat_hate_timer.Check(false)) { // 'Alt Combat' gives some more 'control' options on how bots process aggro
-		
+
 		// Empty hate list - let's find some aggro
 		if (!IsEngaged() && NOT_HOLDING && NOT_PASSIVE && (!bot_owner->GetBotPulling() || NOT_PULLING_BOT)) {
 
@@ -2775,7 +2745,7 @@ void Bot::AI_Process()
 
 		Mob* tar = GetTarget(); // We should have a target..if not, we're awaiting new orders
 		if (!tar || PASSIVE) {
-			
+
 			SetTarget(nullptr);
 			WipeHateList();
 			SetAttackFlag(false);
@@ -3056,7 +3026,7 @@ void Bot::AI_Process()
 
 		// We can fight
 		if (atCombatRange) {
-			
+
 			//if (IsMoving() || GetCombatJitterFlag()) { // StopMoving() needs to be called so that the jitter timer can be reset
 			if (IsMoving()) {
 
@@ -3403,7 +3373,7 @@ void Bot::AI_Process()
 
 				// This is a mob that is fleeing either because it has been feared or is low on hitpoints
 				AI_PursueCastCheck(); // This appears to always return true..can't trust for success/fail
-				
+
 				return;
 			}
 		} // End not in combat range
@@ -3423,7 +3393,7 @@ void Bot::AI_Process()
 		}
 	}
 	else { // Out-of-combat behavior
-		
+
 		SetAttackFlag(false);
 		SetAttackingFlag(false);
 		if (!bot_owner->GetBotPulling()) {
@@ -3443,7 +3413,7 @@ void Bot::AI_Process()
 				m_auto_defend_timer.Start(zone->random.Int(250, 1250)); // random timer to simulate 'awareness' (cuts down on scanning overhead)
 				return;
 			}
-			
+
 			if (m_auto_defend_timer.Check() && bot_owner->GetAggroCount()) {
 
 				if (NOT_HOLDING && NOT_PASSIVE) {
@@ -3485,7 +3455,7 @@ void Bot::AI_Process()
 		}
 
 //#pragma endregion
-		
+
 		SetTarget(nullptr);
 
 		if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
@@ -3499,7 +3469,7 @@ void Bot::AI_Process()
 		}
 
 //#pragma region OK TO IDLE
-		
+
 		// Ok to idle
 		if ((NOT_GUARDING && fm_distance <= GetFollowDistance()) || (GUARDING && DistanceSquared(GetPosition(), GetGuardPoint()) <= GetFollowDistance())) {
 
@@ -3596,9 +3566,9 @@ void Bot::AI_Process()
 void Bot::PetAIProcess() {
 	if( !HasPet() || !GetPet() || !GetPet()->IsNPC())
 		return;
-	
-	Mob* BotOwner = this->GetBotOwner();
-	NPC* botPet = this->GetPet()->CastToNPC();
+
+	Mob* BotOwner = GetBotOwner();
+	NPC* botPet = GetPet()->CastToNPC();
 	if(!botPet->GetOwner() || !botPet->GetID() || !botPet->GetOwnerID()) {
 		Kill();
 		return;
@@ -3829,25 +3799,25 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		_lastZoneId = GetZoneID();
 
 		// this change propagates to Bot::FillSpawnStruct()
-		this->helmtexture = 0; //0xFF;
-		this->texture = 0; //0xFF;
+		helmtexture = 0; //0xFF;
+		texture = 0; //0xFF;
 
-		if(this->Save())
-			this->GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", this->GetCleanName());
+		if(Save())
+			GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", GetCleanName());
 		else
-			this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
+			GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", GetCleanName());
 
 		// Spawn the bot at the bot owner's loc
-		this->m_Position.x = botCharacterOwner->GetX();
-		this->m_Position.y = botCharacterOwner->GetY();
-		this->m_Position.z = botCharacterOwner->GetZ();
+		m_Position.x = botCharacterOwner->GetX();
+		m_Position.y = botCharacterOwner->GetY();
+		m_Position.z = botCharacterOwner->GetZ();
 
 		// Make the bot look at the bot owner
 		FaceTarget(botCharacterOwner);
 		UpdateEquipmentLight();
 		UpdateActiveLight();
 
-		this->m_targetable = true;
+		m_targetable = true;
 		entity_list.AddBot(this, true, true);
 		// Load pet
 		LoadPet();
@@ -3862,7 +3832,7 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 			if(itemID != 0) {
 				materialFromSlot = EQ::InventoryProfile::CalcMaterialFromSlot(i);
 				if(materialFromSlot != 0xFF)
-					this->SendWearChange(materialFromSlot);
+					SendWearChange(materialFromSlot);
 			}
 		}
 
@@ -3948,7 +3918,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		const EQ::ItemData* item = nullptr;
 		const EQ::ItemInstance* inst = nullptr;
 		uint32 spawnedbotid = 0;
-		spawnedbotid = this->GetBotID();
+		spawnedbotid = GetBotID();
 		for (int i = EQ::textures::textureBegin; i < EQ::textures::weaponPrimary; i++) {
 			inst = GetBotItem(i);
 			if (inst) {
@@ -3997,10 +3967,10 @@ Bot* Bot::LoadBot(uint32 botID)
 	Bot* loaded_bot = nullptr;
 	if (!botID)
 		return loaded_bot;
-	
+
 	if (!database.botdb.LoadBot(botID, loaded_bot)) // TODO: Consider update to message handler
 		return loaded_bot;
-	
+
 	return loaded_bot;
 }
 
@@ -4017,7 +3987,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 					botOwner->Message(Chat::Red, "%s", BotDatabase::fail::LoadGroupedBotsByGroupID());
 					return;
 				}
-				
+
 				if(!ActiveBots.empty()) {
 					for(std::list<uint32>::iterator itr = ActiveBots.begin(); itr != ActiveBots.end(); ++itr) {
 						Bot* activeBot = Bot::LoadBot(*itr);
@@ -4150,29 +4120,6 @@ void Bot::BotRemoveEquipItem(int16 slot)
 		SendAppearancePacket(AT_Light, GetActiveLightType());
 }
 
-void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQ::ItemInstance* inst, const EQ::ItemInstance* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap) {
-
-	if(!errorMessage->empty())
-		return;
-
-	client->PushItemOnCursor(*inst_swap, true);
-
-	// Remove the item from the bot and from the bot's database records
-	RemoveBotItemBySlot(lootSlot, errorMessage);
-
-	if(!errorMessage->empty())
-		return;
-
-	this->BotRemoveEquipItem(lootSlot);
-
-	if(swap) {
-		BotTradeAddItem(inst->GetItem()->ID, inst, inst->GetCharges(), equipableSlots, lootSlot, errorMessage);
-
-		if(!errorMessage->empty())
-			return;
-	}
-}
-
 void Bot::BotTradeAddItem(uint32 id, const EQ::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb)
 {
 	if(addToDb) {
@@ -4184,7 +4131,7 @@ void Bot::BotTradeAddItem(uint32 id, const EQ::ItemInstance* inst, int16 charges
 		m_inv.PutItem(lootSlot, *inst);
 	}
 
-	this->BotAddEquipItem(lootSlot, id);
+	BotAddEquipItem(lootSlot, id);
 }
 
 bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
@@ -4259,28 +4206,24 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType)
 }
 
 // Perfoms the actual trade action with a client bot owner
-void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client)
+void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client* client)
 {
 	using namespace EQ;
 
 	struct ClientTrade {
-		const ItemInstance* tradeItemInstance;
-		int16 fromClientSlot;
-		int16 toBotSlot;
-		int adjustStackSize;
-		std::string acceptedItemName;
-
-		ClientTrade(const ItemInstance* item, int16 from, const char* name = "") : tradeItemInstance(item), fromClientSlot(from), toBotSlot(invslot::SLOT_INVALID), adjustStackSize(0), acceptedItemName(name) { }
+		const ItemInstance* trade_item_instance;
+		int16 from_client_slot;
+		int16 to_bot_slot;
+		
+		ClientTrade(const ItemInstance* item, int16 from) : trade_item_instance(item), from_client_slot(from), to_bot_slot(invslot::SLOT_INVALID) { }
 	};
 
 	struct ClientReturn {
-		const ItemInstance* returnItemInstance;
-		int16 fromBotSlot;
-		int16 toClientSlot;
-		int adjustStackSize;
-		std::string failedItemName;
-
-		ClientReturn(const ItemInstance* item, int16 from, const char* name = "") : returnItemInstance(item), fromBotSlot(from), toClientSlot(invslot::SLOT_INVALID), adjustStackSize(0), failedItemName(name) { }
+		const ItemInstance* return_item_instance;
+		int16 from_bot_slot;
+		int16 to_client_slot;
+		
+		ClientReturn(const ItemInstance* item, int16 from) : return_item_instance(item), from_bot_slot(from), to_client_slot(invslot::SLOT_INVALID) { }
 	};
 
 	static const int16 bot_equip_order[invslot::EQUIPMENT_COUNT] = {
@@ -4300,32 +4243,37 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	}
 
 	if (client != GetOwner()) {
-		client->Message(Chat::Red, "You are not the owner of this bot - Trade Canceled.");
+		client->Message(Chat::Red, "You are not the owner of this bot, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if ((beginSlotID != invslot::TRADE_BEGIN) && (beginSlotID != invslot::slotCursor)) {
-		client->Message(Chat::Red, "Trade request processing from illegal 'begin' slot - Trade Canceled.");
+
+	if (begin_slot_id != invslot::TRADE_BEGIN && begin_slot_id != invslot::slotCursor) {
+		client->Message(Chat::Red, "Trade request processing from illegal 'begin' slot, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if ((endSlotID != invslot::TRADE_END) && (endSlotID != invslot::slotCursor)) {
-		client->Message(Chat::Red, "Trade request processing from illegal 'end' slot - Trade Canceled.");
+
+	if (end_slot_id != invslot::TRADE_END && end_slot_id != invslot::slotCursor) {
+		client->Message(Chat::Red, "Trade request processing from illegal 'end' slot, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if (((beginSlotID == invslot::slotCursor) && (endSlotID != invslot::slotCursor)) || ((beginSlotID != invslot::slotCursor) && (endSlotID == invslot::slotCursor))) {
-		client->Message(Chat::Red, "Trade request processing illegal slot range - Trade Canceled.");
+
+	if ((begin_slot_id == invslot::slotCursor && end_slot_id != invslot::slotCursor) || (begin_slot_id != invslot::slotCursor && end_slot_id == invslot::slotCursor)) {
+		client->Message(Chat::Red, "Trade request processing illegal slot range, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
-	if (endSlotID < beginSlotID) {
-		client->Message(Chat::Red, "Trade request processing in reverse slot order - Trade Canceled.");
+
+	if (end_slot_id < begin_slot_id) {
+		client->Message(Chat::Red, "Trade request processing in reverse slot order, the trade has been cancelled.");
 		client->ResetTrade();
 		return;
 	}
+
 	if (client->IsEngaged() || IsEngaged()) {
-		client->Message(Chat::Yellow, "You may not perform a trade while engaged - Trade Canceled!");
+		client->Message(Chat::Yellow, "You may not perform a trade while engaged, the trade has been cancelled!");
 		client->ResetTrade();
 		return;
 	}
@@ -4334,30 +4282,58 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	std::list<ClientReturn> client_return;
 
 	// pre-checks for incoming illegal transfers
-	for (int16 trade_index = beginSlotID; trade_index <= endSlotID; ++trade_index) {
+	for (int16 trade_index = begin_slot_id; trade_index <= end_slot_id; ++trade_index) {
 		auto trade_instance = client->GetInv()[trade_index];
-		if (!trade_instance)
+		if (!trade_instance) {
 			continue;
+		}
 
 		if (!trade_instance->GetItem()) {
-			// TODO: add logging
-			client->Message(Chat::Red, "A server error was encountered while processing client slot %i - Trade Canceled.", trade_index);
+			LogError("Bot::PerformTradeWithClient could not find item from instance in trade for {} with {} in slot {}.", client->GetCleanName(), GetCleanName(), trade_index);
+			client->Message(
+				Chat::Red,
+				fmt::format(
+					"A server error was encountered while processing client slot {}, the trade has been cancelled.",
+					trade_index
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
-		if ((trade_index != invslot::slotCursor) && !trade_instance->IsDroppable()) {
-			// TODO: add logging
-			client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
+
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(trade_instance);
+
+		auto item_link = linker.GenerateLink();
+	
+		if (trade_index != invslot::slotCursor && !trade_instance->IsDroppable()) {
+			LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
+			client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
 			client->ResetTrade();
 			return;
 		}
+
 		if (trade_instance->IsStackable() && (trade_instance->GetCharges() < trade_instance->GetItem()->StackSize)) { // temp until partial stacks are implemented
-			client->Message(Chat::Yellow, "'%s' is only a partially stacked item - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(
+				Chat::Yellow,
+				fmt::format(
+					"{} is only a partially stacked item, the trade has been cancelled!",
+					item_link
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
+
 		if (CheckLoreConflict(trade_instance->GetItem())) {
-			client->Message(Chat::Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->Message(
+				Chat::Yellow,
+				fmt::format(
+					"This bot already has {}, the trade has been cancelled!",
+					item_link
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
@@ -4382,37 +4358,43 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 
 		if (!trade_instance->IsType(item::ItemClassCommon)) {
-			client_return.push_back(ClientReturn(trade_instance, trade_index, trade_instance->GetItem()->Name));
-			continue;
-		}
-		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) { // deity checks will be handled within IsEquipable()
-			client_return.push_back(ClientReturn(trade_instance, trade_index, trade_instance->GetItem()->Name));
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
 			continue;
 		}
 
-		client_trade.push_back(ClientTrade(trade_instance, trade_index, trade_instance->GetItem()->Name));
+		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) { // deity checks will be handled within IsEquipable()
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
+		}
+
+		client_trade.push_back(ClientTrade(trade_instance, trade_index));
 	}
 
 	// check for incoming lore hacks
 	for (auto& trade_iterator : client_trade) {
-		if (!trade_iterator.tradeItemInstance->GetItem()->LoreFlag)
+		if (!trade_iterator.trade_item_instance->GetItem()->LoreFlag) {
 			continue;
+		}
 
 		for (const auto& check_iterator : client_trade) {
-			if (check_iterator.fromClientSlot == trade_iterator.fromClientSlot)
+			if (check_iterator.from_client_slot == trade_iterator.from_client_slot) {
 				continue;
-			if (!check_iterator.tradeItemInstance->GetItem()->LoreFlag)
+			}
+
+			if (!check_iterator.trade_item_instance->GetItem()->LoreFlag) {
 				continue;
-			
-			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup == -1) && (check_iterator.tradeItemInstance->GetItem()->ID == trade_iterator.tradeItemInstance->GetItem()->ID)) {
-				// TODO: add logging
-				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
+			}
+
+			if (trade_iterator.trade_item_instance->GetItem()->LoreGroup == -1 && check_iterator.trade_item_instance->GetItem()->ID == trade_iterator.trade_item_instance->GetItem()->ID) {
+				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
+				client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
 				return;
 			}
-			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup > 0) && (check_iterator.tradeItemInstance->GetItem()->LoreGroup == trade_iterator.tradeItemInstance->GetItem()->LoreGroup)) {
-				// TODO: add logging
-				client->Message(Chat::Red, "Trade hack detected - Trade Canceled.");
+
+			if ((trade_iterator.trade_item_instance->GetItem()->LoreGroup > 0) && (check_iterator.trade_item_instance->GetItem()->LoreGroup == trade_iterator.trade_item_instance->GetItem()->LoreGroup)) {
+				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
+				client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
 				return;
 			}
@@ -4427,16 +4409,18 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	//for (unsigned stage_loop = stageStackable; stage_loop <= stageReplaceable; ++stage_loop) { // awaiting implementation
 	for (unsigned stage_loop = stageEmpty; stage_loop <= stageReplaceable; ++stage_loop) {
 		for (auto& trade_iterator : client_trade) {
-			if (trade_iterator.toBotSlot != invslot::SLOT_INVALID)
+			if (trade_iterator.to_bot_slot != invslot::SLOT_INVALID) {
 				continue;
+			}
 
-			auto trade_instance = trade_iterator.tradeItemInstance;
+			auto trade_instance = trade_iterator.trade_item_instance;
 			//if ((stage_loop == stageStackable) && !trade_instance->IsStackable())
 			//	continue;
 
 			for (auto index : bot_equip_order) {
-				if (!(trade_instance->GetItem()->Slots & (1 << index)))
+				if (!(trade_instance->GetItem()->Slots & (1 << index))) {
 					continue;
+				}
 
 				//if (stage_loop == stageStackable) {
 				//	// TODO: implement
@@ -4444,59 +4428,64 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				//}
 
 				if (stage_loop != stageReplaceable) {
-					if (m_inv[index])
+					if (m_inv[index]) {
 						continue;
+					}
 				}
 
 				bool slot_taken = false;
 				for (const auto& check_iterator : client_trade) {
-					if (check_iterator.fromClientSlot == trade_iterator.fromClientSlot)
+					if (check_iterator.from_client_slot == trade_iterator.from_client_slot) {
 						continue;
+					}
 
-					if (check_iterator.toBotSlot == index) {
+					if (check_iterator.to_bot_slot == index) {
 						slot_taken = true;
 						break;
 					}
 				}
-				if (slot_taken)
+
+				if (slot_taken) {
 					continue;
+				}
 
 				if (index == invslot::slotPrimary) {
 					if (trade_instance->GetItem()->IsType2HWeapon()) {
 						if (!melee_secondary) {
 							melee_2h_weapon = true;
-
 							auto equipped_secondary_weapon = m_inv[invslot::slotSecondary];
-							if (equipped_secondary_weapon)
+							if (equipped_secondary_weapon) {
 								client_return.push_back(ClientReturn(equipped_secondary_weapon, invslot::slotSecondary));
-						}
-						else {
+							}
+						} else {
 							continue;
 						}
 					}
-				}
-				if (index == invslot::slotSecondary) {
+				} else if (index == invslot::slotSecondary) {
 					if (!melee_2h_weapon) {
-						if ((can_dual_wield && trade_instance->GetItem()->IsType1HWeapon()) || trade_instance->GetItem()->IsTypeShield() || !trade_instance->IsWeapon()) {
+						if (
+							(can_dual_wield && trade_instance->GetItem()->IsType1HWeapon()) ||
+							trade_instance->GetItem()->IsTypeShield() ||
+							!trade_instance->IsWeapon()
+						) {
 							melee_secondary = true;
-
 							auto equipped_primary_weapon = m_inv[invslot::slotPrimary];
-							if (equipped_primary_weapon && equipped_primary_weapon->GetItem()->IsType2HWeapon())
+							if (equipped_primary_weapon && equipped_primary_weapon->GetItem()->IsType2HWeapon()) {
 								client_return.push_back(ClientReturn(equipped_primary_weapon, invslot::slotPrimary));
-						}
-						else {
+							}
+						} else {
 							continue;
 						}
-					}
-					else {
+					} else {
 						continue;
 					}
 				}
 
-				trade_iterator.toBotSlot = index;
+				trade_iterator.to_bot_slot = index;
 
-				if (m_inv[index])
+				if (m_inv[index]) {
 					client_return.push_back(ClientReturn(m_inv[index], index));
+				}
 
 				break;
 			}
@@ -4505,41 +4494,59 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 	// move unassignable items from trade list to return list
 	for (std::list<ClientTrade>::iterator trade_iterator = client_trade.begin(); trade_iterator != client_trade.end();) {
-		if (trade_iterator->toBotSlot == invslot::SLOT_INVALID) {
-			client_return.push_back(ClientReturn(trade_iterator->tradeItemInstance, trade_iterator->fromClientSlot, trade_iterator->tradeItemInstance->GetItem()->Name));
+		if (trade_iterator->to_bot_slot == invslot::SLOT_INVALID) {
+			client_return.push_back(ClientReturn(trade_iterator->trade_item_instance, trade_iterator->from_client_slot));
 			trade_iterator = client_trade.erase(trade_iterator);
 			continue;
 		}
 		++trade_iterator;
 	}
-	
+
 	// out-going return checks for client
 	for (auto& return_iterator : client_return) {
-		auto return_instance = return_iterator.returnItemInstance;
-		if (!return_instance)
+		auto return_instance = return_iterator.return_item_instance;
+		if (!return_instance) {
 			continue;
+		}
 
 		if (!return_instance->GetItem()) {
-			// TODO: add logging
-			client->Message(Chat::Red, "A server error was encountered while processing bot slot %i - Trade Canceled.", return_iterator.fromBotSlot);
+			LogError("Bot::PerformTradeWithClient error processing bot slot {} for {} in trade with {}.", return_iterator.from_bot_slot, GetCleanName(), client->GetCleanName());
+			client->Message(
+				Chat::Red,
+				fmt::format(
+					"A server error was encountered while processing bot slot {}, the trade has been cancelled.",
+					return_iterator.from_bot_slot
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
+
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(return_instance);
+
+		auto item_link = linker.GenerateLink();
+
 		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
 		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
 		if (client->CheckLoreConflict(return_instance->GetItem())) {
-			client->Message(Chat::Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
+			client->Message(
+				Chat::Yellow,
+				fmt::format(
+					"You already have {}, the trade has been cancelled!",
+					item_link
+				).c_str()
+			);
 			client->ResetTrade();
 			return;
 		}
 
-		if (return_iterator.fromBotSlot == invslot::slotCursor) {
-			return_iterator.toClientSlot = invslot::slotCursor;
-		}
-		else {
+		if (return_iterator.from_bot_slot == invslot::slotCursor) {
+			return_iterator.to_client_slot = invslot::slotCursor;
+		} else {
 			int16 client_search_general = invslot::GENERAL_BEGIN;
 			uint8 client_search_bag = invbag::SLOT_BEGIN;
-
 			bool run_search = true;
 			while (run_search) {
 				int16 client_test_slot = client->GetInv().FindFreeSlotForTradeItem(return_instance, client_search_general, client_search_bag);
@@ -4550,23 +4557,23 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 
 				bool slot_taken = false;
 				for (const auto& check_iterator : client_return) {
-					if (check_iterator.fromBotSlot == return_iterator.fromBotSlot)
+					if (check_iterator.from_bot_slot == return_iterator.from_bot_slot) {
 						continue;
+					}
 
-					if ((check_iterator.toClientSlot == client_test_slot) && (client_test_slot != invslot::slotCursor)) {
+					if (check_iterator.to_client_slot == client_test_slot && client_test_slot != invslot::slotCursor) {
 						slot_taken = true;
 						break;
 					}
 				}
+
 				if (slot_taken) {
-					if ((client_test_slot >= invslot::GENERAL_BEGIN) && (client_test_slot <= invslot::GENERAL_END)) {
+					if (client_test_slot >= invslot::GENERAL_BEGIN && client_test_slot <= invslot::GENERAL_END) {
 						++client_search_general;
 						client_search_bag = invbag::SLOT_BEGIN;
-					}
-					else {
+					} else {
 						client_search_general = InventoryProfile::CalcSlotId(client_test_slot);
 						client_search_bag = InventoryProfile::CalcBagIdx(client_test_slot);
-
 						++client_search_bag;
 						if (client_search_bag >= invbag::SLOT_COUNT) {
 							// incrementing this past legacy::GENERAL_END triggers the (client_test_slot == legacy::SLOT_INVALID) at the beginning of the search loop
@@ -4579,13 +4586,13 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 					continue;
 				}
 
-				return_iterator.toClientSlot = client_test_slot;
+				return_iterator.to_client_slot = client_test_slot;
 				run_search = false;
 			}
 		}
 
-		if (return_iterator.toClientSlot == invslot::SLOT_INVALID) {
-			client->Message(Chat::Yellow, "You do not have room to complete this trade - Trade Canceled!");
+		if (return_iterator.to_client_slot == invslot::SLOT_INVALID) {
+			client->Message(Chat::Yellow, "You do not have room to complete this trade, the trade has been cancelled!");
 			client->ResetTrade();
 			return;
 		}
@@ -4596,70 +4603,105 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	for (auto& return_iterator : client_return) {
 		// TODO: code for stackables
 
-		if (return_iterator.fromBotSlot == invslot::slotCursor) { // failed trade return
+		if (return_iterator.from_bot_slot == invslot::slotCursor) { // failed trade return
 			// no movement action required
-		}
-		else if ((return_iterator.fromBotSlot >= invslot::TRADE_BEGIN) && (return_iterator.fromBotSlot <= invslot::TRADE_END)) { // failed trade returns
-			client->PutItemInInventory(return_iterator.toClientSlot, *return_iterator.returnItemInstance);
-			client->SendItemPacket(return_iterator.toClientSlot, return_iterator.returnItemInstance, ItemPacketTrade);
-			client->DeleteItemInInventory(return_iterator.fromBotSlot);
-		}
-		else { // successful trade returns
-			auto return_instance = m_inv.PopItem(return_iterator.fromBotSlot);
-			//if (*return_instance != *return_iterator.returnItemInstance) {
+		} else if ((return_iterator.from_bot_slot >= invslot::TRADE_BEGIN) && (return_iterator.from_bot_slot <= invslot::TRADE_END)) { // failed trade returns
+			client->PutItemInInventory(return_iterator.to_client_slot, *return_iterator.return_item_instance);
+			client->SendItemPacket(return_iterator.to_client_slot, return_iterator.return_item_instance, ItemPacketTrade);
+			client->DeleteItemInInventory(return_iterator.from_bot_slot);
+		} else { // successful trade returns
+			auto return_instance = m_inv.PopItem(return_iterator.from_bot_slot);
+			//if (*return_instance != *return_iterator.return_item_instance) {
 			//	// TODO: add logging
 			//}
 
-			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
-				client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
+			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.from_bot_slot)) {
+				client->Message(
+					Chat::Red,
+					fmt::format(
+						"Failed to delete item by slot from slot {} for {}.",
+						return_iterator.from_bot_slot,
+						GetCleanName()
+					).c_str()
+				);
+			}
 
-			BotRemoveEquipItem(return_iterator.fromBotSlot);
-			if (return_instance)
-				client->PutItemInInventory(return_iterator.toClientSlot, *return_instance, true);
+			BotRemoveEquipItem(return_iterator.from_bot_slot);
+
+			if (return_instance) {
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+				linker.SetItemInst(return_instance);
+				auto item_link = linker.GenerateLink();
+
+				client->Message(
+					Chat::Tell,
+					fmt::format(
+						"{} tells you, 'I have returned {}.'",
+						GetCleanName(),
+						item_link
+					).c_str()
+				);
+
+				client->PutItemInInventory(return_iterator.to_client_slot, *return_instance, true);
+			}
+
 			InventoryProfile::MarkDirty(return_instance);
 		}
-		return_iterator.returnItemInstance = nullptr;
+		return_iterator.return_item_instance = nullptr;
 	}
 
 	// trades can now go in as empty slot inserts
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
 
-		if (!database.botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
-			client->Message(Chat::Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
+		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {			
+			client->Message(
+				Chat::Red,
+				fmt::format(
+					"Failed to save item by slot to slot {} for {}.",
+					trade_iterator.to_bot_slot,
+					GetCleanName()
+				).c_str()
+			);
+		}
 
-		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
-		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
-		trade_iterator.tradeItemInstance = nullptr; // actual deletion occurs in client delete below
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(trade_iterator.trade_item_instance);
+		auto item_link = linker.GenerateLink();
 
-		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, (trade_iterator.fromClientSlot == EQ::invslot::slotCursor));
+		client->Message(
+			Chat::Tell,
+			fmt::format(
+				"{} tells you, 'I have accepted {}.'",
+				GetCleanName(),
+				item_link
+			).c_str()
+		);
+
+		m_inv.PutItem(trade_iterator.to_bot_slot, *trade_iterator.trade_item_instance);
+		BotAddEquipItem(trade_iterator.to_bot_slot, (trade_iterator.trade_item_instance ? trade_iterator.trade_item_instance->GetID() : 0));
+		trade_iterator.trade_item_instance = nullptr; // actual deletion occurs in client delete below
+
+		client->DeleteItemInInventory(trade_iterator.from_client_slot, 0, (trade_iterator.from_client_slot == EQ::invslot::slotCursor));
 
 		// database currently has unattuned item saved in inventory..it will be attuned on next bot load
 		// this prevents unattuned item returns in the mean time (TODO: re-work process)
-		if (trade_iterator.toBotSlot >= invslot::EQUIPMENT_BEGIN && trade_iterator.toBotSlot <= invslot::EQUIPMENT_END) {
-			auto attune_item = m_inv.GetItem(trade_iterator.toBotSlot);
-			if (attune_item && attune_item->GetItem()->Attuneable)
+		if (trade_iterator.to_bot_slot >= invslot::EQUIPMENT_BEGIN && trade_iterator.to_bot_slot <= invslot::EQUIPMENT_END) {
+			auto attune_item = m_inv.GetItem(trade_iterator.to_bot_slot);
+			if (attune_item && attune_item->GetItem()->Attuneable) {
 				attune_item->SetAttuned(true);
+			}
 		}
-	}
-
-	// trade messages
-	for (const auto& return_iterator : client_return) {
-		if (return_iterator.failedItemName.size())
-			client->Message(Chat::Tell, "%s tells you, \"%s, I can't use this '%s.'\"", GetCleanName(), client->GetName(), return_iterator.failedItemName.c_str());
-	}
-	for (const auto& trade_iterator : client_trade) {
-		if (trade_iterator.acceptedItemName.size())
-			client->Message(Chat::Tell, "%s tells you, \"Thank you for the '%s,' %s!\"", GetCleanName(), trade_iterator.acceptedItemName.c_str(), client->GetName());
 	}
 
 	size_t accepted_count = client_trade.size();
 	size_t returned_count = client_return.size();
 
-	client->Message(Chat::Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
-
-	if (accepted_count)
+	if (accepted_count) {
 		CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
+	}
 }
 
 bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
@@ -4681,7 +4723,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 
-	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
+	bool IsLdonTreasure = (GetClass() == LDON_TREASURE);
 	if(entity_list.GetCorpseByID(GetID()))
 		entity_list.GetCorpseByID(GetID())->Depop();
 
@@ -4746,7 +4788,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
 
-	entity_list.RemoveBot(this->GetID());
+	entity_list.RemoveBot(GetID());
 	return true;
 }
 
@@ -4797,7 +4839,7 @@ void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic, pet_command);
 }
 
-bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {	
+bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
 	if (!other) {
 		SetTarget(nullptr);
 		LogError("A null Mob object was passed to Bot::Attack for evaluation!");
@@ -4817,11 +4859,11 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	SetTarget(other);
 	// takes more to compare a call result, load for a call, load a compare to address and compare, and finally
 	// push a value to an address than to just load for a call and push a value to an address.
-	
+
 	LogCombat("Attacking [{}] with hand [{}] [{}]", other->GetCleanName(), Hand, (FromRiposte ? "(this is a riposte)" : ""));
 	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) || (!IsAttackAllowed(other))) {
-		if(this->GetOwnerID())
-			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", this->GetCleanName(), this->GetTarget()->GetCleanName());
+		if(GetOwnerID())
+			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", GetCleanName(), GetTarget()->GetCleanName());
 
 		if(other) {
 			RemoveFromHateList(other);
@@ -6172,7 +6214,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	}
 
 	if(ka_time){
-		
+
 		switch(GetClass()){
 			case SHADOWKNIGHT: {
 				CastSpell(SPELL_NPC_HARM_TOUCH, target->GetID());
@@ -6209,7 +6251,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		switch (GetClass()) {
 		case MONK: {
 			int reuse = (MonkSpecialAttack(target, EQ::skills::SkillTigerClaw) - 1);
-			
+
 			// Live AA - Technique of Master Wu
 			int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
 
@@ -6372,7 +6414,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		skill_to_use == EQ::skills::SkillRoundKick
 	) {
 		reuse = (MonkSpecialAttack(target, skill_to_use) - 1);
-		
+
 		// Live AA - Technique of Master Wu
 		int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
 
@@ -6462,7 +6504,7 @@ FACTION_VALUE Bot::GetReverseFactionCon(Mob* iOther) {
 
 Mob* Bot::GetOwnerOrSelf() {
 	Mob* Result = nullptr;
-	if(this->GetBotOwner())
+	if(GetBotOwner())
 		Result = GetBotOwner();
 	else
 		Result = this;
@@ -6474,7 +6516,7 @@ Mob* Bot::GetOwner() {
 	Mob* Result = nullptr;
 	Result = GetBotOwner();
 	if(!Result)
-		this->SetBotOwner(0);
+		SetBotOwner(0);
 
 	return Result;
 }
@@ -6578,7 +6620,7 @@ void Bot::ProcessGuildInvite(Client* guildOfficer, Bot* botToGuild) {
 				guildOfficer->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveGuildMembership(), botToGuild->GetCleanName());
 				return;
 			}
-			
+
 			ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
 			ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
 			s->guild_id = guildOfficer->GuildID();
@@ -7003,8 +7045,8 @@ int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 }
 
 int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
-	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5) {
-		int32 mana_back = (this->itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100);
+	if(itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5) {
+		int32 mana_back = (itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100);
 		if(mana_back > cost)
 			mana_back = cost;
 
@@ -7215,7 +7257,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot s
 		}
 
 		Result = Mob::CastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, 0xFFFFFFFF, 0, resist_adjust, aa_id);
-	
+
 	}
 	return Result;
 }
@@ -8236,7 +8278,7 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 {
 	if (!group)
 		return;
-	
+
 	for (auto iter : group->members) {
 		if (!iter)
 			continue;
@@ -8273,7 +8315,7 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 				default:
 					healer = iter;
 				}
-			
+
 			break;
 		case DRUID:
 			if (!healer)
@@ -8926,14 +8968,14 @@ void Bot::CalcBotStats(bool showtext) {
 			GetSkill(EQ::skills::SkillBrassInstruments), GetSkill(EQ::skills::SkillPercussionInstruments), GetSkill(EQ::skills::SkillSinging), GetSkill(EQ::skills::SkillStringedInstruments), GetSkill(EQ::skills::SkillWindInstruments));
 	}
 
-	//if(this->Save())
-	//	this->GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", this->GetCleanName());
+	//if(Save())
+	//	GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", GetCleanName());
 	//else
-	//	this->GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", this->GetCleanName());
+	//	GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", GetCleanName());
 
 	CalcBonuses();
 
-	AI_AddNPCSpells(this->GetBotSpellID());
+	AI_AddNPCSpells(GetBotSpellID());
 
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());
@@ -9403,8 +9445,8 @@ void EntityList::ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mob
 uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
 	uint8 needHealed = 0;
 	Group *g = nullptr;
-	if(this->HasGroup()) {
-		g = this->GetGroup();
+	if(HasGroup()) {
+		g = GetGroup();
 		if(g) {
 			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 				if(g->members[i] && !g->members[i]->qglobal) {
@@ -9569,7 +9611,7 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	// TODO: Still awaiting bot spell rework..
 	if (!tar || !tar->IsEngaged() || !tar->HasTargetReflection() || !tar->GetTarget()->IsNPC())
 		return false;
-	
+
 	//if (tar->IsClient()) {
 	//	switch (tar->GetClass()) {
 	//		// TODO: figure out affectable classes..
@@ -9662,7 +9704,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 			if(spells[spell_id].timer_id > 0 && spells[spell_id].timer_id < MAX_DISCIPLINE_TIMERS)
 				SetDisciplineRecastTimer(spells[spell_id].timer_id, spell.recast_time);
 		} else {
-			uint32 remaining_time = (GetDisciplineRemainingTime(this, spells[spell_id].timer_id) / 1000);			
+			uint32 remaining_time = (GetDisciplineRemainingTime(this, spells[spell_id].timer_id) / 1000);
 			GetOwner()->Message(
 				Chat::White,
 				fmt::format(
@@ -9689,7 +9731,7 @@ bool Bot::CreateHealRotation(uint32 interval_ms, bool fast_heals, bool adaptive_
 		return false;
 	if (!IsHealRotationMemberClass(GetClass()))
 		return false;
-	
+
 	m_member_of_heal_rotation = std::make_shared<HealRotation>(this, interval_ms, fast_heals, adaptive_targeting, casting_override);
 
 	return IsHealRotationMember();
@@ -9742,7 +9784,7 @@ bool Bot::UseHealRotationFastHeals()
 {
 	if (!IsHealRotationMember())
 		return false;
-	
+
 	return m_member_of_heal_rotation->FastHeals();
 }
 

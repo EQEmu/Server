@@ -127,7 +127,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_CONSIDER_CORPSE",
 	"EVENT_LOOT_ZONE",
 	"EVENT_EQUIP_ITEM_CLIENT",
-	"EVENT_UNEQUIP_ITEM_CLIENT"
+	"EVENT_UNEQUIP_ITEM_CLIENT",
+	"EVENT_SKILL_UP",
+	"EVENT_LANGUAGE_SKILL_UP"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
@@ -1706,6 +1708,23 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "item_id", extradata);
 			ExportVar(package_name.c_str(), "item_quantity", sep.arg[0]);
 			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
+			break;
+		}
+
+		case EVENT_SKILL_UP: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "skill_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "skill_value", sep.arg[1]);
+			ExportVar(package_name.c_str(), "skill_max", sep.arg[2]);
+			ExportVar(package_name.c_str(), "is_tradeskill", sep.arg[3]);
+			break;
+		}
+
+		case EVENT_LANGUAGE_SKILL_UP: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "skill_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "skill_value", sep.arg[1]);
+			ExportVar(package_name.c_str(), "skill_max", sep.arg[2]);
 			break;
 		}
 

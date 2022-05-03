@@ -733,13 +733,15 @@ public:
 	void ReadBook(BookRequest_Struct *book);
 	void ReadBookByName(std::string book_name, uint8 book_type);
 	void QuestReadBook(const char* text, uint8 type);
-	void SendClientMoneyUpdate(uint8 type,uint32 amount);
 	void SendMoneyUpdate();
-	bool TakeMoneyFromPP(uint64 copper, bool updateclient=false);
-	void AddMoneyToPP(uint64 copper,bool updateclient);
-	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold,uint32 platinum,bool updateclient);
+	bool TakeMoneyFromPP(uint64 copper, bool update_client = false);
+	bool TakePlatinum(uint32 platinum, bool update_client = false);
+	void AddMoneyToPP(uint64 copper, bool update_client = false);
+	void AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client = false);
+	void AddPlatinum(uint32 platinu, bool update_client = false);
 	bool HasMoney(uint64 copper);
 	uint64 GetCarriedMoney();
+	uint32 GetCarriedPlatinum();
 	uint64 GetAllMoney();
 	uint32 GetMoney(uint8 type, uint8 subtype);
 	int GetAccountAge();
@@ -990,11 +992,17 @@ public:
 	virtual void ThrowingAttack(Mob* other, bool CanDoubleAttack = false);
 	void DoClassAttacks(Mob *ca_target, uint16 skill = -1, bool IsRiposte=false);
 
-	void SetZoneFlag(uint32 zone_id);
 	void ClearZoneFlag(uint32 zone_id);
 	bool HasZoneFlag(uint32 zone_id) const;
-	void SendZoneFlagInfo(Client *to) const;
 	void LoadZoneFlags();
+	void SendZoneFlagInfo(Client *to) const;
+	void SetZoneFlag(uint32 zone_id);
+
+	void ClearPEQZoneFlag(uint32 zone_id);
+	bool HasPEQZoneFlag(uint32 zone_id) const;
+	void LoadPEQZoneFlags();
+	void SendPEQZoneFlagInfo(Client *to) const;
+	void SetPEQZoneFlag(uint32 zone_id);
 
 	bool CanFish();
 	void GoFish();
@@ -1915,6 +1923,7 @@ private:
 	float AreaEndRegen;
 
 	std::set<uint32> zone_flags;
+	std::set<uint32> peqzone_flags;
 
 	ClientTaskState *task_state;
 	int TotalSecondsPlayed;

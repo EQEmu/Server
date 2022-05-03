@@ -149,7 +149,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			SetDualWieldingSameDelayWeapons(3);
 		}
 	}
-	
+
 	//If both weapons have same delay this allows a chance for DW animation
 	if (GetDualWieldingSameDelayWeapons() && Hand == EQ::invslot::slotPrimary) {
 
@@ -1395,7 +1395,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 		FromRiposte = false;
 	}
 
-	// check to see if we hit.. 
+	// check to see if we hit..
 	if (!FromRiposte && other->AvoidDamage(this, hit)) {
 		int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
 		if (strike_through && zone->random.Roll(strike_through)) {
@@ -1992,7 +1992,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		dead_timer.Start(5000, true);
 		m_pp.zone_id = m_pp.binds[0].zone_id;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		database.MoveCharacterToZone(this->CharacterID(), m_pp.zone_id);
+		database.MoveCharacterToZone(CharacterID(), m_pp.zone_id);
 		Save();
 		GoToDeath();
 	}
@@ -2001,8 +2001,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	if (RuleB(QueryServ, PlayerLogDeaths)) {
 		const char * killer_name = "";
 		if (killerMob && killerMob->GetCleanName()) { killer_name = killerMob->GetCleanName(); }
-		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", this->GetZoneID(), this->GetInstanceID(), killer_name, spell, damage);
-		QServ->PlayerLogEvent(Player_Log_Deaths, this->CharacterID(), event_desc);
+		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", GetZoneID(), GetInstanceID(), killer_name, spell, damage);
+		QServ->PlayerLogEvent(Player_Log_Deaths, CharacterID(), event_desc);
 	}
 
 	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, export_string, 0);
@@ -2025,8 +2025,8 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	//Check that we can attack before we calc heading and face our target
 	if (!IsAttackAllowed(other)) {
-		if (this->GetOwnerID())
-			this->SayString(NOT_LEGAL_TARGET);
+		if (GetOwnerID())
+			SayString(NOT_LEGAL_TARGET);
 		if (other) {
 			if (other->IsClient())
 				other->CastToClient()->RemoveXTarget(this, false);
@@ -2156,7 +2156,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 
 		uint8 otherlevel = other->GetLevel();
-		uint8 mylevel = this->GetLevel();
+		uint8 mylevel = GetLevel();
 
 		otherlevel = otherlevel ? otherlevel : 1;
 		mylevel = mylevel ? mylevel : 1;
@@ -2429,7 +2429,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	if (!IsCharmed() && give_exp_client && !RuleB(NPC, EnableMeritBasedFaction))
 		hate_list.DoFactionHits(GetNPCFactionID());
 
-	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
+	bool IsLdonTreasure = (GetClass() == LDON_TREASURE);
 
 	if (give_exp_client && !IsCorpse()) {
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
@@ -2478,8 +2478,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 						(sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
 				PlayerCount = 0;
 				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
-				QS->s1.NPCID = this->GetNPCTypeID();
-				QS->s1.ZoneID = this->GetZoneID();
+				QS->s1.NPCID = GetNPCTypeID();
+				QS->s1.ZoneID = GetZoneID();
 				QS->s1.Type = 2; // Raid Fight
 				for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 					if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
@@ -2525,8 +2525,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 						(sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
 				PlayerCount = 0;
 				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
-				QS->s1.NPCID = this->GetNPCTypeID();
-				QS->s1.ZoneID = this->GetZoneID();
+				QS->s1.NPCID = GetNPCTypeID();
+				QS->s1.ZoneID = GetZoneID();
 				QS->s1.Type = 1; // Group Fight
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 					if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
@@ -2567,8 +2567,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 					sizeof(QSPlayerLogNPCKill_Struct) +
 					(sizeof(QSPlayerLogNPCKillsPlayers_Struct) * 1));
 				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
-				QS->s1.NPCID = this->GetNPCTypeID();
-				QS->s1.ZoneID = this->GetZoneID();
+				QS->s1.NPCID = GetNPCTypeID();
+				QS->s1.ZoneID = GetZoneID();
 				QS->s1.Type = 0; // Solo Fight
 				Client *c = give_exp_client;
 				QS->Chars[0].char_id = c->CharacterID();
@@ -2593,12 +2593,12 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 				killer = killer->GetOwner();
 
 			if (killer->IsClient() && !killer->CastToClient()->GetGM())
-				this->CheckTrivialMinMaxLevelDrop(killer);
+				CheckTrivialMinMaxLevelDrop(killer);
 		}
 
 		entity_list.RemoveFromAutoXTargets(this);
 
-		uint16 emoteid = this->GetEmoteID();
+		uint16 emoteid = GetEmoteID();
 		auto corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,
 			level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS)
 			: RuleI(NPC, MinorNPCCorpseDecayTimeMS));
@@ -2610,7 +2610,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 		// entity_list.RemoveMobFromCloseLists(this);
 		close_mobs.clear();
-		this->SetID(0);
+		SetID(0);
 		ApplyIllusionToCorpse(illusion_spell_id, corpse);
 
 		if (killer != 0 && emoteid != 0)
@@ -2696,9 +2696,9 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	if (oos) {
 		mod_npc_killed(oos);
 
-		uint16 emoteid = this->GetEmoteID();
+		uint16 emoteid = GetEmoteID();
 		if (emoteid != 0)
-			this->DoNPCEmote(ONDEATH, emoteid);
+			DoNPCEmote(ONDEATH, emoteid);
 		if (oos->IsNPC()) {
 			parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
 			uint16 emoteid = oos->GetEmoteID();
@@ -2724,6 +2724,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		static_cast<int>(attack_skill)
 	);
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0);
+	combat_record.Stop();
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 	if (RuleB(Zone, UseZoneController)) {
@@ -2770,9 +2771,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	bool wasengaged = IsEngaged();
 	Mob* owner = other->GetOwner();
-	Mob* mypet = this->GetPet();
-	Mob* myowner = this->GetOwner();
-	Mob* targetmob = this->GetTarget();
+	Mob* mypet = GetPet();
+	Mob* myowner = GetOwner();
+	Mob* targetmob = GetTarget();
 	bool on_hatelist = CheckAggro(other);
 
 	if (other) {
@@ -2913,8 +2914,8 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			// owner must get on list, but he's not actually gained any hate yet
 			if (
 				!owner->GetSpecialAbility(IMMUNE_AGGRO) &&
-				!(this->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && owner->IsClient()) &&
-				!(this->GetSpecialAbility(IMMUNE_AGGRO_NPC) && owner->IsNPC())
+				!(GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && owner->IsClient()) &&
+				!(GetSpecialAbility(IMMUNE_AGGRO_NPC) && owner->IsNPC())
 			) {
 				if (owner->IsClient() && !CheckAggro(owner)) {
 					owner->CastToClient()->AddAutoXTarget(this);
@@ -2928,8 +2929,8 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		if (
 			!mypet->IsFamiliar() &&
 			!mypet->GetSpecialAbility(IMMUNE_AGGRO) &&
-			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && this->IsClient()) &&
-			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_NPC) && this->IsNPC())
+			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && IsClient()) &&
+			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_NPC) && IsNPC())
 		) {
 			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 		}
@@ -2938,8 +2939,8 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		if (
 			myowner->IsAIControlled() &&
 			!myowner->GetSpecialAbility(IMMUNE_AGGRO) &&
-			!(this->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && myowner->IsClient()) &&
-			!(this->GetSpecialAbility(IMMUNE_AGGRO_NPC) && myowner->IsNPC())
+			!(GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && myowner->IsClient()) &&
+			!(GetSpecialAbility(IMMUNE_AGGRO_NPC) && myowner->IsNPC())
 		) {
 			myowner->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 		}
@@ -2952,7 +2953,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	if (!wasengaged) {
 		if (IsNPC() && other->IsClient() && other->CastToClient())
-			parse->EventNPC(EVENT_AGGRO, this->CastToNPC(), other, "", 0);
+			parse->EventNPC(EVENT_AGGRO, CastToNPC(), other, "", 0);
 		AI_Event_Engaged(other, iYellForHelp);
 	}
 }
@@ -3380,7 +3381,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 		// Reduce damage by the Spell Shielding first so that the runes don't take the raw damage.
 		int total_spellshielding = itembonuses.SpellShield + itembonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] + aabonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT];
 		damage -= (damage * total_spellshielding / 100);
-		
+
 		//Only mitigate if damage is above the minimium specified.
 		if (spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT]) {
 			slot = spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT];
@@ -3674,14 +3675,14 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
-				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName());
+				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
 			}
 
 			// If a client pet is damaged while sitting, stand, fix sit button,
 			// and remove sitting regen.  Removes bug where client clicks sit
 			// during battle and gains pet hp-regen and bugs the sit button.
 			if (IsPet()) {
-				Mob *owner = this->GetOwner();
+				Mob *owner = GetOwner();
 				if (owner && owner->IsClient()) {
 					if (GetPetOrder() == SPO_Sit) {
 						SetPetOrder(SPO_Follow);
@@ -3721,7 +3722,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 					}
 
 					// fix GUI sit button to be unpressed and stop sitting regen
-					this->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
 					pet->SetAppearance(eaStanding);
 				}
 
@@ -4232,7 +4233,7 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 				int32 aa_spell_id = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
 				int32 aa_proc_chance = 100 + aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
 				uint32 aa_proc_reuse_timer = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER];
-				
+
 				if (aa_rank_id) {
 					if (!IsProcLimitTimerActive(-aa_rank_id, aa_proc_reuse_timer, ProcType::DEFENSIVE_PROC)) {
 						float chance = ProcChance * (static_cast<float>(aa_proc_chance) / 100.0f);
@@ -4508,7 +4509,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 				aa_proc_reuse_timer = aabonuses.RangedProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
 				proc_type = ProcType::RANGED_PROC;
 			}
-			
+
 			if (aa_rank_id) {
 
 				passed_skill_limit_check = PassLimitToSkill(skillinuse, 0, proc_type, aa_rank_id);
@@ -4630,8 +4631,8 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 	}
 
 #ifdef BOTS
-	if (this->IsPet() && this->GetOwner() && this->GetOwner()->IsBot()) {
-		this->TryPetCriticalHit(defender, hit);
+	if (IsPet() && GetOwner() && GetOwner()->IsBot()) {
+		TryPetCriticalHit(defender, hit);
 		return;
 	}
 #endif // BOTS
@@ -5180,7 +5181,7 @@ void Mob::TrySkillProc(Mob *on, EQ::skills::SkillType skill, uint16 ReuseTime, b
 						proc_spell_id = spells[base_spell_id].base_value[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].limit_value[i]);
 					}
-					
+
 					else if (spells[base_spell_id].effect_id[i] == SE_LimitToSkill && spells[base_spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
 						if (CanProc && spells[base_spell_id].base_value[i] == skill && IsValidSpell(proc_spell_id)) {
 							float final_chance = chance * (ProcMod / 100.0f);
@@ -5330,7 +5331,7 @@ float Mob::GetSkillProcChances(uint16 ReuseTime, uint16 hand) {
 }
 
 void Mob::TryCastOnSkillUse(Mob *on, EQ::skills::SkillType skill) {
-	
+
 	if (!spellbonuses.HasSkillAttackProc[skill] && !itembonuses.HasSkillAttackProc[skill] && !aabonuses.HasSkillAttackProc[skill]) {
 		return;
 	}

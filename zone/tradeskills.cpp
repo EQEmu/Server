@@ -59,7 +59,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		inst = user_inv.GetItem(in_augment->container_slot);
 		if (inst) {
 			const EQ::ItemData* item = inst->GetItem();
-			if (item && inst->IsType(EQ::item::ItemClassBag) && item->BagType == EQ::item::BagTypeAugmentationSealer) { // We have found an appropriate inventory augmentation sealer				
+			if (item && inst->IsType(EQ::item::ItemClassBag) && item->BagType == EQ::item::BagTypeAugmentationSealer) { // We have found an appropriate inventory augmentation sealer
 				container = inst;
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
@@ -105,11 +105,11 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			user->Message(Chat::Red, "Error: There must be 1 augmentable item in the sealer.");
 			return;
 		}
-	} else { // This happens if the augment button is clicked more than once quickly while augmenting		
+	} else { // This happens if the augment button is clicked more than once quickly while augmenting
 		if (!container->GetItem(0))	{
 			user->Message(Chat::Red, "Error: No item in the first slot of sealer.");
 		}
-		
+
 		if (!container->GetItem(1)) {
 			user->Message(Chat::Red, "Error: No item in the second slot of sealer.");
 		}
@@ -204,7 +204,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 					user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_augment->container_slot, i), 0, true);
 				}
 			}
-			
+
 			container->Clear(); // Explicitly mark container as cleared.
 		}
 	}
@@ -763,7 +763,7 @@ void Client::SendTradeskillSearchResults(
 		uint32     comp_count = (uint32) atoi(row[3]);
 		uint32     tradeskill = (uint16) atoi(row[4]);
 		uint32     must_learn = (uint16) atoi(row[5]);
-		
+
 
 		// Skip the recipes that exceed the threshold in skill difference
 		// Recipes that have either been made before or were
@@ -787,7 +787,7 @@ void Client::SendTradeskillSearchResults(
 
 		//Skip recipes that must be learned
 		if ((must_learn & 0xf) && !character_learned_recipe.recipe_id) {
-			continue; 
+			continue;
 		}
 
 
@@ -1070,8 +1070,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 						spec->tradeskill,
 						spec->trivial,
 						chance,
-						this->GetZoneID(),
-						this->GetInstanceID()
+						GetZoneID(),
+						GetInstanceID()
 					).c_str()
 				);
 			}
@@ -1079,8 +1079,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			/* QS: Player_Log_Trade_Skill_Events */
 			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)) {
 
-				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
+				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, GetZoneID(), GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, CharacterID(), event_desc);
 			}
 
 			if (RuleB(TaskSystem, EnableTaskSystem)) {
@@ -1101,16 +1101,16 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		MessageString(Chat::Emote,TRADESKILL_FAILED);
 
 		LogTradeskills("Tradeskill failed");
-			if (this->GetGroup())
+			if (GetGroup())
 		{
-			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
+			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),GetGender() == 0 ? "his" : GetGender() == 1 ? "her" : "its");
 
 		}
 
 		/* QS: Player_Log_Trade_Skill_Events */
 		if (RuleB(QueryServ, PlayerLogTradeSkillEvents)){
-			std::string event_desc = StringFormat("Failed :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
+			std::string event_desc = StringFormat("Failed :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, CharacterID(), event_desc);
 		}
 
 		itr = spec->onfail.begin();
@@ -1148,6 +1148,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 
 	if(!CanIncreaseTradeskill(tradeskill))
 		return;	//not allowed to go higher.
+	uint16 maxskill = MaxSkill(tradeskill);
 
 	float chance_stage2 = 0;
 
@@ -1176,7 +1177,14 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	if (chance_stage2 > zone->random.Real(0, 99)) {
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);
-
+		std::string export_string = fmt::format(
+			"{} {} {} {}",
+			tradeskill,
+			current_raw_skill + 1,
+			maxskill,
+			1
+		);
+		parse->EventPlayer(EVENT_SKILL_UP, this, export_string, 0);
 		if(title_manager.IsNewTradeSkillTitleAvailable(tradeskill, current_raw_skill + 1))
 			NotifyNewTitlesAvailable();
 	}
@@ -1528,7 +1536,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		"FROM tradeskill_recipe_entries "
 		"WHERE salvagecount > 0 AND recipe_id = %u", recipe_id
 	);
-	
+
 	results = QueryDatabase(query);
 	if (results.Success()) {
 		for (auto row = results.begin(); row != results.end(); ++row) {

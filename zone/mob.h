@@ -28,6 +28,7 @@
 #include "aa.h"
 #include "../common/light_source.h"
 #include "../common/emu_constants.h"
+#include "combat_record.h"
 #include <set>
 #include <vector>
 #include <memory>
@@ -162,7 +163,8 @@ public:
 		uint8 in_legtexture,
 		uint8 in_feettexture,
 		uint16 in_usemodel,
-		bool in_always_aggros_foes
+		bool in_always_aggros_foes,
+		int64 in_hp_regen_per_second = 0
 	);
 	virtual ~Mob();
 
@@ -245,11 +247,11 @@ public:
 	//Invisible
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state, bool set_on_bonus_calc = false);
-	
+
 	void CalcSeeInvisibleLevel();
 	void CalcInvisibleLevel();
 	void ZeroInvisibleVars(uint8 invisible_type);
-	
+
 	inline uint8 GetSeeInvisibleLevelFromNPCStat(uint16 in_see_invis);
 
 	void BreakInvisibleSpells();
@@ -269,7 +271,7 @@ public:
 	inline void SetSeeInvisibleUndead(uint8 val) { see_invis_undead = val; }
 
 	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
-	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals; 
+	uint8 invisible, nobuff_invisible, invisible_undead, invisible_animals;
 	uint8 see_invis, innate_see_invis, see_invis_undead; //TODO: do we need a see_invis_animal ?
 
 	bool sneaking, hidden, improved_hidden;
@@ -298,7 +300,7 @@ public:
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0, float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr, EQ::skills::SkillType skillInUse = EQ::skills::SkillArchery);
-	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target=nullptr, uint32 value1slot = 1, uint32 value1ground = 1, uint32 value2slot = 1, uint32 value2ground = 1, 
+	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target=nullptr, uint32 value1slot = 1, uint32 value1ground = 1, uint32 value2slot = 1, uint32 value2ground = 1,
 		uint32 value3slot = 1, uint32 value3ground = 1, uint32 value4slot = 1, uint32 value4ground = 1, uint32 value5slot = 1, uint32 value5ground = 1);
 	void SendLevelAppearance();
 	void SendStunAppearance();
@@ -380,13 +382,13 @@ public:
 	int16 GetItemSlotToConsumeCharge(int32 spell_id, uint32 inventory_slot);
 	bool CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot);
 	bool IsFromTriggeredSpell(EQ::spells::CastingSlot slot, uint32 item_slot = 0xFFFFFFFF);
-	
-	//Bard 
+
+	//Bard
 	bool ApplyBardPulse(int32 spell_id, Mob *spell_target, EQ::spells::CastingSlot slot);
 	bool IsActiveBardSong(int32 spell_id);
 	bool HasActiveSong() const { return(bardsong != 0); }
 	void ZeroBardPulseVars();
-	void DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot, 
+	void DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time, int32 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, uint32 item_slot,
 		uint32 recast_type , uint32 recast_delay);
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
 
@@ -493,7 +495,7 @@ public:
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) = 0;
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
-	inline virtual void SetHP(int32 hp) { if (hp >= max_hp) current_hp = max_hp; else current_hp = hp;}
+	virtual void SetHP(int32 hp);
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int32 newoocregen) {ooc_regen = newoocregen;}
 	virtual void Heal();
@@ -1424,6 +1426,7 @@ protected:
 	int32 current_mana;
 	int32 max_mana;
 	int32 hp_regen;
+	int64 hp_regen_per_second;
 	int32 mana_regen;
 	int32 ooc_regen;
 	uint8 maxlevel;
@@ -1542,6 +1545,7 @@ protected:
 	int attack_delay; //delay between attacks in 10ths of seconds
 	bool always_aggro;
 	int16 slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
+	Timer hp_regen_per_second_timer;
 	Timer tic_timer;
 	Timer mana_timer;
 	int32 dw_same_delay;
@@ -1558,7 +1562,7 @@ protected:
 
 	int32 appearance_effects_id[MAX_APPEARANCE_EFFECTS];
 	int32 appearance_effects_slot[MAX_APPEARANCE_EFFECTS];
-	
+
 	int queue_wearchange_slot;
 
 	Timer shield_timer;
@@ -1639,6 +1643,8 @@ protected:
 	bool endur_upkeep;
 	bool degenerating_effects; // true if we have a buff that needs to be recalced every tick
 	bool spawned_in_water;
+
+	CombatRecord combat_record{};
 
 public:
 	bool GetWasSpawnedInWater() const;
@@ -1766,7 +1772,7 @@ protected:
 
 private:
 	Mob* target;
-	
+
 
 #ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;

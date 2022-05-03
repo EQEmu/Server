@@ -295,7 +295,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 	int32 dmg = 0;
 
-	int32 skill_reduction = this->GetSkillReuseTime(ca_atk->m_skill);
+	int32 skill_reduction = GetSkillReuseTime(ca_atk->m_skill);
 
 	// not sure what the '100' indicates..if ->m_atk is not used as 'slot' reference, then change SlotRange above back to '11'
 	if (ca_atk->m_atk == 100 &&
@@ -339,6 +339,11 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 		ReuseTime = FrenzyReuseTime - 1 - skill_reduction;
 		ReuseTime = (ReuseTime * HasteMod) / 100;
+
+		auto primary_in_use = GetInv().GetItem(EQ::invslot::slotPrimary);
+		if (primary_in_use && GetWeaponDamage(GetTarget(), primary_in_use) <= 0) {
+			max_dmg = DMG_INVULNERABLE;
+		}
 
 		while (AtkRounds > 0) {
 			if (GetTarget())
@@ -816,7 +821,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 			if (!RangeWeapon && !Ammo && range_id && ammo_id) {
 				if (IsClient()) {
 					_RangeWeapon = CastToClient()->m_inv[EQ::invslot::slotRange];
-					if (_RangeWeapon && _RangeWeapon->GetItem() && 
+					if (_RangeWeapon && _RangeWeapon->GetItem() &&
 					    _RangeWeapon->GetItem()->ID == range_id)
 						RangeWeapon = _RangeWeapon;
 
@@ -1304,7 +1309,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	int ammo_slot = EQ::invslot::slotRange;
 	const EQ::ItemInstance* RangeWeapon = m_inv[EQ::invslot::slotRange];
-	
+
 	if (!RangeWeapon || !RangeWeapon->IsClassCommon()) {
 		LogCombat("Ranged attack canceled. Missing or invalid ranged weapon ([{}]) in slot [{}]", GetItemIDAt(EQ::invslot::slotRange), EQ::invslot::slotRange);
 		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing to throw!", GetItemIDAt(EQ::invslot::slotRange));
@@ -1661,7 +1666,7 @@ void NPC::DoClassAttacks(Mob *target) {
 	//general stuff, for all classes....
 	//only gets used when their primary ability get used too
 	if (taunting && HasOwner() && target->IsNPC() && target->GetBodyType() != BT_Undead && taunt_time) {
-		this->GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
+		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), false);
 	}
 
