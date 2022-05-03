@@ -163,7 +163,7 @@ bool TaskGoalListManager::IsInMatchListPartial(const std::string &match_list, co
 {
 	std::string entry_match = str_tolower(entry);
 	for (auto &s: SplitString(match_list, '|')) {
-		if (str_tolower(entry_match).find(s) != std::string::npos) {
+		if (entry_match.find(str_tolower(s)) != std::string::npos) {
 			return true;
 		}
 	}
