@@ -4079,12 +4079,12 @@ XS(XS_Client_GetCarriedMoney) {
 		Perl_croak(aTHX_ "Usage: Client::GetCarriedMoney(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
-		int RETVAL;
+		uint64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCarriedMoney();
 		XSprePUSH;
-		PUSHi((IV) RETVAL);
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -4097,12 +4097,12 @@ XS(XS_Client_GetAllMoney) {
 		Perl_croak(aTHX_ "Usage: Client::GetAllMoney(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
-		int RETVAL;
+		uint64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAllMoney();
 		XSprePUSH;
-		PUSHi((IV) RETVAL);
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
