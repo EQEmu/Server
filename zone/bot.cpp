@@ -3791,7 +3791,12 @@ void Bot::Depop() {
 }
 
 bool Bot::Spawn(Client* botCharacterOwner) {
-	if(GetBotID() > 0 && _botOwnerCharacterID > 0 && botCharacterOwner && botCharacterOwner->CharacterID() == _botOwnerCharacterID) {
+	if (
+		GetBotID() &&
+		_botOwnerCharacterID &&
+		botCharacterOwner &&
+		botCharacterOwner->CharacterID() == _botOwnerCharacterID
+	) {
 		// Rename the bot name to make sure that Mob::GetName() matches Mob::GetCleanName() so we dont have a bot named "Jesuschrist001"
 		strcpy(name, GetCleanName());
 
@@ -3802,10 +3807,23 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		helmtexture = 0; //0xFF;
 		texture = 0; //0xFF;
 
-		if(Save())
-			GetBotOwner()->CastToClient()->Message(Chat::White, "%s saved.", GetCleanName());
-		else
-			GetBotOwner()->CastToClient()->Message(Chat::Red, "%s save failed!", GetCleanName());
+		if (Save()) {
+			GetBotOwner()->CastToClient()->Message(
+				Chat::White,
+				fmt::format(
+					"{} saved.",
+					GetCleanName()
+				).c_str()
+			);
+		} else {
+			GetBotOwner()->CastToClient()->Message(
+				Chat::Red,
+				fmt::format(
+					"{} save failed!",
+					GetCleanName()
+				).c_str()
+			);
+		}
 
 		// Spawn the bot at the bot owner's loc
 		m_Position.x = botCharacterOwner->GetX();
@@ -3825,14 +3843,15 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		ping_timer.Start(8000);
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
-		uint32 itemID = 0;
-		uint8 materialFromSlot = 0xFF;
-		for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; ++i) {
-			itemID = GetBotItemBySlot(i);
-			if(itemID != 0) {
-				materialFromSlot = EQ::InventoryProfile::CalcMaterialFromSlot(i);
-				if(materialFromSlot != 0xFF)
-					SendWearChange(materialFromSlot);
+		uint32 item_id = 0;
+		uint8 material_from_slot = 0xFF;
+		for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+			item_id = GetBotItemBySlot(slot_id);
+			if (item_id != 0) {
+				material_from_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot_id);
+				if (material_from_slot != 0xFF) {
+					SendWearChange(material_from_slot);
+				}
 			}
 		}
 
@@ -3843,26 +3862,29 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 }
 
 // Deletes the inventory record for the specified item from the database for this bot.
-void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage)
+void Bot::RemoveBotItemBySlot(uint16 slot_id, std::string *error_message)
 {
-	if(!GetBotID())
+	if (!GetBotID()) {
         return;
+	}
 
-    if(!database.botdb.DeleteItemBySlot(GetBotID(), slotID))
-        *errorMessage = BotDatabase::fail::DeleteItemBySlot();
+    if (!database.botdb.DeleteItemBySlot(GetBotID(), slot_id)) {
+        *error_message = BotDatabase::fail::DeleteItemBySlot();
+	}
 
-    m_inv.DeleteItem(slotID);
+    m_inv.DeleteItem(slot_id);
 	UpdateEquipmentLight();
 }
 
 // Retrieves all the inventory records from the database for this bot.
-void Bot::GetBotItems(EQ::InventoryProfile &inv, std::string* errorMessage)
+void Bot::GetBotItems(EQ::InventoryProfile &inv, std::string* error_message)
 {
-	if(!GetBotID())
+	if (!GetBotID()) {
 		return;
+	}
 
 	if (!database.botdb.LoadItems(GetBotID(), inv)) {
-		*errorMessage = BotDatabase::fail::LoadItems();
+		*error_message = BotDatabase::fail::LoadItems();
 		return;
 	}
 
@@ -3870,15 +3892,23 @@ void Bot::GetBotItems(EQ::InventoryProfile &inv, std::string* errorMessage)
 }
 
 // Returns the inventory record for this bot from the database for the specified equipment slot.
-uint32 Bot::GetBotItemBySlot(uint32 slotID)
+uint32 Bot::GetBotItemBySlot(uint16 slot_id)
 {
 	uint32 item_id = 0;
-	if(!GetBotID())
+	if (!GetBotID()) {
         return item_id;
+	}
 
-	if (!database.botdb.LoadItemBySlot(GetBotID(), slotID, item_id)) {
-		if (GetBotOwner() && GetBotOwner()->IsClient())
-			GetBotOwner()->CastToClient()->Message(Chat::Red, "%s", BotDatabase::fail::LoadItemBySlot());
+	if (!database.botdb.LoadItemBySlot(GetBotID(), slot_id, item_id)) {
+		if (GetBotOwner() && GetBotOwner()->IsClient()) {
+			GetBotOwner()->CastToClient()->Message(
+				Chat::Red,
+				fmt::format(
+					"{}",
+					BotDatabase::fail::LoadItemBySlot()
+				).c_str()
+			);
+		}
 	}
 
 	return item_id;
@@ -4075,63 +4105,191 @@ void Bot::SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 
 }
 
 // Returns the item id that is in the bot inventory collection for the specified slot.
-EQ::ItemInstance* Bot::GetBotItem(uint32 slotID) {
-	EQ::ItemInstance* item = m_inv.GetItem(slotID);
-	if(item)
+EQ::ItemInstance* Bot::GetBotItem(uint16 slot_id) {
+	EQ::ItemInstance* item = m_inv.GetItem(slot_id);
+	if (item) {
 		return item;
+	}
 
 	return nullptr;
 }
 
 // Adds the specified item it bot to the NPC equipment array and to the bot inventory collection.
-void Bot::BotAddEquipItem(int slot, uint32 id) {
+void Bot::BotAddEquipItem(uint16 slot_id, uint32 item_id) {
 	// this is being called before bot is assigned an entity id..
 	// ..causing packets to be sent out to zone with an id of '0'
-	if(slot > 0 && id > 0) {
-		uint8 materialFromSlot = EQ::InventoryProfile::CalcMaterialFromSlot(slot);
+	if (item_id) {
+		uint8 material_from_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot_id);
 
-		if (materialFromSlot != EQ::textures::materialInvalid) {
-			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
-			if (GetID()) // temp hack fix
-				SendWearChange(materialFromSlot);
+		if (material_from_slot != EQ::textures::materialInvalid) {
+			equipment[slot_id] = item_id; // npc has more than just material slots. Valid material should mean valid inventory index
+			if (GetID()) { // temp hack fix
+				SendWearChange(material_from_slot);
+			}
 		}
 
 		UpdateEquipmentLight();
-		if (UpdateActiveLight())
-			if (GetID()) // temp hack fix
+		if (UpdateActiveLight()) {
+			if (GetID()) { // temp hack fix
 				SendAppearancePacket(AT_Light, GetActiveLightType());
+			}
+		}
 	}
 }
 
 // Erases the specified item from bot the NPC equipment array and from the bot inventory collection.
-void Bot::BotRemoveEquipItem(int16 slot)
+void Bot::BotRemoveEquipItem(uint16 slot_id)
 {
-	uint8 material_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot);
+	uint8 material_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot_id);
 
 	if (material_slot != EQ::textures::materialInvalid) {
-		equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
+		equipment[slot_id] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
 		SendWearChange(material_slot);
-		if (material_slot == EQ::textures::armorChest)
+		if (material_slot == EQ::textures::armorChest) {
 			SendWearChange(EQ::textures::armorArms);
+		}
 	}
 
 	UpdateEquipmentLight();
-	if (UpdateActiveLight())
+	if (UpdateActiveLight()) {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
+	}
 }
 
-void Bot::BotTradeAddItem(uint32 id, const EQ::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb)
+void Bot::BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database)
 {
-	if(addToDb) {
-		if (!database.botdb.SaveItemBySlot(this, lootSlot, inst)) {
-			*errorMessage = BotDatabase::fail::SaveItemBySlot();
+	if (save_to_database) {
+		if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
+			*error_message = BotDatabase::fail::SaveItemBySlot();
 			return;
 		}
 
-		m_inv.PutItem(lootSlot, *inst);
+		m_inv.PutItem(slot_id, *inst);
 	}
 
-	BotAddEquipItem(lootSlot, id);
+	auto item_id = inst ? inst->GetID() : 0;
+
+	BotAddEquipItem(slot_id, item_id);
+}
+
+void Bot::AddItem(
+	uint16 slot_id,
+	uint32 item_id,
+	int16 charges,
+	bool attuned,
+	uint32 augment_one,
+	uint32 augment_two,
+	uint32 augment_three,
+	uint32 augment_four,
+	uint32 augment_five,
+	uint32 augment_six
+) {
+	auto inst = database.CreateItem(
+		item_id,
+		charges,
+		augment_one,
+		augment_two,
+		augment_three,
+		augment_four,
+		augment_five,
+		augment_six,
+		attuned
+	);
+
+	if (!inst) {
+		LogError(
+			"Bot:AddItem Invalid Item data: ID [{}] Charges [{}] Aug1 [{}] Aug2 [{}] Aug3 [{}] Aug4 [{}] Aug5 [{}] Aug6 [{}] Attuned [{}]",
+			item_id,
+			charges,
+			augment_one,
+			augment_two,
+			augment_three,
+			augment_four,
+			augment_five,
+			augment_six,
+			attuned
+		);
+		return;
+	}
+	
+	if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
+		LogError("Failed to save item by slot to slot [{}] for [{}].", slot_id, GetCleanName());
+		return;
+	}
+
+	m_inv.PutItem(slot_id, *inst);
+
+	BotAddEquipItem(slot_id, item_id);
+}
+
+uint32 Bot::CountItem(uint32 item_id) {
+	uint32 item_count = 0;
+	EQ::ItemInstance *inst = nullptr;
+
+	for (uint16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		inst = GetBotItem(slot_id);
+		if (!inst || !inst->GetItem()) {
+			continue;
+		}
+
+		if (inst->GetID() == item_id) {
+			item_count++;
+		}
+	}
+
+	return item_count;
+}
+
+bool Bot::HasItem(uint32 item_id) {
+	bool has_item = false;
+	EQ::ItemInstance *inst = nullptr;
+
+	for (uint16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		inst = GetBotItem(slot_id);
+		if (!inst || !inst->GetItem()) {
+			continue;
+		}
+
+		if (inst->GetID() == item_id) {
+			has_item = true;
+			break;
+		}
+	}
+
+	return has_item;
+}
+
+void Bot::RemoveItem(uint32 item_id) {
+	EQ::ItemInstance *inst = nullptr;
+
+	for (uint16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		inst = GetBotItem(slot_id);
+		if (!inst || !inst->GetItem()) {
+			continue;
+		}
+		
+
+		if (inst->GetID() == item_id) {
+			std::string error_message;
+			RemoveBotItemBySlot(slot_id, &error_message);
+			if (!error_message.empty()) {
+				if (GetOwner()) {
+					GetOwner()->CastToClient()->Message(
+						Chat::Magenta,
+						fmt::format(
+							"Database Error: {}",
+							error_message
+						).c_str()
+					);
+				}
+				return;
+			}
+
+			BotRemoveEquipItem(slot_id);
+			CalcBotStats(GetOwner()->CastToClient()->GetBotOption(Client::booStatsUpdate));
+			return;
+		}
+	}
 }
 
 bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
@@ -4181,21 +4339,28 @@ bool Bot::AddBotToGroup(Bot* bot, Group* group) {
 }
 
 // Completes a trade with a client bot owner
-void Bot::FinishTrade(Client* client, BotTradeType tradeType)
+void Bot::FinishTrade(Client* client, BotTradeType trade_type)
 {
-	if (!client || (GetOwner() != client) || client->GetTradeskillObject() || client->trade->state == Trading) {
-		if (client)
+	if (
+		!client ||
+		GetOwner() != client ||
+		client->GetTradeskillObject() ||
+		client->trade->state == Trading
+	) {
+		if (client) {
 			client->ResetTrade();
+		}
+
 		return;
 	}
 
 	// these notes are not correct or obselete
-	if (tradeType == BotTradeClientNormal) {
+	if (trade_type == BotTradeClientNormal) {
 		// Items being traded are found in the normal trade window used to trade between a Client and a Client or NPC
 		// Items in this mode are found in slot ids 3000 thru 3003 - thought bots used the full 8-slot window..?
 		PerformTradeWithClient(EQ::invslot::TRADE_BEGIN, EQ::invslot::TRADE_END, client); // {3000..3007}
 	}
-	else if (tradeType == BotTradeClientNoDropNoTrade) {
+	else if (trade_type == BotTradeClientNoDropNoTrade) {
 		// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
 		// If it is a bag, then we have to search for items in slots 331 thru 340
 		PerformTradeWithClient(EQ::invslot::slotCursor, EQ::invslot::slotCursor, client);
@@ -4314,7 +4479,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			return;
 		}
 
-		if (trade_instance->IsStackable() && (trade_instance->GetCharges() < trade_instance->GetItem()->StackSize)) { // temp until partial stacks are implemented
+		if (trade_instance->IsStackable() && trade_instance->GetCharges() < trade_instance->GetItem()->StackSize) { // temp until partial stacks are implemented
 			client->Message(
 				Chat::Yellow,
 				fmt::format(
@@ -4586,7 +4751,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 		if (return_iterator.from_bot_slot == invslot::slotCursor) { // failed trade return
 			// no movement action required
-		} else if ((return_iterator.from_bot_slot >= invslot::TRADE_BEGIN) && (return_iterator.from_bot_slot <= invslot::TRADE_END)) { // failed trade returns
+		} else if (return_iterator.from_bot_slot >= invslot::TRADE_BEGIN && return_iterator.from_bot_slot <= invslot::TRADE_END) { // failed trade returns
 			client->PutItemInInventory(return_iterator.to_client_slot, *return_iterator.return_item_instance);
 			client->SendItemPacket(return_iterator.to_client_slot, return_iterator.return_item_instance, ItemPacketTrade);
 			client->DeleteItemInInventory(return_iterator.from_bot_slot);
@@ -6548,17 +6713,18 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 	return Result;
 }
 
-void Bot::EquipBot(std::string* errorMessage) {
-	GetBotItems(m_inv, errorMessage);
+void Bot::EquipBot(std::string* error_message) {
+	GetBotItems(m_inv, error_message);
 	const EQ::ItemInstance* inst = nullptr;
 	const EQ::ItemData* item = nullptr;
-	for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; ++i) {
-		inst = GetBotItem(i);
-		if(inst) {
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		inst = GetBotItem(slot_id);
+		if (inst) {
 			item = inst->GetItem();
-			BotTradeAddItem(inst->GetID(), inst, inst->GetCharges(), item->Slots, i, errorMessage, false);
-			if(!errorMessage->empty())
+			BotTradeAddItem(inst, slot_id, error_message, false);
+			if (!error_message->empty()) {
 				return;
+			}
 		}
 	}
 	UpdateEquipmentLight();
