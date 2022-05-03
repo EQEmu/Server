@@ -194,6 +194,7 @@ std::string JoinString(const std::vector<std::string>& ar, const std::string &de
 void find_replace(std::string& string_subject, const std::string& search_string, const std::string& replace_string);
 std::string replace_string(std::string subject, const std::string &search, const std::string &replace);
 void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
+std::string commify(const std::string &number);
 
 //const char based
 

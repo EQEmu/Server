@@ -8175,6 +8175,22 @@ XS(XS__getenvironmentaldamagename) {
 	XSRETURN(1);
 }
 
+XS(XS__commify);
+XS(XS__commify) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::commify(std::string number)");
+
+	dXSTARG;
+	std::string number = (std::string) SvPV_nolen(ST(0));
+	std::string commified_number = commify(number);
+
+	sv_setpv(TARG, commified_number.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8268,6 +8284,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "clear_zone_flag"), XS__clear_zone_flag, file);
 	newXS(strcpy(buf, "clearspawntimers"), XS__clearspawntimers, file);
 	newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
+	newXS(strcpy(buf, "commify"), XS__commify, file);
 	newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
 	newXS(strcpy(buf, "countitem"), XS__countitem, file);
 	newXS(strcpy(buf, "countspawnednpcs"), XS__countspawnednpcs, file);
