@@ -22,30 +22,8 @@
 #include "mob.h"
 #include "../common/races.h"
 #include "../common/say_link.h"
+#include "../common/string_util.h"
 #include "npc_scale_manager.h"
-
-std::string commify(const std::string &number)
-{
-	std::string temp_string;
-
-	auto string_length = static_cast<int>(number.length());
-
-	int i = 0;
-	for (i = string_length - 3; i >= 0; i -= 3) {
-		if (i > 0) {
-			temp_string = "," + number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		}
-		else {
-			temp_string = number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		}
-	}
-
-	if (i < 0) {
-		temp_string = number.substr(0, static_cast<unsigned long>(3 + i)) + temp_string;
-	}
-
-	return temp_string;
-}
 
 inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribute)
 {

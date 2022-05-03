@@ -3388,6 +3388,10 @@ std::string lua_get_environmental_damage_name(uint8 damage_type) {
 	return quest_manager.getenvironmentaldamagename(damage_type);
 }
 
+std::string lua_commify(std::string number) {
+	return commify(number);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3840,6 +3844,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_body_type_name", &lua_get_body_type_name),
 		luabind::def("get_consider_level_name", &lua_get_consider_level_name),
 		luabind::def("get_environmental_damage_name", &lua_get_environmental_damage_name),
+		luabind::def("commify", &lua_commify),
 
 		/*
 			Cross Zone
