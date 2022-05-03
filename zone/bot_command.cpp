@@ -8433,8 +8433,13 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
+	if (!sep->IsNumber(1)) {
+		c->Message(Chat::Red, "Slot ID must be a number.");
+		return;
+	}
+
 	auto slot_id = static_cast<uint16>(std::stoul(sep->arg[1]));
-	if (!sep->IsNumber(1) || slot_id > EQ::invslot::EQUIPMENT_END || slot_id < EQ::invslot::EQUIPMENT_BEGIN) {
+	if (slot_id > EQ::invslot::EQUIPMENT_END || slot_id < EQ::invslot::EQUIPMENT_BEGIN) {
 		c->Message(Chat::Red, "Valid slots are 0 to 22.");
 		return;
 	}
