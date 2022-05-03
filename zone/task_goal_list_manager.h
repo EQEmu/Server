@@ -27,6 +27,8 @@ public:
 	bool IsInList(int list_id, int entry);
 	int GetFirstEntry(int list_id);
 	std::vector<int> GetListContents(int list_index);
+	static bool IsInMatchList(const std::string& match_list, const std::string& entry);
+	static bool IsInMatchListPartial(const std::string& match_list, const std::string& entry);
 
 private:
 	std::vector<TaskGoalList_Struct> m_task_goal_lists;

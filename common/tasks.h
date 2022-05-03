@@ -61,6 +61,7 @@ struct ActivityInformation {
 	int              skill_id; // older clients, first id from above
 	int              spell_id; // older clients, first id from above
 	int              goal_id;
+	std::string      goal_match_list;
 	TaskMethodType   goal_method;
 	int              goal_count;
 	int              deliver_to_npc;
