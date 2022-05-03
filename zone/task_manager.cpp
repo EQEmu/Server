@@ -1877,6 +1877,9 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, st
 						if (!m_goal_list_manager.IsInList(
 							activity_info->goal_id,
 							(int) npc_type_id
+						) && !TaskGoalListManager::IsInMatchList(
+							activity_info->goal_match_list,
+							std::to_string(npc_type_id)
 						) && !TaskGoalListManager::IsInMatchListPartial(
 							activity_info->goal_match_list,
 							npc_name
