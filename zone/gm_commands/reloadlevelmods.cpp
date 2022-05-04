@@ -11,6 +11,5 @@ void command_reloadlevelmods(Client *c, const Seperator *sep)
 	auto pack = new ServerPacket(ServerOP_ReloadLevelEXPMods, 0);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-	c->Message(Chat::White, "Level based experience modifiers have been successfully reloaded globally.");
 }
 
