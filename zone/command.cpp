@@ -285,7 +285,7 @@ int command_init(void)
 		command_add("pf", "- Display additional mob coordinate and wandering data", AccountStatus::Player, command_pf) ||
 		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
 		command_add("profanity", "Manage censored language.", AccountStatus::GMLeadAdmin, command_profanity) ||
-		command_add("push", "Lets you do spell push", AccountStatus::GMLeadAdmin, command_push) ||
+		command_add("push", "[Back Push] [Up Push] - Lets you do spell push on an NPC", AccountStatus::GMLeadAdmin, command_push) ||
 		command_add("proximity", "Shows NPC proximity", AccountStatus::GMLeadAdmin, command_proximity) ||
 		command_add("pvp", "[On|Off] - Set you or your player target's PVP status", AccountStatus::GMAdmin, command_pvp) ||
 		command_add("qglobal", "[on/off/view] - Toggles qglobal functionality on an NPC", AccountStatus::GMAdmin, command_qglobal) ||
