@@ -44,11 +44,11 @@ XS(XS_Bot_GetOwner)
 	XSRETURN(1);
 }
 
-XS(XS_Bot_AddItem); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Bot_AddItem) {
+XS(XS_Bot_AddBotItem); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Bot_AddBotItem) {
 	dXSARGS;
 	if (items < 3 || items > 11)
-		Perl_croak(aTHX_ "Usage: Bot::AddItem(THIS, uint16 slot_id, uint32 item_id, [int16 charges = -1], [bool attuned = false], [uint32 augment_one = 0], [uint32 augment_two = 0], [uint32 augment_three = 0], [uint32 augment_four = 0], [uint32 augment_five = 0], [uint32 augment_six = 0])"); // @categories Inventory and Items, Script Utility
+		Perl_croak(aTHX_ "Usage: Bot::AddBotItem(THIS, uint16 slot_id, uint32 item_id, [int16 charges = -1], [bool attuned = false], [uint32 augment_one = 0], [uint32 augment_two = 0], [uint32 augment_three = 0], [uint32 augment_four = 0], [uint32 augment_five = 0], [uint32 augment_six = 0])"); // @categories Inventory and Items, Script Utility
 	{
 		Bot* THIS;
 		uint16 slot_id = (uint16) SvUV(ST(1));
@@ -95,56 +95,56 @@ XS(XS_Bot_AddItem) {
 			augment_six = (uint32) SvUV(ST(10));
 		}
 
-		THIS->AddItem(slot_id, item_id, charges, attuned, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six);
+		THIS->AddBotItem(slot_id, item_id, charges, attuned, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six);
 	}
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Bot_CountItem);
-XS(XS_Bot_CountItem) {
+XS(XS_Bot_CountBotItem);
+XS(XS_Bot_CountBotItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Bot::CountItem(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Bot::CountBotItem(THIS, uint32 item_id)");
 	{
 		Bot* THIS;
 		int item_count = 0;
 		uint32 item_id = (uint32) SvUV(ST(1));
 		dXSTARG;
 		VALIDATE_THIS_IS_BOT;
-		item_count = THIS->CountItem(item_id);
+		item_count = THIS->CountBotItem(item_id);
 		XSprePUSH;
 		PUSHu((UV) item_count);
 	}
 	XSRETURN(1);
 }
 
-XS(XS_Bot_HasItem);
-XS(XS_Bot_HasItem) {
+XS(XS_Bot_HasBotItem);
+XS(XS_Bot_HasBotItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Bot:HasItem(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Bot:HasBotItem(THIS, uint32 item_id)");
 	{
 		Bot* THIS;
 		bool has_item = false;
 		uint32 item_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_BOT;
-		has_item = THIS->HasItem(item_id);
+		has_item = THIS->HasBotItem(item_id);
 		ST(0) = boolSV(has_item);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
 }
 
-XS(XS_Bot_RemoveItem);
-XS(XS_Bot_RemoveItem) {
+XS(XS_Bot_RemoveBotItem);
+XS(XS_Bot_RemoveBotItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Bot::RemoveItem(THIS, uint32 item_id)"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Bot::RemoveBotItem(THIS, uint32 item_id)"); // @categories Spells and Disciplines
 	{
 		Bot* THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_BOT;
-		THIS->RemoveItem(item_id);
+		THIS->RemoveBotItem(item_id);
 	}
 	XSRETURN_EMPTY;
 }
@@ -167,11 +167,11 @@ XS(boot_Bot)
 	char buf[128];
 
 	XS_VERSION_BOOTCHECK;
-	newXSproto(strcpy(buf, "AddItem"), XS_Bot_AddItem, file, "$$$;$$$$$$$$");
-	newXSproto(strcpy(buf, "CountItem"), XS_Bot_CountItem, file, "$$");
+	newXSproto(strcpy(buf, "AddBotItem"), XS_Bot_AddBotItem, file, "$$$;$$$$$$$$");
+	newXSproto(strcpy(buf, "CountBotItem"), XS_Bot_CounBotItem, file, "$$");
 	newXSproto(strcpy(buf, "GetOwner"), XS_Bot_GetOwner, file, "$");
-	newXSproto(strcpy(buf, "HasItem"), XS_Bot_HasItem, file, "$$");
-	newXSproto(strcpy(buf, "RemoveItem"), XS_Bot_RemoveItem, file, "$$");
+	newXSproto(strcpy(buf, "HasBotItem"), XS_Bot_HasBotItem, file, "$$");
+	newXSproto(strcpy(buf, "RemoveBotItem"), XS_Bot_RemoveBotItem, file, "$$");
 	XSRETURN_YES;
 }
 
