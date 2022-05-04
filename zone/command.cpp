@@ -239,7 +239,7 @@ int command_init(void)
 		command_add("loc", "- Print out your or your target's current location and heading", AccountStatus::Player, command_loc) ||
 		command_add("lock", "- Lock the worldserver", AccountStatus::GMLeadAdmin, command_lock) ||
 		command_add("logs",  "Manage anything to do with logs", AccountStatus::GMImpossible, command_logs) ||
-		command_add("makepet", "[level] [class] [race] [texture] - Make a pet", AccountStatus::Guide, command_makepet) ||
+		command_add("makepet", "[Pet Name] - Make a pet", AccountStatus::Guide, command_makepet) ||
 		command_add("mana", "- Fill your or your target's mana", AccountStatus::Guide, command_mana) ||
 		command_add("maxskills", "Maxes skills for you.", AccountStatus::GMMgmt, command_max_all_skills) ||
 		command_add("memspell", "[Spell ID] [Spell Gem] - Memorize a Spell by ID to the specified Spell Gem for you or your target", AccountStatus::Guide, command_memspell) ||
