@@ -2,12 +2,30 @@
 
 void command_getvariable(Client *c, const Seperator *sep)
 {
-	std::string tmp;
-	if (database.GetVariable(sep->argplus[1], tmp)) {
-		c->Message(Chat::White, "%s = %s", sep->argplus[1], tmp.c_str());
+	std::string variable = sep->argplus[1];
+	if (variable.empty()) {
+		c->Message(Chat::White, "Usage: #getvariable [Variable Name]");
+		return;
 	}
-	else {
-		c->Message(Chat::White, "GetVariable(%s) returned false", sep->argplus[1]);
+
+	std::string message;
+	std::string value;
+	if (database.GetVariable(variable, value)) {
+		message = fmt::format(
+			"Variable {}: {}",
+			variable,
+			value
+		);
+	} else {
+		message = fmt::format(
+			"Variable '{}' does not exist.",
+			variable
+		);
 	}
+
+	c->Message(
+		Chat::White,
+		message.c_str()
+	);
 }
 
