@@ -2013,6 +2013,34 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
+	case ServerOP_ReloadLevelEXPMods: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Level based experience modifiers reloaded for {}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							"Instance ID: {}",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
+		zone->LoadLevelEXPMods();
+		break;
+	}
 	case ServerOP_CameraShake:
 	{
 		if (zone)

@@ -228,6 +228,7 @@
 #define ServerOP_UpdateSchedulerEvents 0x4012
 #define ServerOP_ReloadContentFlags 0x4013
 #define ServerOP_ReloadVariablesWorld 0x4014
+#define ServerOP_ReloadLevelEXPMods 0x4015
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
