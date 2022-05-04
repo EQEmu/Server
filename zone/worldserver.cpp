@@ -2013,6 +2013,35 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
+	case ServerOP_ReloadAAData: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Alternate Advancement data reloaded for {}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							"Instance ID: {}",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+			zone->LoadAlternateAdvancement();
+			entity_list.SendAlternateAdvancementStats();
+		}
+		break;	
+	}
 	case ServerOP_CameraShake:
 	{
 		if (zone)
