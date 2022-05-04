@@ -2037,8 +2037,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					)
 				).c_str()
 			);
+			zone->LoadLevelEXPMods();
 		}
-		zone->LoadLevelEXPMods();
 		break;
 	}
 	case ServerOP_CameraShake:
