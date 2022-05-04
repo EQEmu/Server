@@ -16,7 +16,6 @@ void command_gassign(Client *c, const Seperator *sep)
 
 	auto target = c->GetTarget()->CastToNPC();
 	if (target->GetSpawnPointID() > 0) {
-		auto spawn2_id = target->GetSpawnPointID();
 		database.AssignGrid(c, grid_id, target->GetID());
 	}
 }
