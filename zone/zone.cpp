@@ -2558,11 +2558,35 @@ void Zone::ReloadWorld(uint32 Option){
 	if (Option == 0) {
 		entity_list.ClearAreas();
 		parse->ReloadQuests();
-	} else if(Option == 1) {
+	} else if (Option == 1) {
 		entity_list.ClearAreas();
 		parse->ReloadQuests();
 		zone->Repop(0);
 	}
+
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::GMAdmin,
+		Chat::Yellow,
+		fmt::format(
+			"Quests reloaded {}for {}.",
+			Option ? "and NPCs repopped " : "",
+			fmt::format(
+				"{} ({})",
+				GetLongName(),
+				GetZoneID()
+			),
+			(
+				GetInstanceID() ?
+				fmt::format(
+					"Instance ID: {}",
+					GetInstanceID()
+				) :
+				""
+			)
+		).c_str()
+	);
 }
 
 void Zone::LoadTickItems()
