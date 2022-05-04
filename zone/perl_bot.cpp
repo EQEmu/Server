@@ -44,6 +44,111 @@ XS(XS_Bot_GetOwner)
 	XSRETURN(1);
 }
 
+XS(XS_Bot_AddItem); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Bot_AddItem) {
+	dXSARGS;
+	if (items < 3 || items > 11)
+		Perl_croak(aTHX_ "Usage: Bot::AddItem(THIS, uint16 slot_id, uint32 item_id, [int16 charges = -1], [bool attuned = false], [uint32 augment_one = 0], [uint32 augment_two = 0], [uint32 augment_three = 0], [uint32 augment_four = 0], [uint32 augment_five = 0], [uint32 augment_six = 0])"); // @categories Inventory and Items, Script Utility
+	{
+		Bot* THIS;
+		uint16 slot_id = (uint16) SvUV(ST(1));
+		uint32 item_id = (uint32) SvUV(ST(2));
+		int16 charges = -1;
+		bool attuned = false;
+		uint32 augment_one = 0;
+		uint32 augment_two = 0;
+		uint32 augment_three = 0;
+		uint32 augment_four = 0;
+		uint32 augment_five = 0;
+		uint32 augment_six = 0;
+		VALIDATE_THIS_IS_BOT;
+
+		if (items > 3) {
+			charges = (int16) SvIV(ST(3));
+		}
+
+		if (items > 4) {
+			attuned = (bool) SvTRUE(ST(4));
+		}
+
+		if (items > 5) {
+			augment_one = (uint32) SvUV(ST(5));
+		}
+
+		if (items > 6) {
+			augment_two = (uint32) SvUV(ST(6));
+		}
+
+		if (items > 7) {
+			augment_three = (uint32) SvUV(ST(7));
+		}
+
+		if (items > 8) {
+			augment_four = (uint32) SvUV(ST(8));
+		}
+
+		if (items > 9) {
+			augment_five = (uint32) SvUV(ST(9));
+		}
+
+		if (items > 10) {
+			augment_six = (uint32) SvUV(ST(10));
+		}
+
+		THIS->AddItem(slot_id, item_id, charges, attuned, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Bot_CountItem);
+XS(XS_Bot_CountItem) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Bot::CountItem(THIS, uint32 item_id)");
+	{
+		Bot* THIS;
+		int item_count = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_BOT;
+		item_count = THIS->CountItem(item_id);
+		XSprePUSH;
+		PUSHu((UV) item_count);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Bot_HasItem);
+XS(XS_Bot_HasItem) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Bot:HasItem(THIS, uint32 item_id)");
+	{
+		Bot* THIS;
+		bool has_item = false;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_BOT;
+		has_item = THIS->HasItem(item_id);
+		ST(0) = boolSV(has_item);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Bot_RemoveItem);
+XS(XS_Bot_RemoveItem) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Bot::RemoveItem(THIS, uint32 item_id)"); // @categories Spells and Disciplines
+	{
+		Bot* THIS;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_BOT;
+		THIS->RemoveItem(item_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -62,7 +167,11 @@ XS(boot_Bot)
 	char buf[128];
 
 	XS_VERSION_BOOTCHECK;
+	newXSproto(strcpy(buf, "AddItem"), XS_Bot_AddItem, file, "$$$;$$$$$$$$");
+	newXSproto(strcpy(buf, "CountItem"), XS_Bot_CountItem, file, "$$");
 	newXSproto(strcpy(buf, "GetOwner"), XS_Bot_GetOwner, file, "$");
+	newXSproto(strcpy(buf, "HasItem"), XS_Bot_HasItem, file, "$$");
+	newXSproto(strcpy(buf, "RemoveItem"), XS_Bot_RemoveItem, file, "$$");
 	XSRETURN_YES;
 }
 
