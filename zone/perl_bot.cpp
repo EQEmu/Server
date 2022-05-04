@@ -168,7 +168,7 @@ XS(boot_Bot)
 
 	XS_VERSION_BOOTCHECK;
 	newXSproto(strcpy(buf, "AddBotItem"), XS_Bot_AddBotItem, file, "$$$;$$$$$$$$");
-	newXSproto(strcpy(buf, "CountBotItem"), XS_Bot_CounBotItem, file, "$$");
+	newXSproto(strcpy(buf, "CountBotItem"), XS_Bot_CountBotItem, file, "$$");
 	newXSproto(strcpy(buf, "GetOwner"), XS_Bot_GetOwner, file, "$");
 	newXSproto(strcpy(buf, "HasBotItem"), XS_Bot_HasBotItem, file, "$$");
 	newXSproto(strcpy(buf, "RemoveBotItem"), XS_Bot_RemoveBotItem, file, "$$");
