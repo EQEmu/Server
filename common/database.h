@@ -121,10 +121,9 @@ public:
 
 	/* General Information Queries */
 
-	bool	AddBannedIP(char* bannedIP, const char* notes); //Add IP address to the banned_ips table.
-	bool	AddGMIP(char* ip_address, char* name);
-	bool	CheckBannedIPs(const char* loginIP); //Check incoming connection against banned IP table.
-	bool	CheckGMIPs(const char* loginIP, uint32 account_id);
+	bool	AddBannedIP(std::string banned_ip, std::string notes); //Add IP address to the banned_ips table.
+	bool	CheckBannedIPs(std::string login_ip); //Check incoming connection against banned IP table.
+	bool	CheckGMIPs(std::string login_ip, uint32 account_id);
 	bool	CheckNameFilter(const char* name, bool surname = false);
 	bool	CheckUsedName(const char* name);
 
@@ -142,7 +141,7 @@ public:
 	std::string GetCharNameByID(uint32 char_id);
 	std::string GetNPCNameByID(uint32 npc_id);
 	std::string GetCleanNPCNameByID(uint32 npc_id);
-	void	LoginIP(uint32 AccountID, const char* LoginIP);
+	void	LoginIP(uint32 account_id, std::string login_ip);
 
 	/* Instancing */
 

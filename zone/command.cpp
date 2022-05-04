@@ -124,7 +124,7 @@ int command_init(void)
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", AccountStatus::GMImpossible, command_apply_shared_memory) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
-		command_add("ban", "[name] [reason]- Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
+		command_add("ban", "[Character Name] [Reason]- Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("beard", "- Change the beard of your target", AccountStatus::QuestTroupe, command_beard) ||
 		command_add("beardcolor", "- Change the beard color of your target", AccountStatus::QuestTroupe, command_beardcolor) ||
 		command_add("bestz", "- Ask map for a good Z coord for your x,y coords.", AccountStatus::Player, command_bestz) ||
@@ -182,7 +182,7 @@ int command_init(void)
 		command_add("findtask", "[search criteria] - Search for a task", AccountStatus::Guide, command_findtask) ||
 		command_add("findzone", "[search criteria] - Search database zones", AccountStatus::GMAdmin, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", AccountStatus::QuestTroupe, command_fixmob) ||
-		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", AccountStatus::Player, command_flag) ||
+		command_add("flag", "[Status] [Account Name] - Refresh your admin status, or set an account's Admin status if arguments provided", AccountStatus::Player, command_flag) ||
 		command_add("flagedit", "- Edit zone flags on your target. Use #flagedit help for more info.", AccountStatus::GMAdmin, command_flagedit) ||
 		command_add("flags", "- displays the Zone Flags of you or your target", AccountStatus::Player, command_flags) ||
 		command_add("flymode", "[0/1/2/3/4/5] - Set your or your player target's flymode to ground/flying/levitate/water/floating/levitate_running", AccountStatus::Guide, command_flymode) ||
@@ -224,11 +224,11 @@ int command_init(void)
 		command_add("interrupt", "[message id] [color] - Interrupt your casting. Arguments are optional.", AccountStatus::Guide, command_interrupt) ||
 		command_add("invsnapshot", "- Manipulates inventory snapshots for your current target", AccountStatus::QuestTroupe, command_invsnapshot) ||
 		command_add("invul", "[On|Off]] - Turn player target's or your invulnerable flag on or off", AccountStatus::QuestTroupe, command_invul) ||
-		command_add("ipban", "[IP address] - Ban IP by character name", AccountStatus::GMMgmt, command_ipban) ||
+		command_add("ipban", "[IP] - Ban IP", AccountStatus::GMMgmt, command_ipban) ||
 		command_add("iplookup", "[charname] - Look up IP address of charname", AccountStatus::GMMgmt, command_iplookup) ||
 		command_add("iteminfo", "- Get information about the item on your cursor", AccountStatus::Steward, command_iteminfo) ||
 		command_add("itemsearch", "[search criteria] - Search for an item", AccountStatus::Steward, command_itemsearch) ||
-		command_add("kick", "[charname] - Disconnect charname", AccountStatus::GMLeadAdmin, command_kick) ||
+		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "- Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
 		command_add("lastname", "[Last Name] - Set you or your player target's lastname", AccountStatus::Guide, command_lastname) ||

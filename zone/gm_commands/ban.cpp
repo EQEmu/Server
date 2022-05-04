@@ -5,67 +5,70 @@ extern WorldServer worldserver;
 
 void command_ban(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0 || sep->arg[2][0] == 0) {
-		c->Message(Chat::White, "Usage: #ban <charname> <message>");
+	int arguments = sep->argnum;
+	if (arguments < 2) {
+		c->Message(Chat::White, "Usage: #ban [Character Name] [Reason]");
 		return;
 	}
 
-	auto account_id = database.GetAccountIDByChar(sep->arg[1]);
-
-	std::string message;
-	int         i   = 2;
-	while (1) {
-		if (sep->arg[i][0] == 0) {
-			break;
-		}
-
-		if (message.length() > 0) {
-			message.push_back(' ');
-		}
-
-		message += sep->arg[i];
-		++i;
-	}
-
-	if (message.length() == 0) {
-		c->Message(Chat::White, "Usage: #ban <charname> <message>");
+	std::string character_name = sep->arg[1];
+	if (character_name.empty()) {
+		c->Message(Chat::White, "Usage: #ban [Character Name] [Reason]");
 		return;
 	}
 
-	if (account_id == 0) {
-		c->Message(Chat::Red, "Character does not exist.");
+	std::string reason = sep->argplus[2];
+	if (reason.empty()) {
+		c->Message(Chat::White, "Usage: #ban [Character Name] [Reason]");
 		return;
 	}
 
-	std::string query   = StringFormat(
-		"UPDATE account SET status = -2, ban_reason = '%s' "
-		"WHERE id = %i", EscapeString(message).c_str(), account_id
+	auto account_id = database.GetAccountIDByChar(character_name.c_str());
+	if (!account_id) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Character {} does not exist."
+			).c_str(),
+			character_name
+		);
+		return;
+	}
+
+	auto query = fmt::format(
+		"UPDATE account SET status = -2, ban_reason = '{}' WHERE id = {}",
+		EscapeString(reason),
+		account_id
 	);
-	auto        results = database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 
 	c->Message(
-		Chat::Red,
-		"Account number %i with the character %s has been banned with message: \"%s\"",
-		account_id,
-		sep->arg[1],
-		message.c_str());
+		Chat::White,
+		fmt::format(
+			"Account ID {} with the character {} has been banned for the following reason: \"{}\"",
+			account_id,
+			character_name,
+			reason
+		).c_str()
+	);
 
-	ServerPacket flagUpdatePack(ServerOP_FlagUpdate, 6);
-	*((uint32 *) &flagUpdatePack.pBuffer[0]) = account_id;
-	*((int16 *) &flagUpdatePack.pBuffer[4])  = -2;
+	ServerPacket flagUpdatePack(ServerOP_FlagUpdate, sizeof(ServerFlagUpdate_Struct));
+	ServerFlagUpdate_Struct *sfus = (ServerFlagUpdate_Struct *) flagUpdatePack.pBuffer;
+	sfus->account_id = account_id;
+	sfus->admin = -2;
 	worldserver.SendPacket(&flagUpdatePack);
 
 	Client *client = nullptr;
-	client                       = entity_list.GetClientByName(sep->arg[1]);
+	client = entity_list.GetClientByName(character_name.c_str());
 	if (client) {
 		client->WorldKick();
 		return;
 	}
 
-	ServerPacket            kickPlayerPack(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+	ServerPacket kickPlayerPack(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
 	ServerKickPlayer_Struct *skp = (ServerKickPlayer_Struct *) kickPlayerPack.pBuffer;
 	strcpy(skp->adminname, c->GetName());
-	strcpy(skp->name, sep->arg[1]);
+	strcpy(skp->name, character_name.c_str());
 	skp->adminrank = c->Admin();
 	worldserver.SendPacket(&kickPlayerPack);
 }

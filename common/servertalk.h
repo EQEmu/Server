@@ -1770,6 +1770,11 @@ struct ServerDzCreateSerialized_Struct {
 	char     cereal_data[0];
 };
 
+struct ServerFlagUpdate_Struct {
+	uint32 account_id;
+	int16 admin;
+};
+
 #pragma pack()
 
 #endif

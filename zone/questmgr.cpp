@@ -2564,7 +2564,7 @@ void QuestManager::whisper(const char *message) {
 
 	std::string mob_name = owner->GetCleanName();
 	std::string new_message = fmt::format("{} whispers, '{}'", mob_name, message);
-	initiator->Message(315, new_message.c_str());
+	initiator->Message(Chat::EchoChat1, new_message.c_str());
 }
 
 int QuestManager::getlevel(uint8 type)
