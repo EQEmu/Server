@@ -182,8 +182,6 @@ void command_nukeitem(Client *c, const Seperator *sep);
 void command_object(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
 void command_opcode(Client *c, const Seperator *sep);
-void command_bestz(Client *c, const Seperator *message);
-void command_pf(Client *c, const Seperator *message);
 
 #ifdef PACKET_PROFILER
 void command_packetprofile(Client *c, const Seperator *sep);
