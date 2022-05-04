@@ -2316,9 +2316,12 @@ struct FaceChange_Struct {
 /*004*/	uint8	hairstyle;
 /*005*/	uint8	beard;
 /*006*/	uint8	face;
-/*007*/ uint32	drakkin_heritage;
-/*011*/ uint32	drakkin_tattoo;
-/*015*/ uint32	drakkin_details;
+/*007*/ uint8  unused_padding;
+/*008*/ uint32 drakkin_heritage;
+/*012*/ uint32 drakkin_tattoo;
+/*016*/ uint32 drakkin_details;
+/*020*/ uint32 entity_id;
+/*024*/
 //there are only 10 faces for barbs changing woad just
 //increase the face value by ten so if there were 8 woad
 //designs then there would be 80 barb faces

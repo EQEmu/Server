@@ -5856,10 +5856,11 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 		return;
 	}
 
-	// Notify other clients in zone
-	entity_list.QueueClients(this, app, false);
+	auto fc = reinterpret_cast<FaceChange_Struct*>(app->pBuffer);
 
-	FaceChange_Struct* fc = (FaceChange_Struct*)app->pBuffer;
+	// Notify other clients in zone
+	SetFaceAppearance(*fc, true);
+
 	m_pp.haircolor = fc->haircolor;
 	m_pp.beardcolor = fc->beardcolor;
 	m_pp.eyecolor1 = fc->eyecolor1;
@@ -5872,7 +5873,6 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 	m_pp.drakkin_details = fc->drakkin_details;
 	Save();
 	MessageString(Chat::Red, FACE_ACCEPTED);
-	//Message(Chat::Red, "Facial features updated.");
 	return;
 }
 

@@ -1761,8 +1761,7 @@ struct AdventureRequestResponse_Struct{
 struct Illusion_Struct {
 /*000*/	uint32	spawnid;
 /*004*/	char	charname[64];
-/*068*/	uint16	race;
-/*070*/	char	unknown070[2];
+/*068*/	int race;
 /*072*/	uint8	gender;
 /*073*/	uint8	texture;
 /*074*/	uint8	helmtexture;
