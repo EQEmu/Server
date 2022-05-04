@@ -265,7 +265,7 @@ int command_init(void)
 		command_add("npcspawn", "[create/add/update/remove/delete] - Manipulate spawn DB", AccountStatus::GMAreas, command_npcspawn) ||
 		command_add("npcspecialattk", "[flagchar] [perm] - Set NPC special attack flags. Flags are E(nrage) F(lurry) R(ampage) S(ummon).", AccountStatus::QuestTroupe, command_npcspecialattk) ||
 		command_add("npcstats", "- Show stats about target NPC", AccountStatus::QuestTroupe, command_npcstats) ||
-		command_add("npctype_cache",  "[id] or all - Clears the npc type cache for either the id or all npcs.", AccountStatus::GMImpossible, command_npctype_cache) ||
+		command_add("npctype_cache",  "[NPC ID] [NPC ID 2] or [All] - Clears the npc type cache for either the list of NPC IDs of or all NPCs.", AccountStatus::GMImpossible, command_npctype_cache) ||
 		command_add("npctypespawn", "[npctypeid] [factionid] - Spawn an NPC from the db", AccountStatus::Steward, command_npctypespawn) ||
 		command_add("nudge", "- Nudge your target's current position by specific values", AccountStatus::QuestTroupe, command_nudge) ||
 		command_add("nukebuffs", "[Beneficial|Detrimental|Help] - Strip all buffs by type on you or your target (no argument to remove all buffs)", AccountStatus::Guide, command_nukebuffs) ||
