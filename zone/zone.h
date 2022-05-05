@@ -278,7 +278,7 @@ public:
 	void ReloadWorld(uint8 global_repop);
 	void RemoveAuth(const char *iCharName, const char *iLSKey);
 	void RemoveAuth(uint32 lsid);
-	void Repop(uint32 delay = 0);
+	void Repop();
 	void RequestUCSServerStatus();
 	void ResetAuth();
 	void SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);

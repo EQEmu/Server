@@ -2564,7 +2564,7 @@ void Zone::ReloadWorld(uint8 global_repop)
 			zone->ClearSpawnTimers();
 		}
 
-		zone->Repop(0);
+		zone->Repop();
 	}
 
 	worldserver.SendEmoteMessage(
