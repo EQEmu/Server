@@ -3,7 +3,7 @@
 void command_resetaa(Client *c, const Seperator *sep)
 {
 	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
-		c->Message(Chat::White, "You must target a client to use this command.");
+		c->Message(Chat::White, "You must target a player to use this command.");
 		return;
 	}
 
