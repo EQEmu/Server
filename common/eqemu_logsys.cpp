@@ -257,9 +257,22 @@ void EQEmuLogSys::ProcessLogWrite(
 	}
 }
 
-void EQEmuLogSys::ProcessDiscord(Logs::DebugLevel level, uint16 category, const std::string& message)
+void EQEmuLogSys::ProcessDiscord(Logs::DebugLevel level, uint16 category, int webhook_id, const std::string &message)
 {
-	Discord::SendWebhookMessage(message, "https://discord.com/api/webhooks/971666542037172244/FqKZ7abGaXeBI0FICQoASG-ManoEaAFve1BJHxyEPoYqzLLuEEmLVcx8sAtt_hWWlE2Y");
+	if (webhook_id > MAX_DISCORD_WEBHOOK_ID) {
+		LogDiscord("Webhook ID [{}] exceeds allowed max [{}]", webhook_id, MAX_DISCORD_WEBHOOK_ID);
+		return;
+	}
+
+	// this will all fundamentally change to be batched by queryserv
+	auto w = discord_webhooks[webhook_id];
+	if (!w.webhook_url.empty()) {
+		std::thread msg(Discord::SendWebhookMessage,
+			message,
+			w.webhook_url
+		);
+		msg.detach();
+	}
 }
 
 /**
@@ -473,7 +486,12 @@ void EQEmuLogSys::Out(
 		on_log_discord_hook(log_category, log_settings[log_category].discord_webhook_id, output_message);
 	}
 	if (log_to_discord) {
-		EQEmuLogSys::ProcessDiscord(debug_level, log_category, output_debug_message);
+		EQEmuLogSys::ProcessDiscord(
+			debug_level,
+			log_category,
+			log_settings[log_category].discord_webhook_id,
+			output_debug_message
+		);
 	}
 }
 
@@ -668,7 +686,6 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 	LogInfo("Loaded [{}] log categories", categories.size());
 
 	auto webhooks = DiscordWebhooksRepository::All(*m_database);
-
 	if (!webhooks.empty()) {
 		for (auto &w: webhooks) {
 			discord_webhooks[w.id] = {w.id, w.webhook_name, w.webhook_url};

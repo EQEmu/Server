@@ -357,7 +357,6 @@ private:
 
 	// reference to database
 	Database                                                                      *m_database;
-
 	std::function<void(uint16 log_category, const std::string &)>                 on_log_gmsay_hook;
 	std::function<void(uint16 log_category, int webhook_id, const std::string &)> on_log_discord_hook;
 	std::function<void(uint16 log_category, const std::string &)>                 on_log_console_hook;

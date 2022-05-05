@@ -71,7 +71,6 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 			if (res->status == 204) {
 				retry = false;
 			}
-
 			if (retries > MAX_RETRIES) {
 				LogDiscord("Retries exceeded for message [{}]", message);
 				retry = false;
