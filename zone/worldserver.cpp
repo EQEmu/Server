@@ -1957,7 +1957,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				AccountStatus::GMAdmin,
 				Chat::Yellow,
 				fmt::format(
-					"Rules reloaded for {}.",
+					"Rules reloaded for {}{}.",
 					fmt::format(
 						"{} ({})",
 						zone->GetLongName(),
@@ -1966,7 +1966,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					(
 						zone->GetInstanceID() ?
 						fmt::format(
-							"Instance ID: {}",
+							" (Instance ID {})",
 							zone->GetInstanceID()
 						) :
 						""

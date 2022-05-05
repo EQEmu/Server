@@ -9,6 +9,5 @@ void command_reloadallrules(Client *c, const Seperator *sep)
 	auto pack = new ServerPacket(ServerOP_ReloadRules, 0);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-	c->Message(Chat::White, "Successfully reloaded all rules globally.");
 }
 
