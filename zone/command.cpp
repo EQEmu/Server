@@ -314,7 +314,7 @@ int command_init(void)
 		command_add("resetaa_timer", "Command to reset AA cooldown timers.", AccountStatus::GMMgmt, command_resetaa_timer) ||
 		command_add("resetdisc_timer", "Command to reset all discipline cooldown timers.", AccountStatus::GMMgmt, command_resetdisc_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", AccountStatus::GMMgmt, command_revoke) ||
-		command_add("roambox", "Manages roambox settings for an NPC", AccountStatus::GMMgmt, command_roambox) ||
+		command_add("roambox", "[Remove|Set] [Box Size] [Delay (Milliseconds)] - Remove or set an NPC's roambox size and delay", AccountStatus::GMMgmt, command_roambox) ||
 		command_add("rules", "(subcommand) - Manage server rules", AccountStatus::GMImpossible, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", AccountStatus::Guide, command_save) ||
 		command_add("scale", "- Handles npc scaling", AccountStatus::GMLeadAdmin, command_scale) ||
