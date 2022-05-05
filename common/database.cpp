@@ -816,36 +816,34 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 	return atoi(row[0]);
 }
 
-uint32 Database::GetAccountIDByName(const char* accname, const char *loginserver, int16* status, uint32* lsid) {
-	if (!isAlphaNumeric(accname))
+uint32 Database::GetAccountIDByName(std::string account_name, std::string loginserver, int16* status, uint32* lsid) {
+	if (!isAlphaNumeric(account_name.c_str())) {
 		return 0;
+	}
 
-	std::string query = StringFormat("SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '%s' AND `ls_id`='%s' LIMIT 1",
-		EscapeString(accname).c_str(), EscapeString(loginserver).c_str());
+	auto query = fmt::format(
+		"SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '{}' AND `ls_id` = '{}' LIMIT 1",
+		EscapeString(account_name),
+		EscapeString(loginserver)
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
-
-	if (results.RowCount() != 1)
-		return 0;
 
 	auto row = results.begin();
+	auto account_id = std::stoul(row[0]);
 
-	uint32 id = atoi(row[0]);
-
-	if (status)
-		*status = atoi(row[1]);
-
-	if (lsid) {
-		if (row[2])
-			*lsid = atoi(row[2]);
-		else
-			*lsid = 0;
+	if (status) {
+		*status = static_cast<int16>(std::stoi(row[1]));
 	}
 
-	return id;
+	if (lsid) {
+		*lsid = row[2] ? std::stoul(row[2]) : 0;
+	}
+
+	return account_id;
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {

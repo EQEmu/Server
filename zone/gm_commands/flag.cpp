@@ -74,7 +74,7 @@ void command_flag(Client *c, const Seperator *sep)
 			std::string loginserver;
 			ParseAccountString(account_name, user, loginserver);
 
-			account_id = database.GetAccountIDByName(account_name.c_str(), loginserver.c_str());
+			account_id = database.GetAccountIDByName(account_name, loginserver);
 
 			ServerPacket pack(ServerOP_FlagUpdate, sizeof(ServerFlagUpdate_Struct));
 			ServerFlagUpdate_Struct *sfus = (ServerFlagUpdate_Struct *) pack.pBuffer;
