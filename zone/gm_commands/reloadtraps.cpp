@@ -8,7 +8,7 @@ void command_reloadtraps(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
-				"Traps reloaded for {}.",
+				"Traps reloaded for {}{}.",
 				fmt::format(
 					"{} ({})",
 					zone->GetLongName(),
@@ -17,7 +17,7 @@ void command_reloadtraps(Client *c, const Seperator *sep)
 				(
 					zone->GetInstanceID() ?
 					fmt::format(
-						"Instance ID: {}",
+						" (Instance ID {})",
 						zone->GetInstanceID()
 					) :
 					""
@@ -38,7 +38,7 @@ void command_reloadtraps(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
-				"Traps reloaded for {}.",
+				"Traps reloaded for {}{}.",
 				fmt::format(
 					"{} ({})",
 					zone->GetLongName(),
@@ -47,7 +47,7 @@ void command_reloadtraps(Client *c, const Seperator *sep)
 				(
 					zone->GetInstanceID() ?
 					fmt::format(
-						"Instance ID: {}",
+						" (Instance ID {})",
 						zone->GetInstanceID()
 					) :
 					""
