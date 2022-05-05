@@ -289,6 +289,7 @@ public:
 		uint8 log_to_file;
 		uint8 log_to_console;
 		uint8 log_to_gmsay;
+		uint8 log_to_discord;
 		uint8 is_category_enabled; /* When any log output in a category > 0, set this to 1 as (Enabled) */
 	};
 
@@ -342,6 +343,7 @@ private:
 	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message);
 	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message);
 	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
+	void ProcessDiscord(Logs::DebugLevel level, uint16 category, const std::string& message);
 	bool IsRfc5424LogCategory(uint16 log_category);
 };
 

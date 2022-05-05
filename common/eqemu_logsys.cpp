@@ -23,6 +23,7 @@
 #include "platform.h"
 #include "string_util.h"
 #include "misc.h"
+#include "discord/discord.h"
 #include "repositories/logsys_categories_repository.h"
 
 #include <iostream>
@@ -281,6 +282,11 @@ void EQEmuLogSys::ProcessLogWrite(
 	}
 }
 
+void EQEmuLogSys::ProcessDiscord(Logs::DebugLevel level, uint16 category, const std::string& message)
+{
+	Discord::SendWebhookMessage(message, "https://discord.com/api/webhooks/971666542037172244/FqKZ7abGaXeBI0FICQoASG-ManoEaAFve1BJHxyEPoYqzLLuEEmLVcx8sAtt_hWWlE2Y");
+}
+
 /**
  * @param log_category
  * @return
@@ -462,7 +468,12 @@ void EQEmuLogSys::Out(
 		log_to_gmsay = false;
 	}
 
-	const bool nothing_to_log = !log_to_console && !log_to_file && !log_to_gmsay;
+	bool log_to_discord = true;
+	if (log_settings[log_category].log_to_discord < debug_level) {
+		log_to_discord = false;
+	}
+
+	const bool nothing_to_log = !log_to_console && !log_to_file && !log_to_gmsay && !log_to_discord;
 	if (nothing_to_log) {
 		return;
 	}
@@ -488,6 +499,9 @@ void EQEmuLogSys::Out(
 	}
 	if (log_to_file) {
 		EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_debug_message);
+	}
+	if (log_to_discord) {
+		EQEmuLogSys::ProcessDiscord(debug_level, log_category, output_debug_message);
 	}
 }
 
@@ -633,13 +647,15 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 		log_settings[c.log_category_id].log_to_console = static_cast<uint8>(c.log_to_console);
 		log_settings[c.log_category_id].log_to_file    = static_cast<uint8>(c.log_to_file);
 		log_settings[c.log_category_id].log_to_gmsay   = static_cast<uint8>(c.log_to_gmsay);
+		log_settings[c.log_category_id].log_to_discord = static_cast<uint8>(c.log_to_discord);
 
 		// Determine if any output method is enabled for the category
 		// and set it to 1 so it can used to check if category is enabled
 		const bool log_to_console      = log_settings[c.log_category_id].log_to_console > 0;
 		const bool log_to_file         = log_settings[c.log_category_id].log_to_file > 0;
 		const bool log_to_gmsay        = log_settings[c.log_category_id].log_to_gmsay > 0;
-		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
+		const bool log_to_discord      = log_settings[c.log_category_id].log_to_discord > 0;
+		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay || log_to_discord;
 
 		if (is_category_enabled) {
 			log_settings[c.log_category_id].is_category_enabled = 1;
@@ -669,6 +685,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 			new_category.log_to_console           = log_settings[i].log_to_console;
 			new_category.log_to_gmsay             = log_settings[i].log_to_gmsay;
 			new_category.log_to_file              = log_settings[i].log_to_file;
+			new_category.log_to_discord           = log_settings[i].log_to_discord;
 
 			LogsysCategoriesRepository::InsertOne(*m_database, new_category);
 		}
@@ -685,3 +702,4 @@ EQEmuLogSys *EQEmuLogSys::SetDatabase(Database *db)
 
 	return this;
 }
+
