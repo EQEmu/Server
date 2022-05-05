@@ -227,6 +227,8 @@ namespace Logs {
 
 class Database;
 
+constexpr uint16 MAX_DISCORD_WEBHOOK_ID = 300;
+
 class EQEmuLogSys {
 public:
 	EQEmuLogSys();
@@ -290,6 +292,7 @@ public:
 		uint8 log_to_console;
 		uint8 log_to_gmsay;
 		uint8 log_to_discord;
+		int   discord_webhook_id;
 		uint8 is_category_enabled; /* When any log output in a category > 0, set this to 1 as (Enabled) */
 	};
 
@@ -300,16 +303,25 @@ public:
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
+	struct DiscordWebhooks {
+		int id;
+		std::string webhook_name;
+		std::string webhook_url;
+	};
+
+	DiscordWebhooks discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
+
 	bool file_logs_enabled = false;
 
-	int                                                                               log_platform = 0;
-	std::string                                                                       platform_file_name;
+	int         log_platform = 0;
+	std::string platform_file_name;
 
 
 	// gmsay
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	EQEmuLogSys * SetGMSayHandler(std::function<void(uint16 log_type, const std::string &)> f) {
+	EQEmuLogSys *SetGMSayHandler(std::function<void(uint16 log_type, const std::string &)> f)
+	{
 		on_log_gmsay_hook = f;
 		return this;
 	}
@@ -331,7 +343,7 @@ public:
 private:
 
 	// reference to database
-	Database *m_database;
+	Database                                                                          *m_database;
 
 	std::function<void(uint16 log_category, const std::string &)>                     on_log_gmsay_hook;
 	std::function<void(uint16 debug_level, uint16 log_category, const std::string &)> on_log_console_hook;
@@ -343,7 +355,7 @@ private:
 	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message);
 	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message);
 	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
-	void ProcessDiscord(Logs::DebugLevel level, uint16 category, const std::string& message);
+	void ProcessDiscord(Logs::DebugLevel level, uint16 category, int webhook_id, const std::string &message);
 	bool IsRfc5424LogCategory(uint16 log_category);
 };
 

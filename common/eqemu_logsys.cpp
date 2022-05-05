@@ -24,6 +24,7 @@
 #include "string_util.h"
 #include "misc.h"
 #include "discord/discord.h"
+#include "repositories/discord_webhooks_repository.h"
 #include "repositories/logsys_categories_repository.h"
 
 #include <iostream>
@@ -47,6 +48,7 @@ std::ofstream process_log;
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <thread>
 
 #endif
 
@@ -109,6 +111,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 		log_settings[log_category_id].log_to_console      = 0;
 		log_settings[log_category_id].log_to_file         = 0;
 		log_settings[log_category_id].log_to_gmsay        = 0;
+		log_settings[log_category_id].log_to_discord      = 0;
 		log_settings[log_category_id].is_category_enabled = 0;
 	}
 
@@ -155,7 +158,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 		const bool log_to_console      = log_settings[log_category_id].log_to_console > 0;
 		const bool log_to_file         = log_settings[log_category_id].log_to_file > 0;
 		const bool log_to_gmsay        = log_settings[log_category_id].log_to_gmsay > 0;
-		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
+		const bool log_to_discord      = log_settings[log_category_id].log_to_discord > 0;
+		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay || log_to_discord;
 		if (is_category_enabled) {
 			log_settings[log_category_id].is_category_enabled = 1;
 		}
@@ -282,9 +286,22 @@ void EQEmuLogSys::ProcessLogWrite(
 	}
 }
 
-void EQEmuLogSys::ProcessDiscord(Logs::DebugLevel level, uint16 category, const std::string& message)
+void EQEmuLogSys::ProcessDiscord(Logs::DebugLevel level, uint16 category, int webhook_id, const std::string &message)
 {
-	Discord::SendWebhookMessage(message, "https://discord.com/api/webhooks/971666542037172244/FqKZ7abGaXeBI0FICQoASG-ManoEaAFve1BJHxyEPoYqzLLuEEmLVcx8sAtt_hWWlE2Y");
+	if (webhook_id > MAX_DISCORD_WEBHOOK_ID) {
+		LogDiscord("Webhook ID [{}] exceeds allowed max [{}]", webhook_id, MAX_DISCORD_WEBHOOK_ID);
+		return;
+	}
+
+	// this will all fundamentally change to be batched by queryserv
+	auto w = discord_webhooks[webhook_id];
+	if (!w.webhook_url.empty()) {
+		std::thread msg(Discord::SendWebhookMessage,
+			message,
+			w.webhook_url
+		);
+		msg.detach();
+	}
 }
 
 /**
@@ -469,7 +486,7 @@ void EQEmuLogSys::Out(
 	}
 
 	bool log_to_discord = true;
-	if (log_settings[log_category].log_to_discord < debug_level) {
+	if (log_settings[log_category].log_to_discord < debug_level && log_settings[log_category].discord_webhook_id > 0) {
 		log_to_discord = false;
 	}
 
@@ -501,7 +518,12 @@ void EQEmuLogSys::Out(
 		EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_debug_message);
 	}
 	if (log_to_discord) {
-		EQEmuLogSys::ProcessDiscord(debug_level, log_category, output_debug_message);
+		EQEmuLogSys::ProcessDiscord(
+			debug_level,
+			log_category,
+			log_settings[log_category].discord_webhook_id,
+			output_debug_message
+		);
 	}
 }
 
@@ -644,17 +666,19 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 			continue;
 		}
 
-		log_settings[c.log_category_id].log_to_console = static_cast<uint8>(c.log_to_console);
-		log_settings[c.log_category_id].log_to_file    = static_cast<uint8>(c.log_to_file);
-		log_settings[c.log_category_id].log_to_gmsay   = static_cast<uint8>(c.log_to_gmsay);
-		log_settings[c.log_category_id].log_to_discord = static_cast<uint8>(c.log_to_discord);
+		log_settings[c.log_category_id].log_to_console     = static_cast<uint8>(c.log_to_console);
+		log_settings[c.log_category_id].log_to_file        = static_cast<uint8>(c.log_to_file);
+		log_settings[c.log_category_id].log_to_gmsay       = static_cast<uint8>(c.log_to_gmsay);
+		log_settings[c.log_category_id].log_to_discord     = static_cast<uint8>(c.log_to_discord);
+		log_settings[c.log_category_id].discord_webhook_id = c.discord_webhook_id;
 
 		// Determine if any output method is enabled for the category
 		// and set it to 1 so it can used to check if category is enabled
 		const bool log_to_console      = log_settings[c.log_category_id].log_to_console > 0;
 		const bool log_to_file         = log_settings[c.log_category_id].log_to_file > 0;
 		const bool log_to_gmsay        = log_settings[c.log_category_id].log_to_gmsay > 0;
-		const bool log_to_discord      = log_settings[c.log_category_id].log_to_discord > 0;
+		const bool log_to_discord      = log_settings[c.log_category_id].log_to_discord > 0 &&
+										 log_settings[c.log_category_id].discord_webhook_id > 0;
 		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay || log_to_discord;
 
 		if (is_category_enabled) {
@@ -692,6 +716,12 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 	}
 
 	LogInfo("Loaded [{}] log categories", categories.size());
+
+	auto webhooks = DiscordWebhooksRepository::All(*m_database);
+	for (auto &w: webhooks) {
+		discord_webhooks[w.id] = {w.id, w.webhook_name, w.webhook_url};
+	}
+	LogInfo("Loaded [{}] discord webhooks", webhooks.size());
 
 	return this;
 }

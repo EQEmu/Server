@@ -40,9 +40,18 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 	std::stringstream payload;
 	payload << p;
 
-	if (auto res = cli.Post(endpoint.c_str(), payload.str(), "application/json")) {
-		if (res->status != 200 && res->status != 204) {
-			LogError("[Discord Client] Code [{}] Error [{}]", res->status, res->body);
+	bool retry = true;
+	while (retry) {
+		if (auto res = cli.Post(endpoint.c_str(), payload.str(), "application/json")) {
+			if (res->status != 200 && res->status != 204) {
+				LogError("[Discord Client] Code [{}] Error [{}]", res->status, res->body);
+			}
+			if (res->status == 429) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(3000) );
+			}
+			if (res->status == 204) {
+				retry = false;
+			}
 		}
 	}
 }
