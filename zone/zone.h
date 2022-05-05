@@ -275,7 +275,7 @@ public:
 	void LoadVeteranRewards();
 	void LoadZoneDoors(const char *zone, int16 version);
 	void ReloadStaticData();
-	void ReloadWorld(uint32 Option);
+	void ReloadWorld(uint8 global_repop);
 	void RemoveAuth(const char *iCharName, const char *iLSKey);
 	void RemoveAuth(uint32 lsid);
 	void Repop(uint32 delay = 0);
@@ -295,6 +295,7 @@ public:
 	void StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
 	void UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void weatherSend(Client *client = nullptr);
+	void ClearSpawnTimers();
 
 	bool IsQuestHotReloadQueued() const;
 	void SetQuestHotReloadQueued(bool in_quest_hot_reload_queued);

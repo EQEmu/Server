@@ -1600,7 +1600,7 @@ struct WWTaskUpdate_Struct {
 };
 
 struct ReloadWorld_Struct {
-	uint32 Option;
+	uint8 global_repop;
 };
 
 struct HotReloadQuestsStruct {

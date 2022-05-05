@@ -306,10 +306,10 @@ int command_init(void)
 		command_add("reloadstatic", "- Reload Static Zone Data", AccountStatus::GMLeadAdmin, command_reloadstatic) ||
 		command_add("reloadtraps", "- Repops all traps in the current zone.", AccountStatus::QuestTroupe, command_reloadtraps) ||
 		command_add("reloadtitles", "- Reload player titles from the database", AccountStatus::GMLeadAdmin, command_reloadtitles) ||
-		command_add("reloadworld", "[0|1] - Clear quest cache (0 - no repop, 1 - repop)", AccountStatus::Max, command_reloadworld) ||
+		command_add("reloadworld", "[0|1|2] - Reload quests global and repop NPCs if specified (0 = No Repop, 1 = Repop, 2 = Force Repop)", AccountStatus::Max, command_reloadworld) ||
 		command_add("reloadzps", "- Reload zone points from database", AccountStatus::GMLeadAdmin, command_reloadzps) ||
 		command_add("removeitem", "[Item ID] [Amount] - Removes the specified Item ID by Amount from you or your player target's inventory (Amount defaults to 1 if not used)", AccountStatus::GMAdmin, command_removeitem) ||
-		command_add("repop", "[delay] - Repop the zone with optional delay", AccountStatus::GMAdmin, command_repop) ||
+		command_add("repop", "[Force] - Repop the zone with optional force repop", AccountStatus::GMAdmin, command_repop) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", AccountStatus::GMMgmt, command_resetaa) ||
 		command_add("resetaa_timer", "Command to reset AA cooldown timers.", AccountStatus::GMMgmt, command_resetaa_timer) ||
 		command_add("resetdisc_timer", "Command to reset all discipline cooldown timers.", AccountStatus::GMMgmt, command_resetdisc_timer) ||

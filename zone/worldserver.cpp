@@ -3094,7 +3094,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		auto* reload_world = (ReloadWorld_Struct*)pack->pBuffer;
 		if (zone) {
-			zone->ReloadWorld(reload_world->Option);
+			zone->ReloadWorld(reload_world->global_repop);
 		}
 		break;
 	}
