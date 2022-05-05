@@ -4,8 +4,8 @@ void command_resetaa_timer(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (!arguments) {
-		c->Message(Chat::White, "usage: #resetaa_timer all - Reset all Alternate Advancement timers");
-		c->Message(Chat::White, "usage: #resetaa_timer [Timer ID] - Reset Alternate Advancement timer by ID");
+		c->Message(Chat::White, "Usage: #resetaa_timer all - Reset all Alternate Advancement timers");
+		c->Message(Chat::White, "Usage: #resetaa_timer [Timer ID] - Reset Alternate Advancement timer by ID");
 		return;
 	}
 

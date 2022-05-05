@@ -311,7 +311,7 @@ int command_init(void)
 		command_add("removeitem", "[Item ID] [Amount] - Removes the specified Item ID by Amount from you or your player target's inventory (Amount defaults to 1 if not used)", AccountStatus::GMAdmin, command_removeitem) ||
 		command_add("repop", "[delay] - Repop the zone with optional delay", AccountStatus::GMAdmin, command_repop) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", AccountStatus::GMMgmt, command_resetaa) ||
-		command_add("resetaa_timer", "[All|Timer ID] _ Command to reset AA cooldown timers for you or your player target.", AccountStatus::GMMgmt, command_resetaa_timer) ||
+		command_add("resetaa_timer", "[All|Timer ID] - Command to reset AA cooldown timers for you or your player target.", AccountStatus::GMMgmt, command_resetaa_timer) ||
 		command_add("resetdisc_timer", "Command to reset all discipline cooldown timers.", AccountStatus::GMMgmt, command_resetdisc_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", AccountStatus::GMMgmt, command_revoke) ||
 		command_add("roambox", "Manages roambox settings for an NPC", AccountStatus::GMMgmt, command_roambox) ||
