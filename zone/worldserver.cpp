@@ -2013,6 +2013,34 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
+	case ServerOP_ReloadZonePoints: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Zone points reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+			content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
+		}
+		break;
+	}
 	case ServerOP_CameraShake:
 	{
 		if (zone)

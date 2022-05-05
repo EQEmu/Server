@@ -889,6 +889,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
+	case ServerOP_ReloadZonePoints:
+	{
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
 	case ServerOP_CameraShake:
 	{
 		zoneserver_list.SendPacket(pack);
