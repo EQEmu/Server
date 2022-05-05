@@ -1,0 +1,48 @@
+#include "discord.h"
+#include "../http/httplib.h"
+#include "../json/json.h"
+#include "../string_util.h"
+#include "../eqemu_logsys.h"
+
+void Discord::SendWebhookMessage(const std::string &message, const std::string &webhook_url)
+{
+	// validate
+	if (webhook_url.empty()) {
+		LogDiscord("[webhook_url] [{}] is empty", webhook_url);
+		return;
+	}
+
+	// validate
+	if (webhook_url.find("http://") == std::string::npos && webhook_url.find("https://") == std::string::npos) {
+		LogDiscord("[webhook_url] [{}] does not contain a valid http/s prefix.", webhook_url);
+		return;
+	}
+
+	// split
+	auto s = SplitString(webhook_url, '/');
+
+	// url
+	std::string base_url = fmt::format("{}//{}", s[0], s[2]);
+	std::string endpoint = replace_string(webhook_url, base_url, "");
+
+	// client
+	httplib::Client cli(base_url.c_str());
+	cli.set_connection_timeout(0, 15000000); // 15 sec
+	cli.set_read_timeout(15, 0); // 15 seconds
+	cli.set_write_timeout(15, 0); // 15 seconds
+	httplib::Headers headers = {
+		{"Content-Type", "application/json"}
+	};
+
+	// payload
+	Json::Value p;
+	p["content"] = message;
+	std::stringstream payload;
+	payload << p;
+
+	if (auto res = cli.Post(endpoint.c_str(), payload.str(), "application/json")) {
+		if (res->status != 200 && res->status != 204) {
+			LogError("[Discord Client] Code [{}] Error [{}]", res->status, res->body);
+		}
+	}
+}

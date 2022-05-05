@@ -130,6 +130,7 @@ namespace Logs {
 		ChecksumVerification,
 		CombatRecord,
 		Hate,
+		Discord,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -218,6 +219,7 @@ namespace Logs {
 		"ChecksumVerification",
 		"CombatRecord",
 		"Hate",
+		"Discord",
 	};
 }
 

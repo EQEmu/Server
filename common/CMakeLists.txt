@@ -7,6 +7,7 @@ SET(common_sources
 	compression.cpp
 	condition.cpp
 	content/world_content_service.cpp
+	discord/discord.cpp
 	crash.cpp
 	crc16.cpp
 	crc32.cpp
@@ -491,6 +492,7 @@ SET(common_headers
 	database_schema.h
 	dbcore.h
 	deity.h
+	discord/discord.h
 	dynamic_zone_base.h
 	emu_constants.h
 	emu_limits.h
