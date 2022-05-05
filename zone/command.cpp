@@ -303,7 +303,7 @@ int command_init(void)
 		command_add("reloadperlexportsettings", nullptr, AccountStatus::Max, command_reloadperlexportsettings) ||
 		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", AccountStatus::GMLeadAdmin, command_reloadqst) ||
 		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", AccountStatus::QuestTroupe, command_reloadworldrules) ||
-		command_add("reloadstatic", "- Reload Static Zone Data", AccountStatus::GMLeadAdmin, command_reloadstatic) ||
+		command_add("reloadstatic", "- Reload Static Zone Data globally", AccountStatus::GMLeadAdmin, command_reloadstatic) ||
 		command_add("reloadtraps", "- Repops all traps in the current zone.", AccountStatus::QuestTroupe, command_reloadtraps) ||
 		command_add("reloadtitles", "- Reload player titles from the database", AccountStatus::GMLeadAdmin, command_reloadtitles) ||
 		command_add("reloadworld", "[0|1] - Clear quest cache (0 - no repop, 1 - repop)", AccountStatus::Max, command_reloadworld) ||
