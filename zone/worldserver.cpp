@@ -1985,7 +1985,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				AccountStatus::GMAdmin,
 				Chat::Yellow,
 				fmt::format(
-					"Content flags (and expansion) reloaded for {}.",
+					"Content flags (and expansion) reloaded for {}{}.",
 					fmt::format(
 						"{} ({})",
 						zone->GetLongName(),
@@ -1994,7 +1994,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					(
 						zone->GetInstanceID() ?
 						fmt::format(
-							"Instance ID: {}",
+							" (Instance ID {})",
 							zone->GetInstanceID()
 						) :
 						""
@@ -2021,7 +2021,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				AccountStatus::GMAdmin,
 				Chat::Yellow,
 				fmt::format(
-					"Alternate Advancement data reloaded for {}.",
+					"Alternate Advancement data reloaded for {}{}.",
 					fmt::format(
 						"{} ({})",
 						zone->GetLongName(),
@@ -2030,7 +2030,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					(
 						zone->GetInstanceID() ?
 						fmt::format(
-							"Instance ID: {}",
+							" (Instance ID {})",
 							zone->GetInstanceID()
 						) :
 						""
