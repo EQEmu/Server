@@ -10,23 +10,23 @@ void command_feature(Client *c, const Seperator *sep)
 			"#npcedit featuresave"
 		);
 
-		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard temporarily");
-		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color temporarily");
-		c->Message(Chat::White, "Usage: #feature details [Details] - Change your or your target's Drakkin Details temporarily");
-		c->Message(Chat::White, "Usage: #feature face [Face] - Change your or your target's Face temporarily");
-		c->Message(Chat::White, "Usage: #feature gender [Gender] - Change your or your target's Gender temporarily");
-		c->Message(Chat::White, "Usage: #feature hair [Hair] - Change your or your target's Hair temporarily");
-		c->Message(Chat::White, "Usage: #feature haircolor [Hair Color] - Change your or your target's Hair Color temporarily");
-		c->Message(Chat::White, "Usage: #feature helm [Helmet Texture] - Change your or your target's Helmet Texture temporarily");
-		c->Message(Chat::White, "Usage: #feature heritage [Heritage] - Change your or your target's Drakkin Heritage temporarily");
-		c->Message(Chat::White, "Usage: #feature race [Race ID] - Change your or your target's Race temporarily");
-		c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size temporarily (Valid values are 0 to 255, decimal increments are allowed.)");
-		c->Message(Chat::White, "Usage: #feature tattoo [Tattoo] - Change your or your target's Drakkin Tattoos temporarily");
-		c->Message(Chat::White, "Usage: #feature texture [Texture] - Change your or your target's Texture temporarily");
+		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
+		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color");
+		c->Message(Chat::White, "Usage: #feature details [Details] - Change your or your target's Drakkin Details");
+		c->Message(Chat::White, "Usage: #feature face [Face] - Change your or your target's Face");
+		c->Message(Chat::White, "Usage: #feature gender [Gender] - Change your or your target's Gender");
+		c->Message(Chat::White, "Usage: #feature hair [Hair] - Change your or your target's Hair");
+		c->Message(Chat::White, "Usage: #feature haircolor [Hair Color] - Change your or your target's Hair Color");
+		c->Message(Chat::White, "Usage: #feature helm [Helmet Texture] - Change your or your target's Helmet Texture");
+		c->Message(Chat::White, "Usage: #feature heritage [Heritage] - Change your or your target's Drakkin Heritage");
+		c->Message(Chat::White, "Usage: #feature race [Race ID] - Change your or your target's Race");
+		c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size (Valid values are 0 to 255, decimal increments are allowed.)");
+		c->Message(Chat::White, "Usage: #feature tattoo [Tattoo] - Change your or your target's Drakkin Tattoos");
+		c->Message(Chat::White, "Usage: #feature texture [Texture] - Change your or your target's Texture");
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Note: If your target is an NPC, you can save these features to the database using {}.",
+				"Note: All features are temporary. If your target is an NPC, you can save these features to the database using {}.",
 				feature_save_link
 			).c_str()
 		);
@@ -70,23 +70,23 @@ void command_feature(Client *c, const Seperator *sep)
 			"#npcedit featuresave"
 		);
 
-		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard temporarily");
-		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color temporarily");
-		c->Message(Chat::White, "Usage: #feature details [Details] - Change your or your target's Drakkin Details temporarily");
-		c->Message(Chat::White, "Usage: #feature face [Face] - Change your or your target's Face temporarily");
-		c->Message(Chat::White, "Usage: #feature gender [Gender] - Change your or your target's Gender temporarily");
-		c->Message(Chat::White, "Usage: #feature hair [Hair] - Change your or your target's Hair temporarily");
-		c->Message(Chat::White, "Usage: #feature haircolor [Hair Color] - Change your or your target's Hair Color temporarily");
-		c->Message(Chat::White, "Usage: #feature helm [Helmet Texture] - Change your or your target's Helmet Texture temporarily");
-		c->Message(Chat::White, "Usage: #feature heritage [Heritage] - Change your or your target's Drakkin Heritage temporarily");
-		c->Message(Chat::White, "Usage: #feature race [Race ID] - Change your or your target's Race temporarily");
-		c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size temporarily (Valid values are 0 to 255, decimal increments are allowed.)");
-		c->Message(Chat::White, "Usage: #feature tattoo [Tattoo] - Change your or your target's Drakkin Tattoos temporarily");
-		c->Message(Chat::White, "Usage: #feature texture [Texture] - Change your or your target's Texture temporarily");
+		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
+		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color");
+		c->Message(Chat::White, "Usage: #feature details [Details] - Change your or your target's Drakkin Details");
+		c->Message(Chat::White, "Usage: #feature face [Face] - Change your or your target's Face");
+		c->Message(Chat::White, "Usage: #feature gender [Gender] - Change your or your target's Gender");
+		c->Message(Chat::White, "Usage: #feature hair [Hair] - Change your or your target's Hair");
+		c->Message(Chat::White, "Usage: #feature haircolor [Hair Color] - Change your or your target's Hair Color");
+		c->Message(Chat::White, "Usage: #feature helm [Helmet Texture] - Change your or your target's Helmet Texture");
+		c->Message(Chat::White, "Usage: #feature heritage [Heritage] - Change your or your target's Drakkin Heritage");
+		c->Message(Chat::White, "Usage: #feature race [Race ID] - Change your or your target's Race");
+		c->Message(Chat::White, "Usage: #feature size [Size] - Change your or your target's Size (Valid values are 0 to 255, decimal increments are allowed.)");
+		c->Message(Chat::White, "Usage: #feature tattoo [Tattoo] - Change your or your target's Drakkin Tattoos");
+		c->Message(Chat::White, "Usage: #feature texture [Texture] - Change your or your target's Texture");
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Note: If your target is an NPC, you can save these features to the database using {}.",
+				"Note: All features are temporary. If your target is an NPC, you can save these features to the database using {}.",
 				feature_save_link
 			).c_str()
 		);
