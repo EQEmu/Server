@@ -361,7 +361,7 @@ int command_init(void)
 		command_add("spawnstatus", "[All|Disabled|Enabled|Spawn ID] - Show respawn timer status", AccountStatus::GMAdmin, command_spawnstatus) ||
 		command_add("spellinfo", "[spellid] - Get detailed info about a spell", AccountStatus::Steward, command_spellinfo) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", AccountStatus::GMAdmin, command_stun) ||
-		command_add("summon", "[charname] - Summons your player/npc/corpse target, or charname if specified", AccountStatus::QuestTroupe, command_summon) ||
+		command_add("summon", "[Character Name] - Summons your corpse, NPC, or player target, or by character name if specified", AccountStatus::QuestTroupe, command_summon) ||
 		command_add("summonburiedplayercorpse", "- Summons the target's oldest buried corpse, if any exist.", AccountStatus::GMAdmin, command_summonburiedplayercorpse) ||
 		command_add("summonitem", "[itemid] [charges] - Summon an item onto your cursor. Charges are optional.", AccountStatus::GMMgmt, command_summonitem) ||
 		command_add("suspend", "[name] [days] [reason] - Suspend by character name and for specificed number of days", AccountStatus::GMLeadAdmin, command_suspend) ||
