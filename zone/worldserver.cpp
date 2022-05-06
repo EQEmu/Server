@@ -625,41 +625,52 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ZonePlayer: {
 		ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*)pack->pBuffer;
-		Client* client = entity_list.GetClientByName(szp->name);
-		// printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, ZoneID(szp->zone), szp->instance_id);
+		auto client = entity_list.GetClientByName(szp->name);
 		if (client) {
-			if (strcasecmp(szp->adminname, szp->name) == 0)
-				client->Message(Chat::White, "Zoning to: %s", szp->zone);
-			else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank)
+			if (!strcasecmp(szp->adminname, szp->name)) {
+				client->Message(
+					Chat::White,
+					fmt::format(
+						"Zoning to {} ({}).",
+						ZoneLongName(
+							ZoneID(szp->zone)
+						),
+						ZoneID(szp->zone)
+					).c_str()
+				);
+			} else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank) {
 				break;
-			else {
+			} else {
+				std::string name = str_tolower(szp->name);
+				name[0] = toupper(name[0]);
+
 				SendEmoteMessage(
 					szp->adminname,
 					0,
 					Chat::White,
 					fmt::format(
-						"Summoning {} to {} at {:.2f}, {:.2f}, {:.2f}",
-						szp->name,
-						szp->zone,
+						"Summoning {} to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
+						name,
 						szp->x_pos,
 						szp->y_pos,
-						szp->z_pos
+						szp->z_pos,
+						ZoneLongName(
+							ZoneID(szp->zone)
+						),
+						ZoneID(szp->zone)
 					).c_str()
 				);
 			}
+
 			if (!szp->instance_id) {
 				client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
-			}
-			else {
-				if (database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone)) == 0) {
-					client->AssignToInstance(szp->instance_id);
-					client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
-				}
-				else {
+			} else {
+				if (database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone))) {
 					client->RemoveFromInstance(database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone)));
-					client->AssignToInstance(szp->instance_id);
-					client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 				}
+				
+				client->AssignToInstance(szp->instance_id);
+				client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 			}
 		}
 		break;

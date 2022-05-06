@@ -2433,7 +2433,7 @@ void Mob::ShowBuffList(Client* client) {
 	}
 }
 
-void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
+void Mob::GMMove(float x, float y, float z, float heading) {
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
@@ -2442,6 +2442,18 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 
 	if (IsNPC()) {
 		CastToNPC()->SaveGuardSpot(glm::vec4(x, y, z, heading));
+	}
+}
+
+void Mob::GMMove(const glm::vec4 &position) {
+	m_Position.x = position.x;
+	m_Position.y = position.y;
+	m_Position.z = position.z;
+	SetHeading(position.w);
+	mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
+
+	if (IsNPC()) {
+		CastToNPC()->SaveGuardSpot(position);
 	}
 }
 
