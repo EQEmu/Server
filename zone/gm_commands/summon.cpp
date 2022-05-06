@@ -58,55 +58,27 @@ void command_summon(Client *c, const Seperator *sep)
 	} else if (c->GetTarget()) {
 		target = c->GetTarget();
 	}
+	
+	if (c == target) {
+		c->Message(Chat::White, "You cannot summon yourself.");
+		return;
+	}
+	
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Summoning {} ({}) to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
+			target->GetCleanName(),
+			target->GetID(),
+			c->GetX(),
+			c->GetY(),
+			c->GetZ(),
+			zone->GetLongName(),
+			zone->GetZoneID()
+		).c_str()
+	);
 
-	if (target->IsNPC()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Summoning NPC {} ({}) to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
-				target->GetCleanName(),
-				target->GetID(),
-				c->GetX(),
-				c->GetY(),
-				c->GetZ(),
-				zone->GetLongName(),
-				zone->GetZoneID()
-			).c_str()
-		);
-
-		target->GMMove(c->GetPosition());
-		target->CastToNPC()->SaveGuardSpot(glm::vec4(0.0f));
-	} else if (target->IsCorpse()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Summoning Corpse {} ({}) to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
-				target->GetCleanName(),
-				target->GetID(),
-				c->GetX(),
-				c->GetY(),
-				c->GetZ(),
-				zone->GetLongName(),
-				zone->GetZoneID()
-			).c_str()
-		);
-
-		target->GMMove(c->GetPosition());
-	} else if (target->IsClient()) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Summoning {} ({}) to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
-				target->GetCleanName(),
-				target->GetID(),
-				c->GetX(),
-				c->GetY(),
-				c->GetZ(),
-				zone->GetLongName(),
-				zone->GetZoneID()
-			).c_str()
-		);
-
+	if (target->IsClient()) {
 		target->CastToClient()->MovePC(
 			zone->GetZoneID(),
 			zone->GetInstanceID(),
@@ -117,6 +89,12 @@ void command_summon(Client *c, const Seperator *sep)
 			2,
 			GMSummon
 		);
+	} else {
+		target->GMMove(c->GetPosition());
+
+		if (target->IsNPC()) {
+			target->CastToNPC()->SaveGuardSpot(glm::vec4(0.0f));
+		}
 	}
 }
 
