@@ -41,7 +41,7 @@ void command_summon(Client *c, const Seperator *sep)
 			}
 
 			auto pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
-			ServerZonePlayer_Struct *szp = (ServerZonePlayer_Struct *) pack->pBuffer;
+			auto szp = (ServerZonePlayer_Struct *) pack->pBuffer;
 			strn0cpy(szp->adminname, c->GetName(), sizeof(szp->adminname));
 			szp->adminrank = c->Admin();
 			szp->ignorerestrictions = 2;
@@ -89,12 +89,13 @@ void command_summon(Client *c, const Seperator *sep)
 			2,
 			GMSummon
 		);
-	} else {
-		target->GMMove(c->GetPosition());
+		return;
+	}
 
-		if (target->IsNPC()) {
-			target->CastToNPC()->SaveGuardSpot(glm::vec4(0.0f));
-		}
+	target->GMMove(c->GetPosition());
+
+	if (target->IsNPC()) {
+		target->CastToNPC()->SaveGuardSpot(glm::vec4(0.0f));
 	}
 }
 
