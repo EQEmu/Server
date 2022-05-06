@@ -397,7 +397,7 @@ void EntityList::GetTrapInfo(Client* client)
 				).c_str()
 			);
 
-			if (!current_trap->message.empty()) {
+			if (!t->message.empty()) {
 				client->Message(
 					Chat::White,
 					fmt::format(
