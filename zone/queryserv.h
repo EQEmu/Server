@@ -21,7 +21,7 @@ enum PlayerGenericLogEventTypes {
 	Player_Log_Issued_Commands,
 	Player_Log_Money_Transactions,
 	Player_Log_Alternate_Currency_Transactions,
-}; 
+};
 
 
 class QueryServ{
@@ -29,7 +29,8 @@ class QueryServ{
 		QueryServ();
 		~QueryServ();
 		void SendQuery(std::string Query);
+		static void SendDiscordMessage(int webhook_id, const std::string& message);
 		void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
 };
 
-#endif /* QUERYSERV_ZONE_H */ 
+#endif /* QUERYSERV_ZONE_H */

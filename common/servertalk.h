@@ -274,6 +274,7 @@
 #define ServerOP_QSPlayerLogMerchantTransactions 0x5005
 #define ServerOP_QSSendQuery 0x5006
 #define ServerOP_QSPlayerDropItem 0x5007
+#define ServerOP_QSDiscordWebhookMessage 0x5008
 
 enum {
 	CZUpdateType_Character,
@@ -1447,6 +1448,11 @@ struct QSMerchantLogTransaction_Struct {
 	MoneyUpdate_Struct		char_money;
 	uint16 char_count;
 	QSTransactionItems_Struct items[0];
+};
+
+struct QSDiscordMessage_Struct {
+	uint32 webhook_id;
+	char message[2000];
 };
 
 struct QSGeneralQuery_Struct {

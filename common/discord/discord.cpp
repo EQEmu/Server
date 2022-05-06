@@ -55,3 +55,12 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 		}
 	}
 }
+
+std::string Discord::FormatDiscordMessage(uint16 category_id, const std::string &message)
+{
+	if (category_id == Logs::LogCategory::MySQLQuery) {
+		return fmt::format("```sql\n{}\n```", message);
+	}
+
+	return message + "\n";
+}

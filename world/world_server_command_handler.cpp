@@ -31,6 +31,7 @@
 #include "../common/rulesys.h"
 #include "../common/repositories/instance_list_repository.h"
 #include "../common/repositories/zone_repository.h"
+#include "../zone/queryserv.h"
 
 namespace WorldserverCommandHandler {
 
@@ -300,11 +301,6 @@ namespace WorldserverCommandHandler {
 		if (cmd[{"-h", "--help"}]) {
 			return;
 		}
-
-		Discord::SendWebhookMessage(
-			"This is a message",
-			"https://discord.com/api/webhooks/971666542037172244/FqKZ7abGaXeBI0FICQoASG-ManoEaAFve1BJHxyEPoYqzLLuEEmLVcx8sAtt_hWWlE2Y"
-		);
 
 	}
 

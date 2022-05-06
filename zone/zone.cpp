@@ -1209,6 +1209,11 @@ bool Zone::Init(bool is_static) {
 	//MODDING HOOK FOR ZONE INIT
 	mod_init();
 
+	// logging origination information
+	LogSys.origination_info.zone_short_name = zone->short_name;
+	LogSys.origination_info.zone_long_name  = zone->long_name;
+	LogSys.origination_info.instance_id     = zone->instanceid;
+
 	return true;
 }
 

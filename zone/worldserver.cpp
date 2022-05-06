@@ -57,6 +57,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/shared_tasks.h"
 #include "shared_task_zone_messaging.h"
 #include "dialogue_window.h"
+#include "queryserv.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -208,6 +209,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		else {
 			LogInfo("World assigned Port: [{}] for this zone", sci->port);
 			ZoneConfig::SetZonePort(sci->port);
+
+			LogSys.SetDiscordHandler(&Zone::DiscordWebhookMessageHandler);
 		}
 		break;
 	}

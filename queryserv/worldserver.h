@@ -18,24 +18,33 @@
 #ifndef WORLDSERVER_H
 #define WORLDSERVER_H
 
+#include <mutex>
 #include "../common/eq_packet_structs.h"
 #include "../common/net/servertalk_client_connection.h"
 
-class WorldServer
-{
-	public:
-		WorldServer();
-		~WorldServer();
+class WorldServer {
+public:
+	WorldServer();
+	~WorldServer();
 
-		void Connect();
-		bool SendPacket(ServerPacket* pack);
-		std::string GetIP() const;
-		uint16 GetPort() const;
-		bool Connected() const;
+	void Connect();
+	bool SendPacket(ServerPacket *pack);
+	std::string GetIP() const;
+	uint16 GetPort() const;
+	bool Connected() const;
 
-		void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
-	private:
-		std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+	// discord
+	std::mutex discord_queue_lock;
+	struct DiscordMessage {
+		int         webhook_id;
+		std::string message;
+	};
+	std::map<uint32, std::vector<std::string>> discord_message_queue;
+
+	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
+private:
+	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
+
 };
 #endif
 

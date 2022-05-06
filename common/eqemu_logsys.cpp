@@ -92,7 +92,7 @@ namespace Console {
 EQEmuLogSys::EQEmuLogSys()
 {
 	on_log_gmsay_hook   = [](uint16 log_type, const std::string &) {};
-	on_log_console_hook = [](uint16 debug_level, uint16 log_type, const std::string &) {};
+	on_log_console_hook = [](uint16 log_type, const std::string &) {};
 }
 
 /**
@@ -139,6 +139,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::ChecksumVerification].log_to_console = static_cast<uint8>(Logs::General);
 	log_settings[Logs::ChecksumVerification].log_to_gmsay   = static_cast<uint8>(Logs::General);
 	log_settings[Logs::CombatRecord].log_to_gmsay           = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Discord].log_to_console              = static_cast<uint8>(Logs::General);
 
 	/**
 	 * RFC 5424
@@ -231,36 +232,7 @@ std::string EQEmuLogSys::FormatOutMessageString(
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessGMSay(
-	uint16 debug_level,
-	uint16 log_category,
-	const std::string &message
-)
-{
-	/**
-	 * Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash
-	 */
-	if (log_category == Logs::LogCategory::Netcode) {
-		return;
-	}
-
-	/**
-	 * Processes that actually support hooks
-	 */
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone ||
-		EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld
-		) {
-		on_log_gmsay_hook(log_category, message);
-	}
-}
-
-/**
- * @param debug_level
- * @param log_category
- * @param message
- */
 void EQEmuLogSys::ProcessLogWrite(
-	uint16 debug_level,
 	uint16 log_category,
 	const std::string &message
 )
@@ -278,29 +250,10 @@ void EQEmuLogSys::ProcessLogWrite(
 		crash_log.close();
 	}
 
-	char time_stamp[80];
-	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
-
 	if (process_log) {
+		char time_stamp[80];
+		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 		process_log << time_stamp << " " << message << std::endl;
-	}
-}
-
-void EQEmuLogSys::ProcessDiscord(Logs::DebugLevel level, uint16 category, int webhook_id, const std::string &message)
-{
-	if (webhook_id > MAX_DISCORD_WEBHOOK_ID) {
-		LogDiscord("Webhook ID [{}] exceeds allowed max [{}]", webhook_id, MAX_DISCORD_WEBHOOK_ID);
-		return;
-	}
-
-	// this will all fundamentally change to be batched by queryserv
-	auto w = discord_webhooks[webhook_id];
-	if (!w.webhook_url.empty()) {
-		std::thread msg(Discord::SendWebhookMessage,
-			message,
-			w.webhook_url
-		);
-		msg.detach();
 	}
 }
 
@@ -395,7 +348,7 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category)
  * @param log_category
  * @param message
  */
-void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message)
+void EQEmuLogSys::ProcessConsoleMessage(uint16 log_category, const std::string &message)
 {
 #ifdef _WINDOWS
 	HANDLE  console_handle;
@@ -413,7 +366,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 	std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;
 #endif
 
-	on_log_console_hook(debug_level, log_category, message);
+	on_log_console_hook(log_category, message);
 }
 
 /**
@@ -470,33 +423,28 @@ void EQEmuLogSys::Out(
 	...
 )
 {
-	bool log_to_console = true;
-	if (log_settings[log_category].log_to_console < debug_level) {
-		log_to_console = false;
-	}
+	bool log_to_console = log_settings[log_category].log_to_console > 0 &&
+						  log_settings[log_category].log_to_console <= debug_level;
+	bool log_to_file    = log_settings[log_category].log_to_file > 0 &&
+						  log_settings[log_category].log_to_file <= debug_level;
+	bool log_to_gmsay   = log_settings[log_category].log_to_gmsay > 0 &&
+						  log_settings[log_category].log_to_gmsay <= debug_level &&
+						  log_category != Logs::LogCategory::Netcode &&
+						  (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone ||
+						   EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld);
+	bool log_to_discord = EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone &&
+						  log_settings[log_category].log_to_discord > 0 &&
+						  log_settings[log_category].log_to_discord <= debug_level &&
+						  log_settings[log_category].discord_webhook_id > 0 &&
+						  log_settings[log_category].discord_webhook_id < MAX_DISCORD_WEBHOOK_ID;
 
-	bool log_to_file = true;
-	if (log_settings[log_category].log_to_file < debug_level) {
-		log_to_file = false;
-	}
-
-	bool log_to_gmsay = true;
-	if (log_settings[log_category].log_to_gmsay < debug_level) {
-		log_to_gmsay = false;
-	}
-
-	bool log_to_discord = true;
-	if (log_settings[log_category].log_to_discord < debug_level && log_settings[log_category].discord_webhook_id > 0) {
-		log_to_discord = false;
-	}
-
+	// bail out if nothing to log
 	const bool nothing_to_log = !log_to_console && !log_to_file && !log_to_gmsay && !log_to_discord;
 	if (nothing_to_log) {
 		return;
 	}
 
 	std::string prefix;
-
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
 		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
 	}
@@ -509,21 +457,16 @@ void EQEmuLogSys::Out(
 	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, prefix + output_message);
 
 	if (log_to_console) {
-		EQEmuLogSys::ProcessConsoleMessage(debug_level, log_category, output_debug_message);
+		EQEmuLogSys::ProcessConsoleMessage(log_category, output_debug_message);
 	}
 	if (log_to_gmsay) {
-		EQEmuLogSys::ProcessGMSay(debug_level, log_category, output_debug_message);
+		on_log_gmsay_hook(log_category, message);
 	}
 	if (log_to_file) {
-		EQEmuLogSys::ProcessLogWrite(debug_level, log_category, output_debug_message);
+		EQEmuLogSys::ProcessLogWrite(log_category, output_debug_message);
 	}
-	if (log_to_discord) {
-		EQEmuLogSys::ProcessDiscord(
-			debug_level,
-			log_category,
-			log_settings[log_category].discord_webhook_id,
-			output_debug_message
-		);
+	if (log_to_discord && on_log_discord_hook) {
+		on_log_discord_hook(log_category, log_settings[log_category].discord_webhook_id, output_message);
 	}
 }
 
@@ -718,10 +661,13 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 	LogInfo("Loaded [{}] log categories", categories.size());
 
 	auto webhooks = DiscordWebhooksRepository::All(*m_database);
-	for (auto &w: webhooks) {
-		discord_webhooks[w.id] = {w.id, w.webhook_name, w.webhook_url};
+
+	if (!webhooks.empty()) {
+		for (auto &w: webhooks) {
+			discord_webhooks[w.id] = {w.id, w.webhook_name, w.webhook_url};
+		}
+		LogInfo("Loaded [{}] Discord webhooks", webhooks.size());
 	}
-	LogInfo("Loaded [{}] discord webhooks", webhooks.size());
 
 	return this;
 }
