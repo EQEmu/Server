@@ -2043,100 +2043,168 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 	return true;
 }
 
-void Zone::SpawnStatus(Mob* client) {
+void Zone::SpawnStatus(Client *client, std::string status_type) {
+	uint32 filtered_count = 0;
+	uint32 spawn_count = 0;
+	uint32 spawn_number = 1;
+
 	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-
-	uint32 x = 0;
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-		else
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-
-		x++;
-		iterator.Advance();
-	}
-	client->Message(Chat::White, "%i spawns listed.", x);
-}
-
-void Zone::ShowEnabledSpawnStatus(Mob* client)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iEnabledCount = 0;
-
 	iterator.Reset();
 
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() != 0xFFFFFFFF)
-		{
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-			iEnabledCount++;
+	while (iterator.MoreElements()) {
+		auto time_remaining = iterator.GetData()->timer.GetRemainingTime();
+
+		if (
+			status_type == "All" ||
+			(
+				status_type == "Disabled" &&
+				time_remaining == 0xFFFFFFFF
+			) ||
+			(
+				status_type == "Enabled" &&
+				time_remaining != 0xFFFFFFFF
+			)
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Spawn {} | ID: {} Coordinates: {:.2f}, {:.2f}, {:.2f}, {:.2f}",
+					spawn_number,
+					iterator.GetData()->GetID(),
+					iterator.GetData()->GetX(),
+					iterator.GetData()->GetY(),
+					iterator.GetData()->GetZ(),
+					iterator.GetData()->GetHeading()
+				).c_str()
+			);
+
+			if (time_remaining != 0xFFFFFFFF) {
+				auto seconds_remaining = (time_remaining / 1000);
+				client->Message(
+					Chat::White,
+					fmt::format(
+						"Spawn {} | Respawn: {} ({} Second{})",
+						spawn_number,
+						ConvertSecondsToTime(seconds_remaining),
+						seconds_remaining,
+						seconds_remaining != 1 ? "s" : ""
+					).c_str()
+				);
+			}
+
+			filtered_count++;
+			spawn_number++;
 		}
 
-		x++;
+		spawn_count++;
+
 		iterator.Advance();
 	}
 
-	client->Message(Chat::White, "%i of %i spawns listed.", iEnabledCount, x);
-}
-
-void Zone::ShowDisabledSpawnStatus(Mob* client)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iDisabledCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-		{
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-			iDisabledCount++;
-		}
-
-		x++;
-		iterator.Advance();
+	if (!spawn_count) {
+		client->Message(Chat::White, "No spawns were found in this zone.");
+		return;
 	}
 
-	client->Message(Chat::White, "%i of %i spawns listed.", iDisabledCount, x);
+	if (!filtered_count) {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"No {} spawns were found in this zone.",
+				status_type
+			).c_str()
+		);
+		return;
+	}
+	
+	if (status_type == "All") {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"{} Spawn{} listed.",
+				spawn_count,
+				spawn_count != 1 ? "s" : ""
+			).c_str()
+		);
+	} else {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"{} Of {} spawn{} listed.",
+				filtered_count,
+				spawn_count,
+				spawn_count != 1 ? "s" : ""
+			).c_str()
+		);
+	}
 }
 
-void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
+void Zone::ShowSpawnStatusByID(Client *client, uint32 spawn_id)
 {
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iSpawnIDCount = 0;
+	uint32 found_count = 0;
+	uint32 spawn_count = 0;
 
+	LinkedListIterator<Spawn2*> iterator(spawn2_list);
 	iterator.Reset();
 
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->GetID() == spawnid)
-		{
-			if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-			else
-				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
+	while (iterator.MoreElements()) {
+		if (iterator.GetData()->GetID() == spawn_id) {
+			auto time_remaining = iterator.GetData()->timer.GetRemainingTime();
 
-			iSpawnIDCount++;
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Spawn ID {} | Coordinates: {:.2f}, {:.2f}, {:.2f}, {:.2f}",
+					spawn_id,
+					iterator.GetData()->GetX(),
+					iterator.GetData()->GetY(),
+					iterator.GetData()->GetZ(),
+					iterator.GetData()->GetHeading()
+				).c_str()
+			);
 
+			if (time_remaining != 0xFFFFFFFF) {
+				auto seconds_remaining = (time_remaining / 1000);
+				client->Message(
+					Chat::White,
+					fmt::format(
+						"Spawn ID {} | Respawn: {} ({} Second{})",
+						spawn_id,
+						ConvertSecondsToTime(seconds_remaining),
+						seconds_remaining,
+						seconds_remaining != 1 ? "s" : ""
+					).c_str()
+				);
+			}
+
+			found_count++;
 			break;
 		}
 
-		x++;
+		spawn_count++;
 		iterator.Advance();
 	}
 
-	if(iSpawnIDCount > 0)
-		client->Message(Chat::White, "%i of %i spawns listed.", iSpawnIDCount, x);
-	else
-		client->Message(Chat::White, "No matching spawn id was found in this zone.");
+	if (!found_count) {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn ID {} was not found in this zone.",
+				spawn_id
+			).c_str()
+		);
+		return;
+	}
+
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"{} of {} spawn{} listed.",
+			spawn_count,
+			spawn_count,
+			spawn_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
 
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)

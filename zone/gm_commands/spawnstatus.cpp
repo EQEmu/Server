@@ -2,27 +2,41 @@
 
 void command_spawnstatus(Client *c, const Seperator *sep)
 {
-	if ((sep->arg[1][0] == 'e') | (sep->arg[1][0] == 'E')) {
-		// show only enabled spawns
-		zone->ShowEnabledSpawnStatus(c);
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #spawnstatus all - Show all spawn statuses for your current zone");
+		c->Message(Chat::White, "Usage: #spawnstatus disabled - Show all disabled spawn statuses for your current zone");
+		c->Message(Chat::White, "Usage: #spawnstatus enabled - Show all enabled spawn statuses for your current zone");
+		c->Message(Chat::White, "Usage: #spawnstatus [Spawn ID] - Show spawn status by ID for your current zone");
+		return;
 	}
-	else if ((sep->arg[1][0] == 'd') | (sep->arg[1][0] == 'D')) {
-		// show only disabled spawns
-		zone->ShowDisabledSpawnStatus(c);
+
+	bool is_all = !strcasecmp(sep->arg[1], "all");
+	bool is_disabled = !strcasecmp(sep->arg[1], "disabled");
+	bool is_enabled = !strcasecmp(sep->arg[1], "enabled");
+
+	if (
+		!is_all &&
+		!is_disabled &&
+		!is_enabled &&
+		!sep->IsNumber(1)
+	) {
+		c->Message(Chat::White, "Usage: #spawnstatus all - Show all spawn statuses for your current zone");
+		c->Message(Chat::White, "Usage: #spawnstatus disabled - Show all disabled spawn statuses for your current zone");
+		c->Message(Chat::White, "Usage: #spawnstatus enabled - Show all enabled spawn statuses for your current zone");
+		c->Message(Chat::White, "Usage: #spawnstatus [Spawn ID] - Show spawn status by ID for your current zone");
+		return;
 	}
-	else if ((sep->arg[1][0] == 'a') | (sep->arg[1][0] == 'A')) {
-		// show all spawn staus with no filters
+
+	if (is_all) {
 		zone->SpawnStatus(c);
-	}
-	else if (sep->IsNumber(1)) {
-		// show spawn status by spawn2 id
-		zone->ShowSpawnStatusByID(c, atoi(sep->arg[1]));
-	}
-	else if (strcmp(sep->arg[1], "help") == 0) {
-		c->Message(Chat::White, "Usage: #spawnstatus <[a]ll | [d]isabled | [e]nabled | {Spawn2 ID}>");
-	}
-	else {
-		zone->SpawnStatus(c);
+	} else if (is_disabled) {
+		zone->SpawnStatus(c, "Disabled");
+	} else if (is_enabled) {
+		zone->SpawnStatus(c, "Enabled");
+	} else if (sep->IsNumber(1)) {
+		auto spawn_id = std::stoul(sep->arg[1]);
+		zone->ShowSpawnStatusByID(c, spawn_id);
 	}
 }
 
