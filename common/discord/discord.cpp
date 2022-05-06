@@ -4,6 +4,8 @@
 #include "../string_util.h"
 #include "../eqemu_logsys.h"
 
+constexpr int MAX_RETRIES = 10;
+
 void Discord::SendWebhookMessage(const std::string &message, const std::string &webhook_url)
 {
 	// validate
@@ -40,18 +42,42 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 	std::stringstream payload;
 	payload << p;
 
-	bool retry = true;
+	bool retry       = true;
+	int  retries     = 0;
+	int  retry_timer = 0;
 	while (retry) {
 		if (auto res = cli.Post(endpoint.c_str(), payload.str(), "application/json")) {
 			if (res->status != 200 && res->status != 204) {
 				LogError("[Discord Client] Code [{}] Error [{}]", res->status, res->body);
 			}
 			if (res->status == 429) {
-				std::this_thread::sleep_for(std::chrono::milliseconds(3000) );
+				if (!res->body.empty()) {
+					std::stringstream ss(res->body);
+					Json::Value       response;
+
+					try {
+						ss >> response;
+					}
+					catch (std::exception const &ex) {
+						LogDiscord("JSON serialization failure [{}] via [{}]", ex.what(), res->body);
+					}
+
+					retry_timer = std::stoi(response["retry_after"].asString()) + 500;
+				}
+
+				LogDiscord("Rate limited... retrying message in [{}ms]", retry_timer);
+				std::this_thread::sleep_for(std::chrono::milliseconds(retry_timer + 500));
 			}
 			if (res->status == 204) {
 				retry = false;
 			}
+
+			if (retries > MAX_RETRIES) {
+				LogDiscord("Retries exceeded for message [{}]", message);
+				retry = false;
+			}
+
+			retries++;
 		}
 	}
 }
