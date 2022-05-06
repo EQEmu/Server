@@ -370,20 +370,20 @@ void EntityList::GetTrapInfo(Client* client)
 	uint32 trap_number = 1;
 
 	for (const auto& trap : trap_list) {
-		auto current_trap = trap.second;
-		if (current_trap->IsTrap()) {
-			bool is_set = (current_trap->chkarea_timer.Enabled() && !current_trap->reset_timer.Enabled());
+		auto t = trap.second;
+		if (t->IsTrap()) {
+			bool is_set = (t->chkarea_timer.Enabled() && !t->reset_timer.Enabled());
 
 			client->Message(
 				Chat::White,
 				fmt::format(
 					"Trap {} | ID: {} Active: {} Coordinates: {:.2f}, {:.2f}, {:.2f}",
 					trap_number,
-					current_trap->trap_id,
+					t->trap_id,
 					is_set ? "Yes" : "No",
-					current_trap->m_Position.x,
-					current_trap->m_Position.y,
-					current_trap->m_Position.z
+					t->m_Position.x,
+					t->m_Position.y,
+					t->m_Position.z
 				).c_str()
 			);
 
@@ -392,8 +392,8 @@ void EntityList::GetTrapInfo(Client* client)
 				fmt::format(
 					"Trap {} | Times Triggered: {} Group: {}",
 					trap_number,
-					current_trap->times_triggered,
-					current_trap->group
+					t->times_triggered,
+					t->group
 				).c_str()
 			);
 
@@ -403,7 +403,7 @@ void EntityList::GetTrapInfo(Client* client)
 					fmt::format(
 						"Trap {} | Message: {}",
 						trap_number,
-						current_trap->message
+						t->message
 					).c_str()
 				);
 			}
