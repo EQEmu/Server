@@ -8,7 +8,7 @@ void command_summonburiedplayercorpse(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	auto corpse = database.SummonBuriedCharacterCorpses(
+	auto *corpse = database.SummonBuriedCharacterCorpses(
 		target->CharacterID(),
 		target->GetZoneID(),
 		zone->GetInstanceID(),
