@@ -67,7 +67,7 @@ void command_revoke(Client *c, const Seperator *sep)
 		);
 
 		auto pack = new ServerPacket(ServerOP_Revoke, sizeof(RevokeStruct));
-		RevokeStruct *rs = (RevokeStruct *) pack->pBuffer;
+		auto rs = (RevokeStruct *) pack->pBuffer;
 		strn0cpy(rs->adminname, c->GetName(), sizeof(rs->adminname));
 		strn0cpy(rs->name, character_name.c_str(), sizeof(rs->name));
 		rs->toggle = revoked;
