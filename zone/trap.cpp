@@ -421,7 +421,7 @@ void EntityList::GetTrapInfo(Client* client)
 	client->Message(
 		Chat::White,
 		fmt::format(
-			"{} Trap{} found.",
+			"{} trap{} found.",
 			trap_count,
 			trap_count != 1 ? "s" : ""
 		).c_str()
