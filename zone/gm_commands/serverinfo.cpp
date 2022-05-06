@@ -51,8 +51,6 @@ void command_serverinfo(Client *c, const Seperator *sep)
 	);
 
 	popup_text.append("</table>");
-		
-	popup_text.append("<br>");
 
 	popup_text.append("<c \"#00FF00\">CPU Information</c>");
 
@@ -71,8 +69,6 @@ void command_serverinfo(Client *c, const Seperator *sep)
 	}
 
 	popup_text.append("</table>");
-
-	popup_text.append("<br>");
 
 	popup_text.append("<c \"#00FF00\">Process Information</c>");
 
