@@ -44,7 +44,7 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 
 	bool retry       = true;
 	int  retries     = 0;
-	int  retry_timer = 0;
+	int  retry_timer = 1000;
 	while (retry) {
 		if (auto res = cli.Post(endpoint.c_str(), payload.str(), "application/json")) {
 			if (res->status != 200 && res->status != 204) {
