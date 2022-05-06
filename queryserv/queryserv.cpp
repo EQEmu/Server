@@ -55,6 +55,7 @@ int main()
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 	Timer LFGuildExpireTimer(60000);
+	Timer discord_message_queue_timer(1000);
 
 	LogInfo("Starting EQEmu QueryServ");
 	if (!queryservconfig::LoadConfig()) {

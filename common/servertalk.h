@@ -266,6 +266,7 @@
 #define ServerOP_QSPlayerLogMerchantTransactions 0x5005
 #define ServerOP_QSSendQuery 0x5006
 #define ServerOP_QSPlayerDropItem 0x5007
+#define ServerOP_QSDiscordWebhookMessage 0x5008
 
 enum {
 	CZUpdateType_Character,

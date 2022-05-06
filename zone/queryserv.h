@@ -29,6 +29,7 @@ class QueryServ{
 		QueryServ();
 		~QueryServ();
 		void SendQuery(std::string Query);
+		static void SendDiscordMessage(int webhook_id, const std::string& message);
 		void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
 };
 

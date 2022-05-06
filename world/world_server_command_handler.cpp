@@ -302,11 +302,6 @@ namespace WorldserverCommandHandler {
 			return;
 		}
 
-		Discord::SendWebhookMessage(
-			"This is a message",
-			"https://discord.com/api/webhooks/971666542037172244/FqKZ7abGaXeBI0FICQoASG-ManoEaAFve1BJHxyEPoYqzLLuEEmLVcx8sAtt_hWWlE2Y"
-		);
-
 	}
 
 	/**
