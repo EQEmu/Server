@@ -33,14 +33,6 @@ public:
 	uint16 GetPort() const;
 	bool Connected() const;
 
-	// discord
-	std::mutex discord_queue_lock;
-	struct DiscordMessage {
-		int         webhook_id;
-		std::string message;
-	};
-	std::map<uint32, std::vector<std::string>> discord_message_queue;
-
 	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 private:
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;

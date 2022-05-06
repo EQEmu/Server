@@ -19,44 +19,42 @@ void DiscordManager::ProcessMessageQueue()
 	}
 
 	webhook_queue_lock.lock();
-
 	for (auto &q: webhook_message_queue) {
 		LogDiscord("Processing [{}] messages in queue for webhook ID [{}]...", q.second.size(), q.first);
 
-		std::string messages = implode("\n", q.second);
 		auto        webhook  = LogSys.discord_webhooks[q.first];
-		std::string buffer;
+		std::string message;
 
-		for (auto &message: q.second) {
+		for (auto &m: q.second) {
 			// next message would become too large
-			bool next_message_too_large = ((int) message.length() + (int) buffer.length()) > MAX_MESSAGE_LENGTH;
+			bool next_message_too_large = ((int) m.length() + (int) message.length()) > MAX_MESSAGE_LENGTH;
 			if (next_message_too_large) {
 				Discord::SendWebhookMessage(
-					buffer,
+					message,
 					webhook.webhook_url
 				);
-				buffer = "";
+				message = "";
 			}
 
-			buffer += message;
+			message += m;
 
 			// one single message was too large
 			// this should rarely happen but the message will need to be split
-			if ((int) buffer.length() > MAX_MESSAGE_LENGTH) {
-				for (unsigned mi = 0; mi < buffer.length(); mi += MAX_MESSAGE_LENGTH) {
+			if ((int) message.length() > MAX_MESSAGE_LENGTH) {
+				for (unsigned mi = 0; mi < message.length(); mi += MAX_MESSAGE_LENGTH) {
 					Discord::SendWebhookMessage(
-						buffer.substr(mi, MAX_MESSAGE_LENGTH),
+						message.substr(mi, MAX_MESSAGE_LENGTH),
 						webhook.webhook_url
 					);
 				}
-				buffer = "";
+				message = "";
 			}
 		}
 
 		// final flush
-		if (!buffer.empty()) {
+		if (!message.empty()) {
 			Discord::SendWebhookMessage(
-				buffer,
+				message,
 				webhook.webhook_url
 			);
 		}
