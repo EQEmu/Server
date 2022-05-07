@@ -2073,6 +2073,36 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
+
+	case ServerOP_ReloadMerchants: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Merchants reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+
+			entity_list.ReloadMerchants();
+		}
+		break;
+	}
 	case ServerOP_ReloadStaticZoneData: {
 		if (zone) {
 			worldserver.SendEmoteMessage(
@@ -2097,6 +2127,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					)
 				).c_str()
 			);
+
 			zone->ReloadStaticData();
 		}
 		break;

@@ -292,7 +292,7 @@ int command_init(void)
 		command_add("reloadcontentflags", "Executes a reload of all expansion and content flags", AccountStatus::QuestTroupe, command_reloadcontentflags) ||
 		command_add("reloademote", "Reloads NPC Emotes", AccountStatus::QuestTroupe, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr, AccountStatus::Max, command_reloadlevelmods) ||
-		command_add("reloadmerchants", nullptr, AccountStatus::Max, command_reloadmerchants) ||
+		command_add("reloadmerchants", "Reloads merchant lists globally", AccountStatus::Max, command_reloadmerchants) ||
 		command_add("reloadperlexportsettings", "Reloads Perl event export settings globally", AccountStatus::Max, command_reloadperlexportsettings) ||
 		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", AccountStatus::GMLeadAdmin, command_reloadqst) ||
 		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", AccountStatus::QuestTroupe, command_reloadworldrules) ||

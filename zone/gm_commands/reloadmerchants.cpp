@@ -2,7 +2,9 @@
 
 void command_reloadmerchants(Client *c, const Seperator *sep)
 {
-	entity_list.ReloadMerchants();
-	c->Message(Chat::Yellow, "Reloading merchants.");
+	c->Message(Chat::White, "Attempting to reload merchants globally.");
+	auto pack = new ServerPacket(ServerOP_ReloadMerchants, 0);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }
 
