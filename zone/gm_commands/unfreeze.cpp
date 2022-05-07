@@ -7,6 +7,15 @@ void command_unfreeze(Client *c, const Seperator *sep)
 		return;
 	}
 
-	c->GetTarget()->SendAppearancePacket(AT_Anim, ANIM_STAND);
+	auto target = c->GetTarget();
+	target->SendAppearancePacket(AT_Anim, ANIM_STAND);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"You have unfrozen {}.",
+			c->GetTargetDescription(target)
+		).c_str()
+	);
 }
 

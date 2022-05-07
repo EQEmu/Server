@@ -125,8 +125,6 @@ int command_init(void)
 		command_add("attack", "[Entity Name] - Make your NPC target attack an entity by name", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
 		command_add("ban", "[name] [reason]- Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
-		command_add("beard", "- Change the beard of your target", AccountStatus::QuestTroupe, command_beard) ||
-		command_add("beardcolor", "- Change the beard color of your target", AccountStatus::QuestTroupe, command_beardcolor) ||
 		command_add("bestz", "- Ask map for a good Z coord for your x,y coords.", AccountStatus::Player, command_bestz) ||
 		command_add("bind", "- Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
 
@@ -153,7 +151,6 @@ int command_init(void)
 		command_add("depop", "- Depop your NPC target", AccountStatus::Guide, command_depop) ||
 		command_add("depopzone", "- Depop the zone", AccountStatus::GMAdmin, command_depopzone) ||
 		command_add("devtools", "- Manages devtools", AccountStatus::GMMgmt, command_devtools) ||
-		command_add("details", "- Change the details of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_details) ||
 		command_add("disablerecipe",  "[Recipe ID] - Disables a Recipe", AccountStatus::QuestTroupe, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", AccountStatus::QuestTroupe, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.", AccountStatus::QuestTroupe, command_distance) ||
@@ -170,7 +167,6 @@ int command_init(void)
 		command_add("enablerecipe",  "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", AccountStatus::Guide, command_equipitem) ||
-		command_add("face", "- Change the face of your target", AccountStatus::QuestTroupe, command_face) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
 		command_add("findaliases", "[search criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
 		command_add("findclass", "[search criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
@@ -206,14 +202,10 @@ int command_init(void)
 		command_add("guildapprove", "[guildapproveid] - Approve a guild with specified ID (guild creator receives the id)", AccountStatus::Player, command_guildapprove) ||
 		command_add("guildcreate", "[guildname] - Creates an approval setup for guild name specified", AccountStatus::Player, command_guildcreate) ||
 		command_add("guildlist", "[guildapproveid] - Lists character names who have approved the guild specified by the approve id", AccountStatus::Player, command_guildlist) ||
-		command_add("hair", "- Change the hair style of your target", AccountStatus::QuestTroupe, command_hair) ||
-		command_add("haircolor", "- Change the hair color of your target", AccountStatus::QuestTroupe, command_haircolor) ||
 		command_add("haste", "[percentage] - Set your haste percentage", AccountStatus::GMAdmin, command_haste) ||
 		command_add("hatelist", "- Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "- Completely heal your target", AccountStatus::Steward, command_heal) ||
-		command_add("helm", "- Change the helm of your target", AccountStatus::QuestTroupe, command_helm) ||
 		command_add("help", "[search term] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
-		command_add("heritage", "- Change the heritage of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_heritage) ||
 		command_add("heromodel",  "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
 		command_add("hideme", "[on/off] - Hide yourself from spawn lists.", AccountStatus::QuestTroupe, command_hideme) ||
 		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", AccountStatus::GMImpossible, command_hotfix) ||
@@ -354,7 +346,6 @@ int command_init(void)
 		command_add("showzonegloballoot", "Show GlobalLoot entires on this zone", AccountStatus::Guide, command_showzonegloballoot) ||
 		command_add("showzonepoints", "Show zone points for current zone", AccountStatus::Guide, command_showzonepoints) ||
 		command_add("shutdown", "- Shut this zone process down", AccountStatus::GMLeadAdmin, command_shutdown) ||
-		command_add("size", "[size] - Change size of you or your target", AccountStatus::Guide, command_size) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", AccountStatus::Steward, command_spawn) ||
 		command_add("spawneditmass", "Mass editing spawn command", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
 		command_add("spawnfix", "- Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", AccountStatus::GMAreas, command_spawnfix) ||
@@ -366,7 +357,6 @@ int command_init(void)
 		command_add("summonitem", "[itemid] [charges] - Summon an item onto your cursor. Charges are optional.", AccountStatus::GMMgmt, command_summonitem) ||
 		command_add("suspend", "[name] [days] [reason] - Suspend by character name and for specificed number of days", AccountStatus::GMLeadAdmin, command_suspend) ||
 		command_add("task", "(subcommand) - Task system commands", AccountStatus::GMLeadAdmin, command_task) ||
-		command_add("tattoo", "- Change the tattoo of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_tattoo) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_tempname) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_petname) ||
 		command_add("texture", "[Texture] [Helmet Texture] - Change your or your target's texture (Helmet Texture defaults to 0 if not used)", AccountStatus::Steward, command_texture) ||
@@ -1118,15 +1108,7 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Inventory cleared for {}, {} items deleted.",
-				(
-					c == target ?
-					"yourself" :
-					fmt::format(
-						"{} ({})",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				),
+				c->GetTargetDescription(target),
 				removed_count
 			).c_str()
 		);
@@ -1134,16 +1116,9 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} no items to delete.",
-				(
-					c == target ?
-					"You have" :
-					fmt::format(
-						"{} ({}) has",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				"{} {} no items to delete.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "have" : "has"
 			).c_str()
 		);
 	}
@@ -1189,8 +1164,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/attack.cpp"
 #include "gm_commands/augmentitem.cpp"
 #include "gm_commands/ban.cpp"
-#include "gm_commands/beard.cpp"
-#include "gm_commands/beardcolor.cpp"
 #include "gm_commands/bestz.cpp"
 #include "gm_commands/bind.cpp"
 #include "gm_commands/camerashake.cpp"
@@ -1230,7 +1203,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/enablerecipe.cpp"
 #include "gm_commands/endurance.cpp"
 #include "gm_commands/equipitem.cpp"
-#include "gm_commands/face.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/findclass.cpp"
 #include "gm_commands/findfaction.cpp"
@@ -1265,13 +1237,9 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/guildapprove.cpp"
 #include "gm_commands/guildcreate.cpp"
 #include "gm_commands/guildlist.cpp"
-#include "gm_commands/hair.cpp"
-#include "gm_commands/haircolor.cpp"
 #include "gm_commands/haste.cpp"
 #include "gm_commands/hatelist.cpp"
 #include "gm_commands/heal.cpp"
-#include "gm_commands/helm.cpp"
-#include "gm_commands/heritage.cpp"
 #include "gm_commands/heromodel.cpp"
 #include "gm_commands/hideme.cpp"
 #include "gm_commands/hp.cpp"
@@ -1411,7 +1379,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/showzonegloballoot.cpp"
 #include "gm_commands/showzonepoints.cpp"
 #include "gm_commands/shutdown.cpp"
-#include "gm_commands/size.cpp"
 #include "gm_commands/spawn.cpp"
 #include "gm_commands/spawnfix.cpp"
 #include "gm_commands/spawnstatus.cpp"
@@ -1422,7 +1389,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/summonitem.cpp"
 #include "gm_commands/suspend.cpp"
 #include "gm_commands/task.cpp"
-#include "gm_commands/tattoo.cpp"
 #include "gm_commands/tempname.cpp"
 #include "gm_commands/texture.cpp"
 #include "gm_commands/time.cpp"

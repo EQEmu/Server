@@ -799,9 +799,8 @@ void Client::CompleteConnect()
 		Message(
 			Chat::Yellow,
 			fmt::format(
-				"{} ({}) will expire in {}.",
-				zone->GetLongName(),
-				zone->GetInstanceID(),
+				"{} will expire in {}.",
+				zone->GetZoneDescription(),
 				time_string
 			).c_str()
 		);

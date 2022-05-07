@@ -3927,6 +3927,65 @@ const char *Mob::GetCleanName()
 	return clean_name;
 }
 
+std::string Mob::GetTargetDescription(Mob* target, uint8 description_type)
+{
+	std::string self_return = "yourself";
+
+	switch (description_type)
+	{
+		case TargetDescriptionType::LCSelf:
+		{
+			self_return = "yourself";
+			break;
+		}
+		case TargetDescriptionType::UCSelf:
+		{
+			self_return = "Yourself";
+			break;
+		}
+		case TargetDescriptionType::LCYou:
+		{
+			self_return = "you";
+			break;
+		}
+		case TargetDescriptionType::UCYou:
+		{
+			self_return = "You";
+			break;
+		}
+		case TargetDescriptionType::LCYour:
+		{
+			self_return = "your";
+			break;
+		}
+		case TargetDescriptionType::UCYour:
+		{
+			self_return = "Your";
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+
+	auto d = fmt::format(
+		"{}",
+		(			
+			this == target ?
+			self_return :
+			fmt::format(
+				"{} ({})",
+				target->GetCleanName(),
+				target->GetID()
+			)
+		)
+	);
+
+	return d;
+}
+
 // hp event
 void Mob::SetNextHPEvent( int hpevent )
 {

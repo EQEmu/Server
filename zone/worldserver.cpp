@@ -168,9 +168,8 @@ void WorldServer::OnConnected() {
 			0,
 			Chat::Yellow,
 			fmt::format(
-				"Zone Connected | {} ({})",
-				zone->GetLongName(),
-				zone->GetZoneID()
+				"Zone Connected | {}",
+				zone->GetZoneDescription()
 			).c_str()
 		);
 		zone->GetTimeSync();
@@ -193,14 +192,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	ServerPacket *pack = &tpack;
 
 	switch (opcode) {
-	case 0: {
-		break;
-	}
+	case 0:
 	case ServerOP_KeepAlive: {
-		// ignore this
 		break;
 	}
-							 // World is tellins us what port to use.
 	case ServerOP_SetConnectInfo: {
 		if (pack->size != sizeof(ServerConnectInfo))
 			break;
@@ -255,7 +250,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_VoiceMacro: {
-
 		if (!is_zone_loaded)
 			break;
 
@@ -270,46 +264,45 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		vmo->MacroNumber = svm->MacroNumber;
 
 		switch (svm->Type) {
-		case VoiceMacroTell: {
-			Client* c = entity_list.GetClientByName(svm->To);
-			if (!c)
+			case VoiceMacroTell: {
+				Client* c = entity_list.GetClientByName(svm->To);
+				if (!c)
+					break;
+
+				c->QueuePacket(outapp);
 				break;
-
-			c->QueuePacket(outapp);
-			break;
-		}
-
-		case VoiceMacroGroup: {
-			Group* g = entity_list.GetGroupByID(svm->GroupID);
-
-			if (!g)
-				break;
-
-			for (unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (g->members[i] && g->members[i]->IsClient())
-					g->members[i]->CastToClient()->QueuePacket(outapp);
-
 			}
-			break;
-		}
 
-		case VoiceMacroRaid: {
-			Raid *r = entity_list.GetRaidByID(svm->RaidID);
+			case VoiceMacroGroup: {
+				Group* g = entity_list.GetGroupByID(svm->GroupID);
 
-			if (!r)
+				if (!g)
+					break;
+
+				for (unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (g->members[i] && g->members[i]->IsClient())
+						g->members[i]->CastToClient()->QueuePacket(outapp);
+
+				}
 				break;
+			}
 
-			for (int i = 0; i < MAX_RAID_MEMBERS; i++)
-				if (r->members[i].member)
-					r->members[i].member->QueuePacket(outapp);
+			case VoiceMacroRaid: {
+				Raid *r = entity_list.GetRaidByID(svm->RaidID);
 
-			break;
-		}
+				if (!r)
+					break;
+
+				for (int i = 0; i < MAX_RAID_MEMBERS; i++)
+					if (r->members[i].member)
+						r->members[i].member->QueuePacket(outapp);
+
+				break;
+			}
 		}
 		safe_delete(outapp);
 		break;
 	}
-
 	case ServerOP_SpawnCondition: {
 		if (pack->size != sizeof(ServerSpawnCondition_Struct))
 			break;
@@ -532,9 +525,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				0,
 				Chat::Yellow,
 				fmt::format(
-					"Zone Shutdown | {} ({})",
-					zone->GetLongName(),
-					zone->GetZoneID()
+					"Zone Shutdown | {}",
+					zone->GetZoneDescription()
 				).c_str()
 			);
 
@@ -562,9 +554,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					0,
 					Chat::White,
 					fmt::format(
-						"Zone Bootup Failed | {} ({}) Already running",
-						zone->GetLongName(),
-						zone->GetZoneID()
+						"Zone Bootup Failed | {} Already running",
+						zone->GetZoneDescription()
 					).c_str()
 				);
 			}
@@ -679,9 +670,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						skp->name,
 						is_zone_loaded ?
 						fmt::format(
-							"in {} ({})",
-							zone->GetLongName(),
-							zone->GetZoneID()
+							"in {}",
+							zone->GetZoneDescription()
 						) :
 						""
 					).c_str()
@@ -715,9 +705,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						skp->target,
 						is_zone_loaded ?
 						fmt::format(
-							"in {} ({})",
-							zone->GetLongName(),
-							zone->GetZoneID()
+							"in {}",
+							zone->GetZoneDescription()
 						) :
 						""
 					).c_str()
@@ -736,22 +725,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
-							  //hand all the guild related packets to the guild manager for processing.
 	case ServerOP_OnlineGuildMembersResponse:
 	case ServerOP_RefreshGuild:
-		//	case ServerOP_GuildInvite:
 	case ServerOP_DeleteGuild:
 	case ServerOP_GuildCharRefresh:
 	case ServerOP_GuildMemberUpdate:
 	case ServerOP_GuildRankUpdate:
 	case ServerOP_LFGuildUpdate:
-		//	case ServerOP_GuildGMSet:
-		//	case ServerOP_GuildGMSetRank:
-		//	case ServerOP_GuildJoin:
+	{
 		guild_mgr.ProcessWorldPacket(pack);
 		break;
-
+	}
 	case ServerOP_FlagUpdate: {
 		Client* client = entity_list.GetClientByAccID(*((uint32*)pack->pBuffer));
 		if (client) {
@@ -774,10 +758,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				0,
 				Chat::Red,
 				fmt::format(
-					"Summoning you to {} ({}) in {} at {:.2f}, {:.2f}, {:.2f}",
+					"Summoning you to {} in {} at {:.2f}, {:.2f}, {:.2f}",
 					client->GetCleanName(),
-					zone->GetLongName(),
-					zone->GetZoneID(),
+					zone->GetZoneDescription(),
 					client->GetX(),
 					client->GetY(),
 					client->GetZ()
@@ -976,9 +959,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				0,
 				Chat::White,
 				fmt::format(
-					"Zone {} ({}) | {} {}.",
-					zone->GetLongName(),
-					zone->GetZoneID(),
+					"Zone {} | {} {}.",
+					zone->GetZoneDescription(),
 					rev->toggle ? "Revoking" : "Unrevoking",
 					client->GetCleanName()
 				).c_str()
@@ -1224,7 +1206,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_ForceGroupUpdate: {
 		ServerForceGroupUpdate_Struct* fgu = (ServerForceGroupUpdate_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1235,7 +1216,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_OOZGroupMessage: {
 		ServerGroupChannelMessage_Struct* gcm = (ServerGroupChannelMessage_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1273,7 +1253,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidRemove: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1294,7 +1273,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidDisband: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1310,7 +1288,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidLockFlag: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1328,7 +1305,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidChangeGroup: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1357,7 +1333,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_UpdateGroup: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1371,7 +1346,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidGroupLeader: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1380,7 +1354,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidLeader: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1401,7 +1374,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_DetailsChange: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1417,7 +1389,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidGroupDisband: {
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1438,7 +1409,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidGroupAdd: {
 		ServerRaidGroupAction_Struct* rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1469,7 +1439,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidGroupRemove: {
 		ServerRaidGroupAction_Struct* rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1500,7 +1469,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidGroupSay: {
 		ServerRaidMessage_Struct* rmsg = (ServerRaidMessage_Struct*)pack->pBuffer;
 		if (zone) {
@@ -1525,7 +1493,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidSay: {
 		ServerRaidMessage_Struct* rmsg = (ServerRaidMessage_Struct*)pack->pBuffer;
 		if (zone)
@@ -1549,7 +1516,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_RaidMOTD: {
 		ServerRaidMOTD_Struct *rmotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
 		if (!zone)
@@ -1561,7 +1527,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		r->SendRaidMOTD();
 		break;
 	}
-
 	case ServerOP_SpawnPlayerCorpse: {
 		SpawnPlayerCorpse_Struct* s = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
 		Corpse* NewCorpse = database.LoadCharacterCorpse(s->player_corpse_id);
@@ -1636,12 +1601,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_ReloadTasks: {
-		if (RuleB(Tasks, EnableTaskSystem)) {
-			HandleReloadTasks(pack);
-		}
-		break;
-	}
 	case ServerOP_LFGMatches: {
 		HandleLFGMatches(pack);
 		break;
@@ -1650,7 +1609,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		HandleLFPMatches(pack);
 		break;
 	}
-
 	case ServerOP_UpdateSpawn: {
 		if (zone)
 		{
@@ -1672,7 +1630,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_InstanceUpdateTime:
 	{
 		ServerInstanceUpdateTime_Struct *iut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
@@ -1685,7 +1642,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_DepopAllPlayersCorpses:
 	{
 		ServerDepopAllPlayersCorpses_Struct *sdapcs = (ServerDepopAllPlayersCorpses_Struct *)pack->pBuffer;
@@ -1696,7 +1652,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 
 	}
-
 	case ServerOP_DepopPlayerCorpse:
 	{
 		ServerDepopPlayerCorpse_Struct *sdpcs = (ServerDepopPlayerCorpse_Struct *)pack->pBuffer;
@@ -1707,13 +1662,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 
 	}
-
-	case ServerOP_ReloadTitles:
-	{
-		title_manager.LoadTitles();
-		break;
-	}
-
 	case ServerOP_SpawnStatusChange:
 	{
 		if (zone)
@@ -1747,7 +1695,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_QGlobalUpdate:
 	{
 		if (pack->size != sizeof(ServerQGlobalUpdate_Struct))
@@ -1773,7 +1720,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_QGlobalDelete:
 	{
 		if (pack->size != sizeof(ServerQGlobalDelete_Struct))
@@ -1792,7 +1738,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureRequestAccept:
 	{
 		ServerAdventureRequestAccept_Struct *ars = (ServerAdventureRequestAccept_Struct*)pack->pBuffer;
@@ -1804,7 +1749,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureRequestDeny:
 	{
 		ServerAdventureRequestDeny_Struct *ars = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
@@ -1816,7 +1760,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureCreateDeny:
 	{
 		Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1827,7 +1770,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureData:
 	{
 		Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1843,7 +1785,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureDataClear:
 	{
 		Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1857,7 +1798,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureClickDoorReply:
 	{
 		ServerPlayerClickedAdventureDoorReply_Struct *adr = (ServerPlayerClickedAdventureDoorReply_Struct*)pack->pBuffer;
@@ -1869,7 +1809,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureClickDoorError:
 	{
 		Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1880,7 +1819,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureLeaveReply:
 	{
 		Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1891,7 +1829,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureLeaveDeny:
 	{
 		Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1902,7 +1839,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureCountUpdate:
 	{
 		ServerAdventureCountUpdate_Struct *ac = (ServerAdventureCountUpdate_Struct*)pack->pBuffer;
@@ -1913,7 +1849,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureZoneData:
 	{
 		if (zone)
@@ -1925,7 +1860,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureFinish:
 	{
 		ServerAdventureFinish_Struct *af = (ServerAdventureFinish_Struct*)pack->pBuffer;
@@ -1936,7 +1870,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
 	case ServerOP_AdventureLeaderboard:
 	{
 		Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
@@ -1949,96 +1882,55 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_ReloadRules: {
-		if (zone) {
-			worldserver.SendEmoteMessage(
-				0,
-				0,
-				AccountStatus::GMAdmin,
-				Chat::Yellow,
-				fmt::format(
-					"Rules reloaded for {}.",
-					fmt::format(
-						"{} ({})",
-						zone->GetLongName(),
-						zone->GetZoneID()
-					),
-					(
-						zone->GetInstanceID() ?
-						fmt::format(
-							"Instance ID: {}",
-							zone->GetInstanceID()
-						) :
-						""
-					)
-				).c_str()
-			);
-		}
-		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
-		break;
-	}
-	case ServerOP_ReloadContentFlags: {
-		if (zone) {
-			worldserver.SendEmoteMessage(
-				0,
-				0,
-				AccountStatus::GMAdmin,
-				Chat::Yellow,
-				fmt::format(
-					"Content flags (and expansion) reloaded for {}.",
-					fmt::format(
-						"{} ({})",
-						zone->GetLongName(),
-						zone->GetZoneID()
-					),
-					(
-						zone->GetInstanceID() ?
-						fmt::format(
-							"Instance ID: {}",
-							zone->GetInstanceID()
-						) :
-						""
-					)
-				).c_str()
-			);
-		}
+	case ServerOP_ReloadContentFlags:
+	{
+		zone->SendReloadMessage("Content Flags");
 		content_service.SetExpansionContext()->ReloadContentFlags();
 		break;
 	}
-	case ServerOP_ReloadLogs: {
+	case ServerOP_ReloadLogs:
+	{
+		zone->SendReloadMessage("Log Settings");
 		LogSys.LoadLogDatabaseSettings();
 		break;
 	}
-	case ServerOP_ReloadPerlExportSettings: {
+	case ServerOP_ReloadPerlExportSettings:
+	{
+		zone->SendReloadMessage("Perl Event Export Settings");
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
-	case ServerOP_ReloadZonePoints: {
-		if (zone) {
-			worldserver.SendEmoteMessage(
-				0,
-				0,
-				AccountStatus::GMAdmin,
-				Chat::Yellow,
-				fmt::format(
-					"Zone points reloaded for {}{}.",
-					fmt::format(
-						"{} ({})",
-						zone->GetLongName(),
-						zone->GetZoneID()
-					),
-					(
-						zone->GetInstanceID() ?
-						fmt::format(
-							" (Instance ID {})",
-							zone->GetInstanceID()
-						) :
-						""
-					)
-				).c_str()
-			);
-			content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
+	case ServerOP_ReloadRules:
+	{
+		zone->SendReloadMessage("Rules");
+		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
+		break;
+	}
+	case ServerOP_ReloadTasks:
+	{
+		if (RuleB(Tasks, EnableTaskSystem)) {
+			HandleReloadTasks(pack);
 		}
+
+		zone->SendReloadMessage("Tasks");
+		break;
+	}
+	case ServerOP_ReloadTitles:
+	{
+		zone->SendReloadMessage("Titles");
+		title_manager.LoadTitles();
+		break;
+	}
+	case ServerOP_ReloadWorld:
+	{
+		auto* reload_world = (ReloadWorld_Struct*)pack->pBuffer;
+		zone->ReloadWorld(reload_world->Option);
+		break;
+	}
+	case ServerOP_ReloadZonePoints:
+	{
+		zone->SendReloadMessage("Zone Points");
+		content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
 		break;
 	}
 	case ServerOP_CameraShake:
@@ -3117,16 +3009,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-
-	case ServerOP_ReloadWorld:
-	{
-		auto* reload_world = (ReloadWorld_Struct*)pack->pBuffer;
-		if (zone) {
-			zone->ReloadWorld(reload_world->Option);
-		}
-		break;
-	}
-
 	case ServerOP_UpdateSchedulerEvents: {
 		LogScheduler("Received signal from world to update");
 		if (m_zone_scheduler) {
@@ -3135,7 +3017,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		break;
 	}
-
 	case ServerOP_HotReloadQuests:
 	{
 		if (!zone) {
@@ -3266,9 +3147,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	default: {
 		LogInfo("[HandleMessage] Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
-
-//		std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
-//		std::cout << " size:" << pack->size << std::endl;
 		break;
 	}
 	}

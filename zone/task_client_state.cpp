@@ -1733,24 +1733,24 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 	}
 }
 
-void ClientTaskState::ShowClientTasks(Client *client)
+void ClientTaskState::ShowClientTasks(Client* who, Client *to)
 {
-	client->Message(Chat::White, "------------------------------------------------");
-	client->Message(
+	to->SendChatLineBreak();
+
+	to->Message(
 		Chat::White,
 		fmt::format(
-			"Task Information for {} ({})",
-			client->GetCleanName(),
-			client->GetID()
+			"Task Information for {}",
+			to->GetTargetDescription(who, TargetDescriptionType::UCSelf)
 		).c_str()
 	);
 
 	if (m_active_task.task_id != TASKSLOTEMPTY) {
-		ShowClientTaskInfoMessage(&m_active_task, client);
+		ShowClientTaskInfoMessage(&m_active_task, to);
 	}
 
 	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
-		ShowClientTaskInfoMessage(&m_active_shared_task, client);
+		ShowClientTaskInfoMessage(&m_active_shared_task, to);
 	}
 
 	for (auto &active_quest : m_active_quests) {
@@ -1758,10 +1758,10 @@ void ClientTaskState::ShowClientTasks(Client *client)
 			continue;
 		}
 
-		ShowClientTaskInfoMessage(&active_quest, client);
+		ShowClientTaskInfoMessage(&active_quest, to);
 	}
 
-	client->Message(Chat::White, "------------------------------------------------");
+	to->SendChatLineBreak();
 }
 
 // TODO: Shared Task

@@ -54,15 +54,7 @@ void command_setaaxp(Client *c, const Seperator *sep)
 
 	std::string aa_exp_message = fmt::format(
 		"{} now {} {} {}AA Experience.",
-		(
-			c == target ?
-			"You" :
-			fmt::format(
-				"{} ({})",
-				target->GetCleanName(),
-				target->GetID()
-			)
-		),
+		c->GetTargetDescription(target, TargetDescriptionType::UCYou),
 		c == target ? "have" : "has",
 		aa_experience,
 		group_raid_string

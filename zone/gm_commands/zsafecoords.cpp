@@ -44,17 +44,8 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Safe Coordinates Changed | Zone: {} ({}){} XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f} Permanent: {} ",
-			zone->GetLongName(),
-			zone->GetZoneID(),
-			(
-				zone->GetInstanceVersion() ?
-				fmt::format(
-					" Version: {}",
-					zone->GetInstanceVersion()
-				) :
-				""
-			),
+			"Safe Coordinates Changed | Zone: {} XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f} Permanent: {} ",
+			zone->GetZoneDescription(),
 			x,
 			y,
 			z,

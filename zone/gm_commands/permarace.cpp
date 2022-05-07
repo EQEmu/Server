@@ -22,7 +22,7 @@ void command_permarace(Client *c, const Seperator *sep)
 	
 	LogInfo("Race changed by {} for {} to {} ({})",
 		c->GetCleanName(),
-		target->GetCleanName(),
+		c->GetTargetDescription(target),
 		GetRaceIDName(race_id),
 		race_id
 	);
@@ -36,15 +36,7 @@ void command_permarace(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Race changed for {} to {} ({}).",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target),
 			GetRaceIDName(race_id),
 			race_id
 		).c_str()

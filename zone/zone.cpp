@@ -2772,3 +2772,45 @@ uint32 Zone::GetCurrencyItemID(uint32 currency_id)
 
 	return 0;
 }
+
+std::string Zone::GetZoneDescription()
+{
+	auto d = fmt::format(
+		"{} ({}){}{}",
+		GetLongName(),
+		GetZoneID(),
+		(
+			GetInstanceID() ?
+			fmt::format(
+				" (Instance ID {})",
+				GetInstanceID()
+			) :
+			""
+		),
+		(
+			GetInstanceVersion() ?
+			fmt::format(
+				" (Version {})",
+				GetInstanceVersion()
+			) :
+			""
+		)
+	);
+
+	return d;
+}
+
+void Zone::SendReloadMessage(std::string reload_type)
+{
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::GMAdmin,
+		Chat::Yellow,
+		fmt::format(
+			"{} reloaded for {}.",
+			reload_type,
+			GetZoneDescription()
+		).c_str()
+	);
+}

@@ -154,16 +154,13 @@ void command_faction(Client *c, const Seperator *sep)
 	}
 	else if (!strcasecmp(sep->arg[1], "view")) {
 		if (c->GetTarget() && c->GetTarget()->IsNPC()) {
-			Mob         *target        = c->GetTarget();
-			uint32      npc_id         = target->GetNPCTypeID();
-			uint32      npc_faction_id = target->CastToNPC()->GetPrimaryFaction();
-			std::string npc_name       = target->GetCleanName();
+			auto target = c->GetTarget();
+			auto npc_faction_id = target->CastToNPC()->GetPrimaryFaction();
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{} ({}) has a Primary Faction  of {} ({}).",
-					npc_name,
-					npc_id,
+					"{} has a Primary Faction of {} ({}).",
+					c->GetTargetDescription(target),
 					content_db.GetFactionName(npc_faction_id),
 					npc_faction_id
 				).c_str()

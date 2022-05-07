@@ -649,9 +649,8 @@ void HateList::PrintHateListToClient(Client *c)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Displaying hate list for {} ({}).",
-				hate_owner->GetCleanName(),
-				hate_owner->GetID()
+				"Displaying hate list for {}.",
+				c->GetTargetDescription(hate_owner)
 			).c_str()
 		);
 
@@ -687,9 +686,8 @@ void HateList::PrintHateListToClient(Client *c)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) has nothing on its hatelist.",
-				hate_owner->GetCleanName(),
-				hate_owner->GetID()
+				"{} has nothing on its hatelist.",
+				c->GetTargetDescription(hate_owner)
 			).c_str()
 		);
 	}

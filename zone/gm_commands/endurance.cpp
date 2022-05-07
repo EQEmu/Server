@@ -20,15 +20,7 @@ void command_endurance(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Set {} to full Endurance ({}).",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target),
 			endurance
 		).c_str()
 	);

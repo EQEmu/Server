@@ -80,9 +80,8 @@ void command_zclip(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Clipping Changed | Zone: {} ({}) Permanent: {}",
-				zone->GetLongName(),
-				zone->GetZoneID(),
+				"Clipping Changed | Zone: {} Permanent: {}",
+				zone->GetZoneDescription(),
 				permanent ? "Yes" : "No"
 			).c_str()
 		);

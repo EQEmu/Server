@@ -17,15 +17,7 @@ void command_aggrozone(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Aggroing zone on {}.",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			)
+			c->GetTargetDescription(target)
 		).c_str()
 	);
 }

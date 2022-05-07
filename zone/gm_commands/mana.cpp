@@ -17,15 +17,7 @@ void command_mana(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Set {} to full Mana ({}).",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target),
 			mana
 		).c_str()
 	);

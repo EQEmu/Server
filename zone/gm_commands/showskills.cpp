@@ -46,13 +46,7 @@ void command_showskills(Client *c, const Seperator *sep)
 
 	std::string popup_title = fmt::format(
 		"Skills for {} [{} to {}]",
-		c == target ?
-		"Yourself" :
-		fmt::format(
-			"{} ({})",
-			target->GetCleanName(),
-			target->GetID()
-		),
+		c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 		start_skill_id,
 		max_skill_id
 	);
@@ -71,13 +65,7 @@ void command_showskills(Client *c, const Seperator *sep)
 			start_skill_id,
 			EQ::skills::GetSkillName((EQ::skills::SkillType) max_skill_id),
 			max_skill_id,
-			c == target ?
-			"yourself" :
-			fmt::format(
-				"{} ({})",
-				target->GetCleanName(),
-				target->GetID()
-			)
+			c->GetTargetDescription(target)
 		).c_str()
 	);
 

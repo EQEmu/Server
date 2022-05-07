@@ -54,15 +54,7 @@ void command_castspell(Client *c, const Seperator *sep)
 					"Cast {} ({}) on {}{}.",
 					GetSpellName(spell_id),
 					spell_id,
-					(
-						c == target ?
-						"yourself" :
-						fmt::format(
-							"{} ({})",
-							target->GetCleanName(),
-							target->GetID()
-						)
-					),
+					c->GetTargetDescription(target),
 					instant_cast ? " instantly" : ""
 				).c_str()
 			);
