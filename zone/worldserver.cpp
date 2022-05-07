@@ -625,41 +625,52 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ZonePlayer: {
 		ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*)pack->pBuffer;
-		Client* client = entity_list.GetClientByName(szp->name);
-		// printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, ZoneID(szp->zone), szp->instance_id);
+		auto client = entity_list.GetClientByName(szp->name);
 		if (client) {
-			if (strcasecmp(szp->adminname, szp->name) == 0)
-				client->Message(Chat::White, "Zoning to: %s", szp->zone);
-			else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank)
+			if (!strcasecmp(szp->adminname, szp->name)) {
+				client->Message(
+					Chat::White,
+					fmt::format(
+						"Zoning to {} ({}).",
+						ZoneLongName(
+							ZoneID(szp->zone)
+						),
+						ZoneID(szp->zone)
+					).c_str()
+				);
+			} else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank) {
 				break;
-			else {
+			} else {
+				std::string name = str_tolower(szp->name);
+				name[0] = toupper(name[0]);
+
 				SendEmoteMessage(
 					szp->adminname,
 					0,
 					Chat::White,
 					fmt::format(
-						"Summoning {} to {} at {:.2f}, {:.2f}, {:.2f}",
-						szp->name,
-						szp->zone,
+						"Summoning {} to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
+						name,
 						szp->x_pos,
 						szp->y_pos,
-						szp->z_pos
+						szp->z_pos,
+						ZoneLongName(
+							ZoneID(szp->zone)
+						),
+						ZoneID(szp->zone)
 					).c_str()
 				);
 			}
+
 			if (!szp->instance_id) {
 				client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
-			}
-			else {
-				if (database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone)) == 0) {
-					client->AssignToInstance(szp->instance_id);
-					client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
-				}
-				else {
+			} else {
+				if (database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone))) {
 					client->RemoveFromInstance(database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone)));
-					client->AssignToInstance(szp->instance_id);
-					client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 				}
+				
+				client->AssignToInstance(szp->instance_id);
+				client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 			}
 		}
 		break;
@@ -1710,6 +1721,31 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 	case ServerOP_ReloadTitles:
 	{
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Titles reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
+
 		title_manager.LoadTitles();
 		break;
 	}
@@ -1957,7 +1993,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				AccountStatus::GMAdmin,
 				Chat::Yellow,
 				fmt::format(
-					"Rules reloaded for {}.",
+					"Rules reloaded for {}{}.",
 					fmt::format(
 						"{} ({})",
 						zone->GetLongName(),
@@ -1966,7 +2002,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					(
 						zone->GetInstanceID() ?
 						fmt::format(
-							"Instance ID: {}",
+							" (Instance ID {})",
 							zone->GetInstanceID()
 						) :
 						""
@@ -2010,6 +2046,30 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadPerlExportSettings: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Perl event export settings reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
@@ -2037,10 +2097,69 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					)
 				).c_str()
 			);
+
 			zone->LoadAlternateAdvancement();
-			entity_list.SendAlternateAdvancementStats();
 		}
-		break;	
+		break;
+	}
+	case ServerOP_ReloadMerchants: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Merchants reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+
+			entity_list.ReloadMerchants();
+		}
+		break;
+	}
+	}
+	case ServerOP_ReloadStaticZoneData: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Static zone data reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+
+			zone->ReloadStaticData();
+		}
+		break;
 	}
 	case ServerOP_CameraShake:
 	{
@@ -3123,7 +3242,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		auto* reload_world = (ReloadWorld_Struct*)pack->pBuffer;
 		if (zone) {
-			zone->ReloadWorld(reload_world->Option);
+			zone->ReloadWorld(reload_world->global_repop);
 		}
 		break;
 	}

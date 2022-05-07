@@ -228,7 +228,9 @@
 #define ServerOP_UpdateSchedulerEvents 0x4012
 #define ServerOP_ReloadContentFlags 0x4013
 #define ServerOP_ReloadVariablesWorld 0x4014
+#define ServerOP_ReloadMerchants 0x4016
 #define ServerOP_ReloadAAData 0x4017
+#define ServerOP_ReloadStaticZoneData 0x4020
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
@@ -1601,7 +1603,7 @@ struct WWTaskUpdate_Struct {
 };
 
 struct ReloadWorld_Struct {
-	uint32 Option;
+	uint8 global_repop;
 };
 
 struct HotReloadQuestsStruct {

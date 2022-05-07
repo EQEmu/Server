@@ -875,7 +875,7 @@ void Console::ProcessCommand(const char* command) {
 				SendEmoteMessage(0,0,0,15,"Reloading World...");
 				auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 				ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
-				RW->Option = 1;
+				RW->global_repop = ReloadWorld::Repop;
 				zoneserver_list.SendPacket(pack);
 				safe_delete(pack);
 			}
