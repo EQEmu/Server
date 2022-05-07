@@ -1041,18 +1041,31 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 	return true;
 }
 
-void ZoneDatabase::AssignGrid(Client *client, int grid, int spawn2id) {
-	std::string query = StringFormat("UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
-	auto results = QueryDatabase(query);
+void ZoneDatabase::AssignGrid(Client *client, uint32 grid_id, uint32 entity_id) {
+	auto target_npc = entity_list.GetNPCByID(entity_id);
+	auto spawn2_id = target_npc ? target_npc->GetSpawnPointID() : 0;
+	if (spawn2_id) {
+		std::string query = fmt::format(
+			"UPDATE spawn2 SET pathgrid = {} WHERE id = {}",
+			grid_id,
+			spawn2_id
+		);
+		auto results = QueryDatabase(query);
 
-	if (!results.Success())
-		return;
+		if (!results.Success() || results.RowsAffected() != 1) {
+			return;
+		}
 
-	if (results.RowsAffected() != 1) {
-		return;
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"{} (Spawn2 ID {}) will now use Grid ID {}.",
+				target_npc->GetCleanName(),
+				spawn2_id,
+				grid_id
+			).c_str()
+		);
 	}
-
-	client->Message(Chat::White, "Grid assign: spawn2 id = %d updated", spawn2id);
 }
 
 
