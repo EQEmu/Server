@@ -1721,6 +1721,31 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 	case ServerOP_ReloadTitles:
 	{
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Titles reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
+
 		title_manager.LoadTitles();
 		break;
 	}
