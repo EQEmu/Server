@@ -2807,6 +2807,8 @@ float NPC::GetNPCStat(const char *identifier)
 	else if (id == "default_atk") {
 		return default_atk;
 	}
+
+	return 0.0f;
 }
 
 void NPC::LevelScale() {
