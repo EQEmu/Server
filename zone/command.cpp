@@ -315,7 +315,7 @@ int command_init(void)
 		command_add("scribespells", "[max level] [min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_scribespells) ||
 		command_add("sendzonespawns", "- Refresh spawn list for all clients in zone", AccountStatus::GMLeadAdmin, command_sendzonespawns) ||
 		command_add("sensetrap",  "Analog for ldon sense trap for the newer clients since we still don't have it working.", AccountStatus::Player, command_sensetrap) ||
-		command_add("serverinfo", "- Get OS info about server host", AccountStatus::GMMgmt, command_serverinfo) ||
+		command_add("serverinfo", "- Get CPU, Operating System, and Process Information about the server", AccountStatus::GMMgmt, command_serverinfo) ||
 		command_add("serverrules", "- Read this server's rules", AccountStatus::Player, command_serverrules) ||
 		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", AccountStatus::GMAdmin, command_setaapts) ||
 		command_add("setaaxp", "[AA|Group|Raid] [AA Experience] - Set your or your player target's AA Experience by Type", AccountStatus::GMAdmin, command_setaaxp) ||
