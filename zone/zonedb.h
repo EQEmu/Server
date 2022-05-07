@@ -480,7 +480,7 @@ public:
 	uint8		GetGridType(uint32 grid, uint32 zoneid);
 	uint8		GetGridType2(uint32 grid, uint16 zoneid);
 	bool		GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp);
-	void        AssignGrid(Client *client, int grid, int spawn2id);
+	void        AssignGrid(Client *client, uint32 grid_id, uint32 entity_id);
 	int			GetHighestGrid(uint32 zoneid);
 	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
 	int			GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, int grid);
