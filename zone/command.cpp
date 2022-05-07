@@ -288,7 +288,7 @@ int command_init(void)
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", AccountStatus::QuestTroupe, command_randomfeatures) ||
 		command_add("refreshgroup", "- Refreshes Group.", AccountStatus::Player, command_refreshgroup) ||
 		command_add("reloadaa", "Reloads AA data", AccountStatus::GMMgmt, command_reloadaa) ||
-		command_add("reloadallrules", "Executes a reload of all rules.", AccountStatus::QuestTroupe, command_reloadallrules) ||
+		command_add("reloadallrules", "Executes a reload of all rules globally.", AccountStatus::QuestTroupe, command_reloadallrules) ||
 		command_add("reloadcontentflags", "Executes a reload of all expansion and content flags", AccountStatus::QuestTroupe, command_reloadcontentflags) ||
 		command_add("reloademote", "Reloads NPC Emotes", AccountStatus::QuestTroupe, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr, AccountStatus::Max, command_reloadlevelmods) ||
