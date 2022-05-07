@@ -263,7 +263,6 @@ int command_init(void)
 		command_add("npcsay", "[message] - Make your NPC target say a message.", AccountStatus::GMLeadAdmin, command_npcsay) ||
 		command_add("npcshout", "[message] - Make your NPC target shout a message.", AccountStatus::GMLeadAdmin, command_npcshout) ||
 		command_add("npcspawn", "[create/add/update/remove/delete] - Manipulate spawn DB", AccountStatus::GMAreas, command_npcspawn) ||
-		command_add("npcspecialattk", "[Flag] [Permanent Flag] - Set NPC special attack flags.", AccountStatus::QuestTroupe, command_npcspecialattk) ||
 		command_add("npcstats", "- Show stats about target NPC", AccountStatus::QuestTroupe, command_npcstats) ||
 		command_add("npctype_cache",  "[id] or all - Clears the npc type cache for either the id or all npcs.", AccountStatus::GMImpossible, command_npctype_cache) ||
 		command_add("npctypespawn", "[npctypeid] [factionid] - Spawn an NPC from the db", AccountStatus::Steward, command_npctypespawn) ||
@@ -1319,7 +1318,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/npcsay.cpp"
 #include "gm_commands/npcshout.cpp"
 #include "gm_commands/npcspawn.cpp"
-#include "gm_commands/npcspecialattk.cpp"
 #include "gm_commands/npcstats.cpp"
 #include "gm_commands/npctype_cache.cpp"
 #include "gm_commands/npctypespawn.cpp"
