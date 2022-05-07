@@ -644,6 +644,9 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity
 					if (!task_manager->m_goal_list_manager.IsInList(
 						activity_info->goal_id,
 						npc_type_id
+					) && !TaskGoalListManager::IsInMatchList(
+						activity_info->goal_match_list,
+						std::to_string(npc_type_id)
 					)) {
 						continue;
 					}
@@ -827,6 +830,9 @@ void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activi
 					if (!task_manager->m_goal_list_manager.IsInList(
 						activity_info->goal_id,
 						item_id
+					) && !TaskGoalListManager::IsInMatchList(
+						activity_info->goal_match_list,
+						std::to_string(item_id)
 					)) { continue; }
 					break;
 
@@ -896,6 +902,9 @@ void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
 					if (!task_manager->m_goal_list_manager.IsInList(
 						activity_info->goal_id,
 						explore_id
+					) && !TaskGoalListManager::IsInMatchList(
+						activity_info->goal_match_list,
+						std::to_string(explore_id)
 					)) {
 						continue;
 					}
@@ -999,7 +1008,11 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 						case METHODLIST:
 							if (!task_manager->m_goal_list_manager.IsInList(
 								activity_info->goal_id,
-								item->GetID())) {
+								item->GetID()
+							) && !TaskGoalListManager::IsInMatchList(
+								activity_info->goal_match_list,
+								std::to_string(item->GetID())
+							)) {
 								continue;
 							}
 							break;
@@ -2227,7 +2240,7 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 		}
 		case TaskType::Quest: {
 			for (int active_quest = 0; active_quest < MAXACTIVEQUESTS; active_quest++) {
-				if (m_active_quests[active_quest].task_id == task_id) {					
+				if (m_active_quests[active_quest].task_id == task_id) {
 					LogTasks("[UPDATE] RemoveTaskByTaskID found Quest [{}] at index [{}]", task_id, active_quest);
 					CancelTask(client, active_quest, TaskType::Quest, true);
 				}
