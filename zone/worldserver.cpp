@@ -2046,6 +2046,30 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadPerlExportSettings: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Perl event export settings reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
