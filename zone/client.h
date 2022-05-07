@@ -231,6 +231,8 @@ public:
 
 	bool is_client_moving;
 
+	void ReconnectUCS();
+
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
 	bool GetDisplayMobInfoWindow() const;
 
@@ -1025,7 +1027,7 @@ public:
 
 	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
 	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
-	
+
 	void ResetCastbarCooldownBySlot(int slot);
 	void ResetAllCastbarCooldowns();
 	void ResetCastbarCooldownBySpellID(uint32 spell_id);
@@ -1894,7 +1896,7 @@ private:
 	Timer pick_lock_timer;
 
 	Timer heroforge_wearchange_timer;
-	
+
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
 
