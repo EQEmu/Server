@@ -537,19 +537,29 @@ void command_npcedit(Client *c, const Seperator *sep)
 	if (strcasecmp(sep->arg[1], "featuresave") == 0) {
 		c->Message(
 			Chat::Yellow,
-			fmt::format("NPC ID {} saved with all current facial feature settings.", npc_id).c_str());
+			fmt::format("NPC ID {} saved with all current body and facial feature settings.", npc_id).c_str());
 		Mob         *target = c->GetTarget();
 		std::string query   = fmt::format(
 			"UPDATE npc_types "
 			"SET luclin_haircolor = {}, luclin_beardcolor = {}, "
 			"luclin_hairstyle = {}, luclin_beard = {}, "
 			"face = {}, drakkin_heritage = {}, "
-			"drakkin_tattoo = {}, drakkin_details = {} "
+			"drakkin_tattoo = {}, drakkin_details = {}, "
+			"texture = {}, helmtexture = {}, "
+			"gender = {}, size = {:.2f}"
 			"WHERE id = {}",
-			target->GetHairColor(), target->GetBeardColor(),
-			target->GetHairStyle(), target->GetBeard(),
-			target->GetLuclinFace(), target->GetDrakkinHeritage(),
-			target->GetDrakkinTattoo(), target->GetDrakkinDetails(),
+			target->GetHairColor(),
+			target->GetBeardColor(),
+			target->GetHairStyle(),
+			target->GetBeard(),
+			target->GetLuclinFace(),
+			target->GetDrakkinHeritage(),
+			target->GetDrakkinTattoo(),
+			target->GetDrakkinDetails(),
+			target->GetTexture(),
+			target->GetHelmTexture(),
+			target->GetGender(),
+			target->GetSize(),
 			npc_id
 		);
 		content_db.QueryDatabase(query);

@@ -170,7 +170,7 @@ public:
 	virtual void SetLevel(uint8 in_level, bool command = false);
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	virtual bool Process();
-	void FinishTrade(Client* client, BotTradeType tradeType);
+	void FinishTrade(Client* client, BotTradeType trade_type);
 	virtual bool Save();
 	virtual void Depop();
 	void CalcBotStats(bool showtext = true);
@@ -344,8 +344,8 @@ public:
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
 
 	// Bot Equipment & Inventory Class Methods
-	void BotTradeAddItem(uint32 id, const EQ::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb = true);
-	void EquipBot(std::string* errorMessage);
+	void BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database = true);
+	void EquipBot(std::string* error_message);
 	bool CheckLoreConflict(const EQ::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
 	const EQ::InventoryProfile& GetBotInv() const { return m_inv; }
@@ -355,7 +355,7 @@ public:
 	static Bot* LoadBot(uint32 botID);
 	static uint32 SpawnedBotCount(uint32 botOwnerCharacterID);
 	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
-	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* errorMessage);
+	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* error_message);
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, std::string botName);
 	static void ProcessBotGroupInvite(Client* c, std::string botName);
@@ -416,7 +416,7 @@ public:
 	uint32 GetBotSpellID() { return npc_spells_id; }
 	Mob* GetBotOwner() { return this->_botOwner; }
 	uint32 GetBotArcheryRange();
-	EQ::ItemInstance* GetBotItem(uint32 slotID);
+	EQ::ItemInstance* GetBotItem(uint16 slot_id);
 	virtual bool GetSpawnStatus() { return _spawnStatus; }
 	uint8 GetPetChooserID() { return _petChooserID; }
 	bool IsPetChooser() { return _petChooser; }
@@ -571,8 +571,23 @@ public:
 
 	// Publicized private functions
 	static NPCType *FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
-	void BotRemoveEquipItem(int16 slot);
-	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage);
+	void BotRemoveEquipItem(uint16 slot_id);
+	void RemoveBotItemBySlot(uint16 slot_id, std::string* error_message);
+	void AddBotItem(
+		uint16 slot_id,
+		uint32 item_id,
+		int16 charges = -1,
+		bool attuned = false,
+		uint32 augment_one = 0,
+		uint32 augment_two = 0,
+		uint32 augment_three = 0,
+		uint32 augment_four = 0,
+		uint32 augment_five = 0,
+		uint32 augment_six = 0
+	);
+	uint32 CountBotItem(uint32 item_id);
+	bool HasBotItem(uint32 item_id);
+	void RemoveBotItem(uint32 item_id);
 	uint32 GetTotalPlayTime();
 
 	// New accessors for BotDatabase access
@@ -714,9 +729,9 @@ private:
 	void SetReturningFlag(bool flag = true) { m_returning_flag = flag; }
 
 	// Private "Inventory" Methods
-	void GetBotItems(EQ::InventoryProfile &inv, std::string* errorMessage);
-	void BotAddEquipItem(int slot, uint32 id);
-	uint32 GetBotItemBySlot(uint32 slotID);
+	void GetBotItems(EQ::InventoryProfile &inv, std::string* error_message);
+	void BotAddEquipItem(uint16 slot_id, uint32 item_id);
+	uint32 GetBotItemBySlot(uint16 slot_id);
 
 	// Private "Pet" Methods
 	bool LoadPet();	// Load and spawn bot pet if there is one

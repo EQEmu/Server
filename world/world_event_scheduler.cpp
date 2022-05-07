@@ -59,7 +59,7 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 
 					auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 					auto *reload_world = (ReloadWorld_Struct *) pack->pBuffer;
-					reload_world->Option = 1;
+					reload_world->global_repop = ReloadWorld::Repop;
 					zs_list->SendPacket(pack);
 					safe_delete(pack);
 				}
