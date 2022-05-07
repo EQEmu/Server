@@ -1918,9 +1918,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadMerchants: {		
-			zone->SendReloadMessage("Merchants");
-			entity_list.ReloadMerchants();
-		}
+		zone->SendReloadMessage("Merchants");
+		entity_list.ReloadMerchants();
 		break;
 	}
 	case ServerOP_ReloadPerlExportSettings:
@@ -1936,27 +1935,26 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadStaticZoneData: {
-			zone->SendReloadMessage("Static Zone Data");
-			zone->ReloadStaticData();
-		}
+		zone->SendReloadMessage("Static Zone Data");
+		zone->ReloadStaticData();
 		break;
 	}
 	case ServerOP_ReloadTasks:
 	{
 		if (RuleB(Tasks, EnableTaskSystem)) {
-      zone->SendReloadMessage("Tasks");
+			zone->SendReloadMessage("Tasks");
 			HandleReloadTasks(pack);
-    }
+		}
 
-    break;
-  }
+		break;
+	}
 	case ServerOP_ReloadTitles:
 	{
 		zone->SendReloadMessage("Titles");
 		title_manager.LoadTitles();
 		break;
 	}
-case ServerOP_ReloadTraps:
+	case ServerOP_ReloadTraps:
 	{
 		zone->SendReloadMessage("Traps");
 		entity_list.UpdateAllTraps(true, true);
@@ -1974,8 +1972,8 @@ case ServerOP_ReloadTraps:
 	{
 		zone->SendReloadMessage("Zone Points");
 		content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
-    break;
-  }
+		break;
+	}
 	case ServerOP_CameraShake:
 	{
 		if (zone)

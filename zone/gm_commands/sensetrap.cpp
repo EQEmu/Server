@@ -18,9 +18,8 @@ void command_sensetrap(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) is too far away.",
-				target->GetCleanName(),
-				target->GetID()
+				"{} is too far away.",
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 	}

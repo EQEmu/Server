@@ -15,24 +15,25 @@ void command_save(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (c->GetTarget()->IsClient()) {
+	auto target = c->GetTarget();
+
+	if (target->IsClient()) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) {} saved.",
-				c->GetTarget()->GetCleanName(),
-				c->GetTarget()->GetID(),
-				c->GetTarget()->CastToClient()->Save(2) ? "successfully" : "failed to be"
+				"{} {} been {} saved.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "have" : "has",
+				target->CastToClient()->Save(2) ? "successfully" : "failed to be"
 			).c_str()
 		);
-	} else if (c->GetTarget()->IsPlayerCorpse()) {
+	} else if (target->IsPlayerCorpse()) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) {} saved.",
-				c->GetTarget()->GetCleanName(),
-				c->GetTarget()->CastToCorpse()->GetCorpseDBID(),
-				c->GetTarget()->CastToMob()->Save() ? "successfully" : "failed to be"
+				"{} has been {} saved.",
+				c->GetTargetDescription(target),
+				target->CastToMob()->Save() ? "successfully" : "failed to be"
 			).c_str()
 		);
 	}

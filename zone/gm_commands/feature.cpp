@@ -210,15 +210,7 @@ void command_feature(Client *c, const Seperator *sep)
 		fmt::format(
 			"{} set for {} to {}.",
 			feature_changed,
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target),
 			(
 				is_size ?
 				fmt::format(

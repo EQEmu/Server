@@ -43,9 +43,8 @@ void command_qglobal(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Failed to disable quest global flag for {} ({}).",
-					target->GetCleanName(),
-					target->GetID()
+					"Failed to disable quest global flag for {}.",
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 			return;
@@ -60,9 +59,8 @@ void command_qglobal(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) will no longer be able to view quest globals, {} them to apply this change.",
-				target->GetCleanName(),
-				target->GetID(),
+				"{} will no longer be able to view quest globals, {} them to apply this change.",
+				c->GetTargetDescription(target),
 				repop_link
 			).c_str()
 		);
@@ -78,9 +76,8 @@ void command_qglobal(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Failed to enable quest global flag for {} ({}).",
-					target->GetCleanName(),
-					target->GetID()
+					"Failed to enable quest global flag for {}.",
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 			return;
@@ -95,9 +92,8 @@ void command_qglobal(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) will now be able to view quest globals, {} them to apply this change.",
-				target->GetCleanName(),
-				target->GetID(),
+				"{} will now be able to view quest globals, {} them to apply this change.",
+				c->GetTargetDescription(target),
 				repop_link
 			).c_str()
 		);
@@ -118,9 +114,8 @@ void command_qglobal(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) {} view quest globals.",
-				target->GetCleanName(),
-				target->GetID(),
+				"{} {} view quest globals.",
+				c->GetTargetDescription(target),
 				npc_type->qglobal ? "can" : "cannot"
 			).c_str()
 		);

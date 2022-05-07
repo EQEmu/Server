@@ -67,9 +67,8 @@ void command_summon(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Summoning {} ({}) to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
-			target->GetCleanName(),
-			target->GetID(),
+			"Summoning {} to {:.2f}, {:.2f}, {:.2f} in {} ({}).",
+			c->GetTargetDescription(target),
 			c->GetX(),
 			c->GetY(),
 			c->GetZ(),
