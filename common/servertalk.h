@@ -232,6 +232,7 @@
 #define ServerOP_ReloadMerchants 0x4016
 #define ServerOP_ReloadAAData 0x4017
 #define ServerOP_ReloadTraps 0x4018
+#define ServerOP_ReloadZonePoints 0x4019
 #define ServerOP_ReloadStaticZoneData 0x4020
 
 #define ServerOP_CZDialogueWindow 0x4500

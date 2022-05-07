@@ -21,15 +21,7 @@ void command_resetaa_timer(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Reset all Alternate Advancement timers for {}.",
-				(
-					c == target ?
-					"yourself" :
-					fmt::format(
-						"{} ({})",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 		target->ResetAlternateAdvancementTimers();
@@ -43,15 +35,7 @@ void command_resetaa_timer(Client *c, const Seperator *sep)
 			fmt::format(
 				"Reset Alternate Advancement timer {} for {}.",
 				timer_id,
-				(
-					c == target ?
-					"yourself" :
-					fmt::format(
-						"{} ({})",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 		target->ResetAlternateAdvancementTimer(timer_id);

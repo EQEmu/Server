@@ -19,10 +19,9 @@ void command_attack(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::EchoChat1,
 			fmt::format(
-				"{} whispers, 'Attacking {} ({}).'",
+				"{} whispers, 'Attacking {}.'",
 				c->GetTarget()->GetCleanName(),
-				entity->GetCleanName(),
-				entity->GetID()
+				c->GetTargetDescription(entity)
 			).c_str()
 		);
 	} else {

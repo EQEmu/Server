@@ -14,16 +14,9 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} not in a group.",
-				(
-					c == target ?
-					"You are" :
-					fmt::format(
-						"{} ({}} is",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				"{} {} not in a group.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "are" : "is"
 			).c_str()
 		);
 		return;
@@ -35,15 +28,7 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Group has been refreshed for {}.",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			)
+			c->GetTargetDescription(target)
 		).c_str()
 	);
 

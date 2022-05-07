@@ -21,15 +21,7 @@ void command_resetdisc_timer(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Reset all Discipline timers for {}.",
-				(
-					c == target ?
-					"yourself" :
-					fmt::format(
-						"{} ({})",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 		target->ResetAllDisciplineTimers();
@@ -43,15 +35,7 @@ void command_resetdisc_timer(Client *c, const Seperator *sep)
 			fmt::format(
 				"Reset Discipline timer {} for {}.",
 				timer_id,
-				(
-					c == target ?
-					"yourself" :
-					fmt::format(
-						"{} ({})",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 		target->ResetDisciplineTimer(timer_id);

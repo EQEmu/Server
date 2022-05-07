@@ -13,18 +13,20 @@ void command_randomfeatures(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) has had their features randomized.",
-				target->GetCleanName(),
-				target->GetID()
+				"{} {} had {} features randomized.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "have" : "had",
+				c == target ? "your" : "their"
 			).c_str()
 		);
 	} else {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) is not a player race, their race is {} ({}).",
-				target->GetCleanName(),
-				target->GetID(),
+				"{} {} not a player race, {} race is {} ({}).",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "are" : "is",
+				c == target ? "your" : "their",
 				GetRaceIDName(target->GetRace()),
 				target->GetRace()
 			).c_str()

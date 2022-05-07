@@ -23,7 +23,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		LogInfo(
 			"Set skill request from [{}], Target: [{}] Skill ID: [{}] Skill Value: [{}]",
 			c->GetCleanName(),
-			target->GetCleanName(),
+			c->GetTargetDescription(target),
 			skill_id,
 			skill_value
 		);
@@ -45,7 +45,7 @@ void command_setskill(Client *c, const Seperator *sep)
 						EQ::skills::GetSkillName((EQ::skills::SkillType) skill_id),
 						skill_id,
 						skill_value,
-						target->GetCleanName()
+						c->GetTargetDescription(target)
 					).c_str()
 				);
 			}

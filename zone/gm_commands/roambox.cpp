@@ -77,9 +77,8 @@ void command_roambox(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"Failed to set roambox for {} ({}).",
-						target->GetCleanName(),
-						target->GetID()
+						"Failed to set roambox for {}.",
+						c->GetTargetDescription(target)
 					).c_str()
 				);
 				return;
@@ -88,10 +87,9 @@ void command_roambox(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Roambox set to box size of {} for {} ({}) on spawn group ID {} with a delay of {} ({}).",
+					"Roambox set to box size of {} for {} on spawn group ID {} with a delay of {} ({}).",
 					box_size,
-					target->GetCleanName(),
-					target->GetID(),
+					c->GetTargetDescription(target),
 					spawn_group_id,
 					ConvertMillisecondsToTime(delay),
 					delay

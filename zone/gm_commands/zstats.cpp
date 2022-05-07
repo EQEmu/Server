@@ -6,11 +6,8 @@ void command_zstats(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Zone | ID: {} Instance ID: {} Name: {} ({})",
-			zone->GetZoneID(),
-			zone->GetInstanceID(),
-			zone->GetLongName(),
-			zone->GetShortName()
+			"Zone | {}",
+			zone->GetZoneDescription()
 		).c_str()
 	);
 

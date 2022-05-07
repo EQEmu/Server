@@ -8,7 +8,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 	}
 
 	if (sep->argnum < 1 || !sep->IsNumber(1)) {
-		c->Message(Chat::White, "FORMAT: #traindisc <max level> <min level>");
+		c->Message(Chat::White, "Usage: #traindisc [Max Level] [Min Level]");
 		return;
 	}
 
@@ -32,12 +32,12 @@ void command_traindisc(Client *c, const Seperator *sep)
 	}
 
 	if (max_level < 1 || min_level < 1) {
-		c->Message(Chat::White, "ERROR: Level must be greater than or equal to 1.");
+		c->Message(Chat::White, "Level must be greater than or equal to 1.");
 		return;
 	}
 
 	if (min_level > max_level) {
-		c->Message(Chat::White, "ERROR: Minimum Level must be less than or equal to Maximum Level.");
+		c->Message(Chat::White, "Minimum Level must be less than or equal to Maximum Level.");
 		return;
 	}
 
@@ -60,7 +60,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} learned for {}.",
 				discipline_message,
-				target->GetCleanName()
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 	}

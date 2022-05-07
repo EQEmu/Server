@@ -51,11 +51,9 @@ void command_ai(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"{} ({}) considers {} ({}) as {} ({}).",
-						target->GetCleanName(),
-						target->GetID(),
-						mob_to_consider->GetCleanName(),
-						mob_to_consider->GetID(),
+						"{} considers {} as {} ({}).",
+						c->GetTargetDescription(target),
+						c->GetTargetDescription(mob_to_consider),
 						EQ::constants::GetConsiderLevelName(consider_level),
 						consider_level
 					).c_str()
@@ -72,9 +70,8 @@ void command_ai(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{} ({}) is now on Faction {}.",
-					target->GetCleanName(),
-					target->GetID(),
+					"{} is now on Faction {}.",
+					c->GetTargetDescription(target),
 					(
 						faction_name.empty() ?
 						std::to_string(faction_id) :
@@ -97,9 +94,8 @@ void command_ai(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) now has a guard spot of {:.2f}, {:.2f}, {:.2f} with a heading of {:.2f}.",
-				target->GetCleanName(),
-				target->GetID(),
+				"{} now has a guard spot of {:.2f}, {:.2f}, {:.2f} with a heading of {:.2f}.",
+				c->GetTargetDescription(target),
 				target_position.x,
 				target_position.y,
 				target_position.z,
@@ -147,9 +143,8 @@ void command_ai(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"{} ({}) now has a roambox from {}, {} to {}, {} with {} and {} and a distance of {}.",
-						target->GetCleanName(),
-						target->GetID(),
+						"{} now has a roambox from {}, {} to {}, {} with {} and {} and a distance of {}.",
+						c->GetTargetDescription(target),
 						min_x,
 						min_y,
 						max_x,
@@ -205,9 +200,8 @@ void command_ai(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"{} ({}) now has a roambox with a max distance of {} and a roam distance variance of {} with {} and {}.",
-						target->GetCleanName(),
-						target->GetID(),
+						"{} now has a roambox with a max distance of {} and a roam distance variance of {} with {} and {}.",
+						c->GetTargetDescription(target),
 						max_distance,
 						roam_distance_variance,
 						(
@@ -246,9 +240,8 @@ void command_ai(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"{} ({}) is now using Spell List {}.",
-						target->GetCleanName(),
-						target->GetID(),
+						"{} is now using Spell List {}.",
+						c->GetTargetDescription(target),
 						spell_list_id
 					).c_str()
 				);

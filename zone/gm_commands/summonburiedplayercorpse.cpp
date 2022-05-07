@@ -19,16 +19,9 @@ void command_summonburiedplayercorpse(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} not have any buried corpses.",
-				(
-					c == target ?
-					"You do" :
-					fmt::format(
-						"{} ({}) does",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				"{} {} not have any buried corpses.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "do" : "does"
 			).c_str()
 		);
 	}

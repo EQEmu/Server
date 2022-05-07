@@ -49,9 +49,8 @@ void command_revoke(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Found {} ({}) in this zone.",
-				revoke_client->GetName(),
-				revoke_client->GetID()
+				"Found {} in this zone.",
+				c->GetTargetDescription(revoke_client)
 			).c_str()
 		);
 		revoke_client->SetRevoked(revoked);

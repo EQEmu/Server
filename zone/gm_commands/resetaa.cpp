@@ -14,15 +14,7 @@ void command_resetaa(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Successfully reset all Alternate Advancements for {}.",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			)
+			c->GetTargetDescription(target)
 		).c_str()
 	);
 }

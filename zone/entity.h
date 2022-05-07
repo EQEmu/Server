@@ -331,7 +331,7 @@ public:
 
 	void	StopMobAI();
 
-	void DescribeAggro(Client *towho, NPC *from_who, float dist, bool verbose);
+	void DescribeAggro(Client *to_who, NPC *from_who, float dist, bool verbose);
 
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);

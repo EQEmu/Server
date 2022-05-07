@@ -95,9 +95,8 @@ void command_peqzone(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"You are already in {} ({}).",
-				zone->GetLongName(),
-				zone->GetShortName()
+				"You are already in {}.",
+				zone->GetZoneDescription()
 			).c_str()
 		);
 		return;

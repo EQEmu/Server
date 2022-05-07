@@ -35,15 +35,7 @@ void command_setstartzone(Client *c, const Seperator *sep)
 		fmt::format(
 			"Start Zone {} for {} |{}",
 			is_reset ? "Reset" : "Changed",
-			(
-				c == target ?
-				"Yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 			(
 				zone_id ?
 				fmt::format(

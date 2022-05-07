@@ -24,15 +24,7 @@ void command_gmspeed(Client *c, const Seperator *sep)
 		fmt::format(
 			"Turning GM Speed {} for {}.",
 			gm_speed_flag ? "on" : "off",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			)
+			c->GetTargetDescription(target)
 		).c_str()
 	);
 
@@ -40,15 +32,7 @@ void command_gmspeed(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Note: {} must zone for it to take effect.",
-			(
-				c == target ?
-				"You" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			)
+			c->GetTargetDescription(target, TargetDescriptionType::UCYou)
 		).c_str()
 	);
 }

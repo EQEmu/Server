@@ -13,7 +13,7 @@ class ClientTaskState {
 public:
 	ClientTaskState();
 	~ClientTaskState();
-	void ShowClientTasks(Client *client);
+	void ShowClientTasks(Client* who, Client *to);
 	inline int GetActiveTaskCount() { return m_active_task_count; }
 	int GetActiveTaskID(int index);
 	bool IsTaskActivityCompleted(TaskType task_type, int index, int activity_id);

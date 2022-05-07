@@ -296,7 +296,7 @@ int command_init(void)
 		command_add("reloadtraps", "[0|1] - Reloads and repops traps, globally if specified (1 = global)", AccountStatus::QuestTroupe, command_reloadtraps) ||
 		command_add("reloadtitles", "- Reload player titles from the database", AccountStatus::GMLeadAdmin, command_reloadtitles) ||
 		command_add("reloadworld", "[0|1|2] - Reload quests global and repop NPCs if specified (0 = No Repop, 1 = Repop, 2 = Force Repop)", AccountStatus::Max, command_reloadworld) ||
-		command_add("reloadzps", "- Reload zone points from database", AccountStatus::GMLeadAdmin, command_reloadzps) ||
+		command_add("reloadzps", "- Reload zone points from database globally", AccountStatus::GMLeadAdmin, command_reloadzps) ||
 		command_add("removeitem", "[Item ID] [Amount] - Removes the specified Item ID by Amount from you or your player target's inventory (Amount defaults to 1 if not used)", AccountStatus::GMAdmin, command_removeitem) ||
 		command_add("repop", "[Force] - Repop the zone with optional force repop", AccountStatus::GMAdmin, command_repop) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", AccountStatus::GMMgmt, command_resetaa) ||
@@ -1104,15 +1104,7 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Inventory cleared for {}, {} items deleted.",
-				(
-					c == target ?
-					"yourself" :
-					fmt::format(
-						"{} ({})",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				),
+				c->GetTargetDescription(target),
 				removed_count
 			).c_str()
 		);
@@ -1120,16 +1112,9 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} no items to delete.",
-				(
-					c == target ?
-					"You have" :
-					fmt::format(
-						"{} ({}) has",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				"{} {} no items to delete.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "have" : "has"
 			).c_str()
 		);
 	}

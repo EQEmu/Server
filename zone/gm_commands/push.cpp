@@ -27,9 +27,8 @@ void command_push(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Pushing {} ({}) with a push back of {:.2f} and a push up of {:.2f}.",
-			target->GetCleanName(),
-			target->GetID(),
+			"Pushing {} with a push back of {:.2f} and a push up of {:.2f}.",
+			c->GetTargetDescription(target),
 			back,
 			up
 		).c_str()

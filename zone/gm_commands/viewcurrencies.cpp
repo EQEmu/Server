@@ -6,16 +6,6 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
 	}
-	
-	auto target_string = (
-		c == target ?
-		"Yourself" :
-		fmt::format(
-			"{} ({})",
-			target->GetCleanName(),
-			target->GetID()
-		)
-	);
 
 	auto platinum = (
 		target->GetMoney(3, 0) +
@@ -52,7 +42,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Money for {} | {}",
-				target_string,
+				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 				ConvertMoneyToString(
 					platinum,
 					gold,
@@ -70,7 +60,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} for {} | {}",
 				database.CreateItemLink(RuleI(Zone, EbonCrystalItemID)),
-				target_string,
+				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 				ebon_crystals
 			).c_str()
 		);
@@ -83,21 +73,21 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} for {} | {}",
 				database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID)),
-				target_string,
+				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 				radiant_crystals
 			).c_str()
 		);
 	}
 
-	for (const auto& alternate_currency : zone->AlternateCurrencies) {
-		auto currency_value = target->GetAlternateCurrencyValue(alternate_currency.id);
+	for (const auto& ac : zone->AlternateCurrencies) {
+		auto currency_value = target->GetAlternateCurrencyValue(ac.id);
 		if (currency_value) {
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"{} for {} | {}",
-					database.CreateItemLink(alternate_currency.item_id),
-					target_string,
+					database.CreateItemLink(ac.item_id),
+					c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 					currency_value
 				).c_str()
 			);
@@ -116,7 +106,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} for {} | {}",
 					EQ::constants::GetLDoNThemeName(ldon_currency_id),
-					target_string,
+					c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 					ldon_currency_value
 				).c_str()
 			);
@@ -129,7 +119,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"PVP Points for {} | {}",
-				target_string,
+				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 				pvp_points
 			).c_str()
 		);

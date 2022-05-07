@@ -48,15 +48,7 @@ void command_setaapts(Client *c, const Seperator *sep)
 
 	std::string aa_message = fmt::format(
 		"{} now {} {} {}AA Point{}.",
-		(
-			c == target ?
-			"You" :
-			fmt::format(
-				"{} ({})",
-				target->GetCleanName(),
-				target->GetID()
-			)
-		),
+		c->GetTargetDescription(target, TargetDescriptionType::UCYou),
 		c == target ? "have" : "has",
 		aa_points,
 		group_raid_string,

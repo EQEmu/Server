@@ -100,29 +100,19 @@ void command_instance(Client *c, const Seperator *sep)
 		uint32 zone_id = database.ZoneIDFromInstanceID(instance_id);
 		uint32 version = database.VersionFromInstanceID(instance_id);
 		uint32 current_id  = database.GetInstanceID(zone_id, character_id, version);
-		if (!current_id) {
-			std::string target_string = (
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					character_name,
-					character_id
-				)
-			);
-			
+		if (!current_id) {			
 			c->Message(
 				Chat::White,
 				(
 					database.AddClientToInstance(instance_id, character_id) ?
 					fmt::format(
 						"Added {} to Instance ID {}.",
-						target_string,
+						c->GetTargetDescription(target),
 						instance_id
 					) :				
 					fmt::format(
 						"Failed to add {} to Instance ID {}.",
-						target_string,
+						c->GetTargetDescription(target),
 						instance_id
 					)
 				).c_str()
@@ -297,28 +287,18 @@ void command_instance(Client *c, const Seperator *sep)
 			return;
 		}
 
-		std::string target_string = (
-			c->CharacterID() == character_id ?
-			"yourself" :
-			fmt::format(
-				"{} ({})",
-				character_name,
-				character_id
-			)
-		);
-
 		c->Message(
 			Chat::White,
 			(
 				database.RemoveClientFromInstance(instance_id, character_id) ?
 				fmt::format(
 					"Removed {} from Instance ID {}.",
-					target_string,
+					c->GetTargetDescription(target),
 					instance_id
 				) :				
 				fmt::format(
 					"Failed to remove {} from Instance ID {}.",
-					target_string,
+					c->GetTargetDescription(target),
 					instance_id
 				)
 			).c_str()

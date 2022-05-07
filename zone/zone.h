@@ -244,6 +244,9 @@ public:
 	uint32 GetCurrencyID(uint32 item_id);
 	uint32 GetCurrencyItemID(uint32 currency_id);
 
+	std::string GetZoneDescription();
+	void SendReloadMessage(std::string reload_type);
+
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);
 	void ChangeWeather();
