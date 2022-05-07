@@ -125,8 +125,6 @@ int command_init(void)
 		command_add("attack", "[Entity Name] - Make your NPC target attack an entity by name", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
 		command_add("ban", "[name] [reason]- Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
-		command_add("beard", "- Change the beard of your target", AccountStatus::QuestTroupe, command_beard) ||
-		command_add("beardcolor", "- Change the beard color of your target", AccountStatus::QuestTroupe, command_beardcolor) ||
 		command_add("bind", "- Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
 
 #ifdef BOTS
@@ -152,7 +150,6 @@ int command_init(void)
 		command_add("depop", "- Depop your NPC target", AccountStatus::Guide, command_depop) ||
 		command_add("depopzone", "- Depop the zone", AccountStatus::GMAdmin, command_depopzone) ||
 		command_add("devtools", "- Manages devtools", AccountStatus::GMMgmt, command_devtools) ||
-		command_add("details", "- Change the details of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_details) ||
 		command_add("disablerecipe",  "[Recipe ID] - Disables a Recipe", AccountStatus::QuestTroupe, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", AccountStatus::QuestTroupe, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.", AccountStatus::QuestTroupe, command_distance) ||
@@ -169,8 +166,8 @@ int command_init(void)
 		command_add("enablerecipe",  "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", AccountStatus::Guide, command_equipitem) ||
-		command_add("face", "- Change the face of your target", AccountStatus::QuestTroupe, command_face) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
+		command_add("feature", "- Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
 		command_add("findaliases", "[search criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
 		command_add("findclass", "[search criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
 		command_add("findfaction", "[search criteria] - Search for a faction", AccountStatus::Guide, command_findfaction) ||
@@ -187,7 +184,7 @@ int command_init(void)
 		command_add("flymode", "[0/1/2/3/4/5] - Set your or your player target's flymode to ground/flying/levitate/water/floating/levitate_running", AccountStatus::Guide, command_flymode) ||
 		command_add("fov", "- Check wether you're behind or in your target's field of view", AccountStatus::QuestTroupe, command_fov) ||
 		command_add("freeze", "- Freeze your target", AccountStatus::QuestTroupe, command_freeze) ||
-		command_add("gassign", "[id] - Assign targetted NPC to predefined wandering grid id", AccountStatus::GMAdmin, command_gassign) ||
+		command_add("gassign", "[Grid ID] - Assign targetted NPC to predefined wandering grid id", AccountStatus::GMAdmin, command_gassign) ||
 		command_add("gearup", "Developer tool to quickly equip a character", AccountStatus::GMMgmt, command_gearup) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", AccountStatus::Guide, command_gender) ||
 		command_add("getplayerburiedcorpsecount", "- Get your or your target's total number of buried player corpses.", AccountStatus::GMAdmin, command_getplayerburiedcorpsecount) ||
@@ -205,14 +202,10 @@ int command_init(void)
 		command_add("guildapprove", "[guildapproveid] - Approve a guild with specified ID (guild creator receives the id)", AccountStatus::Player, command_guildapprove) ||
 		command_add("guildcreate", "[guildname] - Creates an approval setup for guild name specified", AccountStatus::Player, command_guildcreate) ||
 		command_add("guildlist", "[guildapproveid] - Lists character names who have approved the guild specified by the approve id", AccountStatus::Player, command_guildlist) ||
-		command_add("hair", "- Change the hair style of your target", AccountStatus::QuestTroupe, command_hair) ||
-		command_add("haircolor", "- Change the hair color of your target", AccountStatus::QuestTroupe, command_haircolor) ||
 		command_add("haste", "[percentage] - Set your haste percentage", AccountStatus::GMAdmin, command_haste) ||
 		command_add("hatelist", "- Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "- Completely heal your target", AccountStatus::Steward, command_heal) ||
-		command_add("helm", "- Change the helm of your target", AccountStatus::QuestTroupe, command_helm) ||
 		command_add("help", "[search term] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
-		command_add("heritage", "- Change the heritage of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_heritage) ||
 		command_add("heromodel",  "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
 		command_add("hideme", "[on/off] - Hide yourself from spawn lists.", AccountStatus::QuestTroupe, command_hideme) ||
 		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", AccountStatus::GMImpossible, command_hotfix) ||
@@ -283,36 +276,36 @@ int command_init(void)
 		command_add("petitioninfo", "[petition number] - Get info about a petition", AccountStatus::ApprenticeGuide, command_petitioninfo) ||
 		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
 		command_add("profanity", "Manage censored language.", AccountStatus::GMLeadAdmin, command_profanity) ||
-		command_add("push", "Lets you do spell push", AccountStatus::GMLeadAdmin, command_push) ||
+		command_add("push", "[Back Push] [Up Push] - Lets you do spell push on an NPC", AccountStatus::GMLeadAdmin, command_push) ||
 		command_add("proximity", "Shows NPC proximity", AccountStatus::GMLeadAdmin, command_proximity) ||
 		command_add("pvp", "[On|Off] - Set you or your player target's PVP status", AccountStatus::GMAdmin, command_pvp) ||
-		command_add("qglobal", "[on/off/view] - Toggles qglobal functionality on an NPC", AccountStatus::GMAdmin, command_qglobal) ||
+		command_add("qglobal", "[On|Off|View] - Toggles quest global functionality for your NPC target", AccountStatus::GMAdmin, command_qglobal) ||
 		command_add("questerrors", "Shows quest errors.", AccountStatus::GMAdmin, command_questerrors) ||
 		command_add("race", "[racenum] - Change your or your target's race. Use racenum 0 to return to normal", AccountStatus::Guide, command_race) ||
 		command_add("raidloot", "[All|GroupLeader|RaidLeader|Selected] - Sets your Raid Loot Type if you have permission to do so.", AccountStatus::Player, command_raidloot) ||
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", AccountStatus::QuestTroupe, command_randomfeatures) ||
-		command_add("refreshgroup", "- Refreshes Group.", AccountStatus::Player, command_refreshgroup) ||
+		command_add("refreshgroup", "- Refreshes Group for you or your player target.", AccountStatus::Player, command_refreshgroup) ||
 		command_add("reloadaa", "Reloads AA data", AccountStatus::GMMgmt, command_reloadaa) ||
-		command_add("reloadallrules", "Executes a reload of all rules.", AccountStatus::QuestTroupe, command_reloadallrules) ||
+		command_add("reloadallrules", "Executes a reload of all rules globally.", AccountStatus::QuestTroupe, command_reloadallrules) ||
 		command_add("reloadcontentflags", "Executes a reload of all expansion and content flags", AccountStatus::QuestTroupe, command_reloadcontentflags) ||
 		command_add("reloademote", "Reloads NPC Emotes", AccountStatus::QuestTroupe, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr, AccountStatus::Max, command_reloadlevelmods) ||
-		command_add("reloadmerchants", nullptr, AccountStatus::Max, command_reloadmerchants) ||
-		command_add("reloadperlexportsettings", nullptr, AccountStatus::Max, command_reloadperlexportsettings) ||
+		command_add("reloadmerchants", "Reloads merchant lists globally", AccountStatus::Max, command_reloadmerchants) ||
+		command_add("reloadperlexportsettings", "Reloads Perl event export settings globally", AccountStatus::Max, command_reloadperlexportsettings) ||
 		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", AccountStatus::GMLeadAdmin, command_reloadqst) ||
 		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", AccountStatus::QuestTroupe, command_reloadworldrules) ||
-		command_add("reloadstatic", "- Reload Static Zone Data", AccountStatus::GMLeadAdmin, command_reloadstatic) ||
+		command_add("reloadstatic", "- Reload Static Zone Data globally", AccountStatus::GMLeadAdmin, command_reloadstatic) ||
 		command_add("reloadtraps", "- Repops all traps in the current zone.", AccountStatus::QuestTroupe, command_reloadtraps) ||
 		command_add("reloadtitles", "- Reload player titles from the database", AccountStatus::GMLeadAdmin, command_reloadtitles) ||
-		command_add("reloadworld", "[0|1] - Clear quest cache (0 - no repop, 1 - repop)", AccountStatus::Max, command_reloadworld) ||
+		command_add("reloadworld", "[0|1|2] - Reload quests global and repop NPCs if specified (0 = No Repop, 1 = Repop, 2 = Force Repop)", AccountStatus::Max, command_reloadworld) ||
 		command_add("reloadzps", "- Reload zone points from database", AccountStatus::GMLeadAdmin, command_reloadzps) ||
 		command_add("removeitem", "[Item ID] [Amount] - Removes the specified Item ID by Amount from you or your player target's inventory (Amount defaults to 1 if not used)", AccountStatus::GMAdmin, command_removeitem) ||
-		command_add("repop", "[delay] - Repop the zone with optional delay", AccountStatus::GMAdmin, command_repop) ||
+		command_add("repop", "[Force] - Repop the zone with optional force repop", AccountStatus::GMAdmin, command_repop) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", AccountStatus::GMMgmt, command_resetaa) ||
-		command_add("resetaa_timer", "Command to reset AA cooldown timers.", AccountStatus::GMMgmt, command_resetaa_timer) ||
-		command_add("resetdisc_timer", "Command to reset all discipline cooldown timers.", AccountStatus::GMMgmt, command_resetdisc_timer) ||
-		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", AccountStatus::GMMgmt, command_revoke) ||
-		command_add("roambox", "Manages roambox settings for an NPC", AccountStatus::GMMgmt, command_roambox) ||
+		command_add("resetaa_timer", "[All|Timer ID] - Command to reset AA cooldown timers for you or your player target.", AccountStatus::GMMgmt, command_resetaa_timer) ||
+		command_add("resetdisc_timer", "[All|Timer ID] - Command to reset discipline timers.", AccountStatus::GMMgmt, command_resetdisc_timer) ||
+		command_add("revoke", "[Character Name] [0|1] - Revokes or unrevokes a player's ability to talk in OOC by name (0 = Unrevoke, 1 = Revoke)", AccountStatus::GMMgmt, command_revoke) ||
+		command_add("roambox", "[Remove|Set] [Box Size] [Delay (Milliseconds)] - Remove or set an NPC's roambox size and delay", AccountStatus::GMMgmt, command_roambox) ||
 		command_add("rules", "(subcommand) - Manage server rules", AccountStatus::GMImpossible, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", AccountStatus::Guide, command_save) ||
 		command_add("scale", "- Handles npc scaling", AccountStatus::GMLeadAdmin, command_scale) ||
@@ -320,7 +313,7 @@ int command_init(void)
 		command_add("scribespells", "[max level] [min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_scribespells) ||
 		command_add("sendzonespawns", "- Refresh spawn list for all clients in zone", AccountStatus::GMLeadAdmin, command_sendzonespawns) ||
 		command_add("sensetrap",  "Analog for ldon sense trap for the newer clients since we still don't have it working.", AccountStatus::Player, command_sensetrap) ||
-		command_add("serverinfo", "- Get OS info about server host", AccountStatus::GMMgmt, command_serverinfo) ||
+		command_add("serverinfo", "- Get CPU, Operating System, and Process Information about the server", AccountStatus::GMMgmt, command_serverinfo) ||
 		command_add("serverrules", "- Read this server's rules", AccountStatus::Player, command_serverrules) ||
 		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", AccountStatus::GMAdmin, command_setaapts) ||
 		command_add("setaaxp", "[AA|Group|Raid] [AA Experience] - Set your or your player target's AA Experience by Type", AccountStatus::GMAdmin, command_setaaxp) ||
@@ -345,26 +338,24 @@ int command_init(void)
 		command_add("showbonusstats", "[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.", AccountStatus::Guide, command_showbonusstats) ||
 		command_add("showbuffs", "- List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
 		command_add("shownumhits",  "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
-		command_add("shownpcgloballoot", "Show GlobalLoot entires on this npc", AccountStatus::Guide, command_shownpcgloballoot) ||
+		command_add("shownpcgloballoot", "Show global loot entries for your target NPC", AccountStatus::Guide, command_shownpcgloballoot) ||
 		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as second argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
 		command_add("showspellslist", "Shows spell list of targeted NPC", AccountStatus::GMAdmin, command_showspellslist) ||
 		command_add("showstats", "- Show details about you or your target", AccountStatus::Guide, command_showstats) ||
-		command_add("showzonegloballoot", "Show GlobalLoot entires on this zone", AccountStatus::Guide, command_showzonegloballoot) ||
+		command_add("showzonegloballoot", "Show global loot entries for your current zone", AccountStatus::Guide, command_showzonegloballoot) ||
 		command_add("showzonepoints", "Show zone points for current zone", AccountStatus::Guide, command_showzonepoints) ||
 		command_add("shutdown", "- Shut this zone process down", AccountStatus::GMLeadAdmin, command_shutdown) ||
-		command_add("size", "[size] - Change size of you or your target", AccountStatus::Guide, command_size) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", AccountStatus::Steward, command_spawn) ||
 		command_add("spawneditmass", "Mass editing spawn command", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
 		command_add("spawnfix", "- Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", AccountStatus::GMAreas, command_spawnfix) ||
-		command_add("spawnstatus", "- Show respawn timer status", AccountStatus::GMAdmin, command_spawnstatus) ||
+		command_add("spawnstatus", "[All|Disabled|Enabled|Spawn ID] - Show respawn timer status", AccountStatus::GMAdmin, command_spawnstatus) ||
 		command_add("spellinfo", "[spellid] - Get detailed info about a spell", AccountStatus::Steward, command_spellinfo) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", AccountStatus::GMAdmin, command_stun) ||
-		command_add("summon", "[charname] - Summons your player/npc/corpse target, or charname if specified", AccountStatus::QuestTroupe, command_summon) ||
+		command_add("summon", "[Character Name] - Summons your corpse, NPC, or player target, or by character name if specified", AccountStatus::QuestTroupe, command_summon) ||
 		command_add("summonburiedplayercorpse", "- Summons the target's oldest buried corpse, if any exist.", AccountStatus::GMAdmin, command_summonburiedplayercorpse) ||
 		command_add("summonitem", "[itemid] [charges] - Summon an item onto your cursor. Charges are optional.", AccountStatus::GMMgmt, command_summonitem) ||
 		command_add("suspend", "[name] [days] [reason] - Suspend by character name and for specificed number of days", AccountStatus::GMLeadAdmin, command_suspend) ||
 		command_add("task", "(subcommand) - Task system commands", AccountStatus::GMLeadAdmin, command_task) ||
-		command_add("tattoo", "- Change the tattoo of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_tattoo) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_tempname) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_petname) ||
 		command_add("texture", "[Texture] [Helmet Texture] - Change your or your target's texture (Helmet Texture defaults to 0 if not used)", AccountStatus::Steward, command_texture) ||
@@ -1187,8 +1178,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/attack.cpp"
 #include "gm_commands/augmentitem.cpp"
 #include "gm_commands/ban.cpp"
-#include "gm_commands/beard.cpp"
-#include "gm_commands/beardcolor.cpp"
 #include "gm_commands/bind.cpp"
 #include "gm_commands/camerashake.cpp"
 #include "gm_commands/castspell.cpp"
@@ -1208,7 +1197,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/delpetition.cpp"
 #include "gm_commands/depop.cpp"
 #include "gm_commands/depopzone.cpp"
-#include "gm_commands/details.cpp"
 #include "gm_commands/devtools.cpp"
 #include "gm_commands/disablerecipe.cpp"
 #include "gm_commands/disarmtrap.cpp"
@@ -1227,8 +1215,8 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/enablerecipe.cpp"
 #include "gm_commands/endurance.cpp"
 #include "gm_commands/equipitem.cpp"
-#include "gm_commands/face.cpp"
 #include "gm_commands/faction.cpp"
+#include "gm_commands/feature.cpp"
 #include "gm_commands/findclass.cpp"
 #include "gm_commands/findfaction.cpp"
 #include "gm_commands/findnpctype.cpp"
@@ -1262,13 +1250,9 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/guildapprove.cpp"
 #include "gm_commands/guildcreate.cpp"
 #include "gm_commands/guildlist.cpp"
-#include "gm_commands/hair.cpp"
-#include "gm_commands/haircolor.cpp"
 #include "gm_commands/haste.cpp"
 #include "gm_commands/hatelist.cpp"
 #include "gm_commands/heal.cpp"
-#include "gm_commands/helm.cpp"
-#include "gm_commands/heritage.cpp"
 #include "gm_commands/heromodel.cpp"
 #include "gm_commands/hideme.cpp"
 #include "gm_commands/hp.cpp"
@@ -1407,7 +1391,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/showzonegloballoot.cpp"
 #include "gm_commands/showzonepoints.cpp"
 #include "gm_commands/shutdown.cpp"
-#include "gm_commands/size.cpp"
 #include "gm_commands/spawn.cpp"
 #include "gm_commands/spawnfix.cpp"
 #include "gm_commands/spawnstatus.cpp"
@@ -1418,7 +1401,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/summonitem.cpp"
 #include "gm_commands/suspend.cpp"
 #include "gm_commands/task.cpp"
-#include "gm_commands/tattoo.cpp"
 #include "gm_commands/tempname.cpp"
 #include "gm_commands/texture.cpp"
 #include "gm_commands/time.cpp"
