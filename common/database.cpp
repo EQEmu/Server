@@ -147,7 +147,7 @@ bool Database::AddBannedIP(std::string banned_ip, std::string notes) {
 	auto query = fmt::format(
 		"INSERT into banned_ips SET ip_address = '{}', notes = '{}'",
 		banned_ip,
-		notes
+		EscapeString(notes)
 	);
 	auto results = QueryDatabase(query);
 
