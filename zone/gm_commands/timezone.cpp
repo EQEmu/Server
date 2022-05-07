@@ -8,16 +8,11 @@ void command_timezone(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Current timezone is {}:{}{} {}.",
+				"Current timezone is {:02}:{:02} {}.",
 				(
 					((zone->zone_time.getEQTimeZoneHr() - 1) % 12) == 0 ?
 					12 :
 					((zone->zone_time.getEQTimeZoneHr() - 1) % 12)
-				),
-				(
-					zone->zone_time.getEQTimeZoneMin() < 10 ?
-					"0" :
-					""
 				),
 				zone->zone_time.getEQTimeZoneMin(),
 				(
@@ -30,26 +25,35 @@ void command_timezone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto hours = static_cast<uint8>(std::stoul(sep->arg[1]));
 	uint8 minutes = 0;
+	auto hours = static_cast<uint8>(std::stoul(sep->arg[1]));
+
+	if (hours > 24) {
+		hours = 24;
+	}
+
+	uint8 real_hours = (
+		(hours - 1) > 0 ?
+		(hours - 1) :
+		0
+	);
 
 	if (sep->IsNumber(2)) {
 		minutes = static_cast<uint8>(std::stoul(sep->arg[2]));
+
+		if (minutes > 59) {
+			minutes = 59;
+		}
 	}
 
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Setting timezone to {}:{}{} {}.",
+			"Setting timezone to {:02}:{:02} {}.",
 			(
-				((hours - 1) % 12) == 0 ?
+				(real_hours % 12) == 0 ?
 				12 :
-				((hours - 1) % 12)
-			),
-			(
-				minutes < 10 ?
-				"0" :
-				""
+				(real_hours % 12)
 			),
 			minutes,
 			(

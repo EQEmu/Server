@@ -10,16 +10,11 @@ void command_time(Client *c, const Seperator *sep)
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &world_time);
 		
 		auto time_string = fmt::format(
-			"{}:{}{} {} (Timezone: {}:{}{} {})",
+			"{:02}:{:02} {} (Timezone: {:02}:{:02} {})",
 			(
 				((world_time.hour - 1) % 12) == 0 ?
 				12 :
 				((world_time.hour - 1) % 12)
-			),
-			(
-				world_time.minute < 10 ?
-				"0" :
-				""
 			),
 			world_time.minute,
 			(
@@ -31,11 +26,6 @@ void command_time(Client *c, const Seperator *sep)
 				((zone->zone_time.getEQTimeZoneHr() - 1) % 12) == 0 ?
 				12 :
 				((zone->zone_time.getEQTimeZoneHr() - 1) % 12)
-			),
-			(
-				zone->zone_time.getEQTimeZoneMin() < 10 ?
-				"0" :
-				""
 			),
 			zone->zone_time.getEQTimeZoneMin(),
 			(
@@ -56,66 +46,35 @@ void command_time(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (sep->IsNumber(1)) {
-		uint8 minutes = 0;
-		auto hours = static_cast<uint8>(std::stoul(sep->arg[1]) + 1);
-		if (sep->IsNumber(2)) {
-			minutes = static_cast<uint8>(std::stoul(sep->arg[2]));
+	uint8 minutes = 0;
+	auto hours = static_cast<uint8>(std::stoul(sep->arg[1]) + 1);
+
+	if (hours > 24) {
+		hours = 24;
+	}
+
+	uint8 real_hours = (
+		(hours - 1) > 0 ?
+		(hours - 1) :
+		0
+	);
+
+	if (sep->IsNumber(2)) {
+		minutes = static_cast<uint8>(std::stoul(sep->arg[2]));
+
+		if (minutes > 59) {
+			minutes = 59;
 		}
+	}
 
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Setting world time to {}:{}{} {} (Timezone: {}:{}{} {}).",
-				(
-					((hours - 1) % 12) == 0 ?
-					12 :
-					((hours - 1) % 12)
-				),
-				(
-					minutes < 10 ?
-					"0" :
-					""
-				),
-				minutes,
-				(
-					hours >= 13 ?
-					"PM" :
-					"AM"
-				),
-				(
-					((zone->zone_time.getEQTimeZoneHr() - 1) % 12) == 0 ?
-					12 :
-					((zone->zone_time.getEQTimeZoneHr() - 1) % 12)
-				),
-				(
-					zone->zone_time.getEQTimeZoneMin() < 10 ?
-					"0" :
-					""
-				),
-				zone->zone_time.getEQTimeZoneMin(),
-				(
-					zone->zone_time.getEQTimeZoneHr() >= 13 ?
-					"PM" :
-					"AM"
-				)
-			).c_str()
-		);
-
-		zone->SetTime(hours, minutes);
-
-		LogInfo(
-			"{} :: Setting world time to {}:{} {} (Timezone: {}:{}{} {})",
-			c->GetCleanName(),
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Setting world time to {:02}:{:02} {} (Timezone: {:02}:{:02} {}).",
 			(
-				((hours - 1) % 12) == 0 ?
+				(hours % 12) == 0 ?
 				12 :
-				((hours - 1) % 12)
-			),
-			(
-				minutes < 10 ?
-				"0" :
-				""
+				(hours % 12)
 			),
 			minutes,
 			(
@@ -128,18 +87,42 @@ void command_time(Client *c, const Seperator *sep)
 				12 :
 				((zone->zone_time.getEQTimeZoneHr() - 1) % 12)
 			),
-			(
-				zone->zone_time.getEQTimeZoneMin() < 10 ?
-				"0" :
-				""
-			),
 			zone->zone_time.getEQTimeZoneMin(),
 			(
 				zone->zone_time.getEQTimeZoneHr() >= 13 ?
 				"PM" :
 				"AM"
 			)
-		);
-	}
+		).c_str()
+	);
+
+	zone->SetTime(real_hours, minutes);
+
+	LogInfo(
+		"{} :: Setting world time to {:02}:{:02} {} (Timezone: {:02}:{:02} {})",
+		c->GetCleanName(),
+		(
+			(hours % 12) == 0 ?
+			12 :
+			(hours % 12)
+		),
+		minutes,
+		(
+			hours >= 13 ?
+			"PM" :
+			"AM"
+		),
+		(
+			((zone->zone_time.getEQTimeZoneHr() - 1) % 12) == 0 ?
+			12 :
+			((zone->zone_time.getEQTimeZoneHr() - 1) % 12)
+		),
+		zone->zone_time.getEQTimeZoneMin(),
+		(
+			zone->zone_time.getEQTimeZoneHr() >= 13 ?
+			"PM" :
+			"AM"
+		)
+	);
 }
 
