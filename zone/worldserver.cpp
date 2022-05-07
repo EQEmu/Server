@@ -2189,7 +2189,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	}
 	case ServerOP_CameraShake:
 	{
 		if (zone)
