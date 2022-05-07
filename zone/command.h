@@ -166,7 +166,6 @@ void command_npcsay(Client *c, const Seperator *sep);
 void command_npcshout(Client *c, const Seperator *sep);
 void command_npcspawn(Client *c, const Seperator *sep);
 void command_npcstats(Client *c, const Seperator *sep);
-void command_npctype_cache(Client *c, const Seperator *sep);
 void command_npctypespawn(Client *c, const Seperator *sep);
 void command_nudge(Client *c, const Seperator *sep);
 void command_nukebuffs(Client *c, const Seperator *sep);

@@ -256,7 +256,6 @@ int command_init(void)
 		command_add("npcshout", "[Message] - Make your NPC target shout a message.", AccountStatus::GMLeadAdmin, command_npcshout) ||
 		command_add("npcspawn", "[create/add/update/remove/delete] - Manipulate spawn DB", AccountStatus::GMAreas, command_npcspawn) ||
 		command_add("npcstats", "- Show stats about target NPC", AccountStatus::QuestTroupe, command_npcstats) ||
-		command_add("npctype_cache",  "[id] or all - Clears the npc type cache for either the id or all npcs.", AccountStatus::GMImpossible, command_npctype_cache) ||
 		command_add("npctypespawn", "[NPC ID] [Faction ID] - Spawn an NPC by ID from the database with an option of setting its Faction ID", AccountStatus::Steward, command_npctypespawn) ||
 		command_add("nudge", "- Nudge your target's current position by specific values", AccountStatus::QuestTroupe, command_nudge) ||
 		command_add("nukebuffs", "[Beneficial|Detrimental|Help] - Strip all buffs by type on you or your target (no argument to remove all buffs)", AccountStatus::Guide, command_nukebuffs) ||
@@ -1299,7 +1298,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/npcshout.cpp"
 #include "gm_commands/npcspawn.cpp"
 #include "gm_commands/npcstats.cpp"
-#include "gm_commands/npctype_cache.cpp"
 #include "gm_commands/npctypespawn.cpp"
 #include "gm_commands/nudge.cpp"
 #include "gm_commands/nukebuffs.cpp"
