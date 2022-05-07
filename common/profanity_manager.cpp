@@ -65,16 +65,7 @@ bool EQ::ProfanityManager::AddProfanity(DBcore *db, std::string profanity) {
 		return false;
 	}
 
-	std::string entry(profanity);
-
-	std::transform(
-		entry.begin(),
-		entry.end(),
-		entry.begin(),
-		[](unsigned char c) -> unsigned char {
-			return tolower(c);
-		}
-	);
+	std::string entry = str_tolower(profanity);
 
 	if (check_for_existing_entry(entry)) {
 		return true;
