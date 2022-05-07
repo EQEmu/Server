@@ -2,11 +2,18 @@
 
 void command_makepet(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == '\0') {
-		c->Message(Chat::White, "Usage: #makepet pet_type_name (will not survive across zones)");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #makepet [Pet Name]");
+		return;
 	}
-	else {
-		c->MakePet(0, sep->arg[1]);
+
+	std::string pet_name = sep->arg[1];
+	if (pet_name.empty()) {
+		c->Message(Chat::White, "Usage: #makepet [Pet Name]");
+		return;
 	}
+
+	c->MakePet(0, pet_name.c_str());
 }
 

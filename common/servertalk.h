@@ -228,6 +228,9 @@
 #define ServerOP_UpdateSchedulerEvents 0x4012
 #define ServerOP_ReloadContentFlags 0x4013
 #define ServerOP_ReloadVariablesWorld 0x4014
+#define ServerOP_ReloadLevelEXPMods 0x4015
+#define ServerOP_ReloadMerchants 0x4016
+#define ServerOP_ReloadAAData 0x4017
 #define ServerOP_ReloadTraps 0x4018
 #define ServerOP_ReloadStaticZoneData 0x4020
 

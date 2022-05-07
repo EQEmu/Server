@@ -165,9 +165,7 @@ void command_npcloot(Client *c, const Seperator *sep);
 void command_npcsay(Client *c, const Seperator *sep);
 void command_npcshout(Client *c, const Seperator *sep);
 void command_npcspawn(Client *c, const Seperator *sep);
-void command_npcspecialattk(Client *c, const Seperator *sep);
 void command_npcstats(Client *c, const Seperator *sep);
-void command_npctype_cache(Client *c, const Seperator *sep);
 void command_npctypespawn(Client *c, const Seperator *sep);
 void command_nudge(Client *c, const Seperator *sep);
 void command_nukebuffs(Client *c, const Seperator *sep);
@@ -175,8 +173,6 @@ void command_nukeitem(Client *c, const Seperator *sep);
 void command_object(Client *c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
 void command_opcode(Client *c, const Seperator *sep);
-void command_bestz(Client *c, const Seperator *message);
-void command_pf(Client *c, const Seperator *message);
 
 #ifdef PACKET_PROFILER
 void command_packetprofile(Client *c, const Seperator *sep);
@@ -291,7 +287,6 @@ void command_titlesuffix(Client *c, const Seperator *sep);
 void command_traindisc(Client *c, const Seperator *sep);
 void command_trapinfo(Client *c, const Seperator *sep);
 void command_tune(Client *c, const Seperator *sep);
-void command_ucs(Client *c, const Seperator *sep);
 void command_undye(Client *c, const Seperator *sep);
 void command_undyeme(Client *c, const Seperator *sep);
 void command_unfreeze(Client *c, const Seperator *sep);
