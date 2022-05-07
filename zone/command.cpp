@@ -295,7 +295,6 @@ int command_init(void)
 		command_add("reloadstatic", "- Reload Static Zone Data globally", AccountStatus::GMLeadAdmin, command_reloadstatic) ||
 		command_add("reloadtraps", "[0|1] - Reloads and repops traps, globally if specified (1 = global)", AccountStatus::QuestTroupe, command_reloadtraps) ||
 		command_add("reloadtitles", "- Reload player titles from the database", AccountStatus::GMLeadAdmin, command_reloadtitles) ||
-		command_add("reloadworld", "[0|1] - Clear quest cache (0 - no repop, 1 - repop)", AccountStatus::Max, command_reloadworld) ||
 		command_add("reloadworld", "[0|1|2] - Reload quests global and repop NPCs if specified (0 = No Repop, 1 = Repop, 2 = Force Repop)", AccountStatus::Max, command_reloadworld) ||
 		command_add("reloadzps", "- Reload zone points from database globally", AccountStatus::GMLeadAdmin, command_reloadzps) ||
 		command_add("removeitem", "[Item ID] [Amount] - Removes the specified Item ID by Amount from you or your player target's inventory (Amount defaults to 1 if not used)", AccountStatus::GMAdmin, command_removeitem) ||
