@@ -125,7 +125,6 @@ int command_init(void)
 		command_add("attack", "[Entity Name] - Make your NPC target attack an entity by name", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
 		command_add("ban", "[Character Name] [Reason]- Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
-		command_add("bestz", "- Ask map for a good Z coord for your x,y coords.", AccountStatus::Player, command_bestz) ||
 		command_add("bind", "- Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
 
 #ifdef BOTS
@@ -275,7 +274,6 @@ int command_init(void)
 		command_add("permarace", "[Race ID] - Change your or your player target's race", AccountStatus::QuestTroupe, command_permarace) ||
 		command_add("petitems", "- View your pet's items if you have one", AccountStatus::ApprenticeGuide, command_petitems) ||
 		command_add("petitioninfo", "[petition number] - Get info about a petition", AccountStatus::ApprenticeGuide, command_petitioninfo) ||
-		command_add("pf", "- Display additional mob coordinate and wandering data", AccountStatus::Player, command_pf) ||
 		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
 		command_add("profanity", "Manage censored language.", AccountStatus::GMLeadAdmin, command_profanity) ||
 		command_add("push", "[Back Push] [Up Push] - Lets you do spell push on an NPC", AccountStatus::GMLeadAdmin, command_push) ||
@@ -1180,7 +1178,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/attack.cpp"
 #include "gm_commands/augmentitem.cpp"
 #include "gm_commands/ban.cpp"
-#include "gm_commands/bestz.cpp"
 #include "gm_commands/bind.cpp"
 #include "gm_commands/camerashake.cpp"
 #include "gm_commands/castspell.cpp"
@@ -1323,7 +1320,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/petitems.cpp"
 #include "gm_commands/petitioninfo.cpp"
 #include "gm_commands/petname.cpp"
-#include "gm_commands/pf.cpp"
 #include "gm_commands/picklock.cpp"
 #include "gm_commands/profanity.cpp"
 #include "gm_commands/proximity.cpp"
