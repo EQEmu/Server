@@ -4118,18 +4118,17 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	cd->damage = 0;
 
 	if (!IsEffectInSpell(spell_id, SE_BindAffinity) && !IsAENukeSpell(spell_id)) {
-		// Do not issue the damage message again, if damage spell and client is the target.
-		Mob *ignore_mob = (IsDamageSpell(spell_id) && !IsDOTWithDDSpell(spell_id)) ? spelltar : nullptr;
-
-		entity_list.QueueCloseClients(
-			spelltar, /* Sender */
-			message_packet, /* Packet */
-			false, /* Ignore Sender */
-			RuleI(Range, SpellMessages),
-			ignore_mob, /* Skip this mob */
-			true, /* Packet ACK */
-			(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
-		);
+		if (!IsDamageSpell(spell_id) || IsDOTWithDDSpell(spell_id)) {
+			entity_list.QueueCloseClients(
+				spelltar, /* Sender */
+				message_packet, /* Packet */
+				false, /* Ignore Sender */
+				RuleI(Range, SpellMessages),
+				0, /* Skip this mob */
+				true, /* Packet ACK */
+				(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
+			);
+		}
 	}
 
 	safe_delete(action_packet);
