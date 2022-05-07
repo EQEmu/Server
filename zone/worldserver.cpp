@@ -2131,7 +2131,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	}
 	case ServerOP_ReloadStaticZoneData: {
 		if (zone) {
 			worldserver.SendEmoteMessage(
