@@ -1483,6 +1483,7 @@ bool IsValidSpell(uint32 spellid);
 bool IsSummonSpell(uint16 spellid);
 bool IsEvacSpell(uint16 spellid);
 bool IsDamageSpell(uint16 spellid);
+bool IsDOTWithDDSpell(uint16 spellid);
 bool IsFearSpell(uint16 spellid);
 bool IsCureSpell(uint16 spellid);
 bool BeneficialSpell(uint16 spell_id);
