@@ -1244,10 +1244,6 @@ int bot_command_count;					// how many bot commands we have
 // init has been performed to point at the real function
 int (*bot_command_dispatch)(Client *,char const *) = bot_command_not_avail;
 
-// TODO: Find out what these are for...
-void bot_command_bestz(Client *c, const Seperator *message);
-void bot_command_pf(Client *c, const Seperator *message);
-
 std::map<std::string, BotCommandRecord *> bot_command_list;
 std::map<std::string, std::string> bot_command_aliases;
 

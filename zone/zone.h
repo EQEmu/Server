@@ -278,10 +278,10 @@ public:
 	void LoadVeteranRewards();
 	void LoadZoneDoors(const char *zone, int16 version);
 	void ReloadStaticData();
-	void ReloadWorld(uint32 Option);
+	void ReloadWorld(uint8 global_repop);
 	void RemoveAuth(const char *iCharName, const char *iLSKey);
 	void RemoveAuth(uint32 lsid);
-	void Repop(uint32 delay = 0);
+	void Repop();
 	void RequestUCSServerStatus();
 	void ResetAuth();
 	void SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
@@ -290,14 +290,11 @@ public:
 	void SetStaticZone(bool sz) { staticzone = sz; }
 	void SetTime(uint8 hour, uint8 minute, bool update_world = true);
 	void SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp);
-	void ShowDisabledSpawnStatus(Mob *client);
-	void ShowEnabledSpawnStatus(Mob *client);
-	void ShowSpawnStatusByID(Mob *client, uint32 spawnid);
 	void SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
-	void SpawnStatus(Mob *client);
 	void StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
 	void UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void weatherSend(Client *client = nullptr);
+	void ClearSpawnTimers();
 
 	bool IsQuestHotReloadQueued() const;
 	void SetQuestHotReloadQueued(bool in_quest_hot_reload_queued);

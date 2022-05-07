@@ -3897,31 +3897,50 @@ void Client::GetRaidAAs(RaidLeadershipAA_Struct *into) const {
 
 void Client::EnteringMessages(Client* client)
 {
-	//server rules
 	std::string rules;
-	if(database.GetVariable("Rules", rules))
-	{
+	if (database.GetVariable("Rules", rules)) {
 		uint8 flag = database.GetAgreementFlag(client->AccountID());
-		if(!flag)
-		{
-			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
+		if (!flag) {
+			auto rules_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+				"#serverrules",
+				false,
+				"rules"
+			);
+
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"You must agree to the {} before you can move.",
+					rules_link
+				).c_str()
+			);
+
 			client->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
 		}
 	}
 }
 
-void Client::SendRules(Client* client)
+void Client::SendRules()
 {
 	std::string rules;
 
-	if (!database.GetVariable("Rules", rules))
+	if (!database.GetVariable("Rules", rules)) {
 		return;
+	}
 
-	auto lines = SplitString(rules, '\n');
-	for (auto&& e : lines)
-		client->Message(Chat::White, "%s", e.c_str());
+	auto lines = split_string(rules, "|");
+	auto line_number = 1;
+	for (auto&& line : lines) {
+		Message(
+			Chat::White,
+			fmt::format(
+				"{}. {}",
+				line_number,
+				line
+			).c_str()
+		);
+		line_number++;
+	}
 }
 
 void Client::SetEndurance(int32 newEnd)

@@ -4172,7 +4172,7 @@ void Bot::BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::str
 	BotAddEquipItem(slot_id, item_id);
 }
 
-void Bot::AddItem(
+void Bot::AddBotItem(
 	uint16 slot_id,
 	uint32 item_id,
 	int16 charges,
@@ -4222,7 +4222,7 @@ void Bot::AddItem(
 	BotAddEquipItem(slot_id, item_id);
 }
 
-uint32 Bot::CountItem(uint32 item_id) {
+uint32 Bot::CountBotItem(uint32 item_id) {
 	uint32 item_count = 0;
 	EQ::ItemInstance *inst = nullptr;
 
@@ -4240,7 +4240,7 @@ uint32 Bot::CountItem(uint32 item_id) {
 	return item_count;
 }
 
-bool Bot::HasItem(uint32 item_id) {
+bool Bot::HasBotItem(uint32 item_id) {
 	bool has_item = false;
 	EQ::ItemInstance *inst = nullptr;
 
@@ -4259,7 +4259,7 @@ bool Bot::HasItem(uint32 item_id) {
 	return has_item;
 }
 
-void Bot::RemoveItem(uint32 item_id) {
+void Bot::RemoveBotItem(uint32 item_id) {
 	EQ::ItemInstance *inst = nullptr;
 
 	for (uint16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {

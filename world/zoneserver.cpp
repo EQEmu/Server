@@ -884,21 +884,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		database.LoadVariables();
 		break;
 	}
-	case ServerOP_ReloadPerlExportSettings:
-	{
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ReloadZonePoints:
-	{
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_CameraShake:
-	{
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
 	case ServerOP_FriendsWho: {
 		ServerFriendsWho_Struct* FriendsWho = (ServerFriendsWho_Struct*)pack->pBuffer;
 		client_list.SendFriendsWho(FriendsWho, this);
@@ -1387,6 +1372,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_SpawnStatusChange:
 	case ServerOP_ReloadWorld:
 	case ServerOP_UpdateSpawn:
+	case ServerOP_ReloadPerlExportSettings:
+	case ServerOP_ReloadZonePoints:
+	case ServerOP_ReloadLevelEXPMods:}
+	case ServerOP_ReloadAAData:
+	case ServerOP_ReloadMerchants:
+	case ServerOP_ReloadStaticZoneData:
+	case ServerOP_CameraShake:
 	{
 		zoneserver_list.SendPacket(pack);
 		break;

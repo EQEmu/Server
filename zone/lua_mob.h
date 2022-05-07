@@ -79,7 +79,6 @@ public:
 	void RandomizeFeatures(bool send_illusion, bool save_variables);
 	void GMMove(double x, double y, double z);
 	void GMMove(double x, double y, double z, double heading);
-	void GMMove(double x, double y, double z, double heading, bool send_update);
 	void TryMoveAlong(float distance, float heading);
 	void TryMoveAlong(float distance, float heading, bool send);
 	bool HasProcs();
