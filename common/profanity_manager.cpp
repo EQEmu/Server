@@ -19,6 +19,7 @@
 
 #include "profanity_manager.h"
 #include "dbcore.h"
+#include "string_util.h"
 
 #include <ctype.h>
 #include <cstring>
