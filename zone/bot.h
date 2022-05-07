@@ -573,7 +573,7 @@ public:
 	static NPCType *FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
 	void BotRemoveEquipItem(uint16 slot_id);
 	void RemoveBotItemBySlot(uint16 slot_id, std::string* error_message);
-	void AddItem(
+	void AddBotItem(
 		uint16 slot_id,
 		uint32 item_id,
 		int16 charges = -1,
@@ -585,9 +585,9 @@ public:
 		uint32 augment_five = 0,
 		uint32 augment_six = 0
 	);
-	uint32 CountItem(uint32 item_id);
-	bool HasItem(uint32 item_id);
-	void RemoveItem(uint32 item_id);
+	uint32 CountBotItem(uint32 item_id);
+	bool HasBotItem(uint32 item_id);
+	void RemoveBotItem(uint32 item_id);
 	uint32 GetTotalPlayTime();
 
 	// New accessors for BotDatabase access
