@@ -253,8 +253,8 @@ int command_init(void)
 		command_add("npceditmass", "[name-search] [column] [value] - Mass (Zone wide) NPC data editing command", AccountStatus::GMAdmin, command_npceditmass) ||
 		command_add("npcemote", "[message] - Make your NPC target emote a message.", AccountStatus::GMLeadAdmin, command_npcemote) ||
 		command_add("npcloot", "- Manipulate the loot an NPC is carrying. Use #npcloot help for more information.", AccountStatus::QuestTroupe, command_npcloot) ||
-		command_add("npcsay", "[message] - Make your NPC target say a message.", AccountStatus::GMLeadAdmin, command_npcsay) ||
-		command_add("npcshout", "[message] - Make your NPC target shout a message.", AccountStatus::GMLeadAdmin, command_npcshout) ||
+		command_add("npcsay", "[Message] - Make your NPC target say a message.", AccountStatus::GMLeadAdmin, command_npcsay) ||
+		command_add("npcshout", "[Message] - Make your NPC target shout a message.", AccountStatus::GMLeadAdmin, command_npcshout) ||
 		command_add("npcspawn", "[create/add/update/remove/delete] - Manipulate spawn DB", AccountStatus::GMAreas, command_npcspawn) ||
 		command_add("npcspecialattk", "[flagchar] [perm] - Set NPC special attack flags. Flags are E(nrage) F(lurry) R(ampage) S(ummon).", AccountStatus::QuestTroupe, command_npcspecialattk) ||
 		command_add("npcstats", "- Show stats about target NPC", AccountStatus::QuestTroupe, command_npcstats) ||
