@@ -1993,7 +1993,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				AccountStatus::GMAdmin,
 				Chat::Yellow,
 				fmt::format(
-					"Rules reloaded for {}.",
+					"Rules reloaded for {}{}.",
 					fmt::format(
 						"{} ({})",
 						zone->GetLongName(),
@@ -2002,7 +2002,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					(
 						zone->GetInstanceID() ?
 						fmt::format(
-							"Instance ID: {}",
+							" (Instance ID {})",
 							zone->GetInstanceID()
 						) :
 						""
@@ -2021,7 +2021,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				AccountStatus::GMAdmin,
 				Chat::Yellow,
 				fmt::format(
-					"Content flags (and expansion) reloaded for {}.",
+					"Content flags (and expansion) reloaded for {}{}.",
 					fmt::format(
 						"{} ({})",
 						zone->GetLongName(),
@@ -2030,7 +2030,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					(
 						zone->GetInstanceID() ?
 						fmt::format(
-							"Instance ID: {}",
+							" (Instance ID {})",
 							zone->GetInstanceID()
 						) :
 						""
@@ -2073,7 +2073,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 		break;
 	}
-
 	case ServerOP_ReloadLevelEXPMods: {
 		if (zone) {
 			worldserver.SendEmoteMessage(
@@ -2100,6 +2099,64 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			);
 
 			zone->LoadLevelEXPMods();
+		}
+		break;
+	}
+	case ServerOP_ReloadAAData: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Alternate Advancement data reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+
+			zone->LoadAlternateAdvancement();
+		}
+		break;
+	}
+	case ServerOP_ReloadMerchants: {
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Merchants reloaded for {}{}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							" (Instance ID {})",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+
+			entity_list.ReloadMerchants();
 		}
 		break;
 	}

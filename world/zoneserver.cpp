@@ -894,6 +894,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
+	case ServerOP_ReloadAAData:
+	{
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_ReloadMerchants:
+	{
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
 	case ServerOP_ReloadStaticZoneData:
 	{
 		zoneserver_list.SendPacket(pack);
