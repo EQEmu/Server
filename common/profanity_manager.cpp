@@ -226,20 +226,10 @@ bool EQ::ProfanityManager::load_database_entries(DBcore *db) {
 	}
 
 	for (auto row : results) {
-		if (std::strlen(row[0]) >= REDACTION_LENGTH_MIN) {
-			std::string entry(row[0]);
-	
-			std::transform(
-				entry.begin(),
-				entry.end(),
-				entry.begin(),
-				[](unsigned char c) -> unsigned char {
-					return tolower(c);
-				}
-			);
-
-			if (!check_for_existing_entry(entry.c_str())) {
-				profanity_list.push_back((std::string)entry);
+		std::string entry = str_tolower(row[0]);
+		if (entry.length() >= REDACTION_LENGTH_MIN) {	
+			if (!check_for_existing_entry(entry)) {
+				profanity_list.push_back(entry);
 			}
 		}
 	}
