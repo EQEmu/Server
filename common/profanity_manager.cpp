@@ -106,16 +106,7 @@ bool EQ::ProfanityManager::RemoveProfanity(DBcore *db, std::string profanity) {
 		return false;
 	}
 
-	std::string entry(profanity);
-
-	std::transform(
-		entry.begin(),
-		entry.end(),
-		entry.begin(),
-		[](unsigned char c) -> unsigned char {
-			return tolower(c);
-		}
-	);
+	std::string entry = str_tolower(profanity);
 
 	if (!check_for_existing_entry(entry)) {
 		return true;
@@ -143,21 +134,12 @@ void EQ::ProfanityManager::RedactMessage(char *message) {
 		return;
 	}
 
-	std::string test_message(message);
+	std::string test_message = str_tolower(message);
 	// hard-coded max length based on channel message buffer size (4096 bytes)..
 	// ..will need to change or remove if other sources are used for redaction
 	if (test_message.length() < REDACTION_LENGTH_MIN || test_message.length() >= 4096) {
 		return;
 	}
-
-	std::transform(
-		test_message.begin(),
-		test_message.end(),
-		test_message.begin(),
-		[](unsigned char c) -> unsigned char {
-			return tolower(c);
-			}
-		);
 	
 	for (const auto &iter : profanity_list) { // consider adding textlink checks if it becomes an issue
 		size_t pos = 0;
@@ -188,16 +170,7 @@ void EQ::ProfanityManager::RedactMessage(std::string &message) {
 		return;
 	}
 
-	std::string test_message(const_cast<const std::string&>(message));
-
-	std::transform(
-		test_message.begin(),
-		test_message.end(),
-		test_message.begin(),
-		[](unsigned char c) -> unsigned char {
-			return tolower(c);
-		}
-	);
+	std::string test_message = str_tolower(message);
 
 	for (const auto &iter : profanity_list) {
 		size_t pos = 0;
@@ -229,16 +202,7 @@ bool EQ::ProfanityManager::ContainsCensoredLanguage(const std::string &message) 
 		return false;
 	}
 
-	std::string test_message(message);
-
-	std::transform(
-		test_message.begin(),
-		test_message.end(),
-		test_message.begin(),
-		[](unsigned char c) -> unsigned char {
-			return tolower(c);
-		}
-	);
+	std::string test_message = str_tolower(message);
 
 	for (const auto &iter : profanity_list) {
 		if (test_message.find(iter) != std::string::npos) {
