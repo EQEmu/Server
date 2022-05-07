@@ -83,7 +83,7 @@ public:
 	int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers = nullptr);
 	
-	void GetErrors(std::list<std::string> &err);
+	void GetErrors(std::list<std::string> &quest_errors);
 
 	/*
 		Internally used memory reference for all Perl Event Export Settings
