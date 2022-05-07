@@ -416,4 +416,10 @@ enum ConsiderLevel : uint8 {
 	Scowls
 };
 
+enum ReloadWorld : uint8 {
+	NoRepop = 0,
+	Repop,
+	ForceRepop
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

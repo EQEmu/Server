@@ -287,11 +287,6 @@ void Lua_Mob::GMMove(double x, double y, double z, double heading) {
 	self->GMMove(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(heading));
 }
 
-void Lua_Mob::GMMove(double x, double y, double z, double heading, bool send_update) {
-	Lua_Safe_Call_Void();
-	self->GMMove(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z), static_cast<float>(heading), send_update);
-}
-
 void Lua_Mob::TryMoveAlong(float distance, float angle) {
 	Lua_Safe_Call_Void();
 	self->TryMoveAlong(distance, angle);
@@ -2605,7 +2600,6 @@ luabind::scope lua_register_mob() {
 	.def("FindType", (bool(Lua_Mob::*)(int,bool,int))&Lua_Mob::FindType)
 	.def("GMMove", (void(Lua_Mob::*)(double,double,double))&Lua_Mob::GMMove)
 	.def("GMMove", (void(Lua_Mob::*)(double,double,double,double))&Lua_Mob::GMMove)
-	.def("GMMove", (void(Lua_Mob::*)(double,double,double,double,bool))&Lua_Mob::GMMove)
 	.def("GetAA", (int(Lua_Mob::*)(int))&Lua_Mob::GetAA)
 	.def("GetAABonuses", &Lua_Mob::GetAABonuses)
 	.def("GetAAByAAID", (int(Lua_Mob::*)(int))&Lua_Mob::GetAAByAAID)

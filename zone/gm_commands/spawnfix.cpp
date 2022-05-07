@@ -1,39 +1,68 @@
 #include "../client.h"
 
-void command_spawnfix(Client *c, const Seperator *sep)
+void command_spawnfix(Client* c, const Seperator* sep)
 {
-	Mob *target_mob = c->GetTarget();
-	if (!target_mob || !target_mob->IsNPC()) {
-		c->Message(Chat::White, "Error: #spawnfix: Need an NPC target.");
+	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
 	}
 
-	Spawn2 *s2 = target_mob->CastToNPC()->respawn2;
+	auto target = c->GetTarget()->CastToNPC();
+	auto spawn2 = target->respawn2;
 
-	if (!s2) {
-		c->Message(
-			Chat::White,
-			"#spawnfix FAILED -- cannot determine which spawn entry in the database this mob came from."
-		);
+	if (!spawn2) {
+		c->Message(Chat::White, "Failed to fix spawn, the spawn must not exist in the database.");
 		return;
 	}
 
-	std::string query   = StringFormat(
-		"UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
-		c->GetX(),
-		c->GetY(),
-		target_mob->GetFixedZ(c->GetPosition()),
-		c->GetHeading(),
-		s2->GetID()
+	auto client_x = c->GetX();
+	auto client_y = c->GetY();
+	auto client_z = target->GetFixedZ(c->GetPosition());
+	auto client_heading = c->GetHeading();
+
+	auto query = fmt::format(
+		"UPDATE spawn2 SET x = {:.2f}, y = {:.2f}, z = {:.2f}, heading = {:.2f} WHERE id = {}",
+		client_x,
+		client_y,
+		client_z,
+		client_heading,
+		spawn2->GetID()
 	);
-	auto        results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
-		c->Message(Chat::Red, results.ErrorMessage().c_str());
+	auto results = content_db.QueryDatabase(query);
+
+	if (!results.Success() || !results.RowsAffected()) {
+		c->Message(Chat::White, "Failed to fix spawn.");
 		return;
 	}
 
-	c->Message(Chat::White, "Updating coordinates successful.");
-	target_mob->Depop(false);
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Updated Spawn | NPC: {}",
+			target->GetCleanName()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Updated Spawn | NPC ID: {} Spawn2 ID: {}",
+			target->GetNPCTypeID(),
+			spawn2->GetID()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Updated Spawn | Coordinates: {:.2f}, {:.2f}, {:.2f}, {:.2f}",
+			client_x,
+			client_y,
+			client_z,
+			client_heading
+		).c_str()
+	);
+
+	target->Depop(false);
 }
 
