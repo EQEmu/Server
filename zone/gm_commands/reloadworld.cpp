@@ -5,17 +5,35 @@ extern WorldServer worldserver;
 
 void command_reloadworld(Client *c, const Seperator *sep)
 {
-	int world_repop = atoi(sep->arg[1]);
-	if (world_repop == 0) {
-		c->Message(Chat::White, "Reloading quest cache worldwide.");
-	}
-	else {
-		c->Message(Chat::White, "Reloading quest cache and repopping zones worldwide.");
+	uint8 global_repop = ReloadWorld::NoRepop;
+
+	if (sep->IsNumber(1)) {
+		global_repop = static_cast<uint8>(std::stoul(sep->arg[1]));
+
+		if (global_repop > ReloadWorld::ForceRepop) {
+			global_repop = ReloadWorld::ForceRepop;
+		}
 	}
 
-	auto               pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Attempting to reload quests {}worldwide.",
+			(
+				global_repop ?
+				(
+					global_repop == ReloadWorld::Repop ?
+					"and repop NPCs " :
+					"and forcefully repop NPCs "
+				) :
+				""
+			)
+		).c_str()
+	);
+
+	auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 	ReloadWorld_Struct *RW  = (ReloadWorld_Struct *) pack->pBuffer;
-	RW->Option = world_repop;
+	RW->global_repop = global_repop;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }

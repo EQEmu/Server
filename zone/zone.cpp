@@ -1773,7 +1773,7 @@ void Zone::ClearNPCTypeCache(int id) {
 	}
 }
 
-void Zone::Repop(uint32 delay)
+void Zone::Repop()
 {
 	if (!Depop()) {
 		return;
@@ -1802,7 +1802,7 @@ void Zone::Repop(uint32 delay)
 		LogError("Loading spawn conditions failed, continuing without them");
 	}
 
-	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay)) {
+	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion())) {
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 	}
 
@@ -2458,14 +2458,65 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 
 }
 
-void Zone::ReloadWorld(uint32 Option){
-	if (Option == 0) {
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-	} else if(Option == 1) {
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-		zone->Repop(0);
+void Zone::ReloadWorld(uint8 global_repop)
+{
+	entity_list.ClearAreas();
+	parse->ReloadQuests();
+
+	if (global_repop) {
+		if (global_repop == ReloadWorld::ForceRepop) {
+			zone->ClearSpawnTimers();
+		}
+
+		zone->Repop();
+	}
+
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::GMAdmin,
+		Chat::Yellow,
+		fmt::format(
+			"Quests reloaded {}for {}{}.",
+			(
+				global_repop ?
+				(
+					global_repop == ReloadWorld::Repop ?
+					"and repopped NPCs " :
+					"and forcefully repopped NPCs "
+				) :
+				""
+			),
+			fmt::format(
+				"{} ({})",
+				GetLongName(),
+				GetZoneID()
+			),
+			(
+				GetInstanceID() ?
+				fmt::format(
+					" (Instance ID {})",
+					GetInstanceID()
+				) :
+				""
+			)
+		).c_str()
+	);
+}
+
+void Zone::ClearSpawnTimers()
+{
+	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		auto query = fmt::format(
+			"DELETE FROM respawn_times WHERE id = {} AND instance_id = {}",
+			iterator.GetData()->GetID(),
+			GetInstanceID()
+		);
+		auto results = database.QueryDatabase(query);
+
+		iterator.Advance();
 	}
 }
 
