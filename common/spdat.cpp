@@ -139,7 +139,7 @@ bool IsEvacSpell(uint16 spellid)
 
 bool IsDamageSpell(uint16 spellid)
 {
-	if (spells[spellid].target_type == ST_Tap)
+	if (IsLifetapSpell(spellid))
 		return false;
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
@@ -152,6 +152,27 @@ bool IsDamageSpell(uint16 spellid)
 	return false;
 }
 
+bool IsDOTWithDDSpell(uint16 spellid)
+{
+	bool is_DOT = false;
+	bool is_DD = false;
+
+	for (int o = 0; o < EFFECT_COUNT; o++) {
+		uint32 tid = spells[spellid].effect_id[o];
+		if (spells[spellid].base_value[o] < 0) {
+			if (tid == SE_CurrentHPOnce)
+				is_DD = true;
+
+			if (tid == SE_CurrentHP && spells[spellid].buff_duration > 0)
+				is_DOT = true;
+		}
+
+		if (is_DD && is_DOT)
+			return true;
+	}
+
+	return false;
+}
 
 bool IsFearSpell(uint16 spell_id)
 {
