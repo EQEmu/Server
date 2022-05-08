@@ -32,16 +32,16 @@ bool CombatRecord::InCombat()
 	return start_time > 0;
 }
 
-void CombatRecord::ProcessHPEvent(int hp, int current_hp)
+void CombatRecord::ProcessHPEvent(int64 hp, int64 current_hp)
 {
 	// damage
 	if (hp < current_hp) {
-		damage_received = damage_received + abs(current_hp - hp);
+		damage_received = damage_received + std::llabs(current_hp - hp);
 	}
 
 	// heal
 	if (hp > current_hp && current_hp > 0) {
-		heal_received = heal_received + abs(current_hp - hp);
+		heal_received = heal_received + std::llabs(current_hp - hp);
 	}
 
 	LogCombatRecordDetail(
@@ -50,7 +50,7 @@ void CombatRecord::ProcessHPEvent(int hp, int current_hp)
 		heal_received,
 		current_hp,
 		hp,
-		abs(current_hp - hp)
+		std::llabs(current_hp - hp)
 	);
 }
 

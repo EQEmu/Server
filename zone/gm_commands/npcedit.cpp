@@ -233,15 +233,22 @@ void command_npcedit(Client *c, const Seperator *sep)
 	}
 
 	if (strcasecmp(sep->arg[1], "hp") == 0) {
-		c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Health.", npc_id, atoi(sep->arg[2])).c_str());
-		std::string query = fmt::format("UPDATE npc_types SET hp = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"NPC ID {} now has {} Health.",
+				npc_id,
+				std::strtoll(sep->arg[2], nullptr, 10)
+			).c_str()
+		);
+		std::string query = fmt::format("UPDATE npc_types SET hp = {} WHERE id = {}", strtoull(sep->arg[2], nullptr, 10), npc_id);
 		content_db.QueryDatabase(query);
 		return;
 	}
 
 	if (strcasecmp(sep->arg[1], "mana") == 0) {
-		c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Mana.", npc_id, atoi(sep->arg[2])).c_str());
-		std::string query = fmt::format("UPDATE npc_types SET mana = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
+		c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Mana.", npc_id, std::strtoll(sep->arg[2], nullptr, 10)).c_str());
+		std::string query = fmt::format("UPDATE npc_types SET mana = {} WHERE id = {}", std::strtoll(sep->arg[2], nullptr, 10), npc_id);
 		content_db.QueryDatabase(query);
 		return;
 	}
@@ -299,10 +306,10 @@ void command_npcedit(Client *c, const Seperator *sep)
 	if (strcasecmp(sep->arg[1], "hpregen") == 0) {
 		c->Message(
 			Chat::Yellow,
-			fmt::format("NPC ID {} now regenerates {} Health per Tick.", npc_id, atoi(sep->arg[2])).c_str());
+			fmt::format("NPC ID {} now regenerates {} Health per Tick.", npc_id, std::strtoll(sep->arg[2], nullptr, 10)).c_str());
 		std::string query = fmt::format(
 			"UPDATE npc_types SET hp_regen_rate = {} WHERE id = {}",
-			atoi(sep->arg[2]),
+			std::strtoll(sep->arg[2], nullptr, 10),
 			npc_id
 		);
 		content_db.QueryDatabase(query);
@@ -315,11 +322,11 @@ void command_npcedit(Client *c, const Seperator *sep)
 			fmt::format(
 				"NPC ID {} now regenerates {} HP per second.",
 				npc_id,
-				atoi(sep->arg[2])).c_str()
+				std::strtoll(sep->arg[2], nullptr, 10)).c_str()
 		);
 		std::string query = fmt::format(
 			"UPDATE npc_types SET hp_regen_per_second = {} WHERE id = {}",
-			atoi(sep->arg[2]),
+			std::strtoll(sep->arg[2], nullptr, 10),
 			npc_id
 		);
 		content_db.QueryDatabase(query);
@@ -329,10 +336,10 @@ void command_npcedit(Client *c, const Seperator *sep)
 	if (strcasecmp(sep->arg[1], "manaregen") == 0) {
 		c->Message(
 			Chat::Yellow,
-			fmt::format("NPC ID {} now regenerates {} Mana per Tick.", npc_id, atoi(sep->arg[2])).c_str());
+			fmt::format("NPC ID {} now regenerates {} Mana per Tick.", npc_id, std::strtoll(sep->arg[2], nullptr, 10)).c_str());
 		std::string query = fmt::format(
 			"UPDATE npc_types SET mana_regen_rate = {} WHERE id = {}",
-			atoi(sep->arg[2]),
+			std::strtoll(sep->arg[2], nullptr, 10),
 			npc_id
 		);
 		content_db.QueryDatabase(query);

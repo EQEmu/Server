@@ -45,8 +45,8 @@ extern WorldServer worldserver;
 Mob::Mob(
 	const char *in_name,
 	const char *in_lastname,
-	int32 in_cur_hp,
-	int32 in_max_hp,
+	int64 in_cur_hp,
+	int64 in_max_hp,
 	uint8 in_gender,
 	uint16 in_race,
 	uint8 in_class,
@@ -85,8 +85,8 @@ Mob::Mob(
 	uint16 in_see_invis_undead,
 	uint8 in_see_hide,
 	uint8 in_see_improved_hide,
-	int32 in_hp_regen,
-	int32 in_mana_regen,
+	int64 in_hp_regen,
+	int64 in_mana_regen,
 	uint8 in_qglobal,
 	uint8 in_maxlevel,
 	uint32 in_scalerate,
@@ -947,7 +947,7 @@ int Mob::_GetFearSpeed() const {
 	return speed_mod;
 }
 
-int32 Mob::CalcMaxMana() {
+int64 Mob::CalcMaxMana() {
 	switch (GetCasterClass()) {
 		case 'I':
 			max_mana = (((GetINT()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
@@ -967,15 +967,15 @@ int32 Mob::CalcMaxMana() {
 	return max_mana;
 }
 
-int32 Mob::CalcMaxHP() {
+int64 Mob::CalcMaxHP() {
 	max_hp = (base_hp + itembonuses.HP + spellbonuses.HP);
 	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
 
 	return max_hp;
 }
 
-int32 Mob::GetItemHPBonuses() {
-	int32 item_hp = 0;
+int64 Mob::GetItemHPBonuses() {
+	int64 item_hp = 0;
 	item_hp = itembonuses.HP;
 	item_hp += item_hp * itembonuses.MaxHPChange / 10000;
 	return item_hp;
@@ -3243,10 +3243,10 @@ void Mob::SetTargetable(bool on) {
 	}
 }
 
-const int32& Mob::SetMana(int32 amount)
+const int64& Mob::SetMana(int64 amount)
 {
 	CalcMaxMana();
-	int32 mmana = GetMaxMana();
+	int64 mmana = GetMaxMana();
 	current_mana = amount < 0 ? 0 : (amount > mmana ? mmana : amount);
 /*
 	if(IsClient())
@@ -4387,7 +4387,7 @@ int Mob::GetSnaredAmount()
 		{
 			if (spells[buffs[i].spellid].effect_id[j] == SE_MovementSpeed)
 			{
-				int val = CalcSpellEffectValue_formula(spells[buffs[i].spellid].formula[j], spells[buffs[i].spellid].base_value[j], spells[buffs[i].spellid].max_value[j], buffs[i].casterlevel, buffs[i].spellid);
+				int64 val = CalcSpellEffectValue_formula(spells[buffs[i].spellid].formula[j], spells[buffs[i].spellid].base_value[j], spells[buffs[i].spellid].max_value[j], buffs[i].casterlevel, buffs[i].spellid);
 				//int effect = CalcSpellEffectValue(buffs[i].spellid, spells[buffs[i].spellid].effectid[j], buffs[i].casterlevel);
 				if (val < 0 && std::abs(val) > worst_snare)
 					worst_snare = std::abs(val);
@@ -4398,7 +4398,7 @@ int Mob::GetSnaredAmount()
 	return worst_snare;
 }
 
-void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int damage)
+void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int64 damage)
 {
 	if (!on) {
 		return;
@@ -4611,7 +4611,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 
 	if(IsClient())
 	{
-		int32 focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+		int focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
 
 		if (focus > 0)
 		{
@@ -4659,7 +4659,7 @@ void Mob::ApplyHealthTransferDamage(Mob *caster, Mob *target, uint16 spell_id)
 		for (int i = 0; i < EFFECT_COUNT; i++) {
 
 			if (spells[spell_id].effect_id[i] == SE_Health_Transfer) {
-				int new_hp = GetMaxHP();
+				int64 new_hp = GetMaxHP();
 				new_hp -= GetMaxHP()  * spells[spell_id].base_value[i] / 1000;
 
 				if (new_hp > 0) {
@@ -5374,7 +5374,7 @@ int Mob::GetCriticalChanceBonus(uint16 skill)
 
 int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 {
-	int dmg_mod = 0;
+	int64 dmg_mod = 0;
 
 	// All skill dmg mod + Skill specific
 	dmg_mod += itembonuses.DamageModifier[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier[EQ::skills::HIGHEST_SKILL + 1] +
@@ -5398,7 +5398,7 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 
 int16 Mob::GetMeleeMinDamageMod_SE(uint16 skill)
 {
-	int dmg_mod = 0;
+	int64 dmg_mod = 0;
 
 	dmg_mod = itembonuses.MinDamageModifier[skill] + spellbonuses.MinDamageModifier[skill] +
 		itembonuses.MinDamageModifier[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.MinDamageModifier[EQ::skills::HIGHEST_SKILL + 1];
@@ -5495,7 +5495,7 @@ int16 Mob::GetPositionalDmgAmt(Mob* defender)
 	return total_amt;
 }
 
-void Mob::MeleeLifeTap(int32 damage) {
+void Mob::MeleeLifeTap(int64 damage) {
 
 	int32 lifetap_amt = 0;
 	int32 melee_lifetap_mod = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
@@ -6576,7 +6576,7 @@ int Mob::CheckBaneDamage(const EQ::ItemInstance *item)
 	if (!item)
 		return 0;
 
-	int damage = item->GetItemBaneDamageBody(GetBodyType(), true);
+	int64 damage = item->GetItemBaneDamageBody(GetBodyType(), true);
 	damage += item->GetItemBaneDamageRace(GetRace(), true);
 
 	return damage;

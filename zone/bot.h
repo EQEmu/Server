@@ -145,8 +145,8 @@ public:
 	Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double totalPlayTime, uint32 lastZoneId, NPCType *npcTypeData);
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
+	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
@@ -179,7 +179,7 @@ public:
 	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
 	virtual float GetProcChances(float ProcBonus, uint16 hand);
 	virtual int GetHandToHandDamage(void);
-	virtual bool TryFinishingBlow(Mob *defender, int &damage);
+	virtual bool TryFinishingBlow(Mob *defender, int64 &damage);
 	virtual void DoRiposte(Mob* defender);
 	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK + ((GetSTR() + GetSkill(EQ::skills::SkillOffense)) * 9 / 10); }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -208,16 +208,16 @@ public:
 	virtual Mob* GetOwnerOrSelf();
 	inline virtual bool HasOwner() { return (GetBotOwner() ? true : false); }
 	virtual int32 CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible = 0);
-	virtual int32 CalcMaxMana();
+	virtual int64 CalcMaxMana();
 	virtual void SetAttackTimer();
-	uint32 GetClassHPFactor();
-	virtual int32 CalcMaxHP();
+	uint64 GetClassHPFactor();
+	virtual int64 CalcMaxHP();
 	bool DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	bool DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool &stopLogic);
 	void SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 color);
 	void Camp(bool databaseSave = true);
-	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
+	virtual void AddToHateList(Mob* other, uint64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
 	virtual void SetTarget(Mob* mob);
 	virtual void Zone();
 	std::vector<AISpells_Struct> GetBotSpells() { return AIspells; }
@@ -286,23 +286,23 @@ public:
 	int32	CalcPR();
 	int32	CalcCR();
 	int32	CalcCorrup();
-	int32	CalcHPRegenCap();
-	int32	CalcManaRegenCap();
+	int64	CalcHPRegenCap();
+	int64	CalcManaRegenCap();
 	int32	LevelRegen();
-	int32	CalcHPRegen();
-	int32	CalcManaRegen();
+	int64	CalcHPRegen();
+	int64	CalcManaRegen();
 	uint32	CalcCurrentWeight();
 	int		GroupLeadershipAAHealthEnhancement();
 	int		GroupLeadershipAAManaEnhancement();
 	int	GroupLeadershipAAHealthRegeneration();
 	int		GroupLeadershipAAOffenseEnhancement();
 	void CalcRestState();
-	int32	CalcMaxEndurance();	//This calculates the maximum endurance we can have
-	int32	CalcBaseEndurance();	//Calculates Base End
-	int32	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
-	int32	GetEndurance()	const {return cur_end;}	//This gets our current endurance
-	int32	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
-	int32	CalcEnduranceRegenCap();
+	int64	CalcMaxEndurance();	//This calculates the maximum endurance we can have
+	int64	CalcBaseEndurance();	//Calculates Base End
+	int64	CalcEnduranceRegen();	//Calculates endurance regen used in DoEnduranceRegen()
+	int64	GetEndurance()	const {return cur_end;}	//This gets our current endurance
+	int64	GetMaxEndurance() const {return max_end;}	//This gets our endurance from the last CalcMaxEndurance() call
+	int64	CalcEnduranceRegenCap();
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd);	//This sets the current endurance to the new value
 	void DoEnduranceRegen();	//This Regenerates endurance
@@ -327,8 +327,8 @@ public:
 
 	// Mob Spell Virtual Override Methods
 	virtual void SpellProcess();
-	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
-	virtual int32 GetActSpellHealing(uint16 spell_id, int32 value, Mob* target = nullptr);
+	virtual int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
+	virtual int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	virtual float GetActSpellRange(uint16 spell_id, float range);

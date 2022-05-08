@@ -2621,7 +2621,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	// lets not consume end for custom items that have disc procs.
 	// One might also want to filter out USE_ITEM_SPELL_SLOT, but DISCIPLINE_SPELL_SLOT are both #defined to the same thing ...
 	if (spells[spell_id].endurance_cost && !isproc) {
-		auto end_cost = spells[spell_id].endurance_cost;
+		auto end_cost = (int64)spells[spell_id].endurance_cost;
 		if (mgb)
 			end_cost *= 2;
 		SetEndurance(GetEndurance() - EQ::ClampUpper(end_cost, GetEndurance()));
@@ -2672,7 +2672,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				recast -= GetAA(aaTouchoftheWicked) * 420;
 			}
 
-			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
+			int64 reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
 
 			if (reduction) {
 				recast -= reduction;
@@ -4708,11 +4708,11 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	if(caster->GetSpecialAbility(CASTING_RESIST_DIFF))
 		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
 
-	int focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
+	int64 focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
 
 	resist_modifier -= 2 * focus_resist;
 
-	int focus_incoming_resist = GetFocusEffect(focusFcResistIncoming, spell_id, caster);
+	int64 focus_incoming_resist = GetFocusEffect(focusFcResistIncoming, spell_id, caster);
 
 	resist_modifier -= focus_incoming_resist;
 
@@ -5702,7 +5702,7 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 				// adjustments necessary for offensive npc casting behavior
 				if (bOffensive) {
 					if (spells[buffs[i].spellid].effect_id[j] == type) {
-						int16 value =
+						int64 value =
 								CalcSpellEffectValue_formula(spells[buffs[i].spellid].buff_duration_formula,
 											spells[buffs[i].spellid].base_value[j],
 											spells[buffs[i].spellid].max_value[j],
@@ -6775,7 +6775,7 @@ bool Mob::IsFromTriggeredSpell(CastingSlot slot, uint32 item_slot) {
 	return false;
 }
 
-void Mob::SetHP(int32 hp)
+void Mob::SetHP(int64 hp)
 {
 	if (hp >= max_hp) {
 		current_hp = max_hp;

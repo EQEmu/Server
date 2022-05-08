@@ -182,22 +182,22 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 	return self->Attack(other, hand, from_riposte, is_strikethrough, is_from_spell, &options);
 }
 
-void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill) {
+void Lua_Mob::Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill) {
 	Lua_Safe_Call_Void();
 	return self->Damage(from, damage, spell_id, static_cast<EQ::skills::SkillType>(attack_skill));
 }
 
-void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable) {
+void Lua_Mob::Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable) {
 	Lua_Safe_Call_Void();
 	return self->Damage(from, damage, spell_id, static_cast<EQ::skills::SkillType>(attack_skill), avoidable);
 }
 
-void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot) {
+void Lua_Mob::Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot) {
 	Lua_Safe_Call_Void();
 	return self->Damage(from, damage, spell_id, static_cast<EQ::skills::SkillType>(attack_skill), avoidable, buffslot);
 }
 
-void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic) {
+void Lua_Mob::Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic) {
 	Lua_Safe_Call_Void();
 	return self->Damage(from, damage, spell_id, static_cast<EQ::skills::SkillType>(attack_skill), avoidable, buffslot, buff_tic);
 }
@@ -217,12 +217,12 @@ void Lua_Mob::Heal() {
 	self->Heal();
 }
 
-void Lua_Mob::HealDamage(uint32 amount) {
+void Lua_Mob::HealDamage(uint64 amount) {
 	Lua_Safe_Call_Void();
 	self->HealDamage(amount);
 }
 
-void Lua_Mob::HealDamage(uint32 amount, Lua_Mob other) {
+void Lua_Mob::HealDamage(uint64 amount, Lua_Mob other) {
 	Lua_Safe_Call_Void();
 	self->HealDamage(amount, other);
 }
@@ -237,7 +237,7 @@ uint32 Lua_Mob::GetLevelCon(int my, int other) {
 	return self->GetLevelCon(my, other);
 }
 
-void Lua_Mob::SetHP(int hp) {
+void Lua_Mob::SetHP(int64 hp) {
 	Lua_Safe_Call_Void();
 	self->SetHP(hp);
 }
@@ -1016,27 +1016,27 @@ void Lua_Mob::AddToHateList(Lua_Mob other) {
 	self->AddToHateList(other);
 }
 
-void Lua_Mob::AddToHateList(Lua_Mob other, int hate) {
+void Lua_Mob::AddToHateList(Lua_Mob other, int64 hate) {
 	Lua_Safe_Call_Void();
 	self->AddToHateList(other, hate);
 }
 
-void Lua_Mob::AddToHateList(Lua_Mob other, int hate, int damage) {
+void Lua_Mob::AddToHateList(Lua_Mob other, int64 hate, int64 damage) {
 	Lua_Safe_Call_Void();
 	self->AddToHateList(other, hate, damage);
 }
 
-void Lua_Mob::AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_help) {
+void Lua_Mob::AddToHateList(Lua_Mob other, int64 hate, int64 damage, bool yell_for_help) {
 	Lua_Safe_Call_Void();
 	self->AddToHateList(other, hate, damage, yell_for_help);
 }
 
-void Lua_Mob::AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_help, bool frenzy) {
+void Lua_Mob::AddToHateList(Lua_Mob other, int64 hate, int64 damage, bool yell_for_help, bool frenzy) {
 	Lua_Safe_Call_Void();
 	self->AddToHateList(other, hate, damage, yell_for_help, frenzy);
 }
 
-void Lua_Mob::AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_help, bool frenzy, bool buff_tic) {
+void Lua_Mob::AddToHateList(Lua_Mob other, int64 hate, int64 damage, bool yell_for_help, bool frenzy, bool buff_tic) {
 	Lua_Safe_Call_Void();
 	self->AddToHateList(other, hate, damage, yell_for_help, frenzy, buff_tic);
 }
@@ -1046,12 +1046,12 @@ void Lua_Mob::SetHate(Lua_Mob other) {
 	self->SetHateAmountOnEnt(other);
 }
 
-void Lua_Mob::SetHate(Lua_Mob other, int hate) {
+void Lua_Mob::SetHate(Lua_Mob other, int64 hate) {
 	Lua_Safe_Call_Void();
 	self->SetHateAmountOnEnt(other, hate);
 }
 
-void Lua_Mob::SetHate(Lua_Mob other, int hate, int damage) {
+void Lua_Mob::SetHate(Lua_Mob other, int64 hate, int64 damage) {
 	Lua_Safe_Call_Void();
 	self->SetHateAmountOnEnt(other, hate, damage);
 }
@@ -1066,17 +1066,17 @@ void Lua_Mob::DoubleAggro(Lua_Mob other) {
 	self->DoubleAggro(other);
 }
 
-uint32 Lua_Mob::GetHateAmount(Lua_Mob target) {
+uint64 Lua_Mob::GetHateAmount(Lua_Mob target) {
 	Lua_Safe_Call_Int();
 	return self->GetHateAmount(target);
 }
 
-uint32 Lua_Mob::GetHateAmount(Lua_Mob target, bool is_damage) {
+uint64 Lua_Mob::GetHateAmount(Lua_Mob target, bool is_damage) {
 	Lua_Safe_Call_Int();
 	return self->GetHateAmount(target, is_damage);
 }
 
-uint32 Lua_Mob::GetDamageAmount(Lua_Mob target) {
+uint64 Lua_Mob::GetDamageAmount(Lua_Mob target) {
 	Lua_Safe_Call_Int();
 	return self->GetDamageAmount(target);
 }
@@ -2283,7 +2283,7 @@ bool Lua_Mob::IsBerserk() {
 	return self->IsBerserk();
 }
 
-bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int &damage) {
+bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int64 &damage) {
 	Lua_Safe_Call_Bool();
 	return self->TryFinishingBlow(defender, damage);
 }
@@ -2478,11 +2478,11 @@ luabind::scope lua_register_mob() {
 	.def(luabind::constructor<>())
 	.def("AddNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::AddNimbusEffect)
 	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::AddToHateList)
-	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::AddToHateList)
-	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::AddToHateList)
-	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool))&Lua_Mob::AddToHateList)
-	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool,bool))&Lua_Mob::AddToHateList)
-	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int,bool,bool,bool))&Lua_Mob::AddToHateList)
+	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int64))&Lua_Mob::AddToHateList)
+	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int64,int64))&Lua_Mob::AddToHateList)
+	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int64,int64,bool))&Lua_Mob::AddToHateList)
+	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int64,int64,bool,bool))&Lua_Mob::AddToHateList)
+	.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int64,int64,bool,bool,bool))&Lua_Mob::AddToHateList)
 	.def("ApplySpellBuff", (void(Lua_Mob::*)(int))&Lua_Mob::ApplySpellBuff)
 	.def("ApplySpellBuff", (void(Lua_Mob::*)(int, int))&Lua_Mob::ApplySpellBuff)
 	.def("Attack", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::Attack)
@@ -2553,10 +2553,10 @@ luabind::scope lua_register_mob() {
 	.def("CheckNumHitsRemaining", &Lua_Mob::CheckNumHitsRemaining)
 	.def("ClearSpecialAbilities", (void(Lua_Mob::*)(void))&Lua_Mob::ClearSpecialAbilities)
 	.def("CombatRange", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CombatRange)
-	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int))&Lua_Mob::Damage)
-	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool))&Lua_Mob::Damage)
-	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool,int))&Lua_Mob::Damage)
-	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int,int,int,bool,int,bool))&Lua_Mob::Damage)
+	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int))&Lua_Mob::Damage)
+	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool))&Lua_Mob::Damage)
+	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool,int))&Lua_Mob::Damage)
+	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool,int,bool))&Lua_Mob::Damage)
 	.def("DelGlobal", (void(Lua_Mob::*)(const char*))&Lua_Mob::DelGlobal)
 	.def("DeleteBucket", (void(Lua_Mob::*)(std::string))&Lua_Mob::DeleteBucket)
 	.def("Depop", (void(Lua_Mob::*)(bool))&Lua_Mob::Depop)
@@ -2653,8 +2653,8 @@ luabind::scope lua_register_mob() {
 	.def("GetHandToHandDamage", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDamage)
 	.def("GetHandToHandDelay", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDelay)
 	.def("GetHaste", (int(Lua_Mob::*)(void))&Lua_Mob::GetHaste)
-	.def("GetHateAmount", (uint32(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
-	.def("GetHateAmount", (uint32(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
+	.def("GetHateAmount", (uint64(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
+	.def("GetHateAmount", (uint64(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
 	.def("GetHateClosest", &Lua_Mob::GetHateClosest)
 	.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
 	.def("GetHateList", &Lua_Mob::GetHateList)
@@ -2752,8 +2752,8 @@ luabind::scope lua_register_mob() {
 	.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
 	.def("Heal", &Lua_Mob::Heal)
-	.def("HealDamage", (void(Lua_Mob::*)(uint32))&Lua_Mob::HealDamage)
-	.def("HealDamage", (void(Lua_Mob::*)(uint32,Lua_Mob))&Lua_Mob::HealDamage)
+	.def("HealDamage", (void(Lua_Mob::*)(uint64))&Lua_Mob::HealDamage)
+	.def("HealDamage", (void(Lua_Mob::*)(uint64,Lua_Mob))&Lua_Mob::HealDamage)
 	.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
 	.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 	.def("IsAIControlled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAIControlled)
@@ -2852,8 +2852,8 @@ luabind::scope lua_register_mob() {
 	.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*,Lua_Mob))&Lua_Mob::SetGlobal)
 	.def("SetHP", &Lua_Mob::SetHP)
 	.def("SetHate", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::SetHate)
-	.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::SetHate)
-	.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::SetHate)
+	.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int64))&Lua_Mob::SetHate)
+	.def("SetHate", (void(Lua_Mob::*)(Lua_Mob,int64,int64))&Lua_Mob::SetHate)
 	.def("SetHeading", (void(Lua_Mob::*)(double))&Lua_Mob::SetHeading)
 	.def("SetInvisible", &Lua_Mob::SetInvisible)
 	.def("SetInvul", (void(Lua_Mob::*)(bool))&Lua_Mob::SetInvul)

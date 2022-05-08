@@ -98,7 +98,7 @@ struct_HateList *HateList::Find(Mob *in_entity)
 	return nullptr;
 }
 
-void HateList::SetHateAmountOnEnt(Mob* other, uint32 in_hate, uint32 in_damage)
+void HateList::SetHateAmountOnEnt(Mob* other, uint64 in_hate, uint64 in_damage)
 {
 	struct_HateList *entity = Find(other);
 	if (entity)
@@ -116,7 +116,7 @@ Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 	Mob* current = nullptr;
 	Group* grp = nullptr;
 	Raid* r = nullptr;
-	uint32 dmg_amt = 0;
+	uint64 dmg_amt = 0;
 
 	auto iterator = list.begin();
 	while (iterator != list.end())
@@ -145,7 +145,7 @@ Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 				dmg_amt = grp->GetTotalGroupDamage(hater);
 			}
 		}
-		else if ((*iterator)->entity_on_hatelist != nullptr && (uint32)(*iterator)->hatelist_damage >= dmg_amt)
+		else if ((*iterator)->entity_on_hatelist != nullptr && (uint64)(*iterator)->hatelist_damage >= dmg_amt)
 		{
 			current = (*iterator)->entity_on_hatelist;
 			dmg_amt = (*iterator)->hatelist_damage;
@@ -181,7 +181,7 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed) {
 	return close_entity;
 }
 
-void HateList::AddEntToHateList(Mob *in_entity, int32 in_hate, int32 in_damage, bool in_is_entity_frenzied, bool iAddIfNotExist)
+void HateList::AddEntToHateList(Mob *in_entity, int64 in_hate, int64 in_damage, bool in_is_entity_frenzied, bool iAddIfNotExist)
 {
 	if (!in_entity)
 		return;
@@ -247,7 +247,7 @@ bool HateList::RemoveEntFromHateList(Mob *in_entity)
 	return is_found;
 }
 
-void HateList::DoFactionHits(int32 npc_faction_level_id) {
+void HateList::DoFactionHits(int64 npc_faction_level_id) {
 	if (npc_faction_level_id <= 0)
 		return;
 	auto iterator = list.begin();
@@ -380,7 +380,7 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed
 					aggro_mod += RuleI(Aggro, SittingAggroMod);
 				}
 #endif
-				
+
 				if (center){
 					if (center->GetTarget() == cur->entity_on_hatelist)
 						aggro_mod += RuleI(Aggro, CurrentTargetAggroMod);
@@ -587,7 +587,7 @@ Mob *HateList::GetEscapingEntOnHateList() {
 
 Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
 	// function is still in design stage
-	
+
 	if (!center)
 		return nullptr;
 
@@ -607,15 +607,15 @@ Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
 			continue;
 		if (iter->entity_on_hatelist->IsStunned())
 			continue;
-		
+
 		float distance_test = DistanceSquared(center->GetPosition(), iter->entity_on_hatelist->GetPosition());
 
 		if (range > 0.0f && distance_test > range)
 			continue;
-		
+
 		if (first)
 			return iter->entity_on_hatelist;
-		
+
 		if (distance_test > mob_distance) {
 			escaping_mob = iter->entity_on_hatelist;
 			mob_distance = distance_test;
@@ -625,7 +625,7 @@ Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
 	return escaping_mob;
 }
 
-int32 HateList::GetEntHateAmount(Mob *in_entity, bool damage)
+int64 HateList::GetEntHateAmount(Mob *in_entity, bool damage)
 {
 	struct_HateList *entity;
 

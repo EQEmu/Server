@@ -252,7 +252,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	//Live AA - Elemental Durability
-	int16 MaxHP = aabonuses.PetMaxHP + itembonuses.PetMaxHP + spellbonuses.PetMaxHP;
+	int64 MaxHP = aabonuses.PetMaxHP + itembonuses.PetMaxHP + spellbonuses.PetMaxHP;
 
 	if (MaxHP){
 		npc_type->max_hp += (npc_type->max_hp*MaxHP)/100;

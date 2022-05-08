@@ -29,7 +29,7 @@ public:
 		int type;
 		int level;
 		int ac;
-		int hp;
+		int64 hp;
 		int accuracy;
 		int slow_mitigation;
 		int attack;
@@ -49,7 +49,7 @@ public:
 		int physical_resist;
 		int min_dmg;
 		int max_dmg;
-		int hp_regen_rate;
+		int64 hp_regen_rate;
 		int attack_delay;
 		int spell_scale;
 		int heal_scale;

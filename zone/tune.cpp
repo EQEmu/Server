@@ -606,7 +606,7 @@ void Mob::TuneGetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_cha
 	Tune support functions
 */
 
-int Mob::TuneClientGetMeanDamage(Mob* other, int ac_override, int atk_override, int add_ac, int add_atk)
+int64 Mob::TuneClientGetMeanDamage(Mob* other, int ac_override, int atk_override, int add_ac, int add_atk)
 {
 	uint32 total_damage = 0;
 	int loop_max = 1000;
@@ -624,7 +624,7 @@ int Mob::TuneClientGetMeanDamage(Mob* other, int ac_override, int atk_override, 
 	return(total_damage / loop_max);
 }
 
-int Mob::TuneClientGetMaxDamage(Mob* other)
+int64 Mob::TuneClientGetMaxDamage(Mob* other)
 {
 	uint32 max_hit = 0;
 	uint32 current_hit = 0;
@@ -646,7 +646,7 @@ int Mob::TuneClientGetMaxDamage(Mob* other)
 	return(max_hit);
 }
 
-int Mob::TuneClientGetMinDamage(Mob* other, int max_hit)
+int64 Mob::TuneClientGetMinDamage(Mob* other, int max_hit)
 {
 	uint32 min_hit = max_hit;
 	uint32 current_hit = 0;
@@ -688,7 +688,7 @@ float Mob::TuneGetACMitigationPct(Mob* defender, Mob *attacker) {
 	return tmp_pct_mitigated;
 }
 
-int Mob::TuneGetOffense(Mob* defender, Mob *attacker, int atk_override)
+int64 Mob::TuneGetOffense(Mob* defender, Mob *attacker, int atk_override)
 {
 	int offense_rating = 0;
 	if (attacker->IsClient()) {
@@ -700,7 +700,7 @@ int Mob::TuneGetOffense(Mob* defender, Mob *attacker, int atk_override)
 	return offense_rating;
 }
 
-int Mob::TuneGetAccuracy(Mob* defender, Mob *attacker, int accuracy_override, int add_accuracy)
+int64 Mob::TuneGetAccuracy(Mob* defender, Mob *attacker, int accuracy_override, int add_accuracy)
 {
 	int accuracy = 0;
 	if (attacker->IsClient()) {
@@ -712,7 +712,7 @@ int Mob::TuneGetAccuracy(Mob* defender, Mob *attacker, int accuracy_override, in
 	return accuracy;
 }
 
-int Mob::TuneGetAvoidance(Mob* defender, Mob *attacker, int avoidance_override, int add_avoidance)
+int64 Mob::TuneGetAvoidance(Mob* defender, Mob *attacker, int avoidance_override, int add_avoidance)
 {
 	return defender->TuneGetTotalDefense(avoidance_override, add_avoidance);
 }
@@ -771,7 +771,7 @@ float Mob::TuneGetAvoidMeleeChance(Mob* defender, Mob *attacker, int type)
 	return chance;
 }
 
-int Mob::TuneCalcEvasionBonus(int final_avoidance, int base_avoidance) {
+int64 Mob::TuneCalcEvasionBonus(int final_avoidance, int base_avoidance) {
 
 	/*
 	float eb = static_cast<float>(final_avoidance) / static_cast<float>(base_avoidance);
@@ -815,7 +815,7 @@ int Mob::TuneCalcEvasionBonus(int final_avoidance, int base_avoidance) {
 	Calculate from modified attack.cpp functions.
 */
 
-int Mob::TuneNPCAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk, bool get_offense, bool get_accuracy,
+int64 Mob::TuneNPCAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk, bool get_offense, bool get_accuracy,
 	int avoidance_override, int accuracy_override, int add_avoidance, int add_accuracy)
 {
 	if (!IsNPC()) {
@@ -874,7 +874,7 @@ int Mob::TuneNPCAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_ch
 	return my_hit.damage_done;
 }
 
-int Mob::TuneClientAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk, bool get_offense, bool get_accuracy,
+int64 Mob::TuneClientAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk, bool get_offense, bool get_accuracy,
 	int avoidance_override, int accuracy_override, int add_avoidance, int add_accuracy)
 {
 	if (!IsClient()) {
@@ -907,7 +907,7 @@ int Mob::TuneClientAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit
 	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	uint32 hate = 0;
+	uint64 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 
@@ -1028,7 +1028,7 @@ void Mob::TuneMeleeMitigation(Mob *attacker, DamageHitInfo &hit, int ac_override
 	hit.damage_done = std::max(static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5), 1);
 }
 
-int Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
+int64 Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 {
 	int ac = 0; // this should be base AC whenever shrouds come around
 	ac += itembonuses.AC; // items + food + tribute
@@ -1113,7 +1113,7 @@ int Mob::TuneACSum(bool skip_caps, int ac_override, int add_ac)
 	return ac;
 }
 
-int Mob::Tuneoffense(EQ::skills::SkillType skill, int atk_override, int add_atk)
+int64 Mob::Tuneoffense(EQ::skills::SkillType skill, int atk_override, int add_atk)
 {
 	int offense = GetSkill(skill);
 	int stat_bonus = GetSTR();
@@ -1235,7 +1235,7 @@ EQ::skills::SkillType Mob::TuneAttackAnimation(int Hand, const EQ::ItemInstance*
 	return skillinuse;
 }
 
-int Mob::Tunecompute_tohit(EQ::skills::SkillType skillinuse, int accuracy_override, int add_accuracy)
+int64 Mob::Tunecompute_tohit(EQ::skills::SkillType skillinuse, int accuracy_override, int add_accuracy)
 {
 	int tohit = GetSkill(EQ::skills::SkillOffense) + 7;
 	tohit += GetSkill(skillinuse);
@@ -1262,7 +1262,7 @@ int Mob::Tunecompute_tohit(EQ::skills::SkillType skillinuse, int accuracy_overri
 }
 
 // return -1 in cases that always hit
-int Mob::TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int accuracy_override, int add_accuracy)
+int64 Mob::TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int accuracy_override, int add_accuracy)
 {
 	if (chance_mod >= 10000) // override for stuff like SE_SkillAttack
 		return -1;
@@ -1322,7 +1322,7 @@ int Mob::TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int accu
 }
 
 // return -1 in cases that always miss
-int Mob::TuneGetTotalDefense(int avoidance_override, int add_avoidance)
+int64 Mob::TuneGetTotalDefense(int avoidance_override, int add_avoidance)
 {
 	auto avoidance = Tunecompute_defense(avoidance_override, add_avoidance) + 10; // add 10 in case the NPC's stats are fucked
 	auto evasion_bonus = spellbonuses.AvoidMeleeChanceEffect; // we check this first since it has a special case
@@ -1347,7 +1347,7 @@ int Mob::TuneGetTotalDefense(int avoidance_override, int add_avoidance)
 	return avoidance;
 }
 
-int Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
+int64 Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
 	defense += (8000 * (GetAGI() - 40)) / 36000;

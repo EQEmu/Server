@@ -7,9 +7,9 @@ void command_aggrozone(Client *c, const Seperator *sep)
 		target = c->GetTarget();
 	}
 
-	uint32 hate = 0;
+	uint64 hate = 0;
 	if (sep->IsNumber(1)) {
-		hate = std::stoul(sep->arg[1]);
+		hate = std::strtoll(sep->arg[1], nullptr, 10);
 	}
 
 	entity_list.AggroZone(target, hate);

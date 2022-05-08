@@ -4379,7 +4379,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		const ItemInstance* trade_item_instance;
 		int16 from_client_slot;
 		int16 to_bot_slot;
-		
+
 		ClientTrade(const ItemInstance* item, int16 from) : trade_item_instance(item), from_client_slot(from), to_bot_slot(invslot::SLOT_INVALID) { }
 	};
 
@@ -4387,7 +4387,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		const ItemInstance* return_item_instance;
 		int16 from_bot_slot;
 		int16 to_client_slot;
-		
+
 		ClientReturn(const ItemInstance* item, int16 from) : return_item_instance(item), from_bot_slot(from), to_client_slot(invslot::SLOT_INVALID) { }
 	};
 
@@ -4471,7 +4471,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		linker.SetItemInst(trade_instance);
 
 		auto item_link = linker.GenerateLink();
-	
+
 		if (trade_index != invslot::slotCursor && !trade_instance->IsDroppable()) {
 			LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 			client->Message(Chat::Red, "Trade hack detected, the trade has been cancelled.");
@@ -4801,7 +4801,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	for (auto& trade_iterator : client_trade) {
 		// TODO: code for stackables
 
-		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {			
+		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {
 			client->Message(
 				Chat::Red,
 				fmt::format(
@@ -4850,7 +4850,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 }
 
-bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
+bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
 	if(!NPC::Death(killerMob, damage, spell_id, attack_skill))
 		return false;
 
@@ -4938,7 +4938,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::Skill
 	return true;
 }
 
-void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
+void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if(spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -4951,7 +4951,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQ::skills::SkillType
 	attacked_timer.Start(CombatEventTimer_expire);
 	// if spell is lifetap add hp to the caster
 	if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
-		int healed = GetActSpellHealing(spell_id, damage);
+		int64 healed = GetActSpellHealing(spell_id, damage);
 		LogCombat("Applying lifetap heal of [{}] to [{}]", healed, GetCleanName());
 		HealDamage(healed);
 		entity_list.MessageClose(this, true, 300, Chat::Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
@@ -4980,8 +4980,8 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQ::skills::SkillType
 	}
 }
 
-//void Bot::AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false)
-void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic, bool pet_command) {
+//void Bot::AddToHateList(Mob* other, uint64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false)
+void Bot::AddToHateList(Mob* other, uint64 hate, int64 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic, bool pet_command) {
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic, pet_command);
 }
 
@@ -5055,7 +5055,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	uint32 hate = 0;
+	uint64 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 
@@ -6053,7 +6053,7 @@ int Bot::GetHandToHandDamage(void) {
 	return 2;
 }
 
-bool Bot::TryFinishingBlow(Mob *defender, int &damage)
+bool Bot::TryFinishingBlow(Mob *defender, int64 &damage)
 {
 	if (!defender)
 		return false;
@@ -6310,7 +6310,7 @@ void Bot::RogueBackstab(Mob *other, bool min_damage, int ReuseTime)
 		return;
 	}
 
-	uint32 hate = 0;
+	uint64 hate = 0;
 
 	int base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
 	hate = base_damage;
@@ -6512,7 +6512,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if(skill_to_use == -1)
 		return;
 
-	int dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
+	int64 dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
 
 	if (skill_to_use == EQ::skills::SkillBash) {
 		if (target != this) {
@@ -6814,7 +6814,7 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 	return Result;
 }
 
-int32 Bot::CalcMaxMana() {
+int64 Bot::CalcMaxMana() {
 	switch(GetCasterClass()) {
 		case 'I':
 		case 'W': {
@@ -6896,7 +6896,7 @@ void Bot::SetAttackTimer() {
 	}
 }
 
-int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
+int64 Bot::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	if (spells[spell_id].target_type == ST_Self)
 		return value;
 
@@ -7001,7 +7001,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	return value;
 }
 
-int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
+int64 Bot::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target) {
 	if (target == nullptr)
 		target = this;
 
@@ -7762,16 +7762,16 @@ void Bot::CalcBonuses() {
 	end_regen = CalcEnduranceRegen();
 }
 
-int32 Bot::CalcHPRegenCap(){
+int64 Bot::CalcHPRegenCap(){
 	int level = GetLevel();
-	int32 hpregen_cap = 0;
+	int64 hpregen_cap = 0;
 	hpregen_cap = (RuleI(Character, ItemHealthRegenCap) + itembonuses.HeroicSTA / 25);
 	hpregen_cap += (aabonuses.ItemHPRegenCap + spellbonuses.ItemHPRegenCap + itembonuses.ItemHPRegenCap);
 	return (hpregen_cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
-int32 Bot::CalcManaRegenCap(){
-	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
+int64 Bot::CalcManaRegenCap(){
+	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass()) {
 		case 'I':
 			cap += (itembonuses.HeroicINT / 25);
@@ -8122,7 +8122,7 @@ int32 Bot::LevelRegen() {
 	int level = GetLevel();
 	bool bonus = GetPlayerRaceBit(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
 	uint8 multiplier1 = bonus ? 2 : 1;
-	int32 hp = 0;
+	int64 hp = 0;
 	if (level < 51) {
 		if (IsSitting()) {
 			if (level < 20)
@@ -8167,14 +8167,14 @@ int32 Bot::LevelRegen() {
 	return hp;
 }
 
-int32 Bot::CalcHPRegen() {
+int64 Bot::CalcHPRegen() {
 	int32 regen = (LevelRegen() + itembonuses.HPRegen + spellbonuses.HPRegen);
 	regen += (aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration());
 	regen = ((regen * RuleI(Character, HPRegenMultiplier)) / 100);
 	return regen;
 }
 
-int32 Bot::CalcManaRegen() {
+int64 Bot::CalcManaRegen() {
 	uint8 level = GetLevel();
 	uint8 botclass = GetClass();
 	int32 regen = 0;
@@ -8205,7 +8205,7 @@ int32 Bot::CalcManaRegen() {
 	return regen;
 }
 
-uint32 Bot::GetClassHPFactor() {
+uint64 Bot::GetClassHPFactor() {
 	uint32 factor;
 	switch(GetClass()) {
 		case BEASTLORD:
@@ -8236,7 +8236,7 @@ uint32 Bot::GetClassHPFactor() {
 	return factor;
 }
 
-int32 Bot::CalcMaxHP() {
+int64 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
@@ -8258,7 +8258,7 @@ int32 Bot::CalcMaxHP() {
 	return max_hp;
 }
 
-int32 Bot::CalcMaxEndurance() {
+int64 Bot::CalcMaxEndurance() {
 	max_end = (CalcBaseEndurance() + spellbonuses.Endurance + itembonuses.Endurance);
 	if (max_end < 0)
 		max_end = 0;
@@ -8276,7 +8276,7 @@ int32 Bot::CalcMaxEndurance() {
 	return max_end;
 }
 
-int32 Bot::CalcBaseEndurance() {
+int64 Bot::CalcBaseEndurance() {
 	int32 base_end = 0;
 	int32 base_endurance = 0;
 	int32 ConvertedStats = 0;
@@ -8331,13 +8331,13 @@ int32 Bot::CalcBaseEndurance() {
 	return base_end;
 }
 
-int32 Bot::CalcEnduranceRegen() {
+int64 Bot::CalcEnduranceRegen() {
 	int32 regen = (int32(GetLevel() * 4 / 10) + 2);
 	regen += (spellbonuses.EnduranceRegen + itembonuses.EnduranceRegen);
 	return (regen * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
-int32 Bot::CalcEnduranceRegenCap() {
+int64 Bot::CalcEnduranceRegenCap() {
 	int cap = (RuleI(Character, ItemEnduranceRegenCap) + itembonuses.HeroicSTR / 25 + itembonuses.HeroicDEX / 25 + itembonuses.HeroicAGI / 25 + itembonuses.HeroicSTA / 25);
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }

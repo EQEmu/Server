@@ -825,15 +825,15 @@ int32 Merc::CalcAC() {
 	return(AC);
 }
 
-int32 Merc::CalcHPRegen() {
-	int32 regen = hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen;
+int64 Merc::CalcHPRegen() {
+	int64 regen = hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen;
 
 	regen += aabonuses.HPRegen + GroupLeadershipAAHealthRegeneration();
 
 	return (regen * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
-int32 Merc::CalcHPRegenCap()
+int64 Merc::CalcHPRegenCap()
 {
 	int cap = RuleI(Character, ItemHealthRegenCap) + itembonuses.HeroicSTA/25;
 
@@ -842,7 +842,7 @@ int32 Merc::CalcHPRegenCap()
 	return (cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
-int32 Merc::CalcMaxHP() {
+int64 Merc::CalcMaxHP() {
 	float nd = 10000;
 	max_hp = (CalcBaseHP() + itembonuses.HP);
 
@@ -862,9 +862,9 @@ int32 Merc::CalcMaxHP() {
 	if (current_hp > max_hp)
 		current_hp = max_hp;
 
-	int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
+	int64 hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if(hp_perc_cap) {
-		int curHP_cap = (max_hp * hp_perc_cap) / 100;
+		int64 curHP_cap = (max_hp * hp_perc_cap) / 100;
 		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP]))
 			current_hp = curHP_cap;
 	}
@@ -872,12 +872,12 @@ int32 Merc::CalcMaxHP() {
 	return max_hp;
 }
 
-int32 Merc::CalcBaseHP()
+int64 Merc::CalcBaseHP()
 {
 	return base_hp;
 }
 
-int32 Merc::CalcMaxMana()
+int64 Merc::CalcMaxMana()
 {
 	switch(GetCasterClass())
 	{
@@ -917,12 +917,12 @@ int32 Merc::CalcMaxMana()
 	return max_mana;
 }
 
-int32 Merc::CalcBaseMana()
+int64 Merc::CalcBaseMana()
 {
 	return base_mana;
 }
 
-int32 Merc::CalcBaseManaRegen()
+int64 Merc::CalcBaseManaRegen()
 {
 	uint8 clevel = GetLevel();
 	int32 regen = 0;
@@ -939,9 +939,9 @@ int32 Merc::CalcBaseManaRegen()
 	return regen;
 }
 
-int32 Merc::CalcManaRegen()
+int64 Merc::CalcManaRegen()
 {
-	int32 regen = 0;
+	int64 regen = 0;
 	if (IsSitting())
 	{
 		BuffFadeBySitModifier();
@@ -971,9 +971,9 @@ int32 Merc::CalcManaRegen()
 	return (regen * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
-int32 Merc::CalcManaRegenCap()
+int64 Merc::CalcManaRegenCap()
 {
-	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
+	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass())
 	{
 	case 'I':
@@ -1007,10 +1007,10 @@ void Merc::CalcMaxEndurance()
 	}
 }
 
-int32 Merc::CalcBaseEndurance()
+int64 Merc::CalcBaseEndurance()
 {
-	int32 base_end = 0;
-	int32 base_endurance = 0;
+	int64 base_end = 0;
+	int64 base_endurance = 0;
 	int32 ConvertedStats = 0;
 	int32 sta_end = 0;
 	int Stats = 0;
@@ -1079,15 +1079,15 @@ int32 Merc::CalcBaseEndurance()
 	return base_end;
 }
 
-int32 Merc::CalcEnduranceRegen() {
-	int32 regen = int32(GetLevel() * 4 / 10) + 2;
+int64 Merc::CalcEnduranceRegen() {
+	int64 regen = int32(GetLevel() * 4 / 10) + 2;
 	regen += aabonuses.EnduranceRegen + spellbonuses.EnduranceRegen + itembonuses.EnduranceRegen;
 
 	return (regen * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
-int32 Merc::CalcEnduranceRegenCap() {
-	int cap = (RuleI(Character, ItemEnduranceRegenCap) + itembonuses.HeroicSTR/25 + itembonuses.HeroicDEX/25 + itembonuses.HeroicAGI/25 + itembonuses.HeroicSTA/25);
+int64 Merc::CalcEnduranceRegenCap() {
+	int64 cap = (RuleI(Character, ItemEnduranceRegenCap) + itembonuses.HeroicSTR/25 + itembonuses.HeroicDEX/25 + itembonuses.HeroicAGI/25 + itembonuses.HeroicSTA/25);
 
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
@@ -2552,7 +2552,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	return false;
 }
 
-int32 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) {
+int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) {
 
 	int32 realTotal = 0;
 	int32 realTotal2 = 0;
@@ -4440,7 +4440,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					if(zone->random.Int(0, 100) > 25) //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					{
 						DoAnim(animKick, 0, false);
-						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
+						int64 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
 
 						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
 							dmg = DMG_INVULNERABLE;
@@ -4452,7 +4452,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					else
 					{
 						DoAnim(animTailRake, 0, false);
-						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
+						int64 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
 
 						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
 							dmg = DMG_INVULNERABLE;
@@ -4480,7 +4480,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
-void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
+void Merc::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
 {
 	if(IsDead() || IsCorpse())
 		return;
@@ -4521,7 +4521,7 @@ Mob* Merc::GetOwnerOrSelf() {
 	return Result;
 }
 
-bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool Merc::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
 {
 	if(!NPC::Death(killerMob, damage, spell, attack_skill))
 	{
@@ -4929,9 +4929,9 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 
 	float scalerate = (float)scalepercent / 100.0f;
 
-	if ((int)((float)base_hp * scalerate) > 1)
+	if ((int64)((float)base_hp * scalerate) > 1)
 	{
-		max_hp = (int)((float)base_hp * scalerate);
+		max_hp = (int64)((float)base_hp * scalerate);
 		base_hp = max_hp;
 		if (setmax)
 			current_hp = max_hp;
@@ -4939,7 +4939,7 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 
 	if (base_mana)
 	{
-		max_mana = (int)((float)base_mana * scalerate);
+		max_mana = (int64)((float)base_mana * scalerate);
 		base_mana = max_mana;
 		if (setmax)
 			current_mana = max_mana;
@@ -4947,7 +4947,7 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 
 	if (base_end)
 	{
-		max_end = (int)((float)base_end * scalerate);
+		max_end = (int64)((float)base_end * scalerate);
 		base_end = max_end;
 		if (setmax)
 			cur_end = max_end;

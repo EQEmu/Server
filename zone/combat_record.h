@@ -10,7 +10,7 @@ public:
 	void Start(std::string in_mob_name);
 	void Stop();
 	bool InCombat();
-	void ProcessHPEvent(int hp, int current_hp);
+	void ProcessHPEvent(int64 hp, int64 current_hp);
 	double TimeInCombat() const;
 private:
 	std::string mob_name;
