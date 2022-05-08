@@ -121,7 +121,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
 
 			else if (IsNPC() && CastToNPC()->GetSpellScale())
-				value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
+				value = int64(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
 			entity_list.MessageCloseString(
 				this, true, 100, Chat::SpellCrit,
@@ -160,7 +160,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
-		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
+		value = int64(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
 	return value;
 }
@@ -177,7 +177,7 @@ int64 Mob::GetActReflectedSpellDamage(int32 spell_id, int64 value, int effective
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
 
 		if (CastToNPC()->GetSpellScale()) {
-			value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
+			value = int64(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 		}
 	}
 
@@ -277,12 +277,12 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 	}
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
-		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
+		value = int64(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
 	return value;
 }
 
-int64 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
+int64 Mob::GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_spell_dmg)
 {
 	if (RuleB(Spells, FlatItemExtraSpellAmt)) {
 		if (RuleB(Spells, ItemExtraSpellAmtCalcAsPercent))
