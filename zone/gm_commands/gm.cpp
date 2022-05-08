@@ -19,9 +19,8 @@ void command_gm(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) is {} flagged as a GM.",
-				target->GetCleanName(),
-				target->GetID(),
+				"{} is {} flagged as a GM.",
+				c->GetTargetDescription(target),
 				gm_flag ? "now" : "no longer"
 			).c_str()
 		);

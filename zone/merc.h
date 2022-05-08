@@ -52,8 +52,8 @@ public:
 	virtual ~Merc();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
+	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
@@ -182,7 +182,7 @@ public:
 	// stat functions
 	virtual void ScaleStats(int scalepercent, bool setmax = false);
 	virtual void CalcBonuses();
-	int32 GetEndurance() const {return cur_end;} //This gets our current endurance
+	int64 GetEndurance() const {return cur_end;} //This gets our current endurance
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	inline virtual int32 GetATK() const { return ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -272,7 +272,7 @@ protected:
 	void AddItemBonuses(const EQ::ItemData *item, StatBonuses* newbon);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
-	int32 GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic = false);
+	int64 GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic = false);
 
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
@@ -309,21 +309,21 @@ private:
 	int32 CalcPR();
 	int32 CalcCR();
 	int32 CalcCorrup();
-	int32 CalcMaxHP();
-	int32 CalcBaseHP();
-	int32 GetClassHPFactor();
-	int32 CalcHPRegen();
-	int32 CalcHPRegenCap();
-	int32 CalcMaxMana();
-	int32 CalcBaseMana();
-	int32 CalcManaRegen();
-	int32 CalcBaseManaRegen();
-	int32 CalcManaRegenCap();
+	int64 CalcMaxHP();
+	int64 CalcBaseHP();
+	int64 GetClassHPFactor();
+	int64 CalcHPRegen();
+	int64 CalcHPRegenCap();
+	int64 CalcMaxMana();
+	int64 CalcBaseMana();
+	int64 CalcManaRegen();
+	int64 CalcBaseManaRegen();
+	int64 CalcManaRegenCap();
 	void CalcMaxEndurance(); //This calculates the maximum endurance we can have
-	int32 CalcBaseEndurance(); //Calculates Base End
-	int32 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
-	int32 CalcEnduranceRegen(); //Calculates endurance regen used in DoEnduranceRegen()
-	int32 CalcEnduranceRegenCap();
+	int64 CalcBaseEndurance(); //Calculates Base End
+	int64 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
+	int64 CalcEnduranceRegen(); //Calculates endurance regen used in DoEnduranceRegen()
+	int64 CalcEnduranceRegenCap();
 	void SetEndurance(int32 newEnd); //This sets the current endurance to the new value
 	void DoEnduranceUpkeep(); //does the endurance upkeep
 	void CalcRestState();
@@ -375,8 +375,8 @@ private:
 	EQ::constants::StanceType _currentStance;
 
 	EQ::InventoryProfile m_inv;
-	int32 max_end;
-	int32 cur_end;
+	int64 max_end;
+	int64 cur_end;
 	bool _medding;
 	bool _suspended;
 	bool p_depop;

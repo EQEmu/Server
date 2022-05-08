@@ -118,8 +118,8 @@ public:
 	static NPC * SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position);
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
+	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
@@ -194,7 +194,7 @@ public:
 	void	AddLootTable();
 	void	AddLootTable(uint32 ldid);
 	void	CheckGlobalLootTables();
-	void	DescribeAggro(Client *towho, Mob *mob, bool verbose);
+	void	DescribeAggro(Client *to_who, Mob *mob, bool verbose);
 	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void	CheckTrivialMinMaxLevelDrop(Mob *killer);
 	void	ClearItemList();
@@ -225,7 +225,7 @@ public:
 	inline void	SetPlatinum(uint32 amt)		{ platinum = amt; }
 
 
-	virtual int32 CalcMaxMana();
+	virtual int64 CalcMaxMana();
 	void SetGrid(int32 grid_){ grid=grid_; }
 	void SetSpawnGroupId(uint32 sg2){ spawn_group_id =sg2; }
 	void SetWaypointMax(uint16 wp_){ wp_m=wp_; }
@@ -271,7 +271,7 @@ public:
 	inline int32 GetPrimaryFaction() const
 	{ return primary_faction; }
 
-	int32 GetNPCHate(Mob *in_ent)
+	int64 GetNPCHate(Mob *in_ent)
 	{ return hate_list.GetEntHateAmount(in_ent); }
 
 	bool IsOnHatelist(Mob *p)
@@ -283,7 +283,7 @@ public:
 		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
-	int32 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster = nullptr);
+	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster = nullptr);
 
     glm::vec4 m_SpawnPoint;
 
@@ -323,7 +323,7 @@ public:
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
 	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
-	int32 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
+	int64 GetNPCHPRegen() const { return hp_regen + itembonuses.HPRegen + spellbonuses.HPRegen; }
 	inline const char* GetAmmoIDfile() const { return ammo_idfile; }
 
 	void ModifyStatsOnCharm(bool is_charm_removed);
@@ -477,7 +477,7 @@ public:
 	uint32	GetSpawnKillCount();
 	int	GetScore();
 	void	mod_prespawn(Spawn2 *sp);
-	int	mod_npc_damage(int damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemData* weapon, Mob* other);
+	int	mod_npc_damage(int64 damage, EQ::skills::SkillType skillinuse, int hand, const EQ::ItemData* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
 	void	AISpellsList(Client *c);
@@ -575,7 +575,7 @@ protected:
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
-	int32 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster, bool from_buff_tic = false);
+	int64 GetFocusEffect(focusType type, uint16 spell_id, Mob* caster, bool from_buff_tic = false);
 	uint16 innate_proc_spell_id;
 
 	uint32	npc_spells_effects_id;
@@ -589,7 +589,7 @@ protected:
 	int32	accuracy_rating;
 	int32	avoidance_rating;
 	int16	attack_count;
-	uint32	npc_mana;
+	uint64	npc_mana;
 	float	spellscale;
 	float	healscale;
 	int32 SpellFocusDMG;

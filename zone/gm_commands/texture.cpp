@@ -41,15 +41,7 @@ void command_texture(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Texture Changed for {} | Texture: {}{}",
-			(
-				c == target ?
-				"Yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
 			texture,
 			(
 				Mob::IsPlayerRace(target->GetModel()) ?

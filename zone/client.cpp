@@ -1840,7 +1840,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 	safe_delete(outapp);
 }
 
-const int32& Client::SetMana(int32 amount) {
+const int64& Client::SetMana(int64 amount) {
 	bool update = false;
 	if (amount < 0)
 		amount = 0;
@@ -2904,7 +2904,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 
 						max_percent = mod_bindwound_percent(max_percent, bindmob);
 
-						int max_hp = bindmob->GetMaxHP() * max_percent / 100;
+						int64 max_hp = bindmob->GetMaxHP() * max_percent / 100;
 
 						// send bindmob new hp's
 						if (bindmob->GetHP() < bindmob->GetMaxHP() && bindmob->GetHP() <= (max_hp)-1) {
@@ -3897,31 +3897,50 @@ void Client::GetRaidAAs(RaidLeadershipAA_Struct *into) const {
 
 void Client::EnteringMessages(Client* client)
 {
-	//server rules
 	std::string rules;
-	if(database.GetVariable("Rules", rules))
-	{
+	if (database.GetVariable("Rules", rules)) {
 		uint8 flag = database.GetAgreementFlag(client->AccountID());
-		if(!flag)
-		{
-			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->Message(Chat::Red,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
+		if (!flag) {
+			auto rules_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+				"#serverrules",
+				false,
+				"rules"
+			);
+
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"You must agree to the {} before you can move.",
+					rules_link
+				).c_str()
+			);
+
 			client->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
 		}
 	}
 }
 
-void Client::SendRules(Client* client)
+void Client::SendRules()
 {
 	std::string rules;
 
-	if (!database.GetVariable("Rules", rules))
+	if (!database.GetVariable("Rules", rules)) {
 		return;
+	}
 
-	auto lines = SplitString(rules, '\n');
-	for (auto&& e : lines)
-		client->Message(Chat::White, "%s", e.c_str());
+	auto lines = split_string(rules, "|");
+	auto line_number = 1;
+	for (auto&& line : lines) {
+		Message(
+			Chat::White,
+			fmt::format(
+				"{}. {}",
+				line_number,
+				line
+			).c_str()
+		);
+		line_number++;
+	}
 }
 
 void Client::SetEndurance(int32 newEnd)
@@ -10951,4 +10970,81 @@ uint16 Client::GetClassTrackingDistanceMultiplier(uint16 class_) {
 
 bool Client::CanThisClassTrack() {
 	return (GetClassTrackingDistanceMultiplier(GetClass()) > 0) ? true : false;
+}
+
+void Client::ReconnectUCS()
+{
+	EQApplicationPacket      *outapp         = nullptr;
+	std::string              buffer;
+	std::string              mail_key        = database.GetMailKey(CharacterID(), true);
+	EQ::versions::UCSVersion connection_type = EQ::versions::ucsUnknown;
+
+	// chat server packet
+	switch (ClientVersion()) {
+		case EQ::versions::ClientVersion::Titanium:
+			connection_type = EQ::versions::ucsTitaniumChat;
+			break;
+		case EQ::versions::ClientVersion::SoF:
+			connection_type = EQ::versions::ucsSoFCombined;
+			break;
+		case EQ::versions::ClientVersion::SoD:
+			connection_type = EQ::versions::ucsSoDCombined;
+			break;
+		case EQ::versions::ClientVersion::UF:
+			connection_type = EQ::versions::ucsUFCombined;
+			break;
+		case EQ::versions::ClientVersion::RoF:
+			connection_type = EQ::versions::ucsRoFCombined;
+			break;
+		case EQ::versions::ClientVersion::RoF2:
+			connection_type = EQ::versions::ucsRoF2Combined;
+			break;
+		default:
+			connection_type = EQ::versions::ucsUnknown;
+			break;
+	}
+
+	buffer = StringFormat(
+		"%s,%i,%s.%s,%c%s",
+		Config->ChatHost.c_str(),
+		Config->ChatPort,
+		Config->ShortName.c_str(),
+		GetName(),
+		connection_type,
+		mail_key.c_str()
+	);
+
+	outapp = new EQApplicationPacket(OP_SetChatServer, (buffer.length() + 1));
+	memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+	outapp->pBuffer[buffer.length()] = '\0';
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	// mail server packet
+	switch (ClientVersion()) {
+		case EQ::versions::ClientVersion::Titanium:
+			connection_type = EQ::versions::ucsTitaniumMail;
+			break;
+		default:
+			// retain value from previous switch
+			break;
+	}
+
+	buffer = StringFormat(
+		"%s,%i,%s.%s,%c%s",
+		Config->MailHost.c_str(),
+		Config->MailPort,
+		Config->ShortName.c_str(),
+		GetName(),
+		connection_type,
+		mail_key.c_str()
+	);
+
+	outapp = new EQApplicationPacket(OP_SetChatServer2, (buffer.length() + 1));
+	memcpy(outapp->pBuffer, buffer.c_str(), buffer.length());
+	outapp->pBuffer[buffer.length()] = '\0';
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }

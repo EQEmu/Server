@@ -33,16 +33,9 @@ void command_unmemspell(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} not have {} ({}) memorized.",
-				(
-					c == target ?
-					"You do" :
-					fmt::format(
-						"{} ({}) does",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				),
+				"{} {} not have {} ({}) memorized.",
+				c->GetTargetDescription(target),
+				c == target ? "do" : "does",
 				GetSpellName(spell_id),
 				spell_id
 			).c_str()
@@ -56,11 +49,10 @@ void command_unmemspell(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} ({}) unmemorized for {} ({}) from spell gem {}.",
+				"{} ({}) unmemorized for {} from spell gem {}.",
 				GetSpellName(spell_id),
 				spell_id,
-				target->GetCleanName(),
-				target->GetID(),
+				c->GetTargetDescription(target),
 				spell_gem
 			).c_str()
 		);

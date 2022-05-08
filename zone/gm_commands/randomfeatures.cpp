@@ -2,17 +2,35 @@
 
 void command_randomfeatures(Client *c, const Seperator *sep)
 {
-	Mob *target = c->GetTarget();
-	if (!target) {
-		c->Message(Chat::White, "Error: This command requires a target");
+	if (!c->GetTarget()) {
+		c->Message(Chat::White, "You must have a target to use this command.");
+		return;
 	}
-	else {
-		if (target->RandomizeFeatures()) {
-			c->Message(Chat::White, "Features Randomized");
-		}
-		else {
-			c->Message(Chat::White, "This command requires a Playable Race as the target");
-		}
+
+	auto target = c->GetTarget();
+	
+	if (target->RandomizeFeatures()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} had {} features randomized.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "have" : "had",
+				c == target ? "your" : "their"
+			).c_str()
+		);
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} not a player race, {} race is {} ({}).",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "are" : "is",
+				c == target ? "your" : "their",
+				GetRaceIDName(target->GetRace()),
+				target->GetRace()
+			).c_str()
+		);
 	}
 }
 

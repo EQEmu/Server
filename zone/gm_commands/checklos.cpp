@@ -4,16 +4,19 @@ void command_checklos(Client *c, const Seperator *sep)
 {
 	if (!c->GetTarget()) {
 		c->Message(Chat::White, "You must have a target to use this command.");
+		return;
 	}
 
-	bool has_los = c->CheckLosFN(c->GetTarget());
+	auto target = c->GetTarget();
+
+	bool has_los = c->CheckLosFN(target);
+
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"You {}have line of sight to {} ({}).",
+			"You {}have line of sight to {}.",
 			has_los ? "" : "do not ",
-			c->GetTarget()->GetCleanName(),
-			c->GetTarget()->GetID()
+			c->GetTargetDescription(target)
 		).c_str()
 	);
 }

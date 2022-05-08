@@ -416,4 +416,19 @@ enum ConsiderLevel : uint8 {
 	Scowls
 };
 
+enum TargetDescriptionType : uint8 {
+	LCSelf,
+	UCSelf,
+	LCYou,
+	UCYou,
+	LCYour,
+	UCYour
+};
+
+enum ReloadWorld : uint8 {
+	NoRepop = 0,
+	Repop,
+	ForceRepop
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

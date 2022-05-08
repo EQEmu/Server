@@ -2,12 +2,20 @@
 
 void command_resetaa(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		c->GetTarget()->CastToClient()->ResetAA();
-		c->Message(Chat::Red, "Successfully reset %s's AAs", c->GetTarget()->GetName());
+	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
+		c->Message(Chat::White, "You must target a player to use this command.");
+		return;
 	}
-	else {
-		c->Message(Chat::White, "Usage: Target a client and use #resetaa to reset the AA data in their Profile.");
-	}
+
+	auto target = c->GetTarget()->CastToClient();
+	target->ResetAA();
+		
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully reset all Alternate Advancements for {}.",
+			c->GetTargetDescription(target)
+		).c_str()
+	);
 }
 

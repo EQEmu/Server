@@ -752,15 +752,14 @@ void ConsoleSetPass(
 		connection->SendLine("Format: setpass accountname password");
 	}
 	else {
-		std::string prefix   = "eqemu";
+		std::string prefix = "eqemu";
 		std::string raw_user = "";
 
 		ParseAccountString(args[0], raw_user, prefix);
 
-		int16  tmpstatus = 0;
-		uint32 tmpid     = database.GetAccountIDByName(raw_user.c_str(), prefix.c_str(), &tmpstatus);
+		auto account_id = database.GetAccountIDByName(raw_user, prefix);
 
-		if (!tmpid) {
+		if (!account_id) {
 			connection->SendLine("Error: Account not found");
 		}
 	}
@@ -889,7 +888,7 @@ void ConsoleReloadWorld(
 	connection->SendLine("Reloading World...");
 	auto               pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 	ReloadWorld_Struct *RW  = (ReloadWorld_Struct *) pack->pBuffer;
-	RW->Option = 1;
+	RW->global_repop = ReloadWorld::Repop;
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }

@@ -519,16 +519,18 @@ void command_guild(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"{} is not in a guild.",
-						client->GetCleanName()
+						"{} {} not in a guild.",
+						c->GetTargetDescription(client, TargetDescriptionType::UCYou),
+						c == target ? "are" : "is"
 					).c_str()
 				);
 			} else if (guild_mgr.IsGuildLeader(client->GuildID(), client->CharacterID())) {
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"{} is the leader of {}.",
-						client->GetName(),
+						"{} {} the leader of {}.",
+						c->GetTargetDescription(client, TargetDescriptionType::UCYou),
+						c == target ? "are" : "is",
 						guild_mgr.GetGuildNameByID(client->GuildID())
 					).c_str()
 				);
@@ -536,8 +538,9 @@ void command_guild(Client *c, const Seperator *sep)
 				c->Message( 
 					Chat::White,
 					fmt::format(
-						"{} is a(n) {} of {}.",
-						client->GetName(),
+						"{} {} a(n) {} of {}.",
+						c->GetTargetDescription(client, TargetDescriptionType::UCYou),
+						c == target ? "are" : "is",
 						guild_mgr.GetRankName(client->GuildID(), client->GuildRank()),
 						guild_mgr.GetGuildNameByID(client->GuildID())
 					).c_str()

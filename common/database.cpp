@@ -92,112 +92,123 @@ Database::~Database()
 */
 uint32 Database::CheckLogin(const char* name, const char* password, const char *loginserver, int16* oStatus) {
 
-	if(strlen(name) >= 50 || strlen(password) >= 50)
+	if (strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
 
-	char tmpUN[100];
-	char tmpPW[100];
+	char temporary_username[100];
+	char temporary_password[100];
 
-	DoEscapeString(tmpUN, name, strlen(name));
-	DoEscapeString(tmpPW, password, strlen(password));
+	DoEscapeString(temporary_username, name, strlen(name));
+	DoEscapeString(temporary_password, password, strlen(password));
 
-	std::string query = StringFormat("SELECT id, status FROM account WHERE `name`='%s' AND ls_id='%s' AND password is not null "
-		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
-		tmpUN, EscapeString(loginserver).c_str(), tmpPW, tmpPW);
+	std::string query = fmt::format(
+		"SELECT id, status FROM account WHERE `name` = '{}' AND ls_id = '{}' AND password is NOT NULL "
+		"AND length(password) > 0 AND (password = '{}' OR password = MD5('{}'))",
+		temporary_username,
+		EscapeString(loginserver),
+		temporary_password,
+		temporary_password
+	);
 
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
 
-	if(results.RowCount() == 0)
-		return 0;
-
 	auto row = results.begin();
 
-	uint32 id = atoi(row[0]);
+	auto id = std::stoul(row[0]);
 
-	if (oStatus)
-		*oStatus = atoi(row[1]);
+	if (oStatus) {
+		*oStatus = std::stoi(row[1]);
+	}
 
 	return id;
 }
 
 //Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
-bool Database::CheckBannedIPs(const char* loginIP)
+bool Database::CheckBannedIPs(std::string login_ip)
 {
-	std::string query = StringFormat("SELECT ip_address FROM banned_ips WHERE ip_address='%s'", loginIP);
-
+	auto query = fmt::format(
+		"SELECT ip_address FROM banned_ips WHERE ip_address = '{}'",
+		login_ip
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success() || results.RowCount() != 0) {
 		return true;
 	}
-
-	if (results.RowCount() != 0)
-		return true;
 
 	return false;
 }
 
-bool Database::AddBannedIP(char* bannedIP, const char* notes) {
-	std::string query = StringFormat("INSERT into banned_ips SET ip_address='%s', notes='%s'", bannedIP, notes);
+bool Database::AddBannedIP(std::string banned_ip, std::string notes) {
+	auto query = fmt::format(
+		"INSERT into banned_ips SET ip_address = '{}', notes = '{}'",
+		EscapeString(banned_ip),
+		EscapeString(notes)
+	);
 	auto results = QueryDatabase(query);
+
 	if (!results.Success()) {
 		return false;
 	}
+
 	return true;
 }
 
- bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
-	std::string query = StringFormat("SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id);
+ bool Database::CheckGMIPs(std::string login_ip, uint32 account_id) {
+	auto query = fmt::format(
+		"SELECT * FROM `gm_ips` WHERE `ip_address` = '{}' AND `account_id` = {}",
+		login_ip,
+		account_id
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
+	}
 
-	if (results.RowCount() == 1)
+	if (results.RowCount() == 1) {
 		return true;
+	}
 
 	return false;
 }
 
-bool Database::AddGMIP(char* ip_address, char* name) {
-	std::string query = StringFormat("INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name);
-	auto results = QueryDatabase(query);
-	return results.Success();
-}
-
-void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
-	std::string query = StringFormat("INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP);
+void Database::LoginIP(uint32 account_id, std::string login_ip) {
+	auto query = fmt::format(
+		"INSERT INTO account_ip SET accid = {}, ip = '{}' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()",
+		account_id,
+		login_ip
+	);
 	QueryDatabase(query);
 }
 
 int16 Database::CheckStatus(uint32 account_id)
 {
-	std::string query = StringFormat(
-	    "SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `account` WHERE `id` = %i",
-	    account_id);
-
+	auto query = fmt::format(
+	    "SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `account` WHERE `id` = {}",
+	    account_id
+	);
 	auto results = QueryDatabase(query);
-	if (!results.Success())
-		return 0;
 
-	if (results.RowCount() != 1)
+	if (!results.Success() || results.RowCount() != 1) {
 		return 0;
+	}
 
 	auto row = results.begin();
-	int16 status = atoi(row[0]);
+	int16 status = std::stoi(row[0]);
 	int32 date_diff = 0;
 
-	if (row[1] != nullptr)
-		date_diff = atoi(row[1]);
+	if (row[1]) {
+		date_diff = std::stoi(row[1]);
+	}
 
-	if (date_diff > 0)
+	if (date_diff > 0) {
 		return -1;
+	}
 
 	return status;
 }
@@ -307,9 +318,7 @@ bool Database::SetAccountStatus(const std::string& account_name, int16 status)
 	LogInfo("Account [{}] is attempting to be set to status [{}]", account_name, status);
 
 	std::string query = fmt::format(
-		SQL(
-			UPDATE account SET status = {} WHERE name = '{}'
-		),
+		"UPDATE account SET status = {} WHERE name = '{}'",
 		status,
 		account_name
 	);
@@ -807,36 +816,34 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 	return atoi(row[0]);
 }
 
-uint32 Database::GetAccountIDByName(const char* accname, const char *loginserver, int16* status, uint32* lsid) {
-	if (!isAlphaNumeric(accname))
+uint32 Database::GetAccountIDByName(std::string account_name, std::string loginserver, int16* status, uint32* lsid) {
+	if (!isAlphaNumeric(account_name.c_str())) {
 		return 0;
+	}
 
-	std::string query = StringFormat("SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '%s' AND `ls_id`='%s' LIMIT 1",
-		EscapeString(accname).c_str(), EscapeString(loginserver).c_str());
+	auto query = fmt::format(
+		"SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '{}' AND `ls_id` = '{}' LIMIT 1",
+		EscapeString(account_name),
+		EscapeString(loginserver)
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
-
-	if (results.RowCount() != 1)
-		return 0;
 
 	auto row = results.begin();
+	auto account_id = std::stoul(row[0]);
 
-	uint32 id = atoi(row[0]);
-
-	if (status)
-		*status = atoi(row[1]);
-
-	if (lsid) {
-		if (row[2])
-			*lsid = atoi(row[2]);
-		else
-			*lsid = 0;
+	if (status) {
+		*status = static_cast<int16>(std::stoi(row[1]));
 	}
 
-	return id;
+	if (lsid) {
+		*lsid = row[2] ? std::stoul(row[2]) : 0;
+	}
+
+	return account_id;
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {

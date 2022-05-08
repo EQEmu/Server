@@ -3,31 +3,39 @@
 
 void command_save(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget() == 0) {
-		c->Message(Chat::White, "Error: no target");
+	if (
+		!c->GetTarget() ||
+		(
+			c->GetTarget() &&
+			!c->GetTarget()->IsClient() &&
+			!c->GetTarget()->IsPlayerCorpse()
+		)
+	) {
+		c->Message(Chat::White, "You must target a player or player corpse to use this command.");
+		return;
 	}
-	else if (c->GetTarget()->IsClient()) {
-		if (c->GetTarget()->CastToClient()->Save(2)) {
-			c->Message(Chat::White, "%s successfully saved.", c->GetTarget()->GetName());
-		}
-		else {
-			c->Message(Chat::White, "Manual save for %s failed.", c->GetTarget()->GetName());
-		}
-	}
-	else if (c->GetTarget()->IsPlayerCorpse()) {
-		if (c->GetTarget()->CastToMob()->Save()) {
-			c->Message(
-				Chat::White,
-				"%s successfully saved. (dbid=%u)",
-				c->GetTarget()->GetName(),
-				c->GetTarget()->CastToCorpse()->GetCorpseDBID());
-		}
-		else {
-			c->Message(Chat::White, "Manual save for %s failed.", c->GetTarget()->GetName());
-		}
-	}
-	else {
-		c->Message(Chat::White, "Error: target not a Client/PlayerCorpse");
+
+	auto target = c->GetTarget();
+
+	if (target->IsClient()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} been {} saved.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "have" : "has",
+				target->CastToClient()->Save(2) ? "successfully" : "failed to be"
+			).c_str()
+		);
+	} else if (target->IsPlayerCorpse()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} has been {} saved.",
+				c->GetTargetDescription(target),
+				target->CastToMob()->Save() ? "successfully" : "failed to be"
+			).c_str()
+		);
 	}
 }
 

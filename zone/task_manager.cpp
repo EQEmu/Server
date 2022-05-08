@@ -233,6 +233,7 @@ bool TaskManager::LoadTasks(int single_task)
 		activity_data->description_override = task_activity.description_override;
 		activity_data->goal_id              = task_activity.goalid;
 		activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;
+		activity_data->goal_match_list      = task_activity.goal_match_list;
 		activity_data->goal_count           = task_activity.goalcount;
 		activity_data->deliver_to_npc       = task_activity.delivertonpc;
 
@@ -1815,7 +1816,7 @@ void TaskManager::SyncClientSharedTaskStateToLocal(
 	}
 }
 
-void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
+void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, std::string npc_name)
 {
 	for (auto &c: client->GetPartyMembers()) {
 		if (!c->ClientDataLoaded() || !c->HasTaskState()) {
@@ -1876,6 +1877,12 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
 						if (!m_goal_list_manager.IsInList(
 							activity_info->goal_id,
 							(int) npc_type_id
+						) && !TaskGoalListManager::IsInMatchList(
+							activity_info->goal_match_list,
+							std::to_string(npc_type_id)
+						) && !TaskGoalListManager::IsInMatchListPartial(
+							activity_info->goal_match_list,
+							npc_name
 						)) {
 							LogTasksDetail("[HandleUpdateTasksOnKill] Matched list goal");
 							continue;

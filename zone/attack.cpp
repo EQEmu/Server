@@ -1045,9 +1045,9 @@ void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions 
 //Else we know we can hit.
 //GetWeaponDamage(mob*, const EQ::ItemData*) is intended to be used for mobs or any other situation where we do not have a client inventory item
 //GetWeaponDamage(mob*, const EQ::ItemInstance*) is intended to be used for situations where we have a client inventory item
-int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
-	int dmg = 0;
-	int banedmg = 0;
+int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
+	int64 dmg = 0;
+	int64 banedmg = 0;
 
 	//can't hit invulnerable stuff with weapons.
 	if (against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)) {
@@ -1148,10 +1148,10 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 		return dmg;
 }
 
-int Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint32 *hate)
+int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint64 *hate)
 {
-	int dmg = 0;
-	int banedmg = 0;
+	int64 dmg = 0;
+	int64 banedmg = 0;
 	int x = 0;
 
 	if (!against || against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE))
@@ -1265,10 +1265,10 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint
 			*hate += banedmg;
 	}
 
-	return std::max(0, dmg);
+	return std::max((int64)0, dmg);
 }
 
-int Client::DoDamageCaps(int base_damage)
+int64 Client::DoDamageCaps(int64 base_damage)
 {
 	// this is based on a client function that caps melee base_damage
 	auto level = GetLevel();
@@ -1379,7 +1379,7 @@ int Client::DoDamageCaps(int base_damage)
 		}
 	}
 
-	return std::min(cap, base_damage);
+	return std::min((int64)cap, base_damage);
 }
 
 // other is the defender, this is the attacker
@@ -1509,7 +1509,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	uint32 hate = 0;
+	uint64 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 
@@ -1649,7 +1649,7 @@ void Mob::Heal()
 	SendHPUpdate();
 }
 
-void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
+void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
 {
 	if (dead || IsCorpse())
 		return;
@@ -1668,7 +1668,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::Skill
 			PvPMitigation = 80;
 		else
 			PvPMitigation = 67;
-		damage = std::max((damage * PvPMitigation) / 100, 1);
+		damage = std::max<int64_t>((damage * PvPMitigation) / 100, 1);
 	}
 
 	if (!ClientFinishedLoading())
@@ -1684,7 +1684,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::Skill
 	}
 }
 
-bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
 {
 	if (!ClientFinishedLoading())
 		return false;
@@ -2118,7 +2118,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 	}
 
-	int weapon_damage = GetWeaponDamage(other, weapon);
+	int64 weapon_damage = GetWeaponDamage(other, weapon);
 
 	//do attack animation regardless of whether or not we can hit below
 	int16 charges = 0;
@@ -2234,7 +2234,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		return false;
 }
 
-void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
+void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if (spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -2277,7 +2277,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::SkillTyp
 	}
 }
 
-bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
 {
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
 		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);
@@ -2445,7 +2445,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 				give_exp_client->GetCleanName(),
 				GetNPCTypeID()
 			);
-			task_manager->HandleUpdateTasksOnKill(give_exp_client, GetNPCTypeID());
+			task_manager->HandleUpdateTasksOnKill(give_exp_client, GetNPCTypeID(), GetCleanName());
 		}
 
 		if (kr) {
@@ -2749,7 +2749,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	return true;
 }
 
-void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/, uint16 spell_id, bool pet_command)
+void Mob::AddToHateList(Mob* other, uint64 hate /*= 0*/, int64 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/, uint16 spell_id, bool pet_command)
 {
 	if (!other)
 		return;
@@ -2780,7 +2780,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		AddRampage(other);
 		if (on_hatelist) { // odd reason, if you're not on the hate list, subtlety etc don't apply!
 						   // Spell Casting Subtlety etc
-			int hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
+			int64 hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
 
 			if (hatemod < 1)
 				hatemod = 1;
@@ -3090,7 +3090,7 @@ uint8 Mob::GetWeaponDamageBonus(const EQ::ItemData *weapon, bool offhand)
 	}
 	else {
 		// 2h damage bonus
-		int damage_bonus = 1 + (level - 28) / 3;
+		int64 damage_bonus = 1 + (level - 28) / 3;
 		if (delay <= 27)
 			return damage_bonus + 1;
 		// Client isn't reflecting what the dev quoted, this matches better
@@ -3231,7 +3231,7 @@ int Mob::GetHandToHandDelay(void)
 	return 35;
 }
 
-int32 Mob::ReduceDamage(int32 damage)
+int64 Mob::ReduceDamage(int64 damage)
 {
 	if (damage <= 0)
 		return damage;
@@ -3262,7 +3262,7 @@ int32 Mob::ReduceDamage(int32 damage)
 		if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MIN_DMG_TO_TRIGGER]))
 		{
 			DisableMeleeRune = true;
-			int damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] / 100;
+			int64 damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] / 100;
 			if (damage_to_reduce >= buffs[slot].melee_rune)
 			{
 				LogSpells("Mob::ReduceDamage SE_MeleeThresholdGuard [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].melee_rune);
@@ -3283,7 +3283,7 @@ int32 Mob::ReduceDamage(int32 damage)
 		slot = spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_BUFFSLOT];
 		if (slot >= 0)
 		{
-			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_PERCENT] / 100;
+			int64 damage_to_reduce = damage * spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_PERCENT] / 100;
 
 			if (spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] && (damage_to_reduce > spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT]))
 				damage_to_reduce = spellbonuses.MitigateMeleeRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT];
@@ -3319,7 +3319,7 @@ int32 Mob::ReduceDamage(int32 damage)
 	return(damage);
 }
 
-int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker)
+int64 Mob::AffectMagicalDamage(int64 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker)
 {
 	if (damage <= 0)
 		return damage;
@@ -3353,7 +3353,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			slot = spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_BUFFSLOT];
 			if (slot >= 0)
 			{
-				int damage_to_reduce = damage * spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT] / 100;
+				int64 damage_to_reduce = damage * spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT] / 100;
 
 				if (spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] && (damage_to_reduce > spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT]))
 					damage_to_reduce = spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT];
@@ -3389,7 +3389,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MIN_DMG_TO_TRIGGER]))
 			{
 				DisableSpellRune = true;
-				int damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] / 100;
+				int64 damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] / 100;
 				if (damage_to_reduce >= buffs[slot].magic_rune)
 				{
 					damage -= buffs[slot].magic_rune;
@@ -3409,7 +3409,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			slot = spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_BUFFSLOT];
 			if (slot >= 0)
 			{
-				int damage_to_reduce = damage * spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] / 100;
+				int64 damage_to_reduce = damage * spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] / 100;
 
 				if (spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] && (damage_to_reduce > spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT]))
 					damage_to_reduce = spellbonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT];
@@ -3449,13 +3449,13 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	return damage;
 }
 
-int32 Mob::ReduceAllDamage(int32 damage)
+int64 Mob::ReduceAllDamage(int64 damage)
 {
 	if (damage <= 0)
 		return damage;
 
 	if (spellbonuses.ManaAbsorbPercentDamage) {
-		int32 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage / 100;
+		int64 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage / 100;
 		if (GetMana() >= mana_reduced) {
 			damage -= mana_reduced;
 			SetMana(GetMana() - mana_reduced);
@@ -3464,7 +3464,7 @@ int32 Mob::ReduceAllDamage(int32 damage)
 	}
 
 	if (spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION]) {
-		int32 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION] / 10000; //If hit for 1000, at 10% then lower damage by 100;
+		int64 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION] / 10000; //If hit for 1000, at 10% then lower damage by 100;
 		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_DRAIN_PER_HP] / 10000; //Reduce endurance by 0.05% per HP loss
 		if (endurance_drain < 1)
 			endurance_drain = 1;
@@ -3612,7 +3612,7 @@ bool Mob::CheckDoubleAttack()
 	return zone->random.Int(1, 500) <= chance;
 }
 
-void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const EQ::skills::SkillType skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks special) {
+void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks special) {
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
 	bool FromDamageShield = (skill_used == EQ::skills::SkillAbjuration);
 	bool ignore_invul = false;
@@ -3667,7 +3667,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		if (attacker) {
 			// if spell is lifetap add hp to the caster
 			if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
-				int healed = damage;
+				int64 healed = damage;
 
 				healed = RuleB(Spells, CompoundLifetapHeals) ? attacker->GetActSpellHealing(spell_id, healed) : healed;
 				LogCombat("Applying lifetap heal of [{}] to [{}]", healed, attacker->GetName());
@@ -3748,7 +3748,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 
 		}
 		else {
-			int32 origdmg = damage;
+			int64 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
 			if (origdmg != damage && attacker && attacker->IsClient()) {
 				if (attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide)
@@ -3772,9 +3772,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		}
 
 		//final damage has been determined.
-
-		SetHP(GetHP() - damage);
-
+		SetHP(int64(GetHP() - damage));
 
 		if (HasDied()) {
 			bool IsSaved = false;
@@ -4068,11 +4066,11 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 
 }
 
-void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
+void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 {
-	int32 maxhp = GetMaxHP();
-	int32 curhp = GetHP();
-	uint32 acthealed = 0;
+	int64 maxhp = GetMaxHP();
+	int64 curhp = GetHP();
+	uint64 acthealed = 0;
 
 	if (amount > (maxhp - curhp))
 		acthealed = (maxhp - curhp);
@@ -4813,10 +4811,17 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 	}
 }
 
-bool Mob::TryFinishingBlow(Mob *defender, int &damage)
+bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 {
 	float hp_limit = 10.0f;
-	auto fb_hp_limit = std::max({ aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO], spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO], itembonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO] });
+
+	auto fb_hp_limit = std::max(
+		{
+			aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO],
+			spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO],
+			itembonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO]
+		}
+	);
 
 	if (fb_hp_limit) {
 		hp_limit = fb_hp_limit/10.0f;
@@ -4913,9 +4918,9 @@ void Mob::DoRiposte(Mob *defender)
 	}
 }
 
-void Mob::ApplyMeleeDamageMods(uint16 skill, int &damage, Mob *defender, ExtraAttackOptions *opts)
+void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, ExtraAttackOptions *opts)
 {
-	int dmgbonusmod = 0;
+	int64 dmgbonusmod = 0;
 
 	dmgbonusmod += GetMeleeDamageMod_SE(skill);
 	dmgbonusmod += GetMeleeDmgPositionMod(defender);
@@ -4936,7 +4941,7 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int &damage, Mob *defender, ExtraAt
 
 bool Mob::HasDied() {
 	bool Result = false;
-	int32 hp_below = 0;
+	int64 hp_below = 0;
 
 	hp_below = (GetDelayDeath() * -1);
 
@@ -5431,7 +5436,7 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 	return false;
 }
 
-int32 Mob::RuneAbsorb(int32 damage, uint16 type)
+int32 Mob::RuneAbsorb(int64 damage, uint16 type)
 {
 	uint32 buff_max = GetMaxTotalSlots();
 	if (type == SE_Rune) {
@@ -5613,7 +5618,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
-void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse)
+void Mob::DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ::skills::SkillType skillInUse)
 {
 	if (!shield_target) {
 		return;
@@ -6070,12 +6075,12 @@ void Mob::SetSpawnedInWater(bool spawned_in_water) {
 	Mob::spawned_in_water = spawned_in_water;
 }
 
-int32 Mob::GetHPRegen() const
+int64 Mob::GetHPRegen() const
 {
 	return hp_regen;
 }
 
-int32 Mob::GetManaRegen() const
+int64 Mob::GetManaRegen() const
 {
 	return mana_regen;
 }

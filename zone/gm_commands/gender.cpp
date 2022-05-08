@@ -30,15 +30,7 @@ void command_gender(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Gender changed for {} to {} ({}).",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target),
 			GetGenderName(gender_id),
 			gender_id
 		).c_str()

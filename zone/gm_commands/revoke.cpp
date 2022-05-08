@@ -5,44 +5,73 @@ extern WorldServer worldserver;
 
 void command_revoke(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0 || sep->arg[2][0] == 0) {
-		c->Message(Chat::White, "Usage: #revoke [charname] [1/0]");
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #revoke [Character Name] [0|1]");
 		return;
 	}
 
-	uint32 characterID = database.GetAccountIDByChar(sep->arg[1]);
-	if (characterID == 0) {
-		c->Message(Chat::Red, "Character does not exist.");
+	std::string character_name = sep->arg[1];
+
+	auto account_id = database.GetAccountIDByChar(character_name.c_str());
+	if (!account_id) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Character {} does not exist.",
+				character_name
+			).c_str()
+		);
 		return;
 	}
 
-	int         flag    = sep->arg[2][0] == '1' ? true : false;
-	std::string query   = StringFormat("UPDATE account SET revoked = %d WHERE id = %i", flag, characterID);
-	auto        results = database.QueryDatabase(query);
+	bool revoked = std::stoi(sep->arg[2]) ? true : false;
+
+	auto query = fmt::format(
+		"UPDATE account SET revoked = {} WHERE id = {}",
+		revoked,
+		account_id
+	);
+	auto results = database.QueryDatabase(query);
 
 	c->Message(
-		Chat::Red,
-		"%s account number %i with the character %s.",
-		flag ? "Revoking" : "Unrevoking",
-		characterID,
-		sep->arg[1]
+		Chat::White,
+		fmt::format(
+			"{} character {} on account ID {}.",
+			revoked ? "Revoking" : "Unrevoking",
+			character_name,
+			account_id
+		).c_str()
 	);
 
-	Client *revokee = entity_list.GetClientByAccID(characterID);
-	if (revokee) {
-		c->Message(Chat::White, "Found %s in this zone.", revokee->GetName());
-		revokee->SetRevoked(flag);
+	auto revoke_client = entity_list.GetClientByAccID(account_id);
+	if (revoke_client) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Found {} in this zone.",
+				c->GetTargetDescription(revoke_client)
+			).c_str()
+		);
+		revoke_client->SetRevoked(revoked);
 		return;
-	}
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Attempting to {} {}.",
+				revoked ? "revoked" : "unrevoke",
+				character_name
+			).c_str()
+		);
 
-	c->Message(Chat::Red, "#revoke: Couldn't find %s in this zone, passing request to worldserver.", sep->arg[1]);
-
-	auto         outapp  = new ServerPacket(ServerOP_Revoke, sizeof(RevokeStruct));
-	RevokeStruct *revoke = (RevokeStruct *) outapp->pBuffer;
-	strn0cpy(revoke->adminname, c->GetName(), 64);
-	strn0cpy(revoke->name, sep->arg[1], 64);
-	revoke->toggle = flag;
-	worldserver.SendPacket(outapp);
-	safe_delete(outapp);
+		auto pack = new ServerPacket(ServerOP_Revoke, sizeof(RevokeStruct));
+		auto rs = (RevokeStruct *) pack->pBuffer;
+		strn0cpy(rs->adminname, c->GetName(), sizeof(rs->adminname));
+		strn0cpy(rs->name, character_name.c_str(), sizeof(rs->name));
+		rs->toggle = revoked;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	};
 }
 

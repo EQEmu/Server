@@ -42,15 +42,7 @@ void command_countitem(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"{} {} {} {}.",
-			(
-				c == target ?
-				"You" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target, TargetDescriptionType::UCYou),
 			c == target ? "have" : "has",
 			(
 				item_count ?

@@ -13,16 +13,9 @@ void command_ginfo(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} not in a group.",
-				(
-					c == target ?
-					"You are" :
-					fmt::format(
-						"{} ({}) is",
-						target->GetCleanName(),
-						target->GetID()
-					)
-				)
+				"{} {} not in a group.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "are" : "is"
 			).c_str()
 		);
 		return;
@@ -30,13 +23,7 @@ void command_ginfo(Client *c, const Seperator *sep)
 
 	std::string popup_title = fmt::format(
 		"Group Info for {}",
-		c == target ?
-		"Yourself" :
-		fmt::format(
-			"{} ({})",
-			target->GetCleanName(),
-			target->GetID()
-		)
+		c->GetTargetDescription(target, TargetDescriptionType::UCSelf)
 	);
 	std::string popup_text = "<table>";
 	popup_text += fmt::format(

@@ -65,7 +65,7 @@ public:
 	uint32 GetSp2();
 	int GetNPCFactionID();
 	int GetPrimaryFaction();
-	int GetNPCHate(Lua_Mob ent);
+	int64 GetNPCHate(Lua_Mob ent);
 	bool IsOnHatelist(Lua_Mob ent);
 	void SetNPCFactionID(int id);
 	uint32 GetMaxDMG();

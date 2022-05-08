@@ -1097,7 +1097,7 @@ int EQ::ItemInstance::GetItemElementalFlag(bool augments) const
 
 int EQ::ItemInstance::GetItemElementalDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->ElemDmgAmt;
@@ -1162,7 +1162,7 @@ int EQ::ItemInstance::GetItemRequiredLevel(bool augments) const
 
 int EQ::ItemInstance::GetItemWeaponDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->Damage;
@@ -1178,7 +1178,7 @@ int EQ::ItemInstance::GetItemWeaponDamage(bool augments) const
 
 int EQ::ItemInstance::GetItemBackstabDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->BackstabDmg;
@@ -1236,7 +1236,7 @@ int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 
 int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		if (item->BaneDmgBody == against)
@@ -1253,7 +1253,7 @@ int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) con
 
 int EQ::ItemInstance::GetItemBaneDamageRace(uint16 against, bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		if (item->BaneDmgRace == against)

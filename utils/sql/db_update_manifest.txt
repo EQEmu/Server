@@ -434,6 +434,8 @@
 9178|2022_03_07_saylink_collation.sql|SELECT * FROM db_version WHERE version >= 9178|empty|
 9179|2022_04_30_hp_regen_per_second.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp_regen_per_second'|empty|
 9180|2022_05_01_character_peqzone_flags.sql|SHOW TABLES LIKE 'character_peqzone_flags'|empty|
+9181|2022_05_03_task_activity_goal_match_list.sql|SHOW COLUMNS FROM `task_activities` LIKE 'goal_match_list'|empty|
+9182|2022_05_02_npc_types_int64.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp'|missing|bigint
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

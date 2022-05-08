@@ -110,10 +110,9 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Deleting {} corpse {} ({}).",
+					"Deleting {} corpse {}.",
 					target->IsNPCCorpse() ? "NPC" : "player",
-					target->GetName(),
-					target->GetID()
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 			target->CastToCorpse()->Delete();
@@ -155,11 +154,10 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Setting the owner to {} ({}) for the player corpse {} ({}).",
+					"Setting the owner to {} ({}) for the player corpse {}.",
 					database.GetCharNameByID(character_id),
 					target->CastToCorpse()->SetCharID(character_id),
-					target->GetName(),
-					target->GetID()
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 		} else {
@@ -181,10 +179,9 @@ void command_corpse(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Reset looter for {} corpse {} ({}).",
+				"Reset looter for {} corpse {}.",
 				target->IsNPCCorpse() ? "NPC" : "player",
-				target->GetName(),
-				target->GetID()
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 	} else if (is_remove_cash) {
@@ -206,10 +203,9 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Removed cash from {} corpse {} ({}).",
+					"Removed cash from {} corpse {}.",
 					target->IsNPCCorpse() ? "NPC" : "player",
-					target->GetName(),
-					target->GetID()
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 		}
@@ -240,10 +236,9 @@ void command_corpse(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Locking {} corpse {} ({}).",
+				"Locking {} corpse {}.",
 				target->IsNPCCorpse() ? "NPC" : "player",
-				target->GetName(),
-				target->GetID()
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 	} else if (is_unlock) {
@@ -261,10 +256,9 @@ void command_corpse(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Unlocking {} corpse {} ({}).",
+				"Unlocking {} corpse {}.",
 				target->IsNPCCorpse() ? "NPC" : "player",
-				target->GetName(),
-				target->GetID()
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 	} else if (is_depop) {
@@ -286,9 +280,8 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Depopping player corpse {} ({}).",
-					target->GetName(),
-					target->GetID()
+					"Depopping player corpse {}.",
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 			target->CastToCorpse()->DepopPlayerCorpse();
@@ -318,9 +311,8 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Depopping all player corpses for {} ({}).",
-					target->GetName(),
-					target->GetID()
+					"Depopping all player corpses for {}.",
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 			target->CastToClient()->DepopAllCorpses();

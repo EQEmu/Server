@@ -20,15 +20,7 @@ void command_lastname(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"{} now {} a last name of '{}'.",
-			(
-				c == target ?
-				"You" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target, TargetDescriptionType::UCYou),
 			c == target ? "have" : "has",
 			last_name
 		).c_str()

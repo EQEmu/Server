@@ -3,26 +3,27 @@
 
 void command_summonburiedplayercorpse(Client *c, const Seperator *sep)
 {
-	Client *t = c;
-
+	auto target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
-		t = c->GetTarget()->CastToClient();
-	}
-	else {
-		c->Message(Chat::White, "You must first select a target!");
-		return;
+		target = c->GetTarget()->CastToClient();
 	}
 
-	Corpse *PlayerCorpse = database.SummonBuriedCharacterCorpses(
-		t->CharacterID(),
-		t->GetZoneID(),
+	auto *corpse = database.SummonBuriedCharacterCorpses(
+		target->CharacterID(),
+		target->GetZoneID(),
 		zone->GetInstanceID(),
-		t->GetPosition());
+		target->GetPosition()
+	);
 
-	if (!PlayerCorpse) {
-		c->Message(Chat::White, "Your target doesn't have any buried corpses.");
+	if (!corpse) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} not have any buried corpses.",
+				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+				c == target ? "do" : "does"
+			).c_str()
+		);
 	}
-
-	return;
 }
 

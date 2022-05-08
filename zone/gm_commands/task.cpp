@@ -80,9 +80,9 @@ void command_task(Client *c, const Seperator *sep)
 		return;
 	}
 
-	Client *client_target = c;
+	Client *target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		client_target = c->GetTarget()->CastToClient();
+		target = c->GetTarget()->CastToClient();
 	}
 
 	bool is_assign = !strcasecmp(sep->arg[1], "assign");
@@ -177,21 +177,13 @@ void command_task(Client *c, const Seperator *sep)
 	if (is_assign) {
 		auto task_id = std::stoul(sep->arg[2]);
 		if (task_id && task_id < MAXTASKS) {
-			client_target->AssignTask(task_id, 0, false);
+			target->AssignTask(task_id, 0, false);
 			c->Message(
 				Chat::Yellow,
 				fmt::format(
 					"Assigned task ID {} to {}.",
 					task_id,
-					(
-						client_target == c ?
-						"yourself" :
-						fmt::format(
-							"{} ({})",
-							client_target->GetCleanName(),
-							client_target->GetID()
-						)
-					)
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 		}
@@ -201,23 +193,15 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::Yellow,
 			fmt::format(
 				"Task timers have been purged for {}.",
-				(
-					client_target == c ?
-					"yourself" :
-					fmt::format(
-						"{} ({})",
-						client_target->GetCleanName(),
-						client_target->GetID()
-					)
-				)
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 
-		if (client_target != c) {
-			client_target->Message(Chat::Yellow, "Your task timers have been purged by a GM.");
+		if (c != target) {
+			target->Message(Chat::Yellow, "Your task timers have been purged by a GM.");
 		}
 
-		client_target->PurgeTaskTimers();
+		target->PurgeTaskTimers();
 		return;
 	} else if (is_reload) {
 		if (arguments >= 2) {
@@ -282,61 +266,44 @@ void command_task(Client *c, const Seperator *sep)
 
 		return;
 	} else if (is_show) {
-		c->ShowClientTasks(client_target);
+		target->ShowClientTasks(c);
 		return;
 	} else if (is_uncomplete) {
 		if (sep->IsNumber(2)) {
 			auto task_id = std::stoul(sep->arg[2]);
-			if (task_id && task_id < MAXTASKS) {
-				if (
-					CompletedTasksRepository::DeleteWhere(
-						database,					
-						fmt::format(
-							"charid = {} AND taskid = {}",
-							client_target->CharacterID(),
-							task_id
-						)
-					)
-				) {
-					c->Message(
-						Chat::Yellow,
-						fmt::format(
-							"Successfully uncompleted task ID {} for {}.",
-							task_id,
-							(
-								client_target == c ?
-								"yourself" :
-								fmt::format(
-									"{} ({})",
-									client_target->GetCleanName(),
-									client_target->GetID()
-								)
-							)
-						).c_str()
-					);
-					return;
-				} else {
-					c->Message(
-						Chat::Yellow,
-						fmt::format(
-							"{} not completed task ID {}.",
-							(
-								client_target == c ?
-								"You have" :
-								fmt::format(
-									"{} ({}) has",
-									client_target->GetCleanName(),
-									client_target->GetID()
-								)
-							),
-							task_id
-						).c_str()
-					);
-					return;
-				}
-			} else {
+			if (!task_id || task_id > MAXTASKS) {
 				c->Message(Chat::White, "Invalid task ID specified.");
 				return;
+			}
+
+			if (
+				CompletedTasksRepository::DeleteWhere(
+					database,					
+					fmt::format(
+						"charid = {} AND taskid = {}",
+					target->CharacterID(),
+					task_id
+					)
+				)
+			) {
+				c->Message(
+					Chat::Yellow,
+					fmt::format(
+						"Successfully uncompleted task ID {} for {}.",
+						task_id,
+						c->GetTargetDescription(target)
+					).c_str()
+				);
+			} else {
+				c->Message(
+					Chat::Yellow,
+					fmt::format(
+						"{} {} not completed task ID {}.",
+						c->GetTargetDescription(target, TargetDescriptionType::UCYou),
+						c == target ? "have" : "has",
+						task_id
+					).c_str()
+				);
 			}
 		}
 	} else if (is_update) {
@@ -359,21 +326,12 @@ void command_task(Client *c, const Seperator *sep)
 					task_id,
 					activity_id,
 					count,
-					(
-						client_target == c ?
-						"yourself" :
-						fmt::format(
-							"{} ({})",
-							client_target->GetCleanName(),
-							client_target->GetID()
-						)
-					)
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 
-			client_target->UpdateTaskActivity(task_id, activity_id, count);
-			c->ShowClientTasks(client_target);
+			target->UpdateTaskActivity(task_id, activity_id, count);
+			target->ShowClientTasks(c);
 		}
-		return;
 	}
 }

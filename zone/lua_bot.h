@@ -27,19 +27,19 @@ public:
 		return reinterpret_cast<Bot*>(GetLuaPtrData());
 	}
 
-	void AddItem(uint16 slot_id, uint32 item_id);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five);
-	void AddItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six);
-	uint32 CountItem(uint32 item_id);
+	void AddBotItem(uint16 slot_id, uint32 item_id);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five);
+	void AddBotItem(uint16 slot_id, uint32 item_id, int16 charges, bool attuned, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six);
+	uint32 CountBotItem(uint32 item_id);
 	Lua_Mob GetOwner();
-	bool HasItem(uint32 item_id);
-	void RemoveItem(uint32 item_id);
+	bool HasBotItem(uint32 item_id);
+	void RemoveBotItem(uint32 item_id);
 };
 
 #endif

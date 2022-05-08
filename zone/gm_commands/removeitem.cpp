@@ -12,16 +12,6 @@ void command_removeitem(Client *c, const Seperator *sep)
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
 	}
-
-	auto target_string = (
-		c == target ?
-		"yourself" :
-		fmt::format(
-			"{} ({})",
-			target->GetCleanName(),
-			target->GetID()
-		)
-	);
 	
 	auto item_id = std::stoi(sep->arg[1]);
 	if (!database.GetItem(item_id)) {
@@ -49,7 +39,7 @@ void command_removeitem(Client *c, const Seperator *sep)
 					amount,
 					item_link,
 					item_id,
-					target_string
+					c->GetTargetDescription(target)
 				).c_str()
 			);
 		} else {
@@ -62,7 +52,7 @@ void command_removeitem(Client *c, const Seperator *sep)
 					item_count,
 					item_link,
 					item_id,
-					target_string,
+					c->GetTargetDescription(target),
 					c == target ? "you" : "they",
 					amount,
 					item_link,
@@ -77,7 +67,7 @@ void command_removeitem(Client *c, const Seperator *sep)
 				"Could not find any {} ({}) to delete from {}.",
 				database.CreateItemLink(item_id),
 				item_id,
-				target_string
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 	}

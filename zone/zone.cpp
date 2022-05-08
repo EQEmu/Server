@@ -1773,7 +1773,7 @@ void Zone::ClearNPCTypeCache(int id) {
 	}
 }
 
-void Zone::Repop(uint32 delay)
+void Zone::Repop()
 {
 	if (!Depop()) {
 		return;
@@ -1802,7 +1802,7 @@ void Zone::Repop(uint32 delay)
 		LogError("Loading spawn conditions failed, continuing without them");
 	}
 
-	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay)) {
+	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion())) {
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 	}
 
@@ -2041,102 +2041,6 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 	}
 
 	return true;
-}
-
-void Zone::SpawnStatus(Mob* client) {
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-
-	uint32 x = 0;
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-		else
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-
-		x++;
-		iterator.Advance();
-	}
-	client->Message(Chat::White, "%i spawns listed.", x);
-}
-
-void Zone::ShowEnabledSpawnStatus(Mob* client)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iEnabledCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() != 0xFFFFFFFF)
-		{
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-			iEnabledCount++;
-		}
-
-		x++;
-		iterator.Advance();
-	}
-
-	client->Message(Chat::White, "%i of %i spawns listed.", iEnabledCount, x);
-}
-
-void Zone::ShowDisabledSpawnStatus(Mob* client)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iDisabledCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-		{
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-			iDisabledCount++;
-		}
-
-		x++;
-		iterator.Advance();
-	}
-
-	client->Message(Chat::White, "%i of %i spawns listed.", iDisabledCount, x);
-}
-
-void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iSpawnIDCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->GetID() == spawnid)
-		{
-			if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-			else
-				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-
-			iSpawnIDCount++;
-
-			break;
-		}
-
-		x++;
-		iterator.Advance();
-	}
-
-	if(iSpawnIDCount > 0)
-		client->Message(Chat::White, "%i of %i spawns listed.", iSpawnIDCount, x);
-	else
-		client->Message(Chat::White, "No matching spawn id was found in this zone.");
 }
 
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
@@ -2554,14 +2458,65 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 
 }
 
-void Zone::ReloadWorld(uint32 Option){
-	if (Option == 0) {
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-	} else if(Option == 1) {
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-		zone->Repop(0);
+void Zone::ReloadWorld(uint8 global_repop)
+{
+	entity_list.ClearAreas();
+	parse->ReloadQuests();
+
+	if (global_repop) {
+		if (global_repop == ReloadWorld::ForceRepop) {
+			zone->ClearSpawnTimers();
+		}
+
+		zone->Repop();
+	}
+
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::GMAdmin,
+		Chat::Yellow,
+		fmt::format(
+			"Quests reloaded {}for {}{}.",
+			(
+				global_repop ?
+				(
+					global_repop == ReloadWorld::Repop ?
+					"and repopped NPCs " :
+					"and forcefully repopped NPCs "
+				) :
+				""
+			),
+			fmt::format(
+				"{} ({})",
+				GetLongName(),
+				GetZoneID()
+			),
+			(
+				GetInstanceID() ?
+				fmt::format(
+					" (Instance ID {})",
+					GetInstanceID()
+				) :
+				""
+			)
+		).c_str()
+	);
+}
+
+void Zone::ClearSpawnTimers()
+{
+	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		auto query = fmt::format(
+			"DELETE FROM respawn_times WHERE id = {} AND instance_id = {}",
+			iterator.GetData()->GetID(),
+			GetInstanceID()
+		);
+		auto results = database.QueryDatabase(query);
+
+		iterator.Advance();
 	}
 }
 
@@ -2771,4 +2726,46 @@ uint32 Zone::GetCurrencyItemID(uint32 currency_id)
 	}
 
 	return 0;
+}
+
+std::string Zone::GetZoneDescription()
+{
+	auto d = fmt::format(
+		"{} ({}){}{}",
+		GetLongName(),
+		GetZoneID(),
+		(
+			GetInstanceID() ?
+			fmt::format(
+				" (Instance ID {})",
+				GetInstanceID()
+			) :
+			""
+		),
+		(
+			GetInstanceVersion() ?
+			fmt::format(
+				" (Version {})",
+				GetInstanceVersion()
+			) :
+			""
+		)
+	);
+
+	return d;
+}
+
+void Zone::SendReloadMessage(std::string reload_type)
+{
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::GMAdmin,
+		Chat::Yellow,
+		fmt::format(
+			"{} reloaded for {}.",
+			reload_type,
+			GetZoneDescription()
+		).c_str()
+	);
 }

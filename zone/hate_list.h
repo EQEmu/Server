@@ -25,18 +25,16 @@ class Mob;
 class Raid;
 struct ExtraAttackOptions;
 
-struct struct_HateList
-{
-	Mob *entity_on_hatelist;
-	int32 hatelist_damage;
-	uint32 stored_hate_amount;
-	bool is_entity_frenzy;
-	int8 oor_count; // count on how long we've been out of range
-	uint32 last_modified; // we need to remove this if it gets higher than 10 mins
+struct struct_HateList {
+	Mob    *entity_on_hatelist;
+	int64  hatelist_damage;
+	uint64 stored_hate_amount;
+	bool   is_entity_frenzy;
+	int8   oor_count; // count on how long we've been out of range
+	uint64 last_modified; // we need to remove this if it gets higher than 10 mins
 };
 
-class HateList
-{
+class HateList {
 public:
 	HateList();
 	~HateList();
@@ -52,8 +50,8 @@ public:
 #ifdef BOTS
 	Bot* GetRandomBotOnHateList(bool skip_mezzed = false);
 #endif
-	Client* GetRandomClientOnHateList(bool skip_mezzed = false);
-	NPC* GetRandomNPCOnHateList(bool skip_mezzed = false);
+	Client *GetRandomClientOnHateList(bool skip_mezzed = false);
+	NPC *GetRandomNPCOnHateList(bool skip_mezzed = false);
 
 	bool IsEntOnHateList(Mob *mob);
 	bool IsHateListEmpty();
@@ -63,16 +61,22 @@ public:
 	int GetSummonedPetCountOnHateList();
 	int GetHateRatio(Mob *top, Mob *other);
 
-	int32 GetEntHateAmount(Mob *ent, bool in_damage = false);
+	int64 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
-	std::list<struct_HateList*>& GetHateList() { return list; }
-	std::list<struct_HateList*> GetHateListByDistance(int distance = 0);
+	std::list<struct_HateList *> &GetHateList() { return list; }
+	std::list<struct_HateList *> GetHateListByDistance(int distance = 0);
 
-	void AddEntToHateList(Mob *ent, int32 in_hate = 0, int32 in_damage = 0, bool in_is_frenzied = false, bool add_to_hate_list_if_not_exist = true);
-	void DoFactionHits(int32 npc_faction_level_id);
+	void AddEntToHateList(
+		Mob *ent,
+		int64 in_hate = 0,
+		int64 in_damage = 0,
+		bool in_is_frenzied = false,
+		bool add_to_hate_list_if_not_exist = true
+	);
+	void DoFactionHits(int64 npc_faction_level_id);
 	void IsEntityInFrenzyMode();
 	void PrintHateListToClient(Client *c);
-	void SetHateAmountOnEnt(Mob *other, uint32 in_hate, uint32 in_damage);
+	void SetHateAmountOnEnt(Mob *other, uint64 in_hate, uint64 in_damage);
 	void SetHateOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }
 	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center = nullptr);
 	void WipeHateList();
@@ -80,10 +84,10 @@ public:
 
 
 protected:
-	struct_HateList* Find(Mob *ent);
+	struct_HateList *Find(Mob *ent);
 private:
-	std::list<struct_HateList*> list;
-	Mob *hate_owner;
+	std::list<struct_HateList *> list;
+	Mob                          *hate_owner;
 };
 
 #endif

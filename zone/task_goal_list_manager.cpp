@@ -147,3 +147,26 @@ bool TaskGoalListManager::IsInList(int list_id, int entry)
 
 	return true;
 }
+
+bool TaskGoalListManager::IsInMatchList(const std::string& match_list, const std::string& entry)
+{
+	for (auto &s: SplitString(match_list, '|')) {
+		if (s == entry) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool TaskGoalListManager::IsInMatchListPartial(const std::string &match_list, const std::string &entry)
+{
+	std::string entry_match = str_tolower(entry);
+	for (auto &s: SplitString(match_list, '|')) {
+		if (entry_match.find(str_tolower(s)) != std::string::npos) {
+			return true;
+		}
+	}
+
+	return false;
+}

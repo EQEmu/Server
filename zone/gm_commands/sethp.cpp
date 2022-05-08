@@ -27,15 +27,7 @@ void command_sethp(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Set {} to {} Health{}.",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			),
+			c->GetTargetDescription(target),
 			(
 				set_to_max ?
 				"full" :

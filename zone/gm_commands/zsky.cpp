@@ -34,9 +34,8 @@ void command_zsky(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Sky Changed | Zone: {} ({}) Sky Type: {} Permanent: {}",
-			zone->GetLongName(),
-			zone->GetZoneID(),
+			"Sky Changed | Zone: {} Sky Type: {} Permanent: {}",
+			zone->GetZoneDescription(),
 			sky_type,
 			permanent ? "Yes" : "No"
 		).c_str()

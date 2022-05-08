@@ -799,9 +799,8 @@ void Client::CompleteConnect()
 		Message(
 			Chat::Yellow,
 			fmt::format(
-				"{} ({}) will expire in {}.",
-				zone->GetLongName(),
-				zone->GetInstanceID(),
+				"{} will expire in {}.",
+				zone->GetZoneDescription(),
 				time_string
 			).c_str()
 		);
@@ -4375,7 +4374,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			safe_delete(outapp);
 
 			/* Update the boat's position on the server, without sending an update */
-			cmob->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
+			cmob->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading));
 			return;
 		}
 		else {

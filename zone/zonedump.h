@@ -36,8 +36,8 @@ struct NPCType
 {
 	char	name[64];
 	char	lastname[70];
-	int32	current_hp;
-	int32	max_hp;
+	int64	current_hp;
+	int64	max_hp;
 	float	size;
 	float	runspeed;
 	uint8	gender;
@@ -60,7 +60,7 @@ struct NPCType
 	uint32	trap_template;
 	uint8	light;
 	uint32	AC;
-	uint32	Mana;	//not loaded from DB
+	uint64	Mana;	//not loaded from DB
 	uint32	ATK;	//not loaded from DB
 	uint32	STR;
 	uint32	STA;
@@ -104,9 +104,9 @@ struct NPCType
 	uint8	prim_melee_type;
 	uint8	sec_melee_type;
 	uint8	ranged_type;
-	int32	hp_regen;
+	int64	hp_regen;
 	int64	hp_regen_per_second;
-	int32	mana_regen;
+	int64	mana_regen;
 	int32	aggroradius; // added for AI improvement - neotokyo
 	int32	assistradius; // assist radius, defaults to aggroradis if not set
 	uint16	see_invis;			// See Invis flag added

@@ -461,12 +461,12 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 				   commify(std::to_string((int) RuleI(Character, ItemDSMitigationCap)));
 		}
 		if (attribute == "hp_regen") {
-			return commify(std::to_string((int) client->GetHPRegen())) + " / " +
+			return commify(std::to_string((int64) client->GetHPRegen())) + " / " +
 				   commify(std::to_string((int) RuleI(Character, ItemHealthRegenCap)));
 		}
 		if (attribute == "mana_regen") {
-			return commify(std::to_string((int) client->GetManaRegen())) + " / " +
-				   commify(std::to_string((int) RuleI(Character, ItemManaRegenCap)));
+			return commify(std::to_string((int64) client->GetManaRegen())) + " / " +
+				   commify(std::to_string((int64) RuleI(Character, ItemManaRegenCap)));
 		}
 		if (attribute == "end_regen") {
 			return commify(std::to_string((int) client->CalcEnduranceRegen())) + " / " +

@@ -32,6 +32,8 @@
 #include "worldserver.h"
 #include <list>
 #include <signal.h>
+#include <csignal>
+#include <thread>
 
 #include "../common/net/tcp_server.h"
 #include "../common/net/servertalk_client_connection.h"
@@ -49,18 +51,42 @@ std::string WorldShortName;
 uint32 ChatMessagesSent = 0;
 uint32 MailMessagesSent = 0;
 
-volatile bool RunLoops = true;
-
-void CatchSignal(int sig_num) {
-
-	RunLoops = false;
-}
-
 std::string GetMailPrefix() {
 
 	return "SOE.EQ." + WorldShortName + ".";
 
 }
+
+void crash_func() {
+	std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+	int* p=0;
+	*p=0;
+}
+
+void Shutdown() {
+	LogInfo("Shutting down...");
+	ChannelList->RemoveAllChannels();
+	g_Clientlist->CloseAllConnections();
+	LogSys.CloseFileLogs();
+}
+
+int caught_loop = 0;
+void CatchSignal(int sig_num) {
+	LogInfo("Caught signal [{}]", sig_num);
+
+	EQ::EventLoop::Get().Shutdown();
+
+	caught_loop++;
+	// when signal handler is incapable of exiting properly
+	if (caught_loop > 1) {
+		LogInfo("In a signal handler loop and process is incapable of exiting properly, forcefully cleaning up");
+		ChannelList->RemoveAllChannels();
+		g_Clientlist->CloseAllConnections();
+		LogSys.CloseFileLogs();
+		std::exit(0);
+	}
+}
+
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformUCS);
@@ -134,16 +160,16 @@ int main() {
 
 	database.LoadChatChannels();
 
-	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		LogInfo("Could not set signal handler");
-		return 1;
-	}
-	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		LogInfo("Could not set signal handler");
-		return 1;
-	}
+	std::signal(SIGINT, CatchSignal);
+	std::signal(SIGTERM, CatchSignal);
+	std::signal(SIGKILL, CatchSignal);
+	std::signal(SIGSEGV, CatchSignal);
 
 	worldserver = new WorldServer;
+
+	// uncomment to simulate timed crash for catching SIGSEV
+//	std::thread crash_test(crash_func);
+//	crash_test.detach();
 
 	auto loop_fn = [&](EQ::Timer* t) {
 
@@ -166,12 +192,7 @@ int main() {
 
 	EQ::EventLoop::Get().Run();
 
-	ChannelList->RemoveAllChannels();
-
-	g_Clientlist->CloseAllConnections();
-
-	LogSys.CloseFileLogs();
-
+	Shutdown();
 }
 
 void UpdateWindowTitle(char* iNewTitle) {

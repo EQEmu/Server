@@ -10,37 +10,37 @@ int32 Lua_StatBonuses::GetAC() const {
 	return self->AC;
 }
 
-int32 Lua_StatBonuses::GetHP() const {
+int64 Lua_StatBonuses::GetHP() const {
 	Lua_Safe_Call_Int();
 	return self->HP;
 }
 
-int32 Lua_StatBonuses::GetHPRegen() const {
+int64 Lua_StatBonuses::GetHPRegen() const {
 	Lua_Safe_Call_Int();
 	return self->HPRegen;
 }
 
-int32 Lua_StatBonuses::GetMaxHP() const {
+int64 Lua_StatBonuses::GetMaxHP() const {
 	Lua_Safe_Call_Int();
 	return self->MaxHP;
 }
 
-int32 Lua_StatBonuses::GetManaRegen() const {
+int64 Lua_StatBonuses::GetManaRegen() const {
 	Lua_Safe_Call_Int();
 	return self->ManaRegen;
 }
 
-int32 Lua_StatBonuses::GetEnduranceRegen() const {
+int64 Lua_StatBonuses::GetEnduranceRegen() const {
 	Lua_Safe_Call_Int();
 	return self->EnduranceRegen;
 }
 
-int32 Lua_StatBonuses::GetMana() const {
+int64 Lua_StatBonuses::GetMana() const {
 	Lua_Safe_Call_Int();
 	return self->Mana;
 }
 
-int32 Lua_StatBonuses::GetEndurance() const {
+int64 Lua_StatBonuses::GetEndurance() const {
 	Lua_Safe_Call_Int();
 	return self->Endurance;
 }
@@ -385,7 +385,7 @@ int8 Lua_StatBonuses::Gethatemod() const {
 	return self->hatemod;
 }
 
-int32 Lua_StatBonuses::GetEnduranceReduction() const {
+int64 Lua_StatBonuses::GetEnduranceReduction() const {
 	Lua_Safe_Call_Int();
 	return self->EnduranceReduction;
 }
@@ -677,7 +677,7 @@ int Lua_StatBonuses::GetXPRateMod() const {
 
 bool Lua_StatBonuses::GetBlockNextSpell() const {
 	Lua_Safe_Call_Bool();
-	//return self->BlockNextSpell; bonus no longer used due to effect being a focus
+	return false; // Bonus no longer used due to effect being a focus
 }
 
 bool Lua_StatBonuses::GetImmuneToFlee() const {

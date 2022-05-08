@@ -214,7 +214,7 @@ void Trap::Trigger(Mob* trigger)
 			{
 				auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 				CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
-				int dmg = zone->random.Int(effectvalue, effectvalue2);
+				int64 dmg = zone->random.Int(effectvalue, effectvalue2);
 				trigger->SetHP(trigger->GetHP() - dmg);
 				a->damage = dmg;
 				a->hit_heading = 0.0f;
@@ -366,21 +366,66 @@ void EntityList::UpdateAllTraps(bool respawn, bool repopnow)
 
 void EntityList::GetTrapInfo(Client* client)
 {
-	uint8 count = 0;
-	auto it = trap_list.begin();
-	while (it != trap_list.end())
-	{
-		Trap* cur = it->second;
-		if (cur->IsTrap())
-		{
-			bool isset = (cur->chkarea_timer.Enabled() && !cur->reset_timer.Enabled());
-			client->Message(Chat::Default, " Trap: (%d) found at %0.2f,%0.2f,%0.2f. Times Triggered: %d Is Active: %d Group: %d Message: %s", cur->trap_id, cur->m_Position.x, cur->m_Position.y, cur->m_Position.z, cur->times_triggered, isset, cur->group, cur->message.c_str());
-			++count;
+	uint32 trap_count = 0;
+	uint32 trap_number = 1;
+
+	for (const auto& trap : trap_list) {
+		auto t = trap.second;
+		if (t->IsTrap()) {
+			bool is_set = (t->chkarea_timer.Enabled() && !t->reset_timer.Enabled());
+
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Trap {} | ID: {} Active: {} Coordinates: {:.2f}, {:.2f}, {:.2f}",
+					trap_number,
+					t->trap_id,
+					is_set ? "Yes" : "No",
+					t->m_Position.x,
+					t->m_Position.y,
+					t->m_Position.z
+				).c_str()
+			);
+
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Trap {} | Times Triggered: {} Group: {}",
+					trap_number,
+					t->times_triggered,
+					t->group
+				).c_str()
+			);
+
+			if (!t->message.empty()) {
+				client->Message(
+					Chat::White,
+					fmt::format(
+						"Trap {} | Message: {}",
+						trap_number,
+						t->message
+					).c_str()
+				);
+			}
+
+			trap_count++;
+			trap_number++;
 		}
-		++it;
 	}
 
-	client->Message(Chat::Default, "%d traps found.", count);
+	if (!trap_count) {
+		client->Message(Chat::White, "No traps were found in this zone.");
+		return;
+	}
+
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"{} trap{} found.",
+			trap_count,
+			trap_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
 
 void EntityList::ClearTrapPointers()
