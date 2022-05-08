@@ -887,14 +887,14 @@ bool NPC::Process()
 
 		uint32 npc_sitting_regen_bonus = 0;
 		uint32 pet_regen_bonus         = 0;
-		uint32 npc_regen               = 0;
-		int32  npc_hp_regen            = GetNPCHPRegen();
+		uint64 npc_regen               = 0;
+		int64  npc_hp_regen            = GetNPCHPRegen();
 
 		if (GetAppearance() == eaSitting) {
 			npc_sitting_regen_bonus += 3;
 		}
 
-		int32 ooc_regen_calc = 0;
+		int64 ooc_regen_calc = 0;
 		if (ooc_regen > 0) { //should pull from Mob class
 			ooc_regen_calc += GetMaxHP() * ooc_regen / 100;
 		}

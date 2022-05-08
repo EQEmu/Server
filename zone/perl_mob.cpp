@@ -3600,13 +3600,13 @@ XS(XS_Mob_AddToHateList) {
 		if (items < 3)
 			hate = 0;
 		else {
-			hate = (int32) SvIV(ST(2));
+			hate = (int64) SvIV(ST(2));
 		}
 
 		if (items < 4)
 			damage = 0;
 		else {
-			damage = (int32) SvIV(ST(3));
+			damage = (int64) SvIV(ST(3));
 		}
 
 		if (items < 5)
@@ -3636,7 +3636,7 @@ XS(XS_Mob_SetHate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetHate) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, Mob* other, [int32 hate = 0], [int64 damage = 0])"); // @categories Hate and Aggro
+		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, Mob* other, [int64 hate = 0], [int64 damage = 0])"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *other;
@@ -3654,13 +3654,13 @@ XS(XS_Mob_SetHate) {
 		if (items < 3)
 			hate = 0;
 		else {
-			hate = (int32) SvIV(ST(2));
+			hate = (int64) SvIV(ST(2));
 		}
 
 		if (items < 4)
 			damage = 0;
 		else {
-			damage = (int32) SvIV(ST(3));
+			damage = (int64) SvIV(ST(3));
 		}
 
 		THIS->SetHateAmountOnEnt(other, hate, damage);
