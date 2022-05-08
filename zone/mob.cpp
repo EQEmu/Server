@@ -4611,7 +4611,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 
 	if(IsClient())
 	{
-		int32 focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+		int focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
 
 		if (focus > 0)
 		{
@@ -4659,7 +4659,7 @@ void Mob::ApplyHealthTransferDamage(Mob *caster, Mob *target, uint16 spell_id)
 		for (int i = 0; i < EFFECT_COUNT; i++) {
 
 			if (spells[spell_id].effect_id[i] == SE_Health_Transfer) {
-				int new_hp = GetMaxHP();
+				int64 new_hp = GetMaxHP();
 				new_hp -= GetMaxHP()  * spells[spell_id].base_value[i] / 1000;
 
 				if (new_hp > 0) {

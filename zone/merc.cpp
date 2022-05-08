@@ -2552,7 +2552,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	return false;
 }
 
-int32 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) {
+int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) {
 
 	int32 realTotal = 0;
 	int32 realTotal2 = 0;
