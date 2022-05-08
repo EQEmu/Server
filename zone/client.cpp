@@ -11048,3 +11048,167 @@ void Client::ReconnectUCS()
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
+
+bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value)
+{
+	std::vector<std::string> bucket_checks;
+	bool found = false;
+	bool passes = false;
+
+	switch (bucket_comparison) {
+		case MerchantBucketComparison::BucketEqualTo:
+		{
+			if (player_value != bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketNotEqualTo:
+		{
+			if (player_value == bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketGreaterThanOrEqualTo:
+		{
+			if (player_value < bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketLesserThanOrEqualTo:
+		{
+			if (player_value > bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketGreaterThan:
+		{
+			if (player_value <= bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketLesserThan:
+		{
+			if (player_value >= bucket_value) {
+				break;
+			}
+
+			passes = true;
+			
+			break;
+		}
+		case MerchantBucketComparison::BucketIsAny:
+		{
+			bucket_checks = split_string(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			for (const auto &bucket : bucket_checks) {
+				if (player_value == bucket) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketIsNotAny:
+		{
+			bucket_checks = split_string(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			for (const auto &bucket : bucket_checks) {
+				if (player_value == bucket) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketIsBetween:
+		{
+			bucket_checks = split_string(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (
+				std::stoll(player_value) < std::stoll(bucket_checks[0]) ||
+				std::stoll(player_value) > std::stoll(bucket_checks[1])
+			) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case MerchantBucketComparison::BucketIsNotBetween:
+		{
+			bucket_checks = split_string(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (
+				std::stoll(player_value) >= std::stoll(bucket_checks[0]) &&
+				std::stoll(player_value) <= std::stoll(bucket_checks[1])
+			) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+	}
+
+	return passes;
+}
+
+std::map<std::string,std::string> Client::GetMerchantDataBuckets()
+{
+	std::map<std::string,std::string> merchant_data_buckets;
+
+	auto query = fmt::format(
+		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
+		EscapeString(GetBucketKey())
+	);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success() || !results.RowCount()) {
+		return merchant_data_buckets;
+	}
+
+	for (auto row : results) {
+		merchant_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+	}
+
+	return merchant_data_buckets;
+}
