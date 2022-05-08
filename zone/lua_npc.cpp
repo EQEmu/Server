@@ -192,7 +192,7 @@ int Lua_NPC::GetPrimaryFaction() {
 	return self->GetPrimaryFaction();
 }
 
-int Lua_NPC::GetNPCHate(Lua_Mob ent) {
+int64 Lua_NPC::GetNPCHate(Lua_Mob ent) {
 	Lua_Safe_Call_Int();
 	return self->GetNPCHate(ent);
 }
@@ -660,7 +660,7 @@ float Lua_NPC::GetNPCStat(const char* identifier)
 }
 
 luabind::scope lua_register_npc() {
-	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")	
+	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
 	.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float))&Lua_NPC::AI_SetRoambox)
 	.def("AI_SetRoambox", (void(Lua_NPC::*)(float,float,float,float,float,uint32,uint32))&Lua_NPC::AI_SetRoambox)
@@ -711,7 +711,7 @@ luabind::scope lua_register_npc() {
 	.def("GetMaxWp", (int(Lua_NPC::*)(void))&Lua_NPC::GetMaxWp)
 	.def("GetMinDMG", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetMinDMG)
 	.def("GetNPCFactionID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCFactionID)
-	.def("GetNPCHate", (int(Lua_NPC::*)(Lua_Mob))&Lua_NPC::GetNPCHate)
+	.def("GetNPCHate", (int64(Lua_NPC::*)(Lua_Mob))&Lua_NPC::GetNPCHate)
 	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 	.def("GetNPCStat", (float(Lua_NPC::*)(const char*))&Lua_NPC::GetNPCStat)
