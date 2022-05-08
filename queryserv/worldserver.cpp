@@ -29,8 +29,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "lfguild.h"
 #include "queryservconfig.h"
 #include "worldserver.h"
-#include "../common/discord/discord.h"
-#include "discord_manager.h"
 #include <iomanip>
 #include <iostream>
 #include <stdarg.h>

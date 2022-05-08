@@ -52,17 +52,3 @@ void QueryServ::PlayerLogEvent(int Event_Type, int Character_ID, std::string Eve
 		EscapeString(Event_Desc).c_str());
 	SendQuery(query);
 }
-
-void QueryServ::SendDiscordMessage(int webhook_id, const std::string &message)
-{
-	if (worldserver.Connected()) {
-		auto pack = new ServerPacket(ServerOP_QSDiscordWebhookMessage, sizeof(QSDiscordMessage_Struct) + 1);
-		auto *q   = (QSDiscordMessage_Struct *) pack->pBuffer;
-
-		strn0cpy(q->message, message.c_str(), 2000);
-		q->webhook_id = webhook_id;
-
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}

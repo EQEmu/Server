@@ -234,6 +234,8 @@
 #define ServerOP_ReloadStaticZoneData 0x4020
 #define ServerOP_DiscordWebhookMessage 0x4021
 
+#define ServerOP_DiscordWebhookMessage 0x4020
+
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
 #define ServerOP_CZMarquee 0x4502
@@ -266,7 +268,6 @@
 #define ServerOP_QSPlayerLogMerchantTransactions 0x5005
 #define ServerOP_QSSendQuery 0x5006
 #define ServerOP_QSPlayerDropItem 0x5007
-#define ServerOP_QSDiscordWebhookMessage 0x5008
 
 enum {
 	CZUpdateType_Character,
