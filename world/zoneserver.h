@@ -32,7 +32,7 @@ class ServerPacket;
 
 class ZoneServer : public WorldTCPConnection {
 public:
-	ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *console);
+	ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *zone_console);
 	~ZoneServer();
 	virtual inline bool IsZoneServer() { return true; }
 

@@ -56,7 +56,7 @@ extern SharedTaskManager shared_task_manager;
 
 void CatchSignal(int sig_num);
 
-ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *console)
+ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *zone_console)
 	: tcpc(connection), zone_boot_timer(5000) {
 
 	/* Set Process tracking variable defaults */
@@ -84,7 +84,7 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn
 		}
 	});
 
-	console = console;
+	console = zone_console;
 }
 
 ZoneServer::~ZoneServer() {
