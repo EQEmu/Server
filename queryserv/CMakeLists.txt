@@ -2,7 +2,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
 
 SET(qserv_sources
     database.cpp
-    discord_manager.cpp
     lfguild.cpp
     queryserv.cpp
     queryservconfig.cpp
@@ -11,7 +10,6 @@ SET(qserv_sources
 
 SET(qserv_headers
     database.h
-    discord_manager.h
     lfguild.h
     queryservconfig.h
     worldserver.h

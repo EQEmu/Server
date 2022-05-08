@@ -361,6 +361,7 @@ public:
 		}
 	}
 
+	static void SendDiscordMessage(int webhook_id, const std::string& message);
 	static void DiscordWebhookMessageHandler(uint16 log_category, int webhook_id, const std::string &message)
 	{
 		std::string message_prefix;
@@ -372,10 +373,7 @@ public:
 			);
 		}
 
-		QueryServ::SendDiscordMessage(
-			webhook_id,
-			message_prefix + Discord::FormatDiscordMessage(log_category, message)
-		);
+		SendDiscordMessage(webhook_id, message_prefix + Discord::FormatDiscordMessage(log_category, message));
 	};
 
 	double GetMaxMovementUpdateRange() const { return max_movement_update_range; }

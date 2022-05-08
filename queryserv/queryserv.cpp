@@ -31,10 +31,9 @@
 #include "queryservconfig.h"
 #include "lfguild.h"
 #include "worldserver.h"
-#include "../common/discord/discord.h"
-#include "discord_manager.h"
 #include <list>
 #include <signal.h>
+#include <thread>
 
 volatile bool RunLoops = true;
 
@@ -44,7 +43,6 @@ std::string           WorldShortName;
 const queryservconfig *Config;
 WorldServer           *worldserver = 0;
 EQEmuLogSys           LogSys;
-DiscordManager        discord_manager;
 
 void CatchSignal(int sig_num)
 {
@@ -57,7 +55,6 @@ int main()
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 	Timer LFGuildExpireTimer(60000);
-	Timer discord_message_queue_timer(1000);
 
 	LogInfo("Starting EQEmu QueryServ");
 	if (!queryservconfig::LoadConfig()) {
@@ -106,10 +103,6 @@ int main()
 		Timer::SetCurrentTime();
 		if (LFGuildExpireTimer.Check()) {
 			lfguildmanager.ExpireEntries();
-		}
-
-		if (discord_message_queue_timer.Check()) {
-			discord_manager.ProcessMessageQueue();
 		}
 
 		EQ::EventLoop::Get().Process();

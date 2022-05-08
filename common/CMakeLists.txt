@@ -35,6 +35,7 @@ SET(common_sources
 	event_sub.cpp
 	expedition_lockout_timer.cpp
 	extprofile.cpp
+	discord_manager.cpp
 	faction.cpp
 	file_util.cpp
 	guild_base.cpp
@@ -493,6 +494,7 @@ SET(common_headers
 	dbcore.h
 	deity.h
 	discord/discord.h
+	discord_manager.h
 	dynamic_zone_base.h
 	emu_constants.h
 	emu_limits.h

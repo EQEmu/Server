@@ -2781,3 +2781,17 @@ void Zone::SendReloadMessage(std::string reload_type)
 		).c_str()
 	);
 }
+
+void Zone::SendDiscordMessage(int webhook_id, const std::string& message)
+{
+	if (worldserver.Connected()) {
+		auto pack = new ServerPacket(ServerOP_DiscordWebhookMessage, sizeof(DiscordWebhookMessage_Struct) + 1);
+		auto *q   = (DiscordWebhookMessage_Struct *) pack->pBuffer;
+
+		strn0cpy(q->message, message.c_str(), 2000);
+		q->webhook_id = webhook_id;
+
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
