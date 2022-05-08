@@ -1432,7 +1432,7 @@ XS(XS_Client_TakeMoneyFromPP) {
 		Client *THIS;
 		bool has_money;
 		bool update_client = false;
-		uint32 copper = (uint32) SvUV(ST(1));
+		uint64 copper = (uint64) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 
 		if (items == 3) {
