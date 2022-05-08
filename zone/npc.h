@@ -271,7 +271,7 @@ public:
 	inline int32 GetPrimaryFaction() const
 	{ return primary_faction; }
 
-	int32 GetNPCHate(Mob *in_ent)
+	int64 GetNPCHate(Mob *in_ent)
 	{ return hate_list.GetEntHateAmount(in_ent); }
 
 	bool IsOnHatelist(Mob *p)
