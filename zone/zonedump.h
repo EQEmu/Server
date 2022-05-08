@@ -106,7 +106,7 @@ struct NPCType
 	uint8	ranged_type;
 	int64	hp_regen;
 	int64	hp_regen_per_second;
-	int32	mana_regen;
+	int64	mana_regen;
 	int32	aggroradius; // added for AI improvement - neotokyo
 	int32	assistradius; // assist radius, defaults to aggroradis if not set
 	uint16	see_invis;			// See Invis flag added

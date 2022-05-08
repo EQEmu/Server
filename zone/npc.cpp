@@ -934,7 +934,7 @@ bool NPC::Process()
 
 		if (GetMana() < GetMaxMana()) {
 			if (RuleB(NPC, UseMeditateBasedManaRegen)) {
-				int32 npc_idle_mana_regen_bonus = 2;
+				int64 npc_idle_mana_regen_bonus = 2;
 				uint16 meditate_skill = GetSkill(EQ::skills::SkillMeditate);
 				if (!IsEngaged() && meditate_skill > 0) {
 					uint8 clevel = GetLevel();
@@ -2598,7 +2598,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		return;
 	}
 	else if (id == "hp_regen") {
-		hp_regen = atoi(val.c_str());
+		hp_regen = strtoll(val.c_str(), nullptr, 10);
 		return;
 	}
 	else if (id == "hp_regen_per_second") {
@@ -2606,7 +2606,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		return;
 	}
 	else if (id == "mana_regen") {
-		mana_regen = atoi(val.c_str());
+		mana_regen = strtoll(val.c_str(), nullptr, 10);
 		return;
 	}
 	else if (id == "level") {

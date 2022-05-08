@@ -1444,7 +1444,7 @@ protected:
 	int64 max_mana;
 	int64 hp_regen;
 	int64 hp_regen_per_second;
-	int32 mana_regen;
+	int64 mana_regen;
 	int32 ooc_regen;
 	uint8 maxlevel;
 	uint32 scalerate;
