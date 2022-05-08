@@ -121,16 +121,15 @@ public:
 
 	/* General Information Queries */
 
-	bool	AddBannedIP(char* bannedIP, const char* notes); //Add IP address to the banned_ips table.
-	bool	AddGMIP(char* ip_address, char* name);
-	bool	CheckBannedIPs(const char* loginIP); //Check incoming connection against banned IP table.
-	bool	CheckGMIPs(const char* loginIP, uint32 account_id);
+	bool	AddBannedIP(std::string banned_ip, std::string notes); //Add IP address to the banned_ips table.
+	bool	CheckBannedIPs(std::string login_ip); //Check incoming connection against banned IP table.
+	bool	CheckGMIPs(std::string login_ip, uint32 account_id);
 	bool	CheckNameFilter(const char* name, bool surname = false);
 	bool	CheckUsedName(const char* name);
 
 	uint32	GetAccountIDByChar(const char* charname, uint32* oCharID = 0);
 	uint32	GetAccountIDByChar(uint32 char_id);
-	uint32	GetAccountIDByName(const char* accname, const char *loginserver, int16* status = 0, uint32* lsid = 0);
+	uint32	GetAccountIDByName(std::string account_name, std::string loginserver, int16* status = 0, uint32* lsid = 0);
 	uint32	GetCharacterID(const char *name);
 	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0, float* oX = 0, float* oY = 0, float* oZ = 0);
 	uint32	GetGuildIDByCharID(uint32 char_id);
@@ -142,7 +141,7 @@ public:
 	std::string GetCharNameByID(uint32 char_id);
 	std::string GetNPCNameByID(uint32 npc_id);
 	std::string GetCleanNPCNameByID(uint32 npc_id);
-	void	LoginIP(uint32 AccountID, const char* LoginIP);
+	void	LoginIP(uint32 account_id, std::string login_ip);
 
 	/* Instancing */
 

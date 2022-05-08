@@ -490,7 +490,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		if (!is_player_zoning) {
 			SendExpansionInfo();
 			SendCharInfo();
-			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
+			database.LoginIP(cle->AccountID(), long2ip(GetIP()));
 		}
 
 		cle->SetIP(GetIP());
@@ -997,7 +997,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	// Voidd: Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
 	if (RuleB(World, GMAccountIPList) && GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
-		if(!database.CheckGMIPs(long2ip(GetIP()).c_str(), GetAccountID())) {
+		if(!database.CheckGMIPs(long2ip(GetIP()), GetAccountID())) {
 			LogInfo("GM Account not permited from source address [{}] and accountid [{}]", long2ip(GetIP()).c_str(), GetAccountID());
 			eqs->Close();
 		}

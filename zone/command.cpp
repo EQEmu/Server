@@ -124,7 +124,7 @@ int command_init(void)
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", AccountStatus::GMImpossible, command_apply_shared_memory) ||
 		command_add("attack", "[Entity Name] - Make your NPC target attack an entity by name", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
-		command_add("ban", "[name] [reason]- Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
+		command_add("ban", "[Character Name] [Reason]- Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bind", "- Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
 
 #ifdef BOTS
@@ -178,7 +178,7 @@ int command_init(void)
 		command_add("findtask", "[search criteria] - Search for a task", AccountStatus::Guide, command_findtask) ||
 		command_add("findzone", "[search criteria] - Search database zones", AccountStatus::GMAdmin, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", AccountStatus::QuestTroupe, command_fixmob) ||
-		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", AccountStatus::Player, command_flag) ||
+		command_add("flag", "[Status] [Account Name] - Refresh your admin status, or set an account's Admin status if arguments provided", AccountStatus::Player, command_flag) ||
 		command_add("flagedit", "- Edit zone flags on your target. Use #flagedit help for more info.", AccountStatus::GMAdmin, command_flagedit) ||
 		command_add("flags", "- displays the Zone Flags of you or your target", AccountStatus::Player, command_flags) ||
 		command_add("flymode", "[0/1/2/3/4/5] - Set your or your player target's flymode to ground/flying/levitate/water/floating/levitate_running", AccountStatus::Guide, command_flymode) ||
@@ -216,11 +216,11 @@ int command_init(void)
 		command_add("interrupt", "[message id] [color] - Interrupt your casting. Arguments are optional.", AccountStatus::Guide, command_interrupt) ||
 		command_add("invsnapshot", "- Manipulates inventory snapshots for your current target", AccountStatus::QuestTroupe, command_invsnapshot) ||
 		command_add("invul", "[On|Off]] - Turn player target's or your invulnerable flag on or off", AccountStatus::QuestTroupe, command_invul) ||
-		command_add("ipban", "[IP address] - Ban IP by character name", AccountStatus::GMMgmt, command_ipban) ||
+		command_add("ipban", "[IP] - Ban IP", AccountStatus::GMMgmt, command_ipban) ||
 		command_add("iplookup", "[charname] - Look up IP address of charname", AccountStatus::GMMgmt, command_iplookup) ||
 		command_add("iteminfo", "- Get information about the item on your cursor", AccountStatus::Steward, command_iteminfo) ||
 		command_add("itemsearch", "[search criteria] - Search for an item", AccountStatus::Steward, command_itemsearch) ||
-		command_add("kick", "[charname] - Disconnect charname", AccountStatus::GMLeadAdmin, command_kick) ||
+		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "- Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
 		command_add("lastname", "[Last Name] - Set you or your player target's lastname", AccountStatus::Guide, command_lastname) ||
@@ -324,9 +324,9 @@ int command_init(void)
 		command_add("setgraveyard", "[zone name] - Creates a graveyard for the specified zone based on your target's LOC.", AccountStatus::GMMgmt, command_setgraveyard) ||
 		command_add("sethp", "[Health] - Set your or your target's Health", AccountStatus::GMAdmin, command_sethp) ||
 		command_add("setlanguage", "[language ID] [value] - Set your target's language skillnum to value", AccountStatus::Guide, command_setlanguage) ||
-		command_add("setlsinfo", "[email] [password] - Set login server email address and password (if supported by login server)", AccountStatus::Steward, command_setlsinfo) ||
+		command_add("setlsinfo", "[Email] [Password] - Set loginserver email address and password (if supported by loginserver)", AccountStatus::Steward, command_setlsinfo) ||
 		command_add("setmana", "[Mana] - Set your or your target's Mana", AccountStatus::GMAdmin, command_setmana) ||
-		command_add("setpass", "[accountname] [password] - Set local password for accountname", AccountStatus::GMLeadAdmin, command_setpass) ||
+		command_add("setpass", "[Account Name] [Password] - Set local password by account name", AccountStatus::GMLeadAdmin, command_setpass) ||
 		command_add("setpvppoints", "[Amount] - Set your or your player target's PVP points", AccountStatus::GMAdmin, command_setpvppoints) ||
 		command_add("setskill", "[skillnum] [value] - Set your target's skill skillnum to value", AccountStatus::Guide, command_setskill) ||
 		command_add("setskillall", "[Skill Level] - Set all of your or your target's skills to the specified skill level", AccountStatus::Guide, command_setskillall) ||
