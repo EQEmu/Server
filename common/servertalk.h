@@ -234,8 +234,6 @@
 #define ServerOP_ReloadStaticZoneData 0x4020
 #define ServerOP_DiscordWebhookMessage 0x4021
 
-#define ServerOP_DiscordWebhookMessage 0x4020
-
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
 #define ServerOP_CZMarquee 0x4502
