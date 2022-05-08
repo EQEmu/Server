@@ -659,7 +659,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				if (database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone))) {
 					client->RemoveFromInstance(database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone)));
 				}
-				
+
 				client->AssignToInstance(szp->instance_id);
 				client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 			}
@@ -1917,7 +1917,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		LogSys.LoadLogDatabaseSettings();
 		break;
 	}
-	case ServerOP_ReloadMerchants: {		
+	case ServerOP_ReloadMerchants: {
 		zone->SendReloadMessage("Merchants");
 		entity_list.ReloadMerchants();
 		break;
@@ -2016,6 +2016,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (zone) {
 			zone->SetUCSServerAvailable((ucsss->available != 0), ucsss->timestamp);
 			LogInfo("UCS Server is now [{}]", (ucsss->available == 1 ? "online" : "offline"));
+
+			for (auto &e : entity_list.GetClientList()) {
+				e.second->ReconnectUCS();
+			}
 		}
 		break;
 	}
