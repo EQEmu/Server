@@ -4130,7 +4130,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 			);
 		}
 	}
-
 	safe_delete(action_packet);
 	safe_delete(message_packet);
 
