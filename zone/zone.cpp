@@ -2795,3 +2795,18 @@ void Zone::SendDiscordMessage(int webhook_id, const std::string& message)
 		safe_delete(pack);
 	}
 }
+
+void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string &message)
+{
+	bool not_found = true;
+	for (auto & w : LogSys.discord_webhooks) {
+		if (w.webhook_name == webhook_name) {
+			SendDiscordMessage(w.id, message);
+			not_found = false;
+		}
+	}
+
+	if (not_found) {
+		LogDiscord("[SendDiscordMessage] Did not find valid webhook by webhook name [{}]", webhook_name);
+	}
+}

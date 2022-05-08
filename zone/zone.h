@@ -362,6 +362,7 @@ public:
 	}
 
 	static void SendDiscordMessage(int webhook_id, const std::string& message);
+	static void SendDiscordMessage(const std::string& webhook_name, const std::string& message);
 	static void DiscordWebhookMessageHandler(uint16 log_category, int webhook_id, const std::string &message)
 	{
 		std::string message_prefix;
