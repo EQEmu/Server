@@ -50,7 +50,7 @@ void command_reload(Client *c, const Seperator *sep)
 	auto pack = new ServerPacket;
 
 	if (is_aa) {
-		c->Message(Chat::White, "Attempted to reload Alternate Advancement Data globally.");	
+		c->Message(Chat::White, "Attempting to reload Alternate Advancement Data globally.");	
 		pack = new ServerPacket(ServerOP_ReloadAAData, 0);
 	} else if (is_content_flags) {		
 		c->Message(Chat::White, "Attempting to reload Content Flags globally.");
@@ -61,7 +61,7 @@ void command_reload(Client *c, const Seperator *sep)
 			return;
 		}
 			
-		c->Message(Chat::White, "Attempted to reload Level Based Experience Modifiers globally.");
+		c->Message(Chat::White, "Attempting to reload Level Based Experience Modifiers globally.");
 		pack = new ServerPacket(ServerOP_ReloadLevelEXPMods, 0);
 	} else if (is_logs) {
 		c->Message(Chat::White, "Attempting to reload Log Settings globally.");
