@@ -1899,10 +1899,36 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		zone->LoadAlternateAdvancement();
 		break;
 	}
+	case ServerOP_ReloadAlternateCurrencies:
+	{
+		zone->SendReloadMessage("Alternate Currencies");
+		zone->LoadAlternateCurrencies();
+		break;
+	}
+	case ServerOP_ReloadBlockedSpells:
+	{
+		zone->SendReloadMessage("Blocked Spells");
+		zone->LoadZoneBlockedSpells();
+		break;
+	}
 	case ServerOP_ReloadContentFlags:
 	{
 		zone->SendReloadMessage("Content Flags");
 		content_service.SetExpansionContext()->ReloadContentFlags();
+		break;
+	}
+	case ServerOP_ReloadDoors:
+	{
+		zone->SendReloadMessage("Doors");
+		entity_list.RemoveAllDoors();
+		zone->LoadZoneDoors();
+		entity_list.RespawnAllDoors();
+		break;
+	}
+	case ServerOP_ReloadGroundSpawns:
+	{
+		zone->SendReloadMessage("Ground Spawns");
+		zone->LoadGroundSpawns();
 		break;
 	}
 	case ServerOP_ReloadLevelEXPMods:
@@ -1925,8 +1951,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ReloadNPCEmotes:
 	{
 		zone->SendReloadMessage("NPC Emotes");
-		zone->NPCEmoteList.Clear();
 		zone->LoadNPCEmotes(&zone->NPCEmoteList);
+		break;
+	}
+	case ServerOP_ReloadObjects:
+	{
+		zone->SendReloadMessage("Objects");
+		entity_list.RemoveAllObjects();
+		zone->LoadZoneObjects();
 		break;
 	}
 	case ServerOP_ReloadPerlExportSettings:
@@ -1971,6 +2003,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		zone->SendReloadMessage("Variables");
 		database.LoadVariables();
+		break;
+	}
+	case ServerOP_ReloadVeteranRewards:
+	{
+		zone->SendReloadMessage("Veteran Rewards");
+		zone->LoadVeteranRewards();
 		break;
 	}
 	case ServerOP_ReloadWorld:

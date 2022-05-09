@@ -1304,15 +1304,21 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_RaidSay:
 		case ServerOP_RefreshCensorship:
 		case ServerOP_ReloadAAData:
+		case ServerOP_ReloadAlternateCurrencies:
+		case ServerOP_ReloadBlockedSpells:
+		case ServerOP_ReloadDoors:
+		case ServerOP_ReloadGroundSpawns:
 		case ServerOP_ReloadLevelEXPMods:
 		case ServerOP_ReloadMerchants:
 		case ServerOP_ReloadNPCEmotes:
+		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
 		case ServerOP_ReloadRules:
 		case ServerOP_ReloadStaticZoneData:
 		case ServerOP_ReloadTitles:
 		case ServerOP_ReloadTraps:
 		case ServerOP_ReloadVariables:
+		case ServerOP_ReloadVeteranRewards:
 		case ServerOP_ReloadWorld:
 		case ServerOP_ReloadZonePoints:
 		case ServerOP_RezzPlayerAccept:
