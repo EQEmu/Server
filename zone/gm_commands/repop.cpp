@@ -5,6 +5,8 @@ void command_repop(Client *c, const Seperator *sep)
 	int arguments = sep->argnum;
 	if (!arguments) {
 		c->Message(Chat::White, "Zone depopped, repopping now.");
+		zone->Repop();
+		zone->spawn2_timer.Trigger();
 		return;
 	}
 
