@@ -608,10 +608,22 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 	std::list<MerchantList> merchant_list;
 
 	auto query = fmt::format(
-		"SELECT item, slot, faction_required, level_required, "
-		"alt_currency_cost, classes_required, probability, "
-		"bucket_name, bucket_value, bucket_comparison "
-		"FROM merchantlist WHERE  merchantid = {} {} ORDER BY slot",
+		SQL(
+			SELECT
+				item,
+				slot,
+				faction_required,
+				level_required,
+				alt_currency_cost,
+				classes_required,
+				probability,
+				bucket_name,
+				bucket_value,
+				bucket_comparison
+			FROM merchantlist
+			WHERE  merchantid = {} {}
+			ORDER BY slot
+		),
 		merchantid,
 		ContentFilterCriteria::apply()
 	);
