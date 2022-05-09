@@ -1503,6 +1503,8 @@ public:
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
+	void SendReloadCommandMessages();
+
 	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0);
 	void SetItemRecastTimer(int32 spell_id, uint32 inventory_slot);
 	bool HasItemRecastTimer(int32 spell_id, uint32 inventory_slot);

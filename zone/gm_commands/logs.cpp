@@ -130,12 +130,9 @@ void command_logs(Client *c, const Seperator *sep)
 			);
 		}
 	} else if (is_reload) {
+		c->Message(Chat::White, "Attempting to reload Log Settings globally.");
 		auto pack = new ServerPacket(ServerOP_ReloadLogs, 0);
 		worldserver.SendPacket(pack);
-		c->Message(
-			Chat::White,
-			"Reloaded log settings worldwide."
-		);
 		safe_delete(pack);
 	} else if (is_set && sep->IsNumber(3)) {
 		auto logs_set = false;

@@ -1894,7 +1894,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadAAData:
-  {
+	{
 		zone->SendReloadMessage("Alternate Advancement Data");
 		zone->LoadAlternateAdvancement();
 		break;
@@ -1920,6 +1920,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ReloadMerchants: {
 		zone->SendReloadMessage("Merchants");
 		entity_list.ReloadMerchants();
+		break;
+	}
+	case ServerOP_ReloadNPCEmotes:
+	{
+		zone->SendReloadMessage("NPC Emotes");
+		zone->NPCEmoteList.Clear();
+		zone->LoadNPCEmotes(&zone->NPCEmoteList);
 		break;
 	}
 	case ServerOP_ReloadPerlExportSettings:
@@ -1958,6 +1965,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		zone->SendReloadMessage("Traps");
 		entity_list.UpdateAllTraps(true, true);
+		break;
+	}
+	case ServerOP_ReloadVariables:
+	{
+		zone->SendReloadMessage("Variables");
+		database.LoadVariables();
 		break;
 	}
 	case ServerOP_ReloadWorld:
@@ -3353,69 +3366,75 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	return ret;
 }
 
-void WorldServer::SendReloadTasks(int Command, int TaskID) {
+void WorldServer::SendReloadTasks(uint8 reload_type, uint32 task_id) {
 	auto pack = new ServerPacket(ServerOP_ReloadTasks, sizeof(ReloadTasks_Struct));
-	ReloadTasks_Struct* rts = (ReloadTasks_Struct*)pack->pBuffer;
+	auto rts = (ReloadTasks_Struct*) pack->pBuffer;
 
-	rts->Command = Command;
-	rts->Parameter = TaskID;
+	rts->reload_type = reload_type;
+	rts->task_id = task_id;
 
 	SendPacket(pack);
 }
 
 void WorldServer::HandleReloadTasks(ServerPacket *pack)
 {
-	ReloadTasks_Struct* rts = (ReloadTasks_Struct*)pack->pBuffer;
+	auto rts = (ReloadTasks_Struct*) pack->pBuffer;
 
-	Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
+	LogTasks("Global reload of tasks received with Reload Type [{}] Task ID [{}]", rts->reload_type, rts->task_id);
 
-	switch (rts->Command) {
-	case RELOADTASKS:
-		entity_list.SaveAllClientsTaskState();
+	switch (rts->reload_type) {
+		case RELOADTASKS:
+		{
+			entity_list.SaveAllClientsTaskState();
 
-		// TODO: Reload at the world level for shared tasks
+			// TODO: Reload at the world level for shared tasks
 
-		if (rts->Parameter == 0) {
-			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload ALL tasks");
-			safe_delete(task_manager);
-			task_manager = new TaskManager;
-			task_manager->LoadTasks();
+			if (!rts->task_id) {
+				LogTasks("Global reload of all Tasks");
+				safe_delete(task_manager);
+				task_manager = new TaskManager;
+				task_manager->LoadTasks();
+
+				if (zone) {
+					task_manager->LoadProximities(zone->GetZoneID());
+				}
+
+				entity_list.ReloadAllClientsTaskState();
+			} else {
+				LogTasks("Global reload of Task ID [{}]", rts->task_id);
+				task_manager->LoadTasks(rts->task_id);
+				entity_list.ReloadAllClientsTaskState(rts->task_id);
+			}
+
+			break;
+		}
+		case RELOADTASKPROXIMITIES:
+		{
 			if (zone) {
+				LogTasks("Global reload of all Task Proximities");
 				task_manager->LoadProximities(zone->GetZoneID());
 			}
-			entity_list.ReloadAllClientsTaskState();
+
+			break;
 		}
-		else {
-			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload only task %i", rts->Parameter);
-			task_manager->LoadTasks(rts->Parameter);
-			entity_list.ReloadAllClientsTaskState(rts->Parameter);
+		case RELOADTASKGOALLISTS:
+		{
+			LogTasks("Global reload of all Task Goal Lists");
+			task_manager->ReloadGoalLists();
+			break;
 		}
-
-		break;
-
-	case RELOADTASKPROXIMITIES:
-		if (zone) {
-			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task proximities");
-			task_manager->LoadProximities(zone->GetZoneID());
+		case RELOADTASKSETS:
+		{
+			LogTasks("Global reload of all Task Sets");
+			task_manager->LoadTaskSets();
+			break;
 		}
-		break;
-
-	case RELOADTASKGOALLISTS:
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task goal lists");
-		task_manager->ReloadGoalLists();
-		break;
-
-	case RELOADTASKSETS:
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task sets");
-		task_manager->LoadTaskSets();
-		break;
-
-	default:
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Unhandled ServerOP_ReloadTasks command %i", rts->Command);
-
+		default:
+		{
+			LogTasks("Unhandled global reload of Tasks Reload Type [{}] Task ID [{}]", rts->reload_type, rts->task_id);
+			break;
+		}
 	}
-
-
 }
 
 
