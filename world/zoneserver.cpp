@@ -640,7 +640,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 				ServerPacket p(ServerOP_SetConnectInfo, sizeof(ServerConnectInfo));
 				memset(p.pBuffer, 0, sizeof(ServerConnectInfo));
-				sci = (ServerConnectInfo*)p.pBuffer;
+				ServerConnectInfo* sci = (ServerConnectInfo*)p.pBuffer;
 				sci->port = client_port;
 				SendPacket(&p);
 				LogInfo("Auto zone port configuration. Telling zone to use port [{}]", client_port);
