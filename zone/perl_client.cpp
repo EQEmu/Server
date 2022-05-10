@@ -445,7 +445,7 @@ XS(XS_Client_GetSpellDmg) {
                 Perl_croak(aTHX_ "Usage: Client::GetSpellDmg(THIS)"); // @categories Stats and Attributes
         {
                 Client *THIS;
-                uint RETVAL;
+                int RETVAL;
                 dXSTARG;
                 VALIDATE_THIS_IS_CLIENT;
                 RETVAL = THIS->GetSpellDmg();
@@ -462,7 +462,7 @@ XS(XS_Client_GetHealAmt) {
                 Perl_croak(aTHX_ "Usage: Client::GetHealAmt(THIS)"); // @categories Stats and Attributes
         {
                 Client *THIS;
-                uint RETVAL;
+                int RETVAL;
                 dXSTARG;
                 VALIDATE_THIS_IS_CLIENT;
                 RETVAL = THIS->GetHealAmt();
