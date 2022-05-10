@@ -4614,7 +4614,7 @@ uint16 EntityList::CreateDoor(const char *model, const glm::vec4& position, uint
 
 	auto door = new Doors(model, position, opentype, size);
 	RemoveAllDoors();
-	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
+	zone->LoadZoneDoors();
 	entity_list.AddDoor(door);
 	entity_list.RespawnAllDoors();
 

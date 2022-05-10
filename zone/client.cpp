@@ -9514,63 +9514,202 @@ void Client::CheckVirtualZoneLines()
 
 void Client::ShowDevToolsMenu()
 {
-	std::string menu_commands_search;
-	std::string menu_commands_show;
-	std::string reload_commands_show;
-	std::string devtools_toggle;
+	std::string menu_search;
+	std::string menu_show;
+	std::string menu_reload_one;
+	std::string menu_reload_two;
+	std::string menu_reload_three;
+	std::string menu_reload_four;
+	std::string menu_reload_five;
+	std::string menu_reload_six;
+	std::string menu_reload_seven;
+	std::string menu_reload_eight;
+	std::string menu_toggle;
 
 	/**
 	 * Search entity commands
 	 */
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#fz", false, "Zones") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#fi", false, "Items") + "] ";
+	menu_search += EQ::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses");
+	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors");
+	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#finditem", false, "Items");
+	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC");
+	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects");
+	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players");
+	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#findzone", false, "Zones");
 
 	/**
 	 * Show
 	 */
-	menu_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#showzonepoints", false, "Zone Points") + "] ";
-	menu_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#showzonegloballoot", false, "Zone Global Loot") + "] ";
+	menu_show += EQ::SayLinkEngine::GenerateQuestSaylink("#showzonepoints", false, "Zone Points");
+	menu_show += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#showzonegloballoot", false, "Zone Global Loot");
 
 	/**
 	 * Reload
 	 */
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#rq", false, "Quests") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadmerchants", false, "Merchants") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadallrules", false, "Rules Globally") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "Ground Spawns") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "Alternate Currencies") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "DB Emotes") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "Doors") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadtraps", false, "Traps") + "] ";
-	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadzps", false, "Zone Points") + "] ";
+	menu_reload_one += EQ::SayLinkEngine::GenerateQuestSaylink("#reload aa", false, "AAs");
+	menu_reload_one += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload alternate_currencies", false, "Alternate Currencies");
+	menu_reload_one += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload blocked_spells", false, "Blocked Spells");
+	menu_reload_one += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload content_flags", false, "Content Flags");
+
+	menu_reload_two += EQ::SayLinkEngine::GenerateQuestSaylink("#reload doors", false, "Doors");
+	menu_reload_two += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload ground_spawns", false, "Ground Spawns");
+
+	menu_reload_three += EQ::SayLinkEngine::GenerateQuestSaylink("#reload logs", false, "Level Based Experience Modifiers");
+	menu_reload_three += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload logs", false, "Log Settings");
+
+	menu_reload_four += EQ::SayLinkEngine::GenerateQuestSaylink("#reload merchants", false, "Merchants");
+	menu_reload_four += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload npc_emotes", false, "NPC Emotes");
+	menu_reload_four += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload objects", false, "Objects");
+
+	menu_reload_five += EQ::SayLinkEngine::GenerateQuestSaylink("#reload perl_export", false, "Perl Event Export Settings");
+	menu_reload_five += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload quest", false, "Quests");
+
+	menu_reload_six += EQ::SayLinkEngine::GenerateQuestSaylink("#reload rules", false, "Rules");
+	menu_reload_six += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload static", false, "Static Zone Data");
+	menu_reload_six += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload tasks", false, "Tasks");
+	
+	menu_reload_seven += EQ::SayLinkEngine::GenerateQuestSaylink("#reload titles", false, "Titles");
+	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload traps 1", false, "Traps");
+	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload variables", false, "Variables");
+	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload veteran_rewards", false, "Veteran Rewards");
+	
+	menu_reload_eight += EQ::SayLinkEngine::GenerateQuestSaylink("#reload world", false, "World");
+	menu_reload_eight += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload zone", false, "Zone");
+	menu_reload_eight += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload zone_points", false, "Zone Points");
 
 	/**
 	 * Show window status
 	 */
-	devtools_toggle = "Disabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable", false, "Enable") + "] ";
+	menu_toggle = EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable", false, "Enable");
 	if (IsDevToolsEnabled()) {
-		devtools_toggle = "Enabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable", false, "Disable") + "] ";
+		menu_toggle = EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable", false, "Disable");
 	}
 
 	/**
 	 * Print menu
 	 */
 	SendChatLineBreak();
+
+	Message(Chat::White, "Developer Tools Menu");
+
 	Message(
-		Chat::White, "| [Devtools] %s Show this menu with %s | Current expansion [%s]",
-		devtools_toggle.c_str(),
-		EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev").c_str(),
-		content_service.GetCurrentExpansionName().c_str()
+		Chat::White,
+		fmt::format(
+			"Current Expansion | {}",
+			content_service.GetCurrentExpansionName()
+		).c_str()
 	);
-	Message(Chat::White, "| [Devtools] Search %s", menu_commands_search.c_str());
-	Message(Chat::White, "| [Devtools] Show %s", menu_commands_show.c_str());
-	Message(Chat::White, "| [Devtools] Reload %s", reload_commands_show.c_str());
-	Message(Chat::White, "| [Devtools] Search commands with #help <search>");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Show Menu | {}",
+			EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev")
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Toggle | {}",
+			menu_toggle
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Search | {}",
+			menu_search
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Show | {}",
+			menu_show
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_one
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_two
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_three
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_four
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_five
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_six
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_seven
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_eight
+		).c_str()
+	);
+
+	auto help_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#help",
+		false,
+		"#help"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Note: You can search for commands with {} [Search String]",
+			help_link
+		).c_str()
+	);
+
 	SendChatLineBreak();
 }
 
@@ -11047,6 +11186,383 @@ void Client::ReconnectUCS()
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+void Client::SendReloadCommandMessages() {
+	SendChatLineBreak();
+
+	auto aa_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload aa",
+		false,
+		"#reload aa"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Alternate Advancement Data globally",
+			aa_link
+		).c_str()
+	);
+
+	auto alternate_currencies_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload alternate_currencies",
+		false,
+		"#reload alternate_currencies"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Alternate Currencies globally",
+			alternate_currencies_link
+		).c_str()
+	);
+
+	auto blocked_spells_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload blocked_spells",
+		false,
+		"#reload blocked_spells"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Blocked Spells globally",
+			blocked_spells_link
+		).c_str()
+	);
+
+	auto content_flags_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload content_flags",
+		false,
+		"#reload content_flags"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Content Flags globally",
+			content_flags_link
+		).c_str()
+	);
+
+	auto doors_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload doors",
+		false,
+		"#reload doors"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Doors globally",
+			doors_link
+		).c_str()
+	);
+
+	auto ground_spawns_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload ground_spawns",
+		false,
+		"#reload ground_spawns"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Ground Spawns globally",
+			ground_spawns_link
+		).c_str()
+	);
+
+	auto level_mods_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload level_mods",
+		false,
+		"#reload level_mods"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Level Based Experience Modifiers globally",
+			level_mods_link
+		).c_str()
+	);
+
+	auto logs_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload logs",
+		false,
+		"#reload logs"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Log Settings globally",
+			logs_link
+		).c_str()
+	);
+
+	auto merchants_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload merchants",
+		false,
+		"#reload merchants"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Merchants globally",
+			merchants_link
+		).c_str()
+	);
+
+	auto npc_emotes_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload npc_emotes",
+		false,
+		"#reload npc_emotes"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads NPC Emotes globally",
+			npc_emotes_link
+		).c_str()
+	);
+
+	auto objects_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload objects",
+		false,
+		"#reload objects"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Objects globally",
+			objects_link
+		).c_str()
+	);
+
+	auto perl_export_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload perl_export",
+		false,
+		"#reload perl_export"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Perl Event Export Settings globally",
+			perl_export_link
+		).c_str()
+	);
+
+	auto quest_link_one = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload quest",
+		false,
+		"#reload quest"
+	);
+
+	auto quest_link_two = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload quest",
+		false,
+		"0"
+	);
+
+	auto quest_link_three = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload quest 1",
+		false,
+		"1"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} [{}|{}] - Reloads Quests and Timers in your current zone if specified (0 = Do Not Reload Timers, 1 = Reload Timers)",
+			quest_link_one,
+			quest_link_two,
+			quest_link_three
+		).c_str()
+	);
+
+	auto rules_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload rules",
+		false,
+		"#reload rules"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Rules globally",
+			rules_link
+		).c_str()
+	);
+
+	auto static_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload static",
+		false,
+		"#reload static"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Static Zone Data globally",
+			static_link
+		).c_str()
+	);
+
+	auto tasks_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload tasks",
+		false,
+		"#reload tasks"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} [Task ID] - Reloads Tasks globally or by ID if specified",
+			tasks_link
+		).c_str()
+	);
+
+	auto titles_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload titles",
+		false,
+		"#reload titles"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Titles globally",
+			titles_link
+		).c_str()
+	);
+
+	auto traps_link_one = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload traps",
+		false,
+		"#reload traps"
+	);
+
+	auto traps_link_two = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload traps",
+		false,
+		"0"
+	);
+
+	auto traps_link_three = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload traps 1",
+		false,
+		"1"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} [{}|{}] - Reloads Traps in your current zone or globally if specified",
+			traps_link_one,
+			traps_link_two,
+			traps_link_three
+		).c_str()
+	);
+
+	auto variables_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload variables",
+		false,
+		"#reload variables"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Variables globally",
+			variables_link
+		).c_str()
+	);
+
+	auto veteran_rewards_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload veteran_rewards",
+		false,
+		"#reload veteran_rewards"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Veteran Rewards globally",
+			veteran_rewards_link
+		).c_str()
+	);
+
+	auto world_link_one = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload world",
+		false,
+		"#reload world"
+	);
+
+	auto world_link_two = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload world",
+		false,
+		"0"
+	);
+
+	auto world_link_three = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload world 1",
+		false,
+		"1"
+	);
+
+	auto world_link_four = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload world 2",
+		false,
+		"2"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} [{}|{}|{}] - Reloads Quests and repops globally if specified (0 = No Repop, 1 = Repop, 2 = Force Repop)",
+			world_link_one,
+			world_link_two,
+			world_link_three,
+			world_link_four
+		).c_str()
+	);
+
+	auto zone_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload zone",
+		false,
+		"#reload zone"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} [Zone ID] [Version] - Reloads Zone configuration for your current zone, can load another Zone's configuration if specified",
+			zone_link
+		).c_str()
+	);
+
+	auto zone_points_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		"#reload zone_points",
+		false,
+		"#reload zone_points"
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Zone Points globally",
+			zone_points_link
+		).c_str()
+	);
+
+	SendChatLineBreak();
 }
 
 bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value)

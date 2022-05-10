@@ -9,9 +9,9 @@ void command_zheader(Client *c, const Seperator *sep)
 	}
 
 	auto zone_id = (
-		sep->IsNumber(1) ?
-		std::stoul(sep->arg[1]) :
-		ZoneID(sep->arg[1])
+		sep->IsNumber(2) ?
+		std::stoul(sep->arg[2]) :
+		ZoneID(sep->arg[2])
 	);
 	if (!zone_id) {
 		c->Message(
@@ -27,8 +27,8 @@ void command_zheader(Client *c, const Seperator *sep)
 	auto zone_short_name = ZoneName(zone_id);
 	auto zone_long_name = ZoneLongName(zone_id);
 	auto version = (
-		sep->IsNumber(2) ?
-		std::stoul(sep->arg[2]) :
+		sep->IsNumber(3) ?
+		std::stoul(sep->arg[3]) :
 		0
 	);
 	

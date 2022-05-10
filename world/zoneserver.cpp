@@ -876,29 +876,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			client_list.SendClientVersionSummary(srcvss->Name);
 			break;
 		}
-		case ServerOP_ReloadLogs: {
-			zoneserver_list.SendPacket(pack);
-			LogSys.LoadLogDatabaseSettings();
-			break;
-		}
-		case ServerOP_ReloadRules: {
-			zoneserver_list.SendPacket(pack);
-			RuleManager::Instance()->LoadRules(&database, "default", true);
-			break;
-		}
-		case ServerOP_ReloadContentFlags: {
-			zoneserver_list.SendPacket(pack);
-			content_service.SetExpansionContext()->ReloadContentFlags();
-			break;
-		}
-		case ServerOP_ReloadRulesWorld: {
-			RuleManager::Instance()->LoadRules(&database, "default", true);
-			break;
-		}
-		case ServerOP_ReloadVariablesWorld: {
-			database.LoadVariables();
-			break;
-		}
 		case ServerOP_FriendsWho: {
 			auto sfw = (ServerFriendsWho_Struct*) pack->pBuffer;
 			client_list.SendFriendsWho(sfw, this);
@@ -1327,11 +1304,21 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_RaidSay:
 		case ServerOP_RefreshCensorship:
 		case ServerOP_ReloadAAData:
+		case ServerOP_ReloadAlternateCurrencies:
+		case ServerOP_ReloadBlockedSpells:
+		case ServerOP_ReloadDoors:
+		case ServerOP_ReloadGroundSpawns:
 		case ServerOP_ReloadLevelEXPMods:
 		case ServerOP_ReloadMerchants:
+		case ServerOP_ReloadNPCEmotes:
+		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
+		case ServerOP_ReloadRules:
 		case ServerOP_ReloadStaticZoneData:
 		case ServerOP_ReloadTitles:
+		case ServerOP_ReloadTraps:
+		case ServerOP_ReloadVariables:
+		case ServerOP_ReloadVeteranRewards:
 		case ServerOP_ReloadWorld:
 		case ServerOP_ReloadZonePoints:
 		case ServerOP_RezzPlayerAccept:
@@ -1348,6 +1335,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_WWTaskUpdate:
 		case ServerOP_ZonePlayer: {
 			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_ReloadContentFlags: {
+			zoneserver_list.SendPacket(pack);
+			content_service.SetExpansionContext()->ReloadContentFlags();
+			break;
+		}	
+		case ServerOP_ReloadLogs: {
+			zoneserver_list.SendPacket(pack);
+			LogSys.LoadLogDatabaseSettings();
 			break;
 		}
 		case ServerOP_ReloadTasks: {
