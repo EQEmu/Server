@@ -129,6 +129,7 @@ namespace Logs {
 		Saylink,
 		ChecksumVerification,
 		CombatRecord,
+		Hate,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -216,6 +217,7 @@ namespace Logs {
 		"Saylink",
 		"ChecksumVerification",
 		"CombatRecord",
+		"Hate",
 	};
 }
 

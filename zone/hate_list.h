@@ -28,10 +28,10 @@ struct ExtraAttackOptions;
 struct struct_HateList {
 	Mob    *entity_on_hatelist;
 	int64  hatelist_damage;
-	uint64 stored_hate_amount;
+	int64  stored_hate_amount;
 	bool   is_entity_frenzy;
 	int8   oor_count; // count on how long we've been out of range
-	uint64 last_modified; // we need to remove this if it gets higher than 10 mins
+	uint32 last_modified; // we need to remove this if it gets higher than 10 mins
 };
 
 class HateList {
@@ -76,7 +76,7 @@ public:
 	void DoFactionHits(int64 npc_faction_level_id);
 	void IsEntityInFrenzyMode();
 	void PrintHateListToClient(Client *c);
-	void SetHateAmountOnEnt(Mob *other, uint64 in_hate, uint64 in_damage);
+	void SetHateAmountOnEnt(Mob *other, int64 in_hate, uint64 in_damage);
 	void SetHateOwner(Mob *new_hate_owner) { hate_owner = new_hate_owner; }
 	void SpellCast(Mob *caster, uint32 spell_id, float range, Mob *ae_center = nullptr);
 	void WipeHateList();

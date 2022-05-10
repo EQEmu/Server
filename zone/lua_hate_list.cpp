@@ -30,12 +30,12 @@ void Lua_HateEntry::SetDamage(int64 value) {
 	self->hatelist_damage = value;
 }
 
-uint64 Lua_HateEntry::GetHate() {
+int64 Lua_HateEntry::GetHate() {
 	Lua_Safe_Call_Int();
 	return self->stored_hate_amount;
 }
 
-void Lua_HateEntry::SetHate(uint64 value) {
+void Lua_HateEntry::SetHate(int64 value) {
 	Lua_Safe_Call_Void();
 	self->stored_hate_amount = value;
 }

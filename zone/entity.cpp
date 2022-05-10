@@ -3618,7 +3618,7 @@ void EntityList::ClearZoneFeignAggro(Mob *targ)
 	}
 }
 
-void EntityList::AggroZone(Mob *who, uint64 hate)
+void EntityList::AggroZone(Mob *who, int64 hate)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
@@ -4614,7 +4614,7 @@ uint16 EntityList::CreateDoor(const char *model, const glm::vec4& position, uint
 
 	auto door = new Doors(model, position, opentype, size);
 	RemoveAllDoors();
-	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
+	zone->LoadZoneDoors();
 	entity_list.AddDoor(door);
 	entity_list.RespawnAllDoors();
 

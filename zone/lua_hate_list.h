@@ -22,8 +22,8 @@ public:
 	void SetEnt(Lua_Mob e);
 	int64 GetDamage();
 	void SetDamage(int64 value);
-	uint64 GetHate();
-	void SetHate(uint64 value);
+	int64 GetHate();
+	void SetHate(int64 value);
 	int GetFrenzy();
 	void SetFrenzy(bool value);
 };

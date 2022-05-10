@@ -4211,7 +4211,7 @@ void Bot::AddBotItem(
 		);
 		return;
 	}
-	
+
 	if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
 		LogError("Failed to save item by slot to slot [{}] for [{}].", slot_id, GetCleanName());
 		return;
@@ -4267,7 +4267,7 @@ void Bot::RemoveBotItem(uint32 item_id) {
 		if (!inst || !inst->GetItem()) {
 			continue;
 		}
-		
+
 
 		if (inst->GetID() == item_id) {
 			std::string error_message;
@@ -4999,8 +4999,8 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 	}
 }
 
-//void Bot::AddToHateList(Mob* other, uint64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false)
-void Bot::AddToHateList(Mob* other, uint64 hate, int64 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic, bool pet_command) {
+//void Bot::AddToHateList(Mob* other, int64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false)
+void Bot::AddToHateList(Mob* other, int64 hate, int64 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic, bool pet_command) {
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic, pet_command);
 }
 
@@ -5074,7 +5074,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	uint64 hate = 0;
+	int64 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 
@@ -6329,7 +6329,7 @@ void Bot::RogueBackstab(Mob *other, bool min_damage, int ReuseTime)
 		return;
 	}
 
-	uint64 hate = 0;
+	int64 hate = 0;
 
 	int base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
 	hate = base_damage;

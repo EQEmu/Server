@@ -283,20 +283,7 @@ int command_init(void)
 		command_add("raidloot", "[All|GroupLeader|RaidLeader|Selected] - Sets your Raid Loot Type if you have permission to do so.", AccountStatus::Player, command_raidloot) ||
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", AccountStatus::QuestTroupe, command_randomfeatures) ||
 		command_add("refreshgroup", "- Refreshes Group for you or your player target.", AccountStatus::Player, command_refreshgroup) ||
-		command_add("reloadaa", "Reloads Alternate Advancement data globally", AccountStatus::GMMgmt, command_reloadaa) ||
-		command_add("reloadallrules", "Executes a reload of all rules globally.", AccountStatus::QuestTroupe, command_reloadallrules) ||
-		command_add("reloadcontentflags", "Executes a reload of all expansion and content flags", AccountStatus::QuestTroupe, command_reloadcontentflags) ||
-		command_add("reloademote", "Reloads NPC Emotes", AccountStatus::QuestTroupe, command_reloademote) ||
-		command_add("reloadlevelmods", "Reloads level based experience modifiers globally", AccountStatus::Max, command_reloadlevelmods) ||
-		command_add("reloadmerchants", "Reloads merchant lists globally", AccountStatus::Max, command_reloadmerchants) ||
-		command_add("reloadperlexportsettings", "Reloads Perl event export settings globally", AccountStatus::Max, command_reloadperlexportsettings) ||
-		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", AccountStatus::GMLeadAdmin, command_reloadqst) ||
-		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", AccountStatus::QuestTroupe, command_reloadworldrules) ||
-		command_add("reloadstatic", "- Reload Static Zone Data globally", AccountStatus::GMLeadAdmin, command_reloadstatic) ||
-		command_add("reloadtraps", "[0|1] - Reloads and repops traps, globally if specified (1 = global)", AccountStatus::QuestTroupe, command_reloadtraps) ||
-		command_add("reloadtitles", "- Reload player titles from the database", AccountStatus::GMLeadAdmin, command_reloadtitles) ||
-		command_add("reloadworld", "[0|1|2] - Reload quests global and repop NPCs if specified (0 = No Repop, 1 = Repop, 2 = Force Repop)", AccountStatus::Max, command_reloadworld) ||
-		command_add("reloadzps", "- Reload zone points from database globally", AccountStatus::GMLeadAdmin, command_reloadzps) ||
+		command_add("reload", "Reloads different types of server data globally, use no argument for help menu.", AccountStatus::GMMgmt, command_reload) ||
 		command_add("removeitem", "[Item ID] [Amount] - Removes the specified Item ID by Amount from you or your player target's inventory (Amount defaults to 1 if not used)", AccountStatus::GMAdmin, command_removeitem) ||
 		command_add("repop", "[Force] - Repop the zone with optional force repop", AccountStatus::GMAdmin, command_repop) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", AccountStatus::GMMgmt, command_resetaa) ||
@@ -1311,20 +1298,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/raidloot.cpp"
 #include "gm_commands/randomfeatures.cpp"
 #include "gm_commands/refreshgroup.cpp"
-#include "gm_commands/reloadaa.cpp"
-#include "gm_commands/reloadallrules.cpp"
-#include "gm_commands/reloadcontentflags.cpp"
-#include "gm_commands/reloademote.cpp"
-#include "gm_commands/reloadlevelmods.cpp"
-#include "gm_commands/reloadmerchants.cpp"
-#include "gm_commands/reloadperlexportsettings.cpp"
-#include "gm_commands/reloadqst.cpp"
-#include "gm_commands/reloadstatic.cpp"
-#include "gm_commands/reloadtitles.cpp"
-#include "gm_commands/reloadtraps.cpp"
-#include "gm_commands/reloadworld.cpp"
-#include "gm_commands/reloadworldrules.cpp"
-#include "gm_commands/reloadzps.cpp"
+#include "gm_commands/reload.cpp"
 #include "gm_commands/removeitem.cpp"
 #include "gm_commands/repop.cpp"
 #include "gm_commands/resetaa.cpp"
