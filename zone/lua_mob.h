@@ -230,8 +230,8 @@ public:
 	void SetHate(Lua_Mob other, int64 hate, int64 damage);
 	void HalveAggro(Lua_Mob other);
 	void DoubleAggro(Lua_Mob other);
-	uint64 GetHateAmount(Lua_Mob target);
-	uint64 GetHateAmount(Lua_Mob target, bool is_damage);
+	int64 GetHateAmount(Lua_Mob target);
+	int64 GetHateAmount(Lua_Mob target, bool is_damage);
 	uint64 GetDamageAmount(Lua_Mob target);
 	void WipeHateList();
 	bool CheckAggro(Lua_Mob other);

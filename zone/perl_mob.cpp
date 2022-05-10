@@ -3719,7 +3719,7 @@ XS(XS_Mob_GetHateAmount) {
 		Perl_croak(aTHX_ "Usage: Mob::GetHateAmount(THIS, Mob* mob, [bool is_damage = false])"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
-		uint32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		Mob *tmob;
 		bool is_dam;
@@ -3752,7 +3752,7 @@ XS(XS_Mob_GetDamageAmount) {
 		Perl_croak(aTHX_ "Usage: Mob::GetDamageAmount(THIS, Mob* target_mob)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		uint32 RETVAL;
+		uint64 RETVAL;
 		dXSTARG;
 		Mob *tmob;
 		VALIDATE_THIS_IS_MOB;
