@@ -677,11 +677,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					0,
 					Chat::White,
 					fmt::format(
-						"Remote Kick | {} booted{}",
+						"Remote Kick | {} booted{}.",
 						skp->name,
 						is_zone_loaded ?
 						fmt::format(
-							"in {}",
+							" in {}",
 							zone->GetZoneDescription()
 						) :
 						""
