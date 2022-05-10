@@ -108,7 +108,7 @@ void EntityList::DescribeAggro(Client *to_who, NPC *from_who, float d, bool verb
 		}
 
 		if (is_engaged) {
-			uint64 hate_amount = from_who->GetHateAmount(npc);
+			int64 hate_amount = from_who->GetHateAmount(npc);
 			to_who->Message(
 				Chat::White,
 				fmt::format(
@@ -1509,8 +1509,8 @@ bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {
 
 void Mob::RogueEvade(Mob *other)
 {
-	int amount = other->GetHateAmount(this) * zone->random.Int(40, 70) / 100;
-	other->SetHateAmountOnEnt(this, std::max(100, amount));
+	int64 amount = other->GetHateAmount(this) * zone->random.Int(40, 70) / 100;
+	other->SetHateAmountOnEnt(this, std::max((int64)100, amount));
 
 	return;
 }

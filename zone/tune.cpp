@@ -907,7 +907,7 @@ int64 Mob::TuneClientAttack(Mob* other, bool no_avoid, bool no_hit_chance, int h
 	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	uint64 hate = 0;
+	int64 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 

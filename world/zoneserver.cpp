@@ -93,23 +93,23 @@ ZoneServer::~ZoneServer() {
 	}
 }
 
-bool ZoneServer::SetZone(uint32 zone_id, uint32 instance_id, bool is_static_zone) {
+bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_static_zone) {
 	is_booting_up = false;
 
-	std::string zone_short_name = ZoneName(zone_id, true);
-	std::string zone_long_name = ZoneLongName(zone_id, true);
+	std::string zone_short_name = ZoneName(in_zone_id, true);
+	std::string zone_long_name = ZoneLongName(in_zone_id, true);
 
-	if (zone_id) {
+	if (in_zone_id) {
 		LogInfo(
 			"Setting zone process to Zone: {} ({}) ID: {}{}{}",
 			zone_long_name,
 			zone_short_name,
-			zone_id,
+			in_zone_id,
 			(
-				instance_id ?
+				in_instance_id ?
 				fmt::format(
 					" (Instance ID {})",
-					instance_id
+					in_instance_id
 				) :
 				""
 			),
@@ -117,10 +117,10 @@ bool ZoneServer::SetZone(uint32 zone_id, uint32 instance_id, bool is_static_zone
 		);
 	}
 
-	zone_server_zone_id = zone_id;
-	instance_id = instance_id;
-	if (zone_id) {
-		zone_server_previous_zone_id = zone_id;
+	zone_server_zone_id = in_zone_id;
+	instance_id = in_instance_id;
+	if (in_zone_id) {
+		zone_server_previous_zone_id = in_zone_id;
 	}
 
 	if (!zone_server_zone_id) {
@@ -876,29 +876,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			client_list.SendClientVersionSummary(srcvss->Name);
 			break;
 		}
-		case ServerOP_ReloadLogs: {
-			zoneserver_list.SendPacket(pack);
-			LogSys.LoadLogDatabaseSettings();
-			break;
-		}
-		case ServerOP_ReloadRules: {
-			zoneserver_list.SendPacket(pack);
-			RuleManager::Instance()->LoadRules(&database, "default", true);
-			break;
-		}
-		case ServerOP_ReloadContentFlags: {
-			zoneserver_list.SendPacket(pack);
-			content_service.SetExpansionContext()->ReloadContentFlags();
-			break;
-		}
-		case ServerOP_ReloadRulesWorld: {
-			RuleManager::Instance()->LoadRules(&database, "default", true);
-			break;
-		}
-		case ServerOP_ReloadVariablesWorld: {
-			database.LoadVariables();
-			break;
-		}
 		case ServerOP_FriendsWho: {
 			auto sfw = (ServerFriendsWho_Struct*) pack->pBuffer;
 			client_list.SendFriendsWho(sfw, this);
@@ -1327,11 +1304,21 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_RaidSay:
 		case ServerOP_RefreshCensorship:
 		case ServerOP_ReloadAAData:
+		case ServerOP_ReloadAlternateCurrencies:
+		case ServerOP_ReloadBlockedSpells:
+		case ServerOP_ReloadDoors:
+		case ServerOP_ReloadGroundSpawns:
 		case ServerOP_ReloadLevelEXPMods:
 		case ServerOP_ReloadMerchants:
+		case ServerOP_ReloadNPCEmotes:
+		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
+		case ServerOP_ReloadRules:
 		case ServerOP_ReloadStaticZoneData:
 		case ServerOP_ReloadTitles:
+		case ServerOP_ReloadTraps:
+		case ServerOP_ReloadVariables:
+		case ServerOP_ReloadVeteranRewards:
 		case ServerOP_ReloadWorld:
 		case ServerOP_ReloadZonePoints:
 		case ServerOP_RezzPlayerAccept:
@@ -1348,6 +1335,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_WWTaskUpdate:
 		case ServerOP_ZonePlayer: {
 			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_ReloadContentFlags: {
+			zoneserver_list.SendPacket(pack);
+			content_service.SetExpansionContext()->ReloadContentFlags();
+			break;
+		}	
+		case ServerOP_ReloadLogs: {
+			zoneserver_list.SendPacket(pack);
+			LogSys.LoadLogDatabaseSettings();
 			break;
 		}
 		case ServerOP_ReloadTasks: {
@@ -1504,10 +1501,10 @@ void ZoneServer::ChangeWID(uint32 iCharID, uint32 iWID) {
 }
 
 
-void ZoneServer::TriggerBootup(uint32 zone_id, uint32 instance_id, const char* admin_name, bool is_static_zone) {
+void ZoneServer::TriggerBootup(uint32 in_zone_id, uint32 in_instance_id, const char* admin_name, bool is_static_zone) {
 	is_booting_up = true;
-	zone_server_zone_id = zone_id;
-	instance_id = instance_id;
+	zone_server_zone_id = in_zone_id;
+	instance_id = in_instance_id;
 
 	auto pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_struct));
 	auto s = (ServerZoneStateChange_struct*) pack->pBuffer;
@@ -1516,12 +1513,12 @@ void ZoneServer::TriggerBootup(uint32 zone_id, uint32 instance_id, const char* a
 		strn0cpy(s->adminname, admin_name, sizeof(s->adminname));
 	}
 
-	s->zoneid = zone_id ? zone_id : GetZoneID();
-	s->instanceid = instance_id;
+	s->zoneid = in_zone_id ? in_zone_id : GetZoneID();
+	s->instanceid = in_instance_id;
 	s->makestatic = is_static_zone;
 	SendPacket(pack);
 	delete pack;
-	LSBootUpdate(zone_id, instance_id);
+	LSBootUpdate(in_zone_id, in_instance_id);
 }
 
 void ZoneServer::IncomingClient(Client* client) {

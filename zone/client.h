@@ -1503,6 +1503,8 @@ public:
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
+	void SendReloadCommandMessages();
+
 	void SendItemRecastTimer(int32 recast_type, uint32 recast_delay = 0);
 	void SetItemRecastTimer(int32 spell_id, uint32 inventory_slot);
 	bool HasItemRecastTimer(int32 spell_id, uint32 inventory_slot);
@@ -1651,6 +1653,9 @@ public:
 
 	// rate limit
 	Timer m_list_task_timers_rate_limit = {};
+
+	std::map<std::string,std::string> GetMerchantDataBuckets();
+	bool CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value);
 
 protected:
 	friend class Mob;

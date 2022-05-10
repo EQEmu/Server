@@ -86,7 +86,7 @@ Zone* zone = 0;
 
 void UpdateWindowTitle(char* iNewTitle);
 
-bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
+bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	const char* zonename = ZoneName(iZoneID);
 
 	if (iZoneID == 0 || zonename == 0)
@@ -103,7 +103,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	zone = new Zone(iZoneID, iInstanceID, zonename);
 
 	//init the zone, loads all the data, etc
-	if (!zone->Init(iStaticZone)) {
+	if (!zone->Init(is_static)) {
 		safe_delete(zone);
 		std::cerr << "Zone->Init failed" << std::endl;
 		worldserver.SetZoneData(0);
@@ -151,14 +151,14 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 
 	LogInfo("---- Zone server [{}], listening on port:[{}] ----", zonename, ZoneConfig::get()->ZonePort);
 	LogInfo("Zone Bootup: [{}] [{}] ([{}]: [{}])",
-		(iStaticZone) ? "Static" : "Dynamic", zonename, iZoneID, iInstanceID);
+		(is_static) ? "Static" : "Dynamic", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle(nullptr);
 
 	// Dynamic zones need to Sync here.
 	// Static zones sync when they connect in worldserver.cpp.
 	// Static zones cannot sync here as request is ignored by worldserver.
-	if (!iStaticZone)
+	if (!is_static)
 	{
 		zone->GetTimeSync();
 	}
@@ -605,26 +605,25 @@ void Zone::LoadTempMerchantData()
 
 void Zone::LoadNewMerchantData(uint32 merchantid) {
 
-	std::list<MerchantList> merlist;
+	std::list<MerchantList> merchant_list;
 
-	std::string query = fmt::format(
+	auto query = fmt::format(
 		SQL(
 			SELECT
-			  item,
-			  slot,
-			  faction_required,
-			  level_required,
-			  alt_currency_cost,
-			  classes_required,
-			  probability
-			FROM
-			  merchantlist
-			WHERE
-			  merchantid = {}
-			  {}
-			ORDER BY
-			  slot
-			),
+				item,
+				slot,
+				faction_required,
+				level_required,
+				alt_currency_cost,
+				classes_required,
+				probability,
+				bucket_name,
+				bucket_value,
+				bucket_comparison
+			FROM merchantlist
+			WHERE  merchantid = {} {}
+			ORDER BY slot
+		),
 		merchantid,
 		ContentFilterCriteria::apply()
 	);
@@ -634,25 +633,28 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
         return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		MerchantList ml;
-		ml.id                = merchantid;
-		ml.item              = atoul(row[0]);
-		ml.slot              = atoul(row[1]);
-		ml.faction_required  = atoul(row[2]);
-		ml.level_required    = atoul(row[3]);
-		ml.alt_currency_cost = atoul(row[4]);
-		ml.classes_required  = atoul(row[5]);
-		ml.probability       = atoul(row[6]);
-		merlist.push_back(ml);
+		ml.id = merchantid;
+		ml.item = std::stoul(row[0]);
+		ml.slot = std::stoul(row[1]);
+		ml.faction_required = static_cast<int16>(std::stoi(row[2]));
+		ml.level_required = static_cast<uint8>(std::stoul(row[3]));
+		ml.alt_currency_cost = static_cast<uint16>(std::stoul(row[4]));
+		ml.classes_required = std::stoul(row[5]);
+		ml.probability = static_cast<uint8>(std::stoul(row[6]));
+		ml.bucket_name = row[7];
+		ml.bucket_value = row[8];
+		ml.bucket_comparison = static_cast<uint8>(std::stoul(row[9]));
+		merchant_list.push_back(ml);
 	}
 
-	merchanttable[merchantid] = merlist;
+	merchanttable[merchantid] = merchant_list;
 }
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
-	std::string query = fmt::format(
+	auto query = fmt::format(
 		SQL (
 			SELECT
 			  DISTINCT merchantlist.merchantid,
@@ -662,7 +664,10 @@ void Zone::GetMerchantDataForZoneLoad() {
 			  merchantlist.level_required,
 			  merchantlist.alt_currency_cost,
 			  merchantlist.classes_required,
-			  merchantlist.probability
+			  merchantlist.probability,
+			  merchantlist.bucket_name,
+			  merchantlist.bucket_value,
+			  merchantlist.bucket_comparison
 			FROM
 			  merchantlist,
 			  npc_types,
@@ -688,49 +693,50 @@ void Zone::GetMerchantDataForZoneLoad() {
 	std::map<uint32, std::list<MerchantList> >::iterator merchant_list;
 
 	uint32 npc_id = 0;
-	if (results.RowCount() == 0) {
+	if (!results.Success() || !results.RowCount()) {
 		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
 	}
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		MerchantList merchant_list_entry{};
-		merchant_list_entry.id = atoul(row[0]);
-		if (npc_id != merchant_list_entry.id) {
-			merchant_list = merchanttable.find(merchant_list_entry.id);
+
+	for (auto row : results) {
+		MerchantList mle{};
+		mle.id = atoul(row[0]);
+		if (npc_id != mle.id) {
+			merchant_list = merchanttable.find(mle.id);
 			if (merchant_list == merchanttable.end()) {
 				std::list<MerchantList> empty;
-				merchanttable[merchant_list_entry.id] = empty;
-				merchant_list = merchanttable.find(merchant_list_entry.id);
+				merchanttable[mle.id] = empty;
+				merchant_list = merchanttable.find(mle.id);
 			}
 
-			npc_id = merchant_list_entry.id;
+			npc_id = mle.id;
 		}
 
-		auto iter  = merchant_list->second.begin();
 		bool found = false;
-		while (iter != merchant_list->second.end()) {
-			if ((*iter).item == merchant_list_entry.id) {
+		for (const auto &m : merchant_list->second) {
+			if (m.item == mle.id) {
 				found = true;
 				break;
 			}
-			++iter;
 		}
 
 		if (found) {
 			continue;
 		}
+		
+		mle.slot = std::stoul(row[0]);
+		mle.item = std::stoul(row[1]);
+		mle.faction_required = static_cast<int16>(std::stoi(row[2]));
+		mle.level_required = static_cast<uint8>(std::stoul(row[3]));
+		mle.alt_currency_cost = static_cast<uint16>(std::stoul(row[4]));
+		mle.classes_required = std::stoul(row[5]);
+		mle.probability = static_cast<uint8>(std::stoul(row[6]));
+		mle.bucket_name = row[7];
+		mle.bucket_value = row[8];
+		mle.bucket_comparison = static_cast<uint8>(std::stoul(row[9]));
 
-		merchant_list_entry.slot              = atoul(row[1]);
-		merchant_list_entry.item              = atoul(row[2]);
-		merchant_list_entry.faction_required  = atoul(row[3]);
-		merchant_list_entry.level_required    = atoul(row[4]);
-		merchant_list_entry.alt_currency_cost = atoul(row[5]);
-		merchant_list_entry.classes_required  = atoul(row[6]);
-		merchant_list_entry.probability       = atoul(row[7]);
-
-		merchant_list->second.push_back(merchant_list_entry);
+		merchant_list->second.push_back(mle);
 	}
-
 }
 
 void Zone::LoadMercTemplates(){
@@ -919,21 +925,19 @@ void Zone::Shutdown(bool quiet)
 	}
 }
 
-void Zone::LoadZoneDoors(const char* zone, int16 version)
+void Zone::LoadZoneDoors()
 {
-	LogInfo("Loading doors for [{}] ", zone);
+	LogInfo("Loading doors for [{}] ", GetShortName());
 
-	auto door_entries = content_db.LoadDoors(zone, version);
-	if (door_entries.empty())
-	{
+	auto door_entries = content_db.LoadDoors(GetShortName(), GetInstanceVersion());
+	if (door_entries.empty()) {
 		LogInfo("No doors loaded");
 		return;
 	}
 
-	for (const auto& entry : door_entries)
-	{
-		auto newdoor = new Doors(entry);
-		entity_list.AddDoor(newdoor);
+	for (const auto &entry : door_entries) {
+		auto d = new Doors(entry);
+		entity_list.AddDoor(d);
 		LogDoorsDetail("Door added to entity list, db id: [{}], door_id: [{}]", entry.id, entry.doorid);
 	}
 }
@@ -1075,14 +1079,14 @@ Zone::~Zone() {
 }
 
 //Modified for timezones.
-bool Zone::Init(bool iStaticZone) {
-	SetStaticZone(iStaticZone);
+bool Zone::Init(bool is_static) {
+	SetStaticZone(is_static);
 
 	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) { // try loading the zone name...
+	if (!LoadZoneCFG(GetShortName(), GetInstanceVersion())) { // try loading the zone name...
 		LoadZoneCFG(
-			zone->GetFileName(),
-			zone->GetInstanceVersion()
+			GetFileName(),
+			GetInstanceVersion()
 		);
 	} // if that fails, try the file name, then load defaults
 
@@ -1093,9 +1097,9 @@ bool Zone::Init(bool iStaticZone) {
 		}
 	}
 
-	zone->zonemap  = Map::LoadMapFile(zone->map_name);
-	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing  = IPathfinder::Load(zone->map_name);
+	zonemap  = Map::LoadMapFile(map_name);
+	watermap = WaterMap::LoadWaterMapfile(map_name);
+	pathing  = IPathfinder::Load(map_name);
 
 	LogInfo("Loading spawn conditions");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
@@ -1152,8 +1156,8 @@ bool Zone::Init(bool iStaticZone) {
 	LogInfo("Flushing old respawn timers");
 	database.QueryDatabase("DELETE FROM `respawn_times` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())");
 
-	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
-	zone->LoadZoneBlockedSpells(zone->GetZoneID());
+	LoadZoneDoors();
+	LoadZoneBlockedSpells();
 
 	//clear trader items if we are loading the bazaar
 	if (strncasecmp(short_name, "bazaar", 6) == 0) {
@@ -1161,30 +1165,31 @@ bool Zone::Init(bool iStaticZone) {
 		database.DeleteBuyLines(0);
 	}
 
-	zone->LoadLDoNTraps();
-	zone->LoadLDoNTrapEntries();
-	zone->LoadVeteranRewards();
-	zone->LoadAlternateCurrencies();
-	zone->LoadNPCEmotes(&NPCEmoteList);
+	LoadLDoNTraps();
+	LoadLDoNTrapEntries();
+	LoadVeteranRewards();
+	LoadAlternateCurrencies();
+	LoadNPCEmotes(&NPCEmoteList);
 
 	LoadAlternateAdvancement();
 
 	content_db.LoadGlobalLoot();
 
 	//Load merchant data
-	zone->GetMerchantDataForZoneLoad();
+	GetMerchantDataForZoneLoad();
 
 	//Load temporary merchant data
-	zone->LoadTempMerchantData();
+	LoadTempMerchantData();
 
 	// Merc data
 	if (RuleB(Mercs, AllowMercs)) {
-		zone->LoadMercTemplates();
-		zone->LoadMercSpells();
+		LoadMercTemplates();
+		LoadMercSpells();
 	}
 
-	if (RuleB(Zone, LevelBasedEXPMods))
-		zone->LoadLevelEXPMods();
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		LoadLevelEXPMods();
+	}
 
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
@@ -1196,9 +1201,9 @@ bool Zone::Init(bool iStaticZone) {
 	Expedition::CacheAllFromDatabase();
 
 	LogInfo("Loading timezone data");
-	zone->zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
+	zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
 
-	LogInfo("Init Finished: ZoneID = [{}], Time Offset = [{}]", zoneid, zone->zone_time.getEQTimeZone());
+	LogInfo("Init Finished: ZoneID = [{}], Time Offset = [{}]", zoneid, zone_time.getEQTimeZone());
 
 	LoadGrids();
 	LoadTickItems();
@@ -1213,7 +1218,6 @@ void Zone::ReloadStaticData() {
 	LogInfo("Reloading Zone Static Data");
 
 	LogInfo("Reloading static zone points");
-	zone_point_list.Clear();
 	if (!content_db.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
 		LogError("Loading static zone points failed");
 	}
@@ -1239,19 +1243,19 @@ void Zone::ReloadStaticData() {
 	}
 
 	entity_list.RemoveAllDoors();
-	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
+	LoadZoneDoors();
 	entity_list.RespawnAllDoors();
 
-	zone->LoadVeteranRewards();
-	zone->LoadAlternateCurrencies();
+	LoadVeteranRewards();
+	LoadAlternateCurrencies();
 	NPCEmoteList.Clear();
-	zone->LoadNPCEmotes(&NPCEmoteList);
+	LoadNPCEmotes(&NPCEmoteList);
 
 	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) { // try loading the zone name...
+	if (!LoadZoneCFG(GetShortName(), GetInstanceVersion())) { // try loading the zone name...
 		LoadZoneCFG(
-			zone->GetFileName(),
-			zone->GetInstanceVersion()
+			GetFileName(),
+			GetInstanceVersion()
 		);
 	} // if that fails, try the file name, then load defaults
 
@@ -2095,13 +2099,13 @@ void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 	m_Graveyard = graveyardPosition;
 }
 
-void Zone::LoadZoneBlockedSpells(uint32 zone_id)
+void Zone::LoadZoneBlockedSpells()
 {
 	if (!blocked_spells) {
-		zone_total_blocked_spells = content_db.GetBlockedSpellsCount(zone_id);
+		zone_total_blocked_spells = content_db.GetBlockedSpellsCount(GetZoneID());
 		if (zone_total_blocked_spells > 0) {
 			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
-			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
+			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, GetZoneID())) {
 				LogError(" Failed to load blocked spells");
 				ClearBlockedSpells();
 			}

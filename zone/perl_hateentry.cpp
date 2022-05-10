@@ -53,7 +53,7 @@ XS(XS_HateEntry_GetHate) {
 		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->stored_hate_amount;
@@ -70,7 +70,7 @@ XS(XS_HateEntry_GetDamage) {
 		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->hatelist_damage;

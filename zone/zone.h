@@ -94,7 +94,7 @@ class MobMovementManager;
 
 class Zone {
 public:
-	static bool Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone = false);
+	static bool Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static = false);
 	static void Shutdown(bool quiet = false);
 
 	Zone(uint32 in_zoneid, uint32 in_instanceid, const char *in_short_name);
@@ -125,7 +125,7 @@ public:
 	);
 	bool HasGraveyard();
 	bool HasWeather();
-	bool Init(bool iStaticZone);
+	bool Init(bool is_static);
 	bool IsCity() const { return (is_city); }
 	bool IsHotzone() const { return (is_hotzone); }
 	bool IsLoaded();
@@ -264,7 +264,7 @@ public:
 	void LoadAdventureFlavor();
 	void LoadAlternateAdvancement();
 	void LoadAlternateCurrencies();
-	void LoadZoneBlockedSpells(uint32 zone_id);
+	void LoadZoneBlockedSpells();
 	void LoadLDoNTrapEntries();
 	void LoadLDoNTraps();
 	void LoadLevelEXPMods();
@@ -276,7 +276,7 @@ public:
 	void LoadTempMerchantData();
 	void LoadTickItems();
 	void LoadVeteranRewards();
-	void LoadZoneDoors(const char *zone, int16 version);
+	void LoadZoneDoors();
 	void ReloadStaticData();
 	void ReloadWorld(uint8 global_repop);
 	void RemoveAuth(const char *iCharName, const char *iLSKey);

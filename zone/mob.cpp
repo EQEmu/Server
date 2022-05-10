@@ -4018,7 +4018,7 @@ std::string Mob::GetTargetDescription(Mob* target, uint8 description_type)
 
 	auto d = fmt::format(
 		"{}",
-		(			
+		(
 			this == target ?
 			self_return :
 			fmt::format(
@@ -6864,4 +6864,13 @@ std::string Mob::GetBucketRemaining(std::string bucket_name) {
 void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration) {
 	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
 	DataBucket::SetData(full_bucket_name, bucket_value, expiration);
+}
+
+std::string Mob::GetMobDescription()
+{
+	return fmt::format(
+		"[{}] ({})",
+		GetCleanName(),
+		GetID()
+	);
 }
