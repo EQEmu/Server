@@ -1066,12 +1066,12 @@ void Lua_Mob::DoubleAggro(Lua_Mob other) {
 	self->DoubleAggro(other);
 }
 
-uint64 Lua_Mob::GetHateAmount(Lua_Mob target) {
+int64 Lua_Mob::GetHateAmount(Lua_Mob target) {
 	Lua_Safe_Call_Int();
 	return self->GetHateAmount(target);
 }
 
-uint64 Lua_Mob::GetHateAmount(Lua_Mob target, bool is_damage) {
+int64 Lua_Mob::GetHateAmount(Lua_Mob target, bool is_damage) {
 	Lua_Safe_Call_Int();
 	return self->GetHateAmount(target, is_damage);
 }
@@ -2653,8 +2653,8 @@ luabind::scope lua_register_mob() {
 	.def("GetHandToHandDamage", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDamage)
 	.def("GetHandToHandDelay", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDelay)
 	.def("GetHaste", (int(Lua_Mob::*)(void))&Lua_Mob::GetHaste)
-	.def("GetHateAmount", (uint64(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
-	.def("GetHateAmount", (uint64(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
+	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateAmount)
+	.def("GetHateAmount", (int64(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::GetHateAmount)
 	.def("GetHateClosest", &Lua_Mob::GetHateClosest)
 	.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
 	.def("GetHateList", &Lua_Mob::GetHateList)

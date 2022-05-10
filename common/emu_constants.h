@@ -431,4 +431,17 @@ enum ReloadWorld : uint8 {
 	ForceRepop
 };
 
+enum MerchantBucketComparison : uint8 {
+	BucketEqualTo = 0,
+	BucketNotEqualTo,
+	BucketGreaterThanOrEqualTo,
+	BucketLesserThanOrEqualTo,
+	BucketGreaterThan,
+	BucketLesserThan,
+	BucketIsAny,
+	BucketIsNotAny,
+	BucketIsBetween,
+	BucketIsNotBetween
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/

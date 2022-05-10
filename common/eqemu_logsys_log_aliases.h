@@ -716,6 +716,16 @@
         OutF(LogSys, Logs::Detail, Logs::CombatRecord, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogHate(message, ...) do {\
+    if (LogSys.log_settings[Logs::Hate].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Hate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogHateDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Hate].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Hate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -1152,6 +1162,12 @@
 } while (0)
 
 #define LogCombatRecordDetail(message, ...) do {\
+} while (0)
+
+#define LogHate(message, ...) do {\
+} while (0)
+
+#define LogHateDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\
