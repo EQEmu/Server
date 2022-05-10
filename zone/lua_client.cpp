@@ -2476,6 +2476,16 @@ void Lua_Client::SetPEQZoneFlag(uint32 zone_id) {
 	self->SetPEQZoneFlag(zone_id);
 }
 
+int Lua_Client::GetHealAmount() {
+	Lua_Safe_Call_Int();
+	return self->GetHealAmt();
+}
+
+int Lua_Client::GetSpellDamage() {
+	Lua_Safe_Call_Int();
+	return self->GetSpellDmg();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2619,6 +2629,7 @@ luabind::scope lua_register_client() {
 	.def("GetGroup", (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup)
 	.def("GetGroupPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetGroupPoints)
 	.def("GetHorseId", (int(Lua_Client::*)(void))&Lua_Client::GetHorseId)
+	.def("GetHealAmount", (int(Lua_Client::*)(void))&Lua_Client::GetHealAmount)
 	.def("GetHunger", (int(Lua_Client::*)(void))&Lua_Client::GetHunger)
 	.def("GetIP", (uint32(Lua_Client::*)(void))&Lua_Client::GetIP)
 	.def("GetIPExemption", (int(Lua_Client::*)(void))&Lua_Client::GetIPExemption)
@@ -2659,6 +2670,7 @@ luabind::scope lua_register_client() {
 	.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L,uint8,uint8))&Lua_Client::GetScribeableSpells)
 	.def("GetScribedSpells", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetScribedSpells)
 	.def("GetSkillPoints", (int(Lua_Client::*)(void))&Lua_Client::GetSkillPoints)
+	.def("GetSpellDamage", (int(Lua_Client::*)(void))&Lua_Client::GetSpellDamage)
 	.def("GetSpellIDByBookSlot", (uint32(Lua_Client::*)(int))&Lua_Client::GetSpellIDByBookSlot)
 	.def("GetSpentAA", (int(Lua_Client::*)(void))&Lua_Client::GetSpentAA)
 	.def("GetStartZone", (int(Lua_Client::*)(void))&Lua_Client::GetStartZone)

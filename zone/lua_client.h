@@ -409,6 +409,8 @@ public:
 	int CountItemEquippedByID(uint32 item_id);
 	bool HasAugmentEquippedByID(uint32 item_id);
 	bool HasItemEquippedByID(uint32 item_id);
+	int GetHealAmount();
+	int GetSpellDamage();
 
 	int GetEnvironmentDamageModifier();
 	void SetEnvironmentDamageModifier(int value);
