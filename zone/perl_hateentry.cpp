@@ -58,7 +58,7 @@ XS(XS_HateEntry_GetHate) {
 		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->stored_hate_amount;
 		XSprePUSH;
-		PUSHi((UV) RETVAL);
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }
