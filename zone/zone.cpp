@@ -700,7 +700,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 
 	for (auto row : results) {
 		MerchantList mle{};
-		mle.id = atoul(row[0]);
+		mle.id = std::stoul(row[0]);
 		if (npc_id != mle.id) {
 			merchant_list = merchanttable.find(mle.id);
 			if (merchant_list == merchanttable.end()) {
@@ -724,16 +724,16 @@ void Zone::GetMerchantDataForZoneLoad() {
 			continue;
 		}
 		
-		mle.slot = std::stoul(row[0]);
-		mle.item = std::stoul(row[1]);
-		mle.faction_required = static_cast<int16>(std::stoi(row[2]));
-		mle.level_required = static_cast<uint8>(std::stoul(row[3]));
-		mle.alt_currency_cost = static_cast<uint16>(std::stoul(row[4]));
-		mle.classes_required = std::stoul(row[5]);
-		mle.probability = static_cast<uint8>(std::stoul(row[6]));
-		mle.bucket_name = row[7];
-		mle.bucket_value = row[8];
-		mle.bucket_comparison = static_cast<uint8>(std::stoul(row[9]));
+		mle.slot = std::stoul(row[1]);
+		mle.item = std::stoul(row[2]);
+		mle.faction_required = static_cast<int16>(std::stoi(row[3]));
+		mle.level_required = static_cast<uint8>(std::stoul(row[4]));
+		mle.alt_currency_cost = static_cast<uint16>(std::stoul(row[5]));
+		mle.classes_required = std::stoul(row[6]);
+		mle.probability = static_cast<uint8>(std::stoul(row[7]));
+		mle.bucket_name = row[8];
+		mle.bucket_value = row[9];
+		mle.bucket_comparison = static_cast<uint8>(std::stoul(row[10]));
 
 		merchant_list->second.push_back(mle);
 	}
