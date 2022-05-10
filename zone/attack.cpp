@@ -1148,7 +1148,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 		return dmg;
 }
 
-int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, uint64 *hate)
+int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, int64 *hate)
 {
 	int64 dmg = 0;
 	int64 banedmg = 0;
@@ -1509,7 +1509,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
-	uint64 hate = 0;
+	int64 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 
@@ -2749,7 +2749,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	return true;
 }
 
-void Mob::AddToHateList(Mob* other, uint64 hate /*= 0*/, int64 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/, uint16 spell_id, bool pet_command)
+void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/, uint16 spell_id, bool pet_command)
 {
 	if (!other)
 		return;

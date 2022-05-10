@@ -98,7 +98,7 @@ struct_HateList *HateList::Find(Mob *in_entity)
 	return nullptr;
 }
 
-void HateList::SetHateAmountOnEnt(Mob* other, uint64 in_hate, uint64 in_damage)
+void HateList::SetHateAmountOnEnt(Mob* other, int64 in_hate, uint64 in_damage)
 {
 	struct_HateList *entity = Find(other);
 	if (entity)
@@ -199,6 +199,16 @@ void HateList::AddEntToHateList(Mob *in_entity, int64 in_hate, int64 in_damage, 
 		entity->stored_hate_amount += in_hate;
 		entity->is_entity_frenzy = in_is_entity_frenzied;
 		entity->last_modified = Timer::GetCurrentTime();
+
+		LogHate(
+			"AddEntToHateList in_entity [{}] ({}) in_hate [{}] in_damage [{}] stored_hate_amount [{}] hatelist_damage [{}]",
+			in_entity->GetCleanName(),
+			in_entity->GetID(),
+			in_hate,
+			in_damage,
+			entity->stored_hate_amount,
+			entity->hatelist_damage
+		);
 	}
 	else if (iAddIfNotExist) {
 		entity = new struct_HateList;
@@ -503,8 +513,21 @@ Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
 	while (iterator != list.end())
 	{
 		struct_HateList *cur = (*iterator);
+		LogHateDetail(
+			"Looping GetEntWithMostHateOnList1 [{}] cur [{}] hate [{}] calc [{}]",
+			cur->entity_on_hatelist->GetMobDescription(),
+			cur->stored_hate_amount,
+			hate,
+			(cur->stored_hate_amount > hate)
+		);
+
 		if (cur && cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
 		{
+			LogHateDetail(
+				"Looping GetEntWithMostHateOnList2 [{}]",
+				cur->entity_on_hatelist->GetMobDescription()
+			);
+
 			if (!skip_mezzed || !cur->entity_on_hatelist->IsMezzed()) {
 				top = cur->entity_on_hatelist;
 				hate = cur->stored_hate_amount;

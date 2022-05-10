@@ -4017,7 +4017,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		case SE_AddHateOverTimePct: {
 			if (IsNPC()) {
-				uint64 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base_value[i]) / 100;
+				int64 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base_value[i]) / 100;
 				if (new_hate <= 0)
 					new_hate = 1;
 

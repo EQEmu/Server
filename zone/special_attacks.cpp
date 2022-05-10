@@ -165,7 +165,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE) && skill != EQ::skills::SkillBackstab)
 		my_hit.damage_done = DMG_INVULNERABLE;
 
-	uint64 hate = my_hit.base_damage;
+	int64 hate = my_hit.base_damage;
 	if (hate_override > -1)
 		hate = hate_override;
 
@@ -609,7 +609,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	if (!other)
 		return;
 
-	uint64 hate = 0;
+	int64 hate = 0;
 
 	// make sure we can hit (bane, magical, etc)
 	if (IsClient()) {
@@ -839,7 +839,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	LogCombat("Ranged attack hit [{}]", other->GetName());
 
-	uint64 hate = 0;
+	int64 hate = 0;
 	int64 TotalDmg = 0;
 	int WDmg = 0;
 	int ADmg = 0;
@@ -2042,11 +2042,32 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 			tauntchance /= 100.0f;
 
 			success = tauntchance > zone->random.Real(0, 1);
+
+			LogHate(
+				"Taunter mob {} target npc {} tauntchance [{}] success [{}] hate_top [{}]",
+				GetMobDescription(),
+				who->GetMobDescription(),
+				tauntchance,
+				success ? "true" : "false",
+				hate_top ? hate_top->GetMobDescription() : "not found"
+			);
 		}
 
 		if (success) {
 			if (hate_top && hate_top != this) {
 				int64 newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1 + bonus_hate;
+
+				LogHate(
+					"Taunter mob {} target npc {} newhate [{}] hated_top {} hate_of_top [{}] this_hate [{}] bonus_hate [{}]",
+					GetMobDescription(),
+					who->GetMobDescription(),
+					newhate,
+					hate_top->GetMobDescription(),
+					who->GetNPCHate(hate_top),
+					who->GetNPCHate(this),
+					bonus_hate
+				);
+
 				who->CastToNPC()->AddToHateList(this, newhate);
 				success = true;
 			} else {
@@ -2223,7 +2244,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		skillinuse = EQ::skills::SkillOffense;
 
 	int64 damage = 0;
-	uint64 hate = 0;
+	int64 hate = 0;
 	if (hate == 0 && weapon_damage > 1)
 		hate = weapon_damage;
 
