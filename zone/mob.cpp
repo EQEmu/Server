@@ -2606,6 +2606,27 @@ void Mob::SendIllusionPacket(
 	);
 }
 
+void Mob::SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender)
+{
+	haircolor        = face.haircolor;
+	beardcolor       = face.beardcolor;
+	eyecolor1        = face.eyecolor1;
+	eyecolor2        = face.eyecolor2;
+	hairstyle        = face.hairstyle;
+	luclinface       = face.face;
+	beard            = face.beard;
+	drakkin_heritage = face.drakkin_heritage;
+	drakkin_tattoo   = face.drakkin_tattoo;
+	drakkin_details  = face.drakkin_details;
+
+	EQApplicationPacket outapp(OP_SetFace, sizeof(FaceChange_Struct));
+	memcpy(outapp.pBuffer, &face, sizeof(FaceChange_Struct));
+	auto buf = reinterpret_cast<FaceChange_Struct*>(outapp.pBuffer);
+	buf->entity_id = GetID();
+
+	entity_list.QueueClients(this, &outapp, skip_sender);
+}
+
 bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 {
 	if (IsPlayerRace(GetRace())) {
