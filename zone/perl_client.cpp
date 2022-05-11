@@ -6332,6 +6332,40 @@ XS(XS_Client_SetPEQZoneFlag) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetHealAmount);
+XS(XS_Client_GetHealAmount) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetHealAmount(THIS)"); // @categories Stats and Attributes, Scriot Utility
+	{
+		Client *THIS;
+		int RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->GetHealAmt();
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetSpellDamage);
+XS(XS_Client_GetSpellDamage) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetSpellDamage(THIS)"); // @categories Stats and Attributes, Scriot Utility
+	{
+		Client *THIS;
+		int RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->GetSpellDmg();
+		XSprePUSH;
+		PUSHi((IV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6462,6 +6496,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetGM"), XS_Client_GetGM, file, "$");
 	newXSproto(strcpy(buf, "GetGroup"), XS_Client_GetGroup, file, "$");
 	newXSproto(strcpy(buf, "GetGroupPoints"), XS_Client_GetGroupPoints, file, "$");
+	newXSproto(strcpy(buf, "GetHealAmount"), XS_Client_GetHealAmount, file, "$");
 	newXSproto(strcpy(buf, "GetHorseId"), XS_Client_GetHorseId, file, "$");
 	newXSproto(strcpy(buf, "GetHunger"), XS_Client_GetHunger, file, "$$");
 	newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
@@ -6499,6 +6534,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetScribedSpells"), XS_Client_GetScribedSpells, file, "$");
 	newXSproto(strcpy(buf, "GetSkillPoints"), XS_Client_GetSkillPoints, file, "$");
 	newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
+	newXSproto(strcpy(buf, "GetSpellDamage"), XS_Client_GetSpellDamage, file, "$");
 	newXSproto(strcpy(buf, "GetSpellIDByBookSlot"), XS_Client_GetSpellIDByBookSlot, file, "$$");
 	newXSproto(strcpy(buf, "GetSpentAA"), XS_Client_GetSpentAA, file, "$$");
 	newXSproto(strcpy(buf, "GetStartZone"), XS_Client_GetStartZone, file, "$");
