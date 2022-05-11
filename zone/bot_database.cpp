@@ -2634,18 +2634,17 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 		return false;
 	//modified query for usecase of a BOTID sharing a CHARACTERID.
 	//in this usecase, when the BOTID=CHARACTERID of BOT OWNER, this BOTID would be added to the GROUP
-	query = StringFormat(
+	/*query = StringFormat(
 		"SELECT `mob_id` FROM `vw_groups` "
 		"WHERE `group_id` = '%u' "
 		"AND `mob_type`='B' "
 		"AND `mob_id` IN (SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u');"
-		, group_id, owner_id);
-	/*query = StringFormat(
+		, group_id, owner_id);*/
+	query = StringFormat(
 		"SELECT `charid` FROM `group_id` WHERE `groupid` = '%u'"
-		" AND `charid` IN (SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u')"
-		" AND `group_id.name` NOT IN (SELECT `name` FROM `character_data`)",
+		" AND `name` IN (SELECT `name` FROM `bot_data` WHERE `owner_id` = '%u')",
 		group_id,
-		owner_id);*/
+		owner_id);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
