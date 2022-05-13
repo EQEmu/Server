@@ -317,7 +317,8 @@ XS(XS_PerlPacket_GetByte)
 		uint32		pos = (uint32)SvUV(ST(1));
 		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetByte(pos);
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -335,7 +336,8 @@ XS(XS_PerlPacket_GetShort)
 		uint32		pos = (uint32)SvUV(ST(1));
 		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetShort(pos);
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -353,7 +355,8 @@ XS(XS_PerlPacket_GetLong)
 		uint32		pos = (uint32)SvUV(ST(1));
 		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetLong(pos);
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -371,7 +374,8 @@ XS(XS_PerlPacket_GetFloat)
 		uint32		pos = (uint32)SvUV(ST(1));
 		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetFloat(pos);
-		XSprePUSH; PUSHn((double)RETVAL);
+		XSprePUSH;
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }

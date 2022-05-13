@@ -499,8 +499,8 @@ XS(XS__getinventoryslotid) {
 		else if (identifier == "augsocket.end")         RETVAL = EQ::invaug::SOCKET_END;
 	}
 
-	XSprePUSH; PUSHu((IV)RETVAL);
-
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -600,7 +600,6 @@ XS(XS__hastimer) {
 	char *timer_name = (char *)SvPV_nolen(ST(0));
 
 	RETVAL = quest_manager.hastimer(timer_name);
-
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -619,7 +618,7 @@ XS(XS__getremainingtimeMS) {
 	RETVAL = quest_manager.getremainingtimeMS(timer_name);
 
 	XSprePUSH;
-	PUSHu((IV)RETVAL);
+	PUSHu((UV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -636,7 +635,7 @@ XS(XS__gettimerdurationMS) {
 	RETVAL = quest_manager.gettimerdurationMS(timer_name);
 
 	XSprePUSH;
-	PUSHu((IV)RETVAL);
+	PUSHu((UV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -926,8 +925,7 @@ XS(XS__isdisctome) {
 	int  item_id = (int) SvIV(ST(0));
 
 	RETVAL = quest_manager.isdisctome(item_id);
-
-	ST(0)        = boolSV(RETVAL);
+	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
@@ -1109,7 +1107,7 @@ XS(XS__scribespells) {
 		RETVAL = quest_manager.scribespells(max_level);
 
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHu((UV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -1131,7 +1129,7 @@ XS(XS__traindiscs) {
 		RETVAL = quest_manager.traindiscs(max_level);
 
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHu((UV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -1886,7 +1884,7 @@ XS(XS__get_spawn_condition) {
 
 		RETVAL = quest_manager.get_spawn_condition(zone_short, zone->GetInstanceID(), cond_id);
 		XSprePUSH;
-		PUSHu((IV) RETVAL);
+		PUSHi((IV) RETVAL);
 
 		XSRETURN(1);
 	} else {
@@ -1899,7 +1897,7 @@ XS(XS__get_spawn_condition) {
 
 		RETVAL = quest_manager.get_spawn_condition(zone_short, instance_id, cond_id);
 		XSprePUSH;
-		PUSHu((IV) RETVAL);
+		PUSHi((IV) RETVAL);
 
 		XSRETURN(1);
 	}
@@ -1934,7 +1932,7 @@ XS(XS__has_zone_flag) {
 
 	RETVAL = quest_manager.has_zone_flag(zone_id);
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHi((IV) RETVAL);
 
 	XSRETURN(1);
 
@@ -1977,8 +1975,7 @@ XS(XS__summonburiedplayercorpse) {
 	auto   position = glm::vec4((float) SvIV(ST(1)), (float) SvIV(ST(2)), (float) SvIV(ST(3)), (float) SvIV(ST(4)));
 
 	RETVAL = quest_manager.summonburiedplayercorpse(char_id, position);
-
-	ST(0)           = boolSV(RETVAL);
+	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
@@ -1994,8 +1991,7 @@ XS(XS__summonallplayercorpses) {
 	auto   position = glm::vec4((float) SvIV(ST(1)), (float) SvIV(ST(2)), (float) SvIV(ST(3)), (float) SvIV(ST(4)));
 
 	RETVAL = quest_manager.summonallplayercorpses(char_id, position);
-
-	ST(0)           = boolSV(RETVAL);
+	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
@@ -2013,7 +2009,7 @@ XS(XS__getplayercorpsecount) {
 
 	RETVAL = quest_manager.getplayercorpsecount(char_id);
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHu((UV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -2032,7 +2028,7 @@ XS(XS__getplayercorpsecountbyzoneid) {
 
 	RETVAL = quest_manager.getplayercorpsecountbyzoneid(char_id, zone_id);
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHu((UV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -2050,7 +2046,7 @@ XS(XS__getplayerburiedcorpsecount) {
 
 	RETVAL = quest_manager.getplayerburiedcorpsecount(char_id);
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHu((UV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -2068,7 +2064,7 @@ XS(XS__buryplayercorpse) {
 
 	RETVAL = quest_manager.buryplayercorpse(char_id);
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHu((UV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -2142,9 +2138,8 @@ XS(XS__isdooropen) {
 	uint32 door_id = (int) SvIV(ST(0));
 
 	RETVAL = quest_manager.isdooropen(door_id);
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
 
@@ -2327,7 +2322,8 @@ XS(XS__createbotcount)
 	dXSTARG;
 
 	RETVAL = quest_manager.createbotcount();
-	XSprePUSH; PUSHi((IV)RETVAL);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -2340,7 +2336,8 @@ XS(XS__spawnbotcount)
 	dXSTARG;
 
 	RETVAL = quest_manager.spawnbotcount();
-	XSprePUSH; PUSHi((IV)RETVAL);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -2353,8 +2350,8 @@ XS(XS__botquest)
 	dXSTARG;
 
 	RETVAL = quest_manager.botquest();
-	XSprePUSH; PUSHu((IV)RETVAL);
-
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -2378,7 +2375,8 @@ XS(XS__createBot)
 	int gender_id = (int) SvIV(ST(5));
 
 	RETVAL = quest_manager.createBot(firstname, lastname, level, race_id, class_id, gender_id);
-	XSprePUSH; PUSHu((IV)RETVAL);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -2454,12 +2452,12 @@ XS(XS__istaskenabled) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskenabled(int task_id)");
 	}
-
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
+
 XS(XS__istaskactive);
 XS(XS__istaskactive) {
 	dXSARGS;
@@ -2472,12 +2470,12 @@ XS(XS__istaskactive) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskactive(int task_id)");
 	}
-
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
+
 XS(XS__istaskactivityactive);
 XS(XS__istaskactivityactive) {
 	dXSARGS;
@@ -2491,12 +2489,12 @@ XS(XS__istaskactivityactive) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskactivityactive(int task_id, int activity_id)");
 	}
-
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
+
 XS(XS__gettaskactivitydonecount);
 XS(XS__gettaskactivitydonecount) {
 	dXSARGS;
@@ -2515,6 +2513,7 @@ XS(XS__gettaskactivitydonecount) {
 
 	XSRETURN(1);
 }
+
 XS(XS__updatetaskactivity);
 XS(XS__updatetaskactivity) {
 	dXSARGS;
@@ -2806,10 +2805,9 @@ XS(XS__istaskappropriate) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskaappropriate(int task_id)");
 	}
-
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
 
@@ -2933,7 +2931,7 @@ XS(XS__getlevel) {
 
 	RETVAL = quest_manager.getlevel(type);
 	XSprePUSH;
-	PUSHu((IV) RETVAL);
+	PUSHi((IV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -3375,10 +3373,9 @@ XS(XS__CheckInstanceByCharID) {
 
 	uint16 instance_id = (int) SvUV(ST(0));
 	uint32 char_id = (int) SvUV(ST(1));
-	RETVAL = quest_manager.CheckInstanceByCharID(instance_id, char_id);
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	RETVAL = quest_manager.CheckInstanceByCharID(instance_id, char_id);	
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
 
@@ -3500,7 +3497,7 @@ XS(XS__getcharidbyname) {
 
 	RETVAL = quest_manager.getcharidbyname(name);
 	XSprePUSH;
-	PUSHu((UV)RETVAL);
+	PUSHu((UV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -3538,7 +3535,7 @@ XS(XS__getcurrencyitemid) {
 	RETVAL = quest_manager.getcurrencyitemid(currency_id);
 
 	XSprePUSH;
-	PUSHi((IV)RETVAL);
+	PUSHi((IV) RETVAL);
   	XSRETURN(1);
 }
 
@@ -3554,7 +3551,7 @@ XS(XS__getcurrencyid) {
 
 	RETVAL = quest_manager.getcurrencyid(item_id);
 	XSprePUSH;
-	PUSHi((IV)RETVAL);
+	PUSHi((IV) RETVAL);
 	XSRETURN(1);
 }
 
@@ -3589,7 +3586,7 @@ XS(XS__getguildidbycharid) {
 	RETVAL = quest_manager.getguildidbycharid(char_id);
 
 	XSprePUSH;
-	PUSHi((IV)RETVAL);
+	PUSHi((IV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -3606,7 +3603,7 @@ XS(XS__getgroupidbycharid) {
 
 	RETVAL = quest_manager.getgroupidbycharid(char_id);
 	XSprePUSH;
-	PUSHi((IV)RETVAL);
+	PUSHi((IV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -3623,7 +3620,7 @@ XS(XS__getraididbycharid) {
 
 	RETVAL = quest_manager.getraididbycharid(char_id);
 	XSprePUSH;
-	PUSHi((IV)RETVAL);
+	PUSHi((IV) RETVAL);
 
 	XSRETURN(1);
 }
@@ -3650,11 +3647,9 @@ XS(XS__IsRunning) {
 	bool RETVAL;
 	dXSTARG;
 
-
-	RETVAL = quest_manager.IsRunning();
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	RETVAL = quest_manager.IsRunning();	
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
 
@@ -3669,11 +3664,9 @@ XS(XS__IsEffectInSpell) {
 	bool   RETVAL;
 	dXSTARG;
 
-
 	RETVAL = IsEffectInSpell(spell_id, effect_id);
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
 
@@ -3687,11 +3680,9 @@ XS(XS__IsBeneficialSpell) {
 	bool   RETVAL;
 	dXSTARG;
 
-
 	RETVAL = BeneficialSpell(spell_id);
-	XSprePUSH;
-	PUSHu((IV) RETVAL);
-
+	ST(0) = boolSV(RETVAL);
+	sv_2mortal(ST(0));
 	XSRETURN(1);
 }
 
@@ -4174,7 +4165,7 @@ XS(XS__delete_data) {
 	std::string key = (std::string) SvPV_nolen(ST(0));
 
 	XSprePUSH;
-	PUSHu((IV) DataBucket::DeleteData(key));
+	PUSHi((IV) DataBucket::DeleteData(key));
 
 	XSRETURN(1);
 }
@@ -4187,9 +4178,12 @@ XS(XS__IsClassicEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_classic_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsClassicEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheRuinsOfKunarkEnabled);
@@ -4199,9 +4193,12 @@ XS(XS__IsTheRuinsOfKunarkEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_ruins_of_kunark_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheRuinsOfKunarkEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheScarsOfVeliousEnabled);
@@ -4211,9 +4208,12 @@ XS(XS__IsTheScarsOfVeliousEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_scars_of_velious_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheScarsOfVeliousEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheShadowsOfLuclinEnabled);
@@ -4223,9 +4223,12 @@ XS(XS__IsTheShadowsOfLuclinEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_shadows_of_luclin_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheShadowsOfLuclinEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsThePlanesOfPowerEnabled);
@@ -4235,9 +4238,12 @@ XS(XS__IsThePlanesOfPowerEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_planes_of_power_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsThePlanesOfPowerEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheLegacyOfYkeshaEnabled);
@@ -4247,9 +4253,12 @@ XS(XS__IsTheLegacyOfYkeshaEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_legacy_of_ykesha_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheLegacyOfYkeshaEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsLostDungeonsOfNorrathEnabled);
@@ -4259,9 +4268,12 @@ XS(XS__IsLostDungeonsOfNorrathEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_lost_dungeons_of_norrath_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsLostDungeonsOfNorrathEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsGatesOfDiscordEnabled);
@@ -4271,9 +4283,12 @@ XS(XS__IsGatesOfDiscordEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_gates_of_discord_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsGatesOfDiscordEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsOmensOfWarEnabled);
@@ -4283,9 +4298,12 @@ XS(XS__IsOmensOfWarEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_omens_of_war_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsOmensOfWarEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsDragonsOfNorrathEnabled);
@@ -4295,9 +4313,12 @@ XS(XS__IsDragonsOfNorrathEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_dragons_of_norrath_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsDragonsOfNorrathEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsDepthsOfDarkhollowEnabled);
@@ -4307,9 +4328,12 @@ XS(XS__IsDepthsOfDarkhollowEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_depths_of_darkhollow_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsDepthsOfDarkhollowEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsProphecyOfRoEnabled);
@@ -4319,9 +4343,12 @@ XS(XS__IsProphecyOfRoEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_prophecy_of_ro_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsProphecyOfRoEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheSerpentsSpineEnabled);
@@ -4331,9 +4358,12 @@ XS(XS__IsTheSerpentsSpineEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_serpents_spine_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheSerpentsSpineEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheBuriedSeaEnabled);
@@ -4343,9 +4373,12 @@ XS(XS__IsTheBuriedSeaEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_buried_sea_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheBuriedSeaEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsSecretsOfFaydwerEnabled);
@@ -4355,9 +4388,12 @@ XS(XS__IsSecretsOfFaydwerEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_secrets_of_faydwer_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsSecretsOfFaydwerEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsSeedsOfDestructionEnabled);
@@ -4367,9 +4403,12 @@ XS(XS__IsSeedsOfDestructionEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_seeds_of_destruction_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsSeedsOfDestructionEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsUnderfootEnabled);
@@ -4379,9 +4418,12 @@ XS(XS__IsUnderfootEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_underfoot_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsUnderfootEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsHouseOfThuleEnabled);
@@ -4391,9 +4433,12 @@ XS(XS__IsHouseOfThuleEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_house_of_thule_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsHouseOfThuleEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsVeilOfAlarisEnabled);
@@ -4403,9 +4448,12 @@ XS(XS__IsVeilOfAlarisEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_veil_of_alaris_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsVeilOfAlarisEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsRainOfFearEnabled);
@@ -4415,9 +4463,12 @@ XS(XS__IsRainOfFearEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_rain_of_fear_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsRainOfFearEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCallOfTheForsakenEnabled);
@@ -4427,9 +4478,12 @@ XS(XS__IsCallOfTheForsakenEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_call_of_the_forsaken_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCallOfTheForsakenEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheDarkendSeaEnabled);
@@ -4439,9 +4493,12 @@ XS(XS__IsTheDarkendSeaEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_darkend_sea_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheDarkendSeaEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheBrokenMirrorEnabled);
@@ -4451,9 +4508,12 @@ XS(XS__IsTheBrokenMirrorEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_broken_mirror_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheBrokenMirrorEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsEmpiresOfKunarkEnabled);
@@ -4463,9 +4523,12 @@ XS(XS__IsEmpiresOfKunarkEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_empires_of_kunark_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsEmpiresOfKunarkEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsRingOfScaleEnabled);
@@ -4475,9 +4538,12 @@ XS(XS__IsRingOfScaleEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_ring_of_scale_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsRingOfScaleEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTheBurningLandsEnabled);
@@ -4487,9 +4553,12 @@ XS(XS__IsTheBurningLandsEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_the_burning_lands_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTheBurningLandsEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsTormentOfVeliousEnabled);
@@ -4499,9 +4568,12 @@ XS(XS__IsTormentOfVeliousEnabled) {
 		Perl_croak(aTHX_ "Usage: quest::is_torment_of_velious_enabled()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsTormentOfVeliousEnabled();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionClassic);
@@ -4511,9 +4583,12 @@ XS(XS__IsCurrentExpansionClassic) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_classic()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionClassic();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheRuinsOfKunark);
@@ -4523,9 +4598,12 @@ XS(XS__IsCurrentExpansionTheRuinsOfKunark) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_ruins_of_kunark()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheRuinsOfKunark();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheScarsOfVelious);
@@ -4535,9 +4613,12 @@ XS(XS__IsCurrentExpansionTheScarsOfVelious) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_scars_of_velious()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheScarsOfVelious();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheShadowsOfLuclin);
@@ -4547,9 +4628,12 @@ XS(XS__IsCurrentExpansionTheShadowsOfLuclin) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_shadows_of_luclin()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheShadowsOfLuclin();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionThePlanesOfPower);
@@ -4559,9 +4643,12 @@ XS(XS__IsCurrentExpansionThePlanesOfPower) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_planes_of_power()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionThePlanesOfPower();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheLegacyOfYkesha);
@@ -4571,9 +4658,12 @@ XS(XS__IsCurrentExpansionTheLegacyOfYkesha) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_legacy_of_ykesha()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheLegacyOfYkesha();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionLostDungeonsOfNorrath);
@@ -4583,9 +4673,12 @@ XS(XS__IsCurrentExpansionLostDungeonsOfNorrath) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_lost_dungeons_of_norrath()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionLostDungeonsOfNorrath();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionGatesOfDiscord);
@@ -4595,9 +4688,12 @@ XS(XS__IsCurrentExpansionGatesOfDiscord) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_gates_of_discord()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionGatesOfDiscord();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionOmensOfWar);
@@ -4607,9 +4703,12 @@ XS(XS__IsCurrentExpansionOmensOfWar) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_omens_of_war()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionOmensOfWar();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionDragonsOfNorrath);
@@ -4619,9 +4718,12 @@ XS(XS__IsCurrentExpansionDragonsOfNorrath) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_dragons_of_norrath()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionDragonsOfNorrath();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionDepthsOfDarkhollow);
@@ -4631,9 +4733,12 @@ XS(XS__IsCurrentExpansionDepthsOfDarkhollow) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_depths_of_darkhollow()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionDepthsOfDarkhollow();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionProphecyOfRo);
@@ -4643,9 +4748,12 @@ XS(XS__IsCurrentExpansionProphecyOfRo) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_prophecy_of_ro()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionProphecyOfRo();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheSerpentsSpine);
@@ -4655,9 +4763,12 @@ XS(XS__IsCurrentExpansionTheSerpentsSpine) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_serpents_spine()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheSerpentsSpine();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheBuriedSea);
@@ -4667,9 +4778,12 @@ XS(XS__IsCurrentExpansionTheBuriedSea) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_buried_sea()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheBuriedSea();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionSecretsOfFaydwer);
@@ -4679,9 +4793,12 @@ XS(XS__IsCurrentExpansionSecretsOfFaydwer) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_secrets_of_faydwer()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionSecretsOfFaydwer();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionSeedsOfDestruction);
@@ -4691,9 +4808,12 @@ XS(XS__IsCurrentExpansionSeedsOfDestruction) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_seeds_of_destruction()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionSeedsOfDestruction();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionUnderfoot);
@@ -4703,9 +4823,12 @@ XS(XS__IsCurrentExpansionUnderfoot) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_underfoot()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionUnderfoot();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionHouseOfThule);
@@ -4715,9 +4838,12 @@ XS(XS__IsCurrentExpansionHouseOfThule) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_house_of_thule()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionHouseOfThule();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionVeilOfAlaris);
@@ -4727,9 +4853,12 @@ XS(XS__IsCurrentExpansionVeilOfAlaris) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_veil_of_alaris()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionVeilOfAlaris();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionRainOfFear);
@@ -4739,9 +4868,12 @@ XS(XS__IsCurrentExpansionRainOfFear) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_rain_of_fear()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionRainOfFear();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionCallOfTheForsaken);
@@ -4751,9 +4883,12 @@ XS(XS__IsCurrentExpansionCallOfTheForsaken) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_call_of_the_forsaken()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionCallOfTheForsaken();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheDarkendSea);
@@ -4763,9 +4898,12 @@ XS(XS__IsCurrentExpansionTheDarkendSea) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_darkend_sea()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheDarkendSea();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheBrokenMirror);
@@ -4775,9 +4913,12 @@ XS(XS__IsCurrentExpansionTheBrokenMirror) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_broken_mirror()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheBrokenMirror();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionEmpiresOfKunark);
@@ -4787,9 +4928,12 @@ XS(XS__IsCurrentExpansionEmpiresOfKunark) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_empires_of_kunark()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionEmpiresOfKunark();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionRingOfScale);
@@ -4799,9 +4943,12 @@ XS(XS__IsCurrentExpansionRingOfScale) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_ring_of_scale()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionRingOfScale();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTheBurningLands);
@@ -4811,9 +4958,12 @@ XS(XS__IsCurrentExpansionTheBurningLands) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_burning_lands()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTheBurningLands();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsCurrentExpansionTormentOfVelious);
@@ -4823,9 +4973,12 @@ XS(XS__IsCurrentExpansionTormentOfVelious) {
 		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_torment_of_velious()");
 	}
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsCurrentExpansionTormentOfVelious();
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__IsContentFlagEnabled);
@@ -4837,9 +4990,12 @@ XS(XS__IsContentFlagEnabled) {
 
 	std::string flag_name = (std::string) SvPV_nolen(ST(0));
 
-	bool RETVAL; dXSTARG;
+	bool RETVAL;
+	dXSTARG;
 	RETVAL = content_service.IsContentFlagEnabled(flag_name);
-	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+	XSprePUSH;
+	PUSHi((IV) RETVAL);
+	XSRETURN(1);
 }
 
 XS(XS__SetContentFlag);
@@ -5346,7 +5502,7 @@ XS(XS__getitemstat) {
 	stat_value = quest_manager.getitemstat(item_id, stat_identifier);
 
 	XSprePUSH;
-	PUSHi((IV)stat_value);
+	PUSHi((IV) stat_value);
 
 	XSRETURN(1);
 }
@@ -5368,7 +5524,7 @@ XS(XS__getspellstat) {
 	stat_value = quest_manager.getspellstat(spell_id, stat_identifier, slot);
 
 	XSprePUSH;
-	PUSHi((IV)stat_value);
+	PUSHi((IV) stat_value);
 
 	XSRETURN(1);
 }
@@ -8054,7 +8210,7 @@ XS(XS__countspawnednpcs) {
 		}
 		npc_count = entity_list.CountSpawnedNPCs(npc_ids);
 		XSprePUSH;
-		PUSHu((UV)npc_count);
+		PUSHu((UV) npc_count);
 		XSRETURN(1);
 	}
 }

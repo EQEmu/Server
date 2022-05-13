@@ -95,7 +95,7 @@ XS(XS_QuestItem_IsType) {
 		uint32 type = (int32) SvIV(ST(1));
 		VALIDATE_THIS_IS_ITEM;
 		RETVAL = THIS->IsType((EQ::item::ItemClass) type);
-		ST(0)       = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);

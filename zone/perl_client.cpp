@@ -55,7 +55,7 @@ XS(XS_Client_Save) {
 		uint8 iCommitNow = (uint8) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Save(iCommitNow);
-		ST(0)            = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -2688,7 +2688,7 @@ XS(XS_Client_DecreaseByID) {
 		int16  quantity  = (int16) SvIV(ST(2));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->DecreaseByID(type, quantity);
-		ST(0)       = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -2826,7 +2826,7 @@ XS(XS_Client_UseDiscipline) {
 		uint32 target   = (uint32) SvUV(ST(2));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->UseDiscipline(spell_id, target);
-		ST(0)           = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -2921,7 +2921,7 @@ XS(XS_Client_HasZoneFlag) {
 		uint32 zone_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasZoneFlag(zone_id);
-		ST(0)          = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -3313,7 +3313,7 @@ XS(XS_Client_KeyRingCheck) {
 		uint32 item_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->KeyRingCheck(item_id);;
-		ST(0)          = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -3705,7 +3705,7 @@ XS(XS_Client_GrantAlternateAdvancementAbility) {
 		}
 
 		RETVAL = THIS->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
-		ST(0)            = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -3810,7 +3810,7 @@ XS(XS_Client_GetSpellIDByBookSlot) {
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetSpellIDByBookSlot(slot_id);
 		XSprePUSH;
-		PUSHi((IV)RETVAL);
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -3904,7 +3904,7 @@ XS(XS_Client_IsTaskCompleted) {
 		int TaskID = (int) SvIV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskCompleted(TaskID);
-		ST(0)      = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -3921,7 +3921,7 @@ XS(XS_Client_IsTaskActive) {
 		int  TaskID = (int) SvIV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskActive(TaskID);
-		ST(0)       = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -3939,7 +3939,7 @@ XS(XS_Client_IsTaskActivityActive) {
 		int  ActivityID = (int) SvIV(ST(2));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskActivityActive(TaskID, ActivityID);
-		ST(0)           = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -4280,7 +4280,7 @@ XS(XS_Client_HasSpellScribed) {
 		int  spell_id = (int) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasSpellScribed(spell_id);
-		ST(0)         = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -4657,7 +4657,7 @@ XS(XS_Client_GetMoney) {
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetMoney(type, subtype);
 		XSprePUSH;
-		PUSHn((uint32) RETVAL);
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -4674,7 +4674,7 @@ XS(XS_Client_GetAccountAge) {
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAccountAge();
 		XSprePUSH;
-		PUSHn((int) RETVAL);
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -4769,7 +4769,7 @@ XS(XS_Client_GetClientMaxLevel) {
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetClientMaxLevel();
 		XSprePUSH;
-		PUSHu((UV)RETVAL);
+		PUSHu((UV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -6015,7 +6015,7 @@ XS(XS_Client_GetEnvironmentDamageModifier) {
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEnvironmentDamageModifier();
 		XSprePUSH;
-		PUSHi((IV)RETVAL);
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -6152,7 +6152,7 @@ XS(XS_Client_CountAugmentEquippedByID) {
 		VALIDATE_THIS_IS_CLIENT;
 		quantity = THIS->GetInv().CountAugmentEquippedByID(item_id);
 		XSprePUSH;
-		PUSHi((IV)quantity);
+		PUSHi((IV) quantity);
 	}
 	XSRETURN(1);
 }
@@ -6224,7 +6224,7 @@ XS(XS_Client_CountItemEquippedByID) {
 		VALIDATE_THIS_IS_CLIENT;
 		quantity = THIS->GetInv().CountItemEquippedByID(item_id);
 		XSprePUSH;
-		PUSHi((IV)quantity);
+		PUSHi((IV) quantity);
 	}
 	XSRETURN(1);
 }
