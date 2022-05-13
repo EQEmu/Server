@@ -3675,7 +3675,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
-				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
+				entity_list.MessageClose(this, false, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
 			}
 
 			// If a client pet is damaged while sitting, stand, fix sit button,
@@ -4021,21 +4021,28 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		// we don't send them here.
 		if (!FromDamageShield) {
 
+			// Send damage to client (including inates skill_id)
+			if (IsClient()) {
+				//I dont think any filters apply to damage affecting us
+				CastToClient()->QueuePacket(outapp);
+			}
+
+			// If the "spell" was an "innate", change to spell type to
+			// produce spell message as well.
+			if (IsClient() && IsValidSpell(spell_id) && skill_used == 52) {
+				a->type = DamageTypeSpell;
+				CastToClient()->QueuePacket(outapp);
+			}
+
 			entity_list.QueueCloseClients(
 				this, /* Sender */
 				outapp, /* packet */
 				true, /* Skip Sender */
 				RuleI(Range, SpellMessages),
-				skip, /* Skip this mob */
+				0, /* Skip this mob */
 				true, /* Packet ACK */
 				filter /* eqFilterType filter */
 				);
-
-			//send the damage to ourself if we are a client
-			if (IsClient()) {
-				//I dont think any filters apply to damage affecting us
-				CastToClient()->QueuePacket(outapp);
-			}
 		}
 
 		safe_delete(outapp);
