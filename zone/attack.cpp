@@ -4021,6 +4021,24 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		// we don't send them here.
 		if (!FromDamageShield) {
 
+			int range;
+			if (IsValidSpell(spell_id)) {
+				range = RuleI(Range, SpellMessages);
+			}
+			else {
+				range = RuleI(Range, DamageMessages);
+			}
+
+			entity_list.QueueCloseClients(
+				this, /* Sender */
+				outapp, /* packet */
+				true, /* Skip Sender */
+				range, /* distance packet travels at the speed of sound */
+				(IsValidSpell(spell_id)) ? 0 : skip, /* Skip if not spell */
+				true, /* Packet ACK */
+				filter /* eqFilterType filter */
+				);
+
 			// Send damage to client (including inates skill_id)
 			if (IsClient()) {
 				//I dont think any filters apply to damage affecting us
@@ -4033,16 +4051,6 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				a->type = DamageTypeSpell;
 				CastToClient()->QueuePacket(outapp);
 			}
-
-			entity_list.QueueCloseClients(
-				this, /* Sender */
-				outapp, /* packet */
-				true, /* Skip Sender */
-				RuleI(Range, SpellMessages),
-				0, /* Skip this mob */
-				true, /* Packet ACK */
-				filter /* eqFilterType filter */
-				);
 		}
 
 		safe_delete(outapp);
