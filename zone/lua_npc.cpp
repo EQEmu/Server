@@ -575,10 +575,10 @@ bool Lua_NPC::IsRaidTarget()
 	return self->IsRaidTarget();
 }
 
-void Lua_NPC::ChangeLastName(const char *lastname)
+void Lua_NPC::ChangeLastName(std::string last_name)
 {
 	Lua_Safe_Call_Void();
-	self->ChangeLastName(lastname);
+	self->ChangeLastName(last_name);
 }
 
 void Lua_NPC::ClearLastName()
@@ -680,7 +680,7 @@ luabind::scope lua_register_npc() {
 	.def("AddLootTable", (void(Lua_NPC::*)(void))&Lua_NPC::AddLootTable)
 	.def("AssignWaypoints", (void(Lua_NPC::*)(int))&Lua_NPC::AssignWaypoints)
 	.def("CalculateNewWaypoint", (void(Lua_NPC::*)(void))&Lua_NPC::CalculateNewWaypoint)
-	.def("ChangeLastName", (void(Lua_NPC::*)(const char*))&Lua_NPC::ChangeLastName)
+	.def("ChangeLastName", (void(Lua_NPC::*)(std::string))&Lua_NPC::ChangeLastName)
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
 	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearItemList)
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)

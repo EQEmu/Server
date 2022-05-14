@@ -1043,11 +1043,11 @@ XS(XS__surname);
 XS(XS__surname) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::surname(string name)");
+		Perl_croak(aTHX_ "Usage: quest::surname(string last_name)");
 
-	char *name = (char *) SvPV_nolen(ST(0));
+	std::string last_name = (std::string) SvPV_nolen(ST(0));
 
-	quest_manager.surname(name);
+	quest_manager.surname(last_name);
 
 	XSRETURN_EMPTY;
 }

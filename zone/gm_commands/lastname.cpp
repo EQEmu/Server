@@ -15,7 +15,7 @@ void command_lastname(Client *c, const Seperator *sep)
 		return;
 	}
 	
-	target->ChangeLastName(last_name.c_str());
+	target->ChangeLastName(last_name);
 	c->Message(
 		Chat::White,
 		fmt::format(

@@ -127,7 +127,7 @@ public:
 	void rain(int weather);
 	void snow(int weather);
 	void rename(std::string name);
-	void surname(const char *name);
+	void surname(std::string last_name);
 	void permaclass(int class_id);
 	void permarace(int race_id);
 	void permagender(int gender_id);

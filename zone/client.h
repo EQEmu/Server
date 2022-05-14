@@ -668,7 +668,7 @@ public:
 	void RemoveFromInstance(uint16 instance_id);
 	void WhoAll();
 	bool CheckLoreConflict(const EQ::ItemData* item);
-	void ChangeLastName(const char* in_lastname);
+	void ChangeLastName(std::string last_name);
 	void GetGroupAAs(GroupLeadershipAA_Struct *into) const;
 	void GetRaidAAs(RaidLeadershipAA_Struct *into) const;
 	void ClearGroupAAs();
@@ -912,8 +912,8 @@ public:
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	inline uint32 GetAAPercent() const { return m_epp.perAA; }
 	int64 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
-	void SetAATitle(const char *Title);
-	void SetTitleSuffix(const char *txt);
+	void SetAATitle(std::string title);
+	void SetTitleSuffix(std::string suffix);
 	void MemorizeSpell(uint32 slot, uint32 spellid, uint32 scribing, uint32 reduction = 0);
 
 	// Item methods
