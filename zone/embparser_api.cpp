@@ -5700,7 +5700,7 @@ XS(XS__crosszoneassigntaskbyraidid);
 XS(XS__crosszoneassigntaskbyraidid) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyraidid(int raid_id, uint32 task_identifier, [bool enforce_level_requirement = false])");\
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyraidid(int raid_id, uint32 task_identifier, [bool enforce_level_requirement = false])");
 	{
 		uint8 update_type = CZUpdateType_Raid;
 		uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;

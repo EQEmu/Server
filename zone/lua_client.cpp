@@ -1385,14 +1385,19 @@ void Lua_Client::UpdateTaskActivity(int task, int activity, int count) {
 	self->UpdateTaskActivity(task, activity, count);
 }
 
-void Lua_Client::AssignTask(int task, int npc_id) {
+void Lua_Client::AssignTask(int task_id) {
 	Lua_Safe_Call_Void();
-	self->AssignTask(task, npc_id);
+	self->AssignTask(task_id);
 }
 
-void Lua_Client::AssignTask(int task, int npc_id, bool enforce_level_requirement) {
+void Lua_Client::AssignTask(int task_id, int npc_id) {
 	Lua_Safe_Call_Void();
-	self->AssignTask(task, npc_id, enforce_level_requirement);
+	self->AssignTask(task_id, npc_id);
+}
+
+void Lua_Client::AssignTask(int task_id, int npc_id, bool enforce_level_requirement) {
+	Lua_Safe_Call_Void();
+	self->AssignTask(task_id, npc_id, enforce_level_requirement);
 }
 
 void Lua_Client::FailTask(int task) {
@@ -2486,6 +2491,35 @@ int Lua_Client::GetSpellDamage() {
 	return self->GetSpellDmg();
 }
 
+void Lua_Client::TaskSelector(luabind::adl::object table) {
+	Lua_Safe_Call_Void();
+
+	if(luabind::type(table) != LUA_TTABLE) {
+		return;
+	}
+
+	int tasks[MAXCHOOSERENTRIES] = { 0 };
+	int task_count = 0;
+
+	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
+		auto cur = table[i];
+		int cur_value = 0;
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				cur_value = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed &) {
+			}
+		} else {
+			task_count = i - 1;
+			break;
+		}
+
+		tasks[i - 1] = cur_value;
+	}
+
+	self->TaskQuestSetSelector(self, task_count, tasks);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2514,6 +2548,7 @@ luabind::scope lua_register_client() {
 	.def("AddPVPPoints", (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints)
 	.def("AddSkill", (void(Lua_Client::*)(int,int))&Lua_Client::AddSkill)
 	.def("Admin", (int(Lua_Client::*)(void))&Lua_Client::Admin)
+	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)
 	.def("AssignToInstance", (void(Lua_Client::*)(int))&Lua_Client::AssignToInstance)
@@ -2876,6 +2911,7 @@ luabind::scope lua_register_client() {
 	.def("TakeMoneyFromPP", (bool(Lua_Client::*)(uint64,bool))&Lua_Client::TakeMoneyFromPP)
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32))&Lua_Client::TakePlatinum)
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32,bool))&Lua_Client::TakePlatinum)
+	.def("TaskSelector", (void(Lua_Client::*)(luabind::adl::object))&Lua_Client::TaskSelector)
 	.def("Thirsty", (bool(Lua_Client::*)(void))&Lua_Client::Thirsty)
 	.def("TrainDisc", (void(Lua_Client::*)(int))&Lua_Client::TrainDisc)
 	.def("TrainDiscBySpellID", (void(Lua_Client::*)(int32))&Lua_Client::TrainDiscBySpellID)

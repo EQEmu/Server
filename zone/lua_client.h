@@ -325,8 +325,9 @@ public:
 	uint32 GetSpellIDByBookSlot(int book_slot);
 	int FindSpellBookSlotBySpellID(int spell_id);
 	void UpdateTaskActivity(int task, int activity, int count);
-	void AssignTask(int task, int npc_id);
-	void AssignTask(int task, int npc_id, bool enforce_level_requirement);
+	void AssignTask(int task_id);
+	void AssignTask(int task_id, int npc_id);
+	void AssignTask(int task_id, int npc_id, bool enforce_level_requirement);
 	void FailTask(int task);
 	bool IsTaskCompleted(int task);
 	bool IsTaskActive(int task);
@@ -419,6 +420,7 @@ public:
 
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
+	void TaskSelector(luabind::adl::object table);
 
 	void SetClientMaxLevel(int value);
 	int GetClientMaxLevel();
