@@ -1236,7 +1236,7 @@ public:
 	}
 	inline void AssignTask(
 		int task_id,
-		int npc_id,
+		int npc_id = 0,
 		bool enforce_level_requirement = false
 	) {
 		if (task_state) {
