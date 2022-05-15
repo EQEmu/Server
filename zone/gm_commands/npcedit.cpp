@@ -549,14 +549,17 @@ void command_npcedit(Client *c, const Seperator *sep)
 		std::string query   = fmt::format(
 			"UPDATE npc_types "
 			"SET luclin_haircolor = {}, luclin_beardcolor = {}, "
+			"luclin_eyecolor = {}, luclin_eyecolor2 = {}, "
 			"luclin_hairstyle = {}, luclin_beard = {}, "
 			"face = {}, drakkin_heritage = {}, "
 			"drakkin_tattoo = {}, drakkin_details = {}, "
 			"texture = {}, helmtexture = {}, "
-			"gender = {}, size = {:.2f}"
+			"gender = {}, size = {:.2f} "
 			"WHERE id = {}",
 			target->GetHairColor(),
 			target->GetBeardColor(),
+			target->GetEyeColor1(),
+			target->GetEyeColor2(),
 			target->GetHairStyle(),
 			target->GetBeard(),
 			target->GetLuclinFace(),
