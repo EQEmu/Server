@@ -453,8 +453,6 @@ public:
 		char **map_filename);
 	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
-	bool		UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location);
-	uint8		GetUseCFGSafeCoords();
 	int			getZoneShutDownDelay(uint32 zoneID, uint32 version);
 
 	/* Spawns and Spawn Points  */

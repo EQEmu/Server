@@ -3145,34 +3145,6 @@ void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 	QueryDatabase(query);
 }
 
-bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location) {
-
-	std::string query = StringFormat("UPDATE zone SET safe_x='%f', safe_y='%f', safe_z='%f' "
-                                    "WHERE short_name='%s';",
-                                    location.x, location.y, location.z, zonename);
-	auto results = QueryDatabase(query);
-	if (!results.Success() || results.RowsAffected() == 0)
-		return false;
-
-	return true;
-}
-
-uint8 ZoneDatabase::GetUseCFGSafeCoords()
-{
-	const std::string query = "SELECT value FROM variables WHERE varname='UseCFGSafeCoords'";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-
-	if (results.RowCount() != 1)
-        return 0;
-
-	auto row = results.begin();
-
-    return atoi(row[0]);
-}
-
 //New functions for timezone
 uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
 
