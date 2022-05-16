@@ -1282,7 +1282,7 @@ XS(XS_NPC_GetNPCStat) {
 
 		RETVAL = THIS->GetNPCStat(identifier);
 		XSprePUSH;
-		PUSHn((double)RETVAL);
+		PUSHn((double) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -1496,7 +1496,7 @@ XS(XS_NPC_GetScore) {
 		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetScore();
 		XSprePUSH;
-		PUSHi((UV) RETVAL);
+		PUSHi((IV) RETVAL);
 	}
 	XSRETURN(1);
 }

@@ -126,7 +126,7 @@ XS(XS_Inventory_GetBagIndex) {
 		VALIDATE_THIS_IS_INVENTORY;
 		bag_index = THIS->CalcBagIdx(slot_id);
 		XSprePUSH;
-		PUSHu((UV)bag_index);
+		PUSHu((UV) bag_index);
 	}
 	XSRETURN(1);
 }
@@ -162,7 +162,7 @@ XS(XS_Inventory_GetMaterialFromSlot) {
 		VALIDATE_THIS_IS_INVENTORY;
 		material = THIS->CalcMaterialFromSlot(slot_id);
 		XSprePUSH;
-		PUSHu((UV)material);
+		PUSHu((UV) material);
 	}
 	XSRETURN(1);
 }
@@ -180,7 +180,7 @@ XS(XS_Inventory_GetSlotByItemInst) {
 		VALIDATE_THIS_IS_INVENTORY;
 		slot_id = THIS->GetSlotByItemInst(item);
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -198,7 +198,7 @@ XS(XS_Inventory_GetSlotFromMaterial) {
 		VALIDATE_THIS_IS_INVENTORY;
 		slot_id = THIS->CalcSlotFromMaterial(material);
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -222,7 +222,7 @@ XS(XS_Inventory_GetSlotID) {
 		}
 
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -247,7 +247,7 @@ XS(XS_Inventory_HasItem) {
 
 		slot_id = THIS->HasItem(item_id, quantity, where_to_look);
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -269,7 +269,7 @@ XS(XS_Inventory_HasItemByLoreGroup) {
 
 		slot_id = THIS->HasItemByLoreGroup(loregroup, where_to_look);
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -292,7 +292,7 @@ XS(XS_Inventory_HasItemByUse) {
 
 		slot_id = THIS->HasItemByUse(item_use, quantity, where_to_look);
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -387,7 +387,7 @@ XS(XS_Inventory_PushCursor) {
 			slot_id = 0;
 
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -409,7 +409,7 @@ XS(XS_Inventory_PutItem) {
 			slot_id = 0;
 			
 		XSprePUSH;
-		PUSHi((IV)slot_id);
+		PUSHi((IV) slot_id);
 	}
 	XSRETURN(1);
 }
@@ -444,7 +444,7 @@ XS(XS_Inventory_CountAugmentEquippedByID) {
 		VALIDATE_THIS_IS_INVENTORY;
 		quantity = THIS->CountAugmentEquippedByID(item_id);
 		XSprePUSH;
-		PUSHi((IV)quantity);
+		PUSHi((IV) quantity);
 	}
 	XSRETURN(1);
 }
@@ -479,7 +479,7 @@ XS(XS_Inventory_CountItemEquippedByID) {
 		VALIDATE_THIS_IS_INVENTORY;
 		quantity = THIS->CountItemEquippedByID(item_id);
 		XSprePUSH;
-		PUSHi((IV)quantity);
+		PUSHi((IV) quantity);
 	}
 	XSRETURN(1);
 }

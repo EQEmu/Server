@@ -40,7 +40,7 @@ XS(XS_EntityList_GetMobID) {
 		uint16     id = (uint16) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMobID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -57,7 +57,7 @@ XS(XS_EntityList_GetMob) {
 		char       *name = (char *) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMob(name);
-		ST(0)            = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -74,7 +74,7 @@ XS(XS_EntityList_GetMobByID) {
 		uint16     id = (uint16) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMob(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -91,7 +91,7 @@ XS(XS_EntityList_GetMobByNpcTypeID) {
 		uint32     get_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMobByNpcTypeID(get_id);
-		ST(0)             = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -108,7 +108,7 @@ XS(XS_EntityList_IsMobSpawnedByNpcTypeID) {
 		uint32     get_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->IsMobSpawnedByNpcTypeID(get_id);
-		ST(0)             = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -125,7 +125,7 @@ XS(XS_EntityList_GetNPCByID) {
 		uint16     id = (uint16) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetNPCByID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -142,7 +142,7 @@ XS(XS_EntityList_GetNPCByNPCTypeID) {
 		uint32     npc_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetNPCByNPCTypeID(npc_id);
-		ST(0)             = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -176,7 +176,7 @@ XS(XS_EntityList_GetClientByName) {
 		char       *name = (char *) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByName(name);
-		ST(0)            = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -193,7 +193,7 @@ XS(XS_EntityList_GetClientByAccID) {
 		uint32     accid = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByAccID(accid);
-		ST(0)            = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -210,7 +210,7 @@ XS(XS_EntityList_GetClientByID) {
 		uint16     id = (uint16) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -227,7 +227,7 @@ XS(XS_EntityList_GetClientByCharID) {
 		uint32     iCharID = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByCharID(iCharID);
-		ST(0)              = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -244,7 +244,7 @@ XS(XS_EntityList_GetClientByWID) {
 		uint32     iWID = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByWID(iWID);
-		ST(0)           = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -261,7 +261,7 @@ XS(XS_EntityList_GetObjectByDBID) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetObjectByDBID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -278,7 +278,7 @@ XS(XS_EntityList_GetObjectByID) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetObjectByID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -295,7 +295,7 @@ XS(XS_EntityList_GetDoorsByDBID) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetDoorsByDBID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -312,7 +312,7 @@ XS(XS_EntityList_GetDoorsByDoorID) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetDoorsByDoorID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -329,7 +329,7 @@ XS(XS_EntityList_GetDoorsByID) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetDoorsByID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -346,7 +346,7 @@ XS(XS_EntityList_FindDoor) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->FindDoor(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -413,7 +413,7 @@ XS(XS_EntityList_GetGroupByID) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetGroupByID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -430,7 +430,7 @@ XS(XS_EntityList_GetGroupByLeaderName) {
 		char       *leader = (char *) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetGroupByLeaderName(leader);
-		ST(0)              = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -447,7 +447,7 @@ XS(XS_EntityList_GetRaidByID) {
 		uint32     id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetRaidByID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -514,7 +514,7 @@ XS(XS_EntityList_GetCorpseByID) {
 		uint16     id = (uint16) SvUV(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetCorpseByID(id);
-		ST(0)         = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -531,7 +531,7 @@ XS(XS_EntityList_GetCorpseByName) {
 		char       *name = (char *) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetCorpseByName(name);
-		ST(0)            = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
 	}
 	XSRETURN(1);

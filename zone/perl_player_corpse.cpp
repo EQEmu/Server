@@ -434,7 +434,7 @@ XS(XS_Corpse_CanMobLoot) {
 		int  charid = (int) SvIV(ST(1));
 		VALIDATE_THIS_IS_CORPSE;
 		RETVAL = THIS->CanPlayerLoot(charid);
-		ST(0)       = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);

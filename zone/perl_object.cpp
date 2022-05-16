@@ -549,7 +549,7 @@ XS(XS_Object_EntityVariableExists) {
 		bool       RETVAL;
 		VALIDATE_THIS_IS_OBJECT;
 		RETVAL = THIS->EntityVariableExists(id);
-		ST(0)          = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
