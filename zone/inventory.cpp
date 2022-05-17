@@ -814,8 +814,8 @@ void Client::DropItem(int16 slot_id, bool recurse)
 	LogInventory("[{}] (char_id: [{}]) Attempting to drop item from slot [{}] on the ground",
 		GetCleanName(), CharacterID(), slot_id);
 
-	if(GetInv().CheckNoDrop(slot_id, recurse) && RuleI(World, FVNoDropFlag) == 0 ||
-		RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2)
+	if(GetInv().CheckNoDrop(slot_id, recurse) && (RuleI(World, FVNoDropFlag) == 0 ||
+		RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2))
 	{
 		auto invalid_drop = m_inv.GetItem(slot_id);
 		if (!invalid_drop) {
@@ -1963,7 +1963,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	if (((with && with->IsClient() && dst_slot_id >= EQ::invslot::TRADE_BEGIN && dst_slot_id <= EQ::invslot::TRADE_END) ||
 		(dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
 	&& GetInv().CheckNoDrop(src_slot_id)
-	&& RuleI(World, FVNoDropFlag) == 0 || RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
+	&& (RuleI(World, FVNoDropFlag) == 0 || RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2)) {
 		auto ndh_inst = m_inv[src_slot_id];
 		std::string ndh_item_data;
 		if (ndh_inst == nullptr) {
