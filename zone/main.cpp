@@ -88,7 +88,6 @@ volatile bool RunLoops = true;
 #endif
 
 extern volatile bool is_zone_loaded;
-extern bool Critical = false;
 
 EntityList entity_list;
 WorldServer worldserver;
@@ -579,7 +578,7 @@ int main(int argc, char** argv) {
 
 	EQ::Timer process_timer(loop_fn);
 	process_timer.Start(32, true);
-	
+
 	EQ::EventLoop::Get().Run();
 
 	entity_list.Clear();

@@ -154,7 +154,7 @@ bool Spawn2::Process() {
 		return true;
 	}
 
-	if (timer.Check() && zone->spawn2_timer.Enabled()) {
+	if (timer.Check()) {
 		timer.Disable();
 
 		LogSpawns("Spawn2 [{}]: Timer has triggered", spawn2_id);

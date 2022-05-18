@@ -1097,11 +1097,7 @@ void Raid::SplitExp(uint32 exp, Mob* other) {
 		return;
 
 	for (unsigned int x = 0; x < MAX_RAID_MEMBERS; x++) {
-#ifdef BOTS
-		if (members[x].member != nullptr && !members[x].IsBot) // If Group Member is Client
-#else
 		if (members[x].member != nullptr) // If Group Member is Client
-#endif
 		{
 			Client *cmember = members[x].member;
 			// add exp + exp cap

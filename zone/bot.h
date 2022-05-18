@@ -35,7 +35,6 @@
 #include "../common/global_define.h"
 #include "guild_mgr.h"
 #include "worldserver.h"
-#include "raids.h"
 
 #include <sstream>
 
@@ -152,8 +151,8 @@ public:
 		ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
-	virtual Raid* GetRaid() { return entity_list.GetRaidByMob(this); } // GetRaidByMob(this);
-	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); } // GetGroupByMob;
+	virtual Raid* GetRaid() { return entity_list.GetRaidByMob(this); }
+	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); }
 
 	// Common, but informal "interfaces" with Client object
 	uint32 CharacterID() { return GetBotID(); } // Just returns the Bot Id
@@ -375,15 +374,6 @@ public:
 	static int32 GetDisciplineRecastTimer(Bot *caster, int timer_index);
 	static bool CheckDisciplineRecastTimers(Bot *caster, int timer_index);
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
-
-	//Raid methods
-	void PetAIProcess_Raid();
-	void AI_Process_Raid();
-	bool AICastSpell_Raid(Mob* tar, uint8 iChance, uint32 iSpellTypes);
-	static void ProcessRaidInvite(Bot* invitee, Client* invitor);
-	static void ProcessRaidInvite(Client* invitee, Client* invitor);
-	uint8 GetNumberNeedingHealedInRaidGroup(uint8 hpr, bool includePets);
-	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
 
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
@@ -620,9 +610,6 @@ public:
 	int32 GetBaseDR() { return _baseDR; }
 	int32 GetBaseCorrup() { return _baseCorrup; }
 
-	//Raid additions
-	Raid* p_raid_instance;
-
 protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
@@ -687,7 +674,6 @@ private:
 	Timer m_auto_defend_timer;
 	//Timer m_combat_jitter_timer;
 	//bool m_combat_jitter_flag;
-	bool m_dirtyautohaters;
 	bool m_guard_flag;
 	bool m_hold_flag;
 	bool m_attack_flag;
@@ -754,7 +740,6 @@ private:
 
 	public:
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
-
 };
 
 #endif // BOTS

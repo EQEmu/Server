@@ -11,7 +11,6 @@ SET(zone_sources
     beacon.cpp
     bonuses.cpp
     bot.cpp
-    bot_raid.cpp
     bot_command.cpp
     bot_database.cpp
     botspellsai.cpp
