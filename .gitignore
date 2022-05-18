@@ -54,5 +54,5 @@ bin/
 /Win32
 /x64
 /client_files/**/CMakeFiles/
-
+submodules/libuv
 .idea

@@ -1742,6 +1742,7 @@ bool Zone::Depop(bool StartSpawnTimer) {
 		itr = npctable.begin();
 		delete itr->second;
 		itr->second = nullptr;
+
 		npctable.erase(itr);
 	}
 
