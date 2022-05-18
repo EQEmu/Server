@@ -4034,7 +4034,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			// produce a spell message.  Send to everyone.
 			// This fixes issues with npc-procs like 1002 and 918 which
 			// need to spit out extra spell color.
-			if (IsValidSpell(spell_id) && skill_used == 52) {
+			if (IsValidSpell(spell_id) && skill_used == EQ::skills::SkillTigerClaw) {
 				a->type = DamageTypeSpell;
 				entity_list.QueueCloseClients(
 					this, /* Sender */
@@ -4058,7 +4058,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					outapp, /* packet */
 					true, /* Skip Sender */
 					range, /* distance packet travels at the speed of sound */
-					(IsValidSpell(spell_id) && skill_used != 52) ? 0 : skip,
+					(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
 					true, /* Packet ACK */
 					filter /* eqFilterType filter */
 					);
