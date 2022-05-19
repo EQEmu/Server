@@ -78,6 +78,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 
+#include "data_bucket.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
@@ -5518,7 +5519,7 @@ uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
 	return highest_spell_id;
 }
 
-bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
+bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 	std::string query = fmt::format(
 		"SELECT qglobal, value FROM spell_globals WHERE spellid = {}",
 		spell_id
@@ -5543,7 +5544,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 
 	query = fmt::format(
 		"SELECT value FROM quest_globals WHERE charid = {} AND name = '{}'",
-		char_id,
+		character_id,
 		EscapeString(spell_global_name)
 	);
 
@@ -5553,7 +5554,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 			"Spell global [{}] for spell ID [{}] for character ID [{}] query failed.",
 			spell_global_name,
 			spell_id,
-			char_id
+			character_id
 		);
 
 		return false; // Query failed, do not allow scribing.
@@ -5564,7 +5565,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 			"Spell global [{}] for spell ID [{}] for character ID [{}] does not exist.",
 			spell_global_name,
 			spell_id,
-			char_id
+			character_id
 		);
 
 		return false; // No rows found, do not allow scribing.
@@ -5587,7 +5588,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 		"Spell global [{}] for spell ID [{}] for character ID [{}] did not match value [{}] value found was [{}].",
 		spell_global_name,
 		spell_id,
-		char_id,
+		character_id,
 		spell_global_value,
 		global_value
 	);
@@ -5595,7 +5596,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 	return false;
 }
 
-bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
+bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 	auto query = fmt::format(
 		"SELECT `key`, value FROM spell_buckets WHERE spellid = {}",
 		spell_id
@@ -5618,56 +5619,43 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
 		return true; // If the entry in the spell_buckets table has nothing set for the qglobal name, allow scribing.
 	}
 
-	query = fmt::format(
-		"SELECT value FROM data_buckets WHERE `key` = '{}-{}'",
-		char_id,
-		EscapeString(spell_bucket_name)
+	auto new_bucket_name = fmt::format(
+		"{}-{}",
+		GetBucketKey(),
+		spell_bucket_name
 	);
 
-	results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError(
-			"Spell bucket [{}] for spell ID [{}] for character ID [{}] query failed.",
-			spell_bucket_name,
-			spell_id,
-			char_id
-		);
-
-		return false; // Query failed, do not allow scribing.
-	}
-
-	if (!results.RowCount()) {
-		LogError(
-			"Spell bucket [{}] for spell ID [{}] for character ID [{}] does not exist.",
-			spell_bucket_name,
-			spell_id,
-			char_id
-		);
-
-		return false; // No rows found, do not allow scribing.
-	}
-
-	row = results.begin();
-	std::string bucket_value = row[0];
-	if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
-		if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
-			return true; // If value is greater than or equal to spell bucket value, allow scribing.
-		}
-	} else {
-		if (bucket_value == spell_bucket_value) {
-			return true; // If value is equal to spell bucket value, allow scribing.
+	auto bucket_value = DataBucket::GetData(new_bucket_name);
+	if (!bucket_value.empty()) {
+		if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
+			if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
+				return true; // If value is greater than or equal to spell bucket value, allow scribing.
+			}
+		} else {				
+			if (bucket_value == spell_bucket_value) {
+				return true; // If value is equal to spell bucket value, allow scribing.
+			}
 		}
 	}
 
-	// If user's data bucket does not meet requirements, do not allow scribing.
-	LogError(
-		"Spell bucket [{}] for spell ID [{}] for character ID [{}] did not match value [{}] value found was [{}].",
-		spell_bucket_name,
-		spell_id,
-		char_id,
-		spell_bucket_value,
-		bucket_value
+	auto old_bucket_name = fmt::format(
+		"{}-{}",
+		character_id,
+		spell_bucket_name
 	);
+
+	bucket_value = DataBucket::GetData(old_bucket_name);
+	if (!bucket_value.empty()) {
+		if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
+			if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
+				return true; // If value is greater than or equal to spell bucket value, allow scribing.
+			}
+		} else {				
+			if (bucket_value == spell_bucket_value) {
+				return true; // If value is equal to spell bucket value, allow scribing.
+			}
+		}
+	}
 
 	return false;
 }

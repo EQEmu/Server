@@ -1839,7 +1839,7 @@ void Lua_Client::SetClientMaxLevel(int value) {
 	self->SetClientMaxLevel(value);
 }
 
-int Lua_Client::GetClientMaxLevel() {
+uint8 Lua_Client::GetClientMaxLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetClientMaxLevel();
 }

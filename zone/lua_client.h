@@ -423,7 +423,7 @@ public:
 	void TaskSelector(luabind::adl::object table);
 
 	void SetClientMaxLevel(int value);
-	int GetClientMaxLevel();
+	uint8 GetClientMaxLevel();
 
 	void DialogueWindow(std::string markdown);
 

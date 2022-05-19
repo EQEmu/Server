@@ -1318,7 +1318,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	drakkin_details = m_pp.drakkin_details;
 
 	// Max Level for Character:PerCharacterQglobalMaxLevel and Character:PerCharacterBucketMaxLevel
-	int client_max_level = 0;
+	uint8 client_max_level = 0;
 	if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
 		client_max_level = GetCharMaxLevelFromQGlobal();
 	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
