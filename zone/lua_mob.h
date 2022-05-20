@@ -9,6 +9,11 @@ struct Lua_HateList;
 class Lua_Item;
 class Lua_ItemInst;
 class Lua_StatBonuses;
+#ifdef BOTS
+class Lua_Bot;
+#endif
+class Lua_NPC;
+class Lua_Client;
 
 namespace luabind {
 	struct scope;
@@ -53,18 +58,18 @@ public:
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::adl::object opts);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot);
-	void Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot);
+	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic);
 	void RangedAttack(Lua_Mob other);
 	void ThrowingAttack(Lua_Mob other);
 	void Heal();
-	void HealDamage(uint32 amount);
-	void HealDamage(uint32 amount, Lua_Mob other);
+	void HealDamage(uint64 amount);
+	void HealDamage(uint64 amount, Lua_Mob other);
 	uint32 GetLevelCon(int other);
 	uint32 GetLevelCon(int my, int other);
-	void SetHP(int hp);
+	void SetHP(int64 hp);
 	void DoAnim(int anim_num);
 	void DoAnim(int anim_num, int type);
 	void DoAnim(int anim_num, int type, bool ackreq);
@@ -74,13 +79,16 @@ public:
 	void RandomizeFeatures(bool send_illusion, bool save_variables);
 	void GMMove(double x, double y, double z);
 	void GMMove(double x, double y, double z, double heading);
-	void GMMove(double x, double y, double z, double heading, bool send_update);
 	void TryMoveAlong(float distance, float heading);
 	void TryMoveAlong(float distance, float heading, bool send);
 	bool HasProcs();
 	bool IsInvisible();
 	bool IsInvisible(Lua_Mob other);
     void SetInvisible(int state);
+	uint8 GetInvisibleLevel();
+	uint8 GetInvisibleUndeadLevel();
+	void SetSeeInvisibleLevel(uint8 invisible_level);
+	void SetSeeInvisibleUndeadLevel(uint8 invisible_level);
 	bool FindBuff(int spell_id);
 	uint16 FindBuffBySlot(int slot);
 	uint32 BuffCount();
@@ -110,6 +118,7 @@ public:
 	int GetClass();
 	int GetLevel();
 	const char *GetCleanName();
+	const char *GetLastName();
 	Lua_Mob GetTarget();
 	void SetTarget(Lua_Mob t);
 	double GetHPRatio();
@@ -198,26 +207,32 @@ public:
 	Lua_Mob GetPet();
 	Lua_Mob GetOwner();
 	Lua_HateList GetHateList();
+	Lua_HateList GetShuffledHateList();
 	Lua_HateList GetHateListByDistance();
 	Lua_HateList GetHateListByDistance(int distance);
 	Lua_Mob GetHateTop();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();
+#ifdef BOTS
+	Lua_Bot GetHateRandomBot();
+#endif
+	Lua_Client GetHateRandomClient();
+	Lua_NPC GetHateRandomNPC();
 	Lua_Mob GetHateClosest();
 	void AddToHateList(Lua_Mob other);
-	void AddToHateList(Lua_Mob other, int hate);
-	void AddToHateList(Lua_Mob other, int hate, int damage);
-	void AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_help);
-	void AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_help, bool frenzy);
-	void AddToHateList(Lua_Mob other, int hate, int damage, bool yell_for_help, bool frenzy, bool buff_tic);
+	void AddToHateList(Lua_Mob other, int64 hate);
+	void AddToHateList(Lua_Mob other, int64 hate, int64 damage);
+	void AddToHateList(Lua_Mob other, int64 hate, int64 damage, bool yell_for_help);
+	void AddToHateList(Lua_Mob other, int64 hate, int64 damage, bool yell_for_help, bool frenzy);
+	void AddToHateList(Lua_Mob other, int64 hate, int64 damage, bool yell_for_help, bool frenzy, bool buff_tic);
 	void SetHate(Lua_Mob other);
-	void SetHate(Lua_Mob other, int hate);
-	void SetHate(Lua_Mob other, int hate, int damage);
+	void SetHate(Lua_Mob other, int64 hate);
+	void SetHate(Lua_Mob other, int64 hate, int64 damage);
 	void HalveAggro(Lua_Mob other);
 	void DoubleAggro(Lua_Mob other);
-	uint32 GetHateAmount(Lua_Mob target);
-	uint32 GetHateAmount(Lua_Mob target, bool is_damage);
-	uint32 GetDamageAmount(Lua_Mob target);
+	int64 GetHateAmount(Lua_Mob target);
+	int64 GetHateAmount(Lua_Mob target, bool is_damage);
+	uint64 GetDamageAmount(Lua_Mob target);
 	void WipeHateList();
 	bool CheckAggro(Lua_Mob other);
 	void Stun(int duration);
@@ -350,9 +365,10 @@ public:
 	void DelGlobal(const char *varname);
 	void SetSlotTint(int material_slot, int red_tint, int green_tint, int blue_tint);
 	void WearChange(int material_slot, int texture, uint32 color);
-	void DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup);
+	void DoKnockback(Lua_Mob caster, uint32 push_back, uint32 push_up);
 	void AddNimbusEffect(int effect_id);
 	void RemoveNimbusEffect(int effect_id);
+	void RemoveAllNimbusEffects();
 	bool IsRunning();
 	void SetRunning(bool running);
 	void SetBodyType(int new_body, bool overwrite_orig);
@@ -360,7 +376,7 @@ public:
 	void ModSkillDmgTaken(int skill, int value);
 	int GetModSkillDmgTaken(int skill);
 	int GetSkillDmgTaken(int skill);
-	int GetFcDamageAmtIncoming(Lua_Mob caster, uint32 spell_id, bool use_skill, uint16 skill);
+	int GetFcDamageAmtIncoming(Lua_Mob caster, int32 spell_id);
 	int GetSkillDmgAmt(uint16 skill);
 	void SetAllowBeneficial(bool value);
 	bool GetAllowBeneficial();
@@ -393,7 +409,7 @@ public:
 	int CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite);
 	void SetPseudoRoot(bool in);
 	uint8 SeeInvisible();
-	bool SeeInvisibleUndead();
+	uint8 SeeInvisibleUndead();
 	bool SeeHide();
 	bool SeeImprovedHide();
 	uint8 GetNimbusEffect1();
@@ -409,6 +425,8 @@ public:
 	bool HasOwner();
 	bool IsPet();
 	bool HasPet();
+	void RemovePet();
+	void SetPet(Lua_Mob new_pet);
 	bool IsSilenced();
 	bool IsAmnesiad();
 	int32 GetMeleeMitigation();
@@ -424,11 +442,10 @@ public:
 	int AttackAnimation(int Hand, Lua_ItemInst weapon);
 	int GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon);
 	bool IsBerserk();
-	bool TryFinishingBlow(Lua_Mob defender, int &damage);
+	bool TryFinishingBlow(Lua_Mob defender, int64 &damage);
 	int GetBodyType();
 	int GetOrigBodyType();
 	void CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id);
-
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
@@ -437,6 +454,14 @@ public:
 	void SetBucket(std::string bucket_name, std::string bucket_value);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 	bool IsHorse();
+	bool CanClassEquipItem(uint32 item_id);
+	bool CanRaceEquipItem(uint32 item_id);
+	void ApplySpellBuff(int spell_id);
+	void ApplySpellBuff(int spell_id, int duration);
+	int GetBuffStatValueBySlot(uint8 slot, const char* identifier);
+	int GetBuffStatValueBySpell(int spell_id, const char* identifier);
+	void SetBuffDuration(int spell_id);
+	void SetBuffDuration(int spell_id, int duration);
 };
 
 #endif

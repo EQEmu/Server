@@ -214,7 +214,7 @@ EQ::ItemInstance::~ItemInstance()
 bool EQ::ItemInstance::IsType(item::ItemClass item_class) const
 {
 	// IsType(<ItemClassTypes>) does not protect against 'm_item = nullptr'
-	
+
 	// Check usage type
 	if ((m_use_type == ItemInstWorldContainer) && (item_class == item::ItemClassBag))
 		return true;
@@ -245,7 +245,7 @@ bool EQ::ItemInstance::IsStackable() const
 {
 	if (!m_item)
 		return false;
-	
+
 	return m_item->Stackable;
 }
 
@@ -253,7 +253,7 @@ bool EQ::ItemInstance::IsCharged() const
 {
 	if (!m_item)
 		return false;
-	
+
 	if (m_item->MaxCharges > 1)
 		return true;
 	else
@@ -381,7 +381,7 @@ EQ::ItemInstance* EQ::ItemInstance::PopItem(uint8 index)
 		m_contents.erase(index);
 		return inst; // Return pointer that needs to be deleted (or otherwise managed)
 	}
-	
+
 	return nullptr;
 }
 
@@ -476,7 +476,7 @@ uint8 EQ::ItemInstance::GetTotalItemCount() const
 {
 	if (!m_item)
 		return 0;
-	
+
 	uint8 item_count = 1;
 
 	if (m_item && !m_item->IsClassBag()) { return item_count; }
@@ -526,7 +526,7 @@ EQ::ItemInstance* EQ::ItemInstance::GetOrnamentationAug(int32 ornamentationAugty
 			{
 				continue;
 			}
-			return this->GetAugment(i);
+			return GetAugment(i);
 		}
 	}
 
@@ -549,7 +549,7 @@ uint32 EQ::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
 bool EQ::ItemInstance::UpdateOrnamentationInfo() {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
-	
+
 	bool ornamentSet = false;
 
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
@@ -642,7 +642,7 @@ void EQ::ItemInstance::PutAugment(uint8 slot, const ItemInstance& augment)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return;
-	
+
 	PutItem(slot, augment);
 }
 
@@ -655,7 +655,7 @@ void EQ::ItemInstance::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id
 	if (aug) {
 		PutAugment(slot, *aug);
 		safe_delete(aug);
-	}	
+	}
 }
 
 // Remove augment from item and destroy it
@@ -663,7 +663,7 @@ void EQ::ItemInstance::DeleteAugment(uint8 index)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return;
-	
+
 	DeleteItem(index);
 }
 
@@ -672,7 +672,7 @@ EQ::ItemInstance* EQ::ItemInstance::RemoveAugment(uint8 index)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return nullptr;
-	
+
 	return PopItem(index);
 }
 
@@ -680,13 +680,52 @@ bool EQ::ItemInstance::IsAugmented()
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
-	
+
 	for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
 		if (GetAugmentItemID(index))
 			return true;
 	}
 
 	return false;
+}
+
+bool EQ::ItemInstance::ContainsAugmentByID(uint32 item_id)
+{
+	if (!m_item || !m_item->IsClassCommon()) {
+		return false;
+	}
+
+	if (!item_id) {
+		return false;
+	}
+
+	for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
+		if (GetAugmentItemID(augment_slot) == item_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int EQ::ItemInstance::CountAugmentByID(uint32 item_id)
+{
+	int quantity = 0;
+	if (!m_item || !m_item->IsClassCommon()) {
+		return quantity;
+	}
+
+	if (!item_id) {
+		return quantity;
+	}
+
+	for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
+		if (GetAugmentItemID(augment_slot) == item_id) {
+			quantity++;
+		}
+	}
+
+	return quantity;
 }
 
 // Has attack/delay?
@@ -834,7 +873,7 @@ bool EQ::ItemInstance::IsDroppable(bool recurse) const
 				return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -1058,7 +1097,7 @@ int EQ::ItemInstance::GetItemElementalFlag(bool augments) const
 
 int EQ::ItemInstance::GetItemElementalDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->ElemDmgAmt;
@@ -1123,7 +1162,7 @@ int EQ::ItemInstance::GetItemRequiredLevel(bool augments) const
 
 int EQ::ItemInstance::GetItemWeaponDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->Damage;
@@ -1139,7 +1178,7 @@ int EQ::ItemInstance::GetItemWeaponDamage(bool augments) const
 
 int EQ::ItemInstance::GetItemBackstabDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->BackstabDmg;
@@ -1197,7 +1236,7 @@ int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 
 int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		if (item->BaneDmgBody == against)
@@ -1214,7 +1253,7 @@ int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) con
 
 int EQ::ItemInstance::GetItemBaneDamageRace(uint16 against, bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		if (item->BaneDmgRace == against)

@@ -7,6 +7,9 @@
 class EntityList;
 class Lua_Mob;
 class Lua_Client;
+#ifdef BOTS
+class Lua_Bot;
+#endif
 class Lua_NPC;
 class Lua_Door;
 class Lua_Corpse;
@@ -16,6 +19,9 @@ class Lua_Raid;
 class Lua_Spawn;
 struct Lua_Mob_List;
 struct Lua_Client_List;
+#ifdef BOTS
+struct Lua_Bot_List;
+#endif
 struct Lua_NPC_List;
 struct Lua_Corpse_List;
 struct Lua_Object_List;
@@ -34,6 +40,10 @@ luabind::scope lua_register_corpse_list();
 luabind::scope lua_register_object_list();
 luabind::scope lua_register_door_list();
 luabind::scope lua_register_spawn_list();
+
+#ifdef BOTS
+luabind::scope lua_register_bot_list();
+#endif
 
 class Lua_EntityList : public Lua_Ptr<EntityList>
 {
@@ -89,8 +99,8 @@ public:
 	std::string MakeNameUnique(const char *name);
 	std::string RemoveNumbers(const char *name);
 	void SignalMobsByNPCID(uint32 npc_id, int signal);
-	int DeleteNPCCorpses();
-	int DeletePlayerCorpses();
+	uint32 DeleteNPCCorpses();
+	uint32 DeletePlayerCorpses();
 	void HalveAggro(Lua_Mob who);
 	void DoubleAggro(Lua_Mob who);
 	void ClearFeignAggro(Lua_Mob who);
@@ -98,8 +108,12 @@ public:
 	void RemoveFromHateLists(Lua_Mob who);
 	void RemoveFromHateLists(Lua_Mob who, bool set_to_one);
 	void MessageGroup(Lua_Mob who, bool skip_close, uint32 type, const char *message);
-	Lua_Client GetRandomClient(float x, float y, float z, float dist);
-	Lua_Client GetRandomClient(float x, float y, float z, float dist, Lua_Client exclude);
+	Lua_Client GetRandomClient(float x, float y, float z, float distance);
+	Lua_Client GetRandomClient(float x, float y, float z, float distance, Lua_Client exclude_client);
+	Lua_Mob GetRandomMob(float x, float y, float z, float distance);
+	Lua_Mob GetRandomMob(float x, float y, float z, float distance, Lua_Mob exclude_mob);
+	Lua_NPC GetRandomNPC(float x, float y, float z, float distance);
+	Lua_NPC GetRandomNPC(float x, float y, float z, float distance, Lua_NPC exclude_npc);
 	Lua_Mob_List GetMobList();
 	Lua_Client_List GetClientList();
 	Lua_Client_List GetShuffledClientList();
@@ -110,6 +124,13 @@ public:
 	Lua_Spawn_List GetSpawnList();
 	void SignalAllClients(int signal);
 	void ChannelMessage(Lua_Mob from, int channel_num, int language, const char *message);
+#ifdef BOTS
+	Lua_Bot GetBotByID(uint32 bot_id);
+	Lua_Bot GetBotByName(std::string bot_name);
+	Lua_Bot_List GetBotList();
+	Lua_Bot_List GetBotListByCharacterID(uint32 character_id);
+	Lua_Bot_List GetBotListByClientName(std::string client_name);
+#endif
 };
 
 #endif

@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseCharacterDataRepository {
 public:
@@ -32,7 +33,7 @@ public:
 		float       heading;
 		int         gender;
 		int         race;
-		int         class;
+		int         class_;
 		int         level;
 		int         deity;
 		int         birthday;
@@ -72,7 +73,7 @@ public:
 		int         sta;
 		int         cha;
 		int         dex;
-		int         int;
+		int         int_;
 		int         agi;
 		int         wis;
 		int         zone_change_count;
@@ -119,7 +120,7 @@ public:
 		int         aa_points_spent_old;
 		int         aa_points_old;
 		int         e_last_invsnapshot;
-		std::string deleted_at;
+		time_t      deleted_at;
 	};
 
 	static std::string PrimaryKey()
@@ -144,7 +145,7 @@ public:
 			"heading",
 			"gender",
 			"race",
-			"class",
+			"`class`",
 			"level",
 			"deity",
 			"birthday",
@@ -184,7 +185,7 @@ public:
 			"sta",
 			"cha",
 			"dex",
-			"int",
+			"`int`",
 			"agi",
 			"wis",
 			"zone_change_count",
@@ -235,9 +236,122 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"account_id",
+			"name",
+			"last_name",
+			"title",
+			"suffix",
+			"zone_id",
+			"zone_instance",
+			"y",
+			"x",
+			"z",
+			"heading",
+			"gender",
+			"race",
+			"`class`",
+			"level",
+			"deity",
+			"birthday",
+			"last_login",
+			"time_played",
+			"level2",
+			"anon",
+			"gm",
+			"face",
+			"hair_color",
+			"hair_style",
+			"beard",
+			"beard_color",
+			"eye_color_1",
+			"eye_color_2",
+			"drakkin_heritage",
+			"drakkin_tattoo",
+			"drakkin_details",
+			"ability_time_seconds",
+			"ability_number",
+			"ability_time_minutes",
+			"ability_time_hours",
+			"exp",
+			"aa_points_spent",
+			"aa_exp",
+			"aa_points",
+			"group_leadership_exp",
+			"raid_leadership_exp",
+			"group_leadership_points",
+			"raid_leadership_points",
+			"points",
+			"cur_hp",
+			"mana",
+			"endurance",
+			"intoxication",
+			"str",
+			"sta",
+			"cha",
+			"dex",
+			"`int`",
+			"agi",
+			"wis",
+			"zone_change_count",
+			"toxicity",
+			"hunger_level",
+			"thirst_level",
+			"ability_up",
+			"ldon_points_guk",
+			"ldon_points_mir",
+			"ldon_points_mmc",
+			"ldon_points_ruj",
+			"ldon_points_tak",
+			"ldon_points_available",
+			"tribute_time_remaining",
+			"career_tribute_points",
+			"tribute_points",
+			"tribute_active",
+			"pvp_status",
+			"pvp_kills",
+			"pvp_deaths",
+			"pvp_current_points",
+			"pvp_career_points",
+			"pvp_best_kill_streak",
+			"pvp_worst_death_streak",
+			"pvp_current_kill_streak",
+			"pvp2",
+			"pvp_type",
+			"show_helm",
+			"group_auto_consent",
+			"raid_auto_consent",
+			"guild_auto_consent",
+			"leadership_exp_on",
+			"RestTimer",
+			"air_remaining",
+			"autosplit_enabled",
+			"lfp",
+			"lfg",
+			"mailkey",
+			"xtargets",
+			"firstlogon",
+			"e_aa_effects",
+			"e_percent_to_aa",
+			"e_expended_aa_spent",
+			"aa_points_spent_old",
+			"aa_points_old",
+			"e_last_invsnapshot",
+			"UNIX_TIMESTAMP(deleted_at)",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -249,7 +363,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -281,7 +395,7 @@ public:
 		entry.heading                 = 0;
 		entry.gender                  = 0;
 		entry.race                    = 0;
-		entry.class                   = 0;
+		entry.class_                  = 0;
 		entry.level                   = 0;
 		entry.deity                   = 0;
 		entry.birthday                = 0;
@@ -321,7 +435,7 @@ public:
 		entry.sta                     = 0;
 		entry.cha                     = 0;
 		entry.dex                     = 0;
-		entry.int                     = 0;
+		entry.int_                    = 0;
 		entry.agi                     = 0;
 		entry.wis                     = 0;
 		entry.zone_change_count       = 0;
@@ -418,7 +532,7 @@ public:
 			entry.heading                 = static_cast<float>(atof(row[11]));
 			entry.gender                  = atoi(row[12]);
 			entry.race                    = atoi(row[13]);
-			entry.class                   = atoi(row[14]);
+			entry.class_                  = atoi(row[14]);
 			entry.level                   = atoi(row[15]);
 			entry.deity                   = atoi(row[16]);
 			entry.birthday                = atoi(row[17]);
@@ -458,7 +572,7 @@ public:
 			entry.sta                     = atoi(row[51]);
 			entry.cha                     = atoi(row[52]);
 			entry.dex                     = atoi(row[53]);
-			entry.int                     = atoi(row[54]);
+			entry.int_                    = atoi(row[54]);
 			entry.agi                     = atoi(row[55]);
 			entry.wis                     = atoi(row[56]);
 			entry.zone_change_count       = atoi(row[57]);
@@ -505,7 +619,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.deleted_at              = strtoll(row[101] ? row[101] : "-1", nullptr, 10);
 
 			return entry;
 		}
@@ -552,7 +666,7 @@ public:
 		update_values.push_back(columns[11] + " = " + std::to_string(character_data_entry.heading));
 		update_values.push_back(columns[12] + " = " + std::to_string(character_data_entry.gender));
 		update_values.push_back(columns[13] + " = " + std::to_string(character_data_entry.race));
-		update_values.push_back(columns[14] + " = " + std::to_string(character_data_entry.class));
+		update_values.push_back(columns[14] + " = " + std::to_string(character_data_entry.class_));
 		update_values.push_back(columns[15] + " = " + std::to_string(character_data_entry.level));
 		update_values.push_back(columns[16] + " = " + std::to_string(character_data_entry.deity));
 		update_values.push_back(columns[17] + " = " + std::to_string(character_data_entry.birthday));
@@ -592,7 +706,7 @@ public:
 		update_values.push_back(columns[51] + " = " + std::to_string(character_data_entry.sta));
 		update_values.push_back(columns[52] + " = " + std::to_string(character_data_entry.cha));
 		update_values.push_back(columns[53] + " = " + std::to_string(character_data_entry.dex));
-		update_values.push_back(columns[54] + " = " + std::to_string(character_data_entry.int));
+		update_values.push_back(columns[54] + " = " + std::to_string(character_data_entry.int_));
 		update_values.push_back(columns[55] + " = " + std::to_string(character_data_entry.agi));
 		update_values.push_back(columns[56] + " = " + std::to_string(character_data_entry.wis));
 		update_values.push_back(columns[57] + " = " + std::to_string(character_data_entry.zone_change_count));
@@ -639,7 +753,7 @@ public:
 		update_values.push_back(columns[98] + " = " + std::to_string(character_data_entry.aa_points_spent_old));
 		update_values.push_back(columns[99] + " = " + std::to_string(character_data_entry.aa_points_old));
 		update_values.push_back(columns[100] + " = " + std::to_string(character_data_entry.e_last_invsnapshot));
-		update_values.push_back(columns[101] + " = '" + EscapeString(character_data_entry.deleted_at) + "'");
+		update_values.push_back(columns[101] + " = FROM_UNIXTIME(" + (character_data_entry.deleted_at > 0 ? std::to_string(character_data_entry.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -675,7 +789,7 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.heading));
 		insert_values.push_back(std::to_string(character_data_entry.gender));
 		insert_values.push_back(std::to_string(character_data_entry.race));
-		insert_values.push_back(std::to_string(character_data_entry.class));
+		insert_values.push_back(std::to_string(character_data_entry.class_));
 		insert_values.push_back(std::to_string(character_data_entry.level));
 		insert_values.push_back(std::to_string(character_data_entry.deity));
 		insert_values.push_back(std::to_string(character_data_entry.birthday));
@@ -715,7 +829,7 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.sta));
 		insert_values.push_back(std::to_string(character_data_entry.cha));
 		insert_values.push_back(std::to_string(character_data_entry.dex));
-		insert_values.push_back(std::to_string(character_data_entry.int));
+		insert_values.push_back(std::to_string(character_data_entry.int_));
 		insert_values.push_back(std::to_string(character_data_entry.agi));
 		insert_values.push_back(std::to_string(character_data_entry.wis));
 		insert_values.push_back(std::to_string(character_data_entry.zone_change_count));
@@ -762,7 +876,7 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.aa_points_spent_old));
 		insert_values.push_back(std::to_string(character_data_entry.aa_points_old));
 		insert_values.push_back(std::to_string(character_data_entry.e_last_invsnapshot));
-		insert_values.push_back("'" + EscapeString(character_data_entry.deleted_at) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (character_data_entry.deleted_at > 0 ? std::to_string(character_data_entry.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -806,7 +920,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.heading));
 			insert_values.push_back(std::to_string(character_data_entry.gender));
 			insert_values.push_back(std::to_string(character_data_entry.race));
-			insert_values.push_back(std::to_string(character_data_entry.class));
+			insert_values.push_back(std::to_string(character_data_entry.class_));
 			insert_values.push_back(std::to_string(character_data_entry.level));
 			insert_values.push_back(std::to_string(character_data_entry.deity));
 			insert_values.push_back(std::to_string(character_data_entry.birthday));
@@ -846,7 +960,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.sta));
 			insert_values.push_back(std::to_string(character_data_entry.cha));
 			insert_values.push_back(std::to_string(character_data_entry.dex));
-			insert_values.push_back(std::to_string(character_data_entry.int));
+			insert_values.push_back(std::to_string(character_data_entry.int_));
 			insert_values.push_back(std::to_string(character_data_entry.agi));
 			insert_values.push_back(std::to_string(character_data_entry.wis));
 			insert_values.push_back(std::to_string(character_data_entry.zone_change_count));
@@ -893,7 +1007,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.aa_points_spent_old));
 			insert_values.push_back(std::to_string(character_data_entry.aa_points_old));
 			insert_values.push_back(std::to_string(character_data_entry.e_last_invsnapshot));
-			insert_values.push_back("'" + EscapeString(character_data_entry.deleted_at) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (character_data_entry.deleted_at > 0 ? std::to_string(character_data_entry.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -941,7 +1055,7 @@ public:
 			entry.heading                 = static_cast<float>(atof(row[11]));
 			entry.gender                  = atoi(row[12]);
 			entry.race                    = atoi(row[13]);
-			entry.class                   = atoi(row[14]);
+			entry.class_                  = atoi(row[14]);
 			entry.level                   = atoi(row[15]);
 			entry.deity                   = atoi(row[16]);
 			entry.birthday                = atoi(row[17]);
@@ -981,7 +1095,7 @@ public:
 			entry.sta                     = atoi(row[51]);
 			entry.cha                     = atoi(row[52]);
 			entry.dex                     = atoi(row[53]);
-			entry.int                     = atoi(row[54]);
+			entry.int_                    = atoi(row[54]);
 			entry.agi                     = atoi(row[55]);
 			entry.wis                     = atoi(row[56]);
 			entry.zone_change_count       = atoi(row[57]);
@@ -1028,7 +1142,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.deleted_at              = strtoll(row[101] ? row[101] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -1067,7 +1181,7 @@ public:
 			entry.heading                 = static_cast<float>(atof(row[11]));
 			entry.gender                  = atoi(row[12]);
 			entry.race                    = atoi(row[13]);
-			entry.class                   = atoi(row[14]);
+			entry.class_                  = atoi(row[14]);
 			entry.level                   = atoi(row[15]);
 			entry.deity                   = atoi(row[16]);
 			entry.birthday                = atoi(row[17]);
@@ -1107,7 +1221,7 @@ public:
 			entry.sta                     = atoi(row[51]);
 			entry.cha                     = atoi(row[52]);
 			entry.dex                     = atoi(row[53]);
-			entry.int                     = atoi(row[54]);
+			entry.int_                    = atoi(row[54]);
 			entry.agi                     = atoi(row[55]);
 			entry.wis                     = atoi(row[56]);
 			entry.zone_change_count       = atoi(row[57]);
@@ -1154,7 +1268,7 @@ public:
 			entry.aa_points_spent_old     = atoi(row[98]);
 			entry.aa_points_old           = atoi(row[99]);
 			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.deleted_at              = strtoll(row[101] ? row[101] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}

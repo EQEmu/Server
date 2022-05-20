@@ -65,6 +65,34 @@ public:
 
 	// Custom extended repository methods here
 
+	static int InsertOrUpdateMany(Database& db,
+		const std::vector<InstanceListPlayer>& instance_list_player_entries)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &instance_list_player_entry: instance_list_player_entries)
+		{
+			std::vector<std::string> insert_values;
+
+			insert_values.push_back(std::to_string(instance_list_player_entry.id));
+			insert_values.push_back(std::to_string(instance_list_player_entry.charid));
+
+			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+		}
+
+		std::vector<std::string> insert_values;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"INSERT INTO {} ({}) VALUES {} ON DUPLICATE KEY UPDATE id = VALUES(id)",
+				TableName(),
+				ColumnsRaw(),
+				implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_INSTANCE_LIST_PLAYER_REPOSITORY_H

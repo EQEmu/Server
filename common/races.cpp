@@ -2232,3 +2232,15 @@ bool PlayerAppearance::IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_v
 	}
 	return false;
 }
+
+const char* GetGenderName(uint32 gender_id) {
+	const char* gender_name = "Unknown";
+	if (gender_id == MALE) {
+		gender_name = "Male";
+	} else if (gender_id == FEMALE) {
+		gender_name = "Female";
+	} else if (gender_id == NEUTER) {
+		gender_name = "Neuter";
+	}
+	return gender_name;
+}

@@ -20,6 +20,7 @@
 #include "clientlist.h"
 #include "login_server.h"
 #include "login_server_list.h"
+#include "shared_task_manager.h"
 #include "worlddb.h"
 #include "zoneserver.h"
 #include "world_config.h"
@@ -30,6 +31,7 @@ extern uint32          numplayers;
 extern LoginServerList loginserverlist;
 extern ClientList      client_list;
 extern volatile bool   RunLoops;
+extern SharedTaskManager shared_task_manager;
 
 /**
  * @param in_id
@@ -131,7 +133,7 @@ void ClientListEntry::SetChar(uint32 iCharID, const char *iCharName)
 
 void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
 {
-	if (iZS == this->Server()) {
+	if (iZS == Server()) {
 		SetOnline(iOnline);
 	}
 }
@@ -249,6 +251,8 @@ void ClientListEntry::LeavingZone(ZoneServer *iZS, CLE_Status iOnline)
 	}
 	SetOnline(iOnline);
 
+	shared_task_manager.RemoveActiveInvitationByCharacterID(CharID());
+
 	if (pzoneserver) {
 		pzoneserver->RemovePlayer();
 		LSUpdate(pzoneserver);
@@ -270,7 +274,7 @@ void ClientListEntry::ClearVars(bool iAll)
 
 		paccountid = 0;
 		memset(paccountname, 0, sizeof(paccountname));
-		padmin = 0;
+		padmin = AccountStatus::Player;
 	}
 	pzoneserver = 0;
 	pzone       = 0;
@@ -361,7 +365,7 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 		}
 		std::string lsworldadmin;
 		if (database.GetVariable("honorlsworldadmin", lsworldadmin)) {
-			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0)) {
+			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == AccountStatus::Player)) {
 				padmin = pworldadmin;
 			}
 		}

@@ -17,13 +17,13 @@ public:
 	Lua_HateEntry() : Lua_Ptr(nullptr) { }
 	Lua_HateEntry(struct_HateList *d) : Lua_Ptr(d) { }
 	virtual ~Lua_HateEntry() { }
-	
+
 	Lua_Mob GetEnt();
 	void SetEnt(Lua_Mob e);
-	int GetDamage();
-	void SetDamage(int value);
-	int GetHate();
-	void SetHate(int value);
+	int64 GetDamage();
+	void SetDamage(int64 value);
+	int64 GetHate();
+	void SetHate(int64 value);
 	int GetFrenzy();
 	void SetFrenzy(bool value);
 };

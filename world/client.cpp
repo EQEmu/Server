@@ -47,6 +47,7 @@
 #include "wguild_mgr.h"
 #include "sof_char_create_data.h"
 #include "world_store.h"
+#include "../common/repositories/account_repository.h"
 
 #include <iostream>
 #include <iomanip>
@@ -121,7 +122,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	m_ClientVersion = eqs->ClientVersion();
 	m_ClientVersionBit = EQ::versions::ConvertClientVersionToClientVersionBit(m_ClientVersion);
-	
+
 	numclients++;
 }
 
@@ -489,7 +490,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		if (!is_player_zoning) {
 			SendExpansionInfo();
 			SendCharInfo();
-			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
+			database.LoginIP(cle->AccountID(), long2ip(GetIP()));
 		}
 
 		cle->SetIP(GetIP());
@@ -734,7 +735,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	if (RuleB(World, EnableIPExemptions) || RuleI(World, MaxClientsPerIP) >= 0) {
-		client_list.GetCLEIP(this->GetIP()); //Check current CLE Entry IPs against incoming connection
+		client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
 	}
 
 	EnterWorld_Struct *ew=(EnterWorld_Struct *)app->pBuffer;
@@ -833,18 +834,11 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	if(instance_id > 0)
 	{
-		if(!database.VerifyInstanceAlive(instance_id, GetCharID()))
+		if (!database.VerifyInstanceAlive(instance_id, GetCharID()) ||
+		    !database.VerifyZoneInstance(zone_id, instance_id))
 		{
-			zone_id = database.MoveCharacterToBind(charid);
+			zone_id = database.MoveCharacterToInstanceSafeReturn(charid, zone_id, instance_id);
 			instance_id = 0;
-		}
-		else
-		{
-			if(!database.VerifyZoneInstance(zone_id, instance_id))
-			{
-				zone_id = database.MoveCharacterToBind(charid);
-				instance_id = 0;
-			}
 		}
 	}
 
@@ -1002,9 +996,9 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	}
 
 	// Voidd: Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
-	if (RuleB(World, GMAccountIPList) && this->GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
-		if(!database.CheckGMIPs(long2ip(this->GetIP()).c_str(), this->GetAccountID())) {
-			LogInfo("GM Account not permited from source address [{}] and accountid [{}]", long2ip(this->GetIP()).c_str(), this->GetAccountID());
+	if (RuleB(World, GMAccountIPList) && GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
+		if(!database.CheckGMIPs(long2ip(GetIP()), GetAccountID())) {
+			LogInfo("GM Account not permited from source address [{}] and accountid [{}]", long2ip(GetIP()).c_str(), GetAccountID());
 			eqs->Close();
 		}
 	}
@@ -1020,15 +1014,18 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	switch(opcode)
 	{
-		case OP_World_Client_CRC1:
-		case OP_World_Client_CRC2:
+		case OP_World_Client_CRC1: // eqgame.exe
+		case OP_World_Client_CRC2: // SkillCaps.txt
+		case OP_World_Client_CRC3: // BaseData.txt
 		{
 			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
 			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
 			// before OP_World_Client_CRC1. Therefore, if we receive OP_World_Client_CRC1 before OP_EnterWorld,
 			// then 'Start Tutorial' was not chosen.
 			StartInTutorial = false;
-			return true;
+
+			return HandleChecksumPacket(app);
+
 		}
 		case OP_SendLoginInfo:
 		{
@@ -1149,39 +1146,168 @@ bool Client::Process() {
 	return ret;
 }
 
+bool Client::HandleChecksumPacket(const EQApplicationPacket *app)
+{
+	// Is checksum verification turned on
+	if (!RuleB(World, EnableChecksumVerification)) {
+		return true;
+	}
+
+	// Get packet structure
+	auto *cs = (Checksum_Struct *)app->pBuffer;
+
+	// Determine which checksum to process
+	switch (app->GetOpcode()) {
+		case OP_World_Client_CRC1: // eqgame.exe
+		{
+			bool passes_checksum_validation = (
+				ChecksumVerificationCRCEQGame(cs->checksum) ||
+				(GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification))
+			);
+
+			LogChecksumVerification(
+				"eqgame.exe validation [{}] client [{}] ({}) has [{}] status [{}]",
+				passes_checksum_validation ? "Passed" : "Failed",
+				GetAccountName(),
+				GetAccountID(),
+				cs->checksum,
+				GetAdmin()
+			);
+
+			return passes_checksum_validation;
+		}
+		case OP_World_Client_CRC2: // SkillCaps.txt
+		{
+			bool passes_checksum_validation = (
+				ChecksumVerificationCRCSkillCaps(cs->checksum) ||
+				(GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification))
+			);
+
+			LogChecksumVerification(
+				"SkillCaps.txt validation [{}] client [{}] ({}) has [{}] status [{}]",
+				passes_checksum_validation ? "Passed" : "Failed",
+				GetAccountName(),
+				GetAccountID(),
+				cs->checksum,
+				GetAdmin()
+			);
+
+			return passes_checksum_validation;
+		}
+		case OP_World_Client_CRC3: // BaseData.txt
+		{
+			bool passes_checksum_validation = (
+				ChecksumVerificationCRCBaseData(cs->checksum) ||
+				(GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification))
+			);
+
+			LogChecksumVerification(
+				"BaseData.txt validation [{}] client [{}] ({}) has [{}] status [{}]",
+				passes_checksum_validation ? "Passed" : "Failed",
+				GetAccountName(),
+				GetAccountID(),
+				cs->checksum,
+				GetAdmin()
+			);
+
+			return passes_checksum_validation;
+		}
+	}
+
+	return false;
+}
+
+bool Client::ChecksumVerificationCRCEQGame(uint64 checksum)
+{
+	database.SetAccountCRCField(GetAccountID(), "crc_eqgame", checksum);
+
+	// Get checksum variable for eqgame.exe
+	std::string checksumvar;
+	uint64_t    checksumint;
+	if (database.GetVariable("crc_eqgame", checksumvar)) {
+		checksumint = atoll(checksumvar.c_str());
+	}
+	else {
+		LogChecksumVerification("[checksum_crc1_eqgame] variable not set in variables table.");
+		return true;
+	}
+
+	// Verify checksums match
+	if (checksumint == checksum) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Client::ChecksumVerificationCRCSkillCaps(uint64 checksum)
+{
+	database.SetAccountCRCField(GetAccountID(), "crc_skillcaps", checksum);
+
+	// Get checksum variable for eqgame.exe
+	std::string checksumvar;
+	uint64_t    checksumint;
+	if (database.GetVariable("crc_skillcaps", checksumvar)) {
+		checksumint = atoll(checksumvar.c_str());
+	}
+	else {
+		LogChecksumVerification("[checksum_crc2_skillcaps] variable not set in variables table.");
+		return true;
+	}
+
+	// Verify checksums match
+	if (checksumint == checksum) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Client::ChecksumVerificationCRCBaseData(uint64 checksum)
+{
+	database.SetAccountCRCField(GetAccountID(), "crc_basedata", checksum);
+
+	// Get checksum variable for skill_caps.txt
+	std::string checksumvar;
+	uint64_t    checksumint;
+	if (database.GetVariable("crc_basedata", checksumvar)) {
+		checksumint = atoll(checksumvar.c_str());
+	}
+	else {
+		LogChecksumVerification("[checksum_crc3_basedata] variable not set in variables table.");
+		return true;
+	}
+
+	// Verify checksums match
+	if (checksumint == checksum) {
+		return true;
+	}
+
+	return false;
+}
+
 void Client::EnterWorld(bool TryBootup) {
 	if (zone_id == 0)
 		return;
 
 	ZoneServer* zone_server = nullptr;
-	if(instance_id > 0)
+	if (instance_id > 0)
 	{
-		if(database.VerifyInstanceAlive(instance_id, GetCharID()))
-		{
-			if(database.VerifyZoneInstance(zone_id, instance_id))
-			{
-				zone_server = zoneserver_list.FindByInstanceID(instance_id);
-			}
-			else
-			{
-				instance_id = 0;
-				zone_server = nullptr;
-				database.MoveCharacterToBind(GetCharID());
-				TellClientZoneUnavailable();
-				return;
-			}
-		}
-		else
+		if (!database.VerifyInstanceAlive(instance_id, GetCharID()) ||
+		    !database.VerifyZoneInstance(zone_id, instance_id))
 		{
 			instance_id = 0;
-			zone_server = nullptr;
-			database.MoveCharacterToBind(GetCharID());
+			database.MoveCharacterToInstanceSafeReturn(GetCharID(), zone_id, instance_id);
 			TellClientZoneUnavailable();
 			return;
 		}
+
+		zone_server = zoneserver_list.FindByInstanceID(instance_id);
 	}
 	else
+	{
 		zone_server = zoneserver_list.FindByZoneID(zone_id);
+	}
 
 	const char *zone_name = ZoneName(zone_id, true);
 	if (zone_server) {
@@ -1569,25 +1695,25 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	}
 
 	/* Set Home Binds  -- yep, all of them */
-	pp.binds[1].zoneId = pp.zone_id;
+	pp.binds[1].zone_id = pp.zone_id;
 	pp.binds[1].x = pp.x;
 	pp.binds[1].y = pp.y;
 	pp.binds[1].z = pp.z;
 	pp.binds[1].heading = pp.heading;
 
-	pp.binds[2].zoneId = pp.zone_id;
+	pp.binds[2].zone_id = pp.zone_id;
 	pp.binds[2].x = pp.x;
 	pp.binds[2].y = pp.y;
 	pp.binds[2].z = pp.z;
 	pp.binds[2].heading = pp.heading;
 
-	pp.binds[3].zoneId = pp.zone_id;
+	pp.binds[3].zone_id = pp.zone_id;
 	pp.binds[3].x = pp.x;
 	pp.binds[3].y = pp.y;
 	pp.binds[3].z = pp.z;
 	pp.binds[3].heading = pp.heading;
 
-	pp.binds[4].zoneId = pp.zone_id;
+	pp.binds[4].zone_id = pp.zone_id;
 	pp.binds[4].x = pp.x;
 	pp.binds[4].y = pp.y;
 	pp.binds[4].z = pp.z;
@@ -1601,7 +1727,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	/*  Will either be the same as home or tutorial if enabled. */
 	if(RuleB(World, StartZoneSameAsBindOnCreation))	{
-		pp.binds[0].zoneId = pp.zone_id;
+		pp.binds[0].zone_id = pp.zone_id;
 		pp.binds[0].x = pp.x;
 		pp.binds[0].y = pp.y;
 		pp.binds[0].z = pp.z;
@@ -1611,9 +1737,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	Log(Logs::Detail, Logs::WorldServer, "Current location: %s (%d)  %0.2f, %0.2f, %0.2f, %0.2f",
 		ZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
 	Log(Logs::Detail, Logs::WorldServer, "Bind location: %s (%d) %0.2f, %0.2f, %0.2f",
-		ZoneName(pp.binds[0].zoneId), pp.binds[0].zoneId, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
+		ZoneName(pp.binds[0].zone_id), pp.binds[0].zone_id, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
 	Log(Logs::Detail, Logs::WorldServer, "Home location: %s (%d) %0.2f, %0.2f, %0.2f",
-		ZoneName(pp.binds[4].zoneId), pp.binds[4].zoneId, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
+		ZoneName(pp.binds[4].zone_id), pp.binds[4].zone_id, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
 
 	/* Starting Items inventory */
 	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());

@@ -39,6 +39,7 @@
 #include "unix.h"
 #include <netinet/in.h>
 #include <sys/time.h>
+
 #endif
 
 #include "database.h"
@@ -46,6 +47,8 @@
 #include "extprofile.h"
 #include "string_util.h"
 #include "database_schema.h"
+#include "http/httplib.h"
+#include "http/uri.h"
 
 extern Client client;
 
@@ -89,112 +92,123 @@ Database::~Database()
 */
 uint32 Database::CheckLogin(const char* name, const char* password, const char *loginserver, int16* oStatus) {
 
-	if(strlen(name) >= 50 || strlen(password) >= 50)
+	if (strlen(name) >= 50 || strlen(password) >= 50)
 		return(0);
 
-	char tmpUN[100];
-	char tmpPW[100];
+	char temporary_username[100];
+	char temporary_password[100];
 
-	DoEscapeString(tmpUN, name, strlen(name));
-	DoEscapeString(tmpPW, password, strlen(password));
+	DoEscapeString(temporary_username, name, strlen(name));
+	DoEscapeString(temporary_password, password, strlen(password));
 
-	std::string query = StringFormat("SELECT id, status FROM account WHERE `name`='%s' AND ls_id='%s' AND password is not null "
-		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
-		tmpUN, EscapeString(loginserver).c_str(), tmpPW, tmpPW);
+	std::string query = fmt::format(
+		"SELECT id, status FROM account WHERE `name` = '{}' AND ls_id = '{}' AND password is NOT NULL "
+		"AND length(password) > 0 AND (password = '{}' OR password = MD5('{}'))",
+		temporary_username,
+		EscapeString(loginserver),
+		temporary_password,
+		temporary_password
+	);
 
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
 
-	if(results.RowCount() == 0)
-		return 0;
-
 	auto row = results.begin();
 
-	uint32 id = atoi(row[0]);
+	auto id = std::stoul(row[0]);
 
-	if (oStatus)
-		*oStatus = atoi(row[1]);
+	if (oStatus) {
+		*oStatus = std::stoi(row[1]);
+	}
 
 	return id;
 }
 
 //Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
-bool Database::CheckBannedIPs(const char* loginIP)
+bool Database::CheckBannedIPs(std::string login_ip)
 {
-	std::string query = StringFormat("SELECT ip_address FROM banned_ips WHERE ip_address='%s'", loginIP);
-
+	auto query = fmt::format(
+		"SELECT ip_address FROM banned_ips WHERE ip_address = '{}'",
+		login_ip
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
-	{
+	if (!results.Success() || results.RowCount() != 0) {
 		return true;
 	}
-
-	if (results.RowCount() != 0)
-		return true;
 
 	return false;
 }
 
-bool Database::AddBannedIP(char* bannedIP, const char* notes) {
-	std::string query = StringFormat("INSERT into banned_ips SET ip_address='%s', notes='%s'", bannedIP, notes);
+bool Database::AddBannedIP(std::string banned_ip, std::string notes) {
+	auto query = fmt::format(
+		"INSERT into banned_ips SET ip_address = '{}', notes = '{}'",
+		EscapeString(banned_ip),
+		EscapeString(notes)
+	);
 	auto results = QueryDatabase(query);
+
 	if (!results.Success()) {
 		return false;
 	}
+
 	return true;
 }
 
- bool Database::CheckGMIPs(const char* ip_address, uint32 account_id) {
-	std::string query = StringFormat("SELECT * FROM `gm_ips` WHERE `ip_address` = '%s' AND `account_id` = %i", ip_address, account_id);
+ bool Database::CheckGMIPs(std::string login_ip, uint32 account_id) {
+	auto query = fmt::format(
+		"SELECT * FROM `gm_ips` WHERE `ip_address` = '{}' AND `account_id` = {}",
+		login_ip,
+		account_id
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
+	}
 
-	if (results.RowCount() == 1)
+	if (results.RowCount() == 1) {
 		return true;
+	}
 
 	return false;
 }
 
-bool Database::AddGMIP(char* ip_address, char* name) {
-	std::string query = StringFormat("INSERT into `gm_ips` SET `ip_address` = '%s', `name` = '%s'", ip_address, name);
-	auto results = QueryDatabase(query);
-	return results.Success();
-}
-
-void Database::LoginIP(uint32 AccountID, const char* LoginIP) {
-	std::string query = StringFormat("INSERT INTO account_ip SET accid=%i, ip='%s' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()", AccountID, LoginIP);
+void Database::LoginIP(uint32 account_id, std::string login_ip) {
+	auto query = fmt::format(
+		"INSERT INTO account_ip SET accid = {}, ip = '{}' ON DUPLICATE KEY UPDATE count=count+1, lastused=now()",
+		account_id,
+		login_ip
+	);
 	QueryDatabase(query);
 }
 
 int16 Database::CheckStatus(uint32 account_id)
 {
-	std::string query = StringFormat(
-	    "SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `account` WHERE `id` = %i",
-	    account_id);
-
+	auto query = fmt::format(
+	    "SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `account` WHERE `id` = {}",
+	    account_id
+	);
 	auto results = QueryDatabase(query);
-	if (!results.Success())
-		return 0;
 
-	if (results.RowCount() != 1)
+	if (!results.Success() || results.RowCount() != 1) {
 		return 0;
+	}
 
 	auto row = results.begin();
-	int16 status = atoi(row[0]);
+	int16 status = std::stoi(row[0]);
 	int32 date_diff = 0;
 
-	if (row[1] != nullptr)
-		date_diff = atoi(row[1]);
+	if (row[1]) {
+		date_diff = std::stoi(row[1]);
+	}
 
-	if (date_diff > 0)
+	if (date_diff > 0) {
 		return -1;
+	}
 
 	return status;
 }
@@ -304,9 +318,7 @@ bool Database::SetAccountStatus(const std::string& account_name, int16 status)
 	LogInfo("Account [{}] is attempting to be set to status [{}]", account_name, status);
 
 	std::string query = fmt::format(
-		SQL(
-			UPDATE account SET status = {} WHERE name = '{}'
-		),
+		"UPDATE account SET status = {} WHERE name = '{}'",
 		status,
 		account_name
 	);
@@ -703,17 +715,17 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		"(%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i)",
-		character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
-		character_id, pp->binds[1].zoneId, 0, pp->binds[1].x, pp->binds[1].y, pp->binds[1].z, pp->binds[1].heading, 1,
-		character_id, pp->binds[2].zoneId, 0, pp->binds[2].x, pp->binds[2].y, pp->binds[2].z, pp->binds[2].heading, 2,
-		character_id, pp->binds[3].zoneId, 0, pp->binds[3].x, pp->binds[3].y, pp->binds[3].z, pp->binds[3].heading, 3,
-		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
+		character_id, pp->binds[0].zone_id, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
+		character_id, pp->binds[1].zone_id, 0, pp->binds[1].x, pp->binds[1].y, pp->binds[1].z, pp->binds[1].heading, 1,
+		character_id, pp->binds[2].zone_id, 0, pp->binds[2].x, pp->binds[2].y, pp->binds[2].z, pp->binds[2].heading, 2,
+		character_id, pp->binds[3].zone_id, 0, pp->binds[3].x, pp->binds[3].y, pp->binds[3].z, pp->binds[3].heading, 3,
+		character_id, pp->binds[4].zone_id, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
 	); results = QueryDatabase(query);
 
         /* HoTT Ability */
         if(RuleB(Character, GrantHoTTOnCreate))
         {
-                query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, rank) VALUES (%u, %i, %i)", character_id, 14, 1);
+                query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%u, %i, %i)", character_id, 14, 1);
                 results = QueryDatabase(query);
         }
 
@@ -804,36 +816,34 @@ uint32 Database::GetAccountIDByChar(uint32 char_id) {
 	return atoi(row[0]);
 }
 
-uint32 Database::GetAccountIDByName(const char* accname, const char *loginserver, int16* status, uint32* lsid) {
-	if (!isAlphaNumeric(accname))
+uint32 Database::GetAccountIDByName(std::string account_name, std::string loginserver, int16* status, uint32* lsid) {
+	if (!isAlphaNumeric(account_name.c_str())) {
 		return 0;
+	}
 
-	std::string query = StringFormat("SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '%s' AND `ls_id`='%s' LIMIT 1",
-		EscapeString(accname).c_str(), EscapeString(loginserver).c_str());
+	auto query = fmt::format(
+		"SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '{}' AND `ls_id` = '{}' LIMIT 1",
+		EscapeString(account_name),
+		EscapeString(loginserver)
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
-
-	if (results.RowCount() != 1)
-		return 0;
 
 	auto row = results.begin();
+	auto account_id = std::stoul(row[0]);
 
-	uint32 id = atoi(row[0]);
-
-	if (status)
-		*status = atoi(row[1]);
-
-	if (lsid) {
-		if (row[2])
-			*lsid = atoi(row[2]);
-		else
-			*lsid = 0;
+	if (status) {
+		*status = static_cast<int16>(std::stoi(row[1]));
 	}
 
-	return id;
+	if (lsid) {
+		*lsid = row[2] ? std::stoul(row[2]) : 0;
+	}
+
+	return account_id;
 }
 
 void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID) {
@@ -870,36 +880,60 @@ void Database::GetCharName(uint32 char_id, char* name) {
 	}
 }
 
-const char* Database::GetCharNameByID(uint32 char_id) {
+std::string Database::GetCharNameByID(uint32 char_id) {
 	std::string query = fmt::format("SELECT `name` FROM `character_data` WHERE id = {}", char_id);
 	auto results = QueryDatabase(query);
+	std::string res;
 
 	if (!results.Success()) {
-		return "";
+		return res;
 	}
 
 	if (results.RowCount() == 0) {
-		return "";
+		return res;
 	}
 
 	auto row = results.begin();
-	return row[0];
+	res = row[0];
+	return res;
 }
 
-const char* Database::GetNPCNameByID(uint32 npc_id) {
+std::string Database::GetNPCNameByID(uint32 npc_id) {
 	std::string query = fmt::format("SELECT `name` FROM `npc_types` WHERE id = {}", npc_id);
 	auto results = QueryDatabase(query);
+	std::string res;
 
 	if (!results.Success()) {
-		return "";
+		return res;
 	}
 
 	if (results.RowCount() == 0) {
-		return "";
+		return res;
 	}
 
 	auto row = results.begin();
-	return row[0];
+	res = row[0];
+	return res;
+}
+
+std::string Database::GetCleanNPCNameByID(uint32 npc_id) {
+	std::string query = fmt::format("SELECT `name` FROM `npc_types` WHERE id = {}", npc_id);
+	auto results = QueryDatabase(query);
+	std::string res;
+	std::string mob_name;
+
+	if (!results.Success()) {
+		return res;
+	}
+
+	if (results.RowCount() == 0) {
+		return res;
+	}
+
+	auto row = results.begin();
+	mob_name = row[0];
+	CleanMobName(mob_name.begin(), mob_name.end(), std::back_inserter(res));
+	return res;
 }
 
 bool Database::LoadVariables() {
@@ -970,11 +1004,37 @@ bool Database::SetVariable(const std::string varname, const std::string &varvalu
 	return true;
 }
 
-// Get zone starting points from DB
-bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
+void Database::SetAccountCRCField(uint32 account_id, std::string field_name, uint64 checksum)
+{
+	QueryDatabase(
+		fmt::format(
+			"UPDATE `account` SET `{}` = '{}' WHERE `id` = {}",
+			field_name,
+			checksum,
+			account_id
+		)
+	);
+}
 
-	std::string query = StringFormat("SELECT safe_x, safe_y, safe_z, min_status, min_level, flag_needed FROM zone "
-		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version);
+// Get zone starting points from DB
+bool Database::GetSafePoints(const char* zone_short_name, uint32 instance_version, float* safe_x, float* safe_y, float* safe_z, float* safe_heading, int16* min_status, uint8* min_level, char *flag_needed) {
+
+	if (zone_short_name == nullptr)
+		return false;
+
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			`safe_x`, `safe_y`, `safe_z`, `safe_heading`, `min_status`, `min_level`, `flag_needed`
+			FROM
+			zone
+			WHERE
+			`short_name` = '{}'
+			AND
+			(`version` = {} OR `version` = 0)
+			ORDER BY `version` DESC
+		), zone_short_name, instance_version
+	);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -987,16 +1047,24 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 
 	if (safe_x != nullptr)
 		*safe_x = atof(row[0]);
+
 	if (safe_y != nullptr)
 		*safe_y = atof(row[1]);
+
 	if (safe_z != nullptr)
 		*safe_z = atof(row[2]);
-	if (minstatus != nullptr)
-		*minstatus = atoi(row[3]);
-	if (minlevel != nullptr)
-		*minlevel = atoi(row[4]);
+
+	if (safe_heading != nullptr)
+		*safe_heading = atof(row[3]);
+
+	if (min_status != nullptr)
+		*min_status = atoi(row[4]);
+
+	if (min_level != nullptr)
+		*min_level = atoi(row[5]);
+
 	if (flag_needed != nullptr)
-		strcpy(flag_needed, row[5]);
+		strcpy(flag_needed, row[6]);
 
 	return true;
 }
@@ -1082,21 +1150,21 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	return true;
 }
 
-uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
-
-	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
+uint8 Database::GetPEQZone(uint32 zone_id, uint32 version){
+	std::string query = fmt::format(
+		"SELECT peqzone FROM zone WHERE zoneidnumber = {} AND (version = {} OR version = 0) ORDER BY version DESC LIMIT 1",
+		zone_id,
+		version
+	);
 	auto results = QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
 
-	if (results.RowCount() == 0)
-		return 0;
-
 	auto row = results.begin();
 
-	return atoi(row[0]);
+	return static_cast<uint8>(std::stoi(row[0]));
 }
 
 bool Database::CheckNameFilter(const char* name, bool surname)
@@ -1993,62 +2061,64 @@ void Database::ClearRaidLeader(uint32 gid, uint32 rid)
 	QueryDatabase(query);
 }
 
-void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
+void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win, bool remove)
 {
-
 	std::string field;
-
-	switch(theme)
-	{
-		case 1:
-		{
+	switch(theme) {
+		case LDoNThemes::GUK: {
 			field = "guk_";
 			break;
 		}
-		case 2:
-		{
+		case LDoNThemes::MIR: {
 			field = "mir_";
 			break;
 		}
-		case 3:
-		{
+		case LDoNThemes::MMC: {
 			field = "mmc_";
 			break;
 		}
-		case 4:
-		{
+		case LDoNThemes::RUJ: {
 			field = "ruj_";
 			break;
 		}
-		case 5:
-		{
+		case LDoNThemes::TAK: {
 			field = "tak_";
 			break;
 		}
-		default:
-		{
+		default: {
 			return;
 		}
 	}
 
-	if (win)
-		field += "wins";
-	else
-		field += "losses";
+	field += win ? "wins" : "losses";
+	std::string field_operation = remove ? "-" : "+";
 
-	std::string query = StringFormat("UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",field.c_str(), field.c_str(), char_id);
+	std::string query = fmt::format(
+		"UPDATE `adventure_stats` SET {} = {} {} 1 WHERE player_id = {}",
+		field,
+		field,
+		field_operation,
+		char_id
+	);
 	auto results = QueryDatabase(query);
 
-	if (results.RowsAffected() != 0)
+	if (results.RowsAffected() != 0) {
 		return;
+	}
 
-	query = StringFormat("INSERT INTO `adventure_stats` SET %s=1, player_id=%u", field.c_str(), char_id);
-	QueryDatabase(query);
+	if (!remove) {
+		query = fmt::format(
+			"INSERT INTO `adventure_stats` SET {} = 1, player_id = {}",
+			field,
+			char_id
+		);
+		QueryDatabase(query);
+	}
 }
 
 bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 {
-	std::string query = StringFormat(
+	std::string query = fmt::format(
 		"SELECT "
 		"`guk_wins`, "
 		"`mir_wins`, "
@@ -2063,7 +2133,7 @@ bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 		"FROM "
 		"`adventure_stats` "
 		"WHERE "
-		"player_id = %u ",
+		"player_id = {}",
 		char_id
 	);
 	auto results = QueryDatabase(query);
@@ -2145,95 +2215,6 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
 	return 0;
 }
 
-/**
- * @param log_settings
- */
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
-{
-	std::string query =
-					"SELECT "
-					"log_category_id, "
-					"log_category_description, "
-					"log_to_console, "
-					"log_to_file, "
-					"log_to_gmsay "
-					"FROM "
-					"logsys_categories "
-					"ORDER BY log_category_id";
-
-	auto results         = QueryDatabase(query);
-	int  log_category_id = 0;
-
-	int *categories_in_database = new int[1000];
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		log_category_id = atoi(row[0]);
-		if (log_category_id <= Logs::None || log_category_id >= Logs::MaxCategoryID) {
-			continue;
-		}
-
-		log_settings[log_category_id].log_to_console = static_cast<uint8>(atoi(row[2]));
-		log_settings[log_category_id].log_to_file    = static_cast<uint8>(atoi(row[3]));
-		log_settings[log_category_id].log_to_gmsay   = static_cast<uint8>(atoi(row[4]));
-
-		/**
-		 * Determine if any output method is enabled for the category
-		 * and set it to 1 so it can used to check if category is enabled
-		 */
-		const bool log_to_console      = log_settings[log_category_id].log_to_console > 0;
-		const bool log_to_file         = log_settings[log_category_id].log_to_file > 0;
-		const bool log_to_gmsay        = log_settings[log_category_id].log_to_gmsay > 0;
-		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
-
-		if (is_category_enabled) {
-			log_settings[log_category_id].is_category_enabled = 1;
-		}
-
-		/**
-		 * This determines whether or not the process needs to actually file log anything.
-		 * If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
-		 */
-		if (log_settings[log_category_id].log_to_file > 0) {
-			LogSys.file_logs_enabled = true;
-		}
-
-		categories_in_database[log_category_id] = 1;
-	}
-
-	/**
-	 * Auto inject categories that don't exist in the database...
-	 */
-	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
-		if (categories_in_database[log_index] != 1) {
-
-			LogInfo(
-				"New Log Category [{0}] doesn't exist... Automatically adding to [logsys_categories] table...",
-				Logs::LogCategoryName[log_index]
-			);
-
-			auto inject_query = fmt::format(
-				"INSERT INTO logsys_categories "
-				"(log_category_id, "
-				"log_category_description, "
-				"log_to_console, "
-				"log_to_file, "
-				"log_to_gmsay) "
-				"VALUES "
-				"({0}, '{1}', {2}, {3}, {4})",
-				log_index,
-				EscapeString(Logs::LogCategoryName[log_index]),
-				std::to_string(log_settings[log_index].log_to_console),
-				std::to_string(log_settings[log_index].log_to_file),
-				std::to_string(log_settings[log_index].log_to_gmsay)
-			);
-
-			QueryDatabase(inject_query);
-		}
-	}
-
-	delete[] categories_in_database;
-}
-
 int Database::CountInvSnapshots() {
 	std::string query = StringFormat("SELECT COUNT(*) FROM (SELECT * FROM `inventory_snapshots` a GROUP BY `charid`, `time_index`) b");
 	auto results = QueryDatabase(query);
@@ -2309,6 +2290,35 @@ int Database::GetIPExemption(std::string account_ip) {
 	}
 
 	return RuleI(World, MaxClientsPerIP);
+}
+
+void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
+	std::string query = fmt::format(
+		"SELECT `exemption_id` FROM `ip_exemptions` WHERE `exemption_ip` = '{}'",
+		account_ip
+	);
+
+	auto results = QueryDatabase(query);
+	uint32 exemption_id = 0;
+	if (results.Success() && results.RowCount() > 0) {
+		auto row = results.begin();
+		exemption_id = atoi(row[0]);
+	}
+
+	query = fmt::format(
+		"INSERT INTO `ip_exemptions` (`exemption_ip`, `exemption_amount`) VALUES ('{}', {})",
+		account_ip,
+		exemption_amount
+	);
+
+	if (exemption_id != 0) {
+		query = fmt::format(
+			"UPDATE `ip_exemptions` SET `exemption_amount` = {} WHERE `exemption_ip` = '{}'",
+			exemption_amount,
+			account_ip
+		);
+	}
+	QueryDatabase(query);
 }
 
 int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
@@ -2459,5 +2469,69 @@ bool Database::CopyCharacter(
 	TransactionCommit();
 
 	return true;
+}
+
+void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string url)
+{
+	try {
+		uri request_uri(url);
+
+		LogHTTP(
+			"[SourceDatabaseTableFromUrl] parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
+			url,
+			request_uri.get_path(),
+			request_uri.get_host(),
+			request_uri.get_query(),
+			request_uri.get_scheme(),
+			request_uri.get_port()
+		);
+
+		if (!DoesTableExist(table_name)) {
+			LogMySQLQuery("Table [{}] does not exist. Downloading from Github and installing...", table_name);
+
+			// http get request
+			httplib::Client cli(
+				fmt::format(
+					"{}://{}",
+					request_uri.get_scheme(),
+					request_uri.get_host()
+				).c_str()
+			);
+
+			cli.set_connection_timeout(0, 60000000); // 60 sec
+			cli.set_read_timeout(60, 0); // 60 seconds
+			cli.set_write_timeout(60, 0); // 60 seconds
+
+			int sourced_queries = 0;
+
+			if (auto res = cli.Get(request_uri.get_path().c_str())) {
+				if (res->status == 200) {
+					for (auto &s: SplitString(res->body, ';')) {
+						if (!trim(s).empty()) {
+							auto results = QueryDatabase(s);
+							if (!results.ErrorMessage().empty()) {
+								LogError("Error sourcing SQL [{}]", results.ErrorMessage());
+								return;
+							}
+							sourced_queries++;
+						}
+					}
+				}
+			}
+			else {
+				LogError("Error retrieving URL [{}]", url);
+			}
+
+			LogMySQLQuery(
+				"Table [{}] installed. Sourced [{}] queries",
+				table_name,
+				sourced_queries
+			);
+		}
+
+	}
+	catch (std::invalid_argument iae) {
+		LogError("[SourceDatabaseTableFromUrl] URI parser error [{}]", iae.what());
+	}
 }
 

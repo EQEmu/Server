@@ -23,6 +23,10 @@
 
 #include <string>
 #include <vector>
+#include "../loottable.h"
+#include "../repositories/content_flags_repository.h"
+
+class Database;
 
 namespace Expansion {
 	static const int EXPANSION_ALL        = -1;
@@ -50,7 +54,7 @@ namespace Expansion {
 		VeilOfAlaris,
 		RainOfFear,
 		CallOfTheForsaken,
-		TheDarkendSea,
+		TheDarkenedSea,
 		TheBrokenMirror,
 		EmpiresOfKunark,
 		RingOfScale,
@@ -123,7 +127,7 @@ public:
 	bool IsVeilOfAlarisEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::VeilOfAlaris || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
 	bool IsRainOfFearEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::RainOfFear || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
 	bool IsCallOfTheForsakenEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::CallOfTheForsaken || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
-	bool IsTheDarkendSeaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheDarkendSea || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheDarkenedSeaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheDarkenedSea || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
 	bool IsTheBrokenMirrorEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheBrokenMirror || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
 	bool IsEmpiresOfKunarkEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::EmpiresOfKunark || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
 	bool IsRingOfScaleEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::RingOfScale || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
@@ -151,21 +155,35 @@ public:
 	bool IsCurrentExpansionVeilOfAlaris() { return current_expansion == Expansion::ExpansionNumber::VeilOfAlaris; }
 	bool IsCurrentExpansionRainOfFear() { return current_expansion == Expansion::ExpansionNumber::RainOfFear; }
 	bool IsCurrentExpansionCallOfTheForsaken() { return current_expansion == Expansion::ExpansionNumber::CallOfTheForsaken; }
-	bool IsCurrentExpansionTheDarkendSea() { return current_expansion == Expansion::ExpansionNumber::TheDarkendSea; }
+	bool IsCurrentExpansionTheDarkenedSea() { return current_expansion == Expansion::ExpansionNumber::TheDarkenedSea; }
 	bool IsCurrentExpansionTheBrokenMirror() { return current_expansion == Expansion::ExpansionNumber::TheBrokenMirror; }
 	bool IsCurrentExpansionEmpiresOfKunark() { return current_expansion == Expansion::ExpansionNumber::EmpiresOfKunark; }
 	bool IsCurrentExpansionRingOfScale() { return current_expansion == Expansion::ExpansionNumber::RingOfScale; }
 	bool IsCurrentExpansionTheBurningLands() { return current_expansion == Expansion::ExpansionNumber::TheBurningLands; }
 	bool IsCurrentExpansionTormentOfVelious() { return current_expansion == Expansion::ExpansionNumber::TormentOfVelious; }
 
+	const std::vector<ContentFlagsRepository::ContentFlags> &GetContentFlags() const;
+	std::vector<std::string> GetContentFlagsEnabled();
+	std::vector<std::string> GetContentFlagsDisabled();
+	bool IsContentFlagEnabled(const std::string& content_flag);
+	bool IsContentFlagDisabled(const std::string& content_flag);
+	void SetContentFlags(std::vector<ContentFlagsRepository::ContentFlags> content_flags);
+	void ReloadContentFlags();
+	WorldContentService * SetExpansionContext();
+
+	bool DoesPassContentFiltering(const ContentFlags& f);
+
+	WorldContentService * SetDatabase(Database *database);
+	Database *GetDatabase() const;
+
+	void SetContentFlag(const std::string &content_flag_name, bool enabled);
+
 private:
 	int current_expansion{};
-	std::vector<std::string> content_flags;
-public:
-	const std::vector<std::string> &GetContentFlags() const;
-	bool IsContentFlagEnabled(const std::string& content_flag);
-	void SetContentFlags(std::vector<std::string> content_flags);
-	void SetExpansionContext();
+	std::vector<ContentFlagsRepository::ContentFlags> content_flags;
+
+	// reference to database
+	Database *m_database;
 };
 
 extern WorldContentService content_service;

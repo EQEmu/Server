@@ -246,7 +246,7 @@ const std::string &RuleManager::_GetRuleNotes(RuleType type, uint16 index) {
 
 bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool reload) {
 
-	int ruleset_id = this->GetRulesetID(database, ruleset_name);
+	int ruleset_id = GetRulesetID(database, ruleset_name);
 	if (ruleset_id < 0) {
 		Log(Logs::Detail, Logs::Rules, "Failed to find ruleset '%s' for load operation. Canceling.", ruleset_name);
 		return (false);
@@ -309,7 +309,7 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool r
 }
 
 void RuleManager::SaveRules(Database *database, const char *ruleset_name) {
-	
+
 	if (ruleset_name != nullptr) {
 		//saving to a specific name
 		if (m_activeName != ruleset_name) {
@@ -347,7 +347,7 @@ void RuleManager::_SaveRule(Database *database, RuleType type, uint16 index) {
 		return;
 	if (type == BoolRule && strcasecmp(_GetRuleName(type, index), "World:UseClientBasedExpansionSettings") == 0)
 		return;
-	
+
 	switch (type) {
 		case IntRule:
 			sprintf(value_string, "%d", m_RuleIntValues[index]);
@@ -432,7 +432,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 
 	// build injected entries
 	for (const auto &rd_iter : rule_data) {
-		
+
 		const auto &dd_iter = std::find(database_data.begin(), database_data.end(), rd_iter.first);
 		if (dd_iter == database_data.end()) {
 
@@ -440,7 +440,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 				std::tuple<int, std::string, std::string, std::string>(
 					ruleset_id,								// `ruleset_id`
 					rd_iter.first,							// `rule_name`
-					rd_iter.second.first,					// `rule_value`	
+					rd_iter.second.first,					// `rule_value`
 					EscapeString(*rd_iter.second.second)	// `notes`
 				)
 			);
@@ -481,7 +481,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 			ruleset_id
 		);
 	}
-	
+
 	return true;
 }
 
@@ -509,7 +509,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 	// build orphaned entries
 	for (auto row : results) {
-		
+
 		const auto &rd_iter = std::find(rule_data.begin(), rule_data.end(), row[0]);
 		if (rd_iter == rule_data.end()) {
 
@@ -539,7 +539,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 		LogInfo("[{}] Orphaned Rule(s) Deleted from [All Rulesets] (-1)", orphaned_rule_entries.size());
 	}
-	
+
 	return true;
 }
 
@@ -586,7 +586,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 		if (!db->QueryDatabase(query).Success()) {
 			continue;
 		}
-		
+
 		++update_count;
 	}
 

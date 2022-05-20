@@ -171,6 +171,7 @@ namespace EQ
 
 		extern const std::map<SkillType, std::string>& GetSkillTypeMap();
 
+		std::string GetSkillName(SkillType skill);
 	} /*skills*/
 
 	struct SkillProfile { // prototype - not implemented

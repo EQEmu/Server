@@ -415,6 +415,28 @@
 9159|2020_12_22_expedition_system.sql|SELECT * FROM db_version WHERE version >= 9159|empty|
 9160|2021_02_14_npc_exp_mod.sql|SHOW COLUMNS from `npc_types` LIKE 'exp_mod'|empty|
 9161|2021_02_15_npc_spell_entries_unsigned.sql|SELECT * FROM db_version WHERE version >= 9161|empty|
+9162|2021_02_17_server_scheduled_events.sql|SELECT * FROM db_version WHERE version >= 9162|empty|
+9163|2021_04_17_zone_safe_heading_changes.sql|SHOW COLUMNS FROM `zone` LIKE 'safe_heading'|empty|
+9164|2021_04_23_character_exp_modifiers.sql|SHOW TABLES LIKE 'character_exp_modifiers'|empty|
+9165|2021_04_28_idle_pathing.sql|SHOW COLUMNS FROM `spawn2` LIKE 'path_when_zone_idle'|empty|
+9166|2021_02_12_dynamic_zone_members.sql|SHOW TABLES LIKE 'dynamic_zone_members'|empty|
+9167|2021_06_06_beastlord_pets.sql|SHOW TABLES LIKE 'pets_beastlord_data'|empty|
+9168|2021_08_31_pvp_duration.sql|SHOW COLUMNS FROM `spells_new` LIKE 'pvp_duration'|empty|
+9169|2021_06_06_dynamic_zone_moved_columns.sql|SELECT * FROM db_version WHERE version >= 9169|empty|
+9170|2021_03_03_instance_safereturns.sql|SHOW TABLES LIKE 'character_instance_safereturns'|empty|
+9171|2021_03_30_remove_dz_is_current_member.sql|SHOW COLUMNS FROM `dynamic_zone_members` LIKE 'is_current_member'|not_empty|
+9172|2021_05_21_shared_tasks.sql|SHOW TABLES LIKE 'shared_tasks'|empty|
+9173|2021_09_14_zone_lava_damage.sql|SHOW COLUMNS FROM `zone` LIKE 'lava_damage'|empty|
+9174|2021_10_09_not_null_door_columns.sql|SELECT * FROM db_version WHERE version >= 9174|empty|
+9175|2022_01_02_expansion_default_value_all.sql|SHOW COLUMNS FROM `forage` LIKE 'min_expansion'|contains|unsigned
+9176|2022_01_10_checksum_verification.sql|SHOW COLUMNS FROM `account` LIKE 'crc_eqgame'|empty|
+9177|2022_03_06_table_structure_changes.sql|SHOW COLUMNS FROM `pets` LIKE 'id'|empty|
+9178|2022_03_07_saylink_collation.sql|SELECT * FROM db_version WHERE version >= 9178|empty|
+9179|2022_04_30_hp_regen_per_second.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp_regen_per_second'|empty|
+9180|2022_05_01_character_peqzone_flags.sql|SHOW TABLES LIKE 'character_peqzone_flags'|empty|
+9181|2022_05_03_task_activity_goal_match_list.sql|SHOW COLUMNS FROM `task_activities` LIKE 'goal_match_list'|empty|
+9182|2022_05_02_npc_types_int64.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp'|missing|bigint
+9183|2022_05_07_merchant_data_buckets.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'bucket_comparison'|empty
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

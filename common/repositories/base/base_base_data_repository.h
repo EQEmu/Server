@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -14,12 +14,13 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseBaseDataRepository {
 public:
 	struct BaseData {
 		int   level;
-		int   class;
+		int   class_;
 		float hp;
 		float mana;
 		float end;
@@ -39,7 +40,23 @@ public:
 	{
 		return {
 			"level",
-			"class",
+			"`class`",
+			"hp",
+			"mana",
+			"end",
+			"unk1",
+			"unk2",
+			"hp_fac",
+			"mana_fac",
+			"end_fac",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"level",
+			"`class`",
 			"hp",
 			"mana",
 			"end",
@@ -56,6 +73,11 @@ public:
 		return std::string(implode(", ", Columns()));
 	}
 
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
+	}
+
 	static std::string TableName()
 	{
 		return std::string("base_data");
@@ -65,7 +87,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -84,7 +106,7 @@ public:
 		BaseData entry{};
 
 		entry.level    = 0;
-		entry.class    = 0;
+		entry.class_   = 0;
 		entry.hp       = 0;
 		entry.mana     = 0;
 		entry.end      = 0;
@@ -129,7 +151,7 @@ public:
 			BaseData entry{};
 
 			entry.level    = atoi(row[0]);
-			entry.class    = atoi(row[1]);
+			entry.class_   = atoi(row[1]);
 			entry.hp       = static_cast<float>(atof(row[2]));
 			entry.mana     = static_cast<float>(atof(row[3]));
 			entry.end      = static_cast<float>(atof(row[4]));
@@ -172,7 +194,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(base_data_entry.level));
-		update_values.push_back(columns[1] + " = " + std::to_string(base_data_entry.class));
+		update_values.push_back(columns[1] + " = " + std::to_string(base_data_entry.class_));
 		update_values.push_back(columns[2] + " = " + std::to_string(base_data_entry.hp));
 		update_values.push_back(columns[3] + " = " + std::to_string(base_data_entry.mana));
 		update_values.push_back(columns[4] + " = " + std::to_string(base_data_entry.end));
@@ -203,7 +225,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(base_data_entry.level));
-		insert_values.push_back(std::to_string(base_data_entry.class));
+		insert_values.push_back(std::to_string(base_data_entry.class_));
 		insert_values.push_back(std::to_string(base_data_entry.hp));
 		insert_values.push_back(std::to_string(base_data_entry.mana));
 		insert_values.push_back(std::to_string(base_data_entry.end));
@@ -242,7 +264,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(base_data_entry.level));
-			insert_values.push_back(std::to_string(base_data_entry.class));
+			insert_values.push_back(std::to_string(base_data_entry.class_));
 			insert_values.push_back(std::to_string(base_data_entry.hp));
 			insert_values.push_back(std::to_string(base_data_entry.mana));
 			insert_values.push_back(std::to_string(base_data_entry.end));
@@ -285,7 +307,7 @@ public:
 			BaseData entry{};
 
 			entry.level    = atoi(row[0]);
-			entry.class    = atoi(row[1]);
+			entry.class_   = atoi(row[1]);
 			entry.hp       = static_cast<float>(atof(row[2]));
 			entry.mana     = static_cast<float>(atof(row[3]));
 			entry.end      = static_cast<float>(atof(row[4]));
@@ -319,7 +341,7 @@ public:
 			BaseData entry{};
 
 			entry.level    = atoi(row[0]);
-			entry.class    = atoi(row[1]);
+			entry.class_   = atoi(row[1]);
 			entry.hp       = static_cast<float>(atof(row[2]));
 			entry.mana     = static_cast<float>(atof(row[3]));
 			entry.end      = static_cast<float>(atof(row[4]));

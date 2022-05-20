@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseTaskActivitiesRepository {
 public:
@@ -28,6 +29,7 @@ public:
 		std::string spell_list;
 		std::string description_override;
 		int         goalid;
+		std::string goal_match_list;
 		int         goalmethod;
 		int         goalcount;
 		int         delivertonpc;
@@ -53,6 +55,29 @@ public:
 			"spell_list",
 			"description_override",
 			"goalid",
+			"goal_match_list",
+			"goalmethod",
+			"goalcount",
+			"delivertonpc",
+			"zones",
+			"optional",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"taskid",
+			"activityid",
+			"step",
+			"activitytype",
+			"target_name",
+			"item_list",
+			"skill_list",
+			"spell_list",
+			"description_override",
+			"goalid",
+			"goal_match_list",
 			"goalmethod",
 			"goalcount",
 			"delivertonpc",
@@ -66,6 +91,11 @@ public:
 		return std::string(implode(", ", Columns()));
 	}
 
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
+	}
+
 	static std::string TableName()
 	{
 		return std::string("task_activities");
@@ -75,7 +105,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -103,6 +133,7 @@ public:
 		entry.spell_list           = "0";
 		entry.description_override = "";
 		entry.goalid               = 0;
+		entry.goal_match_list      = "";
 		entry.goalmethod           = 0;
 		entry.goalcount            = 1;
 		entry.delivertonpc         = 0;
@@ -153,11 +184,12 @@ public:
 			entry.spell_list           = row[7] ? row[7] : "";
 			entry.description_override = row[8] ? row[8] : "";
 			entry.goalid               = atoi(row[9]);
-			entry.goalmethod           = atoi(row[10]);
-			entry.goalcount            = atoi(row[11]);
-			entry.delivertonpc         = atoi(row[12]);
-			entry.zones                = row[13] ? row[13] : "";
-			entry.optional             = atoi(row[14]);
+			entry.goal_match_list      = row[10] ? row[10] : "";
+			entry.goalmethod           = atoi(row[11]);
+			entry.goalcount            = atoi(row[12]);
+			entry.delivertonpc         = atoi(row[13]);
+			entry.zones                = row[14] ? row[14] : "";
+			entry.optional             = atoi(row[15]);
 
 			return entry;
 		}
@@ -201,11 +233,12 @@ public:
 		update_values.push_back(columns[7] + " = '" + EscapeString(task_activities_entry.spell_list) + "'");
 		update_values.push_back(columns[8] + " = '" + EscapeString(task_activities_entry.description_override) + "'");
 		update_values.push_back(columns[9] + " = " + std::to_string(task_activities_entry.goalid));
-		update_values.push_back(columns[10] + " = " + std::to_string(task_activities_entry.goalmethod));
-		update_values.push_back(columns[11] + " = " + std::to_string(task_activities_entry.goalcount));
-		update_values.push_back(columns[12] + " = " + std::to_string(task_activities_entry.delivertonpc));
-		update_values.push_back(columns[13] + " = '" + EscapeString(task_activities_entry.zones) + "'");
-		update_values.push_back(columns[14] + " = " + std::to_string(task_activities_entry.optional));
+		update_values.push_back(columns[10] + " = '" + EscapeString(task_activities_entry.goal_match_list) + "'");
+		update_values.push_back(columns[11] + " = " + std::to_string(task_activities_entry.goalmethod));
+		update_values.push_back(columns[12] + " = " + std::to_string(task_activities_entry.goalcount));
+		update_values.push_back(columns[13] + " = " + std::to_string(task_activities_entry.delivertonpc));
+		update_values.push_back(columns[14] + " = '" + EscapeString(task_activities_entry.zones) + "'");
+		update_values.push_back(columns[15] + " = " + std::to_string(task_activities_entry.optional));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -237,6 +270,7 @@ public:
 		insert_values.push_back("'" + EscapeString(task_activities_entry.spell_list) + "'");
 		insert_values.push_back("'" + EscapeString(task_activities_entry.description_override) + "'");
 		insert_values.push_back(std::to_string(task_activities_entry.goalid));
+		insert_values.push_back("'" + EscapeString(task_activities_entry.goal_match_list) + "'");
 		insert_values.push_back(std::to_string(task_activities_entry.goalmethod));
 		insert_values.push_back(std::to_string(task_activities_entry.goalcount));
 		insert_values.push_back(std::to_string(task_activities_entry.delivertonpc));
@@ -281,6 +315,7 @@ public:
 			insert_values.push_back("'" + EscapeString(task_activities_entry.spell_list) + "'");
 			insert_values.push_back("'" + EscapeString(task_activities_entry.description_override) + "'");
 			insert_values.push_back(std::to_string(task_activities_entry.goalid));
+			insert_values.push_back("'" + EscapeString(task_activities_entry.goal_match_list) + "'");
 			insert_values.push_back(std::to_string(task_activities_entry.goalmethod));
 			insert_values.push_back(std::to_string(task_activities_entry.goalcount));
 			insert_values.push_back(std::to_string(task_activities_entry.delivertonpc));
@@ -329,11 +364,12 @@ public:
 			entry.spell_list           = row[7] ? row[7] : "";
 			entry.description_override = row[8] ? row[8] : "";
 			entry.goalid               = atoi(row[9]);
-			entry.goalmethod           = atoi(row[10]);
-			entry.goalcount            = atoi(row[11]);
-			entry.delivertonpc         = atoi(row[12]);
-			entry.zones                = row[13] ? row[13] : "";
-			entry.optional             = atoi(row[14]);
+			entry.goal_match_list      = row[10] ? row[10] : "";
+			entry.goalmethod           = atoi(row[11]);
+			entry.goalcount            = atoi(row[12]);
+			entry.delivertonpc         = atoi(row[13]);
+			entry.zones                = row[14] ? row[14] : "";
+			entry.optional             = atoi(row[15]);
 
 			all_entries.push_back(entry);
 		}
@@ -368,11 +404,12 @@ public:
 			entry.spell_list           = row[7] ? row[7] : "";
 			entry.description_override = row[8] ? row[8] : "";
 			entry.goalid               = atoi(row[9]);
-			entry.goalmethod           = atoi(row[10]);
-			entry.goalcount            = atoi(row[11]);
-			entry.delivertonpc         = atoi(row[12]);
-			entry.zones                = row[13] ? row[13] : "";
-			entry.optional             = atoi(row[14]);
+			entry.goal_match_list      = row[10] ? row[10] : "";
+			entry.goalmethod           = atoi(row[11]);
+			entry.goalcount            = atoi(row[12]);
+			entry.delivertonpc         = atoi(row[13]);
+			entry.zones                = row[14] ? row[14] : "";
+			entry.optional             = atoi(row[15]);
 
 			all_entries.push_back(entry);
 		}

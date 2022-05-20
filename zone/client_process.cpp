@@ -119,8 +119,9 @@ bool Client::Process() {
 
 		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
 		// since the function will anyways
-		if (hpupdate_timer.Check(false))
+		if (hpupdate_timer.Check(false)) {
 			SendHPUpdate();
+		}
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
 		if (!is_client_moving && position_update_timer.Check()) {
@@ -131,9 +132,9 @@ bool Client::Process() {
 			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
-			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zoneId);
+			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zone_id);
 
-			m_pp.zone_id = m_pp.binds[0].zoneId;
+			m_pp.zone_id = m_pp.binds[0].zone_id;
 			m_pp.zoneInstance = m_pp.binds[0].instance_id;
 			m_pp.x = m_pp.binds[0].x;
 			m_pp.y = m_pp.binds[0].y;
@@ -180,11 +181,9 @@ bool Client::Process() {
 				myraid->MemberZoned(this);
 			}
 
-			Expedition* expedition = GetExpedition();
-			if (expedition)
-			{
-				expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
-			}
+			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
+
+			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 
 			return false; //delete client
 		}
@@ -200,8 +199,29 @@ bool Client::Process() {
 			instalog = true;
 		}
 
+		if (heroforge_wearchange_timer.Check()) {
+			/*
+				This addresses bug where on zone in heroforge models would not be sent to other clients when this was
+				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue.
+				Unclear the underlying reason for this, if a better solution can be found then can move this back.
+			*/
+			if (queue_wearchange_slot >= 0) { //Resend slot from Client::SwapItem if heroforge item is swapped.
+				SendWearChange(static_cast<uint8>(queue_wearchange_slot));
+			}
+			else { //Send from Client::CompleteConnect()
+				SendWearChangeAndLighting(EQ::textures::LastTexture);
+				Mob *pet = GetPet();
+				if (pet) {
+					pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
+				}
+			}
+			heroforge_wearchange_timer.Disable();
+		}
+
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
+
+		cheat_manager.ClientProcess();
 
 		if (bardsong_timer.Check() && bardsong != 0) {
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
@@ -218,9 +238,9 @@ bool Client::Process() {
 				InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 			}
 			else {
-				if (!ApplyNextBardPulse(bardsong, song_target, bardsong_slot))
+				if (!ApplyBardPulse(bardsong, song_target, bardsong_slot)) {
 					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-				//SpellFinished(bardsong, bardsong_target, bardsong_slot, spells[bardsong].mana);
+				}
 			}
 		}
 
@@ -301,6 +321,10 @@ bool Client::Process() {
 		}
 
 		if (AutoFireEnabled()) {
+			if (GetTarget() == this) {
+				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+				auto_fire = false;
+			}
 			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
 			if (ranged)
 			{
@@ -390,12 +414,17 @@ bool Client::Process() {
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
 				EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotPrimary);
-				TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotPrimary);
+				TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotPrimary);
 				TriggerDefensiveProcs(auto_attack_target, EQ::invslot::slotPrimary, false);
 
 				DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
+
+				if (TryDoubleMeleeRoundEffect()) {
+					DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
+				}
+
 				if (CheckAATimer(aaTimerRampage)) {
-					entity_list.AEAttack(this, 30);
+					entity_list.AEAttack(this, 40);
 				}
 			}
 		}
@@ -431,26 +460,15 @@ bool Client::Process() {
 				CheckIncreaseSkill(EQ::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
 					EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotSecondary);
-					TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotSecondary);
+					TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotSecondary);
 
 					DoAttackRounds(auto_attack_target, EQ::invslot::slotSecondary);
 				}
 			}
 		}
 
-		if (HasVirus()) {
-			if (viral_timer.Check()) {
-				viral_timer_counter++;
-				for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i += 2) {
-					if (viral_spells[i]) {
-						if (viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
-							SpreadVirus(viral_spells[i], viral_spells[i + 1]);
-						}
-					}
-				}
-			}
-			if (viral_timer_counter > 999)
-				viral_timer_counter = 0;
+		if (viral_timer.Check() && !dead) {
+			VirusEffectProcess();
 		}
 
 		ProjectileAttack();
@@ -460,32 +478,8 @@ bool Client::Process() {
 				DoGravityEffect();
 		}
 
-		if (shield_timer.Check())
-		{
-			if (shield_target)
-			{
-				if (!CombatRange(shield_target))
-				{
-					entity_list.MessageCloseString(
-						this, false, 100, 0,
-						END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
-					for (int y = 0; y < 2; y++)
-					{
-						if (shield_target->shielder[y].shielder_id == GetID())
-						{
-							shield_target->shielder[y].shielder_id = 0;
-							shield_target->shielder[y].shielder_bonus = 0;
-						}
-					}
-					shield_target = 0;
-					shield_timer.Disable();
-				}
-			}
-			else
-			{
-				shield_target = 0;
-				shield_timer.Disable();
-			}
+		if (shield_timer.Check()) {
+			ShieldAbilityFinish();
 		}
 
 		SpellProcess();
@@ -548,7 +542,7 @@ bool Client::Process() {
 	if (client_state == DISCONNECTED) {
 		OnDisconnect(true);
 		std::cout << "Client disconnected (cs=d): " << GetName() << std::endl;
-		database.SetMQDetectionFlag(this->AccountName(), GetName(), "/MQInstantCamp: Possible instant camp disconnect.", zone->GetShortName());
+		database.SetMQDetectionFlag(AccountName(), GetName(), "/MQInstantCamp: Possible instant camp disconnect.", zone->GetShortName());
 		return false;
 	}
 
@@ -562,7 +556,7 @@ bool Client::Process() {
 		OnDisconnect(true);
 		LogInfo("Client linkdead: {}", name);
 
-		if (Admin() > 100) {
+		if (Admin() > AccountStatus::GMAdmin) {
 			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
@@ -575,11 +569,7 @@ bool Client::Process() {
 			AI_Start(CLIENT_LD_TIMEOUT);
 			SendAppearancePacket(AT_Linkdead, 1);
 
-			Expedition* expedition = GetExpedition();
-			if (expedition)
-			{
-				expedition->SetMemberStatus(this, ExpeditionMemberStatus::LinkDead);
-			}
+			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 		}
 	}
 
@@ -706,15 +696,14 @@ void Client::OnDisconnect(bool hard_disconnect) {
 
 		/* QS: PlayerLogConnectDisconnect */
 		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
-			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
+			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Connect_State, CharacterID(), event_desc);
 		}
 	}
 
-	Expedition* expedition = GetExpedition();
-	if (expedition && !bZoning)
+	if (!bZoning)
 	{
-		expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
+		SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();
@@ -824,152 +813,168 @@ void Client::BulkSendInventoryItems()
 }
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
-	const EQ::ItemData* handyitem = nullptr;
-	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
+	const EQ::ItemData* handy_item = nullptr;
+
+	uint32 merchant_slots = 80; //The max number of items passed in the transaction.
 	if (m_ClientVersionBit & EQ::versions::maskRoFAndLater) { // RoF+ can send 200 items
-		numItemSlots = 200;
+		merchant_slots = 200;
 	}
+
 	const EQ::ItemData *item = nullptr;
-	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
-	std::list<MerchantList>::const_iterator itr;
-	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
-	if (merlist.size() == 0) { //Attempt to load the data, it might have been missed if someone spawned the merchant after the zone was loaded
+	auto merchant_list = zone->merchanttable[merchant_id];
+	auto npc = entity_list.GetMobByNpcTypeID(npcid);
+	if (!merchant_list.size() == 0) {
 		zone->LoadNewMerchantData(merchant_id);
-		merlist = zone->merchanttable[merchant_id];
-		if (merlist.size() == 0)
+		merchant_list = zone->merchanttable[merchant_id];
+		if (!merchant_list.size()) {
 			return;
+		}
 	}
-	std::list<TempMerchantList> tmp_merlist = zone->tmpmerchanttable[npcid];
-	std::list<TempMerchantList>::iterator tmp_itr;
 
-	uint32 i = 1;
-	uint8 handychance = 0;
-	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
-		MerchantList ml = *itr;
-		if (ml.probability != 100 && zone->random.Int(1, 100) > ml.probability)
-			continue;
+	auto client_data_buckets = GetMerchantDataBuckets();
 
-		if (GetLevel() < ml.level_required)
-			continue;
-
-		if (!(ml.classes_required & (1 << (GetClass() - 1))))
-			continue;
-
-		int32 fac = merch ? merch->GetPrimaryFaction() : 0;
-		int32 cur_fac_level;
-		if (fac == 0 || sneaking) {
-			cur_fac_level = 0;
-		}
-		else {
-			cur_fac_level = GetModCharacterFactionLevel(fac);
+	auto temporary_merchant_list = zone->tmpmerchanttable[npcid];
+	uint32 slot_id = 1;
+	uint8 handy_chance = 0;
+	for (auto ml : merchant_list) {
+		if (slot_id > merchant_slots) {
+			break;
 		}
 
-		if (cur_fac_level < ml.faction_required)
-			continue;
+		auto bucket_name = ml.bucket_name;
+		auto bucket_value = ml.bucket_value;
+		if (!bucket_name.empty() && !bucket_value.empty()) {
+			auto full_name = fmt::format(
+				"{}-{}",
+				GetBucketKey(),
+				bucket_name
+			);
 
-		handychance = zone->random.Int(0, merlist.size() + tmp_merlist.size() - 1);
+			auto player_value = client_data_buckets[full_name];
+			if (player_value.empty()) {
+				continue;
+			}
+
+			if (!CheckMerchantDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
+				continue;
+			}
+		}
+
+		if (ml.probability != 100 && zone->random.Int(1, 100) > ml.probability) {
+			continue;
+		}
+
+		if (GetLevel() < ml.level_required) {
+			continue;
+		}
+
+		if (!(ml.classes_required & (1 << (GetClass() - 1)))) {
+			continue;
+		}
+
+
+		int32 faction_id = npc ? npc->GetPrimaryFaction() : 0;
+		int32 faction_level = (
+			(!faction_id || sneaking) ?
+			0 :
+			GetModCharacterFactionLevel(faction_id)
+		);
+
+		if (faction_level < ml.faction_required) {
+			continue;
+		}
+
+		handy_chance = zone->random.Int(0, merchant_list.size() + temporary_merchant_list.size() - 1);
 
 		item = database.GetItem(ml.item);
 		if (item) {
-			if (handychance == 0)
-				handyitem = item;
-			else
-				handychance--;
-			int charges = 1;
-			if (item->IsClassCommon())
-				charges = item->MaxCharges;
-			EQ::ItemInstance* inst = database.CreateItem(item, charges);
+			if (!handy_chance) {
+				handy_item = item;
+			} else {
+				handy_chance--;
+			}
+
+			int16 charges = item->IsClassCommon() ? item->MaxCharges : 1;
+
+			auto inst = database.CreateItem(item, charges);
 			if (inst) {
+				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
+				auto item_charges = charges ? charges : 1;
+
 				if (RuleB(Merchant, UsePriceMod)) {
-					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
+					item_price *= Client::CalcPriceMod(npc);
 				}
-				else
-					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate));
+
+				inst->SetCharges(item_charges);
+				inst->SetMerchantCount(-1);
 				inst->SetMerchantSlot(ml.slot);
-				inst->SetMerchantCount(-1);		//unlimited
-				if (charges > 0)
-					inst->SetCharges(charges);
-				else
-					inst->SetCharges(1);
+				inst->SetPrice(item_price);
 
 				SendItemPacket(ml.slot - 1, inst, ItemPacketMerchant);
 				safe_delete(inst);
 			}
 		}
+
 		// Account for merchant lists with gaps.
-		if (ml.slot >= i) {
-			if (ml.slot > i)
-				LogDebug("(WARNING) Merchantlist contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", i, merchant_id, npcid);
-			i = ml.slot + 1;
+		if (ml.slot >= slot_id) {
+			if (ml.slot > slot_id) {
+				LogDebug("(WARNING) Merchantlist contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", slot_id, merchant_id, npcid);
+			}
+
+			slot_id = ml.slot + 1;
 		}
 	}
-	std::list<TempMerchantList> origtmp_merlist = zone->tmpmerchanttable[npcid];
-	tmp_merlist.clear();
-	for (tmp_itr = origtmp_merlist.begin(); tmp_itr != origtmp_merlist.end() && i <= numItemSlots; ++tmp_itr) {
-		TempMerchantList ml = *tmp_itr;
+
+	auto temporary_merchant_list_two = zone->tmpmerchanttable[npcid];
+	temporary_merchant_list.clear();
+	for (auto ml : temporary_merchant_list_two) {
+		if (slot_id > merchant_slots) {
+			break;
+		}
+
 		item = database.GetItem(ml.item);
-		ml.slot = i;
+		ml.slot = slot_id;
 		if (item) {
-			if (handychance == 0)
-				handyitem = item;
-			else
-				handychance--;
-			int charges = 1;
-			//if(item->ItemClass==ItemClassCommon && (int16)ml.charges <= item->MaxCharges)
-			//	charges=ml.charges;
-			//else
-			charges = item->MaxCharges;
-			EQ::ItemInstance* inst = database.CreateItem(item, charges);
+			if (!handy_chance) {
+				handy_item = item;
+			} else {
+				handy_chance--;
+			}
+
+			auto charges = item->MaxCharges;
+			auto inst = database.CreateItem(item, charges);
 			if (inst) {
+				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
+				auto item_charges = charges ? charges : 1;
+
 				if (RuleB(Merchant, UsePriceMod)) {
-					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
+					item_price *= Client::CalcPriceMod(npc);
 				}
-				else
-					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate));
-				inst->SetMerchantSlot(ml.slot);
+
+				inst->SetCharges(item_charges);
 				inst->SetMerchantCount(ml.charges);
-				if(charges > 0)
-					inst->SetCharges(item->MaxCharges);//inst->SetCharges(charges);
-				else
-					inst->SetCharges(1);
-				SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
+				inst->SetMerchantSlot(ml.slot);
+				inst->SetPrice(item_price);
+
+				SendItemPacket(ml.slot - 1, inst, ItemPacketMerchant);
 				safe_delete(inst);
 			}
 		}
-		tmp_merlist.push_back(ml);
-		i++;
+		temporary_merchant_list.push_back(ml);
+		slot_id++;
 	}
+
 	//this resets the slot
-	zone->tmpmerchanttable[npcid] = tmp_merlist;
-	if (merch != nullptr && handyitem) {
-		char handy_id[8] = { 0 };
-		int greeting = zone->random.Int(0, 4);
-		int greet_id = 0;
-		switch (greeting) {
-			case 1:
-				greet_id = MERCHANT_GREETING;
-				break;
-			case 2:
-				greet_id = MERCHANT_HANDY_ITEM1;
-				break;
-			case 3:
-				greet_id = MERCHANT_HANDY_ITEM2;
-				break;
-			case 4:
-				greet_id = MERCHANT_HANDY_ITEM3;
-				break;
-			default:
-				greet_id = MERCHANT_HANDY_ITEM4;
+	zone->tmpmerchanttable[npcid] = temporary_merchant_list;
+	if (npc && handy_item) {
+		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);		
+		auto handy_id = std::to_string(greet_id);
+		if (greet_id != MERCHANT_GREETING) {
+			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName(), handy_item->Name);
+		} else {
+			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName());
 		}
-		sprintf(handy_id, "%i", greet_id);
-
-		if (greet_id != MERCHANT_GREETING)
-			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName(), handyitem->Name);
-		else
-			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName());
 	}
-
-//		safe_delete_array(cpi);
 }
 
 uint8 Client::WithCustomer(uint16 NewCustomer){
@@ -1012,31 +1017,38 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		// corpse is in has shutdown since the rez spell was cast.
 		database.MarkCorpseAsRezzed(PendingRezzDBID);
 		LogSpells("Player [{}] got a [{}] Rezz, spellid [{}] in zone[{}], instance id [{}]",
-				this->name, (uint16)spells[SpellID].base[0],
+				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
-		this->BuffFadeNonPersistDeath();
+		BuffFadeNonPersistDeath();
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
-		if((SpellEffectDescNum == 82) || (SpellEffectDescNum == 39067)) {
+		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
+			SetHP(GetMaxHP() / 5);
 			SetMana(0);
-			SetHP(GetMaxHP()/5);
-			int rez_eff = 756;
-			if (RuleB(Character, UseOldRaceRezEffects) &&
-			    (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE))
-				rez_eff = 757;
-			SpellOnTarget(rez_eff, this); // Rezz effects
+			int resurrection_sickness_spell_id = (
+				RuleB(Character, UseOldRaceRezEffects) &&
+			    (
+					GetRace() == BARBARIAN ||
+					GetRace() == DWARF ||
+					GetRace() == TROLL ||
+					GetRace() == OGRE
+				) ?
+				RuleI(Character, OldResurrectionSicknessSpellID) :
+				RuleI(Character, ResurrectionSicknessSpellID)
+			);
+			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
 		}
 		else {
-			SetMana(GetMaxMana());
 			SetHP(GetMaxHP());
+			SetMana(GetMaxMana());
 		}
-		if(spells[SpellID].base[0] < 100 && spells[SpellID].base[0] > 0 && PendingRezzXP > 0)
+		if(spells[SpellID].base_value[0] < 100 && spells[SpellID].base_value[0] > 0 && PendingRezzXP > 0)
 		{
-				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base[0])))),
+				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))),
 						GetAAXP(),true);
 		}
-		else if (spells[SpellID].base[0] == 100 && PendingRezzXP > 0) {
+		else if (spells[SpellID].base_value[0] == 100 && PendingRezzXP > 0) {
 			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
 		}
 
@@ -1053,6 +1065,11 @@ void Client::OPTGB(const EQApplicationPacket *app)
 {
 	if(!app) return;
 	if(!app->pBuffer) return;
+
+	if(!RuleB(Character, EnableTGB))
+	{
+		return;
+	}
 
 	uint32 tgb_flag = *(uint32 *)app->pBuffer;
 	if(tgb_flag == 2)
@@ -1162,9 +1179,9 @@ void Client::BreakInvis()
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
-		invisible = false;
-		invisible_undead = false;
-		invisible_animals = false;
+		ZeroInvisibleVars(InvisType::T_INVISIBLE);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_UNDEAD);
+		ZeroInvisibleVars(InvisType::T_INVISIBLE_VERSE_ANIMAL);
 		hidden = false;
 		improved_hidden = false;
 	}
@@ -1450,7 +1467,12 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		}
 		else{
 			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared){
-				this->Message(Chat::Red, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE");
+				SendPopupToClient(
+					"Shared Bank Warning",
+					"<c \"#F62217\">::: WARNING! :::<br>"
+					"SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE!</c>"
+				);
+				Message(Chat::Red, "::: WARNING! ::: SHARED BANK IS DISABLED AND YOUR PLATINUM WILL BE DESTROYED IF YOU PUT IT HERE!");
 			}
 		}
 	}
@@ -1746,17 +1768,17 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 	}
 	else
 	{
-		if(admin < 80)
+		if(admin < AccountStatus::QuestTroupe)
 		{
 			return;
 		}
 		if(st)
 		{
 			Message(0, "Local: Summoning %s to %f, %f, %f", gms->charname, gms->x, gms->y, gms->z);
-			if (st->IsClient() && (st->CastToClient()->GetAnon() != 1 || this->Admin() >= st->CastToClient()->Admin()))
-				st->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), (float)gms->x, (float)gms->y, (float)gms->z, this->GetHeading(), true);
+			if (st->IsClient() && (st->CastToClient()->GetAnon() != 1 || Admin() >= st->CastToClient()->Admin()))
+				st->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), (float)gms->x, (float)gms->y, (float)gms->z, GetHeading(), true);
 			else
-				st->GMMove(this->GetX(), this->GetY(), this->GetZ(),this->GetHeading());
+				st->GMMove(GetX(), GetY(), GetZ(),GetHeading());
 		}
 		else
 		{
@@ -1769,8 +1791,8 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 			{
 				auto pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
 				ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
-				strcpy(szp->adminname, this->GetName());
-				szp->adminrank = this->Admin();
+				strcpy(szp->adminname, GetName());
+				szp->adminrank = Admin();
 				strcpy(szp->name, gms->charname);
 				strcpy(szp->zone, zone->GetShortName());
 				szp->x_pos = (float)gms->x;
@@ -1842,7 +1864,7 @@ void Client::DoStaminaHungerUpdate()
 void Client::DoEnduranceRegen()
 {
 	// endurance has some negative mods that could result in a negative regen when starved
-	int regen = CalcEnduranceRegen();
+	int64 regen = CalcEnduranceRegen();
 
 	if (regen < 0 || (regen > 0 && GetEndurance() < GetMaxEndurance()))
 		SetEndurance(GetEndurance() + regen);
@@ -1861,7 +1883,7 @@ void Client::DoEnduranceUpkeep() {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
-			int upkeep = spells[buffs[buffs_i].spellid].EndurUpkeep;
+			int upkeep = spells[buffs[buffs_i].spellid].endurance_upkeep;
 			if(upkeep > 0) {
 				has_effect = true;
 				if(cost_redux > 0) {
@@ -1881,7 +1903,7 @@ void Client::DoEnduranceUpkeep() {
 
 	if(upkeep_sum != 0){
 		SetEndurance(GetEndurance() - upkeep_sum);
-		TryTriggerOnValueAmount(false, false, true);
+		TryTriggerOnCastRequirement();
 	}
 
 	if (!has_effect)
@@ -1996,7 +2018,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		BindStruct* b = &m_pp.binds[0];
 		default_to_bind = new RespawnOption;
 		default_to_bind->name = "Bind Location";
-		default_to_bind->zone_id = b->zoneId;
+		default_to_bind->zone_id = b->zone_id;
 		default_to_bind->instance_id = b->instance_id;
 		default_to_bind->x = b->x;
 		default_to_bind->y = b->y;
@@ -2089,7 +2111,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		}
 
 		//After they've respawned into the same zone, trigger EVENT_RESPAWN
-		parse->EventPlayer(EVENT_RESPAWN, this, static_cast<std::string>(itoa(Option)), is_rez ? 1 : 0);
+		std::string export_string = fmt::format("{}", Option);
+		parse->EventPlayer(EVENT_RESPAWN, this, export_string, is_rez ? 1 : 0);
 
 		//Pop Rez option from the respawn options list;
 		//easiest way to make sure it stays at the end and

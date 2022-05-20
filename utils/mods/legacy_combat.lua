@@ -962,15 +962,14 @@ function CommonOutgoingHitSuccess(e)
 			)
 	);
 
-	e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * e.other:GetSkillDmgTaken(e.hit.skill) / 100) + (e.self:GetSkillDmgAmt(e.hit.skill) + e.other:GetFcDamageAmtIncoming(e.self, 0, true, e.hit.skill));
+	e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * e.other:GetSkillDmgTaken(e.hit.skill) / 100) + e.self:GetSkillDmgAmt(e.hit.skill);
 
 	eq.log_combat(
-			string.format("[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] SkillDmgTaken [%i] SkillDmgtAmt [%i] FcDmgAmtIncoming [%i] Post DmgCalcs",
+			string.format("[%s] [Mob::CommonOutgoingHitSuccess] Dmg [%i] SkillDmgTaken [%i] SkillDmgtAmt [%i] Post DmgCalcs",
 					e.self:GetCleanName(),
 					e.hit.damage_done,
 					e.other:GetSkillDmgTaken(e.hit.skill),
-					e.self:GetSkillDmgAmt(e.hit.skill),
-					e.other:GetFcDamageAmtIncoming(e.self, 0, true, e.hit.skill)
+					e.self:GetSkillDmgAmt(e.hit.skill)
 			)
 	);
 

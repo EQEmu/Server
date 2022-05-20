@@ -20,6 +20,7 @@
 
 #include "../common/eq_packet_structs.h"
 #include "../common/net/servertalk_client_connection.h"
+#include "zone_event_scheduler.h"
 
 class ServerPacket;
 class EQApplicationPacket;
@@ -50,7 +51,7 @@ public:
 
 	void SetLaunchedName(const char *n) { m_launchedName = n; }
 	void SetLauncherName(const char *n) { m_launcherName = n; }
-	void SendReloadTasks(int Command, int TaskID=0);
+	void SendReloadTasks(uint8 reload_type, uint32 task_id = 0);
 	void HandleReloadTasks(ServerPacket *pack);
 	void UpdateLFP(uint32 LeaderID, uint8 Action, uint8 MatchFilter, uint32 FromLevel, uint32 ToLevel, uint32 Classes, const char *Comments,
 				GroupLFPMemberEntry *LFPMembers);
@@ -76,6 +77,11 @@ private:
 
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
 	std::unique_ptr<EQ::Timer> m_keepalive;
+
+	ZoneEventScheduler *m_zone_scheduler;
+public:
+	ZoneEventScheduler *GetScheduler() const;
+	void SetScheduler(ZoneEventScheduler *scheduler);
 };
 #endif
 

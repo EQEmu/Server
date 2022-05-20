@@ -16,6 +16,7 @@ SET(common_sources
 	database_instances.cpp
 	dbcore.cpp
 	deity.cpp
+	dynamic_zone_base.cpp
 	emu_constants.cpp
 	emu_limits.cpp
 	emu_opcodes.cpp
@@ -68,7 +69,9 @@ SET(common_sources
 	rulesys.cpp
 	say_link.cpp
 	serialize_buffer.cpp
+	server_event_scheduler.cpp
 	serverinfo.cpp
+	shared_tasks.cpp
 	shareddb.cpp
 	skills.cpp
 	spdat.cpp
@@ -151,6 +154,7 @@ SET(repositories
 	repositories/base/base_character_disciplines_repository.h
 	repositories/base/base_character_expedition_lockouts_repository.h
 	repositories/base/base_character_inspect_messages_repository.h
+	repositories/base/base_character_instance_safereturns_repository.h
 	repositories/base/base_character_item_recast_repository.h
 	repositories/base/base_character_languages_repository.h
 	repositories/base/base_character_leadership_abilities_repository.h
@@ -162,11 +166,15 @@ SET(repositories
 	repositories/base/base_character_potionbelt_repository.h
 	repositories/base/base_character_skills_repository.h
 	repositories/base/base_character_spells_repository.h
+	repositories/base/base_character_task_timers_repository.h
 	repositories/base/base_character_tasks_repository.h
 	repositories/base/base_char_create_combinations_repository.h
 	repositories/base/base_char_create_point_allocations_repository.h
 	repositories/base/base_char_recipe_list_repository.h
 	repositories/base/base_completed_tasks_repository.h
+	repositories/base/base_completed_shared_tasks_repository.h
+	repositories/base/base_completed_shared_task_members_repository.h
+	repositories/base/base_completed_shared_task_activity_state_repository.h
 	repositories/base/base_content_flags_repository.h
 	repositories/base/base_damageshieldtypes_repository.h
 	repositories/base/base_data_buckets_repository.h
@@ -174,10 +182,10 @@ SET(repositories
 	repositories/base/base_discovered_items_repository.h
 	repositories/base/base_doors_repository.h
 	repositories/base/base_dynamic_zones_repository.h
+	repositories/base/base_dynamic_zone_members_repository.h
 	repositories/base/base_eventlog_repository.h
 	repositories/base/base_expeditions_repository.h
 	repositories/base/base_expedition_lockouts_repository.h
-	repositories/base/base_expedition_members_repository.h
 	repositories/base/base_faction_base_data_repository.h
 	repositories/base/base_faction_list_repository.h
 	repositories/base/base_faction_list_mod_repository.h
@@ -251,6 +259,11 @@ SET(repositories
 	repositories/base/base_rule_sets_repository.h
 	repositories/base/base_rule_values_repository.h
 	repositories/base/base_saylink_repository.h
+	repositories/base/base_server_scheduled_events_repository.h
+	repositories/base/base_shared_tasks_repository.h
+	repositories/base/base_shared_task_activity_state_repository.h
+	repositories/base/base_shared_task_dynamic_zones_repository.h
+	repositories/base/base_shared_task_members_repository.h
 	repositories/base/base_skill_caps_repository.h
 	repositories/base/base_spawn2_repository.h
 	repositories/base/base_spawnentry_repository.h
@@ -314,6 +327,7 @@ SET(repositories
 	repositories/character_disciplines_repository.h
 	repositories/character_expedition_lockouts_repository.h
 	repositories/character_inspect_messages_repository.h
+	repositories/character_instance_safereturns_repository.h
 	repositories/character_item_recast_repository.h
 	repositories/character_languages_repository.h
 	repositories/character_leadership_abilities_repository.h
@@ -325,11 +339,15 @@ SET(repositories
 	repositories/character_potionbelt_repository.h
 	repositories/character_skills_repository.h
 	repositories/character_spells_repository.h
+	repositories/character_task_timers_repository.h
 	repositories/character_tasks_repository.h
 	repositories/char_create_combinations_repository.h
 	repositories/char_create_point_allocations_repository.h
 	repositories/char_recipe_list_repository.h
 	repositories/completed_tasks_repository.h
+	repositories/completed_shared_tasks_repository.h
+	repositories/completed_shared_task_members_repository.h
+	repositories/completed_shared_task_activity_state_repository.h
 	repositories/content_flags_repository.h
 	repositories/damageshieldtypes_repository.h
 	repositories/data_buckets_repository.h
@@ -337,10 +355,10 @@ SET(repositories
 	repositories/discovered_items_repository.h
 	repositories/doors_repository.h
 	repositories/dynamic_zones_repository.h
+	repositories/dynamic_zone_members_repository.h
 	repositories/eventlog_repository.h
 	repositories/expeditions_repository.h
 	repositories/expedition_lockouts_repository.h
-	repositories/expedition_members_repository.h
 	repositories/faction_base_data_repository.h
 	repositories/faction_list_repository.h
 	repositories/faction_list_mod_repository.h
@@ -414,6 +432,11 @@ SET(repositories
 	repositories/rule_sets_repository.h
 	repositories/rule_values_repository.h
 	repositories/saylink_repository.h
+	repositories/server_scheduled_events_repository.h
+	repositories/shared_tasks_repository.h
+	repositories/shared_task_activity_state_repository.h
+	repositories/shared_task_dynamic_zones_repository.h
+	repositories/shared_task_members_repository.h
 	repositories/skill_caps_repository.h
 	repositories/spawn2_repository.h
 	repositories/spawnentry_repository.h
@@ -446,6 +469,7 @@ SET(repositories
 )
 
 SET(common_headers
+	additive_lagged_fibonacci_engine.h
 	any.h
 	base_packet.h
 	base_data.h
@@ -460,12 +484,14 @@ SET(common_headers
 	cli/argh.h
 	cli/eqemu_command_handler.h
 	cli/terminal_color.hpp
+	cron/croncpp.h
 	database/database_dump_service.h
 	data_verification.h
 	database.h
 	database_schema.h
 	dbcore.h
 	deity.h
+	dynamic_zone_base.h
 	emu_constants.h
 	emu_limits.h
 	emu_opcodes.h
@@ -500,6 +526,7 @@ SET(common_headers
 	guild_base.h
 	guilds.h
 	http/httplib.h
+	http/uri.h
 	inventory_profile.h
 	inventory_slot.h
 	ipc_mutex.h
@@ -541,13 +568,16 @@ SET(common_headers
 	say_link.h
 	seperator.h
 	serialize_buffer.h
+	server_event_scheduler.h
 	serverinfo.h
 	servertalk.h
+	shared_tasks.h
 	shareddb.h
 	skills.h
 	spdat.h
     string_util.h
 	struct_strategy.h
+	tasks.h
 	textures.h
 	timer.h
 	types.h
@@ -609,7 +639,8 @@ SET(common_headers
 	StackWalker/StackWalker.h
 	util/memory_stream.h
 	util/directory.h
-	util/uuid.h)
+	util/uuid.h
+)
 
 SOURCE_GROUP(Event FILES
 	event/event_loop.h

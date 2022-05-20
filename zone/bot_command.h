@@ -109,7 +109,7 @@ public:
 	} AType;
 	static const int AilmentTypeCount = 5;
 
-	typedef enum InvisibilityType {
+	typedef enum InvisType {
 		IT_None = 0,
 		IT_Animal,
 		IT_Undead,
@@ -593,6 +593,7 @@ void bot_command_summon_corpse(Client *c, const Seperator *sep);
 void bot_command_suspend(Client *c, const Seperator *sep);
 void bot_command_taunt(Client *c, const Seperator *sep);
 void bot_command_track(Client *c, const Seperator *sep);
+void bot_command_view_combos(Client *c, const Seperator *sep);
 void bot_command_water_breathing(Client *c, const Seperator *sep);
 
 

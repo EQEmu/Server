@@ -65,7 +65,7 @@ class Adventure
 {
 public:
 	Adventure(AdventureTemplate *t);
-	Adventure(AdventureTemplate *t, int count, int assassination_count, AdventureStatus status, uint16 instance_id, uint32 time_left);
+	Adventure(AdventureTemplate *t, int in_count, int in_assassination_count, AdventureStatus in_status, uint16 in_instance_id, uint32 time_left);
 	~Adventure();
 	bool Process();
 	bool IsActive();

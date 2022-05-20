@@ -52,10 +52,10 @@ extern Zone* zone;
 
 // if lifetime is 0 this is a permanent beacon.. not sure if that'll be
 // useful for anything
-Beacon::Beacon(Mob *at_mob, int lifetime)
+Beacon::Beacon(const glm::vec4 &in_pos, int lifetime)
 :Mob
 (
-	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, at_mob->GetPosition(), 0, 0, 0,
+	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, in_pos, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, EQ::TintProfile(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false
 ),
 		remove_timer(lifetime),
@@ -98,7 +98,7 @@ bool Beacon::Process()
 		{
 			// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
 			// I don't think any other cases that get here matter
-			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled()) && spells[spell_id].targettype != ST_AECaster;
+			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled()) && spells[spell_id].target_type != ST_AECaster;
 			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust, &max_targets);
 		}
 		else
@@ -121,16 +121,19 @@ bool Beacon::Process()
 
 void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adjust)
 {
-	if(!IsValidSpell(cast_spell_id) || !caster)
+	if (!IsValidSpell(cast_spell_id) || !caster) {
 		return;
+	}
 
 	caster_id = caster->GetID();
 	spell_id = cast_spell_id;
-	this->resist_adjust = resist_adjust;
-	spell_iterations = spells[spell_id].AEDuration / 2500;
+	resist_adjust = resist_adjust;
+	spell_iterations = spells[spell_id].aoe_duration / 2500;
 	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
-	if (spells[spell_id].aemaxtargets)
-		max_targets = spells[spell_id].aemaxtargets;
+	if (spells[spell_id].aoe_max_targets) {
+		max_targets = spells[spell_id].aoe_max_targets;
+	}
+
 	spell_timer.Start(2500);
 	spell_timer.Trigger();
 }

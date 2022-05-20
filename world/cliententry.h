@@ -60,7 +60,7 @@ public:
 	 * @param scl
 	 * @param iOnline
 	 */
-	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = 0);
+	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = AccountStatus::Player);
 	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, CLE_Status iOnline);
 	~ClientListEntry();
 	bool	CheckStale();

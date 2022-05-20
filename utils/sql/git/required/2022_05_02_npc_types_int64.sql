@@ -1,0 +1,4 @@
+ALTER TABLE npc_types MODIFY COLUMN hp BIGINT;
+ALTER TABLE npc_types MODIFY COLUMN mana BIGINT;
+ALTER TABLE npc_types MODIFY COLUMN hp_regen_rate BIGINT;
+ALTER TABLE npc_types MODIFY COLUMN mana_regen_rate BIGINT;

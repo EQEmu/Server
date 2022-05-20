@@ -22,6 +22,7 @@
 #include "../common/net/servertalk_server.h"
 #include "../common/event/timer.h"
 #include "../common/timer.h"
+#include "../common/emu_constants.h"
 #include "console.h"
 #include <string.h>
 #include <string>
@@ -29,10 +30,9 @@
 class Client;
 class ServerPacket;
 
-
 class ZoneServer : public WorldTCPConnection {
 public:
-	ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *console);
+	ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> in_connection, EQ::Net::ConsoleServer *in_console);
 	~ZoneServer();
 	virtual inline bool IsZoneServer() { return true; }
 
@@ -40,13 +40,13 @@ public:
 	void		SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);
 	void		SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message);
 	void		SendKeepAlive();
-	bool		SetZone(uint32 iZoneID, uint32 iInstanceID = 0, bool iStaticZone = false);
-	void		TriggerBootup(uint32 iZoneID = 0, uint32 iInstanceID = 0, const char* iAdminName = 0, bool iMakeStatic = false);
+	bool		SetZone(uint32 in_zone_id, uint32 in_instance_id = 0, bool is_static_zone = false);
+	void		TriggerBootup(uint32 in_zone_id = 0, uint32 in_instance_id = 0, const char* admin_name = 0, bool is_static_zone = false);
 	void		Disconnect() { auto handle = tcpc->Handle(); if (handle) { handle->Disconnect(); } }
 	void		IncomingClient(Client* client);
-	void		LSBootUpdate(uint32 zoneid, uint32 iInstanceID = 0, bool startup = false);
-	void		LSSleepUpdate(uint32 zoneid);
-	void		LSShutDownUpdate(uint32 zoneid);
+	void		LSBootUpdate(uint32 zone_id, uint32 instance_id = 0, bool startup = false);
+	void		LSSleepUpdate(uint32 zone_id);
+	void		LSShutDownUpdate(uint32 zone_id);
 	uint32		GetPrevZoneID() { return zone_server_previous_zone_id; }
 	void		ChangeWID(uint32 iCharID, uint32 iWID);
 	void		SendGroupIDs();

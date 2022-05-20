@@ -28,20 +28,17 @@ Adventure::Adventure(AdventureTemplate *t)
 	instance_id = 0;
 }
 
-Adventure::Adventure(AdventureTemplate *t, int count, int assassination_count, AdventureStatus status, uint16 instance_id, uint32 time_left)
+Adventure::Adventure(AdventureTemplate *t, int in_count, int in_assassination_count, AdventureStatus in_status, uint16 in_instance_id, uint32 time_left)
 {
 	adventure_template = t;
-	this->count = count;
-	this->assassination_count = assassination_count;
-	this->status = status;
-	this->instance_id = instance_id;
+	count = in_count;
+	assassination_count = in_assassination_count;
+	status = in_status;
+	instance_id = in_instance_id;
 
-	if(status == AS_Finished)
-	{
+	if (in_status == AS_Finished) {
 		database.SetInstanceDuration(instance_id, time_left);
-	}
-	else
-	{
+	} else {
 		database.SetInstanceDuration(instance_id, time_left + 60);
 	}
 

@@ -76,26 +76,53 @@ void NPC::AI_SetRoambox(
 	roambox_min_delay     = min_delay;
 }
 
-void NPC::DisplayWaypointInfo(Client *c) {
+void NPC::DisplayWaypointInfo(Client *client) {
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"Waypoint Info for {} ({}) | Grid: {} Waypoint: {} of {}",
+			GetCleanName(),
+			GetID(),
+			GetGrid(),
+			GetCurWp(),
+			GetMaxWp()
+		).c_str()
+	);
 
-	c->Message(Chat::White, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
-			   GetGrid(),
-			   GetSpawnGroupId(),
-			   GetCurWp(),
-			   GetMaxWp());
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"Waypoint Info for {} ({}) | Spawn Group: {} Spawn Point: {}",
+			GetCleanName(),
+			GetID(),
+			GetSpawnGroupId(),
+			GetSpawnPointID()
+		).c_str()
+	);
 
 
-	std::vector<wplist>::iterator cur, end;
-	cur = Waypoints.begin();
-	end = Waypoints.end();
-	for (; cur != end; ++cur) {
-		c->Message(Chat::White, "Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
-			cur->index,
-			cur->x,
-			cur->y,
-			cur->z,
-			cur->heading,
-			cur->pause);
+	for (const auto& current_waypoint : Waypoints) {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Waypoint {}{} | XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f}{}",
+				current_waypoint.index,
+				current_waypoint.centerpoint ? " (Center)" : "",
+				current_waypoint.x,
+				current_waypoint.y,
+				current_waypoint.z,
+				current_waypoint.heading,
+				(
+					current_waypoint.pause ?
+					fmt::format(
+						"{} ({})",
+						ConvertSecondsToTime(current_waypoint.pause),
+						current_waypoint.pause
+					) :
+					""
+				)
+			).c_str()
+		);
 	}
 }
 
@@ -138,11 +165,10 @@ void NPC::ResumeWandering()
 
 		if (m_CurrentWayPoint.x == GetX() && m_CurrentWayPoint.y == GetY())
 		{	// are we we at a waypoint? if so, trigger event and start to next
-			char temp[100];
-			itoa(cur_wp, temp, 10);	//do this before updating to next waypoint
+			std::string export_string = fmt::format("{}", cur_wp);
 			CalculateNewWaypoint();
 			SetAppearance(eaStanding, false);
-			parse->EventNPC(EVENT_WAYPOINT_DEPART, this, nullptr, temp, 0);
+			parse->EventNPC(EVENT_WAYPOINT_DEPART, this, nullptr, export_string, 0);
 		}	// if not currently at a waypoint, we continue on to the one we were headed to before the stop
 	}
 	else
@@ -211,7 +237,7 @@ void NPC::MoveTo(const glm::vec4 &position, bool saveguardspot)
 		}        //hack to make IsGuarding simpler
 
 		if (m_GuardPoint.w == -1)
-			m_GuardPoint.w = this->CalculateHeadingToTarget(position.x, position.y);
+			m_GuardPoint.w = CalculateHeadingToTarget(position.x, position.y);
 
 		LogAI("Setting guard position to [{}]", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
@@ -606,7 +632,7 @@ void NPC::AssignWaypoints(int32 grid_id, int start_wp)
 
 	if (grid_id < 0) {
 		// Allow setting negative grid values for pausing pathing
-		this->CastToNPC()->SetGrid(grid_id);
+		CastToNPC()->SetGrid(grid_id);
 		return;
 	}
 
@@ -741,9 +767,9 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 		/*
 		 * Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors
 		 */
-		new_z = this->FindDestGroundZ(destination, z_find_offset);
+		new_z = FindDestGroundZ(destination, z_find_offset);
 		if (new_z != BEST_Z_INVALID) {
-			new_z += this->GetZOffset();
+			new_z += GetZOffset();
 
 			if (new_z < -2000) {
 				new_z = m_Position.z;
@@ -753,7 +779,7 @@ float Mob::GetFixedZ(const glm::vec3 &destination, int32 z_find_offset) {
 		auto duration = timer.elapsed();
 
 		LogFixZ("Mob::GetFixedZ() ([{}]) returned [{}] at [{}], [{}], [{}] - Took [{}]",
-			this->GetCleanName(),
+			GetCleanName(),
 			new_z,
 			destination.x,
 			destination.y,
@@ -785,17 +811,17 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 
 	if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
 		if (RuleB(Map, MobZVisualDebug)) {
-			this->SendAppearanceEffect(78, 0, 0, 0, 0);
+			SendAppearanceEffect(78, 0, 0, 0, 0);
 		}
 
 		m_Position.z = new_z;
 	}
 	else {
 		if (RuleB(Map, MobZVisualDebug)) {
-			this->SendAppearanceEffect(103, 0, 0, 0, 0);
+			SendAppearanceEffect(103, 0, 0, 0, 0);
 		}
 
-		LogFixZ("[{}] is failing to find Z [{}]", this->GetCleanName(), std::abs(m_Position.z - new_z));
+		LogFixZ("[{}] is failing to find Z [{}]", GetCleanName(), std::abs(m_Position.z - new_z));
 	}
 }
 
@@ -932,7 +958,29 @@ void Mob::TryMoveAlong(float distance, float angle, bool send)
 	}
 
 	new_pos.z = GetFixedZ(new_pos);
+
 	Teleport(new_pos);
+}
+
+// like above, but takes a starting position and returns a new location instead of actually moving
+glm::vec4 Mob::TryMoveAlong(const glm::vec4 &start, float distance, float angle)
+{
+	angle += start.w;
+	angle = FixHeading(angle);
+
+	glm::vec3 tmp_pos;
+	glm::vec3 new_pos = start;
+	new_pos.x += distance * g_Math.FastSin(angle);
+	new_pos.y += distance * g_Math.FastCos(angle);
+
+	if (zone->HasMap()) {
+		if (zone->zonemap->LineIntersectsZone(start, new_pos, 0.0f, &tmp_pos))
+			new_pos = tmp_pos;
+	}
+
+	new_pos.z = GetFixedZ(new_pos);
+
+	return {new_pos.x, new_pos.y, new_pos.z, start.w};
 }
 
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
@@ -993,18 +1041,31 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 	return true;
 }
 
-void ZoneDatabase::AssignGrid(Client *client, int grid, int spawn2id) {
-	std::string query = StringFormat("UPDATE spawn2 SET pathgrid = %d WHERE id = %d", grid, spawn2id);
-	auto results = QueryDatabase(query);
+void ZoneDatabase::AssignGrid(Client *client, uint32 grid_id, uint32 entity_id) {
+	auto target_npc = entity_list.GetNPCByID(entity_id);
+	auto spawn2_id = target_npc ? target_npc->GetSpawnPointID() : 0;
+	if (spawn2_id) {
+		std::string query = fmt::format(
+			"UPDATE spawn2 SET pathgrid = {} WHERE id = {}",
+			grid_id,
+			spawn2_id
+		);
+		auto results = QueryDatabase(query);
 
-	if (!results.Success())
-		return;
+		if (!results.Success() || results.RowsAffected() != 1) {
+			return;
+		}
 
-	if (results.RowsAffected() != 1) {
-		return;
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"{} (Spawn2 ID {}) will now use Grid ID {}.",
+				target_npc->GetCleanName(),
+				spawn2_id,
+				grid_id
+			).c_str()
+		);
 	}
-
-	client->Message(Chat::White, "Grid assign: spawn2 id = %d updated", spawn2id);
 }
 
 
@@ -1029,11 +1090,29 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
 		return;
 	}
 
-	std::string query = StringFormat("DELETE FROM grid where id=%i", id);
+	std::string query = StringFormat("DELETE FROM grid where id=%i and zoneid=%i", id, zoneid);
 	auto results = QueryDatabase(query);
 
 	query = StringFormat("DELETE FROM grid_entries WHERE zoneid = %i AND gridid = %i", zoneid, id);
 	results = QueryDatabase(query);
+}
+
+bool ZoneDatabase::GridExistsInZone(uint32 zone_id, uint32 grid_id) {
+	bool grid_exists = false;
+	std::string query = fmt::format(
+		"SELECT * FROM `grid` WHERE `id` = {} AND `zoneid` = {}",
+		grid_id,
+		zone_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return grid_exists;
+	}
+
+	if (results.RowCount() == 1) {
+		grid_exists = true;
+	}
+	return grid_exists;
 }
 
 /**************************************

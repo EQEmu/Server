@@ -194,7 +194,7 @@ void MD5::Final(uint8 digest[16], MD5Context *ctx) {
 
 /* The heart of the MD5 algorithm. */
 void MD5::Transform(uint32 hash[4], const uint32 input[16]) {
-	register uint32 a = hash[0], b = hash[1], c = hash[2], d = hash[3];
+	uint32 a = hash[0], b = hash[1], c = hash[2], d = hash[3];
 
 	MD5STEP(F1, a, b, c, d, input[ 0]+0xd76aa478, 7);
 	MD5STEP(F1, d, a, b, c, input[ 1]+0xe8c7b756, 12);

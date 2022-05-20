@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -14,6 +14,7 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseCharacterCorpsesRepository {
 public:
@@ -27,7 +28,7 @@ public:
 		float       y;
 		float       z;
 		float       heading;
-		std::string time_of_death;
+		time_t      time_of_death;
 		int         guild_consent_id;
 		int         is_rezzed;
 		int         is_buried;
@@ -38,7 +39,7 @@ public:
 		int         level;
 		int         race;
 		int         gender;
-		int         class;
+		int         class_;
 		int         deity;
 		int         texture;
 		int         helm_texture;
@@ -95,7 +96,60 @@ public:
 			"level",
 			"race",
 			"gender",
-			"class",
+			"`class`",
+			"deity",
+			"texture",
+			"helm_texture",
+			"copper",
+			"silver",
+			"gold",
+			"platinum",
+			"hair_color",
+			"beard_color",
+			"eye_color_1",
+			"eye_color_2",
+			"hair_style",
+			"face",
+			"beard",
+			"drakkin_heritage",
+			"drakkin_tattoo",
+			"drakkin_details",
+			"wc_1",
+			"wc_2",
+			"wc_3",
+			"wc_4",
+			"wc_5",
+			"wc_6",
+			"wc_7",
+			"wc_8",
+			"wc_9",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"charid",
+			"charname",
+			"zone_id",
+			"instance_id",
+			"x",
+			"y",
+			"z",
+			"heading",
+			"UNIX_TIMESTAMP(time_of_death)",
+			"guild_consent_id",
+			"is_rezzed",
+			"is_buried",
+			"was_at_graveyard",
+			"is_locked",
+			"exp",
+			"size",
+			"level",
+			"race",
+			"gender",
+			"`class`",
 			"deity",
 			"texture",
 			"helm_texture",
@@ -130,6 +184,11 @@ public:
 		return std::string(implode(", ", Columns()));
 	}
 
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
+	}
+
 	static std::string TableName()
 	{
 		return std::string("character_corpses");
@@ -139,7 +198,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -166,7 +225,7 @@ public:
 		entry.y                = 0;
 		entry.z                = 0;
 		entry.heading          = 0;
-		entry.time_of_death    = "0000-00-00 00:00:00";
+		entry.time_of_death    = 0;
 		entry.guild_consent_id = 0;
 		entry.is_rezzed        = 0;
 		entry.is_buried        = 0;
@@ -177,7 +236,7 @@ public:
 		entry.level            = 0;
 		entry.race             = 0;
 		entry.gender           = 0;
-		entry.class            = 0;
+		entry.class_           = 0;
 		entry.deity            = 0;
 		entry.texture          = 0;
 		entry.helm_texture     = 0;
@@ -248,7 +307,7 @@ public:
 			entry.y                = static_cast<float>(atof(row[6]));
 			entry.z                = static_cast<float>(atof(row[7]));
 			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = row[9] ? row[9] : "";
+			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);
@@ -259,7 +318,7 @@ public:
 			entry.level            = atoi(row[17]);
 			entry.race             = atoi(row[18]);
 			entry.gender           = atoi(row[19]);
-			entry.class            = atoi(row[20]);
+			entry.class_           = atoi(row[20]);
 			entry.deity            = atoi(row[21]);
 			entry.texture          = atoi(row[22]);
 			entry.helm_texture     = atoi(row[23]);
@@ -327,7 +386,7 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(character_corpses_entry.y));
 		update_values.push_back(columns[7] + " = " + std::to_string(character_corpses_entry.z));
 		update_values.push_back(columns[8] + " = " + std::to_string(character_corpses_entry.heading));
-		update_values.push_back(columns[9] + " = '" + EscapeString(character_corpses_entry.time_of_death) + "'");
+		update_values.push_back(columns[9] + " = FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
 		update_values.push_back(columns[10] + " = " + std::to_string(character_corpses_entry.guild_consent_id));
 		update_values.push_back(columns[11] + " = " + std::to_string(character_corpses_entry.is_rezzed));
 		update_values.push_back(columns[12] + " = " + std::to_string(character_corpses_entry.is_buried));
@@ -338,7 +397,7 @@ public:
 		update_values.push_back(columns[17] + " = " + std::to_string(character_corpses_entry.level));
 		update_values.push_back(columns[18] + " = " + std::to_string(character_corpses_entry.race));
 		update_values.push_back(columns[19] + " = " + std::to_string(character_corpses_entry.gender));
-		update_values.push_back(columns[20] + " = " + std::to_string(character_corpses_entry.class));
+		update_values.push_back(columns[20] + " = " + std::to_string(character_corpses_entry.class_));
 		update_values.push_back(columns[21] + " = " + std::to_string(character_corpses_entry.deity));
 		update_values.push_back(columns[22] + " = " + std::to_string(character_corpses_entry.texture));
 		update_values.push_back(columns[23] + " = " + std::to_string(character_corpses_entry.helm_texture));
@@ -395,7 +454,7 @@ public:
 		insert_values.push_back(std::to_string(character_corpses_entry.y));
 		insert_values.push_back(std::to_string(character_corpses_entry.z));
 		insert_values.push_back(std::to_string(character_corpses_entry.heading));
-		insert_values.push_back("'" + EscapeString(character_corpses_entry.time_of_death) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
 		insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
 		insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
 		insert_values.push_back(std::to_string(character_corpses_entry.is_buried));
@@ -406,7 +465,7 @@ public:
 		insert_values.push_back(std::to_string(character_corpses_entry.level));
 		insert_values.push_back(std::to_string(character_corpses_entry.race));
 		insert_values.push_back(std::to_string(character_corpses_entry.gender));
-		insert_values.push_back(std::to_string(character_corpses_entry.class));
+		insert_values.push_back(std::to_string(character_corpses_entry.class_));
 		insert_values.push_back(std::to_string(character_corpses_entry.deity));
 		insert_values.push_back(std::to_string(character_corpses_entry.texture));
 		insert_values.push_back(std::to_string(character_corpses_entry.helm_texture));
@@ -471,7 +530,7 @@ public:
 			insert_values.push_back(std::to_string(character_corpses_entry.y));
 			insert_values.push_back(std::to_string(character_corpses_entry.z));
 			insert_values.push_back(std::to_string(character_corpses_entry.heading));
-			insert_values.push_back("'" + EscapeString(character_corpses_entry.time_of_death) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
 			insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
 			insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
 			insert_values.push_back(std::to_string(character_corpses_entry.is_buried));
@@ -482,7 +541,7 @@ public:
 			insert_values.push_back(std::to_string(character_corpses_entry.level));
 			insert_values.push_back(std::to_string(character_corpses_entry.race));
 			insert_values.push_back(std::to_string(character_corpses_entry.gender));
-			insert_values.push_back(std::to_string(character_corpses_entry.class));
+			insert_values.push_back(std::to_string(character_corpses_entry.class_));
 			insert_values.push_back(std::to_string(character_corpses_entry.deity));
 			insert_values.push_back(std::to_string(character_corpses_entry.texture));
 			insert_values.push_back(std::to_string(character_corpses_entry.helm_texture));
@@ -551,7 +610,7 @@ public:
 			entry.y                = static_cast<float>(atof(row[6]));
 			entry.z                = static_cast<float>(atof(row[7]));
 			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = row[9] ? row[9] : "";
+			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);
@@ -562,7 +621,7 @@ public:
 			entry.level            = atoi(row[17]);
 			entry.race             = atoi(row[18]);
 			entry.gender           = atoi(row[19]);
-			entry.class            = atoi(row[20]);
+			entry.class_           = atoi(row[20]);
 			entry.deity            = atoi(row[21]);
 			entry.texture          = atoi(row[22]);
 			entry.helm_texture     = atoi(row[23]);
@@ -622,7 +681,7 @@ public:
 			entry.y                = static_cast<float>(atof(row[6]));
 			entry.z                = static_cast<float>(atof(row[7]));
 			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = row[9] ? row[9] : "";
+			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			entry.guild_consent_id = atoi(row[10]);
 			entry.is_rezzed        = atoi(row[11]);
 			entry.is_buried        = atoi(row[12]);
@@ -633,7 +692,7 @@ public:
 			entry.level            = atoi(row[17]);
 			entry.race             = atoi(row[18]);
 			entry.gender           = atoi(row[19]);
-			entry.class            = atoi(row[20]);
+			entry.class_           = atoi(row[20]);
 			entry.deity            = atoi(row[21]);
 			entry.texture          = atoi(row[22]);
 			entry.helm_texture     = atoi(row[23]);

@@ -70,7 +70,8 @@ CREATE TABLE spawn_events (
 Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	float in_x, float in_y, float in_z, float in_heading,
 	uint32 respawn, uint32 variance, uint32 timeleft, uint32 grid,
-	uint16 in_cond_id, int16 in_min_value, bool in_enabled, EmuAppearance anim)
+	bool in_path_when_zone_idle, uint16 in_cond_id, int16 in_min_value,
+	bool in_enabled, EmuAppearance anim)
 : timer(100000), killcount(0)
 {
 	spawn2_id = in_spawn2_id;
@@ -82,6 +83,7 @@ Spawn2::Spawn2(uint32 in_spawn2_id, uint32 spawngroup_id,
 	respawn_ = respawn;
 	variance_ = variance;
 	grid_ = grid;
+	path_when_zone_idle = in_path_when_zone_idle;
 	condition_id = in_cond_id;
 	condition_min_value = in_min_value;
 	npcthis = nullptr;
@@ -474,6 +476,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		"respawntime, "
 		"variance, "
 		"pathgrid, "
+		"path_when_zone_idle, "
 		"_condition, "
 		"cond_value, "
 		"enabled, "
@@ -494,7 +497,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 
 		uint32 spawn_time_left = 0;
 		Spawn2* new_spawn = 0;
-		bool perl_enabled = atoi(row[11]) == 1 ? true : false;
+		bool perl_enabled = atoi(row[12]) == 1 ? true : false;
 
 		if (spawn_times.count(atoi(row[0])) != 0)
 			spawn_time_left = spawn_times[atoi(row[0])];
@@ -508,21 +511,22 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		if (mob_distance > repop_distance)
 			continue;
 
-		new_spawn = new Spawn2(							   //
-			atoi(row[0]), 								   // uint32 in_spawn2_id
-			atoi(row[1]), 								   // uint32 spawngroup_id
-			atof(row[2]), 								   // float in_x
-			atof(row[3]), 								   // float in_y
-			atof(row[4]),								   // float in_z
-			atof(row[5]), 								   // float in_heading
-			atoi(row[6]), 								   // uint32 respawn
-			atoi(row[7]), 								   // uint32 variance
-			spawn_time_left,							   // uint32 timeleft
-			atoi(row[8]),								   // uint32 grid
-			atoi(row[9]), 								   // uint16 in_cond_id
-			atoi(row[10]), 								   // int16 in_min_value
-			perl_enabled, 								   // bool in_enabled
-			(EmuAppearance)atoi(row[12])				   // EmuAppearance anim
+		new_spawn = new Spawn2(
+			atoi(row[0]),					// uint32 in_spawn2_id
+			atoi(row[1]),					// uint32 spawngroup_id
+			atof(row[2]),					// float in_x
+			atof(row[3]),					// float in_y
+			atof(row[4]),					// float in_z
+			atof(row[5]),					// float in_heading
+			atoi(row[6]),					// uint32 respawn
+			atoi(row[7]),					// uint32 variance
+			spawn_time_left,				// uint32 timeleft
+			atoi(row[8]),					// uint32 grid
+			(bool)atoi(row[9]),				// bool path_when_zone_idle
+			atoi(row[10]),					// uint16 in_cond_id
+			atoi(row[11]),					// int16 in_min_value
+			perl_enabled,					// bool in_enabled
+			(EmuAppearance)atoi(row[13])	// EmuAppearance anim
 			);
 
 		spawn2_list.Insert(new_spawn);
@@ -531,7 +535,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 	return true;
 }
 
-bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay) {
+bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version) {
 
 	std::unordered_map<uint32, uint32> spawn_times;
 
@@ -578,6 +582,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"respawntime, "
 		"variance, "
 		"pathgrid, "
+		"path_when_zone_idle, "
 		"_condition, "
 		"cond_value, "
 		"enabled, "
@@ -598,26 +603,27 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 		uint32 spawn_time_left = 0;
 		Spawn2* new_spawn = 0;
-		bool perl_enabled = atoi(row[11]) == 1 ? true : false;
+		bool perl_enabled = atoi(row[12]) == 1 ? true : false;
 
 		if (spawn_times.count(atoi(row[0])) != 0)
 			spawn_time_left = spawn_times[atoi(row[0])];
 
-		new_spawn = new Spawn2(							   //
-			atoi(row[0]), 								   // uint32 in_spawn2_id
-			atoi(row[1]), 								   // uint32 spawngroup_id
-			atof(row[2]), 								   // float in_x
-			atof(row[3]), 								   // float in_y
-			atof(row[4]),								   // float in_z
-			atof(row[5]), 								   // float in_heading
-			atoi(row[6]), 								   // uint32 respawn
-			atoi(row[7]), 								   // uint32 variance
-			spawn_time_left,							   // uint32 timeleft
-			atoi(row[8]),								   // uint32 grid
-			atoi(row[9]), 								   // uint16 in_cond_id
-			atoi(row[10]), 								   // int16 in_min_value
-			perl_enabled, 								   // bool in_enabled
-			(EmuAppearance)atoi(row[12])				   // EmuAppearance anim
+		new_spawn = new Spawn2(
+			atoi(row[0]),					// uint32 in_spawn2_id
+			atoi(row[1]),					// uint32 spawngroup_id
+			atof(row[2]),					// float in_x
+			atof(row[3]),					// float in_y
+			atof(row[4]),					// float in_z
+			atof(row[5]),					// float in_heading
+			atoi(row[6]),					// uint32 respawn
+			atoi(row[7]),					// uint32 variance
+			spawn_time_left,				// uint32 timeleft
+			atoi(row[8]),					// uint32 grid
+			(bool)atoi(row[9]),				// bool path_when_zone_idle
+			atoi(row[10]),					// uint16 in_cond_id
+			atoi(row[11]),					// int16 in_min_value
+			perl_enabled,					// bool in_enabled
+			(EmuAppearance)atoi(row[13])	// EmuAppearance anim
 		);
 
 		spawn2_list.Insert(new_spawn);
@@ -632,9 +638,10 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft) {
 
 	std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
-                                    "respawntime, variance, pathgrid, _condition, "
-                                    "cond_value, enabled, animation FROM spawn2 "
-                                    "WHERE id = %i", spawn2id);
+									"respawntime, variance, pathgrid, "
+									"path_when_zone_idle, _condition, "
+									"cond_value, enabled, animation FROM spawn2 "
+									"WHERE id = %i", spawn2id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return nullptr;
@@ -646,11 +653,12 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 
 	auto row = results.begin();
 
-    bool perl_enabled = atoi(row[11]) == 1 ? true : false;
+    bool perl_enabled = atoi(row[12]) == 1 ? true : false;
 
-    auto newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]),
-			       atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]), atoi(row[9]), atoi(row[10]),
-			       perl_enabled, (EmuAppearance)atoi(row[12]));
+    auto newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]),
+			atof(row[3]), atof(row[4]), atof(row[5]), atoi(row[6]), atoi(row[7]),
+			timeleft, atoi(row[8]), (bool) atoi(row[9]), atoi(row[10]),
+			atoi(row[11]), perl_enabled, (EmuAppearance)atoi(row[13]));
 
     spawn2_list.Insert(newSpawn);
 
@@ -824,8 +832,11 @@ void SpawnConditionManager::Process() {
 				if(EQTime::IsTimeBefore(&tod, &cevent.next)) {
 					//this event has been triggered.
 					//execute the event
-					if(!cevent.strict || (cevent.strict && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
+					uint8 min = cevent.next.minute + RuleI(Zone, SpawnEventMin);
+					if(!cevent.strict || (cevent.strict && tod.minute < min && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
 						ExecEvent(cevent, true);
+					else
+						LogSpawns("Event {}: Is strict, ExecEvent is skipped.", cevent.id);
 
 					//add the period of the event to the trigger time
 					EQTime::AddMinutes(cevent.period, &cevent.next);
@@ -850,6 +861,7 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 	std::map<uint16, SpawnCondition>::iterator condi;
 	condi = spawn_conditions.find(event.condition_id);
 	if(condi == spawn_conditions.end()) {
+		//If we're here, strict has already been checked. Check again in case hour has changed.
 		LogSpawns("Event [{}]: Unable to find condition [{}] to execute on", event.id, event.condition_id);
 		return;	//unable to find the spawn condition to operate on
 	}

@@ -535,7 +535,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 		if(members[x].member == caster) {
 			caster->SpellOnTarget(spellid, caster);
 #ifdef GROUP_BUFF_PETS
-			if(spells[spellid].targettype != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
+			if(spells[spellid].target_type != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
 				caster->SpellOnTarget(spellid, caster->GetPet());
 #endif
 		}
@@ -546,7 +546,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 				if(distance <= range2){
 					caster->SpellOnTarget(spellid, members[x].member);
 #ifdef GROUP_BUFF_PETS
-					if(spells[spellid].targettype != ST_GroupNoPets && members[x].member->GetPet() && members[x].member->HasPetAffinity() && !members[x].member->GetPet()->IsCharmed())
+					if(spells[spellid].target_type != ST_GroupNoPets && members[x].member->GetPet() && members[x].member->HasPetAffinity() && !members[x].member->GetPet()->IsCharmed())
 						caster->SpellOnTarget(spellid, members[x].member->GetPet());
 #endif
 				}
@@ -827,42 +827,6 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 	}
 }
 
-void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
-	uint32 z;
-	float range, distance;
-
-	if(!caster)
-		return;
-
-	range = caster->GetAOERange(spellid);
-
-	float range2 = range*range;
-
-	for(z=0; z < MAX_RAID_MEMBERS; z++) {
-		if(members[z].member == caster) {
-			caster->BardPulse(spellid, caster);
-#ifdef GROUP_BUFF_PETS
-			if(caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
-				caster->BardPulse(spellid, caster->GetPet());
-#endif
-		}
-		else if(members[z].member != nullptr)
-		{
-			if(members[z].GroupNumber == gid){
-				distance = DistanceSquared(caster->GetPosition(), members[z].member->GetPosition());
-				if(distance <= range2) {
-					members[z].member->BardPulse(spellid, caster);
-#ifdef GROUP_BUFF_PETS
-					if(members[z].member->GetPet() && members[z].member->HasPetAffinity() && !members[z].member->GetPet()->IsCharmed())
-						members[z].member->GetPet()->BardPulse(spellid, caster);
-#endif
-				} else
-					LogSpells("Group bard pulse: [{}] is out of range [{}] at distance [{}] from [{}]", members[z].member->GetName(), range, distance, caster->GetName());
-			}
-		}
-	}
-}
-
 void Raid::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading, uint32 gid)
 {
 	for(int i = 0; i < MAX_RAID_MEMBERS; i++)
@@ -1032,7 +996,7 @@ void Raid::SendRaidAddAll(const char *who)
 			ram->_class = members[x]._class;
 			ram->level = members[x].level;
 			ram->isGroupLeader = members[x].IsGroupLeader;
-			this->QueuePacket(outapp);
+			QueuePacket(outapp);
 			safe_delete(outapp);
 			return;
 		}
@@ -1591,7 +1555,7 @@ void Raid::SendHPManaEndPacketsTo(Client *client)
 	if(!client)
 		return;
 
-	uint32 group_id = this->GetGroup(client);
+	uint32 group_id = GetGroup(client);
 
 	EQApplicationPacket hp_packet;
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
@@ -1631,7 +1595,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 	uint32 group_id = 0;
 
 	if(mob->IsClient())
-		group_id = this->GetGroup(mob->CastToClient());
+		group_id = GetGroup(mob->CastToClient());
 
 	EQApplicationPacket hpapp;
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
@@ -1667,7 +1631,7 @@ void Raid::SendManaPacketFrom(Mob *mob)
 	uint32 group_id = 0;
 
 	if (mob->IsClient())
-		group_id = this->GetGroup(mob->CastToClient());
+		group_id = GetGroup(mob->CastToClient());
 
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
@@ -1694,7 +1658,7 @@ void Raid::SendEndurancePacketFrom(Mob *mob)
 	uint32 group_id = 0;
 
 	if (mob->IsClient())
-		group_id = this->GetGroup(mob->CastToClient());
+		group_id = GetGroup(mob->CastToClient());
 
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
@@ -1814,7 +1778,7 @@ void Raid::SetDirtyAutoHaters()
 void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required /*= true*/, bool ignore_sender /*= true*/, float distance /*= 0*/, bool group_only /*= true*/) {
 	if (sender && sender->IsClient()) {
 
-		uint32 group_id = this->GetGroup(sender->CastToClient());
+		uint32 group_id = GetGroup(sender->CastToClient());
 
 		/* If this is a group only packet and we're not in a group -- return */
 		if (!group_id == 0xFFFFFFFF && group_only)

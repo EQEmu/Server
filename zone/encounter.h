@@ -34,8 +34,8 @@ public:
 	~Encounter();
 
 	//abstract virtual function implementations required by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
+	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr) {
 		return false;
@@ -44,13 +44,13 @@ public:
 	virtual bool HasGroup() { return false; }
 	virtual Raid* GetRaid() { return 0; }
 	virtual Group* GetGroup() { return 0; }
-	
+
 	bool IsEncounter() const { return true; }
 	const char* GetEncounterName() const { return encounter_name; }
 
 	bool	Process();
 	virtual void	Depop(bool not_used = true)	{ remove_me = true; }
-	
+
 
 protected:
 	bool remove_me;

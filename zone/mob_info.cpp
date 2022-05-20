@@ -22,30 +22,8 @@
 #include "mob.h"
 #include "../common/races.h"
 #include "../common/say_link.h"
+#include "../common/string_util.h"
 #include "npc_scale_manager.h"
-
-std::string commify(const std::string &number)
-{
-	std::string temp_string;
-
-	auto string_length = static_cast<int>(number.length());
-
-	int i = 0;
-	for (i = string_length - 3; i >= 0; i -= 3) {
-		if (i > 0) {
-			temp_string = "," + number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		}
-		else {
-			temp_string = number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		}
-	}
-
-	if (i < 0) {
-		temp_string = number.substr(0, static_cast<unsigned long>(3 + i)) + temp_string;
-	}
-
-	return temp_string;
-}
 
 inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribute)
 {
@@ -483,12 +461,12 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 				   commify(std::to_string((int) RuleI(Character, ItemDSMitigationCap)));
 		}
 		if (attribute == "hp_regen") {
-			return commify(std::to_string((int) client->GetHPRegen())) + " / " +
+			return commify(std::to_string((int64) client->GetHPRegen())) + " / " +
 				   commify(std::to_string((int) RuleI(Character, ItemHealthRegenCap)));
 		}
 		if (attribute == "mana_regen") {
-			return commify(std::to_string((int) client->GetManaRegen())) + " / " +
-				   commify(std::to_string((int) RuleI(Character, ItemManaRegenCap)));
+			return commify(std::to_string((int64) client->GetManaRegen())) + " / " +
+				   commify(std::to_string((int64) RuleI(Character, ItemManaRegenCap)));
 		}
 		if (attribute == "end_regen") {
 			return commify(std::to_string((int) client->CalcEnduranceRegen())) + " / " +
@@ -557,7 +535,7 @@ inline std::string WriteDisplayInfoSection(
 		 *     "total_to_hit" = "Total To Hit"
 		 */
 		if (attribute_name.find('_') != std::string::npos) {
-			std::vector<std::string> split_string = split(attribute_name, '_');
+			auto split_string = SplitString(attribute_name, '_');
 			std::string new_attribute_name;
 			for (std::string &string_value : split_string) {
 				new_attribute_name += ucfirst(string_value) + " ";
@@ -638,11 +616,11 @@ void Mob::DisplayInfo(Mob *mob)
 		return;
 	}
 
-	if (this->IsClient()) {
+	if (IsClient()) {
 
 		std::string window_text = "<c \"#FFFF66\">*Drag window open vertically to see all</c><br>";
 
-		Client *client = this->CastToClient();
+		Client *client = CastToClient();
 
 		if (!client->IsDevToolsEnabled()) {
 			return;

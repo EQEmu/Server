@@ -82,6 +82,26 @@ const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
 
 /**
  * @param zone_id
+ * @param error_unknown
+ * @return
+ */
+const char *ZoneStore::GetZoneLongName(uint32 zone_id, bool error_unknown)
+{
+	for (auto &z: zones) {
+		if (z.zoneidnumber == zone_id) {
+			return z.long_name.c_str();
+		}
+	}
+
+	if (error_unknown) {
+		return "UNKNOWN";
+	}
+
+	return nullptr;
+}
+
+/**
+ * @param zone_id
  * @return
  */
 std::string ZoneStore::GetZoneName(uint32 zone_id)
@@ -139,55 +159,4 @@ ZoneRepository::Zone ZoneStore::GetZone(const char *in_zone_name)
 	}
 
 	return ZoneRepository::Zone();
-}
-
-/**
- * @return
- */
-void ZoneStore::LoadContentFlags()
-{
-	std::vector<std::string> set_content_flags;
-	auto                     content_flags = ContentFlagsRepository::GetWhere(database, "enabled = 1");
-
-	set_content_flags.reserve(content_flags.size());
-	for (auto &flags: content_flags) {
-		set_content_flags.push_back(flags.flag_name);
-	}
-
-	LogInfo(
-		"Enabled content flags [{}]",
-		implode(", ", set_content_flags)
-	);
-
-	content_service.SetContentFlags(set_content_flags);
-}
-
-/**
- * Sets the value in the database and proceeds to load content flags into the server context again
- *
- * @param content_flag_name
- * @param enabled
- */
-void ZoneStore::SetContentFlag(const std::string &content_flag_name, bool enabled)
-{
-	auto content_flags = ContentFlagsRepository::GetWhere(database,
-		fmt::format("flag_name = '{}'", content_flag_name)
-	);
-
-	auto content_flag = ContentFlagsRepository::NewEntity();
-	if (!content_flags.empty()) {
-		content_flag = content_flags.front();
-	}
-
-	content_flag.enabled   = enabled ? 1 : 0;
-	content_flag.flag_name = content_flag_name;
-
-	if (!content_flags.empty()) {
-		ContentFlagsRepository::UpdateOne(database, content_flag);
-	}
-	else {
-		ContentFlagsRepository::InsertOne(database, content_flag);
-	}
-
-	LoadContentFlags();
 }

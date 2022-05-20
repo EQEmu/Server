@@ -132,13 +132,25 @@ namespace EQ
 		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
 
 		// Remove item from inventory
-		bool DeleteItem(int16 slot_id, uint8 quantity = 0);
+		bool DeleteItem(int16 slot_id, int16 quantity = 0);
 
 		// Checks All items in a bag for No Drop
 		bool CheckNoDrop(int16 slot_id, bool recurse = true);
 
 		// Remove item from inventory (and take control of memory)
 		ItemInstance* PopItem(int16 slot_id);
+
+		// Check if player has a specific item equipped by Item ID
+		bool HasItemEquippedByID(uint32 item_id);
+
+		// Check how many of a specific item the player has equipped by Item ID
+		int CountItemEquippedByID(uint32 item_id);
+
+		// Check if player has a specific augment equipped by Item ID
+		bool HasAugmentEquippedByID(uint32 item_id);
+
+		// Check how many of a specific augment the player has equipped by Item ID
+		int CountAugmentEquippedByID(uint32 item_id);
 
 		// Check whether there is space for the specified number of the specified item.
 		bool HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity);
@@ -190,6 +202,7 @@ namespace EQ
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value);
 		void SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value);
 		std::string GetCustomItemData(int16 slot_id, std::string identifier);
+		static int GetItemStatValue(uint32 item_id, const char* identifier);
 	protected:
 		///////////////////////////////
 		// Protected Methods

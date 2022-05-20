@@ -86,7 +86,7 @@ Zone* zone = 0;
 
 void UpdateWindowTitle(char* iNewTitle);
 
-bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
+bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	const char* zonename = ZoneName(iZoneID);
 
 	if (iZoneID == 0 || zonename == 0)
@@ -103,7 +103,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	zone = new Zone(iZoneID, iInstanceID, zonename);
 
 	//init the zone, loads all the data, etc
-	if (!zone->Init(iStaticZone)) {
+	if (!zone->Init(is_static)) {
 		safe_delete(zone);
 		std::cerr << "Zone->Init failed" << std::endl;
 		worldserver.SetZoneData(0);
@@ -150,10 +150,18 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	}
 
 	LogInfo("---- Zone server [{}], listening on port:[{}] ----", zonename, ZoneConfig::get()->ZonePort);
-	LogInfo("Zone Bootup: [{}] ([{}]: [{}])", zonename, iZoneID, iInstanceID);
+	LogInfo("Zone Bootup: [{}] [{}] ([{}]: [{}])",
+		(is_static) ? "Static" : "Dynamic", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle(nullptr);
-	zone->GetTimeSync();
+
+	// Dynamic zones need to Sync here.
+	// Static zones sync when they connect in worldserver.cpp.
+	// Static zones cannot sync here as request is ignored by worldserver.
+	if (!is_static)
+	{
+		zone->GetTimeSync();
+	}
 
 	zone->RequestUCSServerStatus();
 
@@ -198,24 +206,27 @@ bool Zone::LoadZoneObjects()
 			if (!shortname)
 				continue;
 
-			Door d;
-			memset(&d, 0, sizeof(d));
+			// todo: clean up duplicate code with command_object
+			auto d = DoorsRepository::NewEntity();
 
-			strn0cpy(d.zone_name, shortname, sizeof(d.zone_name));
-			d.db_id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
-			d.door_id = -1;			     // Client doesn't care if these are all the same door_id
+			d.zone = shortname;
+			d.id = 1000000000 + atoi(row[0]); // Out of range of normal use for doors.id
+			d.doorid = -1; // Client doesn't care if these are all the same door_id
 			d.pos_x = atof(row[2]);		     // xpos
 			d.pos_y = atof(row[3]);		     // ypos
 			d.pos_z = atof(row[4]);		     // zpos
 			d.heading = atof(row[5]);	    // heading
 
-			strn0cpy(d.door_name, row[8], sizeof(d.door_name)); // objectname
-			// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
-			int len = strlen(d.door_name);
-			if ((len > 9) && (memcmp(&d.door_name[len - 9], "_ACTORDEF", 10) == 0))
-				d.door_name[len - 9] = '\0';
+			d.name = row[8]; // objectname
 
-			memcpy(d.dest_zone, "NONE", 5);
+			// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
+			int pos = d.name.size() - strlen("_ACTORDEF");
+			if (pos > 0 && d.name.compare(pos, std::string::npos, "_ACTORDEF") == 0)
+			{
+				d.name.erase(pos);
+			}
+
+			d.dest_zone = "NONE";
 
 			if ((d.size = atoi(row[11])) == 0) // unknown08 = optional size percentage
 				d.size = 100;
@@ -233,7 +244,7 @@ bool Zone::LoadZoneObjects()
 			d.incline = atoi(row[13]);	  // unknown20 = optional model incline value
 			d.client_version_mask = 0xFFFFFFFF; // We should load the mask from the zone.
 
-			auto door = new Doors(&d);
+			auto door = new Doors(d);
 			entity_list.AddDoor(door);
 		}
 
@@ -361,7 +372,8 @@ void Zone::DumpMerchantList(uint32 npcid) {
 
 int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold) {
 
-	LogInventory("Transaction of [{}] [{}]", charges, item);
+	LogInventory("[{}] [{}] charges of [{}]", ((sold) ? "Sold" : "Bought"),
+		charges, item);
 	//DumpMerchantList(npcid);
 	// Iterate past main items.
 	// If the item being transacted is in this list, return 0;
@@ -419,12 +431,10 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 				if (!ml.origslot) {
 					ml.origslot = ml.slot;
 				}
-
-				if (charges > 0) {
+				if (ml.charges > 0) {
 					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
 					tmp_merlist.push_back(ml);
-				}
-				else {
+				} else {
 					database.DeleteMerchantTemp(npcid, ml.origslot);
 				}
 			}
@@ -535,6 +545,10 @@ void Zone::LoadTempMerchantData()
 		)
 	);
 
+    if (!results.Success() || results.RowCount() == 0) {
+        return;
+	}
+
 	std::vector<std::string> npc_ids;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		npc_ids.push_back(row[0]);
@@ -591,26 +605,25 @@ void Zone::LoadTempMerchantData()
 
 void Zone::LoadNewMerchantData(uint32 merchantid) {
 
-	std::list<MerchantList> merlist;
+	std::list<MerchantList> merchant_list;
 
-	std::string query = fmt::format(
+	auto query = fmt::format(
 		SQL(
 			SELECT
-			  item,
-			  slot,
-			  faction_required,
-			  level_required,
-			  alt_currency_cost,
-			  classes_required,
-			  probability
-			FROM
-			  merchantlist
-			WHERE
-			  merchantid = {}
-			  {}
-			ORDER BY
-			  slot
-			),
+				item,
+				slot,
+				faction_required,
+				level_required,
+				alt_currency_cost,
+				classes_required,
+				probability,
+				bucket_name,
+				bucket_value,
+				bucket_comparison
+			FROM merchantlist
+			WHERE  merchantid = {} {}
+			ORDER BY slot
+		),
 		merchantid,
 		ContentFilterCriteria::apply()
 	);
@@ -620,25 +633,28 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
         return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		MerchantList ml;
-		ml.id                = merchantid;
-		ml.item              = atoul(row[0]);
-		ml.slot              = atoul(row[1]);
-		ml.faction_required  = atoul(row[2]);
-		ml.level_required    = atoul(row[3]);
-		ml.alt_currency_cost = atoul(row[4]);
-		ml.classes_required  = atoul(row[5]);
-		ml.probability       = atoul(row[6]);
-		merlist.push_back(ml);
+		ml.id = merchantid;
+		ml.item = std::stoul(row[0]);
+		ml.slot = std::stoul(row[1]);
+		ml.faction_required = static_cast<int16>(std::stoi(row[2]));
+		ml.level_required = static_cast<uint8>(std::stoul(row[3]));
+		ml.alt_currency_cost = static_cast<uint16>(std::stoul(row[4]));
+		ml.classes_required = std::stoul(row[5]);
+		ml.probability = static_cast<uint8>(std::stoul(row[6]));
+		ml.bucket_name = row[7];
+		ml.bucket_value = row[8];
+		ml.bucket_comparison = static_cast<uint8>(std::stoul(row[9]));
+		merchant_list.push_back(ml);
 	}
 
-	merchanttable[merchantid] = merlist;
+	merchanttable[merchantid] = merchant_list;
 }
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
-	std::string query = fmt::format(
+	auto query = fmt::format(
 		SQL (
 			SELECT
 			  DISTINCT merchantlist.merchantid,
@@ -648,7 +664,10 @@ void Zone::GetMerchantDataForZoneLoad() {
 			  merchantlist.level_required,
 			  merchantlist.alt_currency_cost,
 			  merchantlist.classes_required,
-			  merchantlist.probability
+			  merchantlist.probability,
+			  merchantlist.bucket_name,
+			  merchantlist.bucket_value,
+			  merchantlist.bucket_comparison
 			FROM
 			  merchantlist,
 			  npc_types,
@@ -674,49 +693,50 @@ void Zone::GetMerchantDataForZoneLoad() {
 	std::map<uint32, std::list<MerchantList> >::iterator merchant_list;
 
 	uint32 npc_id = 0;
-	if (results.RowCount() == 0) {
+	if (!results.Success() || !results.RowCount()) {
 		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
 	}
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		MerchantList merchant_list_entry{};
-		merchant_list_entry.id = atoul(row[0]);
-		if (npc_id != merchant_list_entry.id) {
-			merchant_list = merchanttable.find(merchant_list_entry.id);
+
+	for (auto row : results) {
+		MerchantList mle{};
+		mle.id = std::stoul(row[0]);
+		if (npc_id != mle.id) {
+			merchant_list = merchanttable.find(mle.id);
 			if (merchant_list == merchanttable.end()) {
 				std::list<MerchantList> empty;
-				merchanttable[merchant_list_entry.id] = empty;
-				merchant_list = merchanttable.find(merchant_list_entry.id);
+				merchanttable[mle.id] = empty;
+				merchant_list = merchanttable.find(mle.id);
 			}
 
-			npc_id = merchant_list_entry.id;
+			npc_id = mle.id;
 		}
 
-		auto iter  = merchant_list->second.begin();
 		bool found = false;
-		while (iter != merchant_list->second.end()) {
-			if ((*iter).item == merchant_list_entry.id) {
+		for (const auto &m : merchant_list->second) {
+			if (m.item == mle.id) {
 				found = true;
 				break;
 			}
-			++iter;
 		}
 
 		if (found) {
 			continue;
 		}
+		
+		mle.slot = std::stoul(row[1]);
+		mle.item = std::stoul(row[2]);
+		mle.faction_required = static_cast<int16>(std::stoi(row[3]));
+		mle.level_required = static_cast<uint8>(std::stoul(row[4]));
+		mle.alt_currency_cost = static_cast<uint16>(std::stoul(row[5]));
+		mle.classes_required = std::stoul(row[6]);
+		mle.probability = static_cast<uint8>(std::stoul(row[7]));
+		mle.bucket_name = row[8];
+		mle.bucket_value = row[9];
+		mle.bucket_comparison = static_cast<uint8>(std::stoul(row[10]));
 
-		merchant_list_entry.slot              = atoul(row[1]);
-		merchant_list_entry.item              = atoul(row[2]);
-		merchant_list_entry.faction_required  = atoul(row[3]);
-		merchant_list_entry.level_required    = atoul(row[4]);
-		merchant_list_entry.alt_currency_cost = atoul(row[5]);
-		merchant_list_entry.classes_required  = atoul(row[6]);
-		merchant_list_entry.probability       = atoul(row[7]);
-
-		merchant_list->second.push_back(merchant_list_entry);
+		merchant_list->second.push_back(mle);
 	}
-
 }
 
 void Zone::LoadMercTemplates(){
@@ -905,33 +925,21 @@ void Zone::Shutdown(bool quiet)
 	}
 }
 
-void Zone::LoadZoneDoors(const char* zone, int16 version)
+void Zone::LoadZoneDoors()
 {
-	LogInfo("Loading doors for [{}] ", zone);
+	LogInfo("Loading doors for [{}] ", GetShortName());
 
-	uint32 maxid;
-	int32 count = content_db.GetDoorsCount(&maxid, zone, version);
-	if(count < 1) {
+	auto door_entries = content_db.LoadDoors(GetShortName(), GetInstanceVersion());
+	if (door_entries.empty()) {
 		LogInfo("No doors loaded");
 		return;
 	}
 
-	auto dlist = new Door[count];
-
-	if(!content_db.LoadDoors(count, dlist, zone, version)) {
-		LogError("Failed to load doors");
-		delete[] dlist;
-		return;
+	for (const auto &entry : door_entries) {
+		auto d = new Doors(entry);
+		entity_list.AddDoor(d);
+		LogDoorsDetail("Door added to entity list, db id: [{}], door_id: [{}]", entry.id, entry.doorid);
 	}
-
-	int r;
-	Door *d = dlist;
-	for(r = 0; r < count; r++, d++) {
-		auto newdoor = new Doors(d);
-		entity_list.AddDoor(newdoor);
-		Log(Logs::Detail, Logs::Doors, "Door Add to Entity List, index: %u db id: %u, door_id %u", r, dlist[r].db_id, dlist[r].door_id);
-	}
-	delete[] dlist;
 }
 
 Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
@@ -941,8 +949,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	spawn2_timer(1000),
 	hot_reload_timer(1000),
 	qglobal_purge_timer(30000),
-	hotzone_timer(120000),
-	m_SafePoint(0.0f,0.0f,0.0f),
+	m_SafePoint(0.0f,0.0f,0.0f,0.0f),
 	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
 {
 	zoneid = in_zoneid;
@@ -1072,14 +1079,14 @@ Zone::~Zone() {
 }
 
 //Modified for timezones.
-bool Zone::Init(bool iStaticZone) {
-	SetStaticZone(iStaticZone);
+bool Zone::Init(bool is_static) {
+	SetStaticZone(is_static);
 
 	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) { // try loading the zone name...
+	if (!LoadZoneCFG(GetShortName(), GetInstanceVersion())) { // try loading the zone name...
 		LoadZoneCFG(
-			zone->GetFileName(),
-			zone->GetInstanceVersion()
+			GetFileName(),
+			GetInstanceVersion()
 		);
 	} // if that fails, try the file name, then load defaults
 
@@ -1090,9 +1097,9 @@ bool Zone::Init(bool iStaticZone) {
 		}
 	}
 
-	zone->zonemap  = Map::LoadMapFile(zone->map_name);
-	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing  = IPathfinder::Load(zone->map_name);
+	zonemap  = Map::LoadMapFile(map_name);
+	watermap = WaterMap::LoadWaterMapfile(map_name);
+	pathing  = IPathfinder::Load(map_name);
 
 	LogInfo("Loading spawn conditions");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
@@ -1149,8 +1156,8 @@ bool Zone::Init(bool iStaticZone) {
 	LogInfo("Flushing old respawn timers");
 	database.QueryDatabase("DELETE FROM `respawn_times` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())");
 
-	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
-	zone->LoadZoneBlockedSpells(zone->GetZoneID());
+	LoadZoneDoors();
+	LoadZoneBlockedSpells();
 
 	//clear trader items if we are loading the bazaar
 	if (strncasecmp(short_name, "bazaar", 6) == 0) {
@@ -1158,41 +1165,45 @@ bool Zone::Init(bool iStaticZone) {
 		database.DeleteBuyLines(0);
 	}
 
-	zone->LoadLDoNTraps();
-	zone->LoadLDoNTrapEntries();
-	zone->LoadVeteranRewards();
-	zone->LoadAlternateCurrencies();
-	zone->LoadNPCEmotes(&NPCEmoteList);
+	LoadLDoNTraps();
+	LoadLDoNTrapEntries();
+	LoadVeteranRewards();
+	LoadAlternateCurrencies();
+	LoadNPCEmotes(&NPCEmoteList);
 
 	LoadAlternateAdvancement();
 
 	content_db.LoadGlobalLoot();
 
 	//Load merchant data
-	zone->GetMerchantDataForZoneLoad();
+	GetMerchantDataForZoneLoad();
 
 	//Load temporary merchant data
-	zone->LoadTempMerchantData();
+	LoadTempMerchantData();
 
 	// Merc data
 	if (RuleB(Mercs, AllowMercs)) {
-		zone->LoadMercTemplates();
-		zone->LoadMercSpells();
+		LoadMercTemplates();
+		LoadMercSpells();
 	}
 
-	if (RuleB(Zone, LevelBasedEXPMods))
-		zone->LoadLevelEXPMods();
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		LoadLevelEXPMods();
+	}
 
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
+
+	LogInfo("Loading dynamic zones");
+	DynamicZone::CacheAllFromDatabase();
 
 	LogInfo("Loading active Expeditions");
 	Expedition::CacheAllFromDatabase();
 
 	LogInfo("Loading timezone data");
-	zone->zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
+	zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
 
-	LogInfo("Init Finished: ZoneID = [{}], Time Offset = [{}]", zoneid, zone->zone_time.getEQTimeZone());
+	LogInfo("Init Finished: ZoneID = [{}], Time Offset = [{}]", zoneid, zone_time.getEQTimeZone());
 
 	LoadGrids();
 	LoadTickItems();
@@ -1207,7 +1218,6 @@ void Zone::ReloadStaticData() {
 	LogInfo("Reloading Zone Static Data");
 
 	LogInfo("Reloading static zone points");
-	zone_point_list.Clear();
 	if (!content_db.LoadStaticZonePoints(&zone_point_list, GetShortName(), GetInstanceVersion())) {
 		LogError("Loading static zone points failed");
 	}
@@ -1233,30 +1243,29 @@ void Zone::ReloadStaticData() {
 	}
 
 	entity_list.RemoveAllDoors();
-	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
+	LoadZoneDoors();
 	entity_list.RespawnAllDoors();
 
-	zone->LoadVeteranRewards();
-	zone->LoadAlternateCurrencies();
+	LoadVeteranRewards();
+	LoadAlternateCurrencies();
 	NPCEmoteList.Clear();
-	zone->LoadNPCEmotes(&NPCEmoteList);
+	LoadNPCEmotes(&NPCEmoteList);
 
 	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) { // try loading the zone name...
+	if (!LoadZoneCFG(GetShortName(), GetInstanceVersion())) { // try loading the zone name...
 		LoadZoneCFG(
-			zone->GetFileName(),
-			zone->GetInstanceVersion()
+			GetFileName(),
+			GetInstanceVersion()
 		);
 	} // if that fails, try the file name, then load defaults
 
-	content_service.SetExpansionContext();
+	content_service.SetExpansionContext()->ReloadContentFlags();
 
-	ZoneStore::LoadContentFlags();
 
 	LogInfo("Zone Static Data Reloaded");
 }
 
-bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
+bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
 
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
@@ -1264,7 +1273,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 
 	if (!content_db.GetZoneCFG(
 		ZoneID(filename),
-		instance_id,
+		instance_version,
 		&newzone_data,
 		can_bind,
 		can_combat,
@@ -1279,7 +1288,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 		&map_name
 	)) {
 		// If loading a non-zero instance failed, try loading the default
-		if (instance_id != 0) {
+		if (instance_version != 0) {
 			safe_delete_array(map_name);
 			if (!content_db.GetZoneCFG(
 				ZoneID(filename),
@@ -1313,7 +1322,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 		GetShortName(),
 		GetLongName(),
 		GetInstanceVersion(),
-		instance_id
+		instance_version
 	);
 
 	return true;
@@ -1493,16 +1502,14 @@ bool Zone::Process() {
 		{
 			if(Instance_Timer->Check())
 			{
-				// if this is a dynamic zone instance notify system associated with it
-				auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
-				if (expedition)
+				auto dz = GetDynamicZone();
+				if (dz)
 				{
-					expedition->RemoveAllMembers(false); // entity list will teleport clients out immediately
+					dz->RemoveAllMembers(); // entity list will teleport clients out immediately
 				}
 
 				// instance shutting down, move corpses to graveyard or non-instanced zone at same coords
 				entity_list.MovePlayerCorpsesToGraveyard(true);
-
 				entity_list.GateAllClientsToSafeReturn();
 				database.DeleteInstance(GetInstanceID());
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds
@@ -1557,7 +1564,7 @@ bool Zone::Process() {
 	if(Weather_Timer->Check())
 	{
 		Weather_Timer->Disable();
-		this->ChangeWeather();
+		ChangeWeather();
 	}
 
 	if(qGlobals)
@@ -1581,8 +1588,6 @@ bool Zone::Process() {
 			}
 		}
 	}
-
-	if(hotzone_timer.Check()) { UpdateHotzone(); }
 
 	mMovementManager->Process();
 
@@ -1689,7 +1694,7 @@ void Zone::ChangeWeather()
 	else
 	{
 		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
-		this->weatherSend();
+		weatherSend();
 		if (zone->weather_intensity == 0)
 		{
 			zone->zone_weather = 0;
@@ -1772,7 +1777,7 @@ void Zone::ClearNPCTypeCache(int id) {
 	}
 }
 
-void Zone::Repop(uint32 delay)
+void Zone::Repop()
 {
 	if (!Depop()) {
 		return;
@@ -1801,7 +1806,7 @@ void Zone::Repop(uint32 delay)
 		LogError("Loading spawn conditions failed, continuing without them");
 	}
 
-	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion(), delay)) {
+	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion())) {
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 	}
 
@@ -1817,7 +1822,8 @@ void Zone::Repop(uint32 delay)
 
 void Zone::GetTimeSync()
 {
-	if (worldserver.Connected() && !zone_has_current_time) {
+	if (!zone_has_current_time) {
+		LogInfo("Requesting world time");
 		auto pack = new ServerPacket(ServerOP_GetWorldTime, 1);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
@@ -1915,7 +1921,11 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 	// this shouldn't open up any exploits since those situations are detected later on
 	if ((zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
 	{
-		//TODO cheat detection
+		if (client) {
+			if (!client->cheat_manager.GetExemptStatus(Port)) {
+				client->cheat_manager.CheatDetected(MQZoneUnknownDest, location);
+			}
+		}
 		LogInfo("WARNING: Closest zone point for zone id [{}] is [{}], you might need to update your zone_points table if you dont arrive at the right spot", to, closest_dist);
 		LogInfo("<Real Zone Points>. [{}]", to_string(location).c_str());
 	}
@@ -2037,102 +2047,6 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 	return true;
 }
 
-void Zone::SpawnStatus(Mob* client) {
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-
-	uint32 x = 0;
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-		else
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-
-		x++;
-		iterator.Advance();
-	}
-	client->Message(Chat::White, "%i spawns listed.", x);
-}
-
-void Zone::ShowEnabledSpawnStatus(Mob* client)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iEnabledCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() != 0xFFFFFFFF)
-		{
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-			iEnabledCount++;
-		}
-
-		x++;
-		iterator.Advance();
-	}
-
-	client->Message(Chat::White, "%i of %i spawns listed.", iEnabledCount, x);
-}
-
-void Zone::ShowDisabledSpawnStatus(Mob* client)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iDisabledCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-		{
-			client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-			iDisabledCount++;
-		}
-
-		x++;
-		iterator.Advance();
-	}
-
-	client->Message(Chat::White, "%i of %i spawns listed.", iDisabledCount, x);
-}
-
-void Zone::ShowSpawnStatusByID(Mob* client, uint32 spawnid)
-{
-	LinkedListIterator<Spawn2*> iterator(spawn2_list);
-	int x = 0;
-	int iSpawnIDCount = 0;
-
-	iterator.Reset();
-
-	while(iterator.MoreElements())
-	{
-		if (iterator.GetData()->GetID() == spawnid)
-		{
-			if (iterator.GetData()->timer.GetRemainingTime() == 0xFFFFFFFF)
-				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: disabled", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ());
-			else
-				client->Message(Chat::White, "  %d: %1.1f, %1.1f, %1.1f: %1.2f", iterator.GetData()->GetID(), iterator.GetData()->GetX(), iterator.GetData()->GetY(), iterator.GetData()->GetZ(), (float)iterator.GetData()->timer.GetRemainingTime() / 1000);
-
-			iSpawnIDCount++;
-
-			break;
-		}
-
-		x++;
-		iterator.Advance();
-	}
-
-	if(iSpawnIDCount > 0)
-		client->Message(Chat::White, "%i of %i spawns listed.", iSpawnIDCount, x);
-	else
-		client->Message(Chat::White, "No matching spawn id was found in this zone.");
-}
-
 bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 {
 	const std::string query =
@@ -2185,13 +2099,13 @@ void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 	m_Graveyard = graveyardPosition;
 }
 
-void Zone::LoadZoneBlockedSpells(uint32 zone_id)
+void Zone::LoadZoneBlockedSpells()
 {
 	if (!blocked_spells) {
-		zone_total_blocked_spells = content_db.GetBlockedSpellsCount(zone_id);
+		zone_total_blocked_spells = content_db.GetBlockedSpellsCount(GetZoneID());
 		if (zone_total_blocked_spells > 0) {
 			blocked_spells = new ZoneSpellsBlocked[zone_total_blocked_spells];
-			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, zone_id)) {
+			if (!content_db.LoadBlockedSpells(zone_total_blocked_spells, blocked_spells, GetZoneID())) {
 				LogError(" Failed to load blocked spells");
 				ClearBlockedSpells();
 			}
@@ -2414,10 +2328,9 @@ void Zone::LoadAlternateCurrencies()
 		return;
     }
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-    {
-        current_currency.id = atoi(row[0]);
-        current_currency.item_id = atoi(row[1]);
+    for (auto row : results) {
+        current_currency.id = std::stoul(row[0]);
+        current_currency.item_id = std::stoul(row[1]);
         AlternateCurrencies.push_back(current_currency);
     }
 
@@ -2549,14 +2462,65 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 
 }
 
-void Zone::ReloadWorld(uint32 Option){
-	if (Option == 0) {
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-	} else if(Option == 1) {
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-		zone->Repop(0);
+void Zone::ReloadWorld(uint8 global_repop)
+{
+	entity_list.ClearAreas();
+	parse->ReloadQuests();
+
+	if (global_repop) {
+		if (global_repop == ReloadWorld::ForceRepop) {
+			zone->ClearSpawnTimers();
+		}
+
+		zone->Repop();
+	}
+
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::GMAdmin,
+		Chat::Yellow,
+		fmt::format(
+			"Quests reloaded {}for {}{}.",
+			(
+				global_repop ?
+				(
+					global_repop == ReloadWorld::Repop ?
+					"and repopped NPCs " :
+					"and forcefully repopped NPCs "
+				) :
+				""
+			),
+			fmt::format(
+				"{} ({})",
+				GetLongName(),
+				GetZoneID()
+			),
+			(
+				GetInstanceID() ?
+				fmt::format(
+					" (Instance ID {})",
+					GetInstanceID()
+				) :
+				""
+			)
+		).c_str()
+	);
+}
+
+void Zone::ClearSpawnTimers()
+{
+	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		auto query = fmt::format(
+			"DELETE FROM respawn_times WHERE id = {} AND instance_id = {}",
+			iterator.GetData()->GetID(),
+			GetInstanceID()
+		);
+		auto results = database.QueryDatabase(query);
+
+		iterator.Advance();
 	}
 }
 
@@ -2602,19 +2566,9 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 	return 0;
 }
 
-void Zone::UpdateHotzone()
+void Zone::SetIsHotzone(bool is_hotzone)
 {
-    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
-    auto results = content_db.QueryDatabase(query);
-    if (!results.Success())
-        return;
-
-    if (results.RowCount() == 0)
-        return;
-
-    auto row = results.begin();
-
-    is_hotzone = atoi(row[0]) == 0 ? false: true;
+	Zone::is_hotzone = is_hotzone;
 }
 
 void Zone::RequestUCSServerStatus() {
@@ -2736,13 +2690,86 @@ DynamicZone* Zone::GetDynamicZone()
 		return nullptr;
 	}
 
-	auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
-	if (expedition)
+	// todo: cache dynamic zone id on zone later for faster lookup
+	for (const auto& dz_iter : zone->dynamic_zone_cache)
 	{
-		return &expedition->GetDynamicZone();
+		if (dz_iter.second->IsSameDz(GetZoneID(), GetInstanceID()))
+		{
+			return dz_iter.second.get();
+		}
 	}
 
-	// todo: tasks, missions, and quests with an associated dz for this instance id
-
 	return nullptr;
+}
+
+uint32 Zone::GetCurrencyID(uint32 item_id)
+{
+	if (!item_id) {
+		return 0;
+	}
+
+	for (const auto& alternate_currency : AlternateCurrencies) {
+		if (item_id == alternate_currency.item_id) {
+			return alternate_currency.id;
+		}
+	}
+
+	return 0;
+}
+
+uint32 Zone::GetCurrencyItemID(uint32 currency_id)
+{
+	if (!currency_id) {
+		return 0;
+	}
+
+	for (const auto& alternate_currency : AlternateCurrencies) {
+		if (currency_id == alternate_currency.id) {
+			return alternate_currency.item_id;
+		}
+	}
+
+	return 0;
+}
+
+std::string Zone::GetZoneDescription()
+{
+	auto d = fmt::format(
+		"{} ({}){}{}",
+		GetLongName(),
+		GetZoneID(),
+		(
+			GetInstanceID() ?
+			fmt::format(
+				" (Instance ID {})",
+				GetInstanceID()
+			) :
+			""
+		),
+		(
+			GetInstanceVersion() ?
+			fmt::format(
+				" (Version {})",
+				GetInstanceVersion()
+			) :
+			""
+		)
+	);
+
+	return d;
+}
+
+void Zone::SendReloadMessage(std::string reload_type)
+{
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::GMAdmin,
+		Chat::Yellow,
+		fmt::format(
+			"{} reloaded for {}.",
+			reload_type,
+			GetZoneDescription()
+		).c_str()
+	);
 }

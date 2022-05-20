@@ -766,7 +766,7 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 		else if (CalculateCorruptionCounters(bot_buffs[buff_count].spellid) > 0)
 			bot_buffs[buff_count].counters = atoi(row[7]);
 
-		bot_buffs[buff_count].numhits = atoi(row[8]);
+		bot_buffs[buff_count].hit_number = atoi(row[8]);
 		bot_buffs[buff_count].melee_rune = atoi(row[9]);
 		bot_buffs[buff_count].magic_rune = atoi(row[10]);
 		bot_buffs[buff_count].dot_rune = atoi(row[11]);
@@ -843,13 +843,13 @@ bool BotDatabase::SaveBuffs(Bot* bot_inst)
 			bot_inst->GetBotID(),
 			bot_buffs[buff_index].spellid,
 			bot_buffs[buff_index].casterlevel,
-			spells[bot_buffs[buff_index].spellid].buffdurationformula,
+			spells[bot_buffs[buff_index].spellid].buff_duration_formula,
 			bot_buffs[buff_index].ticsremaining,
 			((CalculatePoisonCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
 			((CalculateDiseaseCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
 			((CalculateCurseCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
 			((CalculateCorruptionCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
-			bot_buffs[buff_index].numhits,
+			bot_buffs[buff_index].hit_number,
 			bot_buffs[buff_index].melee_rune,
 			bot_buffs[buff_index].magic_rune,
 			bot_buffs[buff_index].dot_rune,
@@ -2637,8 +2637,8 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 		"SELECT `charid`"
 		" FROM `group_id`"
 		" WHERE `groupid` = '%u'"
-		" AND `charid` IN ("
-		"  SELECT `bot_id`"
+		" AND `name` IN ("
+		"  SELECT `name`"
 		"  FROM `bot_data`"
 		"  WHERE `owner_id` = '%u'"
 		"  )",
@@ -2952,6 +2952,20 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 	return Bot::spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index];
 }
 
+uint16 BotDatabase::GetRaceClassBitmask(uint16 bot_race)
+{
+	std::string query = fmt::format(
+		"SELECT `classes` FROM `bot_create_combinations` WHERE `race` = {}",
+		bot_race
+	);
+	auto results = database.QueryDatabase(query);
+	uint16 classes = 0;
+	if (results.RowCount() == 1) {
+		auto row = results.begin();
+		classes = atoi(row[0]);
+	}
+	return classes;
+}
 
 /* fail::Bot functions   */
 const char* BotDatabase::fail::QueryNameAvailablity() { return "Failed to query name availability"; }

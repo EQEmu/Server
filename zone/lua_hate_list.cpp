@@ -20,22 +20,22 @@ void Lua_HateEntry::SetEnt(Lua_Mob e) {
 	self->entity_on_hatelist = e;
 }
 
-int Lua_HateEntry::GetDamage() {
+int64 Lua_HateEntry::GetDamage() {
 	Lua_Safe_Call_Int();
 	return self->hatelist_damage;
 }
 
-void Lua_HateEntry::SetDamage(int value) {
+void Lua_HateEntry::SetDamage(int64 value) {
 	Lua_Safe_Call_Void();
 	self->hatelist_damage = value;
 }
 
-int Lua_HateEntry::GetHate() {
+int64 Lua_HateEntry::GetHate() {
 	Lua_Safe_Call_Int();
 	return self->stored_hate_amount;
 }
 
-void Lua_HateEntry::SetHate(int value) {
+void Lua_HateEntry::SetHate(int64 value) {
 	Lua_Safe_Call_Void();
 	self->stored_hate_amount = value;
 }
@@ -51,19 +51,18 @@ void Lua_HateEntry::SetFrenzy(bool value) {
 }
 
 luabind::scope lua_register_hate_entry() {
-
 	return luabind::class_<Lua_HateEntry>("HateEntry")
-			.property("null", &Lua_HateEntry::Null)
-			.property("valid", &Lua_HateEntry::Valid)
-			.property("ent", &Lua_HateEntry::GetEnt, &Lua_HateEntry::SetEnt)
-			.property("damage", &Lua_HateEntry::GetDamage, &Lua_HateEntry::SetDamage)
-			.property("hate", &Lua_HateEntry::GetHate, &Lua_HateEntry::SetHate)
-			.property("frenzy", &Lua_HateEntry::GetFrenzy, &Lua_HateEntry::SetFrenzy);
+	.property("null", &Lua_HateEntry::Null)
+	.property("valid", &Lua_HateEntry::Valid)
+	.property("damage", &Lua_HateEntry::GetDamage, &Lua_HateEntry::SetDamage)
+	.property("ent", &Lua_HateEntry::GetEnt, &Lua_HateEntry::SetEnt)
+	.property("frenzy", &Lua_HateEntry::GetFrenzy, &Lua_HateEntry::SetFrenzy)
+	.property("hate", &Lua_HateEntry::GetHate, &Lua_HateEntry::SetHate);
 }
 
 luabind::scope lua_register_hate_list() {
 	return luabind::class_<Lua_HateList>("HateList")
-			.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator);
+	.def_readwrite("entries", &Lua_HateList::entries, luabind::return_stl_iterator);
 }
 
 #endif

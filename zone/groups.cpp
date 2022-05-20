@@ -295,7 +295,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				members[i]->CastToClient()->QueuePacket(outapp);
 
 				//put new member into existing group members' list(s)
-				strcpy(members[i]->CastToClient()->GetPP().groupMembers[this->GroupCount()-1], NewMemberName);
+				strcpy(members[i]->CastToClient()->GetPP().groupMembers[GroupCount()-1], NewMemberName);
 			}
 
 			//put existing group member(s) into the new member's list
@@ -586,7 +586,7 @@ void Group::SendGroupJoinOOZ(Mob* NewMember) {
 	{
 		return;
 	}
-	
+
 	if (!NewMember->HasGroup())
 	{
 		return;
@@ -686,7 +686,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	{
 		for(uint32 nl = 0; nl < MAX_GROUP_MEMBERS; nl++)
 		{
-			if(members[nl]) 
+			if(members[nl])
 			{
 				if (members[nl]->IsClient())
 				{
@@ -696,7 +696,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 			}
 		}
 	}
-	
+
 	if (!GetLeaderName())
 	{
 		DisbandGroup();
@@ -741,14 +741,14 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		if(oldmember->IsClient())
 			oldmember->CastToClient()->QueuePacket(outapp);
 	}
-	
+
 	safe_delete(outapp);
 
 	if(oldmember->IsClient())
 	{
 		database.SetGroupID(oldmember->GetCleanName(), 0, oldmember->CastToClient()->CharacterID(), false);
 	}
-	
+
 	if(oldmember->IsMerc())
 	{
 		Client* owner = oldmember->CastToMerc()->GetMercOwner();
@@ -824,7 +824,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 		if(members[z] == caster) {
 			caster->SpellOnTarget(spell_id, caster);
 #ifdef GROUP_BUFF_PETS
-			if(spells[spell_id].targettype != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
+			if(spells[spell_id].target_type != ST_GroupNoPets && caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
 				caster->SpellOnTarget(spell_id, caster->GetPet());
 #endif
 		}
@@ -835,7 +835,7 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 				members[z]->CalcSpellPowerDistanceMod(spell_id, distance);
 				caster->SpellOnTarget(spell_id, members[z]);
 #ifdef GROUP_BUFF_PETS
-				if(spells[spell_id].targettype != ST_GroupNoPets && members[z]->GetPet() && members[z]->HasPetAffinity() && !members[z]->GetPet()->IsCharmed())
+				if(spells[spell_id].target_type != ST_GroupNoPets && members[z]->GetPet() && members[z]->HasPetAffinity() && !members[z]->GetPet()->IsCharmed())
 					caster->SpellOnTarget(spell_id, members[z]->GetPet());
 #endif
 			} else
@@ -845,42 +845,6 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 
 	castspell = false;
 	disbandcheck = true;
-}
-
-// does the caster + group
-void Group::GroupBardPulse(Mob* caster, uint16 spell_id) {
-	uint32 z;
-	float range, distance;
-
-	if(!caster)
-		return;
-
-	castspell = true;
-	range = caster->GetAOERange(spell_id);
-
-	float range2 = range*range;
-
-	for(z=0; z < MAX_GROUP_MEMBERS; z++) {
-		if(members[z] == caster) {
-			caster->BardPulse(spell_id, caster);
-#ifdef GROUP_BUFF_PETS
-			if(caster->GetPet() && caster->HasPetAffinity() && !caster->GetPet()->IsCharmed())
-				caster->BardPulse(spell_id, caster->GetPet());
-#endif
-		}
-		else if(members[z] != nullptr)
-		{
-			distance = DistanceSquared(caster->GetPosition(), members[z]->GetPosition());
-			if(distance <= range2) {
-				members[z]->BardPulse(spell_id, caster);
-#ifdef GROUP_BUFF_PETS
-				if(members[z]->GetPet() && members[z]->HasPetAffinity() && !members[z]->GetPet()->IsCharmed())
-					members[z]->GetPet()->BardPulse(spell_id, caster);
-#endif
-			} else
-				LogSpells("Group bard pulse: [{}] is out of range [{}] at distance [{}] from [{}]", members[z]->GetName(), range, distance, caster->GetName());
-		}
-	}
 }
 
 bool Group::IsGroupMember(Mob* client)
@@ -976,7 +940,7 @@ void Group::DisbandGroup(bool joinraid) {
 			if (!joinraid)
 				members[i]->CastToClient()->LeaveGroupXTargets(this);
 		}
-		
+
 		if (members[i]->IsMerc())
 		{
 			Client* owner = members[i]->CastToMerc()->GetMercOwner();
@@ -1253,7 +1217,7 @@ void Group::GroupMessageString(Mob* sender, uint32 type, uint32 string_id, const
 
 		if(members[i] == sender)
 			continue;
-			
+
 		if(!members[i]->IsClient())
 			continue;
 
@@ -1272,7 +1236,7 @@ void Client::LeaveGroup() {
 		{
 			MemberCount -= 1;
 		}
-		
+
 		if(MemberCount < 3)
 		{
 			g->DisbandGroup();
@@ -1345,7 +1309,7 @@ void Group::BalanceHP(int32 penalty, float range, Mob* caster, int32 limit)
 	if (!range)
 		range = 200;
 
-	int dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
+	int64 dmgtaken = 0, numMem = 0, dmgtaken_tmp = 0;
 
 	float distance;
 	float range2 = range*range;
@@ -2456,7 +2420,7 @@ bool Group::AmIPuller(const char *mob_name)
 {
 	if (!mob_name)
 		return false;
-	
+
 	return !((bool)PullerName.compare(mob_name));
 }
 

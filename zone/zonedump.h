@@ -35,9 +35,9 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 struct NPCType
 {
 	char	name[64];
-	char	lastname[70]; 
-	int32	current_hp;
-	int32	max_hp; 
+	char	lastname[70];
+	int64	current_hp;
+	int64	max_hp;
 	float	size;
 	float	runspeed;
 	uint8	gender;
@@ -60,7 +60,7 @@ struct NPCType
 	uint32	trap_template;
 	uint8	light;
 	uint32	AC;
-	uint32	Mana;	//not loaded from DB
+	uint64	Mana;	//not loaded from DB
 	uint32	ATK;	//not loaded from DB
 	uint32	STR;
 	uint32	STA;
@@ -104,12 +104,13 @@ struct NPCType
 	uint8	prim_melee_type;
 	uint8	sec_melee_type;
 	uint8	ranged_type;
-	int32	hp_regen;
-	int32	mana_regen;
+	int64	hp_regen;
+	int64	hp_regen_per_second;
+	int64	mana_regen;
 	int32	aggroradius; // added for AI improvement - neotokyo
 	int32	assistradius; // assist radius, defaults to aggroradis if not set
-	uint8	see_invis;			// See Invis flag added
-	bool	see_invis_undead;	// See Invis vs. Undead flag added
+	uint16	see_invis;			// See Invis flag added
+	uint16	see_invis_undead;	// See Invis vs. Undead flag added
 	bool	see_hide;
 	bool	see_improved_hide;
 	bool	qglobal;
@@ -122,7 +123,7 @@ struct NPCType
 	int		avoidance_rating;	// flat bonus before mods
 	bool	findable;		//can be found with find command
 	bool	trackable;
-	int16	slow_mitigation;	
+	int16	slow_mitigation;
 	uint8	maxlevel;
 	uint32	scalerate;
 	bool	private_corpse;
@@ -164,8 +165,8 @@ namespace player_lootitem {
 		uint32	aug_5;
 		uint32	aug_6;
 		int8	attuned;
-		uint8	min_level;		  // 
-		uint8	max_level;		  // 
+		uint8	min_level;		  //
+		uint8	max_level;		  //
 	};
 }
 
@@ -199,37 +200,6 @@ struct PlayerCorpse_Struct {
 	uint32 drakkin_details;
 	player_lootitem::ServerLootItem_Struct	items[0];
 	//std::list<player_lootitem::ServerLootItem_Struct*> items;
-};
-
-struct Door {
-	uint32	db_id;
-	uint8	door_id;
-	char	zone_name[32];
-	char	door_name[32];
-	float	pos_x;
-	float	pos_y;
-	float	pos_z;
-	float	heading;
-	int		incline;
-	uint8	opentype;
-	uint32	guild_id;
-	uint16	lock_pick;
-	uint32	keyitem;
-	uint8	nokeyring;
-	uint8	trigger_door;
-	uint8	trigger_type;
-	uint8	disable_timer;
-	uint32	door_param;
-	int		invert_state;
-	uint16	size;
-	char	dest_zone[16];
-	uint32	dest_instance_id;
-	float	dest_x;
-	float	dest_y;
-	float	dest_z;
-	float	dest_heading;
-	uint8	is_ldon_door;
-	uint32	client_version_mask;
 };
 
 #pragma pack()

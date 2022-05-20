@@ -178,7 +178,7 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
-	this->EVENT_ITEM_ScriptStopReturn();
+	EVENT_ITEM_ScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
 
@@ -186,25 +186,57 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// make sure the item exists
 	if(item == nullptr) {
-		Message(Chat::Red, "Item %u does not exist.", item_id);
-		LogInventory("Player [{}] on account [{}] attempted to create an item with an invalid id.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-			GetName(), account_name, item_id, aug1, aug2, aug3, aug4, aug5, aug6);
-
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Item {} does not exist.",
+				item_id
+			).c_str()
+		);
+		LogInventory(
+			"Player [{}] on account [{}] attempted to create an item with an invalid id.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+			GetName(),
+			account_name,
+			item_id,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 		return false;
 	}
 	// check that there is not a lore conflict between base item and existing inventory
 	else if(CheckLoreConflict(item)) {
 		// DuplicateLoreMessage(item_id);
-		Message(Chat::Red, "You already have a lore %s (%i) in your inventory.", item->Name, item_id);
-
+		Message(
+			Chat::Red,
+			fmt::format(
+				"You already have a lore {} ({}) in your inventory.",
+				database.CreateItemLink(item_id),
+				item_id
+			).c_str()
+		);
 		return false;
 	}
 	// check to make sure we are augmenting an augmentable item
 	else if (((!item->IsClassCommon()) || (item->AugType > 0)) && (aug1 | aug2 | aug3 | aug4 | aug5 | aug6)) {
 		Message(Chat::Red, "You can not augment an augment or a non-common class item.");
-		LogInventory("Player [{}] on account [{}] attempted to augment an augment or a non-common class item.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug5: [{}])\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
-
+		LogInventory(
+			"Player [{}] on account [{}] attempted to augment an augment or a non-common class item.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug5: [{}])\n",
+			GetName(),
+			account_name,
+			item->ID,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 		return false;
 	}
 
@@ -214,33 +246,49 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// check to make sure we are a GM if the item is GM-only
 	/*
-	else if(item->MinStatus && ((this->Admin() < item->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+	else if(item->MinStatus && ((Admin() < item->MinStatus) || (Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 		Message(Chat::Red, "You are not a GM or do not have the status to summon this item.");
-		LogInventory("Player [{}] on account [{}] attempted to create a GM-only item with a status of [{}].\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}], MinStatus: [{}])\n",
-			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
+		LogInventory("Player [{}] on account [{}] attempted to create a GM-only item with a status of [{}].\n"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}], MinStatus: [{}])\n",
+			GetName(), account_name, Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 		return false;
 	}
 	*/
 
 	uint32 augments[EQ::invaug::SOCKET_COUNT] = { aug1, aug2, aug3, aug4, aug5, aug6 };
-
-	uint32 classes	= item->Classes;
-	uint32 races	= item->Races;
-	uint32 slots	= item->Slots;
-
-	bool enforcewear	= RuleB(Inventory, EnforceAugmentWear);
-	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
-	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
-
+	uint32 classes = item->Classes;
+	uint32 races = item->Races;
+	uint32 slots = item->Slots;
+	bool enforce_wearable = RuleB(Inventory, EnforceAugmentWear);
+	bool enforce_restrictions = RuleB(Inventory, EnforceAugmentRestriction);
+	bool enforce_usable = RuleB(Inventory, EnforceAugmentUsability);
 	for (int iter = EQ::invaug::SOCKET_BEGIN; iter <= EQ::invaug::SOCKET_END; ++iter) {
+		int augment_slot = iter + 1;
 		const EQ::ItemData* augtest = database.GetItem(augments[iter]);
-
 		if(augtest == nullptr) {
 			if(augments[iter]) {
-				Message(Chat::Red, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
-				LogInventory("Player [{}] on account [{}] attempted to create an augment (Aug[{}]) with an invalid id.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-					GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"Augment {} in Augment Slot {} does not exist.",
+						augments[iter],
+						augment_slot
+					).c_str()
+				);
+				LogInventory(
+					"Player [{}] on account [{}] attempted to create an augment (Aug[{}]) with an invalid id.\n"
+					"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+					GetName(),
+					account_name,
+					augment_slot,
+					item->ID,
+					aug1,
+					aug2,
+					aug3,
+					aug4,
+					aug5,
+					aug6
+				);
 
 				return false;
 			}
@@ -249,15 +297,42 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			// check that there is not a lore conflict between augment and existing inventory
 			if(CheckLoreConflict(augtest)) {
 				// DuplicateLoreMessage(augtest->ID);
-				Message(Chat::Red, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"You already have a lore {} ({}) in your inventory.",
+						database.CreateItemLink(augtest->ID),
+						augtest->ID
+					).c_str()
+				);
 
 				return false;
 			}
 			// check that augment is an actual augment
 			else if(augtest->AugType == 0) {
-				Message(Chat::Red, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
-				LogInventory("Player [{}] on account [{}] attempted to use a non-augment item (Aug[{}]) as an augment.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5, aug6);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"{} ({}) in Augment Slot {} is not an actual augment.",
+						database.CreateItemLink(augtest->ID),
+						augtest->ID,
+						augment_slot
+					).c_str()
+				);
+				LogInventory(
+					"Player [{}] on account [{}] attempted to use a non-augment item (Augment Slot [{}]) as an augment.\n"
+					"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+					GetName(),
+					account_name,
+					item->ID,
+					augment_slot,
+					aug1,
+					aug2,
+					aug3,
+					aug4,
+					aug5,
+					aug6
+				);
 
 				return false;
 			}
@@ -266,235 +341,357 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 			// check to make sure we are a GM if the augment is GM-only
 			/*
-			else if(augtest->MinStatus && ((this->Admin() < augtest->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+			else if(augtest->MinStatus && ((Admin() < augtest->MinStatus) || (Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 				Message(Chat::Red, "You are not a GM or do not have the status to summon this augment.");
 				LogInventory("Player [{}] on account [{}] attempted to create a GM-only augment (Aug[{}]) with a status of [{}].\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], MinStatus: [{}])\n",
-					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
+					GetName(), account_name, augment_slot, Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 				return false;
 			}
 			*/
 
 			// check for augment type allowance
-			if(enforcewear) {
+			if(enforce_wearable) {
 				if ((item->AugSlotType[iter] == EQ::item::AugTypeNone) || !(((uint32)1 << (item->AugSlotType[iter] - 1)) & augtest->AugType)) {
-					Message(Chat::Red, "Augment %u (Aug%i) is not acceptable wear on Item %u.", augments[iter], iter + 1, item->ID);
-					LogInventory("Player [{}] on account [{}] attempted to augment an item with an unacceptable augment type (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"Augment {} ({}) in Augment Slot {} is not capable of being socketed in to {} ({}).",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot,
+							database.CreateItemLink(item->ID),
+							item->ID
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an item with an unacceptable augment type (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				if(item->AugSlotVisible[iter] == 0) {
-					Message(Chat::Red, "Item %u has not evolved enough to accept Augment %u (Aug%i).", item->ID, augments[iter], iter + 1);
-					LogInventory("Player [{}] on account [{}] attempted to augment an unevolved item with augment type (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) has not evolved enough to accept {} ({}) in Augment Slot {}.",
+							database.CreateItemLink(item->ID),
+							item->ID,
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an unevolved item with augment type (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 			}
 
 			// check for augment to item restriction
-			if(enforcerestr) {
-				bool restrictfail = false;
-				uint8 it = item->ItemType;
-
-				switch(augtest->AugRestrict) {
-				case EQ::item::AugRestrictionAny:
-					break;
-				case EQ::item::AugRestrictionArmor:
-					switch(it) {
-					case EQ::item::ItemTypeArmor:
+			if(enforce_restrictions) {
+				bool is_restricted = false;
+				uint8 item_type = item->ItemType;
+				switch (augtest->AugRestrict) {
+					case EQ::item::AugRestrictionAny:
 						break;
+					case EQ::item::AugRestrictionArmor:
+						switch (item_type) {
+							case EQ::item::ItemTypeArmor:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionWeapons:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemType1HPiercing:
+							case EQ::item::ItemTypeMartial:
+							case EQ::item::ItemType2HSlash:
+							case EQ::item::ItemType2HBlunt:
+							case EQ::item::ItemType2HPiercing:
+							case EQ::item::ItemTypeBow:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HWeapons:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemType1HPiercing:
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HWeapons:
+						switch (item_type) {
+							case EQ::item::ItemType2HSlash:
+							case EQ::item::ItemType2HBlunt:
+							case EQ::item::ItemType2HPiercing:
+							case EQ::item::ItemTypeBow:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HSlash:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HBlunt:
+						switch (item_type) {
+							case EQ::item::ItemType1HBlunt:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionPiercing:
+						switch (item_type) {
+							case EQ::item::ItemType1HPiercing:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionHandToHand:
+						switch (item_type) {
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HSlash:
+						switch (item_type) {
+							case EQ::item::ItemType2HSlash:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HBlunt:
+						switch (item_type) {
+							case EQ::item::ItemType2HBlunt:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HPierce:
+						switch (item_type) {
+							case EQ::item::ItemType2HPiercing:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionBows:
+						switch (item_type) {
+							case EQ::item::ItemTypeBow:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionShields:
+						switch (item_type) {
+							case EQ::item::ItemTypeShield:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HBluntOrHandToHand:
+							switch (item_type) {
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					// These 3 are in-work
+					case EQ::item::AugRestrictionUnknown1:
+					case EQ::item::AugRestrictionUnknown2:
+					case EQ::item::AugRestrictionUnknown3:
 					default:
-						restrictfail = true;
+						is_restricted = true;
 						break;
-					}
-					break;
-				case EQ::item::AugRestrictionWeapons:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemType1HPiercing:
-					case EQ::item::ItemTypeMartial:
-					case EQ::item::ItemType2HSlash:
-					case EQ::item::ItemType2HBlunt:
-					case EQ::item::ItemType2HPiercing:
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HWeapons:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemType1HPiercing:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HWeapons:
-					switch(it) {
-					case EQ::item::ItemType2HSlash:
-					case EQ::item::ItemType2HBlunt:
-					case EQ::item::ItemType2HPiercing:
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HSlash:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HBlunt:
-					switch(it) {
-					case EQ::item::ItemType1HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionPiercing:
-					switch(it) {
-					case EQ::item::ItemType1HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionHandToHand:
-					switch(it) {
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HSlash:
-					switch(it) {
-					case EQ::item::ItemType2HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HBlunt:
-					switch(it) {
-					case EQ::item::ItemType2HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HPierce:
-					switch(it) {
-					case EQ::item::ItemType2HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionBows:
-					switch(it) {
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionShields:
-					switch(it) {
-					case EQ::item::ItemTypeShield:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HBluntOrHandToHand:
-					switch(it) {
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				// These 3 are in-work
-				case EQ::item::AugRestrictionUnknown1:
-				case EQ::item::AugRestrictionUnknown2:
-				case EQ::item::AugRestrictionUnknown3:
-				default:
-					restrictfail = true;
-					break;
 				}
 
-				if(restrictfail) {
-					Message(Chat::Red, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], (iter + 1), item->ID);
-					LogInventory("Player [{}] on account [{}] attempted to augment an item with a restricted augment (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+				if(is_restricted) {
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} is restricted from being augmented in to {} ({}).",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot,
+							database.CreateItemLink(item->ID),
+							item->ID
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an item with a restricted augment (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 			}
 
-			if(enforceusable) {
+			if(enforce_usable) {
 				// check for class usability
 				if(item->Classes && !(classes &= augtest->Classes)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable by any class.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable by any class.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable by any class.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				// check for race usability
 				if(item->Races && !(races &= augtest->Races)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable by any race.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable by any race.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable by any race.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				// check for slot usability
 				if(item->Slots && !(slots &= augtest->Slots)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable in any slot.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable in any slot.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable in any slot.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
@@ -506,12 +703,11 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
 	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant
-	if(charges <= 0 && item->Stackable)
+	if(charges <= 0 && item->Stackable) {
 		charges = 1;
-
-	// if the charges is -1, then no charge value was passed in set to max charges
-	else if(charges == -1)
+	} else if(charges == -1) { // if the charges is -1, then no charge value was passed in set to max charges
 		charges = item->MaxCharges;
+	}
 
 	// in any other situation just use charges as passed
 
@@ -520,35 +716,67 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if(inst == nullptr) {
 		Message(Chat::Red, "An unknown server error has occurred and your item was not created.");
 		// this goes to logfile since this is a major error
-		LogError("Player [{}] on account [{}] encountered an unknown item creation error.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+		LogError(
+			"Player [{}] on account [{}] encountered an unknown item creation error.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+			GetName(),
+			account_name,
+			item->ID,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 
 		return false;
 	}
 
 	// add any validated augments
 	for (int iter = EQ::invaug::SOCKET_BEGIN; iter <= EQ::invaug::SOCKET_END; ++iter) {
-		if(augments[iter])
+		if(augments[iter]) {
 			inst->PutAugment(&database, iter, augments[iter]);
+		}
 	}
 
 	// attune item
-	if(attuned && inst->GetItem()->Attuneable)
+	if(attuned && inst->GetItem()->Attuneable) {
 		inst->SetAttuned(true);
+	}
 
 	inst->SetOrnamentIcon(ornament_icon);
 	inst->SetOrnamentationIDFile(ornament_idfile);
 	inst->SetOrnamentHeroModel(ornament_hero_model);
 
 	// check to see if item is usable in requested slot
-	if (enforceusable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
+	if (enforce_usable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
 		uint32 slottest = to_slot;
-
 		if(!(slots & ((uint32)1 << slottest))) {
-			Message(0, "This item is not equipable at slot %u - moving to cursor.", to_slot);
-			LogInventory("Player [{}] on account [{}] attempted to equip an item unusable in slot [{}] - moved to cursor.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-				GetName(), account_name, to_slot, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
-
+			Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) cannot be equipped in {} ({}), moving to cursor.",
+					database.CreateItemLink(item->ID),
+					item->ID,
+					EQ::invslot::GetInvPossessionsSlotName(to_slot),
+					to_slot
+				).c_str()
+			);
+			LogInventory(
+				"Player [{}] on account [{}] attempted to equip an item unusable in slot [{}] - moved to cursor.\n"
+				"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+				GetName(),
+				account_name,
+				to_slot,
+				item->ID,
+				aug1,
+				aug2,
+				aug3,
+				aug4,
+				aug5,
+				aug6
+			);
 			to_slot = EQ::invslot::slotCursor;
 		}
 	}
@@ -557,8 +785,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if (to_slot == EQ::invslot::slotCursor) {
 		PushItemOnCursor(*inst);
 		SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
-	}
-	else {
+	} else {
 		PutItemInInventory(to_slot, *inst, true);
 	}
 
@@ -566,8 +793,9 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// discover item and any augments
 	if((RuleB(Character, EnableDiscoveredItems)) && !GetGM()) {
-		if(!IsDiscovered(item_id))
+		if(!IsDiscovered(item_id)) {
 			DiscoverItem(item_id);
+		}
 		/*
 		// Augments should have been discovered prior to being placed on an item.
 		for (int iter = AUG_BEGIN; iter < EQ::constants::ITEM_COMMON_SIZE; ++iter) {
@@ -612,7 +840,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		}
 		invalid_drop = nullptr;
 
-		database.SetHackerFlag(this->AccountName(), this->GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
+		database.SetHackerFlag(AccountName(), GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
 		GetInv().DeleteItem(slot_id);
 		return;
 	}
@@ -686,12 +914,12 @@ void Client::DropItemQS(EQ::ItemInstance* inst, bool pickup) {
 		std::list<void*> event_details;
 		memset(&qs_audit, 0, sizeof(QSPlayerDropItem_Struct));
 
-		qs_audit.char_id = this->character_id;
+		qs_audit.char_id = character_id;
 		qs_audit.pickup = pickup;
-		qs_audit.zone_id = this->GetZoneID();
-		qs_audit.x = (int) this->GetX();
-		qs_audit.y = (int) this->GetY();
-		qs_audit.z = (int) this->GetZ();
+		qs_audit.zone_id = GetZoneID();
+		qs_audit.x = (int) GetX();
+		qs_audit.y = (int) GetY();
+		qs_audit.z = (int) GetZ();
 
 		if (inst) {
 			auto detail = new QSDropItems_Struct;
@@ -865,7 +1093,7 @@ void Client::SendCursorBuffer()
 }
 
 // Remove item from inventory
-void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_update, bool update_db) {
+void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_update, bool update_db) {
 	#if (EQDEBUG >= 5)
 		LogDebug("DeleteItemInInventory([{}], [{}], [{}])", slot_id, quantity, (client_update) ? "true":"false");
 	#endif
@@ -1020,10 +1248,10 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 
 	if (slot_id == EQ::invslot::slotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		return database.SaveCursor(this->CharacterID(), s, e);
+		return database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		return database.SaveInventory(this->CharacterID(), &inst, slot_id);
+		return database.SaveInventory(CharacterID(), &inst, slot_id);
 	}
 
 	CalcBonuses();
@@ -1039,11 +1267,11 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Ser
 	if (slot_id == EQ::invslot::slotCursor) {
 		m_inv.PushCursor(inst);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
 		m_inv.PutItem(slot_id, inst);
-		database.SaveInventory(this->CharacterID(), &inst, slot_id);
+		database.SaveInventory(CharacterID(), &inst, slot_id);
 	}
 
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
@@ -1101,7 +1329,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 	int16 i;
 	uint32 item_id = item->GetItem()->ID;
 	for (i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		EQ::ItemInstance* tmp_inst = m_inv.GetItem(i);
@@ -1115,7 +1343,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 		}
 	}
 	for (i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
@@ -1143,7 +1371,7 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 	// #1: Try to auto equip
 	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel <= level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != EQ::item::ItemTypeAugmentation) {
 		for (int16 i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++) {
-			if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
 
 			if (!m_inv[i]) {
@@ -1235,10 +1463,10 @@ void Client::MoveItemCharges(EQ::ItemInstance &from, int16 to_slot, uint8 type)
 		SendLootItemInPacket(tmp_inst, to_slot);
 		if (to_slot == EQ::invslot::slotCursor) {
 			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-			database.SaveCursor(this->CharacterID(), s, e);
+			database.SaveCursor(CharacterID(), s, e);
 		}
 		else {
-			database.SaveInventory(this->CharacterID(), tmp_inst, to_slot);
+			database.SaveInventory(CharacterID(), tmp_inst, to_slot);
 		}
 	}
 }
@@ -1477,12 +1705,12 @@ packet with the item number in it, but I cant seem to find it right now
 	safe_delete(outapp);
 	if (send_to_all==false)
 		return;
-	const char* charname = this->GetName();
+	const char* charname = GetName();
 	outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(itemlink)+14+strlen(charname));
 	char buffer3[150] = {0};
 	sprintf(buffer3,"%c%c%c%c%c%c%c%c%c%c%c%c%6s%c%s",0x00,0x00,0x00,0x00,0xD2,0x01,0x00,0x00,0x00,0x00,0x00,0x00,charname,0x00,itemlink);
 	memcpy(outapp->pBuffer,buffer3,outapp->size);
-	entity_list.QueueCloseClients(this->CastToMob(),outapp,true,200,0,false);
+	entity_list.QueueCloseClients(CastToMob(),outapp,true,200,0,false);
 	safe_delete(outapp);
 }
 
@@ -1673,9 +1901,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (dstbag)
 				dstbagid = dstbag->GetItem()->ID;
 		}
-		if (srcitemid==17899 || srcbagid==17899 || dstitemid==17899 || dstbagid==17899){
-			this->Trader_EndTrader();
-			this->Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
+		if ((srcbagid && srcbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (dstbagid && dstbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (srcitemid && src_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (dstitemid && dst_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)) {
+			Trader_EndTrader();
+			Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
 		}
 	}
 
@@ -1974,27 +2205,63 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		if (src_slot_id <= EQ::invslot::EQUIPMENT_END) {
 			if(src_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+					src_slot_id
+				);
+
+				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
 			}
 
 			if(dst_inst) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, dst_inst, nullptr, "", src_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+					src_slot_id
+				);
+
+				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
 			}
 		}
 
 		if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {
 			if(dst_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+					dst_slot_id
+				);
+
+				parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
 			}
 
 			if(src_inst) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
+
+				std::string export_string = fmt::format(
+					"{} {}",
+					src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+					dst_slot_id
+				);
+
+				parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
 			}
 		}
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);
-	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END && matslot != EQ::textures::armorHead) { // think this is to allow the client to update with /showhelm
+	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {// on Titanium and ROF2 /showhelm works even if sending helm slot
 		SendWearChange(matslot);
+	}
+	// This is part of a bug fix to ensure heroforge graphics display to other clients in zone.
+	if (queue_wearchange_slot >= 0) {
+		heroforge_wearchange_timer.Start(100);
 	}
 
 	// Step 7: Save change to the database
@@ -2023,6 +2290,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 8: Re-calc stats
 	CalcBonuses();
+	ApplyWeaponsStance();
 	return true;
 }
 
@@ -2227,11 +2495,11 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 			if (slot != INVALID_INDEX){
 				DeleteItemInInventory(slot,1,true);
 				uint8 slot2=SlotConvert(i);
-				EQ::ItemInstance* inst = this->m_inv.GetItem(slot2);
+				EQ::ItemInstance* inst = m_inv.GetItem(slot2);
 				if(inst){
 					uint32 armor_color = ((uint32)dye->Slot[i].Red << 16) | ((uint32)dye->Slot[i].Green << 8) | ((uint32)dye->Slot[i].Blue);
 					inst->SetColor(armor_color);
-					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
+					database.SaveCharacterMaterialColor(CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
 					if(dye->Slot[i].UseTint)
 						m_pp.item_tint.Slot[i].UseTint = 0xFF;
@@ -2257,11 +2525,11 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 
 void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
 	uint8 item_slot = SlotConvert(slot);
-	EQ::ItemInstance* item_instance = this->m_inv.GetItem(item_slot);
+	EQ::ItemInstance* item_instance = m_inv.GetItem(item_slot);
 	if (item_instance) {
 		uint32 armor_color = ((uint32)red << 16) | ((uint32)green << 8) | ((uint32)blue);
-		item_instance->SetColor(armor_color); 
-		database.SaveCharacterMaterialColor(this->CharacterID(), slot, armor_color);
+		item_instance->SetColor(armor_color);
+		database.SaveCharacterMaterialColor(CharacterID(), slot, armor_color);
 		database.SaveInventory(CharacterID(), item_instance, item_slot);
 		m_pp.item_tint.Slot[slot].UseTint = (use_tint ? 0xFF : 0x00);
 	}
@@ -2271,69 +2539,16 @@ void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint
 	SendWearChange(slot);
 }
 
-#if 0
-bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
-	const ItemData* TempItem = 0;
-	EQ::ItemInstance* ins;
-	int x;
-	for(x=EQ::legacy::POSSESSIONS_BEGIN; x <= EQ::legacy::POSSESSIONS_END; x++)
-	{
-		TempItem = 0;
-		ins = GetInv().GetItem(x);
-		if (ins)
-			TempItem = ins->GetItem();
-		if (TempItem && TempItem->ItemType == type)
-		{
-			if (ins->GetCharges() < amt)
-			{
-				amt -= ins->GetCharges();
-				DeleteItemInInventory(x,amt,true);
-			}
-			else
-			{
-				DeleteItemInInventory(x,amt,true);
-				amt = 0;
-			}
-			if (amt < 1)
-				return true;
-		}
-	}
-	for(x=EQ::legacy::GENERAL_BAGS_BEGIN; x <= EQ::legacy::GENERAL_BAGS_END; x++)
-	{
-		TempItem = 0;
-		ins = GetInv().GetItem(x);
-		if (ins)
-			TempItem = ins->GetItem();
-		if (TempItem && TempItem->ItemType == type)
-		{
-			if (ins->GetCharges() < amt)
-			{
-				amt -= ins->GetCharges();
-				DeleteItemInInventory(x,amt,true);
-			}
-			else
-			{
-				DeleteItemInInventory(x,amt,true);
-				amt = 0;
-			}
-			if (amt < 1)
-				return true;
-		}
-	}
-	return false;
-}
-#endif
-
-bool Client::DecreaseByID(uint32 type, uint8 amt) {
+bool Client::DecreaseByID(uint32 type, int16 quantity) {
 	const EQ::ItemData* TempItem = nullptr;
 	EQ::ItemInstance* ins = nullptr;
 	int x;
 	int num = 0;
 
 	for (x = EQ::invslot::POSSESSIONS_BEGIN; x <= EQ::invslot::POSSESSIONS_END; ++x) {
-		if (num >= amt)
+		if (num >= quantity)
 			break;
-		if (((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		TempItem = nullptr;
@@ -2345,7 +2560,7 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	}
 
 	for (x = EQ::invbag::GENERAL_BAGS_BEGIN; x <= EQ::invbag::GENERAL_BAGS_END; ++x) {
-		if (num >= amt)
+		if (num >= quantity)
 			break;
 		if ((((uint64)1 << (EQ::invslot::GENERAL_BEGIN + ((x - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT))) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
@@ -2359,7 +2574,7 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	}
 
 	for (x = EQ::invbag::CURSOR_BAG_BEGIN; x <= EQ::invbag::CURSOR_BAG_END; ++x) {
-		if (num >= amt)
+		if (num >= quantity)
 			break;
 
 		TempItem = nullptr;
@@ -2370,14 +2585,14 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 			num += ins->GetCharges();
 	}
 
-	if (num < amt)
+	if (num < quantity)
 		return false;
 
 
 	for (x = EQ::invslot::POSSESSIONS_BEGIN; x <= EQ::invslot::POSSESSIONS_END; ++x) {
-		if (amt < 1)
+		if (quantity < 1)
 			break;
-		if (((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		TempItem = nullptr;
@@ -2387,18 +2602,18 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 		if (TempItem && TempItem->ID != type)
 			continue;
 
-		if (ins->GetCharges() < amt) {
-			amt -= ins->GetCharges();
-			DeleteItemInInventory(x, amt, true);
+		if (ins->GetCharges() < quantity) {
+			quantity -= ins->GetCharges();
+			DeleteItemInInventory(x, quantity, true);
 		}
 		else {
-			DeleteItemInInventory(x, amt, true);
-			amt = 0;
+			DeleteItemInInventory(x, quantity, true);
+			quantity = 0;
 		}
 	}
 
 	for (x = EQ::invbag::GENERAL_BAGS_BEGIN; x <= EQ::invbag::GENERAL_BAGS_END; ++x) {
-		if (amt < 1)
+		if (quantity < 1)
 			break;
 		if ((((uint64)1 << (EQ::invslot::GENERAL_BEGIN + ((x - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT))) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
@@ -2410,18 +2625,18 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 		if (TempItem && TempItem->ID != type)
 			continue;
 
-		if (ins->GetCharges() < amt) {
-			amt -= ins->GetCharges();
-			DeleteItemInInventory(x, amt, true);
+		if (ins->GetCharges() < quantity) {
+			quantity -= ins->GetCharges();
+			DeleteItemInInventory(x, quantity, true);
 		}
 		else {
-			DeleteItemInInventory(x, amt, true);
-			amt = 0;
+			DeleteItemInInventory(x, quantity, true);
+			quantity = 0;
 		}
 	}
 
 	for (x = EQ::invbag::CURSOR_BAG_BEGIN; x <= EQ::invbag::CURSOR_BAG_END; ++x) {
-		if (amt < 1)
+		if (quantity < 1)
 			break;
 
 		TempItem = nullptr;
@@ -2431,13 +2646,13 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 		if (TempItem && TempItem->ID != type)
 			continue;
 
-		if (ins->GetCharges() < amt) {
-			amt -= ins->GetCharges();
-			DeleteItemInInventory(x, amt, true);
+		if (ins->GetCharges() < quantity) {
+			quantity -= ins->GetCharges();
+			DeleteItemInInventory(x, quantity, true);
 		}
 		else {
-			DeleteItemInInventory(x, amt, true);
-			amt = 0;
+			DeleteItemInInventory(x, quantity, true);
+			quantity = 0;
 		}
 	}
 
@@ -2517,8 +2732,8 @@ static bool CopyBagContents(EQ::ItemInstance* new_bag, const EQ::ItemInstance* o
 void Client::DisenchantSummonedBags(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
-			continue; // not useable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
+			continue; // not usable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
 
 		auto inst = m_inv[slot_id];
 		if (!inst) { continue; }
@@ -2621,7 +2836,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 			local.clear();
 
 			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-			database.SaveCursor(this->CharacterID(), s, e);
+			database.SaveCursor(CharacterID(), s, e);
 		}
 		else {
 			safe_delete(new_inst); // deletes disenchanted bag if not used
@@ -2634,7 +2849,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 void Client::RemoveNoRent(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2645,7 +2860,7 @@ void Client::RemoveNoRent(bool client_update)
 	}
 
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2674,7 +2889,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Bank slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Bank slots
 		}
 	}
 
@@ -2686,7 +2901,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Bank Container slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Bank Container slots
 		}
 	}
 
@@ -2694,7 +2909,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Shared Bank slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Shared Bank slots
 		}
 	}
 
@@ -2702,7 +2917,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Shared Bank Container slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Shared Bank Container slots
 		}
 	}
 
@@ -2729,7 +2944,7 @@ void Client::RemoveNoRent(bool client_update)
 		local.clear();
 
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 }
 
@@ -2737,7 +2952,7 @@ void Client::RemoveNoRent(bool client_update)
 void Client::RemoveDuplicateLore(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -2753,7 +2968,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 	}
 
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -2860,7 +3075,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		local_2.clear();
 
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 }
 
@@ -3059,7 +3274,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 	const EQ::ItemData *BaseItem = nullptr;
 	int16 WeaponSlot = 0;
 
-	database.DeleteCharacterBandolier(this->CharacterID(), bs->Number);
+	database.DeleteCharacterBandolier(CharacterID(), bs->Number);
 
 	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
@@ -3069,7 +3284,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 			LogInventory("Char: [{}] adding item [{}] to slot [{}]", GetName(),BaseItem->Name, WeaponSlot);
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = BaseItem->ID;
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = BaseItem->Icon;
-			database.SaveCharacterBandolier(this->CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
+			database.SaveCharacterBandolier(CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
 		}
 		else {
 			LogInventory("Char: [{}] no item in slot [{}]", GetName(), WeaponSlot);
@@ -3088,7 +3303,7 @@ void Client::RemoveBandolier(const EQApplicationPacket *app)
 		m_pp.bandoliers[bds->Number].Items[i].ID = 0;
 		m_pp.bandoliers[bds->Number].Items[i].Icon = 0;
 	}
-	database.DeleteCharacterBandolier(this->CharacterID(), bds->Number);
+	database.DeleteCharacterBandolier(CharacterID(), bds->Number);
 }
 
 void Client::SetBandolier(const EQApplicationPacket *app)
@@ -3117,8 +3332,11 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
 				if (m_inv.GetItem(EQ::invslot::slotCursor)) {
-					if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
-						m_inv.GetItem(EQ::invslot::slotCursor)->GetCharges() >= 1) { // '> 0' the same, but this matches Inventory::_HasItem conditional check
+					// Below used to check charges but for some reason
+					// m_inv.GetItem(EQ::invslot::slotCursor)->GetCharges()
+					// is returning 0.  We know it exists, so removed check.
+					// TODO: Why is 0 being returned for slotCursor.
+					if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 						slot = EQ::invslot::slotCursor;
 					}
 					else if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ItemClass == 1) {
@@ -3269,7 +3487,7 @@ bool Client::MoveItemToInventory(EQ::ItemInstance *ItemToReturn, bool UpdateClie
 	if(ItemToReturn->IsStackable()) {
 
 		for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::slotCursor; i++) { // changed slot max to 30 from 29. client will stack into slot 30 (bags too) before moving.
-			if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
 
 			EQ::ItemInstance* InvItem = m_inv.GetItem(i);
@@ -3330,7 +3548,7 @@ bool Client::MoveItemToInventory(EQ::ItemInstance *ItemToReturn, bool UpdateClie
 	// We have tried stacking items, now just try and find an empty slot.
 
 	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::slotCursor; i++) { // changed slot max to 30 from 29. client will move into slot 30 (bags too) before pushing onto cursor.
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		EQ::ItemInstance* InvItem = m_inv.GetItem(i);
@@ -3648,4 +3866,342 @@ std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string i
 		return inst->GetCustomData(identifier);
 	}
 	return "";
+}
+
+int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, const char* identifier) {
+	const EQ::ItemInstance* inst = database.CreateItem(item_id);
+	if (!inst)
+		return 0;
+
+	const EQ::ItemData* item = inst->GetItem();
+	if (!item)
+		return 0;
+
+	if (!identifier)
+		return 0;
+
+	int32 stat = 0;
+
+	std::string id = identifier;
+	for(uint32 i = 0; i < id.length(); ++i)	{
+		id[i] = tolower(id[i]);
+	}
+	if (id == "itemclass")
+		stat = int32(item->ItemClass);
+	if (id == "id")
+		stat = int32(item->ID);
+	if (id == "idfile")
+		stat = atoi(&item->IDFile[2]);
+	if (id == "weight")
+		stat = int32(item->Weight);
+	if (id == "norent")
+		stat = int32(item->NoRent);
+	if (id == "nodrop")
+		stat = int32(item->NoDrop);
+	if (id == "size")
+		stat = int32(item->Size);
+	if (id == "slots")
+		stat = int32(item->Slots);
+	if (id == "price")
+		stat = int32(item->Price);
+	if (id == "icon")
+		stat = int32(item->Icon);
+	if (id == "loregroup")
+		stat = int32(item->LoreGroup);
+	if (id == "loreflag")
+		stat = int32(item->LoreFlag);
+	if (id == "pendingloreflag")
+		stat = int32(item->PendingLoreFlag);
+	if (id == "artifactflag")
+		stat = int32(item->ArtifactFlag);
+	if (id == "summonedflag")
+		stat = int32(item->SummonedFlag);
+	if (id == "fvnodrop")
+		stat = int32(item->FVNoDrop);
+	if (id == "favor")
+		stat = int32(item->Favor);
+	if (id == "guildfavor")
+		stat = int32(item->GuildFavor);
+	if (id == "pointtype")
+		stat = int32(item->PointType);
+	if (id == "bagtype")
+		stat = int32(item->BagType);
+	if (id == "bagslots")
+		stat = int32(item->BagSlots);
+	if (id == "bagsize")
+		stat = int32(item->BagSize);
+	if (id == "bagwr")
+		stat = int32(item->BagWR);
+	if (id == "benefitflag")
+		stat = int32(item->BenefitFlag);
+	if (id == "tradeskills")
+		stat = int32(item->Tradeskills);
+	if (id == "cr")
+		stat = int32(item->CR);
+	if (id == "dr")
+		stat = int32(item->DR);
+	if (id == "pr")
+		stat = int32(item->PR);
+	if (id == "mr")
+		stat = int32(item->MR);
+	if (id == "fr")
+		stat = int32(item->FR);
+	if (id == "astr")
+		stat = int32(item->AStr);
+	if (id == "asta")
+		stat = int32(item->ASta);
+	if (id == "aagi")
+		stat = int32(item->AAgi);
+	if (id == "adex")
+		stat = int32(item->ADex);
+	if (id == "acha")
+		stat = int32(item->ACha);
+	if (id == "aint")
+		stat = int32(item->AInt);
+	if (id == "awis")
+		stat = int32(item->AWis);
+	if (id == "hp")
+		stat = int32(item->HP);
+	if (id == "mana")
+		stat = int32(item->Mana);
+	if (id == "ac")
+		stat = int32(item->AC);
+	if (id == "deity")
+		stat = int32(item->Deity);
+	if (id == "skillmodvalue")
+		stat = int32(item->SkillModValue);
+	if (id == "skillmodtype")
+		stat = int32(item->SkillModType);
+	if (id == "banedmgrace")
+		stat = int32(item->BaneDmgRace);
+	if (id == "banedmgamt")
+		stat = int32(item->BaneDmgAmt);
+	if (id == "banedmgbody")
+		stat = int32(item->BaneDmgBody);
+	if (id == "magic")
+		stat = int32(item->Magic);
+	if (id == "casttime_")
+		stat = int32(item->CastTime_);
+	if (id == "reqlevel")
+		stat = int32(item->ReqLevel);
+	if (id == "bardtype")
+		stat = int32(item->BardType);
+	if (id == "bardvalue")
+		stat = int32(item->BardValue);
+	if (id == "light")
+		stat = int32(item->Light);
+	if (id == "delay")
+		stat = int32(item->Delay);
+	if (id == "reclevel")
+		stat = int32(item->RecLevel);
+	if (id == "recskill")
+		stat = int32(item->RecSkill);
+	if (id == "elemdmgtype")
+		stat = int32(item->ElemDmgType);
+	if (id == "elemdmgamt")
+		stat = int32(item->ElemDmgAmt);
+	if (id == "range")
+		stat = int32(item->Range);
+	if (id == "damage")
+		stat = int32(item->Damage);
+	if (id == "color")
+		stat = int32(item->Color);
+	if (id == "classes")
+		stat = int32(item->Classes);
+	if (id == "races")
+		stat = int32(item->Races);
+	if (id == "maxcharges")
+		stat = int32(item->MaxCharges);
+	if (id == "itemtype")
+		stat = int32(item->ItemType);
+	if (id == "material")
+		stat = int32(item->Material);
+	if (id == "casttime")
+		stat = int32(item->CastTime);
+	if (id == "elitematerial")
+		stat = int32(item->EliteMaterial);
+	if (id == "herosforgemodel")
+		stat = int32(item->HerosForgeModel);
+	if (id == "procrate")
+		stat = int32(item->ProcRate);
+	if (id == "combateffects")
+		stat = int32(item->CombatEffects);
+	if (id == "shielding")
+		stat = int32(item->Shielding);
+	if (id == "stunresist")
+		stat = int32(item->StunResist);
+	if (id == "strikethrough")
+		stat = int32(item->StrikeThrough);
+	if (id == "extradmgskill")
+		stat = int32(item->ExtraDmgSkill);
+	if (id == "extradmgamt")
+		stat = int32(item->ExtraDmgAmt);
+	if (id == "spellshield")
+		stat = int32(item->SpellShield);
+	if (id == "avoidance")
+		stat = int32(item->Avoidance);
+	if (id == "accuracy")
+		stat = int32(item->Accuracy);
+	if (id == "charmfileid")
+		stat = int32(item->CharmFileID);
+	if (id == "factionmod1")
+		stat = int32(item->FactionMod1);
+	if (id == "factionmod2")
+		stat = int32(item->FactionMod2);
+	if (id == "factionmod3")
+		stat = int32(item->FactionMod3);
+	if (id == "factionmod4")
+		stat = int32(item->FactionMod4);
+	if (id == "factionamt1")
+		stat = int32(item->FactionAmt1);
+	if (id == "factionamt2")
+		stat = int32(item->FactionAmt2);
+	if (id == "factionamt3")
+		stat = int32(item->FactionAmt3);
+	if (id == "factionamt4")
+		stat = int32(item->FactionAmt4);
+	if (id == "augtype")
+		stat = int32(item->AugType);
+	if (id == "ldontheme")
+		stat = int32(item->LDoNTheme);
+	if (id == "ldonprice")
+		stat = int32(item->LDoNPrice);
+	if (id == "ldonsold")
+		stat = int32(item->LDoNSold);
+	if (id == "banedmgraceamt")
+		stat = int32(item->BaneDmgRaceAmt);
+	if (id == "augrestrict")
+		stat = int32(item->AugRestrict);
+	if (id == "endur")
+		stat = int32(item->Endur);
+	if (id == "dotshielding")
+		stat = int32(item->DotShielding);
+	if (id == "attack")
+		stat = int32(item->Attack);
+	if (id == "regen")
+		stat = int32(item->Regen);
+	if (id == "manaregen")
+		stat = int32(item->ManaRegen);
+	if (id == "enduranceregen")
+		stat = int32(item->EnduranceRegen);
+	if (id == "haste")
+		stat = int32(item->Haste);
+	if (id == "damageshield")
+		stat = int32(item->DamageShield);
+	if (id == "recastdelay")
+		stat = int32(item->RecastDelay);
+	if (id == "recasttype")
+		stat = int32(item->RecastType);
+	if (id == "augdistiller")
+		stat = int32(item->AugDistiller);
+	if (id == "attuneable")
+		stat = int32(item->Attuneable);
+	if (id == "nopet")
+		stat = int32(item->NoPet);
+	if (id == "potionbelt")
+		stat = int32(item->PotionBelt);
+	if (id == "stackable")
+		stat = int32(item->Stackable);
+	if (id == "notransfer")
+		stat = int32(item->NoTransfer);
+	if (id == "questitemflag")
+		stat = int32(item->QuestItemFlag);
+	if (id == "stacksize")
+		stat = int32(item->StackSize);
+	if (id == "potionbeltslots")
+		stat = int32(item->PotionBeltSlots);
+	if (id == "book")
+		stat = int32(item->Book);
+	if (id == "booktype")
+		stat = int32(item->BookType);
+	if (id == "svcorruption")
+		stat = int32(item->SVCorruption);
+	if (id == "purity")
+		stat = int32(item->Purity);
+	if (id == "backstabdmg")
+		stat = int32(item->BackstabDmg);
+	if (id == "dsmitigation")
+		stat = int32(item->DSMitigation);
+	if (id == "heroicstr")
+		stat = int32(item->HeroicStr);
+	if (id == "heroicint")
+		stat = int32(item->HeroicInt);
+	if (id == "heroicwis")
+		stat = int32(item->HeroicWis);
+	if (id == "heroicagi")
+		stat = int32(item->HeroicAgi);
+	if (id == "heroicdex")
+		stat = int32(item->HeroicDex);
+	if (id == "heroicsta")
+		stat = int32(item->HeroicSta);
+	if (id == "heroiccha")
+		stat = int32(item->HeroicCha);
+	if (id == "heroicmr")
+		stat = int32(item->HeroicMR);
+	if (id == "heroicfr")
+		stat = int32(item->HeroicFR);
+	if (id == "heroiccr")
+		stat = int32(item->HeroicCR);
+	if (id == "heroicdr")
+		stat = int32(item->HeroicDR);
+	if (id == "heroicpr")
+		stat = int32(item->HeroicPR);
+	if (id == "heroicsvcorrup")
+		stat = int32(item->HeroicSVCorrup);
+	if (id == "healamt")
+		stat = int32(item->HealAmt);
+	if (id == "spelldmg")
+		stat = int32(item->SpellDmg);
+	if (id == "ldonsellbackrate")
+		stat = int32(item->LDoNSellBackRate);
+	if (id == "scriptfileid")
+		stat = int32(item->ScriptFileID);
+	if (id == "expendablearrow")
+		stat = int32(item->ExpendableArrow);
+	if (id == "clairvoyance")
+		stat = int32(item->Clairvoyance);
+	// Begin Effects
+	if (id == "clickeffect")
+		stat = int32(item->Click.Effect);
+	if (id == "clicktype")
+		stat = int32(item->Click.Type);
+	if (id == "clicklevel")
+		stat = int32(item->Click.Level);
+	if (id == "clicklevel2")
+		stat = int32(item->Click.Level2);
+	if (id == "proceffect")
+		stat = int32(item->Proc.Effect);
+	if (id == "proctype")
+		stat = int32(item->Proc.Type);
+	if (id == "proclevel")
+		stat = int32(item->Proc.Level);
+	if (id == "proclevel2")
+		stat = int32(item->Proc.Level2);
+	if (id == "worneffect")
+		stat = int32(item->Worn.Effect);
+	if (id == "worntype")
+		stat = int32(item->Worn.Type);
+	if (id == "wornlevel")
+		stat = int32(item->Worn.Level);
+	if (id == "wornlevel2")
+		stat = int32(item->Worn.Level2);
+	if (id == "focuseffect")
+		stat = int32(item->Focus.Effect);
+	if (id == "focustype")
+		stat = int32(item->Focus.Type);
+	if (id == "focuslevel")
+		stat = int32(item->Focus.Level);
+	if (id == "focuslevel2")
+		stat = int32(item->Focus.Level2);
+	if (id == "scrolleffect")
+		stat = int32(item->Scroll.Effect);
+	if (id == "scrolltype")
+		stat = int32(item->Scroll.Type);
+	if (id == "scrolllevel")
+		stat = int32(item->Scroll.Level);
+	if (id == "scrolllevel2")
+		stat = int32(item->Scroll.Level2);
+
+	safe_delete(inst);
+	return stat;
 }

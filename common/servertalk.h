@@ -6,7 +6,10 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/net/packet.h"
 #include <cereal/cereal.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/chrono.hpp>
 #include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 
 #define SERVER_TIMEOUT	45000	// how often keepalive gets sent
 #define INTERSERVER_TIMER					10000
@@ -80,17 +83,15 @@
 #define ServerOP_UpdateSpawn		0x003f
 #define ServerOP_SpawnStatusChange	0x0040
 #define ServerOP_DropClient         0x0041	// DropClient
-#define ServerOP_ReloadTasks		0x0060
-#define ServerOP_DepopAllPlayersCorpses	0x0061
-#define ServerOP_ReloadTitles		0x0062
-#define ServerOP_QGlobalUpdate		0x0063
-#define ServerOP_QGlobalDelete		0x0064
-#define ServerOP_DepopPlayerCorpse	0x0065
-#define ServerOP_RequestTellQueue	0x0066 // client asks for it's tell queues
-#define ServerOP_ChangeSharedMem	0x0067
-#define	ServerOP_WebInterfaceEvent  0x0068
-#define ServerOP_WebInterfaceSubscribe 0x0069
-#define ServerOP_WebInterfaceUnsubscribe 0x0070
+#define ServerOP_DepopAllPlayersCorpses	0x0060
+#define ServerOP_QGlobalUpdate		0x0061
+#define ServerOP_QGlobalDelete		0x0062
+#define ServerOP_DepopPlayerCorpse	0x0063
+#define ServerOP_RequestTellQueue	0x0064 // client asks for it's tell queues
+#define ServerOP_ChangeSharedMem	0x0065
+#define ServerOP_WebInterfaceEvent  0x0066
+#define ServerOP_WebInterfaceSubscribe 0x0067
+#define ServerOP_WebInterfaceUnsubscribe 0x0068
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -141,33 +142,33 @@
 #define ServerOP_LFPMatches			0x0214
 #define ServerOP_ClientVersionSummary 0x0215
 
+// expedition
 #define ServerOP_ExpeditionCreate             0x0400
-#define ServerOP_ExpeditionDeleted            0x0401
-#define ServerOP_ExpeditionLeaderChanged      0x0402
 #define ServerOP_ExpeditionLockout            0x0403
-#define ServerOP_ExpeditionMemberChange       0x0404
-#define ServerOP_ExpeditionMemberSwap         0x0405
-#define ServerOP_ExpeditionMemberStatus       0x0406
-#define ServerOP_ExpeditionGetOnlineMembers   0x0407
 #define ServerOP_ExpeditionDzAddPlayer        0x0408
 #define ServerOP_ExpeditionDzMakeLeader       0x0409
-#define ServerOP_ExpeditionDzCompass          0x040a
-#define ServerOP_ExpeditionDzSafeReturn       0x040b
-#define ServerOP_ExpeditionDzZoneIn           0x040c
 #define ServerOP_ExpeditionCharacterLockout   0x040d
 #define ServerOP_ExpeditionSaveInvite         0x040e
 #define ServerOP_ExpeditionRequestInvite      0x040f
 #define ServerOP_ExpeditionReplayOnJoin       0x0410
 #define ServerOP_ExpeditionLockState          0x0411
-#define ServerOP_ExpeditionMembersRemoved     0x0412
-#define ServerOP_ExpeditionDzDuration         0x0413
 #define ServerOP_ExpeditionLockoutDuration    0x0414
-#define ServerOP_ExpeditionSecondsRemaining   0x0415
-#define ServerOP_ExpeditionExpireWarning      0x0416
-#define ServerOP_ExpeditionChooseNewLeader    0x0417
 
-#define ServerOP_DzCharacterChange            0x0450
-#define ServerOP_DzRemoveAllCharacters        0x0451
+// dz
+#define ServerOP_DzAddRemoveMember            0x0450
+#define ServerOP_DzRemoveAllMembers           0x0451
+#define ServerOP_DzSetSecondsRemaining        0x0452
+#define ServerOP_DzDurationUpdate             0x0453
+#define ServerOP_DzSetCompass                 0x0454
+#define ServerOP_DzSetSafeReturn              0x0455
+#define ServerOP_DzSetZoneIn                  0x0456
+#define ServerOP_DzSwapMembers                0x0457
+#define ServerOP_DzGetMemberStatuses          0x0458
+#define ServerOP_DzUpdateMemberStatus         0x0459
+#define ServerOP_DzLeaderChanged              0x045a
+#define ServerOP_DzExpireWarning              0x045b
+#define ServerOP_DzCreated                    0x045c
+#define ServerOP_DzDeleted                    0x045d
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -210,102 +211,57 @@
 #define ServerOP_LauncherZoneStatus		0x3002
 #define ServerOP_DoZoneCommand		0x3003
 
-#define ServerOP_UCSMessage		0x4000
-#define ServerOP_UCSMailMessage 0x4001
-#define ServerOP_ReloadRules	0x4002
-#define ServerOP_ReloadRulesWorld	0x4003
-#define ServerOP_CameraShake	0x4004
-#define ServerOP_QueryServGeneric	0x4005
-#define ServerOP_ReloadWorld 0x4006
-#define ServerOP_ReloadLogs 0x4007
-#define ServerOP_ReloadPerlExportSettings	0x4008
-#define ServerOP_UCSServerStatusRequest		0x4009
-#define ServerOP_UCSServerStatusReply		0x4010
-#define ServerOP_HotReloadQuests 0x4011
+#define ServerOP_CameraShake 0x4000
+#define ServerOP_HotReloadQuests 0x4001
+#define ServerOP_QueryServGeneric 0x4002
+#define ServerOP_UCSMailMessage 0x4003
+#define ServerOP_UCSMessage 0x4004
+#define ServerOP_UCSServerStatusReply 0x4005
+#define ServerOP_UCSServerStatusRequest 0x4006
+#define ServerOP_UpdateSchedulerEvents 0x4007
 
-#define ServerOP_CZCastSpellPlayer 0x4500
-#define ServerOP_CZCastSpellGroup 0x4501
-#define ServerOP_CZCastSpellRaid 0x4502
-#define ServerOP_CZCastSpellGuild 0x4503
-#define ServerOP_CZMarqueePlayer 0x4504
-#define ServerOP_CZMarqueeGroup 0x4505
-#define ServerOP_CZMarqueeRaid 0x4506
-#define ServerOP_CZMarqueeGuild 0x4507
-#define ServerOP_CZMessagePlayer 0x4508
-#define ServerOP_CZMessageGroup 0x4509
-#define ServerOP_CZMessageRaid 0x4510
-#define ServerOP_CZMessageGuild 0x4511
-#define ServerOP_CZMovePlayer 0x4512
-#define ServerOP_CZMoveGroup 0x4513
-#define ServerOP_CZMoveRaid 0x4514
-#define ServerOP_CZMoveGuild 0x4515
-#define ServerOP_CZMoveInstancePlayer 0x4516
-#define ServerOP_CZMoveInstanceGroup 0x4517
-#define ServerOP_CZMoveInstanceRaid 0x4518
-#define ServerOP_CZMoveInstanceGuild 0x4519
-#define ServerOP_CZRemoveSpellPlayer 0x4520
-#define ServerOP_CZRemoveSpellGroup 0x4521
-#define ServerOP_CZRemoveSpellRaid 0x4522
-#define ServerOP_CZRemoveSpellGuild 0x4523
-#define ServerOP_CZSetEntityVariableByClientName 0x4524
-#define ServerOP_CZSetEntityVariableByNPCTypeID 0x4525
-#define ServerOP_CZSetEntityVariableByGroupID 0x4526
-#define ServerOP_CZSetEntityVariableByRaidID 0x4527
-#define ServerOP_CZSetEntityVariableByGuildID 0x4528
-#define ServerOP_CZSignalClient 0x4529
-#define ServerOP_CZSignalClientByName 0x4530
-#define ServerOP_CZSignalNPC 0x4531
-#define ServerOP_CZSignalGroup 0x4532
-#define ServerOP_CZSignalRaid 0x4533
-#define ServerOP_CZSignalGuild 0x4534
-#define ServerOP_CZTaskActivityResetPlayer 0x4535
-#define ServerOP_CZTaskActivityResetGroup 0x4536
-#define ServerOP_CZTaskActivityResetRaid 0x4537
-#define ServerOP_CZTaskActivityResetGuild 0x4538
-#define ServerOP_CZTaskActivityUpdatePlayer 0x4539
-#define ServerOP_CZTaskActivityUpdateGroup 0x4540
-#define ServerOP_CZTaskActivityUpdateRaid 0x4541
-#define ServerOP_CZTaskActivityUpdateGuild 0x4542
-#define ServerOP_CZTaskAssignPlayer 0x4543
-#define ServerOP_CZTaskAssignGroup 0x4544
-#define ServerOP_CZTaskAssignRaid 0x4545
-#define ServerOP_CZTaskAssignGuild 0x4546
-#define ServerOP_CZTaskDisablePlayer 0x4547
-#define ServerOP_CZTaskDisableGroup 0x4548
-#define ServerOP_CZTaskDisableRaid 0x4549
-#define ServerOP_CZTaskDisableGuild 0x4550
-#define ServerOP_CZTaskEnablePlayer 0x4551
-#define ServerOP_CZTaskEnableGroup 0x4552
-#define ServerOP_CZTaskEnableRaid 0x4553
-#define ServerOP_CZTaskEnableGuild 0x4554
-#define ServerOP_CZTaskFailPlayer 0x4555
-#define ServerOP_CZTaskFailGroup 0x4556
-#define ServerOP_CZTaskFailRaid 0x4557
-#define ServerOP_CZTaskFailGuild 0x4558
-#define ServerOP_CZTaskRemovePlayer 0x4559
-#define ServerOP_CZTaskRemoveGroup 0x4560
-#define ServerOP_CZTaskRemoveRaid 0x4561
-#define ServerOP_CZTaskRemoveGuild 0x4562
-#define ServerOP_CZClientMessageString 0x4563
+#define ServerOP_ReloadAAData 0x4100
+#define ServerOP_ReloadAlternateCurrencies 0x4101
+#define ServerOP_ReloadBlockedSpells 0x4102
+#define ServerOP_ReloadContentFlags 0x4103
+#define ServerOP_ReloadDoors 0x4104
+#define ServerOP_ReloadGroundSpawns 0x4105
+#define ServerOP_ReloadLevelEXPMods 0x4106
+#define ServerOP_ReloadLogs 0x4107
+#define ServerOP_ReloadMerchants 0x4108
+#define ServerOP_ReloadNPCEmotes 0x4109
+#define ServerOP_ReloadObjects 0x4110
+#define ServerOP_ReloadPerlExportSettings 0x4111
+#define ServerOP_ReloadRules 0x4112
+#define ServerOP_ReloadStaticZoneData 0x4113
+#define ServerOP_ReloadTasks 0x4114
+#define ServerOP_ReloadTitles 0x4115
+#define ServerOP_ReloadTraps 0x4116
+#define ServerOP_ReloadVariables 0x4117
+#define ServerOP_ReloadVeteranRewards 0x4118
+#define ServerOP_ReloadWorld 0x4119
+#define ServerOP_ReloadZonePoints 0x4120
 
-#define ServerOP_WWAssignTask 0x4750
-#define ServerOP_WWCastSpell 0x4751
-#define ServerOP_WWCompleteActivity 0x4752
-#define ServerOP_WWDisableTask 0x4753
-#define ServerOP_WWEnableTask 0x4754
-#define ServerOP_WWFailTask 0x4755
-#define ServerOP_WWMarquee 0x4756
-#define ServerOP_WWMessage 0x4757
-#define ServerOP_WWMove 0x4758
-#define ServerOP_WWMoveInstance 0x4759
-#define ServerOP_WWRemoveSpell 0x4760
-#define ServerOP_WWRemoveTask 0x4761
-#define ServerOP_WWResetActivity 0x4762
-#define ServerOP_WWSetEntityVariableClient 0x4763
-#define ServerOP_WWSetEntityVariableNPC 0x4764
-#define ServerOP_WWSignalClient 0x4765
-#define ServerOP_WWSignalNPC 0x4766
-#define ServerOP_WWUpdateActivity 0x4767
+#define ServerOP_CZDialogueWindow 0x4500
+#define ServerOP_CZLDoNUpdate 0x4501
+#define ServerOP_CZMarquee 0x4502
+#define ServerOP_CZMessage 0x4503
+#define ServerOP_CZMove 0x4504
+#define ServerOP_CZSetEntityVariable 0x4505
+#define ServerOP_CZSignal 0x4506
+#define ServerOP_CZSpell 0x4507
+#define ServerOP_CZTaskUpdate 0x4508
+#define ServerOP_CZClientMessageString 0x4509
+
+#define ServerOP_WWDialogueWindow 0x4750
+#define ServerOP_WWLDoNUpdate 0x4751
+#define ServerOP_WWMarquee 0x4752
+#define ServerOP_WWMessage 0x4753
+#define ServerOP_WWMove 0x4754
+#define ServerOP_WWSetEntityVariable 0x4755
+#define ServerOP_WWSignal 0x4756
+#define ServerOP_WWSpell 0x4757
+#define ServerOP_WWTaskUpdate 0x4758
 
 /**
  * QueryServer
@@ -319,8 +275,84 @@
 #define ServerOP_QSSendQuery 0x5006
 #define ServerOP_QSPlayerDropItem 0x5007
 
+enum {
+	CZUpdateType_Character,
+	CZUpdateType_Group,
+	CZUpdateType_Raid,
+	CZUpdateType_Guild,
+	CZUpdateType_Expedition,
+	CZUpdateType_ClientName,
+	CZUpdateType_NPC
+};
+
+enum {
+	CZLDoNUpdateSubtype_AddLoss,
+	CZLDoNUpdateSubtype_AddPoints,
+	CZLDoNUpdateSubtype_AddWin,
+	CZLDoNUpdateSubtype_RemoveLoss,
+	CZLDoNUpdateSubtype_RemoveWin,
+};
+
+enum {
+	CZMoveUpdateSubtype_MoveZone,
+	CZMoveUpdateSubtype_MoveZoneInstance
+};
+
+enum {
+	CZSpellUpdateSubtype_Cast,
+	CZSpellUpdateSubtype_Remove
+};
+
+enum {
+	CZTaskUpdateSubtype_ActivityReset,
+	CZTaskUpdateSubtype_ActivityUpdate,
+	CZTaskUpdateSubtype_AssignTask,
+	CZTaskUpdateSubtype_DisableTask,
+	CZTaskUpdateSubtype_EnableTask,
+	CZTaskUpdateSubtype_FailTask,
+	CZTaskUpdateSubtype_RemoveTask
+};
+
+enum {
+	WWLDoNUpdateType_AddLoss,
+	WWLDoNUpdateType_AddPoints,
+	WWLDoNUpdateType_AddWin,
+	WWLDoNUpdateType_RemoveLoss,
+	WWLDoNUpdateType_RemoveWin
+};
+
+enum {
+	WWMoveUpdateType_MoveZone,
+	WWMoveUpdateType_MoveZoneInstance
+};
+
+enum {
+	WWSetEntityVariableUpdateType_Character,
+	WWSetEntityVariableUpdateType_NPC
+};
+
+enum {
+	WWSignalUpdateType_Character,
+	WWSignalUpdateType_NPC
+};
+
+enum {
+	WWSpellUpdateType_Cast,
+	WWSpellUpdateType_Remove
+};
+
+enum {
+	WWTaskUpdateType_ActivityReset,
+	WWTaskUpdateType_ActivityUpdate,
+	WWTaskUpdateType_AssignTask,
+	WWTaskUpdateType_DisableTask,
+	WWTaskUpdateType_EnableTask,
+	WWTaskUpdateType_FailTask,
+	WWTaskUpdateType_RemoveTask
+};
+
 /* Query Serv Generic Packet Flag/Type Enumeration */
-enum { QSG_LFGuild = 0 }; 
+enum { QSG_LFGuild = 0 };
 enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_RequestPlayerInfo, QSG_LFGuild_UpdateGuildInfo, QSG_LFGuild_GuildMatches,
 	QSG_LFGuild_RequestGuildInfo };
 
@@ -380,7 +412,10 @@ public:
 	}
 
 	void WriteUInt8(uint8 value) { *(uint8 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint8); }
+	void WriteInt8(uint8_t value) { *(uint8_t *)(pBuffer + _wpos) = value; _wpos += sizeof(uint8_t); }
 	void WriteUInt32(uint32 value) { *(uint32 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint32); }
+	void WriteInt32(int32_t value) { *(int32_t *)(pBuffer + _wpos) = value; _wpos += sizeof(int32_t); }
+
 	void WriteString(const char * str) { uint32 len = static_cast<uint32>(strlen(str)) + 1; memcpy(pBuffer + _wpos, str, len); _wpos += len; }
 
 	uint8 ReadUInt8() { uint8 value = *(uint8 *)(pBuffer + _rpos); _rpos += sizeof(uint8); return value; }
@@ -984,8 +1019,8 @@ struct ServerOP_Consent_Struct {
 };
 
 struct ReloadTasks_Struct {
-	uint32 Command;
-	uint32 Parameter;
+	uint8 reload_type;
+	uint32 task_id;
 };
 
 struct ServerDepopAllPlayersCorpses_Struct
@@ -1418,481 +1453,107 @@ struct QSGeneralQuery_Struct {
 	char QueryString[0];
 };
 
-struct CZCastSpellPlayer_Struct {
-	int character_id;
-	uint32 spell_id;
-};
-
-struct CZCastSpellGroup_Struct {
-	int group_id;
-	uint32 spell_id;
-};
-
-struct CZCastSpellRaid_Struct {
-	int raid_id;
-	uint32 spell_id;
-};
-
-struct CZCastSpellGuild_Struct {
-	int guild_id;
-	uint32 spell_id;
-};
-
-struct CZClientSignal_Struct {
-	int character_id;
-	uint32 signal;
-};
-
-struct CZGroupSignal_Struct {
-	int group_id;
-	uint32 signal;
-};
-
-struct CZRaidSignal_Struct {
-	int raid_id;
-	uint32 signal;
-};
-
-struct CZGuildSignal_Struct {
-	int guild_id;
-	uint32 signal;
-};
-
-struct CZNPCSignal_Struct {
-	uint32 npctype_id;
-	uint32 signal;
-};
-
 struct CZClientMessageString_Struct {
 	uint32 string_id;
 	uint16 chat_type;
-	char   character_name[64];
+	char   client_name[64];
 	uint32 args_size;
 	char   args[1]; // null delimited
 };
 
-struct CZClientSignalByName_Struct {
-	char character_name[64];
+struct CZDialogueWindow_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	char message[4096];
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZLDoNUpdate_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Loss, 1 - Points, 2 - Win
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint32 theme_id;
+	int points; // Only used in Points Subtype, else 1
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZMarquee_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint32 type;
+	uint32 priority;
+	uint32 fade_in;
+	uint32 fade_out;
+	uint32 duration;
+	char message[512];
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZMessage_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	int update_identifier; // Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint32 type;
+	char message[512];
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZMove_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Move Zone, 1 - Move Zone Instance
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint16 instance_id; // Only used by Move Zone Instance, else 0
+	char zone_short_name[32]; // Only by with Move Zone, else empty
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZSetEntityVariable_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name, 6 - NPC
+	int update_identifier; // Group ID, Raid ID, Guild ID, Expedition ID, or NPC ID based on update type, 0 for Character Name
+	char variable_name[256];
+	char variable_value[256];
+	char client_name[64]; // Only used by Character Type, else empty
+};
+
+struct CZSignal_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name, 6 - NPC
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, Expedition ID, or NPC ID based on update type, 0 for Character Name
 	uint32 signal;
+	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
-struct CZCompleteActivityPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZCompleteActivityGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZCompleteActivityRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZCompleteActivityGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZMovePlayer_Struct {
-	int character_id;
-	char zone_short_name[32];
-};
-
-struct CZMarqueePlayer_Struct {
-	int character_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMarqueeGroup_Struct {
-	int group_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMarqueeRaid_Struct {
-	int raid_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMarqueeGuild_Struct {
-	int guild_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMessagePlayer_Struct {
-	uint32 type;
-	char character_name[64];
-	char message[512];
-};
-
-struct CZMessageGroup_Struct {
-	uint32 type;
-	int group_id;
-	char message[512];
-};
-
-struct CZMessageRaid_Struct {
-	uint32 type;
-	int raid_id;
-	char message[512];
-};
-
-struct CZMessageGuild_Struct {
-	uint32 type;
-	int guild_id;
-	char message[512];
-};
-
-struct CZMoveGroup_Struct {
-	int group_id;
-	char zone_short_name[32];
-};
-
-struct CZMoveRaid_Struct {
-	int raid_id;
-	char zone_short_name[32];
-};
-
-struct CZMoveGuild_Struct {
-	int guild_id;
-	char zone_short_name[32];
-};
-
-struct CZMoveInstancePlayer_Struct {
-	int character_id;
-	uint16 instance_id;
-};
-
-struct CZMoveInstanceGroup_Struct {
-	int group_id;
-	uint16 instance_id;
-};
-
-struct CZMoveInstanceRaid_Struct {
-	int raid_id;
-	uint16 instance_id;
-};
-
-struct CZMoveInstanceGuild_Struct {
-	int guild_id;
-	uint16 instance_id;
-};
-
-struct CZRemoveSpellPlayer_Struct {
-	int character_id;
+struct CZSpell_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Cast Spell, 1 - Remove Spell
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
 	uint32 spell_id;
+	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
-struct CZRemoveSpellGroup_Struct {
-	int group_id;
-	uint32 spell_id;
+struct CZTaskUpdate_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Activity Reset, 1 - Activity Update, 2 - Assign Task, 3 - Disable Task, 4 - Enable Task, 5 - Fail Task, 6 - Remove Task
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint32 task_identifier;
+	int task_subidentifier; // Activity ID for Activity Reset and Activity Update, NPC Entity ID for Assign Task, else -1
+	int update_count; // Only used by Activity Update, else 1
+	bool enforce_level_requirement; // Only used by Assign Task
+	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
-struct CZRemoveSpellRaid_Struct {
-	int raid_id;
-	uint32 spell_id;
-};
-
-struct CZRemoveSpellGuild_Struct {
-	int guild_id;
-	uint32 spell_id;
-};
-
-struct CZRemoveTaskPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZRemoveTaskGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZRemoveTaskRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZRemoveTaskGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZResetActivityPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZResetActivityGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZResetActivityRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZResetActivityGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZSetEntVarByNPCTypeID_Struct {
-	uint32 npctype_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByClientName_Struct {
-	char character_name[64];
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByGroupID_Struct {
-	int group_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByRaidID_Struct {
-	int raid_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByGuildID_Struct {
-	int guild_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZTaskActivityResetPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityResetGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityResetRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityResetGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityUpdatePlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskActivityUpdateGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskActivityUpdateRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskActivityUpdateGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskAssignPlayer_Struct {
-	uint16 npc_entity_id;
-	int character_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskAssignGroup_Struct {
-	uint16 npc_entity_id;
-	int group_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskAssignRaid_Struct {
-	uint16 npc_entity_id;
-	int raid_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskAssignGuild_Struct {
-	uint16 npc_entity_id;
-	int guild_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskDisablePlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskDisableGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskDisableRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskDisableGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnablePlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnableGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnableRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnableGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemovePlayer_Struct {
-	uint16 npc_entity_id;
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemoveGroup_Struct {
-	uint16 npc_entity_id;
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemoveRaid_Struct {
-	uint16 npc_entity_id;
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemoveGuild_Struct {
-	uint16 npc_entity_id;
-	int guild_id;
-	uint32 task_id;
-};
-
-struct WWAssignTask_Struct {
-	uint16 npc_entity_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
+struct WWDialogueWindow_Struct {
+	char message[4096];
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWCastSpell_Struct {
-	uint32 spell_id;
+struct WWLDoNUpdate_Struct {
+	uint8 update_type; // 0 - Loss, 1 - Points, 2 - Win
+	uint32 theme_id;
+	int points; // Only used in Points Subtype, else 1
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWDisableTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWEnableTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWFailTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-};
 struct WWMarquee_Struct {
 	uint32 type;
 	uint32 priority;
@@ -1912,69 +1573,47 @@ struct WWMessage_Struct {
 };
 
 struct WWMove_Struct {
-	char zone_short_name[32];
+	uint8 update_type; // 0 - Move Zone, 1 - Move Zone Instance
+	char zone_short_name[32]; // Used with Move Zone
+	uint16 instance_id; // Used with Move Zone Instance
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWMoveInstance_Struct {
-	uint16 instance_id;
+struct WWSetEntityVariable_Struct {
+	uint8 update_type; // 0 - Character, 1 - NPC
+	char variable_name[256];
+	char variable_value[256];
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWRemoveSpell_Struct {
+struct WWSignal_Struct {
+	uint8 update_type; // 0 - Character, 1 - NPC
+	uint32 signal;
+	uint8 min_status;
+	uint8 max_status;
+};
+
+struct WWSpell_Struct {
+	uint8 update_type; // 0 - Cast Spell, 1 - Remove Spell
 	uint32 spell_id;
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWRemoveTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-	
-};
-
-struct WWResetActivity_Struct {
-	uint32 task_id;
-	int activity_id;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWSetEntVarClient_Struct {
-	char variable_name[256];
-	char variable_value[256];
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWSetEntVarNPC_Struct {
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct WWSignalClient_Struct {
-	uint32 signal;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWSignalNPC_Struct {
-	uint32 signal;
-};
-
-struct WWUpdateActivity_Struct {
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
+struct WWTaskUpdate_Struct {
+	uint8 update_type; // 0 - Activity Reset, 1 - Activity Update, 2 - Assign Task, 3 - Disable Task, 4 - Enable Task, 5 - Fail Task, 6 - Remove Task
+	uint32 task_identifier;
+	int task_subidentifier; // Activity ID for Activity Reset and Activity Update, NPC Entity ID for Assign Task, else -1
+	int update_count; // Update Count for Activity Update, else 1
+	bool enforce_level_requirement; // Only used by Assign Task, else false
 	uint8 min_status;
 	uint8 max_status;
 };
 
 struct ReloadWorld_Struct {
-	uint32 Option;
+	uint8 global_repop;
 };
 
 struct HotReloadQuestsStruct {
@@ -2002,51 +1641,28 @@ struct ServerExpeditionID_Struct {
 	uint32 sender_instance_id;
 };
 
-struct ServerExpeditionLeaderID_Struct {
-	uint32 expedition_id;
+struct ServerDzLeaderID_Struct {
+	uint32 dz_id;
 	uint32 leader_id;
 };
 
-struct ServerExpeditionMemberChange_Struct {
-	uint32 expedition_id;
-	uint32 sender_zone_id;
-	uint16 sender_instance_id;
-	uint8  removed; // 0: added, 1: removed
-	uint32 char_id;
-	char   char_name[64];
-};
-
-struct ServerExpeditionMemberSwap_Struct {
-	uint32 expedition_id;
-	uint32 sender_zone_id;
-	uint16 sender_instance_id;
-	uint32 add_char_id;
-	uint32 remove_char_id;
-	char   add_char_name[64];
-	char   remove_char_name[64];
-};
-
-struct ServerExpeditionMemberStatus_Struct {
-	uint32 expedition_id;
+struct ServerDzMemberStatus_Struct {
+	uint32 dz_id;
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
 	uint8  status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
 	uint32 character_id;
 };
 
-struct ServerExpeditionCharacterEntry_Struct {
-	uint32 expedition_id;
+struct ServerDzMemberStatusEntry_Struct {
 	uint32 character_id;
-	uint32 character_zone_id;
-	uint16 character_instance_id;
-	uint8  character_online; // 0: offline 1: online
+	uint8  online_status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
 };
 
-struct ServerExpeditionCharacters_Struct {
-	uint32 sender_zone_id;
-	uint16 sender_instance_id;
+struct ServerDzMemberStatuses_Struct {
+	uint32 dz_id;
 	uint32 count;
-	ServerExpeditionCharacterEntry_Struct entries[0];
+	ServerDzMemberStatusEntry_Struct entries[0];
 };
 
 struct ServerExpeditionLockout_Struct {
@@ -2090,13 +1706,8 @@ struct ServerExpeditionCharacterID_Struct {
 	uint32_t character_id;
 };
 
-struct ServerExpeditionUpdateDuration_Struct {
-	uint32_t expedition_id;
-	uint32_t new_duration_seconds;
-};
-
-struct ServerExpeditionExpireWarning_Struct {
-	uint32_t expedition_id;
+struct ServerDzExpireWarning_Struct {
+	uint32_t dz_id;
 	uint32_t minutes_remaining;
 };
 
@@ -2109,31 +1720,72 @@ struct ServerDzCommand_Struct {
 };
 
 struct ServerDzCommandMakeLeader_Struct {
-	uint32 expedition_id;
+	uint32 dz_id;
 	uint32 requester_id;
 	uint8  is_online;  // set by world, 0: new leader name offline, 1: online
 	uint8  is_success; // set by world, 0: makeleader failed, 1: success (is online member)
 	char   new_leader_name[64];
 };
 
-struct ServerDzLocation_Struct {
-	uint32 owner_id;           // system associated with the dz (expedition, shared task, etc)
+struct ServerDzID_Struct {
+	uint32 dz_id;
 	uint16 dz_zone_id;
-	uint16 dz_instance_id;
+	uint16 dz_instance_id; // for cache-independent redundancy (messages to dz's instance)
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
-	uint32 zone_id;            // compass or safereturn zone id
+};
+
+struct ServerDzLocation_Struct {
+	uint32 dz_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 zone_id;
 	float  y;
 	float  x;
 	float  z;
 	float  heading;
 };
 
-struct ServerDzCharacter_Struct {
-	uint16 zone_id;
-	uint16 instance_id;
-	uint8  remove; // 0: added 1: removed
+struct ServerDzMember_Struct {
+	uint32 dz_id;
+	uint16 dz_zone_id;
+	uint16 dz_instance_id; // for cache redundancy
+	uint16 sender_zone_id;
+	uint16 sender_instance_id;
+	uint8  removed; // 0: added, 1: removed
 	uint32 character_id;
+	uint8  character_status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
+	char   character_name[64];
+};
+
+struct ServerDzMemberSwap_Struct {
+	uint32 dz_id;
+	uint16 dz_zone_id;
+	uint16 dz_instance_id; // for cache redundancy
+	uint16 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 add_character_id;
+	uint32 remove_character_id;
+	uint8  add_character_status;
+	char   add_character_name[64];
+	char   remove_character_name[64];
+};
+
+struct ServerDzSetDuration_Struct {
+	uint32 dz_id;
+	uint32 seconds;
+};
+
+struct ServerDzCreateSerialized_Struct {
+	uint16_t origin_zone_id;
+	uint16_t origin_instance_id;
+	uint32_t cereal_size;
+	char     cereal_data[0];
+};
+
+struct ServerFlagUpdate_Struct {
+	uint32 account_id;
+	int16 admin;
 };
 
 #pragma pack()

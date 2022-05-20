@@ -10,10 +10,13 @@
 #include "../common/eqemu_logsys.h"
 #include "aa_ability.h"
 #include "event_codes.h"
+#include "../common/repositories/doors_repository.h"
 
 #ifdef BOTS
 #include "bot_database.h"
 #endif
+
+#define WOLF 42
 
 class Client;
 class Corpse;
@@ -69,9 +72,9 @@ struct DBnpcspellseffects_entries_Struct {
 	int16	spelleffectid;
 	uint8	minlevel;
 	uint8	maxlevel;
-	int32	base;
+	int32	base_value;
 	int32	limit;
-	int32	max;
+	int32	max_value;
 };
 #pragma pack()
 
@@ -243,6 +246,38 @@ struct ClientMercEntry {
 	uint32 npcid;
 };
 
+namespace BeastlordPetData {	
+	struct PetStruct {
+		uint16 race_id = WOLF;
+		uint8 texture = 0;
+		uint8 helm_texture = 0;
+		uint8 gender = 2;
+		float size_modifier = 1.0f;
+		uint8 face = 0;
+	};
+}
+
+namespace NPCSpawnTypes {
+	enum : uint8 {
+		CreateNewSpawn,
+		AddNewSpawngroup,
+		UpdateAppearance,
+		RemoveSpawn,
+		DeleteSpawn,
+		AddSpawnFromSpawngroup,
+		CreateNewNPC
+  };
+}
+
+namespace RaidLootTypes {
+	enum : uint32 {
+		RaidLeader = 1,
+		GroupLeader,
+		Selected,
+		All
+	};
+}
+
 class ZoneDatabase : public SharedDatabase {
 	typedef std::list<ServerLootItem_Struct*> ItemList;
 public:
@@ -275,6 +310,9 @@ public:
 	void RemoveBuyLine(uint32 CharID, uint32 BuySlot);
 	void DeleteBuyLines(uint32 CharID);
 	void UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity);
+
+
+	void UpdateGMStatus(uint32 accID, int newStatus);
 
 	/**
 	 ************************************************
@@ -319,7 +357,7 @@ public:
 
 	bool SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges);
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
-	bool SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_num);
+	bool SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_number);
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
 	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
@@ -331,6 +369,11 @@ public:
 	bool SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
+	
+	double GetAAEXPModifier(uint32 character_id, uint32 zone_id) const;
+	double GetEXPModifier(uint32 character_id, uint32 zone_id) const;
+	void SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier);
+	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier);
 
 	/* Character Inventory  */
 	bool	NoRentExpired(const char* name);
@@ -380,10 +423,12 @@ public:
 	/* Faction   */
 	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);
 	bool		GetFactionData(FactionMods* fd, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id); //needed for factions Dec, 16 2001
-	bool		GetFactionName(int32 faction_id, char* name, uint32 buflen); // needed for factions Dec, 16 2001
+	bool		GetFactionName(int faction_id, char* name, uint32 buflen); // needed for factions Dec, 16 2001
+	std::string GetFactionName(int faction_id);
 	bool		GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction = 0); // improve faction handling
 	bool		SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // needed for factions Dec, 16 2001
 	bool		LoadFactionData();
+	inline uint32 GetMaxFaction() { return max_faction; }
 
 	/* AAs New */
 	bool	LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
@@ -393,7 +438,7 @@ public:
 	/* Zone related   */
 	bool		GetZoneCFG(
 		uint32 zoneid, 
-		uint16 instance_id, 
+		uint16 instance_version, 
 		NewZone_Struct *data, 
 		bool &can_bind, 
 		bool &can_combat, 
@@ -406,16 +451,14 @@ public:
 		uint8 &zone_type, 
 		int &ruleset, 
 		char **map_filename);
-	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd);
+	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
-	bool		UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location);
-	uint8		GetUseCFGSafeCoords();
 	int			getZoneShutDownDelay(uint32 zoneID, uint32 version);
 
 	/* Spawns and Spawn Points  */
 	bool		LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
 	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
-	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay = 0);
+	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version);
 	bool		PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance);
 	Spawn2*		LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft);
 	bool		CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value);
@@ -430,11 +473,12 @@ public:
 	void		AddWP(Client *c, uint32 gridid, uint32 wpnum, const glm::vec4& position, uint32 pause, uint16 zoneid);
 	uint32		AddWPForSpawn(Client *c, uint32 spawn2id, const glm::vec4& position, uint32 pause, int type1, int type2, uint16 zoneid);
 	void		ModifyGrid(Client *c, bool remove, uint32 id, uint8 type = 0, uint8 type2 = 0, uint16 zoneid = 0);
+	bool		GridExistsInZone(uint32 zone_id, uint32 grid_id);
 	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, const glm::vec3& location, uint32 script = 0, uint16 zoneid = 0);
 	uint8		GetGridType(uint32 grid, uint32 zoneid);
 	uint8		GetGridType2(uint32 grid, uint16 zoneid);
 	bool		GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp);
-	void        AssignGrid(Client *client, int grid, int spawn2id);
+	void        AssignGrid(Client *client, uint32 grid_id, uint32 entity_id);
 	int			GetHighestGrid(uint32 zoneid);
 	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
 	int			GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, int grid);
@@ -453,6 +497,7 @@ public:
 	bool		GetPetEntry(const char *pet_type, PetRecord *into);
 	bool		GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
+	BeastlordPetData::PetStruct GetBeastlordPetData(uint16 race_id);
 	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
 	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item_list, uint8 droplimit, uint8 mindrop);
 	uint32		GetMaxNPCSpellsID();
@@ -501,9 +546,7 @@ public:
 	bool	LoadTributes();
 
 	/* Doors   */
-	bool	DoorIsOpen(uint8 door_id,const char* zone_name);
-	void	SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name);
-	bool	LoadDoors(int32 door_count, Door *into, const char *zone_name, int16 version);
+	std::vector<DoorsRepository::Doors> LoadDoors(const std::string& zone_name, int16 version);
 	uint32	GetGuildEQID(uint32 guilddbid);
 	void	UpdateDoorGuildID(int doorid, int guild_id);
 	int32	GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version);
@@ -531,7 +574,7 @@ public:
 	uint8 RaidGroupCount(uint32 raidid, uint32 groupid);
 
 	/* Instancing   */
-	void ListAllInstances(Client* c, uint32 charid);
+	void ListAllInstances(Client* c, uint32 character_id);
 
 	/* QGlobals   */
 	void QGlobalPurge();
@@ -571,7 +614,6 @@ protected:
 	std::unordered_set<uint32> npc_spells_loadtried;
 	DBnpcspellseffects_Struct** npc_spellseffects_cache;
 	bool*				npc_spellseffects_loadtried;
-	uint8 door_isopen_array[255];
 };
 
 extern ZoneDatabase database;

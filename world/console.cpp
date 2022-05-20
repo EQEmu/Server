@@ -280,20 +280,33 @@ void ConsoleEmote(
 	join_args.erase(join_args.begin(), join_args.begin() + 2);
 
 	if (strcasecmp(args[0].c_str(), "world") == 0) {
-		zoneserver_list.SendEmoteMessageRaw(0, 0, 0, atoi(args[1].c_str()), JoinString(join_args, " ").c_str());
+		zoneserver_list.SendEmoteMessageRaw(
+			0,
+			0,
+			AccountStatus::Player,
+			atoi(args[1].c_str()),
+			JoinString(join_args, " ").c_str()
+		);
 	}
 	else {
 		ZoneServer *zs = zoneserver_list.FindByName(args[0].c_str());
 		if (zs != 0) {
-			zs->SendEmoteMessageRaw(0, 0, 0, atoi(args[1].c_str()), JoinString(join_args, " ").c_str());
+			zs->SendEmoteMessageRaw(
+				0,
+				0,
+				AccountStatus::Player,
+				atoi(args[1].c_str()),
+				JoinString(join_args, " ").c_str()
+			);
 		}
 		else {
 			zoneserver_list.SendEmoteMessageRaw(
 				args[0].c_str(),
 				0,
-				0,
+				AccountStatus::Player,
 				atoi(args[1].c_str()),
-				JoinString(join_args, " ").c_str());
+				JoinString(join_args, " ").c_str()
+			);
 		}
 	}
 }
@@ -637,7 +650,16 @@ void ConsoleZoneLock(
 		uint16 tmp = ZoneID(args[1].c_str());
 		if (tmp) {
 			if (zoneserver_list.SetLockedZone(tmp, true)) {
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", ZoneName(tmp));
+				zoneserver_list.SendEmoteMessage(
+					0,
+					0,
+					AccountStatus::QuestTroupe,
+					Chat::Yellow,
+					fmt::format(
+						"Zone locked: {}",
+						ZoneName(tmp)
+					).c_str()
+				);
 			}
 			else {
 				connection->SendLine("Failed to change lock");
@@ -655,7 +677,16 @@ void ConsoleZoneLock(
 		uint16 tmp = ZoneID(args[1].c_str());
 		if (tmp) {
 			if (zoneserver_list.SetLockedZone(tmp, false)) {
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", ZoneName(tmp));
+				zoneserver_list.SendEmoteMessage(
+					0,
+					0,
+					AccountStatus::QuestTroupe,
+					Chat::Yellow,
+					fmt::format(
+						"Zone unlocked: {}",
+						ZoneName(tmp)
+					).c_str()
+				);
 			}
 			else {
 				connection->SendLine("Failed to change lock");
@@ -721,15 +752,14 @@ void ConsoleSetPass(
 		connection->SendLine("Format: setpass accountname password");
 	}
 	else {
-		std::string prefix   = "eqemu";
+		std::string prefix = "eqemu";
 		std::string raw_user = "";
 
 		ParseAccountString(args[0], raw_user, prefix);
 
-		int16  tmpstatus = 0;
-		uint32 tmpid     = database.GetAccountIDByName(raw_user.c_str(), prefix.c_str(), &tmpstatus);
+		auto account_id = database.GetAccountIDByName(raw_user, prefix);
 
-		if (!tmpid) {
+		if (!account_id) {
 			connection->SendLine("Error: Account not found");
 		}
 	}
@@ -778,8 +808,14 @@ void ConsoleWorldShutdown(
 			zoneserver_list.WorldShutDown(0, 0);
 		}
 		else if (strcasecmp(args[0].c_str(), "disable") == 0) {
-			connection->SendLine("<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
-			zoneserver_list.SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
+			connection->SendLine("[SYSTEM] World shutdown has been aborted.");
+			zoneserver_list.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::Player,
+				Chat::Yellow,
+				"[SYSTEM] World shutdown has been aborted."
+			);
 			zoneserver_list.shutdowntimer->Disable();
 			zoneserver_list.reminder->Disable();
 		}
@@ -825,14 +861,15 @@ void ConsoleSignalCharByName(
 	}
 
 	connection->SendLine(StringFormat("Signal Sent to %s with ID %i", (char *) args[0].c_str(), atoi(args[1].c_str())));
-	uint32                      message_len = strlen((char *) args[0].c_str()) + 1;
-	auto                        pack        = new ServerPacket(
-		ServerOP_CZSignalClientByName,
-		sizeof(CZClientSignalByName_Struct) + message_len
-	);
-	CZClientSignalByName_Struct *CZSC       = (CZClientSignalByName_Struct *) pack->pBuffer;
-	strn0cpy(CZSC->character_name, (char *) args[0].c_str(), 64);
-	CZSC->signal = atoi(args[1].c_str());
+	uint32 message_len = strlen((char *) args[0].c_str()) + 1;
+	auto pack = new ServerPacket(ServerOP_CZSignal, sizeof(CZSignal_Struct) + message_len);
+	CZSignal_Struct* CZS = (CZSignal_Struct*) pack->pBuffer;
+	uint8 update_type = CZUpdateType_ClientName;
+	int update_identifier = 0;
+	CZS->update_type = update_type;
+	CZS->update_identifier = update_identifier;
+	CZS->signal = atoi(args[1].c_str());
+	strn0cpy(CZS->client_name, (char *) args[0].c_str(), 64);
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -851,7 +888,7 @@ void ConsoleReloadWorld(
 	connection->SendLine("Reloading World...");
 	auto               pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 	ReloadWorld_Struct *RW  = (ReloadWorld_Struct *) pack->pBuffer;
-	RW->Option = 1;
+	RW->global_repop = ReloadWorld::Repop;
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }
