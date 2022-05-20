@@ -150,8 +150,6 @@ RULE_INT(Character, InvSnapshotMinRetryM, 30, "Time to re-attempt an inventory s
 RULE_INT(Character, InvSnapshotHistoryD, 30, "Time to keep snapshot entries (days)")
 RULE_BOOL(Character, RestrictSpellScribing, false, "Setting whether to restrict spell scribing to allowable races/classes of spell scroll")
 RULE_BOOL(Character, UseStackablePickPocketing, true, "Allows stackable pickpocketed items to stack instead of only being allowed in empty inventory slots")
-RULE_BOOL(Character, EnableAvoidanceCap, false, "Setting whether the avoidance cap should be activated")
-RULE_INT(Character, AvoidanceCap, 750, "750 Is a pretty good value, seen people dodge all attacks beyond 1,000 Avoidance")
 RULE_BOOL(Character, AllowMQTarget, false, "Disables putting players in the 'hackers' list for targeting beyond the clip plane or attempting to target something untargetable")
 RULE_BOOL(Character, UseOldBindWound, false, "Uses the original bind wound behavior")
 RULE_BOOL(Character, GrantHoTTOnCreate, false, "Grant Health of Target's Target leadership AA on character creation")
