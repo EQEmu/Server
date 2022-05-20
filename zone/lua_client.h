@@ -422,7 +422,7 @@ public:
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 	void TaskSelector(luabind::adl::object table);
 
-	void SetClientMaxLevel(int value);
+	void SetClientMaxLevel(uint8 max_level);
 	uint8 GetClientMaxLevel();
 
 	void DialogueWindow(std::string markdown);
