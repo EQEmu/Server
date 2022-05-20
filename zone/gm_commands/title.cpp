@@ -31,9 +31,9 @@ void command_title(Client *c, const Seperator *sep)
 	}
 
 	if (!save_title || is_remove) {
-		target->SetAATitle(title.c_str());
+		target->SetAATitle(title);
 	} else if (save_title) {
-		title_manager.CreateNewPlayerTitle(target, title.c_str());
+		title_manager.CreateNewPlayerTitle(target, title);
 	}
 
 	target->Save();

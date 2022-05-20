@@ -12875,7 +12875,7 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 		return;
 	}
 
-	SetTitle_Struct *sts = (SetTitle_Struct *)app->pBuffer;
+	auto sts = (SetTitle_Struct *) app->pBuffer;
 
 	if (sts->title_id && !title_manager.HasTitle(this, sts->title_id)) {
 		return;
@@ -12892,9 +12892,9 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 	);
 
 	if (!sts->is_suffix) {
-		SetAATitle(title.c_str());
+		SetAATitle(title);
 	} else {
-		SetTitleSuffix(title.c_str());
+		SetTitleSuffix(title);
 	}
 }
 

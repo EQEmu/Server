@@ -441,7 +441,7 @@ public:
 
 	virtual int GetKillExpMod() const { return NPCTypedata_ours ? NPCTypedata_ours->exp_mod : NPCTypedata->exp_mod; }
 
-	void ChangeLastName(const char* in_lastname);
+	void ChangeLastName(std::string last_name);
 	void ClearLastName();
 
 	bool GetDepop() { return p_depop; }

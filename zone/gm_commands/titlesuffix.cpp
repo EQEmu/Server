@@ -31,9 +31,9 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 	}
 
 	if (!save_suffix || is_remove) {
-		target->SetTitleSuffix(suffix.c_str());
+		target->SetTitleSuffix(suffix);
 	} else if (save_suffix) {
-		title_manager.CreateNewPlayerSuffix(target, suffix.c_str());
+		title_manager.CreateNewPlayerSuffix(target, suffix);
 	}
 
 	target->Save();

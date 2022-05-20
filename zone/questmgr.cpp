@@ -1111,20 +1111,18 @@ void QuestManager::rename(std::string name) {
 	}
 }
 
-void QuestManager::surname(const char *name) {
+void QuestManager::surname(std::string last_name) {
 	QuestManagerCurrentQuestVars();
 	//Changes the last name.
-	if(initiator)
-	{
-		if(initiator->IsClient())
-		{
-			initiator->ChangeLastName(name);
-			initiator->Message(Chat::Yellow,"Your surname has been changed/set to: %s", name);
-		}
-		else
-		{
-			initiator->Message(Chat::Yellow,"Error changing/setting surname");
-		}
+	if (initiator && initiator->IsClient()) {
+		initiator->ChangeLastName(last_name);
+		initiator->Message(
+			Chat::White,
+			fmt::format(
+				"Your last name has been set to \"{}\".",
+				last_name
+			).c_str()
+		);
 	}
 }
 
