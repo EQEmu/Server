@@ -499,7 +499,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					LogTrading("Giving container [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
-					if (inst->GetItem()->NoDrop != 0 || RuleI(World, FVNoDropFlag) == 1 || (RuleI(World, FVNoDropFlag) == 2 && Admin() >= RuleI(Character, MinStatusForNoDropExemptions))|| other == this) {
+					if (inst->GetItem()->NoDrop != 0 || RuleI(World, FVNoDropFlag) == 1 || (RuleI(World, FVNoDropFlag) == 2 && Admin() >= RuleI(Character, MinStatusForNoDropExemptions)) || other == this) {
 						int16 free_slot = other->GetInv().FindFreeSlotForTradeItem(inst);
 
 						if (free_slot != INVALID_INDEX) {
