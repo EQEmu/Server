@@ -5,8 +5,11 @@
 #include "../common/string_util.h"
 #include "encryption.h"
 #include "account_management.h"
+#include "../common/rulesys.h"
 
 extern LoginServer server;
+int32_t expansion = 0;
+int32_t owned_expansion = 0;
 
 /**
  * @param c
@@ -14,17 +17,17 @@ extern LoginServer server;
  */
 Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
 {
-	m_connection       = c;
-	m_client_version   = v;
-	m_client_status    = cs_not_sent_session_ready;
-	m_account_id       = 0;
-	m_play_server_id   = 0;
+	m_connection = c;
+	m_client_version = v;
+	m_client_status = cs_not_sent_session_ready;
+	m_account_id = 0;
+	m_play_server_id = 0;
 	m_play_sequence_id = 0;
 }
 
 bool Client::Process()
 {
-	EQApplicationPacket *app = m_connection->PopPacket();
+	EQApplicationPacket* app = m_connection->PopPacket();
 	while (app) {
 		if (server.options.IsTraceOn()) {
 			LogDebug("Application packet received from client (size {0})", app->Size());
@@ -41,55 +44,55 @@ bool Client::Process()
 		}
 
 		switch (app->GetOpcode()) {
-			case OP_SessionReady: {
-				if (server.options.IsTraceOn()) {
-					LogInfo("Session ready received from client");
-				}
-				Handle_SessionReady((const char *) app->pBuffer, app->Size());
+		case OP_SessionReady: {
+			if (server.options.IsTraceOn()) {
+				LogInfo("Session ready received from client");
+			}
+			Handle_SessionReady((const char*)app->pBuffer, app->Size());
+			break;
+		}
+		case OP_Login: {
+			if (app->Size() < 20) {
+				LogError("Login received but it is too small, discarding");
 				break;
 			}
-			case OP_Login: {
-				if (app->Size() < 20) {
-					LogError("Login received but it is too small, discarding");
-					break;
-				}
 
-				if (server.options.IsTraceOn()) {
-					LogInfo("Login received from client");
-				}
+			if (server.options.IsTraceOn()) {
+				LogInfo("Login received from client");
+			}
 
-				Handle_Login((const char *) app->pBuffer, app->Size());
+			Handle_Login((const char*)app->pBuffer, app->Size());
+			break;
+		}
+		case OP_ServerListRequest: {
+			if (app->Size() < 4) {
+				LogError("Server List Request received but it is too small, discarding");
 				break;
 			}
-			case OP_ServerListRequest: {
-				if (app->Size() < 4) {
-					LogError("Server List Request received but it is too small, discarding");
-					break;
-				}
 
-				if (server.options.IsTraceOn()) {
-					LogDebug("Server list request received from client");
-				}
+			if (server.options.IsTraceOn()) {
+				LogDebug("Server list request received from client");
+			}
 
-				SendServerListPacket(*(uint32_t *) app->pBuffer);
+			SendServerListPacket(*(uint32_t*)app->pBuffer);
+			break;
+		}
+		case OP_PlayEverquestRequest: {
+			if (app->Size() < sizeof(PlayEverquestRequest_Struct)) {
+				LogError("Play received but it is too small, discarding");
 				break;
 			}
-			case OP_PlayEverquestRequest: {
-				if (app->Size() < sizeof(PlayEverquestRequest_Struct)) {
-					LogError("Play received but it is too small, discarding");
-					break;
-				}
 
-				Handle_Play((const char *) app->pBuffer);
-				break;
+			Handle_Play((const char*)app->pBuffer);
+			break;
+		}
+		default: {
+			if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
+				char dump[64];
+				app->build_header_dump(dump);
+				LogError("Recieved unhandled application packet from the client: [{}]", dump);
 			}
-			default: {
-				if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
-					char dump[64];
-					app->build_header_dump(dump);
-					LogError("Recieved unhandled application packet from the client: [{}]", dump);
-				}
-			}
+		}
 		}
 
 		delete app;
@@ -105,7 +108,7 @@ bool Client::Process()
  * @param data
  * @param size
  */
-void Client::Handle_SessionReady(const char *data, unsigned int size)
+void Client::Handle_SessionReady(const char* data, unsigned int size)
 {
 	if (m_client_status != cs_not_sent_session_ready) {
 		LogError("Session ready received again after already being received");
@@ -122,10 +125,10 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	/**
 	 * The packets are identical between the two versions
 	 */
-	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply_Struct));
+	auto* outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply_Struct));
 	auto buf = reinterpret_cast<LoginHandShakeReply_Struct*>(outapp->pBuffer);
-	buf->base_header.sequence    = 0x02;
-	buf->base_reply.success      = true;
+	buf->base_header.sequence = 0x02;
+	buf->base_reply.success = true;
 	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
 
 	if (server.options.IsDumpOutPacketsOn()) {
@@ -142,7 +145,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
  * @param data
  * @param size
  */
-void Client::Handle_Login(const char *data, unsigned int size)
+void Client::Handle_Login(const char* data, unsigned int size)
 {
 	if (m_client_status != cs_waiting_for_login) {
 		LogError("Login received after already having logged in");
@@ -165,7 +168,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		return;
 	}
 
-	char *login_packet_buffer = nullptr;
+	char* login_packet_buffer = nullptr;
 
 	unsigned int db_account_id = 0;
 
@@ -204,7 +207,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	bool result = false;
 	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
 		if (server.options.IsTokenLoginAllowed()) {
-			cred   = (&outbuffer[2 + user.length()]);
+			cred = (&outbuffer[2 + user.length()]);
 			result = server.db->GetLoginTokenDataFromToken(
 				cred,
 				m_connection->GetRemoteAddr(),
@@ -216,11 +219,11 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	}
 	else {
 		if (server.options.IsPasswordLoginAllowed()) {
-			cred            = (&outbuffer[1 + user.length()]);
+			cred = (&outbuffer[1 + user.length()]);
 			auto components = SplitString(user, ':');
 			if (components.size() == 2) {
 				db_loginserver = components[0];
-				user           = components[1];
+				user = components[1];
 			}
 
 			// health checks
@@ -279,16 +282,16 @@ void Client::Handle_Login(const char *data, unsigned int size)
  *
  * @param data
  */
-void Client::Handle_Play(const char *data)
+void Client::Handle_Play(const char* data)
 {
 	if (m_client_status != cs_logged_in) {
 		LogError("Client sent a play request when they were not logged in, discarding");
 		return;
 	}
 
-	const auto *play        = (const PlayEverquestRequest_Struct *) data;
-	auto       server_id_in = (unsigned int) play->server_number;
-	auto       sequence_in  = (unsigned int) play->base_header.sequence;
+	const auto* play = (const PlayEverquestRequest_Struct*)data;
+	auto       server_id_in = (unsigned int)play->server_number;
+	auto       sequence_in = (unsigned int)play->base_header.sequence;
 
 	if (server.options.IsTraceOn()) {
 		LogInfo(
@@ -299,9 +302,9 @@ void Client::Handle_Play(const char *data)
 		);
 	}
 
-	m_play_server_id   = (unsigned int) play->server_number;
+	m_play_server_id = (unsigned int)play->server_number;
 	m_play_sequence_id = sequence_in;
-	m_play_server_id   = server_id_in;
+	m_play_server_id = server_id_in;
 	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
 }
 
@@ -319,7 +322,7 @@ void Client::SendServerListPacket(uint32 seq)
 	m_connection->QueuePacket(outapp.get());
 }
 
-void Client::SendPlayResponse(EQApplicationPacket *outapp)
+void Client::SendPlayResponse(EQApplicationPacket* outapp)
 {
 	if (server.options.IsTraceOn()) {
 		LogDebug("Sending play response for {0}", GetAccountName());
@@ -334,15 +337,15 @@ void Client::GenerateKey()
 	int count = 0;
 	while (count < 10) {
 		static const char key_selection[] =
-							  {
-								  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-								  'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-								  'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-								  'Y', 'Z', '0', '1', '2', '3', '4', '5',
-								  '6', '7', '8', '9'
-							  };
+		{
+			'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+			'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+			'Y', 'Z', '0', '1', '2', '3', '4', '5',
+			'6', '7', '8', '9'
+		};
 
-		m_key.append((const char *) &key_selection[m_random.Int(0, 35)], 1);
+		m_key.append((const char*)&key_selection[m_random.Int(0, 35)], 1);
 		count++;
 	}
 }
@@ -353,9 +356,9 @@ void Client::GenerateKey()
  * @param loginserver
  */
 void Client::AttemptLoginAccountCreation(
-	const std::string &user,
-	const std::string &pass,
-	const std::string &loginserver
+	const std::string& user,
+	const std::string& pass,
+	const std::string& loginserver
 )
 {
 	LogInfo("[AttemptLoginAccountCreation] user [{}] loginserver [{}]", user, loginserver);
@@ -403,15 +406,15 @@ void Client::DoFailedLogin()
 
 	// unencrypted
 	LoginBaseMessage_Struct base_header{};
-	base_header.sequence     = m_llrs.sequence; // login (3)
+	base_header.sequence = m_llrs.sequence; // login (3)
 	base_header.encrypt_type = m_llrs.encrypt_type;
 
 	// encrypted
 	PlayerLoginReply_Struct login_reply{};
-	login_reply.base_reply.success      = false;
+	login_reply.base_reply.success = false;
 	login_reply.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
-	char encrypted_buffer[80] = {0};
+	char encrypted_buffer[80] = { 0 };
 	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block for failed login");
@@ -440,10 +443,10 @@ void Client::DoFailedLogin()
  * @return
  */
 bool Client::VerifyLoginHash(
-	const std::string &account_username,
-	const std::string &source_loginserver,
-	const std::string &account_password,
-	const std::string &password_hash
+	const std::string& account_username,
+	const std::string& source_loginserver,
+	const std::string& account_password,
+	const std::string& password_hash
 )
 {
 	auto encryption_mode = server.options.GetEncryptionMode();
@@ -520,7 +523,7 @@ bool Client::VerifyLoginHash(
 void Client::DoSuccessfulLogin(
 	const std::string in_account_name,
 	int db_account_id,
-	const std::string &db_loginserver
+	const std::string& db_loginserver
 )
 {
 	m_stored_user.clear();
@@ -534,36 +537,38 @@ void Client::DoSuccessfulLogin(
 	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
 	GenerateKey();
 
-	m_account_id       = db_account_id;
-	m_account_name     = in_account_name;
+	m_account_id = db_account_id;
+	m_account_name = in_account_name;
 	m_loginserver_name = db_loginserver;
 
 	// unencrypted
 	LoginBaseMessage_Struct base_header{};
-	base_header.sequence     = m_llrs.sequence;
-	base_header.compressed   = false;
+	base_header.sequence = m_llrs.sequence;
+	base_header.compressed = false;
 	base_header.encrypt_type = m_llrs.encrypt_type;
-	base_header.unk3         = m_llrs.unk3;
+	base_header.unk3 = m_llrs.unk3;
 
 	// not serializing any of the variable length strings so just use struct directly
 	PlayerLoginReply_Struct login_reply{};
-	login_reply.base_reply.success         = true;
-	login_reply.base_reply.error_str_id    = 101; // No Error
-	login_reply.unk1                       = 0;
-	login_reply.unk2                       = 0;
-	login_reply.lsid                       = db_account_id;
-	login_reply.failed_attempts            = 0;
-	login_reply.show_player_count          = server.options.IsShowPlayerCountEnabled();
-	login_reply.offer_min_days             = 99;
-	login_reply.offer_min_views            = -1;
-	login_reply.offer_cooldown_minutes     = 0;
-	login_reply.web_offer_number           = 0;
-	login_reply.web_offer_min_days         = 99;
-	login_reply.web_offer_min_views        = -1;
+	login_reply.base_reply.success = true;
+	login_reply.base_reply.error_str_id = 101; // No Error
+	login_reply.unk1 = 0;
+	login_reply.unk2 = 0;
+	login_reply.lsid = db_account_id;
+	login_reply.failed_attempts = 0;
+	login_reply.show_player_count = server.options.IsShowPlayerCountEnabled();
+	login_reply.offer_min_days = 99;
+	login_reply.offer_min_views = -1;
+	login_reply.offer_cooldown_minutes = 0;
+	login_reply.web_offer_number = 0;
+	login_reply.web_offer_min_days = 99;
+	login_reply.web_offer_min_views = -1;
 	login_reply.web_offer_cooldown_minutes = 0;
 	memcpy(login_reply.key, m_key.c_str(), m_key.size());
 
-	char encrypted_buffer[80] = {0};
+	SendExpansionPacketData(login_reply);
+
+	char encrypted_buffer[80] = { 0 };
 	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block");
@@ -583,14 +588,81 @@ void Client::DoSuccessfulLogin(
 	m_client_status = cs_logged_in;
 }
 
+void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
+{
+	int default_ruleset = 1;
+	SerializeBuffer buf;
+	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'
+	int ExpansionLookup[20] = { 3007, 3008, 3009, 3010,	3012,
+								3014, 3031, 3033, 3036, 3040,
+								3045, 3046, 3047, 3514, 3516,
+								3518, 3520, 3522, 3524 };
+
+
+	//Get the active expansion from the database Rule:WorldExpansionSettings.  Do this only once.  Requires restart to effect change
+	if (!owned_expansion) {
+		std::string r_name = RuleManager::Instance()->GetRulesetName(server.db, default_ruleset);
+		if (r_name.size() > 0) {
+			RuleManager::Instance()->LoadRules(server.db, r_name.c_str(), false);
+			expansion = RuleManager::Instance()->GetIntRule(RuleManager::Int__ExpansionSettings);
+			owned_expansion = (expansion << 1) | 1;
+		}
+	}
+
+	if (m_client_version == cv_sod) {
+
+		// header info of packet.  Requires OP_LoginExpansionPacketData=0x0031 to be in login_opcodes_sod.conf
+		buf.WriteInt32(0x00);
+		buf.WriteInt32(0x01);
+		buf.WriteInt16(0x00);
+		buf.WriteInt32(19); //number of expansions to include in packet
+
+		//generate expansion data
+		for (int i = 0; i < 19; i++)
+		{
+			buf.WriteInt32(i);													//sequenctial number
+			buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);	//1 own 0 not own
+			buf.WriteInt8(0x00);
+			buf.WriteInt32(ExpansionLookup[i]);									//from eqlsstr_us.txt
+			buf.WriteInt32(0x179E);												//from eqlsstr_us.txt for buttons/order
+			buf.WriteInt32(0xFFFFFFFF);											//end identification
+			buf.WriteInt8(0x0);													//force order window to appear 1 appear 0 not appear
+			buf.WriteInt8(0x0);
+			buf.WriteInt32(0x0000);
+			buf.WriteInt32(0x0000);
+			buf.WriteInt32(0xFFFFFFFF);
+		}
+
+		auto out = std::make_unique<EQApplicationPacket>(OP_LoginExpansionPacketData, buf);
+		m_connection->QueuePacket(out.get());
+
+	}
+	else if (m_client_version == cv_titanium)
+	{
+		if (expansion > 1023)
+		{
+			// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
+			plrs.offer_min_days = (1023 << 1) | 1;
+		}
+		else
+		{
+			plrs.offer_min_days = owned_expansion;
+		}
+		// Titanium shipped with 10 expansions so set max to 10.
+		plrs.web_offer_min_views = (1023 << 1);
+
+	}
+
+}
+
 /**
  * @param username
  * @param password
  */
-void Client::CreateLocalAccount(const std::string &username, const std::string &password)
+void Client::CreateLocalAccount(const std::string& username, const std::string& password)
 {
-	auto         mode  = server.options.GetEncryptionMode();
-	auto         hash  = eqcrypt_hash(username, password, mode);
+	auto         mode = server.options.GetEncryptionMode();
+	auto         hash = eqcrypt_hash(username, password, mode);
 	unsigned int db_id = 0;
 	if (!server.db->CreateLoginData(username, hash, "local", db_id)) {
 		DoFailedLogin();
@@ -606,8 +678,8 @@ void Client::CreateLocalAccount(const std::string &username, const std::string &
  * @param loginserver_account_id
  */
 void Client::CreateEQEmuAccount(
-	const std::string &in_account_name,
-	const std::string &in_account_password,
+	const std::string& in_account_name,
+	const std::string& in_account_password,
 	unsigned int loginserver_account_id
 )
 {
@@ -675,16 +747,16 @@ void Client::LoginOnStatusChangeIgnored(
  * @param conn
  * @param p
  */
-void Client::LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p)
+void Client::LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet& p)
 {
 	auto opcode = p.GetUInt16(0);
 	switch (opcode) {
-		case 0x0017: //OP_ChatMessage
-			LoginSendLogin();
-			break;
-		case 0x0018:
-			LoginProcessLoginResponse(p);
-			break;
+	case 0x0017: //OP_ChatMessage
+		LoginSendLogin();
+		break;
+	case 0x0018:
+		LoginProcessLoginResponse(p);
+		break;
 	}
 }
 
@@ -716,7 +788,7 @@ void Client::LoginSendLogin()
 	p.PutUInt16(0, 2); //OP_Login
 	p.PutUInt32(2, 3);
 
-	eqcrypt_block(&buffer[0], buffer_len, (char *) p.Data() + 12, true);
+	eqcrypt_block(&buffer[0], buffer_len, (char*)p.Data() + 12, true);
 
 	m_login_connection->QueuePacket(p);
 }
@@ -724,9 +796,9 @@ void Client::LoginSendLogin()
 /**
  * @param p
  */
-void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
+void Client::LoginProcessLoginResponse(const EQ::Net::Packet& p)
 {
-	auto encrypt_size                    = p.Length() - 12;
+	auto encrypt_size = p.Length() - 12;
 
 	if (encrypt_size % 8 > 0) {
 		encrypt_size = (encrypt_size / 8) * 8;
@@ -734,7 +806,7 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 
 	std::unique_ptr<char[]> decrypted(new char[encrypt_size]);
 
-	eqcrypt_block((char *) p.Data() + 12, encrypt_size, &decrypted[0], false);
+	eqcrypt_block((char*)p.Data() + 12, encrypt_size, &decrypted[0], false);
 
 	EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
 	auto                  response_error = sp.GetUInt16(1);
