@@ -6375,7 +6375,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 	}
 	Client* client = entity_list.GetClientByName(gmn->oldname);
 	LogInfo("GM([{}]) changeing players name. Old:[{}] New:[{}]", GetName(), gmn->oldname, gmn->newname);
-	bool usedname = database.CheckUsedName((const char*)gmn->newname);
+	bool usedname = database.CheckUsedName(gmn->newname);
 	if (client == 0) {
 		Message(Chat::Red, "%s not found for name change. Operation failed!", gmn->oldname);
 		return;

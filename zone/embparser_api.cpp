@@ -8347,6 +8347,21 @@ XS(XS__commify) {
 	XSRETURN(1);
 }
 
+XS(XS__checknamefilter);
+XS(XS__checknamefilter) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::checknamefilter(std::string name)");
+	}
+
+	dXSTARG;
+	std::string name = (std::string) SvPV_nolen(ST(0));
+	bool passes = database.CheckNameFilter(name);
+	ST(0) = boolSV(passes);
+	sv_2mortal(ST(0));
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8434,6 +8449,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "buryplayercorpse"), XS__buryplayercorpse, file);
 	newXS(strcpy(buf, "castspell"), XS__castspell, file);
 	newXS(strcpy(buf, "changedeity"), XS__changedeity, file);
+	newXS(strcpy(buf, "checknamefilter"), XS__checknamefilter, file);
 	newXS(strcpy(buf, "checktitle"), XS__checktitle, file);
 	newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
 	newXS(strcpy(buf, "clear_proximity"), XS__clear_proximity, file);

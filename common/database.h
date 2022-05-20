@@ -88,7 +88,6 @@ public:
 
 	/* Character Creation */
 
-	bool AddToNameFilter(const char *name);
 	bool CreateCharacter(
 		uint32 account_id,
 		char *name,
@@ -122,10 +121,11 @@ public:
 	/* General Information Queries */
 
 	bool	AddBannedIP(std::string banned_ip, std::string notes); //Add IP address to the banned_ips table.
+	bool	AddToNameFilter(std::string name);
 	bool	CheckBannedIPs(std::string login_ip); //Check incoming connection against banned IP table.
 	bool	CheckGMIPs(std::string login_ip, uint32 account_id);
-	bool	CheckNameFilter(const char* name, bool surname = false);
-	bool	CheckUsedName(const char* name);
+	bool	CheckNameFilter(std::string name, bool surname = false);
+	bool	CheckUsedName(std::string name);
 
 	uint32	GetAccountIDByChar(const char* charname, uint32* oCharID = 0);
 	uint32	GetAccountIDByChar(uint32 char_id);
