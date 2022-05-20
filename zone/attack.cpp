@@ -3675,7 +3675,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
-				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
+				entity_list.MessageClose(this, false, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
 			}
 
 			// If a client pet is damaged while sitting, stand, fix sit button,
@@ -4021,20 +4021,47 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		// we don't send them here.
 		if (!FromDamageShield) {
 
-			entity_list.QueueCloseClients(
-				this, /* Sender */
-				outapp, /* packet */
-				true, /* Skip Sender */
-				RuleI(Range, SpellMessages),
-				skip, /* Skip this mob */
-				true, /* Packet ACK */
-				filter /* eqFilterType filter */
-				);
+			// Determine message range based on spell/other-damage
+			int range;
+			if (IsValidSpell(spell_id)) {
+				range = RuleI(Range, SpellMessages);
+			}
+			else {
+				range = RuleI(Range, DamageMessages);
+			}
 
-			//send the damage to ourself if we are a client
-			if (IsClient()) {
+			// If an "innate" spell, change to spell type to
+			// produce a spell message.  Send to everyone.
+			// This fixes issues with npc-procs like 1002 and 918 which
+			// need to spit out extra spell color.
+			if (IsValidSpell(spell_id) && skill_used == EQ::skills::SkillTigerClaw) {
+				a->type = DamageTypeSpell;
+				entity_list.QueueCloseClients(
+					this, /* Sender */
+					outapp, /* packet */
+					false, /* Skip Sender */
+					range, /* distance packet travels at the speed of sound */
+					0, /* don't skip anyone on spell */
+					true, /* Packet ACK */
+					filter /* eqFilterType filter */
+					);
+			}
+			else {
 				//I dont think any filters apply to damage affecting us
-				CastToClient()->QueuePacket(outapp);
+				if (IsClient()) {
+					CastToClient()->QueuePacket(outapp);
+				}
+
+				// Otherwise, send normal spell or melee message to observers.
+				entity_list.QueueCloseClients(
+					this, /* Sender */
+					outapp, /* packet */
+					true, /* Skip Sender */
+					range, /* distance packet travels at the speed of sound */
+					(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
+					true, /* Packet ACK */
+					filter /* eqFilterType filter */
+					);
 			}
 		}
 

@@ -3509,8 +3509,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	bool is_damage_or_lifetap_spell = IsDamageSpell(spell_id) || IsLifetapSpell(spell_id);
-
 	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id) && !IsEffectInSpell(spell_id, SE_BindSight)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
@@ -4107,9 +4105,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		if(IsClient())	// send to caster
 			CastToClient()->QueuePacket(action_packet);
 	}
-	// send to people in the area, ignoring caster and target
-	//live dosent send this to anybody but the caster
-	//entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+
 	message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 	CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
 	cd->target = action->target;
@@ -4121,7 +4117,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	cd->hit_pitch = action->hit_pitch;
 	cd->damage = 0;
 
-	if(!IsEffectInSpell(spell_id, SE_BindAffinity) && !is_damage_or_lifetap_spell){
+	if (!IsLifetapSpell(spell_id) && !IsEffectInSpell(spell_id, SE_BindAffinity) && !IsAENukeSpell(spell_id) && !IsDamageSpell(spell_id)) {
 		entity_list.QueueCloseClients(
 			spelltar, /* Sender */
 			message_packet, /* Packet */
@@ -4131,18 +4127,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 			true, /* Packet ACK */
 			(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
 		);
-	} else if (is_damage_or_lifetap_spell) {
-		// Sends the client owner a message like "%T staggers"
-		if (spellOwner->IsClient()) {
-			spellOwner->CastToClient()->QueuePacket(message_packet, true,
-				Mob::CLIENT_CONNECTINGALL, FilterPCSpells);
-		}
-		// Show the "you feel your life force drain away" on target client...
-		if (IsLifetapSpell(spell_id) && spelltar->IsClient()) {
-			spelltar->CastToClient()->QueuePacket(message_packet, true,
-				Mob::CLIENT_CONNECTINGALL,
-				(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells));
-		}
 	}
 	safe_delete(action_packet);
 	safe_delete(message_packet);
