@@ -223,7 +223,7 @@ int command_init(void)
 		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "- Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
-		command_add("lastname", "[Last Name] - Set you or your player target's lastname", AccountStatus::Guide, command_lastname) ||
+		command_add("lastname", "[Last Name] - Set your or your player target's last name", AccountStatus::Guide, command_lastname) ||
 		command_add("level", "[level] - Set your or your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
 		command_add("listpetition", "- List petitions", AccountStatus::Guide, command_listpetition) ||
@@ -347,8 +347,8 @@ int command_init(void)
 		command_add("time", "[Hour] [Minute] - Set world time to specified time", AccountStatus::EQSupport, command_time) ||
 		command_add("timers", "- Display persistent timers for target", AccountStatus::GMMgmt, command_timers) ||
 		command_add("timezone", "[Hour] [Minutes] - Set timezone (Minutes are optional)", AccountStatus::EQSupport, command_timezone) ||
-		command_add("title", "[Remove|Title] [Save (0 = False, 1 = True)] - Set your or your player target's title (use remove to remove title, Save defaults to false if not used)", AccountStatus::Guide, command_title) ||
-		command_add("titlesuffix", "[Remove|Title Suffix] [Save (0 = False, 1 = True)] - Set your or your player target's title suffix (use remove to remove title suffix, Save defaults to false if not used)", AccountStatus::Guide, command_titlesuffix) ||
+		command_add("title", "[Remove|Title] - Set your or your player target's title (use \"-1\" to remove title)", AccountStatus::Guide, command_title) ||
+		command_add("titlesuffix", "[Remove|Title Suffix] - Set your or your player target's title suffix (use \"-1\" to remove title suffix)", AccountStatus::Guide, command_titlesuffix) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_traindisc) ||
 		command_add("trapinfo", "- Gets infomation about the traps currently spawned in the zone.", AccountStatus::QuestTroupe, command_trapinfo) ||
 		command_add("tune",  "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||

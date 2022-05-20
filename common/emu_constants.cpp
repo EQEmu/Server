@@ -22,7 +22,6 @@
 #include "data_verification.h"
 #include "bodytypes.h"
 
-
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
 	static const int16 local_array[] = {
 		POSSESSIONS_SIZE,
@@ -189,6 +188,7 @@ const std::map<int, std::string>& EQ::constants::GetLanguageMap()
 		{ LANG_HADAL, "Hadal" },
 		{ LANG_UNKNOWN, "Unknown" }
 	};
+
 	return language_map;
 }
 
@@ -198,6 +198,7 @@ std::string EQ::constants::GetLanguageName(int language_id)
 		auto languages = EQ::constants::GetLanguageMap();
 		return languages[language_id];
 	}
+
 	return std::string();
 }
 
@@ -211,6 +212,7 @@ const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
 		{ LDoNThemes::RUJ, "Rujarkian Hills" },
 		{ LDoNThemes::TAK, "Takish-Hiz" },
 	};
+
 	return ldon_theme_map;
 }
 
@@ -220,12 +222,13 @@ std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 		auto ldon_themes = EQ::constants::GetLDoNThemeMap();
 		return ldon_themes[theme_id];
 	}
+
 	return std::string();	
 }
 
-const std::map<uint8, std::string>& EQ::constants::GetFlyModeMap()
+const std::map<int8, std::string>& EQ::constants::GetFlyModeMap()
 {
-	static const std::map<uint8, std::string> flymode_map = {
+	static const std::map<int8, std::string> flymode_map = {
 		{ GravityBehavior::Ground, "Ground" },
 		{ GravityBehavior::Flying, "Flying" },
 		{ GravityBehavior::Levitating, "Levitating" },
@@ -233,15 +236,17 @@ const std::map<uint8, std::string>& EQ::constants::GetFlyModeMap()
 		{ GravityBehavior::Floating, "Floating" },
 		{ GravityBehavior::LevitateWhileRunning, "Levitating While Running" },
 	};
+
 	return flymode_map;
 }
 
-std::string EQ::constants::GetFlyModeName(uint8 flymode_id)
+std::string EQ::constants::GetFlyModeName(int8 flymode_id)
 {
 	if (EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
 		auto flymodes = EQ::constants::GetFlyModeMap();
 		return flymodes[flymode_id];
 	}
+
 	return std::string();
 }
 
@@ -288,6 +293,7 @@ const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
 		{ BT_InvisMan, "Invisible Man" },
 		{ BT_Special, "Special" },
 	};
+
 	return bodytype_map;
 }
 
@@ -297,6 +303,7 @@ std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
 	if (!bodytypes[bodytype_id].empty()) {
 		return bodytypes[bodytype_id];
 	}
+
 	return std::string();
 }
 
@@ -321,6 +328,7 @@ const std::map<uint8, std::string>& EQ::constants::GetAccountStatusMap()
 		{ AccountStatus::GMImpossible, "GM Impossible" },	
 		{ AccountStatus::Max, "GM Max" }
 	};
+
 	return account_status_map;
 }
 
@@ -351,6 +359,7 @@ const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
 		{ ConsiderLevel::Threateningly, "Threateningly" },
 		{ ConsiderLevel::Scowls, "Scowls" }
 	};
+
 	return consider_level_map;
 }
 
@@ -360,6 +369,7 @@ std::string EQ::constants::GetConsiderLevelName(uint8 faction_consider_level)
 	if (!consider_levels[faction_consider_level].empty()) {
 		return consider_levels[faction_consider_level];
 	}
+
 	return std::string();
 }
 
@@ -371,6 +381,7 @@ const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
 		{ EnvironmentalDamage::Falling, "Falling" },
 		{ EnvironmentalDamage::Trap, "Trap" }
 	};
+
 	return damage_type_map;
 }
 
@@ -380,5 +391,51 @@ std::string EQ::constants::GetEnvironmentalDamageName(uint8 damage_type)
 		auto damage_types = EQ::constants::GetEnvironmentalDamageMap();
 		return damage_types[damage_type];
 	}
+
+	return std::string();
+}
+
+const std::map<uint8, std::string>& EQ::constants::GetStuckBehaviorMap()
+{
+	static const std::map<uint8, std::string> stuck_behavior_map = {
+		{ StuckBehavior::RunToTarget, "Run To Target" },
+		{ StuckBehavior::WarpToTarget, "Warp To Target" },
+		{ StuckBehavior::TakeNoAction, "Take No Action" },
+		{ StuckBehavior::EvadeCombat, "Evade Combat" }
+	};
+
+	return stuck_behavior_map;
+}
+
+std::string EQ::constants::GetStuckBehaviorName(uint8 behavior_id)
+{
+	if (EQ::ValueWithin(behavior_id, StuckBehavior::RunToTarget, StuckBehavior::EvadeCombat)) {
+		auto stuck_behaviors = EQ::constants::GetStuckBehaviorMap();
+		return stuck_behaviors[behavior_id];
+	}
+
+	return std::string();
+}
+
+const std::map<uint8, std::string>& EQ::constants::GetSpawnAnimationMap()
+{
+	static const std::map<uint8, std::string> spawn_animation_map = {
+		{ SpawnAnimations::Standing, "Standing" },
+		{ SpawnAnimations::Sitting, "Sitting" },
+		{ SpawnAnimations::Crouching, "Crouching" },
+		{ SpawnAnimations::Laying, "Laying" },
+		{ SpawnAnimations::Looting, "Looting" }
+	};
+
+	return spawn_animation_map;
+}
+
+std::string EQ::constants::GetSpawnAnimationName(uint8 animation_id)
+{
+	if (EQ::ValueWithin(animation_id, SpawnAnimations::Standing, SpawnAnimations::Looting)) {
+		auto spawn_animations = EQ::constants::GetSpawnAnimationMap();
+		return spawn_animations[animation_id];
+	}
+
 	return std::string();
 }
