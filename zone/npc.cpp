@@ -3253,7 +3253,6 @@ void NPC::ChangeLastName(std::string last_name)
 void NPC::ClearLastName()
 {
 	std::string empty;
-	empty = '\0'; //Clear Last Name
 	ChangeLastName(empty);
 }
 
