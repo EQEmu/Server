@@ -42,7 +42,7 @@ public:
 	 * @param data
 	 * @param size
 	 */
-	void Handle_SessionReady(const char *data, unsigned int size);
+	void Handle_SessionReady(const char* data, unsigned int size);
 
 	/**
 	* Sends the expansion data packet
@@ -62,14 +62,26 @@ public:
 	 * @param data
 	 * @param size
 	 */
-	void Handle_Login(const char *data, unsigned int size);
+	void Handle_Login(const char* data, unsigned int size);
+
+	/**
+	* Sends the expansion data packet
+	*
+	* Titanium uses the encrypted data block to contact the expansion (You own xxx:) and the max expansions (of yyy)
+	* Rof uses a seperate data packet specifically for the expansion data
+	* Live, as of July 2021 uses a similar but slightly different seperate data packet
+	*
+	* @param PlayerLoginReply_Struct
+	*
+	*/
+	void SendExpansionPacketData(PlayerLoginReply_Struct& plrs);
 
 	/**
 	 * Sends a packet to the requested server to see if the client is allowed or not
 	 *
 	 * @param data
 	 */
-	void Handle_Play(const char *data);
+	void Handle_Play(const char* data);
 
 	/**
 	 * Sends a server list packet to the client
@@ -83,7 +95,7 @@ public:
 	 *
 	 * @param outapp
 	 */
-	void SendPlayResponse(EQApplicationPacket *outapp);
+	void SendPlayResponse(EQApplicationPacket* outapp);
 
 	/**
 	 * Generates a random login key for the client during login
@@ -146,7 +158,7 @@ public:
 	 * @param pass
 	 * @param loginserver
 	 */
-	void AttemptLoginAccountCreation(const std::string &user, const std::string &pass, const std::string &loginserver);
+	void AttemptLoginAccountCreation(const std::string& user, const std::string& pass, const std::string& loginserver);
 
 	/**
 	 * Does a failed login
@@ -163,15 +175,15 @@ public:
 	 * @return
 	 */
 	bool VerifyLoginHash(
-		const std::string &account_username,
-		const std::string &source_loginserver,
-		const std::string &account_password,
-		const std::string &password_hash
+		const std::string& account_username,
+		const std::string& source_loginserver,
+		const std::string& account_password,
+		const std::string& password_hash
 	);
 
-	void DoSuccessfulLogin(const std::string in_account_name, int db_account_id, const std::string &db_loginserver);
-	void CreateLocalAccount(const std::string &username, const std::string &password);
-	void CreateEQEmuAccount(const std::string &in_account_name, const std::string &in_account_password, unsigned int loginserver_account_id);
+	void DoSuccessfulLogin(const std::string in_account_name, int db_account_id, const std::string& db_loginserver);
+	void CreateLocalAccount(const std::string& username, const std::string& password);
+	void CreateEQEmuAccount(const std::string& in_account_name, const std::string& in_account_password, unsigned int loginserver_account_id);
 
 private:
 	EQ::Random                         m_random;
@@ -203,10 +215,10 @@ private:
 		EQ::Net::DbProtocolStatus from,
 		EQ::Net::DbProtocolStatus to
 	);
-	void LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p);
+	void LoginOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet& p);
 	void LoginSendSessionReady();
 	void LoginSendLogin();
-	void LoginProcessLoginResponse(const EQ::Net::Packet &p);
+	void LoginProcessLoginResponse(const EQ::Net::Packet& p);
 	static bool ProcessHealthCheck(std::string username);
 };
 
