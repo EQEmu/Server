@@ -223,7 +223,7 @@ int command_init(void)
 		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "- Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
-		command_add("lastname", "[Last Name] - Set your or your player target's last name", AccountStatus::Guide, command_lastname) ||
+		command_add("lastname", "[Last Name] - Set your or your player target's last name (use \"-1\" to remove last name)", AccountStatus::Guide, command_lastname) ||
 		command_add("level", "[level] - Set your or your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
 		command_add("listpetition", "- List petitions", AccountStatus::Guide, command_listpetition) ||
