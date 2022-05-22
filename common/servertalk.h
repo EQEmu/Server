@@ -740,8 +740,8 @@ struct ServerMultiLineMsg_Struct {
 };
 
 struct ServerLock_Struct {
-	char	myname[64]; // User that did it
-	uint8	mode; // 0 = Unlocked ; 1 = Locked
+	char character_name[64];
+	bool is_locked;
 };
 
 struct ServerMotd_Struct {
