@@ -261,7 +261,7 @@ int command_init(void)
 		command_add("nukebuffs", "[Beneficial|Detrimental|Help] - Strip all buffs by type on you or your target (no argument to remove all buffs)", AccountStatus::Guide, command_nukebuffs) ||
 		command_add("nukeitem", "[Item ID] - Removes the specified Item ID from you or your player target's inventory", AccountStatus::GMLeadAdmin, command_nukeitem) ||
 		command_add("object", "List|Add|Edit|Move|Rotate|Copy|Save|Undo|Delete - Manipulate static and tradeskill objects within the zone", AccountStatus::GMAdmin, command_object) ||
-		command_add("oocmute", "[1/0] - Mutes OOC chat", AccountStatus::GMMgmt, command_oocmute) ||
+		command_add("oocmute", "[0|1] - Enable or Disable Server OOC", AccountStatus::GMMgmt, command_oocmute) ||
 		command_add("opcode", "- opcode management", AccountStatus::GMImpossible, command_opcode) ||
 		command_add("path", "- view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
