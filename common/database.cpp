@@ -1482,41 +1482,25 @@ uint8 Database::GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16
 	return base_cap;
 }
 
-uint32 Database::GetCharacterInfo(
-	const char *iName,
-	uint32 *oAccID,
-	uint32 *oZoneID,
-	uint32 *oInstanceID,
-	float *oX,
-	float *oY,
-	float *oZ
-)
+uint32 Database::GetCharacterInfo(std::string character_name, uint32 *account_id, uint32 *zone_id, uint32 *instance_id)
 {
-	std::string query = StringFormat(
-		"SELECT `id`, `account_id`, `zone_id`, `zone_instance`, `x`, `y`, `z` FROM `character_data` WHERE `name` = '%s'",
-		EscapeString(iName).c_str()
+	auto query = fmt::format(
+		"SELECT `id`, `account_id`, `zone_id`, `zone_instance` FROM `character_data` WHERE `name` = '{}'",
+		EscapeString(character_name)
 	);
 
 	auto results = QueryDatabase(query);
-
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
 
-	if (results.RowCount() != 1) {
-		return 0;
-	}
+	auto row = results.begin();
+	auto character_id = std::stoul(row[0]);
+	*account_id = std::stoul(row[1]);
+	*zone_id = std::stoul(row[2]);
+	*instance_id = std::stoul(row[3]);
 
-	auto   row    = results.begin();
-	uint32 charid = atoi(row[0]);
-	if (oAccID) { *oAccID = atoi(row[1]); }
-	if (oZoneID) { *oZoneID = atoi(row[2]); }
-	if (oInstanceID) { *oInstanceID = atoi(row[3]); }
-	if (oX) { *oX = atof(row[4]); }
-	if (oY) { *oY = atof(row[5]); }
-	if (oZ) { *oZ = atof(row[6]); }
-
-	return charid;
+	return character_id;
 }
 
 bool Database::UpdateLiveChar(char* charname, uint32 account_id) {
@@ -1640,29 +1624,36 @@ uint32 Database::GetGroupID(const char* name){
 	return atoi(row[0]);
 }
 
-/* Is this really getting used properly... A half implementation ? Akkadius */
-char* Database::GetGroupLeaderForLogin(const char* name, char* leaderbuf) {
-	strcpy(leaderbuf, "");
+std::string Database::GetGroupLeaderForLogin(std::string character_name) {
 	uint32 group_id = 0;
 
-	std::string query = StringFormat("SELECT `groupid` FROM `group_id` WHERE `name` = '%s'", name);
+	auto query = fmt::format(
+		"SELECT `groupid` FROM `group_id` WHERE `name` = '{}'",
+		character_name
+	);
 	auto results = QueryDatabase(query);
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		if (row[0])
-			group_id = atoi(row[0]);
+	if (results.Success() && results.RowCount()) {
+		auto row = results.begin();
+		group_id = std::stoul(row[0]);
+	}
 
-	if (group_id == 0)
-		return leaderbuf;
+	if (!group_id) {
+		return std::string();
+	}
 
-	query = StringFormat("SELECT `leadername` FROM `group_leaders` WHERE `gid` = '%u' LIMIT 1", group_id);
+	query = fmt::format(
+		"SELECT `leadername` FROM `group_leaders` WHERE `gid` = {} LIMIT 1",
+		group_id
+	);
 	results = QueryDatabase(query);
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		if (row[0])
-			strcpy(leaderbuf, row[0]);
+	if (results.Success() && results.RowCount()) {
+		auto row = results.begin();
+		return row[0];
+	}
 
-	return leaderbuf;
+	return std::string();
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) {
@@ -2257,28 +2248,32 @@ bool Database::SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year
 }
 
 int Database::GetIPExemption(std::string account_ip) {
-	std::string query = StringFormat("SELECT `exemption_amount` FROM `ip_exemptions` WHERE `exemption_ip` = '%s'", account_ip.c_str());
-	auto results = QueryDatabase(query);
-
-	if (results.Success() && results.RowCount() > 0) {
-		auto row = results.begin();
-		return atoi(row[0]);
-	}
-
-	return RuleI(World, MaxClientsPerIP);
-}
-
-void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
-	std::string query = fmt::format(
-		"SELECT `exemption_id` FROM `ip_exemptions` WHERE `exemption_ip` = '{}'",
+	auto query = fmt::format(
+		"SELECT `exemption_amount` FROM `ip_exemptions` WHERE `exemption_ip` = '{}'",
 		account_ip
 	);
 
 	auto results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return RuleI(World, MaxClientsPerIP);
+	}
+
+	auto row = results.begin();
+	return std::stoi(row[0]);
+}
+
+void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
+	auto query = fmt::format(
+		"SELECT `exemption_id` FROM `ip_exemptions` WHERE `exemption_ip` = '{}'",
+		account_ip
+	);
+
 	uint32 exemption_id = 0;
-	if (results.Success() && results.RowCount() > 0) {
+
+	auto results = QueryDatabase(query);
+	if (results.Success() && results.RowCount()) {
 		auto row = results.begin();
-		exemption_id = atoi(row[0]);
+		exemption_id = std::stoul(row[0]);
 	}
 
 	query = fmt::format(
@@ -2287,13 +2282,14 @@ void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
 		exemption_amount
 	);
 
-	if (exemption_id != 0) {
+	if (exemption_id) {
 		query = fmt::format(
 			"UPDATE `ip_exemptions` SET `exemption_amount` = {} WHERE `exemption_ip` = '{}'",
 			exemption_amount,
 			account_ip
 		);
 	}
+
 	QueryDatabase(query);
 }
 
