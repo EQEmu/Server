@@ -3308,18 +3308,44 @@ uint32 EntityList::DeleteNPCCorpses()
 
 void EntityList::CorpseFix(Client* c)
 {
-
-	auto it = corpse_list.begin();
-	while (it != corpse_list.end()) {
-		Corpse* corpse = it->second;
+	uint32 fixed_count = 0;
+	for (const auto& corpse_entity : corpse_list) {
+		auto corpse = corpse_entity.second;
 		if (corpse->IsNPCCorpse()) {
 			if (DistanceNoZ(c->GetPosition(), corpse->GetPosition()) < 100) {
-				c->Message(Chat::Yellow, "Attempting to fix %s", it->second->GetCleanName());
-				corpse->GMMove(corpse->GetX(), corpse->GetY(), c->GetZ() + 2, 0);
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Attempting to fix {}.",
+						corpse->GetCleanName()
+					).c_str()
+				);
+
+				corpse->GMMove(
+					corpse->GetX(),
+					corpse->GetY(),
+					corpse->GetFixedZ(c->GetPosition()),
+					c->GetHeading()
+				);
+				
+				fixed_count++;
 			}
 		}
-		++it;
 	}
+
+	if (!fixed_count) {
+		c->Message(Chat::White, "There were no nearby NPC corpses to fix.");
+		return;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Fixed {} nearby NPC corpse{}.",
+			fixed_count,
+			fixed_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
 
 // returns the number of corpses deleted. A negative number indicates an error code.
