@@ -4187,39 +4187,6 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFactio
 
 /*  Corpse Queries */
 
-bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
-	std::string query = StringFormat( "UPDATE `zone` SET `graveyard_id` = 0 WHERE `zone_idnumber` = %u AND `version` = 0", zone_id);
-	auto results = QueryDatabase(query);
-
-	query = StringFormat("DELETE FROM `graveyard` WHERE `id` = %u",  graveyard_id);
-	auto results2 = QueryDatabase(query);
-
-	if (results.Success() && results2.Success()){
-		return true;
-	}
-
-	return false;
-}
-
-uint32 ZoneDatabase::AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id) {
-	std::string query = StringFormat(
-		"UPDATE `zone` SET `graveyard_id` = %u WHERE `zone_idnumber` = %u AND `version` = 0",
-		graveyard_id, zone_id
-	);
-	auto results = QueryDatabase(query);
-	return zone_id;
-}
-
-uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, const glm::vec4& position) {
-	std::string query = StringFormat("INSERT INTO `graveyard` "
-                                    "SET `zone_id` = %u, `x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f",
-                                    graveyard_zone_id, position.x, position.y, position.z, position.w);
-	auto results = QueryDatabase(query);
-	if (results.Success())
-		return results.LastInsertedID();
-
-	return 0;
-}
 uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, const glm::vec4& position) {
 
 	double xcorpse = (position.x + zone->random.Real(-20,20));
