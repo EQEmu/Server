@@ -972,8 +972,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				break;
 			}
 
-			auto slock = (ServerLock_Struct*) pack->pBuffer;
-			if (slock->mode >= 1) {
+			auto l = (ServerLock_Struct*) pack->pBuffer;
+			if (l->is_locked) {
 				WorldConfig::LockWorld();
 			} else {
 				WorldConfig::UnlockWorld();
@@ -982,24 +982,24 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			if (loginserverlist.Connected()) {
 				loginserverlist.SendStatus();
 				SendEmoteMessage(
-					slock->myname,
+					l->character_name,
 					0,
 					AccountStatus::Player,
-					Chat::Red,
+					Chat::Yellow,
 					fmt::format(
 						"World {}.",
-						slock->mode ? "locked" : "unlocked"
+						l->is_locked ? "locked" : "unlocked"
 					).c_str()
 				);
 			} else {
 				SendEmoteMessage(
-					slock->myname,
+					l->character_name,
 					0,
 					AccountStatus::Player,
-					Chat::Red,
+					Chat::Yellow,
 					fmt::format(
 						"World {}, but login server not connected.",
-						slock->mode ? "locked" : "unlocked"
+						l->is_locked ? "locked" : "unlocked"
 					).c_str()
 				);
 			}
