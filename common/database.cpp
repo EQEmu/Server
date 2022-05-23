@@ -2519,7 +2519,6 @@ uint8 Database::GetMinStatus(uint32 zone_id, uint32 instance_version)
 		instance_version
 	);
 	auto results = QueryDatabase(query);
-
 	if (!results.Success() || !results.RowCount()) {
 		return 0;
 	}
