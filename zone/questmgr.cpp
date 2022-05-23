@@ -1170,52 +1170,35 @@ void QuestManager::untraindiscs() {
 	initiator->UntrainDiscAll();
 }
 
-void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
+void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient() && ((copper + silver + gold + platinum) > 0))
-	{
+	if (
+		initiator &&
+		initiator->IsClient() &&
+		(
+			copper ||
+			silver ||
+			gold ||
+			platinum
+		)
+	) {
 		initiator->AddMoneyToPP(copper, silver, gold, platinum, true);
 
-		std::string tmp;
-		if (platinum > 0)
-		{
-			tmp = "You receive ";
-			tmp += itoa(platinum);
-			tmp += " platinum";
-		}
-		if (gold > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
+		auto money_string = ConvertMoneyToString(platinum, gold, silver, copper);
 
-			tmp += itoa(gold);
-			tmp += " gold";
+		if (money_string == "Unknown") {
+			return;
 		}
-		if(silver > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
 
-			tmp += itoa(silver);
-			tmp += " silver";
+		if (initiator) {
+			initiator->Message(
+				Chat::Green,
+				fmt::format(
+					"You receive {}.",
+					money_string
+				).c_str()
+			);
 		}
-		if(copper > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
-
-			tmp += itoa(copper);
-			tmp += " copper";
-		}
-		tmp += " pieces.";
-		if (initiator)
-			initiator->Message(Chat::OOC, tmp.c_str());
 	}
 }
 
