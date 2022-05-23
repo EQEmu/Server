@@ -380,9 +380,9 @@ int command_init(void)
 		command_add("zclip", "[Minimum Clip] [Maximum Clip] [Fog Minimum Clip] [Fog Maximum Clip] [Permanent (0 = False, 1 = True)] - Change zone clipping", AccountStatus::QuestTroupe, command_zclip) ||
 		command_add("zcolor", "[Red] [Green] [Blue] [Permanent (0 = False, 1 = True)] - Change sky color", AccountStatus::QuestTroupe, command_zcolor) ||
 		command_add("zheader", "[Zone ID|Zone Short Name] [Version] - Load a zone header from the database", AccountStatus::QuestTroupe, command_zheader) ||
-		command_add("zone", "[zonename] [x] [y] [z] - Go to specified zone (coords optional)", AccountStatus::Guide, command_zone) ||
+		command_add("zone", "[Zone ID|Zone Short Name] [X] [Y] [Z] - Teleport to specified Zone by ID or Short Name (coordinates are optional)", AccountStatus::Guide, command_zone) ||
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", AccountStatus::GMLeadAdmin, command_zonebootup) ||
-		command_add("zoneinstance", "[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)", AccountStatus::Guide, command_zone_instance) ||
+		command_add("zoneinstance", "[Instance ID] [X] [Y] [Z] - Teleport to specified Instance by ID (coordinates are optional)", AccountStatus::Guide, command_zone_instance) ||
 		command_add("zonelock", "[List|Lock|Unlock] [Zone ID|Zone Short Name] - Set or get lock status of a Zone by ID or Short Name", AccountStatus::GMAdmin, command_zonelock) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
 		command_add("zonestatus", "- Show connected zoneservers, synonymous with /servers", AccountStatus::GMLeadAdmin, command_zonestatus) ||
@@ -635,117 +635,6 @@ void command_help(Client *c, const Seperator *sep)
 	}
 	c->Message(Chat::White, "%d command%s listed.",  commands_shown, commands_shown!=1?"s":"");
 
-}
-
-void command_zone(Client *c, const Seperator *sep)
-{
-	if(c->Admin() < commandZoneToCoords &&
-		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
-		c->Message(Chat::White, "Your status is not high enough to zone to specific coordinates.");
-		return;
-	}
-
-	uint16 zoneid = 0;
-
-	if (sep->IsNumber(1))
-	{
-		if(atoi(sep->arg[1])==26 && (c->Admin() < commandZoneToSpecials)){ //cshome
-				c->Message(Chat::White, "Only Guides and above can goto that zone.");
-				return;
-		}
-		zoneid = atoi(sep->arg[1]);
-	}
-	else if (sep->arg[1][0] == 0)
-	{
-		c->Message(Chat::White, "Usage: #zone [zonename]");
-		c->Message(Chat::White, "Optional Usage: #zone [zonename] y x z");
-		return;
-	}
-	else if (zone->GetZoneID() == 184 && c->Admin() < commandZoneToSpecials) {	// Zone: 'Load'
-		c->Message(Chat::White, "The Gods brought you here, only they can send you away.");
-		return;
-	} else {
-		if((strcasecmp(sep->arg[1], "cshome")==0) && (c->Admin() < commandZoneToSpecials)){
-			c->Message(Chat::White, "Only Guides and above can goto that zone.");
-			return;
-		}
-
-		zoneid = ZoneID(sep->arg[1]);
-		if(zoneid == 0) {
-			c->Message(Chat::White, "Unable to locate zone '%s'",  sep->arg[1]);
-			return;
-		}
-	}
-
-#ifdef BOTS
-	// This block is necessary to clean up any bot objects owned by a Client
-	if(zoneid != c->GetZoneID())
-		Bot::ProcessClientZoneChange(c);
-#endif
-
-	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
-		//zone to specific coords
-		c->MovePC(zoneid, (float)atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), 0.0f, 0);
-		}
-	else
-		//zone to safe coords
-		c->MovePC(zoneid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
-}
-
-//todo: fix this so it checks if you're in the instance set
-void command_zone_instance(Client *c, const Seperator *sep)
-{
-	if(c->Admin() < commandZoneToCoords &&
-		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
-		c->Message(Chat::White, "Your status is not high enough to zone to specific coordinates.");
-		return;
-	}
-
-	if (sep->arg[1][0] == 0)
-	{
-		c->Message(Chat::White, "Usage: #zoneinstance [instance id]");
-		c->Message(Chat::White, "Optional Usage: #zoneinstance [instance id] y x z");
-		return;
-	}
-
-	uint16 zoneid = 0;
-	uint16 instanceid = 0;
-
-	if(sep->IsNumber(1))
-	{
-		instanceid = atoi(sep->arg[1]);
-		if(!instanceid)
-		{
-			c->Message(Chat::White, "Must enter a valid instance id.");
-			return;
-		}
-
-		zoneid = database.ZoneIDFromInstanceID(instanceid);
-		if(!zoneid)
-		{
-			c->Message(Chat::White, "Instance not found or zone is set to null.");
-			return;
-		}
-	}
-	else
-	{
-		c->Message(Chat::White, "Must enter a valid instance id.");
-		return;
-	}
-
-	if(!database.VerifyInstanceAlive(instanceid, c->CharacterID()))
-	{
-		c->Message(Chat::White, "Instance ID expiried or you are not apart of this instance.");
-		return;
-	}
-
-	if (sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4)){
-		//zone to specific coords
-		c->MovePC(zoneid, instanceid, atof(sep->arg[2]), atof(sep->arg[3]), atof(sep->arg[4]), 0.0f, 0);
-	}
-	else{
-		c->MovePC(zoneid, instanceid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
-	}
 }
 
 void command_level(Client *c, const Seperator *sep)
@@ -1392,10 +1281,12 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/zclip.cpp"
 #include "gm_commands/zcolor.cpp"
 #include "gm_commands/zheader.cpp"
+#include "gm_commands/zone.cpp"
 #include "gm_commands/zonebootup.cpp"
 #include "gm_commands/zonelock.cpp"
 #include "gm_commands/zoneshutdown.cpp"
 #include "gm_commands/zonestatus.cpp"
+#include "gm_commands/zone_instance.cpp"
 #include "gm_commands/zopp.cpp"
 #include "gm_commands/zsafecoords.cpp"
 #include "gm_commands/zsave.cpp"

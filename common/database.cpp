@@ -2511,3 +2511,19 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 	}
 }
 
+uint8 Database::GetMinStatus(uint32 zone_id, uint32 instance_version){
+	auto query = fmt::format(
+		"SELECT min_status FROM zone WHERE zoneidnumber = {} AND (version = {} OR version = 0) ORDER BY version DESC LIMIT 1",
+		zone_id,
+		instance_version
+	);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
+	}
+
+	auto row = results.begin();
+
+	return static_cast<uint8>(std::stoul(row[0]));
+}
