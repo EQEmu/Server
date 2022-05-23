@@ -2511,7 +2511,8 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 	}
 }
 
-uint8 Database::GetMinStatus(uint32 zone_id, uint32 instance_version){
+uint8 Database::GetMinStatus(uint32 zone_id, uint32 instance_version)
+{
 	auto query = fmt::format(
 		"SELECT min_status FROM zone WHERE zoneidnumber = {} AND (version = {} OR version = 0) ORDER BY version DESC LIMIT 1",
 		zone_id,
