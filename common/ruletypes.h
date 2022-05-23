@@ -417,6 +417,7 @@ RULE_BOOL(Spells, CompoundLifetapHeals, true, "True: Lifetap heals calculate dam
 RULE_BOOL(Spells, UseFadingMemoriesMaxLevel, false, "Enables to limit field in spell data to set the max level that over which an NPC will ignore fading memories effect and not lose aggro.")
 RULE_BOOL(Spells, FixBeaconHeading, false, "Beacon spells use casters heading to fix live bug.  False: Live like heading always 0.")
 RULE_BOOL(Spells, UseSpellImpliedTargeting, false, "Replicates EQ2-style targeting behavior for spells. Spells will 'pass through' inappropriate targets to target's target if it is appropriate.")
+RULE_BOOL(Spells, BuffsFadeOnDeath, true, "Disable to keep buffs from fading on death")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

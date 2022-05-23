@@ -398,7 +398,10 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		current_hp = max_hp;
 
 	if(current_hp <= 0) {
-		BuffFadeNonPersistDeath();
+		if (RuleB(Spells, BuffsFadeOnDeath)) {
+			BuffFadeNonPersistDeath();
+		}
+
 		if (RuleB(Bots, ResurrectionSickness)) {
 			int resurrection_sickness_spell_id = (
 				RuleB(Bots, OldRaceRezEffects) &&

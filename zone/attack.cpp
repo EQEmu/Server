@@ -1894,7 +1894,10 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		int32 illusion_spell_id = spellbonuses.Illusion;
 
 		//this generates a lot of 'updates' to the client that the client does not need
-		BuffFadeNonPersistDeath();
+		if (RuleB(Spells, BuffsFadeOnDeath)) {
+			BuffFadeNonPersistDeath();
+		}
+
 		if (RuleB(Character, UnmemSpellsOnDeath)) {
 			if ((ClientVersionBit() & EQ::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover))
 				UnmemSpellAll(true);
