@@ -251,8 +251,6 @@ public:
 	bool	GetZoneLongName(const char* short_name, char** long_name, char* file_name = 0, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, uint32* graveyard_id = 0, uint32* maxclients = 0);
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
 
-	uint32	GetZoneGraveyardID(uint32 zone_id, uint32 version);
-
 	uint8	GetPEQZone(uint32 zone_id, uint32 version);
 	uint8	GetRaceSkill(uint8 skillid, uint8 in_race);
 	uint8	GetServerType();

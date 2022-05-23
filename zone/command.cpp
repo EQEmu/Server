@@ -145,7 +145,6 @@ int command_init(void)
 		command_add("date", "[yyyy] [mm] [dd] [HH] [MM] - Set EQ time", AccountStatus::EQSupport, command_date) ||
 		command_add("dbspawn2", "[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table", AccountStatus::GMAdmin, command_dbspawn2) ||
 		command_add("delacct", "[accountname] - Delete an account", AccountStatus::GMLeadAdmin, command_delacct) ||
-		command_add("deletegraveyard", "[zone name] - Deletes the graveyard for the specified zone.", AccountStatus::GMMgmt, command_deletegraveyard) ||
 		command_add("delpetition", "[petition number] - Delete a petition", AccountStatus::ApprenticeGuide, command_delpetition) ||
 		command_add("depop", "- Depop your NPC target", AccountStatus::Guide, command_depop) ||
 		command_add("depopzone", "- Depop the zone", AccountStatus::GMAdmin, command_depopzone) ||
@@ -308,7 +307,6 @@ int command_init(void)
 		command_add("setcrystals", "[value] - Set your or your player target's available radiant or ebon crystals", AccountStatus::GMAdmin, command_setcrystals) ||
 		command_add("setendurance", "[Endurance] - Set your or your target's Endurance", AccountStatus::GMAdmin, command_setendurance) ||
 		command_add("setfaction", "[Faction ID] - Sets targeted NPC's faction in the database", AccountStatus::GMAreas, command_setfaction) ||
-		command_add("setgraveyard", "[zone name] - Creates a graveyard for the specified zone based on your target's LOC.", AccountStatus::GMMgmt, command_setgraveyard) ||
 		command_add("sethp", "[Health] - Set your or your target's Health", AccountStatus::GMAdmin, command_sethp) ||
 		command_add("setlanguage", "[language ID] [value] - Set your target's language skillnum to value", AccountStatus::Guide, command_setlanguage) ||
 		command_add("setlsinfo", "[Email] [Password] - Set loginserver email address and password (if supported by loginserver)", AccountStatus::Steward, command_setlsinfo) ||
@@ -1161,7 +1159,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/date.cpp"
 #include "gm_commands/dbspawn2.cpp"
 #include "gm_commands/delacct.cpp"
-#include "gm_commands/deletegraveyard.cpp"
 #include "gm_commands/delpetition.cpp"
 #include "gm_commands/depop.cpp"
 #include "gm_commands/depopzone.cpp"
@@ -1322,7 +1319,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/setcrystals.cpp"
 #include "gm_commands/setendurance.cpp"
 #include "gm_commands/setfaction.cpp"
-#include "gm_commands/setgraveyard.cpp"
 #include "gm_commands/sethp.cpp"
 #include "gm_commands/setlanguage.cpp"
 #include "gm_commands/setlsinfo.cpp"
