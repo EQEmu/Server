@@ -26,7 +26,7 @@ void command_ipban(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			"IP '{}' has failed to be banned, the IP address may already be in the table.",
-			ip
+			ip.c_str()
 		);
 	}
 }

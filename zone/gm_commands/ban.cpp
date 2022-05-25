@@ -30,7 +30,7 @@ void command_ban(Client *c, const Seperator *sep)
 			fmt::format(
 				"Character {} does not exist."
 			).c_str(),
-			character_name
+			character_name.c_str()
 		);
 		return;
 	}
