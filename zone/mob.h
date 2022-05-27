@@ -1239,8 +1239,8 @@ public:
 	inline uint8 GetManaPercent() { return (uint8)((float)current_mana / (float)max_mana * 100.0f); }
 	virtual uint8 GetEndurancePercent() { return 0; }
 
-	inline virtual bool IsBlockedBuff(int16 SpellID) { return false; }
-	inline virtual bool IsBlockedPetBuff(int16 SpellID) { return false; }
+	inline virtual bool IsBlockedBuff(int32 SpellID) { return false; }
+	inline virtual bool IsBlockedPetBuff(int32 SpellID) { return false; }
 
 	std::string GetGlobal(const char *varname);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = nullptr);
