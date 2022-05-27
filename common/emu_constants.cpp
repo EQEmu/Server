@@ -195,8 +195,7 @@ const std::map<int, std::string>& EQ::constants::GetLanguageMap()
 std::string EQ::constants::GetLanguageName(int language_id)
 {
 	if (EQ::ValueWithin(language_id, LANG_COMMON_TONGUE, LANG_UNKNOWN)) {
-		auto languages = EQ::constants::GetLanguageMap();
-		return languages[language_id];
+		return EQ::constants::GetLanguageMap().find(language_id)->second;
 	}
 
 	return std::string();
@@ -219,8 +218,7 @@ const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
 std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 {
 	if (EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
-		auto ldon_themes = EQ::constants::GetLDoNThemeMap();
-		return ldon_themes[theme_id];
+		return EQ::constants::GetLDoNThemeMap().find(theme_id)->second;
 	}
 
 	return std::string();	
@@ -243,8 +241,7 @@ const std::map<int8, std::string>& EQ::constants::GetFlyModeMap()
 std::string EQ::constants::GetFlyModeName(int8 flymode_id)
 {
 	if (EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
-		auto flymodes = EQ::constants::GetFlyModeMap();
-		return flymodes[flymode_id];
+		return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
 	}
 
 	return std::string();
@@ -299,9 +296,8 @@ const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
 
 std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
 {
-	auto bodytypes = EQ::constants::GetBodyTypeMap();
-	if (!bodytypes[bodytype_id].empty()) {
-		return bodytypes[bodytype_id];
+	if (!EQ::constants::GetBodyTypeMap().find(bodytype_id)->second.empty()) {
+		return EQ::constants::GetBodyTypeMap().find(bodytype_id)->second;
 	}
 
 	return std::string();
@@ -334,16 +330,17 @@ const std::map<uint8, std::string>& EQ::constants::GetAccountStatusMap()
 
 std::string EQ::constants::GetAccountStatusName(uint8 account_status)
 {
-	auto account_statuses = EQ::constants::GetAccountStatusMap();
-	std::string status_name;
-	for (auto status_level = account_statuses.rbegin(); status_level != account_statuses.rend(); ++status_level) {
+	for (
+		auto status_level = EQ::constants::GetAccountStatusMap().rbegin();
+		status_level != EQ::constants::GetAccountStatusMap().rend();
+		++status_level
+	) {
 		if (account_status >= status_level->first) {
-			status_name = status_level->second;
-			break;
+			return status_level->second;
 		}
 	}
 
-	return status_name;
+	return std::string();
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
@@ -365,9 +362,8 @@ const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
 
 std::string EQ::constants::GetConsiderLevelName(uint8 faction_consider_level)
 {
-	auto consider_levels = EQ::constants::GetConsiderLevelMap();
-	if (!consider_levels[faction_consider_level].empty()) {
-		return consider_levels[faction_consider_level];
+	if (!EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second.empty()) {
+		return EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second;
 	}
 
 	return std::string();
@@ -388,8 +384,7 @@ const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
 std::string EQ::constants::GetEnvironmentalDamageName(uint8 damage_type)
 {
 	if (EQ::ValueWithin(damage_type, EnvironmentalDamage::Lava, EnvironmentalDamage::Trap)) {
-		auto damage_types = EQ::constants::GetEnvironmentalDamageMap();
-		return damage_types[damage_type];
+		return EQ::constants::GetEnvironmentalDamageMap().find(damage_type)->second;
 	}
 
 	return std::string();
@@ -410,8 +405,7 @@ const std::map<uint8, std::string>& EQ::constants::GetStuckBehaviorMap()
 std::string EQ::constants::GetStuckBehaviorName(uint8 behavior_id)
 {
 	if (EQ::ValueWithin(behavior_id, StuckBehavior::RunToTarget, StuckBehavior::EvadeCombat)) {
-		auto stuck_behaviors = EQ::constants::GetStuckBehaviorMap();
-		return stuck_behaviors[behavior_id];
+		return EQ::constants::GetStuckBehaviorMap().find(behavior_id)->second;
 	}
 
 	return std::string();
@@ -433,8 +427,7 @@ const std::map<uint8, std::string>& EQ::constants::GetSpawnAnimationMap()
 std::string EQ::constants::GetSpawnAnimationName(uint8 animation_id)
 {
 	if (EQ::ValueWithin(animation_id, SpawnAnimations::Standing, SpawnAnimations::Looting)) {
-		auto spawn_animations = EQ::constants::GetSpawnAnimationMap();
-		return spawn_animations[animation_id];
+		return EQ::constants::GetSpawnAnimationMap().find(animation_id)->second;
 	}
 
 	return std::string();
