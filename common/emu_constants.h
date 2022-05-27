@@ -221,7 +221,7 @@ namespace EQ
 			stanceBurnAE
 		};
 
-		enum GravityBehavior : uint8 {
+		enum GravityBehavior : int8 {
 			Ground,
 			Flying,
 			Levitating,
