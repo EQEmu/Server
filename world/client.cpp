@@ -839,7 +839,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	if (instance_id) {
 		if (
 			!database.VerifyInstanceAlive(instance_id, GetCharID()) ||
-		    !database.VerifyZoneInstance(zone_id, instance_id)
+			!database.VerifyZoneInstance(zone_id, instance_id)
 		) {
 			zone_id = database.MoveCharacterToInstanceSafeReturn(charid, zone_id, instance_id);
 			instance_id = 0;
