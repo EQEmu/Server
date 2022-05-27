@@ -5330,11 +5330,14 @@ bool Mob::TrySpellOnDeath()
 		if(spellbonuses.SpellOnDeath[i] && IsValidSpell(spellbonuses.SpellOnDeath[i])) {
 			if(zone->random.Roll(static_cast<int>(spellbonuses.SpellOnDeath[i + 1]))) {
 				SpellFinished(spellbonuses.SpellOnDeath[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spellbonuses.SpellOnDeath[i]].resist_difficulty);
-				}
 			}
 		}
+	}
 
-	BuffFadeNonPersistDeath();
+	if (RuleB(Spells, BuffsFadeOnDeath)) {
+		BuffFadeNonPersistDeath();
+	}
+
 	return false;
 	//You should not be able to use this effect and survive (ALWAYS return false),
 	//attempting to place a heal in these effects will still result
