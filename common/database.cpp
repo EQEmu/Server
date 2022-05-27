@@ -50,6 +50,8 @@
 #include "http/httplib.h"
 #include "http/uri.h"
 
+#include "repositories/zone_repository.h"
+
 extern Client client;
 
 Database::Database () {
@@ -2496,3 +2498,16 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 	}
 }
 
+uint8 Database::GetMinStatus(uint32 zone_id, uint32 instance_version)
+{
+	auto zones = ZoneRepository::GetWhere(
+		*this,
+		fmt::format(
+			"zoneidnumber = {} AND (version = {} OR version = 0) ORDER BY version DESC LIMIT 1",
+			zone_id,
+			instance_version
+		)
+	);
+
+	return !zones.empty() ? zones[0].min_status : 0;
+}
