@@ -958,7 +958,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_OOCMute: {
-		oocmuted = *(pack->pBuffer);
+		auto o = (ServerOOCMute_Struct *) pack->pBuffer;
+		oocmuted = o->is_muted;
 		break;
 	}
 	case ServerOP_Revoke: {
