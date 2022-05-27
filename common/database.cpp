@@ -1109,21 +1109,6 @@ bool Database::GetZoneLongName(const char* short_name, char** long_name, char* f
 	return true;
 }
 
-uint32 Database::GetZoneGraveyardID(uint32 zone_id, uint32 version) {
-
-	std::string query = StringFormat("SELECT graveyard_id FROM zone WHERE zoneidnumber='%u' AND (version=%i OR version=0) ORDER BY version DESC", zone_id, version);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return 0;
-
-	if (results.RowCount() == 0)
-		return 0;
-
-	auto row = results.begin();
-	return atoi(row[0]);
-}
-
 bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid, float* graveyard_x, float* graveyard_y, float* graveyard_z, float* graveyard_heading) {
 
 	std::string query = StringFormat("SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id);
