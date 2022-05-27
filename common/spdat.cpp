@@ -139,7 +139,7 @@ bool IsEvacSpell(uint16 spellid)
 
 bool IsDamageSpell(uint16 spellid)
 {
-	if (spells[spellid].target_type == ST_Tap)
+	if (IsLifetapSpell(spellid))
 		return false;
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
