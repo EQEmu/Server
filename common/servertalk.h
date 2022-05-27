@@ -1788,6 +1788,10 @@ struct ServerFlagUpdate_Struct {
 	int16 admin;
 };
 
+struct ServerOOCMute_Struct {
+	bool is_muted;
+};
+
 #pragma pack()
 
 #endif
