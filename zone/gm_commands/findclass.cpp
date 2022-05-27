@@ -3,9 +3,8 @@
 void command_findclass(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-
-	if (arguments == 0) {
-		c->Message(Chat::White, "Command Syntax: #findclass [search criteria]");
+	if (!arguments) {
+		c->Message(Chat::White, "Command Syntax: #findclass [Search Criteria]");
 		return;
 	}
 
@@ -16,9 +15,17 @@ void command_findclass(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Class {}: {}",
+					"Class {} | {}{}",
 					class_id,
-					class_name
+					class_name,
+					(
+						c->IsPlayerClass(class_id) ?
+						fmt::format(
+							" ({})",
+							GetPlayerClassBit(class_id)
+						) :
+						""
+					)
 				).c_str()
 			);
 		}
@@ -31,51 +38,52 @@ void command_findclass(Client *c, const Seperator *sep)
 				).c_str()
 			);
 		}
-	}
-	else {
-		std::string search_criteria = str_tolower(sep->argplus[1]);
-		int         found_count     = 0;
-		for (int    class_id        = WARRIOR; class_id <= MERCERNARY_MASTER; class_id++) {
-			std::string class_name       = GetClassIDName(class_id);
-			std::string class_name_lower = str_tolower(class_name);
-			if (search_criteria.length() > 0 && class_name_lower.find(search_criteria) == std::string::npos) {
+	} else {
+		auto search_criteria = str_tolower(sep->argplus[1]);
+		int found_count = 0;
+		for (uint16 class_id = WARRIOR; class_id <= MERCERNARY_MASTER; class_id++) {
+			std::string class_name = GetClassIDName(class_id);
+			auto class_name_lower = str_tolower(class_name);
+			if (
+				search_criteria.length() &&
+				class_name_lower.find(search_criteria) == std::string::npos
+			) {
 				continue;
 			}
 
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Class {}: {}",
+					"Class {} | {}{}",
 					class_id,
-					class_name
+					class_name,
+					(
+						c->IsPlayerClass(class_id) ?
+						fmt::format(
+							" ({})",
+							GetPlayerClassBit(class_id)
+						) :
+						""
+					)
 				).c_str()
 			);
+
 			found_count++;
 
-			if (found_count == 20) {
+			if (found_count == 50) {
 				break;
 			}
 		}
 
-		if (found_count == 20) {
-			c->Message(Chat::White, "20 Classes found... max reached.");
-		}
-		else {
-			auto class_message = (
-				found_count > 0 ?
-					(
-						found_count == 1 ?
-							"A Class was" :
-							fmt::format("{} Classes were", found_count)
-					) :
-					"No Classes were"
-			);
-
+		if (found_count == 50) {
+			c->Message(Chat::White, "50 Classes found, max reached.");
+		} else {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{} found.",
-					class_message
+					"{} Class{} found.",
+					found_count,
+					found_count != 1 ? "es" : ""
 				).c_str()
 			);
 		}

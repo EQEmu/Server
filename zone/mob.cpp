@@ -2854,6 +2854,16 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 	return false;
 }
 
+bool Mob::IsPlayerClass(uint16 in_class) {
+	if (
+		in_class >= WARRIOR &&
+		in_class <= BERSERKER
+	) {
+		return true;
+	}
+
+	return false;
+}
 
 bool Mob::IsPlayerRace(uint16 in_race) {
 
