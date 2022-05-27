@@ -101,14 +101,18 @@ bool IsSacrificeSpell(uint16 spell_id)
 
 bool IsLifetapSpell(uint16 spell_id)
 {
-	// Ancient Lifebane: 2115
-	if (IsValidSpell(spell_id) &&
-			(spells[spell_id].target_type == ST_Tap ||
-			 spells[spell_id].target_type == ST_TargetAETap ||
-			 spell_id == 2115))
-		return true;
+    if (
+        IsValidSpell(spell_id) &&
+        (
+            spells[spell_id].target_type == ST_Tap ||
+            spells[spell_id].target_type == ST_TargetAETap ||
+            spell_id == SPELL_ANCIENT_LIFEBANE
+        )
+    ) {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 bool IsMezSpell(uint16 spell_id)
