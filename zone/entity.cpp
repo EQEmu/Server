@@ -3309,22 +3309,22 @@ uint32 EntityList::DeleteNPCCorpses()
 void EntityList::CorpseFix(Client* c)
 {
 	uint32 fixed_count = 0;
-	for (const auto& corpse_entity : corpse_list) {
-		auto corpse = corpse_entity.second;
-		if (corpse->IsNPCCorpse()) {
-			if (DistanceNoZ(c->GetPosition(), corpse->GetPosition()) < 100) {
+	for (const auto& e : corpse_list) {
+		auto cur = e.second;
+		if (cur->IsNPCCorpse()) {
+			if (DistanceNoZ(c->GetPosition(), cur->GetPosition()) < 100) {
 				c->Message(
 					Chat::White,
 					fmt::format(
 						"Attempting to fix {}.",
-						corpse->GetCleanName()
+						cur->GetCleanName()
 					).c_str()
 				);
 
-				corpse->GMMove(
-					corpse->GetX(),
-					corpse->GetY(),
-					corpse->GetFixedZ(c->GetPosition()),
+				cur->GMMove(
+					cur->GetX(),
+					cur->GetY(),
+					cur->GetFixedZ(c->GetPosition()),
 					c->GetHeading()
 				);
 				
