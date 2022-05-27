@@ -223,7 +223,7 @@ int command_init(void)
 		command_add("kill", "- Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
 		command_add("lastname", "[Last Name] - Set you or your player target's lastname", AccountStatus::Guide, command_lastname) ||
-		command_add("level", "[level] - Set your or your target's level", AccountStatus::Steward, command_level) ||
+		command_add("level", "[Level] - Set your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
 		command_add("listpetition", "- List petitions", AccountStatus::Guide, command_listpetition) ||
 		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", AccountStatus::GMImpossible, command_load_shared_memory) ||
@@ -746,40 +746,6 @@ void command_zone_instance(Client *c, const Seperator *sep)
 	}
 }
 
-void command_level(Client *c, const Seperator *sep)
-{
-	uint16 level = atoi(sep->arg[1]);
-
-	if ((level <= 0) || ((level > RuleI(Character, MaxLevel)) && (c->Admin() < commandLevelAboveCap))) {
-		c->Message(Chat::White, "Error: #Level: Invalid Level");
-	}
-	else if (c->Admin() < RuleI(GM, MinStatusToLevelTarget)) {
-		c->SetLevel(level, true);
-#ifdef BOTS
-		if(RuleB(Bots, BotLevelsWithOwner))
-			Bot::LevelBotWithClient(c, level, true);
-#endif
-	}
-	else if (!c->GetTarget()) {
-		c->Message(Chat::White, "Error: #Level: No target");
-	}
-	else {
-		if (!c->GetTarget()->IsNPC() && ((c->Admin() < commandLevelNPCAboveCap) && (level > RuleI(Character, MaxLevel)))) {
-			c->Message(Chat::White, "Error: #Level: Invalid Level");
-		}
-		else {
-			c->GetTarget()->SetLevel(level, true);
-			if(c->GetTarget()->IsClient()) {
-				c->GetTarget()->CastToClient()->SendLevelAppearance();
-#ifdef BOTS
-				if(RuleB(Bots, BotLevelsWithOwner))
-					Bot::LevelBotWithClient(c->GetTarget()->CastToClient(), level, true);
-#endif
-			}
-		}
-	}
-}
-
 void command_spawneditmass(Client *c, const Seperator *sep)
 {
 	std::string query = fmt::format(
@@ -1235,6 +1201,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/kill.cpp"
 #include "gm_commands/killallnpcs.cpp"
 #include "gm_commands/lastname.cpp"
+#include "gm_commands/level.cpp"
 #include "gm_commands/list.cpp"
 #include "gm_commands/listpetition.cpp"
 #include "gm_commands/loc.cpp"
