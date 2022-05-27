@@ -456,12 +456,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	}
 
 	// Don't aggro new clients if we are already engaged unless PROX_AGGRO is set
-
-	// Frustrated mobs (all rooted up with no one to kill)
-	// will engage without PROX_AGGRO ability if someone new is close now.
-	bool is_frustrated = (IsRooted() && !CombatRange(target));
-
-	if (!is_frustrated && IsEngaged() && (!GetSpecialAbility(PROX_AGGRO) || (GetSpecialAbility(PROX_AGGRO) && !CombatRange(mob)))) {
+	if (IsEngaged() && (!GetSpecialAbility(PROX_AGGRO) || (GetSpecialAbility(PROX_AGGRO) && !CombatRange(mob)))) {
 		LogAggro(
 			"[{}] is in combat, and does not have prox_aggro, or does and is out of combat range with [{}]",
 			GetName(),
