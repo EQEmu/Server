@@ -192,7 +192,7 @@ int command_init(void)
 		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "Kill your target", AccountStatus::GMAdmin, command_kill) ||
 		command_add("killallnpcs", "[npc_name] - Kills all npcs by search name, leave blank for all attackable NPC's", AccountStatus::GMMgmt, command_killallnpcs) ||
-		command_add("lastname", "[Last Name] - Set you or your player target's lastname", AccountStatus::Guide, command_lastname) ||
+		command_add("lastname", "[Last Name] - Set your or your player target's last name (use \"-1\" to remove last name)", AccountStatus::Guide, command_lastname) ||
 		command_add("level", "[Level] - Set your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
 		command_add("listpetition", "List petitions", AccountStatus::Guide, command_listpetition) ||
@@ -205,7 +205,7 @@ int command_init(void)
 		command_add("memspell", "[Spell ID] [Spell Gem] - Memorize a Spell by ID to the specified Spell Gem for you or your target", AccountStatus::Guide, command_memspell) ||
 		command_add("merchant_close_shop",  "Closes a merchant shop", AccountStatus::GMAdmin, command_merchantcloseshop) ||
 		command_add("merchant_open_shop",  "Opens a merchants shop", AccountStatus::GMAdmin, command_merchantopenshop) ||
-		command_add("modifynpcstat", "- Modifys a NPC's stats", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
+		command_add("modifynpcstat", "Modifies an NPC's stats", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
 		command_add("motd", "[Message of the Day] - Set Message of the Day (leave empty to have no Message of the Day)", AccountStatus::GMLeadAdmin, command_motd) ||
 		command_add("movechar", "[Character ID|Character Name] [Zone ID|Zone Short Name] - Move an offline character to the specified zone", AccountStatus::Guide, command_movechar) ||
 		command_add("movement", "Various movement commands", AccountStatus::GMMgmt, command_movement) ||
@@ -230,8 +230,8 @@ int command_init(void)
 		command_add("nukeitem", "[Item ID] - Removes the specified Item ID from you or your player target's inventory", AccountStatus::GMLeadAdmin, command_nukeitem) ||
 		command_add("object", "List|Add|Edit|Move|Rotate|Copy|Save|Undo|Delete - Manipulate static and tradeskill objects within the zone", AccountStatus::GMAdmin, command_object) ||
 		command_add("oocmute", "[0|1] - Enable or Disable Server OOC", AccountStatus::GMMgmt, command_oocmute) ||
-		command_add("opcode", "- opcode management", AccountStatus::GMImpossible, command_opcode) ||
-		command_add("path", "- view and edit pathing", AccountStatus::GMMgmt, command_path) ||
+		command_add("opcode", "opcode management", AccountStatus::GMImpossible, command_opcode) ||
+		command_add("path", "view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
 		command_add("peqzone", "[Zone ID|Zone Short Name] - Teleports you to the specified zone if you meet the requirements.", AccountStatus::Player, command_peqzone) ||
 		command_add("peqzone_flags", "displays the PEQZone Flags of you or your target", AccountStatus::Player, command_peqzone_flags) ||
@@ -315,8 +315,8 @@ int command_init(void)
 		command_add("time", "[Hour] [Minute] - Set world time to specified time", AccountStatus::EQSupport, command_time) ||
 		command_add("timers", "Display persistent timers for target", AccountStatus::GMMgmt, command_timers) ||
 		command_add("timezone", "[Hour] [Minutes] - Set timezone (Minutes are optional)", AccountStatus::EQSupport, command_timezone) ||
-		command_add("title", "[Remove|Title] [Save (0 = False, 1 = True)] - Set your or your player target's title (use remove to remove title, Save defaults to false if not used)", AccountStatus::Guide, command_title) ||
-		command_add("titlesuffix", "[Remove|Title Suffix] [Save (0 = False, 1 = True)] - Set your or your player target's title suffix (use remove to remove title suffix, Save defaults to false if not used)", AccountStatus::Guide, command_titlesuffix) ||
+		command_add("title", "[Title] - Set your or your player target's title (use \"-1\" to remove title)", AccountStatus::Guide, command_title) ||
+		command_add("titlesuffix", "[Title Suffix] - Set your or your player target's title suffix (use \"-1\" to remove title suffix)", AccountStatus::Guide, command_titlesuffix) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_traindisc) ||
 		command_add("trapinfo", "Gets infomation about the traps currently spawned in the zone.", AccountStatus::QuestTroupe, command_trapinfo) ||
 		command_add("tune",  "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||
