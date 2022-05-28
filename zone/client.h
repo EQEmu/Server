@@ -720,8 +720,8 @@ public:
 	void SendGuildJoin(GuildJoin_Struct* gj);
 	void RefreshGuildInfo();
 
-	int GetClientMaxLevel() const { return client_max_level; }
-	void SetClientMaxLevel(int max_level) { client_max_level = max_level; }
+	uint8 GetClientMaxLevel() const { return client_max_level; }
+	void SetClientMaxLevel(uint8 max_level) { client_max_level = max_level; }
 
 	void CheckManaEndUpdate();
 	void SendManaUpdate();
@@ -828,8 +828,8 @@ public:
 	void UntrainDiscBySpellID(uint16 spell_id, bool update_client = true);
 	bool SpellGlobalCheck(uint16 spell_id, uint32 char_id);
 	bool SpellBucketCheck(uint16 spell_id, uint32 char_id);
-	uint32 GetCharMaxLevelFromQGlobal();
-	uint32 GetCharMaxLevelFromBucket();
+	uint8 GetCharMaxLevelFromQGlobal();
+	uint8 GetCharMaxLevelFromBucket();
 
 	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clipping = false);
 
@@ -2008,7 +2008,7 @@ private:
 	void InterrogateInventory_(bool errorcheck, Client* requester, int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, bool log, bool silent, bool &error, int depth);
 	bool InterrogateInventory_error(int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, int depth);
 
-	int client_max_level;
+	uint8 client_max_level;
 
 	uint32 m_expedition_id = 0;
 	ExpeditionInvite m_pending_expedition_invite { 0 };

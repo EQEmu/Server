@@ -8351,7 +8351,7 @@ XS(XS__checknamefilter);
 XS(XS__checknamefilter) {
 	dXSARGS;
 	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::checknamefilter(std::string name)");
+		Perl_croak(aTHX_ "Usage: quest::checknamefilter(string name)");
 	}
 
 	dXSTARG;

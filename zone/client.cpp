@@ -282,11 +282,9 @@ Client::Client(EQStreamInterface* ieqs)
 	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
 		SetClientMaxLevel(0);
 	} else if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
-		int client_max_level = GetCharMaxLevelFromQGlobal();
-		SetClientMaxLevel(client_max_level);
+		SetClientMaxLevel(GetCharMaxLevelFromQGlobal());
 	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
-		int client_max_level = GetCharMaxLevelFromBucket();
-		SetClientMaxLevel(client_max_level);
+		SetClientMaxLevel(GetCharMaxLevelFromBucket());
 	}
 
 	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
@@ -10295,40 +10293,45 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 }
 
 std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_level) {
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
 	std::vector<int> learnable_disciplines;
-	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
 		bool learnable = false;
-		if (!IsValidSpell(spell_id))
+		if (!IsValidSpell(spell_id)) {
 			continue;
-		if (!IsDiscipline(spell_id))
-			continue;
-		if (spells[spell_id].classes[WARRIOR] == 0)
-			continue;
-		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
-			continue;
-		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
-			continue;
-		if (spells[spell_id].skill == 52)
-			continue;
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == 10)
-			continue;
-		if (HasDisciplineLearned(spell_id))
-			continue;
+		}
 
-		if (SpellGlobalRule) {
-			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
-			if (SpellGlobalCheckResult) {
-				learnable = true;
-			}
-		} else if (SpellBucketRule) {
-			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
-			if (SpellBucketCheckResult) {
-				learnable = true;
-			}
+		if (!IsDiscipline(spell_id)) {
+			continue;
+		}
+
+		if (spells[spell_id].classes[WARRIOR] == 0) {
+			continue;
+		}
+
+		if (max_level && spells[spell_id].classes[m_pp.class_ - 1] > max_level) {
+			continue;
+		}
+
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level) {
+			continue;
+		}
+
+		if (spells[spell_id].skill == EQ::skills::SkillTigerClaw) {
+			continue;
+		}
+
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SE_CHA) {
+			continue;
+		}
+
+		if (HasDisciplineLearned(spell_id)) {
+			continue;
+		}
+
+		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
+			learnable = true;
+		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
+			learnable = true;
 		} else {
 			learnable = true;
 		}
@@ -10361,40 +10364,45 @@ std::vector<int> Client::GetMemmedSpells() {
 }
 
 std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
 	std::vector<int> scribeable_spells;
-	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
 		bool scribeable = false;
-		if (!IsValidSpell(spell_id))
+		if (!IsValidSpell(spell_id)) {
 			continue;
-		if (IsDiscipline(spell_id))
-			continue;
-		if (spells[spell_id].classes[WARRIOR] == 0)
-			continue;
-		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
-			continue;
-		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
-			continue;
-		if (spells[spell_id].skill == 52)
-			continue;
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == 10)
-			continue;
-		if (HasSpellScribed(spell_id))
-			continue;
+		}
 
-		if (SpellGlobalRule) {
-			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
-			if (SpellGlobalCheckResult) {
-				scribeable = true;
-			}
-		} else if (SpellBucketRule) {
-			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
-			if (SpellBucketCheckResult) {
-				scribeable = true;
-			}
+		if (IsDiscipline(spell_id)) {
+			continue;
+		}
+
+		if (spells[spell_id].classes[WARRIOR] == 0) {
+			continue;
+		}
+
+		if (max_level && spells[spell_id].classes[m_pp.class_ - 1] > max_level) {
+			continue;
+		}
+
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level) {
+			continue;
+		}
+
+		if (spells[spell_id].skill == EQ::skills::SkillTigerClaw) {
+			continue;
+		}
+
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SE_CHA) {
+			continue;
+		}
+
+		if (HasSpellScribed(spell_id)) {
+			continue;
+		}
+
+		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
+			scribeable = true;
+		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
+			scribeable = true;
 		} else {
 			scribeable = true;
 		}

@@ -4759,12 +4759,12 @@ XS(XS_Client_SetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetClientMaxLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetClientMaxLevel(THIS, int in_level)");
+		Perl_croak(aTHX_ "Usage: Client::SetClientMaxLevel(THIS, uint8 max_level)");
 	{
 		Client* THIS;
-		int in_level = (int)SvUV(ST(1));
+		uint8 max_level = (uint8) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetClientMaxLevel(in_level);
+		THIS->SetClientMaxLevel(max_level);
 	}
 	XSRETURN_EMPTY;
 }
@@ -4776,7 +4776,7 @@ XS(XS_Client_GetClientMaxLevel) {
 		Perl_croak(aTHX_ "Usage: Client::GetClientMaxLevel(THIS)");
 	{
 		Client* THIS;
-		int RETVAL;
+		uint8 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetClientMaxLevel();

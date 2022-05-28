@@ -1844,12 +1844,12 @@ void Lua_Client::SetSecondaryWeaponOrnamentation(uint32 model_id) {
 	self->SetSecondaryWeaponOrnamentation(model_id);
 }
 
-void Lua_Client::SetClientMaxLevel(int value) {
+void Lua_Client::SetClientMaxLevel(uint8 max_level) {
 	Lua_Safe_Call_Void();
-	self->SetClientMaxLevel(value);
+	self->SetClientMaxLevel(max_level);
 }
 
-int Lua_Client::GetClientMaxLevel() {
+uint8 Lua_Client::GetClientMaxLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetClientMaxLevel();
 }
