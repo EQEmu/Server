@@ -56,6 +56,7 @@
 #include "../common/string_util.h"
 #include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/emu_constants.h"
 
 
 #include "bot_command.h"
@@ -1309,116 +1310,116 @@ int bot_command_init(void)
 	bot_command_aliases.clear();
 
 	if (
-		bot_command_add("actionable", "Lists actionable command arguments and use descriptions", 0, bot_command_actionable) ||
-		bot_command_add("aggressive", "Orders a bot to use a aggressive discipline", 0, bot_command_aggressive) ||
-		bot_command_add("applypoison", "Applies cursor-held poison to a rogue bot's weapon", 0, bot_command_apply_poison) ||
-		bot_command_add("applypotion", "Applies cursor-held potion to a bot's effects", 0, bot_command_apply_potion) ||
-		bot_command_add("attack", "Orders bots to attack a designated target", 0, bot_command_attack) ||
-		bot_command_add("bindaffinity", "Orders a bot to attempt an affinity binding", 0, bot_command_bind_affinity) ||
-		bot_command_add("bot", "Lists the available bot management [subcommands]", 0, bot_command_bot) ||
-		bot_command_add("botappearance", "Lists the available bot appearance [subcommands]", 0, bot_subcommand_bot_appearance) ||
-		bot_command_add("botbeardcolor", "Changes the beard color of a bot", 0, bot_subcommand_bot_beard_color) ||
-		bot_command_add("botbeardstyle", "Changes the beard style of a bot", 0, bot_subcommand_bot_beard_style) ||
-		bot_command_add("botcamp", "Orders a bot(s) to camp", 0, bot_subcommand_bot_camp) ||
-		bot_command_add("botclone", "Creates a copy of a bot", 200, bot_subcommand_bot_clone) ||
-		bot_command_add("botcreate", "Creates a new bot", 0, bot_subcommand_bot_create) ||
-		bot_command_add("botdelete", "Deletes all record of a bot", 0, bot_subcommand_bot_delete) ||
-		bot_command_add("botdetails", "Changes the Drakkin details of a bot", 0, bot_subcommand_bot_details) ||
-		bot_command_add("botdyearmor", "Changes the color of a bot's (bots') armor", 0, bot_subcommand_bot_dye_armor) ||
-		bot_command_add("boteyes", "Changes the eye colors of a bot", 0, bot_subcommand_bot_eyes) ||
-		bot_command_add("botface", "Changes the facial appearance of your bot", 0, bot_subcommand_bot_face) ||
-		bot_command_add("botfollowdistance", "Changes the follow distance(s) of a bot(s)", 0, bot_subcommand_bot_follow_distance) ||
-		bot_command_add("botgroup", "Lists the available bot-group [subcommands]", 0, bot_command_botgroup) ||
-		bot_command_add("botgroupaddmember", "Adds a member to a bot-group", 0, bot_subcommand_botgroup_add_member) ||
-		bot_command_add("botgroupcreate", "Creates a bot-group and designates a leader", 0, bot_subcommand_botgroup_create) ||
-		bot_command_add("botgroupdelete", "Deletes a bot-group and releases its members", 0, bot_subcommand_botgroup_delete) ||
-		bot_command_add("botgrouplist", "Lists all of your existing bot-groups", 0, bot_subcommand_botgroup_list) ||
-		bot_command_add("botgroupload", "Loads all members of a bot-group", 0, bot_subcommand_botgroup_load) ||
-		bot_command_add("botgroupremovemember", "Removes a bot from its bot-group", 0, bot_subcommand_botgroup_remove_member) ||
-		bot_command_add("bothaircolor", "Changes the hair color of a bot", 0, bot_subcommand_bot_hair_color) ||
-		bot_command_add("bothairstyle", "Changes the hairstyle of a bot", 0, bot_subcommand_bot_hairstyle) ||
-		bot_command_add("botheritage", "Changes the Drakkin heritage of a bot", 0, bot_subcommand_bot_heritage) ||
-		bot_command_add("botinspectmessage", "Changes the inspect message of a bot", 0, bot_subcommand_bot_inspect_message) ||
-		bot_command_add("botlist", "Lists the bots that you own", 0, bot_subcommand_bot_list) ||
-		bot_command_add("botoutofcombat", "Toggles your bot between standard and out-of-combat spell/skill use - if any specialized behaviors exist", 0, bot_subcommand_bot_out_of_combat) ||
-		bot_command_add("botreport", "Orders a bot to report its readiness", 0, bot_subcommand_bot_report) ||
-		bot_command_add("botspawn", "Spawns a created bot", 0, bot_subcommand_bot_spawn) ||
-		bot_command_add("botstance", "Changes the stance of a bot", 0, bot_subcommand_bot_stance) ||
-		bot_command_add("botstopmeleelevel", "Sets the level a caster or spell-casting fighter bot will stop melee combat", 0, bot_subcommand_bot_stop_melee_level) ||
-		bot_command_add("botsuffix", "Sets a bots suffix", 0, bot_subcommand_bot_suffix) ||
-		bot_command_add("botsummon", "Summons bot(s) to your location", 0, bot_subcommand_bot_summon) ||
-		bot_command_add("botsurname", "Sets a bots surname (last name)", 0, bot_subcommand_bot_surname) ||
-		bot_command_add("bottattoo", "Changes the Drakkin tattoo of a bot", 0, bot_subcommand_bot_tattoo) ||
-		bot_command_add("bottogglearcher", "Toggles a archer bot between melee and ranged weapon use", 0, bot_subcommand_bot_toggle_archer) ||
-		bot_command_add("bottogglehelm", "Toggles the helm visibility of a bot between shown and hidden", 0, bot_subcommand_bot_toggle_helm) ||
-		bot_command_add("bottitle", "Sets a bots title", 0, bot_subcommand_bot_title) ||
-		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", 0, bot_subcommand_bot_update) ||
-		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", 0, bot_subcommand_bot_woad) ||
-		bot_command_add("charm", "Attempts to have a bot charm your target", 0, bot_command_charm) ||
-		bot_command_add("circle", "Orders a Druid bot to open a magical doorway to a specified destination", 0, bot_subcommand_circle) ||
-		bot_command_add("cure", "Orders a bot to remove any ailments", 0, bot_command_cure) ||
-		bot_command_add("defensive", "Orders a bot to use a defensive discipline", 0, bot_command_defensive) ||
-		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", 0, bot_command_depart) ||
-		bot_command_add("escape", "Orders a bot to send a target group to a safe location within the zone", 0, bot_command_escape) ||
-		bot_command_add("findaliases", "Find available aliases for a bot command", 0, bot_command_find_aliases) ||
-		bot_command_add("follow", "Orders bots to follow a designated target (option 'chain' auto-links eligible spawned bots)", 0, bot_command_follow) ||
-		bot_command_add("guard", "Orders bots to guard their current positions", 0, bot_command_guard) ||
-		bot_command_add("healrotation", "Lists the available bot heal rotation [subcommands]", 0, bot_command_heal_rotation) ||
-		bot_command_add("healrotationadaptivetargeting", "Enables or disables adaptive targeting within the heal rotation instance", 0, bot_subcommand_heal_rotation_adaptive_targeting) ||
-		bot_command_add("healrotationaddmember", "Adds a bot to a heal rotation instance", 0, bot_subcommand_heal_rotation_add_member) ||
-		bot_command_add("healrotationaddtarget", "Adds target to a heal rotation instance", 0, bot_subcommand_heal_rotation_add_target) ||
-		bot_command_add("healrotationadjustcritical", "Adjusts the critial HP limit of the heal rotation instance's Class Armor Type criteria", 0, bot_subcommand_heal_rotation_adjust_critical) ||
-		bot_command_add("healrotationadjustsafe", "Adjusts the safe HP limit of the heal rotation instance's Class Armor Type criteria", 0, bot_subcommand_heal_rotation_adjust_safe) ||
-		bot_command_add("healrotationcastingoverride", "Enables or disables casting overrides within the heal rotation instance", 0, bot_subcommand_heal_rotation_casting_override) ||
-		bot_command_add("healrotationchangeinterval", "Changes casting interval between members within the heal rotation instance", 0, bot_subcommand_heal_rotation_change_interval) ||
-		bot_command_add("healrotationclearhot", "Clears the HOT of a heal rotation instance", 0, bot_subcommand_heal_rotation_clear_hot) ||
-		bot_command_add("healrotationcleartargets", "Removes all targets from a heal rotation instance", 0, bot_subcommand_heal_rotation_clear_targets) ||
-		bot_command_add("healrotationcreate", "Creates a bot heal rotation instance and designates a leader", 0, bot_subcommand_heal_rotation_create) ||
-		bot_command_add("healrotationdelete", "Deletes a bot heal rotation entry by leader", 0, bot_subcommand_heal_rotation_delete) ||
-		bot_command_add("healrotationfastheals", "Enables or disables fast heals within the heal rotation instance", 0, bot_subcommand_heal_rotation_fast_heals) ||
-		bot_command_add("healrotationlist", "Reports heal rotation instance(s) information", 0, bot_subcommand_heal_rotation_list) ||
-		bot_command_add("healrotationremovemember", "Removes a bot from a heal rotation instance", 0, bot_subcommand_heal_rotation_remove_member) ||
-		bot_command_add("healrotationremovetarget", "Removes target from a heal rotations instance", 0, bot_subcommand_heal_rotation_remove_target) ||
-		bot_command_add("healrotationresetlimits", "Resets all Class Armor Type HP limit criteria in a heal rotation to its default value", 0, bot_subcommand_heal_rotation_reset_limits) ||
-		bot_command_add("healrotationsave", "Saves a bot heal rotation entry by leader", 0, bot_subcommand_heal_rotation_save) ||
-		bot_command_add("healrotationsethot", "Sets the HOT in a heal rotation instance", 0, bot_subcommand_heal_rotation_set_hot) ||
-		bot_command_add("healrotationstart", "Starts a heal rotation", 0, bot_subcommand_heal_rotation_start) ||
-		bot_command_add("healrotationstop", "Stops a heal rotation", 0, bot_subcommand_heal_rotation_stop) ||
-		bot_command_add("help", "List available commands and their description - specify partial command as argument to search", 0, bot_command_help) ||
-		bot_command_add("hold", "Prevents a bot from attacking until released", 0, bot_command_hold) ||
-		bot_command_add("identify", "Orders a bot to cast an item identification spell", 0, bot_command_identify) ||
-		bot_command_add("inventory", "Lists the available bot inventory [subcommands]", 0, bot_command_inventory) ||
-		bot_command_add("inventorygive", "Gives the item on your cursor to a bot", 0, bot_subcommand_inventory_give) ||
-		bot_command_add("inventorylist", "Lists all items in a bot's inventory", 0, bot_subcommand_inventory_list) ||
-		bot_command_add("inventoryremove", "Removes an item from a bot's inventory", 0, bot_subcommand_inventory_remove) ||
-		bot_command_add("inventorywindow", "Displays all items in a bot's inventory in a pop-up window", 0, bot_subcommand_inventory_window) ||
-		bot_command_add("invisibility", "Orders a bot to cast a cloak of invisibility, or allow them to be seen", 0, bot_command_invisibility) ||
-		bot_command_add("itemuse", "Elicits a report from spawned bots that can use the item on your cursor (option 'empty' yields only empty slots)", 0, bot_command_item_use) ||
-		bot_command_add("levitation", "Orders a bot to cast a levitation spell", 0, bot_command_levitation) ||
-		bot_command_add("lull", "Orders a bot to cast a pacification spell", 0, bot_command_lull) ||
-		bot_command_add("mesmerize", "Orders a bot to cast a mesmerization spell", 0, bot_command_mesmerize) ||
-		bot_command_add("movementspeed", "Orders a bot to cast a movement speed enhancement spell", 0, bot_command_movement_speed) ||
-		bot_command_add("owneroption", "Sets options available to bot owners", 0, bot_command_owner_option) ||
-		bot_command_add("pet", "Lists the available bot pet [subcommands]", 0, bot_command_pet) ||
-		bot_command_add("petgetlost", "Orders a bot to remove its summoned pet", 0, bot_subcommand_pet_get_lost) ||
-		bot_command_add("petremove", "Orders a bot to remove its charmed pet", 0, bot_subcommand_pet_remove) ||
-		bot_command_add("petsettype", "Orders a Magician bot to use a specified pet type", 0, bot_subcommand_pet_set_type) ||
-		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", 0, bot_command_pick_lock) ||
-		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", 0, bot_command_precombat) ||
-		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", 0, bot_subcommand_portal) ||
-		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", 0, bot_command_pull) ||
-		bot_command_add("release", "Releases a suspended bot's AI processing (with hate list wipe)", 0, bot_command_release) ||
-		bot_command_add("resistance", "Orders a bot to cast a specified resistance buff", 0, bot_command_resistance) ||
-		bot_command_add("resurrect", "Orders a bot to resurrect a player's (players') corpse(s)", 0, bot_command_resurrect) ||
-		bot_command_add("rune", "Orders a bot to cast a rune of protection", 0, bot_command_rune) ||
-		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", 0, bot_command_send_home) ||
-		bot_command_add("size", "Orders a bot to change a player's size", 0, bot_command_size) ||
-		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", 0, bot_command_summon_corpse) ||
-		bot_command_add("suspend", "Suspends a bot's AI processing until released", 0, bot_command_suspend) ||
-		bot_command_add("taunt", "Toggles taunt use by a bot", 0, bot_command_taunt) ||
-		bot_command_add("track", "Orders a capable bot to track enemies", 0, bot_command_track) ||
-		bot_command_add("viewcombos", "Views bot race class combinations", 0, bot_command_view_combos) ||
-		bot_command_add("waterbreathing", "Orders a bot to cast a water breathing spell", 0, bot_command_water_breathing)
+		bot_command_add("actionable", "Lists actionable command arguments and use descriptions", AccountStatus::Player, bot_command_actionable) ||
+		bot_command_add("aggressive", "Orders a bot to use a aggressive discipline", AccountStatus::Player, bot_command_aggressive) ||
+		bot_command_add("applypoison", "Applies cursor-held poison to a rogue bot's weapon", AccountStatus::Player, bot_command_apply_poison) ||
+		bot_command_add("applypotion", "Applies cursor-held potion to a bot's effects", AccountStatus::Player, bot_command_apply_potion) ||
+		bot_command_add("attack", "Orders bots to attack a designated target", AccountStatus::Player, bot_command_attack) ||
+		bot_command_add("bindaffinity", "Orders a bot to attempt an affinity binding", AccountStatus::Player, bot_command_bind_affinity) ||
+		bot_command_add("bot", "Lists the available bot management [subcommands]", AccountStatus::Player, bot_command_bot) ||
+		bot_command_add("botappearance", "Lists the available bot appearance [subcommands]", AccountStatus::Player, bot_subcommand_bot_appearance) ||
+		bot_command_add("botbeardcolor", "Changes the beard color of a bot", AccountStatus::Player, bot_subcommand_bot_beard_color) ||
+		bot_command_add("botbeardstyle", "Changes the beard style of a bot", AccountStatus::Player, bot_subcommand_bot_beard_style) ||
+		bot_command_add("botcamp", "Orders a bot(s) to camp", AccountStatus::Player, bot_subcommand_bot_camp) ||
+		bot_command_add("botclone", "Creates a copy of a bot", AccountStatus::GMMgmt, bot_subcommand_bot_clone) ||
+		bot_command_add("botcreate", "Creates a new bot", AccountStatus::Player, bot_subcommand_bot_create) ||
+		bot_command_add("botdelete", "Deletes all record of a bot", AccountStatus::Player, bot_subcommand_bot_delete) ||
+		bot_command_add("botdetails", "Changes the Drakkin details of a bot", AccountStatus::Player, bot_subcommand_bot_details) ||
+		bot_command_add("botdyearmor", "Changes the color of a bot's (bots') armor", AccountStatus::Player, bot_subcommand_bot_dye_armor) ||
+		bot_command_add("boteyes", "Changes the eye colors of a bot", AccountStatus::Player, bot_subcommand_bot_eyes) ||
+		bot_command_add("botface", "Changes the facial appearance of your bot", AccountStatus::Player, bot_subcommand_bot_face) ||
+		bot_command_add("botfollowdistance", "Changes the follow distance(s) of a bot(s)", AccountStatus::Player, bot_subcommand_bot_follow_distance) ||
+		bot_command_add("botgroup", "Lists the available bot-group [subcommands]", AccountStatus::Player, bot_command_botgroup) ||
+		bot_command_add("botgroupaddmember", "Adds a member to a bot-group", AccountStatus::Player, bot_subcommand_botgroup_add_member) ||
+		bot_command_add("botgroupcreate", "Creates a bot-group and designates a leader", AccountStatus::Player, bot_subcommand_botgroup_create) ||
+		bot_command_add("botgroupdelete", "Deletes a bot-group and releases its members", AccountStatus::Player, bot_subcommand_botgroup_delete) ||
+		bot_command_add("botgrouplist", "Lists all of your existing bot-groups", AccountStatus::Player, bot_subcommand_botgroup_list) ||
+		bot_command_add("botgroupload", "Loads all members of a bot-group", AccountStatus::Player, bot_subcommand_botgroup_load) ||
+		bot_command_add("botgroupremovemember", "Removes a bot from its bot-group", AccountStatus::Player, bot_subcommand_botgroup_remove_member) ||
+		bot_command_add("bothaircolor", "Changes the hair color of a bot", AccountStatus::Player, bot_subcommand_bot_hair_color) ||
+		bot_command_add("bothairstyle", "Changes the hairstyle of a bot", AccountStatus::Player, bot_subcommand_bot_hairstyle) ||
+		bot_command_add("botheritage", "Changes the Drakkin heritage of a bot", AccountStatus::Player, bot_subcommand_bot_heritage) ||
+		bot_command_add("botinspectmessage", "Changes the inspect message of a bot", AccountStatus::Player, bot_subcommand_bot_inspect_message) ||
+		bot_command_add("botlist", "Lists the bots that you own", AccountStatus::Player, bot_subcommand_bot_list) ||
+		bot_command_add("botoutofcombat", "Toggles your bot between standard and out-of-combat spell/skill use - if any specialized behaviors exist", AccountStatus::Player, bot_subcommand_bot_out_of_combat) ||
+		bot_command_add("botreport", "Orders a bot to report its readiness", AccountStatus::Player, bot_subcommand_bot_report) ||
+		bot_command_add("botspawn", "Spawns a created bot", AccountStatus::Player, bot_subcommand_bot_spawn) ||
+		bot_command_add("botstance", "Changes the stance of a bot", AccountStatus::Player, bot_subcommand_bot_stance) ||
+		bot_command_add("botstopmeleelevel", "Sets the level a caster or spell-casting fighter bot will stop melee combat", AccountStatus::Player, bot_subcommand_bot_stop_melee_level) ||
+		bot_command_add("botsuffix", "Sets a bots suffix", AccountStatus::Player, bot_subcommand_bot_suffix) ||
+		bot_command_add("botsummon", "Summons bot(s) to your location", AccountStatus::Player, bot_subcommand_bot_summon) ||
+		bot_command_add("botsurname", "Sets a bots surname (last name)", AccountStatus::Player, bot_subcommand_bot_surname) ||
+		bot_command_add("bottattoo", "Changes the Drakkin tattoo of a bot", AccountStatus::Player, bot_subcommand_bot_tattoo) ||
+		bot_command_add("bottogglearcher", "Toggles a archer bot between melee and ranged weapon use", AccountStatus::Player, bot_subcommand_bot_toggle_archer) ||
+		bot_command_add("bottogglehelm", "Toggles the helm visibility of a bot between shown and hidden", AccountStatus::Player, bot_subcommand_bot_toggle_helm) ||
+		bot_command_add("bottitle", "Sets a bots title", AccountStatus::Player, bot_subcommand_bot_title) ||
+		bot_command_add("botupdate", "Updates a bot to reflect any level changes that you have experienced", AccountStatus::Player, bot_subcommand_bot_update) ||
+		bot_command_add("botwoad", "Changes the Barbarian woad of a bot", AccountStatus::Player, bot_subcommand_bot_woad) ||
+		bot_command_add("charm", "Attempts to have a bot charm your target", AccountStatus::Player, bot_command_charm) ||
+		bot_command_add("circle", "Orders a Druid bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_subcommand_circle) ||
+		bot_command_add("cure", "Orders a bot to remove any ailments", AccountStatus::Player, bot_command_cure) ||
+		bot_command_add("defensive", "Orders a bot to use a defensive discipline", AccountStatus::Player, bot_command_defensive) ||
+		bot_command_add("depart", "Orders a bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_command_depart) ||
+		bot_command_add("escape", "Orders a bot to send a target group to a safe location within the zone", AccountStatus::Player, bot_command_escape) ||
+		bot_command_add("findaliases", "Find available aliases for a bot command", AccountStatus::Player, bot_command_find_aliases) ||
+		bot_command_add("follow", "Orders bots to follow a designated target (option 'chain' auto-links eligible spawned bots)", AccountStatus::Player, bot_command_follow) ||
+		bot_command_add("guard", "Orders bots to guard their current positions", AccountStatus::Player, bot_command_guard) ||
+		bot_command_add("healrotation", "Lists the available bot heal rotation [subcommands]", AccountStatus::Player, bot_command_heal_rotation) ||
+		bot_command_add("healrotationadaptivetargeting", "Enables or disables adaptive targeting within the heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_adaptive_targeting) ||
+		bot_command_add("healrotationaddmember", "Adds a bot to a heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_add_member) ||
+		bot_command_add("healrotationaddtarget", "Adds target to a heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_add_target) ||
+		bot_command_add("healrotationadjustcritical", "Adjusts the critial HP limit of the heal rotation instance's Class Armor Type criteria", AccountStatus::Player, bot_subcommand_heal_rotation_adjust_critical) ||
+		bot_command_add("healrotationadjustsafe", "Adjusts the safe HP limit of the heal rotation instance's Class Armor Type criteria", AccountStatus::Player, bot_subcommand_heal_rotation_adjust_safe) ||
+		bot_command_add("healrotationcastingoverride", "Enables or disables casting overrides within the heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_casting_override) ||
+		bot_command_add("healrotationchangeinterval", "Changes casting interval between members within the heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_change_interval) ||
+		bot_command_add("healrotationclearhot", "Clears the HOT of a heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_clear_hot) ||
+		bot_command_add("healrotationcleartargets", "Removes all targets from a heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_clear_targets) ||
+		bot_command_add("healrotationcreate", "Creates a bot heal rotation instance and designates a leader", AccountStatus::Player, bot_subcommand_heal_rotation_create) ||
+		bot_command_add("healrotationdelete", "Deletes a bot heal rotation entry by leader", AccountStatus::Player, bot_subcommand_heal_rotation_delete) ||
+		bot_command_add("healrotationfastheals", "Enables or disables fast heals within the heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_fast_heals) ||
+		bot_command_add("healrotationlist", "Reports heal rotation instance(s) information", AccountStatus::Player, bot_subcommand_heal_rotation_list) ||
+		bot_command_add("healrotationremovemember", "Removes a bot from a heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_remove_member) ||
+		bot_command_add("healrotationremovetarget", "Removes target from a heal rotations instance", AccountStatus::Player, bot_subcommand_heal_rotation_remove_target) ||
+		bot_command_add("healrotationresetlimits", "Resets all Class Armor Type HP limit criteria in a heal rotation to its default value", AccountStatus::Player, bot_subcommand_heal_rotation_reset_limits) ||
+		bot_command_add("healrotationsave", "Saves a bot heal rotation entry by leader", AccountStatus::Player, bot_subcommand_heal_rotation_save) ||
+		bot_command_add("healrotationsethot", "Sets the HOT in a heal rotation instance", AccountStatus::Player, bot_subcommand_heal_rotation_set_hot) ||
+		bot_command_add("healrotationstart", "Starts a heal rotation", AccountStatus::Player, bot_subcommand_heal_rotation_start) ||
+		bot_command_add("healrotationstop", "Stops a heal rotation", AccountStatus::Player, bot_subcommand_heal_rotation_stop) ||
+		bot_command_add("help", "List available commands and their description - specify partial command as argument to search", AccountStatus::Player, bot_command_help) ||
+		bot_command_add("hold", "Prevents a bot from attacking until released", AccountStatus::Player, bot_command_hold) ||
+		bot_command_add("identify", "Orders a bot to cast an item identification spell", AccountStatus::Player, bot_command_identify) ||
+		bot_command_add("inventory", "Lists the available bot inventory [subcommands]", AccountStatus::Player, bot_command_inventory) ||
+		bot_command_add("inventorygive", "Gives the item on your cursor to a bot", AccountStatus::Player, bot_subcommand_inventory_give) ||
+		bot_command_add("inventorylist", "Lists all items in a bot's inventory", AccountStatus::Player, bot_subcommand_inventory_list) ||
+		bot_command_add("inventoryremove", "Removes an item from a bot's inventory", AccountStatus::Player, bot_subcommand_inventory_remove) ||
+		bot_command_add("inventorywindow", "Displays all items in a bot's inventory in a pop-up window", AccountStatus::Player, bot_subcommand_inventory_window) ||
+		bot_command_add("invisibility", "Orders a bot to cast a cloak of invisibility, or allow them to be seen", AccountStatus::Player, bot_command_invisibility) ||
+		bot_command_add("itemuse", "Elicits a report from spawned bots that can use the item on your cursor (option 'empty' yields only empty slots)", AccountStatus::Player, bot_command_item_use) ||
+		bot_command_add("levitation", "Orders a bot to cast a levitation spell", AccountStatus::Player, bot_command_levitation) ||
+		bot_command_add("lull", "Orders a bot to cast a pacification spell", AccountStatus::Player, bot_command_lull) ||
+		bot_command_add("mesmerize", "Orders a bot to cast a mesmerization spell", AccountStatus::Player, bot_command_mesmerize) ||
+		bot_command_add("movementspeed", "Orders a bot to cast a movement speed enhancement spell", AccountStatus::Player, bot_command_movement_speed) ||
+		bot_command_add("owneroption", "Sets options available to bot owners", AccountStatus::Player, bot_command_owner_option) ||
+		bot_command_add("pet", "Lists the available bot pet [subcommands]", AccountStatus::Player, bot_command_pet) ||
+		bot_command_add("petgetlost", "Orders a bot to remove its summoned pet", AccountStatus::Player, bot_subcommand_pet_get_lost) ||
+		bot_command_add("petremove", "Orders a bot to remove its charmed pet", AccountStatus::Player, bot_subcommand_pet_remove) ||
+		bot_command_add("petsettype", "Orders a Magician bot to use a specified pet type", AccountStatus::Player, bot_subcommand_pet_set_type) ||
+		bot_command_add("picklock", "Orders a capable bot to pick the lock of the closest door", AccountStatus::Player, bot_command_pick_lock) ||
+		bot_command_add("precombat", "Sets flag used to determine pre-combat behavior", AccountStatus::Player, bot_command_precombat) ||
+		bot_command_add("portal", "Orders a Wizard bot to open a magical doorway to a specified destination", AccountStatus::Player, bot_subcommand_portal) ||
+		bot_command_add("pull", "Orders a designated bot to 'pull' an enemy", AccountStatus::Player, bot_command_pull) ||
+		bot_command_add("release", "Releases a suspended bot's AI processing (with hate list wipe)", AccountStatus::Player, bot_command_release) ||
+		bot_command_add("resistance", "Orders a bot to cast a specified resistance buff", AccountStatus::Player, bot_command_resistance) ||
+		bot_command_add("resurrect", "Orders a bot to resurrect a player's (players') corpse(s)", AccountStatus::Player, bot_command_resurrect) ||
+		bot_command_add("rune", "Orders a bot to cast a rune of protection", AccountStatus::Player, bot_command_rune) ||
+		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", AccountStatus::Player, bot_command_send_home) ||
+		bot_command_add("size", "Orders a bot to change a player's size", AccountStatus::Player, bot_command_size) ||
+		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) ||
+		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
+		bot_command_add("taunt", "Toggles taunt use by a bot", AccountStatus::Player, bot_command_taunt) ||
+		bot_command_add("track", "Orders a capable bot to track enemies", AccountStatus::Player, bot_command_track) ||
+		bot_command_add("viewcombos", "Views bot race class combinations", AccountStatus::Player, bot_command_view_combos) ||
+		bot_command_add("waterbreathing", "Orders a bot to cast a water breathing spell", AccountStatus::Player, bot_command_water_breathing)
 	) {
 		bot_command_deinit();
 		return -1;

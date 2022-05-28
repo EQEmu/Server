@@ -741,6 +741,7 @@ public:
 	//Util
 	static uint32 RandomTimer(int min, int max);
 	static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
+	static bool IsPlayerClass(uint16 in_class);
 	static bool IsPlayerRace(uint16 in_race);
 	EQ::skills::SkillType GetSkillByItemType(int ItemType);
 	uint8 GetItemTypeBySkill(EQ::skills::SkillType skill);
@@ -1239,8 +1240,8 @@ public:
 	inline uint8 GetManaPercent() { return (uint8)((float)current_mana / (float)max_mana * 100.0f); }
 	virtual uint8 GetEndurancePercent() { return 0; }
 
-	inline virtual bool IsBlockedBuff(int16 SpellID) { return false; }
-	inline virtual bool IsBlockedPetBuff(int16 SpellID) { return false; }
+	inline virtual bool IsBlockedBuff(int32 SpellID) { return false; }
+	inline virtual bool IsBlockedPetBuff(int32 SpellID) { return false; }
 
 	std::string GetGlobal(const char *varname);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = nullptr);

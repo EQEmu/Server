@@ -437,6 +437,7 @@
 9181|2022_05_03_task_activity_goal_match_list.sql|SHOW COLUMNS FROM `task_activities` LIKE 'goal_match_list'|empty|
 9182|2022_05_02_npc_types_int64.sql|SHOW COLUMNS FROM `npc_types` LIKE 'hp'|missing|bigint
 9183|2022_05_07_merchant_data_buckets.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'bucket_comparison'|empty
+9184|2022_05_21_schema_consistency.sql|SELECT * FROM db_version WHERE version >= 9184|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

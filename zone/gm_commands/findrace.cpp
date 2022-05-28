@@ -3,26 +3,35 @@
 void command_findrace(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-
-	if (arguments == 0) {
-		c->Message(Chat::White, "Command Syntax: #findrace [search criteria]");
+	if (!arguments) {
+		c->Message(Chat::White, "Command Syntax: #findrace [Search Criteria]");
 		return;
 	}
 
 	if (sep->IsNumber(1)) {
-		int         race_id   = std::stoi(sep->arg[1]);
+		auto race_id = static_cast<uint16>(std::stoul(sep->arg[1]));
 		std::string race_name = GetRaceIDName(race_id);
-		if (race_id >= RACE_HUMAN_1 && race_id <= RACE_PEGASUS_732) {
+		if (
+			race_id >= RACE_HUMAN_1 &&
+			race_id <= RACE_PEGASUS_732
+		) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Race {}: {}",
+					"Race {} | {}{}",
 					race_id,
-					race_name
+					race_name,
+					(
+						c->IsPlayerRace(race_id) ?
+						fmt::format(
+							" ({})",
+							GetPlayerRaceBit(race_id)
+						) :
+						""
+					)
 				).c_str()
 			);
-		}
-		else {
+		} else {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -31,51 +40,52 @@ void command_findrace(Client *c, const Seperator *sep)
 				).c_str()
 			);
 		}
-	}
-	else {
-		std::string search_criteria = str_tolower(sep->argplus[1]);
-		int         found_count     = 0;
-		for (int    race_id         = RACE_HUMAN_1; race_id <= RACE_PEGASUS_732; race_id++) {
-			std::string race_name       = GetRaceIDName(race_id);
-			std::string race_name_lower = str_tolower(race_name);
-			if (search_criteria.length() > 0 && race_name_lower.find(search_criteria) == std::string::npos) {
+	} else {
+		auto search_criteria = str_tolower(sep->argplus[1]);
+		int found_count = 0;
+		for (uint16 race_id = RACE_HUMAN_1; race_id <= RACE_PEGASUS_732; race_id++) {
+			std::string race_name = GetRaceIDName(race_id);
+			auto race_name_lower = str_tolower(race_name);
+			if (
+				search_criteria.length() && 
+				race_name_lower.find(search_criteria) == std::string::npos
+			) {
 				continue;
 			}
 
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Race {}: {}",
+					"Race {} | {}{}",
 					race_id,
-					race_name
+					race_name,
+					(
+						c->IsPlayerRace(race_id) ?
+						fmt::format(
+							" ({})",
+							GetPlayerRaceBit(race_id)
+						) :
+						""
+					)
 				).c_str()
 			);
+
 			found_count++;
 
-			if (found_count == 20) {
+			if (found_count == 50) {
 				break;
 			}
 		}
 
-		if (found_count == 20) {
-			c->Message(Chat::White, "20 Races found... max reached.");
-		}
-		else {
-			auto race_message = (
-				found_count > 0 ?
-					(
-						found_count == 1 ?
-							"A Race was" :
-							fmt::format("{} Races were", found_count)
-					) :
-					"No Races were"
-			);
-
+		if (found_count == 50) {
+			c->Message(Chat::White, "50 Races found, max reached.");
+		} else {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{} found.",
-					race_message
+					"{} Race{} found.",
+					found_count,
+					found_count != 1 ? "s" : ""
 				).c_str()
 			);
 		}
