@@ -208,7 +208,7 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 }
 
 uint32 ClientList::GetCLEIPCount(uint32 in_ip) {
-	ClientListEntry* cle = 0;
+	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	int count = 0;
@@ -233,7 +233,7 @@ uint32 ClientList::GetCLEIPCount(uint32 in_ip) {
 }
 
 void ClientList::DisconnectByIP(uint32 in_ip) {
-	ClientListEntry* cle = 0;
+	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 	iterator.Reset();
 
