@@ -296,7 +296,7 @@ const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
 
 std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
 {
-	if (!EQ::constants::GetBodyTypeMap().find(bodytype_id)->second.empty()) {
+	if (EQ::constants::GetBodyTypeMap().find(bodytype_id) != EQ::constants::GetBodyTypeMap().end()) {
 		return EQ::constants::GetBodyTypeMap().find(bodytype_id)->second;
 	}
 
@@ -362,7 +362,7 @@ const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
 
 std::string EQ::constants::GetConsiderLevelName(uint8 faction_consider_level)
 {
-	if (!EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second.empty()) {
+	if (EQ::constants::GetConsiderLevelMap().find(faction_consider_level) != EQ::constants::GetConsiderLevelMap().end()) {
 		return EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second;
 	}
 
