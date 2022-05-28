@@ -2910,6 +2910,7 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == RACE_FAYGUARD_112 ||
 		in_race == RACE_ERUDITE_GHOST_118 ||
 		in_race == RACE_IKSAR_CITIZEN_139 ||
+		in_race == RACE_SHADE_224 ||
 		in_race == RACE_TROLL_CREW_MEMBER_331 ||
 		in_race == RACE_PIRATE_DECKHAND_332 ||
 		in_race == RACE_GNOME_PIRATE_338 ||
@@ -2922,7 +2923,12 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == RACE_WARLOCK_OF_HATE_352 ||
 		in_race == RACE_UNDEAD_VAMPIRE_359 ||
 		in_race == RACE_VAMPIRE_360 ||
+		in_race == RACE_SAND_ELF_364 ||
+		in_race == RACE_TAELOSIAN_NATIVE_385 ||
+		in_race == RACE_TAELOSIAN_EVOKER_386 ||
+		in_race == RACE_DRACHNID_461 ||
 		in_race == RACE_ZOMBIE_471 ||
+		in_race == RACE_ELDDAR_489 ||
 		in_race == RACE_VAMPIRE_497 ||
 		in_race == RACE_KERRAN_562 ||
 		in_race == RACE_BROWNIE_568 ||
@@ -2949,11 +2955,22 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == RACE_SPECTRAL_IKSAR_147 ||
 		in_race == RACE_INVISIBLE_MAN_127 ||
 		in_race == RACE_VAMPYRE_208 ||
+		in_race == RACE_RECUSO_237 ||
 		in_race == RACE_BROKEN_SKULL_PIRATE_333 ||
+		in_race == RACE_INVISIBLE_MAN_OF_ZOMM_600 ||
+		in_race == RACE_OGRE_NPC_MALE_624 ||
+		in_race == RACE_BEEFEATER_667 ||
 		in_race == RACE_ERUDITE_678
 	) { // Male only races
 		return 0;
-	} else if (in_race == RACE_FAIRY_25 || in_race == RACE_PIXIE_56) { // Female only races
+	} else if (
+		in_race == RACE_FAIRY_25 ||
+		in_race == RACE_PIXIE_56 ||
+		in_race == RACE_BANSHEE_487 ||
+		in_race == RACE_BANSHEE_488 ||
+		in_race == RACE_AYONAE_RO_498 ||
+		in_race == RACE_SULLON_ZEK_499
+	) { // Female only races
 		return 1;
 	} else { // Neutral default for NPC Races
 		return 2;
