@@ -916,12 +916,12 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				break;
 		}
 
-		buffer = fmt::format("{},{},{}.{},{}{}",
+		buffer = fmt::format("{},{},{}.{},{}{:08X}",
 			config->ChatHost,
 			config->ChatPort,
 			config->ShortName,
 			GetCharName(),
-			connection_type,
+			static_cast<char>(connection_type),
 			mail_key
 		);
 
@@ -942,12 +942,12 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 				break;
 		}
 
-		buffer = fmt::format("{},{},{}.{},{}{}",
+		buffer = fmt::format("{},{},{}.{},{}{:08X}",
 			config->MailHost,
 			config->MailPort,
 			config->ShortName,
 			GetCharName(),
-			connection_type,
+			static_cast<char>(connection_type),
 			mail_key
 		);
 
