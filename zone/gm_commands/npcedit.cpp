@@ -12,7 +12,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 
 	int arguments = sep->argnum;
 
-	bool is_help = arguments >= 1 ? !strcasecmp(sep->arg[1], "help") : true;
+	bool is_help = (arguments == 0 || !strcasecmp(sep->arg[1], "help"));
 
 	if (is_help) {
 		c->Message(Chat::White, "Usage: #npcedit name [Name] - Sets an NPC's Name");
