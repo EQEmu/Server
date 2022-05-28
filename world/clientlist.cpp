@@ -101,7 +101,7 @@ ClientListEntry* ClientList::GetCLE(uint32 iID) {
 //Check current CLE Entry IPs against incoming connection
 
 void ClientList::GetCLEIP(uint32 in_ip) {
-	ClientListEntry* cle = 0;
+	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	int count = 0;
