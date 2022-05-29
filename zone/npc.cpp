@@ -886,9 +886,9 @@ bool NPC::Process()
 		}
 
 		int64 npc_sitting_regen_bonus = 0;
-		int64 pet_regen_bonus         = 0;
-		int64 npc_regen               = 0;
-		int64  npc_hp_regen            = GetNPCHPRegen();
+		int64 pet_regen_bonus = 0;
+		int64 npc_regen = 0;
+		int64 npc_hp_regen = GetNPCHPRegen();
 
 		if (GetAppearance() == eaSitting) {
 			npc_sitting_regen_bonus += 3;
