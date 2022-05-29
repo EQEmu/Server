@@ -198,6 +198,12 @@ namespace WorldserverCommandHandler {
 		for (const auto          &table: version_tables) {
 			version_tables_json.append(table);
 		}
+		
+		Json::Value              player_bot_tables_json;
+		std::vector<std::string> player_bot_tables = DatabaseSchema::GetPlayerBotTables();
+		for (const auto          &table: player_bot_tables) {
+			player_bot_tables_json.append(table);
+		}
 
 		Json::Value schema;
 
@@ -207,6 +213,7 @@ namespace WorldserverCommandHandler {
 		schema["server_tables"]  = server_tables_json;
 		schema["state_tables"]   = state_tables_json;
 		schema["version_tables"] = version_tables_json;
+		schema["player_bot_tables"] = player_bot_tables_json;
 
 		std::stringstream payload;
 		payload << schema;
