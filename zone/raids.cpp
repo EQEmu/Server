@@ -24,6 +24,7 @@
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
+#include "string_ids.h"
 
 #include "worldserver.h"
 
@@ -789,15 +790,26 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 	auto gold_split = gold / member_count;
 	auto platinum_split = platinum / member_count;
 
-	auto cash_message = fmt::format(
-		"You receive {} as your split.",
-		ConvertMoneyToString(platinum_split, gold_split, silver_split, copper_split)
-	);
-
 	for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++) {
 		if (members[i].member && members[i].GroupNumber == gid) { // If Group Member is Client
-			members[i].member->AddMoneyToPP(copper_split, silver_split, gold_split, platinum_split, true);
-			members[i].member->Message(Chat::Green, cash_message.c_str());
+			members[i].member->AddMoneyToPP(
+				copper_split,
+				silver_split,
+				gold_split,
+				platinum_split,
+				true
+			);
+
+			members[i].member->MessageString(
+				Chat::MoneySplit,
+				YOU_RECEIVE_AS_SPLIT,
+				ConvertMoneyToString(
+					platinum_split,
+					gold_split,
+					silver_split,
+					copper_split
+				).c_str()
+			);
 		}
 	}
 }

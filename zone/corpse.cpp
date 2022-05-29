@@ -1029,7 +1029,12 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				Chat::Yellow,
 				fmt::format(
 					"This corpse contains {}.",
-					ConvertMoneyToString(GetPlatinum(), GetGold(), GetSilver(), GetCopper())
+					ConvertMoneyToString(
+						GetPlatinum(),
+						GetGold(),
+						GetSilver(),
+						GetCopper()
+					)
 				).c_str()
 			);
 		} else {
@@ -1519,13 +1524,12 @@ void Corpse::QueryLoot(Client* to) {
 		}
 	}
 
-	bool has_money = (
-		platinum > 0 ||
-		gold > 0 ||
-		silver > 0 ||
-		copper > 0
-	);
-	if (has_money) {
+	if (
+		platinum ||
+		gold ||
+		silver ||
+		copper
+	) {
 		to->Message(
 			Chat::White,
 			fmt::format(

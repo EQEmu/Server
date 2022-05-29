@@ -1340,22 +1340,22 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		silver   = copper / 10;
 		copper   = copper - (silver * 10);
 
-		std::string cash_message;
-
 		if (
 			copper ||
 			silver ||
 			gold ||
 			platinum
 		) {
-			cash_message = fmt::format(
-				"You receive {}.",
-				ConvertMoneyToString(platinum, gold, silver, copper)
+			client->MessageString(
+				Chat::Yellow,
+				YOU_RECEIVE,
+				ConvertMoneyToString(
+					platinum,
+					gold,
+					silver,
+					copper
+				).c_str()
 			);
-		}
-
-		if (!cash_message.empty()) {
-			client->Message(Chat::Yellow, cash_message.c_str());
 		}
 	}
 	int32 experience_reward = task_information->experience_reward;
