@@ -3848,9 +3848,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						IsPlayerRace(GetBaseRace()) &&
 						RuleI(Combat, FrontalStunImmunityRaces) & GetPlayerRaceBit(GetBaseRace())
 					) ||
-					GetBaseRace() == RACE_OGGOK_CITIZEN_93 ||
-					GetBaseRace() == RACE_RALLOS_OGRE_325 ||
-					GetBaseRace() == RACE_OGRE_PIRATE_340
+					GetBaseRace() == RACE_OGGOK_CITIZEN_93
 				) {
 					is_immune_to_frontal_stun = true;
 				}
@@ -3870,9 +3868,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							IsPlayerRace(GetBaseRace()) &&
 							RuleI(Combat, FrontalStunImmunityRaces) & GetPlayerRaceBit(GetBaseRace())
 						) ||
-						GetBaseRace() == RACE_OGGOK_CITIZEN_93 ||
-						GetBaseRace() == RACE_RALLOS_OGRE_325 ||
-						GetBaseRace() == RACE_OGRE_PIRATE_340
+						GetBaseRace() == RACE_OGGOK_CITIZEN_93
 					)
 				) {
 					is_immune_to_frontal_stun = true;
