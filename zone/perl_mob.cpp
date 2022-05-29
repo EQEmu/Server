@@ -1579,7 +1579,7 @@ XS(XS_Mob_GetHP) {
 		Perl_croak(aTHX_ "Usage: Mob::GetHP(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetHP();
@@ -1596,7 +1596,7 @@ XS(XS_Mob_GetMaxHP) {
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxHP(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetMaxHP();
@@ -1613,7 +1613,7 @@ XS(XS_Mob_GetItemHPBonuses) {
 		Perl_croak(aTHX_ "Usage: Mob::GetItemHPBonuses(THIS)"); // @categories Inventory and Items, Stats and Attributes
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetItemHPBonuses();
@@ -4417,12 +4417,12 @@ XS(XS_Mob_SetOOCRegen); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetOOCRegen) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, int32 new_ooc_regen)"); // @categories Stats and Attributes
+		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, int64 new_ooc_regen)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int32 newoocregen = (int32) SvIV(ST(1));
+		int64 new_ooc_regen = (int64) SvIV(ST(1));
 		VALIDATE_THIS_IS_MOB;
-		THIS->SetOOCRegen(newoocregen);
+		THIS->SetOOCRegen(new_ooc_regen);
 	}
 	XSRETURN_EMPTY;
 }
