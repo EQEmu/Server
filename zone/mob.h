@@ -497,7 +497,7 @@ public:
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
 	virtual void SetHP(int64 hp);
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
-	inline void SetOOCRegen(int32 newoocregen) {ooc_regen = newoocregen;}
+	inline void SetOOCRegen(int64 new_ooc_regen) { ooc_regen = new_ooc_regen; }
 	virtual void Heal();
 	virtual void HealDamage(uint64 ammount, Mob* caster = nullptr, uint16 spell_id = SPELL_UNKNOWN);
 	virtual void SetMaxHP() { current_hp = max_hp; }
@@ -1448,7 +1448,7 @@ protected:
 	int64 hp_regen;
 	int64 hp_regen_per_second;
 	int64 mana_regen;
-	int32 ooc_regen;
+	int64 ooc_regen;
 	uint8 maxlevel;
 	uint32 scalerate;
 	Buffs_Struct *buffs;

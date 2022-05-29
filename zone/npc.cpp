@@ -693,13 +693,12 @@ void NPC::QueryLoot(Client* to, bool is_pet_query)
 	}
 
 	if (!is_pet_query) {
-		bool has_money = (
-			platinum > 0 ||
-			gold > 0 ||
-			silver > 0 ||
-			copper > 0
-		);
-		if (has_money) {
+		if (
+			platinum ||
+			gold ||
+			silver ||
+			copper
+		) {
 			to->Message(
 				Chat::White,
 				fmt::format(
@@ -885,10 +884,10 @@ bool NPC::Process()
 			ProcessFlee();
 		}
 
-		uint32 npc_sitting_regen_bonus = 0;
-		uint32 pet_regen_bonus         = 0;
-		uint64 npc_regen               = 0;
-		int64  npc_hp_regen            = GetNPCHPRegen();
+		int64 npc_sitting_regen_bonus = 0;
+		int64 pet_regen_bonus = 0;
+		int64 npc_regen = 0;
+		int64 npc_hp_regen = GetNPCHPRegen();
 
 		if (GetAppearance() == eaSitting) {
 			npc_sitting_regen_bonus += 3;
