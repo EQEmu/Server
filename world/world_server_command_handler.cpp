@@ -230,6 +230,7 @@ namespace WorldserverCommandHandler {
 			"--content-tables",
 			"--login-tables",
 			"--player-tables",
+			"--player-bot-tables",
 			"--state-tables",
 			"--system-tables",
 			"--query-serv-tables",
@@ -260,6 +261,7 @@ namespace WorldserverCommandHandler {
 		database_dump_service->SetDumpContentTables(cmd[{"--content-tables"}] || dump_all);
 		database_dump_service->SetDumpLoginServerTables(cmd[{"--login-tables"}] || dump_all);
 		database_dump_service->SetDumpPlayerTables(cmd[{"--player-tables"}] || dump_all);
+		database_dump_service->SetDumpPlayerBotTables(cmd[{"--player-bot-tables"}] || dump_all);
 		database_dump_service->SetDumpStateTables(cmd[{"--state-tables"}] || dump_all);
 		database_dump_service->SetDumpSystemTables(cmd[{"--system-tables"}] || dump_all);
 		database_dump_service->SetDumpQueryServerTables(cmd[{"--query-serv-tables"}] || dump_all);

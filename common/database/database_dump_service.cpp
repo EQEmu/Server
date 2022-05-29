@@ -436,6 +436,7 @@ void DatabaseDumpService::Dump()
 //	LogDebug("[{}] login", (IsDumpLoginServerTables() ? "true" : "false"));
 //	LogDebug("[{}] player", (IsDumpPlayerTables() ? "true" : "false"));
 //	LogDebug("[{}] system", (IsDumpSystemTables() ? "true" : "false"));
+//	LogDebug("[{}] bot", (IsDumpPlayerBotTables() ? "true" : "false"));
 }
 
 bool DatabaseDumpService::IsDumpSystemTables() const
@@ -576,4 +577,14 @@ bool DatabaseDumpService::IsDumpStateTables() const
 void DatabaseDumpService::SetDumpStateTables(bool dump_state_tables)
 {
 	DatabaseDumpService::dump_state_tables = dump_state_tables;
+}
+
+bool DatabaseDumpService::IsDumpPlayerBotTables() const
+{
+	return dump_player_bot_tables;
+}
+
+void DatabaseDumpService::SetDumpPlayerBotTables(bool dump_player_bot_tables)
+{
+	DatabaseDumpService::dump_player_bot_tables = dump_player_bot_tables;
 }
