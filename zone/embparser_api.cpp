@@ -1160,13 +1160,26 @@ XS(XS__untraindiscs) {
 XS(XS__givecash);
 XS(XS__givecash) {
 	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::givecash(int copper, int silver, int gold, int platinum)");
+	if (items < 1 || items > 4) {
+		Perl_croak(aTHX_ "Usage: quest::givecash(uint32 copper, [uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0])");
+	}
 
-	int copper   = (int) SvIV(ST(0));
-	int silver   = (int) SvIV(ST(1));
-	int gold     = (int) SvIV(ST(2));
-	int platinum = (int) SvIV(ST(3));
+	uint32 copper = (uint32) SvUV(ST(0));
+	uint32 silver = 0;
+	uint32 gold = 0;
+	uint32 platinum = 0;
+
+	if (items > 1) {
+		silver = (uint32) SvUV(ST(1));
+	}
+
+	if (items > 2) {
+		gold = (uint32) SvUV(ST(2));
+	}
+
+	if (items > 3) {
+		platinum = (uint32) SvUV(ST(3));
+	}
 
 	quest_manager.givecash(copper, silver, gold, platinum);
 
