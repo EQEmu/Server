@@ -608,7 +608,7 @@ public:
 	virtual int64 GetMaxEndurance() const { return 0; }
 	virtual void SetEndurance(int32 newEnd) { return; }
 	int64 GetItemHPBonuses();
-	int32 GetSpellHPBonuses();
+	int64 GetSpellHPBonuses();
 	virtual const int64& SetMana(int64 amount);
 	inline float GetManaRatio() const { return max_mana == 0 ? 100 :
 		((static_cast<float>(current_mana) / max_mana) * 100); }

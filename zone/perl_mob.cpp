@@ -770,7 +770,7 @@ XS(XS_Mob_SetHP) {
 		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int64 hp)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int64 hp = (int32) SvIV(ST(1));
+		int64 hp = (int64) SvIV(ST(1));
 		VALIDATE_THIS_IS_MOB;
 		THIS->SetHP(hp);
 	}
@@ -1630,7 +1630,7 @@ XS(XS_Mob_GetSpellHPBonuses) {
 		Perl_croak(aTHX_ "Usage: Mob::GetSpellHPBonuses(THIS)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetSpellHPBonuses();
