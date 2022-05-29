@@ -4,17 +4,16 @@ void command_nudge(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (!arguments) {
-		auto example_link = EQ::SayLinkEngine::GenerateQuestSaylink(
-			"#nudge x=5.0",
-			false,
-			"#nudge x=5.0"
-		);
 		c->Message(Chat::White, "Usage: #nudge [x=float] [y=float] [z=float] [h=float]");
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Note: Partial or mixed arguments allowed, example {}.",
-				example_link
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					"#nudge x=5.0",
+					false,
+					"#nudge x=5.0"
+				)
 			).c_str()
 		);
 		return;
@@ -73,9 +72,8 @@ void command_nudge(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Nudging {} ({}) to {:.2f}, {:.2f}, {:.2f}, {:.2f} with offsets of {:.2f}, {:.2f}, {:.2f}, {:.2f}.",
-			target->GetCleanName(),
-			target->GetID(),
+			"Nudging {} to {:.2f}, {:.2f}, {:.2f}, {:.2f} with offsets of {:.2f}, {:.2f}, {:.2f}, {:.2f}.",
+			c->GetTargetDescription(target),
 			new_position.x,
 			new_position.y,
 			new_position.z,
