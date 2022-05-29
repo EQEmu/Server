@@ -1340,45 +1340,23 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		silver   = copper / 10;
 		copper   = copper - (silver * 10);
 
-		std::string cash_message;
-
-		if (platinum > 0) {
-			cash_message = "You receive ";
-			cash_message += itoa(platinum);
-			cash_message += " platinum";
+		if (
+			copper ||
+			silver ||
+			gold ||
+			platinum
+		) {
+			client->MessageString(
+				Chat::Yellow,
+				YOU_RECEIVE,
+				ConvertMoneyToString(
+					platinum,
+					gold,
+					silver,
+					copper
+				).c_str()
+			);
 		}
-		if (gold > 0) {
-			if (cash_message.length() == 0) {
-				cash_message = "You receive ";
-			}
-			else {
-				cash_message += ",";
-			}
-			cash_message += itoa(gold);
-			cash_message += " gold";
-		}
-		if (silver > 0) {
-			if (cash_message.length() == 0) {
-				cash_message = "You receive ";
-			}
-			else {
-				cash_message += ",";
-			}
-			cash_message += itoa(silver);
-			cash_message += " silver";
-		}
-		if (copper > 0) {
-			if (cash_message.length() == 0) {
-				cash_message = "You receive ";
-			}
-			else {
-				cash_message += ",";
-			}
-			cash_message += itoa(copper);
-			cash_message += " copper";
-		}
-		cash_message += " pieces.";
-		client->Message(Chat::Yellow, cash_message.c_str());
 	}
 	int32 experience_reward = task_information->experience_reward;
 	if (experience_reward > 0) {
