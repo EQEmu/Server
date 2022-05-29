@@ -78,6 +78,7 @@ private:
 	std::string GetMySQLVersion();
 	std::string GetBaseMySQLDumpCommand();
 	std::string GetPlayerTablesList();
+	std::string GetPlayerBotTablesList();
 	std::string GetSystemTablesList();
 	std::string GetStateTablesList();
 	std::string GetContentTablesList();
@@ -88,7 +89,6 @@ private:
 	std::string GetDumpFileNameWithPath();
 	std::string GetSetDumpPath();
 	std::string GetQueryServTables();
-	std::string GetPlayerBotTables();
 };
 
 
