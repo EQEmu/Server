@@ -59,8 +59,8 @@ void command_nudge(Client *c, const Seperator *sep)
 		}
 	}
 
-	const auto &current_position = target->GetPosition();
-	glm::vec4  new_position(
+	const auto& current_position = target->GetPosition();
+	glm::vec4 new_position(
 		(current_position.x + position_offset.x),
 		(current_position.y + position_offset.y),
 		(current_position.z + position_offset.z),
