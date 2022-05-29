@@ -497,7 +497,7 @@ int64 Lua_Mob::GetItemHPBonuses() {
 	return self->GetItemHPBonuses();
 }
 
-int Lua_Mob::GetSpellHPBonuses() {
+int64 Lua_Mob::GetSpellHPBonuses() {
 	Lua_Safe_Call_Int();
 	return self->GetSpellHPBonuses();
 }
