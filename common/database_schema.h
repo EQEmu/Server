@@ -386,6 +386,8 @@ namespace DatabaseSchema {
 	{
 		return {
 			"bot_buffs",
+			"bot_command_settings",
+			"bot_create_combinations",
 			"bot_data",
 			"bot_group_members",
 			"bot_groups",
@@ -399,8 +401,12 @@ namespace DatabaseSchema {
 			"bot_pet_buffs",
 			"bot_pet_inventories",
 			"bot_pets",
+			"bot_spell_casting_chances",
+			"bot_spells_entries",
 			"bot_stances",
-			"bot_timers"
+			"bot_timers",
+			"vw_bot_character_mobs",
+			"vw_bot_groups"
 		};
 	}
 
