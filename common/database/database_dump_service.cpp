@@ -166,6 +166,20 @@ std::string DatabaseDumpService::GetPlayerTablesList()
 /**
  * @return
  */
+std::string DatabaseDumpService::GetPlayerBotTablesList()
+{
+	std::string              tables_list;
+	std::vector<std::string> tables = DatabaseSchema::GetPlayerBotTables();
+	for (const auto          &table : tables) {
+		tables_list += table + " ";
+	}
+
+	return trim(tables_list);
+}
+
+/**
+ * @return
+ */
 std::string DatabaseDumpService::GetLoginTableList()
 {
 	std::string              tables_list;
@@ -316,6 +330,11 @@ void DatabaseDumpService::Dump()
 		if (IsDumpPlayerTables()) {
 			tables_to_dump += GetPlayerTablesList() + " ";
 			dump_descriptor += "-player";
+		}
+		
+		if (IsDumpPlayerBotTables()) {
+			tables_to_dump += GetPlayerBotTablesList() + " ";
+			dump_descriptor += "-bots";
 		}
 
 		if (IsDumpSystemTables()) {
