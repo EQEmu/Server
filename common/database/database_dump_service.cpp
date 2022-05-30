@@ -598,9 +598,9 @@ void DatabaseDumpService::SetDumpStateTables(bool dump_state_tables)
 	DatabaseDumpService::dump_state_tables = dump_state_tables;
 }
 
-bool DatabaseDumpService::IsDumpPlayerBotTables() const
+bool DatabaseDumpService::IsDumpBotTables() const
 {
-	return dump_player_bot_tables;
+	return dump_bot_tables;
 }
 
 void DatabaseDumpService::SetDumpBotTables(bool dump_bot_tables)

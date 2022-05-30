@@ -54,7 +54,7 @@ public:
 	bool IsDumpStateTables() const;
 	void SetDumpStateTables(bool dump_state_tables);
 	bool IsDumpBotTables() const;
-	void SetDumpBotTables(bool dump_player_bot_tables);
+	void SetDumpBotTables(bool dump_bot_tables);
 
 private:
 	bool        dump_all_tables             = false;
