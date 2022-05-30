@@ -35,7 +35,7 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 struct NPCType
 {
 	char	name[64];
-	char	lastname[70];
+	char	lastname[64];
 	int64	current_hp;
 	int64	max_hp;
 	float	size;

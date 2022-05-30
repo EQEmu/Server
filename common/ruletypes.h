@@ -511,6 +511,7 @@ RULE_BOOL(NPC, UseMeditateBasedManaRegen, false, "Based NPC ooc regen on Meditat
 RULE_REAL(NPC, NPCHealOnGateAmount, 25, "How much the NPC will heal on gate if enabled")
 RULE_BOOL(NPC, AnimalsOpenDoors, true, "Determines or not whether animals open doors or not when they approach them")
 RULE_INT(NPC, MaxRaceID, 732, "Maximum Race ID, RoF2 by default supports up to 732")
+RULE_BOOL(NPC, DisableLastNames, false, "Enable to disable NPC Last Names")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)

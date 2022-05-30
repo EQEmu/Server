@@ -1074,77 +1074,87 @@ uint8 Mob::GetArchetype() const {
 	}
 }
 
+void Mob::SetSpawnLastNameByClass(NewSpawn_Struct* ns)
+{
+	switch (ns->spawn.class_) {
+		case TRIBUTE_MASTER:
+			strcpy(ns->spawn.lastName, "Tribute Master");
+			break;
+		case ADVENTURERECRUITER:
+			strcpy(ns->spawn.lastName, "Adventure Recruiter");
+			break;
+		case BANKER:
+			strcpy(ns->spawn.lastName, "Banker");
+			break;
+		case ADVENTUREMERCHANT:
+			strcpy(ns->spawn.lastName, "Adventure Merchant");
+			break;
+		case WARRIORGM:
+			strcpy(ns->spawn.lastName, "GM Warrior");
+			break;
+		case PALADINGM:
+			strcpy(ns->spawn.lastName, "GM Paladin");
+			break;
+		case RANGERGM:
+			strcpy(ns->spawn.lastName, "GM Ranger");
+			break;
+		case SHADOWKNIGHTGM:
+			strcpy(ns->spawn.lastName, "GM Shadowknight");
+			break;
+		case DRUIDGM:
+			strcpy(ns->spawn.lastName, "GM Druid");
+			break;
+		case BARDGM:
+			strcpy(ns->spawn.lastName, "GM Bard");
+			break;
+		case ROGUEGM:
+			strcpy(ns->spawn.lastName, "GM Rogue");
+			break;
+		case SHAMANGM:
+			strcpy(ns->spawn.lastName, "GM Shaman");
+			break;
+		case NECROMANCERGM:
+			strcpy(ns->spawn.lastName, "GM Necromancer");
+			break;
+		case WIZARDGM:
+			strcpy(ns->spawn.lastName, "GM Wizard");
+			break;
+		case MAGICIANGM:
+			strcpy(ns->spawn.lastName, "GM Magician");
+			break;
+		case ENCHANTERGM:
+			strcpy(ns->spawn.lastName, "GM Enchanter");
+			break;
+		case BEASTLORDGM:
+			strcpy(ns->spawn.lastName, "GM Beastlord");
+			break;
+		case BERSERKERGM:
+			strcpy(ns->spawn.lastName, "GM Berserker");
+			break;
+		case MERCERNARY_MASTER:
+			strcpy(ns->spawn.lastName, "Mercenary liaison");
+			break;
+		default:
+			strcpy(ns->spawn.lastName, ns->spawn.lastName);
+			break;
+	}
+}
+
 void Mob::CreateSpawnPacket(EQApplicationPacket *app, Mob *ForWho)
 {
 	app->SetOpcode(OP_NewSpawn);
-	app->size    = sizeof(NewSpawn_Struct);
+	app->size = sizeof(NewSpawn_Struct);
 	app->pBuffer = new uchar[app->size];
 	memset(app->pBuffer, 0, app->size);
-	NewSpawn_Struct *ns = (NewSpawn_Struct *) app->pBuffer;
+	auto ns = (NewSpawn_Struct *) app->pBuffer;
 	FillSpawnStruct(ns, ForWho);
 
-	if (RuleB(NPC, UseClassAsLastName) && strlen(ns->spawn.lastName) == 0) {
-		switch (ns->spawn.class_) {
-			case TRIBUTE_MASTER:
-				strcpy(ns->spawn.lastName, "Tribute Master");
-				break;
-			case ADVENTURERECRUITER:
-				strcpy(ns->spawn.lastName, "Adventure Recruiter");
-				break;
-			case BANKER:
-				strcpy(ns->spawn.lastName, "Banker");
-				break;
-			case ADVENTUREMERCHANT:
-				strcpy(ns->spawn.lastName, "Adventure Merchant");
-				break;
-			case WARRIORGM:
-				strcpy(ns->spawn.lastName, "GM Warrior");
-				break;
-			case PALADINGM:
-				strcpy(ns->spawn.lastName, "GM Paladin");
-				break;
-			case RANGERGM:
-				strcpy(ns->spawn.lastName, "GM Ranger");
-				break;
-			case SHADOWKNIGHTGM:
-				strcpy(ns->spawn.lastName, "GM Shadowknight");
-				break;
-			case DRUIDGM:
-				strcpy(ns->spawn.lastName, "GM Druid");
-				break;
-			case BARDGM:
-				strcpy(ns->spawn.lastName, "GM Bard");
-				break;
-			case ROGUEGM:
-				strcpy(ns->spawn.lastName, "GM Rogue");
-				break;
-			case SHAMANGM:
-				strcpy(ns->spawn.lastName, "GM Shaman");
-				break;
-			case NECROMANCERGM:
-				strcpy(ns->spawn.lastName, "GM Necromancer");
-				break;
-			case WIZARDGM:
-				strcpy(ns->spawn.lastName, "GM Wizard");
-				break;
-			case MAGICIANGM:
-				strcpy(ns->spawn.lastName, "GM Magician");
-				break;
-			case ENCHANTERGM:
-				strcpy(ns->spawn.lastName, "GM Enchanter");
-				break;
-			case BEASTLORDGM:
-				strcpy(ns->spawn.lastName, "GM Beastlord");
-				break;
-			case BERSERKERGM:
-				strcpy(ns->spawn.lastName, "GM Berserker");
-				break;
-			case MERCERNARY_MASTER:
-				strcpy(ns->spawn.lastName, "Mercenary Recruiter");
-				break;
-			default:
-				break;
-		}
+	if (
+		!RuleB(NPC, DisableLastNames) &&
+		RuleB(NPC, UseClassAsLastName) &&
+		!strlen(ns->spawn.lastName)
+	) {
+		SetSpawnLastNameByClass(ns);
 	}
 }
 
@@ -1158,80 +1168,20 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 	memcpy(app->pBuffer, ns, sizeof(NewSpawn_Struct));
 
 	// Custom packet data
-	NewSpawn_Struct* ns2 = (NewSpawn_Struct*)app->pBuffer;
+	auto ns2 = (NewSpawn_Struct*) app->pBuffer;
 	strcpy(ns2->spawn.name, ns->spawn.name);
 
 	// Set default Last Names for certain Classes if not defined
-	if (RuleB(NPC, UseClassAsLastName) && strlen(ns->spawn.lastName) == 0)
-	{
-		switch (ns->spawn.class_)
-		{
-			case TRIBUTE_MASTER:
-				strcpy(ns2->spawn.lastName, "Tribute Master");
-				break;
-			case ADVENTURERECRUITER:
-				strcpy(ns2->spawn.lastName, "Adventure Recruiter");
-				break;
-			case BANKER:
-				strcpy(ns2->spawn.lastName, "Banker");
-				break;
-			case ADVENTUREMERCHANT:
-				strcpy(ns2->spawn.lastName, "Adventure Merchant");
-				break;
-			case WARRIORGM:
-				strcpy(ns2->spawn.lastName, "GM Warrior");
-				break;
-			case PALADINGM:
-				strcpy(ns2->spawn.lastName, "GM Paladin");
-				break;
-			case RANGERGM:
-				strcpy(ns2->spawn.lastName, "GM Ranger");
-				break;
-			case SHADOWKNIGHTGM:
-				strcpy(ns2->spawn.lastName, "GM Shadowknight");
-				break;
-			case DRUIDGM:
-				strcpy(ns2->spawn.lastName, "GM Druid");
-				break;
-			case BARDGM:
-				strcpy(ns2->spawn.lastName, "GM Bard");
-				break;
-			case ROGUEGM:
-				strcpy(ns2->spawn.lastName, "GM Rogue");
-				break;
-			case SHAMANGM:
-				strcpy(ns2->spawn.lastName, "GM Shaman");
-				break;
-			case NECROMANCERGM:
-				strcpy(ns2->spawn.lastName, "GM Necromancer");
-				break;
-			case WIZARDGM:
-				strcpy(ns2->spawn.lastName, "GM Wizard");
-				break;
-			case MAGICIANGM:
-				strcpy(ns2->spawn.lastName, "GM Magician");
-				break;
-			case ENCHANTERGM:
-				strcpy(ns2->spawn.lastName, "GM Enchanter");
-				break;
-			case BEASTLORDGM:
-				strcpy(ns2->spawn.lastName, "GM Beastlord");
-				break;
-			case BERSERKERGM:
-				strcpy(ns2->spawn.lastName, "GM Berserker");
-				break;
-			case MERCERNARY_MASTER:
-				strcpy(ns2->spawn.lastName, "Mercenary liaison");
-				break;
-			default:
-				strcpy(ns2->spawn.lastName, ns->spawn.lastName);
-				break;
-		}
-	}
-	else
-	{
+	if (
+		!RuleB(NPC, DisableLastNames) &&
+		RuleB(NPC, UseClassAsLastName) &&
+		!strlen(ns->spawn.lastName)
+	) {
+		SetSpawnLastNameByClass(ns2);
+	} else {
 		strcpy(ns2->spawn.lastName, ns->spawn.lastName);
 	}
+
 	memset(&app->pBuffer[sizeof(Spawn_Struct)-7], 0xFF, 7);
 }
 

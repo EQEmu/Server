@@ -2511,8 +2511,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->see_invis        = n.see_invis != 0;
 		t->see_invis_undead = n.see_invis_undead != 0;    // Set see_invis_undead flag
 
-		if (!n.lastname.empty()) {
-			strn0cpy(t->lastname, n.lastname.c_str(), 32);
+		if (!RuleB(NPC, DisableLastNames) && !n.lastname.empty()) {
+			strn0cpy(t->lastname, n.lastname.c_str(), sizeof(t->lastname));
 		}
 
 		t->qglobal                = n.qglobal != 0;    // qglobal
