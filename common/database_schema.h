@@ -382,7 +382,7 @@ namespace DatabaseSchema {
 	 *
 	 * @return
 	 */
-	static std::vector<std::string> GetPlayerBotTables()
+	static std::vector<std::string> GetBotTables()
 	{
 		return {
 			"bot_buffs",
