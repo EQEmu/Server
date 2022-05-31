@@ -209,12 +209,12 @@ void command_npcedit(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} now has the lastname '{}'.",
 				npc_id_string,
-				sep->argplus[2]
+				last_name
 			).c_str()
 		);
 		auto query = fmt::format(
 			"UPDATE npc_types SET lastname = '{}' WHERE id = {}",
-			sep->argplus[2],
+			last_name,
 			npc_id
 		);
 		content_db.QueryDatabase(query);

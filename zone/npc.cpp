@@ -265,7 +265,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	HasAISpellEffects    = false;
 	innate_proc_spell_id = 0;
 
-	if (GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs)) {
+	if (GetClass() == MERCENARY_MASTER && RuleB(Mercs, AllowMercs)) {
 		LoadMercTypes();
 		LoadMercs();
 	}
