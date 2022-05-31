@@ -9,7 +9,7 @@ void command_date(Client *c, const Seperator *sep)
 		!sep->IsNumber(2) ||
 		!sep->IsNumber(3)
 	) {
-		c->Message(Chat::White, "Usage: #date Year Month Day [Hour] [Minute]");
+		c->Message(Chat::White, "Usage: #date [Year] [Month] [Day] [Hour] [Minute]");
 		return;
 	}
 
