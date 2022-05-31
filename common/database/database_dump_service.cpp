@@ -166,6 +166,20 @@ std::string DatabaseDumpService::GetPlayerTablesList()
 /**
  * @return
  */
+std::string DatabaseDumpService::GetBotTablesList()
+{
+	std::string              tables_list;
+	std::vector<std::string> tables = DatabaseSchema::GetBotTables();
+	for (const auto          &table : tables) {
+		tables_list += table + " ";
+	}
+
+	return trim(tables_list);
+}
+
+/**
+ * @return
+ */
 std::string DatabaseDumpService::GetLoginTableList()
 {
 	std::string              tables_list;
@@ -317,6 +331,11 @@ void DatabaseDumpService::Dump()
 			tables_to_dump += GetPlayerTablesList() + " ";
 			dump_descriptor += "-player";
 		}
+		
+		if (IsDumpBotTables()) {
+			tables_to_dump += GetBotTablesList() + " ";
+			dump_descriptor += "-bots";
+		}
 
 		if (IsDumpSystemTables()) {
 			tables_to_dump += GetSystemTablesList() + " ";
@@ -436,6 +455,7 @@ void DatabaseDumpService::Dump()
 //	LogDebug("[{}] login", (IsDumpLoginServerTables() ? "true" : "false"));
 //	LogDebug("[{}] player", (IsDumpPlayerTables() ? "true" : "false"));
 //	LogDebug("[{}] system", (IsDumpSystemTables() ? "true" : "false"));
+//	LogDebug("[{}] bot", (IsDumpBotTables() ? "true" : "false"));
 }
 
 bool DatabaseDumpService::IsDumpSystemTables() const
@@ -576,4 +596,14 @@ bool DatabaseDumpService::IsDumpStateTables() const
 void DatabaseDumpService::SetDumpStateTables(bool dump_state_tables)
 {
 	DatabaseDumpService::dump_state_tables = dump_state_tables;
+}
+
+bool DatabaseDumpService::IsDumpBotTables() const
+{
+	return dump_bot_tables;
+}
+
+void DatabaseDumpService::SetDumpBotTables(bool dump_bot_tables)
+{
+	DatabaseDumpService::dump_bot_tables = dump_bot_tables;
 }
