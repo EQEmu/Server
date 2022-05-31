@@ -25,6 +25,7 @@
 #include "../common/packet_dump.h"
 #include "../common/string_util.h"
 #include "worldserver.h"
+#include "string_ids.h"
 
 extern EntityList entity_list;
 extern WorldServer worldserver;

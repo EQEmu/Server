@@ -37,6 +37,7 @@
 #include "zonedb.h"
 #include "zone_store.h"
 #include "dialogue_window.h"
+#include "string_ids.h"
 
 #include <iostream>
 #include <limits.h>
