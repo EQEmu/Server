@@ -1095,9 +1095,6 @@ void Mob::SetSpawnLastNameByClass(NewSpawn_Struct* ns)
 		case BANKER:
 			strcpy(ns->spawn.lastName, "Banker");
 			break;
-		case ADVENTURE_MERCHANT:
-			strcpy(ns->spawn.lastName, "Adventure Merchant");
-			break;
 		case WARRIORGM:
 			strcpy(ns->spawn.lastName, "Warrior Guildmaster");
 			break;
