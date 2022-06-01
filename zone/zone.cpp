@@ -2737,13 +2737,12 @@ std::string Zone::GetZoneDescription()
 {
 	if (!IsLoaded()) {
 		return fmt::format(
-			"{} PID ({})",
-			IsStaticZone() ? "Static" : "Dynamic",
+			"PID ({})",
 			EQ::GetPID()
 		);
 	}
 
-	auto d = fmt::format(
+	return fmt::format(
 		"{} ({}){}{}",
 		GetLongName(),
 		GetZoneID(),
@@ -2764,8 +2763,6 @@ std::string Zone::GetZoneDescription()
 			""
 		)
 	);
-
-	return d;
 }
 
 void Zone::SendReloadMessage(std::string reload_type)
