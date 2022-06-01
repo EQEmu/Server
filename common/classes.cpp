@@ -384,6 +384,8 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			return "Adventure Recruiter";
 		case ADVENTURE_MERCHANT:
 			return "Adventure Merchant";
+		case LDON_TREASURE:
+			return "LDoN Treasure";
 		case TRIBUTE_MASTER:
 			return "Tribute Master";
 		case GUILD_TRIBUTE_MASTER:
