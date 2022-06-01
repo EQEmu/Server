@@ -2356,7 +2356,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 			SQL(
 				id IN (
 					select npcID from spawnentry where spawngroupID IN (
-						select spawngroupID from spawn2 where `zone` = '{}' and `version` = {}
+						select spawngroupID from spawn2 where `zone` = '{}' and (`version` = {} OR `version` = -1)
 					)
 				)
 			),

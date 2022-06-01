@@ -655,38 +655,35 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
+	
 	auto query = fmt::format(
 		SQL (
 			SELECT
-			  DISTINCT merchantlist.merchantid,
-			  merchantlist.slot,
-			  merchantlist.item,
-			  merchantlist.faction_required,
-			  merchantlist.level_required,
-			  merchantlist.alt_currency_cost,
-			  merchantlist.classes_required,
-			  merchantlist.probability,
-			  merchantlist.bucket_name,
-			  merchantlist.bucket_value,
-			  merchantlist.bucket_comparison
-			FROM
-			  merchantlist,
-			  npc_types,
-			  spawnentry,
-			  spawn2
-			WHERE
-			  npc_types.merchant_id = merchantlist.merchantid
-			  AND npc_types.id = spawnentry.npcid
-			  AND spawnentry.spawngroupid = spawn2.spawngroupid
-			  AND spawn2.zone = '{}'
-			  AND spawn2.version = {}
-			  {}
+			merchantid,
+			slot,
+			item,
+			faction_required,
+			level_required,
+			alt_currency_cost,
+			classes_required,
+			probability,
+			bucket_name,
+			bucket_value,
+			bucket_comparison
+			from merchantlist where merchantid IN (
+					select merchant_id from npc_types where id in (
+						select npcID from spawnentry where spawngroupID IN (
+							select spawngroupID from spawn2 where `zone` = '{}' and (`version` = {} OR `version` = -1)
+					)
+				)
+			)
+			{}
 			ORDER BY
-			  merchantlist.slot
+			merchantlist.slot
 		),
 		GetShortName(),
 		GetInstanceVersion(),
-		ContentFilterCriteria::apply("merchantlist")
+		ContentFilterCriteria::apply()
 	);
 
 	auto results = content_db.QueryDatabase(query);
