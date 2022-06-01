@@ -60,6 +60,7 @@
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/content_flags_repository.h"
 #include "../common/repositories/zone_points_repository.h"
+#include "../common/serverinfo.h"
 
 #include <time.h>
 #include <ctime>
@@ -723,7 +724,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 		if (found) {
 			continue;
 		}
-		
+
 		mle.slot = std::stoul(row[1]);
 		mle.item = std::stoul(row[2]);
 		mle.faction_required = static_cast<int16>(std::stoi(row[3]));
@@ -2734,6 +2735,14 @@ uint32 Zone::GetCurrencyItemID(uint32 currency_id)
 
 std::string Zone::GetZoneDescription()
 {
+	if (!IsLoaded()) {
+		return fmt::format(
+			"{} PID ({})",
+			IsStaticZone() ? "Static" : "Dynamic",
+			EQ::GetPID()
+		);
+	}
+
 	auto d = fmt::format(
 		"{} ({}){}{}",
 		GetLongName(),
