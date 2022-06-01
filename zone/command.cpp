@@ -299,7 +299,7 @@ int command_init(void)
 		command_add("showzonepoints", "Show zone points for current zone", AccountStatus::Guide, command_showzonepoints) ||
 		command_add("shutdown", "Shut this zone process down", AccountStatus::GMLeadAdmin, command_shutdown) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", AccountStatus::Steward, command_spawn) ||
-		command_add("spawneditmass", "[Search Criteria] [Edit Option] [Edit Value] [Apply] Mass editing spawn command (Apply is optional, 0 = False, 1 = True, default is false)", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
+		command_add("spawneditmass", "[Search Criteria] [Edit Option] [Edit Value] [Apply] Mass editing spawn command (Apply is optional, 0 = False, 1 = True, default is False)", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
 		command_add("spawnfix", "Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", AccountStatus::GMAreas, command_spawnfix) ||
 		command_add("spawnstatus", "[All|Disabled|Enabled|Spawn ID] - Show respawn timer status", AccountStatus::GMAdmin, command_spawnstatus) ||
 		command_add("spellinfo", "[spellid] - Get detailed info about a spell", AccountStatus::Steward, command_spellinfo) ||

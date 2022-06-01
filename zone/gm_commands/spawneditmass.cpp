@@ -8,6 +8,16 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 		return;
 	}
 
+	std::string search_criteria = sep->arg[1];
+	std::string edit_option = sep->arg[2];
+	std::string edit_value = sep->arg[3];
+	bool is_apply = sep->arg[4] ? !strcasecmp(sep->arg[4], "apply") : false;
+
+	if (edit_option != "respawn_time") { // Remove this when other options are added, here so people know there's only one option at the moment.
+		c->Message(Chat::Yellow, "The only edit option currently implemented is \"respawn_time\", more will be added in the future.");
+		return;
+	}
+
 	auto query = fmt::format(
 		SQL(
 			SELECT
@@ -26,12 +36,6 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 		zone->GetShortName(),
 		zone->GetInstanceVersion()
 	);
-
-
-	std::string search_criteria = sep->arg[1];
-	std::string edit_option = sep->arg[2];
-	std::string edit_value = sep->arg[3];
-	bool is_apply = sep->arg[4] ? !strcasecmp(sep->arg[4], "apply") : false;
 
 	std::vector<std::string> spawn2_ids;
 
@@ -120,11 +124,6 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 				edit_link
 			).c_str()
 		);
-	}
-
-	if (edit_option != "respawn_time") { // Remove this when other options are added, here so people know there's only one option at the moment.
-		c->Message(Chat::Yellow, "The only edit option currently implemented is \"respawn_time\", more will be added in the future.");
-		return;
 	}
 
 	if (edit_option == "respawn_time" && is_apply) {
