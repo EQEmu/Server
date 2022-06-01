@@ -655,19 +655,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
-
-	std::string filter = fmt::format(
-		SQL(
-			id IN (
-				select npcID from spawnentry where spawngroupID IN (
-					select spawngroupID from spawn2 where `zone` = '{}' and `version` = {}
-				)
-			)
-		),
-		zone->GetShortName(),
-		zone->GetInstanceVersion()
-	);
-
+	
 	auto query = fmt::format(
 		SQL (
 			SELECT
