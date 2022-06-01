@@ -10,7 +10,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 
 	auto instance_id = std::stoul(sep->arg[1]);
 	if (!instance_id) {
-		c->Message(Chat::White, "You must enter a valid instance id.");
+		c->Message(Chat::White, "You must enter a valid Instance ID.");
 		return;
 	}
 
@@ -36,18 +36,16 @@ void command_zone_instance(Client *c, const Seperator *sep)
 		);
 		return;
 	}
-
-	if (database.CharacterInInstanceGroup(instance_id, c->CharacterID())) {
-		c->Message(Chat::White, "You are already a part of this instance, sending you there.");
-		c->MoveZoneInstance(instance_id);
-		return;
+	
+	if (!database.CharacterInInstanceGroup(instance_id, c->CharacterID())) {
+		database.AddClientToInstance(instance_id, c->CharacterID());
 	}
-
+	
 	if (!database.VerifyInstanceAlive(instance_id, c->CharacterID())) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Instance ID {} expired or you are not apart of this instance.",
+				"Instance ID {} expired.",
 				instance_id
 			).c_str()
 		);
@@ -57,6 +55,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 	auto x = sep->IsNumber(2) ? std::stof(sep->arg[2]) : 0.0f;
 	auto y = sep->IsNumber(3) ? std::stof(sep->arg[3]) : 0.0f;
 	auto z = sep->IsNumber(4) ? std::stof(sep->arg[4]) : 0.0f;
+	auto zone_mode = sep->IsNumber(2) ? ZoneSolicited : ZoneToSafeCoords;
 
 	c->MovePC(
 		zone_id,
@@ -65,6 +64,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 		y,
 		z,
 		0.0f,
-		sep->IsNumber(2) ? 0 : ZoneToSafeCoords
+		0,
+		zone_mode
 	);
 }
