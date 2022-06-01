@@ -424,17 +424,17 @@ void EQEmuLogSys::Out(
 )
 {
 	bool log_to_console = log_settings[log_category].log_to_console > 0 &&
-						  log_settings[log_category].log_to_console <= debug_level;
+						  log_settings[log_category].log_to_console >= debug_level;
 	bool log_to_file    = log_settings[log_category].log_to_file > 0 &&
-						  log_settings[log_category].log_to_file <= debug_level;
+						  log_settings[log_category].log_to_file >= debug_level;
 	bool log_to_gmsay   = log_settings[log_category].log_to_gmsay > 0 &&
-						  log_settings[log_category].log_to_gmsay <= debug_level &&
+						  log_settings[log_category].log_to_gmsay >= debug_level &&
 						  log_category != Logs::LogCategory::Netcode &&
 						  (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone ||
 						   EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld);
 	bool log_to_discord = EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone &&
 						  log_settings[log_category].log_to_discord > 0 &&
-						  log_settings[log_category].log_to_discord <= debug_level &&
+						  log_settings[log_category].log_to_discord >= debug_level &&
 						  log_settings[log_category].discord_webhook_id > 0 &&
 						  log_settings[log_category].discord_webhook_id < MAX_DISCORD_WEBHOOK_ID;
 
