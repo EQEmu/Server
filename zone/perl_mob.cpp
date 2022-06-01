@@ -6569,7 +6569,7 @@ XS(XS_Mob_ShieldAbility) {
 		if (items < 8) {
 			can_shield_npc = true;
 		}
-		THIS->ShieldAbility(target_id, shielder_max_distance, shield_duration, shield_duration, shield_duration, use_aa, can_shield_npc);
+		THIS->ShieldAbility(target_id, shielder_max_distance, shield_duration, shield_target_mitigation, shielder_mitigation, use_aa, can_shield_npc);
 
 	}
 	XSRETURN_EMPTY;

@@ -5668,17 +5668,17 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ
 		shielder->shield_timer.Disable();
 		shield_target->SetShielderID(0);
 		shield_target->SetShieldTargetMitigation(0);
-		return; //Too far away, no message is given thoughh.
+		return; //Too far away, no message is given though.
 	}
 
-	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equiping a shield item
+	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equipping a shield item
 	if (shielder->IsClient() && shielder->HasShieldEquiped()) {
 		EQ::ItemInstance* inst = shielder->CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 		if (inst) {
 			const EQ::ItemData* shield = inst->GetItem();
 			if (shield && shield->ItemType == EQ::item::ItemTypeShield) {
 				mitigation += shield->AC * 50 / 100; //1% increase per 2 AC
-				std::min(50, mitigation);//50 pct max mitigation bonus from /shield
+				mitigation = std::min(50, mitigation);//50 pct max mitigation bonus from /shield
 			}
 		}
 	}
