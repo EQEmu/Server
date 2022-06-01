@@ -800,6 +800,18 @@ RULE_CATEGORY(Doors)
 RULE_BOOL(Doors, RequireKeyOnCursor, false, "Enable this to require pre-keyring keys to be on player cursor to open doors.")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Items)
+RULE_BOOL(Items, DisableAttuneable, false, "Enable this to disable Attuneable Items")
+RULE_BOOL(Items, DisableBardFocusEffects, false, "Enable this to disable Bard Focus Effects on Items")
+RULE_BOOL(Items, DisableLore, false, "Enable this to disable Lore Items")
+RULE_BOOL(Items, DisableNoDrop, false, "Enable this to disable No Drop Items")
+RULE_BOOL(Items, DisableNoPet, false, "Enable this to disable No Pet Items")
+RULE_BOOL(Items, DisableNoRent, false, "Enable this to disable No Rent Items")
+RULE_BOOL(Items, DisableNoTransfer, false, "Enable this to disable No Transfer Items")
+RULE_BOOL(Items, DisablePotionBelt, false, "Enable this to disable Potion Belt Items")
+RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell Focus Effects on Items")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL
