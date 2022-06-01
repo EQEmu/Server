@@ -1489,14 +1489,6 @@ void Client::TellClientZoneUnavailable() {
 	autobootup_timeout.Disable();
 }
 
-bool Client::GenPassKey(char* key) {
-	char* passKey=nullptr;
-	*passKey += ((char)('A'+((int)emu_random.Int(0, 25))));
-	*passKey += ((char)('A'+((int)emu_random.Int(0, 25))));
-	memcpy(key, passKey, strlen(passKey));
-	return true;
-}
-
 void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
 	LogNetcode("Sending EQApplicationPacket OpCode {:#04x}", app->GetOpcode());
 
