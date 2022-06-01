@@ -10,7 +10,7 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 {
 	// validate
 	if (webhook_url.empty()) {
-		LogDiscord("[webhook_url] [{}] is empty", webhook_url);
+		LogDiscord("[webhook_url] is empty");
 		return;
 	}
 
