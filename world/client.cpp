@@ -1570,7 +1570,6 @@ void Client::SendApproveWorld()
 bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 {
 	PlayerProfile_Struct pp;
-	ExtendedProfile_Struct ext;
 	EQ::InventoryProfile inv;
 
 	pp.SetPlayerProfileVersion(EQ::versions::ConvertClientVersionToMobVersion(EQ::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit)));
@@ -1578,9 +1577,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	inv.SetGMInventory(false); // character cannot have gm flag at this point
 
 	time_t bday = time(nullptr);
-	char startzone[50]={0};
-	uint32 i;
-	struct in_addr in;
+	in_addr in;
 
 	int stats_sum = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
 
@@ -1659,8 +1656,8 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
 	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQ::spells::SPELL_GEM_COUNT));
 
-	for(i = 0; i < BUFF_COUNT; i++)
-		pp.buffs[i].spellid = 0xFFFF;
+	for (auto& buff : pp.buffs)
+		buff.spellid = 0xFFFF;
 
 	/* If server is PVP by default, make all character set to it. */
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
@@ -1781,7 +1778,6 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 		return false;
 	}
 
-	uint32 max_stats = 0;
 	uint32 allocs = character_create_allocations.size();
 	RaceClassAllocation allocation = {0};
 	found = false;
@@ -1798,7 +1794,7 @@ bool CheckCharCreateInfoSoF(CharCreate_Struct *cc)
 		return false;
 	}
 
-	max_stats = allocation.DefaultPointAllocation[0] +
+	uint32 max_stats = allocation.DefaultPointAllocation[0] +
 		allocation.DefaultPointAllocation[1] +
 		allocation.DefaultPointAllocation[2] +
 		allocation.DefaultPointAllocation[3] +
