@@ -7996,7 +7996,6 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 
 	for (int i = 0; i < MAX_NPC_FACTIONS; i++) {
 		int32 faction_before_hit;
-		int32 faction_to_use_for_messaging;
 		FactionMods fm;
 		int32 this_faction_max;
 		int32 this_faction_min;
