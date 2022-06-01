@@ -8,21 +8,34 @@ void command_zone(Client *c, const Seperator *sep)
 		return;
 	}
 
+	std::string zone_identifier = sep->arg[1];
+
+	if (StringIsNumber(zone_identifier) && zone_identifier == "0") {
+		c->Message(Chat::White, "Sending you to the safe coordinates of this zone.");
+
+		c->MovePC(
+			0.0f,
+			0.0f,
+			0.0f,
+			0.0f,
+			0,
+			ZoneToSafeCoords
+		);
+		return;
+	}
+
 	auto zone_id = (
 		sep->IsNumber(1) ?
-		std::stoul(sep->arg[1]) :
-		ZoneID(sep->arg[1])
+		std::stoul(zone_identifier) :
+		ZoneID(zone_identifier)
 	);
 	auto zone_short_name = ZoneName(zone_id);
-	if (
-		!zone_id ||
-		!zone_short_name
-	) {
+	if (!zone_id || !zone_short_name) {
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"No zones were found matching '{}'.",
-				sep->arg[1]
+				zone_identifier
 			).c_str()
 		);
 		return;
