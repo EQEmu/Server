@@ -5531,7 +5531,6 @@ bool Client::TryReward(uint32 claim_id)
 	if (free_slot == 0xFFFFFFFF)
 		return false;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
 	std::string query = StringFormat("SELECT amount FROM account_rewards "
 					 "WHERE account_id = %i AND reward_id = %i",
 					 AccountID(), claim_id);
