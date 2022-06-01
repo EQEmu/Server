@@ -6685,7 +6685,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 
 	SetShieldTargetID(shield_target->GetID());
-	SetShielderMitigation(shield_target_mitigation);
+	SetShielderMitigation(shielder_mitigation);
 	SetShielderMaxDistance(shielder_max_distance);
 
 	shield_target->SetShielderID(GetID());
