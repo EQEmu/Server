@@ -39,7 +39,6 @@ public:
 	~Client();
 
 	bool	Process();
-	void	ReceiveData(uchar* buf, int len);
 	void	SendCharInfo();
 	void	SendMaxCharCreate();
 	void	SendMembership();
@@ -54,7 +53,6 @@ public:
 	void	SendLogServer();
 	void	SendApproveWorld();
 	void	SendPostEnterWorld();
-	bool	GenPassKey(char* key);
 
 	inline uint32		GetIP()				{ return ip; }
 	inline uint16		GetPort()			{ return port; }

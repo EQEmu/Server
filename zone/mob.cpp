@@ -4549,9 +4549,9 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 	/*The effects SE_SpellTrigger (SPA 340) and SE_Chance_Best_in_Spell_Grp (SPA 469) work as follows, you typically will have 2-3 different spells each with their own
 	chance to be triggered with all chances equaling up to 100 pct, with only 1 spell out of the group being ultimately cast.
 	(ie Effect1 trigger spellA with 30% chance, Effect2 triggers spellB with 20% chance, Effect3 triggers spellC with 50% chance).
-	The following function ensures a stastically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there
+	The following function ensures a statistically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there
 	is only 1 effect using the trigger effect. In those situations we simply roll a chance for that spell to be cast once.
-	Note: Both SPA 340 and 469 can be in same spell and both cummulative add up to 100 pct chances. SPA469 only difference being the spell cast will
+	Note: Both SPA 340 and 469 can be in same spell and both cumulative add up to 100 pct chances. SPA469 only difference being the spell cast will
 	be "best in spell group", instead of a defined spell_id.*/
 
 	int chance_array[EFFECT_COUNT] = {};
@@ -4568,15 +4568,13 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 	if (total_chance == 100)
 	{
 		int current_chance = 0;
-		int cummulative_chance = 0;
 
 		for (int i = 0; i < EFFECT_COUNT; i++){
-			//Find spells with SPA 340 and add the cummulative percent chances to the roll array
+			//Find spells with SPA 340 and add the cumulative percent chances to the roll array
 			if ((spells[spell_id].effect_id[i] == SE_SpellTrigger) || (spells[spell_id].effect_id[i] == SE_Chance_Best_in_Spell_Grp)){
-
-				cummulative_chance = current_chance + spells[spell_id].base_value[i];
-				chance_array[i] = cummulative_chance;
-				current_chance = cummulative_chance;
+				const int cumulative_chance = current_chance + spells[spell_id].base_value[i];
+				chance_array[i] = cumulative_chance;
+				current_chance = cumulative_chance;
 			}
 		}
 		int random_roll = zone->random.Int(1, 100);
