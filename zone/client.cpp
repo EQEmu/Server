@@ -6519,8 +6519,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	npc_type = made_npc;
 
-	int summon_count = 0;
-	summon_count = pet.count;
+	int summon_count = pet.count;
 
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
@@ -6531,7 +6530,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
 	};
 
-	while(summon_count > 0) {
+	while(summon_count >= 0) {
 		NPCType *npc_dup = nullptr;
 		if(made_npc != nullptr) {
 			npc_dup = new NPCType;
@@ -6541,7 +6540,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		NPC* swarm_pet_npc = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
-				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
+				GetPosition() + glm::vec4(swarmPetLocations[summon_count - 1], 0.0f, 0.0f),
 				GravityBehavior::Water);
 
 		if(!swarm_pet_npc->GetSwarmInfo()){
