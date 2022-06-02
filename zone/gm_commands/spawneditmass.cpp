@@ -49,8 +49,6 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 		).c_str()
 	);
 
-	int spawn_number = 1;
-
 	for (auto row : results) {
 		std::string npc_id = row[0];
 		std::string npc_name = row[1];
@@ -64,27 +62,16 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::Yellow,
 			fmt::format(
-				"Spawn {} | NPC ID: {} Name: {}",
-				spawn_number,
-				commify(npc_id),
-				npc_name
-			).c_str()
-		);
-
-		c->Message(
-			Chat::Yellow,
-			fmt::format(
-				"Spawn {} | Spawn2 ID: {} Respawn Time: {} ({})",
-				spawn_number,
+				"Spawn2 ID: {} NPC ID: {} Name: {} Respawn Time: {} ({})",
 				commify(spawn2_id),
+				commify(npc_id),
+				npc_name,
 				ConvertSecondsToTime(std::stoi(respawn_time)),
 				commify(respawn_time)
 			).c_str()
 		);
 
 		spawn2_ids.push_back(spawn2_id);
-
-		spawn_number++;
 	}
 
 	if (!spawn2_ids.size()) {
