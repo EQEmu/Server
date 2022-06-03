@@ -6530,7 +6530,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
 	};
 
-	while(summon_count >= 0) {
+	while(summon_count > 0) {
 		NPCType *npc_dup = nullptr;
 		if(made_npc != nullptr) {
 			npc_dup = new NPCType;
