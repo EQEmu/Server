@@ -353,7 +353,7 @@ void Client::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses *newbon, b
 		}
 
 		// FatherNitwit: New style haste, shields, and regens
-		if (newbon->haste < (int32)item->Haste) {
+		if (newbon->haste < item->Haste) {
 			newbon->haste = item->Haste;
 		}
 		if (item->Regen > 0)

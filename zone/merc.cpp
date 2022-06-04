@@ -351,7 +351,7 @@ void Merc::AddItemBonuses(const EQ::ItemData *item, StatBonuses* newbon) {
 	}
 
 	//FatherNitwit: New style haste, shields, and regens
-	if(newbon->haste < (int16)item->Haste) {
+	if(newbon->haste < item->Haste) {
 		newbon->haste = item->Haste;
 	}
 	if(item->Regen > 0)
