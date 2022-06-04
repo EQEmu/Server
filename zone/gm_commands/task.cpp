@@ -266,7 +266,7 @@ void command_task(Client *c, const Seperator *sep)
 
 		return;
 	} else if (is_show) {
-		target->ShowClientTasks(c);
+		target->ShowClientTasks(target, c);
 		return;
 	} else if (is_uncomplete) {
 		if (sep->IsNumber(2)) {
