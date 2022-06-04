@@ -478,7 +478,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (IsClient() && slot == CastingSlot::Item && item_slot != 0xFFFFFFFF) {
 		auto item = CastToClient()->GetInv().GetItem(item_slot);
 		if (item && item->GetItem())
-			MessageString(Chat::Spells, BEGINS_TO_GLOW, item->GetItem()->Name);
+			MessageString(Chat::FocusEffect, BEGINS_TO_GLOW, item->GetItem()->Name);
 	}
 
 	return(true);

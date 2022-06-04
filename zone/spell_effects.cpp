@@ -6497,7 +6497,7 @@ int64 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool 
 			default:
 				break;
 			}
-			MessageString(Chat::Spells, string_id, UsedItem->Name);
+			MessageString(Chat::FocusEffect, string_id, UsedItem->Name);
 		}
 	}
 
