@@ -10,7 +10,7 @@ void command_findclass(Client *c, const Seperator *sep)
 
 	if (sep->IsNumber(1)) {
 		int class_id = std::stoi(sep->arg[1]);
-		if (class_id >= WARRIOR && class_id <= MERCERNARY_MASTER) {
+		if (class_id >= WARRIOR && class_id <= MERCENARY_MASTER) {
 			std::string class_name = GetClassIDName(class_id);
 			c->Message(
 				Chat::White,
@@ -41,7 +41,7 @@ void command_findclass(Client *c, const Seperator *sep)
 	} else {
 		auto search_criteria = str_tolower(sep->argplus[1]);
 		int found_count = 0;
-		for (uint16 class_id = WARRIOR; class_id <= MERCERNARY_MASTER; class_id++) {
+		for (uint16 class_id = WARRIOR; class_id <= MERCENARY_MASTER; class_id++) {
 			std::string class_name = GetClassIDName(class_id);
 			auto class_name_lower = str_tolower(class_name);
 			if (

@@ -204,24 +204,20 @@ void command_npcedit(Client *c, const Seperator *sep)
 		return;
 	} else if (!strcasecmp(sep->arg[1], "lastname")) {
 		std::string last_name = sep->argplus[2];
-		if (!last_name.empty()) {
-			c->Message(
-				Chat::Yellow,
-				fmt::format(
-					"{} now has the lastname '{}'.",
-					npc_id_string,
-					sep->argplus[2]
-				).c_str()
-			);
-			auto query = fmt::format(
-				"UPDATE npc_types SET lastname = '{}' WHERE id = {}",
-				sep->argplus[2],
-				npc_id
-			);
-			content_db.QueryDatabase(query);
-		} else {
-			c->Message(Chat::White, "Usage: #npcedit lastname [Last Name] - Sets an NPC's Last Name");
-		}
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"{} now has the lastname '{}'.",
+				npc_id_string,
+				last_name
+			).c_str()
+		);
+		auto query = fmt::format(
+			"UPDATE npc_types SET lastname = '{}' WHERE id = {}",
+			last_name,
+			npc_id
+		);
+		content_db.QueryDatabase(query);
 		return;
 	} else if (!strcasecmp(sep->arg[1], "level")) {
 		if (sep->IsNumber(2)) {
