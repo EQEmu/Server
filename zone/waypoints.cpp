@@ -795,6 +795,10 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/, bool fix_client_z /*= false*/) {
 		return;
 	}
 
+	if (IsBoat()) {
+		return;
+	}
+
 	if (flymode == GravityBehavior::Flying) {
 		return;
 	}
