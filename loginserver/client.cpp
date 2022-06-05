@@ -600,56 +600,53 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 
 
 	//Get the active expansion from the database Rule:WorldExpansionSettings.  Do this only once.  Requires restart to effect change
-	if (!owned_expansion) {
-		std::string r_name = RuleManager::Instance()->GetRulesetName(server.db, default_ruleset);
-		if (r_name.size() > 0) {
-			RuleManager::Instance()->LoadRules(server.db, r_name.c_str(), false);
-			expansion = RuleManager::Instance()->GetIntRule(RuleManager::Int__ExpansionSettings);
-			owned_expansion = (expansion << 1) | 1;
+	if (server.options.IsDisplayExpansions()) {
+
+		expansion = server.options.GetMaxExpansions();
+		owned_expansion = (expansion << 1) | 1;
+
+		if (m_client_version == cv_sod) {
+
+			// header info of packet.  Requires OP_LoginExpansionPacketData=0x0031 to be in login_opcodes_sod.conf
+			buf.WriteInt32(0x00);
+			buf.WriteInt32(0x01);
+			buf.WriteInt16(0x00);
+			buf.WriteInt32(19); //number of expansions to include in packet
+
+			//generate expansion data
+			for (int i = 0; i < 19; i++)
+			{
+				buf.WriteInt32(i);													//sequenctial number
+				buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);	//1 own 0 not own
+				buf.WriteInt8(0x00);
+				buf.WriteInt32(ExpansionLookup[i]);									//from eqlsstr_us.txt
+				buf.WriteInt32(0x179E);												//from eqlsstr_us.txt for buttons/order
+				buf.WriteInt32(0xFFFFFFFF);											//end identification
+				buf.WriteInt8(0x0);													//force order window to appear 1 appear 0 not appear
+				buf.WriteInt8(0x0);
+				buf.WriteInt32(0x0000);
+				buf.WriteInt32(0x0000);
+				buf.WriteInt32(0xFFFFFFFF);
+			}
+
+			auto out = std::make_unique<EQApplicationPacket>(OP_LoginExpansionPacketData, buf);
+			m_connection->QueuePacket(out.get());
+
 		}
-	}
-
-	if (m_client_version == cv_sod) {
-
-		// header info of packet.  Requires OP_LoginExpansionPacketData=0x0031 to be in login_opcodes_sod.conf
-		buf.WriteInt32(0x00);
-		buf.WriteInt32(0x01);
-		buf.WriteInt16(0x00);
-		buf.WriteInt32(19); //number of expansions to include in packet
-
-		//generate expansion data
-		for (int i = 0; i < 19; i++)
+		else if (m_client_version == cv_titanium)
 		{
-			buf.WriteInt32(i);													//sequenctial number
-			buf.WriteInt32((expansion & (1 << i)) == (1 << i) ? 0x01 : 0x00);	//1 own 0 not own
-			buf.WriteInt8(0x00);
-			buf.WriteInt32(ExpansionLookup[i]);									//from eqlsstr_us.txt
-			buf.WriteInt32(0x179E);												//from eqlsstr_us.txt for buttons/order
-			buf.WriteInt32(0xFFFFFFFF);											//end identification
-			buf.WriteInt8(0x0);													//force order window to appear 1 appear 0 not appear
-			buf.WriteInt8(0x0);
-			buf.WriteInt32(0x0000);
-			buf.WriteInt32(0x0000);
-			buf.WriteInt32(0xFFFFFFFF);
-		}
-
-		auto out = std::make_unique<EQApplicationPacket>(OP_LoginExpansionPacketData, buf);
-		m_connection->QueuePacket(out.get());
-
-	}
-	else if (m_client_version == cv_titanium)
-	{
-		if (expansion > 1023)
-		{
+			if (expansion >= EQ::expansions::bitPoR)
+			{
+				// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
+				plrs.offer_min_days = ((EQ::expansions::bitDoD << 2) | 1) - 2;
+			}
+			else
+			{
+				plrs.offer_min_days = owned_expansion;
+			}
 			// Titanium shipped with 10 expansions.  Set owned expansions to be max 10.
-			plrs.offer_min_days = (1023 << 1) | 1;
+			plrs.web_offer_min_views = ((EQ::expansions::bitDoD << 2) | 1) - 2;
 		}
-		else
-		{
-			plrs.offer_min_days = owned_expansion;
-		}
-		// Titanium shipped with 10 expansions so set max to 10.
-		plrs.web_offer_min_views = (1023 << 1);
 
 	}
 
