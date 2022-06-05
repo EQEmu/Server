@@ -466,6 +466,9 @@ int command_init(void)
  */
 void command_deinit(void)
 {
+	for (auto &c : commandlist)
+		delete c.second;
+
 	commandlist.clear();
 	commandaliases.clear();
 
