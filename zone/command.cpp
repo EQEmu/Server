@@ -52,6 +52,7 @@ int (*command_dispatch)(Client *,std::string) = command_notavail;
 
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
+std::vector<CommandRecord *> command_delete_list;
 
 /*
  * command_notavail
@@ -466,6 +467,9 @@ int command_init(void)
  */
 void command_deinit(void)
 {
+	for (auto &c : command_delete_list)
+		delete c;
+	command_delete_list.clear();
 	commandlist.clear();
 	commandaliases.clear();
 
@@ -517,6 +521,7 @@ int command_add(std::string command_name, std::string description, uint8 admin, 
 
 	commandlist[command_name] = c;
 	commandaliases[command_name] = command_name;
+	command_delete_list.push_back(c);
 	command_count++;
 
 	return 0;
