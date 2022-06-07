@@ -2136,7 +2136,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				if (IsClient()) {
 					if (caster->IsClient()) {
-						if (!entity_list.IsInSameGroupOrRaidGroup(caster->CastToClient(), this->CastToClient())) {
+						if (!entity_list.IsInSameGroupOrRaidGroup(caster->CastToClient(), CastToClient())) {
 							caster->Message(Chat::Red, "Your target must be a group member for this spell.");
 							break;
 						}
