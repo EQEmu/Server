@@ -655,7 +655,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
-	
+
 	auto query = fmt::format(
 		SQL (
 			SELECT
@@ -2801,7 +2801,7 @@ void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string
 	bool not_found = true;
 	for (auto & w : LogSys.discord_webhooks) {
 		if (w.webhook_name == webhook_name) {
-			SendDiscordMessage(w.id, message);
+			SendDiscordMessage(w.id, message + "\n");
 			not_found = false;
 		}
 	}
