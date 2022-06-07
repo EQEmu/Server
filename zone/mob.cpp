@@ -1682,101 +1682,6 @@ void Mob::ShowStats(Client* client)
 			target->GetCharmedMinDamage() != 0
 		);
 
-		// Spawn Data
-		if (
-			target->GetGrid() ||
-			target->GetSpawnGroupId() ||
-			target->GetSpawnPointID()
-		) {
-			client->Message(
-				Chat::White,
-				fmt::format(
-					"Spawn | Group: {} Point: {} Grid: {}",
-					target->GetSpawnGroupId(),
-					target->GetSpawnPointID(),
-					target->GetGrid()
-				).c_str()
-			);
-		}
-
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn | Raid: {} Rare: {}",
-				target->IsRaidTarget() ? "Yes" : "No",
-				target->IsRareSpawn() ? "Yes" : "No",
-				target->GetSkipGlobalLoot() ? "Yes" : "No"
-			).c_str()
-		);
-
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn | Skip Global Loot: {} Ignore Despawn: {}",
-				target->GetSkipGlobalLoot() ? "Yes" : "No",
-				target->GetIgnoreDespawn() ? "Yes" : "No"
-			).c_str()
-		);
-
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn | Findable: {} Trackable: {} Underwater: {}",
-				target->IsFindable() ? "Yes" : "No",
-				target->IsTrackable() ? "Yes" : "No",
-				target->IsUnderwaterOnly() ? "Yes" : "No"
-			).c_str()
-		);
-
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn | Stuck Behavior: {} Fly Mode: {}",
-				target->GetStuckBehavior(),
-				static_cast<int>(target->GetFlyMode())
-			).c_str()
-		);
-
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn | Aggro NPCs: {} Always Aggro: {}",
-				target->GetNPCAggro() ? "Yes" : "No",
-				target->GetAlwaysAggro() ? "Yes" : "No"
-			).c_str()
-		);
-
-		// NPC
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"NPC | ID: {} Entity ID: {} Name: {}{} Level: {}",
-				target->GetNPCTypeID(),
-				target->GetID(),
-				target_name,
-				(
-					!target_last_name.empty() ?
-					fmt::format(" ({})", target_last_name) :
-					""
-				),
-				target->GetLevel()
-			).c_str()
-		);
-
-		// Race / Class / Gender
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Race: {} ({}) Class: {} ({}) Gender: {} ({})",
-				GetRaceIDName(target->GetRace()),
-				target->GetRace(),
-				GetClassIDName(target->GetClass()),
-				target->GetClass(),
-				GetGenderName(target->GetGender()),
-				target->GetGender()
-			).c_str()
-		);
-
 		// Faction
 		if (target->GetNPCFactionID()) {
 			auto faction_id = target->GetNPCFactionID();
@@ -2310,6 +2215,101 @@ void Mob::ShowStats(Client* client)
 				).c_str()
 			);
 		}
+
+		// Spawn Data
+		if (
+			target->GetGrid() ||
+			target->GetSpawnGroupId() ||
+			target->GetSpawnPointID()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Spawn | Group: {} Point: {} Grid: {}",
+					target->GetSpawnGroupId(),
+					target->GetSpawnPointID(),
+					target->GetGrid()
+				).c_str()
+			);
+		}
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Raid: {} Rare: {}",
+				target->IsRaidTarget() ? "Yes" : "No",
+				target->IsRareSpawn() ? "Yes" : "No",
+				target->GetSkipGlobalLoot() ? "Yes" : "No"
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Skip Global Loot: {} Ignore Despawn: {}",
+				target->GetSkipGlobalLoot() ? "Yes" : "No",
+				target->GetIgnoreDespawn() ? "Yes" : "No"
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Findable: {} Trackable: {} Underwater: {}",
+				target->IsFindable() ? "Yes" : "No",
+				target->IsTrackable() ? "Yes" : "No",
+				target->IsUnderwaterOnly() ? "Yes" : "No"
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Stuck Behavior: {} Fly Mode: {}",
+				target->GetStuckBehavior(),
+				static_cast<int>(target->GetFlyMode())
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Aggro NPCs: {} Always Aggro: {}",
+				target->GetNPCAggro() ? "Yes" : "No",
+				target->GetAlwaysAggro() ? "Yes" : "No"
+			).c_str()
+		);
+
+		// Race / Class / Gender
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Race: {} ({}) Class: {} ({}) Gender: {} ({})",
+				GetRaceIDName(target->GetRace()),
+				target->GetRace(),
+				GetClassIDName(target->GetClass()),
+				target->GetClass(),
+				GetGenderName(target->GetGender()),
+				target->GetGender()
+			).c_str()
+		);
+
+		// NPC
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"NPC | ID: {} Entity ID: {} Name: {}{} Level: {}",
+				target->GetNPCTypeID(),
+				target->GetID(),
+				target_name,
+				(
+					!target_last_name.empty() ?
+					fmt::format(" ({})", target_last_name) :
+					""
+				),
+				target->GetLevel()
+			).c_str()
+		);
 	}
 }
 
