@@ -3832,11 +3832,59 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				can_stun = true;
 			}
 
-			if ((GetBaseRace() == OGRE || GetBaseRace() == OGGOK_CITIZEN) &&
-				!attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))
+			bool is_immune_to_frontal_stun = false;
+
+			if (IsBot() || IsClient() || IsMerc()) {
+				if (
+					IsPlayerClass(GetClass()) &&
+					RuleI(Combat, FrontalStunImmunityClasses) & GetPlayerClassBit(GetClass())
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+
+
+				if (
+					(
+						IsPlayerRace(GetBaseRace()) &&
+						RuleI(Combat, FrontalStunImmunityRaces) & GetPlayerRaceBit(GetBaseRace())
+					) ||
+					GetBaseRace() == RACE_OGGOK_CITIZEN_93
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+			} else if (IsNPC()) {
+				if (
+					RuleB(Combat, NPCsUseFrontalStunImmunityClasses) &&
+					IsPlayerClass(GetClass()) &&
+					RuleI(Combat, FrontalStunImmunityClasses) & GetPlayerClassBit(GetClass())
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+
+				if (
+					RuleB(Combat, NPCsUseFrontalStunImmunityRaces) &&
+					(
+						(
+							IsPlayerRace(GetBaseRace()) &&
+							RuleI(Combat, FrontalStunImmunityRaces) & GetPlayerRaceBit(GetBaseRace())
+						) ||
+						GetBaseRace() == RACE_OGGOK_CITIZEN_93
+					)
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+			}
+
+			if (
+				is_immune_to_frontal_stun &&
+				!attacker->BehindMob(this, attacker->GetX(), attacker->GetY())
+			) {
 				can_stun = false;
-			if (GetSpecialAbility(UNSTUNABLE))
+			}
+
+			if (GetSpecialAbility(UNSTUNABLE)) {
 				can_stun = false;
+			}
 		}
 		if (can_stun) {
 			int bashsave_roll = zone->random.Int(0, 100);
