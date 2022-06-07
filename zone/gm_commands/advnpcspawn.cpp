@@ -140,7 +140,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				).c_str()
 			);
 		}
-			return;
+		return;
 	} else if (is_clear_box) {
 		if (arguments != 2 || !sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #advnpcspawn clearbox [Spawngroup ID]");
