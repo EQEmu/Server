@@ -206,7 +206,7 @@ void LuaMod::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, Extra
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -253,7 +253,7 @@ void LuaMod::ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -301,7 +301,7 @@ void LuaMod::AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &return
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -354,7 +354,7 @@ void LuaMod::CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ret
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -409,7 +409,7 @@ void LuaMod::CommonOutgoingHitSuccess(Mob *self, Mob *other, DamageHitInfo &hit,
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -459,7 +459,7 @@ void LuaMod::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraA
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -505,7 +505,7 @@ void LuaMod::GetRequiredAAExperience(Client *self, uint32 &returnValue, bool &ig
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -553,7 +553,7 @@ void LuaMod::GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, boo
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -604,7 +604,7 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValu
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
