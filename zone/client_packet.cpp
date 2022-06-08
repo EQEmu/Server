@@ -3672,12 +3672,18 @@ void Client::Handle_OP_Bind_Wound(const EQApplicationPacket *app)
 		LogError("Size mismatch for Bind wound packet");
 		DumpPacket(app);
 	}
+
+	// Not allowed to forage while mounted
+	if (RuleB(Character, NoSkillsOnHorse) && GetHorseId()) {
+		MessageString(Chat::Skills, NO_SKILL_WHILE_MOUNTED);
+		return;
+	}
+
 	BindWound_Struct* bind_in = (BindWound_Struct*)app->pBuffer;
 	Mob* bindmob = entity_list.GetMob(bind_in->to);
 	if (!bindmob) {
 		LogError("Bindwound on non-exsistant mob from [{}]", GetName());
-	}
-	else {
+	} else {
 		LogDebug("BindWound in: to:\'[{}]\' from=\'[{}]\'", bindmob->GetName(), GetName());
 		BindWound(bindmob, true);
 	}
@@ -6055,6 +6061,13 @@ void Client::Handle_OP_Forage(const EQApplicationPacket *app)
 		Message(Chat::Red, "Ability recovery time not yet met.");
 		return;
 	}
+
+	// Not allowed to forage while mounted
+	if (RuleB(Character, NoSkillsOnHorse) && GetHorseId()) {
+		MessageString(Chat::Skills, NO_SKILL_WHILE_MOUNTED);
+		return;
+	}
+
 	p_timers.Start(pTimerForaging, ForagingReuseTime - 1);
 
 	ForageItem();

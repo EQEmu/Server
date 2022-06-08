@@ -477,6 +477,7 @@
 #define NO_LONGER_HIDDEN			12337   //You are no longer hidden.
 #define STOP_SNEAKING				12338	//You stop sneaking
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
+#define NO_SKILL_WHILE_MOUNTED		12393	//You can not use this skill while on a mount.
 #define STAND_TO_CAST				12441	//You must be standing to cast a spell.
 #define ALREADY_CASTING				12442	//You are already casting a spell!
 #define SHIMMERS_BRIEFLY			12444	//Your %1 shimmers briefly.

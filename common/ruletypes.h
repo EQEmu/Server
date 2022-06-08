@@ -158,6 +158,7 @@ RULE_BOOL(Character, OPClientUpdateVisualDebug, false, "Shows a pulse and forwar
 RULE_BOOL(Character, AllowCrossClassTrainers, false, "If the value is true, a player can also train with other class Guildmasters.")
 RULE_BOOL(Character, PetsUseReagents, true, "Conjuring pets consumes reagents")
 RULE_BOOL(Character, DismountWater, true, "Dismount horses when entering water")
+RULE_BOOL(Character, NoSkillsOnHorse, false, "Enabling this will prevent Bind Wound and Foraging while on a mount")
 RULE_BOOL(Character, UseNoJunkFishing, false, "Disregards junk items when fishing")
 RULE_BOOL(Character, SoftDeletes, true, "When characters are deleted in character select, they are only soft deleted")
 RULE_INT(Character, DefaultGuild, 0, "If not 0, new characters placed into the guild # indicated")
