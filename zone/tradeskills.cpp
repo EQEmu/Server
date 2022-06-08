@@ -512,6 +512,15 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		return;
 	}
 
+	// Character does not have the required skill.
+	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
+		// Notify client.
+		user->Message(Chat::Red, "You are not skilled enough.");
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
+
     //pull the list of components
 	std::string query = StringFormat("SELECT tre.item_id, tre.componentcount "
                                     "FROM tradeskill_recipe_entries AS tre "
