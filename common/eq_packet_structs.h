@@ -4466,6 +4466,10 @@ struct LoadSpellSet_Struct {
 	uint32 unknown;					//there seems to be an extra field in this packet...
 };
 
+struct LootItem_Struct {
+	uint16 entity_id;
+};
+
 // This is the structure for OP_ZonePlayerToBind opcode. Discovered on Feb 9 2007 by FNW from packet logs for titanium client
 // This field "zone_name" is text the Titanium client will display on player death
 // it appears to be a variable length, null-terminated string
