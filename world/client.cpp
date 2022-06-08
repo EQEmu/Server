@@ -1504,6 +1504,7 @@ void Client::SendGuildList() {
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList("", outapp->size);
 	if(outapp->pBuffer == nullptr) {
+		safe_delete(outapp);
 		return;
 	}
 

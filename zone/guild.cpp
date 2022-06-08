@@ -175,6 +175,7 @@ void Client::SendGuildList() {
 	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
 		LogGuilds("Unable to make guild list!");
+		safe_delete(outapp);
 		return;
 	}
 
