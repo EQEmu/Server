@@ -441,6 +441,7 @@ RULE_REAL(Combat, ProcPerMinDexContrib, 0.075, "Increases the probability of a p
 RULE_REAL(Combat, BaseProcChance, 0.035, "Base chance for procs")
 RULE_REAL(Combat, ProcDexDivideBy, 11000, "Divisor for the probability of a proc increased by dexterity")
 RULE_INT(Combat, MinRangedAttackDist, 25, "Minimum Distance to use Ranged Attacks")
+RULE_REAL(Combat, BashACBonusDivisor, 25.0f, "this divides the AC value contribution to bash damage, lower to increase damage")
 RULE_BOOL(Combat, ArcheryBonusRequiresStationary, true, "does the 2x archery bonus chance require a stationary npc")
 RULE_REAL(Combat, ArcheryNPCMultiplier, 1.0, "Value is multiplied by the regular dmg to get the archery dmg")
 RULE_BOOL(Combat, AssistNoTargetSelf, true, "When assisting a target that does not have a target: true = target self, false = leave target as was before assist (false = live like)")

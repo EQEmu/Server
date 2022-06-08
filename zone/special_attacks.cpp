@@ -90,18 +90,24 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 		float skill_bonus = skill_level / 10.0f;
 		float ac_bonus = 0.0f;
 		const EQ::ItemInstance *inst = nullptr;
+
 		if (IsClient()) {
-			if (HasShieldEquiped())
+			if (HasShieldEquiped()) {
 				inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
-			else if (HasTwoHanderEquipped())
-				inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+			} else if (HasTwoHanderEquipped()) {
+				inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotShoulders);
+			}
 		}
-		if (inst)
-			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
-		else
+
+		if (inst) {
+			ac_bonus = inst->GetItemArmorClass(true) / RuleR(Combat, BashACBonusDivisor);
+		} else {
 			return 0; // return 0 in cases where we don't have an item
-		if (ac_bonus > skill_bonus)
+		}
+
+		if (ac_bonus > skill_bonus) {
 			ac_bonus = skill_bonus;
+		}
 		return static_cast<int>(ac_bonus + skill_bonus);
 	}
 	case EQ::skills::SkillBackstab: {
