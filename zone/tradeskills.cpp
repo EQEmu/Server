@@ -513,7 +513,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	}
 
 	// Character does not have the required skill.
-	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
+	if (spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed) {
 		// Notify client.
 		user->Message(Chat::Red, "You are not skilled enough.");
 		user->QueuePacket(outapp);
