@@ -1158,6 +1158,7 @@ void Mob::CreateSpawnPacket(EQApplicationPacket *app, Mob *ForWho)
 {
 	app->SetOpcode(OP_NewSpawn);
 	app->size = sizeof(NewSpawn_Struct);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[app->size];
 	memset(app->pBuffer, 0, app->size);
 	auto ns = (NewSpawn_Struct *) app->pBuffer;
@@ -1175,7 +1176,7 @@ void Mob::CreateSpawnPacket(EQApplicationPacket *app, Mob *ForWho)
 void Mob::CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns) {
 	app->SetOpcode(OP_NewSpawn);
 	app->size = sizeof(NewSpawn_Struct);
-
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(NewSpawn_Struct)];
 
 	// Copy ns directly into packet
@@ -1367,6 +1368,7 @@ void Mob::CreateDespawnPacket(EQApplicationPacket* app, bool Decay)
 {
 	app->SetOpcode(OP_DeleteSpawn);
 	app->size = sizeof(DeleteSpawn_Struct);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[app->size];
 	memset(app->pBuffer, 0, app->size);
 	DeleteSpawn_Struct* ds = (DeleteSpawn_Struct*)app->pBuffer;
