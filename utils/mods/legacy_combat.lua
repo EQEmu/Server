@@ -852,7 +852,12 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 	);
 
 	-- Changed from positive to negative per original
-	damage = damage - (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+    local spell_based_mitigation = defender:GetSpellBonuses():MeleeMitigationEffect() * -1;
+    local item_based_mitigation = defender:GetItemBonuses():MeleeMitigationEffect() * -1;
+    local aa_based_mitigation = defender:GetAABonuses():MeleeMitigationEffect() * -1;
+
+    -- Changed from positive to negative per original
+    damage = damage - (damage * (spell_based_mitigation + item_based_mitigation + aa_based_mitigation) / 100);
 
 	eq.log_combat(
 			string.format("[%s] [Mob::GetMeleeMitDmg] Damage [%02f] SpellMit [%i] ItemMit [%i] AAMit [%i] Post All Mit Bonuses",
