@@ -2465,7 +2465,7 @@ XS(XS__istaskenabled) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskenabled(int task_id)");
 	}
-	
+
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -2483,7 +2483,7 @@ XS(XS__istaskactive) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskactive(int task_id)");
 	}
-	
+
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -2502,7 +2502,7 @@ XS(XS__istaskactivityactive) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskactivityactive(int task_id, int activity_id)");
 	}
-	
+
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -2818,7 +2818,7 @@ XS(XS__istaskappropriate) {
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::istaskaappropriate(int task_id)");
 	}
-	
+
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -3386,7 +3386,7 @@ XS(XS__CheckInstanceByCharID) {
 
 	uint16 instance_id = (int) SvUV(ST(0));
 	uint32 char_id = (int) SvUV(ST(1));
-	RETVAL = quest_manager.CheckInstanceByCharID(instance_id, char_id);	
+	RETVAL = quest_manager.CheckInstanceByCharID(instance_id, char_id);
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -3660,7 +3660,7 @@ XS(XS__IsRunning) {
 	bool RETVAL;
 	dXSTARG;
 
-	RETVAL = quest_manager.IsRunning();	
+	RETVAL = quest_manager.IsRunning();
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
@@ -8426,18 +8426,32 @@ XS(XS__commify) {
 }
 
 XS(XS__checknamefilter);
-XS(XS__checknamefilter) {
+XS(XS__checknamefilter)
+{
 	dXSARGS;
 	if (items != 1) {
 		Perl_croak(aTHX_ "Usage: quest::checknamefilter(string name)");
 	}
 
 	dXSTARG;
-	std::string name = (std::string) SvPV_nolen(ST(0));
-	bool passes = database.CheckNameFilter(name);
-	ST(0) = boolSV(passes);
+	std::string name   = (std::string) SvPV_nolen(ST(0));
+	bool        passes = database.CheckNameFilter(name);
+	ST(0)              = boolSV(passes);
 	sv_2mortal(ST(0));
 	XSRETURN(1);
+}
+
+XS(XS__discordsend);
+XS(XS__discordsend) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::discordsend(string webhook_name, string message)");
+	{
+		std::string webhook_name = (std::string) SvPV_nolen(ST(0));
+		std::string message = (std::string) SvPV_nolen(ST(1));
+		zone->SendDiscordMessage(webhook_name, message);
+	}
+	XSRETURN_EMPTY;
 }
 
 /*
@@ -8704,6 +8718,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "disable_spawn2"), XS__disable_spawn2, file);
 	newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
 	newXS(strcpy(buf, "disabletask"), XS__disabletask, file);
+	newXS(strcpy(buf, "discordsend"), XS__discordsend, file);
 	newXS(strcpy(buf, "doanim"), XS__doanim, file);
 	newXS(strcpy(buf, "echo"), XS__echo, file);
 	newXS(strcpy(buf, "emote"), XS__emote, file);

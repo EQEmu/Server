@@ -219,6 +219,7 @@
 #define ServerOP_UCSServerStatusReply 0x4005
 #define ServerOP_UCSServerStatusRequest 0x4006
 #define ServerOP_UpdateSchedulerEvents 0x4007
+#define ServerOP_DiscordWebhookMessage 0x4008
 
 #define ServerOP_ReloadAAData 0x4100
 #define ServerOP_ReloadAlternateCurrencies 0x4101
@@ -1447,6 +1448,11 @@ struct QSMerchantLogTransaction_Struct {
 	MoneyUpdate_Struct		char_money;
 	uint16 char_count;
 	QSTransactionItems_Struct items[0];
+};
+
+struct DiscordWebhookMessage_Struct {
+	uint32 webhook_id;
+	char message[2000];
 };
 
 struct QSGeneralQuery_Struct {
