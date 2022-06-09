@@ -1382,6 +1382,7 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	IsFullHP=(current_hp>=max_hp);
 	app->SetOpcode(OP_MobHealth);
 	app->size = sizeof(SpawnHPUpdate_Struct2);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[app->size];
 	memset(app->pBuffer, 0, sizeof(SpawnHPUpdate_Struct2));
 	SpawnHPUpdate_Struct2* ds = (SpawnHPUpdate_Struct2*)app->pBuffer;
