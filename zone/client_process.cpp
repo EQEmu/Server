@@ -2053,6 +2053,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
 			{
 				LogSpells("Unexpected Rezz from hover request");
+				safe_delete(default_to_bind);
 				return;
 			}
 			SetHP(GetMaxHP() / 5);
