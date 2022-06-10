@@ -929,16 +929,27 @@ XS(XS_NPC_NextGuardPosition) {
 XS(XS_NPC_SaveGuardSpot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SaveGuardSpot) {
 	dXSARGS;
-	if (items != 5)
+	if (items != 1 && items != 2 && items != 5)
 		Perl_croak(aTHX_ "Usage: NPC::SaveGuardSpot(THIS, x, y, z, heading)"); // @categories Script Utility
 	{
-		NPC  *THIS;
-		float x = (float)SvNV(ST(1));
-		float y = (float)SvNV(ST(2));
-		float z = (float)SvNV(ST(3));
-		float heading = (float)SvNV(ST(4));
-		VALIDATE_THIS_IS_NPC;
-		THIS->SaveGuardSpot(glm::vec4(x, y, z, heading));
+		NPC *THIS;
+		if (items == 1 || items == 2) {
+			bool clear_guard_spot = false;
+
+			if (items > 1) {
+				clear_guard_spot = (bool) SvTRUE(ST(1));
+			}
+
+			VALIDATE_THIS_IS_NPC;
+			THIS->SaveGuardSpot(clear_guard_spot);
+		} else if (items == 5) {
+			float x = (float)SvNV(ST(1));
+			float y = (float)SvNV(ST(2));
+			float z = (float)SvNV(ST(3));
+			float heading = (float)SvNV(ST(4));
+			VALIDATE_THIS_IS_NPC;
+			THIS->SaveGuardSpot(glm::vec4(x, y, z, heading));
+		}
 	}
 	XSRETURN_EMPTY;
 }
@@ -2017,7 +2028,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "RemoveMeleeProc"), XS_NPC_RemoveMeleeProc, file, "$$");
 	newXSproto(strcpy(buf, "RemoveRangedProc"), XS_NPC_RemoveRangedProc, file, "$$");
 	newXSproto(strcpy(buf, "ResumeWandering"), XS_NPC_ResumeWandering, file, "$");
-	newXSproto(strcpy(buf, "SaveGuardSpot"), XS_NPC_SaveGuardSpot, file, "$$$$$");
+	newXSproto(strcpy(buf, "SaveGuardSpot"), XS_NPC_SaveGuardSpot, file, "$;$$$$");
 	newXSproto(strcpy(buf, "ScaleNPC"), XS_NPC_ScaleNPC, file, "$$");
 	newXSproto(strcpy(buf, "SetCopper"), XS_NPC_SetCopper, file, "$$");
 	newXSproto(strcpy(buf, "SetGold"), XS_NPC_SetGold, file, "$$");
