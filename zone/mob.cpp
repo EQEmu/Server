@@ -512,6 +512,18 @@ Mob::Mob(
 	mob_close_scan_timer.Trigger();
 
 	SetCanOpenDoors(true);
+
+	is_boat = (
+        race == RACE_SHIP_72 ||
+        race == RACE_LAUNCH_73 ||
+        race == RACE_GHOST_SHIP_114 ||
+        race == RACE_SHIP_404 ||
+        race == RACE_MERCHANT_SHIP_550 ||
+        race == RACE_PIRATE_SHIP_551 ||
+        race == RACE_GHOST_SHIP_552 ||
+        race == RACE_BOAT_533
+    );
+
 }
 
 Mob::~Mob()
@@ -5658,20 +5670,6 @@ void Mob::RemoveAllNimbusEffects()
 	nimbus_effect1 = 0;
 	nimbus_effect2 = 0;
 	nimbus_effect3 = 0;
-}
-
-bool Mob::IsBoat() const {
-
-	return (
-		race == RACE_SHIP_72 ||
-		race == RACE_LAUNCH_73 ||
-		race == RACE_GHOST_SHIP_114 ||
-		race == RACE_SHIP_404 ||
-		race == RACE_MERCHANT_SHIP_550 ||
-		race == RACE_PIRATE_SHIP_551 ||
-		race == RACE_GHOST_SHIP_552 ||
-		race == RACE_BOAT_533
-	);
 }
 
 bool Mob::IsControllableBoat() const {

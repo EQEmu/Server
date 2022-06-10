@@ -630,7 +630,7 @@ public:
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
 	inline const GravityBehavior GetFlyMode() const { return flymode; }
-	bool IsBoat() const;
+	bool IsBoat() const { return is_boat; }
 	bool IsControllableBoat() const;
 	inline const bool AlwaysAggro() const { return always_aggro; }
 
@@ -1664,6 +1664,7 @@ protected:
 	bool endur_upkeep;
 	bool degenerating_effects; // true if we have a buff that needs to be recalced every tick
 	bool spawned_in_water;
+	bool is_boat;
 
 	CombatRecord combat_record{};
 
