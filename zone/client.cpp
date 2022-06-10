@@ -6517,8 +6517,6 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	}
 	made_npc->loottable_id = 0;
 
-	npc_type = made_npc;
-
 	int summon_count = pet.count;
 
 	if(summon_count > MAX_SWARM_PETS)
@@ -6531,14 +6529,11 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	};
 
 	while(summon_count > 0) {
-		NPCType *npc_dup = nullptr;
-		if(made_npc != nullptr) {
-			npc_dup = new NPCType;
-			memcpy(npc_dup, made_npc, sizeof(NPCType));
-		}
+		auto npc_type_copy = new NPCType;
+		memcpy(npc_type_copy, made_npc, sizeof(NPCType));
 
 		NPC* swarm_pet_npc = new NPC(
-				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
+				npc_type_copy,
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count - 1], 0.0f, 0.0f),
 				GravityBehavior::Water);
@@ -6563,12 +6558,13 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		swarm_pet_npc->GetSwarmInfo()->target = 0;
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if(npc_dup != nullptr)
-			swarm_pet_npc->GiveNPCTypeData(npc_dup);
+		swarm_pet_npc->GiveNPCTypeData(npc_type_copy);
 
 		entity_list.AddNPC(swarm_pet_npc);
 		summon_count--;
 	}
+
+	safe_delete(made_npc);
 }
 
 void Client::AssignToInstance(uint16 instance_id)
