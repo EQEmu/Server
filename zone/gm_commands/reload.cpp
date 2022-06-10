@@ -61,7 +61,7 @@ void command_reload(Client *c, const Seperator *sep)
 		return;
 	}
 
-	ServerPacket pack;
+	ServerPacket* pack;
 
 	if (is_aa) {
 		c->Message(Chat::White, "Attempting to reload Alternate Advancement Data globally.");	
