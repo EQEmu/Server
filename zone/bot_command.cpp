@@ -5123,7 +5123,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 }
 
 void bot_command_view_combos(Client *c, const Seperator *sep)
-{	
+{
 	const std::string class_substrs[17] = { "",
 		"%u (WAR)", "%u (CLR)", "%u (PAL)", "%u (RNG)",
 		"%u (SHD)", "%u (DRU)", "%u (MNK)", "%u (BRD)",
@@ -5375,7 +5375,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		EQ::textures::armorLegs,
 		EQ::textures::armorFeet
 	);
-	
+
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_dye_armor", sep->arg[0], "botdyearmor")) {
 		return;
 	}
@@ -5943,7 +5943,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 			false,
 			bots_iter.Name
 		);
-	
+
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -6333,7 +6333,7 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 
 	bool current_flag = false;
 	auto bst = EQ::constants::stanceUnknown;
-	
+
 	if (!strcasecmp(sep->arg[1], "current"))
 		current_flag = true;
 	else if (sep->IsNumber(1)) {
@@ -7317,7 +7317,7 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 				(botgroup_count + 1),
 				botgroups_iter.first,
 				botgroups_iter.second,
-				database.botdb.IsBotGroupAutoSpawn(botgroups_iter.first) ? " (Auto Spawn)" : "",				
+				database.botdb.IsBotGroupAutoSpawn(botgroups_iter.first) ? " (Auto Spawn)" : "",
 				EQ::SayLinkEngine::GenerateQuestSaylink(
 					fmt::format("^botgroupload {}", botgroups_iter.first),
 					false,
@@ -9389,6 +9389,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	if (!my_bot->Save()) {
 		bot_owner->Message(Chat::White, "Failed to create '%s' due to unknown cause", my_bot->GetCleanName());
+		safe_delete(my_bot);
 		return bot_id;
 	}
 
