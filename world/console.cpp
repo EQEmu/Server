@@ -421,10 +421,6 @@ void ConsoleGuildSay(
 		return;
 	}
 
-	char tmpname[64];
-	tmpname[0] = '*';
-	strcpy(&tmpname[1], connection->UserName().c_str());
-
 	auto from = args[0];
 	auto guild_id = std::stoul(args[1]);
 
