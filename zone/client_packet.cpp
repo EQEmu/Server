@@ -14459,6 +14459,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 			if (!TradeItemsValid) {
 				Trader_EndTrader();
+				safe_delete(gis);
 				return;
 			}
 
