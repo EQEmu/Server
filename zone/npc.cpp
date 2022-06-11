@@ -1903,6 +1903,7 @@ void NPC::PickPocket(Client* thief)
 		}
 		RemoveItem(item_inst->GetID());
 		thief->SendPickPocketResponse(this, 0, PickPocketItem, item_inst->GetItem());
+		safe_delete(item_inst);
 
 		return;
 	}
