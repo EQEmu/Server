@@ -9544,7 +9544,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		Corpse::SendEndLootErrorPacket(this);
 		return;
 	}
-	
+
 	entity->CastToCorpse()->LootItem(this, app);
 }
 
