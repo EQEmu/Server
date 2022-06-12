@@ -9531,26 +9531,21 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	EQApplicationPacket* outapp = nullptr;
-	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
-	if (entity == 0) {
-		Message(Chat::Red, "Error: OP_LootItem: Corpse not found (ent = 0)");
-		outapp = new EQApplicationPacket(OP_LootComplete, 0);
+	auto* l = (LootingItem_Struct*) app->pBuffer;
+	auto entity = entity_list.GetID(static_cast<uint16>(l->lootee));
+	if (!entity) {
+		auto outapp = new EQApplicationPacket(OP_LootComplete, 0);
 		QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
 
-	if (entity->IsCorpse()) {
-		entity->CastToCorpse()->LootItem(this, app);
+	if (!entity->IsCorpse()) {
+		Corpse::SendEndLootErrorPacket(this);
 		return;
 	}
-	else {
-		Message(Chat::Red, "Error: Corpse not found! (!ent->IsCorpse())");
-		Corpse::SendEndLootErrorPacket(this);
-	}
 
-	return;
+	entity->CastToCorpse()->LootItem(this, app);
 }
 
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
