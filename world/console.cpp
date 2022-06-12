@@ -422,7 +422,10 @@ void ConsoleGuildSay(
 	}
 
 	auto from = args[0];
-	auto guild_id = std::stoul(args[1]);
+	auto guild_id = StringIsNumber(args[1]) ? std::stoul(args[1]) : 0;
+	if (!guild_id) {
+		return;
+	}
 
 	auto join_args = args;
 	join_args.erase(join_args.begin(), join_args.begin() + 2);
