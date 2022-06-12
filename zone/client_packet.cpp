@@ -9531,8 +9531,8 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	auto* l = (LootItem_Struct*) app->pBuffer;
-	auto entity = entity_list.GetID(l->entity_id);
+	auto* l = (LootingItem_Struct*) app->pBuffer;
+	auto entity = entity_list.GetID(static_cast<uint16>(l->lootee));
 	if (!entity) {
 		auto outapp = new EQApplicationPacket(OP_LootComplete, 0);
 		QueuePacket(outapp);
