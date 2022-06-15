@@ -66,8 +66,8 @@ SharedDatabase::~SharedDatabase() = default;
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 {
-	std::string query = StringFormat("UPDATE account SET hideme = %i WHERE id = %i", hideme, account_id);
-	auto results = QueryDatabase(query);
+	const std::string query = StringFormat("UPDATE account SET hideme = %i WHERE id = %i", hideme, account_id);
+	const auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
@@ -77,7 +77,7 @@ bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 
 uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
 {
-	std::string query = StringFormat("SELECT gmspeed FROM account WHERE id = '%i'", account_id);
+	const std::string query = StringFormat("SELECT gmspeed FROM account WHERE id = '%i'", account_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
@@ -93,8 +93,8 @@ uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
 
 bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 {
-	std::string query = StringFormat("UPDATE account SET gmspeed = %i WHERE id = %i", gmspeed, account_id);
-	auto results = QueryDatabase(query);
+	const std::string query = StringFormat("UPDATE account SET gmspeed = %i WHERE id = %i", gmspeed, account_id);
+	const auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
@@ -104,7 +104,7 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 
 uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	uint32 EntitledTime = 0;
-	std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
+	const std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		EntitledTime += atoi(row[0]);
@@ -121,9 +121,9 @@ void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 	else
 		sprintf(MailKeyString, "%08X", MailKey);
 
-	std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
-		MailKeyString, CharID);
-	auto results = QueryDatabase(query);
+	const std::string query = StringFormat("UPDATE character_data SET mailkey = '%s' WHERE id = '%i'",
+	                                       MailKeyString, CharID);
+	const auto results = QueryDatabase(query);
 	if (!results.Success())
 		LogError("SharedDatabase::SetMailKey({}, {}) : {}", CharID, MailKeyString, results.ErrorMessage().c_str());
 
@@ -131,7 +131,7 @@ void SharedDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
 
 std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
 {
-	std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", CharID);
+	const std::string query = StringFormat("SELECT `mailkey` FROM `character_data` WHERE `id`='%i' LIMIT 1", CharID);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -168,12 +168,12 @@ std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
 {
 	// Delete cursor items
-	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
-                                    "AND ((slotid >= 8000 AND slotid <= 8999) "
-                                    "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
-									char_id, EQ::invslot::slotCursor,
-									EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
-    auto results = QueryDatabase(query);
+	const std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
+	                                       "AND ((slotid >= 8000 AND slotid <= 8999) "
+	                                       "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
+	                                       char_id, EQ::invslot::slotCursor,
+	                                       EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
+	const auto results = QueryDatabase(query);
     if (!results.Success()) {
         std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
         return false;
@@ -182,8 +182,8 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::co
     int i = 8000;
     for(auto it = start; it != end; ++it, i++) {
 		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
-        EQ::ItemInstance *inst = *it;
-		int16 use_slot = (i == 8000) ? EQ::invslot::slotCursor : i;
+		const EQ::ItemInstance *inst = *it;
+		const int16 use_slot = (i == 8000) ? EQ::invslot::slotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
 		}
@@ -195,9 +195,9 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::co
 bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ::ItemInstance* inst)
 {
 	// Delete cursor items
-	std::string query = StringFormat("SELECT itemid, charges FROM sharedbank "
-                                    "WHERE acctid = %d AND slotid = %d",
-                                    account_id, slot_id);
+	const std::string query = StringFormat("SELECT itemid, charges FROM sharedbank "
+	                                       "WHERE acctid = %d AND slotid = %d",
+	                                       account_id, slot_id);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		//returning true is less harmful in the face of a query error
@@ -209,8 +209,8 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ:
 
 	auto row = results.begin();
 
-    uint32 id = atoi(row[0]);
-    uint16 charges = atoi(row[1]);
+	const uint32 id = atoi(row[0]);
+	const uint16 charges = atoi(row[1]);
 
     uint16 expect_charges = 0;
 
@@ -263,7 +263,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 	uint32 augslot[EQ::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
 	if (inst->IsClassCommon()) {
 		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-			EQ::ItemInstance *auginst = inst->GetItem(i);
+			const EQ::ItemInstance *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 		}
 	}
@@ -275,18 +275,18 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 		charges = 0x7FFF;
 
 	// Update/Insert item
-    std::string query = StringFormat("REPLACE INTO inventory "
-                                    "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
-                                    "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
-                                    "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
-                                    "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
-                                    (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
-                                    (unsigned long)charges, (unsigned long)(inst->IsAttuned()? 1: 0),
-                                    inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
-                                    (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
-									(unsigned long)augslot[3], (unsigned long)augslot[4], (unsigned long)augslot[5], (unsigned long)inst->GetOrnamentationIcon(),
-									(unsigned long)inst->GetOrnamentationIDFile(), (unsigned long)inst->GetOrnamentHeroModel());
-	auto results = QueryDatabase(query);
+	const std::string query = StringFormat("REPLACE INTO inventory "
+	                                       "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
+	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
+	                                       "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
+	                                       "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
+	                                       (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
+	                                       (unsigned long)charges, (unsigned long)(inst->IsAttuned()? 1: 0),
+	                                       inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
+	                                       (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
+	                                       (unsigned long)augslot[3], (unsigned long)augslot[4], (unsigned long)augslot[5], (unsigned long)inst->GetOrnamentationIcon(),
+	                                       (unsigned long)inst->GetOrnamentationIDFile(), (unsigned long)inst->GetOrnamentHeroModel());
+	const auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
 	if (inst->IsClassBag() && EQ::InventoryProfile::SupportsContainers(slot_id))
@@ -310,29 +310,29 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
 	uint32 augslot[EQ::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
 	if (inst->IsClassCommon()) {
 		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-			EQ::ItemInstance *auginst = inst->GetItem(i);
+			const EQ::ItemInstance *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 		}
 	}
 
 // Update/Insert item
-    uint32 account_id = GetAccountIDByChar(char_id);
+	const uint32 account_id = GetAccountIDByChar(char_id);
     uint16 charges = 0;
     if(inst->GetCharges() >= 0)
         charges = inst->GetCharges();
     else
         charges = 0x7FFF;
 
-    std::string query = StringFormat("REPLACE INTO sharedbank "
-                                    "(acctid, slotid, itemid, charges, custom_data, "
-                                    "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6) "
-                                    "VALUES( %lu, %lu, %lu, %lu, '%s', "
-                                    "%lu, %lu, %lu, %lu, %lu, %lu)",
-                                    (unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
-                                    (unsigned long)charges, inst->GetCustomDataString().c_str(), (unsigned long)augslot[0],
-									(unsigned long)augslot[1], (unsigned long)augslot[2], (unsigned long)augslot[3], (unsigned long)augslot[4],
-									(unsigned long)augslot[5]);
-    auto results = QueryDatabase(query);
+	const std::string query = StringFormat("REPLACE INTO sharedbank "
+	                                       "(acctid, slotid, itemid, charges, custom_data, "
+	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6) "
+	                                       "VALUES( %lu, %lu, %lu, %lu, '%s', "
+	                                       "%lu, %lu, %lu, %lu, %lu, %lu)",
+	                                       (unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
+	                                       (unsigned long)charges, inst->GetCustomDataString().c_str(), (unsigned long)augslot[0],
+	                                       (unsigned long)augslot[1], (unsigned long)augslot[2], (unsigned long)augslot[3], (unsigned long)augslot[4],
+	                                       (unsigned long)augslot[5]);
+	const auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
 	if (inst->IsClassBag() && EQ::InventoryProfile::SupportsContainers(slot_id)) {
@@ -364,7 +364,7 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 	if (!EQ::InventoryProfile::SupportsContainers(slot_id))
         return true;
 
-	int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
+	const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
     query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
                         char_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
@@ -379,7 +379,7 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 
     // Delete item
-	uint32 account_id = GetAccountIDByChar(char_id);
+    const uint32 account_id = GetAccountIDByChar(char_id);
 	std::string query = StringFormat("DELETE FROM sharedbank WHERE acctid=%i AND slotid=%i", account_id, slot_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -390,7 +390,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 	if (!EQ::InventoryProfile::SupportsContainers(slot_id))
         return true;
 
-	int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
+    const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
     query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
                         "AND slotid >= %i AND slotid < %i",
                         account_id, base_slot_id, (base_slot_id+10));
@@ -406,7 +406,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 
 int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 {
-	std::string query = StringFormat("SELECT sharedplat FROM account WHERE id = '%i'", account_id);
+	const std::string query = StringFormat("SELECT sharedplat FROM account WHERE id = '%i'", account_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return false;
@@ -421,8 +421,8 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
 }
 
 bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
-	std::string query = StringFormat("UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id);
-	auto results = QueryDatabase(query);
+	const std::string query = StringFormat("UPDATE account SET sharedplat = sharedplat + %i WHERE id = %i", amount_to_add, account_id);
+	const auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
@@ -434,7 +434,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQ::InventoryPro
 
 	const EQ::ItemData *myitem;
 
-	std::string query   = StringFormat(
+	const std::string query   = StringFormat(
 		"SELECT itemid, item_charges, slot FROM starting_items "
 		"WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
 		"(deityid = %i or deityid = 0) AND (zoneid = %i or zoneid = 0) AND "
@@ -454,15 +454,15 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQ::InventoryPro
 
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		int32 itemid = atoi(row[0]);
-		int32 charges = atoi(row[1]);
+		const int32 itemid = atoi(row[0]);
+		const int32 charges = atoi(row[1]);
 		int32 slot = atoi(row[2]);
 		myitem = GetItem(itemid);
 
 		if(!myitem)
 			continue;
 
-		EQ::ItemInstance* myinst = CreateBaseItem(myitem, charges);
+		const EQ::ItemInstance* myinst = CreateBaseItem(myitem, charges);
 
 		if(slot < 0)
 			slot = inv->FindFreeSlot(0, 0);
@@ -501,7 +501,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = (int16)atoi(row[0]);
 		uint32 item_id = (uint32)atoi(row[1]);
-		int16 charges = (int16)atoi(row[2]);
+		const int16 charges = (int16)atoi(row[2]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
 		aug[0] = (uint32)atoi(row[3]);
@@ -546,7 +546,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 					continue;
 				}
 
-				char v = data_str[i];
+				const char v = data_str[i];
 				if (use_id)
 					idAsString.push_back(v);
 				else
@@ -579,7 +579,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		return false;
 
 	// Retrieve character inventory
-	std::string query =
+	const std::string query =
 	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, augslot2, augslot3, augslot4, augslot5, "
 			 "augslot6, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model FROM "
 			 "inventory WHERE charid = %i ORDER BY slotid",
@@ -592,11 +592,11 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		return false;
 	}
 
-	auto timestamps = GetItemRecastTimestamps(char_id);
+	const auto timestamps = GetItemRecastTimestamps(char_id);
 
 	auto cv_conflict = false;
-	auto pmask = inv->GetLookup()->PossessionsBitmask;
-	auto bank_size = inv->GetLookup()->InventoryTypeSize.Bank;
+	const auto pmask = inv->GetLookup()->PossessionsBitmask;
+	const auto bank_size = inv->GetLookup()->InventoryTypeSize.Bank;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
@@ -608,7 +608,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			}
 		}
 		else if (slot_id <= EQ::invbag::GENERAL_BAGS_END && slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN) { // Titanium thru UF check
-			auto parent_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
+			const auto parent_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
 			if ((((uint64)1 << parent_slot) & pmask) == 0) {
 				cv_conflict = true;
 				continue;
@@ -621,7 +621,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			}
 		}
 		else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) { // Titanium check
-			auto parent_index = ((slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
+			const auto parent_index = ((slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
 			if (parent_index < EQ::invslot::SLOT_BEGIN || parent_index >= bank_size) {
 				cv_conflict = true;
 				continue;
@@ -629,8 +629,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		}
 
 		uint32 item_id = atoi(row[1]);
-		uint16 charges = atoi(row[2]);
-		uint32 color = atoul(row[3]);
+		const uint16 charges = atoi(row[2]);
+		const uint32 color = atoul(row[3]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
 
@@ -641,10 +641,10 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		aug[4] = std::stoul(row[8]);
 		aug[5] = std::stoul(row[9]);
 
-		bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
+		const bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
 
-		uint32 ornament_icon = std::stoul(row[12]);
-		uint32 ornament_idfile = std::stoul(row[13]);
+		const uint32 ornament_icon = std::stoul(row[12]);
+		const uint32 ornament_idfile = std::stoul(row[13]);
 		uint32 ornament_hero_model = std::stoul(row[14]);
 
 		const EQ::ItemData *item = GetItem(item_id);
@@ -680,7 +680,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 					continue;
 				}
 
-				char v = data_str[i];
+				const char v = data_str[i];
 				if (use_id)
 					idAsString.push_back(v);
 				else
@@ -758,7 +758,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv) // deprecated
 {
 	// Retrieve character inventory
-	std::string query =
+	const std::string query =
 	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
 			 "augslot2, augslot3, augslot4, augslot5, augslot6, instnodrop, custom_data, ornamenticon, "
 			 "ornamentidfile, ornament_hero_model "
@@ -776,8 +776,8 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
 		uint32 item_id = atoi(row[1]);
-		int8 charges = atoi(row[2]);
-		uint32 color = atoul(row[3]);
+		const int8 charges = atoi(row[2]);
+		const uint32 color = atoul(row[3]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
 		aug[0] = (uint32)atoi(row[4]);
@@ -787,9 +787,9 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 		aug[4] = (uint32)atoi(row[8]);
 		aug[5] = (uint32)atoi(row[9]);
 
-		bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
-		uint32 ornament_icon = std::stoul(row[12]);
-		uint32 ornament_idfile = std::stoul(row[13]);
+		const bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
+		const uint32 ornament_icon = std::stoul(row[12]);
+		const uint32 ornament_idfile = std::stoul(row[13]);
 		uint32 ornament_hero_model = std::stoul(row[14]);
 
 		const EQ::ItemData *item = GetItem(item_id);
@@ -822,7 +822,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 					continue;
 				}
 
-				char v = data_str[i];
+				const char v = data_str[i];
 				if (use_id)
 					idAsString.push_back(v);
 				else
@@ -866,7 +866,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
 {
 	std::map<uint32, uint32> timers;
-	std::string query = StringFormat("SELECT recast_type,timestamp FROM character_item_recast WHERE id=%u", char_id);
+	const std::string query = StringFormat("SELECT recast_type,timestamp FROM character_item_recast WHERE id=%u", char_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() == 0)
 		return timers;
@@ -878,8 +878,8 @@ std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
 
 uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type)
 {
-	std::string query = StringFormat("SELECT timestamp FROM character_item_recast WHERE id=%u AND recast_type=%u",
-					 char_id, recast_type);
+	const std::string query = StringFormat("SELECT timestamp FROM character_item_recast WHERE id=%u AND recast_type=%u",
+	                                       char_id, recast_type);
 	auto results = QueryDatabase(query);
 	if (!results.Success() || results.RowCount() == 0)
 		return 0;
@@ -891,7 +891,7 @@ uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type
 void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
 {
 	// This actually isn't strictly live-like. Live your recast timestamps are forever
-	std::string query =
+	const std::string query =
 	    StringFormat("DELETE FROM character_item_recast WHERE id = %u and timestamp < UNIX_TIMESTAMP()", char_id);
 	QueryDatabase(query);
 }
@@ -923,7 +923,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 	items_mmf.reset(nullptr);
 
 	try {
-		auto Config = EQEmuConfig::get();
+		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("items");
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
@@ -1312,7 +1312,7 @@ std::string SharedDatabase::GetBook(const char *txtfile, int16 *language)
 	std::string txtout;
 	strcpy(txtfile2, txtfile);
 
-	std::string query = StringFormat("SELECT txtfile, language FROM books WHERE name = '%s'", txtfile2);
+	const std::string query = StringFormat("SELECT txtfile, language FROM books WHERE name = '%s'", txtfile2);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		txtout.assign(" ",1);
@@ -1380,7 +1380,7 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
     uint32 current_entry = 0;
 
     for(auto row = results.begin(); row != results.end(); ++row) {
-        uint32 id = static_cast<uint32>(atoul(row[0]));
+	    const uint32 id = static_cast<uint32>(atoul(row[0]));
         if(id != current_id) {
             if(current_id != 0) {
                 hash.insert(current_id, faction);
@@ -1417,7 +1417,7 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 	faction_hash.reset(nullptr);
 
 	try {
-		auto Config = EQEmuConfig::get();
+		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("faction");
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
@@ -1515,21 +1515,21 @@ EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16
 
 int32 SharedDatabase::DeleteStalePlayerCorpses() {
 	if(RuleB(Zone, EnableShadowrest)) {
-        std::string query = StringFormat(
+		const std::string query = StringFormat(
 			"UPDATE `character_corpses` SET `is_buried` = 1 WHERE `is_buried` = 0 AND "
             "(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > %d AND NOT time_of_death = 0",
              (RuleI(Character, CorpseDecayTimeMS) / 1000));
-        auto results = QueryDatabase(query);
+		const auto results = QueryDatabase(query);
 		if (!results.Success())
 			return -1;
 
 		return results.RowsAffected();
 	}
 
-    std::string query = StringFormat(
+	const std::string query = StringFormat(
 		"DELETE FROM `character_corpses` WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > %d "
 		"AND NOT time_of_death = 0", (RuleI(Character, CorpseDecayTimeMS) / 1000));
-    auto results = QueryDatabase(query);
+	const auto results = QueryDatabase(query);
     if (!results.Success())
         return -1;
 
@@ -1540,7 +1540,7 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 {
 	command_settings.clear();
 
-	std::string query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
+	const std::string query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return false;
@@ -1564,8 +1564,7 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<std::string, uint8>> &injected)
 {
 	if (injected.size()) {
-
-		std::string query = fmt::format(
+		const std::string query = fmt::format(
 			"REPLACE INTO `command_settings`(`command`, `access`) VALUES {}",
 			implode(
 				",",
@@ -1590,8 +1589,7 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string> &orphaned)
 {
 	if (orphaned.size()) {
-
-		std::string query = fmt::format(
+		const std::string query = fmt::format(
 			"DELETE FROM `command_settings` WHERE `command` IN ({})",
 			implode(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
@@ -1613,13 +1611,13 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 	skill_caps_mmf.reset(nullptr);
 
-	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	uint32 level_count = HARD_LEVEL_CAP + 1;
+	const uint32 class_count = PLAYER_CLASS_COUNT;
+	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
+	const uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
 
 	try {
-		auto Config = EQEmuConfig::get();
+		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("skill_caps");
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
@@ -1635,9 +1633,9 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 }
 
 void SharedDatabase::LoadSkillCaps(void *data) {
-	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	uint32 level_count = HARD_LEVEL_CAP + 1;
+	const uint32 class_count = PLAYER_CLASS_COUNT;
+	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
+	const uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);
 
 	const std::string query = "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level";
@@ -1648,15 +1646,15 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	}
 
     for(auto row = results.begin(); row != results.end(); ++row) {
-        uint8 skillID = atoi(row[0]);
-        uint8 class_ = atoi(row[1]) - 1;
-        uint8 level = atoi(row[2]);
-        uint16 cap = atoi(row[3]);
+	    const uint8 skillID = atoi(row[0]);
+	    const uint8 class_ = atoi(row[1]) - 1;
+	    const uint8 level = atoi(row[2]);
+	    const uint16 cap = atoi(row[3]);
 
         if(skillID >= skill_count || class_ >= class_count || level >= level_count)
             continue;
 
-        uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
+	    const uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
         skill_caps_table[index] = cap;
     }
 }
@@ -1674,9 +1672,9 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, ui
 		SkillMaxLevel = RuleI(Character, MaxLevel);
 	}
 
-	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	uint32 level_count = HARD_LEVEL_CAP + 1;
+	const uint32 class_count = PLAYER_CLASS_COUNT;
+	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
+	const uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
 		return 0;
 	}
@@ -1685,8 +1683,8 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, ui
 		Level = static_cast<uint8>(SkillMaxLevel);
 	}
 
-	uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count) + Level;
-	uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+	const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count) + Level;
+	const uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
 	return skill_caps_table[index];
 }
 
@@ -1703,17 +1701,17 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, u
 		SkillMaxLevel = RuleI(Character, MaxLevel);
 	}
 
-	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	uint32 level_count = HARD_LEVEL_CAP + 1;
+	const uint32 class_count = PLAYER_CLASS_COUNT;
+	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
+	const uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
 		return 0;
 	}
 
 	uint8 ret = 0;
 	if(Level > static_cast<uint8>(SkillMaxLevel)) {
-		uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
-		uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+		const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
+		const uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
 		for(uint8 x = 0; x < Level; x++){
 			if(skill_caps_table[index + x]){
 				ret = x;
@@ -1723,8 +1721,8 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, u
 	}
 	else
 	{
-		uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
-		uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+		const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
+		const uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
 		for(int x = 0; x < SkillMaxLevel; x++){
 			if(skill_caps_table[index + x]){
 				ret = x;
@@ -1740,16 +1738,15 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, u
 }
 
 void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {
-
-	std::string query = StringFormat("SELECT `spellid`, `type` FROM `damageshieldtypes` WHERE `spellid` > 0 "
-                                    "AND `spellid` <= %i", iMaxSpellID);
+	const std::string query = StringFormat("SELECT `spellid`, `type` FROM `damageshieldtypes` WHERE `spellid` > 0 "
+	                                       "AND `spellid` <= %i", iMaxSpellID);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return;
     }
 
     for(auto row = results.begin(); row != results.end(); ++row) {
-        int spellID = atoi(row[0]);
+	    const int spellID = atoi(row[0]);
         if((spellID > 0) && (spellID <= iMaxSpellID))
             sp[spellID].damage_shield_type = atoi(row[1]);
     }
@@ -1761,7 +1758,7 @@ const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
 }
 
 int SharedDatabase::GetMaxSpellID() {
-	std::string query = "SELECT MAX(id) FROM spells_new";
+	const std::string query = "SELECT MAX(id) FROM spells_new";
 	auto results = QueryDatabase(query);
     if (!results.Success()) {
         return -1;
@@ -1776,7 +1773,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 	spells_mmf.reset(nullptr);
 
 	try {
-		auto Config = EQEmuConfig::get();
+		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("spells");
 		mutex.Lock();
 
@@ -1990,7 +1987,7 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 	base_data_mmf.reset(nullptr);
 
 	try {
-		auto Config = EQEmuConfig::get();
+		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("base_data");
 		mutex.Lock();
 
@@ -2072,13 +2069,13 @@ const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) {
 
 	char *base_ptr = reinterpret_cast<char*>(base_data_mmf->Get());
 
-	uint32 offset = ((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct);
+	const uint32 offset = ((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct);
 
 	if(offset >= base_data_mmf->Size()) {
 		return nullptr;
 	}
 
-	BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + offset);
+	const BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + offset);
 	return bd;
 }
 
@@ -2172,7 +2169,7 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	uint32 current_entry = 0;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 id = static_cast<uint32>(atoul(row[0]));
+		const uint32 id = static_cast<uint32>(atoul(row[0]));
 		if (id != current_id) {
 			if (current_id != 0) {
 				hash.insert(
@@ -2266,7 +2263,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	uint32 current_entry = 0;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto id = static_cast<uint32>(atoul(row[0]));
+		const auto id = static_cast<uint32>(atoul(row[0]));
 		if (id != current_id) {
 			if (current_id != 0) {
 				hash.insert(
@@ -2314,7 +2311,7 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 	loot_drop_mmf.reset(nullptr);
 
 	try {
-		auto Config = EQEmuConfig::get();
+		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("loot");
 		mutex.Lock();
 		std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
@@ -2365,7 +2362,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 }
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
-	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
+	const std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
 	auto results = QueryDatabase(query);
 	auto row = results.begin();
 	memset(message, '\0', sizeof(InspectMessage_Struct));
@@ -2375,6 +2372,6 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 }
 
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
-	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
+	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
 	auto results = QueryDatabase(query);
 }
