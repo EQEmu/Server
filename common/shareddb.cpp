@@ -1091,11 +1091,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// Health, Mana, and Endurance
 		item.HP = std::stoi(row[ItemField::hp]);
-		item.Regen = std::stoul(row[ItemField::regen]);
+		item.Regen = std::stoi(row[ItemField::regen]);
 		item.Mana = std::stoi(row[ItemField::mana]);
-		item.ManaRegen = std::stoul(row[ItemField::manaregen]);
-		item.Endur = std::stoul(row[ItemField::endur]);
-		item.EnduranceRegen = std::stoul(row[ItemField::enduranceregen]);
+		item.ManaRegen = std::stoi(row[ItemField::manaregen]);
+		item.Endur = std::stoi(row[ItemField::endur]);
+		item.EnduranceRegen = std::stoi(row[ItemField::enduranceregen]);
 
 		// Bane Damage
 		item.BaneDmgAmt = std::stoi(row[ItemField::banedmgamt]);
