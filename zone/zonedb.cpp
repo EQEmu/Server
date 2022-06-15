@@ -197,7 +197,7 @@ bool ZoneDatabase::GetZoneCFG(
 		return false;
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	memset(zone_data, 0, sizeof(NewZone_Struct));
 	zone_data->ztype = atoi(row[0]);
@@ -323,7 +323,7 @@ uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
     if (results.RowCount() != 1)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
     timeval tv;
     gettimeofday(&tv, nullptr);
@@ -656,7 +656,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQ::ItemInstance* contain
 		return;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         uint8 index = (uint8)atoi(row[0]);
         uint32 item_id = (uint32)atoi(row[1]);
         int8 charges = (int8)atoi(row[2]);
@@ -756,7 +756,7 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
 	}
 
 	loadti->Code = BazaarTrader_ShowItems;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[5]) >= 80 || atoi(row[4]) < 0) {
 			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
@@ -780,7 +780,7 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 		return loadti;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[5]) >= 80 || atoi(row[5]) < 0) {
 			LogTrading("Bad Slot number when trying to load trader information!\n");
 			continue;
@@ -806,7 +806,7 @@ EQ::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNu
         return nullptr;
     }
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
     int ItemID = atoi(row[1]);
 	int Charges = atoi(row[3]);
@@ -1075,7 +1075,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		"character_data             "
 		"WHERE `id` = %i         ", character_id);
 	auto results = database.QueryDatabase(query); int r = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		strcpy(pp->name, row[r]); r++;											 // "`name`,                    "
 		strcpy(pp->last_name, row[r]); r++;										 // "last_name,                 "
 		pp->gender = atoi(row[r]); r++;											 // "gender,                    "
@@ -1176,7 +1176,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 bool ZoneDatabase::LoadCharacterFactionValues(uint32 character_id, faction_map & val_list) {
 	std::string query = StringFormat("SELECT `faction_id`, `current_value` FROM `faction_values` WHERE `char_id` = %i", character_id);
 	auto results = database.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) { val_list[atoi(row[0])] = atoi(row[1]); }
+	for (auto& row = results.begin(); row != results.end(); ++row) { val_list[atoi(row[0])] = atoi(row[1]); }
 	return true;
 }
 
@@ -1194,7 +1194,7 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 	for (i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++){
 		pp->mem_spells[i] = 0xFFFFFFFF;
 	}
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
 		if (i < EQ::spells::SPELL_GEM_COUNT && atoi(row[1]) <= SPDAT_RECORDS){
 			pp->mem_spells[i] = atoi(row[1]);
@@ -1222,7 +1222,7 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 	// they have scribed spells on a newer one that exceeds the older one's limit.
 	// Load them all so that server actions are valid..but, nix them in translators.
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		int idx = atoi(row[0]);
 		int id = atoi(row[1]);
 
@@ -1250,7 +1250,7 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 	for (i = 0; i < MAX_PP_LANGUAGE; ++i)
 		pp->languages[i] = 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
 		if (i < MAX_PP_LANGUAGE){
 			pp->languages[i] = atoi(row[1]);
@@ -1263,7 +1263,7 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 bool ZoneDatabase::LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT slot, `rank` FROM character_leadership_abilities WHERE `id` = %u", character_id);
 	auto results = database.QueryDatabase(query); uint32 slot = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		slot = atoi(row[0]);
 		pp->leader_abilities.ranks[slot] = atoi(row[1]);
 	}
@@ -1282,7 +1282,7 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 
 	/* Initialize Disciplines */
 	memset(pp->disciplines.values, 0, (sizeof(pp->disciplines.values[0]) * MAX_PP_DISCIPLINES));
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if (i < MAX_PP_DISCIPLINES)
 			pp->disciplines.values[i] = atoi(row[0]);
         ++i;
@@ -1304,7 +1304,7 @@ bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct
 	for (i = 0; i < MAX_PP_SKILL; ++i)
 		pp->skills[i] = 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
 		if (i < MAX_PP_SKILL)
 			pp->skills[i] = atoi(row[1]);
@@ -1336,7 +1336,7 @@ bool ZoneDatabase::LoadCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 		"character_currency      "
 		"WHERE `id` = %i         ", character_id);
 	auto results = database.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		pp->platinum = atoi(row[0]);
 		pp->gold = atoi(row[1]);
 		pp->silver = atoi(row[2]);
@@ -1360,7 +1360,7 @@ bool ZoneDatabase::LoadCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT slot, blue, green, red, use_tint, color FROM `character_material` WHERE `id` = %u LIMIT 9", character_id);
 	auto results = database.QueryDatabase(query); int i = 0; int r = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		r = 0;
 		i = atoi(row[r]); /* Slot */ r++;
 		pp->item_tint.Slot[i].Blue = atoi(row[r]); r++;
@@ -1385,7 +1385,7 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 		}
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		r = 0;
 		i = atoi(row[r]); /* Bandolier ID */ r++;
 		si = atoi(row[r]); /* Bandolier Slot */ r++;
@@ -1417,7 +1417,7 @@ bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struc
 		pp->tributes[i].tier = 0;
 	}
 	i = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if(atoi(row[1]) != TRIBUTE_NONE){
 			pp->tributes[i].tier = atoi(row[0]);
 			pp->tributes[i].tribute = atoi(row[1]);
@@ -1440,7 +1440,7 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 		pp->potionbelt.Items[i].Name[0] = '\0';
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
 		const EQ::ItemData *item_data = database.GetItem(atoi(row[1]));
 		if (!item_data)
@@ -1463,7 +1463,7 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 	if (!results.RowCount()) // SHIT -- this actually isn't good
 		return true;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		int index = atoi(row[0]);
 		if (index < 0 || index > 4)
 			continue;
@@ -1993,7 +1993,7 @@ bool ZoneDatabase::NoRentExpired(const char* name){
     if (results.RowCount() != 1)
         return false;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	uint32 seconds = atoi(row[0]);
 
 	return (seconds>1800);
@@ -2073,7 +2073,7 @@ int ZoneDatabase::CountCharacterInvSnapshots(uint32 character_id) {
 	if (!results.Success())
 		return -1;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	int64 count = atoll(row[0]);
 	if (count > 2147483647)
@@ -2490,7 +2490,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 				armor_tint_id = 0;
 			}
 			else {
-				auto armorTint_row = armortint_results.begin();
+				auto& armorTint_row = armortint_results.begin();
 
 				for (int index = EQ::textures::textureBegin; index <= EQ::textures::LastTexture; index++) {
 					t->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
@@ -2663,7 +2663,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 	const NPCType *npc = nullptr;
 
 	// Process each row returned.
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		NPCType *tmpNPCType;
 		tmpNPCType = new NPCType;
 		memset(tmpNPCType, 0, sizeof *tmpNPCType);
@@ -2745,7 +2745,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 			if (!results.Success() || results.RowCount() == 0)
 				armor_tint_id = 0;
 			else {
-				auto armorTint_row = results.begin();
+				auto& armorTint_row = results.begin();
 
 				for (int index = EQ::textures::textureBegin; index <= EQ::textures::LastTexture; index++) {
 					tmpNPCType->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
@@ -2795,7 +2795,7 @@ bool ZoneDatabase::LoadMercInfo(Client *client) {
 	if(results.RowCount() == 0)
 		return false;
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         uint8 slot = atoi(row[1]);
 
         if(slot >= MAXMERCS)
@@ -2853,7 +2853,7 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
 		return false;
 
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         client->GetMercInfo(slot).mercid = atoi(row[0]);
         client->GetMercInfo(slot).slot = slot;
         snprintf(client->GetMercInfo(slot).merc_name, 64, "%s", row[1]);
@@ -3019,7 +3019,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 	}
 
     int buffCount = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++buffCount) {
+    for (auto& row = results.begin(); row != results.end(); ++row, ++buffCount) {
         if(buffCount == BUFF_COUNT)
             break;
 
@@ -3105,7 +3105,7 @@ void ZoneDatabase::LoadMercEquipment(Merc *merc) {
 	}
 
     int itemCount = 0;
-    for(auto row = results.begin(); row != results.end(); ++row) {
+    for(auto& row = results.begin(); row != results.end(); ++row) {
 		if (itemCount == EQ::invslot::EQUIPMENT_COUNT)
             break;
 
@@ -3128,7 +3128,7 @@ uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
     if (results.RowCount() != 1)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -3159,7 +3159,7 @@ uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
     if (results.RowCount() == 0)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
     return atoi(row[0]);
 }
 
@@ -3245,7 +3245,7 @@ uint8 ZoneDatabase::GroupCount(uint32 groupid) {
     if (results.RowCount() == 0)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -3263,7 +3263,7 @@ uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
     if (results.RowCount() == 0)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
 	return atoi(row[0]);
  }
@@ -3279,7 +3279,7 @@ int32 ZoneDatabase::GetBlockedSpellsCount(uint32 zoneid)
 	if (results.RowCount() == 0)
         return -1;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -3299,7 +3299,7 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 		return true;
 
     int32 index = 0;
-    for(auto row = results.begin(); row != results.end(); ++row, ++index) {
+    for(auto& row = results.begin(); row != results.end(); ++row, ++index) {
         if(index >= blockedSpellsCount) {
             std::cerr << "Error, Blocked Spells Count of " << blockedSpellsCount << " exceeded." << std::endl;
             break;
@@ -3331,7 +3331,7 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
         return (RuleI(Zone, AutoShutdownDelay));
     }
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
     return atoi(row[0]);
 }
@@ -3343,7 +3343,7 @@ uint32 ZoneDatabase::GetKarma(uint32 acct_id)
 	if (!results.Success())
 		return 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atoi(row[0]);
 	}
 
@@ -3521,7 +3521,7 @@ void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32
         return;
     }
 
-    for (auto row = results.begin(); row != results.end(); ++row)
+    for (auto& row = results.begin(); row != results.end(); ++row)
         currency[atoi(row[0])] = atoi(row[1]);
 
 }
@@ -3580,7 +3580,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		uint32 slot_id = atoul(row[1]);
 		if (slot_id >= client->GetMaxBuffSlots())
 			continue;
@@ -3685,7 +3685,7 @@ void ZoneDatabase::LoadAuras(Client *c)
 	if (!results.Success())
 		return;
 
-	for (auto row = results.begin(); row != results.end(); ++row)
+	for (auto& row = results.begin(); row != results.end(); ++row)
 		c->MakeAura(atoi(row[0]));
 }
 
@@ -3797,7 +3797,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 	}
 
 	PetInfo *pi;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		uint16 pet = atoi(row[0]);
 
 		if (pet == 0)
@@ -3825,7 +3825,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		uint16 pet = atoi(row[0]);
 		if (pet == 0)
 			pi = petinfo;
@@ -3868,7 +3868,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		uint16 pet = atoi(row[0]);
 		if (pet == 0)
 			pi = petinfo;
@@ -4038,7 +4038,7 @@ bool ZoneDatabase::LoadFactionData()
 		return false;
 	}
 
-    auto fmr_row = faction_max_results.begin();
+    auto& fmr_row = faction_max_results.begin();
 
 	max_faction = atoul(fmr_row[0]);
 	faction_array = new Faction *[max_faction + 1];
@@ -4217,7 +4217,7 @@ void ZoneDatabase::SendCharacterCorpseToNonInstance(uint32 corpse_db_id)
 uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	std::string query = StringFormat("SELECT(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `character_corpses` WHERE `id` = %d AND NOT `time_of_death` = 0", corpse_db_id);
 	auto results = QueryDatabase(query);
-	auto row = results.begin();
+	auto& row = results.begin();
 	if (results.Success() && results.RowsAffected() != 0)
 		return atoul(row[0]);
 
@@ -4409,7 +4409,7 @@ uint32 ZoneDatabase::GetCharacterBuriedCorpseCount(uint32 char_id) {
 	std::string query = StringFormat("SELECT COUNT(*) FROM `character_corpses` WHERE `charid` = '%u' AND `is_buried` = 1", char_id);
 	auto results = QueryDatabase(query);
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atoi(row[0]);
 	}
 	return 0;
@@ -4419,7 +4419,7 @@ uint32 ZoneDatabase::GetCharacterCorpseCount(uint32 char_id) {
 	std::string query = StringFormat("SELECT COUNT(*) FROM `character_corpses` WHERE `charid` = '%u'", char_id);
 	auto results = QueryDatabase(query);
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atoi(row[0]);
 	}
 	return 0;
@@ -4429,7 +4429,7 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 	std::string query = StringFormat("SELECT `id` FROM `character_corpses` WHERE `charid` = '%u' limit %d, 1", char_id, corpse);
 
 	auto results = QueryDatabase(query);
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	if (row != results.end())
 		return atoul(row[0]);
@@ -4442,7 +4442,7 @@ uint32 ZoneDatabase::GetCharacterCorpseItemCount(uint32 corpse_id){
 		corpse_id
 	);
 	auto results = QueryDatabase(query);
-	auto row = results.begin();
+	auto& row = results.begin();
 	if (results.Success() && results.RowsAffected() != 0){
 		return atoi(row[0]);
 	}
@@ -4503,7 +4503,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	);
 	auto results = QueryDatabase(query);
 	uint16 i = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		pcs->locked = atoi(row[i++]);						// is_locked,
 		pcs->exp = atoul(row[i++]);							// exp,
 		pcs->size = atoi(row[i++]);							// size,
@@ -4561,7 +4561,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 	i = 0;
 	pcs->itemcount = results.RowCount();
 	uint16 r = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		memset(&pcs->items[i], 0, sizeof (player_lootitem::ServerLootItem_Struct));
 		pcs->items[i].equip_slot = atoi(row[r++]);		// equip_slot,
 		pcs->items[i].item_id = atoul(row[r++]); 		// item_id,
@@ -4589,7 +4589,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_z
                                     char_id);
 	auto results = QueryDatabase(query);
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		corpse = Corpse::LoadCharacterCorpseEntity(
 			atoul(row[0]), 			 // uint32 in_dbid
 			char_id, 				 // uint32 in_charid
@@ -4629,7 +4629,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zone_id
 		char_id);
 	results = QueryDatabase(query);
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		corpse = Corpse::LoadCharacterCorpseEntity(
 			atoul(row[0]),
 			char_id,
@@ -4667,7 +4667,7 @@ int ZoneDatabase::CountCharacterCorpses(uint32 char_id) {
 		char_id
 	);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atoi(row[0]);
 	}
 	return 0;
@@ -4689,7 +4689,7 @@ int ZoneDatabase::CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id) 
 		zone_id
 	);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atoi(row[0]);
 	}
 	return 0;
@@ -4717,7 +4717,7 @@ Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 player_corpse_id) {
 		player_corpse_id
 	);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
         auto position = glm::vec4(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
 		NewCorpse = Corpse::LoadCharacterCorpseEntity(
 				atoul(row[0]), 		 // id					  uint32 in_dbid
@@ -4744,7 +4744,7 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 	}
 
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
         auto position = glm::vec4(atof(row[3]), atof(row[4]), atof(row[5]), atof(row[6]));
 		entity_list.AddCorpse(
 			 Corpse::LoadCharacterCorpseEntity(
@@ -4765,7 +4765,7 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id) {
 uint32 ZoneDatabase::GetFirstCorpseID(uint32 char_id) {
 	std::string query = StringFormat("SELECT `id` FROM `character_corpses` WHERE `charid` = '%u' AND `is_buried` = 0 ORDER BY `time_of_death` LIMIT 1", char_id);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atoi(row[0]);
 	}
 	return 0;
@@ -4792,7 +4792,7 @@ bool ZoneDatabase::BuryCharacterCorpse(uint32 db_id) {
 bool ZoneDatabase::BuryAllCharacterCorpses(uint32 char_id) {
 	std::string query = StringFormat("SELECT `id` FROM `character_corpses` WHERE `charid` = %u", char_id);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		BuryCharacterCorpse(atoi(row[0]));
 		return true;
 	}
@@ -4824,7 +4824,7 @@ uint32 ZoneDatabase::LoadSaylinkID(const char* saylink_text, bool auto_insert)
 			return 0;
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	return atoi(row[0]);
 }
 
@@ -4859,7 +4859,7 @@ double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id) const
 		zone_id
 	);
 	auto results = database.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atof(row[0]);
 	}
 	return 1.0f;
@@ -4883,7 +4883,7 @@ double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id) const {
 		zone_id
 	);
 	auto results = database.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atof(row[0]);
 	}
 	return 1.0f;
