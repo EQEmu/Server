@@ -62,8 +62,7 @@ SharedDatabase::SharedDatabase(const char* host, const char* user, const char* p
 {
 }
 
-SharedDatabase::~SharedDatabase() {
-}
+SharedDatabase::~SharedDatabase() = default;
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
 {
