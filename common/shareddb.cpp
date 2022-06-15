@@ -1956,10 +1956,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].spell_class = atoi(row[221]);
 		sp[tempid].spell_subclass = atoi(row[222]);
 		sp[tempid].persist_death = atoi(row[224]) != 0;
-		sp[tempid].min_distance = atof(row[227]);
-		sp[tempid].min_distance_mod = atof(row[228]);
-		sp[tempid].max_distance = atof(row[229]);
-		sp[tempid].max_distance_mod = atof(row[230]);
+		sp[tempid].min_distance = static_cast<float>(atof(row[227]));
+		sp[tempid].min_distance_mod = static_cast<float>(atof(row[228]));
+		sp[tempid].max_distance = static_cast<float>(atof(row[229]));
+		sp[tempid].max_distance_mod = static_cast<float>(atof(row[230]));
 		sp[tempid].min_range = static_cast<float>(atoi(row[231]));
 		sp[tempid].no_remove = atoi(row[232]) != 0;
 		sp[tempid].damage_shield_type = 0;
