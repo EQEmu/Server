@@ -280,12 +280,12 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
 	                                       "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
 	                                       "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
-	                                       (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
-	                                       (unsigned long)charges, (unsigned long)(inst->IsAttuned()? 1: 0),
-	                                       inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
-	                                       (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
-	                                       (unsigned long)augslot[3], (unsigned long)augslot[4], (unsigned long)augslot[5], (unsigned long)inst->GetOrnamentationIcon(),
-	                                       (unsigned long)inst->GetOrnamentationIDFile(), (unsigned long)inst->GetOrnamentHeroModel());
+	                                       static_cast<unsigned long>(char_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
+	                                       static_cast<unsigned long>(charges), static_cast<unsigned long>(inst->IsAttuned() ? 1 : 0),
+	                                       inst->GetCustomDataString().c_str(), static_cast<unsigned long>(inst->GetColor()),
+	                                       static_cast<unsigned long>(augslot[0]), static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]),
+	                                       static_cast<unsigned long>(augslot[3]), static_cast<unsigned long>(augslot[4]), static_cast<unsigned long>(augslot[5]), static_cast<unsigned long>(inst->GetOrnamentationIcon()),
+	                                       static_cast<unsigned long>(inst->GetOrnamentationIDFile()), static_cast<unsigned long>(inst->GetOrnamentHeroModel()));
 	const auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
@@ -328,10 +328,10 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
 	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6) "
 	                                       "VALUES( %lu, %lu, %lu, %lu, '%s', "
 	                                       "%lu, %lu, %lu, %lu, %lu, %lu)",
-	                                       (unsigned long)account_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
-	                                       (unsigned long)charges, inst->GetCustomDataString().c_str(), (unsigned long)augslot[0],
-	                                       (unsigned long)augslot[1], (unsigned long)augslot[2], (unsigned long)augslot[3], (unsigned long)augslot[4],
-	                                       (unsigned long)augslot[5]);
+	                                       static_cast<unsigned long>(account_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
+	                                       static_cast<unsigned long>(charges), inst->GetCustomDataString().c_str(), static_cast<unsigned long>(augslot[0]),
+	                                       static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]), static_cast<unsigned long>(augslot[3]), static_cast<unsigned long>(augslot[4]),
+	                                       static_cast<unsigned long>(augslot[5]));
 	const auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
@@ -499,17 +499,17 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = (int16)atoi(row[0]);
-		uint32 item_id = (uint32)atoi(row[1]);
-		const int16 charges = (int16)atoi(row[2]);
+		int16 slot_id = static_cast<int16>(atoi(row[0]));
+		uint32 item_id = static_cast<uint32>(atoi(row[1]));
+		const int16 charges = static_cast<int16>(atoi(row[2]));
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = (uint32)atoi(row[3]);
-		aug[1] = (uint32)atoi(row[4]);
-		aug[2] = (uint32)atoi(row[5]);
-		aug[3] = (uint32)atoi(row[6]);
-		aug[4] = (uint32)atoi(row[7]);
-		aug[5] = (uint32)atoi(row[8]);
+		aug[0] = static_cast<uint32>(atoi(row[3]));
+		aug[1] = static_cast<uint32>(atoi(row[4]));
+		aug[2] = static_cast<uint32>(atoi(row[5]));
+		aug[3] = static_cast<uint32>(atoi(row[6]));
+		aug[4] = static_cast<uint32>(atoi(row[7]));
+		aug[5] = static_cast<uint32>(atoi(row[8]));
 
 		const EQ::ItemData *item = GetItem(item_id);
 
@@ -602,14 +602,14 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		int16 slot_id = atoi(row[0]);
 
 		if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) { // Titanium thru UF check
-			if ((((uint64)1 << slot_id) & pmask) == 0) {
+			if (((static_cast<uint64>(1) << slot_id) & pmask) == 0) {
 				cv_conflict = true;
 				continue;
 			}
 		}
 		else if (slot_id <= EQ::invbag::GENERAL_BAGS_END && slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN) { // Titanium thru UF check
 			const auto parent_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
-			if ((((uint64)1 << parent_slot) & pmask) == 0) {
+			if (((static_cast<uint64>(1) << parent_slot) & pmask) == 0) {
 				cv_conflict = true;
 				continue;
 			}
@@ -641,7 +641,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		aug[4] = std::stoul(row[8]);
 		aug[5] = std::stoul(row[9]);
 
-		const bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
+		const bool instnodrop = (row[10] && static_cast<uint16>(atoi(row[10]))) ? true : false;
 
 		const uint32 ornament_icon = std::stoul(row[12]);
 		const uint32 ornament_idfile = std::stoul(row[13]);
@@ -780,14 +780,14 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 		const uint32 color = atoul(row[3]);
 
 		uint32 aug[EQ::invaug::SOCKET_COUNT];
-		aug[0] = (uint32)atoi(row[4]);
-		aug[1] = (uint32)atoi(row[5]);
-		aug[2] = (uint32)atoi(row[6]);
-		aug[3] = (uint32)atoi(row[7]);
-		aug[4] = (uint32)atoi(row[8]);
-		aug[5] = (uint32)atoi(row[9]);
+		aug[0] = static_cast<uint32>(atoi(row[4]));
+		aug[1] = static_cast<uint32>(atoi(row[5]));
+		aug[2] = static_cast<uint32>(atoi(row[6]));
+		aug[3] = static_cast<uint32>(atoi(row[7]));
+		aug[4] = static_cast<uint32>(atoi(row[8]));
+		aug[5] = static_cast<uint32>(atoi(row[9]));
 
-		const bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
+		const bool instnodrop = (row[10] && static_cast<uint16>(atoi(row[10]))) ? true : false;
 		const uint32 ornament_icon = std::stoul(row[12]);
 		const uint32 ornament_idfile = std::stoul(row[13]);
 		uint32 ornament_hero_model = std::stoul(row[14]);
@@ -1781,7 +1781,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		spells_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		*records = *reinterpret_cast<uint32*>(spells_mmf->Get());
-		*sp = reinterpret_cast<const SPDat_Spell_Struct*>((char*)spells_mmf->Get() + 4);
+		*sp = reinterpret_cast<const SPDat_Spell_Struct*>(static_cast<char*>(spells_mmf->Get()) + 4);
 		mutex.Unlock();
 	}
 	catch(std::exception& ex) {
@@ -1792,8 +1792,8 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 }
 
 void SharedDatabase::LoadSpells(void *data, int max_spells) {
-	*(uint32*)data = max_spells;
-	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>((char*)data + sizeof(uint32));
+	*static_cast<uint32*>(data) = max_spells;
+	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>(static_cast<char*>(data) + sizeof(uint32));
 
 	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
     auto results = QueryDatabase(query);
@@ -1868,7 +1868,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		for(y=0; y< EFFECT_COUNT;y++)
 			sp[tempid].effect_id[y]=atoi(row[86+y]);
 
-		sp[tempid].target_type = (SpellTargetType) atoi(row[98]);
+		sp[tempid].target_type = static_cast<SpellTargetType>(atoi(row[98]));
 		sp[tempid].base_difficulty=atoi(row[99]);
 
 		int tmp_skill = atoi(row[100]);;
@@ -1876,7 +1876,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		if (tmp_skill < 0 || tmp_skill > EQ::skills::HIGHEST_SKILL)
 			sp[tempid].skill = EQ::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
         else
-			sp[tempid].skill = (EQ::skills::SkillType) tmp_skill;
+			sp[tempid].skill = static_cast<EQ::skills::SkillType>(tmp_skill);
 
 		sp[tempid].zone_type=atoi(row[101]);
 		sp[tempid].environment_type=atoi(row[102]);
