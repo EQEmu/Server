@@ -1091,11 +1091,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// Health, Mana, and Endurance
 		item.HP = std::stoi(row[ItemField::hp]);
-		item.Regen = std::stoul(row[ItemField::regen]);
+		item.Regen = std::stoi(row[ItemField::regen]);
 		item.Mana = std::stoi(row[ItemField::mana]);
-		item.ManaRegen = std::stoul(row[ItemField::manaregen]);
-		item.Endur = std::stoul(row[ItemField::endur]);
-		item.EnduranceRegen = std::stoul(row[ItemField::enduranceregen]);
+		item.ManaRegen = std::stoi(row[ItemField::manaregen]);
+		item.Endur = std::stoi(row[ItemField::endur]);
+		item.EnduranceRegen = std::stoi(row[ItemField::enduranceregen]);
 
 		// Bane Damage
 		item.BaneDmgAmt = std::stoi(row[ItemField::banedmgamt]);
@@ -1212,7 +1212,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		// Click Effect
 		item.CastTime = std::stoul(row[ItemField::casttime]);
 		item.CastTime_ = std::stoi(row[ItemField::casttime_]);
-		item.Click.Effect = std::stoul(row[ItemField::clickeffect]);
+		item.Click.Effect = std::stoi(row[ItemField::clickeffect]);
 		item.Click.Type = static_cast<uint8>(std::stoul(row[ItemField::clicktype]));
 		item.Click.Level = static_cast<uint8>(std::stoul(row[ItemField::clicklevel]));
 		item.Click.Level2 = static_cast<uint8>(std::stoul(row[ItemField::clicklevel2]));
