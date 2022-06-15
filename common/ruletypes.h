@@ -417,6 +417,7 @@ RULE_BOOL(Spells, UseSpellImpliedTargeting, false, "Replicates EQ2-style targeti
 RULE_BOOL(Spells, BuffsFadeOnDeath, true, "Disable to keep buffs from fading on death")
 RULE_BOOL(Spells, IllusionsAlwaysPersist, false, "Allows Illusions to persist beyond death and zoning always.")
 RULE_BOOL(Spells, UseItemCastMessage, false, "Enable to use the \"item begins to glow\" messages when casting from an item.")
+RULE_BOOL(Spells, WaterMatchRequiredForLoS, false, "Enable/Disable the requirement of both the attacker/victim being both in or out of water for spells LoS to pass.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -484,6 +485,7 @@ RULE_INT(Combat, FrontalStunImmunityClasses, 0, "Bitmask for Classes than have f
 RULE_BOOL(Combat, NPCsUseFrontalStunImmunityClasses, false, "Enable or disable NPCs using frontal stun immunity Classes from Combat:FrontalStunImmunityClasses, false by default.")
 RULE_INT(Combat, FrontalStunImmunityRaces, 512, "Bitmask for Races than have frontal stun immunity, Ogre (512) only by default.")
 RULE_BOOL(Combat, NPCsUseFrontalStunImmunityRaces, true, "Enable or disable NPCs using frontal stun immunity Races from Combat:FrontalStunImmunityRaces, true by default.")
+RULE_BOOL(Combat, WaterMatchRequiredForAutoFireLoS, false, "Enable/Disable the requirement of both the attacker/victim being both in or out of water for AutoFire LoS to pass.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
