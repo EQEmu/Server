@@ -26,7 +26,6 @@
 
 #include "classes.h"
 #include "eq_packet_structs.h"
-#include "eqemu_exception.h"
 #include "faction.h"
 #include "features.h"
 #include "ipc_mutex.h"
