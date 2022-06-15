@@ -129,7 +129,6 @@ float Mob::mod_parry_chance(float parrychance, Mob* attacker) { return(parrychan
 //Final dodge chance
 float Mob::mod_dodge_chance(float dodgechance, Mob* attacker) { return(dodgechance); }
 
-//Monk AC Bonus weight cap.  Defined in Combat:MonkACBonusWeight
 //Usually 15, a monk under this weight threshold gets an AC bonus
 float Mob::mod_monk_weight(float monkweight, Mob* attacker) { return(monkweight); }
 

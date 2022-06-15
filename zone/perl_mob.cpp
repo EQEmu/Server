@@ -770,7 +770,7 @@ XS(XS_Mob_SetHP) {
 		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int64 hp)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int64 hp = (int32) SvIV(ST(1));
+		int64 hp = (int64) SvIV(ST(1));
 		VALIDATE_THIS_IS_MOB;
 		THIS->SetHP(hp);
 	}
@@ -1579,7 +1579,7 @@ XS(XS_Mob_GetHP) {
 		Perl_croak(aTHX_ "Usage: Mob::GetHP(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetHP();
@@ -1596,7 +1596,7 @@ XS(XS_Mob_GetMaxHP) {
 		Perl_croak(aTHX_ "Usage: Mob::GetMaxHP(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetMaxHP();
@@ -1613,7 +1613,7 @@ XS(XS_Mob_GetItemHPBonuses) {
 		Perl_croak(aTHX_ "Usage: Mob::GetItemHPBonuses(THIS)"); // @categories Inventory and Items, Stats and Attributes
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetItemHPBonuses();
@@ -1630,7 +1630,7 @@ XS(XS_Mob_GetSpellHPBonuses) {
 		Perl_croak(aTHX_ "Usage: Mob::GetSpellHPBonuses(THIS)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
-		int32 RETVAL;
+		int64 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_MOB;
 		RETVAL = THIS->GetSpellHPBonuses();
@@ -4417,12 +4417,12 @@ XS(XS_Mob_SetOOCRegen); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetOOCRegen) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, int32 new_ooc_regen)"); // @categories Stats and Attributes
+		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, int64 new_ooc_regen)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
-		int32 newoocregen = (int32) SvIV(ST(1));
+		int64 new_ooc_regen = (int64) SvIV(ST(1));
 		VALIDATE_THIS_IS_MOB;
-		THIS->SetOOCRegen(newoocregen);
+		THIS->SetOOCRegen(new_ooc_regen);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6569,7 +6569,7 @@ XS(XS_Mob_ShieldAbility) {
 		if (items < 8) {
 			can_shield_npc = true;
 		}
-		THIS->ShieldAbility(target_id, shielder_max_distance, shield_duration, shield_duration, shield_duration, use_aa, can_shield_npc);
+		THIS->ShieldAbility(target_id, shielder_max_distance, shield_duration, shield_target_mitigation, shielder_mitigation, use_aa, can_shield_npc);
 
 	}
 	XSRETURN_EMPTY;

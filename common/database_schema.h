@@ -375,6 +375,40 @@ namespace DatabaseSchema {
 			"inventory_versions",
 		};
 	}
+	
+	/**
+	 * @description Gets all player bot tables
+	 * @note These tables have no content in the PEQ daily dump
+	 *
+	 * @return
+	 */
+	static std::vector<std::string> GetBotTables()
+	{
+		return {
+			"bot_buffs",
+			"bot_command_settings",
+			"bot_create_combinations",
+			"bot_data",
+			"bot_group_members",
+			"bot_groups",
+			"bot_guild_members",
+			"bot_heal_rotation_members",
+			"bot_heal_rotation_targets",
+			"bot_heal_rotations",
+			"bot_inspect_messages",
+			"bot_inventories",
+			"bot_owner_options",
+			"bot_pet_buffs",
+			"bot_pet_inventories",
+			"bot_pets",
+			"bot_spell_casting_chances",
+			"bot_spells_entries",
+			"bot_stances",
+			"bot_timers",
+			"vw_bot_character_mobs",
+			"vw_bot_groups"
+		};
+	}
 
 }
 

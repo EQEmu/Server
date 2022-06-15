@@ -219,6 +219,7 @@
 #define ServerOP_UCSServerStatusReply 0x4005
 #define ServerOP_UCSServerStatusRequest 0x4006
 #define ServerOP_UpdateSchedulerEvents 0x4007
+#define ServerOP_DiscordWebhookMessage 0x4008
 
 #define ServerOP_ReloadAAData 0x4100
 #define ServerOP_ReloadAlternateCurrencies 0x4101
@@ -740,8 +741,8 @@ struct ServerMultiLineMsg_Struct {
 };
 
 struct ServerLock_Struct {
-	char	myname[64]; // User that did it
-	uint8	mode; // 0 = Unlocked ; 1 = Locked
+	char character_name[64];
+	bool is_locked;
 };
 
 struct ServerMotd_Struct {
@@ -1449,6 +1450,11 @@ struct QSMerchantLogTransaction_Struct {
 	QSTransactionItems_Struct items[0];
 };
 
+struct DiscordWebhookMessage_Struct {
+	uint32 webhook_id;
+	char message[2000];
+};
+
 struct QSGeneralQuery_Struct {
 	char QueryString[0];
 };
@@ -1786,6 +1792,10 @@ struct ServerDzCreateSerialized_Struct {
 struct ServerFlagUpdate_Struct {
 	uint32 account_id;
 	int16 admin;
+};
+
+struct ServerOOCMute_Struct {
+	bool is_muted;
 };
 
 #pragma pack()

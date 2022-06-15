@@ -303,12 +303,17 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 int64 Client::CalcHPRegenCap()
 {
-	int cap = RuleI(Character, ItemHealthRegenCap);
-	if (GetLevel() > 60)
-		cap = std::max(cap, GetLevel() - 30); // if the rule is set greater than normal I guess
-	if (GetLevel() > 65)
+	int64 cap = RuleI(Character, ItemHealthRegenCap);
+	if (GetLevel() > 60) {
+		cap = std::max(cap, static_cast<int64>(GetLevel() - 30)); // if the rule is set greater than normal I guess
+	}
+
+	if (GetLevel() > 65) {
 		cap += GetLevel() - 65;
+	}
+
 	cap += aabonuses.ItemHPRegenCap + spellbonuses.ItemHPRegenCap + itembonuses.ItemHPRegenCap;
+
 	return (cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 

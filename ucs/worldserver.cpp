@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "clientlist.h"
 #include "ucsconfig.h"
 #include "database.h"
+#include "../common/discord_manager.h"
 
 #include <iostream>
 #include <string.h>
@@ -35,10 +36,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <stdlib.h>
 #include <stdarg.h>
 
-extern WorldServer worldserver;
-extern Clientlist *g_Clientlist;
+extern WorldServer     worldserver;
+extern Clientlist      *g_Clientlist;
 extern const ucsconfig *Config;
-extern Database database;
+extern Database        database;
+extern DiscordManager  discord_manager;
 
 void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message);
 
@@ -70,6 +72,16 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 	}
 	case ServerOP_KeepAlive:
 	{
+		break;
+	}
+	case ServerOP_DiscordWebhookMessage: {
+		auto *q = (DiscordWebhookMessage_Struct *) p.Data();
+
+		discord_manager.QueueWebhookMessage(
+			q->webhook_id,
+			q->message
+		);
+
 		break;
 	}
 	case ServerOP_UCSMessage:

@@ -100,67 +100,101 @@ ClientListEntry* ClientList::GetCLE(uint32 iID) {
 
 //Check current CLE Entry IPs against incoming connection
 
-void ClientList::GetCLEIP(uint32 iIP) {
-	ClientListEntry* countCLEIPs = 0;
+void ClientList::GetCLEIP(uint32 in_ip) {
+	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
-	int IPInstances = 0;
+	int count = 0;
 	iterator.Reset();
 
-	while(iterator.MoreElements()) {
-		countCLEIPs = iterator.GetData();
-		if ((countCLEIPs->GetIP() == iIP) && ((countCLEIPs->Admin() < (RuleI(World, ExemptMaxClientsStatus))) || (RuleI(World, ExemptMaxClientsStatus) < 0))) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
-			IPInstances++; // Increment the occurences of this IP address
-			LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
+	while (iterator.MoreElements()) {
+		cle = iterator.GetData();
+		if (
+			cle->GetIP() == in_ip &&
+			(
+				cle->Admin() < RuleI(World, ExemptMaxClientsStatus) ||
+				RuleI(World, ExemptMaxClientsStatus) < 0
+			)
+		) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
+			auto ip_string = long2ip(cle->GetIP());
+			count++; // Increment the occurences of this IP address
+			LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}]", cle->LSID(), cle->LSName(), ip_string);
+
 			if (RuleB(World, EnableIPExemptions)) {
-				LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}] IP Instances: [{}] Max IP Instances: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str(), IPInstances, database.GetIPExemption(long2ip(countCLEIPs->GetIP()).c_str()));
-				if (IPInstances > database.GetIPExemption(long2ip(countCLEIPs->GetIP()).c_str())) {
-					if(RuleB(World, IPLimitDisconnectAll)) {
-						LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
-						DisconnectByIP(iIP);
+				LogClientLogin(
+					"Account ID: [{}] Account Name: [{}] IP: [{}] IP Instances: [{}] Max IP Instances: [{}]",
+					cle->LSID(),
+					cle->LSName(),
+					ip_string,
+					count,
+					database.GetIPExemption(ip_string)
+				);
+
+				auto exemption_amount = database.GetIPExemption(ip_string);
+				if (exemption_amount > 0 && count > exemption_amount) {
+					if (RuleB(World, IPLimitDisconnectAll)) {
+						LogClientLogin("Disconnect: All Accounts on IP [{}]", ip_string);
+						DisconnectByIP(in_ip);
 						return;
 					} else {
-						LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
-						countCLEIPs->SetOnline(CLE_Status::Offline);
+						LogClientLogin("Disconnect: Account [{}] on IP [{}]", cle->LSName(), ip_string);
+						cle->SetOnline(CLE_Status::Offline);
 						iterator.RemoveCurrent();
 						continue;
 					}
 				}
 			} else {
-				if (IPInstances > (RuleI(World, MaxClientsPerIP))) { // If the number of connections exceeds the lower limit
+				if (
+					RuleI(World, MaxClientsPerIP) > 0 &&
+					count > RuleI(World, MaxClientsPerIP)
+				) { // If the number of connections exceeds the lower limit
 					if (RuleB(World, MaxClientsSetByStatus)) { // If MaxClientsSetByStatus is set to True, override other IP Limit Rules
-						LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}] IP Instances: [{}] Max IP Instances: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str(), IPInstances, countCLEIPs->Admin());
-						if (IPInstances > countCLEIPs->Admin()) { // The IP Limit is set by the status of the account if status > MaxClientsPerIP
-							if(RuleB(World, IPLimitDisconnectAll)) {
-								LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
-								DisconnectByIP(iIP);
+						LogClientLogin(
+							"Account ID: [{}] Account Name: [{}] IP: [{}] IP Instances: [{}] Max IP Instances: [{}]",
+							cle->LSID(),
+							cle->LSName(),
+							ip_string,
+							count,
+							cle->Admin()
+						);
+
+						if (count > cle->Admin()) { // The IP Limit is set by the status of the account if status > MaxClientsPerIP
+							if (RuleB(World, IPLimitDisconnectAll)) {
+								LogClientLogin("Disconnect: All Accounts on IP [{}]", ip_string);
+								DisconnectByIP(in_ip);
 								return;
 							} else {
-								LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
-								countCLEIPs->SetOnline(CLE_Status::Offline); // Remove the connection
+								LogClientLogin("Disconnect: Account [{}] on IP [{}]", cle->LSName(), ip_string);
+								cle->SetOnline(CLE_Status::Offline); // Remove the connection
 								iterator.RemoveCurrent();
 								continue;
 							}
 						}
-					} else if ((countCLEIPs->Admin() < RuleI(World, AddMaxClientsStatus)) || (RuleI(World, AddMaxClientsStatus) < 0)) { // Else if the Admin status of the connection is not eligible for the higher limit, or there is no higher limit (AddMaxClientStatus < 0)
-						if(RuleB(World, IPLimitDisconnectAll)) {
-							LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
-							DisconnectByIP(iIP);
+					} else if (
+						cle->Admin() < RuleI(World, AddMaxClientsStatus) ||
+						RuleI(World, AddMaxClientsStatus) < 0
+					) { // Else if the Admin status of the connection is not eligible for the higher limit, or there is no higher limit (AddMaxClientStatus < 0)
+						if (RuleB(World, IPLimitDisconnectAll)) {
+							LogClientLogin("Disconnect: All Accounts on IP [{}]", ip_string);
+							DisconnectByIP(in_ip);
 							return;
 						} else {
-							LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
-							countCLEIPs->SetOnline(CLE_Status::Offline); // Remove the connection
+							LogClientLogin("Disconnect: Account [{}] on IP [{}]", cle->LSName(), ip_string);
+							cle->SetOnline(CLE_Status::Offline); // Remove the connection
 							iterator.RemoveCurrent();
 							continue;
 						}
-					} else if (IPInstances > RuleI(World, AddMaxClientsPerIP)) { // else they are eligible for the higher limit, but if they exceed that
-						if(RuleB(World, IPLimitDisconnectAll)) {
-							LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
-							DisconnectByIP(iIP);
+					} else if (
+						RuleI(World, AddMaxClientsPerIP) > 0 &&
+						count > RuleI(World, AddMaxClientsPerIP)
+					) { // else they are eligible for the higher limit, but if they exceed that
+						if (RuleB(World, IPLimitDisconnectAll)) {
+							LogClientLogin("Disconnect: All Accounts on IP [{}]", ip_string);
+							DisconnectByIP(in_ip);
 							return;
 						} else {
-							LogClientLogin("Disconnect: Account [{}] on IP [{}]", countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
-							countCLEIPs->SetOnline(CLE_Status::Offline); // Remove the connection
+							LogClientLogin("Disconnect: Account [{}] on IP [{}]", cle->LSName(), ip_string);
+							cle->SetOnline(CLE_Status::Offline); // Remove the connection
 							iterator.RemoveCurrent();
 							continue;
 						}
@@ -168,46 +202,54 @@ void ClientList::GetCLEIP(uint32 iIP) {
 				}
 			}
 		}
+
 		iterator.Advance();
 	}
 }
 
-uint32 ClientList::GetCLEIPCount(uint32 iIP) {
-	ClientListEntry* countCLEIPs = 0;
+uint32 ClientList::GetCLEIPCount(uint32 in_ip) {
+	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
-	int IPInstances = 0;
+	int count = 0;
 	iterator.Reset();
 
 	while (iterator.MoreElements()) {
-		countCLEIPs = iterator.GetData();
-		if ((countCLEIPs->GetIP() == iIP) && ((countCLEIPs->Admin() < (RuleI(World, ExemptMaxClientsStatus))) || (RuleI(World, ExemptMaxClientsStatus) < 0)) && countCLEIPs->Online() >= CLE_Status::Online) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
-			IPInstances++; // Increment the occurences of this IP address
+		cle = iterator.GetData();
+		if (
+			cle->GetIP() == in_ip &&
+			(
+				cle->Admin() < RuleI(World, ExemptMaxClientsStatus) ||
+				RuleI(World, ExemptMaxClientsStatus) < 0
+			) &&
+			cle->Online() >= CLE_Status::Online
+		) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
+			count++; // Increment the occurences of this IP address
 		}
 		iterator.Advance();
 	}
 
-	return IPInstances;
+	return count;
 }
 
-void ClientList::DisconnectByIP(uint32 iIP) {
-	ClientListEntry* countCLEIPs = 0;
+void ClientList::DisconnectByIP(uint32 in_ip) {
+	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 	iterator.Reset();
 
-	while(iterator.MoreElements()) {
-		countCLEIPs = iterator.GetData();
-		if ((countCLEIPs->GetIP() == iIP)) {
-			if(strlen(countCLEIPs->name())) {
+	while (iterator.MoreElements()) {
+		cle = iterator.GetData();
+		if (cle->GetIP() == in_ip) {
+			if (strlen(cle->name())) {
 				auto pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-				ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
-				strcpy(skp->adminname, "SessionLimit");
-				strcpy(skp->name, countCLEIPs->name());
+				auto skp = (ServerKickPlayer_Struct*) pack->pBuffer;
+				strn0cpy(skp->adminname, "SessionLimit", sizeof(skp->adminname));
+				strn0cpy(skp->name, cle->name(), sizeof(skp->name));
 				skp->adminrank = 255;
 				zoneserver_list.SendPacket(pack);
 				safe_delete(pack);
 			}
-			countCLEIPs->SetOnline(CLE_Status::Offline);
+			cle->SetOnline(CLE_Status::Offline);
 			iterator.RemoveCurrent();
 		}
 		iterator.Advance();

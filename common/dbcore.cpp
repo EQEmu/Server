@@ -167,7 +167,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 	if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1) {
 		if ((strncasecmp(query, "select", 6) == 0)) {
 			LogMySQLQuery(
-				"{0} ({1} row{2} returned) ({3}s)",
+				"{0}; -- ({1} row{2} returned) ({3}s)",
 				query,
 				requestResult.RowCount(),
 				requestResult.RowCount() == 1 ? "" : "s",
@@ -176,7 +176,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		}
 		else {
 			LogMySQLQuery(
-				"{0} ({1} row{2} affected) ({3}s)",
+				"{0}; -- ({1} row{2} affected) ({3}s)",
 				query,
 				requestResult.RowsAffected(),
 				requestResult.RowsAffected() == 1 ? "" : "s",

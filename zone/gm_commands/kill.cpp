@@ -2,11 +2,27 @@
 
 void command_kill(Client *c, const Seperator *sep)
 {
-	if (!c->GetTarget()) {
-		c->Message(Chat::White, "Error: #Kill: No target.");
+	auto target = c->GetTarget();
+	if (!target) {
+		c->Message(Chat::White, "You must have a target to use this command.");
+		return;
 	}
-	else if (!c->GetTarget()->IsClient() || c->GetTarget()->CastToClient()->Admin() <= c->Admin()) {
-		c->GetTarget()->Kill();
+
+	if (
+		!target->IsClient() ||
+		target->CastToClient()->Admin() <= c->Admin()
+	) {
+		if (c != target) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Killing {}.",
+					c->GetTargetDescription(target)
+				).c_str()
+			);
+		}
+
+		target->Kill();
 	}
 }
 

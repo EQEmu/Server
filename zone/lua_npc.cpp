@@ -318,6 +318,16 @@ void Lua_NPC::NextGuardPosition() {
 	self->NextGuardPosition();
 }
 
+void Lua_NPC::SaveGuardSpot() {
+	Lua_Safe_Call_Void();
+	self->SaveGuardSpot();
+}
+
+void Lua_NPC::SaveGuardSpot(bool clear) {
+	Lua_Safe_Call_Void();
+	self->SaveGuardSpot(clear);
+}
+
 void Lua_NPC::SaveGuardSpot(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
 	self->SaveGuardSpot(glm::vec4(x, y, z, heading));
@@ -575,10 +585,10 @@ bool Lua_NPC::IsRaidTarget()
 	return self->IsRaidTarget();
 }
 
-void Lua_NPC::ChangeLastName(const char *lastname)
+void Lua_NPC::ChangeLastName(std::string last_name)
 {
 	Lua_Safe_Call_Void();
-	self->ChangeLastName(lastname);
+	self->ChangeLastName(last_name);
 }
 
 void Lua_NPC::ClearLastName()
@@ -680,7 +690,7 @@ luabind::scope lua_register_npc() {
 	.def("AddLootTable", (void(Lua_NPC::*)(void))&Lua_NPC::AddLootTable)
 	.def("AssignWaypoints", (void(Lua_NPC::*)(int))&Lua_NPC::AssignWaypoints)
 	.def("CalculateNewWaypoint", (void(Lua_NPC::*)(void))&Lua_NPC::CalculateNewWaypoint)
-	.def("ChangeLastName", (void(Lua_NPC::*)(const char*))&Lua_NPC::ChangeLastName)
+	.def("ChangeLastName", (void(Lua_NPC::*)(std::string))&Lua_NPC::ChangeLastName)
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
 	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearItemList)
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)
@@ -759,6 +769,8 @@ luabind::scope lua_register_npc() {
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int))&Lua_NPC::RemoveItem)
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int,int))&Lua_NPC::RemoveItem)
 	.def("ResumeWandering", (void(Lua_NPC::*)(void))&Lua_NPC::ResumeWandering)
+	.def("SaveGuardSpot", (void(Lua_NPC::*)(void))&Lua_NPC::SaveGuardSpot)
+	.def("SaveGuardSpot", (void(Lua_NPC::*)(bool))&Lua_NPC::SaveGuardSpot)
 	.def("SaveGuardSpot", (void(Lua_NPC::*)(float,float,float,float))&Lua_NPC::SaveGuardSpot)
 	.def("ScaleNPC", (void(Lua_NPC::*)(uint8))&Lua_NPC::ScaleNPC)
 	.def("SetCopper", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetCopper)

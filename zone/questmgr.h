@@ -127,7 +127,7 @@ public:
 	void rain(int weather);
 	void snow(int weather);
 	void rename(std::string name);
-	void surname(const char *name);
+	void surname(std::string last_name);
 	void permaclass(int class_id);
 	void permarace(int race_id);
 	void permagender(int gender_id);
@@ -135,7 +135,7 @@ public:
 	uint16 traindiscs(uint8 max_level, uint8 min_level = 1);
 	void unscribespells();
 	void untraindiscs();
-	void givecash(int copper, int silver, int gold, int platinum);
+	void givecash(uint32 copper, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
 	void pvp(const char *mode);
 	void movepc(int zone_id, float x, float y, float z, float heading);
 	void gmmove(float x, float y, float z);

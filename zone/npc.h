@@ -348,6 +348,7 @@ public:
 	int32				GetEquipmentMaterial(uint8 material_slot) const;
 
 	void				NextGuardPosition();
+	void				SaveGuardSpot(bool ClearGuardSpot = false);
 	void				SaveGuardSpot(const glm::vec4 &pos);
 	inline bool			IsGuarding() const { return(m_GuardPoint.w != 0); }
 	void				SaveGuardSpotCharm();
@@ -441,7 +442,7 @@ public:
 
 	virtual int GetKillExpMod() const { return NPCTypedata_ours ? NPCTypedata_ours->exp_mod : NPCTypedata->exp_mod; }
 
-	void ChangeLastName(const char* in_lastname);
+	void ChangeLastName(std::string last_name);
 	void ClearLastName();
 
 	bool GetDepop() { return p_depop; }

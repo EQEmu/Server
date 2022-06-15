@@ -225,9 +225,9 @@ bool TitleManager::IsNewTradeSkillTitleAvailable(int skill_id, int skill_value)
 	return false;
 }
 
-void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
+void TitleManager::CreateNewPlayerTitle(Client *client, std::string title)
 {
-	if (!client || !title) {
+	if (!client || title.empty()) {
 		return;
 	}
 
@@ -258,15 +258,15 @@ void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
 	safe_delete(pack);
 }
 
-void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
+void TitleManager::CreateNewPlayerSuffix(Client *client, std::string suffix)
 {
-	if (!client || !suffix) {
+	if (!client || suffix.empty()) {
 		return;
 	}
 
 	client->SetTitleSuffix(suffix);
 
-	std::string query = fmt::format(
+	auto query = fmt::format(
 		"SELECT `id` FROM titles WHERE `suffix` = '{}' AND char_id = {}",
 		EscapeString(suffix),
 		client->CharacterID()
@@ -291,24 +291,24 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
 	safe_delete(pack);
 }
 
-void Client::SetAATitle(const char *title)
+void Client::SetAATitle(std::string title)
 {
-	strn0cpy(m_pp.title, title, sizeof(m_pp.title));
+	strn0cpy(m_pp.title, title.c_str(), sizeof(m_pp.title));
 	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
-	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
-	strn0cpy(strs->title, title, sizeof(strs->title));
+	auto strs = (SetTitleReply_Struct *) outapp->pBuffer;
+	strn0cpy(strs->title, title.c_str(), sizeof(strs->title));
 	strs->entity_id = GetID();
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 }
 
-void Client::SetTitleSuffix(const char *suffix)
+void Client::SetTitleSuffix(std::string suffix)
 {
-	strn0cpy(m_pp.suffix, suffix, sizeof(m_pp.suffix));
+	strn0cpy(m_pp.suffix, suffix.c_str(), sizeof(m_pp.suffix));
 	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
-	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
+	auto strs = (SetTitleReply_Struct *) outapp->pBuffer;
 	strs->is_suffix = 1;
-	strn0cpy(strs->title, suffix, sizeof(strs->title));
+	strn0cpy(strs->title, suffix.c_str(), sizeof(strs->title));
 	strs->entity_id = GetID();
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);

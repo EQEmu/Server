@@ -20,6 +20,7 @@
 
 #include "world_server_command_handler.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/discord/discord.h"
 #include "../common/json/json.h"
 #include "../common/version.h"
 #include "worlddb.h"
@@ -30,6 +31,7 @@
 #include "../common/rulesys.h"
 #include "../common/repositories/instance_list_repository.h"
 #include "../common/repositories/zone_repository.h"
+#include "../zone/queryserv.h"
 
 namespace WorldserverCommandHandler {
 
@@ -157,14 +159,14 @@ namespace WorldserverCommandHandler {
 	 */
 	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description)
 	{
-		description                             = "Displays server database schema";
+		description = "Displays server database schema";
 
 		if (cmd[{"-h", "--help"}]) {
 			return;
 		}
 
 		Json::Value              player_tables_json;
-		std::vector<std::string> player_tables  = DatabaseSchema::GetPlayerTables();
+		std::vector<std::string> player_tables = DatabaseSchema::GetPlayerTables();
 		for (const auto          &table: player_tables) {
 			player_tables_json.append(table);
 		}
@@ -176,19 +178,19 @@ namespace WorldserverCommandHandler {
 		}
 
 		Json::Value              server_tables_json;
-		std::vector<std::string> server_tables  = DatabaseSchema::GetServerTables();
+		std::vector<std::string> server_tables = DatabaseSchema::GetServerTables();
 		for (const auto          &table: server_tables) {
 			server_tables_json.append(table);
 		}
 
 		Json::Value              login_tables_json;
-		std::vector<std::string> login_tables   = DatabaseSchema::GetLoginTables();
+		std::vector<std::string> login_tables = DatabaseSchema::GetLoginTables();
 		for (const auto          &table: login_tables) {
 			login_tables_json.append(table);
 		}
 
 		Json::Value              state_tables_json;
-		std::vector<std::string> state_tables   = DatabaseSchema::GetStateTables();
+		std::vector<std::string> state_tables = DatabaseSchema::GetStateTables();
 		for (const auto          &table: state_tables) {
 			state_tables_json.append(table);
 		}
@@ -197,6 +199,12 @@ namespace WorldserverCommandHandler {
 		std::vector<std::string> version_tables = DatabaseSchema::GetVersionTables();
 		for (const auto          &table: version_tables) {
 			version_tables_json.append(table);
+		}
+		
+		Json::Value              bot_tables_json;
+		std::vector<std::string> bot_tables = DatabaseSchema::GetBotTables();
+		for (const auto          &table: bot_tables) {
+			bot_tables_json.append(table);
 		}
 
 		Json::Value schema;
@@ -207,6 +215,7 @@ namespace WorldserverCommandHandler {
 		schema["server_tables"]  = server_tables_json;
 		schema["state_tables"]   = state_tables_json;
 		schema["version_tables"] = version_tables_json;
+		schema["bot_tables"]     = bot_tables_json;
 
 		std::stringstream payload;
 		payload << schema;
@@ -230,6 +239,7 @@ namespace WorldserverCommandHandler {
 			"--content-tables",
 			"--login-tables",
 			"--player-tables",
+			"--bot-tables",
 			"--state-tables",
 			"--system-tables",
 			"--query-serv-tables",
@@ -260,6 +270,7 @@ namespace WorldserverCommandHandler {
 		database_dump_service->SetDumpContentTables(cmd[{"--content-tables"}] || dump_all);
 		database_dump_service->SetDumpLoginServerTables(cmd[{"--login-tables"}] || dump_all);
 		database_dump_service->SetDumpPlayerTables(cmd[{"--player-tables"}] || dump_all);
+		database_dump_service->SetDumpBotTables(cmd[{"--bot-tables"}] || dump_all);
 		database_dump_service->SetDumpStateTables(cmd[{"--state-tables"}] || dump_all);
 		database_dump_service->SetDumpSystemTables(cmd[{"--system-tables"}] || dump_all);
 		database_dump_service->SetDumpQueryServerTables(cmd[{"--query-serv-tables"}] || dump_all);

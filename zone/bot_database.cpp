@@ -167,15 +167,21 @@ bool BotDatabase::LoadBotSpellCastingChances()
 /* Bot functions   */
 bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& available_flag)
 {
-	if (bot_name.empty() || bot_name.size() > 60 || !database.CheckUsedName(bot_name.c_str()))
+	if (bot_name.empty() || bot_name.size() > 60 || !database.CheckUsedName(bot_name))
 		return false;
 
-	query = StringFormat("SELECT `id` FROM `vw_bot_character_mobs` WHERE `name` LIKE '%s' LIMIT 1", bot_name.c_str());
+	query = fmt::format(
+		"SELECT `id` FROM `vw_bot_character_mobs` WHERE `name` LIKE '{}' LIMIT 1",
+		bot_name
+	);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (results.RowCount())
+	}
+
+	if (results.RowCount()) {
 		return true;
+	}
 
 	available_flag = true;
 

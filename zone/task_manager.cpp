@@ -227,9 +227,9 @@ bool TaskManager::LoadTasks(int single_task)
 		activity_data->target_name          = task_activity.target_name;
 		activity_data->item_list            = task_activity.item_list;
 		activity_data->skill_list           = task_activity.skill_list;
-		activity_data->skill_id             = std::stoi(task_activity.skill_list); // for older clients
+		activity_data->skill_id             = StringIsNumber(task_activity.skill_list) ? std::stoi(task_activity.skill_list) : 0; // for older clients
 		activity_data->spell_list           = task_activity.spell_list;
-		activity_data->spell_id             = std::stoi(task_activity.spell_list); // for older clients
+		activity_data->spell_id             = StringIsNumber(task_activity.spell_list) ? std::stoi(task_activity.spell_list) : 0; // for older clients
 		activity_data->description_override = task_activity.description_override;
 		activity_data->goal_id              = task_activity.goalid;
 		activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;

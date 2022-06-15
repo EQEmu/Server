@@ -668,7 +668,7 @@ public:
 	void RemoveFromInstance(uint16 instance_id);
 	void WhoAll();
 	bool CheckLoreConflict(const EQ::ItemData* item);
-	void ChangeLastName(const char* in_lastname);
+	void ChangeLastName(std::string last_name);
 	void GetGroupAAs(GroupLeadershipAA_Struct *into) const;
 	void GetRaidAAs(RaidLeadershipAA_Struct *into) const;
 	void ClearGroupAAs();
@@ -720,8 +720,8 @@ public:
 	void SendGuildJoin(GuildJoin_Struct* gj);
 	void RefreshGuildInfo();
 
-	int GetClientMaxLevel() const { return client_max_level; }
-	void SetClientMaxLevel(int max_level) { client_max_level = max_level; }
+	uint8 GetClientMaxLevel() const { return client_max_level; }
+	void SetClientMaxLevel(uint8 max_level) { client_max_level = max_level; }
 
 	void CheckManaEndUpdate();
 	void SendManaUpdate();
@@ -828,8 +828,8 @@ public:
 	void UntrainDiscBySpellID(uint16 spell_id, bool update_client = true);
 	bool SpellGlobalCheck(uint16 spell_id, uint32 char_id);
 	bool SpellBucketCheck(uint16 spell_id, uint32 char_id);
-	uint32 GetCharMaxLevelFromQGlobal();
-	uint32 GetCharMaxLevelFromBucket();
+	uint8 GetCharMaxLevelFromQGlobal();
+	uint8 GetCharMaxLevelFromBucket();
 
 	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clipping = false);
 
@@ -912,8 +912,8 @@ public:
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	inline uint32 GetAAPercent() const { return m_epp.perAA; }
 	int64 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
-	void SetAATitle(const char *Title);
-	void SetTitleSuffix(const char *txt);
+	void SetAATitle(std::string title);
+	void SetTitleSuffix(std::string suffix);
 	void MemorizeSpell(uint32 slot, uint32 spellid, uint32 scribing, uint32 reduction = 0);
 
 	// Item methods
@@ -2008,7 +2008,7 @@ private:
 	void InterrogateInventory_(bool errorcheck, Client* requester, int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, bool log, bool silent, bool &error, int depth);
 	bool InterrogateInventory_error(int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, int depth);
 
-	int client_max_level;
+	uint8 client_max_level;
 
 	uint32 m_expedition_id = 0;
 	ExpeditionInvite m_pending_expedition_invite { 0 };

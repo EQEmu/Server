@@ -60,6 +60,7 @@
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/content_flags_repository.h"
 #include "../common/repositories/zone_points_repository.h"
+#include "../common/serverinfo.h"
 
 #include <time.h>
 #include <ctime>
@@ -654,38 +655,35 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 void Zone::GetMerchantDataForZoneLoad() {
 	LogInfo("Loading Merchant Lists");
+
 	auto query = fmt::format(
 		SQL (
 			SELECT
-			  DISTINCT merchantlist.merchantid,
-			  merchantlist.slot,
-			  merchantlist.item,
-			  merchantlist.faction_required,
-			  merchantlist.level_required,
-			  merchantlist.alt_currency_cost,
-			  merchantlist.classes_required,
-			  merchantlist.probability,
-			  merchantlist.bucket_name,
-			  merchantlist.bucket_value,
-			  merchantlist.bucket_comparison
-			FROM
-			  merchantlist,
-			  npc_types,
-			  spawnentry,
-			  spawn2
-			WHERE
-			  npc_types.merchant_id = merchantlist.merchantid
-			  AND npc_types.id = spawnentry.npcid
-			  AND spawnentry.spawngroupid = spawn2.spawngroupid
-			  AND spawn2.zone = '{}'
-			  AND spawn2.version = {}
-			  {}
+			merchantid,
+			slot,
+			item,
+			faction_required,
+			level_required,
+			alt_currency_cost,
+			classes_required,
+			probability,
+			bucket_name,
+			bucket_value,
+			bucket_comparison
+			from merchantlist where merchantid IN (
+					select merchant_id from npc_types where id in (
+						select npcID from spawnentry where spawngroupID IN (
+							select spawngroupID from spawn2 where `zone` = '{}' and (`version` = {} OR `version` = -1)
+					)
+				)
+			)
+			{}
 			ORDER BY
-			  merchantlist.slot
+			merchantlist.slot
 		),
 		GetShortName(),
 		GetInstanceVersion(),
-		ContentFilterCriteria::apply("merchantlist")
+		ContentFilterCriteria::apply()
 	);
 
 	auto results = content_db.QueryDatabase(query);
@@ -723,7 +721,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 		if (found) {
 			continue;
 		}
-		
+
 		mle.slot = std::stoul(row[1]);
 		mle.item = std::stoul(row[2]);
 		mle.faction_required = static_cast<int16>(std::stoi(row[3]));
@@ -1210,6 +1208,11 @@ bool Zone::Init(bool is_static) {
 
 	//MODDING HOOK FOR ZONE INIT
 	mod_init();
+
+	// logging origination information
+	LogSys.origination_info.zone_short_name = zone->short_name;
+	LogSys.origination_info.zone_long_name  = zone->long_name;
+	LogSys.origination_info.instance_id     = zone->instanceid;
 
 	return true;
 }
@@ -2734,7 +2737,14 @@ uint32 Zone::GetCurrencyItemID(uint32 currency_id)
 
 std::string Zone::GetZoneDescription()
 {
-	auto d = fmt::format(
+	if (!IsLoaded()) {
+		return fmt::format(
+			"PID ({})",
+			EQ::GetPID()
+		);
+	}
+
+	return fmt::format(
 		"{} ({}){}{}",
 		GetLongName(),
 		GetZoneID(),
@@ -2755,8 +2765,6 @@ std::string Zone::GetZoneDescription()
 			""
 		)
 	);
-
-	return d;
 }
 
 void Zone::SendReloadMessage(std::string reload_type)
@@ -2772,4 +2780,33 @@ void Zone::SendReloadMessage(std::string reload_type)
 			GetZoneDescription()
 		).c_str()
 	);
+}
+
+void Zone::SendDiscordMessage(int webhook_id, const std::string& message)
+{
+	if (worldserver.Connected()) {
+		auto pack = new ServerPacket(ServerOP_DiscordWebhookMessage, sizeof(DiscordWebhookMessage_Struct) + 1);
+		auto *q   = (DiscordWebhookMessage_Struct *) pack->pBuffer;
+
+		strn0cpy(q->message, message.c_str(), 2000);
+		q->webhook_id = webhook_id;
+
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string &message)
+{
+	bool not_found = true;
+	for (auto & w : LogSys.discord_webhooks) {
+		if (w.webhook_name == webhook_name) {
+			SendDiscordMessage(w.id, message + "\n");
+			not_found = false;
+		}
+	}
+
+	if (not_found) {
+		LogDiscord("[SendDiscordMessage] Did not find valid webhook by webhook name [{}]", webhook_name);
+	}
 }

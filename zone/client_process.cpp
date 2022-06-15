@@ -330,7 +330,7 @@ bool Client::Process() {
 			{
 				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQ::item::ItemTypeBow) {
 					if (ranged_timer.Check(false)) {
-						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())) {
+						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
@@ -350,7 +350,7 @@ bool Client::Process() {
 				}
 				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
 					if (ranged_timer.Check(false)) {
-						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())) {
+						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
@@ -411,7 +411,7 @@ bool Client::Process() {
 			else if (!los_status || !los_status_facing) {
 				//you can't see your target
 			}
-			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
+			else if (auto_attack_target->GetHP() > -10 && IsAttackAllowed(auto_attack_target)) // -10 so we can watch people bleed in PvP
 			{
 				EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotPrimary);
 				TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotPrimary);
@@ -456,7 +456,7 @@ bool Client::Process() {
 			{
 				//you can't see your target
 			}
-			else if (auto_attack_target->GetHP() > -10) {
+			else if (auto_attack_target->GetHP() > -10 && IsAttackAllowed(auto_attack_target)) {
 				CheckIncreaseSkill(EQ::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
 					EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotSecondary);
@@ -1020,7 +1020,10 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
-		BuffFadeNonPersistDeath();
+		if (RuleB(Spells, BuffsFadeOnDeath)) {
+			BuffFadeNonPersistDeath();
+		}
+
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {

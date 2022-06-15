@@ -265,7 +265,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	HasAISpellEffects    = false;
 	innate_proc_spell_id = 0;
 
-	if (GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs)) {
+	if (GetClass() == MERCENARY_MASTER && RuleB(Mercs, AllowMercs)) {
 		LoadMercTypes();
 		LoadMercs();
 	}
@@ -693,13 +693,12 @@ void NPC::QueryLoot(Client* to, bool is_pet_query)
 	}
 
 	if (!is_pet_query) {
-		bool has_money = (
-			platinum > 0 ||
-			gold > 0 ||
-			silver > 0 ||
-			copper > 0
-		);
-		if (has_money) {
+		if (
+			platinum ||
+			gold ||
+			silver ||
+			copper
+		) {
 			to->Message(
 				Chat::White,
 				fmt::format(
@@ -885,10 +884,10 @@ bool NPC::Process()
 			ProcessFlee();
 		}
 
-		uint32 npc_sitting_regen_bonus = 0;
-		uint32 pet_regen_bonus         = 0;
-		uint64 npc_regen               = 0;
-		int64  npc_hp_regen            = GetNPCHPRegen();
+		int64 npc_sitting_regen_bonus = 0;
+		int64 pet_regen_bonus = 0;
+		int64 npc_regen = 0;
+		int64 npc_hp_regen = GetNPCHPRegen();
 
 		if (GetAppearance() == eaSitting) {
 			npc_sitting_regen_bonus += 3;
@@ -3231,27 +3230,29 @@ void NPC::DoQuestPause(Mob *other) {
 
 }
 
-void NPC::ChangeLastName(const char* in_lastname)
+void NPC::ChangeLastName(std::string last_name)
 {
-
 	auto outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
-	GMLastName_Struct* gmn = (GMLastName_Struct*)outapp->pBuffer;
-	strcpy(gmn->name, GetName());
-	strcpy(gmn->gmname, GetName());
-	strcpy(gmn->lastname, in_lastname);
-	gmn->unknown[0]=1;
-	gmn->unknown[1]=1;
-	gmn->unknown[2]=1;
-	gmn->unknown[3]=1;
+	auto gmn = (GMLastName_Struct*) outapp->pBuffer;
+
+	strn0cpy(gmn->name, GetName(), sizeof(gmn->name));
+	strn0cpy(gmn->gmname, GetName(), sizeof(gmn->gmname));
+	strn0cpy(gmn->lastname, last_name.c_str(), sizeof(gmn->lastname));
+
+	gmn->unknown[0] = 1;
+	gmn->unknown[1] = 1;
+	gmn->unknown[2] = 1;
+	gmn->unknown[3] = 1;
+
 	entity_list.QueueClients(this, outapp, false);
+
 	safe_delete(outapp);
 }
 
 void NPC::ClearLastName()
 {
-	std::string WT;
-	WT = '\0'; //Clear Last Name
-	ChangeLastName( WT.c_str());
+	std::string empty;
+	ChangeLastName(empty);
 }
 
 void NPC::DepopSwarmPets()

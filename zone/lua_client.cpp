@@ -16,6 +16,7 @@
 #include "lua_raid.h"
 #include "lua_packet.h"
 #include "dialogue_window.h"
+#include "titles.h"
 #include "../common/expedition_lockout_timer.h"
 
 struct InventoryWhere { };
@@ -415,9 +416,9 @@ void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id) {
 	self->MoveZoneInstanceRaid(instance_id);
 }
 
-void Lua_Client::ChangeLastName(const char *in) {
+void Lua_Client::ChangeLastName(std::string last_name) {
 	Lua_Safe_Call_Void();
-	self->ChangeLastName(in);
+	self->ChangeLastName(last_name);
 }
 
 int Lua_Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc) {
@@ -1120,9 +1121,18 @@ void Lua_Client::SendZoneFlagInfo(Lua_Client to) {
 	self->SendZoneFlagInfo(to);
 }
 
-void Lua_Client::SetAATitle(const char *title) {
+void Lua_Client::SetAATitle(std::string title) {
 	Lua_Safe_Call_Void();
 	self->SetAATitle(title);
+}
+
+void Lua_Client::SetAATitle(std::string title, bool save_to_database) {
+	Lua_Safe_Call_Void();
+	if (!save_to_database) {
+		self->SetAATitle(title);
+	} else {
+		title_manager.CreateNewPlayerTitle(self, title);
+	}
 }
 
 int Lua_Client::GetClientVersion() {
@@ -1834,12 +1844,12 @@ void Lua_Client::SetSecondaryWeaponOrnamentation(uint32 model_id) {
 	self->SetSecondaryWeaponOrnamentation(model_id);
 }
 
-void Lua_Client::SetClientMaxLevel(int value) {
+void Lua_Client::SetClientMaxLevel(uint8 max_level) {
 	Lua_Safe_Call_Void();
-	self->SetClientMaxLevel(value);
+	self->SetClientMaxLevel(max_level);
 }
 
-int Lua_Client::GetClientMaxLevel() {
+uint8 Lua_Client::GetClientMaxLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetClientMaxLevel();
 }
@@ -2558,7 +2568,7 @@ luabind::scope lua_register_client() {
 	.def("CalcCurrentWeight", &Lua_Client::CalcCurrentWeight)
 	.def("CalcPriceMod", (float(Lua_Client::*)(Lua_Mob,bool))&Lua_Client::CalcPriceMod)
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
-	.def("ChangeLastName", (void(Lua_Client::*)(const char *in))&Lua_Client::ChangeLastName)
+	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)
 	.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)
@@ -2838,7 +2848,8 @@ luabind::scope lua_register_client() {
 	.def("SendZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendZoneFlagInfo)
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAPoints", (void(Lua_Client::*)(int))&Lua_Client::SetAAPoints)
-	.def("SetAATitle", (void(Lua_Client::*)(const char *))&Lua_Client::SetAATitle)
+	.def("SetAATitle", (void(Lua_Client::*)(std::string))&Lua_Client::SetAATitle)
+	.def("SetAATitle", (void(Lua_Client::*)(std::string,bool))&Lua_Client::SetAATitle)
 	.def("SetAFK", (void(Lua_Client::*)(uint8))&Lua_Client::SetAFK)
 	.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
 	.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
