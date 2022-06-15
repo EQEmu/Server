@@ -212,7 +212,7 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ:
 	const uint32 id = atoi(row[0]);
 	const uint16 charges = atoi(row[1]);
 
-    uint16 expect_charges = 0;
+    uint16 expect_charges;
 
     if(inst->GetCharges() >= 0)
         expect_charges = inst->GetCharges();
@@ -268,7 +268,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 		}
 	}
 
-    uint16 charges = 0;
+    uint16 charges;
 	if(inst->GetCharges() >= 0)
 		charges = inst->GetCharges();
 	else
@@ -317,7 +317,7 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
 
 // Update/Insert item
 	const uint32 account_id = GetAccountIDByChar(char_id);
-    uint16 charges = 0;
+    uint16 charges;
     if(inst->GetCharges() >= 0)
         charges = inst->GetCharges();
     else
@@ -519,8 +519,6 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 			continue;
 		}
 
-		int16 put_slot_id = INVALID_INDEX;
-
 		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
 		if (inst && item->IsClassCommon()) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
@@ -555,7 +553,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 		}
 
 		// theoretically inst can be nullptr ... this would be very bad ...
-		put_slot_id = inv->PutItem(slot_id, *inst);
+		const int16 put_slot_id = inv->PutItem(slot_id, *inst);
 		safe_delete(inst);
 
 		// Save ptr to item in inventory
@@ -655,8 +653,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			continue;
 		}
 
-		int16 put_slot_id = INVALID_INDEX;
-
 		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr)
@@ -719,6 +715,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			}
 		}
 
+		int16 put_slot_id;
 		if (slot_id >= 8000 && slot_id <= 8999) {
 			put_slot_id = inv->PushCursor(*inst);
 		} else if (slot_id >= 3111 && slot_id <= 3179) {
@@ -793,7 +790,6 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 		uint32 ornament_hero_model = std::stoul(row[14]);
 
 		const EQ::ItemData *item = GetItem(item_id);
-		int16 put_slot_id = INVALID_INDEX;
 		if (!item)
 			continue;
 
@@ -846,6 +842,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 			}
 		}
 
+		int16 put_slot_id;
 		if (slot_id >= 8000 && slot_id <= 8999)
 			put_slot_id = inv->PushCursor(*inst);
 		else
@@ -1438,10 +1435,9 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 // Create appropriate EQ::ItemInstance class
 EQ::ItemInstance* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
-	const EQ::ItemData* item = nullptr;
 	EQ::ItemInstance* inst = nullptr;
 
-	item = GetItem(item_id);
+	const EQ::ItemData* item = GetItem(item_id);
 	if (item) {
 		inst = CreateBaseItem(item, charges);
 
@@ -1612,11 +1608,6 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 
 bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 	skill_caps_mmf.reset(nullptr);
-
-	const uint32 class_count = PLAYER_CLASS_COUNT;
-	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	const uint32 level_count = HARD_LEVEL_CAP + 1;
-	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
 
 	try {
 		const auto Config = EQEmuConfig::get();
@@ -1810,11 +1801,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		return;
     }
 
-    int tempid = 0;
-    int counter = 0;
+	int counter = 0;
 
     for (auto& row = results.begin(); row != results.end(); ++row) {
-        tempid = atoi(row[0]);
+	    const int tempid = atoi(row[0]);
         if(tempid >= max_spells) {
       LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
             continue;
@@ -1875,7 +1865,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].target_type = static_cast<SpellTargetType>(atoi(row[98]));
 		sp[tempid].base_difficulty=atoi(row[99]);
 
-		int tmp_skill = atoi(row[100]);;
+		int tmp_skill = atoi(row[100]);
 
 		if (tmp_skill < 0 || tmp_skill > EQ::skills::HIGHEST_SKILL)
 			sp[tempid].skill = EQ::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
@@ -2015,12 +2005,9 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
         return;
 	}
 
-    int lvl = 0;
-    int cl = 0;
-
-    for (auto& row = results.begin(); row != results.end(); ++row) {
-        lvl = atoi(row[0]);
-        cl = atoi(row[1]);
+	for (auto& row = results.begin(); row != results.end(); ++row) {
+		const int lvl = atoi(row[0]);
+		const int cl = atoi(row[1]);
 
         if(lvl <= 0) {
             LogError("Non fatal error: base_data.level <= 0, ignoring.");
