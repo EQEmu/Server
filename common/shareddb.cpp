@@ -929,7 +929,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		items_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
-		items_hash = std::make_unique<EQ::FixedMemoryHashSet<EQ::ItemData>>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size());
+		items_hash = std::make_unique<EQ::FixedMemoryHashSet<EQ::ItemData>>(static_cast<uint8*>(items_mmf->Get()), items_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		LogError("Error Loading Items: {}", ex.what());
@@ -941,7 +941,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 
 void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id)
 {
-	EQ::FixedMemoryHashSet<EQ::ItemData> hash(reinterpret_cast<uint8 *>(data), size, items, max_item_id);
+	EQ::FixedMemoryHashSet<EQ::ItemData> hash(static_cast<uint8 *>(data), size, items, max_item_id);
 
 	std::string variable_buffer;
 
@@ -1366,7 +1366,7 @@ const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) const
 }
 
 void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists) {
-	EQ::FixedMemoryHashSet<NPCFactionList> hash(reinterpret_cast<uint8*>(data), size, list_count, max_lists);
+	EQ::FixedMemoryHashSet<NPCFactionList> hash(static_cast<uint8*>(data), size, list_count, max_lists);
 	NPCFactionList faction;
 
 	const std::string query = "SELECT npc_faction.id, npc_faction.primaryfaction, npc_faction.ignore_primary_assist, "
@@ -1425,7 +1425,7 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 		std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		faction_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
-		faction_hash = std::make_unique<EQ::FixedMemoryHashSet<NPCFactionList>>(reinterpret_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size());
+		faction_hash = std::make_unique<EQ::FixedMemoryHashSet<NPCFactionList>>(static_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		LogError("Error Loading npc factions: {}", ex.what());
@@ -1638,7 +1638,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
 	const uint32 class_count = PLAYER_CLASS_COUNT;
 	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
 	const uint32 level_count = HARD_LEVEL_CAP + 1;
-	uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);
+	uint16 *skill_caps_table = static_cast<uint16*>(data);
 
 	const std::string query = "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level";
 	auto results = QueryDatabase(query);
@@ -1687,7 +1687,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, ui
 	}
 
 	const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count) + Level;
-	const uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+	const uint16 *skill_caps_table = static_cast<uint16*>(skill_caps_mmf->Get());
 	return skill_caps_table[index];
 }
 
@@ -1715,7 +1715,7 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, u
 	uint8 ret = 0;
 	if(Level > static_cast<uint8>(SkillMaxLevel)) {
 		const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
-		const uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+		const uint16 *skill_caps_table = static_cast<uint16*>(skill_caps_mmf->Get());
 		for(uint8 x = 0; x < Level; x++){
 			if(skill_caps_table[index + x]){
 				ret = x;
@@ -1726,7 +1726,7 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, u
 	else
 	{
 		const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
-		const uint16 *skill_caps_table = reinterpret_cast<uint16*>(skill_caps_mmf->Get());
+		const uint16 *skill_caps_table = static_cast<uint16*>(skill_caps_mmf->Get());
 		for(int x = 0; x < SkillMaxLevel; x++){
 			if(skill_caps_table[index + x]){
 				ret = x;
@@ -1784,7 +1784,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
 		spells_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
-		*records = *reinterpret_cast<uint32*>(spells_mmf->Get());
+		*records = *static_cast<uint32*>(spells_mmf->Get());
 		*sp = reinterpret_cast<const SPDat_Spell_Struct*>(static_cast<char*>(spells_mmf->Get()) + 4);
 		mutex.Unlock();
 	}
@@ -2007,7 +2007,7 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 }
 
 void SharedDatabase::LoadBaseData(void *data, int max_level) {
-	char *base_ptr = reinterpret_cast<char*>(data);
+	char *base_ptr = static_cast<char*>(data);
 
 	const std::string query = "SELECT * FROM base_data ORDER BY level, class ASC";
 	auto results = QueryDatabase(query);
@@ -2072,7 +2072,7 @@ const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) const
 		return nullptr;
 	}
 
-	char *base_ptr = reinterpret_cast<char*>(base_data_mmf->Get());
+	char *base_ptr = static_cast<char*>(base_data_mmf->Get());
 
 	const uint32 offset = ((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct);
 
@@ -2134,7 +2134,7 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 }
 
 void SharedDatabase::LoadLootTables(void *data, uint32 size) {
-	EQ::FixedMemoryVariableHashSet<LootTable_Struct> hash(reinterpret_cast<uint8*>(data), size);
+	EQ::FixedMemoryVariableHashSet<LootTable_Struct> hash(static_cast<uint8*>(data), size);
 
 	uint8 loot_table[sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128)];
 	LootTable_Struct *lt = reinterpret_cast<LootTable_Struct*>(loot_table);
@@ -2227,7 +2227,7 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 
 void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 
-	EQ::FixedMemoryVariableHashSet<LootDrop_Struct> hash(reinterpret_cast<uint8*>(data), size);
+	EQ::FixedMemoryVariableHashSet<LootDrop_Struct> hash(static_cast<uint8*>(data), size);
 	uint8 loot_drop[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260)];
 	LootDrop_Struct *p_loot_drop_struct = reinterpret_cast<LootDrop_Struct*>(loot_drop);
 
@@ -2322,12 +2322,12 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 		std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
 		loot_table_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_lt);
 		loot_table_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootTable_Struct>>(
-			reinterpret_cast<uint8*>(loot_table_mmf->Get()),
+			static_cast<uint8*>(loot_table_mmf->Get()),
 			loot_table_mmf->Size());
 		std::string file_name_ld = Config->SharedMemDir + prefix + std::string("loot_drop");
 		loot_drop_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_ld);
 		loot_drop_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>(
-			reinterpret_cast<uint8*>(loot_drop_mmf->Get()),
+			static_cast<uint8*>(loot_drop_mmf->Get()),
 			loot_drop_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception &ex) {
