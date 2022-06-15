@@ -1212,7 +1212,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		// Click Effect
 		item.CastTime = std::stoul(row[ItemField::casttime]);
 		item.CastTime_ = std::stoi(row[ItemField::casttime_]);
-		item.Click.Effect = std::stoul(row[ItemField::clickeffect]);
+		item.Click.Effect = std::stoi(row[ItemField::clickeffect]);
 		item.Click.Type = static_cast<uint8>(std::stoul(row[ItemField::clicktype]));
 		item.Click.Level = static_cast<uint8>(std::stoul(row[ItemField::clicklevel]));
 		item.Click.Level2 = static_cast<uint8>(std::stoul(row[ItemField::clicklevel2]));
