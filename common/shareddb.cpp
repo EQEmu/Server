@@ -86,7 +86,7 @@ uint8 SharedDatabase::GetGMSpeed(uint32 account_id)
     if (results.RowCount() != 1)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -106,7 +106,7 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	uint32 EntitledTime = 0;
 	const std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);
 	auto results = QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		EntitledTime += atoi(row[0]);
 	}
 	return EntitledTime;
@@ -146,7 +146,7 @@ std::string SharedDatabase::GetMailKey(int CharID, bool key_only)
 		return std::string();
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	if (row != results.end()) {
 
 		std::string mail_key = row[0];
@@ -180,7 +180,7 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::co
     }
 
     int i = 8000;
-    for(auto it = start; it != end; ++it, i++) {
+    for(auto& it = start; it != end; ++it, i++) {
 		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
 		const EQ::ItemInstance *inst = *it;
 		const int16 use_slot = (i == 8000) ? EQ::invslot::slotCursor : i;
@@ -207,7 +207,7 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ:
 	if (results.RowCount() == 0)
         return false;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	const uint32 id = atoi(row[0]);
 	const uint16 charges = atoi(row[1]);
@@ -415,7 +415,7 @@ int32 SharedDatabase::GetSharedPlatinum(uint32 account_id)
     if (results.RowCount() != 1)
         return 0;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -453,7 +453,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQ::InventoryPro
 	}
 
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		const int32 itemid = atoi(row[0]);
 		const int32 charges = atoi(row[1]);
 		int32 slot = atoi(row[2]);
@@ -498,7 +498,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = static_cast<int16>(atoi(row[0]));
 		uint32 item_id = static_cast<uint32>(atoi(row[1]));
 		const int16 charges = static_cast<int16>(atoi(row[2]));
@@ -598,7 +598,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 	const auto pmask = inv->GetLookup()->PossessionsBitmask;
 	const auto bank_size = inv->GetLookup()->InventoryTypeSize.Bank;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
 
 		if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) { // Titanium thru UF check
@@ -773,7 +773,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
 		uint32 item_id = atoi(row[1]);
 		const int8 charges = atoi(row[2]);
@@ -871,7 +871,7 @@ std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
 	if (!results.Success() || results.RowCount() == 0)
 		return timers;
 
-	for (auto row = results.begin(); row != results.end(); ++row)
+	for (auto& row = results.begin(); row != results.end(); ++row)
 		timers[atoul(row[0])] = atoul(row[1]);
 	return timers; // RVO or move assigned
 }
@@ -884,7 +884,7 @@ uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type
 	if (!results.Success() || results.RowCount() == 0)
 		return 0;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	return static_cast<uint32>(atoul(row[0]));
 }
 
@@ -910,7 +910,7 @@ void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
 	if (results.RowCount() == 0)
 		return;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	if (row[0])
 		max_id = atoi(row[0]);
@@ -993,7 +993,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		memset(&item, 0, sizeof(EQ::ItemData));
 
 		// Unique Identifier
@@ -1326,7 +1326,7 @@ std::string SharedDatabase::GetBook(const char *txtfile, int16 *language)
         return txtout;
     }
 
-    auto row = results.begin();
+    auto& row = results.begin();
     txtout.assign(row[0],strlen(row[0]));
     *language = static_cast<int16>(atoi(row[1]));
 
@@ -1346,7 +1346,7 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
 	if (results.RowCount() == 0)
         return;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
     list_count = static_cast<uint32>(atoul(row[0]));
     max_lists = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
@@ -1381,7 +1381,7 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
     uint32 current_id = 0;
     uint32 current_entry = 0;
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
+    for(auto& row = results.begin(); row != results.end(); ++row) {
 	    const uint32 id = static_cast<uint32>(atoul(row[0]));
         if(id != current_id) {
             if(current_id != 0) {
@@ -1547,7 +1547,7 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 	if (!results.Success())
 		return false;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		command_settings[row[0]].first = atoi(row[1]);
 		if (row[2][0] == 0)
 			continue;
@@ -1647,7 +1647,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
         return;
 	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
+    for(auto& row = results.begin(); row != results.end(); ++row) {
 	    const uint8 skillID = atoi(row[0]);
 	    const uint8 class_ = atoi(row[1]) - 1;
 	    const uint8 level = atoi(row[2]);
@@ -1749,7 +1749,7 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
         return;
     }
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
+    for(auto& row = results.begin(); row != results.end(); ++row) {
 	    const int spellID = atoi(row[0]);
         if((spellID > 0) && (spellID <= iMaxSpellID))
             sp[spellID].damage_shield_type = atoi(row[1]);
@@ -1768,7 +1768,7 @@ int SharedDatabase::GetMaxSpellID() {
         return -1;
     }
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -1813,7 +1813,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     int tempid = 0;
     int counter = 0;
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         tempid = atoi(row[0]);
         if(tempid >= max_spells) {
       LogSpells("Non fatal error: spell.id >= max_spells, ignoring");
@@ -1982,7 +1982,7 @@ int SharedDatabase::GetMaxBaseDataLevel() {
 	if (results.RowCount() == 0)
         return -1;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
 	return atoi(row[0]);
 }
@@ -2018,7 +2018,7 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
     int lvl = 0;
     int cl = 0;
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         lvl = atoi(row[0]);
         cl = atoi(row[1]);
 
@@ -2101,7 +2101,7 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	if (results.RowCount() == 0)
         return;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
     loot_table_count = static_cast<uint32>(atoul(row[0]));
 	max_loot_table = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
@@ -2126,7 +2126,7 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
 	if (results.RowCount() == 0)
         return;
 
-    auto row =results.begin();
+    auto& row =results.begin();
 
     loot_drop_count = static_cast<uint32>(atoul(row[0]));
 	max_loot_drop = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
@@ -2173,7 +2173,7 @@ void SharedDatabase::LoadLootTables(void *data, uint32 size) {
 	uint32 current_id    = 0;
 	uint32 current_entry = 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		const uint32 id = static_cast<uint32>(atoul(row[0]));
 		if (id != current_id) {
 			if (current_id != 0) {
@@ -2267,7 +2267,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 	uint32 current_id    = 0;
 	uint32 current_entry = 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		const auto id = static_cast<uint32>(atoul(row[0]));
 		if (id != current_id) {
 			if (current_id != 0) {
@@ -2371,9 +2371,8 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) const
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
 	const std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
 	auto results = QueryDatabase(query);
-	auto row = results.begin();
 	memset(message, '\0', sizeof(InspectMessage_Struct));
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		memcpy(message, row[0], sizeof(InspectMessage_Struct));
 	}
 }
