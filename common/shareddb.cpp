@@ -1269,7 +1269,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	}
 }
 
-const EQ::ItemData *SharedDatabase::GetItem(uint32 id)
+const EQ::ItemData *SharedDatabase::GetItem(uint32 id) const
 {
 	if (id == 0) {
 		return nullptr;
@@ -1286,7 +1286,8 @@ const EQ::ItemData *SharedDatabase::GetItem(uint32 id)
 	return nullptr;
 }
 
-const EQ::ItemData* SharedDatabase::IterateItems(uint32* id) {
+const EQ::ItemData* SharedDatabase::IterateItems(uint32* id) const
+{
 	if(!items_hash || !id) {
 		return nullptr;
 	}
@@ -1351,7 +1352,8 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
     max_lists = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
 }
 
-const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
+const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) const
+{
 	if(!faction_hash) {
 		return nullptr;
 	}
@@ -1659,7 +1661,8 @@ void SharedDatabase::LoadSkillCaps(void *data) {
     }
 }
 
-uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) {
+uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const
+{
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -1688,7 +1691,8 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, ui
 	return skill_caps_table[index];
 }
 
-uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) {
+uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const
+{
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -2050,7 +2054,8 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
     }
 }
 
-const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) {
+const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) const
+{
 	if(!base_data_mmf) {
 		return nullptr;
 	}
@@ -2333,7 +2338,8 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 	return true;
 }
 
-const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
+const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) const
+{
 	if(!loot_table_hash)
 		return nullptr;
 
@@ -2347,7 +2353,8 @@ const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) {
 	return nullptr;
 }
 
-const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
+const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) const
+{
 	if(!loot_drop_hash)
 		return nullptr;
 
