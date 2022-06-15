@@ -190,7 +190,8 @@ public:
 	void LoadBaseData(void *data, int max_level);
 	const BaseDataStruct *GetBaseData(int lvl, int cl) const;
 
-	std::string CreateItemLink(uint32 item_id) {
+	std::string CreateItemLink(uint32 item_id) const
+	{
 		EQ::SayLinkEngine linker;
 		linker.SetLinkType(EQ::saylink::SayLinkItemData);
 		const EQ::ItemData *item = GetItem(item_id);
