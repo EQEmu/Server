@@ -632,7 +632,7 @@ public:
 	inline const GravityBehavior GetFlyMode() const { return flymode; }
 	bool IsBoat() const; // Checks races - used on mob instantiation
 	bool GetIsBoat() const { return is_boat; } // Set on instantiation for speed
-	bool SetIsBoat(bool boat) { is_boat = boat; };
+	void SetIsBoat(bool boat) { is_boat = boat; }
 	bool IsControllableBoat() const;
 	inline const bool AlwaysAggro() const { return always_aggro; }
 
