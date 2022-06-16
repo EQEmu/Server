@@ -630,7 +630,9 @@ public:
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
 	inline const GravityBehavior GetFlyMode() const { return flymode; }
-	bool IsBoat() const { return is_boat; }
+	bool IsBoat() const; // Checks races - used on mob instantiation
+	bool GetIsBoat() const { return is_boat; } // Set on instantiation for speed
+	bool SetIsBoat(bool boat) { is_boat = boat; };
 	bool IsControllableBoat() const;
 	inline const bool AlwaysAggro() const { return always_aggro; }
 
