@@ -1506,6 +1506,8 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* C
 				Trader_EndTrader();
 			}
 
+			safe_delete(TraderItems);
+
 			return;
 		}
 		else
