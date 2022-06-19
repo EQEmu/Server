@@ -11763,6 +11763,7 @@ void Client::SetTrackingID(uint32 entity_id)
 
 	auto *m = entity_list.GetMob(entity_id);
 	if (!m) {
+		TrackingID = 0;
 		return;
 	}
 
