@@ -3688,3 +3688,12 @@ std::string QuestManager::getenvironmentaldamagename(uint8 damage_type) {
 	std::string environmental_damage_name = EQ::constants::GetEnvironmentalDamageName(damage_type);
 	return environmental_damage_name;
 }
+
+void QuestManager::TrackNPC(uint32 entity_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SetTrackingID(entity_id);
+}

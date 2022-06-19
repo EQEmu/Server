@@ -11753,3 +11753,22 @@ void Client::Undye()
 
 	database.DeleteCharacterDye(CharacterID());
 }
+
+void Client::SetTrackingID(uint32 entity_id)
+{
+	if (!entity_id) {
+		TrackingID = 0;
+		return;
+	}
+
+	auto *m = entity_list.GetMob(entity_id);
+	if (!m) {
+		return;
+	}
+
+	TrackingID = entity_id;
+
+	MessageString(Chat::Skills, TRACKING_BEGIN, m->GetCleanName());
+
+	DoTracking();
+}

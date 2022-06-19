@@ -14165,16 +14165,14 @@ void Client::Handle_OP_TrackTarget(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (app->size != sizeof(TrackTarget_Struct))
-	{
-		LogError("Invalid size for OP_TrackTarget: Expected: [{}], Got: [{}]",
-			sizeof(TrackTarget_Struct), app->size);
+	if (app->size != sizeof(TrackTarget_Struct)) {
+		LogError("Invalid size for OP_TrackTarget: Expected: [{}], Got: [{}]", sizeof(TrackTarget_Struct), app->size);
 		return;
 	}
 
-	TrackTarget_Struct *tts = (TrackTarget_Struct*)app->pBuffer;
+	auto *t = (TrackTarget_Struct*) app->pBuffer;
 
-	TrackingID = tts->EntityID;
+	SetTrackingID(t->EntityID);
 }
 
 void Client::Handle_OP_TrackUnknown(const EQApplicationPacket *app)
