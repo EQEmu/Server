@@ -5847,17 +5847,32 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 
 void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 {
-	// TODO: Consider re-working to use player race values instead of actual race
+	enum {
+		FilterClass,
+		FilterRace,
+		FilterName,
+		FilterCount,
+		MaskClass = (1 << FilterClass),
+		MaskRace = (1 << FilterRace),
+		MaskName = (1 << FilterName)
+	};
 
-	enum { FilterClass, FilterRace, FilterName, FilterCount, MaskClass = (1 << FilterClass), MaskRace = (1 << FilterRace), MaskName = (1 << FilterName) };
-
-	if (helper_command_alias_fail(c, "bot_subcommand_bot_list", sep->arg[0], "botlist"))
-		return;
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s (account) ([class] [value]) ([race] [value]) ([name] [partial-full])", sep->arg[0]);
-		c->Message(Chat::Gray, "note: filter criteria is orderless and optional");
+	if (helper_command_alias_fail(c, "bot_subcommand_bot_list", sep->arg[0], "botlist")) {
 		return;
 	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} (account) ([class] [value]) ([race] [value]) ([name] [partial-full])",
+				sep->arg[0]
+			).c_str()
+		);
+		c->Message(Chat::White, "Note: Filter criteria is orderless and optional.");
+		return;
+	}
+
 	bool Account = false;
 	int seps = 1;
 	uint32 filter_value[FilterCount];
@@ -5865,81 +5880,132 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 	memset(&filter_value, 0, sizeof(uint32) * FilterCount);
 
 	int filter_mask = 0;
-	if (strcasecmp(sep->arg[1], "account") == 0) {
+	if (!strcasecmp(sep->arg[1], "account")) {
 		Account = true;
 		seps = 2;
 	}
+
 	for (int i = seps; i < (FilterCount * 2); i += 2) {
-		if (sep->arg[i][0] == '\0')
+		if (sep->arg[i][0] == '\0') {
 			break;
+		}
 
 		if (!strcasecmp(sep->arg[i], "class")) {
 			filter_mask |= MaskClass;
 			filter_value[FilterClass] = atoi(sep->arg[i + 1]);
 			continue;
 		}
+
 		if (!strcasecmp(sep->arg[i], "race")) {
 			filter_mask |= MaskRace;
 			filter_value[FilterRace] = atoi(sep->arg[i + 1]);
 			continue;
 		}
+
 		if (!strcasecmp(sep->arg[i], "name")) {
 			filter_mask |= MaskName;
 			name_criteria_arg = (i + 1);
 			continue;
 		}
 
-		c->Message(Chat::Red, "A numeric value or name is required to use the filter property of this command (f: '%s', v: '%s')", sep->arg[i], sep->arg[i + 1]);
+		c->Message(Chat::White, "A numeric value or name is required to use the filter property of this command (f: '%s', v: '%s')", sep->arg[i], sep->arg[i + 1]);
 		return;
 	}
 
 	std::list<BotsAvailableList> bots_list;
 	if (!database.botdb.LoadBotsList(c->CharacterID(), bots_list, Account)) {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::LoadBotsList());
-		return;
-	}
-	if (bots_list.empty()) {
-		c->Message(Chat::Red, "You have no bots");
+		c->Message(Chat::White, "%s", BotDatabase::fail::LoadBotsList());
 		return;
 	}
 
-	int bot_count = 0;
-	int bots_owned = 0;
+	if (bots_list.empty()) {
+		c->Message(Chat::White, "You have no bots.");
+		return;
+	}
+
+	auto bot_count = 0;
+	auto bots_owned = 0;
+	auto bot_number = 1;
 	for (auto bots_iter : bots_list) {
 		if (filter_mask) {
-			if ((filter_mask & MaskClass) && filter_value[FilterClass] != bots_iter.Class)
+			if ((filter_mask & MaskClass) && filter_value[FilterClass] != bots_iter.Class) {
 				continue;
-			if ((filter_mask & MaskRace) && filter_value[FilterRace] != bots_iter.Race)
+			}
+
+			if ((filter_mask & MaskRace) && filter_value[FilterRace] != bots_iter.Race) {
 				continue;
+			}
+
 			if (filter_mask & MaskName) {
 				std::string name_criteria = sep->arg[name_criteria_arg];
 				std::transform(name_criteria.begin(), name_criteria.end(), name_criteria.begin(), ::tolower);
 				std::string name_check = bots_iter.Name;
 				std::transform(name_check.begin(), name_check.end(), name_check.begin(), ::tolower);
-				if (name_check.find(name_criteria) == std::string::npos)
+				if (name_check.find(name_criteria) == std::string::npos) {
 					continue;
+				}
 			}
 		}
-		Bot * botCheckNotOnline = entity_list.GetBotByBotName(bots_iter.Name);
-		std::string	botspawn_saylink = StringFormat("^botspawn %s", bots_iter.Name);
-		c->Message(Chat::White, "[%s] is a level %u %s %s %s who is owned by %s",
-			((c->CharacterID() == bots_iter.Owner_ID) && (!botCheckNotOnline) ? (EQ::SayLinkEngine::GenerateQuestSaylink(botspawn_saylink, false, bots_iter.Name).c_str()) : (bots_iter.Name)),
-			bots_iter.Level,
-			GetRaceIDName(bots_iter.Race),
-			((bots_iter.Gender == FEMALE) ? ("Female") : ((bots_iter.Gender == MALE) ? ("Male") : ("Neuter"))),
-			GetClassIDName(bots_iter.Class),
-			bots_iter.Owner
+
+		auto* bot = entity_list.GetBotByBotName(bots_iter.Name);
+		auto bot_spawn_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			fmt::format("^spawn {}", bots_iter.Name),
+			false,
+			bots_iter.Name
 		);
-		if (c->CharacterID() == bots_iter.Owner_ID) { ++bots_owned; }
-		++bot_count;
+	
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Bot {} | {} is a Level {} {} {} {} owned by {}.",
+				bot_number,
+				(
+					(c->CharacterID() == bots_iter.Owner_ID && !bot) ?
+					bot_spawn_saylink :
+					bots_iter.Name
+				),
+				bots_iter.Level,
+				GetGenderName(bots_iter.Gender),
+				GetRaceIDName(bots_iter.Race),
+				GetClassIDName(bots_iter.Class),
+				bots_iter.Owner
+			).c_str()
+		);
+
+		if (c->CharacterID() == bots_iter.Owner_ID) {
+			bots_owned++;
+		}
+
+		bot_count++;
+		bot_number++;
 	}
+
 	if (!bot_count) {
-		c->Message(Chat::Red, "You have no bots meeting this criteria");
-	}
-	else {
-		c->Message(Chat::Yellow, "%i of %i bot%s shown.", bot_count, bots_list.size(), ((bot_count != 1) ? ("s") : ("")));
-		c->Message(Chat::Yellow, "%i of %i bot%s are owned by you. (You may spawn any available by clicking name)", bots_owned, bot_count, ((bot_count != 1) ? ("s") : ("")));
-		c->Message(Chat::White, "Your limit is %i bot%s", RuleI(Bots, CreationLimit), ((RuleI(Bots, CreationLimit) != 1) ? ("s") : ("")));
+		c->Message(Chat::White, "You have no bots meeting this criteria.");
+		return;
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} Of {} bot{} shown, {} {} owned by you.",
+				bot_count,
+				bots_list.size(),
+				bot_count != 1 ? "s" : "",
+				bots_owned,
+				bots_owned != 1 ? "are" : "is"
+			).c_str()
+		);
+
+		c->Message(Chat::White, "Note: You can spawn any owned bots by clicking their name if they are not already spawned.");
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Your bot creation limit is {} bot{}.",
+				RuleI(Bots, CreationLimit),
+				RuleI(Bots, CreationLimit) != 1 ? "s" : ""
+			).c_str()
+		);
 	}
 }
 
@@ -8360,10 +8426,15 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Slot {} ({}) | {}",
+				"Slot {} ({}) | {} | {}",
 				slot_id,
 				EQ::invslot::GetInvPossessionsSlotName(slot_id),
-				linker.GenerateLink()
+				linker.GenerateLink(),
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format("^inventoryremove {}", slot_id),
+					false,
+					"Remove"
+				)
 			).c_str()
 		);
 
@@ -8426,26 +8497,50 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 
 	auto my_bot = sbl.front();
 	if (!my_bot) {
-		c->Message(Chat::Magenta, "ActionableBots returned 'nullptr'");
+		c->Message(Chat::White, "ActionableBots returned 'nullptr'");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "Slot ID must be a number.");
+		c->Message(Chat::White, "Slot ID must be a number.");
 		return;
 	}
 
 	auto slot_id = static_cast<uint16>(std::stoul(sep->arg[1]));
 	if (slot_id > EQ::invslot::EQUIPMENT_END || slot_id < EQ::invslot::EQUIPMENT_BEGIN) {
-		c->Message(Chat::Red, "Valid slots are 0 to 22.");
+		c->Message(Chat::White, "Valid slots are 0 to 22.");
 		return;
 	}
 
-	const EQ::ItemData* itm = nullptr;
-	const EQ::ItemInstance* inst = my_bot->GetBotItem(slot_id);
-	if (inst) {
-		itm = inst->GetItem();
+	const auto* inst = my_bot->GetBotItem(slot_id);
+	if (!inst) {
+		std::string slot_message = "is";
+		switch (slot_id) {
+			case EQ::invslot::slotShoulders:
+			case EQ::invslot::slotArms:
+			case EQ::invslot::slotHands:
+			case EQ::invslot::slotLegs:
+			case EQ::invslot::slotFeet:
+				slot_message = "are";
+				break;
+			default:
+				break;
+		}
+
+		c->Message(
+			Chat::Tell,
+			fmt::format(
+				"{} tells you, 'My {} (Slot {}) {} already unequipped.'",
+				my_bot->GetCleanName(),
+				EQ::invslot::GetInvPossessionsSlotName(slot_id),
+				slot_id,
+				slot_message
+			).c_str()
+		);
+		return;
 	}
+
+	const auto* itm = inst->GetItem();
 
 	if (inst && itm && c->CheckLoreConflict(itm)) {
 		c->MessageString(Chat::White, PICK_LORE);
@@ -8453,10 +8548,6 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	for (int m = EQ::invaug::SOCKET_BEGIN; m <= EQ::invaug::SOCKET_END; ++m) {
-		if (!inst) {
-			break;
-		}
-
 		EQ::ItemInstance *augment = inst->GetAugment(m);
 		if (!augment) {
 			continue;
@@ -8472,6 +8563,10 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 
 	std::string error_message;
 	if (itm) {
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+		linker.SetItemInst(inst);
+
 		c->PushItemOnCursor(*inst, true);
 		if (
 			slot_id == EQ::invslot::slotRange ||
@@ -8496,54 +8591,17 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 
 		my_bot->BotRemoveEquipItem(slot_id);
 		my_bot->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
-	}
 
-	switch (slot_id) {
-		case EQ::invslot::slotCharm:
-		case EQ::invslot::slotEar1:
-		case EQ::invslot::slotHead:
-		case EQ::invslot::slotFace:
-		case EQ::invslot::slotEar2:
-		case EQ::invslot::slotNeck:
-		case EQ::invslot::slotBack:
-		case EQ::invslot::slotWrist1:
-		case EQ::invslot::slotWrist2:
-		case EQ::invslot::slotRange:
-		case EQ::invslot::slotPrimary:
-		case EQ::invslot::slotSecondary:
-		case EQ::invslot::slotFinger1:
-		case EQ::invslot::slotFinger2:
-		case EQ::invslot::slotChest:
-		case EQ::invslot::slotWaist:
-		case EQ::invslot::slotPowerSource:
-		case EQ::invslot::slotAmmo:
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"My {} (Slot {}) is {} unequipped.",
-					EQ::invslot::GetInvPossessionsSlotName(slot_id),
-					slot_id,
-					itm ? "now" : "already"
-				).c_str()
-			);
-			break;
-		case EQ::invslot::slotShoulders:
-		case EQ::invslot::slotArms:
-		case EQ::invslot::slotHands:
-		case EQ::invslot::slotLegs:
-		case EQ::invslot::slotFeet:
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"My {} (Slot {}) are {} unequipped",
-					EQ::invslot::GetInvPossessionsSlotName(slot_id),
-					slot_id,
-					itm ? "now" : "already"
-				).c_str()
-			);
-			break;
-		default:
-			break;
+		c->Message(
+			Chat::Tell,
+			fmt::format(
+				"{} tells you, 'I have unequipped {} from my {} (Slot {}).'",
+				my_bot->GetCleanName(),
+				linker.GenerateLink(),
+				EQ::invslot::GetInvPossessionsSlotName(slot_id),
+				slot_id
+			).c_str()
+		);
 	}
 }
 
