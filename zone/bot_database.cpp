@@ -2699,7 +2699,7 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std
 		return true;
 	}
 
-	for (auto& row : results) {
+	for (auto row : results) {
 		if (!group_name.compare(row[1])) {
 			botgroup_id = std::stoul(row[0]);
 			break;
@@ -2738,7 +2738,7 @@ bool BotDatabase::LoadBotGroup(const std::string& group_name, std::map<uint32, s
 		return true;
 	}
 
-	for (auto& row : results) {
+	for (auto row : results) {
 		member_list[botgroup_id].push_back(std::stoul(row[0]));
 	}
 
@@ -2765,7 +2765,7 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 		return true;
 	}
 
-	for (auto& row : results) {
+	for (auto row : results) {
 		botgroups_list.push_back(std::pair<std::string, std::string>(row[0], row[1]));
 	}
 
@@ -2836,7 +2836,7 @@ bool BotDatabase::LoadAutoSpawnBotGroupsByOwnerID(const uint32 owner_id, std::li
 		return true;
 	}
 
-	for (auto& row : results) {
+	for (auto row : results) {
 		group_list.push_back(
 			std::pair<uint32,std::string>(std::stoul(row[0]), row[1])
 		);
@@ -2869,7 +2869,7 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 		return true;
 	}
 
-	for (auto& row : results) {
+	for (auto row : results) {
 		group_list.push_back(std::stoul(row[0]));
 	}
 
