@@ -1262,7 +1262,7 @@ LinkedList<BotCommandRecord *> cleanup_bot_command_list;
  */
 int bot_command_not_avail(Client *c, const char *message)
 {
-	c->Message(Chat::Red, "Bot commands not available.");
+	c->Message(Chat::White, "Bot commands not available.");
 	return -1;
 }
 
@@ -1331,6 +1331,7 @@ int bot_command_init(void)
 		bot_command_add("botfollowdistance", "Changes the follow distance(s) of a bot(s)", AccountStatus::Player, bot_subcommand_bot_follow_distance) ||
 		bot_command_add("botgroup", "Lists the available bot-group [subcommands]", AccountStatus::Player, bot_command_botgroup) ||
 		bot_command_add("botgroupaddmember", "Adds a member to a bot-group", AccountStatus::Player, bot_subcommand_botgroup_add_member) ||
+		bot_command_add("botgroupautospawn", "Toggles auto spawning for a bot-group, spawning the bot group when you zone automatically", AccountStatus::Player, bot_subcommand_botgroup_auto_spawn) ||
 		bot_command_add("botgroupcreate", "Creates a bot-group and designates a leader", AccountStatus::Player, bot_subcommand_botgroup_create) ||
 		bot_command_add("botgroupdelete", "Deletes a bot-group and releases its members", AccountStatus::Player, bot_subcommand_botgroup_delete) ||
 		bot_command_add("botgrouplist", "Lists all of your existing bot-groups", AccountStatus::Player, bot_subcommand_botgroup_list) ||
@@ -1615,7 +1616,7 @@ int bot_command_real_dispatch(Client *c, const char *message)
 
 	BotCommandRecord *cur = bot_command_list[cstr];
 	if(c->Admin() < cur->access){
-		c->Message(Chat::Red, "Your access level is not high enough to use this bot command.");
+		c->Message(Chat::White, "Your access level is not high enough to use this bot command.");
 		return(-1);
 	}
 
@@ -2296,11 +2297,11 @@ namespace ActionableBots
 				return ABT_None;
 
 			if (!ab_mask)
-				bot_owner->Message(Chat::Red, "Command passed null 'ActionableBot' criteria");
+				bot_owner->Message(Chat::White, "Command passed null 'ActionableBot' criteria");
 			else if (ab_mask & ab_type)
-				bot_owner->Message(Chat::Red, "You have no spawned bots meeting this criteria - type: '%s', name: '%s'", ab_type_arg.c_str(), ((name) ? (name) : ("")));
+				bot_owner->Message(Chat::White, "You have no spawned bots meeting this criteria - type: '%s', name: '%s'", ab_type_arg.c_str(), ((name) ? (name) : ("")));
 			else
-				bot_owner->Message(Chat::Red, "This command does not allow 'ActionableBot' criteria '%s'", ab_type_arg.c_str());
+				bot_owner->Message(Chat::White, "This command does not allow 'ActionableBot' criteria '%s'", ab_type_arg.c_str());
 			return ABT_None;
 		}
 
@@ -2527,17 +2528,17 @@ void bot_command_actionable(Client *c, const Seperator *sep)
 
 	c->Message(Chat::White, "Actionable command arguments:");
 
-	c->Message(Chat::Cyan, "target - selects target as single bot .. use ^command [target] or imply by empty actionable argument");
-	c->Message(Chat::Cyan, "byname [name] - selects single bot by name");
-	c->Message(Chat::Cyan, "ownergroup - selects all bots in the owner's group");
-	c->Message(Chat::Cyan, "botgroup [name] - selects members of a bot-group by its name");
-	c->Message(Chat::Cyan, "targetgroup - selects all bots in target's group");
-	c->Message(Chat::Cyan, "namesgroup [name] - selects all bots in name's group");
-	c->Message(Chat::Cyan, "healrotation [name] - selects all member and target bots of a heal rotation where name is a member");
-	c->Message(Chat::Cyan, "healrotationmembers [name] - selects all member bots of a heal rotation where name is a member");
-	c->Message(Chat::Cyan, "healrotationtargets [name] - selects all target bots of a heal rotation where name is a member");
-	c->Message(Chat::Cyan, "spawned - selects all spawned bots");
-	c->Message(Chat::Cyan, "all - selects all spawned bots .. argument use indicates en masse database updating");
+	c->Message(Chat::White, "target - selects target as single bot .. use ^command [target] or imply by empty actionable argument");
+	c->Message(Chat::White, "byname [name] - selects single bot by name");
+	c->Message(Chat::White, "ownergroup - selects all bots in the owner's group");
+	c->Message(Chat::White, "botgroup [name] - selects members of a bot-group by its name");
+	c->Message(Chat::White, "targetgroup - selects all bots in target's group");
+	c->Message(Chat::White, "namesgroup [name] - selects all bots in name's group");
+	c->Message(Chat::White, "healrotation [name] - selects all member and target bots of a heal rotation where name is a member");
+	c->Message(Chat::White, "healrotationmembers [name] - selects all member bots of a heal rotation where name is a member");
+	c->Message(Chat::White, "healrotationtargets [name] - selects all target bots of a heal rotation where name is a member");
+	c->Message(Chat::White, "spawned - selects all spawned bots");
+	c->Message(Chat::White, "all - selects all spawned bots .. argument use indicates en masse database updating");
 
 	c->Message(Chat::White, "You may only select your bots as actionable");
 }
@@ -2548,7 +2549,7 @@ void bot_command_aggressive(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Stance) || helper_command_alias_fail(c, "bot_command_aggressive", sep->arg[0], "aggressive"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Stance);
 		return;
 	}
@@ -2592,7 +2593,7 @@ void bot_command_aggressive(Client *c, const Seperator *sep)
 		}
 	}
 
-	c->Message(Chat::Yellow, "%i of %i bots have used aggressive disciplines", success_count, candidate_count);
+	c->Message(Chat::White, "%i of %i bots have used aggressive disciplines", success_count, candidate_count);
 }
 
 void bot_command_apply_poison(Client *c, const Seperator *sep)
@@ -2605,7 +2606,7 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: <rogue_bot_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <rogue_bot_target> %s", sep->arg[0]);
 		return;
 	}
 
@@ -2615,26 +2616,26 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 	}
 	if (!my_rogue_bot) {
 
-		c->Message(Chat::Red, "You must target a rogue bot that you own to use this command!");
+		c->Message(Chat::White, "You must target a rogue bot that you own to use this command!");
 		return;
 	}
 	if (my_rogue_bot->GetLevel() < 18) {
 
-		c->Message(Chat::Red, "Your rogue bot must be level 18 before %s can apply poison!", (my_rogue_bot->GetGender() == 1 ? "she" : "he"));
+		c->Message(Chat::White, "Your rogue bot must be level 18 before %s can apply poison!", (my_rogue_bot->GetGender() == 1 ? "she" : "he"));
 		return;
 	}
 
 	const auto poison_instance = c->GetInv().GetItem(EQ::invslot::slotCursor);
 	if (!poison_instance) {
 
-		c->Message(Chat::Red, "No item found on cursor!");
+		c->Message(Chat::White, "No item found on cursor!");
 		return;
 	}
 
 	auto poison_data = poison_instance->GetItem();
 	if (!poison_data) {
 
-		c->Message(Chat::Red, "No data found for cursor item!");
+		c->Message(Chat::White, "No data found for cursor item!");
 		return;
 	}
 
@@ -2642,13 +2643,13 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 
 		if ((~poison_data->Races) & GetPlayerRaceBit(my_rogue_bot->GetRace())) {
 
-			c->Message(Chat::Red, "Invalid race for weapon poison!");
+			c->Message(Chat::White, "Invalid race for weapon poison!");
 			return;
 		}
 
 		if (poison_data->Proc.Level2 > my_rogue_bot->GetLevel()) {
 
-			c->Message(Chat::Red, "This poison is too powerful for your intended target!");
+			c->Message(Chat::White, "This poison is too powerful for your intended target!");
 			return;
 		}
 
@@ -2661,17 +2662,17 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 		bool apply_poison_chance = (ChanceRoll < (.75 + poison_skill / 1000));
 
 		if (apply_poison_chance && my_rogue_bot->AddProcToWeapon(poison_data->Proc.Effect, false, (my_rogue_bot->GetDEX() / 100) + 103, POISON_PROC)) {
-			c->Message(Chat::Yellow, "Successfully applied %s to %s's weapon.", poison_data->Name, my_rogue_bot->GetCleanName());
+			c->Message(Chat::White, "Successfully applied %s to %s's weapon.", poison_data->Name, my_rogue_bot->GetCleanName());
 		}
 		else {
-			c->Message(Chat::Red, "Failed to apply %s to %s's weapon.", poison_data->Name, my_rogue_bot->GetCleanName());
+			c->Message(Chat::White, "Failed to apply %s to %s's weapon.", poison_data->Name, my_rogue_bot->GetCleanName());
 		}
 
 		c->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
 	}
 	else {
 
-		c->Message(Chat::Red, "Item on cursor is not a weapon poison!");
+		c->Message(Chat::White, "Item on cursor is not a weapon poison!");
 		return;
 	}
 }
@@ -2686,7 +2687,7 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: <bot_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <bot_target> %s", sep->arg[0]);
 		return;
 	}
 
@@ -2696,21 +2697,21 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 	}
 	if (!my_bot) {
 
-		c->Message(Chat::Red, "You must target a bot that you own to use this command!");
+		c->Message(Chat::White, "You must target a bot that you own to use this command!");
 		return;
 	}
 
 	const auto potion_instance = c->GetInv().GetItem(EQ::invslot::slotCursor);
 	if (!potion_instance) {
 
-		c->Message(Chat::Red, "No item found on cursor!");
+		c->Message(Chat::White, "No item found on cursor!");
 		return;
 	}
 
 	auto potion_data = potion_instance->GetItem();
 	if (!potion_data) {
 
-		c->Message(Chat::Red, "No data found for cursor item!");
+		c->Message(Chat::White, "No data found for cursor item!");
 		return;
 	}
 
@@ -2718,39 +2719,39 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 
 		if (RuleB(Bots, RestrictApplyPotionToRogue) && potion_data->Classes != PLAYER_CLASS_ROGUE_BIT) {
 
-			c->Message(Chat::Red, "This command is restricted to rogue poison potions only!");
+			c->Message(Chat::White, "This command is restricted to rogue poison potions only!");
 			return;
 		}
 		if ((~potion_data->Races) & GetPlayerRaceBit(my_bot->GetRace())) {
 
-			c->Message(Chat::Red, "Invalid race for potion!");
+			c->Message(Chat::White, "Invalid race for potion!");
 			return;
 		}
 		if ((~potion_data->Classes) & GetPlayerClassBit(my_bot->GetClass())) {
 
-			c->Message(Chat::Red, "Invalid class for potion!");
+			c->Message(Chat::White, "Invalid class for potion!");
 			return;
 		}
 
 		if (potion_data->Click.Level2 > my_bot->GetLevel()) {
 
-			c->Message(Chat::Red, "This potion is too powerful for your intended target!");
+			c->Message(Chat::White, "This potion is too powerful for your intended target!");
 			return;
 		}
 
 		// TODO: figure out best way to handle casting time/animation
 		if (my_bot->SpellFinished(potion_data->Click.Effect, my_bot, EQ::spells::CastingSlot::Item, 0)) {
-			c->Message(Chat::Yellow, "Successfully applied %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
+			c->Message(Chat::White, "Successfully applied %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
 		}
 		else {
-			c->Message(Chat::Red, "Failed to apply %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
+			c->Message(Chat::White, "Failed to apply %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
 		}
 
 		c->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
 	}
 	else {
 
-		c->Message(Chat::Red, "Item on cursor is not a potion!");
+		c->Message(Chat::White, "Item on cursor is not a potion!");
 		return;
 	}
 }
@@ -2762,7 +2763,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: <enemy_target> %s [actionable: byname | ownergroup | botgroup | namesgroup | healrotation | default: spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s [actionable: byname | ownergroup | botgroup | namesgroup | healrotation | default: spawned] ([actionable_name])", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_Type2;
@@ -2770,7 +2771,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	Mob* target_mob = ActionableTarget::AsSingle_ByAttackable(c);
 	if (!target_mob) {
 
-		c->Message(Chat::Red, "You must <target> an enemy to use this command");
+		c->Message(Chat::White, "You must <target> an enemy to use this command");
 		return;
 	}
 
@@ -2804,7 +2805,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 		Bot::BotGroupSay(first_attacker, "Attacking %s!", target_mob->GetCleanName());
 	}
 	else {
-		c->Message(Chat::Yellow, "%i of your bots are attacking %s!", sbl.size(), target_mob->GetCleanName());
+		c->Message(Chat::White, "%i of your bots are attacking %s!", sbl.size(), target_mob->GetCleanName());
 	}
 }
 
@@ -2814,7 +2815,7 @@ void bot_command_bind_affinity(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_BindAffinity) || helper_command_alias_fail(c, "bot_command_bind_affinity", sep->arg[0], "bindaffinity"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_BindAffinity);
 		return;
 	}
@@ -2839,9 +2840,9 @@ void bot_command_bind_affinity(Client *c, const Seperator *sep)
 
 		// Cast effect message is not being generated
 		if (helper_cast_standard_spell(my_bot, target_mob, local_entry->spell_id))
-			c->Message(Chat::Yellow, "Successfully bound %s to this location", target_mob->GetCleanName());
+			c->Message(Chat::White, "Successfully bound %s to this location", target_mob->GetCleanName());
 		else
-			c->Message(Chat::Red, "Failed to bind %s to this location", target_mob->GetCleanName());
+			c->Message(Chat::White, "Failed to bind %s to this location", target_mob->GetCleanName());
 		break;
 	}
 
@@ -2888,24 +2889,13 @@ void bot_command_bot(Client *c, const Seperator *sep)
 
 void bot_command_botgroup(Client *c, const Seperator *sep)
 {
-	/* VS2012 code - begin */
-	std::list<const char*> subcommand_list;
-	subcommand_list.push_back("botgroupaddmember");
-	subcommand_list.push_back("botgroupcreate");
-	subcommand_list.push_back("botgroupdelete");
-	subcommand_list.push_back("botgrouplist");
-	subcommand_list.push_back("botgroupload");
-	subcommand_list.push_back("botgroupremovemember");
-	/* VS2012 code - end */
-
-	/* VS2013 code
 	const std::list<const char*> subcommand_list = {
 		"botgroupaddmember", "botgroupcreate", "botgroupdelete", "botgrouplist", "botgroupload", "botgroupremovemember"
 	};
-	*/
 
-	if (helper_command_alias_fail(c, "bot_command_botgroup", sep->arg[0], "botgroup"))
+	if (helper_command_alias_fail(c, "bot_command_botgroup", sep->arg[0], "botgroup")) {
 		return;
+	}
 
 	helper_send_available_subcommands(c, "bot-group", subcommand_list);
 }
@@ -2916,7 +2906,7 @@ void bot_command_charm(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Charm) || helper_command_alias_fail(c, "bot_command_charm", sep->arg[0], "charm"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <enemy_target> %s ([option: dire])", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s ([option: dire])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Charm);
 		return;
 	}
@@ -2942,7 +2932,7 @@ void bot_command_charm(Client *c, const Seperator *sep)
 		if (!target_mob)
 			continue;
 		if (target_mob->IsCharmed()) {
-			c->Message(Chat::Red, "Your <target> is already charmed");
+			c->Message(Chat::White, "Your <target> is already charmed");
 			return;
 		}
 
@@ -2969,7 +2959,7 @@ void bot_command_cure(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Cure) || helper_command_alias_fail(c, "bot_command_cure", sep->arg[0], "cure"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s [ailment: blindness | disease | poison | curse | corruption]", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s [ailment: blindness | disease | poison | curse | corruption]", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Cure);
 		return;
 	}
@@ -2989,7 +2979,7 @@ void bot_command_cure(Client *c, const Seperator *sep)
 		ailment_type = BCEnum::AT_Corruption;
 
 	if (ailment_type == BCEnum::AT_None) {
-		c->Message(Chat::Red, "You must specify a cure [ailment] to use this command");
+		c->Message(Chat::White, "You must specify a cure [ailment] to use this command");
 		return;
 	}
 
@@ -3039,7 +3029,7 @@ void bot_command_defensive(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Stance) || helper_command_alias_fail(c, "bot_command_defensive", sep->arg[0], "defensive"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Stance);
 		return;
 	}
@@ -3083,7 +3073,7 @@ void bot_command_defensive(Client *c, const Seperator *sep)
 		}
 	}
 
-	c->Message(Chat::Yellow, "%i of %i bots have used defensive disciplines", success_count, candidate_count);
+	c->Message(Chat::White, "%i of %i bots have used defensive disciplines", success_count, candidate_count);
 }
 
 void bot_command_depart(Client *c, const Seperator *sep)
@@ -3092,7 +3082,7 @@ void bot_command_depart(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Depart) || helper_command_alias_fail(c, "bot_command_depart", sep->arg[0], "depart"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Depart);
 		return;
 	}
@@ -3110,7 +3100,7 @@ void bot_command_depart(Client *c, const Seperator *sep)
 		return;
 	}
 	else if (destination.empty()) {
-		c->Message(Chat::Red, "A [destination] or [list] argument is required to use this command");
+		c->Message(Chat::White, "A [destination] or [list] argument is required to use this command");
 		return;
 	}
 
@@ -3150,7 +3140,7 @@ void bot_command_escape(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Escape) || helper_command_alias_fail(c, "bot_command_escape", sep->arg[0], "escape"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s ([option: lesser])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s ([option: lesser])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Escape);
 		return;
 	}
@@ -3192,19 +3182,19 @@ void bot_command_find_aliases(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_find_aliases", sep->arg[0], "findaliases"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [alias | command]", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [alias | command]", sep->arg[0]);
 		return;
 	}
 
 	auto find_iter = bot_command_aliases.find(sep->arg[1]);
 	if (find_iter == bot_command_aliases.end()) {
-		c->Message(Chat::Red, "No bot commands or aliases match '%s'", sep->arg[1]);
+		c->Message(Chat::White, "No bot commands or aliases match '%s'", sep->arg[1]);
 		return;
 	}
 
 	auto command_iter = bot_command_list.find(find_iter->second);
 	if (find_iter->second.empty() || command_iter == bot_command_list.end()) {
-		c->Message(Chat::Magenta, "An unknown condition has occurred...");
+		c->Message(Chat::White, "An unknown condition has occurred...");
 		return;
 	}
 
@@ -3215,7 +3205,7 @@ void bot_command_find_aliases(Client *c, const Seperator *sep)
 		if (strcasecmp(find_iter->second.c_str(), alias_iter.second.c_str()) || c->Admin() < command_iter->second->access)
 			continue;
 
-		c->Message(Chat::Cyan, "%c%s", BOT_COMMAND_CHAR, alias_iter.first.c_str());
+		c->Message(Chat::White, "%c%s", BOT_COMMAND_CHAR, alias_iter.first.c_str());
 		++bot_command_aliases_shown;
 	}
 	c->Message(Chat::White, "%d bot command alias%s listed.", bot_command_aliases_shown, bot_command_aliases_shown != 1 ? "es" : "");
@@ -3226,8 +3216,8 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_follow", sep->arg[0], "follow"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s ([option: reset]) [actionable: byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
-		c->Message(Chat::Cyan, "usage: %s chain", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s ([option: reset]) [actionable: byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s chain", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_Type2;
@@ -3241,7 +3231,7 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	if (!optional_arg.compare("chain")) {
 
 		auto chain_count = helper_bot_follow_option_chain(c);
-		c->Message(Chat::Yellow, "%i of your bots %s now chain following you", chain_count, (chain_count == 1 ? "is" : "are"));
+		c->Message(Chat::White, "%i of your bots %s now chain following you", chain_count, (chain_count == 1 ? "is" : "are"));
 
 		return;
 	}
@@ -3253,7 +3243,7 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	else {
 		target_mob = ActionableTarget::VerifyFriendly(c, BCEnum::TT_Single);
 		if (!target_mob) {
-			c->Message(Chat::Red, "You must <target> a friendly mob to use this command");
+			c->Message(Chat::White, "You must <target> a friendly mob to use this command");
 			return;
 		}
 	}
@@ -3300,9 +3290,9 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	}
 	else {
 		if (reset)
-			c->Message(Chat::Yellow, "%i of your bots are following their default assignments", sbl.size());
+			c->Message(Chat::White, "%i of your bots are following their default assignments", sbl.size());
 		else
-			c->Message(Chat::Yellow, "%i of your bots are following %s", sbl.size(), target_mob->GetCleanName());
+			c->Message(Chat::White, "%i of your bots are following %s", sbl.size(), target_mob->GetCleanName());
 	}
 }
 
@@ -3313,7 +3303,7 @@ void bot_command_guard(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_Type2);
@@ -3350,7 +3340,7 @@ void bot_command_guard(Client *c, const Seperator *sep)
 		Bot::BotGroupSay(sbl.front(), "%suarding this position.", (clear ? "No longer g" : "G"));
 	}
 	else {
-		c->Message(Chat::Yellow, "%i of your bots are %sguarding their positions.", sbl.size(), (clear ? "no longer " : ""));
+		c->Message(Chat::White, "%i of your bots are %sguarding their positions.", sbl.size(), (clear ? "no longer " : ""));
 	}
 }
 
@@ -3424,7 +3414,7 @@ void bot_command_help(Client *c, const Seperator *sep)
 		if (c->Admin() < command_iter.second->access)
 			continue;
 
-		c->Message(Chat::Cyan, "%c%s - %s", BOT_COMMAND_CHAR, command_iter.first.c_str(), command_iter.second->desc == nullptr ? "[no description]" : command_iter.second->desc);
+		c->Message(Chat::White, "%c%s - %s", BOT_COMMAND_CHAR, command_iter.first.c_str(), command_iter.second->desc == nullptr ? "[no description]" : command_iter.second->desc);
 		++bot_commands_shown;
 	}
 	if (parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
@@ -3434,7 +3424,7 @@ void bot_command_help(Client *c, const Seperator *sep)
 		}
 	}
 	c->Message(Chat::White, "%d bot command%s listed.", bot_commands_shown, bot_commands_shown != 1 ? "s" : "");
-	c->Message(Chat::Gray, "type %ccommand [help | usage] for more information", BOT_COMMAND_CHAR);
+	c->Message(Chat::White, "type %ccommand [help | usage] for more information", BOT_COMMAND_CHAR);
 }
 
 void bot_command_hold(Client *c, const Seperator *sep)
@@ -3444,7 +3434,7 @@ void bot_command_hold(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: clear]) [actionable: target | byname | ownergroup | botgroup | namesgroup | healrotation | spawned] ([actionable_name])", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_Type2);
@@ -3481,7 +3471,7 @@ void bot_command_hold(Client *c, const Seperator *sep)
 		Bot::BotGroupSay(sbl.front(), "%solding my attacks.", (clear ? "No longer h" : "H"));
 	}
 	else {
-		c->Message(Chat::Yellow, "%i of your bots are %sholding their attacks.", sbl.size(), (clear ? "no longer " : ""));
+		c->Message(Chat::White, "%i of your bots are %sholding their attacks.", sbl.size(), (clear ? "no longer " : ""));
 	}
 }
 
@@ -3491,7 +3481,7 @@ void bot_command_identify(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Identify) || helper_command_alias_fail(c, "bot_command_identify", sep->arg[0], "identify"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Identify);
 		return;
 	}
@@ -3548,7 +3538,7 @@ void bot_command_invisibility(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Invisibility) || helper_command_alias_fail(c, "bot_command_invisibility", sep->arg[0], "invisibility"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s [invisibility: living | undead | animal | see]", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s [invisibility: living | undead | animal | see]", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Invisibility);
 		return;
 	}
@@ -3566,7 +3556,7 @@ void bot_command_invisibility(Client *c, const Seperator *sep)
 		invisibility_type = BCEnum::IT_See;
 
 	if (invisibility_type == BCEnum::IT_None) {
-		c->Message(Chat::Red, "You must specify an [invisibility]");
+		c->Message(Chat::White, "You must specify an [invisibility]");
 		return;
 	}
 
@@ -3602,7 +3592,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: %s ([empty])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([empty])", sep->arg[0]);
 		return;
 	}
 
@@ -3615,20 +3605,20 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 	const auto item_instance = c->GetInv().GetItem(EQ::invslot::slotCursor);
 	if (!item_instance) {
 
-		c->Message(Chat::Red, "No item found on cursor!");
+		c->Message(Chat::White, "No item found on cursor!");
 		return;
 	}
 
 	auto item_data = item_instance->GetItem();
 	if (!item_data) {
 
-		c->Message(Chat::Red, "No data found for cursor item!");
+		c->Message(Chat::White, "No data found for cursor item!");
 		return;
 	}
 
 	if (item_data->ItemClass != EQ::item::ItemClassCommon || item_data->Slots == 0) {
 
-		c->Message(Chat::Red, "'%s' is not an equipable item!", item_data->Name);
+		c->Message(Chat::White, "'%s' is not an equipable item!", item_data->Name);
 		return;
 	}
 
@@ -3703,7 +3693,7 @@ void bot_command_levitation(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Levitation) || helper_command_alias_fail(c, "bot_command_levitation", sep->arg[0], "levitation"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Levitation);
 		return;
 	}
@@ -3740,7 +3730,7 @@ void bot_command_lull(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Lull) || helper_command_alias_fail(c, "bot_command_lull", sep->arg[0], "lull"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <enemy_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Lull);
 		return;
 	}
@@ -3782,7 +3772,7 @@ void bot_command_mesmerize(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Mesmerize) || helper_command_alias_fail(c, "bot_command_mesmerize", sep->arg[0], "mesmerize"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <enemy_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Mesmerize);
 		return;
 	}
@@ -3824,7 +3814,7 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_MovementSpeed) || helper_command_alias_fail(c, "bot_command_movement_speed", sep->arg[0], "movementspeed"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s ([group | sow])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s ([group | sow])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_MovementSpeed);
 		return;
 	}
@@ -3871,7 +3861,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: %s [option] [argument]", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [option] [argument]", sep->arg[0]);
 
 		std::string window_title = "Bot Owner Options";
 		std::string window_text =
@@ -3980,7 +3970,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booDeathMarquee, c->GetBotOption(Client::booDeathMarquee));
 
-		c->Message(Chat::Yellow, "Bot 'death marquee' is now %s.", (c->GetBotOption(Client::booDeathMarquee) == true ? "enabled" : "disabled"));
+		c->Message(Chat::White, "Bot 'death marquee' is now %s.", (c->GetBotOption(Client::booDeathMarquee) == true ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("statsupdate")) {
 
@@ -3996,7 +3986,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booStatsUpdate, c->GetBotOption(Client::booStatsUpdate));
 
-		c->Message(Chat::Yellow, "Bot 'stats update' is now %s.", (c->GetBotOption(Client::booStatsUpdate) == true ? "enabled" : "disabled"));
+		c->Message(Chat::White, "Bot 'stats update' is now %s.", (c->GetBotOption(Client::booStatsUpdate) == true ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("spawnmessage")) {
 
@@ -4032,7 +4022,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 		}
 		else {
 
-			c->Message(Chat::Red, "Owner option '%s' argument '%s' is not recognized.", owner_option.c_str(), argument.c_str());
+			c->Message(Chat::White, "Owner option '%s' argument '%s' is not recognized.", owner_option.c_str(), argument.c_str());
 			return;
 		}
 
@@ -4060,11 +4050,11 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 		}
 		else {
 
-			c->Message(Chat::Yellow, "Bot 'spawn message' is now ERROR.");
+			c->Message(Chat::White, "Bot 'spawn message' is now ERROR.");
 			return;
 		}
 
-		c->Message(Chat::Yellow, "Bot 'spawn message' is now %s.", argument.c_str());
+		c->Message(Chat::White, "Bot 'spawn message' is now %s.", argument.c_str());
 	}
 	else if (!owner_option.compare("altcombat")) {
 
@@ -4082,10 +4072,10 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 			database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAltCombat, c->GetBotOption(Client::booAltCombat));
 
-			c->Message(Chat::Yellow, "Bot 'alt combat' is now %s.", (c->GetBotOption(Client::booAltCombat) == true ? "enabled" : "disabled"));
+			c->Message(Chat::White, "Bot 'alt combat' is now %s.", (c->GetBotOption(Client::booAltCombat) == true ? "enabled" : "disabled"));
 		}
 		else {
-			c->Message(Chat::Red, "Bot owner option 'altcombat' is not allowed on this server.");
+			c->Message(Chat::White, "Bot owner option 'altcombat' is not allowed on this server.");
 		}
 	}
 	else if (!owner_option.compare("autodefend")) {
@@ -4104,10 +4094,10 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 			database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAutoDefend, c->GetBotOption(Client::booAutoDefend));
 
-			c->Message(Chat::Yellow, "Bot 'auto defend' is now %s.", (c->GetBotOption(Client::booAutoDefend) == true ? "enabled" : "disabled"));
+			c->Message(Chat::White, "Bot 'auto defend' is now %s.", (c->GetBotOption(Client::booAutoDefend) == true ? "enabled" : "disabled"));
 		}
 		else {
-			c->Message(Chat::Red, "Bot owner option 'autodefend' is not allowed on this server.");
+			c->Message(Chat::White, "Bot owner option 'autodefend' is not allowed on this server.");
 		}
 	}
 	else if (!owner_option.compare("buffcounter")) {
@@ -4124,7 +4114,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booBuffCounter, c->GetBotOption(Client::booBuffCounter));
 
-		c->Message(Chat::Yellow, "Bot 'buff counter' is now %s.", (c->GetBotOption(Client::booBuffCounter) == true ? "enabled" : "disabled"));
+		c->Message(Chat::White, "Bot 'buff counter' is now %s.", (c->GetBotOption(Client::booBuffCounter) == true ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("monkwumessage")) {
 
@@ -4140,7 +4130,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		database.botdb.SaveOwnerOption(c->CharacterID(), Client::booMonkWuMessage, c->GetBotOption(Client::booMonkWuMessage));
 
-		c->Message(Chat::Yellow, "Bot 'monk wu message' is now %s.", (c->GetBotOption(Client::booMonkWuMessage) == true ? "enabled" : "disabled"));
+		c->Message(Chat::White, "Bot 'monk wu message' is now %s.", (c->GetBotOption(Client::booMonkWuMessage) == true ? "enabled" : "disabled"));
 	}
 	else if (!owner_option.compare("current")) {
 
@@ -4173,7 +4163,7 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
 	}
 	else {
-		c->Message(Chat::Red, "Owner option '%s' is not recognized.", owner_option.c_str());
+		c->Message(Chat::White, "Owner option '%s' is not recognized.", owner_option.c_str());
 	}
 }
 
@@ -4201,8 +4191,8 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_pick_lock", sep->arg[0], "picklock"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s", sep->arg[0]);
-		c->Message(Chat::Gray, "requires one of the following bot classes:");
+		c->Message(Chat::White, "usage: %s", sep->arg[0]);
+		c->Message(Chat::White, "requires one of the following bot classes:");
 		c->Message(Chat::White, "Rogue(5) or Bard(40)");
 		return;
 	}
@@ -4213,7 +4203,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 	float pick_lock_value = 0.0f;
 	ActionableBots::Filter_ByHighestPickLock(c, sbl, pick_lock_value);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "No bots are capable of performing this action");
+		c->Message(Chat::White, "No bots are capable of performing this action");
 		return;
 	}
 
@@ -4250,7 +4240,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 			Bot::BotGroupSay(my_bot, "I am not skilled enough for this lock...");
 		}
 	}
-	c->Message(Chat::Yellow, "%i door%s attempted - %i door%s successful", door_count, ((door_count != 1) ? ("s") : ("")), open_count, ((open_count != 1) ? ("s") : ("")));
+	c->Message(Chat::White, "%i door%s attempted - %i door%s successful", door_count, ((door_count != 1) ? ("s") : ("")), open_count, ((open_count != 1) ? ("s") : ("")));
 }
 
 void bot_command_precombat(Client* c, const Seperator* sep)
@@ -4260,13 +4250,13 @@ void bot_command_precombat(Client* c, const Seperator* sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: %s ([set | clear])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([set | clear])", sep->arg[0]);
 		return;
 	}
 
 	if (!c->GetTarget() || !c->IsAttackAllowed(c->GetTarget())) {
 
-		c->Message(Chat::Red, "This command requires an attackable target.");
+		c->Message(Chat::White, "This command requires an attackable target.");
 		return;
 	}
 
@@ -4282,7 +4272,7 @@ void bot_command_precombat(Client* c, const Seperator* sep)
 		c->SetBotPrecombat(!c->GetBotPrecombat());
 	}
 
-	c->Message(Chat::Yellow, "Precombat flag is now %s.", (c->GetBotPrecombat() == true ? "set" : "clear"));
+	c->Message(Chat::White, "Precombat flag is now %s.", (c->GetBotPrecombat() == true ? "set" : "clear"));
 }
 
 // TODO: Rework to allow owner specificed criteria for puller
@@ -4293,7 +4283,7 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::Cyan, "usage: <enemy_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s", sep->arg[0]);
 		return;
 	}
 	int ab_mask = ActionableBots::ABM_OwnerGroup; // existing behavior - need to add c->IsGrouped() check and modify code if different behavior is desired
@@ -4307,13 +4297,13 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	auto target_mob = ActionableTarget::VerifyEnemy(c, BCEnum::TT_Single);
 	if (!target_mob) {
 
-		c->Message(Chat::Red, "Your current target is not attackable!");
+		c->Message(Chat::White, "Your current target is not attackable!");
 		return;
 	}
 
 	if (target_mob->IsNPC() && target_mob->GetHateList().size()) {
 
-		c->Message(Chat::Red, "Your current target is already engaged!");
+		c->Message(Chat::White, "Your current target is already engaged!");
 		return;
 	}
 
@@ -4407,7 +4397,7 @@ void bot_command_release(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_release", sep->arg[0], "release"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: <any>] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: <any>] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -4422,7 +4412,7 @@ void bot_command_release(Client *c, const Seperator *sep)
 		bot_iter->SetPauseAI(false);
 	}
 
-	c->Message(Chat::Yellow, "%i of your bots %s released.", sbl.size(), ((sbl.size() != 1) ? ("are") : ("is")));
+	c->Message(Chat::White, "%i of your bots %s released.", sbl.size(), ((sbl.size() != 1) ? ("are") : ("is")));
 }
 
 void bot_command_resistance(Client *c, const Seperator *sep)
@@ -4431,7 +4421,7 @@ void bot_command_resistance(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Resistance) || helper_command_alias_fail(c, "bot_command_resistance", sep->arg[0], "resistance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s [resistance: fire | cold | poison | disease | magic | corruption]", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s [resistance: fire | cold | poison | disease | magic | corruption]", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Resistance);
 		return;
 	}
@@ -4453,7 +4443,7 @@ void bot_command_resistance(Client *c, const Seperator *sep)
 		resistance_type = BCEnum::RT_Corruption;
 
 	if (resistance_type == BCEnum::RT_None) {
-		c->Message(Chat::Red, "You must specify a [resistance]");
+		c->Message(Chat::White, "You must specify a [resistance]");
 		return;
 	}
 
@@ -4505,8 +4495,8 @@ void bot_command_resurrect(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Resurrect) || helper_command_alias_fail(c, "bot_command_resurrect", sep->arg[0], "resurrect"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		//c->Message(Chat::Cyan, "usage: <corpse_target> %s ([option: aoe])", sep->arg[0]);
-		c->Message(Chat::Cyan, "usage: <corpse_target> %s", sep->arg[0]);
+		//c->Message(Chat::White, "usage: <corpse_target> %s ([option: aoe])", sep->arg[0]);
+		c->Message(Chat::White, "usage: <corpse_target> %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Resurrect);
 		return;
 	}
@@ -4559,7 +4549,7 @@ void bot_command_rune(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Rune) || helper_command_alias_fail(c, "bot_command_rune", sep->arg[0], "rune"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Rune);
 		return;
 	}
@@ -4598,7 +4588,7 @@ void bot_command_send_home(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_SendHome) || helper_command_alias_fail(c, "bot_command_send_home", sep->arg[0], "sendhome"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s ([option: group])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s ([option: group])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_SendHome);
 		return;
 	}
@@ -4642,7 +4632,7 @@ void bot_command_size(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Size) || helper_command_alias_fail(c, "bot_command_size", sep->arg[0], "size"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s [grow | shrink]", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s [grow | shrink]", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Size);
 		return;
 	}
@@ -4653,7 +4643,7 @@ void bot_command_size(Client *c, const Seperator *sep)
 		size_type = BCEnum::SzT_Enlarge;
 	}
 	else if (size_arg.compare("shrink")) {
-		c->Message(Chat::Red, "This command requires a [grow | shrink] argument");
+		c->Message(Chat::White, "This command requires a [grow | shrink] argument");
 		return;
 	}
 
@@ -4690,14 +4680,14 @@ void bot_command_summon_corpse(Client *c, const Seperator *sep)
 	// Same methodology as old command..but, does not appear to work... (note: didn't work there, either...)
 
 	// temp
-	c->Message(Chat::Red, "This command is currently unavailable...");
+	c->Message(Chat::White, "This command is currently unavailable...");
 	return;
 
 	bcst_list* local_list = &bot_command_spells[BCEnum::SpT_SummonCorpse];
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_SummonCorpse) || helper_command_alias_fail(c, "bot_command_summon_corpse", sep->arg[0], "summoncorpse"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <friendly_target> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <friendly_target> %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_SummonCorpse);
 		return;
 	}
@@ -4737,7 +4727,7 @@ void bot_command_suspend(Client *c, const Seperator *sep)
 		return;
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: <any>] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: <any>] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -4752,7 +4742,7 @@ void bot_command_suspend(Client *c, const Seperator *sep)
 		bot_iter->SetPauseAI(true);
 	}
 
-	c->Message(Chat::Yellow, "%i of your bots %s suspended.", sbl.size(), ((sbl.size() != 1) ? ("are") : ("is")));
+	c->Message(Chat::White, "%i of your bots %s suspended.", sbl.size(), ((sbl.size() != 1) ? ("are") : ("is")));
 }
 
 void bot_command_taunt(Client *c, const Seperator *sep)
@@ -4760,7 +4750,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_taunt", sep->arg[0], "taunt"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotationtargets | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_Type1;
@@ -4816,12 +4806,12 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 
 	if (taunting_count) {
 		if (toggle_taunt)
-			c->Message(Chat::Yellow, "%i of your bots and their pets %s toggled their taunting state", taunting_count, ((taunting_count != 1) ? ("have") : ("has")));
+			c->Message(Chat::White, "%i of your bots and their pets %s toggled their taunting state", taunting_count, ((taunting_count != 1) ? ("have") : ("has")));
 		else
-			c->Message(Chat::Yellow, "%i of your bots and their pets %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
+			c->Message(Chat::White, "%i of your bots and their pets %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
 	}
 	else {
-		c->Message(Chat::Red, "None of your bots are capable of taunting");
+		c->Message(Chat::White, "None of your bots are capable of taunting");
 	}
 }
 
@@ -4830,8 +4820,8 @@ void bot_command_track(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_track", sep->arg[0], "track"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s (Ranger: [option=all: all | rare | local])", sep->arg[0]);
-		c->Message(Chat::Gray, "requires one of the following bot classes:");
+		c->Message(Chat::White, "usage: %s (Ranger: [option=all: all | rare | local])", sep->arg[0]);
+		c->Message(Chat::White, "requires one of the following bot classes:");
 		c->Message(Chat::White, "Ranger(1), Druid(20) or Bard(35)");
 		return;
 	}
@@ -4852,7 +4842,7 @@ void bot_command_track(Client *c, const Seperator *sep)
 			my_bot = ActionableBots::AsSpawned_ByMinLevelAndClass(c, sbl, 35, BARD);
 	}
 	if (!my_bot) {
-		c->Message(Chat::Red, "No bots are capable of performing this action");
+		c->Message(Chat::White, "No bots are capable of performing this action");
 		return;
 	}
 
@@ -4887,7 +4877,7 @@ void bot_command_track(Client *c, const Seperator *sep)
 		return;
 	}
 	if (!base_distance) {
-		c->Message(Chat::Magenta, "An unknown codition has occurred");
+		c->Message(Chat::White, "An unknown codition has occurred");
 		return;
 	}
 
@@ -4902,7 +4892,7 @@ void bot_command_water_breathing(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_WaterBreathing) || helper_command_alias_fail(c, "bot_command_water_breathing", sep->arg[0], "waterbreathing"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<friendly_target>) %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<friendly_target>) %s", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_WaterBreathing);
 		return;
 	}
@@ -4971,19 +4961,19 @@ void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_beard_color", sep->arg[0], "botbeardcolor"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n] (Dwarves or male bots only)", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n] (Dwarves or male bots only)", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5008,19 +4998,19 @@ void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_beard_style", sep->arg[0], "botbeardstyle"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n] (Dwarves or male bots only)", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n] (Dwarves or male bots only)", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5045,7 +5035,7 @@ void bot_subcommand_bot_camp(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_camp", sep->arg[0], "botcamp"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -5063,30 +5053,30 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_clone", sep->arg[0], "botclone"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [clone_name]", sep->arg[0]);
+		c->Message(Chat::White, "usage: <target_bot> %s [clone_name]", sep->arg[0]);
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 	if (!my_bot->GetBotID()) {
-		c->Message(Chat::Magenta, "An unknown error has occured - BotName: %s, BotID: %u", my_bot->GetCleanName(), my_bot->GetBotID());
+		c->Message(Chat::White, "An unknown error has occured - BotName: %s, BotID: %u", my_bot->GetCleanName(), my_bot->GetBotID());
 		LogCommands("bot_command_clone(): - Error: Active bot reported invalid ID (BotName: [{}], BotID: [{}], OwnerName: [{}], OwnerID: [{}], AcctName: [{}], AcctID: [{}])",
 			my_bot->GetCleanName(), my_bot->GetBotID(), c->GetCleanName(), c->CharacterID(), c->AccountName(), c->AccountID());
 		return;
 	}
 
 	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
-		c->Message(Chat::Red, "You must [name] your bot clone");
+		c->Message(Chat::White, "You must [name] your bot clone");
 		return;
 	}
 	std::string bot_name = sep->arg[1];
 
 	if (!Bot::IsValidName(bot_name)) {
-		c->Message(Chat::Red, "'%s' is an invalid name. You may only use characters 'A-Z', 'a-z' and '_'", bot_name.c_str());
+		c->Message(Chat::White, "'%s' is an invalid name. You may only use characters 'A-Z', 'a-z' and '_'", bot_name.c_str());
 		return;
 	}
 
@@ -5094,11 +5084,11 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 
 	bool available_flag = false;
 	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::QueryNameAvailablity());
+		c->Message(Chat::White, "%s", BotDatabase::fail::QueryNameAvailablity());
 		return;
 	}
 	if (!available_flag) {
-		c->Message(Chat::Red, "The name %s is already being used. Please choose a different name", bot_name.c_str());
+		c->Message(Chat::White, "The name %s is already being used. Please choose a different name", bot_name.c_str());
 		return;
 	}
 
@@ -5106,30 +5096,30 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 
 	uint32 bot_count = 0;
 	if (!database.botdb.QueryBotCount(c->CharacterID(), bot_count)) {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::QueryBotCount());
+		c->Message(Chat::White, "%s", BotDatabase::fail::QueryBotCount());
 		return;
 	}
 	if (bot_count >= max_bot_count) {
-		c->Message(Chat::Red, "You have reached the maximum limit of %i bots", max_bot_count);
+		c->Message(Chat::White, "You have reached the maximum limit of %i bots", max_bot_count);
 		return;
 	}
 
 	uint32 clone_id = 0;
 	if (!database.botdb.CreateCloneBot(c->CharacterID(), my_bot->GetBotID(), bot_name, clone_id) || !clone_id) {
-		c->Message(Chat::Red, "%s '%s'", BotDatabase::fail::CreateCloneBot(), bot_name.c_str());
+		c->Message(Chat::White, "%s '%s'", BotDatabase::fail::CreateCloneBot(), bot_name.c_str());
 		return;
 	}
 
 	int clone_stance = EQ::constants::stancePassive;
 	if (!database.botdb.LoadStance(my_bot->GetBotID(), clone_stance))
-		c->Message(Chat::Red, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
+		c->Message(Chat::White, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
 	if (!database.botdb.SaveStance(clone_id, clone_stance))
-		c->Message(Chat::Red, "%s for clone '%s'", BotDatabase::fail::SaveStance(), bot_name.c_str());
+		c->Message(Chat::White, "%s for clone '%s'", BotDatabase::fail::SaveStance(), bot_name.c_str());
 
 	if (!database.botdb.CreateCloneBotInventory(c->CharacterID(), my_bot->GetBotID(), clone_id))
-		c->Message(Chat::Red, "%s for clone '%s'", BotDatabase::fail::CreateCloneBotInventory(), bot_name.c_str());
+		c->Message(Chat::White, "%s for clone '%s'", BotDatabase::fail::CreateCloneBotInventory(), bot_name.c_str());
 
-	c->Message(Chat::Yellow, "Bot '%s' was successfully cloned to bot '%s'", my_bot->GetCleanName(), bot_name.c_str());
+	c->Message(Chat::White, "Bot '%s' was successfully cloned to bot '%s'", my_bot->GetCleanName(), bot_name.c_str());
 }
 
 void bot_command_view_combos(Client *c, const Seperator *sep)
@@ -5160,7 +5150,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 		std::string window_title = "Bot Races";
 		std::string window_text;
 		std::string message_separator = " ";
-		c->Message(Chat::Cyan, "Usage: %s [bot_race]", sep->arg[0]);
+		c->Message(Chat::White, "Usage: %s [bot_race]", sep->arg[0]);
 		window_text.append("<c \"#FFFFFF\">Races:<c \"#FFFF\">");
 		for (int race_id = 0; race_id <= 15; ++race_id) {
 			window_text.append(message_separator);
@@ -5172,7 +5162,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	}
 
 	if (sep->arg[1][0] == '\0' || !sep->IsNumber(1)) {
-		c->Message(Chat::Red, "Invalid Race!");
+		c->Message(Chat::White, "Invalid Race!");
 		return;
 	}
 	uint16 bot_race = atoi(sep->arg[1]);
@@ -5181,7 +5171,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	std::string window_title = "Bot Classes";
 	std::string window_text;
 	std::string message_separator = " ";
-	c->Message(Chat::Cyan, "%s can be these classes.", race_name);
+	c->Message(Chat::White, "%s can be these classes.", race_name);
 	window_text.append("<c \"#FFFFFF\">Classes:<c \"#FFFF\">");
 	for (int class_id = 0; class_id <= 15; ++class_id) {
 		if (classes_bitmask & GetPlayerClassBit(class_id)) {
@@ -5224,7 +5214,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_create", sep->arg[0], "botcreate"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [bot_name] [bot_class] [bot_race] [bot_gender]", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [bot_name] [bot_class] [bot_race] [bot_gender]", sep->arg[0]);
 		std::string window_title = "Bot Create Options";
 		std::string window_text;
 		std::string message_separator;
@@ -5276,25 +5266,25 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	}
 
 	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
-		c->Message(Chat::Red, "You must [name] your bot");
+		c->Message(Chat::White, "You must [name] your bot");
 		return;
 	}
 	std::string bot_name = sep->arg[1];
 	bot_name = ucfirst(bot_name);
 	if (sep->arg[2][0] == '\0' || !sep->IsNumber(2)) {
-		c->Message(Chat::Red, "Invalid Class!");
+		c->Message(Chat::White, "Invalid Class!");
 		return;
 	}
 	uint8 bot_class = atoi(sep->arg[2]);
 
 	if (sep->arg[3][0] == '\0' || !sep->IsNumber(3)) {
-		c->Message(Chat::Red, "Invalid Race!");
+		c->Message(Chat::White, "Invalid Race!");
 		return;
 	}
 	uint16 bot_race = atoi(sep->arg[3]);
 
 	if (sep->arg[4][0] == '\0') {
-		c->Message(Chat::Red, "Invalid Gender!");
+		c->Message(Chat::White, "Invalid Gender!");
 		return;
 	}
 	uint8 bot_gender = atoi(sep->arg[4]);
@@ -5307,20 +5297,20 @@ void bot_subcommand_bot_delete(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_delete", sep->arg[0], "botdelete"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: <target_bot> %s", sep->arg[0]);
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	std::string error_message;
 
 	if (!my_bot->DeleteBot()) {
-		c->Message(Chat::Magenta, "Failed to delete '%s' due to database error", my_bot->GetCleanName());
+		c->Message(Chat::White, "Failed to delete '%s' due to database error", my_bot->GetCleanName());
 		return;
 	}
 
@@ -5329,7 +5319,7 @@ void bot_subcommand_bot_delete(Client *c, const Seperator *sep)
 
 	my_bot->Camp(false);
 
-	c->Message(Chat::Yellow, "Successfully deleted bot '%s' (id: %i)", bot_name.c_str(), bid);
+	c->Message(Chat::White, "Successfully deleted bot '%s' (id: %i)", bot_name.c_str(), bid);
 }
 
 void bot_subcommand_bot_details(Client *c, const Seperator *sep)
@@ -5339,19 +5329,19 @@ void bot_subcommand_bot_details(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_details", sep->arg[0], "botdetails"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n] (Drakkin bots only)", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n] (Drakkin bots only)", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5392,13 +5382,13 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(
-			Chat::Cyan,
+			Chat::White,
 			fmt::format(
 				"Usage: {} [Material Slot] [Red: 0-255] [Green: 0-255] [Blue: 0-255] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
 				sep->arg[0]
 			).c_str()
 		);
-		c->Message(Chat::Gray, material_slot_message.c_str());
+		c->Message(Chat::White, material_slot_message.c_str());
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -5412,14 +5402,14 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		slot_id = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
 		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQ::textures::LastTintableTexture) {
-			c->Message(Chat::Red, "Valid material slots for this command are:");
-			c->Message(Chat::Red, material_slot_message.c_str());
+			c->Message(Chat::White, "Valid material slots for this command are:");
+			c->Message(Chat::White, material_slot_message.c_str());
 			return;
 		}
 	}
 
 	if (!sep->IsNumber(2)) {
-		c->Message(Chat::Red, "Valid Red values for this command are 0 to 255.");
+		c->Message(Chat::White, "Valid Red values for this command are 0 to 255.");
 		return;
 	}
 
@@ -5429,7 +5419,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	}
 
 	if (!sep->IsNumber(3)) {
-		c->Message(Chat::Red, "Valid Green values for this command are 0 to 255.");
+		c->Message(Chat::White, "Valid Green values for this command are 0 to 255.");
 		return;
 	}
 
@@ -5439,7 +5429,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	}
 
 	if (!sep->IsNumber(4)) {
-		c->Message(Chat::Red, "Valid Blue values for this command are 0 to 255.");
+		c->Message(Chat::White, "Valid Blue values for this command are 0 to 255.");
 		return;
 	}
 
@@ -5463,7 +5453,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 
 		if (!bot_iter->DyeArmor(slot_id, rgb_value, dye_all, (ab_type != ActionableBots::ABT_All))) {
 			c->Message(
-				Chat::Red,
+				Chat::White,
 				fmt::format(
 					"Failed to change armor color for {} due to unknown cause.",
 					bot_iter->GetCleanName()
@@ -5477,7 +5467,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		if (dye_all) {
 			if (!database.botdb.SaveAllArmorColors(c->CharacterID(), rgb_value)) {
 				c->Message(
-					Chat::Red,
+					Chat::White,
 					fmt::format(
 						"{}",
 						BotDatabase::fail::SaveAllArmorColors()
@@ -5487,7 +5477,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		} else {
 			if (!database.botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value)) {
 				c->Message(
-					Chat::Red,
+					Chat::White,
 					fmt::format(
 						"{}",
 						BotDatabase::fail::SaveAllArmorColorBySlot()
@@ -5506,20 +5496,20 @@ void bot_subcommand_bot_eyes(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_eyes", sep->arg[0], "boteyes"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		//c->Message(Chat::Cyan, "usage: <target_bot> %s [value:0-n] ([option: left | right])", sep->arg[0]);
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		//c->Message(Chat::White, "usage: <target_bot> %s [value:0-n] ([option: left | right])", sep->arg[0]);
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5552,7 +5542,7 @@ void bot_subcommand_bot_eyes(Client *c, const Seperator *sep)
 	if (helper_bot_appearance_fail(c, my_bot, fail_type, "eyes"))
 		return;
 
-	c->Message(Chat::Yellow, "This feature will update the next time your bot is spawned");
+	c->Message(Chat::White, "This feature will update the next time your bot is spawned");
 	//helper_bot_appearance_form_final(c, my_bot);
 }
 
@@ -5561,19 +5551,19 @@ void bot_subcommand_bot_face(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_face", sep->arg[0], "botface"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5601,8 +5591,8 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_follow_distance", sep->arg[0], "botfollowdistance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [set] [distance] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::Cyan, "usage: %s [clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [set] [distance] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -5613,7 +5603,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 
 	if (!strcasecmp(sep->arg[1], "set")) {
 		if (!sep->IsNumber(2)) {
-			c->Message(Chat::Red, "A numeric [distance] is required to use this command");
+			c->Message(Chat::White, "A numeric [distance] is required to use this command");
 			return;
 		}
 
@@ -5626,7 +5616,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 		ab_arg = 3;
 	}
 	else if (strcasecmp(sep->arg[1], "clear")) {
-		c->Message(Chat::Red, "This command requires a [set | clear] argument");
+		c->Message(Chat::White, "This command requires a [set | clear] argument");
 		return;
 	}
 
@@ -5642,7 +5632,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 
 		bot_iter->SetFollowDistance(bfd);
 		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveFollowDistance(c->CharacterID(), bot_iter->GetBotID(), bfd)) {
-			c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveFollowDistance(), bot_iter->GetCleanName());
+			c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveFollowDistance(), bot_iter->GetCleanName());
 			return;
 		}
 
@@ -5651,14 +5641,14 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 
 	if (ab_type == ActionableBots::ABT_All) {
 		if (!database.botdb.SaveAllFollowDistances(c->CharacterID(), bfd)) {
-			c->Message(Chat::Red, "%s", BotDatabase::fail::SaveAllFollowDistances());
+			c->Message(Chat::White, "%s", BotDatabase::fail::SaveAllFollowDistances());
 			return;
 		}
 
-		c->Message(Chat::Yellow, "%s all of your bot follow distances", set_flag ? "Set" : "Cleared");
+		c->Message(Chat::White, "%s all of your bot follow distances", set_flag ? "Set" : "Cleared");
 	}
 	else {
-		c->Message(Chat::Yellow, "%s %i of your spawned bot follow distances", (set_flag ? "Set" : "Cleared"), bot_count);
+		c->Message(Chat::White, "%s %i of your spawned bot follow distances", (set_flag ? "Set" : "Cleared"), bot_count);
 	}
 }
 
@@ -5667,19 +5657,19 @@ void bot_subcommand_bot_hair_color(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_hair_color", sep->arg[0], "bothaircolor"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5702,19 +5692,19 @@ void bot_subcommand_bot_hairstyle(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_hairstyle", sep->arg[0], "bothairstyle"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n]", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5739,19 +5729,19 @@ void bot_subcommand_bot_heritage(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_heritage", sep->arg[0], "botheritage"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n] (Drakkin bots only)", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n] (Drakkin bots only)", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -5776,8 +5766,8 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_inspect_message", sep->arg[0], "botinspectmessage"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::Gray, "Notes:");
+		c->Message(Chat::White, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "Notes:");
 		if (c->ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 			c->Message(Chat::White, "- Self-inspect and type your bot's inspect message");
 			c->Message(Chat::White, "- Close the self-inspect window to update the server");
@@ -5798,7 +5788,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 		set_flag = true;
 	}
 	else if (strcasecmp(sep->arg[1], "clear")) {
-		c->Message(Chat::Yellow, "This command requires a [set | clear] argument");
+		c->Message(Chat::White, "This command requires a [set | clear] argument");
 		return;
 	}
 
@@ -5820,7 +5810,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 			memcpy(bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
 		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveInspectMessage(bot_iter->GetBotID(), *bot_message_struct)) {
-			c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveInspectMessage(), bot_iter->GetCleanName());
+			c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveInspectMessage(), bot_iter->GetCleanName());
 			return;
 		}
 
@@ -5834,14 +5824,14 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 			memcpy(&bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
 		if (!database.botdb.SaveAllInspectMessages(c->CharacterID(), bot_message_struct)) {
-			c->Message(Chat::Red, "%s", BotDatabase::fail::SaveAllInspectMessages());
+			c->Message(Chat::White, "%s", BotDatabase::fail::SaveAllInspectMessages());
 			return;
 		}
 
-		c->Message(Chat::Yellow, "%s all of your bot inspect messages", set_flag ? "Set" : "Cleared");
+		c->Message(Chat::White, "%s all of your bot inspect messages", set_flag ? "Set" : "Cleared");
 	}
 	else {
-		c->Message(Chat::Yellow, "%s %i of your spawned bot inspect messages", set_flag ? "Set" : "Cleared", bot_count);
+		c->Message(Chat::White, "%s %i of your spawned bot inspect messages", set_flag ? "Set" : "Cleared", bot_count);
 	}
 }
 
@@ -6014,7 +6004,7 @@ void bot_subcommand_bot_out_of_combat(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_out_of_combat", sep->arg[0], "botoutofcombat"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([option: on | off]) ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
@@ -6054,16 +6044,16 @@ void bot_subcommand_bot_out_of_combat(Client *c, const Seperator *sep)
 void bot_subcommand_bot_surname(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
-		c->Message(Chat::Red, "You must specify a [surname] to use this command (use _ to define spaces or -remove to clear.)");
+		c->Message(Chat::White, "You must specify a [surname] to use this command (use _ to define spaces or -remove to clear.)");
 		return;
 	}
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 	if (strlen(sep->arg[1]) > 31) {
-		c->Message(Chat::Red, "Surname must be 31 characters or less.");
+		c->Message(Chat::White, "Surname must be 31 characters or less.");
 		return;
 	}
 	std::string bot_surname = sep->arg[1];
@@ -6072,26 +6062,26 @@ void bot_subcommand_bot_surname(Client *c, const Seperator *sep)
 
 	my_bot->SetSurname(bot_surname);
 	if (!database.botdb.SaveBot(my_bot)) {
-		c->Message(Chat::Red, BotDatabase::fail::SaveBot());
+		c->Message(Chat::White, BotDatabase::fail::SaveBot());
 	}
 	else {
-		c->Message(Chat::Yellow, "Bot Surname Saved.");
+		c->Message(Chat::White, "Bot Surname Saved.");
 	}
 }
 
 void bot_subcommand_bot_title(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
-		c->Message(Chat::Red, "You must specify a [title] to use this command. (use _ to define spaces or -remove to clear.)");
+		c->Message(Chat::White, "You must specify a [title] to use this command. (use _ to define spaces or -remove to clear.)");
 		return;
 	}
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 	if (strlen(sep->arg[1]) > 31) {
-		c->Message(Chat::Red, "Title must be 31 characters or less.");
+		c->Message(Chat::White, "Title must be 31 characters or less.");
 		return;
 	}
 	std::string bot_title = sep->arg[1];
@@ -6100,26 +6090,26 @@ void bot_subcommand_bot_title(Client *c, const Seperator *sep)
 
 	my_bot->SetTitle(bot_title);
 	if (!database.botdb.SaveBot(my_bot)) {
-		c->Message(Chat::Red, BotDatabase::fail::SaveBot());
+		c->Message(Chat::White, BotDatabase::fail::SaveBot());
 	}
 	else {
-		c->Message(Chat::Yellow, "Bot Title Saved.");
+		c->Message(Chat::White, "Bot Title Saved.");
 	}
 }
 
 void bot_subcommand_bot_suffix(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
-		c->Message(Chat::Red, "You must specify a [suffix] to use this command. (use _ to define spaces or -remove to clear.)");
+		c->Message(Chat::White, "You must specify a [suffix] to use this command. (use _ to define spaces or -remove to clear.)");
 		return;
 	}
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 	if (strlen(sep->arg[1]) > 31) {
-		c->Message(Chat::Red, "Suffix must be 31 characters or less.");
+		c->Message(Chat::White, "Suffix must be 31 characters or less.");
 		return;
 	}
 	std::string bot_suffix = sep->arg[1];
@@ -6128,10 +6118,10 @@ void bot_subcommand_bot_suffix(Client *c, const Seperator *sep)
 
 	my_bot->SetSuffix(bot_suffix);
 	if (!database.botdb.SaveBot(my_bot)) {
-		c->Message(Chat::Red, BotDatabase::fail::SaveBot());
+		c->Message(Chat::White, BotDatabase::fail::SaveBot());
 	}
 	else {
-		c->Message(Chat::Yellow, "Bot Suffix Saved.");
+		c->Message(Chat::White, "Bot Suffix Saved.");
 	}
 }
 
@@ -6140,7 +6130,7 @@ void bot_subcommand_bot_report(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_report", sep->arg[0], "botreport"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -6180,18 +6170,18 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_spawn", sep->arg[0], "botspawn"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [bot_name]", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [bot_name]", sep->arg[0]);
 		return;
 	}
 
 	int rule_level = RuleI(Bots, BotCharacterLevel);
 	if (c->GetLevel() < rule_level) {
-		c->Message(Chat::Red, "You must be level %i to use bots", rule_level);
+		c->Message(Chat::White, "You must be level %i to use bots", rule_level);
 		return;
 	}
 
 	if (c->GetFeigned()) {
-		c->Message(Chat::Red, "You can not spawn a bot while feigned");
+		c->Message(Chat::White, "You can not spawn a bot while feigned");
 		return;
 	}
 
@@ -6199,44 +6189,54 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 
 	int rule_limit = RuleI(Bots, SpawnLimit);
 	if (spawned_bot_count >= rule_limit && !c->GetGM()) {
-		c->Message(Chat::Red, "You can not have more than %i spawned bots", rule_limit);
+		c->Message(Chat::White, "You can not have more than %i spawned bots", rule_limit);
 		return;
 	}
 
 	if (RuleB(Bots, QuestableSpawnLimit) && !c->GetGM()) {
 		int allowed_bot_count = 0;
 		if (!database.botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
-			c->Message(Chat::Red, "%s", BotDatabase::fail::LoadQuestableSpawnCount());
+			c->Message(Chat::White, "Failed to load questable spawn count.");
 			return;
 		}
+
 		if (!allowed_bot_count) {
-			c->Message(Chat::Red, "You are not currently allowed any spawned bots");
+			c->Message(Chat::White, "You are not currently allowed to spawn any bots.");
 			return;
 		}
+
 		if (spawned_bot_count >= allowed_bot_count) {
-			c->Message(Chat::Red, "You have reached your current limit of %i spawned bots", allowed_bot_count);
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"You have reached your current limit of {} spawned bot{}.",
+					allowed_bot_count,
+					allowed_bot_count != 1 ? "s" : ""
+				).c_str()
+			);
 			return;
 		}
 	}
 
 	if (sep->arg[1][0] == '\0' || sep->IsNumber(1)) {
-		c->Message(Chat::Red, "You must specify a [name] to use this command");
+		c->Message(Chat::White, "You must specify a name to use this command.");
 		return;
 	}
+
 	std::string bot_name = sep->arg[1];
 
 	uint32 bot_id = 0;
 	if (!database.botdb.LoadBotID(c->CharacterID(), bot_name, bot_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotID(), bot_name.c_str());
+		c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadBotID(), bot_name.c_str());
 		return;
 	}
 	if (!bot_id) {
-		c->Message(Chat::Red, "You don't own a bot named '%s'", bot_name.c_str());
+		c->Message(Chat::White, "You don't own a bot named '%s'", bot_name.c_str());
 		return;
 	}
 
 	if (entity_list.GetMobByBotID(bot_id)) {
-		c->Message(Chat::Red, "'%s' is already spawned in zone", bot_name.c_str());
+		c->Message(Chat::White, "'%s' is already spawned in zone", bot_name.c_str());
 		return;
 	}
 
@@ -6250,29 +6250,29 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 			if (member_iter->qglobal) // what is this?? really should have had a message to describe failure... (can't spawn bots if you are assigned to a task/instance?)
 				return;
 			if (!member_iter->qglobal && (member_iter->GetAppearance() != eaDead) && (member_iter->IsEngaged() || (member_iter->IsClient() && member_iter->CastToClient()->GetAggroCount()))) {
-				c->Message(Chat::Red, "You can't summon bots while you are engaged.");
+				c->Message(Chat::White, "You can't summon bots while you are engaged.");
 				return;
 			}
 		}
 	}
 	else if (c->GetAggroCount() > 0) {
-		c->Message(Chat::Red, "You can't spawn bots while you are engaged.");
+		c->Message(Chat::White, "You can't spawn bots while you are engaged.");
 		return;
 	}
 
 	//if (c->IsEngaged()) {
-	//	c->Message(Chat::Red, "You can't spawn bots while you are engaged.");
+	//	c->Message(Chat::White, "You can't spawn bots while you are engaged.");
 	//	return;
 	//}
 
 	auto my_bot = Bot::LoadBot(bot_id);
 	if (!my_bot) {
-		c->Message(Chat::Red, "No valid bot '%s' (id: %i) exists", bot_name.c_str(), bot_id);
+		c->Message(Chat::White, "No valid bot '%s' (id: %i) exists", bot_name.c_str(), bot_id);
 		return;
 	}
 
 	if (!my_bot->Spawn(c)) {
-		c->Message(Chat::Red, "Failed to spawn bot '%s' (id: %i)", bot_name.c_str(), bot_id);
+		c->Message(Chat::White, "Failed to spawn bot '%s' (id: %i)", bot_name.c_str(), bot_id);
 		safe_delete(my_bot);
 		return;
 	}
@@ -6315,8 +6315,8 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_stance", sep->arg[0], "botstance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [current | value: 1-9] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::Gray, "value: %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s)",
+		c->Message(Chat::White, "usage: %s [current | value: 1-9] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "value: %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s)",
 			EQ::constants::stancePassive, EQ::constants::GetStanceName(EQ::constants::stancePassive),
 			EQ::constants::stanceBalanced, EQ::constants::GetStanceName(EQ::constants::stanceBalanced),
 			EQ::constants::stanceEfficient, EQ::constants::GetStanceName(EQ::constants::stanceEfficient),
@@ -6343,7 +6343,7 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	}
 
 	if (!current_flag && bst == EQ::constants::stanceUnknown) {
-		c->Message(Chat::Red, "A [current] argument or valid numeric [value] is required to use this command");
+		c->Message(Chat::White, "A [current] argument or valid numeric [value] is required to use this command");
 		return;
 	}
 
@@ -6374,20 +6374,20 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_stop_melee_level", sep->arg[0], "botstopmeleelevel"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [current | reset | sync | value: 0-255]", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Only caster or hybrid class bots may be modified");
-		c->Message(Chat::Gray, "note: Use [reset] to set stop melee level to server rule");
-		c->Message(Chat::Gray, "note: Use [sync] to set stop melee level to current bot level");
+		c->Message(Chat::White, "usage: <target_bot> %s [current | reset | sync | value: 0-255]", sep->arg[0]);
+		c->Message(Chat::White, "note: Only caster or hybrid class bots may be modified");
+		c->Message(Chat::White, "note: Use [reset] to set stop melee level to server rule");
+		c->Message(Chat::White, "note: Use [sync] to set stop melee level to current bot level");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 	if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
-		c->Message(Chat::Red, "You must <target> a caster or hybrid class bot to use this command");
+		c->Message(Chat::White, "You must <target> a caster or hybrid class bot to use this command");
 		return;
 	}
 
@@ -6404,16 +6404,16 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 		return;
 	}
 	else if (strcasecmp(sep->arg[1], "reset")) {
-		c->Message(Chat::Red, "A [current] or [reset] argument, or numeric [value] is required to use this command");
+		c->Message(Chat::White, "A [current] or [reset] argument, or numeric [value] is required to use this command");
 		return;
 	}
 	// [reset] falls through with initialization value
 
 	my_bot->SetStopMeleeLevel(sml);
 	if (!database.botdb.SaveStopMeleeLevel(c->CharacterID(), my_bot->GetBotID(), sml))
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::SaveStopMeleeLevel(), my_bot->GetCleanName());
+		c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveStopMeleeLevel(), my_bot->GetCleanName());
 
-	c->Message(Chat::Yellow, "Successfully set stop melee level for %s to %u", my_bot->GetCleanName(), sml);
+	c->Message(Chat::White, "Successfully set stop melee level for %s to %u", my_bot->GetCleanName(), sml);
 }
 
 void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
@@ -6421,7 +6421,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_summon", sep->arg[0], "botsummon"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -6450,9 +6450,9 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() == 1)
-		c->Message(Chat::Yellow, "Summoned %s to you", ((sbl.front()) ? (sbl.front()->GetCleanName()) : ("'nullptr'")));
+		c->Message(Chat::White, "Summoned %s to you", ((sbl.front()) ? (sbl.front()->GetCleanName()) : ("'nullptr'")));
 	else
-		c->Message(Chat::Yellow, "Summoned %i bots to you", sbl.size());
+		c->Message(Chat::White, "Summoned %i bots to you", sbl.size());
 }
 
 void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep)
@@ -6462,19 +6462,19 @@ void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_tattoo", sep->arg[0], "bottattoo"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n] (Drakkin bots only)", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n] (Drakkin bots only)", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -6499,7 +6499,7 @@ void bot_subcommand_bot_toggle_archer(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_toggle_archer", sep->arg[0], "bottogglearcher"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([option: on | off]) ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
@@ -6543,7 +6543,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_toggle_helm", sep->arg[0], "bottogglehelm"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -6580,7 +6580,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 
 		if (ab_type != ActionableBots::ABT_All) {
 			if (!database.botdb.SaveHelmAppearance(c->CharacterID(), bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
-				c->Message(Chat::Magenta, "%s for '%s'", bot_iter->GetCleanName());
+				c->Message(Chat::White, "%s for '%s'", bot_iter->GetCleanName());
 				return;
 			}
 
@@ -6602,17 +6602,17 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 		std::string query;
 		if (toggle_helm) {
 			if (!database.botdb.ToggleAllHelmAppearances(c->CharacterID()))
-				c->Message(Chat::Red, "%s", BotDatabase::fail::ToggleAllHelmAppearances());
+				c->Message(Chat::White, "%s", BotDatabase::fail::ToggleAllHelmAppearances());
 		}
 		else {
 			if (!database.botdb.SaveAllHelmAppearances(c->CharacterID(), helm_state))
-				c->Message(Chat::Red, "%s", BotDatabase::fail::SaveAllHelmAppearances());
+				c->Message(Chat::White, "%s", BotDatabase::fail::SaveAllHelmAppearances());
 		}
 
-		c->Message(Chat::Yellow, "%s all of your bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"));
+		c->Message(Chat::White, "%s all of your bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"));
 	}
 	else {
-		c->Message(Chat::Yellow, "%s %i of your spawned bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"), bot_count);
+		c->Message(Chat::White, "%s %i of your spawned bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"), bot_count);
 	}
 
 	// Notes:
@@ -6670,14 +6670,14 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_update", sep->arg[0], "botupdate"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s", sep->arg[0]);
 		return;
 	}
 
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You currently have no spawned bots");
+		c->Message(Chat::White, "You currently have no spawned bots");
 		return;
 	}
 
@@ -6692,7 +6692,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 		++bot_count;
 	}
 
-	c->Message(Chat::Yellow, "Updated %i of your %i spawned bots", bot_count, sbl.size());
+	c->Message(Chat::White, "Updated %i of your %i spawned bots", bot_count, sbl.size());
 }
 
 void bot_subcommand_bot_woad(Client *c, const Seperator *sep)
@@ -6700,19 +6700,19 @@ void bot_subcommand_bot_woad(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_woad", sep->arg[0], "botwoad"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: <target_bot> %s [value: 0-n] (Barbarian bots only)", sep->arg[0]);
-		c->Message(Chat::Gray, "note: Actual limit is filter-based");
+		c->Message(Chat::White, "usage: <target_bot> %s [value: 0-n] (Barbarian bots only)", sep->arg[0]);
+		c->Message(Chat::White, "note: Actual limit is filter-based");
 		return;
 	}
 
 	auto my_bot = ActionableBots::AsTarget_ByBot(c);
 	if (!my_bot) {
-		c->Message(Chat::Red, "You must <target> a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::Red, "A numeric [value] is required to use this command");
+		c->Message(Chat::White, "A numeric [value] is required to use this command");
 		return;
 	}
 
@@ -6738,208 +6738,480 @@ void bot_subcommand_bot_woad(Client *c, const Seperator *sep)
 
 void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_add_member", sep->arg[0], "botgroupaddmember"))
+	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_add_member", sep->arg[0], "botgroupaddmember")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_leader>) %s [member_name] ([leader_name])", sep->arg[0]);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: (<target_leader>) {} [member_name] ([leader_name])",
+				sep->arg[0]
+			).c_str()
+		);
 		return;
 	}
 
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must [name] a new member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must name a new member as a bot that you own to use this command.");
 		return;
 	}
 
 	auto new_member = sbl.front();
 	if (!new_member) {
-		c->Message(Chat::Magenta, "Error: New member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: New member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (new_member->HasGroup()) {
-		c->Message(Chat::Red, "%s is already a current member of a group and can not join another one", new_member->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is already member of a group.",
+				new_member->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
 	uint32 botgroup_id = 0;
 	if (!database.botdb.LoadBotGroupIDByMemberID(new_member->GetBotID(), botgroup_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByMemberID(), new_member->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group id by member ID for '{}'.",
+				new_member->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
+
 	if (botgroup_id) {
-		c->Message(Chat::Red, "%s is already a current member of a bot-group", new_member->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is already a member of a bot-group.",
+				new_member->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
-	if (sbl.empty())
-		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a group leader as a bot that you own to use this command");
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	}
+
+	if (sbl.empty()) {
+		c->Message(Chat::White, "You must target or name a group leader as a bot that you own to use this command.");
 		return;
 	}
 
-	auto botgroup_leader = sbl.front();
-	if (!botgroup_leader) {
-		c->Message(Chat::Magenta, "Error: Group leader bot dereferenced to nullptr");
+	auto leader = sbl.front();
+	if (!leader) {
+		c->Message(Chat::White, "Error: Group leader bot dereferenced to nullptr.");
 		return;
 	}
 
-	Group* group_inst = botgroup_leader->GetGroup();
-	if (!group_inst || group_inst->GetLeader() != botgroup_leader) {
-		c->Message(Chat::Red, "%s is not the current leader of a group", botgroup_leader->GetCleanName());
+	auto* g = leader->GetGroup();
+	if (!g || g->GetLeader() != leader) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is not the leader of a group.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
 	botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByLeaderID(), botgroup_leader->GetCleanName());
+	if (!database.botdb.LoadBotGroupIDByLeaderID(leader->GetBotID(), botgroup_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group ID by leader ID for '{}'.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
+
 	if (!botgroup_id) {
-		c->Message(Chat::Red, "%s is not the current leader of a bot-group", botgroup_leader->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is not the leader of a bot-group.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
-	if (!Bot::AddBotToGroup(new_member, group_inst)) {
-		c->Message(Chat::Red, "Could not add %s as a new member to %s's group", new_member->GetCleanName(), botgroup_leader->GetCleanName());
+	if (!Bot::AddBotToGroup(new_member, g)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not add {} as a new member to a group with {}.",
+				new_member->GetCleanName(),
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
-	database.SetGroupID(new_member->GetName(), group_inst->GetID(), new_member->GetBotID());
+	database.SetGroupID(new_member->GetName(), g->GetID(), new_member->GetBotID());
 
-	if (!database.botdb.AddMemberToBotGroup(botgroup_leader->GetBotID(), new_member->GetBotID())) {
-		c->Message(Chat::Red, "%s - %s->%s", BotDatabase::fail::AddMemberToBotGroup(), new_member->GetCleanName(), botgroup_leader->GetCleanName());
-		Bot::RemoveBotFromGroup(new_member, botgroup_leader->GetGroup());
+	if (!database.botdb.AddMemberToBotGroup(leader->GetBotID(), new_member->GetBotID())) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to add member to bot-group, {} could not be added to a group with {}.",
+				new_member->GetCleanName(),
+				leader->GetCleanName()
+			).c_str()
+		);
+		Bot::RemoveBotFromGroup(new_member, leader->GetGroup());
 		return;
 	}
 
 	std::string botgroup_name;
-	if (!database.botdb.LoadBotGroupNameByLeaderID(botgroup_leader->GetBotID(), botgroup_name))
-		c->Message(Chat::Red, "%s", BotDatabase::fail::LoadBotGroupNameByLeaderID());
+	if (!database.botdb.LoadBotGroupNameByLeaderID(leader->GetBotID(), botgroup_name)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group name by leader ID for bot ID {}.",
+				leader->GetBotID()
+			).c_str()
+		);
+	}
 
-	c->Message(Chat::Yellow, "Successfully added %s to bot-group %s", new_member->GetCleanName(), botgroup_name.c_str());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully added {} to bot-group {}.",
+			new_member->GetCleanName(),
+			botgroup_name
+		).c_str()
+	);
+}
+
+void bot_subcommand_botgroup_auto_spawn(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_auto_spawn", sep->arg[0], "botgroupautospawn")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: (<target_leader>) {} ([leader_name])",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	std::list<Bot*> sbl;
+
+	if (sbl.empty()) {
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	}
+
+	if (sbl.empty()) {
+		c->Message(Chat::White, "You must target or name a group leader as a bot that you own to use this command.");
+		return;
+	}
+
+	auto leader = sbl.front();
+	if (!leader) {
+		c->Message(Chat::White, "Error: Group leader bot dereferenced to nullptr.");
+		return;
+	}
+
+	auto* g = leader->GetGroup();
+	if (!g || g->GetLeader() != leader) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is not the leader of a group.",
+				leader->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	uint32 botgroup_id = 0;
+	if (!database.botdb.LoadBotGroupIDByLeaderID(leader->GetBotID(), botgroup_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group ID by leader ID for '{}'.",
+				leader->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	if (!botgroup_id) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is not the leader of a bot-group.",
+				leader->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	std::string botgroup_name;
+	if (!database.botdb.LoadBotGroupNameByLeaderID(leader->GetBotID(), botgroup_name)) {
+		c->Message(Chat::White, "Failed to load bot-group name by leader ID.");
+		return;
+	}
+
+	if (!database.botdb.ToggleBotGroupAutoSpawn(botgroup_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to toggle auto spawn for bot-group '{}'.",
+				botgroup_name
+			).c_str()
+		);
+		return;
+	}
+
+	bool auto_spawn = database.botdb.IsBotGroupAutoSpawn(botgroup_name);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Auto spawn is now {}active bot-group '{}'.",
+			!auto_spawn ? "in" : "",
+			botgroup_name
+		).c_str()
+	);
 }
 
 void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_create", sep->arg[0], "botgroupcreate"))
-		return;
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_leader>) %s [group_name] ([leader_name])", sep->arg[0]);
+	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_create", sep->arg[0], "botgroupcreate")) {
 		return;
 	}
 
-	std::string botgroup_name_arg = sep->arg[1];
-	if (botgroup_name_arg.empty()) {
-		c->Message(Chat::Red, "You must specify a [name] for this bot-group to use this command");
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: (<target_leader>) {} [group_name] ([leader_name])",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	std::string botgroup_name = sep->argplus[1];
+	if (botgroup_name.empty()) {
+		c->Message(Chat::White, "You must specify a name for this bot-group to use this command.");
 		return;
 	}
 
 	bool extant_flag = false;
-	if (!database.botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::QueryBotGroupExistence(), botgroup_name_arg.c_str());
+	if (!database.botdb.QueryBotGroupExistence(botgroup_name, extant_flag)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to query bot-group existence for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
+
 	if (extant_flag) {
-		c->Message(Chat::Red, "The [name] %s already exists for a bot-group. Please choose another", botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"The name '{}' already exists for a bot-group. Please choose another.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
-	if (sbl.empty())
-		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a group leader as a bot that you own to use this command");
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	}
+
+	if (sbl.empty()) {
+		c->Message(Chat::White, "You must target or name a group leader as a bot that you own to use this command.");
 		return;
 	}
 
-	auto botgroup_leader = sbl.front();
-	if (!botgroup_leader) {
-		c->Message(Chat::Magenta, "Error: Group leader bot dereferenced to nullptr");
+	auto leader = sbl.front();
+	if (!leader) {
+		c->Message(Chat::White, "Error: Group leader bot dereferenced to nullptr.");
 		return;
 	}
 
-	if (botgroup_leader->HasGroup()) {
-		c->Message(Chat::Red, "%s is already a current member of a group", botgroup_leader->GetCleanName());
+	if (leader->HasGroup()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is already a current member of a group.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
 	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByLeaderID(), botgroup_leader->GetCleanName());
+	if (!database.botdb.LoadBotGroupIDByLeaderID(leader->GetBotID(), botgroup_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group ID by leader ID for '{}'.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
+
 	if (botgroup_id) {
-		c->Message(Chat::Red, "%s is already the current leader of a bot-group", botgroup_leader->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is already the current leader of a bot-group.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
 	botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDByMemberID(botgroup_leader->GetBotID(), botgroup_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByMemberID(), botgroup_leader->GetCleanName());
+	if (!database.botdb.LoadBotGroupIDByMemberID(leader->GetBotID(), botgroup_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group id by member ID for '{}'.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
+
 	if (botgroup_id) {
-		c->Message(Chat::Red, "%s is already a current member of a bot-group", botgroup_leader->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is already a current member of a bot-group.",
+				leader->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
-	Group* group_inst = new Group(botgroup_leader);
-	if (!group_inst) {
-		c->Message(Chat::Magenta, "Could not create a new group instance");
+	auto* g = new Group(leader);
+	if (!g) {
+		c->Message(Chat::White, "Could not create a new group instance.");
 		return;
 	}
 
-	if (!database.botdb.CreateBotGroup(botgroup_name_arg, botgroup_leader->GetBotID())) {
-		c->Message(Chat::Red, "%s '%s'", BotDatabase::fail::CreateBotGroup(), botgroup_name_arg.c_str());
-		safe_delete(group_inst);
+	if (!database.botdb.CreateBotGroup(botgroup_name, leader->GetBotID())) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to create bot-group '{}'.",
+				botgroup_name
+			).c_str()
+		);
+		safe_delete(g);
 		return;
 	}
 
-	entity_list.AddGroup(group_inst);
-	database.SetGroupID(botgroup_leader->GetCleanName(), group_inst->GetID(), botgroup_leader->GetBotID());
-	database.SetGroupLeaderName(group_inst->GetID(), botgroup_leader->GetCleanName());
-	botgroup_leader->SetFollowID(c->GetID());
+	entity_list.AddGroup(g);
+	database.SetGroupID(leader->GetCleanName(), g->GetID(), leader->GetBotID());
+	database.SetGroupLeaderName(g->GetID(), leader->GetCleanName());
+	leader->SetFollowID(c->GetID());
 
-	c->Message(Chat::Yellow, "Successfully created bot-group '%s' with '%s' as its leader", botgroup_name_arg.c_str(), botgroup_leader->GetCleanName());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully created bot-group '{}' with '{}' as its leader.",
+			botgroup_name,
+			leader->GetCleanName()
+		).c_str()
+	);
 }
 
 void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_delete", sep->arg[0], "botgroupdelete"))
-		return;
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [botgroup_name]", sep->arg[0]);
+	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_delete", sep->arg[0], "botgroupdelete")) {
 		return;
 	}
 
-	std::string botgroup_name_arg = sep->arg[1];
-	if (botgroup_name_arg.empty()) {
-		c->Message(Chat::Red, "You must specify a [name] for this bot-group to use this command");
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "usage: %s [botgroup_name]", sep->arg[0]);
+		return;
+	}
+
+	std::string botgroup_name = sep->argplus[1];
+	if (botgroup_name.empty()) {
+		c->Message(Chat::White, "You must specify a [name] for this bot-group to use this command");
 		return;
 	}
 
 	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDForLoadBotGroup(), botgroup_name_arg.c_str());
+	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name, botgroup_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group ID for load bot-group for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
+
 	if (!botgroup_id) {
-		c->Message(Chat::Red, "Could not locate group id for '%s'", botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not locate group ID for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
 	uint32 leader_id = 0;
 	if (!database.botdb.LoadLeaderIDByBotGroupID(botgroup_id, leader_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadLeaderIDByBotGroupID(), botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load leader ID by bot-group ID for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
+
 	if (!leader_id) {
-		c->Message(Chat::Red, "Could not locate leader id for '%s'", botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not locate leader ID for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
@@ -6948,12 +7220,25 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	std::map<uint32, std::list<uint32>> member_list;
-	if (!database.botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
-		c->Message(Chat::Red, "%s '%s'", BotDatabase::fail::LoadBotGroup(), botgroup_name_arg.c_str());
+	if (!database.botdb.LoadBotGroup(botgroup_name, member_list)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
+
 	if (member_list.find(botgroup_id) == member_list.end() || member_list[botgroup_id].empty()) {
-		c->Message(Chat::Red, "Could not locate member list for bot-group '%s'", botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not locate member list for bot-group '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
@@ -6965,73 +7250,142 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 			}
 		}
 	}
+
 	gbl.unique();
 
 	for (auto group_member : gbl) {
-		if (group_member->HasGroup())
+		if (group_member->HasGroup()) {
 			Bot::RemoveBotFromGroup(group_member, group_member->GetGroup());
+		}
 	}
 
 	if (!database.botdb.DeleteBotGroup(leader_id)) {
-		c->Message(Chat::Red, "%s '%s'", BotDatabase::fail::DeleteBotGroup(), botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to delete bot-group '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Successfully deleted bot-group %s", botgroup_name_arg.c_str());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully deleted bot-group '{}'.",
+			botgroup_name
+		).c_str()
+	);
 }
 
 void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_list", sep->arg[0], "botgrouplist"))
+	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_list", sep->arg[0], "botgrouplist")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s", sep->arg[0]);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {}",
+				sep->arg[0]
+			).c_str()
+		);
 		return;
 	}
 
 	std::list<std::pair<std::string, std::string>> botgroups_list;
 	if (!database.botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::LoadBotGroupsListByOwnerID());
+		c->Message(Chat::White, "Failed to load bot-group.");
 		return;
 	}
+
 	if (botgroups_list.empty()) {
-		c->Message(Chat::Red, "You have no saved bot-groups");
+		c->Message(Chat::White, "You have no saved bot-groups.");
 		return;
 	}
 
-	int botgroup_count = 0;
-	for (auto botgroups_iter : botgroups_list)
-		c->Message(Chat::White, "(%i) Bot-group name: %s | Leader: %s", (++botgroup_count), botgroups_iter.first.c_str(), botgroups_iter.second.c_str());
+	uint32 botgroup_count = 0;
 
-	c->Message(Chat::Yellow, "%i bot-groups listed", botgroup_count);
+	for (auto botgroups_iter : botgroups_list) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Bot-group {} | Name: {} | Leader: {}{} | {}",
+				(botgroup_count + 1),
+				botgroups_iter.first,
+				botgroups_iter.second,
+				database.botdb.IsBotGroupAutoSpawn(botgroups_iter.first) ? " (Auto Spawn)" : "",				
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format("^botgroupload {}", botgroups_iter.first),
+					false,
+					"Load"
+				)
+			).c_str()
+		);
+
+		botgroup_count++;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} Bot-group{} listed.",
+			botgroup_count,
+			botgroup_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
 
 void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_load", sep->arg[0], "botgroupload"))
-		return;
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [botgroup_name]", sep->arg[0]);
+	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_load", sep->arg[0], "botgroupload")) {
 		return;
 	}
 
-	std::string botgroup_name_arg = sep->arg[1];
-	if (botgroup_name_arg.empty()) {
-		c->Message(Chat::Red, "You must specify the [name] of a bot-group to load to use this command");
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [botgroup_name]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	std::string botgroup_name = sep->argplus[1];
+	if (botgroup_name.empty()) {
+		c->Message(Chat::White, "You must specify the name of a bot-group to load to use this command.");
 		return;
 	}
 
 	bool extant_flag = false;
-	if (!database.botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::QueryBotGroupExistence(), botgroup_name_arg.c_str());
-		return;
-	}
-	if (!extant_flag) {
-		c->Message(Chat::Red, "Bot-group %s does not exist", botgroup_name_arg.c_str());
+	if (!database.botdb.QueryBotGroupExistence(botgroup_name, extant_flag)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to query bot-group existence for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
-	Group* owner_group = c->GetGroup();
+	if (!extant_flag) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Bot-group {} does not exist.",
+				botgroup_name
+			).c_str()
+		);
+		return;
+	}
+
+	auto* owner_group = c->GetGroup();
 	if (owner_group) {
 		std::list<Client*> member_list;
 		owner_group->GetClientList(member_list);
@@ -7039,31 +7393,49 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 
 		for (auto member_iter : member_list) {
 			if (member_iter->IsEngaged() || member_iter->GetAggroCount() > 0) {
-				c->Message(Chat::Red, "You can't spawn bots while your group is engaged");
+				c->Message(Chat::White, "You can't spawn bots while your group is engaged,");
 				return;
 			}
 		}
-	}
-	else {
+	} else {
 		if (c->GetAggroCount() > 0) {
-			c->Message(Chat::Red, "You can't spawn bots while you are engaged");
+			c->Message(Chat::White, "You can't spawn bots while you are engaged,");
 			return;
 		}
 	}
 
 	uint32 botgroup_id = 0;
-	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id) || !botgroup_id) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDForLoadBotGroup(), botgroup_name_arg.c_str());
+	if (!database.botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name, botgroup_id) || !botgroup_id) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group ID for load bot-group for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
 	std::map<uint32, std::list<uint32>> member_list;
-	if (!database.botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotGroup(), botgroup_name_arg.c_str());
+	if (!database.botdb.LoadBotGroup(botgroup_name, member_list)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load bot-group for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
+
 	if (member_list.find(botgroup_id) == member_list.end() || member_list[botgroup_id].empty()) {
-		c->Message(Chat::Red, "Database returned an empty list for bot-group '%s'", botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Database returned an empty list for bot-group '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
@@ -7072,119 +7444,142 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 	if (RuleB(Bots, QuestableSpawnLimit)) {
 		int allowed_bot_count = 0;
 		if (!database.botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
-			c->Message(Chat::Red, "%s", BotDatabase::fail::LoadQuestableSpawnCount());
+			c->Message(Chat::White, "Failed to load questable spawn count.");
 			return;
 		}
 
 		if (!allowed_bot_count) {
-			c->Message(Chat::Red, "You can not spawn any bots");
+			c->Message(Chat::White, "You can not spawn any bots");
 			return;
 		}
 
 		if (spawned_bot_count >= allowed_bot_count || (spawned_bot_count + member_list.begin()->second.size()) > allowed_bot_count) {
-			c->Message(Chat::Red, "You can not spawn more than %i bot%s (quest-limit)", allowed_bot_count, ((allowed_bot_count == 1) ? ("") : ("s")));
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"You can not spawn more than {} bot{}.",
+					allowed_bot_count,
+					allowed_bot_count != 1 ? "s" : ""
+				).c_str()
+			);
 			return;
 		}
 	}
 
 	const int allowed_bot_limit = RuleI(Bots, SpawnLimit);
 	if (spawned_bot_count >= allowed_bot_limit || (spawned_bot_count + member_list.begin()->second.size()) > allowed_bot_limit) {
-		c->Message(Chat::Red, "You can not spawn more than %i bot%s (hard-limit)", allowed_bot_limit, ((allowed_bot_limit == 1) ? ("") : ("s")));
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You can not spawn more than {} bot{}.",
+				allowed_bot_limit,
+				allowed_bot_limit != 1 ? "s" : ""
+			).c_str()
+		);
 		return;
 	}
 
 	uint32 leader_id = 0;
-	if (!database.botdb.LoadLeaderIDByBotGroupName(botgroup_name_arg, leader_id)) {
-		c->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadLeaderIDByBotGroupName(), botgroup_name_arg.c_str());
+	if (!database.botdb.LoadLeaderIDByBotGroupName(botgroup_name, leader_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load leader ID by bot-group name for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
+
 	if (!leader_id) {
-		c->Message(Chat::Red, "Cannot locate bot-group leader id for '%s'", botgroup_name_arg.c_str());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Cannot locate bot-group leader ID for '{}'.",
+				botgroup_name
+			).c_str()
+		);
 		return;
 	}
 
-	auto botgroup_leader = Bot::LoadBot(leader_id);
-	if (!botgroup_leader) {
-		c->Message(Chat::Red, "Could not load bot-group leader for '%s'", botgroup_name_arg.c_str());
-		safe_delete(botgroup_leader);
-		return;
-	}
-
-	if (!botgroup_leader->Spawn(c)) {
-		c->Message(Chat::Red, "Could not spawn bot-group leader %s for '%s'", botgroup_leader->GetName(), botgroup_name_arg.c_str());
-		safe_delete(botgroup_leader);
-		return;
-	}
-
-	Group* group_inst = new Group(botgroup_leader);
-
-	entity_list.AddGroup(group_inst);
-	database.SetGroupID(botgroup_leader->GetCleanName(), group_inst->GetID(), botgroup_leader->GetBotID());
-	database.SetGroupLeaderName(group_inst->GetID(), botgroup_leader->GetCleanName());
-	botgroup_leader->SetFollowID(c->GetID());
-
-	member_list[botgroup_id].remove(0);
-	member_list[botgroup_id].remove(botgroup_leader->GetBotID());
-	for (auto member_iter : member_list[botgroup_id]) {
-		auto botgroup_member = Bot::LoadBot(member_iter);
-		if (!botgroup_member) {
-			c->Message(Chat::Red, "Could not load bot id %i", member_iter);
-			safe_delete(botgroup_member);
-			return;
-		}
-
-		if (!botgroup_member->Spawn(c)) {
-			c->Message(Chat::Red, "Could not spawn bot '%s' (id: %i)", botgroup_member->GetName(), member_iter);
-			safe_delete(botgroup_member);
-			return;
-		}
-
-		Bot::AddBotToGroup(botgroup_member, group_inst);
-	}
-
-	c->Message(Chat::Yellow, "Successfully loaded bot-group %s", botgroup_name_arg.c_str());
+	Bot::SpawnBotGroupByName(c, botgroup_name, leader_id);
 }
 
 void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_remove_member", sep->arg[0], "botgroupremovemember"))
+	if (helper_command_alias_fail(c, "bot_subcommand_botgroup_remove_member", sep->arg[0], "botgroupremovemember")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: (<target_member>) {} ([member_name])",
+				sep->arg[0]
+			).c_str()
+		);
 		return;
 	}
 
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
-	if (sbl.empty())
-		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a group member as a bot that you own to use this command");
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	}
+
+	if (sbl.empty()) {
+		c->Message(Chat::White, "You must target or name a group member as a bot that you own to use this command.");
 		return;
 	}
 
 	auto group_member = sbl.front();
 	if (!group_member) {
-		c->Message(Chat::Magenta, "Error: Group member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Group member bot dereferenced to nullptr.");
 		return;
 	}
 
 	if (!group_member->HasGroup()) {
-		c->Message(Chat::Red, "%s is not a current member of a group", group_member->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} is not a current member of a group.",
+				group_member->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
 	if (!Bot::RemoveBotFromGroup(group_member, group_member->GetGroup())) {
-		c->Message(Chat::Red, "Could not remove %s from their group", group_member->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not remove {} from their group.",
+				group_member->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
 	if (!database.botdb.RemoveMemberFromBotGroup(group_member->GetBotID())) {
-		c->Message(Chat::Red, "%s - '%s'", BotDatabase::fail::RemoveMemberFromBotGroup(), group_member->GetCleanName());
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Could not remove {} from their bot-group.",
+				group_member->GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Successfully removed %s from their bot-group", group_member->GetCleanName());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully removed {} from their bot-group.",
+			group_member->GetCleanName()
+		).c_str()
+	);
 }
 
 void bot_subcommand_circle(Client *c, const Seperator *sep)
@@ -7193,7 +7588,7 @@ void bot_subcommand_circle(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Depart) || helper_command_alias_fail(c, "bot_subcommand_circle", sep->arg[0], "circle"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Depart, DRUID);
 		return;
 	}
@@ -7210,7 +7605,7 @@ void bot_subcommand_circle(Client *c, const Seperator *sep)
 		return;
 	}
 	else if (destination.empty()) {
-		c->Message(Chat::Red, "A [destination] or [list] argument is required to use this command");
+		c->Message(Chat::White, "A [destination] or [list] argument is required to use this command");
 		return;
 	}
 
@@ -7251,7 +7646,7 @@ void bot_subcommand_heal_rotation_adaptive_targeting(Client *c, const Seperator 
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_adaptive_targeting", sep->arg[0], "healrotationadaptivetargeting"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name]) ([option: on | off])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name]) ([option: on | off])", sep->arg[0]);
 		return;
 	}
 
@@ -7268,18 +7663,18 @@ void bot_subcommand_heal_rotation_adaptive_targeting(Client *c, const Seperator 
 	}
 
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
@@ -7289,13 +7684,13 @@ void bot_subcommand_heal_rotation_adaptive_targeting(Client *c, const Seperator 
 		hr_adaptive_targeting = true;
 	}
 	else if (adaptive_targeting_arg.compare("off")) {
-		c->Message(Chat::Yellow, "Adaptive targeting is currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->AdaptiveTargeting()) ? ("on") : ("off")), current_member->GetCleanName());
+		c->Message(Chat::White, "Adaptive targeting is currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->AdaptiveTargeting()) ? ("on") : ("off")), current_member->GetCleanName());
 		return;
 	}
 
 	(*current_member->MemberOfHealRotation())->SetAdaptiveTargeting(hr_adaptive_targeting);
 
-	c->Message(Chat::Yellow, "Adaptive targeting is now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->AdaptiveTargeting()) ? ("on") : ("off")), current_member->GetCleanName());
+	c->Message(Chat::White, "Adaptive targeting is now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->AdaptiveTargeting()) ? ("on") : ("off")), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_add_member(Client *c, const Seperator *sep)
@@ -7303,25 +7698,25 @@ void bot_subcommand_heal_rotation_add_member(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_add_member", sep->arg[0], "healrotationaddmember"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s [new_member_name] ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s [new_member_name] ([member_name])", sep->arg[0]);
 		return;
 	}
 
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must [name] a new member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must [name] a new member as a bot that you own to use this command");
 		return;
 	}
 
 	auto new_member = sbl.front();
 	if (!new_member) {
-		c->Message(Chat::Magenta, "Error: New member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: New member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (new_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is already a current member of a Heal Rotation and can not join another one", new_member->GetCleanName());
+		c->Message(Chat::White, "%s is already a current member of a Heal Rotation and can not join another one", new_member->GetCleanName());
 		return;
 	}
 
@@ -7329,27 +7724,27 @@ void bot_subcommand_heal_rotation_add_member(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	if (!new_member->JoinHealRotationMemberPool(current_member->MemberOfHealRotation())) {
-		c->Message(Chat::Red, "Failed to add %s as a current member of this Heal Rotation", new_member->GetCleanName());
+		c->Message(Chat::White, "Failed to add %s as a current member of this Heal Rotation", new_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Successfully added %s as a current member of this Heal Rotation", new_member->GetCleanName());
+	c->Message(Chat::White, "Successfully added %s as a current member of this Heal Rotation", new_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_add_target(Client *c, const Seperator *sep)
@@ -7357,7 +7752,7 @@ void bot_subcommand_heal_rotation_add_target(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_add_target", sep->arg[0], "healrotationaddtarget"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s [heal_target_name] ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s [heal_target_name] ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -7366,40 +7761,40 @@ void bot_subcommand_heal_rotation_add_target(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	auto heal_target = entity_list.GetMob(sep->arg[1]);
 	if (!heal_target) {
-		c->Message(Chat::Red, "No target exists by the name '%s'", sep->arg[1]);
+		c->Message(Chat::White, "No target exists by the name '%s'", sep->arg[1]);
 		return;
 	}
 
 	if ((!heal_target->IsClient() && !heal_target->IsBot() && !heal_target->IsPet()) ||
 		(heal_target->IsPet() && (!heal_target->GetOwner() || (!heal_target->GetOwner()->IsClient() && !heal_target->GetOwner()->IsBot()))))
 	{
-		c->Message(Chat::Red, "%s's entity type is not an allowable heal target", heal_target->GetCleanName());
+		c->Message(Chat::White, "%s's entity type is not an allowable heal target", heal_target->GetCleanName());
 		return;
 	}
 
 	if (!heal_target->JoinHealRotationTargetPool(current_member->MemberOfHealRotation())) {
-		c->Message(Chat::Red, "Failed to add heal target with a name of '%s'", heal_target->GetCleanName());
+		c->Message(Chat::White, "Failed to add heal target with a name of '%s'", heal_target->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Successfully added heal target %s to %s's Heal Rotation", heal_target->GetCleanName(), current_member->GetCleanName());
+	c->Message(Chat::White, "Successfully added heal target %s to %s's Heal Rotation", heal_target->GetCleanName(), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *sep)
@@ -7407,8 +7802,8 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_adjust_critical", sep->arg[0], "healrotationadjustcritical"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s [armor_type] [value: %3.1f-%3.1f | + | -] ([member_name])", sep->arg[0], CRITICAL_HP_RATIO_BASE, SAFE_HP_RATIO_BASE);
-		c->Message(Chat::Gray, "armor_types: %u(Base), %u(Cloth), %u(Leather), %u(Chain), %u(Plate)",
+		c->Message(Chat::White, "usage: (<target_member>) %s [armor_type] [value: %3.1f-%3.1f | + | -] ([member_name])", sep->arg[0], CRITICAL_HP_RATIO_BASE, SAFE_HP_RATIO_BASE);
+		c->Message(Chat::White, "armor_types: %u(Base), %u(Cloth), %u(Leather), %u(Chain), %u(Plate)",
 			ARMOR_TYPE_UNKNOWN, ARMOR_TYPE_CLOTH, ARMOR_TYPE_LEATHER, ARMOR_TYPE_CHAIN, ARMOR_TYPE_PLATE);
 		return;
 	}
@@ -7421,7 +7816,7 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 		armor_type_value = atoi(armor_type_arg.c_str());
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
-		c->Message(Chat::Red, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
+		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
 		return;
 	}
 
@@ -7430,18 +7825,18 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
@@ -7459,12 +7854,12 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 		critical_ratio = CRITICAL_HP_RATIO_ABS;
 
 	if (!(*current_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(armor_type_value, critical_ratio)) {
-		c->Message(Chat::Red, "Critical value %3.1f%%(%u) exceeds safe value %3.1f%%(%u) for %s's Heal Rotation",
+		c->Message(Chat::White, "Critical value %3.1f%%(%u) exceeds safe value %3.1f%%(%u) for %s's Heal Rotation",
 			critical_ratio, armor_type_value, (*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(armor_type_value), armor_type_value, current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Class Armor Type %u critical value %3.1f%% set for %s's Heal Rotation",
+	c->Message(Chat::White, "Class Armor Type %u critical value %3.1f%% set for %s's Heal Rotation",
 		armor_type_value, (*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(armor_type_value), current_member->GetCleanName());
 }
 
@@ -7473,8 +7868,8 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_adjust_safe", sep->arg[0], "healrotationadjustsafe"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s [armor_type] [value: %3.1f-%3.1f | + | -] ([member_name])", sep->arg[0], CRITICAL_HP_RATIO_BASE, SAFE_HP_RATIO_BASE);
-		c->Message(Chat::Gray, "armor_types: %u(Base), %u(Cloth), %u(Leather), %u(Chain), %u(Plate)",
+		c->Message(Chat::White, "usage: (<target_member>) %s [armor_type] [value: %3.1f-%3.1f | + | -] ([member_name])", sep->arg[0], CRITICAL_HP_RATIO_BASE, SAFE_HP_RATIO_BASE);
+		c->Message(Chat::White, "armor_types: %u(Base), %u(Cloth), %u(Leather), %u(Chain), %u(Plate)",
 			ARMOR_TYPE_UNKNOWN, ARMOR_TYPE_CLOTH, ARMOR_TYPE_LEATHER, ARMOR_TYPE_CHAIN, ARMOR_TYPE_PLATE);
 		return;
 	}
@@ -7487,7 +7882,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 		armor_type_value = atoi(armor_type_arg.c_str());
 
 	if (armor_type_value > ARMOR_TYPE_LAST) {
-		c->Message(Chat::Red, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
+		c->Message(Chat::White, "You must specify a valid [armor_type: %u-%u] to use this command", ARMOR_TYPE_FIRST, ARMOR_TYPE_LAST);
 		return;
 	}
 
@@ -7496,18 +7891,18 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
@@ -7525,12 +7920,12 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 		safe_ratio = CRITICAL_HP_RATIO_ABS;
 
 	if (!(*current_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(armor_type_value, safe_ratio)) {
-		c->Message(Chat::Red, "Safe value %3.1f%%(%u) does not exceed critical value %3.1f%%(%u) for %s's Heal Rotation",
+		c->Message(Chat::White, "Safe value %3.1f%%(%u) does not exceed critical value %3.1f%%(%u) for %s's Heal Rotation",
 			safe_ratio, armor_type_value, (*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(armor_type_value), armor_type_value, current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Class Armor Type %u safe value %3.1f%% set for %s's Heal Rotation",
+	c->Message(Chat::White, "Class Armor Type %u safe value %3.1f%% set for %s's Heal Rotation",
 		armor_type_value, (*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(armor_type_value), current_member->GetCleanName());
 }
 
@@ -7539,7 +7934,7 @@ void bot_subcommand_heal_rotation_casting_override(Client *c, const Seperator *s
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_casting_override", sep->arg[0], "healrotationcastingoverride"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name]) ([option: on | off])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name]) ([option: on | off])", sep->arg[0]);
 		return;
 	}
 
@@ -7556,18 +7951,18 @@ void bot_subcommand_heal_rotation_casting_override(Client *c, const Seperator *s
 	}
 
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
@@ -7577,13 +7972,13 @@ void bot_subcommand_heal_rotation_casting_override(Client *c, const Seperator *s
 		hr_casting_override = true;
 	}
 	else if (casting_override_arg.compare("off")) {
-		c->Message(Chat::Yellow, "Casting override is currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
+		c->Message(Chat::White, "Casting override is currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
 		return;
 	}
 
 	(*current_member->MemberOfHealRotation())->SetCastingOverride(hr_casting_override);
 
-	c->Message(Chat::Yellow, "Casting override is now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
+	c->Message(Chat::White, "Casting override is now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *sep)
@@ -7591,7 +7986,7 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_change_interval", sep->arg[0], "healrotationchangeinterval"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name]) ([interval=%u: %u-%u(seconds)])",
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name]) ([interval=%u: %u-%u(seconds)])",
 			sep->arg[0], CASTING_CYCLE_DEFAULT_INTERVAL_S, CASTING_CYCLE_MINIMUM_INTERVAL_S, CASTING_CYCLE_MAXIMUM_INTERVAL_S);
 		return;
 	}
@@ -7609,18 +8004,18 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	}
 
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
@@ -7631,7 +8026,7 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	}
 	else {
 		hr_change_interval_s = (*current_member->MemberOfHealRotation())->IntervalS();
-		c->Message(Chat::Yellow, "Casting interval is currently '%i' second%s for %s's Heal Rotation", hr_change_interval_s, ((hr_change_interval_s == 1) ? ("") : ("s")), current_member->GetCleanName());
+		c->Message(Chat::White, "Casting interval is currently '%i' second%s for %s's Heal Rotation", hr_change_interval_s, ((hr_change_interval_s == 1) ? ("") : ("s")), current_member->GetCleanName());
 		return;
 	}
 
@@ -7641,7 +8036,7 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 	(*current_member->MemberOfHealRotation())->SetIntervalS(hr_change_interval_s);
 
 	hr_change_interval_s = (*current_member->MemberOfHealRotation())->IntervalS();
-	c->Message(Chat::Yellow, "Casting interval is now '%i' second%s for %s's Heal Rotation", hr_change_interval_s, ((hr_change_interval_s == 1) ? ("") : ("s")), current_member->GetCleanName());
+	c->Message(Chat::White, "Casting interval is now '%i' second%s for %s's Heal Rotation", hr_change_interval_s, ((hr_change_interval_s == 1) ? ("") : ("s")), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_clear_hot(Client *c, const Seperator *sep)
@@ -7649,7 +8044,7 @@ void bot_subcommand_heal_rotation_clear_hot(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_clear_hot", sep->arg[0], "healrotationclearhot"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -7658,26 +8053,26 @@ void bot_subcommand_heal_rotation_clear_hot(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	if (!(*current_member->MemberOfHealRotation())->ClearHOTTarget()) {
-		c->Message(Chat::Red, "Failed to clear %s's Heal Rotation HOT", current_member->GetCleanName());
+		c->Message(Chat::White, "Failed to clear %s's Heal Rotation HOT", current_member->GetCleanName());
 	}
 
-	c->Message(Chat::Yellow, "Succeeded in clearing %s's Heal Rotation HOT", current_member->GetCleanName());
+	c->Message(Chat::White, "Succeeded in clearing %s's Heal Rotation HOT", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_clear_targets(Client *c, const Seperator *sep)
@@ -7685,7 +8080,7 @@ void bot_subcommand_heal_rotation_clear_targets(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_clear_targets", sep->arg[0], "healrotationcleartargets"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -7694,27 +8089,27 @@ void bot_subcommand_heal_rotation_clear_targets(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	if (!(*current_member->MemberOfHealRotation())->ClearTargetPool()) {
-		c->Message(Chat::Red, "Failed to clear all targets from %s's Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "Failed to clear all targets from %s's Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "All targets have been cleared from %s's Heal Rotation", current_member->GetCleanName());
+	c->Message(Chat::White, "All targets have been cleared from %s's Heal Rotation", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
@@ -7722,7 +8117,7 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_create", sep->arg[0], "healrotationcreate"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_creator>) %s ([creator_name]) ([interval=%u: %u-%u(seconds)] [fastheals=off: on | off] [adaptivetargeting=off: on | off] [castingoverride=off: on | off])",
+		c->Message(Chat::White, "usage: (<target_creator>) %s ([creator_name]) ([interval=%u: %u-%u(seconds)] [fastheals=off: on | off] [adaptivetargeting=off: on | off] [castingoverride=off: on | off])",
 			sep->arg[0], CASTING_CYCLE_DEFAULT_INTERVAL_S, CASTING_CYCLE_MINIMUM_INTERVAL_S, CASTING_CYCLE_MAXIMUM_INTERVAL_S);
 		return;
 	}
@@ -7749,18 +8144,18 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a creator as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a creator as a bot that you own to use this command");
 		return;
 	}
 
 	auto creator_member = sbl.front();
 	if (!creator_member) {
-		c->Message(Chat::Magenta, "Error: Creator bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Creator bot dereferenced to nullptr");
 		return;
 	}
 
 	if (creator_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is already a current member of a Heal Rotation", creator_member->GetCleanName());
+		c->Message(Chat::White, "%s is already a current member of a Heal Rotation", creator_member->GetCleanName());
 		return;
 	}
 
@@ -7791,7 +8186,7 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 	hr_interval_s *= 1000; // convert to milliseconds for Bot/HealRotation constructor
 
 	if (!creator_member->CreateHealRotation(hr_interval_s, hr_fast_heals, hr_adaptive_targeting, hr_casting_override)) {
-		c->Message(Chat::Red, "Failed to add %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
+		c->Message(Chat::White, "Failed to add %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
 		return;
 	}
 
@@ -7802,10 +8197,10 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 	bool target_fail = false;
 
 	if (!database.botdb.LoadHealRotation(creator_member, member_list, target_list, load_flag, member_fail, target_fail))
-		c->Message(Chat::Red, "%s", BotDatabase::fail::LoadHealRotation());
+		c->Message(Chat::White, "%s", BotDatabase::fail::LoadHealRotation());
 
 	if (!load_flag) {
-		c->Message(Chat::Yellow, "Successfully added %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
+		c->Message(Chat::White, "Successfully added %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
 		return;
 	}
 
@@ -7821,18 +8216,18 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 					continue;
 
 				if (!bot_iter->JoinHealRotationMemberPool(creator_member->MemberOfHealRotation()))
-					c->Message(Chat::Red, "Failed to add member '%s'", bot_iter->GetCleanName());
+					c->Message(Chat::White, "Failed to add member '%s'", bot_iter->GetCleanName());
 				member_found = true;
 
 				break;
 			}
 
 			if (!member_found)
-				c->Message(Chat::Red, "Could not locate member with bot id '%u'", member_iter);
+				c->Message(Chat::White, "Could not locate member with bot id '%u'", member_iter);
 		}
 	}
 	else {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::LoadHealRotationMembers());
+		c->Message(Chat::White, "%s", BotDatabase::fail::LoadHealRotationMembers());
 	}
 
 	if (!target_fail) {
@@ -7842,19 +8237,19 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 
 			auto target_mob = entity_list.GetMob(target_iter.c_str());
 			if (!target_mob) {
-				c->Message(Chat::Red, "Could not locate target '%s'", target_iter.c_str());
+				c->Message(Chat::White, "Could not locate target '%s'", target_iter.c_str());
 				continue;
 			}
 
 			if (!target_mob->JoinHealRotationTargetPool(creator_member->MemberOfHealRotation()))
-				c->Message(Chat::Red, "Failed to add target '%s'", target_mob->GetCleanName());
+				c->Message(Chat::White, "Failed to add target '%s'", target_mob->GetCleanName());
 		}
 	}
 	else {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::LoadHealRotationTargets());
+		c->Message(Chat::White, "%s", BotDatabase::fail::LoadHealRotationTargets());
 	}
 
-	c->Message(Chat::Yellow, "Successfully loaded %s's Heal Rotation", creator_member->GetCleanName());
+	c->Message(Chat::White, "Successfully loaded %s's Heal Rotation", creator_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
@@ -7862,7 +8257,7 @@ void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_delete", sep->arg[0], "healrotationdelete"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([option: all]) ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([option: all]) ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -7875,9 +8270,9 @@ void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
 
 	if (all_flag) {
 		if (database.botdb.DeleteAllHealRotations(c->CharacterID()))
-			c->Message(Chat::Yellow, "Succeeded in deleting all heal rotations");
+			c->Message(Chat::White, "Succeeded in deleting all heal rotations");
 		else
-			c->Message(Chat::Red, "%s", BotDatabase::fail::DeleteAllHealRotations());
+			c->Message(Chat::White, "%s", BotDatabase::fail::DeleteAllHealRotations());
 
 		return;
 	}
@@ -7887,22 +8282,22 @@ void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!database.botdb.DeleteHealRotation(current_member->GetBotID())) {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::DeleteHealRotation());
+		c->Message(Chat::White, "%s", BotDatabase::fail::DeleteHealRotation());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Succeeded in deleting %s's heal rotation", current_member->GetCleanName());
+	c->Message(Chat::White, "Succeeded in deleting %s's heal rotation", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_fast_heals(Client *c, const Seperator *sep)
@@ -7910,7 +8305,7 @@ void bot_subcommand_heal_rotation_fast_heals(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_fast_heals", sep->arg[0], "healrotationfastheals"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name]) ([option: on | off])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name]) ([option: on | off])", sep->arg[0]);
 		return;
 	}
 
@@ -7927,18 +8322,18 @@ void bot_subcommand_heal_rotation_fast_heals(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
@@ -7948,13 +8343,13 @@ void bot_subcommand_heal_rotation_fast_heals(Client *c, const Seperator *sep)
 		hr_fast_heals = true;
 	}
 	else if (fast_heals_arg.compare("off")) {
-		c->Message(Chat::Yellow, "Fast heals are currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->FastHeals()) ? ("on") : ("off")), current_member->GetCleanName());
+		c->Message(Chat::White, "Fast heals are currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->FastHeals()) ? ("on") : ("off")), current_member->GetCleanName());
 		return;
 	}
 
 	(*current_member->MemberOfHealRotation())->SetFastHeals(hr_fast_heals);
 
-	c->Message(Chat::Yellow, "Fast heals are now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->FastHeals()) ? ("on") : ("off")), current_member->GetCleanName());
+	c->Message(Chat::White, "Fast heals are now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->FastHeals()) ? ("on") : ("off")), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep)
@@ -7962,7 +8357,7 @@ void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_list", sep->arg[0], "healrotationlist"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -7971,22 +8366,22 @@ void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Gray, "Heal Rotation Settings:");
+	c->Message(Chat::White, "Heal Rotation Settings:");
 
 	c->Message(Chat::White, "Current state: %s", (((*current_member->MemberOfHealRotation())->IsActive()) ? ("active") : ("inactive")));
 	c->Message(Chat::White, "Casting interval: %i seconds", (*current_member->MemberOfHealRotation())->IntervalS());
@@ -8012,7 +8407,7 @@ void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep)
 		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE),
 		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE));
 
-	c->Message(Chat::Gray, "Heal Rotation Members:");
+	c->Message(Chat::White, "Heal Rotation Members:");
 
 	int member_index = 0;
 	auto member_pool = (*current_member->MemberOfHealRotation())->MemberList();
@@ -8023,9 +8418,9 @@ void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "(%i) %s", (++member_index), member_iter->GetCleanName());
 	}
 	if (!member_index)
-		c->Message(Chat::Red, "(0) None");
+		c->Message(Chat::White, "(0) None");
 
-	c->Message(Chat::Gray, "Heal Rotation Targets:");
+	c->Message(Chat::White, "Heal Rotation Targets:");
 
 	int target_index = 0;
 	auto target_pool = (*current_member->MemberOfHealRotation())->TargetList();
@@ -8044,7 +8439,7 @@ void bot_subcommand_heal_rotation_remove_member(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_remove_member", sep->arg[0], "healrotationremovemember"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -8053,27 +8448,27 @@ void bot_subcommand_heal_rotation_remove_member(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	if (!current_member->LeaveHealRotationMemberPool()) {
-		c->Message(Chat::Red, "Failed to remove %s from their Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "Failed to remove %s from their Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "%s has been removed from their Heal Rotation", current_member->GetCleanName());
+	c->Message(Chat::White, "%s has been removed from their Heal Rotation", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_remove_target(Client *c, const Seperator *sep)
@@ -8081,7 +8476,7 @@ void bot_subcommand_heal_rotation_remove_target(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_remove_target", sep->arg[0], "healrotationremovetarget"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s [heal_target_name] ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s [heal_target_name] ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -8090,33 +8485,33 @@ void bot_subcommand_heal_rotation_remove_target(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	auto heal_target = entity_list.GetMob(sep->arg[1]);
 	if (!heal_target) {
-		c->Message(Chat::Red, "No target exists by the name '%s'", sep->arg[1]);
+		c->Message(Chat::White, "No target exists by the name '%s'", sep->arg[1]);
 		return;
 	}
 
 	if (!current_member->MemberOfHealRotation()->get()->IsTargetInPool(heal_target) || !heal_target->LeaveHealRotationTargetPool()) {
-		c->Message(Chat::Red, "Failed to remove heal target with a name of '%s'", heal_target->GetCleanName());
+		c->Message(Chat::White, "Failed to remove heal target with a name of '%s'", heal_target->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Successfully removed heal target %s from %s's Heal Rotation", heal_target->GetCleanName(), current_member->GetCleanName());
+	c->Message(Chat::White, "Successfully removed heal target %s from %s's Heal Rotation", heal_target->GetCleanName(), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_reset_limits(Client *c, const Seperator *sep)
@@ -8124,7 +8519,7 @@ void bot_subcommand_heal_rotation_reset_limits(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_reset_limits", sep->arg[0], "healrotationresetlimits"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -8133,24 +8528,24 @@ void bot_subcommand_heal_rotation_reset_limits(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	(*current_member->MemberOfHealRotation())->ResetArmorTypeHPLimits();
 
-	c->Message(Chat::Yellow, "Class Armor Type HP limit criteria has been set to default values for %s's Heal Rotation", current_member->GetCleanName());
+	c->Message(Chat::White, "Class Armor Type HP limit criteria has been set to default values for %s's Heal Rotation", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep)
@@ -8158,7 +8553,7 @@ void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_save", sep->arg[0], "healrotationsave"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -8167,33 +8562,33 @@ void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	bool member_fail = false;
 	bool target_fail = false;
 	if (!database.botdb.SaveHealRotation(current_member, member_fail, target_fail)) {
-		c->Message(Chat::Red, "%s", BotDatabase::fail::SaveHealRotation());
+		c->Message(Chat::White, "%s", BotDatabase::fail::SaveHealRotation());
 		return;
 	}
 	if (member_fail)
-		c->Message(Chat::Red, "Failed to save heal rotation members");
+		c->Message(Chat::White, "Failed to save heal rotation members");
 	if (target_fail)
-		c->Message(Chat::Red, "Failed to save heal rotation targets");
+		c->Message(Chat::White, "Failed to save heal rotation targets");
 
-	c->Message(Chat::Yellow, "Succeeded in saving %s's heal rotation", current_member->GetCleanName());
+	c->Message(Chat::White, "Succeeded in saving %s's heal rotation", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_set_hot(Client *c, const Seperator *sep)
@@ -8201,7 +8596,7 @@ void bot_subcommand_heal_rotation_set_hot(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_set_hot", sep->arg[0], "healrotationsethot"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s [heal_override_target_name] ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s [heal_override_target_name] ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -8210,38 +8605,38 @@ void bot_subcommand_heal_rotation_set_hot(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	auto hot_target = entity_list.GetMob(sep->arg[1]);
 	if (!hot_target) {
-		c->Message(Chat::Red, "No target exists by the name '%s'", sep->arg[1]);
+		c->Message(Chat::White, "No target exists by the name '%s'", sep->arg[1]);
 		return;
 	}
 
 	if (!(*current_member->MemberOfHealRotation())->IsTargetInPool(hot_target)) {
-		c->Message(Chat::Red, "%s is not a target in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a target in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
 		return;
 	}
 
 	if (!(*current_member->MemberOfHealRotation())->SetHOTTarget(hot_target)) {
-		c->Message(Chat::Red, "Failed to set %s as the HOT in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
+		c->Message(Chat::White, "Failed to set %s as the HOT in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "Succeeded in setting %s as the HOT in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
+	c->Message(Chat::White, "Succeeded in setting %s as the HOT in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_start(Client *c, const Seperator *sep)
@@ -8249,7 +8644,7 @@ void bot_subcommand_heal_rotation_start(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_start", sep->arg[0], "healrotationstart"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -8258,32 +8653,32 @@ void bot_subcommand_heal_rotation_start(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	if ((*current_member->MemberOfHealRotation())->IsActive()) {
-		c->Message(Chat::Red, "%s's Heal Rotation is already active", current_member->GetCleanName());
+		c->Message(Chat::White, "%s's Heal Rotation is already active", current_member->GetCleanName());
 		return;
 	}
 
 	if (!current_member->MemberOfHealRotation()->get()->Start()) {
-		c->Message(Chat::Red, "Failed to start %s's Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "Failed to start %s's Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "%s's Heal Rotation is now active", current_member->GetCleanName());
+	c->Message(Chat::White, "%s's Heal Rotation is now active", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_stop(Client *c, const Seperator *sep)
@@ -8291,7 +8686,7 @@ void bot_subcommand_heal_rotation_stop(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_stop", sep->arg[0], "healrotationstop"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
 		return;
 	}
 
@@ -8300,32 +8695,32 @@ void bot_subcommand_heal_rotation_stop(Client *c, const Seperator *sep)
 	if (sbl.empty())
 		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You must <target> or [name] a current member as a bot that you own to use this command");
+		c->Message(Chat::White, "You must <target> or [name] a current member as a bot that you own to use this command");
 		return;
 	}
 
 	auto current_member = sbl.front();
 	if (!current_member) {
-		c->Message(Chat::Magenta, "Error: Current member bot dereferenced to nullptr");
+		c->Message(Chat::White, "Error: Current member bot dereferenced to nullptr");
 		return;
 	}
 
 	if (!current_member->IsHealRotationMember()) {
-		c->Message(Chat::Red, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
 	if (!(*current_member->MemberOfHealRotation())->IsActive()) {
-		c->Message(Chat::Red, "%s's Heal Rotation is already inactive", current_member->GetCleanName());
+		c->Message(Chat::White, "%s's Heal Rotation is already inactive", current_member->GetCleanName());
 		return;
 	}
 
 	if (!current_member->MemberOfHealRotation()->get()->Stop()) {
-		c->Message(Chat::Red, "Failed to stop %s's Heal Rotation", current_member->GetCleanName());
+		c->Message(Chat::White, "Failed to stop %s's Heal Rotation", current_member->GetCleanName());
 		return;
 	}
 
-	c->Message(Chat::Yellow, "%s's Heal Rotation is now inactive", current_member->GetCleanName());
+	c->Message(Chat::White, "%s's Heal Rotation is now inactive", current_member->GetCleanName());
 }
 
 void bot_subcommand_inventory_give(Client *c, const Seperator *sep)
@@ -8336,7 +8731,7 @@ void bot_subcommand_inventory_give(Client *c, const Seperator *sep)
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(
-			Chat::Cyan,
+			Chat::White,
 			fmt::format(
 				"Usage: {} ([actionable: target | byname] ([actionable_name]))",
 				sep->arg[0]
@@ -8354,7 +8749,7 @@ void bot_subcommand_inventory_give(Client *c, const Seperator *sep)
 
 	auto my_bot = sbl.front();
 	if (!my_bot) {
-		c->Message(Chat::Magenta, "ActionableBots returned 'nullptr'");
+		c->Message(Chat::White, "ActionableBots returned 'nullptr'");
 		return;
 	}
 
@@ -8369,7 +8764,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(
-			Chat::Cyan,
+			Chat::White,
 			fmt::format(
 				"Usage: {} ([actionable: target | byname] ([actionable_name]))",
 				sep->arg[0]
@@ -8387,7 +8782,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 
 	auto my_bot = sbl.front();
 	if (!my_bot) {
-		c->Message(Chat::Magenta, "ActionableBots returned 'nullptr'");
+		c->Message(Chat::White, "ActionableBots returned 'nullptr'");
 		return;
 	}
 
@@ -8444,7 +8839,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	uint32 database_count = 0;
 	if (!database.botdb.QueryInventoryCount(my_bot->GetBotID(), database_count)) {
 		c->Message(
-			Chat::Magenta,
+			Chat::White,
 			fmt::format(
 				"{}",
 				BotDatabase::fail::QueryInventoryCount()
@@ -8454,7 +8849,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 
 	if (inventory_count != database_count) {
 		c->Message(
-			Chat::Magenta,
+			Chat::White,
 			fmt::format(
 				"Inventory-database item count mismatch, inventory has {} item{} and the database has {} item{}.",
 				inventory_count,
@@ -8474,7 +8869,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(
-			Chat::Cyan,
+			Chat::White,
 			fmt::format(
 				"Usage: {} [Slot ID: 0-22] ([actionable: target | byname] ([actionable_name]))",
 				sep->arg[0]
@@ -8580,7 +8975,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		my_bot->RemoveBotItemBySlot(slot_id, &error_message);
 		if (!error_message.empty()) {
 			c->Message(
-				Chat::Magenta,
+				Chat::White,
 				fmt::format(
 					"Database Error: {}",
 					error_message
@@ -8613,7 +9008,7 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(
-			Chat::Cyan,
+			Chat::White,
 			fmt::format(
 				"Usage: {} [actionable: target]",
 				sep->arg[0]
@@ -8631,7 +9026,7 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 
 	auto my_bot = sbl.front();
 	if (!my_bot) {
-		c->Message(Chat::Magenta, "ActionableBots returned 'nullptr'");
+		c->Message(Chat::White, "ActionableBots returned 'nullptr'");
 		return;
 	}
 
@@ -8670,7 +9065,7 @@ void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_pet_get_lost", sep->arg[0], "petgetlost"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	int ab_mask = ActionableBots::ABM_NoFilter;
@@ -8693,7 +9088,7 @@ void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep)
 		++summoned_pet;
 	}
 
-	c->Message(Chat::Yellow, "%i of your bots released their summoned pet%s", summoned_pet, (summoned_pet == 1) ? "" : "s");
+	c->Message(Chat::White, "%i of your bots released their summoned pet%s", summoned_pet, (summoned_pet == 1) ? "" : "s");
 }
 
 void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
@@ -8701,7 +9096,7 @@ void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_pet_remove", sep->arg[0], "petremove"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
@@ -8713,7 +9108,7 @@ void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
 	uint16 class_mask = (PLAYER_CLASS_DRUID_BIT | PLAYER_CLASS_NECROMANCER_BIT | PLAYER_CLASS_ENCHANTER_BIT);
 	ActionableBots::Filter_ByClasses(c, sbl, class_mask);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You have no spawned bots capable of charming");
+		c->Message(Chat::White, "You have no spawned bots capable of charming");
 		return;
 	}
 	sbl.remove(nullptr);
@@ -8741,7 +9136,7 @@ void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() != 1)
-		c->Message(Chat::Yellow, "%i of your bots set for charming, %i of your bots set for summoned pet use", charmed_pet, summoned_pet);
+		c->Message(Chat::White, "%i of your bots set for charming, %i of your bots set for summoned pet use", charmed_pet, summoned_pet);
 }
 
 void bot_subcommand_pet_set_type(Client *c, const Seperator *sep)
@@ -8749,8 +9144,8 @@ void bot_subcommand_pet_set_type(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_pet_set_type", sep->arg[0], "petsettype"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [type: water | fire | air | earth | monster] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::Gray, "requires one of the following bot classes:");
+		c->Message(Chat::White, "usage: %s [type: water | fire | air | earth | monster] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "requires one of the following bot classes:");
 		c->Message(Chat::White, "Magician(1)");
 		return;
 	}
@@ -8782,7 +9177,7 @@ void bot_subcommand_pet_set_type(Client *c, const Seperator *sep)
 	}
 
 	if (pet_type == 255) {
-		c->Message(Chat::Red, "You must specify a pet [type: water | fire | air | earth | monster]");
+		c->Message(Chat::White, "You must specify a pet [type: water | fire | air | earth | monster]");
 		return;
 	}
 
@@ -8793,13 +9188,13 @@ void bot_subcommand_pet_set_type(Client *c, const Seperator *sep)
 	uint16 class_mask = PLAYER_CLASS_MAGICIAN_BIT;
 	ActionableBots::Filter_ByClasses(c, sbl, class_mask);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You have no spawned Magician bots");
+		c->Message(Chat::White, "You have no spawned Magician bots");
 		return;
 	}
 
 	ActionableBots::Filter_ByMinLevel(c, sbl, level_req);
 	if (sbl.empty()) {
-		c->Message(Chat::Red, "You have no spawned Magician bots capable of using this pet type: '%s'", pet_arg.c_str());
+		c->Message(Chat::White, "You have no spawned Magician bots capable of using this pet type: '%s'", pet_arg.c_str());
 		return;
 	}
 
@@ -8824,7 +9219,7 @@ void bot_subcommand_portal(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_Depart) || helper_command_alias_fail(c, "bot_subcommand_portal", sep->arg[0], "portal"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::Cyan, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [list | destination] ([option: single])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_Depart, WIZARD);
 		return;
 	}
@@ -8841,7 +9236,7 @@ void bot_subcommand_portal(Client *c, const Seperator *sep)
 		return;
 	}
 	else if (destination.empty()) {
-		c->Message(Chat::Red, "A [destination] or [list] argument is required to use this command");
+		c->Message(Chat::White, "A [destination] or [list] argument is required to use this command");
 		return;
 	}
 
@@ -8885,13 +9280,13 @@ bool helper_bot_appearance_fail(Client *bot_owner, Bot *my_bot, BCEnum::AFType f
 {
 	switch (fail_type) {
 	case BCEnum::AFT_Value:
-		bot_owner->Message(Chat::Red, "Failed to change '%s' for %s due to invalid value for this command", type_desc, my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid value for this command", type_desc, my_bot->GetCleanName());
 		return true;
 	case BCEnum::AFT_GenderRace:
-		bot_owner->Message(Chat::Red, "Failed to change '%s' for %s due to invalid bot gender and/or race for this command", type_desc, my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid bot gender and/or race for this command", type_desc, my_bot->GetCleanName());
 		return true;
 	case BCEnum::AFT_Race:
-		bot_owner->Message(Chat::Red, "Failed to change '%s' for %s due to invalid bot race for this command", type_desc, my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "Failed to change '%s' for %s due to invalid bot race for this command", type_desc, my_bot->GetCleanName());
 		return true;
 	default:
 		return false;
@@ -8903,12 +9298,12 @@ void helper_bot_appearance_form_final(Client *bot_owner, Bot *my_bot)
 	if (!MyBots::IsMyBot(bot_owner, my_bot))
 		return;
 	if (!my_bot->Save()) {
-		bot_owner->Message(Chat::Magenta, "Failed to save appearance change for %s due to unknown cause...", my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "Failed to save appearance change for %s due to unknown cause...", my_bot->GetCleanName());
 		return;
 	}
 
 	helper_bot_appearance_form_update(my_bot);
-	bot_owner->Message(Chat::Yellow, "Successfully changed appearance for %s!", my_bot->GetCleanName());
+	bot_owner->Message(Chat::White, "Successfully changed appearance for %s!", my_bot->GetCleanName());
 }
 
 void helper_bot_appearance_form_update(Bot *my_bot)
@@ -8942,17 +9337,17 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	if (!bot_owner)
 		return bot_id;
 	if (!Bot::IsValidName(bot_name)) {
-		bot_owner->Message(Chat::Red, "'%s' is an invalid name. You may only use characters 'A-Z', 'a-z' and '_'", bot_name.c_str());
+		bot_owner->Message(Chat::White, "'%s' is an invalid name. You may only use characters 'A-Z', 'a-z' and '_'", bot_name.c_str());
 		return bot_id;
 	}
 
 	bool available_flag = false;
 	if (!database.botdb.QueryNameAvailablity(bot_name, available_flag)) {
-		bot_owner->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), bot_name.c_str());
+		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), bot_name.c_str());
 		return bot_id;
 	}
 	if (!available_flag) {
-		bot_owner->Message(Chat::Red, "The name %s is already being used. Please choose a different name", bot_name.c_str());
+		bot_owner->Message(Chat::White, "The name %s is already being used. Please choose a different name", bot_name.c_str());
 		return bot_id;
 	}
 
@@ -8961,7 +9356,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		const char* bot_class_name = GetClassIDName(bot_class);
 		std::string view_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format("^viewcombos {}", bot_race), false, "view");
 		bot_owner->Message(
-			Chat::Red,
+			Chat::White,
 			fmt::format(
 				"{} {} is an invalid race-class combination, would you like to {} proper combinations for {}?",
 				bot_race_name,
@@ -8974,7 +9369,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	}
 
 	if (bot_gender > FEMALE) {
-		bot_owner->Message(Chat::Red, "gender: %u (M), %u (F)", MALE, FEMALE);
+		bot_owner->Message(Chat::White, "gender: %u (M), %u (F)", MALE, FEMALE);
 		return bot_id;
 	}
 
@@ -8982,22 +9377,22 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	uint32 bot_count = 0;
 	if (!database.botdb.QueryBotCount(bot_owner->CharacterID(), bot_count)) {
-		bot_owner->Message(Chat::Red, "%s", BotDatabase::fail::QueryBotCount());
+		bot_owner->Message(Chat::White, "%s", BotDatabase::fail::QueryBotCount());
 		return bot_id;
 	}
 	if (bot_count >= max_bot_count) {
-		bot_owner->Message(Chat::Red, "You have reached the maximum limit of %i bots.", max_bot_count);
+		bot_owner->Message(Chat::White, "You have reached the maximum limit of %i bots.", max_bot_count);
 		return bot_id;
 	}
 
 	auto my_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(bot_name.c_str(), "", bot_owner->GetLevel(), bot_race, bot_class, bot_gender), bot_owner);
 
 	if (!my_bot->Save()) {
-		bot_owner->Message(Chat::Magenta, "Failed to create '%s' due to unknown cause", my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "Failed to create '%s' due to unknown cause", my_bot->GetCleanName());
 		return bot_id;
 	}
 
-	bot_owner->Message(Chat::Yellow, "Successfully created '%s' (id: %u)", my_bot->GetCleanName(), my_bot->GetBotID());
+	bot_owner->Message(Chat::White, "Successfully created '%s' (id: %u)", my_bot->GetCleanName(), my_bot->GetBotID());
 
 	bot_id = my_bot->GetBotID();
 	safe_delete(my_bot);
@@ -9018,10 +9413,10 @@ void helper_bot_out_of_combat(Client *bot_owner, Bot *my_bot)
 	case SHADOWKNIGHT:
 	case DRUID:
 	case MONK:
-		bot_owner->Message(Chat::Magenta, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
 		break;
 	case BARD:
-		bot_owner->Message(Chat::Yellow, "%s will %s use out-of-combat behavior for bard songs", my_bot->GetCleanName(), ((my_bot->GetAltOutOfCombatBehavior()) ? ("now") : ("no longer")));
+		bot_owner->Message(Chat::White, "%s will %s use out-of-combat behavior for bard songs", my_bot->GetCleanName(), ((my_bot->GetAltOutOfCombatBehavior()) ? ("now") : ("no longer")));
 		break;
 	case ROGUE:
 	case SHAMAN:
@@ -9031,11 +9426,11 @@ void helper_bot_out_of_combat(Client *bot_owner, Bot *my_bot)
 	case ENCHANTER:
 	case BEASTLORD:
 	case BERSERKER:
-		bot_owner->Message(Chat::Magenta, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "%s has no out-of-combat behavior defined", my_bot->GetCleanName());
 		break;
 	default:
 		break;
-		bot_owner->Message(Chat::Red, "Undefined bot class for %s", my_bot->GetCleanName());
+		bot_owner->Message(Chat::White, "Undefined bot class for %s", my_bot->GetCleanName());
 	}
 }
 
@@ -9123,7 +9518,7 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 bool helper_command_disabled(Client* bot_owner, bool rule_value, const char* command)
 {
 	if (rule_value == false) {
-		bot_owner->Message(Chat::Red, "Bot command %s is not enabled on this server.", command);
+		bot_owner->Message(Chat::White, "Bot command %s is not enabled on this server.", command);
 		return true;
 	}
 
@@ -9134,7 +9529,7 @@ bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, c
 {
 	auto alias_iter = bot_command_aliases.find(&alias[1]);
 	if (alias_iter == bot_command_aliases.end() || alias_iter->second.compare(command)) {
-		bot_owner->Message(Chat::Red, "Undefined linker usage in %s (%s)", command_handler, &alias[1]);
+		bot_owner->Message(Chat::White, "Undefined linker usage in %s (%s)", command_handler, &alias[1]);
 		return true;
 	}
 
@@ -9151,13 +9546,13 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 	if (!MyBots::IsMyBot(bot_owner, wizard_bot))
 		wizard_bot = nullptr;
 	if (!druid_bot && !wizard_bot) {
-		bot_owner->Message(Chat::Red, "No bots are capable of performing this action");
+		bot_owner->Message(Chat::White, "No bots are capable of performing this action");
 		return;
 	}
 
 	bot_owner->Message(Chat::White, "The following destinations are available:");
 	if (!local_list) {
-		bot_owner->Message(Chat::Red, "None");
+		bot_owner->Message(Chat::White, "None");
 		return;
 	}
 
@@ -9190,7 +9585,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 		}
 	}
 	if (!destinations)
-		bot_owner->Message(Chat::Red, "None");
+		bot_owner->Message(Chat::White, "None");
 }
 
 bool helper_is_help_or_usage(const char* arg)
@@ -9208,7 +9603,7 @@ bool helper_no_available_bots(Client *bot_owner, Bot *my_bot)
 	if (!bot_owner)
 		return true;
 	if (!my_bot) {
-		bot_owner->Message(Chat::Red, "No bots are capable of performing this action");
+		bot_owner->Message(Chat::White, "No bots are capable of performing this action");
 		return true;
 	}
 
@@ -9227,7 +9622,7 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 		if (bot_owner->Admin() < find_iter->second->access)
 			continue;
 
-		bot_owner->Message(Chat::Cyan, "%c%s - %s", BOT_COMMAND_CHAR, subcommand_iter, ((find_iter != bot_command_list.end()) ? (find_iter->second->desc) : ("[no description]")));
+		bot_owner->Message(Chat::White, "%c%s - %s", BOT_COMMAND_CHAR, subcommand_iter, ((find_iter != bot_command_list.end()) ? (find_iter->second->desc) : ("[no description]")));
 		++bot_subcommands_shown;
 	}
 
@@ -9236,7 +9631,7 @@ void helper_send_available_subcommands(Client *bot_owner, const char* command_si
 
 void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class)
 {
-	bot_owner->Message(Chat::Gray, "requires one of the following bot classes:");
+	bot_owner->Message(Chat::White, "requires one of the following bot classes:");
 	if (bot_class)
 		bot_owner->Message(Chat::White, "%s", required_bots_map_by_class[spell_type][bot_class].c_str());
 	else
@@ -9256,7 +9651,7 @@ bool helper_spell_check_fail(STBaseEntry* local_entry)
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type)
 {
 	if (!spell_list || spell_list->empty()) {
-		bot_owner->Message(Chat::Red, "%s", required_bots_map[spell_type].c_str());
+		bot_owner->Message(Chat::White, "%s", required_bots_map[spell_type].c_str());
 		return true;
 	}
 

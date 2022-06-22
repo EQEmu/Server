@@ -362,7 +362,7 @@ public:
 	static void ProcessBotGroupDisband(Client* c, std::string botName);
 	static void BotOrderCampAll(Client* c);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
-	static void LoadAndSpawnAllZonedBots(Client* botOwner);
+	static void LoadAndSpawnAllZonedBots(Client* bot_owner);
 	static bool GroupHasBot(Group* group);
 	static Bot* GetFirstBotInGroup(Group* group);
 	static void ProcessClientZoneChange(Client* botOwner);
@@ -560,6 +560,8 @@ public:
 	void SetDrakkinHeritage(uint32 value) { drakkin_heritage = value; }
 	void SetDrakkinTattoo(uint32 value) { drakkin_tattoo = value; }
 	bool DyeArmor(int16 slot_id, uint32 rgb, bool all_flag = false, bool save_flag = true);
+
+	static void SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id);
 
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 

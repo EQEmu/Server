@@ -2330,15 +2330,23 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, const std::pair<size_t,
 /* Bot bot-group functions   */
 bool BotDatabase::QueryBotGroupExistence(const std::string& group_name, bool& extant_flag)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_name` FROM `vw_bot_groups` WHERE `group_name` LIKE '%s' LIMIT 1", group_name.c_str());
+	query = fmt::format(
+		"SELECT `group_name` FROM `vw_bot_groups` WHERE `group_name` = '{}' LIMIT 1",
+		group_name
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	extant_flag = true;
 
@@ -2347,105 +2355,153 @@ bool BotDatabase::QueryBotGroupExistence(const std::string& group_name, bool& ex
 
 bool BotDatabase::LoadBotGroupIDByBotGroupName(const std::string& group_name, uint32& botgroup_id)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index` FROM `bot_groups` WHERE `group_name` = '%s' LIMIT 1", group_name.c_str());
+	query = fmt::format(
+		"SELECT `groups_index` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
+		EscapeString(group_name)
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	botgroup_id = atoi(row[0]);
+	botgroup_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupIDByLeaderID(const uint32 leader_id, uint32& botgroup_id)
 {
-	if (!leader_id)
+	if (!leader_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index` FROM `bot_groups` WHERE `group_leader_id` = '%u' LIMIT 1", leader_id);
+	query = fmt::format(
+		"SELECT `groups_index` FROM `bot_groups` WHERE `group_leader_id` = {} LIMIT 1",
+		leader_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	botgroup_id = atoi(row[0]);
+	botgroup_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupIDByMemberID(const uint32 member_id, uint32& botgroup_id)
 {
-	if (!member_id)
+	if (!member_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index` FROM `bot_group_members` WHERE `bot_id` = '%u' LIMIT 1", member_id);
+	query = fmt::format(
+		"SELECT `groups_index` FROM `bot_group_members` WHERE `bot_id` = {} LIMIT 1",
+		member_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	botgroup_id = atoi(row[0]);
+	botgroup_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadLeaderIDByBotGroupName(const std::string& group_name, uint32& leader_id)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_leader_id` FROM `bot_groups` WHERE `group_name` = '%s' LIMIT 1", group_name.c_str());
+	query = fmt::format(
+		"SELECT `group_leader_id` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
+		group_name
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	leader_id = atoi(row[0]);
+	leader_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadLeaderIDByBotGroupID(const uint32 group_id, uint32& leader_id)
 {
-	if (!group_id)
+	if (!group_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_leader_id` FROM `bot_groups` WHERE `groups_index` = '%u' LIMIT 1", group_id);
+	query = fmt::format(
+		"SELECT `group_leader_id` FROM `bot_groups` WHERE `groups_index` = {} LIMIT 1",
+		group_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	leader_id = atoi(row[0]);
+	leader_id = std::stoul(row[0]);
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupNameByBotGroupID(const uint32 group_id, std::string& botgroup_name)
 {
-	if (!group_id)
+	if (!group_id) {
 		false;
+	}
 
-	query = StringFormat("SELECT `group_name` FROM `bot_groups` WHERE `groups_index` = '%u' LIMIT 1", group_id);
+	query = fmt::format(
+		"SELECT `group_name` FROM `bot_groups` WHERE `groups_index` = {} LIMIT 1",
+		group_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
 	botgroup_name = row[0];
@@ -2455,15 +2511,23 @@ bool BotDatabase::LoadBotGroupNameByBotGroupID(const uint32 group_id, std::strin
 
 bool BotDatabase::LoadBotGroupNameByLeaderID(const uint32 leader_id, std::string& botgroup_name)
 {
-	if (!leader_id)
+	if (!leader_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_name` FROM `bot_groups` WHERE `group_leader_id` = '%u' LIMIT 1", leader_id);
+	query = fmt::format(
+		"SELECT `group_name` FROM `bot_groups` WHERE `group_leader_id` = {} LIMIT 1",
+		leader_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
 	botgroup_name = row[0];
@@ -2473,16 +2537,25 @@ bool BotDatabase::LoadBotGroupNameByLeaderID(const uint32 leader_id, std::string
 
 bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 leader_id)
 {
-	if (group_name.empty() || !leader_id)
+	if (group_name.empty() || !leader_id) {
 		return false;
+	}
 
 	bool extant_flag = false;
-	if (!QueryBotGroupExistence(group_name, extant_flag))
+	if (!QueryBotGroupExistence(group_name, extant_flag)) {
 		return false;
-	if (extant_flag)
-		return true;
+	}
 
-	query = StringFormat("INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES ('%u', '%s')", leader_id, group_name.c_str());
+	if (extant_flag) {
+		return true;
+	}
+
+	query = fmt::format(
+		"INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES ({}, '{}')",
+		leader_id,
+		group_name
+	);
+
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		DeleteBotGroup(leader_id);
@@ -2495,7 +2568,12 @@ bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 lea
 		return false;
 	}
 
-	query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ('%u', '%u')", botgroup_id, leader_id);
+	query = fmt::format(
+		"INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ({}, {})",
+		botgroup_id,
+		leader_id
+	);
+
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		RemoveMemberFromBotGroup(leader_id);
@@ -2507,40 +2585,63 @@ bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 lea
 
 bool BotDatabase::DeleteBotGroup(const uint32 leader_id)
 {
-	if (!leader_id)
+	if (!leader_id) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id))
+	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id)) {
 		return false;
-	if (!botgroup_id)
+	}
+
+	if (!botgroup_id) {
 		return true;
+	}
 
-	query = StringFormat("DELETE FROM `bot_group_members` WHERE `groups_index` = '%u'", botgroup_id);
+	query = fmt::format(
+		"DELETE FROM `bot_group_members` WHERE `groups_index` = {}",
+		botgroup_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowsAffected()) {
 		return false;
+	}
 
-	query = StringFormat("DELETE FROM `bot_groups` WHERE `groups_index` = '%u'", botgroup_id);
+	query = fmt::format(
+		"DELETE FROM `bot_groups` WHERE `groups_index` = {}",
+		botgroup_id
+	);
+
 	results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowsAffected()) {
 		return false;
+	}
 
 	return true;
 }
 
 bool BotDatabase::AddMemberToBotGroup(const uint32 leader_id, const uint32 member_id)
 {
-	if (!leader_id || !member_id)
+	if (!leader_id || !member_id) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id))
+	if (!LoadBotGroupIDByLeaderID(leader_id, botgroup_id)) {
 		return false;
-	if (!botgroup_id)
-		return true;
+	}
 
-	query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ('%u', '%u')", botgroup_id, member_id);
+	if (!botgroup_id) {
+		return true;
+	}
+
+	query = fmt::format(
+		"INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES ({}, {})",
+		botgroup_id,
+		member_id
+	);
+
 	auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
 		RemoveMemberFromBotGroup(member_id);
@@ -2552,38 +2653,55 @@ bool BotDatabase::AddMemberToBotGroup(const uint32 leader_id, const uint32 membe
 
 bool BotDatabase::RemoveMemberFromBotGroup(const uint32 member_id)
 {
-	if (!member_id)
+	if (!member_id) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByLeaderID(member_id, botgroup_id))
+	if (!LoadBotGroupIDByLeaderID(member_id, botgroup_id)) {
 		return false;
-	if (botgroup_id)
-		return DeleteBotGroup(member_id);
+	}
 
-	query = StringFormat("DELETE FROM `bot_group_members` WHERE `bot_id` = '%u'", member_id);
+	if (botgroup_id) {
+		return DeleteBotGroup(member_id);
+	}
+
+	query = fmt::format(
+		"DELETE FROM `bot_group_members` WHERE `bot_id` = {}",
+		member_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
+	}
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std::string& group_name, uint32& botgroup_id)
 {
-	if (!owner_id || group_name.empty())
+	if (!owner_id || group_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = '%u'", owner_id);
+	query = fmt::format(
+		"SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = {}",
+		owner_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto& row : results) {
 		if (!group_name.compare(row[1])) {
-			botgroup_id = atoi(row[0]);
+			botgroup_id = std::stoul(row[0]);
 			break;
 		}
 	}
@@ -2593,75 +2711,167 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std
 
 bool BotDatabase::LoadBotGroup(const std::string& group_name, std::map<uint32, std::list<uint32>>& member_list)
 {
-	if (group_name.empty())
+	if (group_name.empty()) {
 		return false;
+	}
 
 	uint32 botgroup_id = 0;
-	if (!LoadBotGroupIDByBotGroupName(group_name, botgroup_id))
+	if (!LoadBotGroupIDByBotGroupName(group_name, botgroup_id)) {
 		return false;
-	if (!botgroup_id)
-		return true;
+	}
 
-	query = StringFormat("SELECT `bot_id` FROM `bot_group_members` WHERE `groups_index` = '%u' LIMIT 6", botgroup_id);
+	if (!botgroup_id) {
+		return true;
+	}
+
+	query = fmt::format(
+		"SELECT `bot_id` FROM `bot_group_members` WHERE `groups_index` = {} LIMIT 6",
+		botgroup_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		member_list[botgroup_id].push_back(atoi(row[0]));
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto& row : results) {
+		member_list[botgroup_id].push_back(std::stoul(row[0]));
+	}
 
 	return true;
 }
 
 bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<std::pair<std::string, std::string>>& botgroups_list)
 {
-	if (!owner_id)
+	if (!owner_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT `group_name`, `group_leader_name` FROM `vw_bot_groups` WHERE `owner_id` = '%u'", owner_id);
+	query = fmt::format(
+		"SELECT `group_name`, `group_leader_name` FROM `vw_bot_groups` WHERE `owner_id` = {}",
+		owner_id
+	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto& row : results) {
 		botgroups_list.push_back(std::pair<std::string, std::string>(row[0], row[1]));
+	}
 
 	return true;
 }
 
+bool BotDatabase::IsBotGroupAutoSpawn(const std::string& botgroup_name)
+{
+	if (botgroup_name.empty()) {
+		return false;
+	}
+
+	query = fmt::format(
+		"SELECT group_name FROM bot_groups WHERE group_name = '{}' AND auto_spawn = 1",
+		botgroup_name
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.RowCount() || !results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotDatabase::ToggleBotGroupAutoSpawn(const uint32 group_id)
+{
+	if (!group_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		"UPDATE bot_groups SET auto_spawn = 1 - auto_spawn WHERE groups_index = {}",
+		group_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success() || !results.RowsAffected()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool BotDatabase::LoadAutoSpawnBotGroupsByOwnerID(const uint32 owner_id, std::list<std::pair<uint32,std::string>>& group_list)
+{
+	if (!owner_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		SQL(
+			SELECT group_leader_id, group_name FROM bot_groups WHERE groups_index IN (
+				SELECT groups_index FROM bot_group_members WHERE bot_id IN (
+					SELECT bot_id FROM bot_data WHERE owner_id = {}
+				)
+			) AND auto_spawn = 1
+		),
+		owner_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto& row : results) {
+		group_list.push_back(
+			std::pair<uint32,std::string>(std::stoul(row[0]), row[1])
+		);
+	}
+
+	return true;
+}
 
 /* Bot owner group functions   */
 // added owner ID to this function to fix groups with mulitple players grouped with bots.
 bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list)
 {
-	if (!group_id || !owner_id)
+	if (!group_id || !owner_id) {
 		return false;
+	}
 
-	query = StringFormat(
-		"SELECT `charid`"
-		" FROM `group_id`"
-		" WHERE `groupid` = '%u'"
-		" AND `name` IN ("
-		"  SELECT `name`"
-		"  FROM `bot_data`"
-		"  WHERE `owner_id` = '%u'"
-		"  )",
+	query = fmt::format(
+		"SELECT `charid` FROM `group_id` WHERE `groupid` = {} AND `name` IN "
+		"(SELECT `name` FROM `bot_data` WHERE `owner_id` = {})",
 		group_id,
 		owner_id
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-		group_list.push_back(atoi(row[0]));
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	for (auto& row : results) {
+		group_list.push_back(std::stoul(row[0]));
+	}
 
 	return true;
 }
@@ -2978,10 +3188,9 @@ uint16 BotDatabase::GetRaceClassBitmask(uint16 bot_race)
 /* fail::Bot functions   */
 const char* BotDatabase::fail::QueryNameAvailablity() { return "Failed to query name availability"; }
 const char* BotDatabase::fail::QueryBotCount() { return "Failed to query bot count"; }
-const char* BotDatabase::fail::LoadQuestableSpawnCount() { return "Failed to load questable spawn count"; }
 const char* BotDatabase::fail::LoadBotsList() { return "Failed to bots list"; }
-const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner id"; }
-const char* BotDatabase::fail::LoadBotID() { return "Failed to load bot id"; }
+const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner ID"; }
+const char* BotDatabase::fail::LoadBotID() { return "Failed to load bot ID"; }
 const char* BotDatabase::fail::LoadBot() { return "Failed to load bot"; }
 const char* BotDatabase::fail::SaveNewBot() { return "Failed to save new bot"; }
 const char* BotDatabase::fail::SaveBot() { return "Failed to save bot"; }
@@ -3012,7 +3221,7 @@ const char* BotDatabase::fail::SaveEquipmentColor() { return "Failed to save equ
 
 /* fail::Bot pet functions   */
 const char* BotDatabase::fail::LoadPetIndex() { return "Failed to load pet index"; }
-const char* BotDatabase::fail::LoadPetSpellID() { return "Failed to load pet spell id"; }
+const char* BotDatabase::fail::LoadPetSpellID() { return "Failed to load pet spell ID"; }
 const char* BotDatabase::fail::LoadPetStats() { return "Failed to load pet stats"; }
 const char* BotDatabase::fail::SavePetStats() { return "Failed to save pet stats"; }
 const char* BotDatabase::fail::DeletePetStats() { return "Failed to delete pet stats"; }
@@ -3041,28 +3250,8 @@ const char* BotDatabase::fail::CreateCloneBot() { return "Failed to create clone
 const char* BotDatabase::fail::CreateCloneBotInventory() { return "Failed to create clone bot inventory"; }
 const char* BotDatabase::fail::SaveStopMeleeLevel() { return "Failed to save stop melee level"; }
 
-/* fail::Bot bot-group functions   */
-const char* BotDatabase::fail::QueryBotGroupExistence() { return "Failed to query bot-group existence"; }
-const char* BotDatabase::fail::LoadBotGroupIDByBotGroupName() { return "Failed to load bot-group id by bot-group name"; }
-const char* BotDatabase::fail::LoadBotGroupIDByLeaderID() { return "Failed to load bot-group id by leader id"; }
-const char* BotDatabase::fail::LoadBotGroupIDByMemberID() { return "Failed to load bot-group id by member id"; }
-const char* BotDatabase::fail::LoadLeaderIDByBotGroupName() { return "Failed to load leader id by bot-group name"; }
-const char* BotDatabase::fail::LoadLeaderIDByBotGroupID() { return "Failed to load leader id by bot-group id"; }
-const char* BotDatabase::fail::LoadBotGroupNameByBotGroupID() { return "Failed to load bot-group name by bot-group id"; }
-const char* BotDatabase::fail::LoadBotGroupNameByLeaderID() { return "Failed to load bot-group name by leader id"; }
-const char* BotDatabase::fail::CreateBotGroup() { return "Failed to create bot-group"; }
-const char* BotDatabase::fail::DeleteBotGroup() { return "Failed to delete bot-group"; }
-const char* BotDatabase::fail::AddMemberToBotGroup() { return "Failed to add member to bot-group"; }
-const char* BotDatabase::fail::RemoveMemberFromBotGroup() { return "Failed to remove member from bot-group"; }
-const char* BotDatabase::fail::LoadBotGroupIDForLoadBotGroup() { return "Failed to load bot-group id for load bot-group"; }
-const char* BotDatabase::fail::LoadBotGroup() { return "Failed to load bot-group"; }
-const char* BotDatabase::fail::LoadBotGroupsListByOwnerID() { return "Failed to load bot-groups list by owner id"; }
-
-/* fail::Bot group functions   */
-const char* BotDatabase::fail::LoadGroupedBotsByGroupID() { return "Failed to load grouped bots by group id"; }
-
 /* fail::Bot heal rotation functions   */
-const char* BotDatabase::fail::LoadHealRotationIDByBotID() { return "Failed to load heal rotation id by bot id"; }
+const char* BotDatabase::fail::LoadHealRotationIDByBotID() { return "Failed to load heal rotation ID by bot ID"; }
 const char* BotDatabase::fail::LoadHealRotation() { return "Failed to load heal rotation"; }
 const char* BotDatabase::fail::LoadHealRotationMembers() { return "Failed to load heal rotation members"; }
 const char* BotDatabase::fail::LoadHealRotationTargets() { return "Failed to load heal rotation targets"; }
