@@ -2197,11 +2197,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_TargetsTarget:
 		{
 			Mob *spell_target_tot = spell_target ? spell_target->GetTarget() : nullptr;
-			if(!spell_target_tot)
+			if (!spell_target_tot) {
 				return false;
+			}
+			
 			//Verfied from live - Target's Target needs to be in combat range to recieve the effect
-			if (!CombatRange(spell_target))
+			if (RuleB(Spells, TargetsTargetRequiresCombatRange) && !CombatRange(spell_target)) {
 				return false;
+			}
 
 			spell_target = spell_target_tot;
 			CastAction = SingleTarget;
