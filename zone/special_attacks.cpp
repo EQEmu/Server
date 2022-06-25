@@ -180,7 +180,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 				auto fbash = GetFuriousBash(itm->Focus.Effect);
 				hate = hate * (100 + fbash) / 100;
 				if (fbash)
-					MessageString(Chat::Spells, GLOWS_RED, itm->Name);
+					MessageString(Chat::FocusEffect, GLOWS_RED, itm->Name);
 			}
 		}
 	}

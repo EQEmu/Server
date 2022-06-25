@@ -16,6 +16,7 @@
 #include "lua_raid.h"
 #include "lua_packet.h"
 #include "dialogue_window.h"
+#include "titles.h"
 #include "../common/expedition_lockout_timer.h"
 
 struct InventoryWhere { };
@@ -415,9 +416,9 @@ void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id) {
 	self->MoveZoneInstanceRaid(instance_id);
 }
 
-void Lua_Client::ChangeLastName(const char *in) {
+void Lua_Client::ChangeLastName(std::string last_name) {
 	Lua_Safe_Call_Void();
-	self->ChangeLastName(in);
+	self->ChangeLastName(last_name);
 }
 
 int Lua_Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc) {
@@ -1120,9 +1121,18 @@ void Lua_Client::SendZoneFlagInfo(Lua_Client to) {
 	self->SendZoneFlagInfo(to);
 }
 
-void Lua_Client::SetAATitle(const char *title) {
+void Lua_Client::SetAATitle(std::string title) {
 	Lua_Safe_Call_Void();
 	self->SetAATitle(title);
+}
+
+void Lua_Client::SetAATitle(std::string title, bool save_to_database) {
+	Lua_Safe_Call_Void();
+	if (!save_to_database) {
+		self->SetAATitle(title);
+	} else {
+		title_manager.CreateNewPlayerTitle(self, title);
+	}
 }
 
 int Lua_Client::GetClientVersion() {
@@ -1385,14 +1395,19 @@ void Lua_Client::UpdateTaskActivity(int task, int activity, int count) {
 	self->UpdateTaskActivity(task, activity, count);
 }
 
-void Lua_Client::AssignTask(int task, int npc_id) {
+void Lua_Client::AssignTask(int task_id) {
 	Lua_Safe_Call_Void();
-	self->AssignTask(task, npc_id);
+	self->AssignTask(task_id);
 }
 
-void Lua_Client::AssignTask(int task, int npc_id, bool enforce_level_requirement) {
+void Lua_Client::AssignTask(int task_id, int npc_id) {
 	Lua_Safe_Call_Void();
-	self->AssignTask(task, npc_id, enforce_level_requirement);
+	self->AssignTask(task_id, npc_id);
+}
+
+void Lua_Client::AssignTask(int task_id, int npc_id, bool enforce_level_requirement) {
+	Lua_Safe_Call_Void();
+	self->AssignTask(task_id, npc_id, enforce_level_requirement);
 }
 
 void Lua_Client::FailTask(int task) {
@@ -1829,12 +1844,12 @@ void Lua_Client::SetSecondaryWeaponOrnamentation(uint32 model_id) {
 	self->SetSecondaryWeaponOrnamentation(model_id);
 }
 
-void Lua_Client::SetClientMaxLevel(int value) {
+void Lua_Client::SetClientMaxLevel(uint8 max_level) {
 	Lua_Safe_Call_Void();
-	self->SetClientMaxLevel(value);
+	self->SetClientMaxLevel(max_level);
 }
 
-int Lua_Client::GetClientMaxLevel() {
+uint8 Lua_Client::GetClientMaxLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetClientMaxLevel();
 }
@@ -2486,6 +2501,35 @@ int Lua_Client::GetSpellDamage() {
 	return self->GetSpellDmg();
 }
 
+void Lua_Client::TaskSelector(luabind::adl::object table) {
+	Lua_Safe_Call_Void();
+
+	if(luabind::type(table) != LUA_TTABLE) {
+		return;
+	}
+
+	int tasks[MAXCHOOSERENTRIES] = { 0 };
+	int task_count = 0;
+
+	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
+		auto cur = table[i];
+		int cur_value = 0;
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				cur_value = luabind::object_cast<int>(cur);
+			} catch(luabind::cast_failed &) {
+			}
+		} else {
+			task_count = i - 1;
+			break;
+		}
+
+		tasks[i - 1] = cur_value;
+	}
+
+	self->TaskQuestSetSelector(self, task_count, tasks);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2514,6 +2558,7 @@ luabind::scope lua_register_client() {
 	.def("AddPVPPoints", (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints)
 	.def("AddSkill", (void(Lua_Client::*)(int,int))&Lua_Client::AddSkill)
 	.def("Admin", (int(Lua_Client::*)(void))&Lua_Client::Admin)
+	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)
 	.def("AssignToInstance", (void(Lua_Client::*)(int))&Lua_Client::AssignToInstance)
@@ -2523,7 +2568,7 @@ luabind::scope lua_register_client() {
 	.def("CalcCurrentWeight", &Lua_Client::CalcCurrentWeight)
 	.def("CalcPriceMod", (float(Lua_Client::*)(Lua_Mob,bool))&Lua_Client::CalcPriceMod)
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
-	.def("ChangeLastName", (void(Lua_Client::*)(const char *in))&Lua_Client::ChangeLastName)
+	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)
 	.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob))&Lua_Client::CheckIncreaseSkill)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob,int))&Lua_Client::CheckIncreaseSkill)
@@ -2803,7 +2848,8 @@ luabind::scope lua_register_client() {
 	.def("SendZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendZoneFlagInfo)
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAPoints", (void(Lua_Client::*)(int))&Lua_Client::SetAAPoints)
-	.def("SetAATitle", (void(Lua_Client::*)(const char *))&Lua_Client::SetAATitle)
+	.def("SetAATitle", (void(Lua_Client::*)(std::string))&Lua_Client::SetAATitle)
+	.def("SetAATitle", (void(Lua_Client::*)(std::string,bool))&Lua_Client::SetAATitle)
 	.def("SetAFK", (void(Lua_Client::*)(uint8))&Lua_Client::SetAFK)
 	.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
 	.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
@@ -2876,6 +2922,7 @@ luabind::scope lua_register_client() {
 	.def("TakeMoneyFromPP", (bool(Lua_Client::*)(uint64,bool))&Lua_Client::TakeMoneyFromPP)
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32))&Lua_Client::TakePlatinum)
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32,bool))&Lua_Client::TakePlatinum)
+	.def("TaskSelector", (void(Lua_Client::*)(luabind::adl::object))&Lua_Client::TaskSelector)
 	.def("Thirsty", (bool(Lua_Client::*)(void))&Lua_Client::Thirsty)
 	.def("TrainDisc", (void(Lua_Client::*)(int))&Lua_Client::TrainDisc)
 	.def("TrainDiscBySpellID", (void(Lua_Client::*)(int32))&Lua_Client::TrainDiscBySpellID)

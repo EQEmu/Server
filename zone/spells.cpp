@@ -78,6 +78,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 
+#include "data_bucket.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
@@ -301,8 +302,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	casting_spell_id = spell_id;
 	casting_spell_slot = slot;
 	casting_spell_inventory_slot = item_slot;
-	if(casting_spell_timer != 0xFFFFFFFF)
-	{
+	if (casting_spell_timer != 0xFFFFFFFF) {
 		casting_spell_timer = timer;
 		casting_spell_timer_duration = timer_duration;
 	}
@@ -351,13 +351,16 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
 	// is a TGB compatible spell.
-	if((IsGroupSpell(spell_id) ||
-		spell.target_type == ST_AEClientV1 ||
-		spell.target_type == ST_Self ||
-		spell.target_type == ST_AECaster ||
-		spell.target_type == ST_Ring ||
-		spell.target_type == ST_Beam) && target_id == 0)
-	{
+	if (
+		(
+			IsGroupSpell(spell_id) ||
+			spell.target_type == ST_AEClientV1 ||
+			spell.target_type == ST_Self ||
+			spell.target_type == ST_AECaster ||
+			spell.target_type == ST_Ring ||
+			spell.target_type == ST_Beam
+		) && target_id == 0
+	) {
 		LogSpells("Spell [{}] auto-targeted the caster. Group? [{}], target type [{}]", spell_id, IsGroupSpell(spell_id), spell.target_type);
 		target_id = GetID();
 	}
@@ -376,8 +379,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		if (cast_time) {
 			cast_time = GetActSpellCasttime(spell_id, cast_time);
 		}
-	}
-	else {
+	} else {
 		orgcasttime = cast_time;
 	}
 
@@ -407,23 +409,21 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// If you're at full mana, let it cast even if you dont have enough mana
 
 	// we calculated this above, now enforce it
-	if(mana_cost > 0 && slot != CastingSlot::Item) {
+	if (mana_cost > 0 && slot != CastingSlot::Item) {
 		int my_curmana = GetMana();
 		int my_maxmana = GetMaxMana();
-		if(my_curmana < mana_cost) {// not enough mana
+		if (my_curmana < mana_cost) {// not enough mana
 			//this is a special case for NPCs with no mana...
-			if(IsNPC() && my_curmana == my_maxmana){
+			if (IsNPC() && my_curmana == my_maxmana){
 				mana_cost = 0;
-			}
-			else {
+			} else {
 				//The client will prevent spell casting if insufficient mana, this is only for serverside enforcement.
 				LogSpells("Spell Error not enough mana spell=[{}] mymana=[{}] cost=[{}]\n", spell_id, my_curmana, mana_cost);
-				if(IsClient()) {
+				if (IsClient()) {
 					//clients produce messages... npcs should not for this case
 					MessageString(Chat::Red, INSUFFICIENT_MANA);
 					InterruptSpell();
-				}
-				else {
+				} else {
 					InterruptSpell(0, 0, 0);	//the 0 args should cause no messages
 				}
 				ZeroCastingVars();
@@ -462,22 +462,24 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// ok we know it has a cast time so we can start the timer now
 	spellend_timer.Start(cast_time);
 
-	if (IsAIControlled())
-	{
+	if (IsAIControlled()) {
 		SetRunAnimSpeed(0);
 		pMob = entity_list.GetMob(target_id);
-		if (pMob && this != pMob)
+		if (pMob && this != pMob) {
 			FaceTarget(pMob);
+		}
 	}
 
 	// if we got here we didn't fizzle, and are starting our cast
-	if (oSpellWillFinish)
+	if (oSpellWillFinish) {
 		*oSpellWillFinish = Timer::GetCurrentTime() + cast_time + 100;
+	}
 
-	if (IsClient() && slot == CastingSlot::Item && item_slot != 0xFFFFFFFF) {
+	if (RuleB(Spells, UseItemCastMessage) && IsClient() && slot == CastingSlot::Item && item_slot != 0xFFFFFFFF) {
 		auto item = CastToClient()->GetInv().GetItem(item_slot);
-		if (item && item->GetItem())
-			MessageString(Chat::Spells, BEGINS_TO_GLOW, item->GetItem()->Name);
+		if (item && item->GetItem()) {
+			MessageString(Chat::FocusEffect, BEGINS_TO_GLOW, item->GetItem()->Name);
+		}
 	}
 
 	return(true);
@@ -2195,11 +2197,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_TargetsTarget:
 		{
 			Mob *spell_target_tot = spell_target ? spell_target->GetTarget() : nullptr;
-			if(!spell_target_tot)
+			if (!spell_target_tot) {
 				return false;
+			}
+			
 			//Verfied from live - Target's Target needs to be in combat range to recieve the effect
-			if (!CombatRange(spell_target))
+			if (RuleB(Spells, TargetsTargetRequiresCombatRange) && !CombatRange(spell_target)) {
 				return false;
+			}
 
 			spell_target = spell_target_tot;
 			CastAction = SingleTarget;
@@ -2800,9 +2805,18 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 		castlevel = caster_level_override;
 
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
-	if (caster == target && (target->aabonuses.IllusionPersistence || target->spellbonuses.IllusionPersistence ||
-		target->itembonuses.IllusionPersistence) &&
-		spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion)) {
+	if (
+		caster == target &&
+		(
+			target->aabonuses.IllusionPersistence ||
+			target->spellbonuses.IllusionPersistence ||
+			target->itembonuses.IllusionPersistence ||
+			RuleB(Spells, IllusionsAlwaysPersist)
+		) &&
+		spell_id != SPELL_MINOR_ILLUSION &&
+		spell_id != SPELL_ILLUSION_TREE &&
+		IsEffectInSpell(spell_id, SE_Illusion)
+	) {
 		res = 10000; // ~16h override
 	}
 
@@ -3509,8 +3523,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	bool is_damage_or_lifetap_spell = IsDamageSpell(spell_id) || IsLifetapSpell(spell_id);
-
 	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id) && !IsEffectInSpell(spell_id, SE_BindSight)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
@@ -4107,9 +4119,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		if(IsClient())	// send to caster
 			CastToClient()->QueuePacket(action_packet);
 	}
-	// send to people in the area, ignoring caster and target
-	//live dosent send this to anybody but the caster
-	//entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+
 	message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 	CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
 	cd->target = action->target;
@@ -4121,7 +4131,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	cd->hit_pitch = action->hit_pitch;
 	cd->damage = 0;
 
-	if(!IsEffectInSpell(spell_id, SE_BindAffinity) && !is_damage_or_lifetap_spell){
+	if (!IsLifetapSpell(spell_id) && !IsEffectInSpell(spell_id, SE_BindAffinity) && !IsAENukeSpell(spell_id) && !IsDamageSpell(spell_id)) {
 		entity_list.QueueCloseClients(
 			spelltar, /* Sender */
 			message_packet, /* Packet */
@@ -4131,18 +4141,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 			true, /* Packet ACK */
 			(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
 		);
-	} else if (is_damage_or_lifetap_spell) {
-		// Sends the client owner a message like "%T staggers"
-		if (spellOwner->IsClient()) {
-			spellOwner->CastToClient()->QueuePacket(message_packet, true,
-				Mob::CLIENT_CONNECTINGALL, FilterPCSpells);
-		}
-		// Show the "you feel your life force drain away" on target client...
-		if (IsLifetapSpell(spell_id) && spelltar->IsClient()) {
-			spelltar->CastToClient()->QueuePacket(message_packet, true,
-				Mob::CLIENT_CONNECTINGALL,
-				(spellOwner->IsClient() ? FilterPCSpells : FilterNPCSpells));
-		}
 	}
 	safe_delete(action_packet);
 	safe_delete(message_packet);
@@ -5518,7 +5516,7 @@ uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
 	return highest_spell_id;
 }
 
-bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
+bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 	std::string query = fmt::format(
 		"SELECT qglobal, value FROM spell_globals WHERE spellid = {}",
 		spell_id
@@ -5543,7 +5541,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 
 	query = fmt::format(
 		"SELECT value FROM quest_globals WHERE charid = {} AND name = '{}'",
-		char_id,
+		character_id,
 		EscapeString(spell_global_name)
 	);
 
@@ -5553,7 +5551,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 			"Spell global [{}] for spell ID [{}] for character ID [{}] query failed.",
 			spell_global_name,
 			spell_id,
-			char_id
+			character_id
 		);
 
 		return false; // Query failed, do not allow scribing.
@@ -5564,7 +5562,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 			"Spell global [{}] for spell ID [{}] for character ID [{}] does not exist.",
 			spell_global_name,
 			spell_id,
-			char_id
+			character_id
 		);
 
 		return false; // No rows found, do not allow scribing.
@@ -5587,7 +5585,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 		"Spell global [{}] for spell ID [{}] for character ID [{}] did not match value [{}] value found was [{}].",
 		spell_global_name,
 		spell_id,
-		char_id,
+		character_id,
 		spell_global_value,
 		global_value
 	);
@@ -5595,7 +5593,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 	return false;
 }
 
-bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
+bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 	auto query = fmt::format(
 		"SELECT `key`, value FROM spell_buckets WHERE spellid = {}",
 		spell_id
@@ -5618,56 +5616,43 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
 		return true; // If the entry in the spell_buckets table has nothing set for the qglobal name, allow scribing.
 	}
 
-	query = fmt::format(
-		"SELECT value FROM data_buckets WHERE `key` = '{}-{}'",
-		char_id,
-		EscapeString(spell_bucket_name)
+	auto new_bucket_name = fmt::format(
+		"{}-{}",
+		GetBucketKey(),
+		spell_bucket_name
 	);
 
-	results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError(
-			"Spell bucket [{}] for spell ID [{}] for character ID [{}] query failed.",
-			spell_bucket_name,
-			spell_id,
-			char_id
-		);
-
-		return false; // Query failed, do not allow scribing.
-	}
-
-	if (!results.RowCount()) {
-		LogError(
-			"Spell bucket [{}] for spell ID [{}] for character ID [{}] does not exist.",
-			spell_bucket_name,
-			spell_id,
-			char_id
-		);
-
-		return false; // No rows found, do not allow scribing.
-	}
-
-	row = results.begin();
-	std::string bucket_value = row[0];
-	if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
-		if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
-			return true; // If value is greater than or equal to spell bucket value, allow scribing.
-		}
-	} else {
-		if (bucket_value == spell_bucket_value) {
-			return true; // If value is equal to spell bucket value, allow scribing.
+	auto bucket_value = DataBucket::GetData(new_bucket_name);
+	if (!bucket_value.empty()) {
+		if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
+			if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
+				return true; // If value is greater than or equal to spell bucket value, allow scribing.
+			}
+		} else {				
+			if (bucket_value == spell_bucket_value) {
+				return true; // If value is equal to spell bucket value, allow scribing.
+			}
 		}
 	}
 
-	// If user's data bucket does not meet requirements, do not allow scribing.
-	LogError(
-		"Spell bucket [{}] for spell ID [{}] for character ID [{}] did not match value [{}] value found was [{}].",
-		spell_bucket_name,
-		spell_id,
-		char_id,
-		spell_bucket_value,
-		bucket_value
+	auto old_bucket_name = fmt::format(
+		"{}-{}",
+		character_id,
+		spell_bucket_name
 	);
+
+	bucket_value = DataBucket::GetData(old_bucket_name);
+	if (!bucket_value.empty()) {
+		if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
+			if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
+				return true; // If value is greater than or equal to spell bucket value, allow scribing.
+			}
+		} else {				
+			if (bucket_value == spell_bucket_value) {
+				return true; // If value is equal to spell bucket value, allow scribing.
+			}
+		}
+	}
 
 	return false;
 }

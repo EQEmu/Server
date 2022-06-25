@@ -399,17 +399,13 @@ public:
 	bool		BuryAllCharacterCorpses(uint32 charid);
 	bool		DeleteCharacterCorpse(uint32 dbid);
 	bool		SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
-	bool		SummonAllGraveyardCorpses(uint32 cur_zoneid, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	int			CountCharacterCorpses(uint32 char_id);
 	int			CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id);
 	bool		UnburyCharacterCorpse(uint32 dbid, uint32 new_zoneid, uint16 dest_instanceid, const glm::vec4& position);
 	bool		LoadCharacterCorpses(uint32 iZoneID, uint16 iInstanceID);
-	bool		DeleteGraveyard(uint32 zone_id, uint32 graveyard_id);
 	uint32		GetCharacterCorpseDecayTimer(uint32 corpse_db_id);
 	uint32		GetCharacterBuriedCorpseCount(uint32 char_id);
 	uint32		SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zoneid, uint16 instanceid, const glm::vec4& position);
-	uint32		CreateGraveyardRecord(uint32 graveyard_zoneid, const glm::vec4& position);
-	uint32		AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id);
 	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid);
 	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, PlayerCorpse_Struct* dbpc, const glm::vec4& position, uint32 guildid, bool rezzed = false);
 	uint32		UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid);
@@ -453,8 +449,6 @@ public:
 		char **map_filename);
 	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
-	bool		UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location);
-	uint8		GetUseCFGSafeCoords();
 	int			getZoneShutDownDelay(uint32 zoneID, uint32 version);
 
 	/* Spawns and Spawn Points  */

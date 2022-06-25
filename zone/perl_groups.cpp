@@ -411,7 +411,7 @@ XS(XS_Group_GetMember) {
 				RETVAL = member->CastToClient();
 		}
 
-		ST(0)          = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);

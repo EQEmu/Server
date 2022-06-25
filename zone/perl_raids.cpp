@@ -40,7 +40,7 @@ XS(XS_Raid_IsRaidMember) {
 		const char *name = (char *) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->IsRaidMember(name);
-		ST(0)            = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -216,7 +216,7 @@ XS(XS_Raid_IsLeader) {
 		const char *name = (char *) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->IsLeader(name);
-		ST(0)            = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -233,7 +233,7 @@ XS(XS_Raid_IsGroupLeader) {
 		const char *who = (char *) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->IsGroupLeader(who);
-		ST(0)           = boolSV(RETVAL);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -284,7 +284,7 @@ XS(XS_Raid_GetClientByIndex) {
 		uint16 index = (uint16) SvUV(ST(1));
 		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->GetClientByIndex(index);
-		ST(0)        = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);
@@ -380,7 +380,7 @@ XS(XS_Raid_GetMember) {
 				RETVAL = THIS->members[index].member->CastToClient();
 		}
 
-		ST(0)          = sv_newmortal();
+		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
 	}
 	XSRETURN(1);

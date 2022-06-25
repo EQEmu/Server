@@ -888,9 +888,8 @@ Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, J
 void RegisterApiLogEvent(std::unique_ptr<EQ::Net::WebsocketServer> &server)
 {
 	LogSys.SetConsoleHandler(
-		[&](uint16 debug_level, uint16 log_category, const std::string &msg) {
+		[&](uint16 log_category, const std::string &msg) {
 			Json::Value data;
-			data["debug_level"]  = debug_level;
 			data["log_category"] = log_category;
 			data["msg"]          = msg;
 			server->DispatchEvent(EQ::Net::SubscriptionEventLog, data, 50);

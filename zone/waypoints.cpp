@@ -557,6 +557,20 @@ void NPC::SetWaypointPause()
 	}
 }
 
+void NPC::SaveGuardSpot(bool ClearGuardSpot) {
+	if (ClearGuardSpot) {
+		LogAI("Clearing guard order.");
+		m_GuardPoint = glm::vec4();
+	} else {
+		m_GuardPoint = m_Position;
+
+		if (m_GuardPoint.w == 0) {
+			m_GuardPoint.w = 0.0001; //hack to make IsGuarding simpler
+		}
+		LogAI("Setting guard position to {0}", to_string(static_cast<glm::vec3>(m_GuardPoint)));
+	}
+}
+
 void NPC::SaveGuardSpot(const glm::vec4 &pos)
 {
 	m_GuardPoint = pos;

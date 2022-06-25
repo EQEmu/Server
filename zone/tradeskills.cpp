@@ -512,6 +512,15 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		return;
 	}
 
+	// Character does not have the required skill.
+	if (spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed) {
+		// Notify client.
+		user->Message(Chat::Red, "You are not skilled enough.");
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
+
     //pull the list of components
 	std::string query = StringFormat("SELECT tre.item_id, tre.componentcount "
                                     "FROM tradeskill_recipe_entries AS tre "
@@ -1051,9 +1060,9 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		itr = spec->onsuccess.begin();
 		while(itr != spec->onsuccess.end() && !spec->quest) {
 
-			SummonItem(itr->first, itr->second);
 			item = database.GetItem(itr->first);
 			if (item) {
+				SummonItem(itr->first, itr->second);
 				if (GetGroup()) {
 					entity_list.MessageGroup(this, true, Chat::Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
 				}

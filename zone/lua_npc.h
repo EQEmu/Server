@@ -90,6 +90,8 @@ public:
 	void PauseWandering(int pause_time);
 	void MoveTo(float x, float y, float z, float h, bool save);
 	void NextGuardPosition();
+	void SaveGuardSpot();
+	void SaveGuardSpot(bool clear);
 	void SaveGuardSpot(float x, float y, float z, float heading);
 	bool IsGuarding();
 	void AI_SetRoambox(float dist, float max_x, float min_x, float max_y, float min_y);
@@ -140,7 +142,7 @@ public:
 	void RecalculateSkills();
 	void ScaleNPC(uint8 npc_level);
 	bool IsRaidTarget();
-	void ChangeLastName(const char *lastname);
+	void ChangeLastName(std::string last_name);
 	void ClearLastName();
 	bool HasItem(uint32 item_id);
 	uint16 CountItem(uint32 item_id);

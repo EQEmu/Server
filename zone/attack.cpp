@@ -1894,7 +1894,10 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		int32 illusion_spell_id = spellbonuses.Illusion;
 
 		//this generates a lot of 'updates' to the client that the client does not need
-		BuffFadeNonPersistDeath();
+		if (RuleB(Spells, BuffsFadeOnDeath)) {
+			BuffFadeNonPersistDeath();
+		}
+
 		if (RuleB(Character, UnmemSpellsOnDeath)) {
 			if ((ClientVersionBit() & EQ::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover))
 				UnmemSpellAll(true);
@@ -2581,7 +2584,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 
 	bool    allow_merchant_corpse = RuleB(Merchant, AllowCorpse);
-	bool    is_merchant = (class_ == MERCHANT || class_ == ADVENTUREMERCHANT || MerchantType != 0);
+	bool    is_merchant = (class_ == MERCHANT || class_ == ADVENTURE_MERCHANT || MerchantType != 0);
 
 	if (!HasOwner() && !IsMerc() && !GetSwarmInfo() && (!is_merchant || allow_merchant_corpse) &&
 		((killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
@@ -3675,7 +3678,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
-				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
+				entity_list.MessageClose(this, false, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
 			}
 
 			// If a client pet is damaged while sitting, stand, fix sit button,
@@ -3829,11 +3832,59 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				can_stun = true;
 			}
 
-			if ((GetBaseRace() == OGRE || GetBaseRace() == OGGOK_CITIZEN) &&
-				!attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))
+			bool is_immune_to_frontal_stun = false;
+
+			if (IsBot() || IsClient() || IsMerc()) {
+				if (
+					IsPlayerClass(GetClass()) &&
+					RuleI(Combat, FrontalStunImmunityClasses) & GetPlayerClassBit(GetClass())
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+
+
+				if (
+					(
+						IsPlayerRace(GetBaseRace()) &&
+						RuleI(Combat, FrontalStunImmunityRaces) & GetPlayerRaceBit(GetBaseRace())
+					) ||
+					GetBaseRace() == RACE_OGGOK_CITIZEN_93
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+			} else if (IsNPC()) {
+				if (
+					RuleB(Combat, NPCsUseFrontalStunImmunityClasses) &&
+					IsPlayerClass(GetClass()) &&
+					RuleI(Combat, FrontalStunImmunityClasses) & GetPlayerClassBit(GetClass())
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+
+				if (
+					RuleB(Combat, NPCsUseFrontalStunImmunityRaces) &&
+					(
+						(
+							IsPlayerRace(GetBaseRace()) &&
+							RuleI(Combat, FrontalStunImmunityRaces) & GetPlayerRaceBit(GetBaseRace())
+						) ||
+						GetBaseRace() == RACE_OGGOK_CITIZEN_93
+					)
+				) {
+					is_immune_to_frontal_stun = true;
+				}
+			}
+
+			if (
+				is_immune_to_frontal_stun &&
+				!attacker->BehindMob(this, attacker->GetX(), attacker->GetY())
+			) {
 				can_stun = false;
-			if (GetSpecialAbility(UNSTUNABLE))
+			}
+
+			if (GetSpecialAbility(UNSTUNABLE)) {
 				can_stun = false;
+			}
 		}
 		if (can_stun) {
 			int bashsave_roll = zone->random.Int(0, 100);
@@ -4021,20 +4072,47 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		// we don't send them here.
 		if (!FromDamageShield) {
 
-			entity_list.QueueCloseClients(
-				this, /* Sender */
-				outapp, /* packet */
-				true, /* Skip Sender */
-				RuleI(Range, SpellMessages),
-				skip, /* Skip this mob */
-				true, /* Packet ACK */
-				filter /* eqFilterType filter */
-				);
+			// Determine message range based on spell/other-damage
+			int range;
+			if (IsValidSpell(spell_id)) {
+				range = RuleI(Range, SpellMessages);
+			}
+			else {
+				range = RuleI(Range, DamageMessages);
+			}
 
-			//send the damage to ourself if we are a client
-			if (IsClient()) {
+			// If an "innate" spell, change to spell type to
+			// produce a spell message.  Send to everyone.
+			// This fixes issues with npc-procs like 1002 and 918 which
+			// need to spit out extra spell color.
+			if (IsValidSpell(spell_id) && skill_used == EQ::skills::SkillTigerClaw) {
+				a->type = DamageTypeSpell;
+				entity_list.QueueCloseClients(
+					this, /* Sender */
+					outapp, /* packet */
+					false, /* Skip Sender */
+					range, /* distance packet travels at the speed of sound */
+					0, /* don't skip anyone on spell */
+					true, /* Packet ACK */
+					filter /* eqFilterType filter */
+					);
+			}
+			else {
 				//I dont think any filters apply to damage affecting us
-				CastToClient()->QueuePacket(outapp);
+				if (IsClient()) {
+					CastToClient()->QueuePacket(outapp);
+				}
+
+				// Otherwise, send normal spell or melee message to observers.
+				entity_list.QueueCloseClients(
+					this, /* Sender */
+					outapp, /* packet */
+					true, /* Skip Sender */
+					range, /* distance packet travels at the speed of sound */
+					(IsValidSpell(spell_id) && skill_used != EQ::skills::SkillTigerClaw) ? 0 : skip,
+					true, /* Packet ACK */
+					filter /* eqFilterType filter */
+					);
 			}
 		}
 
@@ -5638,17 +5716,17 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ
 		shielder->shield_timer.Disable();
 		shield_target->SetShielderID(0);
 		shield_target->SetShieldTargetMitigation(0);
-		return; //Too far away, no message is given thoughh.
+		return; //Too far away, no message is given though.
 	}
 
-	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equiping a shield item
+	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equipping a shield item
 	if (shielder->IsClient() && shielder->HasShieldEquiped()) {
 		EQ::ItemInstance* inst = shielder->CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 		if (inst) {
 			const EQ::ItemData* shield = inst->GetItem();
 			if (shield && shield->ItemType == EQ::item::ItemTypeShield) {
 				mitigation += shield->AC * 50 / 100; //1% increase per 2 AC
-				std::min(50, mitigation);//50 pct max mitigation bonus from /shield
+				mitigation = std::min(50, mitigation);//50 pct max mitigation bonus from /shield
 			}
 		}
 	}

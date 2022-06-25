@@ -5,29 +5,30 @@ class Client;
 class Seperator;
 
 #include "../common/types.h"
+#include <string>
 
 #define    COMMAND_CHAR '#'
 
 typedef void (*CmdFuncPtr)(Client *, const Seperator *);
 
 typedef struct {
-	int        access;
-	const char *desc;            // description of command
-	CmdFuncPtr function;        // null means perl function
-}            CommandRecord;
+	uint8 admin;
+	std::string description;
+	CmdFuncPtr function; // null means perl function
+} CommandRecord;
 
-extern int (*command_dispatch)(Client *, char const *);
-extern int commandcount;        // number of commands loaded
+extern int (*command_dispatch)(Client *,std::string);
+extern int command_count; // Commands Loaded Count
 
-// the command system:
+// Command Utilities
 int command_init(void);
 void command_deinit(void);
-int command_add(std::string command_name, const char *desc, int access, CmdFuncPtr function);
-int command_notavail(Client *c, const char *message);
-int command_realdispatch(Client *c, char const *message);
-void command_logcommand(Client *c, const char *message);
+int command_add(std::string command_name, std::string description, uint8 admin, CmdFuncPtr function);
+int command_notavail(Client *c, std::string message);
+int command_realdispatch(Client *c, std::string message);
+void command_logcommand(Client *c, std::string message);
 
-//commands
+// Commands
 void command_acceptrules(Client *c, const Seperator *sep);
 void command_advnpcspawn(Client *c, const Seperator *sep);
 void command_aggro(Client *c, const Seperator *sep);
@@ -54,7 +55,6 @@ void command_databuckets(Client *c, const Seperator *sep);
 void command_date(Client *c, const Seperator *sep);
 void command_dbspawn2(Client *c, const Seperator *sep);
 void command_delacct(Client *c, const Seperator *sep);
-void command_deletegraveyard(Client *c, const Seperator *sep);
 void command_delpetition(Client *c, const Seperator *sep);
 void command_depop(Client *c, const Seperator *sep);
 void command_depopzone(Client *c, const Seperator *sep);
@@ -108,7 +108,6 @@ void command_gmzone(Client *c, const Seperator *sep);
 void command_goto(Client *c, const Seperator *sep);
 void command_grid(Client *c, const Seperator *sep);
 void command_guild(Client *c, const Seperator *sep);
-bool helper_guild_edit(Client *c, uint32 dbid, uint32 eqid, uint8 rank, const char *what, const char *value);
 void command_guildapprove(Client *c, const Seperator *sep);
 void command_guildcreate(Client *c, const Seperator *sep);
 void command_guildlist(Client *c, const Seperator *sep);
@@ -139,7 +138,6 @@ void command_list(Client *c, const Seperator *sep);
 void command_listpetition(Client *c, const Seperator *sep);
 void command_load_shared_memory(Client *c, const Seperator *sep);
 void command_loc(Client *c, const Seperator *sep);
-void command_lock(Client *c, const Seperator *sep);
 void command_logs(Client *c, const Seperator *sep);
 void command_makepet(Client *c, const Seperator *sep);
 void command_mana(Client *c, const Seperator *sep);
@@ -214,6 +212,7 @@ void command_revoke(Client *c, const Seperator *sep);
 void command_roambox(Client *c, const Seperator *sep);
 void command_rules(Client *c, const Seperator *sep);
 void command_save(Client *c, const Seperator *sep);
+void command_serverlock(Client *c, const Seperator *sep);
 void command_scale(Client *c, const Seperator *sep);
 void command_scribespell(Client *c, const Seperator *sep);
 void command_scribespells(Client *c, const Seperator *sep);
@@ -229,7 +228,6 @@ void command_setanim(Client *c, const Seperator *sep);
 void command_setcrystals(Client *c, const Seperator *sep);
 void command_setendurance(Client *c, const Seperator *sep);
 void command_setfaction(Client *c, const Seperator *sep);
-void command_setgraveyard(Client *c, const Seperator *sep);
 void command_sethp(Client *c, const Seperator *sep);
 void command_setlanguage(Client *c, const Seperator *sep);
 void command_setlsinfo(Client *c, const Seperator *sep);

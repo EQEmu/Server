@@ -806,14 +806,14 @@ void Client::AI_Process()
 					FaceTarget();
 				}
 			}
-			if (GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
+			if (GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned() && IsAttackAllowed(GetTarget())) {
 				if (attack_timer.Check()) {
 					// Should charmed clients not be procing?
 					DoAttackRounds(GetTarget(), EQ::invslot::slotPrimary);
 				}
 			}
 
-			if (CanThisClassDualWield() && GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
+			if (CanThisClassDualWield() && GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned() && IsAttackAllowed(GetTarget())) {
 				if (attack_dw_timer.Check()) {
 					if (CheckDualWield()) {
 						// Should charmed clients not be procing?

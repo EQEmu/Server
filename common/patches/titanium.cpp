@@ -1464,6 +1464,30 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_SetFace)
+	{
+		auto emu = reinterpret_cast<FaceChange_Struct*>((*p)->pBuffer);
+
+		EQApplicationPacket outapp(OP_Illusion, sizeof(structs::Illusion_Struct));
+		auto buf = reinterpret_cast<structs::Illusion_Struct*>(outapp.pBuffer);
+
+		buf->spawnid     = emu->entity_id;
+		buf->race        = -1; // unchanged
+		buf->gender      = -1; // unchanged
+		buf->texture     = -1; // unchanged
+		buf->helmtexture = -1; // unchanged
+		buf->face        = emu->face;
+		buf->hairstyle   = emu->hairstyle;
+		buf->haircolor   = emu->haircolor;
+		buf->beard       = emu->beard;
+		buf->beardcolor  = emu->beardcolor;
+		buf->size        = 0.0f; // unchanged
+
+		safe_delete(*p); // not using the original packet
+
+		dest->QueuePacket(&outapp, ack_req);
+	}
+
 	ENCODE(OP_ShopPlayerSell)
 	{
 		ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);

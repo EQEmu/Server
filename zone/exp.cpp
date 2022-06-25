@@ -22,6 +22,7 @@
 #include "../common/string_util.h"
 
 #include "client.h"
+#include "data_bucket.h"
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
@@ -722,12 +723,12 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		}
 	}
 
-	if (GetClientMaxLevel() > 0) {
-		int client_max_level = GetClientMaxLevel();
+	auto client_max_level = GetClientMaxLevel();
+	if (client_max_level) {
 		if (GetLevel() >= client_max_level) {
-			uint32 expneeded = GetEXPForLevel(client_max_level);
-			if(set_exp > expneeded) {
-				set_exp = expneeded;
+			auto exp_needed = GetEXPForLevel(client_max_level);
+			if (set_exp > exp_needed) {
+				set_exp = exp_needed;
 			}
 		}
 	}
@@ -1148,44 +1149,52 @@ void Client::SendLeadershipEXPUpdate() {
 	FastQueuePacket(&outapp);
 }
 
-uint32 Client::GetCharMaxLevelFromQGlobal() {
-	QGlobalCache *char_c = nullptr;
-	char_c = GetQGlobals();
+uint8 Client::GetCharMaxLevelFromQGlobal() {
+	auto char_cache = GetQGlobals();
 
-	std::list<QGlobal> globalMap;
-	uint32 ntype = 0;
+	std::list<QGlobal> global_map;
 
-	if(char_c) {
-		QGlobalCache::Combine(globalMap, char_c->GetBucket(), ntype, CharacterID(), zone->GetZoneID());
+	if (char_cache) {
+		QGlobalCache::Combine(global_map, char_cache->GetBucket(), 0, CharacterID(), zone->GetZoneID());
 	}
 
-	auto iter = globalMap.begin();
-	uint32 gcount = 0;
-	while(iter != globalMap.end()) {
-		if((*iter).name.compare("CharMaxLevel") == 0){
-			return atoi((*iter).value.c_str());
+	for (const auto& global : global_map) {
+		if (global.name == "CharMaxLevel") {
+			if (StringIsNumber(global.value)) {
+				return static_cast<uint8>(std::stoul(global.value));
+			}
 		}
-		++iter;
-		++gcount;
 	}
 
 	return 0;
 }
 
-uint32 Client::GetCharMaxLevelFromBucket()
+uint8 Client::GetCharMaxLevelFromBucket()
 {
-	uint32      char_id = CharacterID();
-	std::string query   = StringFormat("SELECT value FROM data_buckets WHERE `key` = '%i-CharMaxLevel'", char_id);
-	auto        results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Data bucket for CharMaxLevel for char ID [{}] failed", char_id);
-		return 0;
+	auto new_bucket_name = fmt::format(
+		"{}-CharMaxLevel",
+		GetBucketKey()
+	);
+
+	auto bucket_value = DataBucket::GetData(new_bucket_name);
+	if (!bucket_value.empty()) {
+		if (StringIsNumber(bucket_value)) {
+			return static_cast<uint8>(std::stoul(bucket_value));
+		}
 	}
 
-	if (results.RowCount() > 0) {
-		auto row = results.begin();
-		return atoi(row[0]);
+	auto old_bucket_name = fmt::format(
+		"{}-CharMaxLevel",
+		CharacterID()
+	);
+
+	bucket_value = DataBucket::GetData(old_bucket_name);
+	if (!bucket_value.empty()) {
+		if (StringIsNumber(bucket_value)) {
+			return static_cast<uint8>(std::stoul(bucket_value));
+		}
 	}
+
 	return 0;
 }
 

@@ -1236,11 +1236,9 @@ void EntityList::AEAttack(
 			) {
 
 			for (int i = 0; i < attack_rounds; i++) {
-
 				if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER) {
 					attacker->Attack(current_mob, Hand, false, false, is_from_spell);
-				}
-				else {
+				} else {
 					attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
 				}
 			}

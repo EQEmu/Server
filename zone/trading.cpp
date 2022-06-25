@@ -1506,6 +1506,8 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* C
 				Trader_EndTrader();
 			}
 
+			safe_delete(TraderItems);
+
 			return;
 		}
 		else
@@ -1836,13 +1838,13 @@ void Client::SendBazaarResults(
 			search_criteria.append(" AND items.itemclass = 2");
 			break;
 		case 46:
-			search_criteria.append(" AND items.spellid > 0 AND items.spellid < 65000");
+			search_criteria.append(" AND items.scrolleffect > 0 AND items.scrolleffect < 65000");
 			break;
 		case 47:
-			search_criteria.append(" AND items.spellid = 998");
+			search_criteria.append(" AND items.worneffect = 998");
 			break;
 		case 48:
-			search_criteria.append(" AND items.spellid >= 1298 AND items.spellid <= 1307");
+			search_criteria.append(" AND items.worneffect >= 1298 AND items.worneffect <= 1307");
 			break;
 		case 49:
 			search_criteria.append(" AND items.focuseffect > 0");

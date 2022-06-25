@@ -351,7 +351,7 @@ void Merc::AddItemBonuses(const EQ::ItemData *item, StatBonuses* newbon) {
 	}
 
 	//FatherNitwit: New style haste, shields, and regens
-	if(newbon->haste < (int16)item->Haste) {
+	if(newbon->haste < item->Haste) {
 		newbon->haste = item->Haste;
 	}
 	if(item->Regen > 0)
@@ -2616,7 +2616,7 @@ int64 Merc::GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic) 
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 
 		if (realTotal != 0 && UsedItem)
-			MessageString(Chat::Spells, BEGINS_TO_GLOW, UsedItem->Name);
+			MessageString(Chat::FocusEffect, BEGINS_TO_GLOW, UsedItem->Name);
 	}
 
 	//Check if spell focus effect exists for the client.

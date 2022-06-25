@@ -28,9 +28,9 @@ void command_ban(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Character {} does not exist."
-			).c_str(),
-			character_name
+				"Character {} does not exist.",
+				character_name
+			).c_str()
 		);
 		return;
 	}
@@ -53,20 +53,19 @@ void command_ban(Client *c, const Seperator *sep)
 	);
 
 	ServerPacket flagUpdatePack(ServerOP_FlagUpdate, sizeof(ServerFlagUpdate_Struct));
-	ServerFlagUpdate_Struct *sfus = (ServerFlagUpdate_Struct *) flagUpdatePack.pBuffer;
+	auto sfus = (ServerFlagUpdate_Struct *) flagUpdatePack.pBuffer;
 	sfus->account_id = account_id;
 	sfus->admin = -2;
 	worldserver.SendPacket(&flagUpdatePack);
 
-	Client *client = nullptr;
-	client = entity_list.GetClientByName(character_name.c_str());
+	auto client = entity_list.GetClientByName(character_name.c_str());
 	if (client) {
 		client->WorldKick();
 		return;
 	}
 
 	ServerPacket kickPlayerPack(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-	ServerKickPlayer_Struct *skp = (ServerKickPlayer_Struct *) kickPlayerPack.pBuffer;
+	auto skp = (ServerKickPlayer_Struct *) kickPlayerPack.pBuffer;
 	strcpy(skp->adminname, c->GetName());
 	strcpy(skp->name, character_name.c_str());
 	skp->adminrank = c->Admin();

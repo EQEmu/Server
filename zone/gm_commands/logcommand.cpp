@@ -1,85 +1,89 @@
 #include "../client.h"
 
-void command_logcommand(Client *c, const char *message)
+void command_logcommand(Client *c, std::string message)
 {
 	int admin = c->Admin();
 
-	bool continueevents = false;
+	bool log = false;
 	switch (zone->loglevelvar) { //catch failsafe
 		case 9: { // log only LeadGM
 			if (
 				admin >= AccountStatus::GMLeadAdmin &&
 				admin < AccountStatus::GMMgmt
-				) {
-				continueevents = true;
+			) {
+				log = true;
 			}
+
 			break;
 		}
 		case 8: { // log only GM
 			if (
 				admin >= AccountStatus::GMAdmin &&
 				admin < AccountStatus::GMLeadAdmin
-				) {
-				continueevents = true;
+			) {
+				log = true;
 			}
+
 			break;
 		}
 		case 1: {
 			if (admin >= AccountStatus::GMMgmt) {
-				continueevents = true;
+				log = true;
 			}
+
 			break;
 		}
 		case 2: {
 			if (admin >= AccountStatus::GMLeadAdmin) {
-				continueevents = true;
+				log = true;
 			}
+
 			break;
 		}
 		case 3: {
 			if (admin >= AccountStatus::GMAdmin) {
-				continueevents = true;
+				log = true;
 			}
+
 			break;
 		}
 		case 4: {
 			if (admin >= AccountStatus::QuestTroupe) {
-				continueevents = true;
+				log = true;
 			}
+
 			break;
 		}
 		case 5: {
 			if (admin >= AccountStatus::ApprenticeGuide) {
-				continueevents = true;
+				log = true;
 			}
+
 			break;
 		}
 		case 6: {
 			if (admin >= AccountStatus::Steward) {
-				continueevents = true;
+				log = true;
 			}
+
 			break;
 		}
 		case 7: {
-			continueevents = true;
+			log = true;
 			break;
 		}
 	}
 
-	if (continueevents) {
+	if (log) {
 		database.logevents(
 			c->AccountName(),
 			c->AccountID(),
-			admin, c->GetName(),
+			admin,
+			c->GetName(),
 			c->GetTarget() ? c->GetTarget()->GetName() : "None",
 			"Command",
-			message,
+			message.c_str(),
 			1
 		);
 	}
 }
-
-
-/*
- * commands go below here
- */

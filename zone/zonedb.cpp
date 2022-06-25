@@ -2356,7 +2356,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 			SQL(
 				id IN (
 					select npcID from spawnentry where spawngroupID IN (
-						select spawngroupID from spawn2 where `zone` = '{}' and `version` = {}
+						select spawngroupID from spawn2 where `zone` = '{}' and (`version` = {} OR `version` = -1)
 					)
 				)
 			),
@@ -2511,8 +2511,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->see_invis        = n.see_invis != 0;
 		t->see_invis_undead = n.see_invis_undead != 0;    // Set see_invis_undead flag
 
-		if (!n.lastname.empty()) {
-			strn0cpy(t->lastname, n.lastname.c_str(), 32);
+		if (!RuleB(NPC, DisableLastNames) && !n.lastname.empty()) {
+			strn0cpy(t->lastname, n.lastname.c_str(), sizeof(t->lastname));
 		}
 
 		t->qglobal                = n.qglobal != 0;    // qglobal
@@ -2560,7 +2560,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->always_aggro           = n.always_aggro != 0;
 		t->exp_mod                = n.exp_mod;
 		t->skip_auto_scale        = false; // hardcoded here for now
-		t->hp_regen_per_second    = n.hp_regen_rate;
+		t->hp_regen_per_second    = n.hp_regen_per_second;
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -3143,34 +3143,6 @@ void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 item, uint
 void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot){
 	std::string query = StringFormat("DELETE FROM merchantlist_temp WHERE npcid=%d AND slot=%d", npcid, slot);
 	QueryDatabase(query);
-}
-
-bool ZoneDatabase::UpdateZoneSafeCoords(const char* zonename, const glm::vec3& location) {
-
-	std::string query = StringFormat("UPDATE zone SET safe_x='%f', safe_y='%f', safe_z='%f' "
-                                    "WHERE short_name='%s';",
-                                    location.x, location.y, location.z, zonename);
-	auto results = QueryDatabase(query);
-	if (!results.Success() || results.RowsAffected() == 0)
-		return false;
-
-	return true;
-}
-
-uint8 ZoneDatabase::GetUseCFGSafeCoords()
-{
-	const std::string query = "SELECT value FROM variables WHERE varname='UseCFGSafeCoords'";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-
-	if (results.RowCount() != 1)
-        return 0;
-
-	auto row = results.begin();
-
-    return atoi(row[0]);
 }
 
 //New functions for timezone
@@ -4215,39 +4187,6 @@ bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFactio
 
 /*  Corpse Queries */
 
-bool ZoneDatabase::DeleteGraveyard(uint32 zone_id, uint32 graveyard_id) {
-	std::string query = StringFormat( "UPDATE `zone` SET `graveyard_id` = 0 WHERE `zone_idnumber` = %u AND `version` = 0", zone_id);
-	auto results = QueryDatabase(query);
-
-	query = StringFormat("DELETE FROM `graveyard` WHERE `id` = %u",  graveyard_id);
-	auto results2 = QueryDatabase(query);
-
-	if (results.Success() && results2.Success()){
-		return true;
-	}
-
-	return false;
-}
-
-uint32 ZoneDatabase::AddGraveyardIDToZone(uint32 zone_id, uint32 graveyard_id) {
-	std::string query = StringFormat(
-		"UPDATE `zone` SET `graveyard_id` = %u WHERE `zone_idnumber` = %u AND `version` = 0",
-		graveyard_id, zone_id
-	);
-	auto results = QueryDatabase(query);
-	return zone_id;
-}
-
-uint32 ZoneDatabase::CreateGraveyardRecord(uint32 graveyard_zone_id, const glm::vec4& position) {
-	std::string query = StringFormat("INSERT INTO `graveyard` "
-                                    "SET `zone_id` = %u, `x` = %1.1f, `y` = %1.1f, `z` = %1.1f, `heading` = %1.1f",
-                                    graveyard_zone_id, position.x, position.y, position.z, position.w);
-	auto results = QueryDatabase(query);
-	if (results.Success())
-		return results.LastInsertedID();
-
-	return 0;
-}
 uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id, uint16 instance_id, const glm::vec4& position) {
 
 	double xcorpse = (position.x + zone->random.Real(-20,20));

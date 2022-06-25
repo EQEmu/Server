@@ -91,20 +91,20 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto spawngroup_id = std::stoi(sep->arg[2]);
-		auto npc_id        = std::stoi(sep->arg[2]);
-		auto spawn_chance  = std::stoi(sep->arg[2]);
+		auto spawngroup_id = std::stoul(sep->arg[2]);
+		auto npc_id = std::stoul(sep->arg[3]);
+		auto spawn_chance = std::stoul(sep->arg[4]);
 
-		std::string query   = fmt::format(
+		auto query = fmt::format(
 			SQL(
-				INSERT INTO spawnentry(spawngroupID, npcID, chance)
-				VALUES({}, {}, {})
+				INSERT INTO spawnentry (spawngroupID, npcID, chance)
+				VALUES ({}, {}, {})
 			),
 			spawngroup_id,
 			npc_id,
 			spawn_chance
 		);
-		auto        results = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to add entry to Spawngroup.");
 			return;
@@ -121,36 +121,37 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			).c_str()
 		);
 		return;
-	}
-	else if (is_add_spawn) {
-		content_db.NPCSpawnDB(
-			NPCSpawnTypes::AddSpawnFromSpawngroup,
-			zone->GetShortName(),
-			zone->GetInstanceVersion(),
-			c,
-			0,
-			std::stoi(sep->arg[2])
-		);
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn Added | Added spawn from Spawngroup ID {}.",
-				std::stoi(sep->arg[2])
-			).c_str()
-		);
+	} else if (is_add_spawn) {
+		if (
+			content_db.NPCSpawnDB(
+				NPCSpawnTypes::AddSpawnFromSpawngroup,
+				zone->GetShortName(),
+				zone->GetInstanceVersion(),
+				c,
+				0,
+				std::stoul(sep->arg[2])
+			)
+		) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Spawn Added | Added spawn from Spawngroup ID {}.",
+					std::stoul(sep->arg[2])
+				).c_str()
+			);
+		}
 		return;
-	}
-	else if (is_clear_box) {
+	} else if (is_clear_box) {
 		if (arguments != 2 || !sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #advnpcspawn clearbox [Spawngroup ID]");
 			return;
 		}
 
-		std::string query   = fmt::format(
+		auto query = fmt::format(
 			"UPDATE spawngroup SET dist = 0, min_x = 0, max_x = 0, min_y = 0, max_y = 0, delay = 0 WHERE id = {}",
-			std::stoi(sep->arg[2])
+			std::stoul(sep->arg[2])
 		);
-		auto        results = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to clear Spawngroup box.");
 			return;
@@ -160,44 +161,45 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Spawngroup {} Roambox Cleared | Delay: 0 Distance: 0.00",
-				std::stoi(sep->arg[2])
+				std::stoul(sep->arg[2])
 			).c_str()
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawngroup {} Roambox Cleared | Minimum X: 0.00 Maximum X: 0.00",
-				std::stoi(sep->arg[2])
+				std::stoul(sep->arg[2])
 			).c_str()
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawngroup {} Roambox Cleared | Minimum Y: 0.00 Maximum Y: 0.00",
-				std::stoi(sep->arg[2])
+				std::stoul(sep->arg[2])
 			).c_str()
 		);
 		return;
-	}
-	else if (is_delete_spawn) {
+	} else if (is_delete_spawn) {
 		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 			c->Message(Chat::White, "You must target an NPC to use this command.");
 			return;
 		}
 
-		NPC    *target = c->GetTarget()->CastToNPC();
-		Spawn2 *spawn2 = target->respawn2;
+		auto target = c->GetTarget()->CastToNPC();
+		auto spawn2 = target->respawn2;
 		if (!spawn2) {
 			c->Message(Chat::White, "Failed to delete spawn because NPC has no Spawn2.");
 			return;
 		}
 
-		auto        spawn2_id = spawn2->GetID();
-		std::string query     = fmt::format(
+		auto spawn2_id = spawn2->GetID();
+		auto query = fmt::format(
 			"DELETE FROM spawn2 WHERE id = {}",
 			spawn2_id
 		);
-		auto        results   = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to delete spawn.");
 			return;
@@ -207,13 +209,13 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Spawn2 {} Deleted | Name: {}",
-				spawn2_id,c->GetTargetDescription(target)
+				spawn2_id,
+				c->GetTargetDescription(target)
 			).c_str()
 		);
 		target->Depop(false);
 		return;
-	}
-	else if (is_edit_box) {
+	} else if (is_edit_box) {
 		if (
 			arguments != 8 ||
 			!sep->IsNumber(3) ||
@@ -222,22 +224,22 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			!sep->IsNumber(6) ||
 			!sep->IsNumber(7) ||
 			!sep->IsNumber(8)
-			) {
+		) {
 			c->Message(
 				Chat::White,
 				"Usage: #advnpcspawn editbox [Spawngroup ID] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]"
 			);
 			return;
 		}
-		auto spawngroup_id = std::stoi(sep->arg[2]);
-		auto distance      = std::stof(sep->arg[3]);
-		auto minimum_x     = std::stof(sep->arg[4]);
-		auto maximum_x     = std::stof(sep->arg[5]);
-		auto minimum_y     = std::stof(sep->arg[6]);
-		auto maximum_y     = std::stof(sep->arg[7]);
-		auto delay         = std::stoi(sep->arg[8]);
+		auto spawngroup_id = std::stoul(sep->arg[2]);
+		auto distance = std::stof(sep->arg[3]);
+		auto minimum_x = std::stof(sep->arg[4]);
+		auto maximum_x = std::stof(sep->arg[5]);
+		auto minimum_y = std::stof(sep->arg[6]);
+		auto maximum_y = std::stof(sep->arg[7]);
+		auto delay = std::stoi(sep->arg[8]);
 
-		std::string query   = fmt::format(
+		auto query = fmt::format(
 			"UPDATE spawngroup SET dist = {:.2f}, min_x = {:.2f}, max_x = {:.2f}, max_y = {:.2f}, min_y = {:.2f}, delay = {} WHERE id = {}",
 			distance,
 			minimum_x,
@@ -247,7 +249,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			delay,
 			spawngroup_id
 		);
-		auto        results = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to edit Spawngroup box.");
 			return;
@@ -262,6 +264,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				distance
 			).c_str()
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -271,6 +274,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				maximum_x
 			).c_str()
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -281,8 +285,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			).c_str()
 		);
 		return;
-	}
-	else if (is_edit_respawn) {
+	} else if (is_edit_respawn) {
 		if (arguments < 2 || !sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance]");
 			return;
@@ -293,27 +296,24 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			return;
 		}
 
-		NPC    *target = c->GetTarget()->CastToNPC();
-		Spawn2 *spawn2 = target->respawn2;
+		auto target = c->GetTarget()->CastToNPC();
+		auto spawn2 = target->respawn2;
 		if (!spawn2) {
 			c->Message(Chat::White, "Failed to edit respawn because NPC has no Spawn2.");
 			return;
 		}
 
-		auto        spawn2_id     = spawn2->GetID();
-		uint32      respawn_timer = std::stoi(sep->arg[2]);
-		uint32      variance      = (
-			sep->IsNumber(3) ?
-				std::stoi(sep->arg[3]) :
-				spawn2->GetVariance()
-		);
-		std::string query         = fmt::format(
+		auto spawn2_id = spawn2->GetID();
+		auto respawn_timer = std::stoul(sep->arg[2]);
+		auto variance = sep->IsNumber(3) ? std::stoul(sep->arg[3]) : spawn2->GetVariance();
+
+		auto query = fmt::format(
 			"UPDATE spawn2 SET respawntime = {}, variance = {} WHERE id = {}",
 			respawn_timer,
 			variance,
 			spawn2_id
 		);
-		auto        results       = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to edit respawn.");
 			return;
@@ -329,37 +329,29 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				variance
 			).c_str()
 		);
+
 		spawn2->SetRespawnTimer(respawn_timer);
 		spawn2->SetVariance(variance);
 		return;
-	}
-	else if (is_make_group) {
-		if (
-			arguments != 9 ||
-			!sep->IsNumber(3) ||
-			!sep->IsNumber(4) ||
-			!sep->IsNumber(5) ||
-			!sep->IsNumber(6) ||
-			!sep->IsNumber(7) ||
-			!sep->IsNumber(8) ||
-			!sep->IsNumber(9)
-			) {
+	} else if (is_make_group) {
+		if (arguments < 2) {
 			c->Message(
 				Chat::White,
 				"Usage: #advncspawn makegroup [Spawn Group Name] [Spawn Limit] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]"
 			);
 			return;
 		}
-		std::string spawngroup_name = sep->arg[2];
-		auto        spawn_limit     = std::stoi(sep->arg[3]);
-		auto        distance        = std::stof(sep->arg[4]);
-		auto        minimum_x       = std::stof(sep->arg[5]);
-		auto        maximum_x       = std::stof(sep->arg[6]);
-		auto        minimum_y       = std::stof(sep->arg[7]);
-		auto        maximum_y       = std::stof(sep->arg[8]);
-		auto        delay           = std::stoi(sep->arg[9]);
 
-		std::string query   = fmt::format(
+		std::string spawngroup_name = sep->arg[2];
+		auto spawn_limit = sep->IsNumber(3) ? std::stoi(sep->arg[3]) : 0;
+		auto distance = sep->IsNumber(4) ? std::stof(sep->arg[4]) : 0.0f;
+		auto minimum_x = sep->IsNumber(5) ? std::stof(sep->arg[5]) : 0.0f;
+		auto maximum_x = sep->IsNumber(6) ? std::stof(sep->arg[6]) : 0.0f;
+		auto minimum_y = sep->IsNumber(7) ? std::stof(sep->arg[7]) : 0.0f;
+		auto maximum_y = sep->IsNumber(8) ? std::stof(sep->arg[8]) : 0.0f;
+		auto delay = sep->IsNumber(9) ? std::stoi(sep->arg[9]) : 0;
+
+		auto query = fmt::format(
 			"INSERT INTO spawngroup"
 			"(name, spawn_limit, dist, min_x, max_x, min_y, max_y, delay)"
 			"VALUES ('{}', {}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {})",
@@ -372,7 +364,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			maximum_y,
 			delay
 		);
-		auto        results = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to make Spawngroup.");
 			return;
@@ -416,39 +408,42 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			).c_str()
 		);
 		return;
-	}
-	else if (is_make_npc) {
+	} else if (is_make_npc) {
 		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 			c->Message(Chat::White, "You must target an NPC to use this command.");
 			return;
 		}
 
-		NPC *target = c->GetTarget()->CastToNPC();
-		content_db.NPCSpawnDB(
-			NPCSpawnTypes::CreateNewNPC,
-			zone->GetShortName(),
-			zone->GetInstanceVersion(),
-			c,
-			target
-		);
+		if (
+			content_db.NPCSpawnDB(
+				NPCSpawnTypes::CreateNewNPC,
+				zone->GetShortName(),
+				zone->GetInstanceVersion(),
+				c,
+				c->GetTarget()->CastToNPC()
+			)
+		) {
+			c->Message(Chat::White, "Created a new NPC.");
+		}
+
 		return;
-	}
-	else if (is_move_spawn) {
+	} else if (is_move_spawn) {
 		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
 			c->Message(Chat::White, "You must target an NPC to use this command.");
 			return;
 		}
 
-		NPC    *target = c->GetTarget()->CastToNPC();
-		Spawn2 *spawn2 = target->respawn2;
+		auto target = c->GetTarget()->CastToNPC();
+		auto spawn2 = target->respawn2;
 		if (!spawn2) {
 			c->Message(Chat::White, "Failed to move spawn because NPC has no Spawn2.");
 			return;
 		}
 
-		auto        client_position = c->GetPosition();
-		auto        spawn2_id       = spawn2->GetID();
-		std::string query           = fmt::format(
+		auto client_position = c->GetPosition();
+		auto spawn2_id = spawn2->GetID();
+
+		auto query = fmt::format(
 			"UPDATE spawn2 SET x = {:.2f}, y = {:.2f}, z = {:.2f}, heading = {:.2f} WHERE id = {}",
 			client_position.x,
 			client_position.y,
@@ -456,7 +451,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			client_position.w,
 			spawn2_id
 		);
-		auto        results         = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to move spawn.");
 			return;
@@ -470,6 +465,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				c->GetTargetDescription(target)
 			).c_str()
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -481,6 +477,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 				client_position.w
 			).c_str()
 		);
+
 		target->GMMove(
 			client_position.x,
 			client_position.y,
@@ -488,8 +485,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			client_position.w
 		);
 		return;
-	}
-	else if (is_set_version) {
+	} else if (is_set_version) {
 		if (arguments != 2 || !sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #advnpcspawn setversion [Version]");
 			return;
@@ -500,14 +496,15 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			return;
 		}
 
-		NPC         *target = c->GetTarget()->CastToNPC();
-		auto        version = std::stoi(sep->arg[2]);
-		std::string query   = fmt::format(
+		auto target = c->GetTarget()->CastToNPC();
+		auto version = std::stoul(sep->arg[2]);
+
+		auto query = fmt::format(
 			"UPDATE spawn2 SET version = {} WHERE spawngroupID = {}",
 			version,
 			target->GetSpawnGroupId()
 		);
-		auto        results = content_db.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			c->Message(Chat::White, "Failed to set version.");
 			return;
