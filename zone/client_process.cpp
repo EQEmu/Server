@@ -823,10 +823,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const EQ::ItemData *item = nullptr;
 	auto merchant_list = zone->merchanttable[merchant_id];
 	auto npc = entity_list.GetMobByNpcTypeID(npcid);
-	if (!merchant_list.size() == 0) {
+	if (merchant_list.empty()) {
 		zone->LoadNewMerchantData(merchant_id);
 		merchant_list = zone->merchanttable[merchant_id];
-		if (!merchant_list.size()) {
+		if (merchant_list.empty()) {
 			return;
 		}
 	}
