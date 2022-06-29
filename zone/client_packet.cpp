@@ -11074,18 +11074,22 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	else if (victim->GetOwnerID()) {
 		Message(0, "You cannot steal from pets!");
 	}
+	else if (victim->IsClient()) {
+		Message(0, "Stealing from clients not yet supported.");
+	}
 	else if (Distance(GetPosition(), victim->GetPosition()) > 20) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
 		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent from outside combat range.", zone->GetShortName());
 	}
-	else if (victim->IsNPC()) {
+	else if (victim->IsNPC() && victim->GetBodyType() == BT_Humanoid) {
 		safe_delete(outapp);
 		victim->CastToNPC()->PickPocket(this);
 		return;
 	}
 	else {
-		Message(0, "Stealing from clients not yet supported.");
+		Message(0, "Your attempt at stealing was unsuccessful.");
 	}
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
