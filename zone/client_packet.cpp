@@ -11089,9 +11089,9 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 			victim->CastToNPC()->PickPocket(this);
 			return;
 		}
-		else {
-			MessageString(Chat::White, STEAL_UNSUCCESSFUL);
-		}
+	}
+	else {
+		MessageString(Chat::White, STEAL_UNSUCCESSFUL);
 	}
 
 	QueuePacket(outapp);
