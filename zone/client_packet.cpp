@@ -11069,13 +11069,13 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 	//if we do not send this packet the client will lock up and require the player to relog.
 
 	if (victim == this) {
-		Message(0, "You catch yourself red-handed.");
+		Message(Chat::White, "You catch yourself red-handed.");
 	}
 	else if (victim->GetOwnerID()) {
-		Message(0, "You cannot steal from pets!");
+		Message(Chat::White, "You cannot steal from pets!");
 	}
 	else if (victim->IsClient()) {
-		Message(0, "Stealing from clients not yet supported.");
+		Message(Chat::White, "Stealing from clients not yet supported.");
 	}
 	else if (Distance(GetPosition(), victim->GetPosition()) > 20) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
