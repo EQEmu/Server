@@ -11087,7 +11087,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		return;
 	}
 	else {
-		Message(0, "Your attempt at stealing was unsuccessful.");
+		MessageString(Chat::White, STEAL_UNSUCCESSFUL);
 	}
 
 	QueuePacket(outapp);
