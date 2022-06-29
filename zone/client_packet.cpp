@@ -11081,13 +11081,17 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
 		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent from outside combat range.", zone->GetShortName());
 	}
-	else if (victim->IsNPC() && victim->GetBodyType() == BT_Humanoid) {
-		safe_delete(outapp);
-		victim->CastToNPC()->PickPocket(this);
-		return;
-	}
-	else {
-		MessageString(Chat::White, STEAL_UNSUCCESSFUL);
+	else if (victim->IsNPC()) {
+		auto body = victim->GetBodyType();
+		if (body == BT_Humanoid || body == BT_Monster || body == BT_Giant ||
+			body == BT_Lycanthrope) {
+			safe_delete(outapp);
+			victim->CastToNPC()->PickPocket(this);
+			return;
+		}
+		else {
+			MessageString(Chat::White, STEAL_UNSUCCESSFUL);
+		}
 	}
 
 	QueuePacket(outapp);
