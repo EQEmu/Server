@@ -11090,9 +11090,6 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 			return;
 		}
 	}
-	else {
-		MessageString(Chat::White, STEAL_UNSUCCESSFUL);
-	}
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
