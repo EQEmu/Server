@@ -454,6 +454,7 @@
 #define NO_ABILITY_OUT_OF_COMBAT	9194	//You can not use this ability while out of combat.
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
 #define FACE_ACCEPTED				12028	//Facial features accepted.
+#define TRACKING_BEGIN				12040   //You begin tracking %1.
 #define SPELL_LEVEL_TO_LOW			12048	//You will have to achieve level %1 before you can scribe the %2.
 #define YOU_RECEIVE_AS_SPLIT		12071   //You receive %1 as your split.
 #define ATTACKFAILED				12158	//%1 try to %2 %3, but %4!

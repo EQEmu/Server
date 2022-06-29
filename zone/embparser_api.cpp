@@ -8454,6 +8454,18 @@ XS(XS__discordsend) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__tracknpc);
+XS(XS__tracknpc) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::tracknpc(uint32 entity_id)");
+	{
+		uint32 entity_id = (uint32) SvUV(ST(0));
+		quest_manager.TrackNPC(entity_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8893,6 +8905,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "tasktimeleft"), XS__tasktimeleft, file);
 	newXS(strcpy(buf, "toggle_spawn_event"), XS__toggle_spawn_event, file);
 	newXS(strcpy(buf, "toggledoorstate"), XS__toggledoorstate, file);
+	newXS(strcpy(buf, "tracknpc"), XS__tracknpc, file);
 	newXS(strcpy(buf, "traindisc"), XS__traindisc, file);
 	newXS(strcpy(buf, "traindiscs"), XS__traindiscs, file);
 	newXS(strcpy(buf, "unique_spawn"), XS__unique_spawn, file);

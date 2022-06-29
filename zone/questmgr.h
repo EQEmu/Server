@@ -336,6 +336,7 @@ public:
 	int getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot = 0);
 	const SPDat_Spell_Struct *getspell(uint32 spell_id);
 	std::string getenvironmentaldamagename(uint8 damage_type);
+	void TrackNPC(uint32 entity_id);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

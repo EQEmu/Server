@@ -1946,10 +1946,11 @@ void Client::CalcRestState()
 
 void Client::DoTracking()
 {
-	if (TrackingID == 0)
+	if (!TrackingID) {
 		return;
+	}
 
-	Mob *m = entity_list.GetMob(TrackingID);
+	auto *m = entity_list.GetMob(TrackingID);
 
 	if (!m || m->IsCorpse()) {
 		MessageString(Chat::Skills, TRACK_LOST_TARGET);
@@ -1957,29 +1958,43 @@ void Client::DoTracking()
 		return;
 	}
 
-	float RelativeHeading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
+	if (DistanceNoZ(m->GetPosition(), GetPosition()) < 10) {
+		Message(
+			Chat::Skills,
+			fmt::format(
+				"You have found {}.",
+				m->GetCleanName()
+			).c_str()
+		);
+		TrackingID = 0;
+		return;
+	}
 
-	if (RelativeHeading < 0)
-		RelativeHeading += 512;
+	float relative_heading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
 
-	if (RelativeHeading > 480)
+	if (relative_heading < 0) {
+		relative_heading += 512;
+	}
+
+	if (relative_heading > 480) {
 		MessageString(Chat::Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
-	else if (RelativeHeading > 416)
+	} else if (relative_heading > 416) {
 		MessageString(Chat::Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
-	else if (RelativeHeading > 352)
+	} else if (relative_heading > 352) {
 		MessageString(Chat::Skills, TRACK_TO_THE, m->GetCleanName(), "left");
-	else if (RelativeHeading > 288)
+	} else if (relative_heading > 288) {
 		MessageString(Chat::Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
-	else if (RelativeHeading > 224)
+	} else if (relative_heading > 224) {
 		MessageString(Chat::Skills, TRACK_BEHIND_YOU, m->GetCleanName());
-	else if (RelativeHeading > 160)
+	} else if (relative_heading > 160) {
 		MessageString(Chat::Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
-	else if (RelativeHeading > 96)
+	} else if (relative_heading > 96) {
 		MessageString(Chat::Skills, TRACK_TO_THE, m->GetCleanName(), "right");
-	else if (RelativeHeading > 32)
+	} else if (relative_heading > 32) {
 		MessageString(Chat::Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
-	else if (RelativeHeading >= 0)
+	} else if (relative_heading >= 0) {
 		MessageString(Chat::Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
+	}
 }
 
 void Client::HandleRespawnFromHover(uint32 Option)
