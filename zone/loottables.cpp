@@ -473,8 +473,6 @@ void NPC::AddLootDrop(
 		}
 
 		if (foundslot == EQ::invslot::slotPrimary) {
-			if (item2->Proc.Effect != 0)
-				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = EQ::textures::weaponPrimary;
 			if (item2->Damage > 0) {
@@ -489,8 +487,6 @@ void NPC::AddLootDrop(
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->IsType1HWeapon() || item2->ItemType == EQ::item::ItemTypeShield || item2->ItemType ==  EQ::item::ItemTypeLight))
 		{
-			if (item2->Proc.Effect!=0)
-				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = EQ::textures::weaponSecondary;
 			if (item2->Damage > 0)
