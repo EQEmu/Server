@@ -11059,14 +11059,6 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		return;
 
 	p_timers.Start(pTimerBeggingPickPocket, 8);
-	auto outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
-	sPickPocket_Struct* pick_out = (sPickPocket_Struct*)outapp->pBuffer;
-	pick_out->coin = 0;
-	pick_out->from = victim->GetID();
-	pick_out->to = GetID();
-	pick_out->myskill = GetSkill(EQ::skills::SkillPickPockets);
-	pick_out->type = 0;
-	//if we do not send this packet the client will lock up and require the player to relog.
 
 	if (victim == this) {
 		Message(Chat::White, "You catch yourself red-handed.");
@@ -11085,14 +11077,12 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		auto body = victim->GetBodyType();
 		if (body == BT_Humanoid || body == BT_Monster || body == BT_Giant ||
 			body == BT_Lycanthrope) {
-			safe_delete(outapp);
 			victim->CastToNPC()->PickPocket(this);
 			return;
 		}
 	}
 
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	SendPickPocketResponse(victim, 0, PickPocketFailed);
 }
 
 void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
