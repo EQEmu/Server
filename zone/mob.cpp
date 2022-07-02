@@ -512,6 +512,8 @@ Mob::Mob(
 	mob_close_scan_timer.Trigger();
 
 	SetCanOpenDoors(true);
+	
+	is_boat = IsBoat();
 }
 
 Mob::~Mob()
@@ -3741,7 +3743,7 @@ bool Mob::HateSummon() {
 
 void Mob::FaceTarget(Mob* mob_to_face /*= 0*/) {
 
-	if (IsBoat()) {
+	if (GetIsBoat()) {
 		return;
 	}
 
