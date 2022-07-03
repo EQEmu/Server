@@ -411,6 +411,39 @@ void ConsoleGMSay(
  * @param command
  * @param args
  */
+void ConsoleGuildSay(
+	EQ::Net::ConsoleServerConnection *connection,
+	const std::string &command,
+	const std::vector<std::string> &args
+)
+{
+	if (args.size() < 1) {
+		return;
+	}
+
+	auto from = args[0];
+	auto guild_id = StringIsNumber(args[1]) ? std::stoul(args[1]) : 0;
+	if (!guild_id) {
+		return;
+	}
+
+	auto join_args = args;
+	join_args.erase(join_args.begin(), join_args.begin() + 2);
+
+	auto message = fmt::format(
+		"{} tells the guild, '{}'",
+		from,
+		JoinString(join_args, " ")
+	);
+
+	zoneserver_list.SendEmoteMessage(0, guild_id, AccountStatus::Player, Chat::Guild, message.c_str());
+}
+
+/**
+ * @param connection
+ * @param command
+ * @param args
+ */
 void ConsoleOOC(
 	EQ::Net::ConsoleServerConnection *connection,
 	const std::string &command,
@@ -951,6 +984,7 @@ void RegisterConsoleFunctions(std::unique_ptr<EQ::Net::ConsoleServer>& console)
 	console->RegisterCall("emote", 50, "emote [zonename or charname or world] [type] [message]", std::bind(ConsoleEmote, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("flag", 200, "flag [status] [accountname]", std::bind(ConsoleFlag, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("gmsay", 50, "gmsay [message]", std::bind(ConsoleGMSay, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	console->RegisterCall("guildsay", 50, "guildsay [Character Name] [Guild ID] [Message]", std::bind(ConsoleGuildSay, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("iplookup", 50, "IPLookup [name]", std::bind(ConsoleIpLookup, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("kick", 150, "kick [charname]", std::bind(ConsoleKick, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	console->RegisterCall("lock", 150, "lock", std::bind(ConsoleLock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
