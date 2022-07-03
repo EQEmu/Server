@@ -11074,35 +11074,30 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		return;
 
 	p_timers.Start(pTimerBeggingPickPocket, 8);
-	auto outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
-	sPickPocket_Struct* pick_out = (sPickPocket_Struct*)outapp->pBuffer;
-	pick_out->coin = 0;
-	pick_out->from = victim->GetID();
-	pick_out->to = GetID();
-	pick_out->myskill = GetSkill(EQ::skills::SkillPickPockets);
-	pick_out->type = 0;
-	//if we do not send this packet the client will lock up and require the player to relog.
 
 	if (victim == this) {
-		Message(0, "You catch yourself red-handed.");
+		Message(Chat::White, "You catch yourself red-handed.");
 	}
 	else if (victim->GetOwnerID()) {
-		Message(0, "You cannot steal from pets!");
+		Message(Chat::White, "You cannot steal from pets!");
+	}
+	else if (victim->IsClient()) {
+		Message(Chat::White, "Stealing from clients not yet supported.");
 	}
 	else if (Distance(GetPosition(), victim->GetPosition()) > 20) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
 		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent from outside combat range.", zone->GetShortName());
 	}
 	else if (victim->IsNPC()) {
-		safe_delete(outapp);
-		victim->CastToNPC()->PickPocket(this);
-		return;
+		auto body = victim->GetBodyType();
+		if (body == BT_Humanoid || body == BT_Monster || body == BT_Giant ||
+			body == BT_Lycanthrope) {
+			victim->CastToNPC()->PickPocket(this);
+			return;
+		}
 	}
-	else {
-		Message(0, "Stealing from clients not yet supported.");
-	}
-	QueuePacket(outapp);
-	safe_delete(outapp);
+
+	SendPickPocketResponse(victim, 0, PickPocketFailed);
 }
 
 void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
