@@ -259,6 +259,7 @@ namespace DatabaseSchema {
 			"command_settings",
 			"content_flags",
 			"db_str",
+			"discord_webhooks",
 			"eqtime",
 			"launcher",
 			"launcher_zones",
@@ -375,7 +376,7 @@ namespace DatabaseSchema {
 			"inventory_versions",
 		};
 	}
-	
+
 	/**
 	 * @description Gets all player bot tables
 	 * @note These tables have no content in the PEQ daily dump
