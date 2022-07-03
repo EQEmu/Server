@@ -2137,7 +2137,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (IsClient()) {
 					if (caster->IsClient()) {
 						if (!entity_list.IsInSameGroupOrRaidGroup(caster->CastToClient(), CastToClient())) {
-							caster->Message(Chat::Red, "Your target must be a group member for this spell.");
+							caster->MessageString(Chat::SpellFailure, TARGET_GROUP_MEMBER);
 							break;
 						}
 
@@ -2150,7 +2150,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), caster->GetX(),
 							       caster->GetY(), caster->GetZ(), caster->GetHeading(), 2,
 							       SummonPC);
-					Message(Chat::Yellow, "You have been summoned!");
+					MessageString(Chat::Spells, PLAYER_SUMMONED);
 				} else {
 					caster->Message(Chat::Red, "This spell can only be cast on players.");
 				}
