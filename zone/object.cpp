@@ -412,6 +412,7 @@ EQ::ItemInstance* Object::PopItem(uint8 index)
 void Object::CreateSpawnPacket(EQApplicationPacket* app)
 {
 	app->SetOpcode(OP_GroundSpawn);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(Object_Struct)];
 	app->size = sizeof(Object_Struct);
 	memcpy(app->pBuffer, &m_data, sizeof(Object_Struct));
@@ -420,6 +421,7 @@ void Object::CreateSpawnPacket(EQApplicationPacket* app)
 void Object::CreateDeSpawnPacket(EQApplicationPacket* app)
 {
 	app->SetOpcode(OP_ClickObject);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(ClickObject_Struct)];
 	app->size = sizeof(ClickObject_Struct);
 	memset(app->pBuffer, 0, sizeof(ClickObject_Struct));
