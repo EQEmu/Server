@@ -2091,6 +2091,14 @@ Group *EntityList::GetGroupByID(uint32 group_id)
 	return nullptr;
 }
 
+bool EntityList::IsInSameGroupOrRaidGroup(Client *client1, Client *client2) {
+	Group* group = entity_list.GetGroupByClient(client1);
+	Raid* raid = entity_list.GetRaidByClient(client1);
+
+	return (group && group->IsGroupMember(client2))
+		   || (raid && raid->IsRaidMember(client2->GetName()) && raid->GetGroup(client1) == raid->GetGroup(client2));
+}
+
 Group *EntityList::GetGroupByClient(Client *client)
 {
 	std::list <Group *>::iterator iterator;
