@@ -2039,6 +2039,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	{
 		PutLootInInventory(EQ::invslot::slotCursor, *inst);
 	}
+	safe_delete(inst);
 	Save(1);
 }
 
@@ -2549,6 +2550,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 		{
 			PutLootInInventory(EQ::invslot::slotCursor, *inst);
 		}
+		safe_delete(inst);
 
 		Save(1);
 	}
@@ -14463,6 +14465,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 			if (!TradeItemsValid) {
 				Trader_EndTrader();
+				safe_delete(gis);
 				return;
 			}
 

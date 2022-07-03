@@ -675,8 +675,8 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQ::ItemInstance* contain
                     inst->PutAugment(&database, i, aug[i]);
             // Put item inside world container
             container->PutItem(index, *inst);
-            safe_delete(inst);
         }
+		safe_delete(inst);
     }
 
 }

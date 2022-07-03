@@ -4283,10 +4283,12 @@ void Bot::AddBotItem(
 
 	if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
 		LogError("Failed to save item by slot to slot [{}] for [{}].", slot_id, GetCleanName());
+		safe_delete(inst);
 		return;
 	}
 
 	m_inv.PutItem(slot_id, *inst);
+	safe_delete(inst);
 
 	BotAddEquipItem(slot_id, item_id);
 }
