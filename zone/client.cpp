@@ -10288,7 +10288,7 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_level) {
 	std::vector<int> learnable_disciplines;
 	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
-		bool learnable = false;
+		bool learnable = true;
 		if (!IsValidSpell(spell_id)) {
 			continue;
 		}
@@ -10321,12 +10321,10 @@ std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_leve
 			continue;
 		}
 
-		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
-			learnable = true;
-		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
-			learnable = true;
-		} else {
-			learnable = true;
+		if (RuleB(Spells, EnableSpellGlobals) && !SpellGlobalCheck(spell_id, CharacterID())) {
+			learnable = false;
+		} else if (RuleB(Spells, EnableSpellBuckets) && !SpellBucketCheck(spell_id, CharacterID())) {
+			learnable = false;
 		}
 
 		if (learnable) {
@@ -10359,7 +10357,7 @@ std::vector<int> Client::GetMemmedSpells() {
 std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 	std::vector<int> scribeable_spells;
 	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
-		bool scribeable = false;
+		bool scribeable = true;
 		if (!IsValidSpell(spell_id)) {
 			continue;
 		}
@@ -10392,12 +10390,10 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		}
 
-		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
-			scribeable = true;
-		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
-			scribeable = true;
-		} else {
-			scribeable = true;
+		if (RuleB(Spells, EnableSpellGlobals) && !SpellGlobalCheck(spell_id, CharacterID())) {
+			scribeable = false;
+		} else if (RuleB(Spells, EnableSpellBuckets) && !SpellBucketCheck(spell_id, CharacterID())) {
+			scribeable = false;
 		}
 
 		if (scribeable) {
