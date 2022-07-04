@@ -812,9 +812,9 @@ void CheckForServerScript(bool force_download)
 			).c_str()
 		);
 
-		r.set_connection_timeout(5, 0);
-		r.set_read_timeout(5, 0);
-		r.set_write_timeout(5, 0);
+		r.set_connection_timeout(1, 0);
+		r.set_read_timeout(1, 0);
+		r.set_write_timeout(1, 0);
 
 		if (auto res = r.Get(u.get_path().c_str())) {
 			if (res->status == 200) {
@@ -822,14 +822,13 @@ void CheckForServerScript(bool force_download)
 				std::ofstream out("eqemu_server.pl");
 				out << res->body;
 				out.close();
-			}
-		}
-
 #ifdef _WIN32
 #else
-		system("chmod 755 eqemu_server.pl");
-		system("chmod +x eqemu_server.pl");
+				system("chmod 755 eqemu_server.pl");
+				system("chmod +x eqemu_server.pl");
 #endif
+			}
+		}
 	}
 }
 
