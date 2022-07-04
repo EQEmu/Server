@@ -25,7 +25,7 @@ void command_logs(Client *c, const Seperator *sep)
 		);
 		return;
 	}
-	
+
 	bool is_list = !strcasecmp(sep->arg[1], "list");
 	bool is_reload = !strcasecmp(sep->arg[1], "reload");
 	bool is_set = !strcasecmp(sep->arg[1], "set");
@@ -73,14 +73,14 @@ void command_logs(Client *c, const Seperator *sep)
 				max_category_id = (Logs::LogCategory::MaxCategoryID - 1);
 				break;
 			}
-			
+
 			popup_text += fmt::format(
 				"<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>",
 				index,
 				Logs::LogCategoryName[index],
-				LogSys.log_settings[index].log_to_console,
-				LogSys.log_settings[index].log_to_file,
-				LogSys.log_settings[index].log_to_gmsay
+				LogSys.m_log_settings[index].log_to_console,
+				LogSys.m_log_settings[index].log_to_file,
+				LogSys.m_log_settings[index].log_to_gmsay
 			);
 		}
 
@@ -155,11 +155,11 @@ void command_logs(Client *c, const Seperator *sep)
 		auto setting = std::stoul(sep->arg[4]);
 
 		if (is_console) {
-			LogSys.log_settings[category_id].log_to_console = setting;
+			LogSys.m_log_settings[category_id].log_to_console = setting;
 		} else if (is_file) {
-			LogSys.log_settings[category_id].log_to_file = setting;
+			LogSys.m_log_settings[category_id].log_to_file = setting;
 		} else if (is_gmsay) {
-			LogSys.log_settings[category_id].log_to_gmsay = setting;
+			LogSys.m_log_settings[category_id].log_to_gmsay = setting;
 		}
 
 		if (logs_set) {
@@ -175,7 +175,7 @@ void command_logs(Client *c, const Seperator *sep)
 			);
 		}
 
-		LogSys.log_settings[category_id].is_category_enabled = setting ? 1 : 0;
+		LogSys.m_log_settings[category_id].is_category_enabled = setting ? 1 : 0;
 	}
 }
 

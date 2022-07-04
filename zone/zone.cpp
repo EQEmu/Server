@@ -1210,9 +1210,9 @@ bool Zone::Init(bool is_static) {
 	mod_init();
 
 	// logging origination information
-	LogSys.origination_info.zone_short_name = zone->short_name;
-	LogSys.origination_info.zone_long_name  = zone->long_name;
-	LogSys.origination_info.instance_id     = zone->instanceid;
+	LogSys.m_origination_info.zone_short_name = zone->short_name;
+	LogSys.m_origination_info.zone_long_name  = zone->long_name;
+	LogSys.m_origination_info.instance_id     = zone->instanceid;
 
 	return true;
 }
@@ -2799,7 +2799,7 @@ void Zone::SendDiscordMessage(int webhook_id, const std::string& message)
 void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string &message)
 {
 	bool not_found = true;
-	for (auto & w : LogSys.discord_webhooks) {
+	for (auto & w : LogSys.m_discord_webhooks) {
 		if (w.webhook_name == webhook_name) {
 			SendDiscordMessage(w.id, message + "\n");
 			not_found = false;

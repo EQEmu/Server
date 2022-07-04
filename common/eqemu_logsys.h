@@ -302,14 +302,14 @@ public:
 		int         instance_id;
 	};
 
-	OriginationInfo origination_info{};
+	OriginationInfo m_origination_info{};
 
 	/**
 	 * Internally used memory reference for all log settings per category
 	 * These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults
 	 * Database loaded via LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
 	*/
-	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
+	LogSettings m_log_settings[Logs::LogCategory::MaxCategoryID]{};
 
 	struct DiscordWebhooks {
 		int         id;
@@ -317,12 +317,12 @@ public:
 		std::string webhook_url;
 	};
 
-	DiscordWebhooks discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
+	DiscordWebhooks m_discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
 
-	bool file_logs_enabled = false;
+	bool m_file_logs_enabled = false;
 
-	int         log_platform = 0;
-	std::string platform_file_name;
+	int         m_log_platform = 0;
+	std::string m_platform_file_name;
 
 
 	// gmsay
@@ -330,13 +330,13 @@ public:
 
 	EQEmuLogSys *SetGMSayHandler(std::function<void(uint16 log_type, const std::string &)> f)
 	{
-		on_log_gmsay_hook = f;
+		m_on_log_gmsay_hook = f;
 		return this;
 	}
 
 	EQEmuLogSys *SetDiscordHandler(std::function<void(uint16 log_category, int webhook_id, const std::string &)> f)
 	{
-		on_log_discord_hook = f;
+		m_on_log_discord_hook = f;
 		return this;
 	}
 
@@ -346,7 +346,7 @@ public:
 			uint16 log_type,
 			const std::string &
 		)> f
-	) { on_log_console_hook = f; }
+	) { m_on_log_console_hook = f; }
 	void SilenceConsoleLogging();
 	void EnableConsoleLogging();
 
@@ -357,9 +357,9 @@ private:
 
 	// reference to database
 	Database                                                                      *m_database;
-	std::function<void(uint16 log_category, const std::string &)>                 on_log_gmsay_hook;
-	std::function<void(uint16 log_category, int webhook_id, const std::string &)> on_log_discord_hook;
-	std::function<void(uint16 log_category, const std::string &)>                 on_log_console_hook;
+	std::function<void(uint16 log_category, const std::string &)>                 m_on_log_gmsay_hook;
+	std::function<void(uint16 log_category, int webhook_id, const std::string &)> m_on_log_discord_hook;
+	std::function<void(uint16 log_category, const std::string &)>                 m_on_log_console_hook;
 
 	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message);
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
@@ -368,6 +368,7 @@ private:
 	void ProcessConsoleMessage(uint16 log_category, const std::string &message);
 	void ProcessLogWrite(uint16 log_category, const std::string &message);
 	bool IsRfc5424LogCategory(uint16 log_category);
+	void InjectTablesIfNotExist();
 };
 
 extern EQEmuLogSys LogSys;

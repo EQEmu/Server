@@ -175,8 +175,8 @@ int main(int argc, char **argv)
 		LoadDatabaseConnection();
 
 		LogSys.LoadLogSettingsDefaults();
-		LogSys.log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);
-		LogSys.log_settings[Logs::Debug].is_category_enabled = 1;
+		LogSys.m_log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);
+		LogSys.m_log_settings[Logs::Debug].is_category_enabled = 1;
 
 		LoginserverCommandHandler::CommandHandler(argc, argv);
 	}
@@ -239,7 +239,7 @@ int main(int argc, char **argv)
 #endif
 
 	LogInfo("Server Started");
-	if (LogSys.log_settings[Logs::Loginserver].log_to_console == 1) {
+	if (LogSys.m_log_settings[Logs::Loginserver].log_to_console == 1) {
 		LogInfo("Loginserver logging set to level [1] for more debugging, enable detail [3]");
 	}
 

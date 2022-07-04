@@ -366,11 +366,11 @@ public:
 	static void DiscordWebhookMessageHandler(uint16 log_category, int webhook_id, const std::string &message)
 	{
 		std::string message_prefix;
-		if (!LogSys.origination_info.zone_short_name.empty()) {
+		if (!LogSys.m_origination_info.zone_short_name.empty()) {
 			message_prefix = fmt::format(
 				"[**{}**] **Zone** [**{}**] ",
 				Logs::LogCategoryName[log_category],
-				LogSys.origination_info.zone_short_name
+				LogSys.m_origination_info.zone_short_name
 			);
 		}
 

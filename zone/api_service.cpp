@@ -840,9 +840,9 @@ Json::Value ApiGetLogsysCategories(EQ::Net::WebsocketServerConnection *connectio
 
 		row["log_category_id"]          = i;
 		row["log_category_description"] = Logs::LogCategoryName[i];
-		row["log_to_console"]           = LogSys.log_settings[i].log_to_console;
-		row["log_to_file"]              = LogSys.log_settings[i].log_to_file;
-		row["log_to_gmsay"]             = LogSys.log_settings[i].log_to_gmsay;
+		row["log_to_console"]           = LogSys.m_log_settings[i].log_to_console;
+		row["log_to_file"]              = LogSys.m_log_settings[i].log_to_file;
+		row["log_to_gmsay"]             = LogSys.m_log_settings[i].log_to_gmsay;
 
 		response.append(row);
 	}
@@ -871,15 +871,15 @@ Json::Value ApiSetLoggingLevel(EQ::Net::WebsocketServerConnection *connection, J
 	if (logging_category < Logs::LogCategory::MaxCategoryID &&
 		logging_category > Logs::LogCategory::None
 		) {
-		LogSys.log_settings[logging_category].log_to_console = logging_level;
+		LogSys.m_log_settings[logging_category].log_to_console = logging_level;
 		response["status"] = "Category log level updated";
 	}
 
 	if (logging_level > 0) {
-		LogSys.log_settings[logging_category].is_category_enabled = 1;
+		LogSys.m_log_settings[logging_category].is_category_enabled = 1;
 	}
 	else {
-		LogSys.log_settings[logging_category].is_category_enabled = 0;
+		LogSys.m_log_settings[logging_category].is_category_enabled = 0;
 	}
 
 	return response;

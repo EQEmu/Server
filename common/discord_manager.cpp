@@ -22,7 +22,7 @@ void DiscordManager::ProcessMessageQueue()
 	for (auto &q: webhook_message_queue) {
 		LogDiscord("Processing [{}] messages in queue for webhook ID [{}]...", q.second.size(), q.first);
 
-		auto        webhook  = LogSys.discord_webhooks[q.first];
+		auto        webhook  = LogSys.m_discord_webhooks[q.first];
 		std::string message;
 
 		for (auto &m: q.second) {
