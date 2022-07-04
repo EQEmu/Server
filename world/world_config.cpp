@@ -118,8 +118,7 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		LogWarning("# Public meta-address (Configuration)");
 		LogWarning("");
 		LogWarning("Your configured public address is set to a meta-address (0.0.0.0) (all-interfaces)");
-		LogWarning(
-			"The meta-address may not work properly and it is recommended you configure your public address explicitly");
+		LogWarning("The meta-address may not work properly and it is recommended you configure your public address explicitly");
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
