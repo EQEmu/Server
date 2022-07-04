@@ -70,7 +70,13 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 	}
 
 	// docker configuration
-	if ((_config->LocalAddress.empty() && _config->WorldAddress.empty()) && is_in_docker) {
+	if (
+		(
+			(_config->LocalAddress.empty() && _config->WorldAddress.empty()) ||
+			(_config->WorldAddress != public_address)
+		)
+		&& is_in_docker
+		) {
 		LogWarning("# Docker Configuration (Configuration)");
 		LogWarning("");
 		LogWarning("You appear to running EQEmu in a docker container");
@@ -97,7 +103,7 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 	if (!_config->WorldAddress.empty() && public_address != _config->WorldAddress) {
 		LogWarning("# Public address (Configuration)");
 		LogWarning("");
-		LogWarning("Your configured public address appears to be different from your configuration!");
+		LogWarning("Your configured public address appears to be different from what's detected!");
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
