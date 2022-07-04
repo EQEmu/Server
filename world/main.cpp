@@ -104,6 +104,7 @@ union semun {
 #include "world_store.h"
 #include "world_event_scheduler.h"
 #include "shared_task_manager.h"
+#include "../common/ip_util.h"
 
 WorldStore          world_store;
 ClientList          client_list;
@@ -633,6 +634,23 @@ int main(int argc, char **argv)
 			web_interface.RemoveConnection(connection);
 		}
 	);
+
+	/**
+	 * LAN checks
+	 */
+	const std::string local_address  = IpUtil::GetLocalIPAddress();
+	const std::string public_address = IpUtil::GetPublicIPAddress();
+	if (local_address != public_address && IpUtil::IsIpInPrivateRfc1918(local_address) &&
+		local_address != Config->LocalAddress) {
+		LogWarning("====================================================================");
+		LogWarning("You appear to be on a LAN and your localaddress may not be properly set!");
+		LogWarning("This will keep clients from properly connecting to your server");
+		LogWarning("https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world");
+		LogWarning("====================================================================");
+		LogWarning("Local address (eqemu_config) [{}]", Config->LocalAddress);
+		LogWarning("Local address (auto-detect) [{}]", local_address);
+		LogWarning("====================================================================");
+	}
 
 	EQStreamManagerInterfaceOptions opts(9000, false, false);
 	opts.daybreak_options.resend_delay_ms     = RuleI(Network, ResendDelayBaseMS);

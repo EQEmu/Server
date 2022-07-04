@@ -30,6 +30,8 @@ public:
 	static uint32_t IPToUInt(const std::string &ip);
 	static bool IsIpInRange(const std::string &ip, const std::string &network, const std::string &mask);
 	static bool IsIpInPrivateRfc1918(const std::string &ip);
+	static std::string GetLocalIPAddress();
+	static std::string GetPublicIPAddress();
 
 };
 
