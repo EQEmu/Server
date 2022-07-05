@@ -51,7 +51,7 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 	}
 
 	LogInfo("Checking for possible configuration issues");
-	LogInfo("To disable configuration checks, set [server->disable_config_checks] to [true] in [{}]", config_file);
+	LogInfo("To disable configuration checks, set [server.disable_config_checks] to [true] in [{}]", config_file);
 
 	std::string config_address = _config->WorldAddress;
 	if (!IpUtil::IsIPAddress(config_address)) {
@@ -78,7 +78,7 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
-		LogWarning("Config file [{}] path [server->world] variable [localaddress]", config_file);
+		LogWarning("Config file [{}] path [server.world] variable [localaddress]", config_file);
 		LogWarning("");
 		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", _config->LocalAddress, local_address);
 		std::cout << std::endl;
@@ -98,19 +98,19 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		LogWarning("In order for networking to work properly you will need to properly configure your server");
 		LogWarning("");
 		LogWarning(
-			"If your Docker host is on a [LAN] or behind a NAT / Firewall, your [localaddress] variable under [server->world] will need to");
+			"If your Docker host is on a [LAN] or behind a NAT / Firewall, your [localaddress] variable under [server.world] will need to");
 		LogWarning(
 			"be set to your LAN address on the host, not the container address. [address] will need to be your public address");
 		LogWarning("");
 		LogWarning(
-			"If your Docker host is directly on the [public internet], your [localaddress] variable under [server->world] can be set to [127.0.0.1]."
+			"If your Docker host is directly on the [public internet], your [localaddress] variable under [server.world] can be set to [127.0.0.1]."
 		);
 		LogWarning("");
 		LogWarning("[address] will need to be your public address");
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
-		LogWarning("Config file [{}] path [server->world] variable(s) [localaddress] [address]", config_file);
+		LogWarning("Config file [{}] path [server.world] variable(s) [localaddress] [address]", config_file);
 		LogWarning("");
 		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", _config->LocalAddress, local_address);
 		LogWarning(
@@ -131,19 +131,19 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		);
 		LogWarning("");
 		LogWarning(
-			"If your Docker host is on a [LAN] or behind a NAT / Firewall, your [localaddress] variable under [server->world] will need to");
+			"If your Docker host is on a [LAN] or behind a NAT / Firewall, your [localaddress] variable under [server.world] will need to");
 		LogWarning(
 			"be set to your LAN address on the host, not the container address. [address] will need to be your public address");
 		LogWarning("");
 		LogWarning(
-			"If your Docker host is directly on the [public internet], your [localaddress] variable under [server->world] can be set to [127.0.0.1]."
+			"If your Docker host is directly on the [public internet], your [localaddress] variable under [server.world] can be set to [127.0.0.1]."
 		);
 		LogWarning("");
 		LogWarning("[address] will need to be your public address");
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
-		LogWarning("Config file [{}] path [server->world] variable(s) [localaddress] [address]", config_file);
+		LogWarning("Config file [{}] path [server.world] variable(s) [localaddress] [address]", config_file);
 		LogWarning("");
 		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", _config->LocalAddress, local_address);
 		LogWarning(
@@ -162,7 +162,7 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
-		LogWarning("Config file [{}] path [server->world] variable [address]", config_file);
+		LogWarning("Config file [{}] path [server.world] variable [address]", config_file);
 		LogWarning("");
 		LogWarning(
 			"Public address (eqemu_config) value [{}] detected value [{}]",
@@ -182,7 +182,7 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
-		LogWarning("Config file [{}] path [server->world] variable [address]", config_file);
+		LogWarning("Config file [{}] path [server.world] variable [address]", config_file);
 		LogWarning("");
 		LogWarning(
 			"Public address (eqemu_config) value [{}] detected value [{}]",
@@ -203,7 +203,7 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		LogWarning("");
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#world]");
 		LogWarning("");
-		LogWarning("Config file [{}] path [server->world] variable [localaddress]", config_file);
+		LogWarning("Config file [{}] path [server.world] variable [localaddress]", config_file);
 		LogWarning("");
 		LogWarning("Local address (eqemu_config) value [{}] detected value [{}]", _config->LocalAddress, local_address);
 		std::cout << std::endl;
@@ -224,12 +224,12 @@ void WorldConfig::CheckForPossibleConfigurationIssues()
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#mailserver]");
 		LogWarning("");
 		LogWarning(
-			"[server->world->address] value [{}] [server->chatserver->host] [{}]",
+			"[server.world.address] value [{}] [server.chatserver.host] [{}]",
 			config_address,
 			_config->ChatHost
 		);
 		LogWarning(
-			"[server->world->address] value [{}] [server->mailserver->host] [{}]",
+			"[server.world.address] value [{}] [server.mailserver.host] [{}]",
 			config_address,
 			_config->MailHost
 		);
