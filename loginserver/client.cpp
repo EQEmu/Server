@@ -5,11 +5,8 @@
 #include "../common/string_util.h"
 #include "encryption.h"
 #include "account_management.h"
-#include "../common/rulesys.h"
 
 extern LoginServer server;
-int32_t expansion = 0;
-int32_t owned_expansion = 0;
 
 /**
  * @param c
@@ -590,7 +587,6 @@ void Client::DoSuccessfulLogin(
 
 void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 {
-	int default_ruleset = 1;
 	SerializeBuffer buf;
 	//from eqlsstr_us.txt id of each expansion, excluding 'Everquest'
 	int ExpansionLookup[20] = { 3007, 3008, 3009, 3010,	3012,
@@ -602,8 +598,9 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 	//Get the active expansion from the database Rule:WorldExpansionSettings.  Do this only once.  Requires restart to effect change
 	if (server.options.IsDisplayExpansions()) {
 
-		expansion = server.options.GetMaxExpansions();
-		owned_expansion = (expansion << 1) | 1;
+		
+		int32_t expansion = server.options.GetMaxExpansions();
+		int32_t owned_expansion = (expansion << 1) | 1;
 
 		if (m_client_version == cv_sod) {
 

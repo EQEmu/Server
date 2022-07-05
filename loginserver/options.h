@@ -152,7 +152,7 @@ private:
 	bool        world_trace;
 	bool        dump_in_packets;
 	bool        dump_out_packets;
-	bool		display_expansions;
+	bool        display_expansions;
 	bool        reject_duplicate_servers;
 	bool        world_dev_test_servers_list_bottom;
 	bool        world_special_character_start_list_bottom;
@@ -163,7 +163,7 @@ private:
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
 	int         encryption_mode;
-	int			max_expansions;
+	int         max_expansions;
 	std::string eqemu_loginserver_address;
 	std::string default_loginserver_name;
 };
