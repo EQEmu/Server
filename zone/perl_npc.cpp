@@ -459,9 +459,14 @@ float Perl_NPC_GetNPCStat(NPC* self, const char* identifier) // @categories Stat
 	return self->GetNPCStat(identifier);
 }
 
-void Perl_NPC_AddSpellToNPCList(NPC* self, int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust) // @categories Spells and Disciplines, Script Utility
+void Perl_NPC_AddSpellToNPCList(NPC* self, int16 priority, uint16_t spell_id, uint32 type, int16 mana_cost, int recast_delay, int16 resist_adjust) // @categories Spells and Disciplines, Script Utility
 {
 	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, 0, 0);
+}
+
+void Perl_NPC_AddSpellToNPCList(NPC* self, int16 priority, uint16_t spell_id, uint32 type, int16 mana_cost, int recast_delay, int16 resist_adjust, int8 min_hp, int8 max_hp) // @categories Spells and Disciplines, Script Utility
+{
+	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, min_hp, max_hp);
 }
 
 void Perl_NPC_RemoveSpellFromNPCList(NPC* self, uint16_t spell_id) // @categories Spells and Disciplines
@@ -664,7 +669,8 @@ void perl_register_npc()
 	package.add("AI_SetRoambox", (void(*)(NPC*, float, float, float, float, float))&Perl_NPC_AI_SetRoambox);
 	package.add("AI_SetRoambox", (void(*)(NPC*, float, float, float, float, float, uint32))&Perl_NPC_AI_SetRoambox);
 	package.add("AI_SetRoambox", (void(*)(NPC*, float, float, float, float, float, uint32, uint32))&Perl_NPC_AI_SetRoambox);
-	package.add("AddAISpell", &Perl_NPC_AddSpellToNPCList);
+	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int16, int, int16))&Perl_NPC_AddSpellToNPCList);
+	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int16, int, int16, int8, int8))&Perl_NPC_AddSpellToNPCList);
 	package.add("AddAISpellEffect", &Perl_NPC_AddAISpellEffect);
 	package.add("AddCash", &Perl_NPC_AddCash);
 	package.add("AddDefensiveProc", &Perl_NPC_AddDefensiveProc);
