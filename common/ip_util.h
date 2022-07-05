@@ -32,6 +32,11 @@ public:
 	static bool IsIpInPrivateRfc1918(const std::string &ip);
 	static std::string GetLocalIPAddress();
 	static std::string GetPublicIPAddress();
+	static std::string DNSLookupSync(
+		const std::string &addr,
+		int port
+	);
+	static bool IsIPAddress(const std::string &ip_address);
 
 };
 

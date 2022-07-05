@@ -31,6 +31,10 @@
 #include "ip_util.h"
 #include "http/httplib.h"
 #include "http/uri.h"
+#include "eqemu_logsys.h"
+#include "event/event_loop.h"
+#include "net/dns.h"
+#include "event/task_scheduler.h"
 
 /**
  * @param ip
@@ -167,6 +171,60 @@ std::string IpUtil::GetPublicIPAddress()
 	}
 
 	return {};
+}
+
+std::string IpUtil::DNSLookupSync(const std::string &addr, int port)
+{
+	auto task_runner = new EQ::Event::TaskScheduler();
+	auto res         = task_runner->Enqueue(
+		[&]() -> std::string {
+			bool        running = true;
+			std::string ret;
+
+			EQ::Net::DNSLookup(
+				addr, port, false, [&](const std::string &addr) {
+					ret = addr;
+					if (addr.empty()) {
+						ret     = "";
+						running = false;
+					}
+
+					return ret;
+				}
+			);
+
+			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+			auto &loop = EQ::EventLoop::Get();
+			while (running) {
+				if (!ret.empty()) {
+					running = false;
+				}
+
+				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > 1500) {
+					LogInfo(
+						"[DNSLookupSync] Deadline exceeded [{}]",
+						1500
+					);
+					running = false;
+				}
+
+				loop.Process();
+			}
+
+			return ret;
+		}
+	);
+
+	return res.get();
+}
+
+bool IpUtil::IsIPAddress(const std::string &ip_address)
+{
+	struct sockaddr_in sa{};
+	int                result = inet_pton(AF_INET, ip_address.c_str(), &(sa.sin_addr));
+	return result != 0;
 }
 
 
