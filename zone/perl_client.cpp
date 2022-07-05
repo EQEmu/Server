@@ -2585,7 +2585,7 @@ void perl_register_client()
 	package.add("HasItemEquippedByID", &Perl_Client_HasItemEquippedByID);
 	package.add("HasPEQZoneFlag", &Perl_Client_HasPEQZoneFlag);
 	package.add("HasSkill", &Perl_Client_HasSkill);
-	package.add("HasSpellScribed", &Perl_Client_HasSkill);
+	package.add("HasSpellScribed", &Perl_Client_HasSpellScribed);
 	package.add("HasZoneFlag", &Perl_Client_HasZoneFlag);
 	package.add("Hungry", &Perl_Client_Hungry);
 	package.add("InZone", &Perl_Client_InZone);
@@ -2662,6 +2662,7 @@ void perl_register_client()
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*, std::string))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveExpeditionLockout", &Perl_Client_RemoveExpeditionLockout);
+	package.add("RemoveFromInstance", &Perl_Client_RemoveFromInstance);
 	package.add("RemoveItem", (void(*)(Client*, uint32))&Perl_Client_RemoveItem);
 	package.add("RemoveItem", (void(*)(Client*, uint32, uint32))&Perl_Client_RemoveItem);
 	package.add("RemoveLDoNLoss", &Perl_Client_RemoveLDoNLoss);

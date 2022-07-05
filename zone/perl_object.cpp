@@ -251,6 +251,7 @@ void perl_register_object()
 	package.add("GetY", &Perl_Object_GetY);
 	package.add("GetZ", &Perl_Object_GetZ);
 	package.add("IsGroundSpawn", &Perl_Object_IsGroundSpawn);
+	package.add("IsObject", &Perl_Object_IsObject);
 	package.add("Repop", &Perl_Object_Repop);
 	package.add("Save", &Perl_Object_Save);
 	package.add("SetEntityVariable", &Perl_Object_SetEntityVariable);
