@@ -1281,14 +1281,14 @@ sub database_dump
 {
     print "[Database] Performing database backup....\n";
     my $command = get_world_command();
-    print `$command database:dump --all --compress`;
+    print `$command database:dump --all`;
 }
 
 sub database_dump_player_tables
 {
     print "[Database] Performing database backup of player tables....\n";
     my $command = get_world_command();
-    print `$command database:dump --player-tables --compress`;
+    print `$command database:dump --player-tables`;
 }
 
 sub database_dump_compress
