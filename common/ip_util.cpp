@@ -217,7 +217,10 @@ std::string IpUtil::DNSLookupSync(const std::string &addr, int port)
 		}
 	);
 
-	return res.get();
+	std::string result = res.get();
+	safe_delete(task_runner);
+
+	return result;
 }
 
 bool IpUtil::IsIPAddress(const std::string &ip_address)
