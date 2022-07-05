@@ -46,7 +46,7 @@ uint32_t Perl_Doors_GetOpenType(Doors* self)  // @categories Doors
 	return self->GetOpenType();
 }
 
-uint32_t Perl_Doors_GetLockpick(Doors* self) // @categories Doors, Skills and Recipes
+uint32_t Perl_Doors_GetLockPick(Doors* self) // @categories Doors, Skills and Recipes
 {
 	return self->GetLockpick();
 }
@@ -76,7 +76,7 @@ void Perl_Doors_SetOpenType(Doors* self, uint32_t open_type) // @categories Door
 	self->SetOpenType(open_type);
 }
 
-void Perl_Doors_SetLockpick(Doors* self, uint32_t lockpick_type) // @categories Doors
+void Perl_Doors_SetLockPick(Doors* self, uint32_t lockpick_type) // @categories Doors
 {
 	self->SetLockpick(lockpick_type);
 }
@@ -161,7 +161,7 @@ void perl_register_doors()
 	package.add("GetID", &Perl_Doors_GetID);
 	package.add("GetIncline", &Perl_Doors_GetIncline);
 	package.add("GetKeyItem", &Perl_Doors_GetKeyItem);
-	package.add("GetLockPick", &Perl_Doors_GetLockpick);
+	package.add("GetLockPick", &Perl_Doors_GetLockPick);
 	package.add("GetModelName", &Perl_Doors_GetModelName);
 	package.add("GetNoKeyring", &Perl_Doors_GetNoKeyring);
 	package.add("GetOpenType", &Perl_Doors_GetOpenType);
@@ -173,7 +173,7 @@ void perl_register_doors()
 	package.add("SetIncline", &Perl_Doors_SetIncline);
 	package.add("SetKeyItem", &Perl_Doors_SetKeyItem);
 	package.add("SetLocation", &Perl_Doors_SetLocation);
-	package.add("SetLockPick", &Perl_Doors_SetLockpick);
+	package.add("SetLockPick", &Perl_Doors_SetLockPick);
 	package.add("SetModelName", &Perl_Doors_SetModelName);
 	package.add("SetNoKeyring", &Perl_Doors_SetNoKeyring);
 	package.add("SetOpenType", &Perl_Doors_SetOpenType);
