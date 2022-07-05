@@ -24,7 +24,7 @@ void DiscordManager::ProcessMessageQueue()
 
 		if (q.first >= MAX_DISCORD_WEBHOOK_ID) {
 			LogDiscord("Out of bounds webhook ID [{}] max [{}]", q.first, MAX_DISCORD_WEBHOOK_ID);
-			return;
+			continue;
 		}
 
 		auto        webhook  = LogSys.GetDiscordWebhooks()[q.first];
