@@ -359,7 +359,7 @@ void NPC::AddLootDrop(
 
 	auto item = new ServerLootItem_Struct;
 
-	if (LogSys.m_log_settings[Logs::Loot].is_category_enabled == 1) {
+	if (LogSys.log_settings[Logs::Loot].is_category_enabled == 1) {
 		EQ::SayLinkEngine linker;
 		linker.SetLinkType(EQ::saylink::SayLinkItemData);
 		linker.SetItemData(item2);

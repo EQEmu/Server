@@ -78,9 +78,9 @@ void command_logs(Client *c, const Seperator *sep)
 				"<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>",
 				index,
 				Logs::LogCategoryName[index],
-				LogSys.m_log_settings[index].log_to_console,
-				LogSys.m_log_settings[index].log_to_file,
-				LogSys.m_log_settings[index].log_to_gmsay
+				LogSys.log_settings[index].log_to_console,
+				LogSys.log_settings[index].log_to_file,
+				LogSys.log_settings[index].log_to_gmsay
 			);
 		}
 
@@ -155,11 +155,11 @@ void command_logs(Client *c, const Seperator *sep)
 		auto setting = std::stoul(sep->arg[4]);
 
 		if (is_console) {
-			LogSys.m_log_settings[category_id].log_to_console = setting;
+			LogSys.log_settings[category_id].log_to_console = setting;
 		} else if (is_file) {
-			LogSys.m_log_settings[category_id].log_to_file = setting;
+			LogSys.log_settings[category_id].log_to_file = setting;
 		} else if (is_gmsay) {
-			LogSys.m_log_settings[category_id].log_to_gmsay = setting;
+			LogSys.log_settings[category_id].log_to_gmsay = setting;
 		}
 
 		if (logs_set) {
@@ -175,7 +175,7 @@ void command_logs(Client *c, const Seperator *sep)
 			);
 		}
 
-		LogSys.m_log_settings[category_id].is_category_enabled = setting ? 1 : 0;
+		LogSys.log_settings[category_id].is_category_enabled = setting ? 1 : 0;
 	}
 }
 

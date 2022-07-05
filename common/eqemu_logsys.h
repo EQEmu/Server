@@ -302,14 +302,14 @@ public:
 		int         instance_id;
 	};
 
-	OriginationInfo m_origination_info{};
+	OriginationInfo origination_info{};
 
 	/**
 	 * Internally used memory reference for all log settings per category
 	 * These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults
 	 * Database loaded via LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
 	*/
-	LogSettings m_log_settings[Logs::LogCategory::MaxCategoryID]{};
+	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
 	struct DiscordWebhooks {
 		int         id;
@@ -317,13 +317,7 @@ public:
 		std::string webhook_url;
 	};
 
-	DiscordWebhooks m_discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
-
-	bool m_file_logs_enabled = false;
-
-	int         m_log_platform = 0;
-	std::string m_platform_file_name;
-
+	const DiscordWebhooks *GetDiscordWebhooks() const;
 
 	// gmsay
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
@@ -360,6 +354,10 @@ private:
 	std::function<void(uint16 log_category, const std::string &)>                 m_on_log_gmsay_hook;
 	std::function<void(uint16 log_category, int webhook_id, const std::string &)> m_on_log_discord_hook;
 	std::function<void(uint16 log_category, const std::string &)>                 m_on_log_console_hook;
+	DiscordWebhooks                                                               m_discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
+	bool                                                                          m_file_logs_enabled = false;
+	int                                                                           m_log_platform      = 0;
+	std::string                                                                   m_platform_file_name;
 
 	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message);
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);

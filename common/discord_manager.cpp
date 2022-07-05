@@ -22,7 +22,12 @@ void DiscordManager::ProcessMessageQueue()
 	for (auto &q: webhook_message_queue) {
 		LogDiscord("Processing [{}] messages in queue for webhook ID [{}]...", q.second.size(), q.first);
 
-		auto        webhook  = LogSys.m_discord_webhooks[q.first];
+		if (q.first >= MAX_DISCORD_WEBHOOK_ID) {
+			LogDiscord("Out of bounds webhook ID [{}] max [{}]", q.first, MAX_DISCORD_WEBHOOK_ID);
+			return;
+		}
+
+		auto        webhook  = LogSys.GetDiscordWebhooks()[q.first];
 		std::string message;
 
 		for (auto &m: q.second) {

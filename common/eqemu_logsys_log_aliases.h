@@ -38,17 +38,17 @@
 } while (0)
 
 #define LogCritical(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Critical].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Critical].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Critical, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogError(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Error].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Error].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Error, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogWarning(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Warning].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Warning].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Warning, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -58,12 +58,12 @@
 } while (0)
 
 #define LogInfo(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Info].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Info].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Info, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogDebug(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Debug].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Debug].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Debug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -72,7 +72,7 @@
  */
 
 #define LogAA(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AA].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AA].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::AA, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -82,7 +82,7 @@
 } while (0)
 
 #define LogAI(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AI].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AI].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -92,12 +92,12 @@
 } while (0)
 
 #define LogAggro(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Aggro].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Aggro].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Aggro, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAggroDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Aggro].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Aggro].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Aggro, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -112,7 +112,7 @@
 } while (0)
 
 #define LogPacketClientServer(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::PacketClientServer].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::PacketClientServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -122,17 +122,17 @@
 } while (0)
 
 #define LogCombat(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Combat].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Combat].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Combat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogCombatDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Combat].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Combat].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Combat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogCommands(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Commands].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Commands].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Commands, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -142,7 +142,7 @@
 } while (0)
 
 #define LogCrash(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Crash].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Crash].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Crash, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -152,12 +152,12 @@
 } while (0)
 
 #define LogDoors(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Doors].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Doors].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Doors, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogDoorsDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Doors].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Doors].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Doors, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -172,7 +172,7 @@
 } while (0)
 
 #define LogGuilds(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Guilds].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Guilds].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Guilds, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -182,7 +182,7 @@
 } while (0)
 
 #define LogInventory(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Inventory].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Inventory].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Inventory, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -202,7 +202,7 @@
 } while (0)
 
 #define LogNetcode(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Netcode].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Netcode].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Netcode, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -232,12 +232,12 @@
 } while (0)
 
 #define LogPathing(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Pathing].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Pathing].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Pathing, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogPathingDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Pathing].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Pathing].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Pathing, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -252,7 +252,7 @@
 } while (0)
 
 #define LogQuests(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Quests].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Quests].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Quests, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -262,7 +262,7 @@
 } while (0)
 
 #define LogRules(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Rules].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Rules].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Rules, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -272,7 +272,7 @@
 } while (0)
 
 #define LogSkills(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Skills].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Skills].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Skills, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -282,17 +282,17 @@
 } while (0)
 
 #define LogSpawns(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Spawns].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Spawns].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Spawns, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogSpawnsDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Spawns].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Spawns].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Spawns, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogSpells(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Spells].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Spells].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Spells, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -312,27 +312,27 @@
 } while (0)
 
 #define LogTasks(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Tasks].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Tasks].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Tasks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogTasksDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Tasks].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Tasks].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Tasks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogTradeskills(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Tradeskills].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Tradeskills].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Tradeskills, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogTradeskillsDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Tradeskills].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Tradeskills].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Tradeskills, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogTrading(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Trading].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Trading].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Trading, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -342,7 +342,7 @@
 } while (0)
 
 #define LogTribute(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Tribute].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Tribute].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Tribute, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -352,7 +352,7 @@
 } while (0)
 
 #define LogMySQLError(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::MySQLError].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::MySQLError].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::MySQLError, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -362,7 +362,7 @@
 } while (0)
 
 #define LogMySQLQuery(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::MySQLQuery].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::MySQLQuery, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -402,7 +402,7 @@
 } while (0)
 
 #define LogClientLogin(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::ClientLogin].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::ClientLogin].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::ClientLogin, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -422,17 +422,17 @@
 } while (0)
 
 #define LogHPUpdate(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::HPUpdate].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::HPUpdate].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::HPUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogHPUpdateDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::HPUpdate].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::HPUpdate].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::HPUpdate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogFixZ(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::FixZ].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::FixZ].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::FixZ, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -442,7 +442,7 @@
 } while (0)
 
 #define LogFood(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Food].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Food].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Food, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -472,7 +472,7 @@
 } while (0)
 
 #define LogNPCScaling(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::NPCScaling].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::NPCScaling].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::NPCScaling, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -482,7 +482,7 @@
 } while (0)
 
 #define LogMobAppearance(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::MobAppearance].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::MobAppearance].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::MobAppearance, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -492,7 +492,7 @@
 } while (0)
 
 #define LogStatus(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Status].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Status].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Status, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -502,27 +502,27 @@
 } while (0)
 
 #define LogAIScanClose(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AIScanClose].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AIScanClose].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAIScanCloseDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AIScanClose].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AIScanClose].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::AIScanClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAIYellForHelp(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AIYellForHelp].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AIYellForHelp].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::AIYellForHelp, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAIYellForHelpDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AIYellForHelp].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AIYellForHelp].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::AIYellForHelp, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogAICastBeneficialClose(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AICastBeneficialClose].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AICastBeneficialClose].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::AICastBeneficialClose, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -532,7 +532,7 @@
 } while (0)
 
 #define LogAoeCast(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::AoeCast].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::AoeCast].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::AoeCast, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -542,7 +542,7 @@
 } while (0)
 
 #define LogEntityManagement(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::EntityManagement].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::EntityManagement].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::EntityManagement, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -552,7 +552,7 @@
 } while (0)
 
 #define LogFlee(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Flee].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Flee].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Flee, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -562,7 +562,7 @@
 } while (0)
 
 #define LogAura(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Aura].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Aura].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Aura, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -572,17 +572,17 @@
 } while (0)
 
 #define LogHotReload(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::HotReload].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::HotReload].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::HotReload, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogHotReloadDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::HotReload].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::HotReload].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::HotReload, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogMerchants(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Merchants].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Merchants].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Merchants, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -592,7 +592,7 @@
 } while (0)
 
 #define LogZonePoints(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::ZonePoints].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::ZonePoints].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::ZonePoints, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -602,52 +602,52 @@
 } while (0)
 
 #define LogLoot(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Loot].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Loot].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Loot, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogLootDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Loot].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Loot].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Loot, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogExpeditions(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Expeditions].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Expeditions].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogExpeditionsModerate(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Expeditions].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Expeditions].is_category_enabled == 1)\
         OutF(LogSys, Logs::Moderate, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogExpeditionsDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Expeditions].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Expeditions].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogDynamicZones(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::DynamicZones].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::DynamicZones].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::DynamicZones, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogDynamicZonesDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::DynamicZones].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::DynamicZones].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::DynamicZones, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogScheduler(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Scheduler].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Scheduler].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Scheduler, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogSchedulerDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Scheduler].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Scheduler].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Scheduler, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogCheat(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Cheat].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Cheat].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Cheat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -662,22 +662,22 @@
 } while (0)
 
 #define LogClientListDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::ClientList].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::ClientList].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::ClientList, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogDiaWind(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::DiaWind].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::DiaWind].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::DiaWind, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogDiaWindDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::DiaWind].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::DiaWind].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::DiaWind, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogHTTP(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::HTTP].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::HTTP].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::HTTP, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -687,17 +687,17 @@
 } while (0)
 
 #define LogSaylink(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Saylink].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Saylink].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Saylink, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogSaylinkDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Saylink].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Saylink].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Saylink, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogChecksumVerification(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::ChecksumVerification].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::ChecksumVerification].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::ChecksumVerification, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -707,27 +707,27 @@
 } while (0)
 
 #define LogCombatRecord(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::CombatRecord].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::CombatRecord].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::CombatRecord, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogCombatRecordDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::CombatRecord].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::CombatRecord].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::CombatRecord, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogHate(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Hate].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Hate].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Hate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogHateDetail(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Hate].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Hate].is_category_enabled == 1)\
         OutF(LogSys, Logs::Detail, Logs::Hate, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogDiscord(message, ...) do {\
-    if (LogSys.m_log_settings[Logs::Discord].is_category_enabled == 1)\
+    if (LogSys.log_settings[Logs::Discord].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Discord, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
@@ -737,12 +737,12 @@
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\
-    if (LogSys.m_log_settings[log_category].is_category_enabled == 1)\
+    if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogF(debug_level, log_category, message, ...) do {\
-    if (LogSys.m_log_settings[log_category].is_category_enabled == 1)\
+    if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         OutF(LogSys, debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 

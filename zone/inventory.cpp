@@ -822,7 +822,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 			LogInventory("Error in InventoryProfile::CheckNoDrop() - returned 'true' for empty slot");
 		}
 		else {
-			if (LogSys.m_log_settings[Logs::Inventory].is_category_enabled) {
+			if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
 				LogInventory("DropItem() Hack detected - full item parse:");
 				LogInventory("depth: 0, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 					(invalid_drop->GetItem() ? invalid_drop->GetItem()->Name : "null data"), invalid_drop->GetID(), (invalid_drop->IsDroppable(false) ? "true" : "false"));
@@ -848,7 +848,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 	// Take control of item in client inventory
 	EQ::ItemInstance *inst = m_inv.PopItem(slot_id);
 	if(inst) {
-		if (LogSys.m_log_settings[Logs::Inventory].is_category_enabled) {
+		if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
 			LogInventory("DropItem() Processing - full item parse:");
 			LogInventory("depth: 0, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 				(inst->GetItem() ? inst->GetItem()->Name : "null data"), inst->GetID(), (inst->IsDroppable(false) ? "true" : "false"));

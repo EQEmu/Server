@@ -446,16 +446,16 @@ void ClearMappedOpcode(EmuOpcode op)
 // client methods
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
-	if (LogSys.m_log_settings[Logs::LogCategory::Netcode].is_category_enabled == 1) {
+	if (LogSys.log_settings[Logs::LogCategory::Netcode].is_category_enabled == 1) {
 		char buffer[64];
 		app->build_header_dump(buffer);
 		Log(Logs::Detail, Logs::PacketClientServer, "Dispatch opcode: %s", buffer);
 	}
 
-	if (LogSys.m_log_settings[Logs::PacketClientServer].is_category_enabled == 1)
+	if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)
 		Log(Logs::General, Logs::PacketClientServer, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
 
-	if (LogSys.m_log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)
+	if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)
 		Log(Logs::General, Logs::PacketClientServerWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
 
 	EmuOpcode opcode = app->GetOpcode();
@@ -499,7 +499,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			if (LogSys.m_log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
+			if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
 				char buffer[64];
 				app->build_header_dump(buffer);
 				Log(Logs::General, Logs::PacketClientServerUnhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
@@ -5056,7 +5056,7 @@ void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 {
-	if (LogSys.m_log_settings[Logs::Inventory].is_category_enabled)
+	if (LogSys.log_settings[Logs::Inventory].is_category_enabled)
 		LogInventory("Handle_OP_CreateObject() [psize: [{}]] [{}]", app->size, DumpPacketToString(app).c_str());
 
 	DropItem(EQ::invslot::slotCursor);
