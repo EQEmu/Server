@@ -4121,19 +4121,29 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 	else {
 		//else, it is a buff tic...
 		// So we can see our dot dmg like live shows it.
-		if (spell_id != SPELL_UNKNOWN && damage > 0 && attacker && attacker != this && attacker->IsClient()) {
+		if (spell_id != SPELL_UNKNOWN && damage > 0 && attacker && attacker != this && !attacker->IsCorpse()) {
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
-			attacker->FilteredMessageString(attacker, Chat::DotDamage, FilterDOT,
-				YOUR_HIT_DOT, GetCleanName(), itoa(damage), spells[spell_id].name);
+			if (attacker->IsClient()) {
+				attacker->FilteredMessageString(attacker, Chat::DotDamage,
+					FilterDOT, YOUR_HIT_DOT, GetCleanName(), itoa(damage),
+					spells[spell_id].name);
+			}
+
+			if (IsClient()) {
+				FilteredMessageString(this, Chat::DotDamage, FilterDOT,
+					YOU_TAKE_DOT, itoa(damage), attacker->GetCleanName(),
+					spells[spell_id].name);
+			}
 
 			/* older clients don't have the below String ID, but it will be filtered */
 			entity_list.FilteredMessageCloseString(
-				attacker, /* Sender */
+				this, /* Sender */
 				true, /* Skip Sender */
 				RuleI(Range, SpellMessages),
 				Chat::DotDamage, /* Type: 325 */
 				FilterDOT, /* FilterType: 19 */
 				OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
+				attacker,		/* sent above */
 				GetCleanName(), /* Message1 */
 				itoa(damage), /* Message2 */
 				attacker->GetCleanName(), /* Message3 */
@@ -4677,6 +4687,7 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 				Chat::MeleeCrit, /* Type: 301 */
 				FilterMeleeCrits, /* FilterType: 12 */
 				CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
+				0,
 				GetCleanName(), /* Message1 */
 				itoa(hit.damage_done + hit.min_damage) /* Message2 */
 			);
@@ -4737,6 +4748,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 						Chat::MeleeCrit, /* Type: 301 */
 						FilterMeleeCrits, /* FilterType: 12 */
 						FEMALE_SLAYUNDEAD, /* MessageFormat: %1's holy blade cleanses her target!(%2) */
+						0,
 						GetCleanName(), /* Message1 */
 						itoa(hit.damage_done + hit.min_damage) /* Message2 */
 					);
@@ -4750,6 +4762,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 						Chat::MeleeCrit, /* Type: 301 */
 						FilterMeleeCrits, /* FilterType: 12 */
 						MALE_SLAYUNDEAD, /* MessageFormat: %1's holy blade cleanses his target!(%2)  */
+						0,
 						GetCleanName(), /* Message1 */
 						itoa(hit.damage_done + hit.min_damage) /* Message2 */
 					);
@@ -4832,6 +4845,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 							Chat::MeleeCrit, /* Type: 301 */
 							FilterMeleeCrits, /* FilterType: 12 */
 							DEADLY_STRIKE, /* MessageFormat: %1 scores a Deadly Strike!(%2) */
+							0,
 							GetCleanName(), /* Message1 */
 							itoa(hit.damage_done + hit.min_damage) /* Message2 */
 						);
@@ -4860,6 +4874,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 					Chat::MeleeCrit, /* Type: 301 */
 					FilterMeleeCrits, /* FilterType: 12 */
 					CRIPPLING_BLOW, /* MessageFormat: %1 lands a Crippling Blow!(%2) */
+					0,
 					GetCleanName(), /* Message1 */
 					itoa(hit.damage_done + hit.min_damage) /* Message2 */
 				);
@@ -4882,6 +4897,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 				Chat::MeleeCrit, /* Type: 301 */
 				FilterMeleeCrits, /* FilterType: 12 */
 				CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
+				0,
 				GetCleanName(), /* Message1 */
 				itoa(hit.damage_done + hit.min_damage) /* Message2 */
 			);
@@ -4931,6 +4947,7 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 				Chat::MeleeCrit, /* Type: 301 */
 				FilterMeleeCrits, /* FilterType: 12 */
 				FINISHING_BLOW, /* MessageFormat: %1 scores a Finishing Blow!!) */
+				0,
 				GetCleanName() /* Message1 */
 			);
 
