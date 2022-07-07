@@ -595,9 +595,7 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 								3518, 3520, 3522, 3524 };
 
 
-	//Get the active expansion from the database Rule:WorldExpansionSettings.  Do this only once.  Requires restart to effect change
 	if (server.options.IsDisplayExpansions()) {
-
 		
 		int32_t expansion = server.options.GetMaxExpansions();
 		int32_t owned_expansion = (expansion << 1) | 1;

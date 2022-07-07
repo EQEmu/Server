@@ -17,7 +17,7 @@ public:
 		dump_in_packets(false),
 		dump_out_packets(false),
 		display_expansions(false),
-		max_expansions(0),
+		max_expansions_mask(0),
 		encryption_mode(5),
 		reject_duplicate_servers(false),
 		allow_password_login(true),
@@ -33,9 +33,9 @@ public:
 	* Returns the value of expansion display settings.
 	*/
 	inline void DisplayExpansions(bool b) { display_expansions = b; }
-	inline void MaxExpansions(int i) { max_expansions = i; }
+	inline void MaxExpansions(int i) { max_expansions_mask = i; }
 	inline bool IsDisplayExpansions() const { return display_expansions; }
-	inline int GetMaxExpansions() const { return max_expansions; }
+	inline int GetMaxExpansions() const { return max_expansions_mask; }
 
 	/**
 	* Returns the value of allow_unregistered.
@@ -163,7 +163,7 @@ private:
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
 	int         encryption_mode;
-	int         max_expansions;
+	int         max_expansions_mask;
 	std::string eqemu_loginserver_address;
 	std::string default_loginserver_name;
 };

@@ -91,7 +91,7 @@ void LoadServerConfig()
 	 * Expansion Display Settings
 	 */
 	server.options.DisplayExpansions(server.config.GetVariableBool("client_configuration", "display_expansions", false)); //disable by default
-	server.options.MaxExpansions(server.config.GetVariableInt("client_configuration", "max_expansions", 67108863)); //enable display of all expansions
+	server.options.MaxExpansions(server.config.GetVariableInt("client_configuration", "max_expansions_mask", 67108863)); //enable display of all expansions
 
 	/**
 	 * Account
