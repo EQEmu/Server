@@ -2799,7 +2799,9 @@ void Zone::SendDiscordMessage(int webhook_id, const std::string& message)
 void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string &message)
 {
 	bool not_found = true;
-	for (auto & w : LogSys.discord_webhooks) {
+
+	for (int i= 0; i < MAX_DISCORD_WEBHOOK_ID; i++) {
+		auto &w = LogSys.GetDiscordWebhooks()[i];
 		if (w.webhook_name == webhook_name) {
 			SendDiscordMessage(w.id, message + "\n");
 			not_found = false;

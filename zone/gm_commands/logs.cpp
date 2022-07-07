@@ -25,7 +25,7 @@ void command_logs(Client *c, const Seperator *sep)
 		);
 		return;
 	}
-	
+
 	bool is_list = !strcasecmp(sep->arg[1], "list");
 	bool is_reload = !strcasecmp(sep->arg[1], "reload");
 	bool is_set = !strcasecmp(sep->arg[1], "set");
@@ -73,7 +73,7 @@ void command_logs(Client *c, const Seperator *sep)
 				max_category_id = (Logs::LogCategory::MaxCategoryID - 1);
 				break;
 			}
-			
+
 			popup_text += fmt::format(
 				"<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>",
 				index,
