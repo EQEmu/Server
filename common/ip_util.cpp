@@ -30,6 +30,8 @@
 #include "net/dns.h"
 #include "event/task_scheduler.h"
 
+#define bzero(p, size)     (void)memset((p), 0, (size))
+
 /**
  * @param ip
  * @return
