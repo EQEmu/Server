@@ -104,6 +104,7 @@ union semun {
 #include "world_store.h"
 #include "world_event_scheduler.h"
 #include "shared_task_manager.h"
+#include "../common/ip_util.h"
 
 WorldStore          world_store;
 ClientList          client_list;
@@ -633,6 +634,8 @@ int main(int argc, char **argv)
 			web_interface.RemoveConnection(connection);
 		}
 	);
+
+	WorldConfig::CheckForPossibleConfigurationIssues();
 
 	EQStreamManagerInterfaceOptions opts(9000, false, false);
 	opts.daybreak_options.resend_delay_ms     = RuleI(Network, ResendDelayBaseMS);
