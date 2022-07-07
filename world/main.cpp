@@ -65,11 +65,11 @@
 
 #if not defined (FREEBSD) && not defined (DARWIN)
 union semun {
-	int val;
+	int             val;
 	struct semid_ds *buf;
-	ushort *array;
-	struct seminfo *__buf;
-	void *__pad;
+	ushort          *array;
+	struct seminfo  *__buf;
+	void            *__pad;
 };
 #endif
 
@@ -105,6 +105,8 @@ union semun {
 #include "world_event_scheduler.h"
 #include "shared_task_manager.h"
 #include "../common/ip_util.h"
+#include "../common/http/httplib.h"
+#include "../common/http/uri.h"
 
 WorldStore          world_store;
 ClientList          client_list;
@@ -775,23 +777,58 @@ void UpdateWindowTitle(char *iNewTitle)
 #endif
 }
 
+int get_file_size(const std::string& filename) // path to file
+{
+	FILE *p_file = NULL;
+	p_file = fopen(filename.c_str(),"rb");
+	fseek(p_file,0,SEEK_END);
+	int size = ftell(p_file);
+	fclose(p_file);
+	return size;
+}
+
 void CheckForServerScript(bool force_download)
 {
+	const std::string file = "eqemu_server.pl";
+	std::ifstream f(file);
+
 	/* Fetch EQEmu Server script */
-	if (!std::ifstream("eqemu_server.pl") || force_download) {
+	if (!f || get_file_size(file) < 100 || force_download) {
 
 		if (force_download) {
 			std::remove("eqemu_server.pl");
 		} /* Delete local before fetch */
 
 		std::cout << "Pulling down EQEmu Server Maintenance Script (eqemu_server.pl)..." << std::endl;
+
+		// http get request
+		uri u("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl");
+
+		httplib::Client r(
+			fmt::format(
+				"{}://{}",
+				u.get_scheme(),
+				u.get_host()
+			).c_str()
+		);
+
+		r.set_connection_timeout(1, 0);
+		r.set_read_timeout(1, 0);
+		r.set_write_timeout(1, 0);
+
+		if (auto res = r.Get(u.get_path().c_str())) {
+			if (res->status == 200) {
+				// write file
+				std::ofstream out("eqemu_server.pl");
+				out << res->body;
+				out.close();
 #ifdef _WIN32
-		if(system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\""));
 #else
-		if (system(
-			"wget -N --no-check-certificate --quiet -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl"
-		)) {}
+				system("chmod 755 eqemu_server.pl");
+				system("chmod +x eqemu_server.pl");
 #endif
+			}
+		}
 	}
 }
 
