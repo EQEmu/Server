@@ -1044,7 +1044,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	for (const auto& zone_id : zone_flags) {
 		int flag_number = (flag_count + 1);
 		const char* zone_short_name = ZoneName(zone_id, true);
-		if (zone_short_name != "UNKNOWN") {
+		if (strncmp(zone_short_name, "UNKNOWN", strlen(zone_short_name)) != 0) {
 			std::string zone_long_name = ZoneLongName(zone_id);
 			float safe_x, safe_y, safe_z, safe_heading;
 			int16 min_status = AccountStatus::Player;
@@ -1073,7 +1073,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 					zone_long_name,
 					zone_short_name,
 					(
-						flag_name != "" ?
+						flag_name[0] != '\0' ?
 						fmt::format(
 							" Flag Required: {}",
 							flag_name
