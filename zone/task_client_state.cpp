@@ -1221,13 +1221,12 @@ void ClientTaskState::IncrementDoneCount(
 		// updated in UnlockActivities. Send the completed task list to the
 		// client. This is the same sequence the packets are sent on live.
 		if (task_complete) {
-			std::string export_string = fmt::format(
-				"{} {} {}",
-				info->activity[activity_id].done_count,
-				info->activity[activity_id].activity_id,
-				info->task_id
-			);
-			parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+			// world adds timers for shared tasks
+			if (task_information->type != TaskType::Shared) {
+				AddReplayTimer(client, *info, *task_information);
+			}
+
+			DispatchEventTaskComplete(client, *info, activity_id);
 
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
@@ -1242,25 +1241,18 @@ void ClientTaskState::IncrementDoneCount(
 			}
 
 			client->SendTaskActivityComplete(info->task_id, 0, task_index, task_information->type, 0);
-			task_manager->SaveClientState(client, this);
 
 			// If Experience and/or cash rewards are set, reward them from the task even if reward_method is METHODQUEST
-			RewardTask(client, task_information);
+			RewardTask(client, task_information, *info);
 			//RemoveTask(c, TaskIndex);
 
-			// add replay timer (world adds timers to shared task members)
-			AddReplayTimer(client, *info, *task_information);
-
 			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
-			if (task_information->type == TaskType::Shared) {
-				return;
+			if (task_information->type != TaskType::Shared) {
+				task_manager->SendCompletedTasksToClient(client, this);
+
+				client->CancelTask(task_index, task_information->type);
 			}
-
-			task_manager->SendCompletedTasksToClient(client, this);
-
-			client->CancelTask(task_index, task_information->type);
 		}
-
 	}
 	else {
 		// Send an updated packet for this single activity_information
@@ -1270,16 +1262,31 @@ void ClientTaskState::IncrementDoneCount(
 			activity_id,
 			task_index
 		);
-		task_manager->SaveClientState(client, this);
 	}
+
+	task_manager->SaveClientState(client, this);
 }
 
-void ClientTaskState::RewardTask(Client *client, TaskInformation *task_information)
+void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
+{
+	std::string export_string = fmt::format(
+		"{} {} {}",
+		info.activity[activity_id].done_count,
+		info.activity[activity_id].activity_id,
+		info.task_id
+	);
+	parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+}
+
+void ClientTaskState::RewardTask(Client *client, TaskInformation *task_information, ClientTaskInformation& client_task)
 {
 
-	if (!task_information || !client) {
+	if (!task_information || !client || client_task.was_rewarded) {
 		return;
 	}
+
+	client_task.was_rewarded = true;
+	client_task.updated = true;
 
 	if (!task_information->completion_emote.empty()) {
 		client->Message(Chat::Yellow, task_information->completion_emote.c_str());
@@ -2398,6 +2405,7 @@ void ClientTaskState::AcceptNewTask(
 	active_slot->accepted_time = static_cast<int>(accept_time);
 	active_slot->updated       = true;
 	active_slot->current_step  = -1;
+	active_slot->was_rewarded  = false;
 
 	for (int activity_id = 0; activity_id < task_manager->m_task_data[task_id]->activity_count; activity_id++) {
 		active_slot->activity[activity_id].activity_id    = activity_id;
@@ -2631,8 +2639,7 @@ void ClientTaskState::ListTaskTimers(Client* client)
 
 void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, TaskInformation& task)
 {
-	// world adds timers for shared tasks and handles messages
-	if (task.type != TaskType::Shared && task.replay_timer_seconds > 0)
+	if (task.replay_timer_seconds > 0)
 	{
 		// solo task replay timers are based on completion time
 		auto expire_time = std::time(nullptr) + task.replay_timer_seconds;
@@ -2642,6 +2649,11 @@ void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& clie
 		timer.task_id      = client_task.task_id;
 		timer.expire_time  = expire_time;
 		timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+
+		// replace any existing replay timer
+		CharacterTaskTimersRepository::DeleteWhere(database, fmt::format(
+			"task_id = {} AND timer_type = {} AND character_id = {}",
+			client_task.task_id, static_cast<int>(TaskTimerType::Replay), client->CharacterID()));
 
 		CharacterTaskTimersRepository::InsertOne(database, timer);
 

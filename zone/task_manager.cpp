@@ -314,13 +314,14 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 				);
 
 				std::string query = StringFormat(
-					"REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime) "
-					"VALUES (%i, %i, %i, %i, %i)",
+					"REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime, was_rewarded) "
+					"VALUES (%i, %i, %i, %i, %i, %d)",
 					character_id,
 					task_id,
 					slot,
 					static_cast<int>(m_task_data[task_id]->type),
-					active_task.accepted_time
+					active_task.accepted_time,
+					active_task.was_rewarded
 				);
 
 				auto results = database.QueryDatabase(query);
@@ -1326,6 +1327,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		task_info->current_step  = -1;
 		task_info->accepted_time = character_task.acceptedtime;
 		task_info->updated       = false;
+		task_info->was_rewarded  = character_task.was_rewarded;
 
 		for (auto &i : task_info->activity) {
 			i.activity_id = -1;
@@ -1337,11 +1339,12 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		LogTasks(
-			"[LoadClientState] character_id [{}] task_id [{}] slot [{}] accepted_time [{}]",
+			"[LoadClientState] character_id [{}] task_id [{}] slot [{}] accepted_time [{}] was_rewarded [{}]",
 			character_id,
 			task_id,
 			slot,
-			character_task.acceptedtime
+			character_task.acceptedtime,
+			character_task.was_rewarded
 		);
 	}
 
@@ -1685,6 +1688,9 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 							shared_task->activity[a.activity_id].activity_state =
 								(a.completed_time > 0 ? ActivityCompleted : ActivityHidden);
 
+							// flag to update character_activities table entry on save
+							shared_task->activity[a.activity_id].updated = true;
+
 							// set flag to persist later
 							fell_behind_state = true;
 						}
@@ -1692,6 +1698,17 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 
 					// fell behind, force a save of client state
 					if (fell_behind_state) {
+						// give reward if member was offline for shared task completion
+						// live does this as long as the shared task is still active when entering game
+						if (!shared_task->was_rewarded && IsActiveTaskComplete(*shared_task))
+						{
+							LogTasksDetail("[LoadClientState] Syncing shared task completion for client [{}]", c->GetName());
+							auto task_info = task_manager->m_task_data[shared_task->task_id];
+							cts->AddReplayTimer(c, *shared_task, *task_info); // live updates a fresh timer
+							cts->DispatchEventTaskComplete(c, *shared_task, task_info->activity_count - 1);
+							cts->RewardTask(c, task_info, *shared_task);
+						}
+
 						SaveClientState(c, cts);
 					}
 
@@ -1914,4 +1931,18 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, st
 			}
 		}
 	}
+}
+
+bool TaskManager::IsActiveTaskComplete(ClientTaskInformation& client_task)
+{
+	auto task_info = task_manager->m_task_data[client_task.task_id];
+	for (int i = 0; i < task_info->activity_count; ++i)
+	{
+		if (client_task.activity[i].activity_state != ActivityCompleted &&
+		    !task_info->activity_information[i].optional)
+		{
+			return false;
+		}
+	}
+	return true;
 }

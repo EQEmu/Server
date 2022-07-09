@@ -43,7 +43,7 @@ public:
 	bool TaskOutOfTime(TaskType task_type, int index);
 	void TaskPeriodicChecks(Client *client);
 	void SendTaskHistory(Client *client, int task_index);
-	void RewardTask(Client *client, TaskInformation *task_information);
+	void RewardTask(Client *client, TaskInformation *task_information, ClientTaskInformation& client_task);
 	void EnableTask(int character_id, int task_count, int *task_list);
 	void DisableTask(int character_id, int task_count, int *task_list);
 	bool IsTaskEnabled(int task_id);
@@ -75,6 +75,7 @@ public:
 
 private:
 	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, TaskInformation& task);
+	void DispatchEventTaskComplete(Client* client, ClientTaskInformation& client_task, int activity_id);
 
 	void IncrementDoneCount(
 		Client *client,

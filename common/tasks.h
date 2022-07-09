@@ -257,6 +257,7 @@ struct ClientTaskInformation {
 	int                       current_step;
 	int                       accepted_time;
 	bool                      updated;
+	bool                      was_rewarded; // character has received reward for this task
 	ClientActivityInformation activity[MAXACTIVITIESPERTASK];
 };
 
