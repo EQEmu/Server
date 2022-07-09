@@ -175,7 +175,7 @@ void command_task(Client *c, const Seperator *sep)
 	}
 
 	if (is_assign) {
-		auto task_id = std::stoul(sep->arg[2]);
+		auto task_id = std::strtoul(sep->arg[2], nullptr, 10);
 		if (task_id && task_id < MAXTASKS) {
 			target->AssignTask(task_id, 0, false);
 			c->Message(
@@ -221,7 +221,7 @@ void command_task(Client *c, const Seperator *sep)
 				c->Message(Chat::Yellow, "Successfully reloaded task sets.");
 				return;
 			} else if (!strcasecmp(sep->arg[2], "task") && arguments == 3) {
-				int task_id = std::stoul(sep->arg[3]);
+				int task_id = std::strtoul(sep->arg[3], nullptr, 10);
 				if (task_id && task_id < MAXTASKS) {
 					c->Message(
 						Chat::Yellow,
@@ -308,12 +308,12 @@ void command_task(Client *c, const Seperator *sep)
 		}
 	} else if (is_update) {
 		if (arguments >= 3) {
-			auto task_id = std::stoul(sep->arg[2]);
-			auto activity_id = std::stoul(sep->arg[3]);
+			auto task_id = std::strtoul(sep->arg[2], nullptr, 10);
+			auto activity_id = std::strtoul(sep->arg[3], nullptr, 10);
 			int count = 1;
 
 			if (arguments >= 4) {
-				count = std::stoi(sep->arg[4]);
+				count = std::strtol(sep->arg[4], nullptr, 10);
 				if (count <= 0) {
 					count = 1;
 				}
