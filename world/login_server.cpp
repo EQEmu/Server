@@ -294,10 +294,27 @@ void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p)
 	const WorldConfig *Config = WorldConfig::get();
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
-	LogInfo("Login server responded with FatalError");
+	std::string error;
+	std::string reason;
+
 	if (p.Length() > 1) {
-		LogError("Error [{}]", (const char *) p.Data());
+		error = fmt::format("{}", (const char *) p.Data());
 	}
+
+	if (error.find("Worldserver Account / Password INVALID") != std::string::npos) {
+		reason = "Usually this indicates you do not have a valid [account] and [password] (worldserver) account associated with your loginserver configuration. ";
+		if (fmt::format("{}", m_loginserver_address).find("login.eqemulator.net") != std::string::npos) {
+			reason += "For Legacy EQEmulator connections, you need to register your server @ http://www.eqemulator.org/account/?LS";
+		}
+	}
+
+	LogInfo(
+		"Login server [{}:{}] responded with fatal error [{}] {}\n",
+		m_loginserver_address,
+		m_loginserver_port,
+		error,
+		reason
+	);
 }
 
 void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
