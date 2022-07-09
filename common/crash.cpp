@@ -154,7 +154,7 @@ void print_trace()
 {
 	bool does_gdb_exist = execute("gdb -v").find("GNU") != std::string::npos;
 	if (!does_gdb_exist) {
-		LogError("[Crash Dump] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed");
+		LogCrash("[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed");
 		std::exit(1);
 	}
 
@@ -165,7 +165,7 @@ void print_trace()
 	if (uid != 0) {
 		bool has_passwordless_sudo = execute("sudo -n true").find("a password is required") == std::string::npos;
 		if (!has_passwordless_sudo) {
-			LogError("[Crash Dump] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root.");
+			LogCrash("[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root.");
 			std::exit(1);
 		}
 	}
