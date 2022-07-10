@@ -248,7 +248,8 @@ std::string Strings::Join(const std::vector<std::string> &ar, const std::string 
 	return ret;
 }
 
-void Strings::FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
+void
+Strings::FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
 {
 	if (string_subject.find(search_string) == std::string::npos) {
 		return;
@@ -603,7 +604,7 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 
 			auto pos = Strings::ToLower(piece).find(word);
 			if (Strings::ToLower(piece).find(word) != std::string::npos && piece.length() > 4 && word.length() > 4) {
-				auto found_word = piece.substr(pos, word.length());
+				auto        found_word     = piece.substr(pos, word.length());
 				std::string replaced_piece = piece.substr(pos, word.length());
 
 				Strings::FindReplace(
@@ -920,10 +921,11 @@ std::vector<std::string> GetBadWords()
 
 bool Strings::Contains(std::vector<std::string> container, std::string element)
 {
-    return std::find(container.begin(), container.end(), element) != container.end();
+	return std::find(container.begin(), container.end(), element) != container.end();
 }
 
-std::string Strings::Commify(const std::string &number) {
+std::string Strings::Commify(const std::string &number)
+{
 	std::string temp_string;
 
 	auto string_length = static_cast<int>(number.length());
@@ -932,7 +934,8 @@ std::string Strings::Commify(const std::string &number) {
 	for (i = string_length - 3; i >= 0; i -= 3) {
 		if (i > 0) {
 			temp_string = "," + number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		} else {
+		}
+		else {
 			temp_string = number.substr(static_cast<unsigned long>(i), 3) + temp_string;
 		}
 	}
@@ -1028,67 +1031,78 @@ std::string Strings::MoneyToString(uint32 platinum, uint32 gold, uint32 silver, 
 			Strings::Commify(std::to_string(silver)),
 			Strings::Commify(std::to_string(copper))
 		);
-	} else if (copper && silver && gold && !platinum) { // CSG
+	}
+	else if (copper && silver && gold && !platinum) { // CSG
 		money_string = fmt::format(
 			"{} Gold, {} Silver, and {} Copper",
 			Strings::Commify(std::to_string(gold)),
 			Strings::Commify(std::to_string(silver)),
 			Strings::Commify(std::to_string(copper))
 		);
-	} else if (copper && silver && !gold && !platinum) { // CS
+	}
+	else if (copper && silver && !gold && !platinum) { // CS
 		money_string = fmt::format(
 			"{} Silver and {} Copper",
 			Strings::Commify(std::to_string(silver)),
 			Strings::Commify(std::to_string(copper))
 		);
-	} else if (!copper && silver && gold && platinum) { // SGP
+	}
+	else if (!copper && silver && gold && platinum) { // SGP
 		money_string = fmt::format(
 			"{} Platinum, {} Gold, and {} Silver",
 			Strings::Commify(std::to_string(platinum)),
 			Strings::Commify(std::to_string(gold)),
 			Strings::Commify(std::to_string(silver))
 		);
-	} else if (!copper && silver && gold && !platinum) { // SG
+	}
+	else if (!copper && silver && gold && !platinum) { // SG
 		money_string = fmt::format(
 			"{} Gold and {} Silver",
 			Strings::Commify(std::to_string(gold)),
 			Strings::Commify(std::to_string(silver))
 		);
-	} else if (copper && !silver && gold && platinum) { // CGP
+	}
+	else if (copper && !silver && gold && platinum) { // CGP
 		money_string = fmt::format(
 			"{} Platinum, {} Gold, and {} Copper",
 			Strings::Commify(std::to_string(platinum)),
 			Strings::Commify(std::to_string(gold)),
 			Strings::Commify(std::to_string(copper))
 		);
-	} else if (copper && !silver && gold && !platinum) { // CG
+	}
+	else if (copper && !silver && gold && !platinum) { // CG
 		money_string = fmt::format(
 			"{} Gold and {} Copper",
 			Strings::Commify(std::to_string(gold)),
 			Strings::Commify(std::to_string(copper))
 		);
-	} else if (!copper && !silver && gold && platinum) { // GP
+	}
+	else if (!copper && !silver && gold && platinum) { // GP
 		money_string = fmt::format(
 			"{} Platinum and {} Gold",
 			Strings::Commify(std::to_string(platinum)),
 			Strings::Commify(std::to_string(gold))
 		);
-	} else if (!copper && !silver && !gold && platinum) { // P
+	}
+	else if (!copper && !silver && !gold && platinum) { // P
 		money_string = fmt::format(
 			"{} Platinum",
 			Strings::Commify(std::to_string(platinum))
 		);
-	} else if (!copper && !silver && gold && !platinum) { // G
+	}
+	else if (!copper && !silver && gold && !platinum) { // G
 		money_string = fmt::format(
 			"{} Gold",
 			Strings::Commify(std::to_string(gold))
 		);
-	} else if (!copper && silver && !gold && !platinum) { // S
+	}
+	else if (!copper && silver && !gold && !platinum) { // S
 		money_string = fmt::format(
 			"{} Silver",
 			Strings::Commify(std::to_string(silver))
 		);
-	} else if (copper && !silver && !gold && !platinum) { // C
+	}
+	else if (copper && !silver && !gold && !platinum) { // C
 		money_string = fmt::format(
 			"{} Copper",
 			Strings::Commify(std::to_string(copper))
@@ -1122,10 +1136,10 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 	timer_length %= 3600;
 	int minutes = int(timer_length / 60);
 	timer_length %= 60;
-	int seconds = timer_length;
-	std::string time_string = "Unknown";
-	std::string day_string = (days == 1 ? "Day" : "Days");
-	std::string hour_string = (hours == 1 ? "Hour" : "Hours");
+	int         seconds       = timer_length;
+	std::string time_string   = "Unknown";
+	std::string day_string    = (days == 1 ? "Day" : "Days");
+	std::string hour_string   = (hours == 1 ? "Hour" : "Hours");
 	std::string minute_string = (minutes == 1 ? "Minute" : "Minutes");
 	std::string second_string = (seconds == 1 ? "Second" : "Seconds");
 	if (days && hours && minutes && seconds) { // DHMS
@@ -1140,7 +1154,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			seconds,
 			second_string
 		);
-	} else if (days && hours && minutes && !seconds) { // DHM
+	}
+	else if (days && hours && minutes && !seconds) { // DHM
 		time_string = fmt::format(
 			"{} {}, {} {}, and {} {}",
 			days,
@@ -1150,7 +1165,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			minutes,
 			minute_string
 		);
-	} else if (days && hours && !minutes && seconds) { // DHS
+	}
+	else if (days && hours && !minutes && seconds) { // DHS
 		time_string = fmt::format(
 			"{} {}, {} {}, and {} {}",
 			days,
@@ -1160,7 +1176,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			seconds,
 			second_string
 		);
-	} else if (days && hours && !minutes && !seconds) { // DH
+	}
+	else if (days && hours && !minutes && !seconds) { // DH
 		time_string = fmt::format(
 			"{} {} and {} {}",
 			days,
@@ -1168,7 +1185,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			hours,
 			hour_string
 		);
-	} else if (days && !hours && minutes && seconds) { // DMS
+	}
+	else if (days && !hours && minutes && seconds) { // DMS
 		time_string = fmt::format(
 			"{} {}, {} {}, and {} {}",
 			days,
@@ -1178,7 +1196,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			seconds,
 			second_string
 		);
-	} else if (days && !hours && minutes && !seconds) { // DM
+	}
+	else if (days && !hours && minutes && !seconds) { // DM
 		time_string = fmt::format(
 			"{} {} and {} {}",
 			days,
@@ -1186,7 +1205,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			minutes,
 			minute_string
 		);
-	} else if (days && !hours && !minutes && seconds) { // DS
+	}
+	else if (days && !hours && !minutes && seconds) { // DS
 		time_string = fmt::format(
 			"{} {} and {} {}",
 			days,
@@ -1194,13 +1214,15 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			seconds,
 			second_string
 		);
-	} else if (days && !hours && !minutes && !seconds) { // D
+	}
+	else if (days && !hours && !minutes && !seconds) { // D
 		time_string = fmt::format(
 			"{} {}",
 			days,
 			day_string
 		);
-	} else if (!days && hours && minutes && seconds) { // HMS
+	}
+	else if (!days && hours && minutes && seconds) { // HMS
 		time_string = fmt::format(
 			"{} {}, {} {}, and {} {}",
 			hours,
@@ -1210,7 +1232,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			seconds,
 			second_string
 		);
-	} else if (!days && hours && minutes && !seconds) { // HM
+	}
+	else if (!days && hours && minutes && !seconds) { // HM
 		time_string = fmt::format(
 			"{} {} and {} {}",
 			hours,
@@ -1218,7 +1241,8 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			minutes,
 			minute_string
 		);
-	} else if (!days && hours && !minutes && seconds) { // HS
+	}
+	else if (!days && hours && !minutes && seconds) { // HS
 		time_string = fmt::format(
 			"{} {} and {} {}",
 			hours,
@@ -1226,13 +1250,15 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			seconds,
 			second_string
 		);
-	} else if (!days && hours && !minutes && !seconds) { // H
+	}
+	else if (!days && hours && !minutes && !seconds) { // H
 		time_string = fmt::format(
 			"{} {}",
 			hours,
 			hour_string
 		);
-	} else if (!days && !hours && minutes && seconds) { // MS
+	}
+	else if (!days && !hours && minutes && seconds) { // MS
 		time_string = fmt::format(
 			"{} {} and {} {}",
 			minutes,
@@ -1240,13 +1266,15 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 			seconds,
 			second_string
 		);
-	} else if (!days && !hours && minutes && !seconds) { // M
+	}
+	else if (!days && !hours && minutes && !seconds) { // M
 		time_string = fmt::format(
 			"{} {}",
 			minutes,
 			minute_string
 		);
-	} else if (!days && !hours && !minutes && seconds) { // S
+	}
+	else if (!days && !hours && !minutes && seconds) { // S
 		time_string = fmt::format(
 			"{} {}",
 			seconds,
@@ -1254,4 +1282,26 @@ std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 		);
 	}
 	return time_string;
+}
+
+std::string &Strings::LTrim(std::string &str, const std::string &chars)
+{
+	str.erase(0, str.find_first_not_of(chars));
+	return str;
+}
+
+std::string Strings::MillisecondsToTime(int duration)
+{
+	return SecondsToTime(duration, true);
+}
+
+std::string &Strings::RTrim(std::string &str, const std::string &chars)
+{
+	str.erase(str.find_last_not_of(chars) + 1);
+	return str;
+}
+
+std::string &Strings::Trim(std::string &str, const std::string &chars)
+{
+	return LTrim(RTrim(str, chars), chars);
 }

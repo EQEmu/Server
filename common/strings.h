@@ -38,11 +38,32 @@
 
 class Strings {
 public:
+	static bool Contains(std::vector<std::string> container, std::string element);
+	static bool IsNumber(const std::string &s);
 	static const std::string ToLower(std::string s);
 	static const std::string ToUpper(std::string s);
 	static const std::string UcFirst(std::string s);
-	static std::vector<std::string> Wrap(std::vector<std::string> &src, std::string character);
+	static std::string &LTrim(std::string &str, const std::string &chars = "\t\n\v\f\r ");
+	static std::string &RTrim(std::string &str, const std::string &chars = "\t\n\v\f\r ");
+	static std::string &Trim(std::string &str, const std::string &chars = "\t\n\v\f\r ");
+	static std::string Commify(const std::string &number);
+	static std::string ConvertToDigit(int n, std::string suffix);
+	static std::string Escape(const std::string &s);
+	static std::string GetBetween(const std::string &s, std::string start_delim, std::string stop_delim);
 	static std::string Implode(std::string glue, std::vector<std::string> src);
+	static std::string Join(const std::vector<std::string> &ar, const std::string &delim);
+	static std::string MillisecondsToTime(int duration);
+	static std::string MoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
+	static std::string NumberToWords(unsigned long long int n);
+	static std::string Repeat(std::string s, int n);
+	static std::string Replace(std::string subject, const std::string &search, const std::string &replace);
+	static std::string SecondsToTime(int duration, bool is_milliseconds = false);
+	static std::string::size_type SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
+	static std::vector<std::string> Split(const std::string &s, const char delim = ',');
+	static std::vector<std::string> Split2(std::string s, std::string delimiter);
+	static std::vector<std::string> Wrap(std::vector<std::string> &src, std::string character);
+	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
+
 	template<typename T>
 	static std::string
 	ImplodePair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
@@ -50,60 +71,14 @@ public:
 		if (src.empty()) {
 			return {};
 		}
-
 		std::ostringstream oss;
-
 		for (const T &src_iter: src) {
 			oss << encapsulation.first << src_iter << encapsulation.second << glue;
 		}
-
 		std::string output(oss.str());
 		output.resize(output.size() - glue.size());
-
 		return output;
 	}
-
-	static std::string ConvertToDigit(int n, std::string suffix);
-	static std::string NumberToWords(unsigned long long int n);
-	static std::string MoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
-	static std::string SecondsToTime(int duration, bool is_milliseconds = false);
-	static inline std::string MillisecondsToTime(int duration)
-	{
-		return SecondsToTime(duration, true);
-	}
-
-	static inline std::string &LTrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
-	{
-		str.erase(0, str.find_first_not_of(chars));
-		return str;
-	}
-
-	static inline std::string &RTrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
-	{
-		str.erase(str.find_last_not_of(chars) + 1);
-		return str;
-	}
-
-	static inline std::string &Trim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
-	{
-		return LTrim(RTrim(str, chars), chars);
-	}
-	static std::string Join(const std::vector<std::string> &ar, const std::string &delim);
-	static std::vector<std::string> Split(const std::string &s, const char delim = ',');
-	static std::vector<std::string> Split2(std::string s, std::string delimiter);
-	static std::string::size_type
-	SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
-	static std::string GetBetween(const std::string &s, std::string start_delim, std::string stop_delim);
-	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
-	static bool Contains(std::vector<std::string> container, std::string element);
-	static std::string Commify(const std::string &number);
-	static std::string Replace(std::string subject, const std::string &search, const std::string &replace);
-	static std::string Repeat(std::string s, int n);
-	static bool IsNumber(const std::string &s);
-	static std::string Escape(const std::string &s);
-
-
-
 };
 
 const std::string StringFormat(const char *format, ...);
