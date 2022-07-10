@@ -652,5 +652,5 @@ std::string Strings::ConvertToDigit(int n, std::string suffix)
 
 std::string Strings::Saylink(std::string saylink_text, bool silent, std::string link_name)
 {
-	return Strings::Saylink(saylink_text, silent, link_name);
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
 }
