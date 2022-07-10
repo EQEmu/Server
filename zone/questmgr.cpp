@@ -2992,7 +2992,7 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 {
 	QuestManagerCurrentQuestVars();
 
-	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+	return Strings::Saylink(saylink_text, silent, link_name);
 }
 
 std::string QuestManager::getcharnamebyid(uint32 char_id) {

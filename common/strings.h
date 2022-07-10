@@ -57,6 +57,7 @@ public:
 	static std::string NumberToWords(unsigned long long int n);
 	static std::string Repeat(std::string s, int n);
 	static std::string Replace(std::string subject, const std::string &search, const std::string &replace);
+	static std::string Saylink(std::string saylink_text, bool silent, std::string link_name);
 	static std::string SecondsToTime(int duration, bool is_milliseconds = false);
 	static std::string::size_type SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 	static std::vector<std::string> Split(const std::string &s, const char delim = ',');

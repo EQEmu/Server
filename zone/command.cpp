@@ -605,7 +605,7 @@ void command_help(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		command_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		command_link = Strings::Saylink(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
@@ -687,7 +687,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto current_commmand_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto current_commmand_link = Strings::Saylink(
 		fmt::format(
 			"{}{}",
 			COMMAND_CHAR,
@@ -712,7 +712,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		alias_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		alias_link = Strings::Saylink(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,

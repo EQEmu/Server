@@ -590,24 +590,24 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 	std::string menu_commands;
 
 	if (npc->GetGrid() > 0) {
-		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#grid show", false, "Grid Points") + "] ";
+		menu_commands += "[" + Strings::Saylink("#grid show", false, "Grid Points") + "] ";
 	}
 
 	if (npc->GetEmoteID() > 0) {
 		std::string saylink = StringFormat("#emotesearch %u", npc->GetEmoteID());
-		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Emotes") + "] ";
+		menu_commands += "[" + Strings::Saylink(saylink, false, "Emotes") + "] ";
 	}
 
 	if (npc->GetLoottableID() > 0) {
-		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#npcloot show", false, "Loot") + "] ";
+		menu_commands += "[" + Strings::Saylink("#npcloot show", false, "Loot") + "] ";
 	}
 
 	if (npc->IsProximitySet()) {
-		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#proximity show", false, "Proximity") + "] ";
+		menu_commands += "[" + Strings::Saylink("#proximity show", false, "Proximity") + "] ";
 	}
 
 	if (menu_commands.length() > 0) {
-		std::string dev_menu = "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools", false, "DevTools") + "] ";;
+		std::string dev_menu = "[" + Strings::Saylink("#devtools", false, "DevTools") + "] ";;
 		client->Message(Chat::White, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
 	}
 }

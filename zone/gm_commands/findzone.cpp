@@ -60,8 +60,8 @@ void command_findzone(Client *c, const Seperator *sep)
 			break;
 		}
 
-		std::string command_zone   = EQ::SayLinkEngine::GenerateQuestSaylink("#zone " + short_name, false, "zone");
-		std::string command_gmzone = EQ::SayLinkEngine::GenerateQuestSaylink(
+		std::string command_zone   = Strings::Saylink("#zone " + short_name, false, "zone");
+		std::string command_gmzone = Strings::Saylink(
 			fmt::format("#gmzone {} {}", short_name, version),
 			false,
 			"gmzone"

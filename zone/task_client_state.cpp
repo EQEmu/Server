@@ -1696,7 +1696,7 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 		std::vector<std::string> update_saylinks;
 
 		for (auto &increment: update_increments) {
-			auto task_update_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			auto task_update_saylink = Strings::Saylink(
 				fmt::format(
 					"#task update {} {} {}",
 					task->task_id,

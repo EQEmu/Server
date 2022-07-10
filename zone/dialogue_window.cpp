@@ -326,7 +326,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (responses.size() > 1) {
 		for (auto &r: responses) {
 			bracket_responses.emplace_back(
-				fmt::format("[{}]", EQ::SayLinkEngine::GenerateQuestSaylink(r, false, r))
+				fmt::format("[{}]", Strings::Saylink(r, false, r))
 			);
 		}
 	}

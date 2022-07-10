@@ -115,7 +115,7 @@ void command_logs(Client *c, const Seperator *sep)
 				next_category_id
 			);
 
-			auto next_list_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+			auto next_list_link = Strings::Saylink(
 				next_list_string,
 				false,
 				next_list_string

@@ -41,6 +41,7 @@
 //Const char based
 #include "strings_legacy.cpp" // legacy c functions
 #include "strings_misc.cpp" // anything non "Strings" scoped
+#include "say_link.h"
 
 std::vector<std::string> Strings::Split(const std::string &str, const char delim)
 {
@@ -647,4 +648,9 @@ std::string Strings::ConvertToDigit(int n, std::string suffix)
 	else {
 		return NUM_TO_ENGLISH_X[n] + suffix;
 	}
+}
+
+std::string Strings::Saylink(std::string saylink_text, bool silent, std::string link_name)
+{
+	return Strings::Saylink(saylink_text, silent, link_name);
 }

@@ -3138,12 +3138,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (request_zone_short_name == local_zone_short_name || can_reload_global_script) {
 			zone->SetQuestHotReloadQueued(true);
 		} else if (request_zone_short_name == "all") {
-			std::string reload_quest_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			std::string reload_quest_saylink = Strings::Saylink(
 				"#reload quest",
 				false,
 				"Locally"
 			);
-			std::string reload_world_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			std::string reload_world_saylink = Strings::Saylink(
 				"#reload world",
 				false,
 				"Globally"
