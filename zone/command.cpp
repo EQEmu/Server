@@ -755,7 +755,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 	auto items_count = database.GetItemsCount();
 	auto shared_items_count = database.GetSharedItemsCount();
 	if (items_count != shared_items_count) {
-		c->Message(Chat::Yellow, "Your database does not have the same spell count as your shared memory.");
+		c->Message(Chat::Yellow, "Your database does not have the same item count as your shared memory.");
 
 		c->Message(
 			Chat::Yellow,
