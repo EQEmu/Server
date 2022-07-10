@@ -1114,7 +1114,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.Attack = std::stoi(row[ItemField::attack]);
 		item.Avoidance = static_cast<int8>(EQ::Clamp(std::stoi(row[ItemField::avoidance]), -128, 127));
 		item.Clairvoyance = std::stoul(row[ItemField::clairvoyance]);
-		item.CombatEffects = StringIsNumber(row[ItemField::combateffects]) ? static_cast<int8>(EQ::Clamp(std::stoi(row[ItemField::combateffects]), -128, 127)) : 0;
+		item.CombatEffects = Strings::IsNumber(row[ItemField::combateffects]) ? static_cast<int8>(EQ::Clamp(std::stoi(row[ItemField::combateffects]), -128, 127)) : 0;
 		item.DamageShield = std::stoi(row[ItemField::damageshield]);
 		item.DotShielding = std::stoi(row[ItemField::dotshielding]);
 		item.DSMitigation = std::stoul(row[ItemField::dsmitigation]);
@@ -1251,7 +1251,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.EvolvingMax = static_cast<uint8>(std::stoul(row[ItemField::evomax]));
 
 		// Scripting
-		item.CharmFileID = StringIsNumber(row[ItemField::charmfileid]) ? std::stoul(row[ItemField::charmfileid]) : 0;
+		item.CharmFileID = Strings::IsNumber(row[ItemField::charmfileid]) ? std::stoul(row[ItemField::charmfileid]) : 0;
 		strn0cpy(item.CharmFile, row[ItemField::charmfile], sizeof(item.CharmFile));
 		strn0cpy(item.Filename, row[ItemField::filename], sizeof(item.Filename));
 		item.ScriptFileID = std::stoul(row[ItemField::scriptfileid]);

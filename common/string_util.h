@@ -97,29 +97,16 @@ public:
 	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
 	static bool Contains(std::vector<std::string> container, std::string element);
 	static std::string Commify(const std::string &number);
+	static std::string Replace(std::string subject, const std::string &search, const std::string &replace);
+	static std::string Repeat(std::string s, int n);
+	static bool IsNumber(const std::string &s);
+
 
 
 };
 
 const std::string StringFormat(const char *format, ...);
 const std::string vStringFormat(const char *format, va_list args);
-
-//std::string based
-//const std::string str_toupper(std::string s);
-//const std::string ucfirst(std::string s);
-
-//std::vector<std::string> wrap(std::vector<std::string> &src, std::string character);
-
-
-//std::string implode(std::string glue, std::vector<std::string> src);
-//std::string convert2digit(int n, std::string suffix);
-//std::string numberToWords(unsigned long long int n);
-//std::string ConvertMoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
-//std::string ConvertSecondsToTime(int duration, bool is_milliseconds = false);
-//inline std::string ConvertMillisecondsToTime(int duration)
-//{
-//	return ConvertSecondsToTime(duration, true);
-//}
 
 // For converstion of numerics into English
 // Used for grid nodes, as NPC names remove numerals.
@@ -212,16 +199,12 @@ std::vector<std::string> join_tuple(
 	return output;
 }
 
-//std::string::size_type
-//Strings::SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 std::string EscapeString(const std::string &s);
-bool StringIsNumber(const std::string &s);
-//std::string Strings::Join(const std::vector<std::string> &ar, const std::string &delim);
-std::string replace_string(std::string subject, const std::string &search, const std::string &replace);
-void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
+
+// misc functions
 std::string SanitizeWorldServerName(std::string server_long_name);
-std::string repeat(std::string s, int n);
 std::vector<std::string> GetBadWords();
+void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
 
 // old c string functions
 
@@ -241,7 +224,6 @@ void RemoveApostrophes(std::string &s);
 std::string FormatName(const std::string &char_name);
 bool IsAllowedWorldServerCharacterList(char c);
 void SanitizeWorldServerName(char *name);
-
 
 template<typename InputIterator, typename OutputIterator>
 auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)

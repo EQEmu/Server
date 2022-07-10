@@ -164,7 +164,7 @@ void ConsoleWho(
 		if (strcasecmp(arg.c_str(), "gm") == 0) {
 			whom.gmlookup = 1;
 		}
-		else if (StringIsNumber(arg)) {
+		else if (Strings::IsNumber(arg)) {
 			if (whom.lvllow == 0xFFFF) {
 				whom.lvllow  = atoi(arg.c_str());
 				whom.lvlhigh = whom.lvllow;
@@ -200,7 +200,7 @@ void ConsoleUptime(
 		return;
 	}
 
-	if (StringIsNumber(args[0]) && atoi(args[0].c_str()) > 0) {
+	if (Strings::IsNumber(args[0]) && atoi(args[0].c_str()) > 0) {
 		auto                pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 		ServerUptime_Struct *sus = (ServerUptime_Struct *) pack->pBuffer;
 		snprintf(sus->adminname, sizeof(sus->adminname), "*%s", connection->UserName().c_str());
@@ -422,7 +422,7 @@ void ConsoleGuildSay(
 	}
 
 	auto from = args[0];
-	auto guild_id = StringIsNumber(args[1]) ? std::stoul(args[1]) : 0;
+	auto guild_id = Strings::IsNumber(args[1]) ? std::stoul(args[1]) : 0;
 	if (!guild_id) {
 		return;
 	}
@@ -584,7 +584,7 @@ void ConsoleZoneShutdown(
 		ServerZoneStateChange_struct *s = (ServerZoneStateChange_struct *) pack->pBuffer;
 		pack->opcode = ServerOP_ZoneShutdown;
 		strcpy(s->adminname, tmpname);
-		if (StringIsNumber(args[0])) {
+		if (Strings::IsNumber(args[0])) {
 			s->ZoneServerID = atoi(args[0].c_str());
 		}
 		else {
@@ -628,7 +628,7 @@ void ConsoleZoneBootup(
 		return;
 	}
 
-	if (args[1].length() == 0 || !StringIsNumber(args[0])) {
+	if (args[1].length() == 0 || !Strings::IsNumber(args[0])) {
 		connection->SendLine("Usage: zonebootup ZoneServerID# zoneshortname");
 	}
 	else {
@@ -754,7 +754,7 @@ void ConsoleFlag(
 		return;
 	}
 
-	if (args[1].length() == 0 || !StringIsNumber(args[0])) {
+	if (args[1].length() == 0 || !Strings::IsNumber(args[0])) {
 		connection->SendLine("Usage: flag [status] [accountname]");
 	}
 	else {
@@ -828,7 +828,7 @@ void ConsoleWorldShutdown(
 {
 	if (args.size() == 2) {
 		int32 time, interval;
-		if (StringIsNumber(args[0]) && StringIsNumber(args[1]) && ((time = atoi(args[0].c_str())) > 0) &&
+		if (Strings::IsNumber(args[0]) && Strings::IsNumber(args[1]) && ((time = atoi(args[0].c_str())) > 0) &&
 			((interval = atoi(args[1].c_str())) > 0)) {
 			zoneserver_list.WorldShutDown(time, interval);
 		}

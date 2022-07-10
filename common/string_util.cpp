@@ -222,7 +222,7 @@ std::string EscapeString(const std::string &s)
 }
 
 
-bool StringIsNumber(const std::string &s)
+bool Strings::IsNumber(const std::string &s)
 {
 	try {
 		auto r = stod(s);
@@ -261,7 +261,7 @@ void Strings::FindReplace(std::string &string_subject, const std::string &search
 	}
 }
 
-std::string replace_string(std::string subject, const std::string &search, const std::string &replace)
+std::string Strings::Replace(std::string subject, const std::string &search, const std::string &replace)
 {
 	size_t pos = 0;
 	while ((pos = subject.find(search, pos)) != std::string::npos) {
@@ -596,7 +596,7 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 				Strings::FindReplace(
 					server_long_name,
 					piece,
-					repeat("*", (int) word.length())
+					Strings::Repeat("*", (int) word.length())
 				);
 				continue;
 			}
@@ -609,7 +609,7 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 				Strings::FindReplace(
 					server_long_name,
 					replaced_piece,
-					repeat("*", (int) word.length())
+					Strings::Repeat("*", (int) word.length())
 				);
 			}
 		}
@@ -618,7 +618,7 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 	return server_long_name;
 }
 
-std::string repeat(std::string s, int n)
+std::string Strings::Repeat(std::string s, int n)
 {
 	std::string s1 = s;
 	for (int    i  = 1; i < n; i++) {

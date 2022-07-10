@@ -70,7 +70,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		Strings::FindReplace(output, fmt::format("+{}+", animation), "");
 
 		// we treat the animation field differently if it is a number
-		if (StringIsNumber(animation)) {
+		if (Strings::IsNumber(animation)) {
 			LogDiaWindDetail("Client [{}] Animation is a number, firing animation [{}]", c->GetCleanName(), animation);
 			target->DoAnim(std::stoi(animation));
 		}
@@ -112,7 +112,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		Strings::FindReplace(output, fmt::format("={}=", expire_time), "");
 
 		// we treat the animation field differently if it is a number
-		if (StringIsNumber(expire_time)) {
+		if (Strings::IsNumber(expire_time)) {
 			LogDiaWindDetail(
 				"Client [{}] Window expire time is a number, setting expiration to [{}]",
 				c->GetCleanName(),
@@ -190,7 +190,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 			// set the popup id
 			if (!popupid.empty()) {
-				popup_id = (StringIsNumber(popupid) ? std::atoi(popupid.c_str()) : 0);
+				popup_id = (Strings::IsNumber(popupid) ? std::atoi(popupid.c_str()) : 0);
 			}
 		}
 	}
@@ -222,7 +222,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 			Strings::FindReplace(output, fmt::format("secondresponseid:{}", secondresponseid), "");
 
 			if (!secondresponseid.empty()) {
-				negative_id = (StringIsNumber(secondresponseid) ? std::atoi(secondresponseid.c_str()) : 0);
+				negative_id = (Strings::IsNumber(secondresponseid) ? std::atoi(secondresponseid.c_str()) : 0);
 			}
 		}
 	}
@@ -407,7 +407,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// click response
 	// window type response
-	uint32      window_type           = (StringIsNumber(wintype) ? std::atoi(wintype.c_str()) : 0);
+	uint32      window_type           = (Strings::IsNumber(wintype) ? std::atoi(wintype.c_str()) : 0);
 	std::string click_response_button = (window_type == 1 ? "Yes" : "OK");
 	std::string click_response        = fmt::format(
 		"<c \"#F07F00\">Click [{}] to continue...</c>",

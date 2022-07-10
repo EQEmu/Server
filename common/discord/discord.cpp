@@ -25,7 +25,7 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 
 	// url
 	std::string base_url = fmt::format("{}//{}", s[0], s[2]);
-	std::string endpoint = replace_string(webhook_url, base_url, "");
+	std::string endpoint = Strings::Replace(webhook_url, base_url, "");
 
 	// client
 	httplib::Client cli(base_url.c_str());

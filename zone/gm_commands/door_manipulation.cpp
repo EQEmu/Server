@@ -299,7 +299,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			}
 
 			// we're passing a move action here
-			if (!arg3.empty() && StringIsNumber(arg3)) {
+			if (!arg3.empty() && Strings::IsNumber(arg3)) {
 				float x_move   = 0.0f;
 				float y_move   = 0.0f;
 				float z_move   = 0.0f;
@@ -512,7 +512,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	// open type
-	if (arg1 == "opentype" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "opentype" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetOpenType(std::atoi(arg2.c_str()));
@@ -520,7 +520,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	// incline
-	if (arg1 == "setincline" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "setincline" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetIncline(std::atoi(arg2.c_str()));
@@ -528,7 +528,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	// incline
-	if (arg1 == "setinvertstate" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "setinvertstate" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetInvertState(std::atoi(arg2.c_str()));
@@ -545,7 +545,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	// incline incremental
-	if (arg1 == "setinclineinc" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "setinclineinc" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetIncline(door->GetIncline() + std::atoi(arg2.c_str()));
