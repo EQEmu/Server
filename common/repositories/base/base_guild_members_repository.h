@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GUILD_MEMBERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGuildMembersRepository {
@@ -195,7 +195,7 @@ public:
 		update_values.push_back(columns[4] + " = " + std::to_string(guild_members_entry.total_tribute));
 		update_values.push_back(columns[5] + " = " + std::to_string(guild_members_entry.last_tribute));
 		update_values.push_back(columns[6] + " = " + std::to_string(guild_members_entry.banker));
-		update_values.push_back(columns[7] + " = '" + EscapeString(guild_members_entry.public_note) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(guild_members_entry.public_note) + "'");
 		update_values.push_back(columns[8] + " = " + std::to_string(guild_members_entry.alt));
 
 		auto results = db.QueryDatabase(
@@ -225,7 +225,7 @@ public:
 		insert_values.push_back(std::to_string(guild_members_entry.total_tribute));
 		insert_values.push_back(std::to_string(guild_members_entry.last_tribute));
 		insert_values.push_back(std::to_string(guild_members_entry.banker));
-		insert_values.push_back("'" + EscapeString(guild_members_entry.public_note) + "'");
+		insert_values.push_back("'" + Strings::Escape(guild_members_entry.public_note) + "'");
 		insert_values.push_back(std::to_string(guild_members_entry.alt));
 
 		auto results = db.QueryDatabase(
@@ -263,7 +263,7 @@ public:
 			insert_values.push_back(std::to_string(guild_members_entry.total_tribute));
 			insert_values.push_back(std::to_string(guild_members_entry.last_tribute));
 			insert_values.push_back(std::to_string(guild_members_entry.banker));
-			insert_values.push_back("'" + EscapeString(guild_members_entry.public_note) + "'");
+			insert_values.push_back("'" + Strings::Escape(guild_members_entry.public_note) + "'");
 			insert_values.push_back(std::to_string(guild_members_entry.alt));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

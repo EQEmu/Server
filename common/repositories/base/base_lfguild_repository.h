@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LFGUILD_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLfguildRepository {
@@ -189,8 +189,8 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(lfguild_entry.type));
-		update_values.push_back(columns[1] + " = '" + EscapeString(lfguild_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(lfguild_entry.comment) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(lfguild_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(lfguild_entry.comment) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(lfguild_entry.fromlevel));
 		update_values.push_back(columns[4] + " = " + std::to_string(lfguild_entry.tolevel));
 		update_values.push_back(columns[5] + " = " + std::to_string(lfguild_entry.classes));
@@ -219,8 +219,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(lfguild_entry.type));
-		insert_values.push_back("'" + EscapeString(lfguild_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(lfguild_entry.comment) + "'");
+		insert_values.push_back("'" + Strings::Escape(lfguild_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(lfguild_entry.comment) + "'");
 		insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
 		insert_values.push_back(std::to_string(lfguild_entry.tolevel));
 		insert_values.push_back(std::to_string(lfguild_entry.classes));
@@ -257,8 +257,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(lfguild_entry.type));
-			insert_values.push_back("'" + EscapeString(lfguild_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(lfguild_entry.comment) + "'");
+			insert_values.push_back("'" + Strings::Escape(lfguild_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(lfguild_entry.comment) + "'");
 			insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
 			insert_values.push_back(std::to_string(lfguild_entry.tolevel));
 			insert_values.push_back(std::to_string(lfguild_entry.classes));

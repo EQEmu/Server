@@ -13,7 +13,7 @@
 #define EQEMU_BASE_AA_RANK_PREREQS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAaRankPrereqsRepository {

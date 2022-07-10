@@ -22,7 +22,7 @@
 #define EQEMU_SHAREDBANK_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class SharedbankRepository {
 public:
@@ -206,7 +206,7 @@ public:
 		update_values.push_back(columns[7] + " = " + std::to_string(sharedbank_entry.augslot4));
 		update_values.push_back(columns[8] + " = " + std::to_string(sharedbank_entry.augslot5));
 		update_values.push_back(columns[9] + " = " + std::to_string(sharedbank_entry.augslot6));
-		update_values.push_back(columns[10] + " = '" + EscapeString(sharedbank_entry.custom_data) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(sharedbank_entry.custom_data) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -237,7 +237,7 @@ public:
 		insert_values.push_back(std::to_string(sharedbank_entry.augslot4));
 		insert_values.push_back(std::to_string(sharedbank_entry.augslot5));
 		insert_values.push_back(std::to_string(sharedbank_entry.augslot6));
-		insert_values.push_back("'" + EscapeString(sharedbank_entry.custom_data) + "'");
+		insert_values.push_back("'" + Strings::Escape(sharedbank_entry.custom_data) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -276,7 +276,7 @@ public:
 			insert_values.push_back(std::to_string(sharedbank_entry.augslot4));
 			insert_values.push_back(std::to_string(sharedbank_entry.augslot5));
 			insert_values.push_back(std::to_string(sharedbank_entry.augslot6));
-			insert_values.push_back("'" + EscapeString(sharedbank_entry.custom_data) + "'");
+			insert_values.push_back("'" + Strings::Escape(sharedbank_entry.custom_data) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

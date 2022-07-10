@@ -74,7 +74,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 
@@ -5542,7 +5542,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 	query = fmt::format(
 		"SELECT value FROM quest_globals WHERE charid = {} AND name = '{}'",
 		character_id,
-		EscapeString(spell_global_name)
+		Strings::Escape(spell_global_name)
 	);
 
 	results = database.QueryDatabase(query);

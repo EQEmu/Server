@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_CORPSE_ITEMS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_corpse_items_repository.h"
 
 class CharacterCorpseItemsRepository: public BaseCharacterCorpseItemsRepository {

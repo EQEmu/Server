@@ -13,7 +13,7 @@
 #define EQEMU_BASE_BLOCKED_SPELLS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseBlockedSpellsRepository {
@@ -212,8 +212,8 @@ public:
 		update_values.push_back(columns[7] + " = " + std::to_string(blocked_spells_entry.x_diff));
 		update_values.push_back(columns[8] + " = " + std::to_string(blocked_spells_entry.y_diff));
 		update_values.push_back(columns[9] + " = " + std::to_string(blocked_spells_entry.z_diff));
-		update_values.push_back(columns[10] + " = '" + EscapeString(blocked_spells_entry.message) + "'");
-		update_values.push_back(columns[11] + " = '" + EscapeString(blocked_spells_entry.description) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(blocked_spells_entry.message) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(blocked_spells_entry.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -245,8 +245,8 @@ public:
 		insert_values.push_back(std::to_string(blocked_spells_entry.x_diff));
 		insert_values.push_back(std::to_string(blocked_spells_entry.y_diff));
 		insert_values.push_back(std::to_string(blocked_spells_entry.z_diff));
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.message) + "'");
-		insert_values.push_back("'" + EscapeString(blocked_spells_entry.description) + "'");
+		insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.message) + "'");
+		insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -286,8 +286,8 @@ public:
 			insert_values.push_back(std::to_string(blocked_spells_entry.x_diff));
 			insert_values.push_back(std::to_string(blocked_spells_entry.y_diff));
 			insert_values.push_back(std::to_string(blocked_spells_entry.z_diff));
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.message) + "'");
-			insert_values.push_back("'" + EscapeString(blocked_spells_entry.description) + "'");
+			insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.message) + "'");
+			insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.description) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

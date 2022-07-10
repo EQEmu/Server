@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ACCOUNT_IP_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAccountIpRepository {
@@ -164,9 +164,9 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(account_ip_entry.accid));
-		update_values.push_back(columns[1] + " = '" + EscapeString(account_ip_entry.ip) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_ip_entry.ip) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(account_ip_entry.count));
-		update_values.push_back(columns[3] + " = '" + EscapeString(account_ip_entry.lastused) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(account_ip_entry.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -189,9 +189,9 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(account_ip_entry.accid));
-		insert_values.push_back("'" + EscapeString(account_ip_entry.ip) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
 		insert_values.push_back(std::to_string(account_ip_entry.count));
-		insert_values.push_back("'" + EscapeString(account_ip_entry.lastused) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,9 +222,9 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(account_ip_entry.accid));
-			insert_values.push_back("'" + EscapeString(account_ip_entry.ip) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
 			insert_values.push_back(std::to_string(account_ip_entry.count));
-			insert_values.push_back("'" + EscapeString(account_ip_entry.lastused) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

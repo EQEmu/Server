@@ -22,7 +22,7 @@
 #define EQEMU_QUEST_GLOBALS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_quest_globals_repository.h"
 
 class QuestGlobalsRepository: public BaseQuestGlobalsRepository {

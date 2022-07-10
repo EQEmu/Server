@@ -22,7 +22,7 @@
 #define EQEMU_INVENTORY_VERSIONS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class InventoryVersionsRepository {
 public:

@@ -16,7 +16,7 @@
 #include "../common/features.h"
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/net/eqstream.h"
 #include "../common/file_util.h"

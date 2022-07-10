@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SAYLINK_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSaylinkRepository {
@@ -153,7 +153,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(saylink_entry.phrase) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(saylink_entry.phrase) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -176,7 +176,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(saylink_entry.id));
-		insert_values.push_back("'" + EscapeString(saylink_entry.phrase) + "'");
+		insert_values.push_back("'" + Strings::Escape(saylink_entry.phrase) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -207,7 +207,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(saylink_entry.id));
-			insert_values.push_back("'" + EscapeString(saylink_entry.phrase) + "'");
+			insert_values.push_back("'" + Strings::Escape(saylink_entry.phrase) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NPC_SCALE_GLOBAL_BASE_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNpcScaleGlobalBaseRepository {
@@ -310,7 +310,7 @@ public:
 		update_values.push_back(columns[24] + " = " + std::to_string(npc_scale_global_base_entry.attack_delay));
 		update_values.push_back(columns[25] + " = " + std::to_string(npc_scale_global_base_entry.spell_scale));
 		update_values.push_back(columns[26] + " = " + std::to_string(npc_scale_global_base_entry.heal_scale));
-		update_values.push_back(columns[27] + " = '" + EscapeString(npc_scale_global_base_entry.special_abilities) + "'");
+		update_values.push_back(columns[27] + " = '" + Strings::Escape(npc_scale_global_base_entry.special_abilities) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -359,7 +359,7 @@ public:
 		insert_values.push_back(std::to_string(npc_scale_global_base_entry.attack_delay));
 		insert_values.push_back(std::to_string(npc_scale_global_base_entry.spell_scale));
 		insert_values.push_back(std::to_string(npc_scale_global_base_entry.heal_scale));
-		insert_values.push_back("'" + EscapeString(npc_scale_global_base_entry.special_abilities) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_scale_global_base_entry.special_abilities) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -416,7 +416,7 @@ public:
 			insert_values.push_back(std::to_string(npc_scale_global_base_entry.attack_delay));
 			insert_values.push_back(std::to_string(npc_scale_global_base_entry.spell_scale));
 			insert_values.push_back(std::to_string(npc_scale_global_base_entry.heal_scale));
-			insert_values.push_back("'" + EscapeString(npc_scale_global_base_entry.special_abilities) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_scale_global_base_entry.special_abilities) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

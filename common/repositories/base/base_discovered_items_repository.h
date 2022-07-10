@@ -13,7 +13,7 @@
 #define EQEMU_BASE_DISCOVERED_ITEMS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseDiscoveredItemsRepository {
@@ -164,7 +164,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(discovered_items_entry.item_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(discovered_items_entry.char_name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(discovered_items_entry.char_name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(discovered_items_entry.discovered_date));
 		update_values.push_back(columns[3] + " = " + std::to_string(discovered_items_entry.account_status));
 
@@ -189,7 +189,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(discovered_items_entry.item_id));
-		insert_values.push_back("'" + EscapeString(discovered_items_entry.char_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(discovered_items_entry.char_name) + "'");
 		insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
 		insert_values.push_back(std::to_string(discovered_items_entry.account_status));
 
@@ -222,7 +222,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(discovered_items_entry.item_id));
-			insert_values.push_back("'" + EscapeString(discovered_items_entry.char_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(discovered_items_entry.char_name) + "'");
 			insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
 			insert_values.push_back(std::to_string(discovered_items_entry.account_status));
 

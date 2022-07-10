@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ADVENTURE_TEMPLATE_ENTRY_FLAVOR_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAdventureTemplateEntryFlavorRepository {
@@ -154,7 +154,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_flavor_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(adventure_template_entry_flavor_entry.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -177,7 +177,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
-		insert_values.push_back("'" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
+		insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_entry.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -208,7 +208,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
-			insert_values.push_back("'" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
+			insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_entry.text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

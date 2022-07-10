@@ -23,7 +23,7 @@
 #include <iterator>
 #include "database_dump_service.h"
 #include "../eqemu_logsys.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../eqemu_config.h"
 #include "../database_schema.h"
 #include "../file_util.h"

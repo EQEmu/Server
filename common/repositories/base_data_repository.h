@@ -22,7 +22,7 @@
 #define EQEMU_BASE_DATA_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_base_data_repository.h"
 
 class BaseDataRepository: public BaseBaseDataRepository {

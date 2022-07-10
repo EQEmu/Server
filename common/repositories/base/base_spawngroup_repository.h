@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWNGROUP_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawngroupRepository {
@@ -208,7 +208,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(spawngroup_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spawngroup_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(spawngroup_entry.spawn_limit));
 		update_values.push_back(columns[3] + " = " + std::to_string(spawngroup_entry.dist));
 		update_values.push_back(columns[4] + " = " + std::to_string(spawngroup_entry.max_x));
@@ -242,7 +242,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(spawngroup_entry.id));
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawngroup_entry.name) + "'");
 		insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
 		insert_values.push_back(std::to_string(spawngroup_entry.dist));
 		insert_values.push_back(std::to_string(spawngroup_entry.max_x));
@@ -284,7 +284,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(spawngroup_entry.id));
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawngroup_entry.name) + "'");
 			insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
 			insert_values.push_back(std::to_string(spawngroup_entry.dist));
 			insert_values.push_back(std::to_string(spawngroup_entry.max_x));

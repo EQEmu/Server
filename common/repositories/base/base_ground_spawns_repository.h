@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GROUND_SPAWNS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGroundSpawnsRepository {
@@ -241,15 +241,15 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(ground_spawns_entry.min_x));
 		update_values.push_back(columns[7] + " = " + std::to_string(ground_spawns_entry.min_y));
 		update_values.push_back(columns[8] + " = " + std::to_string(ground_spawns_entry.heading));
-		update_values.push_back(columns[9] + " = '" + EscapeString(ground_spawns_entry.name) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(ground_spawns_entry.name) + "'");
 		update_values.push_back(columns[10] + " = " + std::to_string(ground_spawns_entry.item));
 		update_values.push_back(columns[11] + " = " + std::to_string(ground_spawns_entry.max_allowed));
-		update_values.push_back(columns[12] + " = '" + EscapeString(ground_spawns_entry.comment) + "'");
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(ground_spawns_entry.comment) + "'");
 		update_values.push_back(columns[13] + " = " + std::to_string(ground_spawns_entry.respawn_timer));
 		update_values.push_back(columns[14] + " = " + std::to_string(ground_spawns_entry.min_expansion));
 		update_values.push_back(columns[15] + " = " + std::to_string(ground_spawns_entry.max_expansion));
-		update_values.push_back(columns[16] + " = '" + EscapeString(ground_spawns_entry.content_flags) + "'");
-		update_values.push_back(columns[17] + " = '" + EscapeString(ground_spawns_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[16] + " = '" + Strings::Escape(ground_spawns_entry.content_flags) + "'");
+		update_values.push_back(columns[17] + " = '" + Strings::Escape(ground_spawns_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -280,15 +280,15 @@ public:
 		insert_values.push_back(std::to_string(ground_spawns_entry.min_x));
 		insert_values.push_back(std::to_string(ground_spawns_entry.min_y));
 		insert_values.push_back(std::to_string(ground_spawns_entry.heading));
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.name) + "'");
 		insert_values.push_back(std::to_string(ground_spawns_entry.item));
 		insert_values.push_back(std::to_string(ground_spawns_entry.max_allowed));
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.comment) + "'");
+		insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.comment) + "'");
 		insert_values.push_back(std::to_string(ground_spawns_entry.respawn_timer));
 		insert_values.push_back(std::to_string(ground_spawns_entry.min_expansion));
 		insert_values.push_back(std::to_string(ground_spawns_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -327,15 +327,15 @@ public:
 			insert_values.push_back(std::to_string(ground_spawns_entry.min_x));
 			insert_values.push_back(std::to_string(ground_spawns_entry.min_y));
 			insert_values.push_back(std::to_string(ground_spawns_entry.heading));
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.name) + "'");
 			insert_values.push_back(std::to_string(ground_spawns_entry.item));
 			insert_values.push_back(std::to_string(ground_spawns_entry.max_allowed));
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.comment) + "'");
+			insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.comment) + "'");
 			insert_values.push_back(std::to_string(ground_spawns_entry.respawn_timer));
 			insert_values.push_back(std::to_string(ground_spawns_entry.min_expansion));
 			insert_values.push_back(std::to_string(ground_spawns_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(ground_spawns_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

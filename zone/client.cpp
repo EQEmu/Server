@@ -36,7 +36,7 @@ extern volatile bool RunLoops;
 #include "../common/spdat.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/data_verification.h"
 #include "../common/profanity_manager.h"
 #include "data_bucket.h"
@@ -11713,7 +11713,7 @@ std::map<std::string,std::string> Client::GetMerchantDataBuckets()
 
 	auto query = fmt::format(
 		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		EscapeString(GetBucketKey())
+		Strings::Escape(GetBucketKey())
 	);
 	auto results = database.QueryDatabase(query);
 

@@ -22,7 +22,7 @@
 #define EQEMU_RAID_LEADERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class RaidLeadersRepository {
 public:
@@ -190,12 +190,12 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(raid_leaders_entry.gid));
 		update_values.push_back(columns[1] + " = " + std::to_string(raid_leaders_entry.rid));
-		update_values.push_back(columns[2] + " = '" + EscapeString(raid_leaders_entry.marknpc) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(raid_leaders_entry.maintank) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(raid_leaders_entry.assist) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(raid_leaders_entry.puller) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(raid_leaders_entry.leadershipaa) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(raid_leaders_entry.mentoree) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(raid_leaders_entry.marknpc) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(raid_leaders_entry.maintank) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(raid_leaders_entry.assist) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(raid_leaders_entry.puller) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(raid_leaders_entry.leadershipaa) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(raid_leaders_entry.mentoree) + "'");
 		update_values.push_back(columns[8] + " = " + std::to_string(raid_leaders_entry.mentor_percent));
 
 		auto results = database.QueryDatabase(
@@ -219,12 +219,12 @@ public:
 
 		insert_values.push_back(std::to_string(raid_leaders_entry.gid));
 		insert_values.push_back(std::to_string(raid_leaders_entry.rid));
-		insert_values.push_back("'" + EscapeString(raid_leaders_entry.marknpc) + "'");
-		insert_values.push_back("'" + EscapeString(raid_leaders_entry.maintank) + "'");
-		insert_values.push_back("'" + EscapeString(raid_leaders_entry.assist) + "'");
-		insert_values.push_back("'" + EscapeString(raid_leaders_entry.puller) + "'");
-		insert_values.push_back("'" + EscapeString(raid_leaders_entry.leadershipaa) + "'");
-		insert_values.push_back("'" + EscapeString(raid_leaders_entry.mentoree) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.marknpc) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.maintank) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.assist) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.puller) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.leadershipaa) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.mentoree) + "'");
 		insert_values.push_back(std::to_string(raid_leaders_entry.mentor_percent));
 
 		auto results = database.QueryDatabase(
@@ -256,12 +256,12 @@ public:
 
 			insert_values.push_back(std::to_string(raid_leaders_entry.gid));
 			insert_values.push_back(std::to_string(raid_leaders_entry.rid));
-			insert_values.push_back("'" + EscapeString(raid_leaders_entry.marknpc) + "'");
-			insert_values.push_back("'" + EscapeString(raid_leaders_entry.maintank) + "'");
-			insert_values.push_back("'" + EscapeString(raid_leaders_entry.assist) + "'");
-			insert_values.push_back("'" + EscapeString(raid_leaders_entry.puller) + "'");
-			insert_values.push_back("'" + EscapeString(raid_leaders_entry.leadershipaa) + "'");
-			insert_values.push_back("'" + EscapeString(raid_leaders_entry.mentoree) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.marknpc) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.maintank) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.assist) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.puller) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.leadershipaa) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_leaders_entry.mentoree) + "'");
 			insert_values.push_back(std::to_string(raid_leaders_entry.mentor_percent));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

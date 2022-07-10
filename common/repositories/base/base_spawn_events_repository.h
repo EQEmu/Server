@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWN_EVENTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawnEventsRepository {
@@ -213,9 +213,9 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(spawn_events_entry.zone) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spawn_events_entry.zone) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(spawn_events_entry.cond_id));
-		update_values.push_back(columns[3] + " = '" + EscapeString(spawn_events_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(spawn_events_entry.name) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(spawn_events_entry.period));
 		update_values.push_back(columns[5] + " = " + std::to_string(spawn_events_entry.next_minute));
 		update_values.push_back(columns[6] + " = " + std::to_string(spawn_events_entry.next_hour));
@@ -248,9 +248,9 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(spawn_events_entry.id));
-		insert_values.push_back("'" + EscapeString(spawn_events_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_events_entry.zone) + "'");
 		insert_values.push_back(std::to_string(spawn_events_entry.cond_id));
-		insert_values.push_back("'" + EscapeString(spawn_events_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_events_entry.name) + "'");
 		insert_values.push_back(std::to_string(spawn_events_entry.period));
 		insert_values.push_back(std::to_string(spawn_events_entry.next_minute));
 		insert_values.push_back(std::to_string(spawn_events_entry.next_hour));
@@ -291,9 +291,9 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(spawn_events_entry.id));
-			insert_values.push_back("'" + EscapeString(spawn_events_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_events_entry.zone) + "'");
 			insert_values.push_back(std::to_string(spawn_events_entry.cond_id));
-			insert_values.push_back("'" + EscapeString(spawn_events_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_events_entry.name) + "'");
 			insert_values.push_back(std::to_string(spawn_events_entry.period));
 			insert_values.push_back(std::to_string(spawn_events_entry.next_minute));
 			insert_values.push_back(std::to_string(spawn_events_entry.next_hour));

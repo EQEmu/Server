@@ -3,7 +3,7 @@
 #include "../common/extprofile.h"
 #include "../common/item_instance.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "corpse.h"
@@ -1779,8 +1779,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
-		EscapeString(pp->name).c_str(),						  // " `name`,                    "
-		EscapeString(pp->last_name).c_str(),					  // " last_name,                 "
+		Strings::Escape(pp->name).c_str(),						  // " `name`,                    "
+		Strings::Escape(pp->last_name).c_str(),					  // " last_name,                 "
 		pp->gender,						  // " gender,                    "
 		pp->race,						  // " race,                      "
 		pp->class_,						  // " class,                     "
@@ -1804,8 +1804,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		pp->ability_number,				  // " ability_number,            "
 		pp->ability_time_minutes,		  // " ability_time_minutes,      "
 		pp->ability_time_hours,			  // " ability_time_hours,        "
-		EscapeString(pp->title).c_str(),						  // " title,                     "
-		EscapeString(pp->suffix).c_str(),						  // " suffix,                    "
+		Strings::Escape(pp->title).c_str(),						  // " title,                     "
+		Strings::Escape(pp->suffix).c_str(),						  // " suffix,                    "
 		pp->exp,						  // " exp,                       "
 		pp->points,						  // " points,                    "
 		pp->mana,						  // " mana,                      "
@@ -4238,7 +4238,7 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
                                     "`wc_2` = %u, `wc_3` = %u, `wc_4` = %u, `wc_5` = %u, `wc_6` = %u, "
                                     "`wc_7` = %u, `wc_8` = %u, `wc_9` = %u "
                                     "WHERE `id` = %u",
-                                    EscapeString(char_name).c_str(), zone_id, instance_id, char_id,
+                                    Strings::Escape(char_name).c_str(), zone_id, instance_id, char_id,
                                     position.x, position.y, position.z, position.w, guild_id,
                                     dbpc->locked, dbpc->exp, dbpc->size, dbpc->level, dbpc->race,
                                     dbpc->gender, dbpc->class_, dbpc->deity, dbpc->texture,
@@ -4315,7 +4315,7 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 		"`wc_7` = %u, "
 		"`wc_8` = %u, "
 		"`wc_9`	= %u ",
-		EscapeString(charname).c_str(),
+		Strings::Escape(charname).c_str(),
 		zoneid,
 		instanceid,
 		charid,

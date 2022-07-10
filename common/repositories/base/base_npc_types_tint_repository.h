@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NPC_TYPES_TINT_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNpcTypesTintRepository {
@@ -289,7 +289,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(npc_types_tint_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(npc_types_tint_entry.tint_set_name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_types_tint_entry.tint_set_name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(npc_types_tint_entry.red1h));
 		update_values.push_back(columns[3] + " = " + std::to_string(npc_types_tint_entry.grn1h));
 		update_values.push_back(columns[4] + " = " + std::to_string(npc_types_tint_entry.blu1h));
@@ -339,7 +339,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(npc_types_tint_entry.id));
-		insert_values.push_back("'" + EscapeString(npc_types_tint_entry.tint_set_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_types_tint_entry.tint_set_name) + "'");
 		insert_values.push_back(std::to_string(npc_types_tint_entry.red1h));
 		insert_values.push_back(std::to_string(npc_types_tint_entry.grn1h));
 		insert_values.push_back(std::to_string(npc_types_tint_entry.blu1h));
@@ -397,7 +397,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(npc_types_tint_entry.id));
-			insert_values.push_back("'" + EscapeString(npc_types_tint_entry.tint_set_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_types_tint_entry.tint_set_name) + "'");
 			insert_values.push_back(std::to_string(npc_types_tint_entry.red1h));
 			insert_values.push_back(std::to_string(npc_types_tint_entry.grn1h));
 			insert_values.push_back(std::to_string(npc_types_tint_entry.blu1h));

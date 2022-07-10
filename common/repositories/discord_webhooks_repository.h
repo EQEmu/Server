@@ -22,7 +22,7 @@
 #define EQEMU_DISCORD_WEBHOOKS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_discord_webhooks_repository.h"
 
 class DiscordWebhooksRepository: public BaseDiscordWebhooksRepository {

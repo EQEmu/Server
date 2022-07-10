@@ -22,7 +22,7 @@
 #define EQEMU_SPELLS_NEW_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_spells_new_repository.h"
 
 class SpellsNewRepository: public BaseSpellsNewRepository {

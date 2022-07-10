@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOOTTABLE_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLoottableRepository {
@@ -193,15 +193,15 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(loottable_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(loottable_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(loottable_entry.mincash));
 		update_values.push_back(columns[3] + " = " + std::to_string(loottable_entry.maxcash));
 		update_values.push_back(columns[4] + " = " + std::to_string(loottable_entry.avgcoin));
 		update_values.push_back(columns[5] + " = " + std::to_string(loottable_entry.done));
 		update_values.push_back(columns[6] + " = " + std::to_string(loottable_entry.min_expansion));
 		update_values.push_back(columns[7] + " = " + std::to_string(loottable_entry.max_expansion));
-		update_values.push_back(columns[8] + " = '" + EscapeString(loottable_entry.content_flags) + "'");
-		update_values.push_back(columns[9] + " = '" + EscapeString(loottable_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(loottable_entry.content_flags) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(loottable_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -224,15 +224,15 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(loottable_entry.id));
-		insert_values.push_back("'" + EscapeString(loottable_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(loottable_entry.name) + "'");
 		insert_values.push_back(std::to_string(loottable_entry.mincash));
 		insert_values.push_back(std::to_string(loottable_entry.maxcash));
 		insert_values.push_back(std::to_string(loottable_entry.avgcoin));
 		insert_values.push_back(std::to_string(loottable_entry.done));
 		insert_values.push_back(std::to_string(loottable_entry.min_expansion));
 		insert_values.push_back(std::to_string(loottable_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(loottable_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(loottable_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(loottable_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(loottable_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -263,15 +263,15 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(loottable_entry.id));
-			insert_values.push_back("'" + EscapeString(loottable_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(loottable_entry.name) + "'");
 			insert_values.push_back(std::to_string(loottable_entry.mincash));
 			insert_values.push_back(std::to_string(loottable_entry.maxcash));
 			insert_values.push_back(std::to_string(loottable_entry.avgcoin));
 			insert_values.push_back(std::to_string(loottable_entry.done));
 			insert_values.push_back(std::to_string(loottable_entry.min_expansion));
 			insert_values.push_back(std::to_string(loottable_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(loottable_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(loottable_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(loottable_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(loottable_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

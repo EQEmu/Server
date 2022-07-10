@@ -18,7 +18,7 @@
 */
 
 #include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "chatchannel.h"
 #include "clientlist.h"
 #include "database.h"

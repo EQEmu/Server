@@ -22,7 +22,7 @@
 #define EQEMU_GUILD_BANK_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class GuildBankRepository {
 public:
@@ -189,9 +189,9 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(guild_bank_entry.slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(guild_bank_entry.itemid));
 		update_values.push_back(columns[4] + " = " + std::to_string(guild_bank_entry.qty));
-		update_values.push_back(columns[5] + " = '" + EscapeString(guild_bank_entry.donator) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(guild_bank_entry.donator) + "'");
 		update_values.push_back(columns[6] + " = " + std::to_string(guild_bank_entry.permissions));
-		update_values.push_back(columns[7] + " = '" + EscapeString(guild_bank_entry.whofor) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(guild_bank_entry.whofor) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -217,9 +217,9 @@ public:
 		insert_values.push_back(std::to_string(guild_bank_entry.slot));
 		insert_values.push_back(std::to_string(guild_bank_entry.itemid));
 		insert_values.push_back(std::to_string(guild_bank_entry.qty));
-		insert_values.push_back("'" + EscapeString(guild_bank_entry.donator) + "'");
+		insert_values.push_back("'" + Strings::Escape(guild_bank_entry.donator) + "'");
 		insert_values.push_back(std::to_string(guild_bank_entry.permissions));
-		insert_values.push_back("'" + EscapeString(guild_bank_entry.whofor) + "'");
+		insert_values.push_back("'" + Strings::Escape(guild_bank_entry.whofor) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -253,9 +253,9 @@ public:
 			insert_values.push_back(std::to_string(guild_bank_entry.slot));
 			insert_values.push_back(std::to_string(guild_bank_entry.itemid));
 			insert_values.push_back(std::to_string(guild_bank_entry.qty));
-			insert_values.push_back("'" + EscapeString(guild_bank_entry.donator) + "'");
+			insert_values.push_back("'" + Strings::Escape(guild_bank_entry.donator) + "'");
 			insert_values.push_back(std::to_string(guild_bank_entry.permissions));
-			insert_values.push_back("'" + EscapeString(guild_bank_entry.whofor) + "'");
+			insert_values.push_back("'" + Strings::Escape(guild_bank_entry.whofor) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -29,7 +29,7 @@
 
 #include "../eq_packet_structs.h"
 #include "../misc_functions.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../item_instance.h"
 #include "titanium_structs.h"
 

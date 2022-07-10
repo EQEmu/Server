@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <signal.h>
 
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/queue.h"
 #include "../common/timer.h"

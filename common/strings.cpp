@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "string_util.h"
+#include "strings.h"
 #include <fmt/format.h>
 #include <algorithm>
 #include <cctype>
@@ -183,7 +183,7 @@ std::vector<std::string> wrap(std::vector<std::string> &src, std::string charact
 	return new_vector;
 }
 
-std::string EscapeString(const std::string &s)
+std::string Strings::Escape(const std::string &s)
 {
 	std::string ret;
 

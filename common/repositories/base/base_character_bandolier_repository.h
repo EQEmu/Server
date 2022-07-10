@@ -13,7 +13,7 @@
 #define EQEMU_BASE_CHARACTER_BANDOLIER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterBandolierRepository {
@@ -178,7 +178,7 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(character_bandolier_entry.bandolier_slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_bandolier_entry.item_id));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_bandolier_entry.icon));
-		update_values.push_back(columns[5] + " = '" + EscapeString(character_bandolier_entry.bandolier_name) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(character_bandolier_entry.bandolier_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -205,7 +205,7 @@ public:
 		insert_values.push_back(std::to_string(character_bandolier_entry.bandolier_slot));
 		insert_values.push_back(std::to_string(character_bandolier_entry.item_id));
 		insert_values.push_back(std::to_string(character_bandolier_entry.icon));
-		insert_values.push_back("'" + EscapeString(character_bandolier_entry.bandolier_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_bandolier_entry.bandolier_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,7 +240,7 @@ public:
 			insert_values.push_back(std::to_string(character_bandolier_entry.bandolier_slot));
 			insert_values.push_back(std::to_string(character_bandolier_entry.item_id));
 			insert_values.push_back(std::to_string(character_bandolier_entry.icon));
-			insert_values.push_back("'" + EscapeString(character_bandolier_entry.bandolier_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_bandolier_entry.bandolier_name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

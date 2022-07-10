@@ -33,7 +33,7 @@ Child of the Mob class.
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 
 #include "corpse.h"

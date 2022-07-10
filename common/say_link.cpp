@@ -20,7 +20,7 @@
 #include "say_link.h"
 #include "emu_constants.h"
 
-#include "string_util.h"
+#include "strings.h"
 #include "item_instance.h"
 #include "item_data.h"
 #include "../zone/zonedb.h"
@@ -485,7 +485,7 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 
 	auto saylinks = SaylinkRepository::GetWhere(
 		database,
-		fmt::format("phrase = '{}'", EscapeString(saylink_text))
+		fmt::format("phrase = '{}'", Strings::Escape(saylink_text))
 	);
 
 	// return if found from the database

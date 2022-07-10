@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NAME_FILTER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNameFilterRepository {
@@ -153,7 +153,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(name_filter_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(name_filter_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -176,7 +176,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(name_filter_entry.id));
-		insert_values.push_back("'" + EscapeString(name_filter_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(name_filter_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -207,7 +207,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(name_filter_entry.id));
-			insert_values.push_back("'" + EscapeString(name_filter_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(name_filter_entry.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

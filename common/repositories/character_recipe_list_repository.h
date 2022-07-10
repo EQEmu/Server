@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_RECIPE_LIST_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class CharacterRecipeListRepository {
 public:

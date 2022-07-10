@@ -22,7 +22,7 @@
 #define EQEMU_DYNAMIC_ZONE_MEMBERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_dynamic_zone_members_repository.h"
 
 class DynamicZoneMembersRepository: public BaseDynamicZoneMembersRepository {

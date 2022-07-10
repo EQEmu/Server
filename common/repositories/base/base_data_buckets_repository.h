@@ -13,7 +13,7 @@
 #define EQEMU_BASE_DATA_BUCKETS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseDataBucketsRepository {
@@ -163,8 +163,8 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(data_buckets_entry.key) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(data_buckets_entry.value) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(data_buckets_entry.key) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(data_buckets_entry.value) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(data_buckets_entry.expires));
 
 		auto results = db.QueryDatabase(
@@ -188,8 +188,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(data_buckets_entry.id));
-		insert_values.push_back("'" + EscapeString(data_buckets_entry.key) + "'");
-		insert_values.push_back("'" + EscapeString(data_buckets_entry.value) + "'");
+		insert_values.push_back("'" + Strings::Escape(data_buckets_entry.key) + "'");
+		insert_values.push_back("'" + Strings::Escape(data_buckets_entry.value) + "'");
 		insert_values.push_back(std::to_string(data_buckets_entry.expires));
 
 		auto results = db.QueryDatabase(
@@ -221,8 +221,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(data_buckets_entry.id));
-			insert_values.push_back("'" + EscapeString(data_buckets_entry.key) + "'");
-			insert_values.push_back("'" + EscapeString(data_buckets_entry.value) + "'");
+			insert_values.push_back("'" + Strings::Escape(data_buckets_entry.key) + "'");
+			insert_values.push_back("'" + Strings::Escape(data_buckets_entry.value) + "'");
 			insert_values.push_back(std::to_string(data_buckets_entry.expires));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

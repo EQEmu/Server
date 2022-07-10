@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPELL_GLOBALS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpellGlobalsRepository {
@@ -164,9 +164,9 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(spell_globals_entry.spellid));
-		update_values.push_back(columns[1] + " = '" + EscapeString(spell_globals_entry.spell_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(spell_globals_entry.qglobal) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(spell_globals_entry.value) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_globals_entry.spell_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_globals_entry.qglobal) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(spell_globals_entry.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -189,9 +189,9 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(spell_globals_entry.spellid));
-		insert_values.push_back("'" + EscapeString(spell_globals_entry.spell_name) + "'");
-		insert_values.push_back("'" + EscapeString(spell_globals_entry.qglobal) + "'");
-		insert_values.push_back("'" + EscapeString(spell_globals_entry.value) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_globals_entry.spell_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_globals_entry.qglobal) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_globals_entry.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,9 +222,9 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(spell_globals_entry.spellid));
-			insert_values.push_back("'" + EscapeString(spell_globals_entry.spell_name) + "'");
-			insert_values.push_back("'" + EscapeString(spell_globals_entry.qglobal) + "'");
-			insert_values.push_back("'" + EscapeString(spell_globals_entry.value) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_globals_entry.spell_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_globals_entry.qglobal) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_globals_entry.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

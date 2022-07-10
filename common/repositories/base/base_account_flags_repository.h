@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ACCOUNT_FLAGS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAccountFlagsRepository {
@@ -159,8 +159,8 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(account_flags_entry.p_accid));
-		update_values.push_back(columns[1] + " = '" + EscapeString(account_flags_entry.p_flag) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(account_flags_entry.p_value) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_flags_entry.p_flag) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(account_flags_entry.p_value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -183,8 +183,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(account_flags_entry.p_accid));
-		insert_values.push_back("'" + EscapeString(account_flags_entry.p_flag) + "'");
-		insert_values.push_back("'" + EscapeString(account_flags_entry.p_value) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_flag) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,8 +215,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(account_flags_entry.p_accid));
-			insert_values.push_back("'" + EscapeString(account_flags_entry.p_flag) + "'");
-			insert_values.push_back("'" + EscapeString(account_flags_entry.p_value) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_flag) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

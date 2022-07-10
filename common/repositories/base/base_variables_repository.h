@@ -30,7 +30,7 @@
 #define EQEMU_BASE_VARIABLES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 
 class BaseVariablesRepository {
 public:
@@ -176,10 +176,10 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(variables_entry.varname) + "'");
-		update_values.push_back(columns[1] + " = '" + EscapeString(variables_entry.value) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(variables_entry.information) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(variables_entry.ts) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(variables_entry.varname) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(variables_entry.value) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(variables_entry.information) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(variables_entry.ts) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -200,10 +200,10 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(variables_entry.varname) + "'");
-		insert_values.push_back("'" + EscapeString(variables_entry.value) + "'");
-		insert_values.push_back("'" + EscapeString(variables_entry.information) + "'");
-		insert_values.push_back("'" + EscapeString(variables_entry.ts) + "'");
+		insert_values.push_back("'" + Strings::Escape(variables_entry.varname) + "'");
+		insert_values.push_back("'" + Strings::Escape(variables_entry.value) + "'");
+		insert_values.push_back("'" + Strings::Escape(variables_entry.information) + "'");
+		insert_values.push_back("'" + Strings::Escape(variables_entry.ts) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -232,10 +232,10 @@ public:
 		for (auto &variables_entry: variables_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(variables_entry.varname) + "'");
-			insert_values.push_back("'" + EscapeString(variables_entry.value) + "'");
-			insert_values.push_back("'" + EscapeString(variables_entry.information) + "'");
-			insert_values.push_back("'" + EscapeString(variables_entry.ts) + "'");
+			insert_values.push_back("'" + Strings::Escape(variables_entry.varname) + "'");
+			insert_values.push_back("'" + Strings::Escape(variables_entry.value) + "'");
+			insert_values.push_back("'" + Strings::Escape(variables_entry.information) + "'");
+			insert_values.push_back("'" + Strings::Escape(variables_entry.ts) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

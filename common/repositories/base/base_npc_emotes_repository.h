@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NPC_EMOTES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNpcEmotesRepository {
@@ -171,7 +171,7 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(npc_emotes_entry.emoteid));
 		update_values.push_back(columns[2] + " = " + std::to_string(npc_emotes_entry.event_));
 		update_values.push_back(columns[3] + " = " + std::to_string(npc_emotes_entry.type));
-		update_values.push_back(columns[4] + " = '" + EscapeString(npc_emotes_entry.text) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(npc_emotes_entry.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 		insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
 		insert_values.push_back(std::to_string(npc_emotes_entry.event_));
 		insert_values.push_back(std::to_string(npc_emotes_entry.type));
-		insert_values.push_back("'" + EscapeString(npc_emotes_entry.text) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_emotes_entry.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -231,7 +231,7 @@ public:
 			insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
 			insert_values.push_back(std::to_string(npc_emotes_entry.event_));
 			insert_values.push_back(std::to_string(npc_emotes_entry.type));
-			insert_values.push_back("'" + EscapeString(npc_emotes_entry.text) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_emotes_entry.text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

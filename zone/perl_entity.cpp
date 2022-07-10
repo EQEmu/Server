@@ -3,7 +3,7 @@
 #ifdef EMBPERL_XS_CLASSES
 
 #include "../common/global_define.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "embperl.h"
 #include "entity.h"
 #include <list>

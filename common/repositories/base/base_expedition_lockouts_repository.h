@@ -13,7 +13,7 @@
 #define EQEMU_BASE_EXPEDITION_LOCKOUTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseExpeditionLockoutsRepository {
@@ -174,10 +174,10 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(expedition_lockouts_entry.expedition_id));
-		update_values.push_back(columns[2] + " = '" + EscapeString(expedition_lockouts_entry.event_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(expedition_lockouts_entry.event_name) + "'");
 		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (expedition_lockouts_entry.expire_time > 0 ? std::to_string(expedition_lockouts_entry.expire_time) : "null") + ")");
 		update_values.push_back(columns[4] + " = " + std::to_string(expedition_lockouts_entry.duration));
-		update_values.push_back(columns[5] + " = '" + EscapeString(expedition_lockouts_entry.from_expedition_uuid) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(expedition_lockouts_entry.from_expedition_uuid) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,10 +201,10 @@ public:
 
 		insert_values.push_back(std::to_string(expedition_lockouts_entry.id));
 		insert_values.push_back(std::to_string(expedition_lockouts_entry.expedition_id));
-		insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.event_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(expedition_lockouts_entry.event_name) + "'");
 		insert_values.push_back("FROM_UNIXTIME(" + (expedition_lockouts_entry.expire_time > 0 ? std::to_string(expedition_lockouts_entry.expire_time) : "null") + ")");
 		insert_values.push_back(std::to_string(expedition_lockouts_entry.duration));
-		insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.from_expedition_uuid) + "'");
+		insert_values.push_back("'" + Strings::Escape(expedition_lockouts_entry.from_expedition_uuid) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,10 +236,10 @@ public:
 
 			insert_values.push_back(std::to_string(expedition_lockouts_entry.id));
 			insert_values.push_back(std::to_string(expedition_lockouts_entry.expedition_id));
-			insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.event_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(expedition_lockouts_entry.event_name) + "'");
 			insert_values.push_back("FROM_UNIXTIME(" + (expedition_lockouts_entry.expire_time > 0 ? std::to_string(expedition_lockouts_entry.expire_time) : "null") + ")");
 			insert_values.push_back(std::to_string(expedition_lockouts_entry.duration));
-			insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.from_expedition_uuid) + "'");
+			insert_values.push_back("'" + Strings::Escape(expedition_lockouts_entry.from_expedition_uuid) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

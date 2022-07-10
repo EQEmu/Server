@@ -13,7 +13,7 @@
 #define EQEMU_BASE_QUEST_GLOBALS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseQuestGlobalsRepository {
@@ -176,8 +176,8 @@ public:
 		update_values.push_back(columns[0] + " = " + std::to_string(quest_globals_entry.charid));
 		update_values.push_back(columns[1] + " = " + std::to_string(quest_globals_entry.npcid));
 		update_values.push_back(columns[2] + " = " + std::to_string(quest_globals_entry.zoneid));
-		update_values.push_back(columns[3] + " = '" + EscapeString(quest_globals_entry.name) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(quest_globals_entry.value) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(quest_globals_entry.name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(quest_globals_entry.value) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(quest_globals_entry.expdate));
 
 		auto results = db.QueryDatabase(
@@ -203,8 +203,8 @@ public:
 		insert_values.push_back(std::to_string(quest_globals_entry.charid));
 		insert_values.push_back(std::to_string(quest_globals_entry.npcid));
 		insert_values.push_back(std::to_string(quest_globals_entry.zoneid));
-		insert_values.push_back("'" + EscapeString(quest_globals_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(quest_globals_entry.value) + "'");
+		insert_values.push_back("'" + Strings::Escape(quest_globals_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(quest_globals_entry.value) + "'");
 		insert_values.push_back(std::to_string(quest_globals_entry.expdate));
 
 		auto results = db.QueryDatabase(
@@ -238,8 +238,8 @@ public:
 			insert_values.push_back(std::to_string(quest_globals_entry.charid));
 			insert_values.push_back(std::to_string(quest_globals_entry.npcid));
 			insert_values.push_back(std::to_string(quest_globals_entry.zoneid));
-			insert_values.push_back("'" + EscapeString(quest_globals_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(quest_globals_entry.value) + "'");
+			insert_values.push_back("'" + Strings::Escape(quest_globals_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(quest_globals_entry.value) + "'");
 			insert_values.push_back(std::to_string(quest_globals_entry.expdate));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

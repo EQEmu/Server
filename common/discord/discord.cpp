@@ -1,7 +1,7 @@
 #include "discord.h"
 #include "../http/httplib.h"
 #include "../json/json.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../eqemu_logsys.h"
 
 constexpr int MAX_RETRIES = 10;

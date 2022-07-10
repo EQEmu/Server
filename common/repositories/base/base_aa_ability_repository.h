@@ -13,7 +13,7 @@
 #define EQEMU_BASE_AA_ABILITY_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAaAbilityRepository {
@@ -214,7 +214,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(aa_ability_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(aa_ability_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(aa_ability_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_entry.category));
 		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_entry.classes));
 		update_values.push_back(columns[4] + " = " + std::to_string(aa_ability_entry.races));
@@ -249,7 +249,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(aa_ability_entry.id));
-		insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(aa_ability_entry.name) + "'");
 		insert_values.push_back(std::to_string(aa_ability_entry.category));
 		insert_values.push_back(std::to_string(aa_ability_entry.classes));
 		insert_values.push_back(std::to_string(aa_ability_entry.races));
@@ -292,7 +292,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(aa_ability_entry.id));
-			insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(aa_ability_entry.name) + "'");
 			insert_values.push_back(std::to_string(aa_ability_entry.category));
 			insert_values.push_back(std::to_string(aa_ability_entry.classes));
 			insert_values.push_back(std::to_string(aa_ability_entry.races));

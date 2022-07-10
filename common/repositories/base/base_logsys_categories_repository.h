@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOGSYS_CATEGORIES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLogsysCategoriesRepository {
@@ -179,7 +179,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(logsys_categories_entry.log_category_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(logsys_categories_entry.log_category_description) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(logsys_categories_entry.log_category_description) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(logsys_categories_entry.log_to_console));
 		update_values.push_back(columns[3] + " = " + std::to_string(logsys_categories_entry.log_to_file));
 		update_values.push_back(columns[4] + " = " + std::to_string(logsys_categories_entry.log_to_gmsay));
@@ -207,7 +207,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_category_id));
-		insert_values.push_back("'" + EscapeString(logsys_categories_entry.log_category_description) + "'");
+		insert_values.push_back("'" + Strings::Escape(logsys_categories_entry.log_category_description) + "'");
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_console));
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_file));
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_gmsay));
@@ -243,7 +243,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_category_id));
-			insert_values.push_back("'" + EscapeString(logsys_categories_entry.log_category_description) + "'");
+			insert_values.push_back("'" + Strings::Escape(logsys_categories_entry.log_category_description) + "'");
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_console));
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_file));
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_gmsay));

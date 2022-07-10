@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/misc_functions.h"
 #include "../common/packet_functions.h"
 #include "../common/md5.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "worldserver.h"
 #include "clientlist.h"
 #include "ucsconfig.h"

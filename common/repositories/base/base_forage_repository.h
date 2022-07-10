@@ -13,7 +13,7 @@
 #define EQEMU_BASE_FORAGE_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseForageRepository {
@@ -194,8 +194,8 @@ public:
 		update_values.push_back(columns[4] + " = " + std::to_string(forage_entry.chance));
 		update_values.push_back(columns[5] + " = " + std::to_string(forage_entry.min_expansion));
 		update_values.push_back(columns[6] + " = " + std::to_string(forage_entry.max_expansion));
-		update_values.push_back(columns[7] + " = '" + EscapeString(forage_entry.content_flags) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(forage_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(forage_entry.content_flags) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(forage_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -224,8 +224,8 @@ public:
 		insert_values.push_back(std::to_string(forage_entry.chance));
 		insert_values.push_back(std::to_string(forage_entry.min_expansion));
 		insert_values.push_back(std::to_string(forage_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(forage_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(forage_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(forage_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(forage_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -262,8 +262,8 @@ public:
 			insert_values.push_back(std::to_string(forage_entry.chance));
 			insert_values.push_back(std::to_string(forage_entry.min_expansion));
 			insert_values.push_back(std::to_string(forage_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(forage_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(forage_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(forage_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(forage_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

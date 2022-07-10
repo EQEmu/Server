@@ -3,7 +3,7 @@
 #include "../common/event/task_scheduler.h"
 #include "../common/event/event_loop.h"
 #include "../common/net/dns.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;

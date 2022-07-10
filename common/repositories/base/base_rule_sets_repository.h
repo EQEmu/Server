@@ -13,7 +13,7 @@
 #define EQEMU_BASE_RULE_SETS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseRuleSetsRepository {
@@ -153,7 +153,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(rule_sets_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(rule_sets_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -176,7 +176,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(rule_sets_entry.ruleset_id));
-		insert_values.push_back("'" + EscapeString(rule_sets_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(rule_sets_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -207,7 +207,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(rule_sets_entry.ruleset_id));
-			insert_values.push_back("'" + EscapeString(rule_sets_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(rule_sets_entry.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -18,7 +18,7 @@
 
 #include "rulesys.h"
 #include "database.h"
-#include "string_util.h"
+#include "strings.h"
 #include <cstdlib>
 #include <cstring>
 #include <fmt/format.h>
@@ -367,7 +367,7 @@ void RuleManager::_SaveRule(Database *database, RuleType type, uint16 index) {
 			m_activeRuleset,
 			_GetRuleName(type, index),
 			value_string,
-			EscapeString(_GetRuleNotes(type, index)).c_str()
+			Strings::Escape(_GetRuleNotes(type, index)).c_str()
 	);
 
 	database->QueryDatabase(query);
@@ -441,7 +441,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 					ruleset_id,								// `ruleset_id`
 					rd_iter.first,							// `rule_name`
 					rd_iter.second.first,					// `rule_value`
-					EscapeString(*rd_iter.second.second)	// `notes`
+					Strings::Escape(*rd_iter.second.second)	// `notes`
 				)
 			);
 
@@ -577,7 +577,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 		std::string query(
 			fmt::format(
 				"UPDATE `rule_values` SET `notes` = '{}' WHERE `ruleset_id` = '{}' AND `rule_name` = '{}'",
-				EscapeString(rule.notes),
+				Strings::Escape(rule.notes),
 				row[0],
 				row[1]
 			)

@@ -22,7 +22,7 @@
 #define EQEMU_EXPEDITION_LOCKOUTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_expedition_lockouts_repository.h"
 
 class ExpeditionLockoutsRepository: public BaseExpeditionLockoutsRepository {

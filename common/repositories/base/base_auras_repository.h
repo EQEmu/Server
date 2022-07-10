@@ -13,7 +13,7 @@
 #define EQEMU_BASE_AURAS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAurasRepository {
@@ -200,7 +200,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(auras_entry.type));
 		update_values.push_back(columns[1] + " = " + std::to_string(auras_entry.npc_type));
-		update_values.push_back(columns[2] + " = '" + EscapeString(auras_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(auras_entry.name) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(auras_entry.spell_id));
 		update_values.push_back(columns[4] + " = " + std::to_string(auras_entry.distance));
 		update_values.push_back(columns[5] + " = " + std::to_string(auras_entry.aura_type));
@@ -232,7 +232,7 @@ public:
 
 		insert_values.push_back(std::to_string(auras_entry.type));
 		insert_values.push_back(std::to_string(auras_entry.npc_type));
-		insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(auras_entry.name) + "'");
 		insert_values.push_back(std::to_string(auras_entry.spell_id));
 		insert_values.push_back(std::to_string(auras_entry.distance));
 		insert_values.push_back(std::to_string(auras_entry.aura_type));
@@ -272,7 +272,7 @@ public:
 
 			insert_values.push_back(std::to_string(auras_entry.type));
 			insert_values.push_back(std::to_string(auras_entry.npc_type));
-			insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(auras_entry.name) + "'");
 			insert_values.push_back(std::to_string(auras_entry.spell_id));
 			insert_values.push_back(std::to_string(auras_entry.distance));
 			insert_values.push_back(std::to_string(auras_entry.aura_type));

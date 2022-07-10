@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ITEM_TICK_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseItemTickRepository {
@@ -176,7 +176,7 @@ public:
 		update_values.push_back(columns[0] + " = " + std::to_string(item_tick_entry.it_itemid));
 		update_values.push_back(columns[1] + " = " + std::to_string(item_tick_entry.it_chance));
 		update_values.push_back(columns[2] + " = " + std::to_string(item_tick_entry.it_level));
-		update_values.push_back(columns[4] + " = '" + EscapeString(item_tick_entry.it_qglobal) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(item_tick_entry.it_bagslot));
 
 		auto results = db.QueryDatabase(
@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(item_tick_entry.it_chance));
 		insert_values.push_back(std::to_string(item_tick_entry.it_level));
 		insert_values.push_back(std::to_string(item_tick_entry.it_id));
-		insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
+		insert_values.push_back("'" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
 		insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
 
 		auto results = db.QueryDatabase(
@@ -238,7 +238,7 @@ public:
 			insert_values.push_back(std::to_string(item_tick_entry.it_chance));
 			insert_values.push_back(std::to_string(item_tick_entry.it_level));
 			insert_values.push_back(std::to_string(item_tick_entry.it_id));
-			insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
+			insert_values.push_back("'" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
 			insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

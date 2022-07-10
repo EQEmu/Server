@@ -22,7 +22,7 @@
 #define EQEMU_NAME_FILTER_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_name_filter_repository.h"
 
 class NameFilterRepository: public BaseNameFilterRepository {

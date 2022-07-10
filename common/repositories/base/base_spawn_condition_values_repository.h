@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWN_CONDITION_VALUES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawnConditionValuesRepository {
@@ -165,7 +165,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(spawn_condition_values_entry.id));
 		update_values.push_back(columns[1] + " = " + std::to_string(spawn_condition_values_entry.value));
-		update_values.push_back(columns[2] + " = '" + EscapeString(spawn_condition_values_entry.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spawn_condition_values_entry.zone) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(spawn_condition_values_entry.instance_id));
 
 		auto results = db.QueryDatabase(
@@ -190,7 +190,7 @@ public:
 
 		insert_values.push_back(std::to_string(spawn_condition_values_entry.id));
 		insert_values.push_back(std::to_string(spawn_condition_values_entry.value));
-		insert_values.push_back("'" + EscapeString(spawn_condition_values_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_condition_values_entry.zone) + "'");
 		insert_values.push_back(std::to_string(spawn_condition_values_entry.instance_id));
 
 		auto results = db.QueryDatabase(
@@ -223,7 +223,7 @@ public:
 
 			insert_values.push_back(std::to_string(spawn_condition_values_entry.id));
 			insert_values.push_back(std::to_string(spawn_condition_values_entry.value));
-			insert_values.push_back("'" + EscapeString(spawn_condition_values_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_condition_values_entry.zone) + "'");
 			insert_values.push_back(std::to_string(spawn_condition_values_entry.instance_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

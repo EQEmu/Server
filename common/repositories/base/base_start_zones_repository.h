@@ -13,7 +13,7 @@
 #define EQEMU_BASE_START_ZONES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseStartZonesRepository {
@@ -255,8 +255,8 @@ public:
 		update_values.push_back(columns[14] + " = " + std::to_string(start_zones_entry.select_rank));
 		update_values.push_back(columns[15] + " = " + std::to_string(start_zones_entry.min_expansion));
 		update_values.push_back(columns[16] + " = " + std::to_string(start_zones_entry.max_expansion));
-		update_values.push_back(columns[17] + " = '" + EscapeString(start_zones_entry.content_flags) + "'");
-		update_values.push_back(columns[18] + " = '" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[17] + " = '" + Strings::Escape(start_zones_entry.content_flags) + "'");
+		update_values.push_back(columns[18] + " = '" + Strings::Escape(start_zones_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -295,8 +295,8 @@ public:
 		insert_values.push_back(std::to_string(start_zones_entry.select_rank));
 		insert_values.push_back(std::to_string(start_zones_entry.min_expansion));
 		insert_values.push_back(std::to_string(start_zones_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -343,8 +343,8 @@ public:
 			insert_values.push_back(std::to_string(start_zones_entry.select_rank));
 			insert_values.push_back(std::to_string(start_zones_entry.min_expansion));
 			insert_values.push_back(std::to_string(start_zones_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

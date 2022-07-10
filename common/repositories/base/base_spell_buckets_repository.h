@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPELL_BUCKETS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpellBucketsRepository {
@@ -159,8 +159,8 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(spell_buckets_entry.spellid));
-		update_values.push_back(columns[1] + " = '" + EscapeString(spell_buckets_entry.key) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(spell_buckets_entry.value) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_buckets_entry.key) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_buckets_entry.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -183,8 +183,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(spell_buckets_entry.spellid));
-		insert_values.push_back("'" + EscapeString(spell_buckets_entry.key) + "'");
-		insert_values.push_back("'" + EscapeString(spell_buckets_entry.value) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.key) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,8 +215,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(spell_buckets_entry.spellid));
-			insert_values.push_back("'" + EscapeString(spell_buckets_entry.key) + "'");
-			insert_values.push_back("'" + EscapeString(spell_buckets_entry.value) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.key) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

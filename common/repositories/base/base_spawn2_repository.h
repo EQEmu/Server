@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWN2_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawn2Repository {
@@ -244,7 +244,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(spawn2_entry.spawngroupID));
-		update_values.push_back(columns[2] + " = '" + EscapeString(spawn2_entry.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spawn2_entry.zone) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(spawn2_entry.version));
 		update_values.push_back(columns[4] + " = " + std::to_string(spawn2_entry.x));
 		update_values.push_back(columns[5] + " = " + std::to_string(spawn2_entry.y));
@@ -260,8 +260,8 @@ public:
 		update_values.push_back(columns[15] + " = " + std::to_string(spawn2_entry.animation));
 		update_values.push_back(columns[16] + " = " + std::to_string(spawn2_entry.min_expansion));
 		update_values.push_back(columns[17] + " = " + std::to_string(spawn2_entry.max_expansion));
-		update_values.push_back(columns[18] + " = '" + EscapeString(spawn2_entry.content_flags) + "'");
-		update_values.push_back(columns[19] + " = '" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[18] + " = '" + Strings::Escape(spawn2_entry.content_flags) + "'");
+		update_values.push_back(columns[19] + " = '" + Strings::Escape(spawn2_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -285,7 +285,7 @@ public:
 
 		insert_values.push_back(std::to_string(spawn2_entry.id));
 		insert_values.push_back(std::to_string(spawn2_entry.spawngroupID));
-		insert_values.push_back("'" + EscapeString(spawn2_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn2_entry.zone) + "'");
 		insert_values.push_back(std::to_string(spawn2_entry.version));
 		insert_values.push_back(std::to_string(spawn2_entry.x));
 		insert_values.push_back(std::to_string(spawn2_entry.y));
@@ -301,8 +301,8 @@ public:
 		insert_values.push_back(std::to_string(spawn2_entry.animation));
 		insert_values.push_back(std::to_string(spawn2_entry.min_expansion));
 		insert_values.push_back(std::to_string(spawn2_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn2_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn2_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -334,7 +334,7 @@ public:
 
 			insert_values.push_back(std::to_string(spawn2_entry.id));
 			insert_values.push_back(std::to_string(spawn2_entry.spawngroupID));
-			insert_values.push_back("'" + EscapeString(spawn2_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn2_entry.zone) + "'");
 			insert_values.push_back(std::to_string(spawn2_entry.version));
 			insert_values.push_back(std::to_string(spawn2_entry.x));
 			insert_values.push_back(std::to_string(spawn2_entry.y));
@@ -350,8 +350,8 @@ public:
 			insert_values.push_back(std::to_string(spawn2_entry.animation));
 			insert_values.push_back(std::to_string(spawn2_entry.min_expansion));
 			insert_values.push_back(std::to_string(spawn2_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn2_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn2_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

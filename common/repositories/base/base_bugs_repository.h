@@ -13,7 +13,7 @@
 #define EQEMU_BASE_BUGS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseBugsRepository {
@@ -208,17 +208,17 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(bugs_entry.zone) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(bugs_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(bugs_entry.ui) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(bugs_entry.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(bugs_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(bugs_entry.ui) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(bugs_entry.x));
 		update_values.push_back(columns[5] + " = " + std::to_string(bugs_entry.y));
 		update_values.push_back(columns[6] + " = " + std::to_string(bugs_entry.z));
-		update_values.push_back(columns[7] + " = '" + EscapeString(bugs_entry.type) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(bugs_entry.type) + "'");
 		update_values.push_back(columns[8] + " = " + std::to_string(bugs_entry.flag));
-		update_values.push_back(columns[9] + " = '" + EscapeString(bugs_entry.target) + "'");
-		update_values.push_back(columns[10] + " = '" + EscapeString(bugs_entry.bug) + "'");
-		update_values.push_back(columns[11] + " = '" + EscapeString(bugs_entry.date) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(bugs_entry.target) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(bugs_entry.bug) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(bugs_entry.date) + "'");
 		update_values.push_back(columns[12] + " = " + std::to_string(bugs_entry.status));
 
 		auto results = db.QueryDatabase(
@@ -242,17 +242,17 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(bugs_entry.id));
-		insert_values.push_back("'" + EscapeString(bugs_entry.zone) + "'");
-		insert_values.push_back("'" + EscapeString(bugs_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(bugs_entry.ui) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_entry.ui) + "'");
 		insert_values.push_back(std::to_string(bugs_entry.x));
 		insert_values.push_back(std::to_string(bugs_entry.y));
 		insert_values.push_back(std::to_string(bugs_entry.z));
-		insert_values.push_back("'" + EscapeString(bugs_entry.type) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_entry.type) + "'");
 		insert_values.push_back(std::to_string(bugs_entry.flag));
-		insert_values.push_back("'" + EscapeString(bugs_entry.target) + "'");
-		insert_values.push_back("'" + EscapeString(bugs_entry.bug) + "'");
-		insert_values.push_back("'" + EscapeString(bugs_entry.date) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_entry.target) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_entry.bug) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_entry.date) + "'");
 		insert_values.push_back(std::to_string(bugs_entry.status));
 
 		auto results = db.QueryDatabase(
@@ -284,17 +284,17 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(bugs_entry.id));
-			insert_values.push_back("'" + EscapeString(bugs_entry.zone) + "'");
-			insert_values.push_back("'" + EscapeString(bugs_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(bugs_entry.ui) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_entry.ui) + "'");
 			insert_values.push_back(std::to_string(bugs_entry.x));
 			insert_values.push_back(std::to_string(bugs_entry.y));
 			insert_values.push_back(std::to_string(bugs_entry.z));
-			insert_values.push_back("'" + EscapeString(bugs_entry.type) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_entry.type) + "'");
 			insert_values.push_back(std::to_string(bugs_entry.flag));
-			insert_values.push_back("'" + EscapeString(bugs_entry.target) + "'");
-			insert_values.push_back("'" + EscapeString(bugs_entry.bug) + "'");
-			insert_values.push_back("'" + EscapeString(bugs_entry.date) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_entry.target) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_entry.bug) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_entry.date) + "'");
 			insert_values.push_back(std::to_string(bugs_entry.status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

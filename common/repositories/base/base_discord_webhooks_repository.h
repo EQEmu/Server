@@ -13,7 +13,7 @@
 #define EQEMU_BASE_DISCORD_WEBHOOKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseDiscordWebhooksRepository {
@@ -168,8 +168,8 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(discord_webhooks_entry.webhook_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(discord_webhooks_entry.webhook_url) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(discord_webhooks_entry.webhook_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(discord_webhooks_entry.webhook_url) + "'");
 		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (discord_webhooks_entry.created_at > 0 ? std::to_string(discord_webhooks_entry.created_at) : "null") + ")");
 		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (discord_webhooks_entry.deleted_at > 0 ? std::to_string(discord_webhooks_entry.deleted_at) : "null") + ")");
 
@@ -194,8 +194,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(discord_webhooks_entry.id));
-		insert_values.push_back("'" + EscapeString(discord_webhooks_entry.webhook_name) + "'");
-		insert_values.push_back("'" + EscapeString(discord_webhooks_entry.webhook_url) + "'");
+		insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_url) + "'");
 		insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.created_at > 0 ? std::to_string(discord_webhooks_entry.created_at) : "null") + ")");
 		insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.deleted_at > 0 ? std::to_string(discord_webhooks_entry.deleted_at) : "null") + ")");
 
@@ -228,8 +228,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(discord_webhooks_entry.id));
-			insert_values.push_back("'" + EscapeString(discord_webhooks_entry.webhook_name) + "'");
-			insert_values.push_back("'" + EscapeString(discord_webhooks_entry.webhook_url) + "'");
+			insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_url) + "'");
 			insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.created_at > 0 ? std::to_string(discord_webhooks_entry.created_at) : "null") + ")");
 			insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.deleted_at > 0 ? std::to_string(discord_webhooks_entry.deleted_at) : "null") + ")");
 

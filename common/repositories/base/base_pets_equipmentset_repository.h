@@ -13,7 +13,7 @@
 #define EQEMU_BASE_PETS_EQUIPMENTSET_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BasePetsEquipmentsetRepository {
@@ -159,7 +159,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(pets_equipmentset_entry.set_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(pets_equipmentset_entry.setname) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(pets_equipmentset_entry.setname) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(pets_equipmentset_entry.nested_set));
 
 		auto results = db.QueryDatabase(
@@ -183,7 +183,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(pets_equipmentset_entry.set_id));
-		insert_values.push_back("'" + EscapeString(pets_equipmentset_entry.setname) + "'");
+		insert_values.push_back("'" + Strings::Escape(pets_equipmentset_entry.setname) + "'");
 		insert_values.push_back(std::to_string(pets_equipmentset_entry.nested_set));
 
 		auto results = db.QueryDatabase(
@@ -215,7 +215,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(pets_equipmentset_entry.set_id));
-			insert_values.push_back("'" + EscapeString(pets_equipmentset_entry.setname) + "'");
+			insert_values.push_back("'" + Strings::Escape(pets_equipmentset_entry.setname) + "'");
 			insert_values.push_back(std::to_string(pets_equipmentset_entry.nested_set));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

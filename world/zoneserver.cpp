@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/guilds.h"
 #include "../common/packet_dump.h"
 #include "../common/misc.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "cliententry.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
@@ -1343,7 +1343,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			content_service.SetExpansionContext()->ReloadContentFlags();
 			break;
-		}	
+		}
 		case ServerOP_ReloadLogs: {
 			zoneserver_list.SendPacket(pack);
 			LogSys.LoadLogDatabaseSettings();

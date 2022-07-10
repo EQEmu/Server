@@ -2,7 +2,7 @@
 #include "server_manager.h"
 #include "login_server.h"
 #include "../common/json/json.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "account_management.h"
 
 extern LoginServer server;

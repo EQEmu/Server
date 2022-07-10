@@ -13,7 +13,7 @@
 #define EQEMU_BASE_TOOL_GAME_OBJECTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseToolGameObjectsRepository {
@@ -174,9 +174,9 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(tool_game_objects_entry.zoneid));
-		update_values.push_back(columns[2] + " = '" + EscapeString(tool_game_objects_entry.zonesn) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(tool_game_objects_entry.object_name) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(tool_game_objects_entry.file_from) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(tool_game_objects_entry.zonesn) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(tool_game_objects_entry.object_name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(tool_game_objects_entry.file_from) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(tool_game_objects_entry.is_global));
 
 		auto results = db.QueryDatabase(
@@ -201,9 +201,9 @@ public:
 
 		insert_values.push_back(std::to_string(tool_game_objects_entry.id));
 		insert_values.push_back(std::to_string(tool_game_objects_entry.zoneid));
-		insert_values.push_back("'" + EscapeString(tool_game_objects_entry.zonesn) + "'");
-		insert_values.push_back("'" + EscapeString(tool_game_objects_entry.object_name) + "'");
-		insert_values.push_back("'" + EscapeString(tool_game_objects_entry.file_from) + "'");
+		insert_values.push_back("'" + Strings::Escape(tool_game_objects_entry.zonesn) + "'");
+		insert_values.push_back("'" + Strings::Escape(tool_game_objects_entry.object_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(tool_game_objects_entry.file_from) + "'");
 		insert_values.push_back(std::to_string(tool_game_objects_entry.is_global));
 
 		auto results = db.QueryDatabase(
@@ -236,9 +236,9 @@ public:
 
 			insert_values.push_back(std::to_string(tool_game_objects_entry.id));
 			insert_values.push_back(std::to_string(tool_game_objects_entry.zoneid));
-			insert_values.push_back("'" + EscapeString(tool_game_objects_entry.zonesn) + "'");
-			insert_values.push_back("'" + EscapeString(tool_game_objects_entry.object_name) + "'");
-			insert_values.push_back("'" + EscapeString(tool_game_objects_entry.file_from) + "'");
+			insert_values.push_back("'" + Strings::Escape(tool_game_objects_entry.zonesn) + "'");
+			insert_values.push_back("'" + Strings::Escape(tool_game_objects_entry.object_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(tool_game_objects_entry.file_from) + "'");
 			insert_values.push_back(std::to_string(tool_game_objects_entry.is_global));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

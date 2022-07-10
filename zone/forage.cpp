@@ -20,7 +20,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "entity.h"
 #include "forage.h"

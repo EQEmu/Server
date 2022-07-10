@@ -13,7 +13,7 @@
 #define EQEMU_BASE_PERL_EVENT_EXPORT_SETTINGS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BasePerlEventExportSettingsRepository {
@@ -179,7 +179,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(perl_event_export_settings_entry.event_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(perl_event_export_settings_entry.event_description) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(perl_event_export_settings_entry.export_qglobals));
 		update_values.push_back(columns[3] + " = " + std::to_string(perl_event_export_settings_entry.export_mob));
 		update_values.push_back(columns[4] + " = " + std::to_string(perl_event_export_settings_entry.export_zone));
@@ -207,7 +207,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.event_id));
-		insert_values.push_back("'" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
+		insert_values.push_back("'" + Strings::Escape(perl_event_export_settings_entry.event_description) + "'");
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_qglobals));
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_mob));
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_zone));
@@ -243,7 +243,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.event_id));
-			insert_values.push_back("'" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
+			insert_values.push_back("'" + Strings::Escape(perl_event_export_settings_entry.event_description) + "'");
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_qglobals));
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_mob));
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_zone));

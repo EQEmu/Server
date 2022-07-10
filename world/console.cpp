@@ -27,7 +27,7 @@
 #include "worlddb.h"
 #include "zonelist.h"
 #include "zoneserver.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/md5.h"
 #include "eqemu_api_world_data_service.h"
 #include "world_store.h"

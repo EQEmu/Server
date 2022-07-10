@@ -10,7 +10,7 @@
 #include "login_server.h"
 #include "loginserver_webserver.h"
 #include "loginserver_command_handler.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>

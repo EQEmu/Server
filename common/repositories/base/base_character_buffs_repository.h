@@ -13,7 +13,7 @@
 #define EQEMU_BASE_CHARACTER_BUFFS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterBuffsRepository {
@@ -232,7 +232,7 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(character_buffs_entry.slot_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_buffs_entry.spell_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_buffs_entry.caster_level));
-		update_values.push_back(columns[4] + " = '" + EscapeString(character_buffs_entry.caster_name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(character_buffs_entry.caster_name) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(character_buffs_entry.ticsremaining));
 		update_values.push_back(columns[6] + " = " + std::to_string(character_buffs_entry.counters));
 		update_values.push_back(columns[7] + " = " + std::to_string(character_buffs_entry.numhits));
@@ -270,7 +270,7 @@ public:
 		insert_values.push_back(std::to_string(character_buffs_entry.slot_id));
 		insert_values.push_back(std::to_string(character_buffs_entry.spell_id));
 		insert_values.push_back(std::to_string(character_buffs_entry.caster_level));
-		insert_values.push_back("'" + EscapeString(character_buffs_entry.caster_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_buffs_entry.caster_name) + "'");
 		insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
 		insert_values.push_back(std::to_string(character_buffs_entry.counters));
 		insert_values.push_back(std::to_string(character_buffs_entry.numhits));
@@ -316,7 +316,7 @@ public:
 			insert_values.push_back(std::to_string(character_buffs_entry.slot_id));
 			insert_values.push_back(std::to_string(character_buffs_entry.spell_id));
 			insert_values.push_back(std::to_string(character_buffs_entry.caster_level));
-			insert_values.push_back("'" + EscapeString(character_buffs_entry.caster_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_buffs_entry.caster_name) + "'");
 			insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
 			insert_values.push_back(std::to_string(character_buffs_entry.counters));
 			insert_values.push_back(std::to_string(character_buffs_entry.numhits));

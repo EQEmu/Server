@@ -22,7 +22,7 @@
 #define EQEMU_TRADER_AUDIT_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class TraderAuditRepository {
 public:
@@ -180,10 +180,10 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(trader_audit_entry.time) + "'");
-		update_values.push_back(columns[1] + " = '" + EscapeString(trader_audit_entry.seller) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(trader_audit_entry.buyer) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(trader_audit_entry.itemname) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(trader_audit_entry.time) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(trader_audit_entry.seller) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(trader_audit_entry.buyer) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(trader_audit_entry.itemname) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(trader_audit_entry.quantity));
 		update_values.push_back(columns[5] + " = " + std::to_string(trader_audit_entry.totalcost));
 		update_values.push_back(columns[6] + " = " + std::to_string(trader_audit_entry.trantype));
@@ -207,10 +207,10 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(trader_audit_entry.time) + "'");
-		insert_values.push_back("'" + EscapeString(trader_audit_entry.seller) + "'");
-		insert_values.push_back("'" + EscapeString(trader_audit_entry.buyer) + "'");
-		insert_values.push_back("'" + EscapeString(trader_audit_entry.itemname) + "'");
+		insert_values.push_back("'" + Strings::Escape(trader_audit_entry.time) + "'");
+		insert_values.push_back("'" + Strings::Escape(trader_audit_entry.seller) + "'");
+		insert_values.push_back("'" + Strings::Escape(trader_audit_entry.buyer) + "'");
+		insert_values.push_back("'" + Strings::Escape(trader_audit_entry.itemname) + "'");
 		insert_values.push_back(std::to_string(trader_audit_entry.quantity));
 		insert_values.push_back(std::to_string(trader_audit_entry.totalcost));
 		insert_values.push_back(std::to_string(trader_audit_entry.trantype));
@@ -242,10 +242,10 @@ public:
 		for (auto &trader_audit_entry: trader_audit_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(trader_audit_entry.time) + "'");
-			insert_values.push_back("'" + EscapeString(trader_audit_entry.seller) + "'");
-			insert_values.push_back("'" + EscapeString(trader_audit_entry.buyer) + "'");
-			insert_values.push_back("'" + EscapeString(trader_audit_entry.itemname) + "'");
+			insert_values.push_back("'" + Strings::Escape(trader_audit_entry.time) + "'");
+			insert_values.push_back("'" + Strings::Escape(trader_audit_entry.seller) + "'");
+			insert_values.push_back("'" + Strings::Escape(trader_audit_entry.buyer) + "'");
+			insert_values.push_back("'" + Strings::Escape(trader_audit_entry.itemname) + "'");
 			insert_values.push_back(std::to_string(trader_audit_entry.quantity));
 			insert_values.push_back(std::to_string(trader_audit_entry.totalcost));
 			insert_values.push_back(std::to_string(trader_audit_entry.trantype));

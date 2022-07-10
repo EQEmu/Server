@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOGIN_SERVER_LIST_TYPES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLoginServerListTypesRepository {
@@ -154,7 +154,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(login_server_list_types_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(login_server_list_types_entry.description) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_server_list_types_entry.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -177,7 +177,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(login_server_list_types_entry.id));
-		insert_values.push_back("'" + EscapeString(login_server_list_types_entry.description) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_server_list_types_entry.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -208,7 +208,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(login_server_list_types_entry.id));
-			insert_values.push_back("'" + EscapeString(login_server_list_types_entry.description) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_server_list_types_entry.description) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

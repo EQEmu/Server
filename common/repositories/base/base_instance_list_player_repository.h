@@ -13,7 +13,7 @@
 #define EQEMU_BASE_INSTANCE_LIST_PLAYER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseInstanceListPlayerRepository {

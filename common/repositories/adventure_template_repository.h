@@ -22,7 +22,7 @@
 #define EQEMU_ADVENTURE_TEMPLATE_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_adventure_template_repository.h"
 
 class AdventureTemplateRepository: public BaseAdventureTemplateRepository {

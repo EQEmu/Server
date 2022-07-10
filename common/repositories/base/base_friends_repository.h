@@ -13,7 +13,7 @@
 #define EQEMU_BASE_FRIENDS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseFriendsRepository {
@@ -160,7 +160,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(friends_entry.charid));
 		update_values.push_back(columns[1] + " = " + std::to_string(friends_entry.type));
-		update_values.push_back(columns[2] + " = '" + EscapeString(friends_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(friends_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -184,7 +184,7 @@ public:
 
 		insert_values.push_back(std::to_string(friends_entry.charid));
 		insert_values.push_back(std::to_string(friends_entry.type));
-		insert_values.push_back("'" + EscapeString(friends_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(friends_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +216,7 @@ public:
 
 			insert_values.push_back(std::to_string(friends_entry.charid));
 			insert_values.push_back(std::to_string(friends_entry.type));
-			insert_values.push_back("'" + EscapeString(friends_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(friends_entry.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -2361,7 +2361,7 @@ bool BotDatabase::LoadBotGroupIDByBotGroupName(const std::string& group_name, ui
 
 	query = fmt::format(
 		"SELECT `groups_index` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
-		EscapeString(group_name)
+		Strings::Escape(group_name)
 	);
 
 	auto results = database.QueryDatabase(query);

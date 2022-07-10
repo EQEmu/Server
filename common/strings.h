@@ -100,6 +100,7 @@ public:
 	static std::string Replace(std::string subject, const std::string &search, const std::string &replace);
 	static std::string Repeat(std::string s, int n);
 	static bool IsNumber(const std::string &s);
+	static std::string Escape(const std::string &s);
 
 
 
@@ -199,7 +200,8 @@ std::vector<std::string> join_tuple(
 	return output;
 }
 
-std::string EscapeString(const std::string &s);
+//std::string Strings::Escape(const std::string &s);
+
 
 // misc functions
 std::string SanitizeWorldServerName(std::string server_long_name);

@@ -35,7 +35,7 @@
 #include "mysql.h"
 #include "rulesys.h"
 #include "shareddb.h"
-#include "string_util.h"
+#include "strings.h"
 #include "eqemu_config.h"
 #include "data_verification.h"
 #include "repositories/criteria/content_filter_criteria.h"
@@ -2364,6 +2364,6 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 }
 
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
-	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
+	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, Strings::Escape(message->text).c_str());
 	auto results = QueryDatabase(query);
 }

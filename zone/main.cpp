@@ -31,7 +31,7 @@
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
 #include "../common/profanity_manager.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/crash.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/spdat.h"

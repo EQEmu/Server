@@ -13,7 +13,7 @@
 #define EQEMU_BASE_PETITIONS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BasePetitionsRepository {
@@ -224,12 +224,12 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(petitions_entry.petid));
-		update_values.push_back(columns[2] + " = '" + EscapeString(petitions_entry.charname) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(petitions_entry.accountname) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(petitions_entry.lastgm) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(petitions_entry.petitiontext) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(petitions_entry.gmtext) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(petitions_entry.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(petitions_entry.charname) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(petitions_entry.accountname) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(petitions_entry.lastgm) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(petitions_entry.petitiontext) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(petitions_entry.gmtext) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(petitions_entry.zone) + "'");
 		update_values.push_back(columns[8] + " = " + std::to_string(petitions_entry.urgency));
 		update_values.push_back(columns[9] + " = " + std::to_string(petitions_entry.charclass));
 		update_values.push_back(columns[10] + " = " + std::to_string(petitions_entry.charrace));
@@ -261,12 +261,12 @@ public:
 
 		insert_values.push_back(std::to_string(petitions_entry.dib));
 		insert_values.push_back(std::to_string(petitions_entry.petid));
-		insert_values.push_back("'" + EscapeString(petitions_entry.charname) + "'");
-		insert_values.push_back("'" + EscapeString(petitions_entry.accountname) + "'");
-		insert_values.push_back("'" + EscapeString(petitions_entry.lastgm) + "'");
-		insert_values.push_back("'" + EscapeString(petitions_entry.petitiontext) + "'");
-		insert_values.push_back("'" + EscapeString(petitions_entry.gmtext) + "'");
-		insert_values.push_back("'" + EscapeString(petitions_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(petitions_entry.charname) + "'");
+		insert_values.push_back("'" + Strings::Escape(petitions_entry.accountname) + "'");
+		insert_values.push_back("'" + Strings::Escape(petitions_entry.lastgm) + "'");
+		insert_values.push_back("'" + Strings::Escape(petitions_entry.petitiontext) + "'");
+		insert_values.push_back("'" + Strings::Escape(petitions_entry.gmtext) + "'");
+		insert_values.push_back("'" + Strings::Escape(petitions_entry.zone) + "'");
 		insert_values.push_back(std::to_string(petitions_entry.urgency));
 		insert_values.push_back(std::to_string(petitions_entry.charclass));
 		insert_values.push_back(std::to_string(petitions_entry.charrace));
@@ -306,12 +306,12 @@ public:
 
 			insert_values.push_back(std::to_string(petitions_entry.dib));
 			insert_values.push_back(std::to_string(petitions_entry.petid));
-			insert_values.push_back("'" + EscapeString(petitions_entry.charname) + "'");
-			insert_values.push_back("'" + EscapeString(petitions_entry.accountname) + "'");
-			insert_values.push_back("'" + EscapeString(petitions_entry.lastgm) + "'");
-			insert_values.push_back("'" + EscapeString(petitions_entry.petitiontext) + "'");
-			insert_values.push_back("'" + EscapeString(petitions_entry.gmtext) + "'");
-			insert_values.push_back("'" + EscapeString(petitions_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(petitions_entry.charname) + "'");
+			insert_values.push_back("'" + Strings::Escape(petitions_entry.accountname) + "'");
+			insert_values.push_back("'" + Strings::Escape(petitions_entry.lastgm) + "'");
+			insert_values.push_back("'" + Strings::Escape(petitions_entry.petitiontext) + "'");
+			insert_values.push_back("'" + Strings::Escape(petitions_entry.gmtext) + "'");
+			insert_values.push_back("'" + Strings::Escape(petitions_entry.zone) + "'");
 			insert_values.push_back(std::to_string(petitions_entry.urgency));
 			insert_values.push_back(std::to_string(petitions_entry.charclass));
 			insert_values.push_back(std::to_string(petitions_entry.charrace));

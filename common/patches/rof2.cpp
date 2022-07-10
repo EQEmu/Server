@@ -28,7 +28,7 @@
 
 #include "../eq_packet_structs.h"
 #include "../misc_functions.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../inventory_profile.h"
 #include "rof2_structs.h"
 #include "../rulesys.h"

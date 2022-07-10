@@ -22,7 +22,7 @@
 #define EQEMU_CHAR_CREATE_COMBINATIONS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_char_create_combinations_repository.h"
 
 class CharCreateCombinationsRepository: public BaseCharCreateCombinationsRepository {

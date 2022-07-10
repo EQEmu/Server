@@ -22,7 +22,7 @@
 #define EQEMU_TRADER_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_trader_repository.h"
 
 class TraderRepository: public BaseTraderRepository {

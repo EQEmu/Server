@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWN_CONDITIONS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawnConditionsRepository {
@@ -168,11 +168,11 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(spawn_conditions_entry.zone) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(spawn_conditions_entry.zone) + "'");
 		update_values.push_back(columns[1] + " = " + std::to_string(spawn_conditions_entry.id));
 		update_values.push_back(columns[2] + " = " + std::to_string(spawn_conditions_entry.value));
 		update_values.push_back(columns[3] + " = " + std::to_string(spawn_conditions_entry.onchange));
-		update_values.push_back(columns[4] + " = '" + EscapeString(spawn_conditions_entry.name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(spawn_conditions_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,11 +194,11 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(spawn_conditions_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_conditions_entry.zone) + "'");
 		insert_values.push_back(std::to_string(spawn_conditions_entry.id));
 		insert_values.push_back(std::to_string(spawn_conditions_entry.value));
 		insert_values.push_back(std::to_string(spawn_conditions_entry.onchange));
-		insert_values.push_back("'" + EscapeString(spawn_conditions_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_conditions_entry.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -228,11 +228,11 @@ public:
 		for (auto &spawn_conditions_entry: spawn_conditions_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(spawn_conditions_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_conditions_entry.zone) + "'");
 			insert_values.push_back(std::to_string(spawn_conditions_entry.id));
 			insert_values.push_back(std::to_string(spawn_conditions_entry.value));
 			insert_values.push_back(std::to_string(spawn_conditions_entry.onchange));
-			insert_values.push_back("'" + EscapeString(spawn_conditions_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_conditions_entry.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

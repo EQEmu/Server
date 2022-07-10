@@ -13,7 +13,7 @@
 #define EQEMU_BASE_FACTION_LIST_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseFactionListRepository {
@@ -159,7 +159,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(faction_list_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(faction_list_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(faction_list_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_entry.base));
 
 		auto results = db.QueryDatabase(
@@ -183,7 +183,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(faction_list_entry.id));
-		insert_values.push_back("'" + EscapeString(faction_list_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(faction_list_entry.name) + "'");
 		insert_values.push_back(std::to_string(faction_list_entry.base));
 
 		auto results = db.QueryDatabase(
@@ -215,7 +215,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(faction_list_entry.id));
-			insert_values.push_back("'" + EscapeString(faction_list_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(faction_list_entry.name) + "'");
 			insert_values.push_back(std::to_string(faction_list_entry.base));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_CHARACTER_INSPECT_MESSAGES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterInspectMessagesRepository {
@@ -154,7 +154,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(character_inspect_messages_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(character_inspect_messages_entry.inspect_message) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(character_inspect_messages_entry.inspect_message) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -177,7 +177,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(character_inspect_messages_entry.id));
-		insert_values.push_back("'" + EscapeString(character_inspect_messages_entry.inspect_message) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_inspect_messages_entry.inspect_message) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -208,7 +208,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(character_inspect_messages_entry.id));
-			insert_values.push_back("'" + EscapeString(character_inspect_messages_entry.inspect_message) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_inspect_messages_entry.inspect_message) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

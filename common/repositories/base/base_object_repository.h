@@ -13,7 +13,7 @@
 #define EQEMU_BASE_OBJECT_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseObjectRepository {
@@ -301,7 +301,7 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(object_entry.heading));
 		update_values.push_back(columns[7] + " = " + std::to_string(object_entry.itemid));
 		update_values.push_back(columns[8] + " = " + std::to_string(object_entry.charges));
-		update_values.push_back(columns[9] + " = '" + EscapeString(object_entry.objectname) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(object_entry.objectname) + "'");
 		update_values.push_back(columns[10] + " = " + std::to_string(object_entry.type));
 		update_values.push_back(columns[11] + " = " + std::to_string(object_entry.icon));
 		update_values.push_back(columns[12] + " = " + std::to_string(object_entry.unknown08));
@@ -317,11 +317,11 @@ public:
 		update_values.push_back(columns[22] + " = " + std::to_string(object_entry.size));
 		update_values.push_back(columns[23] + " = " + std::to_string(object_entry.tilt_x));
 		update_values.push_back(columns[24] + " = " + std::to_string(object_entry.tilt_y));
-		update_values.push_back(columns[25] + " = '" + EscapeString(object_entry.display_name) + "'");
+		update_values.push_back(columns[25] + " = '" + Strings::Escape(object_entry.display_name) + "'");
 		update_values.push_back(columns[26] + " = " + std::to_string(object_entry.min_expansion));
 		update_values.push_back(columns[27] + " = " + std::to_string(object_entry.max_expansion));
-		update_values.push_back(columns[28] + " = '" + EscapeString(object_entry.content_flags) + "'");
-		update_values.push_back(columns[29] + " = '" + EscapeString(object_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[28] + " = '" + Strings::Escape(object_entry.content_flags) + "'");
+		update_values.push_back(columns[29] + " = '" + Strings::Escape(object_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -352,7 +352,7 @@ public:
 		insert_values.push_back(std::to_string(object_entry.heading));
 		insert_values.push_back(std::to_string(object_entry.itemid));
 		insert_values.push_back(std::to_string(object_entry.charges));
-		insert_values.push_back("'" + EscapeString(object_entry.objectname) + "'");
+		insert_values.push_back("'" + Strings::Escape(object_entry.objectname) + "'");
 		insert_values.push_back(std::to_string(object_entry.type));
 		insert_values.push_back(std::to_string(object_entry.icon));
 		insert_values.push_back(std::to_string(object_entry.unknown08));
@@ -368,11 +368,11 @@ public:
 		insert_values.push_back(std::to_string(object_entry.size));
 		insert_values.push_back(std::to_string(object_entry.tilt_x));
 		insert_values.push_back(std::to_string(object_entry.tilt_y));
-		insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(object_entry.display_name) + "'");
 		insert_values.push_back(std::to_string(object_entry.min_expansion));
 		insert_values.push_back(std::to_string(object_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(object_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(object_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(object_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(object_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -411,7 +411,7 @@ public:
 			insert_values.push_back(std::to_string(object_entry.heading));
 			insert_values.push_back(std::to_string(object_entry.itemid));
 			insert_values.push_back(std::to_string(object_entry.charges));
-			insert_values.push_back("'" + EscapeString(object_entry.objectname) + "'");
+			insert_values.push_back("'" + Strings::Escape(object_entry.objectname) + "'");
 			insert_values.push_back(std::to_string(object_entry.type));
 			insert_values.push_back(std::to_string(object_entry.icon));
 			insert_values.push_back(std::to_string(object_entry.unknown08));
@@ -427,11 +427,11 @@ public:
 			insert_values.push_back(std::to_string(object_entry.size));
 			insert_values.push_back(std::to_string(object_entry.tilt_x));
 			insert_values.push_back(std::to_string(object_entry.tilt_y));
-			insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(object_entry.display_name) + "'");
 			insert_values.push_back(std::to_string(object_entry.min_expansion));
 			insert_values.push_back(std::to_string(object_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(object_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(object_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(object_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(object_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

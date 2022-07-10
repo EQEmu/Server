@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOGIN_API_TOKENS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLoginApiTokensRepository {
@@ -173,7 +173,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(login_api_tokens_entry.token) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_api_tokens_entry.token) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_entry.can_write));
 		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_entry.can_read));
 		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
@@ -200,7 +200,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(login_api_tokens_entry.id));
-		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_api_tokens_entry.token) + "'");
 		insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
 		insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
 		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
@@ -235,7 +235,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(login_api_tokens_entry.id));
-			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_api_tokens_entry.token) + "'");
 			insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
 			insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
 			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");

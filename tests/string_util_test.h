@@ -20,7 +20,7 @@
 #define __EQEMU_TESTS_STRING_UTIL_H
 
 #include "cppunit/cpptest.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 class StringUtilTest : public Test::Suite {
 	typedef void(StringUtilTest::*TestFunction)(void);
@@ -62,7 +62,7 @@ public:
 		t[8] = '\"';
 		t[9] = '\x1a';
 
-		auto s = EscapeString(t);
+		auto s = Strings::Escape(t);
 		TEST_ASSERT(s.compare("abc\\x00\\n\\r\\\\\\'\\\"\\x1a") == 0);
 	}
 
@@ -79,7 +79,7 @@ public:
 		t[8] = '\"';
 		t[9] = '\x1a';
 
-		auto s = EscapeString(t, 10);
+		auto s = Strings::Escape(t, 10);
 		TEST_ASSERT(s.compare("abc\\x00\\n\\r\\\\\\'\\\"\\x1a") == 0);
 	}
 

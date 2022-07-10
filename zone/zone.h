@@ -23,7 +23,7 @@
 #include "../common/rulesys.h"
 #include "../common/types.h"
 #include "../common/random.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "zonedb.h"
 #include "zone_store.h"
 #include "../common/repositories/grid_repository.h"

@@ -19,7 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/features.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "entity.h"

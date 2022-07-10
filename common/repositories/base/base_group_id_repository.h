@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GROUP_ID_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGroupIdRepository {
@@ -165,7 +165,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(group_id_entry.groupid));
 		update_values.push_back(columns[1] + " = " + std::to_string(group_id_entry.charid));
-		update_values.push_back(columns[2] + " = '" + EscapeString(group_id_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(group_id_entry.name) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(group_id_entry.ismerc));
 
 		auto results = db.QueryDatabase(
@@ -190,7 +190,7 @@ public:
 
 		insert_values.push_back(std::to_string(group_id_entry.groupid));
 		insert_values.push_back(std::to_string(group_id_entry.charid));
-		insert_values.push_back("'" + EscapeString(group_id_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_id_entry.name) + "'");
 		insert_values.push_back(std::to_string(group_id_entry.ismerc));
 
 		auto results = db.QueryDatabase(
@@ -223,7 +223,7 @@ public:
 
 			insert_values.push_back(std::to_string(group_id_entry.groupid));
 			insert_values.push_back(std::to_string(group_id_entry.charid));
-			insert_values.push_back("'" + EscapeString(group_id_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_id_entry.name) + "'");
 			insert_values.push_back(std::to_string(group_id_entry.ismerc));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

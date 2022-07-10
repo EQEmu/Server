@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NPC_FACTION_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNpcFactionRepository {
@@ -163,7 +163,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(npc_faction_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_faction_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(npc_faction_entry.primaryfaction));
 		update_values.push_back(columns[3] + " = " + std::to_string(npc_faction_entry.ignore_primary_assist));
 
@@ -188,7 +188,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(npc_faction_entry.id));
-		insert_values.push_back("'" + EscapeString(npc_faction_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_faction_entry.name) + "'");
 		insert_values.push_back(std::to_string(npc_faction_entry.primaryfaction));
 		insert_values.push_back(std::to_string(npc_faction_entry.ignore_primary_assist));
 
@@ -221,7 +221,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(npc_faction_entry.id));
-			insert_values.push_back("'" + EscapeString(npc_faction_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_faction_entry.name) + "'");
 			insert_values.push_back(std::to_string(npc_faction_entry.primaryfaction));
 			insert_values.push_back(std::to_string(npc_faction_entry.ignore_primary_assist));
 

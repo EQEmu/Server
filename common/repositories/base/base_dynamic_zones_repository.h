@@ -13,7 +13,7 @@
 #define EQEMU_BASE_DYNAMIC_ZONES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseDynamicZonesRepository {
@@ -255,8 +255,8 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zones_entry.instance_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zones_entry.type));
-		update_values.push_back(columns[3] + " = '" + EscapeString(dynamic_zones_entry.uuid) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(dynamic_zones_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(dynamic_zones_entry.uuid) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(dynamic_zones_entry.name) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(dynamic_zones_entry.leader_id));
 		update_values.push_back(columns[6] + " = " + std::to_string(dynamic_zones_entry.min_players));
 		update_values.push_back(columns[7] + " = " + std::to_string(dynamic_zones_entry.max_players));
@@ -298,8 +298,8 @@ public:
 		insert_values.push_back(std::to_string(dynamic_zones_entry.id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.instance_id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.type));
-		insert_values.push_back("'" + EscapeString(dynamic_zones_entry.uuid) + "'");
-		insert_values.push_back("'" + EscapeString(dynamic_zones_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(dynamic_zones_entry.uuid) + "'");
+		insert_values.push_back("'" + Strings::Escape(dynamic_zones_entry.name) + "'");
 		insert_values.push_back(std::to_string(dynamic_zones_entry.leader_id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.min_players));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.max_players));
@@ -349,8 +349,8 @@ public:
 			insert_values.push_back(std::to_string(dynamic_zones_entry.id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.instance_id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.type));
-			insert_values.push_back("'" + EscapeString(dynamic_zones_entry.uuid) + "'");
-			insert_values.push_back("'" + EscapeString(dynamic_zones_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(dynamic_zones_entry.uuid) + "'");
+			insert_values.push_back("'" + Strings::Escape(dynamic_zones_entry.name) + "'");
 			insert_values.push_back(std::to_string(dynamic_zones_entry.leader_id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.min_players));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.max_players));

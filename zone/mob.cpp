@@ -17,7 +17,7 @@
 */
 
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 
 #include "data_bucket.h"

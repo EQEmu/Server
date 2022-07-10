@@ -13,7 +13,7 @@
 #define EQEMU_BASE_BUYER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseBuyerRepository {
@@ -176,7 +176,7 @@ public:
 		update_values.push_back(columns[0] + " = " + std::to_string(buyer_entry.charid));
 		update_values.push_back(columns[1] + " = " + std::to_string(buyer_entry.buyslot));
 		update_values.push_back(columns[2] + " = " + std::to_string(buyer_entry.itemid));
-		update_values.push_back(columns[3] + " = '" + EscapeString(buyer_entry.itemname) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(buyer_entry.itemname) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(buyer_entry.quantity));
 		update_values.push_back(columns[5] + " = " + std::to_string(buyer_entry.price));
 
@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(buyer_entry.charid));
 		insert_values.push_back(std::to_string(buyer_entry.buyslot));
 		insert_values.push_back(std::to_string(buyer_entry.itemid));
-		insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
+		insert_values.push_back("'" + Strings::Escape(buyer_entry.itemname) + "'");
 		insert_values.push_back(std::to_string(buyer_entry.quantity));
 		insert_values.push_back(std::to_string(buyer_entry.price));
 
@@ -238,7 +238,7 @@ public:
 			insert_values.push_back(std::to_string(buyer_entry.charid));
 			insert_values.push_back(std::to_string(buyer_entry.buyslot));
 			insert_values.push_back(std::to_string(buyer_entry.itemid));
-			insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
+			insert_values.push_back("'" + Strings::Escape(buyer_entry.itemname) + "'");
 			insert_values.push_back(std::to_string(buyer_entry.quantity));
 			insert_values.push_back(std::to_string(buyer_entry.price));
 

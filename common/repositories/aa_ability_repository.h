@@ -22,7 +22,7 @@
 #define EQEMU_AA_ABILITY_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_aa_ability_repository.h"
 
 class AaAbilityRepository: public BaseAaAbilityRepository {

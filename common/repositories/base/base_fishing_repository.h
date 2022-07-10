@@ -13,7 +13,7 @@
 #define EQEMU_BASE_FISHING_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseFishingRepository {
@@ -206,8 +206,8 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(fishing_entry.npc_chance));
 		update_values.push_back(columns[7] + " = " + std::to_string(fishing_entry.min_expansion));
 		update_values.push_back(columns[8] + " = " + std::to_string(fishing_entry.max_expansion));
-		update_values.push_back(columns[9] + " = '" + EscapeString(fishing_entry.content_flags) + "'");
-		update_values.push_back(columns[10] + " = '" + EscapeString(fishing_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(fishing_entry.content_flags) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(fishing_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -238,8 +238,8 @@ public:
 		insert_values.push_back(std::to_string(fishing_entry.npc_chance));
 		insert_values.push_back(std::to_string(fishing_entry.min_expansion));
 		insert_values.push_back(std::to_string(fishing_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(fishing_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(fishing_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(fishing_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(fishing_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -278,8 +278,8 @@ public:
 			insert_values.push_back(std::to_string(fishing_entry.npc_chance));
 			insert_values.push_back(std::to_string(fishing_entry.min_expansion));
 			insert_values.push_back(std::to_string(fishing_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(fishing_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(fishing_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(fishing_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(fishing_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

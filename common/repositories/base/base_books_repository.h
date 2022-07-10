@@ -13,7 +13,7 @@
 #define EQEMU_BASE_BOOKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseBooksRepository {
@@ -163,8 +163,8 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(books_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(books_entry.txtfile) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(books_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(books_entry.txtfile) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(books_entry.language));
 
 		auto results = db.QueryDatabase(
@@ -188,8 +188,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(books_entry.id));
-		insert_values.push_back("'" + EscapeString(books_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(books_entry.txtfile) + "'");
+		insert_values.push_back("'" + Strings::Escape(books_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(books_entry.txtfile) + "'");
 		insert_values.push_back(std::to_string(books_entry.language));
 
 		auto results = db.QueryDatabase(
@@ -221,8 +221,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(books_entry.id));
-			insert_values.push_back("'" + EscapeString(books_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(books_entry.txtfile) + "'");
+			insert_values.push_back("'" + Strings::Escape(books_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(books_entry.txtfile) + "'");
 			insert_values.push_back(std::to_string(books_entry.language));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

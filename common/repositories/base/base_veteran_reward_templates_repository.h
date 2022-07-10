@@ -13,7 +13,7 @@
 #define EQEMU_BASE_VETERAN_REWARD_TEMPLATES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseVeteranRewardTemplatesRepository {
@@ -169,7 +169,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(veteran_reward_templates_entry.claim_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(veteran_reward_templates_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(veteran_reward_templates_entry.item_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(veteran_reward_templates_entry.charges));
 		update_values.push_back(columns[4] + " = " + std::to_string(veteran_reward_templates_entry.reward_slot));
@@ -195,7 +195,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.claim_id));
-		insert_values.push_back("'" + EscapeString(veteran_reward_templates_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.item_id));
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.charges));
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.reward_slot));
@@ -229,7 +229,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.claim_id));
-			insert_values.push_back("'" + EscapeString(veteran_reward_templates_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.item_id));
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.charges));
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.reward_slot));

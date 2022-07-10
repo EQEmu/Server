@@ -19,7 +19,7 @@
  */
 
 #include "npc_scale_manager.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/repositories/npc_scale_global_base_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 

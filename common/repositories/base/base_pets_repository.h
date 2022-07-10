@@ -13,7 +13,7 @@
 #define EQEMU_BASE_PETS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BasePetsRepository {
@@ -188,7 +188,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(pets_entry.type) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(pets_entry.type) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(pets_entry.petpower));
 		update_values.push_back(columns[3] + " = " + std::to_string(pets_entry.npcID));
 		update_values.push_back(columns[4] + " = " + std::to_string(pets_entry.temp));
@@ -218,7 +218,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(pets_entry.id));
-		insert_values.push_back("'" + EscapeString(pets_entry.type) + "'");
+		insert_values.push_back("'" + Strings::Escape(pets_entry.type) + "'");
 		insert_values.push_back(std::to_string(pets_entry.petpower));
 		insert_values.push_back(std::to_string(pets_entry.npcID));
 		insert_values.push_back(std::to_string(pets_entry.temp));
@@ -256,7 +256,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(pets_entry.id));
-			insert_values.push_back("'" + EscapeString(pets_entry.type) + "'");
+			insert_values.push_back("'" + Strings::Escape(pets_entry.type) + "'");
 			insert_values.push_back(std::to_string(pets_entry.petpower));
 			insert_values.push_back(std::to_string(pets_entry.npcID));
 			insert_values.push_back(std::to_string(pets_entry.temp));

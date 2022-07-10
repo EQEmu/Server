@@ -26,7 +26,7 @@
 #include "../common/crash.h"
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "items.h"
 #include "npc_faction.h"
 #include "loot.h"

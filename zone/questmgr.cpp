@@ -21,7 +21,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 
 #include "entity.h"

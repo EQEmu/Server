@@ -1,6 +1,6 @@
 #include "combat_record.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 void CombatRecord::Start(std::string in_mob_name)
 {

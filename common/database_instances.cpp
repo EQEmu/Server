@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/timer.h"
 #include "../common/repositories/dynamic_zone_members_repository.h"
 #include "../common/repositories/dynamic_zones_repository.h"

@@ -22,7 +22,7 @@
 #define EQEMU_LEVEL_EXP_MODS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_level_exp_mods_repository.h"
 
 class LevelExpModsRepository: public BaseLevelExpModsRepository {

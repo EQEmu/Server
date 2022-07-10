@@ -16,7 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "entity.h"
@@ -1435,7 +1435,7 @@ void Raid::GetRaidDetails()
 void Raid::SaveRaidMOTD()
 {
 	std::string query = StringFormat("UPDATE raid_details SET motd = '%s' WHERE raidid = %lu",
-			EscapeString(motd).c_str(), (unsigned long)GetID());
+			Strings::Escape(motd).c_str(), (unsigned long)GetID());
 
 	auto results = database.QueryDatabase(query);
 }

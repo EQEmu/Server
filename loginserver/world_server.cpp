@@ -2,7 +2,7 @@
 #include "login_server.h"
 #include "login_types.h"
 #include "../common/ip_util.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern LoginServer server;
 

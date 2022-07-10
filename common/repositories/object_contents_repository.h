@@ -22,7 +22,7 @@
 #define EQEMU_OBJECT_CONTENTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_object_contents_repository.h"
 
 class ObjectContentsRepository: public BaseObjectContentsRepository {

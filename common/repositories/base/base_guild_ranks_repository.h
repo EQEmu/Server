@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GUILD_RANKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGuildRanksRepository {
@@ -200,7 +200,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(guild_ranks_entry.guild_id));
 		update_values.push_back(columns[1] + " = " + std::to_string(guild_ranks_entry.rank));
-		update_values.push_back(columns[2] + " = '" + EscapeString(guild_ranks_entry.title) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(guild_ranks_entry.title) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(guild_ranks_entry.can_hear));
 		update_values.push_back(columns[4] + " = " + std::to_string(guild_ranks_entry.can_speak));
 		update_values.push_back(columns[5] + " = " + std::to_string(guild_ranks_entry.can_invite));
@@ -232,7 +232,7 @@ public:
 
 		insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
 		insert_values.push_back(std::to_string(guild_ranks_entry.rank));
-		insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
+		insert_values.push_back("'" + Strings::Escape(guild_ranks_entry.title) + "'");
 		insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
 		insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
 		insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));
@@ -272,7 +272,7 @@ public:
 
 			insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
 			insert_values.push_back(std::to_string(guild_ranks_entry.rank));
-			insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
+			insert_values.push_back("'" + Strings::Escape(guild_ranks_entry.title) + "'");
 			insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
 			insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
 			insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));

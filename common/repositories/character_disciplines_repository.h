@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_DISCIPLINES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_disciplines_repository.h"
 
 class CharacterDisciplinesRepository: public BaseCharacterDisciplinesRepository {

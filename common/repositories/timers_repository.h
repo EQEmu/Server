@@ -22,7 +22,7 @@
 #define EQEMU_TIMERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_timers_repository.h"
 
 class TimersRepository: public BaseTimersRepository {

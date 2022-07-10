@@ -30,7 +30,7 @@
 #define EQEMU_BASE_LAUNCHER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 
 class BaseLauncherRepository {
 public:
@@ -168,7 +168,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(launcher_entry.name) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(launcher_entry.name) + "'");
 		update_values.push_back(columns[1] + " = " + std::to_string(launcher_entry.dynamics));
 
 		auto results = database.QueryDatabase(
@@ -190,7 +190,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(launcher_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(launcher_entry.name) + "'");
 		insert_values.push_back(std::to_string(launcher_entry.dynamics));
 
 		auto results = database.QueryDatabase(
@@ -220,7 +220,7 @@ public:
 		for (auto &launcher_entry: launcher_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(launcher_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(launcher_entry.name) + "'");
 			insert_values.push_back(std::to_string(launcher_entry.dynamics));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

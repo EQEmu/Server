@@ -13,7 +13,7 @@
 #define EQEMU_BASE_EVENTLOG_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseEventlogRepository {
@@ -193,14 +193,14 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(eventlog_entry.accountname) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(eventlog_entry.accountname) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(eventlog_entry.accountid));
 		update_values.push_back(columns[3] + " = " + std::to_string(eventlog_entry.status));
-		update_values.push_back(columns[4] + " = '" + EscapeString(eventlog_entry.charname) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(eventlog_entry.target) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(eventlog_entry.time) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(eventlog_entry.descriptiontype) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(eventlog_entry.description) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(eventlog_entry.charname) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(eventlog_entry.target) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(eventlog_entry.time) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(eventlog_entry.descriptiontype) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(eventlog_entry.description) + "'");
 		update_values.push_back(columns[9] + " = " + std::to_string(eventlog_entry.event_nid));
 
 		auto results = db.QueryDatabase(
@@ -224,14 +224,14 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(eventlog_entry.id));
-		insert_values.push_back("'" + EscapeString(eventlog_entry.accountname) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_entry.accountname) + "'");
 		insert_values.push_back(std::to_string(eventlog_entry.accountid));
 		insert_values.push_back(std::to_string(eventlog_entry.status));
-		insert_values.push_back("'" + EscapeString(eventlog_entry.charname) + "'");
-		insert_values.push_back("'" + EscapeString(eventlog_entry.target) + "'");
-		insert_values.push_back("'" + EscapeString(eventlog_entry.time) + "'");
-		insert_values.push_back("'" + EscapeString(eventlog_entry.descriptiontype) + "'");
-		insert_values.push_back("'" + EscapeString(eventlog_entry.description) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_entry.charname) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_entry.target) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_entry.time) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_entry.descriptiontype) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_entry.description) + "'");
 		insert_values.push_back(std::to_string(eventlog_entry.event_nid));
 
 		auto results = db.QueryDatabase(
@@ -263,14 +263,14 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(eventlog_entry.id));
-			insert_values.push_back("'" + EscapeString(eventlog_entry.accountname) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_entry.accountname) + "'");
 			insert_values.push_back(std::to_string(eventlog_entry.accountid));
 			insert_values.push_back(std::to_string(eventlog_entry.status));
-			insert_values.push_back("'" + EscapeString(eventlog_entry.charname) + "'");
-			insert_values.push_back("'" + EscapeString(eventlog_entry.target) + "'");
-			insert_values.push_back("'" + EscapeString(eventlog_entry.time) + "'");
-			insert_values.push_back("'" + EscapeString(eventlog_entry.descriptiontype) + "'");
-			insert_values.push_back("'" + EscapeString(eventlog_entry.description) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_entry.charname) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_entry.target) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_entry.time) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_entry.descriptiontype) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_entry.description) + "'");
 			insert_values.push_back(std::to_string(eventlog_entry.event_nid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_TRIBUTES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseTributesRepository {
@@ -170,8 +170,8 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(tributes_entry.id));
 		update_values.push_back(columns[1] + " = " + std::to_string(tributes_entry.unknown));
-		update_values.push_back(columns[2] + " = '" + EscapeString(tributes_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(tributes_entry.descr) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(tributes_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(tributes_entry.descr) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(tributes_entry.isguild));
 
 		auto results = db.QueryDatabase(
@@ -196,8 +196,8 @@ public:
 
 		insert_values.push_back(std::to_string(tributes_entry.id));
 		insert_values.push_back(std::to_string(tributes_entry.unknown));
-		insert_values.push_back("'" + EscapeString(tributes_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(tributes_entry.descr) + "'");
+		insert_values.push_back("'" + Strings::Escape(tributes_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(tributes_entry.descr) + "'");
 		insert_values.push_back(std::to_string(tributes_entry.isguild));
 
 		auto results = db.QueryDatabase(
@@ -230,8 +230,8 @@ public:
 
 			insert_values.push_back(std::to_string(tributes_entry.id));
 			insert_values.push_back(std::to_string(tributes_entry.unknown));
-			insert_values.push_back("'" + EscapeString(tributes_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(tributes_entry.descr) + "'");
+			insert_values.push_back("'" + Strings::Escape(tributes_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(tributes_entry.descr) + "'");
 			insert_values.push_back(std::to_string(tributes_entry.isguild));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

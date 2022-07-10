@@ -42,7 +42,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "event_codes.h"
 #include "expedition.h"
 #include "guild_mgr.h"

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_REPORTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseReportsRepository {
@@ -163,9 +163,9 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(reports_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(reports_entry.reported) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(reports_entry.reported_text) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(reports_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(reports_entry.reported) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(reports_entry.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,9 +188,9 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(reports_entry.id));
-		insert_values.push_back("'" + EscapeString(reports_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(reports_entry.reported) + "'");
-		insert_values.push_back("'" + EscapeString(reports_entry.reported_text) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_entry.reported) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_entry.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -221,9 +221,9 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(reports_entry.id));
-			insert_values.push_back("'" + EscapeString(reports_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(reports_entry.reported) + "'");
-			insert_values.push_back("'" + EscapeString(reports_entry.reported_text) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_entry.reported) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_entry.reported_text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -23,7 +23,7 @@
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/emu_versions.h"
 #include "../common/features.h"
 #include "../common/item_instance.h"
@@ -1551,7 +1551,7 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
 	std::string query = fmt::format(
 		"INSERT INTO spawngroup (name) VALUES('{}{}{}')",
 		zone,
-		EscapeString(spawn->GetName()),
+		Strings::Escape(spawn->GetName()),
 		Timer::GetCurrentTime()
 	);
 

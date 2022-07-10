@@ -13,7 +13,7 @@
 #define EQEMU_BASE_MAIL_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseMailRepository {
@@ -185,10 +185,10 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(mail_entry.charid));
 		update_values.push_back(columns[2] + " = " + std::to_string(mail_entry.timestamp));
-		update_values.push_back(columns[3] + " = '" + EscapeString(mail_entry.from) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(mail_entry.subject) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(mail_entry.body) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(mail_entry.to) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(mail_entry.from) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(mail_entry.subject) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(mail_entry.body) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(mail_entry.to) + "'");
 		update_values.push_back(columns[7] + " = " + std::to_string(mail_entry.status));
 
 		auto results = db.QueryDatabase(
@@ -214,10 +214,10 @@ public:
 		insert_values.push_back(std::to_string(mail_entry.msgid));
 		insert_values.push_back(std::to_string(mail_entry.charid));
 		insert_values.push_back(std::to_string(mail_entry.timestamp));
-		insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.subject) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.body) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.to) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.from) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.subject) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.body) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.to) + "'");
 		insert_values.push_back(std::to_string(mail_entry.status));
 
 		auto results = db.QueryDatabase(
@@ -251,10 +251,10 @@ public:
 			insert_values.push_back(std::to_string(mail_entry.msgid));
 			insert_values.push_back(std::to_string(mail_entry.charid));
 			insert_values.push_back(std::to_string(mail_entry.timestamp));
-			insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.subject) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.body) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.to) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.from) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.subject) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.body) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.to) + "'");
 			insert_values.push_back(std::to_string(mail_entry.status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");

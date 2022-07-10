@@ -13,7 +13,7 @@
 #define EQEMU_BASE_DB_STR_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseDbStrRepository {
@@ -160,7 +160,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(db_str_entry.id));
 		update_values.push_back(columns[1] + " = " + std::to_string(db_str_entry.type));
-		update_values.push_back(columns[2] + " = '" + EscapeString(db_str_entry.value) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(db_str_entry.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -184,7 +184,7 @@ public:
 
 		insert_values.push_back(std::to_string(db_str_entry.id));
 		insert_values.push_back(std::to_string(db_str_entry.type));
-		insert_values.push_back("'" + EscapeString(db_str_entry.value) + "'");
+		insert_values.push_back("'" + Strings::Escape(db_str_entry.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +216,7 @@ public:
 
 			insert_values.push_back(std::to_string(db_str_entry.id));
 			insert_values.push_back(std::to_string(db_str_entry.type));
-			insert_values.push_back("'" + EscapeString(db_str_entry.value) + "'");
+			insert_values.push_back("'" + Strings::Escape(db_str_entry.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

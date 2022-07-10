@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOOTDROP_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLootdropRepository {
@@ -173,11 +173,11 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(lootdrop_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(lootdrop_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_entry.min_expansion));
 		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entry.max_expansion));
-		update_values.push_back(columns[4] + " = '" + EscapeString(lootdrop_entry.content_flags) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(lootdrop_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(lootdrop_entry.content_flags) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(lootdrop_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -200,11 +200,11 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(lootdrop_entry.id));
-		insert_values.push_back("'" + EscapeString(lootdrop_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(lootdrop_entry.name) + "'");
 		insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
 		insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -235,11 +235,11 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(lootdrop_entry.id));
-			insert_values.push_back("'" + EscapeString(lootdrop_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(lootdrop_entry.name) + "'");
 			insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
 			insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -165,7 +165,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 				return;
 			}
 
-			std::string flag_name = EscapeString(sep->argplus[3]);
+			std::string flag_name = Strings::Escape(sep->argplus[3]);
 			std::string zone_long_name = ZoneLongName(zone_id);
 
 			auto query = fmt::format(

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_RAID_DETAILS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseRaidDetailsRepository {
@@ -166,7 +166,7 @@ public:
 		update_values.push_back(columns[0] + " = " + std::to_string(raid_details_entry.raidid));
 		update_values.push_back(columns[1] + " = " + std::to_string(raid_details_entry.loottype));
 		update_values.push_back(columns[2] + " = " + std::to_string(raid_details_entry.locked));
-		update_values.push_back(columns[3] + " = '" + EscapeString(raid_details_entry.motd) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(raid_details_entry.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -191,7 +191,7 @@ public:
 		insert_values.push_back(std::to_string(raid_details_entry.raidid));
 		insert_values.push_back(std::to_string(raid_details_entry.loottype));
 		insert_values.push_back(std::to_string(raid_details_entry.locked));
-		insert_values.push_back("'" + EscapeString(raid_details_entry.motd) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_details_entry.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -224,7 +224,7 @@ public:
 			insert_values.push_back(std::to_string(raid_details_entry.raidid));
 			insert_values.push_back(std::to_string(raid_details_entry.loottype));
 			insert_values.push_back(std::to_string(raid_details_entry.locked));
-			insert_values.push_back("'" + EscapeString(raid_details_entry.motd) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_details_entry.motd) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

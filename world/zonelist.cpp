@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "world_config.h"
 #include "../common/misc_functions.h"
 #include "../common/servertalk.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/random.h"
 #include "../common/json/json.h"
 #include "../common/event_sub.h"

@@ -22,7 +22,7 @@
 #define EQEMU_ACCOUNT_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_account_repository.h"
 
 class AccountRepository: public BaseAccountRepository {
