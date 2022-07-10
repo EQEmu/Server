@@ -357,3 +357,15 @@ std::vector<std::string> GetBadWords()
 		"zoophilia"
 	};
 }
+
+void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver)
+{
+	auto split = Strings::Split(s, ':');
+	if (split.size() == 2) {
+		loginserver = split[0];
+		account     = split[1];
+	}
+	else if (split.size() == 1) {
+		account = split[0];
+	}
+}

@@ -235,18 +235,6 @@ std::string Strings::Replace(std::string subject, const std::string &search, con
 	return subject;
 }
 
-void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver)
-{
-	auto split = Strings::Split(s, ':');
-	if (split.size() == 2) {
-		loginserver = split[0];
-		account     = split[1];
-	}
-	else if (split.size() == 1) {
-		account = split[0];
-	}
-}
-
 std::string Strings::Repeat(std::string s, int n)
 {
 	std::string s1 = s;
