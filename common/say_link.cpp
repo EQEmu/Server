@@ -334,7 +334,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	LogSaylinkDetail("new_message pre pass 1 [{}]", new_message);
 
 	// first pass - strip existing saylinks by putting placeholder anchors on them
-	for (auto &saylink: Strings::Split2(new_message, saylink_separator)) {
+	for (auto &saylink: Strings::Split(new_message, saylink_separator)) {
 		if (!saylink.empty() && saylink.length() > saylink_length &&
 			saylink.find(saylink_partial) != std::string::npos) {
 			saylinks.emplace_back(saylink);
@@ -358,9 +358,9 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 
 	// loop through brackets until none exist
 	if (new_message.find('[') != std::string::npos) {
-		for (auto &b: Strings::Split2(new_message, "[")) {
+		for (auto &b: Strings::Split(new_message, "[")) {
 			if (!b.empty() && b.find(']') != std::string::npos) {
-				std::vector<std::string> right_split = Strings::Split2(b, "]");
+				std::vector<std::string> right_split = Strings::Split(b, "]");
 				if (!right_split.empty()) {
 					std::string bracket_message = Strings::Trim(right_split[0]);
 

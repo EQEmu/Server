@@ -38,7 +38,7 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 	server_long_name = Strings::Trim(server_long_name);
 
 	// bad word filter
-	for (auto &piece: Strings::Split2(server_long_name, " ")) {
+	for (auto &piece: Strings::Split(server_long_name, " ")) {
 		for (auto &word: GetBadWords()) {
 			// for shorter words that can actually be part of legitimate words
 			// make sure that it isn't part of another word by matching on a space

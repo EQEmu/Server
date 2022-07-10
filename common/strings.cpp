@@ -60,7 +60,7 @@ std::vector<std::string> Strings::Split(const std::string &str, const char delim
 }
 
 // this one takes delimiter length into consideration
-std::vector<std::string> Strings::Split2(std::string s, std::string delimiter)
+std::vector<std::string> Strings::Split(std::string s, std::string delimiter)
 {
 	size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
 	std::string              token;
@@ -82,10 +82,10 @@ std::string Strings::Strings::GetBetween(const std::string &s, std::string start
 		return "";
 	}
 
-	auto first_split = Strings::Split2(s, start_delim);
+	auto first_split = Strings::Split(s, start_delim);
 	if (!first_split.empty()) {
 		std::string remaining_block = first_split[1];
-		auto        second_split    = Strings::Split2(remaining_block, stop_delim);
+		auto        second_split    = Strings::Split(remaining_block, stop_delim);
 		if (!second_split.empty()) {
 			std::string between = second_split[0];
 			return between;

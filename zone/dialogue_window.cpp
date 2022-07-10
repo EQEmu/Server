@@ -133,12 +133,12 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (markdown.find("wintype:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering wintype option", c->GetCleanName());
 
-		auto first_split = Strings::Split2(output, "wintype:");
+		auto first_split = Strings::Split(output, "wintype:");
 		if (!first_split.empty()) {
 
 			// assumed that there is more after the wintype declaration
 			// wintype:0 +animation+ etc.
-			auto second_split = Strings::Split2(first_split[1], " ");
+			auto second_split = Strings::Split(first_split[1], " ");
 			if (!second_split.empty()) {
 				wintype = second_split[0];
 				LogDiaWindDetail("Client [{}] Rendering wintype option wintype [{}]", c->GetCleanName(), wintype);
@@ -164,12 +164,12 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (markdown.find("popupid:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering popupid option", c->GetCleanName());
 
-		auto first_split = Strings::Split2(output, "popupid:");
+		auto first_split = Strings::Split(output, "popupid:");
 		if (!first_split.empty()) {
 
 			// assumed that there is more after the popupid declaration
 			// popupid:0 +animation+ etc.
-			auto second_split = Strings::Split2(first_split[1], " ");
+			auto second_split = Strings::Split(first_split[1], " ");
 			if (!second_split.empty()) {
 				popupid = second_split[0];
 				LogDiaWindDetail("Client [{}] Rendering popupid option popupid [{}]", c->GetCleanName(), popupid);
@@ -200,9 +200,9 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (markdown.find("secondresponseid:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering secondresponseid option", c->GetCleanName());
 
-		auto first_split = Strings::Split2(output, "secondresponseid:");
+		auto first_split = Strings::Split(output, "secondresponseid:");
 		if (!first_split.empty()) {
-			auto second_split = Strings::Split2(first_split[1], " ");
+			auto second_split = Strings::Split(first_split[1], " ");
 			if (!second_split.empty()) {
 				secondresponseid = second_split[0];
 				LogDiaWindDetail("Client [{}] Rendering secondresponseid option secondresponseid [{}]",

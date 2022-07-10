@@ -60,7 +60,7 @@ public:
 	static std::string SecondsToTime(int duration, bool is_milliseconds = false);
 	static std::string::size_type SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 	static std::vector<std::string> Split(const std::string &s, const char delim = ',');
-	static std::vector<std::string> Split2(std::string s, std::string delimiter);
+	static std::vector<std::string> Split(std::string s, std::string delimiter);
 	static std::vector<std::string> Wrap(std::vector<std::string> &src, std::string character);
 	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
 

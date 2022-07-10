@@ -3928,7 +3928,7 @@ void Client::SendRules()
 		return;
 	}
 
-	auto lines = Strings::Split2(rules, "|");
+	auto lines = Strings::Split(rules, "|");
 	auto line_number = 1;
 	for (auto&& line : lines) {
 		Message(
@@ -11628,7 +11628,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsAny:
 		{
-			bucket_checks = Strings::Split2(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11649,7 +11649,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsNotAny:
 		{
-			bucket_checks = Strings::Split2(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11670,7 +11670,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsBetween:
 		{
-			bucket_checks = Strings::Split2(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11687,7 +11687,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsNotBetween:
 		{
-			bucket_checks = Strings::Split2(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
