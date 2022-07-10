@@ -68,7 +68,7 @@ void command_databuckets(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				"%s : %s",
-				Strings::Saylink(del_saylink, false, "Delete").c_str(),
+				Saylink::Create(del_saylink, false, "Delete").c_str(),
 				key.c_str(),
 				"  Value:  ",
 				value.c_str());

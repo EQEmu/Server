@@ -508,3 +508,8 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 
 	return {};
 }
+
+std::string Saylink::Create(std::string saylink_text, bool silent, std::string link_name)
+{
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+}

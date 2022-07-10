@@ -5938,7 +5938,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		}
 
 		auto* bot = entity_list.GetBotByBotName(bots_iter.Name);
-		auto bot_spawn_saylink = Strings::Saylink(
+		auto bot_spawn_saylink = Saylink::Create(
 			fmt::format("^spawn {}", bots_iter.Name),
 			false,
 			bots_iter.Name
@@ -7318,7 +7318,7 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 				botgroups_iter.first,
 				botgroups_iter.second,
 				database.botdb.IsBotGroupAutoSpawn(botgroups_iter.first) ? " (Auto Spawn)" : "",
-				Strings::Saylink(
+				Saylink::Create(
 					fmt::format("^botgroupload {}", botgroups_iter.first),
 					false,
 					"Load"
@@ -8825,7 +8825,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 				slot_id,
 				EQ::invslot::GetInvPossessionsSlotName(slot_id),
 				linker.GenerateLink(),
-				Strings::Saylink(
+				Saylink::Create(
 					fmt::format("^inventoryremove {}", slot_id),
 					false,
 					"Remove"
@@ -9354,7 +9354,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
 		const char* bot_race_name = GetRaceIDName(bot_race);
 		const char* bot_class_name = GetClassIDName(bot_class);
-		std::string view_saylink = Strings::Saylink(fmt::format("^viewcombos {}", bot_race), false, "view");
+		std::string view_saylink = Saylink::Create(fmt::format("^viewcombos {}", bot_race), false, "view");
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(

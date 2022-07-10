@@ -223,7 +223,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 				Chat::Yellow,
 				fmt::format(
 					"Would you like to {} these changes?",
-					Strings::Saylink(saylink, false, "apply")
+					Saylink::Create(saylink, false, "apply")
 				).c_str()
 			);
 

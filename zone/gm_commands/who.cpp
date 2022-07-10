@@ -98,7 +98,7 @@ void command_who(Client *c, const Seperator *sep)
 
 		std::string displayed_guild_name;
 		if (guild_name.length()) {
-			displayed_guild_name = Strings::Saylink(
+			displayed_guild_name = Saylink::Create(
 				fmt::format(
 					"#who \"{}\"",
 					guild_name
@@ -111,7 +111,7 @@ void command_who(Client *c, const Seperator *sep)
 			);
 		}
 
-		auto goto_saylink = Strings::Saylink(
+		auto goto_saylink = Saylink::Create(
 			fmt::format(
 				"#goto {}",
 				player_name
@@ -120,7 +120,7 @@ void command_who(Client *c, const Seperator *sep)
 			"Goto"
 		);
 
-		auto summon_saylink = Strings::Saylink(
+		auto summon_saylink = Saylink::Create(
 			fmt::format(
 				"#summon {}",
 				player_name
@@ -134,7 +134,7 @@ void command_who(Client *c, const Seperator *sep)
 			static_cast<uint8>(player_level)
 		);
 
-		auto class_saylink = Strings::Saylink(
+		auto class_saylink = Saylink::Create(
 			fmt::format(
 				"#who {}",
 				base_class_name
@@ -143,7 +143,7 @@ void command_who(Client *c, const Seperator *sep)
 			display_class_name
 		);
 
-		auto race_saylink = Strings::Saylink(
+		auto race_saylink = Saylink::Create(
 			fmt::format(
 				"#who %s",
 				displayed_race_name
@@ -152,7 +152,7 @@ void command_who(Client *c, const Seperator *sep)
 			displayed_race_name
 		);
 
-		auto zone_saylink = Strings::Saylink(
+		auto zone_saylink = Saylink::Create(
 			fmt::format(
 				"#who {}",
 				zone_short_name
@@ -161,7 +161,7 @@ void command_who(Client *c, const Seperator *sep)
 			zone_long_name
 		);
 
-		auto account_saylink = Strings::Saylink(
+		auto account_saylink = Saylink::Create(
 			fmt::format(
 				"#who {}",
 				account_name
@@ -170,7 +170,7 @@ void command_who(Client *c, const Seperator *sep)
 			account_name
 		);
 
-		auto account_ip_saylink = Strings::Saylink(
+		auto account_ip_saylink = Saylink::Create(
 			fmt::format(
 				"#who {}",
 				account_ip

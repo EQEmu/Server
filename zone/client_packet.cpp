@@ -4230,7 +4230,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 			fmt::format(
 				"Door ({}) [{}]",
 				currentdoor->GetEntityID(),
-				Strings::Saylink("#door edit", false, "#door edit")
+				Saylink::Create("#door edit", false, "#door edit")
 			).c_str()
 		);
 	}

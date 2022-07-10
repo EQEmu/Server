@@ -50,7 +50,7 @@ void command_qglobal(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto repop_link = Strings::Saylink(
+		auto repop_link = Saylink::Create(
 			"#repop",
 			false,
 			"repop"
@@ -83,7 +83,7 @@ void command_qglobal(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto repop_link = Strings::Saylink(
+		auto repop_link = Saylink::Create(
 			"#repop",
 			false,
 			"repop"

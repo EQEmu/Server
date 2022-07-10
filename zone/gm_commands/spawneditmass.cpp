@@ -107,7 +107,7 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 			Chat::Yellow,
 			fmt::format(
 				"To apply these changes, click {} or type \"{}\".",
-				Strings::Saylink(edit_link, false, "apply"),
+				Saylink::Create(edit_link, false, "apply"),
 				edit_link
 			).c_str()
 		);
