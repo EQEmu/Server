@@ -93,7 +93,11 @@ public:
 	static std::vector<std::string> Split2(std::string s, std::string delimiter);
 	static std::string::size_type
 	SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
-	static std::string get_between(const std::string &s, std::string start_delim, std::string stop_delim);
+	static std::string GetBetween(const std::string &s, std::string start_delim, std::string stop_delim);
+	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
+	static bool Contains(std::vector<std::string> container, std::string element);
+	static std::string commify(const std::string &number);
+
 
 };
 
@@ -213,14 +217,11 @@ std::vector<std::string> join_tuple(
 std::string EscapeString(const std::string &s);
 bool StringIsNumber(const std::string &s);
 //std::string Strings::Join(const std::vector<std::string> &ar, const std::string &delim);
-void find_replace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
 std::string replace_string(std::string subject, const std::string &search, const std::string &replace);
 void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
-std::string commify(const std::string &number);
 std::string SanitizeWorldServerName(std::string server_long_name);
 std::string repeat(std::string s, int n);
 std::vector<std::string> GetBadWords();
-bool contains(std::vector<std::string> container, std::string element);
 
 // old c string functions
 

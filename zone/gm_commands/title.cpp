@@ -8,10 +8,10 @@ void command_title(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #title [Title] (use \"-1\" to remove title)");
 		return;
 	}
-	
+
 	bool is_remove = !strcasecmp(sep->argplus[1], "-1");
 	std::string title = is_remove ? "" : sep->argplus[1];
-		
+
 	auto target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
@@ -23,7 +23,7 @@ void command_title(Client *c, const Seperator *sep)
 	}
 
 	if (!title.empty()) {
-		find_replace(title, "_", " ");
+		Strings::FindReplace(title, "_", " ");
 	}
 
 	if (is_remove) {

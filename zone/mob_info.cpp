@@ -528,7 +528,7 @@ inline std::string WriteDisplayInfoSection(
 
 		std::string attribute_name = attribute;
 
-		find_replace(attribute_name, "_min_max", std::string(""));
+		Strings::FindReplace(attribute_name, "_min_max", std::string(""));
 
 		/**
 		 * Translate attribute names with underscores
@@ -559,8 +559,8 @@ inline std::string WriteDisplayInfoSection(
 			attribute_name = Strings::UcFirst(attribute_name);
 		}
 
-		find_replace(attribute_name, "Proximity", std::string(""));
-		find_replace(attribute_name, "Roambox", std::string(""));
+		Strings::FindReplace(attribute_name, "Proximity", std::string(""));
+		Strings::FindReplace(attribute_name, "Roambox", std::string(""));
 
 		std::string attribute_value = GetMobAttributeByString(mob, attribute);
 

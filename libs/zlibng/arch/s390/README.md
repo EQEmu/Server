@@ -1,6 +1,6 @@
 # Introduction
 
-This directory contains SystemZ deflate hardware acceleration support.
+This directory Contains SystemZ deflate hardware acceleration support.
 It can be enabled using the following build commands:
 
     $ ./configure --with-dfltcc-deflate --with-dfltcc-inflate

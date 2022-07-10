@@ -112,7 +112,7 @@ std::vector<std::string> Strings::Split2(std::string s, std::string delimiter)
 	return res;
 }
 
-std::string Strings::Strings::get_between(const std::string &s, std::string start_delim, std::string stop_delim)
+std::string Strings::Strings::GetBetween(const std::string &s, std::string start_delim, std::string stop_delim)
 {
 	if (s.find(start_delim) == std::string::npos && s.find(stop_delim) == std::string::npos) {
 		return "";
@@ -248,7 +248,7 @@ std::string Strings::Join(const std::vector<std::string> &ar, const std::string 
 	return ret;
 }
 
-void find_replace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
+void Strings::FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string)
 {
 	if (string_subject.find(search_string) == std::string::npos) {
 		return;
@@ -593,7 +593,7 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 			// for shorter words that can actually be part of legitimate words
 			// make sure that it isn't part of another word by matching on a space
 			if (Strings::ToLower(piece) == word) {
-				find_replace(
+				Strings::FindReplace(
 					server_long_name,
 					piece,
 					repeat("*", (int) word.length())
@@ -606,7 +606,7 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 				auto found_word = piece.substr(pos, word.length());
 				std::string replaced_piece = piece.substr(pos, word.length());
 
-				find_replace(
+				Strings::FindReplace(
 					server_long_name,
 					replaced_piece,
 					repeat("*", (int) word.length())
@@ -918,12 +918,12 @@ std::vector<std::string> GetBadWords()
 	};
 }
 
-bool contains(std::vector<std::string> container, std::string element)
+bool Strings::Contains(std::vector<std::string> container, std::string element)
 {
     return std::find(container.begin(), container.end(), element) != container.end();
 }
 
-std::string commify(const std::string &number) {
+std::string Strings::commify(const std::string &number) {
 	std::string temp_string;
 
 	auto string_length = static_cast<int>(number.length());

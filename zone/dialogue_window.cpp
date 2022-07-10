@@ -16,28 +16,28 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	c->SetEntityVariable(DIAWIND_RESPONSE_TWO_KEY.c_str(), "");
 
 	// simple find and replace for the markdown
-	find_replace(output, "~", "</c>");
-	find_replace(output, "{y}", "<c \"#CCFF33\">");
-	find_replace(output, "{lb}", "<c \"#00FFFF\">");
-	find_replace(output, "{r}", "<c \"#FF0000\">");
-	find_replace(output, "{g}", "<c \"#00FF00\">");
-	find_replace(output, "{gold}", "<c \"#FFFF66\">");
-	find_replace(output, "{orange}", "<c \"#FFA500\">");
-	find_replace(output, "{gray}", "<c \"#808080\">");
-	find_replace(output, "{tan}", "<c \"#daa520\">");
-	find_replace(output, "{bullet}", "•");
-	find_replace(output, "{name}", fmt::format("{}", c->GetCleanName()));
-	find_replace(output, "{linebreak}", "--------------------------------------------------------------------");
-	find_replace(output, "{rowpad}", R"(<tr><td>{tdpad}<"td><td>{tdpad}<"td><"tr>)");
-	find_replace(output, "{tdpad}", "----------------------");
-	find_replace(output, "{in}", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+	Strings::FindReplace(output, "~", "</c>");
+	Strings::FindReplace(output, "{y}", "<c \"#CCFF33\">");
+	Strings::FindReplace(output, "{lb}", "<c \"#00FFFF\">");
+	Strings::FindReplace(output, "{r}", "<c \"#FF0000\">");
+	Strings::FindReplace(output, "{g}", "<c \"#00FF00\">");
+	Strings::FindReplace(output, "{gold}", "<c \"#FFFF66\">");
+	Strings::FindReplace(output, "{orange}", "<c \"#FFA500\">");
+	Strings::FindReplace(output, "{gray}", "<c \"#808080\">");
+	Strings::FindReplace(output, "{tan}", "<c \"#daa520\">");
+	Strings::FindReplace(output, "{bullet}", "•");
+	Strings::FindReplace(output, "{name}", fmt::format("{}", c->GetCleanName()));
+	Strings::FindReplace(output, "{linebreak}", "--------------------------------------------------------------------");
+	Strings::FindReplace(output, "{rowpad}", R"(<tr><td>{tdpad}<"td><td>{tdpad}<"td><"tr>)");
+	Strings::FindReplace(output, "{tdpad}", "----------------------");
+	Strings::FindReplace(output, "{in}", "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 
 	// mysterious voice
 	bool render_mysterious_voice = false;
 	if (markdown.find("{mysterious}") != std::string::npos) {
 		render_mysterious_voice = true;
 		LogDiaWind("Client [{}] Rendering mysterious voice", c->GetCleanName());
-		find_replace(output, "{mysterious}", "");
+		Strings::FindReplace(output, "{mysterious}", "");
 	}
 
 	// noquotes
@@ -45,7 +45,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (markdown.find("noquotes") != std::string::npos) {
 		render_noquotes = true;
 		LogDiaWind("Client [{}] Rendering noquotes", c->GetCleanName());
-		find_replace(output, "noquotes", "");
+		Strings::FindReplace(output, "noquotes", "");
 	}
 
 	// nobracket
@@ -53,21 +53,21 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (markdown.find("nobracket") != std::string::npos) {
 		render_nobracket = true;
 		LogDiaWind("Client [{}] Rendering nobracket", c->GetCleanName());
-		find_replace(output, "nobracket", "");
+		Strings::FindReplace(output, "nobracket", "");
 	}
 
 	bool render_hiddenresponse = false;
 	if (markdown.find("hiddenresponse") != std::string::npos) {
 		render_hiddenresponse = true;
 		LogDiaWind("Client [{}] Rendering hiddenresponse", c->GetCleanName());
-		find_replace(output, "hiddenresponse", "");
+		Strings::FindReplace(output, "hiddenresponse", "");
 	}
 
 	// animations
-	std::string animation = Strings::get_between(output, "+", "+");
+	std::string animation = Strings::GetBetween(output, "+", "+");
 	if (!animation.empty()) {
 		LogDiaWind("Client [{}] Animation is not empty, contents are [{}]", c->GetCleanName(), animation);
-		find_replace(output, fmt::format("+{}+", animation), "");
+		Strings::FindReplace(output, fmt::format("+{}+", animation), "");
 
 		// we treat the animation field differently if it is a number
 		if (StringIsNumber(animation)) {
@@ -105,11 +105,11 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	}
 
 	// window expire time
-	std::string expire_time           = Strings::get_between(output, "=", "=");
+	std::string expire_time           = Strings::GetBetween(output, "=", "=");
 	uint32      window_expire_seconds = 0;
 	if (!expire_time.empty()) {
 		LogDiaWind("Client [{}] Window expire time is not empty, contents are [{}]", c->GetCleanName(), expire_time);
-		find_replace(output, fmt::format("={}=", expire_time), "");
+		Strings::FindReplace(output, fmt::format("={}=", expire_time), "");
 
 		// we treat the animation field differently if it is a number
 		if (StringIsNumber(expire_time)) {
@@ -155,7 +155,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				);
 			}
 
-			find_replace(output, fmt::format("wintype:{}", wintype), "");
+			Strings::FindReplace(output, fmt::format("wintype:{}", wintype), "");
 		}
 	}
 
@@ -186,7 +186,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				);
 			}
 
-			find_replace(output, fmt::format("popupid:{}", popupid), "");
+			Strings::FindReplace(output, fmt::format("popupid:{}", popupid), "");
 
 			// set the popup id
 			if (!popupid.empty()) {
@@ -219,7 +219,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				);
 			}
 
-			find_replace(output, fmt::format("secondresponseid:{}", secondresponseid), "");
+			Strings::FindReplace(output, fmt::format("secondresponseid:{}", secondresponseid), "");
 
 			if (!secondresponseid.empty()) {
 				negative_id = (StringIsNumber(secondresponseid) ? std::atoi(secondresponseid.c_str()) : 0);
@@ -237,19 +237,19 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 		LogDiaWind("Client [{}] Rendering button_one option.", c->GetCleanName());
 
-		button_one = Strings::get_between(output, "{button_one:", "}");
+		button_one = Strings::GetBetween(output, "{button_one:", "}");
 		LogDiaWind("Client [{}] button_one [{}]", c->GetCleanName(), button_one);
 
 		if (!button_one.empty()) {
-			find_replace(output, fmt::format("{{button_one:{}}}", button_one), "");
+			Strings::FindReplace(output, fmt::format("{{button_one:{}}}", button_one), "");
 			button_one_name = Strings::Trim(button_one);
 		}
 
-		button_two = Strings::get_between(output, "{button_two:", "}");
+		button_two = Strings::GetBetween(output, "{button_two:", "}");
 		LogDiaWind("Client [{}] button_two [{}]", c->GetCleanName(), button_two);
 
 		if (!button_two.empty()) {
-			find_replace(output, fmt::format("{{button_two:{}}}", button_two), "");
+			Strings::FindReplace(output, fmt::format("{{button_two:{}}}", button_two), "");
 			button_two_name = Strings::Trim(button_two);
 		}
 
@@ -270,7 +270,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		std::string                        strip_saylinks = output;
 		std::map<std::string, std::string> replacements   = {};
 		while (strip_saylinks.find('[') != std::string::npos && strip_saylinks.find(']') != std::string::npos) {
-			std::string bracket_message = Strings::get_between(strip_saylinks, "[", "]");
+			std::string bracket_message = Strings::GetBetween(strip_saylinks, "[", "]");
 
 			// strip saylinks and normalize to [regular message]
 			size_t link_open  = bracket_message.find('\x12');
@@ -284,12 +284,12 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				);
 			}
 
-			find_replace(strip_saylinks, fmt::format("[{}]", bracket_message), "");
+			Strings::FindReplace(strip_saylinks, fmt::format("[{}]", bracket_message), "");
 		}
 
 		// write replacement strips
 		for (auto &replacement: replacements) {
-			find_replace(output, replacement.first, replacement.second.substr(0, replacement.second.size() - 1));
+			Strings::FindReplace(output, replacement.first, replacement.second.substr(0, replacement.second.size() - 1));
 		}
 
 		// copy
@@ -298,7 +298,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		// while brackets still exist
 		int response_index = 0;
 		while (content.find('[') != std::string::npos && content.find(']') != std::string::npos) {
-			std::string bracket_message = Strings::get_between(content, "[", "]");
+			std::string bracket_message = Strings::GetBetween(content, "[", "]");
 
 			LogDiaWindDetail(
 				"Client [{}] Rendering responses ({}) [{}]",
@@ -311,7 +311,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 			responses.emplace_back(bracket_message);
 
 			// pop the response off of the message
-			find_replace(content, fmt::format("[{}]", bracket_message), "");
+			Strings::FindReplace(content, fmt::format("[{}]", bracket_message), "");
 
 			// too many iterations / safety net
 			if (response_index > 100) {
@@ -346,13 +346,13 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	// handle silent prompts from the [> silent syntax
 	std::string silent_message;
 	if (responses.empty() && markdown.find('[') != std::string::npos && markdown.find('>') != std::string::npos) {
-		silent_message = Strings::get_between(output, "[", ">");
+		silent_message = Strings::GetBetween(output, "[", ">");
 
 		// temporary and used during the response
 		c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str(), silent_message.c_str());
 
 		// pop the silent message off
-		find_replace(output, fmt::format("[{}>", silent_message), "");
+		Strings::FindReplace(output, fmt::format("[{}>", silent_message), "");
 	}
 	else if (!responses.empty()) {
 		// handle silent prompts from the single respond bracket syntax []
@@ -362,13 +362,13 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		c->SetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str(), silent_message.c_str());
 
 		// pop the silent message off
-		find_replace(output, fmt::format("[{}]", silent_message), "");
+		Strings::FindReplace(output, fmt::format("[{}]", silent_message), "");
 	}
 
 	// strip brackets
 	if (render_nobracket) {
-		find_replace(output, "[", "");
-		find_replace(output, "]", "");
+		Strings::FindReplace(output, "[", "");
+		Strings::FindReplace(output, "]", "");
 	}
 
 	// render title
@@ -385,12 +385,12 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	// title
 	std::string popup_title;
 	if (markdown.find("{title:") != std::string::npos) {
-		popup_title = Strings::get_between(output, "{title:", "}");
+		popup_title = Strings::GetBetween(output, "{title:", "}");
 
 		LogDiaWind("Client [{}] Rendering title option title [{}]", c->GetCleanName(), popup_title);
 
 		if (!popup_title.empty()) {
-			find_replace(output, fmt::format("{{title:{}}}", popup_title), "");
+			Strings::FindReplace(output, fmt::format("{{title:{}}}", popup_title), "");
 			title = Strings::Trim(popup_title);
 		}
 	}
@@ -449,7 +449,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		// while brackets still exist
 		int tag_index = 0;
 		while (output.find('{') != std::string::npos && output.find('}') != std::string::npos) {
-			std::string color_tag = Strings::get_between(output, "{", "}");
+			std::string color_tag = Strings::GetBetween(output, "{", "}");
 
 			LogDiaWindDetail(
 				"Client [{}] Rendering color tags ({}) [{}]",
@@ -464,7 +464,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 					// build html tag
 					html_tag = fmt::format("<c \"{}\">", color.second);
 					// pop the response off of the message
-					find_replace(output, fmt::format("{{{}}}", color.first), html_tag);
+					Strings::FindReplace(output, fmt::format("{{{}}}", color.first), html_tag);
 				}
 			}
 

@@ -918,7 +918,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		// Account for merchant lists with gaps.
 		if (ml.slot >= slot_id) {
 			if (ml.slot > slot_id) {
-				LogDebug("(WARNING) Merchantlist contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", slot_id, merchant_id, npcid);
+				LogDebug("(WARNING) Merchantlist Contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", slot_id, merchant_id, npcid);
 			}
 
 			slot_id = ml.slot + 1;
@@ -967,7 +967,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	//this resets the slot
 	zone->tmpmerchanttable[npcid] = temporary_merchant_list;
 	if (npc && handy_item) {
-		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);		
+		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);
 		auto handy_id = std::to_string(greet_id);
 		if (greet_id != MERCHANT_GREETING) {
 			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName(), handy_item->Name);

@@ -6,28 +6,28 @@
 // //////////////////////////////////////////////////////////////////////
 
 /*
-The JsonCpp library's source code, including accompanying documentation, 
+The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
 conditions...
 
-The author (Baptiste Lepilleur) explicitly disclaims copyright in all 
-jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+The author (Baptiste Lepilleur) explicitly disclaims copyright in all
+jurisdictions which recognize such a disclaimer. In such jurisdictions,
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
 2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur, and is
 released under the terms of the MIT License (see below).
 
-In jurisdictions which recognize Public Domain property, the user of this 
-software may choose to accept it either as 1) Public Domain, 2) under the 
-conditions of the MIT License (see below), or 3) under the terms of dual 
+In jurisdictions which recognize Public Domain property, the user of this
+software may choose to accept it either as 1) Public Domain, 2) under the
+conditions of the MIT License (see below), or 3) under the terms of dual
 Public Domain/MIT License conditions described here, as they choose.
 
 The MIT License is about as close to Public Domain as a license can get, and is
 described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-   
+
 The full text of the MIT License follows:
 
 ========================================================================
@@ -465,7 +465,7 @@ public:
 #endif
 
 //Conditional NORETURN attribute on the throw functions would:
-// a) suppress false positives from static code analysis 
+// a) suppress false positives from static code analysis
 // b) possibly improve optimization opportunities.
 #if !defined(JSONCPP_NORETURN)
 #  if defined(_MSC_VER)
@@ -506,7 +506,7 @@ protected:
 /** Exceptions which the user cannot easily avoid.
  *
  * E.g. out-of-memory (when we use malloc), stack-overflow, malicious input
- * 
+ *
  * \remark derived from Json::Exception
  */
 class JSON_API RuntimeError : public Exception {
@@ -517,7 +517,7 @@ public:
 /** Exceptions thrown by JSON_ASSERT/JSON_FAIL macros.
  *
  * These are precondition-violations (user bugs) and internal errors (our bugs).
- * 
+ *
  * \remark derived from Json::Exception
  */
 class JSON_API LogicError : public Exception {
@@ -844,7 +844,7 @@ Json::Value obj_value(Json::objectValue); // {}
   void resize(ArrayIndex size);
 
   /// Access an array element (zero based index ).
-  /// If the array contains less than index element, then null value are
+  /// If the array Contains less than index element, then null value are
   /// inserted
   /// in the array so that its size is index+1.
   /// (You may need to say 'value[0u]' to get your compiler to distinguish
@@ -852,7 +852,7 @@ Json::Value obj_value(Json::objectValue); // {}
   Value& operator[](ArrayIndex index);
 
   /// Access an array element (zero based index ).
-  /// If the array contains less than index element, then null value are
+  /// If the array Contains less than index element, then null value are
   /// inserted
   /// in the array so that its size is index+1.
   /// (You may need to say 'value[0u]' to get your compiler to distinguish
@@ -869,7 +869,7 @@ Json::Value obj_value(Json::objectValue); // {}
   ///  this from the operator[] which takes a string.)
   const Value& operator[](int index) const;
 
-  /// If the array contains at least index+1 elements, returns the element
+  /// If the array Contains at least index+1 elements, returns the element
   /// value,
   /// otherwise returns defaultValue.
   Value get(ArrayIndex index, const Value& defaultValue) const;
@@ -1650,7 +1650,7 @@ public:
     - `"rejectDupKeys": false or true`
       - If true, `parse()` returns false when a key is duplicated within an object.
     - `"allowSpecialFloats": false or true`
-      - If true, special float values (NaNs and infinities) are allowed 
+      - If true, special float values (NaNs and infinities) are allowed
         and their values are lossfree restorable.
 
     You can examine 'settings_` yourself
@@ -1944,11 +1944,11 @@ private:
  *       and then unindent and line break and print '}'.
  * - Array value:
  *     - if empty then print [] without indent and line break
- *     - if the array contains no object value, empty array or some other value
+ *     - if the array Contains no object value, empty array or some other value
  *types,
  *       and all the values fit on one lines, then print the array on a single
  *line.
- *     - otherwise, it the values do not fit on one line, or the array contains
+ *     - otherwise, it the values do not fit on one line, or the array Contains
  *       object or non empty array, then print one value per line.
  *
  * If the Value have comments then they are outputed according to their
@@ -2005,11 +2005,11 @@ private:
  *       and then unindent and line break and print '}'.
  * - Array value:
  *     - if empty then print [] without indent and line break
- *     - if the array contains no object value, empty array or some other value
+ *     - if the array Contains no object value, empty array or some other value
  types,
  *       and all the values fit on one lines, then print the array on a single
  line.
- *     - otherwise, it the values do not fit on one line, or the array contains
+ *     - otherwise, it the values do not fit on one line, or the array Contains
  *       object or non empty array, then print one value per line.
  *
  * If the Value have comments then they are outputed according to their

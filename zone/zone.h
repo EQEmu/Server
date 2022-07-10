@@ -328,7 +328,7 @@ public:
 		/**
 		 * Replace Occurrences of % or MessageStatus will crash
 		 */
-		find_replace(message, std::string("%"), std::string("."));
+		Strings::FindReplace(message, std::string("%"), std::string("."));
 
 		if (message.find('\n') != std::string::npos) {
 			auto message_split = Strings::Split(message, '\n');

@@ -1156,7 +1156,7 @@ void ZoneDatabase::AddWP(Client *client, uint32 gridid, uint32 wpnum, const glm:
 * DeleteWaypoint - Removes a specific waypoint from the grid
 *	grid_id:	The ID number of the grid whose wp is being deleted
 *	wp_num:		The number of the waypoint being deleted
-*	zoneid:		The ID number of the zone that contains the waypoint being deleted
+*	zoneid:		The ID number of the zone that Contains the waypoint being deleted
 */
 void ZoneDatabase::DeleteWaypoint(Client *client, uint32 grid_num, uint32 wp_num, uint16 zoneid)
 {

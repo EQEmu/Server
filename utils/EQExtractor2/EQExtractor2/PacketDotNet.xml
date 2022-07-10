@@ -81,7 +81,7 @@
         <member name="M:PacketDotNet.EthernetPacket.ParseEncapsulatedBytes(PacketDotNet.Utils.ByteArraySegment,PacketDotNet.EthernetPacketType,PacketDotNet.PosixTimeval)">
             <summary>
             Used by the EthernetPacket constructor. Located here because the LinuxSLL constructor
-            also needs to perform the same operations as it contains an ethernet type
+            also needs to perform the same operations as it Contains an ethernet type
             </summary>
             <param name="Header">
             A <see cref="T:PacketDotNet.Utils.ByteArraySegment" /></param>
@@ -118,7 +118,7 @@
             Code constants for well-defined ethernet protocols.
             EtherType is a two-octet field in an Ethernet frame, as defined by the Ethernet II framing networking standard.
             It is used to indicate which protocol is encapsulated in the payload.
-            Also contains entries taken from linux/if_ether.h and tcpdump/ethertype.h
+            Also Contains entries taken from linux/if_ether.h and tcpdump/ethertype.h
             </summary></member>
         <member name="F:PacketDotNet.EthernetPacketType.None">
             <summary>
@@ -965,7 +965,7 @@
         <member name="T:PacketDotNet.Utils.AnsiEscapeSequences">
             <summary> String constants for color console output.
             <p>
-            This file contains control sequences to print color text on a text
+            This file Contains control sequences to print color text on a text
             console capable of interpreting and displaying control sequences.
             </p><p>
             A capable console would be
@@ -2235,7 +2235,7 @@
             <summary> Type of service code constants for IP. Type of service describes
             how a packet should be handled.
             <p>
-            TOS is an 8-bit record in an IP header which contains a 3-bit
+            TOS is an 8-bit record in an IP header which Contains a 3-bit
             precendence field, 4 TOS bit fields and a 0 bit.
             </p><p>
             The following constants are bit masks which can be logically and'ed
@@ -3465,7 +3465,7 @@
         </member>
         <member name="M:PacketDotNet.Utils.HexPrinter.GetString(System.Byte[],System.Int32,System.Int32)">
             <summary>
-            Create a string that contains the hex values of byte[] Byte in
+            Create a string that Contains the hex values of byte[] Byte in
             text form
             </summary>
             <param name="Byte">
@@ -4102,14 +4102,14 @@
         </member>
         <member name="P:PacketDotNet.PacketOrByteArraySegment.Type">
             <value>
-            Whether or not this container contains a packet, a byte[] or neither
+            Whether or not this container Contains a packet, a byte[] or neither
             </value>
         </member>
         <member name="M:PacketDotNet.PacketOrByteArraySegment.AppendToMemoryStream(System.IO.MemoryStream)">
             <summary>
             Appends to the MemoryStream either the byte[] represented by TheByteArray, or
             if ThePacket is non-null, the Packet.Bytes will be appended to the memory stream
-            which will append ThePacket's header and any encapsulated packets it contains
+            which will append ThePacket's header and any encapsulated packets it Contains
             </summary>
             <param name="ms">
             A <see cref="T:System.IO.MemoryStream" /></param>
@@ -4509,7 +4509,7 @@
         </member>
         <member name="P:PacketDotNet.LLDP.TLV.Bytes">
             <summary>
-            Return a byte[] that contains the tlv
+            Return a byte[] that Contains the tlv
             </summary>
         </member>
         <member name="P:PacketDotNet.LLDP.TLV.tlvData">

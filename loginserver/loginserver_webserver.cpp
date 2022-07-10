@@ -444,7 +444,7 @@ namespace LoginserverWebserver {
 			auto header_value = header.second;
 			if (header_key == "Authorization") {
 				authorization_key = header.second;
-				find_replace(authorization_key, "Bearer ", "");
+				Strings::FindReplace(authorization_key, "Bearer ", "");
 				if (LoginserverWebserver::TokenManager::TokenExists(authorization_key)) {
 					user_token = server.token_manager->GetToken(authorization_key);
 				}
