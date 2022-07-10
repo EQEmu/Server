@@ -20,7 +20,7 @@
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
 #include "zonedb.h"
@@ -61,7 +61,7 @@ bool BotDatabase::UpdateInjectedBotCommandSettings(const std::vector<std::pair<s
 
 		query = fmt::format(
 			"REPLACE INTO `bot_command_settings`(`bot_command`, `access`) VALUES {}",
-			Strings::Implode(
+			Strings::ImplodePair(
 				",",
 				std::pair<char, char>('(', ')'),
 				join_pair(",", std::pair<char, char>('\'', '\''), injected)
@@ -89,7 +89,7 @@ bool BotDatabase::UpdateOrphanedBotCommandSettings(const std::vector<std::string
 
 		query = fmt::format(
 			"DELETE FROM `bot_command_settings` WHERE `bot_command` IN ({})",
-			Strings::Implode(",", std::pair<char, char>('\'', '\''), orphaned)
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		if (!database.QueryDatabase(query).Success()) {

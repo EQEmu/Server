@@ -53,7 +53,7 @@
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/emu_constants.h"

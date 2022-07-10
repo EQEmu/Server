@@ -23,7 +23,7 @@
 #include "doors.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 
 extern volatile bool is_zone_loaded;
