@@ -923,7 +923,7 @@ bool Strings::Contains(std::vector<std::string> container, std::string element)
     return std::find(container.begin(), container.end(), element) != container.end();
 }
 
-std::string Strings::commify(const std::string &number) {
+std::string Strings::Commify(const std::string &number) {
 	std::string temp_string;
 
 	auto string_length = static_cast<int>(number.length());
@@ -1023,75 +1023,75 @@ std::string Strings::MoneyToString(uint32 platinum, uint32 gold, uint32 silver, 
 	if (copper && silver && gold && platinum) { // CSGP
 		money_string = fmt::format(
 			"{} Platinum, {} Gold, {} Silver, and {} Copper",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver)),
-			commify(std::to_string(copper))
+			Strings::Commify(std::to_string(platinum)),
+			Strings::Commify(std::to_string(gold)),
+			Strings::Commify(std::to_string(silver)),
+			Strings::Commify(std::to_string(copper))
 		);
 	} else if (copper && silver && gold && !platinum) { // CSG
 		money_string = fmt::format(
 			"{} Gold, {} Silver, and {} Copper",
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver)),
-			commify(std::to_string(copper))
+			Strings::Commify(std::to_string(gold)),
+			Strings::Commify(std::to_string(silver)),
+			Strings::Commify(std::to_string(copper))
 		);
 	} else if (copper && silver && !gold && !platinum) { // CS
 		money_string = fmt::format(
 			"{} Silver and {} Copper",
-			commify(std::to_string(silver)),
-			commify(std::to_string(copper))
+			Strings::Commify(std::to_string(silver)),
+			Strings::Commify(std::to_string(copper))
 		);
 	} else if (!copper && silver && gold && platinum) { // SGP
 		money_string = fmt::format(
 			"{} Platinum, {} Gold, and {} Silver",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver))
+			Strings::Commify(std::to_string(platinum)),
+			Strings::Commify(std::to_string(gold)),
+			Strings::Commify(std::to_string(silver))
 		);
 	} else if (!copper && silver && gold && !platinum) { // SG
 		money_string = fmt::format(
 			"{} Gold and {} Silver",
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver))
+			Strings::Commify(std::to_string(gold)),
+			Strings::Commify(std::to_string(silver))
 		);
 	} else if (copper && !silver && gold && platinum) { // CGP
 		money_string = fmt::format(
 			"{} Platinum, {} Gold, and {} Copper",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold)),
-			commify(std::to_string(copper))
+			Strings::Commify(std::to_string(platinum)),
+			Strings::Commify(std::to_string(gold)),
+			Strings::Commify(std::to_string(copper))
 		);
 	} else if (copper && !silver && gold && !platinum) { // CG
 		money_string = fmt::format(
 			"{} Gold and {} Copper",
-			commify(std::to_string(gold)),
-			commify(std::to_string(copper))
+			Strings::Commify(std::to_string(gold)),
+			Strings::Commify(std::to_string(copper))
 		);
 	} else if (!copper && !silver && gold && platinum) { // GP
 		money_string = fmt::format(
 			"{} Platinum and {} Gold",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold))
+			Strings::Commify(std::to_string(platinum)),
+			Strings::Commify(std::to_string(gold))
 		);
 	} else if (!copper && !silver && !gold && platinum) { // P
 		money_string = fmt::format(
 			"{} Platinum",
-			commify(std::to_string(platinum))
+			Strings::Commify(std::to_string(platinum))
 		);
 	} else if (!copper && !silver && gold && !platinum) { // G
 		money_string = fmt::format(
 			"{} Gold",
-			commify(std::to_string(gold))
+			Strings::Commify(std::to_string(gold))
 		);
 	} else if (!copper && silver && !gold && !platinum) { // S
 		money_string = fmt::format(
 			"{} Silver",
-			commify(std::to_string(silver))
+			Strings::Commify(std::to_string(silver))
 		);
 	} else if (copper && !silver && !gold && !platinum) { // C
 		money_string = fmt::format(
 			"{} Copper",
-			commify(std::to_string(copper))
+			Strings::Commify(std::to_string(copper))
 		);
 	}
 	return money_string;

@@ -63,11 +63,11 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 			Chat::Yellow,
 			fmt::format(
 				"Spawn2 ID: {} NPC ID: {} Name: {} Respawn Time: {} ({})",
-				commify(spawn2_id),
-				commify(npc_id),
+				Strings::Commify(spawn2_id),
+				Strings::Commify(npc_id),
 				npc_name,
 				Strings::SecondsToTime(std::stoi(respawn_time)),
-				commify(respawn_time)
+				Strings::Commify(respawn_time)
 			).c_str()
 		);
 

@@ -96,7 +96,7 @@ public:
 	static std::string GetBetween(const std::string &s, std::string start_delim, std::string stop_delim);
 	static void FindReplace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
 	static bool Contains(std::vector<std::string> container, std::string element);
-	static std::string commify(const std::string &number);
+	static std::string Commify(const std::string &number);
 
 
 };

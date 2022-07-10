@@ -3638,7 +3638,7 @@ std::string Perl__getenvironmentaldamagename(uint8 damage_type)
 
 std::string Perl__commify(perl::scalar number)
 {
-	return commify(number.c_str());
+	return Strings::Commify(number.c_str());
 }
 
 bool Perl__checknamefilter(std::string name)
@@ -3744,7 +3744,7 @@ void perl_register_quest()
 	package.add("clear_zone_flag", &Perl__clear_zone_flag);
 	package.add("clearspawntimers", &Perl__clearspawntimers);
 	package.add("collectitems", &Perl__collectitems);
-	package.add("commify", &Perl__commify);
+	package.add("Commify", &Perl__commify);
 	package.add("completedtasksinset", &Perl__completedtasksinset);
 	package.add("countitem", &Perl__countitem);
 	package.add("countspawnednpcs", &Perl__countspawnednpcs);
