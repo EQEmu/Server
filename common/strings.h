@@ -175,9 +175,6 @@ std::vector<std::string> join_tuple(
 	return output;
 }
 
-//std::string Strings::Escape(const std::string &s);
-
-
 // misc functions
 std::string SanitizeWorldServerName(std::string server_long_name);
 std::vector<std::string> GetBadWords();
