@@ -3856,7 +3856,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_body_type_name", &lua_get_body_type_name),
 		luabind::def("get_consider_level_name", &lua_get_consider_level_name),
 		luabind::def("get_environmental_damage_name", &lua_get_environmental_damage_name),
-		luabind::def("Commify", &lua_commify),
+		luabind::def("commify", &lua_commify),
 		luabind::def("check_name_filter", &lua_check_name_filter),
 		luabind::def("discord_send", &lua_discord_send),
 		luabind::def("track_npc", &lua_track_npc),

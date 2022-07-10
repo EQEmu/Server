@@ -3744,7 +3744,7 @@ void perl_register_quest()
 	package.add("clear_zone_flag", &Perl__clear_zone_flag);
 	package.add("clearspawntimers", &Perl__clearspawntimers);
 	package.add("collectitems", &Perl__collectitems);
-	package.add("Commify", &Perl__commify);
+	package.add("commify", &Perl__commify);
 	package.add("completedtasksinset", &Perl__completedtasksinset);
 	package.add("countitem", &Perl__countitem);
 	package.add("countspawnednpcs", &Perl__countspawnednpcs);
