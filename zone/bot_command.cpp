@@ -5270,7 +5270,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		return;
 	}
 	std::string bot_name = sep->arg[1];
-	bot_name = ucfirst(bot_name);
+	bot_name = Strings::UcFirst(bot_name);
 	if (sep->arg[2][0] == '\0' || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Invalid Class!");
 		return;

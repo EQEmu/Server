@@ -378,7 +378,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				}
 			);
 
-			auto s = SplitString(server.options.GetEQEmuLoginServerAddress(), ':');
+			auto s = Strings::Split(server.options.GetEQEmuLoginServerAddress(), ':');
 			if (s.size() == 2) {
 				auto address = s[0];
 				auto port    = std::stoi(s[1]);

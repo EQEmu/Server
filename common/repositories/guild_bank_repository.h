@@ -58,7 +58,7 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string InsertColumnsRaw()
@@ -73,7 +73,7 @@ public:
 			insert_columns.push_back(column);
 		}
 
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", insert_columns));
 	}
 
 	static std::string TableName()
@@ -197,7 +197,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				guild_bank_entry.
 			)
@@ -225,7 +225,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -257,7 +257,7 @@ public:
 			insert_values.push_back(std::to_string(guild_bank_entry.permissions));
 			insert_values.push_back("'" + EscapeString(guild_bank_entry.whofor) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -266,7 +266,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -50,7 +50,7 @@ ZSList::~ZSList() {
 
 void ZSList::ShowUpTime(WorldTCPConnection* con, const char* adminname) {
 	uint32 ms = Timer::GetCurrentTime();
-	std::string time_string = ConvertMillisecondsToTime(ms);
+	std::string time_string = Strings::MillisecondsToTime(ms);
 	con->SendEmoteMessage(
 		adminname,
 		0,

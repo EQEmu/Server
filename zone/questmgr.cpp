@@ -1195,7 +1195,7 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 			initiator->MessageString(
 				Chat::MoneySplit,
 				YOU_RECEIVE,
-				ConvertMoneyToString(
+				Strings::MoneyToString(
 					platinum,
 					gold,
 					silver,
@@ -3401,7 +3401,7 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 }
 
 std::string QuestManager::secondstotime(int duration) {
-	return ConvertSecondsToTime(duration);
+	return Strings::SecondsToTime(duration);
 }
 
 std::string QuestManager::gethexcolorcode(std::string color_name) {

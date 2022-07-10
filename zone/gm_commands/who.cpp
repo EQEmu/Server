@@ -55,7 +55,7 @@ void command_who(Client *c, const Seperator *sep)
 	std::string search_string;
 
 	if (sep->arg[1]) {
-		search_string = str_tolower(sep->arg[1]);
+		search_string = Strings::ToLower(sep->arg[1]);
 	}
 
 	int found_count = 0;
@@ -82,13 +82,13 @@ void command_who(Client *c, const Seperator *sep)
 
 		if (search_string.length()) {
 			bool found_search_term = (
-				str_tolower(player_name).find(search_string) != std::string::npos ||
-				str_tolower(zone_short_name).find(search_string) != std::string::npos ||
-				str_tolower(displayed_race_name).find(search_string) != std::string::npos ||
-				str_tolower(base_class_name).find(search_string) != std::string::npos ||
-				str_tolower(guild_name).find(search_string) != std::string::npos ||
-				str_tolower(account_name).find(search_string) != std::string::npos ||
-				str_tolower(account_ip).find(search_string) != std::string::npos
+				Strings::ToLower(player_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(zone_short_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(displayed_race_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(base_class_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(guild_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(account_name).find(search_string) != std::string::npos ||
+				Strings::ToLower(account_ip).find(search_string) != std::string::npos
 			);
 
 			if (!found_search_term) {

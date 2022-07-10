@@ -801,7 +801,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			Chat::White,
 			fmt::format(
 				"You can use this discipline in {}.",
-				ConvertSecondsToTime(remaining_time)
+				Strings::SecondsToTime(remaining_time)
 			).c_str()
 		);
 		return false;

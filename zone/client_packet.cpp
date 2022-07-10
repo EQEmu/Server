@@ -795,7 +795,7 @@ void Client::CompleteConnect()
 	if (zone && zone->GetInstanceTimer()) {
 		bool is_permanent = false;
 		uint32 remaining_time = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
-		auto time_string = ConvertSecondsToTime(remaining_time);
+		auto time_string = Strings::SecondsToTime(remaining_time);
 		Message(
 			Chat::Yellow,
 			fmt::format(
@@ -4852,7 +4852,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 
 	uint32 decay_time = target->GetDecayTime();
 	if (decay_time) {
-		auto time_string = ConvertSecondsToTime(decay_time, true);
+		auto time_string = Strings::SecondsToTime(decay_time, true);
 		Message(
 			Chat::NPCQuestSay,
 			fmt::format(
@@ -12945,7 +12945,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 			Chat::White,
 			fmt::format(
 				"You can use the ability /shield in {}.",
-				ConvertSecondsToTime(remaining_time)
+				Strings::SecondsToTime(remaining_time)
 			).c_str()
 		);
 		return;

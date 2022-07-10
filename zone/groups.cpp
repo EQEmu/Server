@@ -180,7 +180,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 			members[i]->CastToClient()->MessageString(
 				Chat::MoneySplit,
 				YOU_RECEIVE_AS_SPLIT,
-				ConvertMoneyToString(
+				Strings::MoneyToString(
 					platinum_split,
 					gold_split,
 					silver_split,

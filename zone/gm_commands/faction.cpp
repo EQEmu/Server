@@ -18,7 +18,7 @@ void command_faction(Client *c, const Seperator *sep)
 
 	std::string faction_filter;
 	if (sep->arg[2]) {
-		faction_filter = str_tolower(sep->arg[2]);
+		faction_filter = Strings::ToLower(sep->arg[2]);
 	}
 
 	if (!strcasecmp(sep->arg[1], "review")) {

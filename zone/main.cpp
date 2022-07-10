@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
 	if (argc == 4) {
 		instance_id = atoi(argv[3]);
 		worldserver.SetLauncherName(argv[2]);
-		auto zone_port = SplitString(argv[1], ':');
+		auto zone_port = Strings::Split(argv[1], ':');
 
 		if (!zone_port.empty()) {
 			z_name = zone_port[0];
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
 	}
 	else if (argc == 3) {
 		worldserver.SetLauncherName(argv[2]);
-		auto zone_port = SplitString(argv[1], ':');
+		auto zone_port = Strings::Split(argv[1], ':');
 
 		if (!zone_port.empty()) {
 			z_name = zone_port[0];
@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
 	}
 	else if (argc == 2) {
 		worldserver.SetLauncherName("NONE");
-		auto zone_port = SplitString(argv[1], ':');
+		auto zone_port = Strings::Split(argv[1], ':');
 
 		if (!zone_port.empty()) {
 			z_name = zone_port[0];

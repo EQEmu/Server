@@ -803,7 +803,7 @@ void Raid::SplitMoney(uint32 gid, uint32 copper, uint32 silver, uint32 gold, uin
 			members[i].member->MessageString(
 				Chat::MoneySplit,
 				YOU_RECEIVE_AS_SPLIT,
-				ConvertMoneyToString(
+				Strings::MoneyToString(
 					platinum_split,
 					gold_split,
 					silver_split,

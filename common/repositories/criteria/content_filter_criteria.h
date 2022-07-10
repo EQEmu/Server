@@ -61,14 +61,14 @@ namespace ContentFilterCriteria {
 			flags_in_filter_enabled = fmt::format(
 				" OR CONCAT(',', {}content_flags, ',') REGEXP ',({}),' ",
 				table_prefix,
-				implode("|", flags_enabled)
+				Strings::Implode("|", flags_enabled)
 			);
 		}
 		if (!flags_disabled.empty()) {
 			flags_in_filter_disabled = fmt::format(
 				" OR CONCAT(',', {}content_flags_disabled, ',') REGEXP ',({}),' ",
 				table_prefix,
-				implode("|", flags_disabled)
+				Strings::Implode("|", flags_disabled)
 			);
 		}
 

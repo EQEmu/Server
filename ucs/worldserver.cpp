@@ -159,7 +159,7 @@ void Client45ToServerSayLink(std::string& serverSayLink, const std::string& clie
 		return;
 	}
 
-	auto segments = SplitString(clientSayLink, '\x12');
+	auto segments = Strings::Split(clientSayLink, '\x12');
 
 	for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 		if (segment_iter & 1) {
@@ -196,7 +196,7 @@ void Client50ToServerSayLink(std::string& serverSayLink, const std::string& clie
 		return;
 	}
 
-	auto segments = SplitString(clientSayLink, '\x12');
+	auto segments = Strings::Split(clientSayLink, '\x12');
 
 	for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 		if (segment_iter & 1) {
@@ -231,7 +231,7 @@ void Client55ToServerSayLink(std::string& serverSayLink, const std::string& clie
 		return;
 	}
 
-	auto segments = SplitString(clientSayLink, '\x12');
+	auto segments = Strings::Split(clientSayLink, '\x12');
 
 	for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 		if (segment_iter & 1) {

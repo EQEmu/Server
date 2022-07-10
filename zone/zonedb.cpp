@@ -3437,7 +3437,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 		auto remaining_time = ((start_time + duration) - current_time);
 		if (!never_expires) {
 			if (remaining_time > 0) {
-				remaining_time_string = ConvertSecondsToTime(remaining_time);
+				remaining_time_string = Strings::SecondsToTime(remaining_time);
 			} else {
 				remaining_time_string = "Already Expired";
 			}
@@ -4080,7 +4080,7 @@ bool ZoneDatabase::LoadFactionData()
 
 	LogInfo("[{}] Faction(s) loaded...", faction_ids.size());
 
-	const std::string faction_id_criteria(implode(",", faction_ids));
+	const std::string faction_id_criteria(Strings::Implode(",", faction_ids));
 
 	// load faction mins/maxes
 	query = fmt::format("SELECT `client_faction_id`, `min`, `max` FROM `faction_base_data` WHERE `client_faction_id` IN ({})", faction_id_criteria);

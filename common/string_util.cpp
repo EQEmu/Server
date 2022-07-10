@@ -69,34 +69,6 @@ const std::string vStringFormat(const char *format, va_list args)
 	return output;
 }
 
-const std::string str_tolower(std::string s)
-{
-	std::transform(
-		s.begin(), s.end(), s.begin(),
-		[](unsigned char c) { return ::tolower(c); }
-	);
-	return s;
-}
-
-const std::string str_toupper(std::string s)
-{
-	std::transform(
-		s.begin(), s.end(), s.begin(),
-		[](unsigned char c) { return ::toupper(c); }
-	);
-	return s;
-}
-
-const std::string ucfirst(std::string s)
-{
-	std::string output = s;
-	if (!s.empty()) {
-		output[0] = static_cast<char>(::toupper(s[0]));
-	}
-
-	return output;
-}
-
 const std::string StringFormat(const char *format, ...)
 {
 	va_list args;
@@ -106,7 +78,7 @@ const std::string StringFormat(const char *format, ...)
 	return output;
 }
 
-std::vector<std::string> SplitString(const std::string &str, const char delim)
+std::vector<std::string> Strings::Split(const std::string &str, const char delim)
 {
 	std::vector<std::string> ret;
 	std::string::size_type   start = 0;
@@ -124,7 +96,7 @@ std::vector<std::string> SplitString(const std::string &str, const char delim)
 }
 
 // this one takes delimiter length into consideration
-std::vector<std::string> split_string(std::string s, std::string delimiter)
+std::vector<std::string> Strings::Split2(std::string s, std::string delimiter)
 {
 	size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
 	std::string              token;
@@ -140,16 +112,16 @@ std::vector<std::string> split_string(std::string s, std::string delimiter)
 	return res;
 }
 
-std::string get_between(const std::string &s, std::string start_delim, std::string stop_delim)
+std::string Strings::Strings::get_between(const std::string &s, std::string start_delim, std::string stop_delim)
 {
 	if (s.find(start_delim) == std::string::npos && s.find(stop_delim) == std::string::npos) {
 		return "";
 	}
 
-	auto first_split = split_string(s, start_delim);
+	auto first_split = Strings::Split2(s, start_delim);
 	if (!first_split.empty()) {
 		std::string remaining_block = first_split[1];
-		auto        second_split    = split_string(remaining_block, stop_delim);
+		auto        second_split    = Strings::Split2(remaining_block, stop_delim);
 		if (!second_split.empty()) {
 			std::string between = second_split[0];
 			return between;
@@ -160,7 +132,7 @@ std::string get_between(const std::string &s, std::string start_delim, std::stri
 }
 
 std::string::size_type
-search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator)
+Strings::SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator)
 {
 	// this shouldn't go out of bounds, even without obvious bounds checks
 	auto pos = haystack.find(needle);
@@ -174,7 +146,8 @@ search_deliminated_string(const std::string &haystack, const std::string &needle
 	return std::string::npos;
 }
 
-std::string implode(std::string glue, std::vector<std::string> src)
+
+std::string Strings::Implode(std::string glue, std::vector<std::string> src)
 {
 	if (src.empty()) {
 		return {};
@@ -248,42 +221,6 @@ std::string EscapeString(const std::string &s)
 	return ret;
 }
 
-std::string EscapeString(const char *src, size_t sz)
-{
-	std::string ret;
-
-	for (size_t i = 0; i < sz; ++i) {
-		char c = src[i];
-		switch (c) {
-			case '\x00':
-				ret += "\\x00";
-				break;
-			case '\n':
-				ret += "\\n";
-				break;
-			case '\r':
-				ret += "\\r";
-				break;
-			case '\\':
-				ret += "\\\\";
-				break;
-			case '\'':
-				ret += "\\'";
-				break;
-			case '\"':
-				ret += "\\\"";
-				break;
-			case '\x1a':
-				ret += "\\x1a";
-				break;
-			default:
-				ret.push_back(c);
-				break;
-		}
-	}
-
-	return ret;
-}
 
 bool StringIsNumber(const std::string &s)
 {
@@ -296,17 +233,8 @@ bool StringIsNumber(const std::string &s)
 	}
 }
 
-void ToLowerString(std::string &s)
-{
-	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-}
 
-void ToUpperString(std::string &s)
-{
-	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-}
-
-std::string JoinString(const std::vector<std::string> &ar, const std::string &delim)
+std::string Strings::Join(const std::vector<std::string> &ar, const std::string &delim)
 {
 	std::string ret;
 	for (size_t i = 0; i < ar.size(); ++i) {
@@ -345,7 +273,7 @@ std::string replace_string(std::string subject, const std::string &search, const
 
 void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver)
 {
-	auto split = SplitString(s, ':');
+	auto split = Strings::Split(s, ':');
 	if (split.size() == 2) {
 		loginserver = split[0];
 		account     = split[1];
@@ -601,7 +529,7 @@ bool isAlphaNumeric(const char *text)
 }
 
 // Function to convert single digit or two digit number into words
-std::string convert2digit(int n, std::string suffix)
+std::string Strings::ConvertToDigit(int n, std::string suffix)
 {
 	// if n is zero
 	if (n == 0) {
@@ -615,37 +543,6 @@ std::string convert2digit(int n, std::string suffix)
 	else {
 		return NUM_TO_ENGLISH_X[n] + suffix;
 	}
-}
-
-// Function to convert a given number (max 9-digits) into words
-std::string numberToWords(unsigned long long int n)
-{
-	// string to store word representation of given number
-	std::string res;
-
-	// this handles digits at ones & tens place
-	res = convert2digit((n % 100), "");
-
-	if (n > 100 && n % 100) {
-		res = "and " + res;
-	}
-
-	// this handles digit at hundreds place
-	res = convert2digit(((n / 100) % 10), "Hundred ") + res;
-
-	// this handles digits at thousands & tens thousands place
-	res = convert2digit(((n / 1000) % 100), "Thousand ") + res;
-
-	// this handles digits at hundred thousands & one millions place
-	res = convert2digit(((n / 100000) % 100), "Lakh, ") + res;
-
-	// this handles digits at ten millions & hundred millions place
-	res = convert2digit((n / 10000000) % 100, "Crore, ") + res;
-
-	// this handles digits at ten millions & hundred millions place
-	res = convert2digit((n / 1000000000) % 100, "Billion, ") + res;
-
-	return res;
 }
 
 // first letter capitalized and rest made lower case
@@ -688,14 +585,14 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 		), server_long_name.end()
 	);
 
-	server_long_name = trim(server_long_name);
+	server_long_name = Strings::Trim(server_long_name);
 
 	// bad word filter
-	for (auto &piece: split_string(server_long_name, " ")) {
+	for (auto &piece: Strings::Split2(server_long_name, " ")) {
 		for (auto &word: GetBadWords()) {
 			// for shorter words that can actually be part of legitimate words
 			// make sure that it isn't part of another word by matching on a space
-			if (str_tolower(piece) == word) {
+			if (Strings::ToLower(piece) == word) {
 				find_replace(
 					server_long_name,
 					piece,
@@ -704,8 +601,8 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 				continue;
 			}
 
-			auto pos = str_tolower(piece).find(word);
-			if (str_tolower(piece).find(word) != std::string::npos && piece.length() > 4 && word.length() > 4) {
+			auto pos = Strings::ToLower(piece).find(word);
+			if (Strings::ToLower(piece).find(word) != std::string::npos && piece.length() > 4 && word.length() > 4) {
 				auto found_word = piece.substr(pos, word.length());
 				std::string replaced_piece = piece.substr(pos, word.length());
 
@@ -1026,7 +923,180 @@ bool contains(std::vector<std::string> container, std::string element)
     return std::find(container.begin(), container.end(), element) != container.end();
 }
 
-std::string ConvertSecondsToTime(int duration, bool is_milliseconds)
+std::string commify(const std::string &number) {
+	std::string temp_string;
+
+	auto string_length = static_cast<int>(number.length());
+
+	int i = 0;
+	for (i = string_length - 3; i >= 0; i -= 3) {
+		if (i > 0) {
+			temp_string = "," + number.substr(static_cast<unsigned long>(i), 3) + temp_string;
+		} else {
+			temp_string = number.substr(static_cast<unsigned long>(i), 3) + temp_string;
+		}
+	}
+
+	if (i < 0) {
+		temp_string = number.substr(0, static_cast<unsigned long>(3 + i)) + temp_string;
+	}
+
+	return temp_string;
+}
+
+const std::string Strings::ToLower(std::string s)
+{
+	std::transform(
+		s.begin(), s.end(), s.begin(),
+		[](unsigned char c) { return ::tolower(c); }
+	);
+	return s;
+}
+const std::string Strings::ToUpper(std::string s)
+{
+	std::transform(
+		s.begin(), s.end(), s.begin(),
+		[](unsigned char c) { return ::toupper(c); }
+	);
+	return s;
+}
+const std::string Strings::UcFirst(std::string s)
+{
+	std::string output = s;
+	if (!s.empty()) {
+		output[0] = static_cast<char>(::toupper(s[0]));
+	}
+
+	return output;
+}
+
+
+std::vector<std::string> Strings::Wrap(std::vector<std::string> &src, std::string character)
+{
+	std::vector<std::string> new_vector;
+	new_vector.reserve(src.size());
+
+	for (auto &e: src) {
+		if (e == "null") {
+			new_vector.emplace_back(e);
+			continue;
+		}
+
+		new_vector.emplace_back(character + e + character);
+	}
+
+	return new_vector;
+}
+
+std::string Strings::NumberToWords(unsigned long long int n)
+{
+	// string to store word representation of given number
+	std::string res;
+
+	// this handles digits at ones & tens place
+	res = Strings::ConvertToDigit((n % 100), "");
+
+	if (n > 100 && n % 100) {
+		res = "and " + res;
+	}
+
+	// this handles digit at hundreds place
+	res = Strings::ConvertToDigit(((n / 100) % 10), "Hundred ") + res;
+
+	// this handles digits at thousands & tens thousands place
+	res = Strings::ConvertToDigit(((n / 1000) % 100), "Thousand ") + res;
+
+	// this handles digits at hundred thousands & one millions place
+	res = Strings::ConvertToDigit(((n / 100000) % 100), "Lakh, ") + res;
+
+	// this handles digits at ten millions & hundred millions place
+	res = Strings::ConvertToDigit((n / 10000000) % 100, "Crore, ") + res;
+
+	// this handles digits at ten millions & hundred millions place
+	res = Strings::ConvertToDigit((n / 1000000000) % 100, "Billion, ") + res;
+
+	return res;
+}
+std::string Strings::MoneyToString(uint32 platinum, uint32 gold, uint32 silver, uint32 copper)
+{
+	std::string money_string = "Unknown";
+	if (copper && silver && gold && platinum) { // CSGP
+		money_string = fmt::format(
+			"{} Platinum, {} Gold, {} Silver, and {} Copper",
+			commify(std::to_string(platinum)),
+			commify(std::to_string(gold)),
+			commify(std::to_string(silver)),
+			commify(std::to_string(copper))
+		);
+	} else if (copper && silver && gold && !platinum) { // CSG
+		money_string = fmt::format(
+			"{} Gold, {} Silver, and {} Copper",
+			commify(std::to_string(gold)),
+			commify(std::to_string(silver)),
+			commify(std::to_string(copper))
+		);
+	} else if (copper && silver && !gold && !platinum) { // CS
+		money_string = fmt::format(
+			"{} Silver and {} Copper",
+			commify(std::to_string(silver)),
+			commify(std::to_string(copper))
+		);
+	} else if (!copper && silver && gold && platinum) { // SGP
+		money_string = fmt::format(
+			"{} Platinum, {} Gold, and {} Silver",
+			commify(std::to_string(platinum)),
+			commify(std::to_string(gold)),
+			commify(std::to_string(silver))
+		);
+	} else if (!copper && silver && gold && !platinum) { // SG
+		money_string = fmt::format(
+			"{} Gold and {} Silver",
+			commify(std::to_string(gold)),
+			commify(std::to_string(silver))
+		);
+	} else if (copper && !silver && gold && platinum) { // CGP
+		money_string = fmt::format(
+			"{} Platinum, {} Gold, and {} Copper",
+			commify(std::to_string(platinum)),
+			commify(std::to_string(gold)),
+			commify(std::to_string(copper))
+		);
+	} else if (copper && !silver && gold && !platinum) { // CG
+		money_string = fmt::format(
+			"{} Gold and {} Copper",
+			commify(std::to_string(gold)),
+			commify(std::to_string(copper))
+		);
+	} else if (!copper && !silver && gold && platinum) { // GP
+		money_string = fmt::format(
+			"{} Platinum and {} Gold",
+			commify(std::to_string(platinum)),
+			commify(std::to_string(gold))
+		);
+	} else if (!copper && !silver && !gold && platinum) { // P
+		money_string = fmt::format(
+			"{} Platinum",
+			commify(std::to_string(platinum))
+		);
+	} else if (!copper && !silver && gold && !platinum) { // G
+		money_string = fmt::format(
+			"{} Gold",
+			commify(std::to_string(gold))
+		);
+	} else if (!copper && silver && !gold && !platinum) { // S
+		money_string = fmt::format(
+			"{} Silver",
+			commify(std::to_string(silver))
+		);
+	} else if (copper && !silver && !gold && !platinum) { // C
+		money_string = fmt::format(
+			"{} Copper",
+			commify(std::to_string(copper))
+		);
+	}
+	return money_string;
+}
+std::string Strings::SecondsToTime(int duration, bool is_milliseconds)
 {
 	if (duration <= 0) {
 		return "Unknown";
@@ -1042,8 +1112,8 @@ std::string ConvertSecondsToTime(int duration, bool is_milliseconds)
 
 	int timer_length = (
 		is_milliseconds ?
-		static_cast<int>(std::ceil(static_cast<float>(duration) / 1000.0f)) :
-		duration
+			static_cast<int>(std::ceil(static_cast<float>(duration) / 1000.0f)) :
+			duration
 	);
 
 	int days = int(timer_length / 86400);
@@ -1184,105 +1254,4 @@ std::string ConvertSecondsToTime(int duration, bool is_milliseconds)
 		);
 	}
 	return time_string;
-}
-
-std::string ConvertMoneyToString(uint32 platinum, uint32 gold, uint32 silver, uint32 copper)
-{
-	std::string money_string = "Unknown";
-	if (copper && silver && gold && platinum) { // CSGP
-		money_string = fmt::format(
-			"{} Platinum, {} Gold, {} Silver, and {} Copper",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver)),
-			commify(std::to_string(copper))
-		);
-	} else if (copper && silver && gold && !platinum) { // CSG
-		money_string = fmt::format(
-			"{} Gold, {} Silver, and {} Copper",
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver)),
-			commify(std::to_string(copper))
-		);
-	} else if (copper && silver && !gold && !platinum) { // CS
-		money_string = fmt::format(
-			"{} Silver and {} Copper",
-			commify(std::to_string(silver)),
-			commify(std::to_string(copper))
-		);
-	} else if (!copper && silver && gold && platinum) { // SGP
-		money_string = fmt::format(
-			"{} Platinum, {} Gold, and {} Silver",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver))
-		);
-	} else if (!copper && silver && gold && !platinum) { // SG
-		money_string = fmt::format(
-			"{} Gold and {} Silver",
-			commify(std::to_string(gold)),
-			commify(std::to_string(silver))
-		);
-	} else if (copper && !silver && gold && platinum) { // CGP
-		money_string = fmt::format(
-			"{} Platinum, {} Gold, and {} Copper",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold)),
-			commify(std::to_string(copper))
-		);
-	} else if (copper && !silver && gold && !platinum) { // CG
-		money_string = fmt::format(
-			"{} Gold and {} Copper",
-			commify(std::to_string(gold)),
-			commify(std::to_string(copper))
-		);
-	} else if (!copper && !silver && gold && platinum) { // GP
-		money_string = fmt::format(
-			"{} Platinum and {} Gold",
-			commify(std::to_string(platinum)),
-			commify(std::to_string(gold))
-		);
-	} else if (!copper && !silver && !gold && platinum) { // P
-		money_string = fmt::format(
-			"{} Platinum",
-			commify(std::to_string(platinum))
-		);
-	} else if (!copper && !silver && gold && !platinum) { // G
-		money_string = fmt::format(
-			"{} Gold",
-			commify(std::to_string(gold))
-		);
-	} else if (!copper && silver && !gold && !platinum) { // S
-		money_string = fmt::format(
-			"{} Silver",
-			commify(std::to_string(silver))
-		);
-	} else if (copper && !silver && !gold && !platinum) { // C
-		money_string = fmt::format(
-			"{} Copper",
-			commify(std::to_string(copper))
-		);
-	}
-	return money_string;
-}
-
-std::string commify(const std::string &number) {
-	std::string temp_string;
-
-	auto string_length = static_cast<int>(number.length());
-
-	int i = 0;
-	for (i = string_length - 3; i >= 0; i -= 3) {
-		if (i > 0) {
-			temp_string = "," + number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		} else {
-			temp_string = number.substr(static_cast<unsigned long>(i), 3) + temp_string;
-		}
-	}
-
-	if (i < 0) {
-		temp_string = number.substr(0, static_cast<unsigned long>(3 + i)) + temp_string;
-	}
-
-	return temp_string;
 }

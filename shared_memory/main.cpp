@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 					}
 					break;
 				case '-': {
-					auto split = SplitString(argv[i], '=');
+					auto split = Strings::Split(argv[i], '=');
 					if (split.size() >= 2) {
 						auto command  = split[0];
 						auto argument = split[1];

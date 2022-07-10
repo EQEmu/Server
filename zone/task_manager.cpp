@@ -239,7 +239,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 		// zones
 		activity_data->zones = task_activity.zones;
-		auto zones = SplitString(
+		auto zones = Strings::Split(
 			task_activity.zones,
 			';'
 		);

@@ -92,7 +92,7 @@ public:
 				safe_heading     = VALUES(safe_heading)
 		),
 			BaseInsert(),
-			implode(",", insert_values)
+			Strings::Implode(",", insert_values)
 		));
 
 		if (results.Success())

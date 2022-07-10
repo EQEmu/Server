@@ -592,7 +592,7 @@ void command_help(Client *c, const Seperator *sep)
 {
 	int found_count = 0;
 	std::string command_link;
-	std::string search_criteria = str_tolower(sep->argplus[1]);
+	std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 
 	for (const auto& cur : commandlist) {
 		if (!search_criteria.empty()) {
@@ -664,7 +664,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string search_criteria = str_tolower(sep->argplus[1]);
+	std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 
 	auto find_iter = commandaliases.find(search_criteria);
 	if (find_iter == commandaliases.end()) {

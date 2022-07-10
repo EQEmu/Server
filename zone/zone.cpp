@@ -566,7 +566,7 @@ void Zone::LoadTempMerchantData()
 				FROM merchantlist_temp
 				WHERE npcid IN ({})
 			),
-			implode(", ", npc_ids)
+			Strings::Implode(", ", npc_ids)
 		)
 	);
 

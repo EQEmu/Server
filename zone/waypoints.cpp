@@ -116,7 +116,7 @@ void NPC::DisplayWaypointInfo(Client *client) {
 					current_waypoint.pause ?
 					fmt::format(
 						"{} ({})",
-						ConvertSecondsToTime(current_waypoint.pause),
+						Strings::SecondsToTime(current_waypoint.pause),
 						current_waypoint.pause
 					) :
 					""

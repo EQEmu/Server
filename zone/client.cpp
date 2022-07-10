@@ -3928,7 +3928,7 @@ void Client::SendRules()
 		return;
 	}
 
-	auto lines = split_string(rules, "|");
+	auto lines = Strings::Split2(rules, "|");
 	auto line_number = 1;
 	for (auto&& line : lines) {
 		Message(
@@ -6337,7 +6337,7 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 		return;
 	}
 
-	std::string spawn_type = str_tolower(identifier);
+	std::string spawn_type = Strings::ToLower(identifier);
 	bool is_add = spawn_type.find("add") != std::string::npos;
 	bool is_create = spawn_type.find("create") != std::string::npos;
 	bool is_delete = spawn_type.find("delete") != std::string::npos;
@@ -9560,12 +9560,12 @@ void Client::ShowDevToolsMenu()
 	menu_reload_six += EQ::SayLinkEngine::GenerateQuestSaylink("#reload rules", false, "Rules");
 	menu_reload_six += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload static", false, "Static Zone Data");
 	menu_reload_six += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload tasks", false, "Tasks");
-	
+
 	menu_reload_seven += EQ::SayLinkEngine::GenerateQuestSaylink("#reload titles", false, "Titles");
 	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload traps 1", false, "Traps");
 	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload variables", false, "Variables");
 	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload veteran_rewards", false, "Veteran Rewards");
-	
+
 	menu_reload_eight += EQ::SayLinkEngine::GenerateQuestSaylink("#reload world", false, "World");
 	menu_reload_eight += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload zone", false, "Zone");
 	menu_reload_eight += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload zone_points", false, "Zone Points");
@@ -10439,7 +10439,7 @@ void Client::SetAFK(uint8 afk_flag) {
 
 void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
 	uint32 zone_id = ZoneID(zone_short_name);
-	std::string current_instance_type = str_tolower(instance_type);
+	std::string current_instance_type = Strings::ToLower(instance_type);
 	std::string instance_type_name = "public";
 	if (current_instance_type.find("solo") != std::string::npos) {
 		instance_type_name = GetCleanName();
@@ -11623,12 +11623,12 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			}
 
 			passes = true;
-			
+
 			break;
 		}
 		case MerchantBucketComparison::BucketIsAny:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split2(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11649,7 +11649,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsNotAny:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split2(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11670,7 +11670,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsBetween:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split2(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11687,7 +11687,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsNotBetween:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split2(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}

@@ -2226,7 +2226,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				"Usage: #npcedit rarespawn [Flag] - Sets an NPC's Rare Spawn Flag [0 = Not a Rare Spawn, 1 = Rare Spawn]"
-			);	
+			);
 		}
 		return;
 	} else if (!strcasecmp(sep->arg[1], "stuck_behavior")) {
@@ -2397,7 +2397,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 					fmt::format(
 						"{} now has a Respawn Timer of {} ({}) on Spawn Group ID {}.",
 						npc_id_string,
-						ConvertSecondsToTime(respawn_time),
+						Strings::SecondsToTime(respawn_time),
 						respawn_time,
 						commify(std::to_string(c->GetTarget()->CastToNPC()->GetSpawnGroupId()))
 					).c_str()

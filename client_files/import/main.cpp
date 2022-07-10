@@ -147,7 +147,7 @@ void ImportSpells(SharedDatabase *db) {
 		}
 
 		std::string escaped = ::EscapeString(buffer);
-		auto split = SplitString(escaped, '^');
+		auto split = Strings::Split(escaped, '^');
 		int line_columns = (int)split.size();
 
 		std::string sql;
@@ -225,7 +225,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 4) {
 			continue;
@@ -260,7 +260,7 @@ void ImportBaseData(SharedDatabase *db) {
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 10) {
 			continue;
@@ -318,7 +318,7 @@ void ImportDBStrings(SharedDatabase *db) {
 			}
 		}
 
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 2) {
 			continue;

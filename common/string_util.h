@@ -25,6 +25,7 @@
 #ifndef _WIN32
 // this doesn't appear to affect linux-based systems..need feedback for _WIN64
 #include <fmt/format.h>
+
 #endif
 
 #ifdef _WINDOWS
@@ -35,88 +36,110 @@
 
 #include "types.h"
 
+class Strings {
+public:
+	static const std::string ToLower(std::string s);
+	static const std::string ToUpper(std::string s);
+	static const std::string UcFirst(std::string s);
+	static std::vector<std::string> Wrap(std::vector<std::string> &src, std::string character);
+	static std::string Implode(std::string glue, std::vector<std::string> src);
+	template<typename T>
+	static std::string
+	ImplodePair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
+	{
+		if (src.empty()) {
+			return {};
+		}
+
+		std::ostringstream oss;
+
+		for (const T &src_iter: src) {
+			oss << encapsulation.first << src_iter << encapsulation.second << glue;
+		}
+
+		std::string output(oss.str());
+		output.resize(output.size() - glue.size());
+
+		return output;
+	}
+
+	static std::string ConvertToDigit(int n, std::string suffix);
+	static std::string NumberToWords(unsigned long long int n);
+	static std::string MoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
+	static std::string SecondsToTime(int duration, bool is_milliseconds = false);
+	static inline std::string MillisecondsToTime(int duration)
+	{
+		return SecondsToTime(duration, true);
+	}
+
+	static inline std::string &LTrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
+	{
+		str.erase(0, str.find_first_not_of(chars));
+		return str;
+	}
+
+	static inline std::string &RTrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
+	{
+		str.erase(str.find_last_not_of(chars) + 1);
+		return str;
+	}
+
+	static inline std::string &Trim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
+	{
+		return LTrim(RTrim(str, chars), chars);
+	}
+	static std::string Join(const std::vector<std::string> &ar, const std::string &delim);
+	static std::vector<std::string> Split(const std::string &s, const char delim = ',');
+	static std::vector<std::string> Split2(std::string s, std::string delimiter);
+	static std::string::size_type
+	SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
+	static std::string get_between(const std::string &s, std::string start_delim, std::string stop_delim);
+
+};
+
+const std::string StringFormat(const char *format, ...);
+const std::string vStringFormat(const char *format, va_list args);
+
 //std::string based
-const std::string str_tolower(std::string s);
-const std::string str_toupper(std::string s);
-const std::string ucfirst(std::string s);
-const std::string StringFormat(const char* format, ...);
-const std::string vStringFormat(const char* format, va_list args);
-std::vector<std::string> wrap(std::vector<std::string> &src, std::string character);
-std::string implode(std::string glue, std::vector<std::string> src);
-std::string convert2digit(int n, std::string suffix);
-std::string numberToWords(unsigned long long int n);
-std::string ConvertMoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
-std::string ConvertSecondsToTime(int duration, bool is_milliseconds = false);
-inline std::string ConvertMillisecondsToTime(int duration) {
-  return ConvertSecondsToTime(duration, true);
-}
+//const std::string str_toupper(std::string s);
+//const std::string ucfirst(std::string s);
+
+//std::vector<std::string> wrap(std::vector<std::string> &src, std::string character);
+
+
+//std::string implode(std::string glue, std::vector<std::string> src);
+//std::string convert2digit(int n, std::string suffix);
+//std::string numberToWords(unsigned long long int n);
+//std::string ConvertMoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
+//std::string ConvertSecondsToTime(int duration, bool is_milliseconds = false);
+//inline std::string ConvertMillisecondsToTime(int duration)
+//{
+//	return ConvertSecondsToTime(duration, true);
+//}
 
 // For converstion of numerics into English
 // Used for grid nodes, as NPC names remove numerals.
 // But general purpose
 
-const std::string NUM_TO_ENGLISH_X[] = { "", "One ", "Two ", "Three ", "Four ",
-				"Five ", "Six ", "Seven ", "Eight ", "Nine ", "Ten ", "Eleven ",
-				"Twelve ", "Thirteen ", "Fourteen ", "Fifteen ",
-				"Sixteen ", "Seventeen ", "Eighteen ", "Nineteen " };
+const std::string NUM_TO_ENGLISH_X[] = {
+	"", "One ", "Two ", "Three ", "Four ",
+	"Five ", "Six ", "Seven ", "Eight ", "Nine ", "Ten ", "Eleven ",
+	"Twelve ", "Thirteen ", "Fourteen ", "Fifteen ",
+	"Sixteen ", "Seventeen ", "Eighteen ", "Nineteen "
+};
 
-const std::string NUM_TO_ENGLISH_Y[] = { "", "", "Twenty ", "Thirty ", "Forty ",
-				"Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety " };
-
-/**
- * @param str
- * @param chars
- * @return
- */
-inline std::string &ltrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
-{
-	str.erase(0, str.find_first_not_of(chars));
-	return str;
-}
-
-/**
- * @param str
- * @param chars
- * @return
- */
-inline std::string &rtrim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
-{
-	str.erase(str.find_last_not_of(chars) + 1);
-	return str;
-}
-
-/**
- * @param str
- * @param chars
- * @return
- */
-inline std::string &trim(std::string &str, const std::string &chars = "\t\n\v\f\r ")
-{
-	return ltrim(rtrim(str, chars), chars);
-}
-
-template <typename T>
-std::string implode(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<T> &src)
-{
-	if (src.empty()) {
-		return {};
-	}
-
-	std::ostringstream oss;
-
-	for (const T &src_iter : src) {
-		oss << encapsulation.first << src_iter << encapsulation.second << glue;
-	}
-
-	std::string output(oss.str());
-	output.resize(output.size() - glue.size());
-
-	return output;
-}
+const std::string NUM_TO_ENGLISH_Y[] = {
+	"", "", "Twenty ", "Thirty ", "Forty ",
+	"Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety "
+};
 
 // _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
-template <typename T1, typename T2>
-std::vector<std::string> join_pair(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::pair<T1, T2>> &src)
+template<typename T1, typename T2>
+std::vector<std::string> join_pair(
+	const std::string &glue,
+	const std::pair<char, char> &encapsulation,
+	const std::vector<std::pair<T1, T2>> &src
+)
 {
 	if (src.empty()) {
 		return {};
@@ -124,7 +147,7 @@ std::vector<std::string> join_pair(const std::string &glue, const std::pair<char
 
 	std::vector<std::string> output;
 
-	for (const std::pair<T1, T2> &src_iter : src) {
+	for (const std::pair<T1, T2> &src_iter: src) {
 		output.push_back(
 
 			fmt::format(
@@ -144,8 +167,12 @@ std::vector<std::string> join_pair(const std::string &glue, const std::pair<char
 }
 
 // _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
-template <typename T1, typename T2, typename T3, typename T4>
-std::vector<std::string> join_tuple(const std::string &glue, const std::pair<char, char> &encapsulation, const std::vector<std::tuple<T1, T2, T3, T4>> &src)
+template<typename T1, typename T2, typename T3, typename T4>
+std::vector<std::string> join_tuple(
+	const std::string &glue,
+	const std::pair<char, char> &encapsulation,
+	const std::vector<std::tuple<T1, T2, T3, T4>> &src
+)
 {
 	if (src.empty()) {
 		return {};
@@ -153,7 +180,7 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 
 	std::vector<std::string> output;
 
-	for (const std::tuple<T1, T2, T3, T4> &src_iter : src) {
+	for (const std::tuple<T1, T2, T3, T4> &src_iter: src) {
 
 		output.push_back(
 
@@ -181,57 +208,52 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 	return output;
 }
 
-std::vector<std::string> SplitString(const std::string &s, const char delim = ',');
-std::vector<std::string> split_string(std::string s, std::string delimiter);
-std::string get_between(const std::string &s, std::string start_delim, std::string stop_delim);
-std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator = ',');
-std::string EscapeString(const char *src, size_t sz);
+//std::string::size_type
+//Strings::SearchDelim(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 std::string EscapeString(const std::string &s);
 bool StringIsNumber(const std::string &s);
-void ToLowerString(std::string &s);
-void ToUpperString(std::string &s);
-std::string JoinString(const std::vector<std::string>& ar, const std::string &delim);
-void find_replace(std::string& string_subject, const std::string& search_string, const std::string& replace_string);
+//std::string Strings::Join(const std::vector<std::string> &ar, const std::string &delim);
+void find_replace(std::string &string_subject, const std::string &search_string, const std::string &replace_string);
 std::string replace_string(std::string subject, const std::string &search, const std::string &replace);
 void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
 std::string commify(const std::string &number);
-
-//const char based
-
-bool atobool(const char* iBool);
-bool isAlphaNumeric(const char *text);
-bool strn0cpyt(char* dest, const char* source, uint32 size);
-char *CleanMobName(const char *in, char *out);
-char *RemoveApostrophes(const char *s);
-char* strn0cpy(char* dest, const char* source, uint32 size);
-const char *ConvertArray(int64 input, char *returnchar);
-const char *ConvertArrayF(float input, char *returnchar);
-const char *MakeLowerString(const char *source);
-uint32 hextoi(const char* num);
-uint64 hextoi64(const char* num);
-void MakeLowerString(const char *source, char *target);
-void RemoveApostrophes(std::string &s);
-std::string convert2digit(int n, std::string suffix);
-std::string numberToWords(unsigned long long int n);
-std::string FormatName(const std::string& char_name);
-bool IsAllowedWorldServerCharacterList(char c);
-void SanitizeWorldServerName(char *name);
 std::string SanitizeWorldServerName(std::string server_long_name);
 std::string repeat(std::string s, int n);
 std::vector<std::string> GetBadWords();
 bool contains(std::vector<std::string> container, std::string element);
 
+// old c string functions
+
+bool atobool(const char *iBool);
+bool isAlphaNumeric(const char *text);
+bool strn0cpyt(char *dest, const char *source, uint32 size);
+char *CleanMobName(const char *in, char *out);
+char *RemoveApostrophes(const char *s);
+char *strn0cpy(char *dest, const char *source, uint32 size);
+const char *ConvertArray(int64 input, char *returnchar);
+const char *ConvertArrayF(float input, char *returnchar);
+const char *MakeLowerString(const char *source);
+uint32 hextoi(const char *num);
+uint64 hextoi64(const char *num);
+void MakeLowerString(const char *source, char *target);
+void RemoveApostrophes(std::string &s);
+std::string FormatName(const std::string &char_name);
+bool IsAllowedWorldServerCharacterList(char c);
+void SanitizeWorldServerName(char *name);
+
+
 template<typename InputIterator, typename OutputIterator>
 auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)
 {
-    for (; first != last; ++first) {
-        if(*first == '_') {
-            *result = ' ';
-        } else if (isalpha(*first) || *first == '`') {
-            *result = *first;
-        }
-    }
-    return result;
+	for (; first != last; ++first) {
+		if (*first == '_') {
+			*result = ' ';
+		}
+		else if (isalpha(*first) || *first == '`') {
+			*result = *first;
+		}
+	}
+	return result;
 }
 
 #endif

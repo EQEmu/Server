@@ -22,7 +22,7 @@ void CombatRecord::Stop()
 		mob_name,
 		time_in_combat > 0 ? (damage_received / time_in_combat) : damage_received,
 		time_in_combat > 0 ? (heal_received / time_in_combat) : heal_received,
-		time_in_combat > 0 ? ConvertSecondsToTime(time_in_combat) : "",
+		time_in_combat > 0 ? Strings::SecondsToTime(time_in_combat) : "",
 		time_in_combat
 	);
 }

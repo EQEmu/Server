@@ -25,8 +25,8 @@ void command_gearup(Client *c, const Seperator *sep)
 
 		if (auto res = cli.Get(url.c_str())) {
 			if (res->status == 200) {
-				for (auto &s: SplitString(res->body, ';')) {
-					if (!trim(s).empty()) {
+				for (auto &s: Strings::Split(res->body, ';')) {
+					if (!Strings::Trim(s).empty()) {
 						auto results = database.QueryDatabase(s);
 						if (!results.ErrorMessage().empty()) {
 							c->Message(

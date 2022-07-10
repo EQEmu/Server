@@ -40,7 +40,7 @@ uint32 ZoneStore::GetZoneID(const char *in_zone_name)
 		return 0;
 	}
 
-	std::string zone_name = str_tolower(in_zone_name);
+	std::string zone_name = Strings::ToLower(in_zone_name);
 
 	return GetZoneID(zone_name);
 }

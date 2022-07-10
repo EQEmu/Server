@@ -251,7 +251,7 @@ static void GMSayHookCallBackProcessWorld(uint16 log_category, std::string messa
 	find_replace(message, std::string("%"), std::string("."));
 
 	if (message.find('\n') != std::string::npos) {
-		auto message_split = SplitString(message, '\n');
+		auto message_split = Strings::Split(message, '\n');
 
 		for (size_t iter = 0; iter < message_split.size(); ++iter) {
 			zoneserver_list.SendEmoteMessage(

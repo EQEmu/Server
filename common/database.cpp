@@ -1156,7 +1156,7 @@ uint8 Database::GetPEQZone(uint32 zone_id, uint32 version){
 
 bool Database::CheckNameFilter(std::string name, bool surname)
 {
-	name = str_tolower(name);
+	name = Strings::ToLower(name);
 
 	// the minimum 4 is enforced by the client too
 	if (name.empty() || name.size() < 4) {
@@ -1196,7 +1196,7 @@ bool Database::CheckNameFilter(std::string name, bool surname)
 	}
 
 	for (auto row : results) {
-		std::string current_row = str_tolower(row[0]);
+		std::string current_row = Strings::ToLower(row[0]);
 		if (name.find(current_row) != std::string::npos) {
 			return false;
 		}
@@ -2358,7 +2358,7 @@ bool Database::CopyCharacter(
 		results = QueryDatabase(
 			fmt::format(
 				"SELECT {} FROM {} WHERE {} = {}",
-				implode(",", wrap(columns, "`")),
+				Strings::Implode(",", Strings::Wrap(columns, "`")),
 				table_name,
 				character_id_column_name,
 				source_character_id
@@ -2394,7 +2394,7 @@ bool Database::CopyCharacter(
 		std::vector<std::string> insert_rows;
 
 		for (auto &r: new_rows) {
-			std::string insert_row = "(" + implode(",", wrap(r, "'")) + ")";
+			std::string insert_row = "(" + Strings::Implode(",", Strings::Wrap(r, "'")) + ")";
 			insert_rows.emplace_back(insert_row);
 		}
 
@@ -2412,8 +2412,8 @@ bool Database::CopyCharacter(
 				fmt::format(
 					"INSERT INTO {} ({}) VALUES {}",
 					table_name,
-					implode(",", wrap(columns, "`")),
-					implode(",", insert_rows)
+					Strings::Implode(",", Strings::Wrap(columns, "`")),
+					Strings::Implode(",", insert_rows)
 				)
 			);
 
@@ -2465,8 +2465,8 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 
 			if (auto res = cli.Get(request_uri.get_path().c_str())) {
 				if (res->status == 200) {
-					for (auto &s: SplitString(res->body, ';')) {
-						if (!trim(s).empty()) {
+					for (auto &s: Strings::Split(res->body, ';')) {
+						if (!Strings::Trim(s).empty()) {
 							auto results = QueryDatabase(s);
 							if (!results.ErrorMessage().empty()) {
 								LogError("Error sourcing SQL [{}]", results.ErrorMessage());

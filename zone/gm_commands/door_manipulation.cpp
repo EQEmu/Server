@@ -431,40 +431,40 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"[{}] - [X] + [{}]",
-					implode(" | ", move_x_options_negative),
-					implode(" | ", move_x_options_positive)
+					Strings::Implode(" | ", move_x_options_negative),
+					Strings::Implode(" | ", move_x_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [Y] + [{}]",
-					implode(" | ", move_y_options_negative),
-					implode(" | ", move_y_options_positive)
+					Strings::Implode(" | ", move_y_options_negative),
+					Strings::Implode(" | ", move_y_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [Z] + [{}]",
-					implode(" | ", move_z_options_negative),
-					implode(" | ", move_z_options_positive)
+					Strings::Implode(" | ", move_z_options_negative),
+					Strings::Implode(" | ", move_z_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [H] + [{}]",
-					implode(" | ", move_h_options_negative),
-					implode(" | ", move_h_options_positive)
+					Strings::Implode(" | ", move_h_options_negative),
+					Strings::Implode(" | ", move_h_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [Size] + [{}]",
-					implode(" | ", set_size_options_negative),
-					implode(" | ", set_size_options_positive)
+					Strings::Implode(" | ", set_size_options_negative),
+					Strings::Implode(" | ", set_size_options_positive)
 				).c_str()
 			);
 
@@ -476,7 +476,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 	// create
 	if (arg1 == "create") {
-		std::string model     = str_toupper(arg2);
+		std::string model     = Strings::ToUpper(arg2);
 		uint16      entity_id = entity_list.CreateDoor(
 			model.c_str(),
 			c->GetPosition(),
@@ -493,7 +493,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	// set model
 	if (arg1 == "model") {
 		Doors       *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
-		std::string model = str_toupper(arg2);
+		std::string model = Strings::ToUpper(arg2);
 		if (door) {
 			door->SetDoorName(model.c_str());
 		}
@@ -612,7 +612,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"[Incline] [{}]",
-				implode(" | ", incline_normal_options)
+				Strings::Implode(" | ", incline_normal_options)
 			).c_str()
 		);
 
@@ -620,8 +620,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"[Incline Increments] [{}] - | + [{}]",
-				implode(" | ", incline_negative_options),
-				implode(" | ", incline_positive_options)
+				Strings::Implode(" | ", incline_negative_options),
+				Strings::Implode(" | ", incline_positive_options)
 			).c_str()
 		);
 	}
@@ -733,7 +733,7 @@ void DoorManipulation::DisplayObjectResultToClient(
 	}
 
 	if (!buffered_links.empty()) {
-		c->Message(Chat::White, implode(" ", buffered_links).c_str());
+		c->Message(Chat::White, Strings::Implode(" ", buffered_links).c_str());
 	}
 }
 
@@ -781,6 +781,6 @@ void DoorManipulation::DisplayModelsFromFileResults(
 	}
 
 	if (!buffered_links.empty()) {
-		c->Message(Chat::White, implode(" ", buffered_links).c_str());
+		c->Message(Chat::White, Strings::Implode(" ", buffered_links).c_str());
 	}
 }

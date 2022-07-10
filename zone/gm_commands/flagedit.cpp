@@ -85,7 +85,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 			std::stoul(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
-		std::string zone_short_name = str_tolower(ZoneName(zone_id, true));
+		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
 		bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 		if (zone_id && !is_unknown_zone) {
 			std::string zone_long_name = ZoneLongName(zone_id);
@@ -120,7 +120,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 		}
 
 		std::string popup_text = "<table>";
-		
+
 		popup_text += "<tr><td>Zone</td><td>Flag Required</td></tr>";
 
 		for (auto row : results) {
@@ -154,7 +154,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 			std::stoul(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
-		std::string zone_short_name = str_tolower(ZoneName(zone_id, true));
+		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
 		bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 		if (zone_id && !is_unknown_zone) {
 			if (arguments < 3) {
@@ -164,7 +164,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 				);
 				return;
 			}
-			
+
 			std::string flag_name = EscapeString(sep->argplus[3]);
 			std::string zone_long_name = ZoneLongName(zone_id);
 
@@ -209,7 +209,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 			std::stoul(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
-		std::string zone_short_name = str_tolower(ZoneName(zone_id, true));
+		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
 		bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 		if (zone_id && !is_unknown_zone) {
 			std::string zone_long_name = ZoneLongName(zone_id);
@@ -237,7 +237,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 			std::stoul(sep->arg[2]) :
 			ZoneID(sep->arg[2])
 		);
-		std::string zone_short_name = str_tolower(ZoneName(zone_id, true));
+		std::string zone_short_name = Strings::ToLower(ZoneName(zone_id, true));
 		bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 		if (zone_id && !is_unknown_zone) {
 			std::string zone_long_name = ZoneLongName(zone_id);

@@ -331,7 +331,7 @@ public:
 		find_replace(message, std::string("%"), std::string("."));
 
 		if (message.find('\n') != std::string::npos) {
-			auto message_split = SplitString(message, '\n');
+			auto message_split = Strings::Split(message, '\n');
 			entity_list.MessageStatus(
 				0,
 				AccountStatus::QuestTroupe,

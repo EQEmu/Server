@@ -462,7 +462,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 		std::string query(
 			fmt::format(
 				"REPLACE INTO `rule_values`(`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES {}",
-				implode(
+				Strings::ImplodePair(
 					",",
 					std::pair<char, char>('(', ')'),
 					join_tuple(",", std::pair<char, char>('\'', '\''), injected_rule_entries)
@@ -529,7 +529,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 		std::string query (
 			fmt::format(
 				"DELETE FROM `rule_values` WHERE `rule_name` IN ({})",
-				implode(",", std::pair<char, char>('\'', '\''), orphaned_rule_entries)
+				Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned_rule_entries)
 			)
 		);
 

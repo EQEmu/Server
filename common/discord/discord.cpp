@@ -21,7 +21,7 @@ void Discord::SendWebhookMessage(const std::string &message, const std::string &
 	}
 
 	// split
-	auto s = SplitString(webhook_url, '/');
+	auto s = Strings::Split(webhook_url, '/');
 
 	// url
 	std::string base_url = fmt::format("{}//{}", s[0], s[2]);
