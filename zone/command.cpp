@@ -766,7 +766,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 			).c_str()
 		);
 
-		c->Message(Chat::Yellow, "You can avoid this message by creating placeholder items so you can reload them dynamically.");
+		c->Message(Chat::Yellow, "If you want to be able to add new items to your server while it is online, you need to create placeholder entries in the database ahead of time and do not add or remove rows/entries. Only modify the existing placeholder rows/entries to safely use #hotfix.");
 
 		return;
 	}
@@ -785,7 +785,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 			).c_str()
 		);
 
-		c->Message(Chat::Yellow, "You can avoid this message by creating placeholder spells so you can reload them dynamically.");
+		c->Message(Chat::Yellow, "If you want to be able to add new spells to your server while it is online, you need to create placeholder entries in the database ahead of time and do not add or remove rows/entries. Only modify the existing placeholder rows/entries to safely use #hotfix.");
 
 		c->Message(Chat::Yellow, "Note: You may still have to distribute a spell file, even with dynamic changes.");
 
