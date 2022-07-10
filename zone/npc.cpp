@@ -703,7 +703,7 @@ void NPC::QueryLoot(Client* to, bool is_pet_query)
 				Chat::White,
 				fmt::format(
 					"Money | {}",
-					Strings::MoneyToString(
+					Strings::Money(
 						platinum,
 						gold,
 						silver,

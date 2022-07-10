@@ -43,7 +43,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			fmt::format(
 				"Money for {} | {}",
 				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-				Strings::MoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,

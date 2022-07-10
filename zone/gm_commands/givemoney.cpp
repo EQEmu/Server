@@ -35,7 +35,7 @@ void command_givemoney(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Added {} to {}.",
-			Strings::MoneyToString(
+			Strings::Money(
 				platinum,
 				gold,
 				silver,

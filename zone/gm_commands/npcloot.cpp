@@ -132,12 +132,12 @@ void command_npcloot(Client *c, const Seperator *sep)
 					gold ||
 					platinum
 				) ?
-				Strings::MoneyToString(
-					platinum,
-					gold,
-					silver,
-					copper
-				) :
+					Strings::Money(
+						platinum,
+						gold,
+						silver,
+						copper
+					) :
 				"no money"
 			);
 

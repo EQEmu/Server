@@ -1349,7 +1349,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 			client->MessageString(
 				Chat::Yellow,
 				YOU_RECEIVE,
-				Strings::MoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,

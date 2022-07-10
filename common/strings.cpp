@@ -358,7 +358,7 @@ std::string Strings::NumberToWords(unsigned long long int n)
 
 	return res;
 }
-std::string Strings::MoneyToString(uint32 platinum, uint32 gold, uint32 silver, uint32 copper)
+std::string Strings::Money(uint32 platinum, uint32 gold, uint32 silver, uint32 copper)
 {
 	std::string money_string = "Unknown";
 	if (copper && silver && gold && platinum) { // CSGP

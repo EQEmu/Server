@@ -1029,7 +1029,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				Chat::Yellow,
 				fmt::format(
 					"This corpse Contains {}.",
-					Strings::MoneyToString(
+					Strings::Money(
 						GetPlatinum(),
 						GetGold(),
 						GetSilver(),
@@ -1534,7 +1534,7 @@ void Corpse::QueryLoot(Client* to) {
 			Chat::White,
 			fmt::format(
 				"Money | {}",
-				Strings::MoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,

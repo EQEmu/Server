@@ -53,7 +53,7 @@ public:
 	static std::string Implode(std::string glue, std::vector<std::string> src);
 	static std::string Join(const std::vector<std::string> &ar, const std::string &delim);
 	static std::string MillisecondsToTime(int duration);
-	static std::string MoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
+	static std::string Money(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
 	static std::string NumberToWords(unsigned long long int n);
 	static std::string Repeat(std::string s, int n);
 	static std::string Replace(std::string subject, const std::string &search, const std::string &replace);

@@ -1195,7 +1195,7 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 			initiator->MessageString(
 				Chat::MoneySplit,
 				YOU_RECEIVE,
-				Strings::MoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,
