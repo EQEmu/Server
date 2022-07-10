@@ -539,7 +539,7 @@
             and added by the network interface driver.
             </summary>
             <param name="adaptHandle">the interface that will be used to send the packet</param>
-            <param name="data">Contains the data of the packet to send (including the various protocol headers)</param>
+            <param name="data">contains the data of the packet to send (including the various protocol headers)</param>
             <param name="size">the dimension of the buffer pointed by data</param>
             <returns>0 if the packet is succesfully sent, -1 otherwise.</returns>
         </member>
@@ -559,7 +559,7 @@
             </summary>
         </member>
         <member name="M:SharpPcap.SafeNativeMethods.pcap_lib_version">
-            <summary>Returns a pointer to a string giving information about the version of the libpcap library being used; note that it Contains more information than just a version number. </summary>
+            <summary>Returns a pointer to a string giving information about the version of the libpcap library being used; note that it contains more information than just a version number. </summary>
         </member>
         <member name="M:SharpPcap.SafeNativeMethods.pcap_dump_file(System.IntPtr)">
             <summary>return the standard I/O stream of the 'savefile' opened by pcap_dump_open().</summary>
@@ -699,7 +699,7 @@
         </member>
         <member name="F:SharpPcap.PcapDevice.m_pcapIf">
             <summary>
-            Low level interface object that Contains device specific information
+            Low level interface object that contains device specific information
             </summary>
         </member>
         <member name="F:SharpPcap.PcapDevice.m_pcapDumpHandle">
@@ -1071,7 +1071,7 @@
         <member name="T:SharpPcap.PcapInterface">
             <summary>
             managed version of struct pcap_if
-            NOTE: we can't use pcap_if directly because the class Contains
+            NOTE: we can't use pcap_if directly because the class contains
             a pointer to pcap_if that will be freed when the
             device memory is freed, so instead convert the unmanaged structure
             to a managed one to avoid this issue
@@ -1242,7 +1242,7 @@
         </member>
         <member name="T:SharpPcap.StatisticsModeEventArgs">
             <summary>
-            Event that Contains statistics mode data
+            Event that contains statistics mode data
             NOTE: WinPcap only
             </summary>
         </member>

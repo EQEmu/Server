@@ -214,7 +214,7 @@ namespace EQ {
 			}
 
 			if(offsets_[i] != 0xFFFFFFFFU) {
-				EQ_EXCEPT("Fixed Memory Hash Set", "Could not insert a Repeat value at this index.");
+				EQ_EXCEPT("Fixed Memory Hash Set", "Could not insert a repeat value at this index.");
 			} else {
 				offsets_[i] = current_offset_;
 				memcpy(&elements_[current_offset_], data, size);
