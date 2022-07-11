@@ -1653,6 +1653,11 @@ void Perl_Client_QuestReward(Client* self, Mob* mob, uint32 copper, uint32 silve
 	self->QuestReward(mob, copper, silver, gold, platinum, item_id, exp, faction);
 }
 
+void Perl_Client_CashReward(Client* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)
+{
+	self->CashReward(copper, silver, gold, platinum);
+}
+
 uint32_t Perl_Client_GetMoney(Client* self, int8 type, int8 subtype)
 {
 	return self->GetMoney(type, subtype);
@@ -2416,6 +2421,7 @@ void perl_register_client()
 	package.add("CalcPriceMod", (float(*)(Client*, Mob*))&Perl_Client_CalcPriceMod);
 	package.add("CalcPriceMod", (float(*)(Client*, Mob*, bool))&Perl_Client_CalcPriceMod);
 	package.add("CanHaveSkill", &Perl_Client_CanHaveSkill);
+	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
 	package.add("CharacterID", &Perl_Client_CharacterID);
 	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
