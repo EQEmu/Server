@@ -8807,6 +8807,8 @@ void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platin
 	outbuf->gold = gold;
 	outbuf->platinum = platinum;
 
+	AddMoneyToPP(copper, silver, gold, platinum);
+
 	QueuePacket(outapp.get());
 }
 
