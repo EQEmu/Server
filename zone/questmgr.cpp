@@ -1183,26 +1183,13 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 			platinum
 		)
 	) {
-		initiator->AddMoneyToPP(
+		initiator->CashReward(
 			copper,
 			silver,
 			gold,
 			platinum,
-			true
 		);
 
-		if (initiator) {
-			initiator->MessageString(
-				Chat::MoneySplit,
-				YOU_RECEIVE,
-				ConvertMoneyToString(
-					platinum,
-					gold,
-					silver,
-					copper
-				).c_str()
-			);
-		}
 	}
 }
 
