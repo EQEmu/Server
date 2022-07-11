@@ -1187,7 +1187,7 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 			copper,
 			silver,
 			gold,
-			platinum,
+			platinum
 		);
 
 	}
