@@ -876,7 +876,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			quest_npc = true;
 		}
 
-		std::vector<EQ::Any> item_list;
+		std::vector<std::any> item_list;
 		std::list<EQ::ItemInstance*> items;
 		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; ++i) {
 			EQ::ItemInstance *inst = m_inv.GetItem(i);

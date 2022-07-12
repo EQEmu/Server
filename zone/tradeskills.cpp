@@ -134,7 +134,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 			EQ::ItemInstance *aug = tobe_auged->GetAugment(slot);
 			if(aug) {
-				std::vector<EQ::Any> args;
+				std::vector<std::any> args;
 				args.push_back(aug);
 				parse->EventItem(EVENT_AUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
@@ -164,7 +164,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 				user->Message(Chat::Red, "Error: Wrong augmentation distiller for safely removing this augment.");
 				return;
 			}
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(aug);
 			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 

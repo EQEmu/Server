@@ -20,8 +20,8 @@
 #define _EQE_QUESTINTERFACE_H
 
 #include "../common/types.h"
-#include "../common/any.h"
 #include "event_codes.h"
+#include <any>
 
 class Client;
 class NPC;
@@ -34,19 +34,19 @@ namespace EQ
 class QuestInterface {
 public:
 	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	
 	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt) { return false; }
 	virtual bool HasGlobalQuestSub(QuestEventID evt) { return false; }
@@ -65,13 +65,13 @@ public:
 	virtual void LoadEncounterScript(std::string filename, std::string encounter_name) { }
 
 	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers) { return 0; }
+		std::vector<std::any> *extra_pointers) { return 0; }
 	
 	virtual void AddVar(std::string name, std::string val) { }
 	virtual std::string GetVar(std::string name) { return std::string(); }
