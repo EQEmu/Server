@@ -105,8 +105,8 @@ bool TaskManager::LoadTasks(int single_task)
 		m_task_data[task_id]->cash_reward             = task.cashreward;
 		m_task_data[task_id]->experience_reward       = task.xpreward;
 		m_task_data[task_id]->reward_method           = (TaskMethodType) task.rewardmethod;
-		m_task_data[task_id]->reward_radiant_crystals = task.reward_radiant_crystals;
-		m_task_data[task_id]->reward_ebon_crystals    = task.reward_ebon_crystals;
+		m_task_data[task_id]->reward_points           = task.reward_points;
+		m_task_data[task_id]->reward_point_type       = static_cast<AltCurrencyType>(task.reward_point_type);
 		m_task_data[task_id]->faction_reward          = task.faction_reward;
 		m_task_data[task_id]->min_level               = task.minlevel;
 		m_task_data[task_id]->max_level               = task.maxlevel;
@@ -1213,8 +1213,7 @@ void TaskManager::SendActiveTaskDescription(
 	task_description_header->open_window    = bring_up_task_journal;
 	task_description_header->task_type      = static_cast<uint32>(m_task_data[task_id]->type);
 
-	constexpr uint32_t reward_radiant_type = 4; // Radiant Crystals, anything else is Ebon for shared tasks
-	task_description_header->reward_type = m_task_data[task_id]->reward_radiant_crystals > 0 ? reward_radiant_type : 0;
+	task_description_header->reward_type = static_cast<int>(m_task_data[task_id]->reward_point_type);
 
 	Ptr = (char *) task_description_header + sizeof(TaskDescriptionHeader_Struct);
 
@@ -1257,10 +1256,8 @@ void TaskManager::SendActiveTaskDescription(
 
 	tdt = (TaskDescriptionTrailer_Struct *) Ptr;
 	// shared tasks show radiant/ebon crystal reward, non-shared tasks show generic points
-	tdt->Points               = m_task_data[task_id]->reward_ebon_crystals;
-	if (m_task_data[task_id]->reward_radiant_crystals > 0) {
-		tdt->Points = m_task_data[task_id]->reward_radiant_crystals;
-	}
+	tdt->Points = m_task_data[task_id]->reward_points;
+
 	tdt->has_reward_selection = 0; // TODO: new rewards window
 
 	client->QueuePacket(outapp);
