@@ -2,6 +2,33 @@
 #include "eqemu_logsys.h"
 #include "crash.h"
 
+std::string execute(const std::string &cmd, bool return_result = true)
+{
+	const char *file_name = "exec-result";
+
+	if (return_result) {
+#ifdef _WINDOWS
+		std::system((cmd + " > " + file_name + " 2>&1").c_str());
+#else
+		std::system((cmd + " > " + file_name + " 2>&1").c_str());
+#endif
+	}
+	else {
+		std::system((cmd).c_str());
+	}
+
+	std::string result;
+
+	if (return_result) {
+		std::ifstream file(file_name);
+		result = {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+		std::remove(file_name);
+
+	}
+
+	return result;
+}
+
 #if defined(_WINDOWS) && defined(CRASH_LOGGING)
 #include "StackWalker.h"
 
@@ -125,9 +152,23 @@ void set_exception_handler() {
 
 void print_trace()
 {
-	auto uid = geteuid();
+	bool does_gdb_exist = execute("gdb -v").find("GNU") != std::string::npos;
+	if (!does_gdb_exist) {
+		LogCrash("[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed");
+		std::exit(1);
+	}
 
+	auto uid = geteuid();
 	std::string temp_output_file = "/tmp/dump-output";
+
+	// check for passwordless sudo if not root
+	if (uid != 0) {
+		bool has_passwordless_sudo = execute("sudo -n true").find("a password is required") == std::string::npos;
+		if (!has_passwordless_sudo) {
+			LogCrash("[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root.");
+			std::exit(1);
+		}
+	}
 
 	char pid_buf[30];
 	sprintf(pid_buf, "%d", getpid());
@@ -136,7 +177,6 @@ void print_trace()
 	int child_pid = fork();
 	if (!child_pid) {
 		int fd = open(temp_output_file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-
 		dup2(fd, 1); // redirect output to stderr
 		fprintf(stdout, "stack trace for %s pid=%s\n", name_buf, pid_buf);
 		if (uid == 0) {
