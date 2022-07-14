@@ -139,19 +139,19 @@ void command_logs(Client *c, const Seperator *sep)
 				);
 			}
 
-			std::string gmsay_string = JoinString(gmsay, "-");
-			std::string console_string = JoinString(console, "-");
-			std::string file_string = JoinString(file, "-");
-			std::string discord_string = JoinString(discord, "-");
+			std::string gmsay_string = Strings::Join(gmsay, "-");
+			std::string console_string = Strings::Join(console, "-");
+			std::string file_string = Strings::Join(file, "-");
+			std::string discord_string = Strings::Join(discord, "-");
 
 			c->Message(
 				0,
 				fmt::format(
 					"G [{}] C [{}] F [{}] D [{}] [{}] [{}] ",
-					rtrim(gmsay_string, "-"),
-					rtrim(console_string, "-"),
-					rtrim(file_string, "-"),
-					rtrim(discord_string, "-"),
+					Strings::RTrim(gmsay_string, "-"),
+					Strings::RTrim(console_string, "-"),
+					Strings::RTrim(file_string, "-"),
+					Strings::RTrim(discord_string, "-"),
 					index,
 					Logs::LogCategoryName[index]
 				).c_str()
