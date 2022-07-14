@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPELLS_NEW_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpellsNewRepository {
@@ -751,12 +751,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -1329,14 +1329,14 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(spells_new_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(spells_new_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(spells_new_entry.player_1) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(spells_new_entry.teleport_zone) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(spells_new_entry.you_cast) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(spells_new_entry.other_casts) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(spells_new_entry.cast_on_you) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(spells_new_entry.cast_on_other) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(spells_new_entry.spell_fades) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spells_new_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spells_new_entry.player_1) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(spells_new_entry.teleport_zone) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(spells_new_entry.you_cast) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(spells_new_entry.other_casts) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(spells_new_entry.cast_on_you) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(spells_new_entry.cast_on_other) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(spells_new_entry.spell_fades) + "'");
 		update_values.push_back(columns[9] + " = " + std::to_string(spells_new_entry.range));
 		update_values.push_back(columns[10] + " = " + std::to_string(spells_new_entry.aoerange));
 		update_values.push_back(columns[11] + " = " + std::to_string(spells_new_entry.pushback));
@@ -1570,7 +1570,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				spells_new_entry.id
 			)
@@ -1587,14 +1587,14 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(spells_new_entry.id));
-		insert_values.push_back("'" + EscapeString(spells_new_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.player_1) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.teleport_zone) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.you_cast) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.other_casts) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.cast_on_you) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.cast_on_other) + "'");
-		insert_values.push_back("'" + EscapeString(spells_new_entry.spell_fades) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.player_1) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.teleport_zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.you_cast) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.other_casts) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.cast_on_you) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.cast_on_other) + "'");
+		insert_values.push_back("'" + Strings::Escape(spells_new_entry.spell_fades) + "'");
 		insert_values.push_back(std::to_string(spells_new_entry.range));
 		insert_values.push_back(std::to_string(spells_new_entry.aoerange));
 		insert_values.push_back(std::to_string(spells_new_entry.pushback));
@@ -1828,7 +1828,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -1853,14 +1853,14 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(spells_new_entry.id));
-			insert_values.push_back("'" + EscapeString(spells_new_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.player_1) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.teleport_zone) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.you_cast) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.other_casts) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.cast_on_you) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.cast_on_other) + "'");
-			insert_values.push_back("'" + EscapeString(spells_new_entry.spell_fades) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.player_1) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.teleport_zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.you_cast) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.other_casts) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.cast_on_you) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.cast_on_other) + "'");
+			insert_values.push_back("'" + Strings::Escape(spells_new_entry.spell_fades) + "'");
 			insert_values.push_back(std::to_string(spells_new_entry.range));
 			insert_values.push_back(std::to_string(spells_new_entry.aoerange));
 			insert_values.push_back(std::to_string(spells_new_entry.pushback));
@@ -2090,7 +2090,7 @@ public:
 			insert_values.push_back(std::to_string(spells_new_entry.field235));
 			insert_values.push_back(std::to_string(spells_new_entry.field236));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -2099,7 +2099,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

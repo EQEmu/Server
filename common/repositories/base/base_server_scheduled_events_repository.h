@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SERVER_SCHEDULED_EVENTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseServerScheduledEventsRepository {
@@ -91,12 +91,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -228,9 +228,9 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(server_scheduled_events_entry.description) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(server_scheduled_events_entry.event_type) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(server_scheduled_events_entry.event_data) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(server_scheduled_events_entry.description) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(server_scheduled_events_entry.event_type) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(server_scheduled_events_entry.event_data) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(server_scheduled_events_entry.minute_start));
 		update_values.push_back(columns[5] + " = " + std::to_string(server_scheduled_events_entry.hour_start));
 		update_values.push_back(columns[6] + " = " + std::to_string(server_scheduled_events_entry.day_start));
@@ -241,7 +241,7 @@ public:
 		update_values.push_back(columns[11] + " = " + std::to_string(server_scheduled_events_entry.day_end));
 		update_values.push_back(columns[12] + " = " + std::to_string(server_scheduled_events_entry.month_end));
 		update_values.push_back(columns[13] + " = " + std::to_string(server_scheduled_events_entry.year_end));
-		update_values.push_back(columns[14] + " = '" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(server_scheduled_events_entry.cron_expression) + "'");
 		update_values.push_back(columns[15] + " = FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
 		update_values.push_back(columns[16] + " = FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
 
@@ -249,7 +249,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				server_scheduled_events_entry.id
 			)
@@ -266,9 +266,9 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.id));
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.description) + "'");
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_type) + "'");
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_data) + "'");
+		insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.description) + "'");
+		insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.event_type) + "'");
+		insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.event_data) + "'");
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.minute_start));
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.hour_start));
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.day_start));
@@ -279,7 +279,7 @@ public:
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.day_end));
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.month_end));
 		insert_values.push_back(std::to_string(server_scheduled_events_entry.year_end));
-		insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
+		insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.cron_expression) + "'");
 		insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
 		insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
 
@@ -287,7 +287,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -312,9 +312,9 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.id));
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.description) + "'");
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_type) + "'");
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.event_data) + "'");
+			insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.description) + "'");
+			insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.event_type) + "'");
+			insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.event_data) + "'");
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.minute_start));
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.hour_start));
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.day_start));
@@ -325,11 +325,11 @@ public:
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.day_end));
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.month_end));
 			insert_values.push_back(std::to_string(server_scheduled_events_entry.year_end));
-			insert_values.push_back("'" + EscapeString(server_scheduled_events_entry.cron_expression) + "'");
+			insert_values.push_back("'" + Strings::Escape(server_scheduled_events_entry.cron_expression) + "'");
 			insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.created_at > 0 ? std::to_string(server_scheduled_events_entry.created_at) : "null") + ")");
 			insert_values.push_back("FROM_UNIXTIME(" + (server_scheduled_events_entry.deleted_at > 0 ? std::to_string(server_scheduled_events_entry.deleted_at) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -338,7 +338,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

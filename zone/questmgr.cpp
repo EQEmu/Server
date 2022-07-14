@@ -21,7 +21,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 
 #include "entity.h"
@@ -1195,7 +1195,7 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 			initiator->MessageString(
 				Chat::MoneySplit,
 				YOU_RECEIVE,
-				ConvertMoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,
@@ -2992,7 +2992,7 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 {
 	QuestManagerCurrentQuestVars();
 
-	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+	return Saylink::Create(saylink_text, silent, link_name);
 }
 
 std::string QuestManager::getcharnamebyid(uint32 char_id) {
@@ -3401,7 +3401,7 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 }
 
 std::string QuestManager::secondstotime(int duration) {
-	return ConvertSecondsToTime(duration);
+	return Strings::SecondsToTime(duration);
 }
 
 std::string QuestManager::gethexcolorcode(std::string color_name) {

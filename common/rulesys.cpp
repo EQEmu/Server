@@ -18,7 +18,7 @@
 
 #include "rulesys.h"
 #include "database.h"
-#include "string_util.h"
+#include "strings.h"
 #include <cstdlib>
 #include <cstring>
 #include <fmt/format.h>
@@ -367,7 +367,7 @@ void RuleManager::_SaveRule(Database *database, RuleType type, uint16 index) {
 			m_activeRuleset,
 			_GetRuleName(type, index),
 			value_string,
-			EscapeString(_GetRuleNotes(type, index)).c_str()
+			Strings::Escape(_GetRuleNotes(type, index)).c_str()
 	);
 
 	database->QueryDatabase(query);
@@ -441,7 +441,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 					ruleset_id,								// `ruleset_id`
 					rd_iter.first,							// `rule_name`
 					rd_iter.second.first,					// `rule_value`
-					EscapeString(*rd_iter.second.second)	// `notes`
+					Strings::Escape(*rd_iter.second.second)	// `notes`
 				)
 			);
 
@@ -462,7 +462,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 		std::string query(
 			fmt::format(
 				"REPLACE INTO `rule_values`(`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES {}",
-				implode(
+				Strings::ImplodePair(
 					",",
 					std::pair<char, char>('(', ')'),
 					join_tuple(",", std::pair<char, char>('\'', '\''), injected_rule_entries)
@@ -529,7 +529,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 		std::string query (
 			fmt::format(
 				"DELETE FROM `rule_values` WHERE `rule_name` IN ({})",
-				implode(",", std::pair<char, char>('\'', '\''), orphaned_rule_entries)
+				Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned_rule_entries)
 			)
 		);
 
@@ -577,7 +577,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 		std::string query(
 			fmt::format(
 				"UPDATE `rule_values` SET `notes` = '{}' WHERE `ruleset_id` = '{}' AND `rule_name` = '{}'",
-				EscapeString(rule.notes),
+				Strings::Escape(rule.notes),
 				row[0],
 				row[1]
 			)

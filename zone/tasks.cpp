@@ -1,7 +1,7 @@
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "client.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"

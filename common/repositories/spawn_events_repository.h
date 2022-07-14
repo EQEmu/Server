@@ -22,7 +22,7 @@
 #define EQEMU_SPAWN_EVENTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_spawn_events_repository.h"
 
 class SpawnEventsRepository: public BaseSpawnEventsRepository {

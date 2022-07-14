@@ -13,7 +13,7 @@
 #define EQEMU_BASE_TASK_ACTIVITIES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseTaskActivitiesRepository {
@@ -88,12 +88,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -227,24 +227,24 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(task_activities_entry.activityid));
 		update_values.push_back(columns[2] + " = " + std::to_string(task_activities_entry.step));
 		update_values.push_back(columns[3] + " = " + std::to_string(task_activities_entry.activitytype));
-		update_values.push_back(columns[4] + " = '" + EscapeString(task_activities_entry.target_name) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(task_activities_entry.item_list) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(task_activities_entry.skill_list) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(task_activities_entry.spell_list) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(task_activities_entry.description_override) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(task_activities_entry.target_name) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(task_activities_entry.item_list) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(task_activities_entry.skill_list) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(task_activities_entry.spell_list) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(task_activities_entry.description_override) + "'");
 		update_values.push_back(columns[9] + " = " + std::to_string(task_activities_entry.goalid));
-		update_values.push_back(columns[10] + " = '" + EscapeString(task_activities_entry.goal_match_list) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(task_activities_entry.goal_match_list) + "'");
 		update_values.push_back(columns[11] + " = " + std::to_string(task_activities_entry.goalmethod));
 		update_values.push_back(columns[12] + " = " + std::to_string(task_activities_entry.goalcount));
 		update_values.push_back(columns[13] + " = " + std::to_string(task_activities_entry.delivertonpc));
-		update_values.push_back(columns[14] + " = '" + EscapeString(task_activities_entry.zones) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(task_activities_entry.zones) + "'");
 		update_values.push_back(columns[15] + " = " + std::to_string(task_activities_entry.optional));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				task_activities_entry.taskid
 			)
@@ -264,24 +264,24 @@ public:
 		insert_values.push_back(std::to_string(task_activities_entry.activityid));
 		insert_values.push_back(std::to_string(task_activities_entry.step));
 		insert_values.push_back(std::to_string(task_activities_entry.activitytype));
-		insert_values.push_back("'" + EscapeString(task_activities_entry.target_name) + "'");
-		insert_values.push_back("'" + EscapeString(task_activities_entry.item_list) + "'");
-		insert_values.push_back("'" + EscapeString(task_activities_entry.skill_list) + "'");
-		insert_values.push_back("'" + EscapeString(task_activities_entry.spell_list) + "'");
-		insert_values.push_back("'" + EscapeString(task_activities_entry.description_override) + "'");
+		insert_values.push_back("'" + Strings::Escape(task_activities_entry.target_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(task_activities_entry.item_list) + "'");
+		insert_values.push_back("'" + Strings::Escape(task_activities_entry.skill_list) + "'");
+		insert_values.push_back("'" + Strings::Escape(task_activities_entry.spell_list) + "'");
+		insert_values.push_back("'" + Strings::Escape(task_activities_entry.description_override) + "'");
 		insert_values.push_back(std::to_string(task_activities_entry.goalid));
-		insert_values.push_back("'" + EscapeString(task_activities_entry.goal_match_list) + "'");
+		insert_values.push_back("'" + Strings::Escape(task_activities_entry.goal_match_list) + "'");
 		insert_values.push_back(std::to_string(task_activities_entry.goalmethod));
 		insert_values.push_back(std::to_string(task_activities_entry.goalcount));
 		insert_values.push_back(std::to_string(task_activities_entry.delivertonpc));
-		insert_values.push_back("'" + EscapeString(task_activities_entry.zones) + "'");
+		insert_values.push_back("'" + Strings::Escape(task_activities_entry.zones) + "'");
 		insert_values.push_back(std::to_string(task_activities_entry.optional));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -309,20 +309,20 @@ public:
 			insert_values.push_back(std::to_string(task_activities_entry.activityid));
 			insert_values.push_back(std::to_string(task_activities_entry.step));
 			insert_values.push_back(std::to_string(task_activities_entry.activitytype));
-			insert_values.push_back("'" + EscapeString(task_activities_entry.target_name) + "'");
-			insert_values.push_back("'" + EscapeString(task_activities_entry.item_list) + "'");
-			insert_values.push_back("'" + EscapeString(task_activities_entry.skill_list) + "'");
-			insert_values.push_back("'" + EscapeString(task_activities_entry.spell_list) + "'");
-			insert_values.push_back("'" + EscapeString(task_activities_entry.description_override) + "'");
+			insert_values.push_back("'" + Strings::Escape(task_activities_entry.target_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(task_activities_entry.item_list) + "'");
+			insert_values.push_back("'" + Strings::Escape(task_activities_entry.skill_list) + "'");
+			insert_values.push_back("'" + Strings::Escape(task_activities_entry.spell_list) + "'");
+			insert_values.push_back("'" + Strings::Escape(task_activities_entry.description_override) + "'");
 			insert_values.push_back(std::to_string(task_activities_entry.goalid));
-			insert_values.push_back("'" + EscapeString(task_activities_entry.goal_match_list) + "'");
+			insert_values.push_back("'" + Strings::Escape(task_activities_entry.goal_match_list) + "'");
 			insert_values.push_back(std::to_string(task_activities_entry.goalmethod));
 			insert_values.push_back(std::to_string(task_activities_entry.goalcount));
 			insert_values.push_back(std::to_string(task_activities_entry.delivertonpc));
-			insert_values.push_back("'" + EscapeString(task_activities_entry.zones) + "'");
+			insert_values.push_back("'" + Strings::Escape(task_activities_entry.zones) + "'");
 			insert_values.push_back(std::to_string(task_activities_entry.optional));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -331,7 +331,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

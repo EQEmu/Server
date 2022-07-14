@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_SKILLS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_skills_repository.h"
 
 class CharacterSkillsRepository: public BaseCharacterSkillsRepository {

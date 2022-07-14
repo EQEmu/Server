@@ -1349,7 +1349,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 			client->MessageString(
 				Chat::Yellow,
 				YOU_RECEIVE,
-				ConvertMoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,
@@ -1696,7 +1696,7 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 		std::vector<std::string> update_saylinks;
 
 		for (auto &increment: update_increments) {
-			auto task_update_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			auto task_update_saylink = Saylink::Create(
 				fmt::format(
 					"#task update {} {} {}",
 					task->task_id,
@@ -1718,7 +1718,7 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 				task->activity[activity_id].done_count,
 				task->activity[activity_id].activity_state,
 				Tasks::GetActivityStateDescription(task->activity[activity_id].activity_state),
-				implode(" | ", update_saylinks)
+				Strings::Implode(" | ", update_saylinks)
 			).c_str()
 		);
 	}

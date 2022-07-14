@@ -13,7 +13,7 @@
 #define EQEMU_BASE_CHARACTER_DATA_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterDataRepository {
@@ -346,12 +346,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -654,10 +654,10 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(character_data_entry.account_id));
-		update_values.push_back(columns[2] + " = '" + EscapeString(character_data_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(character_data_entry.last_name) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(character_data_entry.title) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(character_data_entry.suffix) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(character_data_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(character_data_entry.last_name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(character_data_entry.title) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(character_data_entry.suffix) + "'");
 		update_values.push_back(columns[6] + " = " + std::to_string(character_data_entry.zone_id));
 		update_values.push_back(columns[7] + " = " + std::to_string(character_data_entry.zone_instance));
 		update_values.push_back(columns[8] + " = " + std::to_string(character_data_entry.y));
@@ -744,7 +744,7 @@ public:
 		update_values.push_back(columns[89] + " = " + std::to_string(character_data_entry.autosplit_enabled));
 		update_values.push_back(columns[90] + " = " + std::to_string(character_data_entry.lfp));
 		update_values.push_back(columns[91] + " = " + std::to_string(character_data_entry.lfg));
-		update_values.push_back(columns[92] + " = '" + EscapeString(character_data_entry.mailkey) + "'");
+		update_values.push_back(columns[92] + " = '" + Strings::Escape(character_data_entry.mailkey) + "'");
 		update_values.push_back(columns[93] + " = " + std::to_string(character_data_entry.xtargets));
 		update_values.push_back(columns[94] + " = " + std::to_string(character_data_entry.firstlogon));
 		update_values.push_back(columns[95] + " = " + std::to_string(character_data_entry.e_aa_effects));
@@ -759,7 +759,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				character_data_entry.id
 			)
@@ -777,10 +777,10 @@ public:
 
 		insert_values.push_back(std::to_string(character_data_entry.id));
 		insert_values.push_back(std::to_string(character_data_entry.account_id));
-		insert_values.push_back("'" + EscapeString(character_data_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(character_data_entry.last_name) + "'");
-		insert_values.push_back("'" + EscapeString(character_data_entry.title) + "'");
-		insert_values.push_back("'" + EscapeString(character_data_entry.suffix) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_data_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_data_entry.last_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_data_entry.title) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_data_entry.suffix) + "'");
 		insert_values.push_back(std::to_string(character_data_entry.zone_id));
 		insert_values.push_back(std::to_string(character_data_entry.zone_instance));
 		insert_values.push_back(std::to_string(character_data_entry.y));
@@ -867,7 +867,7 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.autosplit_enabled));
 		insert_values.push_back(std::to_string(character_data_entry.lfp));
 		insert_values.push_back(std::to_string(character_data_entry.lfg));
-		insert_values.push_back("'" + EscapeString(character_data_entry.mailkey) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_data_entry.mailkey) + "'");
 		insert_values.push_back(std::to_string(character_data_entry.xtargets));
 		insert_values.push_back(std::to_string(character_data_entry.firstlogon));
 		insert_values.push_back(std::to_string(character_data_entry.e_aa_effects));
@@ -882,7 +882,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -908,10 +908,10 @@ public:
 
 			insert_values.push_back(std::to_string(character_data_entry.id));
 			insert_values.push_back(std::to_string(character_data_entry.account_id));
-			insert_values.push_back("'" + EscapeString(character_data_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(character_data_entry.last_name) + "'");
-			insert_values.push_back("'" + EscapeString(character_data_entry.title) + "'");
-			insert_values.push_back("'" + EscapeString(character_data_entry.suffix) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_data_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_data_entry.last_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_data_entry.title) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_data_entry.suffix) + "'");
 			insert_values.push_back(std::to_string(character_data_entry.zone_id));
 			insert_values.push_back(std::to_string(character_data_entry.zone_instance));
 			insert_values.push_back(std::to_string(character_data_entry.y));
@@ -998,7 +998,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.autosplit_enabled));
 			insert_values.push_back(std::to_string(character_data_entry.lfp));
 			insert_values.push_back(std::to_string(character_data_entry.lfg));
-			insert_values.push_back("'" + EscapeString(character_data_entry.mailkey) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_data_entry.mailkey) + "'");
 			insert_values.push_back(std::to_string(character_data_entry.xtargets));
 			insert_values.push_back(std::to_string(character_data_entry.firstlogon));
 			insert_values.push_back(std::to_string(character_data_entry.e_aa_effects));
@@ -1009,7 +1009,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.e_last_invsnapshot));
 			insert_values.push_back("FROM_UNIXTIME(" + (character_data_entry.deleted_at > 0 ? std::to_string(character_data_entry.deleted_at) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -1018,7 +1018,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

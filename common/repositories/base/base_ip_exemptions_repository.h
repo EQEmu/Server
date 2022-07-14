@@ -13,7 +13,7 @@
 #define EQEMU_BASE_IP_EXEMPTIONS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseIpExemptionsRepository {
@@ -49,12 +49,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -158,14 +158,14 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(ip_exemptions_entry.exemption_ip) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(ip_exemptions_entry.exemption_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				ip_exemptions_entry.exemption_id
 			)
@@ -182,14 +182,14 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_id));
-		insert_values.push_back("'" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
+		insert_values.push_back("'" + Strings::Escape(ip_exemptions_entry.exemption_ip) + "'");
 		insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -214,10 +214,10 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_id));
-			insert_values.push_back("'" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
+			insert_values.push_back("'" + Strings::Escape(ip_exemptions_entry.exemption_ip) + "'");
 			insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -226,7 +226,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -22,7 +22,7 @@
 #define EQEMU_NPC_SPELLS_EFFECTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_npc_spells_effects_repository.h"
 
 class NpcSpellsEffectsRepository: public BaseNpcSpellsEffectsRepository {

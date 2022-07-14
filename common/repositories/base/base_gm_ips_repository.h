@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GM_IPS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGmIpsRepository {
@@ -49,12 +49,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -158,15 +158,15 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(gm_ips_entry.name) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(gm_ips_entry.name) + "'");
 		update_values.push_back(columns[1] + " = " + std::to_string(gm_ips_entry.account_id));
-		update_values.push_back(columns[2] + " = '" + EscapeString(gm_ips_entry.ip_address) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(gm_ips_entry.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				gm_ips_entry.account_id
 			)
@@ -182,15 +182,15 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(gm_ips_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(gm_ips_entry.name) + "'");
 		insert_values.push_back(std::to_string(gm_ips_entry.account_id));
-		insert_values.push_back("'" + EscapeString(gm_ips_entry.ip_address) + "'");
+		insert_values.push_back("'" + Strings::Escape(gm_ips_entry.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -214,11 +214,11 @@ public:
 		for (auto &gm_ips_entry: gm_ips_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(gm_ips_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(gm_ips_entry.name) + "'");
 			insert_values.push_back(std::to_string(gm_ips_entry.account_id));
-			insert_values.push_back("'" + EscapeString(gm_ips_entry.ip_address) + "'");
+			insert_values.push_back("'" + Strings::Escape(gm_ips_entry.ip_address) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -227,7 +227,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

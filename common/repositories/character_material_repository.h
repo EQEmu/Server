@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_MATERIAL_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_material_repository.h"
 
 class CharacterMaterialRepository: public BaseCharacterMaterialRepository {

@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_POTIONBELT_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_potionbelt_repository.h"
 
 class CharacterPotionbeltRepository: public BaseCharacterPotionbeltRepository {

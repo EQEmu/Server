@@ -46,7 +46,7 @@ void command_serverinfo(Client *c, const Seperator *sep)
 	popup_text.append(
 		fmt::format(
 			"<tr><td>Uptime</td><td>{}</td></tr>",
-			ConvertSecondsToTime(uptime)
+			Strings::SecondsToTime(uptime)
 		)
 	);
 

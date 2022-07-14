@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NPC_TYPES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNpcTypesRepository {
@@ -412,12 +412,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -763,8 +763,8 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(npc_types_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(npc_types_entry.lastname) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_types_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(npc_types_entry.lastname) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(npc_types_entry.level));
 		update_values.push_back(columns[4] + " = " + std::to_string(npc_types_entry.race));
 		update_values.push_back(columns[5] + " = " + std::to_string(npc_types_entry.class_));
@@ -790,8 +790,8 @@ public:
 		update_values.push_back(columns[25] + " = " + std::to_string(npc_types_entry.mindmg));
 		update_values.push_back(columns[26] + " = " + std::to_string(npc_types_entry.maxdmg));
 		update_values.push_back(columns[27] + " = " + std::to_string(npc_types_entry.attack_count));
-		update_values.push_back(columns[28] + " = '" + EscapeString(npc_types_entry.npcspecialattks) + "'");
-		update_values.push_back(columns[29] + " = '" + EscapeString(npc_types_entry.special_abilities) + "'");
+		update_values.push_back(columns[28] + " = '" + Strings::Escape(npc_types_entry.npcspecialattks) + "'");
+		update_values.push_back(columns[29] + " = '" + Strings::Escape(npc_types_entry.special_abilities) + "'");
 		update_values.push_back(columns[30] + " = " + std::to_string(npc_types_entry.aggroradius));
 		update_values.push_back(columns[31] + " = " + std::to_string(npc_types_entry.assistradius));
 		update_values.push_back(columns[32] + " = " + std::to_string(npc_types_entry.face));
@@ -810,7 +810,7 @@ public:
 		update_values.push_back(columns[45] + " = " + std::to_string(npc_types_entry.armortint_blue));
 		update_values.push_back(columns[46] + " = " + std::to_string(npc_types_entry.d_melee_texture1));
 		update_values.push_back(columns[47] + " = " + std::to_string(npc_types_entry.d_melee_texture2));
-		update_values.push_back(columns[48] + " = '" + EscapeString(npc_types_entry.ammo_idfile) + "'");
+		update_values.push_back(columns[48] + " = '" + Strings::Escape(npc_types_entry.ammo_idfile) + "'");
 		update_values.push_back(columns[49] + " = " + std::to_string(npc_types_entry.prim_melee_type));
 		update_values.push_back(columns[50] + " = " + std::to_string(npc_types_entry.sec_melee_type));
 		update_values.push_back(columns[51] + " = " + std::to_string(npc_types_entry.ranged_type));
@@ -891,7 +891,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				npc_types_entry.id
 			)
@@ -908,8 +908,8 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(npc_types_entry.id));
-		insert_values.push_back("'" + EscapeString(npc_types_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(npc_types_entry.lastname) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_types_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_types_entry.lastname) + "'");
 		insert_values.push_back(std::to_string(npc_types_entry.level));
 		insert_values.push_back(std::to_string(npc_types_entry.race));
 		insert_values.push_back(std::to_string(npc_types_entry.class_));
@@ -935,8 +935,8 @@ public:
 		insert_values.push_back(std::to_string(npc_types_entry.mindmg));
 		insert_values.push_back(std::to_string(npc_types_entry.maxdmg));
 		insert_values.push_back(std::to_string(npc_types_entry.attack_count));
-		insert_values.push_back("'" + EscapeString(npc_types_entry.npcspecialattks) + "'");
-		insert_values.push_back("'" + EscapeString(npc_types_entry.special_abilities) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_types_entry.npcspecialattks) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_types_entry.special_abilities) + "'");
 		insert_values.push_back(std::to_string(npc_types_entry.aggroradius));
 		insert_values.push_back(std::to_string(npc_types_entry.assistradius));
 		insert_values.push_back(std::to_string(npc_types_entry.face));
@@ -955,7 +955,7 @@ public:
 		insert_values.push_back(std::to_string(npc_types_entry.armortint_blue));
 		insert_values.push_back(std::to_string(npc_types_entry.d_melee_texture1));
 		insert_values.push_back(std::to_string(npc_types_entry.d_melee_texture2));
-		insert_values.push_back("'" + EscapeString(npc_types_entry.ammo_idfile) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_types_entry.ammo_idfile) + "'");
 		insert_values.push_back(std::to_string(npc_types_entry.prim_melee_type));
 		insert_values.push_back(std::to_string(npc_types_entry.sec_melee_type));
 		insert_values.push_back(std::to_string(npc_types_entry.ranged_type));
@@ -1036,7 +1036,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -1061,8 +1061,8 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(npc_types_entry.id));
-			insert_values.push_back("'" + EscapeString(npc_types_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(npc_types_entry.lastname) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_types_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_types_entry.lastname) + "'");
 			insert_values.push_back(std::to_string(npc_types_entry.level));
 			insert_values.push_back(std::to_string(npc_types_entry.race));
 			insert_values.push_back(std::to_string(npc_types_entry.class_));
@@ -1088,8 +1088,8 @@ public:
 			insert_values.push_back(std::to_string(npc_types_entry.mindmg));
 			insert_values.push_back(std::to_string(npc_types_entry.maxdmg));
 			insert_values.push_back(std::to_string(npc_types_entry.attack_count));
-			insert_values.push_back("'" + EscapeString(npc_types_entry.npcspecialattks) + "'");
-			insert_values.push_back("'" + EscapeString(npc_types_entry.special_abilities) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_types_entry.npcspecialattks) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_types_entry.special_abilities) + "'");
 			insert_values.push_back(std::to_string(npc_types_entry.aggroradius));
 			insert_values.push_back(std::to_string(npc_types_entry.assistradius));
 			insert_values.push_back(std::to_string(npc_types_entry.face));
@@ -1108,7 +1108,7 @@ public:
 			insert_values.push_back(std::to_string(npc_types_entry.armortint_blue));
 			insert_values.push_back(std::to_string(npc_types_entry.d_melee_texture1));
 			insert_values.push_back(std::to_string(npc_types_entry.d_melee_texture2));
-			insert_values.push_back("'" + EscapeString(npc_types_entry.ammo_idfile) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_types_entry.ammo_idfile) + "'");
 			insert_values.push_back(std::to_string(npc_types_entry.prim_melee_type));
 			insert_values.push_back(std::to_string(npc_types_entry.sec_melee_type));
 			insert_values.push_back(std::to_string(npc_types_entry.ranged_type));
@@ -1185,7 +1185,7 @@ public:
 			insert_values.push_back(std::to_string(npc_types_entry.always_aggro));
 			insert_values.push_back(std::to_string(npc_types_entry.exp_mod));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -1194,7 +1194,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

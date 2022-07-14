@@ -22,7 +22,7 @@
 #define EQEMU_SPELL_GLOBALS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_spell_globals_repository.h"
 
 class SpellGlobalsRepository: public BaseSpellGlobalsRepository {

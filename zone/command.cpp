@@ -16,7 +16,7 @@
 #include "../common/features.h"
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/net/eqstream.h"
 #include "../common/file_util.h"
@@ -592,7 +592,7 @@ void command_help(Client *c, const Seperator *sep)
 {
 	int found_count = 0;
 	std::string command_link;
-	std::string search_criteria = str_tolower(sep->argplus[1]);
+	std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 
 	for (const auto& cur : commandlist) {
 		if (!search_criteria.empty()) {
@@ -605,7 +605,7 @@ void command_help(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		command_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		command_link = Saylink::Create(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
@@ -664,7 +664,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string search_criteria = str_tolower(sep->argplus[1]);
+	std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 
 	auto find_iter = commandaliases.find(search_criteria);
 	if (find_iter == commandaliases.end()) {
@@ -687,7 +687,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto current_commmand_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto current_commmand_link = Saylink::Create(
 		fmt::format(
 			"{}{}",
 			COMMAND_CHAR,
@@ -712,7 +712,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		alias_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		alias_link = Saylink::Create(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,

@@ -19,7 +19,7 @@
 
 #include "inventory_slot.h"
 #include "textures.h"
-#include "string_util.h"
+#include "strings.h"
 
 
 int8 EQ::inventory::ConvertEquipmentIndexToTextureIndex(int16 slot_index)
@@ -86,7 +86,7 @@ bool EQ::InventorySlot::IsValidSlot() const
 {
 	if (_typeless)
 		return false;
-	
+
 	int16 slot_count = invtype::GetInvTypeSize(_type_index);
 	if (!slot_count || _slot_index < invslot::SLOT_BEGIN || _slot_index >= slot_count)
 		return false;
@@ -136,7 +136,7 @@ bool EQ::InventorySlot::IsWeaponIndex(int16 slot_index)
 {
 	if (slot_index == invslot::slotPrimary || slot_index == invslot::slotSecondary || slot_index == invslot::slotRange)
 		return true;
-	
+
 	return false;
 }
 
@@ -364,7 +364,7 @@ bool EQ::InventorySlot::operator<(const InventorySlot& rhs) const
 {
 	if (Typeless() || rhs.Typeless())
 		return inventory_slot_typeless_lessthan(*this, rhs);
-	
+
 	if (TypeIndex() < rhs.TypeIndex())
 		return true;
 
@@ -384,6 +384,6 @@ bool EQ::operator==(const InventorySlot& lhs, const InventorySlot& rhs)
 {
 	if (lhs.Typeless() || rhs.Typeless())
 		return ((lhs.SlotIndex() == rhs.SlotIndex()) && (lhs.ContainerIndex() == rhs.ContainerIndex()) && (lhs.SocketIndex() == rhs.SocketIndex()));
-	
+
 	return ((lhs.TypeIndex() == rhs.TypeIndex()) && (lhs.SlotIndex() == rhs.SlotIndex()) && (lhs.ContainerIndex() == rhs.ContainerIndex()) && (lhs.SocketIndex() == rhs.SocketIndex()));
 }

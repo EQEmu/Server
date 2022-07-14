@@ -22,7 +22,7 @@
 #define EQEMU_ACCOUNT_REWARDS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_account_rewards_repository.h"
 
 class AccountRewardsRepository: public BaseAccountRewardsRepository {

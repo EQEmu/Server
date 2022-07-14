@@ -22,7 +22,7 @@
 #define EQEMU_SPAWNENTRY_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_spawnentry_repository.h"
 
 class SpawnentryRepository: public BaseSpawnentryRepository {

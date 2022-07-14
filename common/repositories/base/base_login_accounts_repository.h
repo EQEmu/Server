@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOGIN_ACCOUNTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLoginAccountsRepository {
@@ -67,12 +67,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -189,11 +189,11 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(login_accounts_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(login_accounts_entry.account_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(login_accounts_entry.account_password) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(login_accounts_entry.account_email) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(login_accounts_entry.source_loginserver) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(login_accounts_entry.last_ip_address) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_accounts_entry.account_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(login_accounts_entry.account_password) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(login_accounts_entry.account_email) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(login_accounts_entry.source_loginserver) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(login_accounts_entry.last_ip_address) + "'");
 		update_values.push_back(columns[6] + " = FROM_UNIXTIME(" + (login_accounts_entry.last_login_date > 0 ? std::to_string(login_accounts_entry.last_login_date) : "null") + ")");
 		update_values.push_back(columns[7] + " = FROM_UNIXTIME(" + (login_accounts_entry.created_at > 0 ? std::to_string(login_accounts_entry.created_at) : "null") + ")");
 		update_values.push_back(columns[8] + " = FROM_UNIXTIME(" + (login_accounts_entry.updated_at > 0 ? std::to_string(login_accounts_entry.updated_at) : "null") + ")");
@@ -202,7 +202,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				login_accounts_entry.id
 			)
@@ -219,11 +219,11 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(login_accounts_entry.id));
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.account_name) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.account_password) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.account_email) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.source_loginserver) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.last_ip_address) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_accounts_entry.account_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_accounts_entry.account_password) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_accounts_entry.account_email) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_accounts_entry.source_loginserver) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_accounts_entry.last_ip_address) + "'");
 		insert_values.push_back("FROM_UNIXTIME(" + (login_accounts_entry.last_login_date > 0 ? std::to_string(login_accounts_entry.last_login_date) : "null") + ")");
 		insert_values.push_back("FROM_UNIXTIME(" + (login_accounts_entry.created_at > 0 ? std::to_string(login_accounts_entry.created_at) : "null") + ")");
 		insert_values.push_back("FROM_UNIXTIME(" + (login_accounts_entry.updated_at > 0 ? std::to_string(login_accounts_entry.updated_at) : "null") + ")");
@@ -232,7 +232,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -257,16 +257,16 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(login_accounts_entry.id));
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.account_name) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.account_password) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.account_email) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.source_loginserver) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.last_ip_address) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_accounts_entry.account_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_accounts_entry.account_password) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_accounts_entry.account_email) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_accounts_entry.source_loginserver) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_accounts_entry.last_ip_address) + "'");
 			insert_values.push_back("FROM_UNIXTIME(" + (login_accounts_entry.last_login_date > 0 ? std::to_string(login_accounts_entry.last_login_date) : "null") + ")");
 			insert_values.push_back("FROM_UNIXTIME(" + (login_accounts_entry.created_at > 0 ? std::to_string(login_accounts_entry.created_at) : "null") + ")");
 			insert_values.push_back("FROM_UNIXTIME(" + (login_accounts_entry.updated_at > 0 ? std::to_string(login_accounts_entry.updated_at) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -275,7 +275,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

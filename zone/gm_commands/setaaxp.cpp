@@ -16,7 +16,7 @@ void command_setaaxp(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	std::string aa_type = str_tolower(sep->arg[1]);
+	std::string aa_type = Strings::ToLower(sep->arg[1]);
 	std::string group_raid_string;
 	uint32 aa_experience = static_cast<uint32>(std::min(
 		std::stoull(sep->arg[2]),

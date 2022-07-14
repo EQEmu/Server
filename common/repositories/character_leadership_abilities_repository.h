@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_LEADERSHIP_ABILITIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_leadership_abilities_repository.h"
 
 class CharacterLeadershipAbilitiesRepository: public BaseCharacterLeadershipAbilitiesRepository {

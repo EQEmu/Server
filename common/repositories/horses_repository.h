@@ -22,7 +22,7 @@
 #define EQEMU_HORSES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_horses_repository.h"
 
 class HorsesRepository: public BaseHorsesRepository {

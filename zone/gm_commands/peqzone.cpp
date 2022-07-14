@@ -16,7 +16,7 @@ void command_peqzone(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"You must wait {} before using this command again.",
-					ConvertSecondsToTime(time_left)
+					Strings::SecondsToTime(time_left)
 				).c_str()
 			);
 			return;

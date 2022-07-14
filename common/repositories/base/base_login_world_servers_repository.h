@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOGIN_WORLD_SERVERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLoginWorldServersRepository {
@@ -70,12 +70,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -193,21 +193,21 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(login_world_servers_entry.long_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(login_world_servers_entry.short_name) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(login_world_servers_entry.tag_description) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_world_servers_entry.long_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(login_world_servers_entry.short_name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(login_world_servers_entry.tag_description) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(login_world_servers_entry.login_server_list_type_id));
 		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (login_world_servers_entry.last_login_date > 0 ? std::to_string(login_world_servers_entry.last_login_date) : "null") + ")");
-		update_values.push_back(columns[6] + " = '" + EscapeString(login_world_servers_entry.last_ip_address) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(login_world_servers_entry.last_ip_address) + "'");
 		update_values.push_back(columns[7] + " = " + std::to_string(login_world_servers_entry.login_server_admin_id));
 		update_values.push_back(columns[8] + " = " + std::to_string(login_world_servers_entry.is_server_trusted));
-		update_values.push_back(columns[9] + " = '" + EscapeString(login_world_servers_entry.note) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(login_world_servers_entry.note) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				login_world_servers_entry.id
 			)
@@ -224,21 +224,21 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(login_world_servers_entry.id));
-		insert_values.push_back("'" + EscapeString(login_world_servers_entry.long_name) + "'");
-		insert_values.push_back("'" + EscapeString(login_world_servers_entry.short_name) + "'");
-		insert_values.push_back("'" + EscapeString(login_world_servers_entry.tag_description) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.long_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.short_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.tag_description) + "'");
 		insert_values.push_back(std::to_string(login_world_servers_entry.login_server_list_type_id));
 		insert_values.push_back("FROM_UNIXTIME(" + (login_world_servers_entry.last_login_date > 0 ? std::to_string(login_world_servers_entry.last_login_date) : "null") + ")");
-		insert_values.push_back("'" + EscapeString(login_world_servers_entry.last_ip_address) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.last_ip_address) + "'");
 		insert_values.push_back(std::to_string(login_world_servers_entry.login_server_admin_id));
 		insert_values.push_back(std::to_string(login_world_servers_entry.is_server_trusted));
-		insert_values.push_back("'" + EscapeString(login_world_servers_entry.note) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.note) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -263,17 +263,17 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(login_world_servers_entry.id));
-			insert_values.push_back("'" + EscapeString(login_world_servers_entry.long_name) + "'");
-			insert_values.push_back("'" + EscapeString(login_world_servers_entry.short_name) + "'");
-			insert_values.push_back("'" + EscapeString(login_world_servers_entry.tag_description) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.long_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.short_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.tag_description) + "'");
 			insert_values.push_back(std::to_string(login_world_servers_entry.login_server_list_type_id));
 			insert_values.push_back("FROM_UNIXTIME(" + (login_world_servers_entry.last_login_date > 0 ? std::to_string(login_world_servers_entry.last_login_date) : "null") + ")");
-			insert_values.push_back("'" + EscapeString(login_world_servers_entry.last_ip_address) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.last_ip_address) + "'");
 			insert_values.push_back(std::to_string(login_world_servers_entry.login_server_admin_id));
 			insert_values.push_back(std::to_string(login_world_servers_entry.is_server_trusted));
-			insert_values.push_back("'" + EscapeString(login_world_servers_entry.note) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.note) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -282,7 +282,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

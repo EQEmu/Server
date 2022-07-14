@@ -37,7 +37,7 @@ void command_ban(Client *c, const Seperator *sep)
 
 	auto query = fmt::format(
 		"UPDATE account SET status = -2, ban_reason = '{}' WHERE id = {}",
-		EscapeString(reason),
+		Strings::Escape(reason),
 		account_id
 	);
 	auto results = database.QueryDatabase(query);

@@ -3335,7 +3335,7 @@ void EntityList::CorpseFix(Client* c)
 					cur->GetFixedZ(c->GetPosition()),
 					c->GetHeading()
 				);
-				
+
 				fixed_count++;
 			}
 		}
@@ -5129,7 +5129,7 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name)
 	}
 
 	for (auto bot : bot_list) {
-		if (bot->GetOwner() && str_tolower(bot->GetOwner()->GetCleanName()) == str_tolower(client_name)) {
+		if (bot->GetOwner() && Strings::ToLower(bot->GetOwner()->GetCleanName()) == Strings::ToLower(client_name)) {
 			client_bot_list.push_back(bot);
 		}
 	}

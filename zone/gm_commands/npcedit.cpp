@@ -178,7 +178,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	uint32 npc_id = c->GetTarget()->CastToNPC()->GetNPCTypeID();
 	auto npc_id_string = fmt::format(
 		"NPC ID {}",
-		commify(std::to_string(npc_id))
+		Strings::Commify(std::to_string(npc_id))
 	);
 
 	if (!strcasecmp(sep->arg[1], "name")) {
@@ -318,7 +318,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Health.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -339,7 +339,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Mana.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -466,7 +466,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now regenerates {} Health per Tick.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -487,7 +487,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now regenerates {} HP per Second.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -508,7 +508,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now regenerates {} Mana per Tick.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -529,7 +529,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Loottable ID {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -550,7 +550,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Merchant ID {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -601,7 +601,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Spell List ID {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -622,7 +622,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Spells Effects ID {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -651,7 +651,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 							faction_name,
 							faction_id
 						) :
-						commify(sep->arg[2])
+							Strings::Commify(sep->arg[2])
 					)
 				).c_str()
 			);
@@ -673,7 +673,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Adventure Template ID {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -694,7 +694,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Trap Template ID {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -716,8 +716,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now hits from {} to {} damage.",
 					npc_id_string,
-					commify(sep->arg[2]),
-					commify(sep->arg[3])
+					Strings::Commify(sep->arg[2]),
+					Strings::Commify(sep->arg[3])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -794,7 +794,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has an Aggro Radius of {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -815,7 +815,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has an Assist Radius of {}",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -873,7 +873,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Armor Tint ID {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -921,7 +921,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} is now using Ammo ID File {}.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -943,8 +943,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} will have Model {} set to their Primary and Model {} set to their Secondary on repop.",
 					npc_id_string,
-					commify(sep->arg[2]),
-					sep->IsNumber(3) ? commify(sep->arg[3]) : 0
+					Strings::Commify(sep->arg[2]),
+					sep->IsNumber(3) ? Strings::Commify(sep->arg[3]) : 0
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1414,7 +1414,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Strength.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1435,7 +1435,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Stamina.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1456,7 +1456,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Agility.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1477,7 +1477,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Dexterity.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1498,7 +1498,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Intelligence.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1519,7 +1519,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Wisdom.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1540,7 +1540,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Charisma.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1630,7 +1630,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Attack.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1651,7 +1651,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Accuracy.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1672,7 +1672,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Avoidance.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1693,7 +1693,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Slow Mitigation.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1756,7 +1756,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has a Scaling Rate of {}%%.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1777,7 +1777,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has a Spell Scaling Rate of {}%%.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -1801,7 +1801,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has a Heal Scaling Rate of {}%%.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2044,7 +2044,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Armor Class while Charmed.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2065,7 +2065,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now does {} Minimum Damage while Charmed.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2086,7 +2086,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now does {} Maximum Damage while Charmed.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2126,7 +2126,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Accuracy Rating while Charmed.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2147,7 +2147,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Avoidance Rating while Charmed.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2168,7 +2168,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has {} Attack while Charmed.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2226,7 +2226,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				"Usage: #npcedit rarespawn [Flag] - Sets an NPC's Rare Spawn Flag [0 = Not a Rare Spawn, 1 = Rare Spawn]"
-			);	
+			);
 		}
 		return;
 	} else if (!strcasecmp(sep->arg[1], "stuck_behavior")) {
@@ -2335,7 +2335,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} now has an Experience Modifier of {}%%.",
 					npc_id_string,
-					commify(sep->arg[2])
+					Strings::Commify(sep->arg[2])
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2373,7 +2373,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 						) :
 						std::to_string(animation_id)
 					),
-					commify(std::to_string(c->GetTarget()->CastToNPC()->GetSpawnGroupId()))
+					Strings::Commify(std::to_string(c->GetTarget()->CastToNPC()->GetSpawnGroupId()))
 				).c_str()
 			);
 			auto query = fmt::format(
@@ -2397,9 +2397,9 @@ void command_npcedit(Client *c, const Seperator *sep)
 					fmt::format(
 						"{} now has a Respawn Timer of {} ({}) on Spawn Group ID {}.",
 						npc_id_string,
-						ConvertSecondsToTime(respawn_time),
+						Strings::SecondsToTime(respawn_time),
 						respawn_time,
-						commify(std::to_string(c->GetTarget()->CastToNPC()->GetSpawnGroupId()))
+						Strings::Commify(std::to_string(c->GetTarget()->CastToNPC()->GetSpawnGroupId()))
 					).c_str()
 				);
 				auto query = fmt::format(
