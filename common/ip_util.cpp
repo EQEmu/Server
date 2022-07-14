@@ -30,8 +30,6 @@
 #include "net/dns.h"
 #include "event/task_scheduler.h"
 
-#define bzero(p, size)     (void)memset((p), 0, (size))
-
 /**
  * @param ip
  * @return
@@ -101,7 +99,7 @@ std::string IpUtil::GetLocalIPAddress()
 	}
 
 	// Set server_addr
-	bzero(&server_address, sizeof(server_address));
+	memset(&server_address, 0, sizeof(server_address));
 	server_address.sin_family      = AF_INET;
 	server_address.sin_addr.s_addr = inet_addr("172.217.160.99");
 	server_address.sin_port        = htons(80);
@@ -113,7 +111,7 @@ std::string IpUtil::GetLocalIPAddress()
 	}
 
 	// Get my ip address and port
-	bzero(&my_address, sizeof(my_address));
+	memset(&my_address, 0, sizeof(my_address));
 	socklen_t len = sizeof(my_address);
 	getsockname(sockfd, (struct sockaddr *) &my_address, &len);
 	inet_ntop(AF_INET, &my_address.sin_addr, my_ip_address, sizeof(my_ip_address));
