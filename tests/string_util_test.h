@@ -28,7 +28,6 @@ public:
 	StringUtilTest() {
 		TEST_ADD(StringUtilTest::StringFormatTest);
 		TEST_ADD(StringUtilTest::EscapeStringTest);
-		TEST_ADD(StringUtilTest::EscapeStringMemoryTest);
 		TEST_ADD(StringUtilTest::SearchDeliminatedStringTest);
 		TEST_ADD(StringUtilTest::SplitStringTest);
 	}
@@ -63,23 +62,6 @@ public:
 		t[9] = '\x1a';
 
 		auto s = Strings::Escape(t);
-		TEST_ASSERT(s.compare("abc\\x00\\n\\r\\\\\\'\\\"\\x1a") == 0);
-	}
-
-	void EscapeStringMemoryTest() {
-		char t[10] = { 0 };
-		t[0] = 'a';
-		t[1] = 'b';
-		t[2] = 'c';
-		t[3] = '\x00';
-		t[4] = '\n';
-		t[5] = '\r';
-		t[6] = '\\';
-		t[7] = '\'';
-		t[8] = '\"';
-		t[9] = '\x1a';
-
-		auto s = Strings::Escape(t, 10);
 		TEST_ASSERT(s.compare("abc\\x00\\n\\r\\\\\\'\\\"\\x1a") == 0);
 	}
 
