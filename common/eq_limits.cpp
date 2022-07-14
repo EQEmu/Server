@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,7 +11,7 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -26,7 +26,7 @@
 
 static bool global_dictionary_init = false;
 void EQ::InitializeDynamicLookups() {
-	if (global_dictionary_init == true)
+	if (global_dictionary_init)
 		return;
 
 	constants::InitializeDynamicLookups();
@@ -167,7 +167,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 			ClientUnknown::INULL, ClientUnknown::INULL, ClientUnknown::INULL,
 			ClientUnknown::INULL
 		),
-		
+
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
@@ -175,7 +175,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
 		ClientUnknown::INULL,
-		
+
 		false,
 		false,
 		false,
@@ -194,7 +194,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 			Client62::INULL, Client62::INULL, Client62::INULL,
 			Client62::INULL
 		),
-		
+
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
@@ -202,7 +202,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 		Client62::INULL,
 		Client62::INULL,
 		Client62::INULL,
-		
+
 		false,
 		false,
 		false,
@@ -221,7 +221,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 			Titanium::INULL,						Titanium::INULL,						Titanium::INULL,
 			Titanium::invtype::OTHER_SIZE
 		),
-		
+
 		Titanium::invslot::EQUIPMENT_BITMASK,
 		Titanium::invslot::GENERAL_BITMASK,
 		Titanium::invslot::CURSOR_BITMASK,
@@ -229,7 +229,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 		Titanium::invslot::CORPSE_BITMASK,
 		Titanium::invbag::SLOT_COUNT,
 		Titanium::invaug::SOCKET_COUNT,
-		
+
 		Titanium::inventory::AllowEmptyBagInBag,
 		Titanium::inventory::AllowClickCastFromBag,
 		Titanium::inventory::ConcatenateInvTypeLimbo,
@@ -248,7 +248,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 			SoF::INULL,							SoF::INULL,							SoF::INULL,
 			SoF::invtype::OTHER_SIZE
 		),
-		
+
 		SoF::invslot::EQUIPMENT_BITMASK,
 		SoF::invslot::GENERAL_BITMASK,
 		SoF::invslot::CURSOR_BITMASK,
@@ -256,7 +256,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 		SoF::invslot::CORPSE_BITMASK,
 		SoF::invbag::SLOT_COUNT,
 		SoF::invaug::SOCKET_COUNT,
-		
+
 		SoF::inventory::AllowEmptyBagInBag,
 		SoF::inventory::AllowClickCastFromBag,
 		SoF::inventory::ConcatenateInvTypeLimbo,
@@ -763,7 +763,7 @@ void EQ::inventory::InitializeDynamicLookups() {
 	// Notes:
 	// - Currently, there are only 3 known expansions that affect inventory-related settings in the clients..
 	//   -- Expansion::PoR "Prophecy of Ro" - toggles between 24 (set) and 16 (clear) bank slots
-	//   -- Expansion::TBS "The Buried Sea" - toggles slotPowerSource activated (set) and deactivated (clear) 
+	//   -- Expansion::TBS "The Buried Sea" - toggles slotPowerSource activated (set) and deactivated (clear)
 	//   -- Expansion::HoT "House of Thule" - toggles slotGeneral9/slotGeneral10 activated (set) and deactivated (clear)
 	// - Corspe size does not appear to reflect loss of active possessions slots
 	// - Inspect size does not appear to reflect loss of active equipment slots
@@ -772,7 +772,7 @@ void EQ::inventory::InitializeDynamicLookups() {
 	// - General9 and General10 slots are activated by GM flag when expansion bit is (clear)
 	// - Obviously, the client must support the expansion to allow any (set) or override condition
 
-	const uint32 dynamic_check_mask = 
+	const uint32 dynamic_check_mask =
 		(
 			EQ::expansions::bitPoR |
 			EQ::expansions::bitTBS |
@@ -1210,10 +1210,10 @@ void EQ::spells::InitializeDynamicLookups() {
 	if (spells_dictionary_init == true)
 		return;
 	spells_dictionary_init = true;
-	
+
 	if (RuleB(World, UseClientBasedExpansionSettings))
 		return;
-	
+
 	// use static references for now
 }
 
@@ -1239,7 +1239,7 @@ const EQ::spells::LookupEntry* EQ::spells::DynamicGMLookup(versions::ClientVersi
 	client_version = versions::ValidateClientVersion(client_version);
 	if (spells_dynamic_gm_lookup_entries[static_cast<int>(client_version)])
 		return spells_dynamic_gm_lookup_entries[static_cast<int>(client_version)].get();
-	
+
 	return &spells_static_lookup_entries[static_cast<int>(client_version)];
 }
 
