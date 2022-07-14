@@ -26,7 +26,7 @@
 #endif
 
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"

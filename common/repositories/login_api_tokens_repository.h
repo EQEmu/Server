@@ -22,7 +22,7 @@
 #define EQEMU_LOGIN_API_TOKENS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_login_api_tokens_repository.h"
 
 class LoginApiTokensRepository: public BaseLoginApiTokensRepository {

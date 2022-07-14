@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_INSPECT_MESSAGES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_inspect_messages_repository.h"
 
 class CharacterInspectMessagesRepository: public BaseCharacterInspectMessagesRepository {

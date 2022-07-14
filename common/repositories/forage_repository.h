@@ -22,7 +22,7 @@
 #define EQEMU_FORAGE_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_forage_repository.h"
 
 class ForageRepository: public BaseForageRepository {

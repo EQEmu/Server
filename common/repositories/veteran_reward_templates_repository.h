@@ -22,7 +22,7 @@
 #define EQEMU_VETERAN_REWARD_TEMPLATES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_veteran_reward_templates_repository.h"
 
 class VeteranRewardTemplatesRepository: public BaseVeteranRewardTemplatesRepository {

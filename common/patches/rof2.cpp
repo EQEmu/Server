@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@
 
 #include "../eq_packet_structs.h"
 #include "../misc_functions.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../inventory_profile.h"
 #include "rof2_structs.h"
 #include "../rulesys.h"
@@ -53,13 +53,13 @@ namespace RoF2
 	static inline structs::InventorySlot_Struct ServerToRoF2CorpseSlot(uint32 server_corpse_slot);
 	static inline uint32 ServerToRoF2CorpseMainSlot(uint32 server_corpse_slot);
 	static inline structs::TypelessInventorySlot_Struct ServerToRoF2TypelessSlot(uint32 server_slot, int16 server_type);
-	
+
 	// client to server inventory location converters
 	static inline uint32 RoF2ToServerSlot(structs::InventorySlot_Struct rof2_slot);
 	static inline uint32 RoF2ToServerCorpseSlot(structs::InventorySlot_Struct rof2_corpse_slot);
 	static inline uint32 RoF2ToServerCorpseMainSlot(uint32 rof2_corpse_slot);
 	static inline uint32 RoF2ToServerTypelessSlot(structs::TypelessInventorySlot_Struct rof2_slot, int16 rof2_type);
-	
+
 	// server to client say link converter
 	static inline void ServerToRoF2SayLink(std::string &rof2_saylink, const std::string &server_saylink);
 
@@ -2894,12 +2894,12 @@ namespace RoF2
 		EQApplicationPacket *inapp = *p;
 		*p = nullptr;
 		AARankInfo_Struct *emu = (AARankInfo_Struct*)inapp->pBuffer;
-		
+
 		// the structs::SendAA_Struct includes enough space for 1 prereq which is the min even if it has no prereqs
 		auto prereq_size = emu->total_prereqs > 1 ? (emu->total_prereqs - 1) * 8 : 0;
 		auto outapp = new EQApplicationPacket(OP_SendAATable, sizeof(structs::SendAA_Struct) + emu->total_effects * sizeof(structs::AA_Ability) + prereq_size);
 		inapp->SetReadPosition(sizeof(AARankInfo_Struct)+emu->total_effects * sizeof(AARankEffect_Struct));
-		
+
 
 		std::vector<int32> skill;
 		std::vector<int32> points;
@@ -2962,7 +2962,7 @@ namespace RoF2
 			outapp->WriteUInt32(inapp->ReadUInt32()); // base2
 			outapp->WriteUInt32(inapp->ReadUInt32()); // slot
  		}
-			
+
 		dest->FastQueuePacket(&outapp);
 		delete inapp;
 	}
@@ -5062,11 +5062,11 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
 		Log(Logs::Moderate, Logs::Netcode, "RoF2::DECODE(OP_MoveItem)");
-		
+
 		emu->from_slot = RoF2ToServerSlot(eq->from_slot);
 		emu->to_slot = RoF2ToServerSlot(eq->to_slot);
 		IN(number_in_stack);
-		
+
 		//LogNetcode("[RoF2] MoveItem Slot from [{}] to [{}], Number [{}]", emu->from_slot, emu->to_slot, emu->number_in_stack);
 
 		FINISH_DIRECT_DECODE();
@@ -5443,7 +5443,7 @@ namespace RoF2
 	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type)
 	{
 		const EQ::ItemData *item = inst->GetUnscaledItem();
-		
+
 		RoF2::structs::ItemSerializationHeader hdr;
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
@@ -5462,7 +5462,7 @@ namespace RoF2
 			slot_id = ServerToRoF2Slot(slot_id_in);
 			break;
 		}
-		
+
 		hdr.slot_type = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
 		hdr.main_slot = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
 		hdr.sub_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
@@ -5550,7 +5550,7 @@ namespace RoF2
 		ob.write("\0", 1);
 
 		ob.write("\0", 1);
-		
+
 		RoF2::structs::ItemBodyStruct ibs;
 		memset(&ibs, 0, sizeof(RoF2::structs::ItemBodyStruct));
 
@@ -5873,7 +5873,7 @@ namespace RoF2
 		iqbs.unknown37a = 0;	// (guessed position) New to RoF2
 		iqbs.unknown38 = 0;
 		iqbs.unknown39 = 1;
-		
+
 		ob.write((const char*)&iqbs, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
 
 		EQ::OutBuffer::pos_type count_pos = ob.tellp();
@@ -6073,7 +6073,7 @@ namespace RoF2
 
 		uint32 server_slot = EQ::invslot::SLOT_INVALID;
 		uint32 temp_slot = invslot::SLOT_INVALID;
-		
+
 		switch (rof2_slot.Type) {
 		case invtype::typePossessions: {
 			if (rof2_slot.Slot >= invslot::POSSESSIONS_BEGIN && rof2_slot.Slot <= invslot::POSSESSIONS_END) {
@@ -6188,11 +6188,11 @@ namespace RoF2
 	static inline uint32 RoF2ToServerCorpseSlot(structs::InventorySlot_Struct rof2_corpse_slot)
 	{
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
-		
+
 		if (rof2_corpse_slot.Type != invtype::typeCorpse || rof2_corpse_slot.SubIndex != invbag::SLOT_INVALID || rof2_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
 			ServerSlot = EQ::invslot::SLOT_INVALID;
 		}
-		
+
 		else {
 			ServerSlot = RoF2ToServerCorpseMainSlot(rof2_corpse_slot.Slot);
 		}
@@ -6346,7 +6346,7 @@ namespace RoF2
 			return;
 		}
 
-		auto segments = SplitString(server_saylink, '\x12');
+		auto segments = Strings::Split(server_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
@@ -6378,7 +6378,7 @@ namespace RoF2
 			return;
 		}
 
-		auto segments = SplitString(rof2_saylink, '\x12');
+		auto segments = Strings::Split(rof2_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {

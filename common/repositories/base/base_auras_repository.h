@@ -13,7 +13,7 @@
 #define EQEMU_BASE_AURAS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAurasRepository {
@@ -73,12 +73,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -200,7 +200,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(auras_entry.type));
 		update_values.push_back(columns[1] + " = " + std::to_string(auras_entry.npc_type));
-		update_values.push_back(columns[2] + " = '" + EscapeString(auras_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(auras_entry.name) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(auras_entry.spell_id));
 		update_values.push_back(columns[4] + " = " + std::to_string(auras_entry.distance));
 		update_values.push_back(columns[5] + " = " + std::to_string(auras_entry.aura_type));
@@ -214,7 +214,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				auras_entry.type
 			)
@@ -232,7 +232,7 @@ public:
 
 		insert_values.push_back(std::to_string(auras_entry.type));
 		insert_values.push_back(std::to_string(auras_entry.npc_type));
-		insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(auras_entry.name) + "'");
 		insert_values.push_back(std::to_string(auras_entry.spell_id));
 		insert_values.push_back(std::to_string(auras_entry.distance));
 		insert_values.push_back(std::to_string(auras_entry.aura_type));
@@ -246,7 +246,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -272,7 +272,7 @@ public:
 
 			insert_values.push_back(std::to_string(auras_entry.type));
 			insert_values.push_back(std::to_string(auras_entry.npc_type));
-			insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(auras_entry.name) + "'");
 			insert_values.push_back(std::to_string(auras_entry.spell_id));
 			insert_values.push_back(std::to_string(auras_entry.distance));
 			insert_values.push_back(std::to_string(auras_entry.aura_type));
@@ -282,7 +282,7 @@ public:
 			insert_values.push_back(std::to_string(auras_entry.icon));
 			insert_values.push_back(std::to_string(auras_entry.cast_time));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -291,7 +291,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

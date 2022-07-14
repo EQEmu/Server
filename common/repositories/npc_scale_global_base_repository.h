@@ -22,7 +22,7 @@
 #define EQEMU_NPC_SCALE_GLOBAL_BASE_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_npc_scale_global_base_repository.h"
 
 class NpcScaleGlobalBaseRepository: public BaseNpcScaleGlobalBaseRepository {

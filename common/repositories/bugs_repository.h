@@ -22,7 +22,7 @@
 #define EQEMU_BUGS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_bugs_repository.h"
 
 class BugsRepository: public BaseBugsRepository {

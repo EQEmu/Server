@@ -22,7 +22,7 @@
 #define EQEMU_LOGIN_ACCOUNTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_login_accounts_repository.h"
 
 class LoginAccountsRepository: public BaseLoginAccountsRepository {

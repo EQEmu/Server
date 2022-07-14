@@ -146,6 +146,8 @@ public:
 	const EQ::ItemData *IterateItems(uint32 *id) const;
 	const EQ::ItemData *GetItem(uint32 id) const;
 	const EvolveInfo *GetEvolveInfo(uint32 loregroup);
+	uint32 GetSharedItemsCount() { return m_shared_items_count; }
+	uint32 GetItemsCount();
 
 	/**
 	 * faction
@@ -181,6 +183,8 @@ public:
 	bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
 	void LoadSpells(void *data, int max_spells);
 	void LoadDamageShieldTypes(SPDat_Spell_Struct *sp, int32 iMaxSpellID);
+	uint32 GetSharedSpellsCount() { return m_shared_spells_count; }
+	uint32 GetSpellsCount();
 
 	/**
 	 * basedata
@@ -212,6 +216,9 @@ protected:
 	std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>  loot_drop_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                             base_data_mmf;
 	std::unique_ptr<EQ::MemoryMappedFile>                             spells_mmf;
+
+	uint32 m_shared_items_count = 0;
+	uint32 m_shared_spells_count = 0;
 };
 
 #endif /*SHAREDDB_H_*/

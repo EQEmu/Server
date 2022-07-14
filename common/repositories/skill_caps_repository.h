@@ -22,7 +22,7 @@
 #define EQEMU_SKILL_CAPS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_skill_caps_repository.h"
 
 class SkillCapsRepository: public BaseSkillCapsRepository {

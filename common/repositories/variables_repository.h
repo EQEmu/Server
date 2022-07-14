@@ -22,7 +22,7 @@
 #define EQEMU_VARIABLES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_variables_repository.h"
 
 class VariablesRepository: public BaseVariablesRepository {

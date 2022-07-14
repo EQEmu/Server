@@ -22,7 +22,7 @@
 #define EQEMU_SHAREDBANK_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class SharedbankRepository {
 public:
@@ -64,7 +64,7 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string InsertColumnsRaw()
@@ -79,7 +79,7 @@ public:
 			insert_columns.push_back(column);
 		}
 
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", insert_columns));
 	}
 
 	static std::string TableName()
@@ -206,13 +206,13 @@ public:
 		update_values.push_back(columns[7] + " = " + std::to_string(sharedbank_entry.augslot4));
 		update_values.push_back(columns[8] + " = " + std::to_string(sharedbank_entry.augslot5));
 		update_values.push_back(columns[9] + " = " + std::to_string(sharedbank_entry.augslot6));
-		update_values.push_back(columns[10] + " = '" + EscapeString(sharedbank_entry.custom_data) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(sharedbank_entry.custom_data) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				sharedbank_entry.
 			)
@@ -237,13 +237,13 @@ public:
 		insert_values.push_back(std::to_string(sharedbank_entry.augslot4));
 		insert_values.push_back(std::to_string(sharedbank_entry.augslot5));
 		insert_values.push_back(std::to_string(sharedbank_entry.augslot6));
-		insert_values.push_back("'" + EscapeString(sharedbank_entry.custom_data) + "'");
+		insert_values.push_back("'" + Strings::Escape(sharedbank_entry.custom_data) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -276,9 +276,9 @@ public:
 			insert_values.push_back(std::to_string(sharedbank_entry.augslot4));
 			insert_values.push_back(std::to_string(sharedbank_entry.augslot5));
 			insert_values.push_back(std::to_string(sharedbank_entry.augslot6));
-			insert_values.push_back("'" + EscapeString(sharedbank_entry.custom_data) + "'");
+			insert_values.push_back("'" + Strings::Escape(sharedbank_entry.custom_data) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -287,7 +287,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

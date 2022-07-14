@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_PET_INVENTORY_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_pet_inventory_repository.h"
 
 class CharacterPetInventoryRepository: public BaseCharacterPetInventoryRepository {

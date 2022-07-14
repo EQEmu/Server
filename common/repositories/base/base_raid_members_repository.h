@@ -13,7 +13,7 @@
 #define EQEMU_BASE_RAID_MEMBERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseRaidMembersRepository {
@@ -67,12 +67,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -193,7 +193,7 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(raid_members_entry.groupid));
 		update_values.push_back(columns[3] + " = " + std::to_string(raid_members_entry._class));
 		update_values.push_back(columns[4] + " = " + std::to_string(raid_members_entry.level));
-		update_values.push_back(columns[5] + " = '" + EscapeString(raid_members_entry.name) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(raid_members_entry.name) + "'");
 		update_values.push_back(columns[6] + " = " + std::to_string(raid_members_entry.isgroupleader));
 		update_values.push_back(columns[7] + " = " + std::to_string(raid_members_entry.israidleader));
 		update_values.push_back(columns[8] + " = " + std::to_string(raid_members_entry.islooter));
@@ -202,7 +202,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				raid_members_entry.charid
 			)
@@ -223,7 +223,7 @@ public:
 		insert_values.push_back(std::to_string(raid_members_entry.groupid));
 		insert_values.push_back(std::to_string(raid_members_entry._class));
 		insert_values.push_back(std::to_string(raid_members_entry.level));
-		insert_values.push_back("'" + EscapeString(raid_members_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(raid_members_entry.name) + "'");
 		insert_values.push_back(std::to_string(raid_members_entry.isgroupleader));
 		insert_values.push_back(std::to_string(raid_members_entry.israidleader));
 		insert_values.push_back(std::to_string(raid_members_entry.islooter));
@@ -232,7 +232,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -261,12 +261,12 @@ public:
 			insert_values.push_back(std::to_string(raid_members_entry.groupid));
 			insert_values.push_back(std::to_string(raid_members_entry._class));
 			insert_values.push_back(std::to_string(raid_members_entry.level));
-			insert_values.push_back("'" + EscapeString(raid_members_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(raid_members_entry.name) + "'");
 			insert_values.push_back(std::to_string(raid_members_entry.isgroupleader));
 			insert_values.push_back(std::to_string(raid_members_entry.israidleader));
 			insert_values.push_back(std::to_string(raid_members_entry.islooter));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -275,7 +275,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

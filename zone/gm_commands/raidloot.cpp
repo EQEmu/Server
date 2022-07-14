@@ -22,7 +22,7 @@ void command_raidloot(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string raid_loot_type  = str_tolower(sep->arg[1]);
+	std::string raid_loot_type  = Strings::ToLower(sep->arg[1]);
 	bool        is_all          = raid_loot_type.find("all") != std::string::npos;
 	bool        is_group_leader = raid_loot_type.find("groupleader") != std::string::npos;
 	bool        is_raid_leader  = raid_loot_type.find("raidleader") != std::string::npos;

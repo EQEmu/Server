@@ -22,7 +22,7 @@
 #define EQEMU_ACCOUNT_IP_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_account_ip_repository.h"
 
 class AccountIpRepository: public BaseAccountIpRepository {

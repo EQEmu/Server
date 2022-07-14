@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWN_EVENTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawnEventsRepository {
@@ -82,12 +82,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -213,9 +213,9 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(spawn_events_entry.zone) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spawn_events_entry.zone) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(spawn_events_entry.cond_id));
-		update_values.push_back(columns[3] + " = '" + EscapeString(spawn_events_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(spawn_events_entry.name) + "'");
 		update_values.push_back(columns[4] + " = " + std::to_string(spawn_events_entry.period));
 		update_values.push_back(columns[5] + " = " + std::to_string(spawn_events_entry.next_minute));
 		update_values.push_back(columns[6] + " = " + std::to_string(spawn_events_entry.next_hour));
@@ -231,7 +231,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				spawn_events_entry.id
 			)
@@ -248,9 +248,9 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(spawn_events_entry.id));
-		insert_values.push_back("'" + EscapeString(spawn_events_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_events_entry.zone) + "'");
 		insert_values.push_back(std::to_string(spawn_events_entry.cond_id));
-		insert_values.push_back("'" + EscapeString(spawn_events_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_events_entry.name) + "'");
 		insert_values.push_back(std::to_string(spawn_events_entry.period));
 		insert_values.push_back(std::to_string(spawn_events_entry.next_minute));
 		insert_values.push_back(std::to_string(spawn_events_entry.next_hour));
@@ -266,7 +266,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -291,9 +291,9 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(spawn_events_entry.id));
-			insert_values.push_back("'" + EscapeString(spawn_events_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_events_entry.zone) + "'");
 			insert_values.push_back(std::to_string(spawn_events_entry.cond_id));
-			insert_values.push_back("'" + EscapeString(spawn_events_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_events_entry.name) + "'");
 			insert_values.push_back(std::to_string(spawn_events_entry.period));
 			insert_values.push_back(std::to_string(spawn_events_entry.next_minute));
 			insert_values.push_back(std::to_string(spawn_events_entry.next_hour));
@@ -305,7 +305,7 @@ public:
 			insert_values.push_back(std::to_string(spawn_events_entry.argument));
 			insert_values.push_back(std::to_string(spawn_events_entry.strict));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -314,7 +314,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

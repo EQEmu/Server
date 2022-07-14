@@ -303,6 +303,7 @@ N(OP_LockoutTimerInfo),
 N(OP_Login),
 N(OP_LoginAccepted),
 N(OP_LoginComplete),
+N(OP_LoginExpansionPacketData), //added for Rof2 client to send expansion data packet.  Requires login_opcodes_sod.conf to be updated.
 N(OP_LoginUnknown1),
 N(OP_LoginUnknown2),
 N(OP_Logout),

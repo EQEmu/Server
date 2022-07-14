@@ -22,7 +22,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "../common/eq_packet_structs.h"
 #include "../common/races.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "aa.h"
 #include "client.h"
 #include "corpse.h"
@@ -310,7 +310,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *target, uint3
 	//pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000; //TODO: Does WTD use pet focus?
 
 	pet.npc_id = WAKE_THE_DEAD_NPCTYPEID;
-	
+
 	NPCType *made_npc = nullptr;
 
 	const NPCType *npc_type = content_db.LoadNPCTypesData(WAKE_THE_DEAD_NPCTYPEID);
@@ -545,7 +545,7 @@ void Client::ResetAA() {
 	m_pp.raid_leadership_points = 0;
 	m_pp.group_leadership_exp = 0;
 	m_pp.raid_leadership_exp = 0;
-	
+
 	database.DeleteCharacterAAs(CharacterID());
 	database.DeleteCharacterLeadershipAAs(CharacterID());
 }
@@ -1766,7 +1766,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	LogInfo("Loaded [{}] Alternate Advancement Abilities", (int)abilities.size());
 	int expansion = RuleI(Expansion, CurrentExpansion);
 	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
-	
+
 	LogInfo("Loading Alternate Advancement Ability Ranks");
 	ranks.clear();
 	if (use_expansion_aa && expansion >= 0) {
@@ -1927,9 +1927,9 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		//Enable
 		TogglePurchaseAlternativeAdvancementRank(rank.next_id);
 		Message(Chat::Spells, "You enable an ability."); //Message live gives you. Should come from spell.
-		
+
 		AA::Rank *rank_next = zone->GetAlternateAdvancementRank(rank.next_id);
-		
+
 		//Add checks for any special cases for toggle.
 		if (IsEffectinAlternateAdvancementRankEffects(*rank_next, SE_Weapon_Stance)) {
 			weaponstance.aabonus_enabled = true;
@@ -1990,7 +1990,7 @@ bool Client::IsEffectinAlternateAdvancementRankEffects(const AA::Rank &rank, int
 }
 
 void Client::ResetAlternateAdvancementRank(uint32 aa_id) {
-	
+
 	/*
 		Resets your AA to baseline
 	*/
@@ -2010,7 +2010,7 @@ void Client::ResetAlternateAdvancementRank(uint32 aa_id) {
 }
 
 void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
-	
+
 	/*
 		Stripped down version of purchasing AA. Will give no messages.
 		Used with toggle hotkey functions.

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_DISCOVERED_ITEMS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseDiscoveredItemsRepository {
@@ -52,12 +52,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -164,7 +164,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(discovered_items_entry.item_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(discovered_items_entry.char_name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(discovered_items_entry.char_name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(discovered_items_entry.discovered_date));
 		update_values.push_back(columns[3] + " = " + std::to_string(discovered_items_entry.account_status));
 
@@ -172,7 +172,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				discovered_items_entry.item_id
 			)
@@ -189,7 +189,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(discovered_items_entry.item_id));
-		insert_values.push_back("'" + EscapeString(discovered_items_entry.char_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(discovered_items_entry.char_name) + "'");
 		insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
 		insert_values.push_back(std::to_string(discovered_items_entry.account_status));
 
@@ -197,7 +197,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -222,11 +222,11 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(discovered_items_entry.item_id));
-			insert_values.push_back("'" + EscapeString(discovered_items_entry.char_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(discovered_items_entry.char_name) + "'");
 			insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
 			insert_values.push_back(std::to_string(discovered_items_entry.account_status));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -235,7 +235,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

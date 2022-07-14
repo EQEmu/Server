@@ -22,7 +22,7 @@
 #define EQEMU_PLAYER_TITLESETS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_player_titlesets_repository.h"
 
 class PlayerTitlesetsRepository: public BasePlayerTitlesetsRepository {

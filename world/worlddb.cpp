@@ -17,7 +17,7 @@
 */
 
 #include "worlddb.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/inventory_profile.h"
 #include "../common/rulesys.h"

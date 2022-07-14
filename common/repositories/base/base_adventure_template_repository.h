@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ADVENTURE_TEMPLATE_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAdventureTemplateRepository {
@@ -139,12 +139,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -309,7 +309,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(adventure_template_entry.zone) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(adventure_template_entry.zone) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(adventure_template_entry.zone_version));
 		update_values.push_back(columns[3] + " = " + std::to_string(adventure_template_entry.is_hard));
 		update_values.push_back(columns[4] + " = " + std::to_string(adventure_template_entry.is_raid));
@@ -322,7 +322,7 @@ public:
 		update_values.push_back(columns[11] + " = " + std::to_string(adventure_template_entry.assa_y));
 		update_values.push_back(columns[12] + " = " + std::to_string(adventure_template_entry.assa_z));
 		update_values.push_back(columns[13] + " = " + std::to_string(adventure_template_entry.assa_h));
-		update_values.push_back(columns[14] + " = '" + EscapeString(adventure_template_entry.text) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(adventure_template_entry.text) + "'");
 		update_values.push_back(columns[15] + " = " + std::to_string(adventure_template_entry.duration));
 		update_values.push_back(columns[16] + " = " + std::to_string(adventure_template_entry.zone_in_time));
 		update_values.push_back(columns[17] + " = " + std::to_string(adventure_template_entry.win_points));
@@ -346,7 +346,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				adventure_template_entry.id
 			)
@@ -363,7 +363,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(adventure_template_entry.id));
-		insert_values.push_back("'" + EscapeString(adventure_template_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(adventure_template_entry.zone) + "'");
 		insert_values.push_back(std::to_string(adventure_template_entry.zone_version));
 		insert_values.push_back(std::to_string(adventure_template_entry.is_hard));
 		insert_values.push_back(std::to_string(adventure_template_entry.is_raid));
@@ -376,7 +376,7 @@ public:
 		insert_values.push_back(std::to_string(adventure_template_entry.assa_y));
 		insert_values.push_back(std::to_string(adventure_template_entry.assa_z));
 		insert_values.push_back(std::to_string(adventure_template_entry.assa_h));
-		insert_values.push_back("'" + EscapeString(adventure_template_entry.text) + "'");
+		insert_values.push_back("'" + Strings::Escape(adventure_template_entry.text) + "'");
 		insert_values.push_back(std::to_string(adventure_template_entry.duration));
 		insert_values.push_back(std::to_string(adventure_template_entry.zone_in_time));
 		insert_values.push_back(std::to_string(adventure_template_entry.win_points));
@@ -400,7 +400,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -425,7 +425,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(adventure_template_entry.id));
-			insert_values.push_back("'" + EscapeString(adventure_template_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(adventure_template_entry.zone) + "'");
 			insert_values.push_back(std::to_string(adventure_template_entry.zone_version));
 			insert_values.push_back(std::to_string(adventure_template_entry.is_hard));
 			insert_values.push_back(std::to_string(adventure_template_entry.is_raid));
@@ -438,7 +438,7 @@ public:
 			insert_values.push_back(std::to_string(adventure_template_entry.assa_y));
 			insert_values.push_back(std::to_string(adventure_template_entry.assa_z));
 			insert_values.push_back(std::to_string(adventure_template_entry.assa_h));
-			insert_values.push_back("'" + EscapeString(adventure_template_entry.text) + "'");
+			insert_values.push_back("'" + Strings::Escape(adventure_template_entry.text) + "'");
 			insert_values.push_back(std::to_string(adventure_template_entry.duration));
 			insert_values.push_back(std::to_string(adventure_template_entry.zone_in_time));
 			insert_values.push_back(std::to_string(adventure_template_entry.win_points));
@@ -458,7 +458,7 @@ public:
 			insert_values.push_back(std::to_string(adventure_template_entry.graveyard_z));
 			insert_values.push_back(std::to_string(adventure_template_entry.graveyard_radius));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -467,7 +467,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

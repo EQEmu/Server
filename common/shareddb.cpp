@@ -35,7 +35,7 @@
 #include "mysql.h"
 #include "rulesys.h"
 #include "shareddb.h"
-#include "string_util.h"
+#include "strings.h"
 #include "eqemu_config.h"
 #include "data_verification.h"
 #include "repositories/criteria/content_filter_criteria.h"
@@ -932,6 +932,8 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		return false;
 	}
 
+	m_shared_items_count = GetItemsCount();
+
 	return true;
 }
 
@@ -970,7 +972,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		}
 	}
 
-	
+
 	if (GetVariable("disablenotransfer", variable_buffer)) {
 		if (variable_buffer == "1") {
 			disable_no_transfer = true;
@@ -1041,7 +1043,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.GuildFavor = std::stoul(row[ItemField::guildfavor]);
 		item.Price = std::stoul(row[ItemField::price]);
 		item.SellRate = std::stof(row[ItemField::sellrate]);
-		
+
 		// Display
 		item.Color = std::stoul(row[ItemField::color]);
 		item.EliteMaterial = std::stoul(row[ItemField::elitematerial]);
@@ -1114,7 +1116,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.Attack = std::stoi(row[ItemField::attack]);
 		item.Avoidance = static_cast<int8>(EQ::Clamp(std::stoi(row[ItemField::avoidance]), -128, 127));
 		item.Clairvoyance = std::stoul(row[ItemField::clairvoyance]);
-		item.CombatEffects = StringIsNumber(row[ItemField::combateffects]) ? static_cast<int8>(EQ::Clamp(std::stoi(row[ItemField::combateffects]), -128, 127)) : 0;
+		item.CombatEffects = Strings::IsNumber(row[ItemField::combateffects]) ? static_cast<int8>(EQ::Clamp(std::stoi(row[ItemField::combateffects]), -128, 127)) : 0;
 		item.DamageShield = std::stoi(row[ItemField::damageshield]);
 		item.DotShielding = std::stoi(row[ItemField::dotshielding]);
 		item.DSMitigation = std::stoul(row[ItemField::dsmitigation]);
@@ -1187,7 +1189,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.LDoNSellBackRate = std::stoul(row[ItemField::ldonsellbackrate]);
 		item.LDoNSold = std::stoul(row[ItemField::ldonsold]);
 		item.PointType = std::stoul(row[ItemField::pointtype]);
-		
+
 		// Bag
 		item.BagSize = static_cast<uint8>(std::stoul(row[ItemField::bagsize]));
 		item.BagSlots = static_cast<uint8>(EQ::Clamp(std::stoi(row[ItemField::bagslots]), 0, 10)); // Will need to be changed from std::min to just use database value when bag slots are increased
@@ -1237,7 +1239,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.Scroll.Level2 = static_cast<uint8>(std::stoul(row[ItemField::scrolllevel2]));
 		strn0cpy(item.ScrollName, row[ItemField::scrollname], sizeof(item.ScrollName));
 
-		// Worn Effect		
+		// Worn Effect
 		item.Worn.Effect = std::stoi(row[ItemField::worneffect]);
 		item.Worn.Type = static_cast<uint8>(std::stoul(row[ItemField::worntype]));
 		item.Worn.Level = static_cast<uint8>(std::stoul(row[ItemField::wornlevel]));
@@ -1251,7 +1253,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.EvolvingMax = static_cast<uint8>(std::stoul(row[ItemField::evomax]));
 
 		// Scripting
-		item.CharmFileID = StringIsNumber(row[ItemField::charmfileid]) ? std::stoul(row[ItemField::charmfileid]) : 0;
+		item.CharmFileID = Strings::IsNumber(row[ItemField::charmfileid]) ? std::stoul(row[ItemField::charmfileid]) : 0;
 		strn0cpy(item.CharmFile, row[ItemField::charmfile], sizeof(item.CharmFile));
 		strn0cpy(item.Filename, row[ItemField::filename], sizeof(item.Filename));
 		item.ScriptFileID = std::stoul(row[ItemField::scriptfileid]);
@@ -1547,7 +1549,7 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 		if (row[2][0] == 0)
 			continue;
 
-		std::vector<std::string> aliases = SplitString(row[2], '|');
+		std::vector<std::string> aliases = Strings::Split(row[2], '|');
 		for (auto iter = aliases.begin(); iter != aliases.end(); ++iter) {
 			if (iter->empty())
 				continue;
@@ -1563,7 +1565,7 @@ bool SharedDatabase::UpdateInjectedCommandSettings(const std::vector<std::pair<s
 	if (injected.size()) {
 		const std::string query = fmt::format(
 			"REPLACE INTO `command_settings`(`command`, `access`) VALUES {}",
-			implode(
+			Strings::ImplodePair(
 				",",
 				std::pair<char, char>('(', ')'),
 				join_pair(",", std::pair<char, char>('\'', '\''), injected)
@@ -1588,7 +1590,7 @@ bool SharedDatabase::UpdateOrphanedCommandSettings(const std::vector<std::string
 	if (orphaned.size()) {
 		const std::string query = fmt::format(
 			"DELETE FROM `command_settings` WHERE `command` IN ({})",
-			implode(",", std::pair<char, char>('\'', '\''), orphaned)
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		if (!QueryDatabase(query).Success()) {
@@ -1782,6 +1784,9 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		LogError("Error Loading Spells: {}", ex.what());
 		return false;
 	}
+	
+	m_shared_spells_count = GetSpellsCount();
+
 	return true;
 }
 
@@ -2364,6 +2369,38 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 }
 
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
-	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
+	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, Strings::Escape(message->text).c_str());
 	auto results = QueryDatabase(query);
+}
+
+uint32 SharedDatabase::GetSpellsCount()
+{
+	auto results = QueryDatabase("SELECT count(*) FROM spells_new");
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
+	}
+
+	auto& row = results.begin();
+
+	if (row[0]) {
+		return atoul(row[0]);
+	}
+
+	return 0;
+}
+
+uint32 SharedDatabase::GetItemsCount()
+{
+	auto results = QueryDatabase("SELECT count(*) FROM items");
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
+	}
+
+	auto& row = results.begin();
+
+	if (row[0]) {
+		return atoul(row[0]);
+	}
+
+	return 0;
 }

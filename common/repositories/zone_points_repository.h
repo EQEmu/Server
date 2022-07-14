@@ -22,7 +22,7 @@
 #define EQEMU_ZONE_POINTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_zone_points_repository.h"
 
 class ZonePointsRepository: public BaseZonePointsRepository {

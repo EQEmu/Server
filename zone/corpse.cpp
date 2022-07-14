@@ -33,7 +33,7 @@ Child of the Mob class.
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 
 #include "corpse.h"
@@ -1028,8 +1028,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			client->Message(
 				Chat::Yellow,
 				fmt::format(
-					"This corpse contains {}.",
-					ConvertMoneyToString(
+					"This corpse Contains {}.",
+					Strings::Money(
 						GetPlatinum(),
 						GetGold(),
 						GetSilver(),
@@ -1038,7 +1038,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				).c_str()
 			);
 		} else {
-			client->Message(Chat::Yellow, "This corpse contains no money.");
+			client->Message(Chat::Yellow, "This corpse Contains no money.");
 		}
 
 		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
@@ -1534,7 +1534,7 @@ void Corpse::QueryLoot(Client* to) {
 			Chat::White,
 			fmt::format(
 				"Money | {}",
-				ConvertMoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,

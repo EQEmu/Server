@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NPC_EMOTES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNpcEmotesRepository {
@@ -55,12 +55,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -171,13 +171,13 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(npc_emotes_entry.emoteid));
 		update_values.push_back(columns[2] + " = " + std::to_string(npc_emotes_entry.event_));
 		update_values.push_back(columns[3] + " = " + std::to_string(npc_emotes_entry.type));
-		update_values.push_back(columns[4] + " = '" + EscapeString(npc_emotes_entry.text) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(npc_emotes_entry.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				npc_emotes_entry.id
 			)
@@ -197,13 +197,13 @@ public:
 		insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
 		insert_values.push_back(std::to_string(npc_emotes_entry.event_));
 		insert_values.push_back(std::to_string(npc_emotes_entry.type));
-		insert_values.push_back("'" + EscapeString(npc_emotes_entry.text) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_emotes_entry.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -231,9 +231,9 @@ public:
 			insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
 			insert_values.push_back(std::to_string(npc_emotes_entry.event_));
 			insert_values.push_back(std::to_string(npc_emotes_entry.type));
-			insert_values.push_back("'" + EscapeString(npc_emotes_entry.text) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_emotes_entry.text) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -242,7 +242,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

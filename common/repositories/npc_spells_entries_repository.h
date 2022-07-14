@@ -22,7 +22,7 @@
 #define EQEMU_NPC_SPELLS_ENTRIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_npc_spells_entries_repository.h"
 
 class NpcSpellsEntriesRepository: public BaseNpcSpellsEntriesRepository {

@@ -17,7 +17,7 @@
 */
 
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 
 #include "data_bucket.h"
@@ -512,7 +512,7 @@ Mob::Mob(
 	mob_close_scan_timer.Trigger();
 
 	SetCanOpenDoors(true);
-	
+
 	is_boat = IsBoat();
 }
 
@@ -6231,9 +6231,9 @@ void Mob::ClearSpecialAbilities() {
 void Mob::ProcessSpecialAbilities(const std::string &str) {
 	ClearSpecialAbilities();
 
-	std::vector<std::string> sp = SplitString(str, '^');
+	std::vector<std::string> sp = Strings::Split(str, '^');
 	for(auto iter = sp.begin(); iter != sp.end(); ++iter) {
-		std::vector<std::string> sub_sp = SplitString((*iter), ',');
+		std::vector<std::string> sub_sp = Strings::Split((*iter), ',');
 		if(sub_sp.size() >= 2) {
 			int ability = std::stoi(sub_sp[0]);
 			int value = std::stoi(sub_sp[1]);
