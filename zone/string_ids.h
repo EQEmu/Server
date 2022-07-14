@@ -520,6 +520,7 @@
 #define REPORT_ONCE					12945	//You may only submit a report once per time that you zone. Thank you.
 #define NOW_INVISIBLE				12950	//%1 is now Invisible.
 #define NOW_VISIBLE					12951	//%1 is now Visible.
+#define YOU_TAKE_DOT				12954	//You have taken %1 damage from %2 by %3
 #define GUILD_NOT_MEMBER2			12966	//You are not in a guild.
 #define HOT_HEAL_SELF				12976 	//You have been healed for %1 hit points by your %2.
 #define HOT_HEAL_OTHER				12997	//You have healed %1 for %2 hit points with your %3.
