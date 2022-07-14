@@ -333,6 +333,7 @@ public:
 	bool IsTaskCompleted(int task);
 	bool IsTaskActive(int task);
 	bool IsTaskActivityActive(int task, int activity);
+	void LockSharedTask(bool lock);
 	int GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);

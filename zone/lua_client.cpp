@@ -1430,6 +1430,11 @@ bool Lua_Client::IsTaskActivityActive(int task, int activity) {
 	return self->IsTaskActivityActive(task, activity);
 }
 
+void Lua_Client::LockSharedTask(bool lock) {
+	Lua_Safe_Call_Void();
+	return self->LockSharedTask(lock);
+}
+
 int Lua_Client::GetCorpseCount() {
 	Lua_Safe_Call_Int();
 	return self->GetCorpseCount();
@@ -2772,6 +2777,7 @@ luabind::scope lua_register_client() {
 	.def("LeaveGroup", (void(Lua_Client::*)(void))&Lua_Client::LeaveGroup)
 	.def("LoadPEQZoneFlags", (void(Lua_Client::*)(void))&Lua_Client::LoadPEQZoneFlags)
 	.def("LoadZoneFlags", (void(Lua_Client::*)(void))&Lua_Client::LoadZoneFlags)
+	.def("LockSharedTask", &Lua_Client::LockSharedTask)
 	.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float))&Lua_Client::MarkSingleCompassLoc)
 	.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float,int))&Lua_Client::MarkSingleCompassLoc)
 	.def("MaxSkill", (int(Lua_Client::*)(int))&Lua_Client::MaxSkill)

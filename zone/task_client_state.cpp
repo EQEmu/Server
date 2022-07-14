@@ -2727,3 +2727,17 @@ bool ClientTaskState::HasActiveTasks()
 
 	return false;
 }
+
+void ClientTaskState::LockSharedTask(Client* client, bool lock)
+{
+	if (m_active_shared_task.task_id != TASKSLOTEMPTY)
+	{
+		ServerPacket pack(ServerOP_SharedTaskLock, sizeof(ServerSharedTaskLock_Struct));
+		auto buf = reinterpret_cast<ServerSharedTaskLock_Struct*>(pack.pBuffer);
+		buf->source_character_id = client->CharacterID();
+		buf->task_id = m_active_shared_task.task_id;
+		buf->lock = lock;
+
+		worldserver.SendPacket(&pack);
+	}
+}
