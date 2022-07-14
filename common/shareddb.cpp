@@ -932,6 +932,8 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		return false;
 	}
 
+	m_shared_items_count = GetItemsCount();
+
 	return true;
 }
 
@@ -1782,6 +1784,9 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		LogError("Error Loading Spells: {}", ex.what());
 		return false;
 	}
+	
+	m_shared_spells_count = GetSpellsCount();
+
 	return true;
 }
 
@@ -2366,4 +2371,36 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
 	const std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, Strings::Escape(message->text).c_str());
 	auto results = QueryDatabase(query);
+}
+
+uint32 SharedDatabase::GetSpellsCount()
+{
+	auto results = QueryDatabase("SELECT count(*) FROM spells_new");
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
+	}
+
+	auto& row = results.begin();
+
+	if (row[0]) {
+		return atoul(row[0]);
+	}
+
+	return 0;
+}
+
+uint32 SharedDatabase::GetItemsCount()
+{
+	auto results = QueryDatabase("SELECT count(*) FROM items");
+	if (!results.Success() || !results.RowCount()) {
+		return 0;
+	}
+
+	auto& row = results.begin();
+
+	if (row[0]) {
+		return atoul(row[0]);
+	}
+
+	return 0;
 }
