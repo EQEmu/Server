@@ -439,6 +439,7 @@
 9183|2022_05_07_merchant_data_buckets.sql|SHOW COLUMNS FROM `merchantlist` LIKE 'bucket_comparison'|empty
 9184|2022_05_21_schema_consistency.sql|SELECT * FROM db_version WHERE version >= 9184|empty|
 9185|2022_05_07_discord_webhooks.sql|SHOW TABLES LIKE 'discord_webhooks'|empty|
+9186|2022_07_09_zone_expansion_deprecate.sql|SHOW COLUMNS FROM 'zone' LIKE 'expansion'|notempty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
