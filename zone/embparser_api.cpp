@@ -3638,7 +3638,7 @@ std::string Perl__getenvironmentaldamagename(uint8 damage_type)
 
 std::string Perl__commify(perl::scalar number)
 {
-	return commify(number.c_str());
+	return Strings::Commify(number.c_str());
 }
 
 bool Perl__checknamefilter(std::string name)

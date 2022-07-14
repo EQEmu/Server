@@ -20,7 +20,7 @@
 #include "database.h"
 
 //#include "misc_functions.h"
-#include "string_util.h"
+#include "strings.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -1281,7 +1281,7 @@ bool BaseGuildManager::IsCharacterInGuild(uint32 character_id, uint32 guild_id)
 	if (current_guild_id == GUILD_NONE) {
 		return false;
 	}
-	
+
 	if (guild_id && current_guild_id != guild_id) {
 		return false;
 	}

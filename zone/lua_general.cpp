@@ -3389,7 +3389,7 @@ std::string lua_get_environmental_damage_name(uint8 damage_type) {
 }
 
 std::string lua_commify(std::string number) {
-	return commify(number);
+	return Strings::Commify(number);
 }
 
 bool lua_check_name_filter(std::string name) {

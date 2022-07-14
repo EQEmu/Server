@@ -22,7 +22,7 @@
 #define EQEMU_AA_RANK_EFFECTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_aa_rank_effects_repository.h"
 
 class AaRankEffectsRepository: public BaseAaRankEffectsRepository {

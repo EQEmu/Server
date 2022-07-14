@@ -25,8 +25,8 @@ void command_gearup(Client *c, const Seperator *sep)
 
 		if (auto res = cli.Get(url.c_str())) {
 			if (res->status == 200) {
-				for (auto &s: SplitString(res->body, ';')) {
-					if (!trim(s).empty()) {
+				for (auto &s: Strings::Split(res->body, ';')) {
+					if (!Strings::Trim(s).empty()) {
 						auto results = database.QueryDatabase(s);
 						if (!results.ErrorMessage().empty()) {
 							c->Message(
@@ -161,7 +161,7 @@ void command_gearup(Client *c, const Seperator *sep)
 		std::string message;
 		for (auto   row = results.begin(); row != results.end(); ++row) {
 			int expansion = atoi(row[0]);
-			message += "[" + EQ::SayLinkEngine::GenerateQuestSaylink(
+			message += "[" + Saylink::Create(
 				fmt::format("#gearup {}", expansion),
 				false,
 				Expansion::ExpansionName[expansion]

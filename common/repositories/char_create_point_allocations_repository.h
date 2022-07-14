@@ -22,7 +22,7 @@
 #define EQEMU_CHAR_CREATE_POINT_ALLOCATIONS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_char_create_point_allocations_repository.h"
 
 class CharCreatePointAllocationsRepository: public BaseCharCreatePointAllocationsRepository {

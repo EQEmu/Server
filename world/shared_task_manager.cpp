@@ -1029,7 +1029,7 @@ void SharedTaskManager::InvitePlayerByPlayerName(SharedTask *s, const std::strin
 {
 	auto character = CharacterDataRepository::GetWhere(
 		*m_database,
-		fmt::format("`name` = '{}' LIMIT 1", EscapeString(player_name))
+		fmt::format("`name` = '{}' LIMIT 1", Strings::Escape(player_name))
 	);
 
 	auto character_id = !character.empty() ? character.front().id : 0;

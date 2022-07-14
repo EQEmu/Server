@@ -18,7 +18,7 @@
 
 #include "../common/database.h"
 #include "../common/guilds.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "guild_mgr.h"
 #include "worldserver.h"

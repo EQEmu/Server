@@ -13,7 +13,7 @@
 #define EQEMU_BASE_START_ZONES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseStartZonesRepository {
@@ -97,12 +97,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -255,14 +255,14 @@ public:
 		update_values.push_back(columns[14] + " = " + std::to_string(start_zones_entry.select_rank));
 		update_values.push_back(columns[15] + " = " + std::to_string(start_zones_entry.min_expansion));
 		update_values.push_back(columns[16] + " = " + std::to_string(start_zones_entry.max_expansion));
-		update_values.push_back(columns[17] + " = '" + EscapeString(start_zones_entry.content_flags) + "'");
-		update_values.push_back(columns[18] + " = '" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[17] + " = '" + Strings::Escape(start_zones_entry.content_flags) + "'");
+		update_values.push_back(columns[18] + " = '" + Strings::Escape(start_zones_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				start_zones_entry.player_choice
 			)
@@ -295,14 +295,14 @@ public:
 		insert_values.push_back(std::to_string(start_zones_entry.select_rank));
 		insert_values.push_back(std::to_string(start_zones_entry.min_expansion));
 		insert_values.push_back(std::to_string(start_zones_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -343,10 +343,10 @@ public:
 			insert_values.push_back(std::to_string(start_zones_entry.select_rank));
 			insert_values.push_back(std::to_string(start_zones_entry.min_expansion));
 			insert_values.push_back(std::to_string(start_zones_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(start_zones_entry.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -355,7 +355,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

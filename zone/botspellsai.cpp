@@ -19,7 +19,7 @@
 #ifdef BOTS
 
 #include "bot.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #if EQDEBUG >= 12
 	#define BotAI_DEBUG_Spells	25

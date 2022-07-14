@@ -10,7 +10,7 @@ void command_zone(Client *c, const Seperator *sep)
 
 	std::string zone_identifier = sep->arg[1];
 
-	if (StringIsNumber(zone_identifier) && zone_identifier == "0") {
+	if (Strings::IsNumber(zone_identifier) && zone_identifier == "0") {
 		c->Message(Chat::White, "Sending you to the safe coordinates of this zone.");
 
 		c->MovePC(

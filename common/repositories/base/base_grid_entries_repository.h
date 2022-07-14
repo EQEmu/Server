@@ -30,7 +30,7 @@
 #define EQEMU_BASE_GRID_ENTRIES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 
 class BaseGridEntriesRepository {
 public:
@@ -68,7 +68,7 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string InsertColumnsRaw()
@@ -83,7 +83,7 @@ public:
 			insert_columns.push_back(column);
 		}
 
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", insert_columns));
 	}
 
 	static std::string TableName()
@@ -207,7 +207,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				grid_entries_entry.number
 			)
@@ -233,7 +233,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -263,7 +263,7 @@ public:
 			insert_values.push_back(std::to_string(grid_entries_entry.pause));
 			insert_values.push_back(std::to_string(grid_entries_entry.centerpoint));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -272,7 +272,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

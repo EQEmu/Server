@@ -22,7 +22,7 @@
 #define EQEMU_LOOTDROP_ENTRIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_lootdrop_entries_repository.h"
 
 class LootdropEntriesRepository: public BaseLootdropEntriesRepository {

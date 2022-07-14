@@ -18,7 +18,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] List active tasks for a client",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task show", false, "show")
+				Saylink::Create("#task show", false, "show")
 			).c_str()
 		);
 		c->Message(Chat::White, "--- update <task_id> <activity_id> [count] | Updates task");
@@ -28,42 +28,42 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload all Task information from the database",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reloadall", false, "reloadall")
+				Saylink::Create("#task reloadall", false, "reloadall")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] <task_id> Reload Task and Activity information for a single task",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload task", false, "reload task")
+				Saylink::Create("#task reload task", false, "reload task")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload goal/reward list information",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload lists", false, "reload lists")
+				Saylink::Create("#task reload lists", false, "reload lists")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload proximity information",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload prox", false, "reload prox")
+				Saylink::Create("#task reload prox", false, "reload prox")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload task set information",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload sets", false, "reload sets")
+				Saylink::Create("#task reload sets", false, "reload sets")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges targeted characters task timers",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task purgetimers", false, "purgetimers")
+				Saylink::Create("#task purgetimers", false, "purgetimers")
 			).c_str()
 		);
 
@@ -74,7 +74,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges all active Shared Tasks in memory and database ",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task sharedpurge", false, "sharedpurge")
+				Saylink::Create("#task sharedpurge", false, "sharedpurge")
 			).c_str()
 		);
 		return;
@@ -112,7 +112,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] List active tasks for a client",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task show", false, "show")
+				Saylink::Create("#task show", false, "show")
 			).c_str()
 		);
 		c->Message(Chat::White, "--- update <task_id> <activity_id> [count] | Updates task");
@@ -122,42 +122,42 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload all Task information from the database",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reloadall", false, "reloadall")
+				Saylink::Create("#task reloadall", false, "reloadall")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] <task_id> Reload Task and Activity information for a single task",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload task", false, "reload task")
+				Saylink::Create("#task reload task", false, "reload task")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload goal/reward list information",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload lists", false, "reload lists")
+				Saylink::Create("#task reload lists", false, "reload lists")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload proximity information",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload prox", false, "reload prox")
+				Saylink::Create("#task reload prox", false, "reload prox")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload task set information",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload sets", false, "reload sets")
+				Saylink::Create("#task reload sets", false, "reload sets")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges targeted characters task timers",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task purgetimers", false, "purgetimers")
+				Saylink::Create("#task purgetimers", false, "purgetimers")
 			).c_str()
 		);
 
@@ -168,7 +168,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges all active Shared Tasks in memory and database ",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task sharedpurge", false, "sharedpurge")
+				Saylink::Create("#task sharedpurge", false, "sharedpurge")
 			).c_str()
 		);
 		return;
@@ -260,7 +260,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"[WARNING] This will purge all active Shared Tasks [{}]?",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task sharedpurge confirm", false, "confirm")
+				Saylink::Create("#task sharedpurge confirm", false, "confirm")
 			).c_str()
 		);
 
@@ -278,7 +278,7 @@ void command_task(Client *c, const Seperator *sep)
 
 			if (
 				CompletedTasksRepository::DeleteWhere(
-					database,					
+					database,
 					fmt::format(
 						"charid = {} AND taskid = {}",
 					target->CharacterID(),

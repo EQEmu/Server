@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOGIN_API_TOKENS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLoginApiTokensRepository {
@@ -58,12 +58,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -173,7 +173,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(login_api_tokens_entry.token) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_api_tokens_entry.token) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_entry.can_write));
 		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_entry.can_read));
 		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
@@ -183,7 +183,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				login_api_tokens_entry.id
 			)
@@ -200,7 +200,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(login_api_tokens_entry.id));
-		insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_api_tokens_entry.token) + "'");
 		insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
 		insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
 		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
@@ -210,7 +210,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -235,13 +235,13 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(login_api_tokens_entry.id));
-			insert_values.push_back("'" + EscapeString(login_api_tokens_entry.token) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_api_tokens_entry.token) + "'");
 			insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
 			insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
 			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
 			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.updated_at > 0 ? std::to_string(login_api_tokens_entry.updated_at) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -250,7 +250,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

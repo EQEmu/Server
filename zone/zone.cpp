@@ -34,7 +34,7 @@
 #include "../common/features.h"
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
 #include "expedition.h"
@@ -566,7 +566,7 @@ void Zone::LoadTempMerchantData()
 				FROM merchantlist_temp
 				WHERE npcid IN ({})
 			),
-			implode(", ", npc_ids)
+			Strings::Implode(", ", npc_ids)
 		)
 	);
 

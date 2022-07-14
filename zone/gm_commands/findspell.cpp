@@ -37,13 +37,13 @@ void command_findspell(Client *c, const Seperator *sep)
 		}
 	}
 	else {
-		std::string search_criteria = str_tolower(sep->argplus[1]);
+		std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 		int         found_count     = 0;
 		for (int    spell_id        = 0; spell_id < SPDAT_RECORDS; spell_id++) {
 			auto current_spell = spells[spell_id];
 			if (current_spell.name[0] != 0) {
 				std::string spell_name       = current_spell.name;
-				std::string spell_name_lower = str_tolower(spell_name);
+				std::string spell_name_lower = Strings::ToLower(spell_name);
 				if (search_criteria.length() > 0 && spell_name_lower.find(search_criteria) == std::string::npos) {
 					continue;
 				}

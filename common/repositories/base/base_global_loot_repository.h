@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GLOBAL_LOOT_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGlobalLootRepository {
@@ -91,12 +91,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -228,28 +228,28 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(global_loot_entry.description) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(global_loot_entry.description) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(global_loot_entry.loottable_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(global_loot_entry.enabled));
 		update_values.push_back(columns[4] + " = " + std::to_string(global_loot_entry.min_level));
 		update_values.push_back(columns[5] + " = " + std::to_string(global_loot_entry.max_level));
 		update_values.push_back(columns[6] + " = " + std::to_string(global_loot_entry.rare));
 		update_values.push_back(columns[7] + " = " + std::to_string(global_loot_entry.raid));
-		update_values.push_back(columns[8] + " = '" + EscapeString(global_loot_entry.race) + "'");
-		update_values.push_back(columns[9] + " = '" + EscapeString(global_loot_entry.class_) + "'");
-		update_values.push_back(columns[10] + " = '" + EscapeString(global_loot_entry.bodytype) + "'");
-		update_values.push_back(columns[11] + " = '" + EscapeString(global_loot_entry.zone) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(global_loot_entry.race) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(global_loot_entry.class_) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(global_loot_entry.bodytype) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(global_loot_entry.zone) + "'");
 		update_values.push_back(columns[12] + " = " + std::to_string(global_loot_entry.hot_zone));
 		update_values.push_back(columns[13] + " = " + std::to_string(global_loot_entry.min_expansion));
 		update_values.push_back(columns[14] + " = " + std::to_string(global_loot_entry.max_expansion));
-		update_values.push_back(columns[15] + " = '" + EscapeString(global_loot_entry.content_flags) + "'");
-		update_values.push_back(columns[16] + " = '" + EscapeString(global_loot_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[15] + " = '" + Strings::Escape(global_loot_entry.content_flags) + "'");
+		update_values.push_back(columns[16] + " = '" + Strings::Escape(global_loot_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				global_loot_entry.id
 			)
@@ -266,28 +266,28 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(global_loot_entry.id));
-		insert_values.push_back("'" + EscapeString(global_loot_entry.description) + "'");
+		insert_values.push_back("'" + Strings::Escape(global_loot_entry.description) + "'");
 		insert_values.push_back(std::to_string(global_loot_entry.loottable_id));
 		insert_values.push_back(std::to_string(global_loot_entry.enabled));
 		insert_values.push_back(std::to_string(global_loot_entry.min_level));
 		insert_values.push_back(std::to_string(global_loot_entry.max_level));
 		insert_values.push_back(std::to_string(global_loot_entry.rare));
 		insert_values.push_back(std::to_string(global_loot_entry.raid));
-		insert_values.push_back("'" + EscapeString(global_loot_entry.race) + "'");
-		insert_values.push_back("'" + EscapeString(global_loot_entry.class_) + "'");
-		insert_values.push_back("'" + EscapeString(global_loot_entry.bodytype) + "'");
-		insert_values.push_back("'" + EscapeString(global_loot_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(global_loot_entry.race) + "'");
+		insert_values.push_back("'" + Strings::Escape(global_loot_entry.class_) + "'");
+		insert_values.push_back("'" + Strings::Escape(global_loot_entry.bodytype) + "'");
+		insert_values.push_back("'" + Strings::Escape(global_loot_entry.zone) + "'");
 		insert_values.push_back(std::to_string(global_loot_entry.hot_zone));
 		insert_values.push_back(std::to_string(global_loot_entry.min_expansion));
 		insert_values.push_back(std::to_string(global_loot_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(global_loot_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(global_loot_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(global_loot_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(global_loot_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -312,24 +312,24 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(global_loot_entry.id));
-			insert_values.push_back("'" + EscapeString(global_loot_entry.description) + "'");
+			insert_values.push_back("'" + Strings::Escape(global_loot_entry.description) + "'");
 			insert_values.push_back(std::to_string(global_loot_entry.loottable_id));
 			insert_values.push_back(std::to_string(global_loot_entry.enabled));
 			insert_values.push_back(std::to_string(global_loot_entry.min_level));
 			insert_values.push_back(std::to_string(global_loot_entry.max_level));
 			insert_values.push_back(std::to_string(global_loot_entry.rare));
 			insert_values.push_back(std::to_string(global_loot_entry.raid));
-			insert_values.push_back("'" + EscapeString(global_loot_entry.race) + "'");
-			insert_values.push_back("'" + EscapeString(global_loot_entry.class_) + "'");
-			insert_values.push_back("'" + EscapeString(global_loot_entry.bodytype) + "'");
-			insert_values.push_back("'" + EscapeString(global_loot_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(global_loot_entry.race) + "'");
+			insert_values.push_back("'" + Strings::Escape(global_loot_entry.class_) + "'");
+			insert_values.push_back("'" + Strings::Escape(global_loot_entry.bodytype) + "'");
+			insert_values.push_back("'" + Strings::Escape(global_loot_entry.zone) + "'");
 			insert_values.push_back(std::to_string(global_loot_entry.hot_zone));
 			insert_values.push_back(std::to_string(global_loot_entry.min_expansion));
 			insert_values.push_back(std::to_string(global_loot_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(global_loot_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(global_loot_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(global_loot_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(global_loot_entry.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -338,7 +338,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

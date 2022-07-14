@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_DATA_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_data_repository.h"
 
 class CharacterDataRepository: public BaseCharacterDataRepository {

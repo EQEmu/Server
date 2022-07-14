@@ -39,11 +39,11 @@ void command_findclass(Client *c, const Seperator *sep)
 			);
 		}
 	} else {
-		auto search_criteria = str_tolower(sep->argplus[1]);
+		auto search_criteria = Strings::ToLower(sep->argplus[1]);
 		int found_count = 0;
 		for (uint16 class_id = WARRIOR; class_id <= MERCENARY_MASTER; class_id++) {
 			std::string class_name = GetClassIDName(class_id);
-			auto class_name_lower = str_tolower(class_name);
+			auto class_name_lower = Strings::ToLower(class_name);
 			if (
 				search_criteria.length() &&
 				class_name_lower.find(search_criteria) == std::string::npos

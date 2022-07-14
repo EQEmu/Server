@@ -2,7 +2,7 @@
 #include "login_server.h"
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "encryption.h"
 #include "account_management.h"
 
@@ -217,7 +217,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	else {
 		if (server.options.IsPasswordLoginAllowed()) {
 			cred            = (&outbuffer[1 + user.length()]);
-			auto components = SplitString(user, ':');
+			auto components = Strings::Split(user, ':');
 			if (components.size() == 2) {
 				db_loginserver = components[0];
 				user           = components[1];

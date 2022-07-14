@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_SPELLS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_spells_repository.h"
 
 class CharacterSpellsRepository: public BaseCharacterSpellsRepository {

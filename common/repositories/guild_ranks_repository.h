@@ -22,7 +22,7 @@
 #define EQEMU_GUILD_RANKS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_guild_ranks_repository.h"
 
 class GuildRanksRepository: public BaseGuildRanksRepository {

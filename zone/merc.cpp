@@ -15,7 +15,7 @@
 #include "zone.h"
 #include "string_ids.h"
 
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/rulesys.h"
 
 extern volatile bool is_zone_loaded;

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_NPC_SPELLS_EFFECTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseNpcSpellsEffectsRepository {
@@ -49,12 +49,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -158,14 +158,14 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(npc_spells_effects_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_spells_effects_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(npc_spells_effects_entry.parent_list));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				npc_spells_effects_entry.id
 			)
@@ -182,14 +182,14 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(npc_spells_effects_entry.id));
-		insert_values.push_back("'" + EscapeString(npc_spells_effects_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(npc_spells_effects_entry.name) + "'");
 		insert_values.push_back(std::to_string(npc_spells_effects_entry.parent_list));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -214,10 +214,10 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(npc_spells_effects_entry.id));
-			insert_values.push_back("'" + EscapeString(npc_spells_effects_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(npc_spells_effects_entry.name) + "'");
 			insert_values.push_back(std::to_string(npc_spells_effects_entry.parent_list));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -226,7 +226,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

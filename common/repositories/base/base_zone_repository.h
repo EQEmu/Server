@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ZONE_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseZoneRepository {
@@ -322,12 +322,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -613,10 +613,10 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(zone_entry.short_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(zone_entry.file_name) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(zone_entry.long_name) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(zone_entry.map_file_name) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(zone_entry.short_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(zone_entry.file_name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(zone_entry.long_name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(zone_entry.map_file_name) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(zone_entry.safe_x));
 		update_values.push_back(columns[6] + " = " + std::to_string(zone_entry.safe_y));
 		update_values.push_back(columns[7] + " = " + std::to_string(zone_entry.safe_z));
@@ -629,7 +629,7 @@ public:
 		update_values.push_back(columns[14] + " = " + std::to_string(zone_entry.timezone));
 		update_values.push_back(columns[15] + " = " + std::to_string(zone_entry.maxclients));
 		update_values.push_back(columns[16] + " = " + std::to_string(zone_entry.ruleset));
-		update_values.push_back(columns[17] + " = '" + EscapeString(zone_entry.note) + "'");
+		update_values.push_back(columns[17] + " = '" + Strings::Escape(zone_entry.note) + "'");
 		update_values.push_back(columns[18] + " = " + std::to_string(zone_entry.underworld));
 		update_values.push_back(columns[19] + " = " + std::to_string(zone_entry.minclip));
 		update_values.push_back(columns[20] + " = " + std::to_string(zone_entry.maxclip));
@@ -664,7 +664,7 @@ public:
 		update_values.push_back(columns[49] + " = " + std::to_string(zone_entry.fog_minclip4));
 		update_values.push_back(columns[50] + " = " + std::to_string(zone_entry.fog_maxclip4));
 		update_values.push_back(columns[51] + " = " + std::to_string(zone_entry.fog_density));
-		update_values.push_back(columns[52] + " = '" + EscapeString(zone_entry.flag_needed) + "'");
+		update_values.push_back(columns[52] + " = '" + Strings::Escape(zone_entry.flag_needed) + "'");
 		update_values.push_back(columns[53] + " = " + std::to_string(zone_entry.canbind));
 		update_values.push_back(columns[54] + " = " + std::to_string(zone_entry.cancombat));
 		update_values.push_back(columns[55] + " = " + std::to_string(zone_entry.canlevitate));
@@ -701,8 +701,8 @@ public:
 		update_values.push_back(columns[86] + " = " + std::to_string(zone_entry.max_movement_update_range));
 		update_values.push_back(columns[87] + " = " + std::to_string(zone_entry.min_expansion));
 		update_values.push_back(columns[88] + " = " + std::to_string(zone_entry.max_expansion));
-		update_values.push_back(columns[89] + " = '" + EscapeString(zone_entry.content_flags) + "'");
-		update_values.push_back(columns[90] + " = '" + EscapeString(zone_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[89] + " = '" + Strings::Escape(zone_entry.content_flags) + "'");
+		update_values.push_back(columns[90] + " = '" + Strings::Escape(zone_entry.content_flags_disabled) + "'");
 		update_values.push_back(columns[91] + " = " + std::to_string(zone_entry.underworld_teleport_index));
 		update_values.push_back(columns[92] + " = " + std::to_string(zone_entry.lava_damage));
 		update_values.push_back(columns[93] + " = " + std::to_string(zone_entry.min_lava_damage));
@@ -711,7 +711,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				zone_entry.id
 			)
@@ -727,11 +727,11 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(zone_entry.short_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.short_name) + "'");
 		insert_values.push_back(std::to_string(zone_entry.id));
-		insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.file_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.long_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.map_file_name) + "'");
 		insert_values.push_back(std::to_string(zone_entry.safe_x));
 		insert_values.push_back(std::to_string(zone_entry.safe_y));
 		insert_values.push_back(std::to_string(zone_entry.safe_z));
@@ -744,7 +744,7 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.timezone));
 		insert_values.push_back(std::to_string(zone_entry.maxclients));
 		insert_values.push_back(std::to_string(zone_entry.ruleset));
-		insert_values.push_back("'" + EscapeString(zone_entry.note) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.note) + "'");
 		insert_values.push_back(std::to_string(zone_entry.underworld));
 		insert_values.push_back(std::to_string(zone_entry.minclip));
 		insert_values.push_back(std::to_string(zone_entry.maxclip));
@@ -779,7 +779,7 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.fog_minclip4));
 		insert_values.push_back(std::to_string(zone_entry.fog_maxclip4));
 		insert_values.push_back(std::to_string(zone_entry.fog_density));
-		insert_values.push_back("'" + EscapeString(zone_entry.flag_needed) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.flag_needed) + "'");
 		insert_values.push_back(std::to_string(zone_entry.canbind));
 		insert_values.push_back(std::to_string(zone_entry.cancombat));
 		insert_values.push_back(std::to_string(zone_entry.canlevitate));
@@ -816,8 +816,8 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.max_movement_update_range));
 		insert_values.push_back(std::to_string(zone_entry.min_expansion));
 		insert_values.push_back(std::to_string(zone_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_entry.content_flags_disabled) + "'");
 		insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 		insert_values.push_back(std::to_string(zone_entry.lava_damage));
 		insert_values.push_back(std::to_string(zone_entry.min_lava_damage));
@@ -826,7 +826,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -850,11 +850,11 @@ public:
 		for (auto &zone_entry: zone_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(zone_entry.short_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.short_name) + "'");
 			insert_values.push_back(std::to_string(zone_entry.id));
-			insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.file_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.long_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.map_file_name) + "'");
 			insert_values.push_back(std::to_string(zone_entry.safe_x));
 			insert_values.push_back(std::to_string(zone_entry.safe_y));
 			insert_values.push_back(std::to_string(zone_entry.safe_z));
@@ -867,7 +867,7 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.timezone));
 			insert_values.push_back(std::to_string(zone_entry.maxclients));
 			insert_values.push_back(std::to_string(zone_entry.ruleset));
-			insert_values.push_back("'" + EscapeString(zone_entry.note) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.note) + "'");
 			insert_values.push_back(std::to_string(zone_entry.underworld));
 			insert_values.push_back(std::to_string(zone_entry.minclip));
 			insert_values.push_back(std::to_string(zone_entry.maxclip));
@@ -902,7 +902,7 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.fog_minclip4));
 			insert_values.push_back(std::to_string(zone_entry.fog_maxclip4));
 			insert_values.push_back(std::to_string(zone_entry.fog_density));
-			insert_values.push_back("'" + EscapeString(zone_entry.flag_needed) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.flag_needed) + "'");
 			insert_values.push_back(std::to_string(zone_entry.canbind));
 			insert_values.push_back(std::to_string(zone_entry.cancombat));
 			insert_values.push_back(std::to_string(zone_entry.canlevitate));
@@ -939,13 +939,13 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.max_movement_update_range));
 			insert_values.push_back(std::to_string(zone_entry.min_expansion));
 			insert_values.push_back(std::to_string(zone_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_entry.content_flags_disabled) + "'");
 			insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 			insert_values.push_back(std::to_string(zone_entry.lava_damage));
 			insert_values.push_back(std::to_string(zone_entry.min_lava_damage));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -954,7 +954,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

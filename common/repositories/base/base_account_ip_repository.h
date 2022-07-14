@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ACCOUNT_IP_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAccountIpRepository {
@@ -52,12 +52,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -164,15 +164,15 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(account_ip_entry.accid));
-		update_values.push_back(columns[1] + " = '" + EscapeString(account_ip_entry.ip) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_ip_entry.ip) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(account_ip_entry.count));
-		update_values.push_back(columns[3] + " = '" + EscapeString(account_ip_entry.lastused) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(account_ip_entry.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				account_ip_entry.accid
 			)
@@ -189,15 +189,15 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(account_ip_entry.accid));
-		insert_values.push_back("'" + EscapeString(account_ip_entry.ip) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
 		insert_values.push_back(std::to_string(account_ip_entry.count));
-		insert_values.push_back("'" + EscapeString(account_ip_entry.lastused) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -222,11 +222,11 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(account_ip_entry.accid));
-			insert_values.push_back("'" + EscapeString(account_ip_entry.ip) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
 			insert_values.push_back(std::to_string(account_ip_entry.count));
-			insert_values.push_back("'" + EscapeString(account_ip_entry.lastused) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -235,7 +235,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -22,7 +22,7 @@
 #define EQEMU_BUYER_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_buyer_repository.h"
 
 class BuyerRepository: public BaseBuyerRepository {
