@@ -460,7 +460,7 @@ void EQEmuLogSys::Out(
 		EQEmuLogSys::ProcessConsoleMessage(log_category, output_debug_message);
 	}
 	if (log_to_gmsay) {
-		m_on_log_gmsay_hook(log_category, message);
+		m_on_log_gmsay_hook(log_category, output_message);
 	}
 	if (log_to_file) {
 		EQEmuLogSys::ProcessLogWrite(log_category, output_debug_message);
