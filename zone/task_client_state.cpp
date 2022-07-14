@@ -621,7 +621,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				LogTasks(
 					"[UPDATE] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
 					client->GetName(),
@@ -699,7 +699,7 @@ int ClientTaskState::ActiveSpeakTask(int npc_type_id)
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				continue;
 			}
 			// Is the activity_information to speak with this type of NPC ?
@@ -748,7 +748,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				continue;
 			}
 
@@ -809,7 +809,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activi
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				LogTasks(
 					"[UpdateTasksForItem] Error: Character [{}] activity_information type [{}] for Item [{}] failed zone check",
 					client->GetName(),
@@ -881,7 +881,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
 			if (activity_info->activity_type != TaskActivityType::Explore) {
 				continue;
 			}
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				LogTasks(
 					"[UpdateTasksOnExplore] character [{}] explore_id [{}] failed zone check",
 					client->GetName(),
@@ -977,7 +977,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				Log(
 					Logs::General, Logs::Tasks,
 					"[UPDATE] Char: %s Deliver activity_information failed zone check (current zone %i, need zone "
@@ -1039,7 +1039,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 	return is_updated;
 }
 
-void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
+void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id, uint16 version)
 {
 	// If the client has no tasks, there is nothing further to check.
 
@@ -1077,7 +1077,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
 			if (activity_info->goal_method != METHODSINGLEID) {
 				continue;
 			}
-			if (!activity_info->CheckZone(zone_id)) {
+			if (!activity_info->CheckZone(zone_id, version)) {
 				LogTasks(
 					"[UpdateTasksOnTouch] character [{}] Touch activity_information failed zone check",
 					client->GetName()
@@ -1929,7 +1929,7 @@ void ClientTaskState::TaskPeriodicChecks(Client *client)
 	// the zone before we send the 'Task activity_information Completed' message.
 	//
 	if (!m_checked_touch_activities) {
-		UpdateTasksOnTouch(client, zone->GetZoneID());
+		UpdateTasksOnTouch(client, zone->GetZoneID(), zone->GetInstanceVersion());
 		m_checked_touch_activities = true;
 	}
 }

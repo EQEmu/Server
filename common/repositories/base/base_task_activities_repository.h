@@ -34,6 +34,7 @@ public:
 		int         goalcount;
 		int         delivertonpc;
 		std::string zones;
+		int         zone_version;
 		int         optional;
 	};
 
@@ -60,6 +61,7 @@ public:
 			"goalcount",
 			"delivertonpc",
 			"zones",
+			"zone_version",
 			"optional",
 		};
 	}
@@ -82,6 +84,7 @@ public:
 			"goalcount",
 			"delivertonpc",
 			"zones",
+			"zone_version",
 			"optional",
 		};
 	}
@@ -138,6 +141,7 @@ public:
 		entry.goalcount            = 1;
 		entry.delivertonpc         = 0;
 		entry.zones                = "";
+		entry.zone_version         = -1;
 		entry.optional             = 0;
 
 		return entry;
@@ -189,7 +193,8 @@ public:
 			entry.goalcount            = atoi(row[12]);
 			entry.delivertonpc         = atoi(row[13]);
 			entry.zones                = row[14] ? row[14] : "";
-			entry.optional             = atoi(row[15]);
+			entry.zone_version         = atoi(row[15]);
+			entry.optional             = atoi(row[16]);
 
 			return entry;
 		}
@@ -238,7 +243,8 @@ public:
 		update_values.push_back(columns[12] + " = " + std::to_string(task_activities_entry.goalcount));
 		update_values.push_back(columns[13] + " = " + std::to_string(task_activities_entry.delivertonpc));
 		update_values.push_back(columns[14] + " = '" + Strings::Escape(task_activities_entry.zones) + "'");
-		update_values.push_back(columns[15] + " = " + std::to_string(task_activities_entry.optional));
+		update_values.push_back(columns[15] + " = " + std::to_string(task_activities_entry.zone_version));
+		update_values.push_back(columns[16] + " = " + std::to_string(task_activities_entry.optional));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -275,6 +281,7 @@ public:
 		insert_values.push_back(std::to_string(task_activities_entry.goalcount));
 		insert_values.push_back(std::to_string(task_activities_entry.delivertonpc));
 		insert_values.push_back("'" + Strings::Escape(task_activities_entry.zones) + "'");
+		insert_values.push_back(std::to_string(task_activities_entry.zone_version));
 		insert_values.push_back(std::to_string(task_activities_entry.optional));
 
 		auto results = db.QueryDatabase(
@@ -320,6 +327,7 @@ public:
 			insert_values.push_back(std::to_string(task_activities_entry.goalcount));
 			insert_values.push_back(std::to_string(task_activities_entry.delivertonpc));
 			insert_values.push_back("'" + Strings::Escape(task_activities_entry.zones) + "'");
+			insert_values.push_back(std::to_string(task_activities_entry.zone_version));
 			insert_values.push_back(std::to_string(task_activities_entry.optional));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
@@ -369,7 +377,8 @@ public:
 			entry.goalcount            = atoi(row[12]);
 			entry.delivertonpc         = atoi(row[13]);
 			entry.zones                = row[14] ? row[14] : "";
-			entry.optional             = atoi(row[15]);
+			entry.zone_version         = atoi(row[15]);
+			entry.optional             = atoi(row[16]);
 
 			all_entries.push_back(entry);
 		}
@@ -409,7 +418,8 @@ public:
 			entry.goalcount            = atoi(row[12]);
 			entry.delivertonpc         = atoi(row[13]);
 			entry.zones                = row[14] ? row[14] : "";
-			entry.optional             = atoi(row[15]);
+			entry.zone_version         = atoi(row[15]);
+			entry.optional             = atoi(row[16]);
 
 			all_entries.push_back(entry);
 		}
