@@ -25,7 +25,7 @@
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
-#include "../../common/string_util.h"
+#include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
 
 EQEmuLogSys LogSys;

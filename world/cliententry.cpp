@@ -25,7 +25,7 @@
 #include "zoneserver.h"
 #include "world_config.h"
 #include "../common/guilds.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern uint32          numplayers;
 extern LoginServerList loginserverlist;

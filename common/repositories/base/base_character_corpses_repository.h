@@ -13,7 +13,7 @@
 #define EQEMU_BASE_CHARACTER_CORPSES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterCorpsesRepository {
@@ -181,12 +181,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -379,7 +379,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(character_corpses_entry.charid));
-		update_values.push_back(columns[2] + " = '" + EscapeString(character_corpses_entry.charname) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(character_corpses_entry.charname) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(character_corpses_entry.zone_id));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_corpses_entry.instance_id));
 		update_values.push_back(columns[5] + " = " + std::to_string(character_corpses_entry.x));
@@ -429,7 +429,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				character_corpses_entry.id
 			)
@@ -447,7 +447,7 @@ public:
 
 		insert_values.push_back(std::to_string(character_corpses_entry.id));
 		insert_values.push_back(std::to_string(character_corpses_entry.charid));
-		insert_values.push_back("'" + EscapeString(character_corpses_entry.charname) + "'");
+		insert_values.push_back("'" + Strings::Escape(character_corpses_entry.charname) + "'");
 		insert_values.push_back(std::to_string(character_corpses_entry.zone_id));
 		insert_values.push_back(std::to_string(character_corpses_entry.instance_id));
 		insert_values.push_back(std::to_string(character_corpses_entry.x));
@@ -497,7 +497,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -523,7 +523,7 @@ public:
 
 			insert_values.push_back(std::to_string(character_corpses_entry.id));
 			insert_values.push_back(std::to_string(character_corpses_entry.charid));
-			insert_values.push_back("'" + EscapeString(character_corpses_entry.charname) + "'");
+			insert_values.push_back("'" + Strings::Escape(character_corpses_entry.charname) + "'");
 			insert_values.push_back(std::to_string(character_corpses_entry.zone_id));
 			insert_values.push_back(std::to_string(character_corpses_entry.instance_id));
 			insert_values.push_back(std::to_string(character_corpses_entry.x));
@@ -569,7 +569,7 @@ public:
 			insert_values.push_back(std::to_string(character_corpses_entry.wc_8));
 			insert_values.push_back(std::to_string(character_corpses_entry.wc_9));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -578,7 +578,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

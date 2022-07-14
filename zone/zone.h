@@ -23,7 +23,7 @@
 #include "../common/rulesys.h"
 #include "../common/types.h"
 #include "../common/random.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "zonedb.h"
 #include "zone_store.h"
 #include "../common/repositories/grid_repository.h"
@@ -328,10 +328,10 @@ public:
 		/**
 		 * Replace Occurrences of % or MessageStatus will crash
 		 */
-		find_replace(message, std::string("%"), std::string("."));
+		Strings::FindReplace(message, std::string("%"), std::string("."));
 
 		if (message.find('\n') != std::string::npos) {
-			auto message_split = SplitString(message, '\n');
+			auto message_split = Strings::Split(message, '\n');
 			entity_list.MessageStatus(
 				0,
 				AccountStatus::QuestTroupe,

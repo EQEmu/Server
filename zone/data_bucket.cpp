@@ -1,6 +1,6 @@
 #include "data_bucket.h"
 #include <utility>
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "zonedb.h"
 #include "zone_store.h"
 #include <ctime>
@@ -35,16 +35,16 @@ void DataBucket::SetData(std::string bucket_key, std::string bucket_value, std::
 
 		query = StringFormat(
 				"UPDATE `data_buckets` SET `value` = '%s' %s WHERE `id` = %i",
-				EscapeString(bucket_value).c_str(),
-				EscapeString(update_expired_time).c_str(),
+				Strings::Escape(bucket_value).c_str(),
+				Strings::Escape(update_expired_time).c_str(),
 				bucket_id
 		);
 	}
 	else {
 		query = StringFormat(
 				"INSERT INTO `data_buckets` (`key`, `value`, `expires`) VALUES ('%s', '%s', '%lld')",
-				EscapeString(bucket_key).c_str(),
-				EscapeString(bucket_value).c_str(),
+				Strings::Escape(bucket_key).c_str(),
+				Strings::Escape(bucket_value).c_str(),
 				expires_time_unix
 		);
 	}
@@ -133,7 +133,7 @@ std::string DataBucket::GetDataRemaining(std::string bucket_key) {
 uint64 DataBucket::DoesBucketExist(std::string bucket_key) {
 	std::string query = StringFormat(
 			"SELECT `id` from `data_buckets` WHERE `key` = '%s' AND (`expires` > %lld OR `expires` = 0) LIMIT 1",
-			EscapeString(bucket_key).c_str(),
+			Strings::Escape(bucket_key).c_str(),
 			(long long) std::time(nullptr)
 	);
 
@@ -157,7 +157,7 @@ uint64 DataBucket::DoesBucketExist(std::string bucket_key) {
 bool DataBucket::DeleteData(std::string bucket_key) {
 	std::string query = StringFormat(
 			"DELETE FROM `data_buckets` WHERE `key` = '%s'",
-			EscapeString(bucket_key).c_str()
+			Strings::Escape(bucket_key).c_str()
 	);
 
 	auto results = database.QueryDatabase(query);

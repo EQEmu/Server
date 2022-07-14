@@ -168,15 +168,15 @@ bool WorldContentService::DoesPassContentFiltering(const ContentFlags &f)
 	}
 
 	// if we don't have any enabled flag in enabled flags, we fail
-	for (const auto& flag: SplitString(f.content_flags)) {
-		if (!contains(GetContentFlagsEnabled(), flag)) {
+	for (const auto& flag: Strings::Split(f.content_flags)) {
+		if (!Strings::Contains(GetContentFlagsEnabled(), flag)) {
 			return false;
 		}
 	}
 
 	// if we don't have any disabled flag in disabled flags, we fail
-	for (const auto& flag: SplitString(f.content_flags_disabled)) {
-		if (!contains(GetContentFlagsDisabled(), flag)) {
+	for (const auto& flag: Strings::Split(f.content_flags_disabled)) {
+		if (!Strings::Contains(GetContentFlagsDisabled(), flag)) {
 			return false;
 		}
 	}

@@ -22,7 +22,7 @@
 #define EQEMU_NPC_FACTION_ENTRIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_npc_faction_entries_repository.h"
 
 class NpcFactionEntriesRepository: public BaseNpcFactionEntriesRepository {

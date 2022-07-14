@@ -22,7 +22,7 @@
 
 #include "../common/misc_functions.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "mob.h"
 #include "quest_parser_collection.h"

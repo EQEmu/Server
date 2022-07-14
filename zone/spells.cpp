@@ -74,7 +74,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 
@@ -333,6 +333,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			Chat::SpellFailure,
 			(IsClient() ? FilterPCSpells : FilterNPCSpells),
 			(fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER),
+			0,
 			/*
 				MessageFormat: You miss a note, bringing your song to a close! (if missed note)
 				MessageFormat: A missed note brings %1's song to a close!
@@ -2200,7 +2201,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			if (!spell_target_tot) {
 				return false;
 			}
-			
+
 			//Verfied from live - Target's Target needs to be in combat range to recieve the effect
 			if (RuleB(Spells, TargetsTargetRequiresCombatRange) && !CombatRange(spell_target)) {
 				return false;
@@ -5542,7 +5543,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 	query = fmt::format(
 		"SELECT value FROM quest_globals WHERE charid = {} AND name = '{}'",
 		character_id,
-		EscapeString(spell_global_name)
+		Strings::Escape(spell_global_name)
 	);
 
 	results = database.QueryDatabase(query);
@@ -5570,7 +5571,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 
 	row = results.begin();
 	std::string global_value = row[0];
-	if (StringIsNumber(global_value) && StringIsNumber(spell_global_value)) {
+	if (Strings::IsNumber(global_value) && Strings::IsNumber(spell_global_value)) {
 		if (std::stoi(global_value) >= std::stoi(spell_global_value)) {
 			return true; // If value is greater than or equal to spell global value, allow scribing.
 		}
@@ -5624,11 +5625,11 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 
 	auto bucket_value = DataBucket::GetData(new_bucket_name);
 	if (!bucket_value.empty()) {
-		if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
+		if (Strings::IsNumber(bucket_value) && Strings::IsNumber(spell_bucket_value)) {
 			if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
 				return true; // If value is greater than or equal to spell bucket value, allow scribing.
 			}
-		} else {				
+		} else {
 			if (bucket_value == spell_bucket_value) {
 				return true; // If value is equal to spell bucket value, allow scribing.
 			}
@@ -5643,11 +5644,11 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 
 	bucket_value = DataBucket::GetData(old_bucket_name);
 	if (!bucket_value.empty()) {
-		if (StringIsNumber(bucket_value) && StringIsNumber(spell_bucket_value)) {
+		if (Strings::IsNumber(bucket_value) && Strings::IsNumber(spell_bucket_value)) {
 			if (std::stoi(bucket_value) >= std::stoi(spell_bucket_value)) {
 				return true; // If value is greater than or equal to spell bucket value, allow scribing.
 			}
-		} else {				
+		} else {
 			if (bucket_value == spell_bucket_value) {
 				return true; // If value is equal to spell bucket value, allow scribing.
 			}

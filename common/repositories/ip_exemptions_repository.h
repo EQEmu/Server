@@ -22,7 +22,7 @@
 #define EQEMU_IP_EXEMPTIONS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_ip_exemptions_repository.h"
 
 class IpExemptionsRepository: public BaseIpExemptionsRepository {

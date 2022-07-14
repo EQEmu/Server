@@ -3,7 +3,7 @@
 #include "../common/extprofile.h"
 #include "../common/rulesys.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/random.h"
 #include "adventure.h"
 #include "adventure_manager.h"

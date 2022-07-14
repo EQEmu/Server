@@ -13,7 +13,7 @@
 #define EQEMU_BASE_MAIL_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseMailRepository {
@@ -64,12 +64,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -185,17 +185,17 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(mail_entry.charid));
 		update_values.push_back(columns[2] + " = " + std::to_string(mail_entry.timestamp));
-		update_values.push_back(columns[3] + " = '" + EscapeString(mail_entry.from) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(mail_entry.subject) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(mail_entry.body) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(mail_entry.to) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(mail_entry.from) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(mail_entry.subject) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(mail_entry.body) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(mail_entry.to) + "'");
 		update_values.push_back(columns[7] + " = " + std::to_string(mail_entry.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				mail_entry.msgid
 			)
@@ -214,17 +214,17 @@ public:
 		insert_values.push_back(std::to_string(mail_entry.msgid));
 		insert_values.push_back(std::to_string(mail_entry.charid));
 		insert_values.push_back(std::to_string(mail_entry.timestamp));
-		insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.subject) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.body) + "'");
-		insert_values.push_back("'" + EscapeString(mail_entry.to) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.from) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.subject) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.body) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_entry.to) + "'");
 		insert_values.push_back(std::to_string(mail_entry.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -251,13 +251,13 @@ public:
 			insert_values.push_back(std::to_string(mail_entry.msgid));
 			insert_values.push_back(std::to_string(mail_entry.charid));
 			insert_values.push_back(std::to_string(mail_entry.timestamp));
-			insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.subject) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.body) + "'");
-			insert_values.push_back("'" + EscapeString(mail_entry.to) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.from) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.subject) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.body) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_entry.to) + "'");
 			insert_values.push_back(std::to_string(mail_entry.status));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -266,7 +266,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

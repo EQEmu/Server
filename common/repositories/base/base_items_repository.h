@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ITEMS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseItemsRepository {
@@ -895,12 +895,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -1570,7 +1570,7 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(items_entry.id));
 		update_values.push_back(columns[1] + " = " + std::to_string(items_entry.minstatus));
-		update_values.push_back(columns[2] + " = '" + EscapeString(items_entry.Name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(items_entry.Name) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(items_entry.aagi));
 		update_values.push_back(columns[4] + " = " + std::to_string(items_entry.ac));
 		update_values.push_back(columns[5] + " = " + std::to_string(items_entry.accuracy));
@@ -1610,11 +1610,11 @@ public:
 		update_values.push_back(columns[39] + " = " + std::to_string(items_entry.book));
 		update_values.push_back(columns[40] + " = " + std::to_string(items_entry.casttime));
 		update_values.push_back(columns[41] + " = " + std::to_string(items_entry.casttime_));
-		update_values.push_back(columns[42] + " = '" + EscapeString(items_entry.charmfile) + "'");
-		update_values.push_back(columns[43] + " = '" + EscapeString(items_entry.charmfileid) + "'");
+		update_values.push_back(columns[42] + " = '" + Strings::Escape(items_entry.charmfile) + "'");
+		update_values.push_back(columns[43] + " = '" + Strings::Escape(items_entry.charmfileid) + "'");
 		update_values.push_back(columns[44] + " = " + std::to_string(items_entry.classes));
 		update_values.push_back(columns[45] + " = " + std::to_string(items_entry.color));
-		update_values.push_back(columns[46] + " = '" + EscapeString(items_entry.combateffects) + "'");
+		update_values.push_back(columns[46] + " = '" + Strings::Escape(items_entry.combateffects) + "'");
 		update_values.push_back(columns[47] + " = " + std::to_string(items_entry.extradmgskill));
 		update_values.push_back(columns[48] + " = " + std::to_string(items_entry.extradmgamt));
 		update_values.push_back(columns[49] + " = " + std::to_string(items_entry.price));
@@ -1639,7 +1639,7 @@ public:
 		update_values.push_back(columns[68] + " = " + std::to_string(items_entry.factionmod2));
 		update_values.push_back(columns[69] + " = " + std::to_string(items_entry.factionmod3));
 		update_values.push_back(columns[70] + " = " + std::to_string(items_entry.factionmod4));
-		update_values.push_back(columns[71] + " = '" + EscapeString(items_entry.filename) + "'");
+		update_values.push_back(columns[71] + " = '" + Strings::Escape(items_entry.filename) + "'");
 		update_values.push_back(columns[72] + " = " + std::to_string(items_entry.focuseffect));
 		update_values.push_back(columns[73] + " = " + std::to_string(items_entry.fr));
 		update_values.push_back(columns[74] + " = " + std::to_string(items_entry.fvnodrop));
@@ -1648,14 +1648,14 @@ public:
 		update_values.push_back(columns[77] + " = " + std::to_string(items_entry.hp));
 		update_values.push_back(columns[78] + " = " + std::to_string(items_entry.regen));
 		update_values.push_back(columns[79] + " = " + std::to_string(items_entry.icon));
-		update_values.push_back(columns[80] + " = '" + EscapeString(items_entry.idfile) + "'");
+		update_values.push_back(columns[80] + " = '" + Strings::Escape(items_entry.idfile) + "'");
 		update_values.push_back(columns[81] + " = " + std::to_string(items_entry.itemclass));
 		update_values.push_back(columns[82] + " = " + std::to_string(items_entry.itemtype));
 		update_values.push_back(columns[83] + " = " + std::to_string(items_entry.ldonprice));
 		update_values.push_back(columns[84] + " = " + std::to_string(items_entry.ldontheme));
 		update_values.push_back(columns[85] + " = " + std::to_string(items_entry.ldonsold));
 		update_values.push_back(columns[86] + " = " + std::to_string(items_entry.light));
-		update_values.push_back(columns[87] + " = '" + EscapeString(items_entry.lore) + "'");
+		update_values.push_back(columns[87] + " = '" + Strings::Escape(items_entry.lore) + "'");
 		update_values.push_back(columns[88] + " = " + std::to_string(items_entry.loregroup));
 		update_values.push_back(columns[89] + " = " + std::to_string(items_entry.magic));
 		update_values.push_back(columns[90] + " = " + std::to_string(items_entry.mana));
@@ -1703,7 +1703,7 @@ public:
 		update_values.push_back(columns[132] + " = " + std::to_string(items_entry.attuneable));
 		update_values.push_back(columns[133] + " = " + std::to_string(items_entry.nopet));
 		update_values.push_back(columns[134] + " = FROM_UNIXTIME(" + (items_entry.updated > 0 ? std::to_string(items_entry.updated) : "null") + ")");
-		update_values.push_back(columns[135] + " = '" + EscapeString(items_entry.comment) + "'");
+		update_values.push_back(columns[135] + " = '" + Strings::Escape(items_entry.comment) + "'");
 		update_values.push_back(columns[136] + " = " + std::to_string(items_entry.UNK127));
 		update_values.push_back(columns[137] + " = " + std::to_string(items_entry.pointtype));
 		update_values.push_back(columns[138] + " = " + std::to_string(items_entry.potionbelt));
@@ -1711,7 +1711,7 @@ public:
 		update_values.push_back(columns[140] + " = " + std::to_string(items_entry.stacksize));
 		update_values.push_back(columns[141] + " = " + std::to_string(items_entry.notransfer));
 		update_values.push_back(columns[142] + " = " + std::to_string(items_entry.stackable));
-		update_values.push_back(columns[143] + " = '" + EscapeString(items_entry.UNK134) + "'");
+		update_values.push_back(columns[143] + " = '" + Strings::Escape(items_entry.UNK134) + "'");
 		update_values.push_back(columns[144] + " = " + std::to_string(items_entry.UNK137));
 		update_values.push_back(columns[145] + " = " + std::to_string(items_entry.proceffect));
 		update_values.push_back(columns[146] + " = " + std::to_string(items_entry.proctype));
@@ -1734,10 +1734,10 @@ public:
 		update_values.push_back(columns[163] + " = " + std::to_string(items_entry.UNK157));
 		update_values.push_back(columns[164] + " = FROM_UNIXTIME(" + (items_entry.serialized > 0 ? std::to_string(items_entry.serialized) : "null") + ")");
 		update_values.push_back(columns[165] + " = FROM_UNIXTIME(" + (items_entry.verified > 0 ? std::to_string(items_entry.verified) : "null") + ")");
-		update_values.push_back(columns[166] + " = '" + EscapeString(items_entry.serialization) + "'");
-		update_values.push_back(columns[167] + " = '" + EscapeString(items_entry.source) + "'");
+		update_values.push_back(columns[166] + " = '" + Strings::Escape(items_entry.serialization) + "'");
+		update_values.push_back(columns[167] + " = '" + Strings::Escape(items_entry.source) + "'");
 		update_values.push_back(columns[168] + " = " + std::to_string(items_entry.UNK033));
-		update_values.push_back(columns[169] + " = '" + EscapeString(items_entry.lorefile) + "'");
+		update_values.push_back(columns[169] + " = '" + Strings::Escape(items_entry.lorefile) + "'");
 		update_values.push_back(columns[170] + " = " + std::to_string(items_entry.UNK014));
 		update_values.push_back(columns[171] + " = " + std::to_string(items_entry.svcorruption));
 		update_values.push_back(columns[172] + " = " + std::to_string(items_entry.skillmodmax));
@@ -1751,36 +1751,36 @@ public:
 		update_values.push_back(columns[180] + " = " + std::to_string(items_entry.UNK120));
 		update_values.push_back(columns[181] + " = " + std::to_string(items_entry.UNK121));
 		update_values.push_back(columns[182] + " = " + std::to_string(items_entry.questitemflag));
-		update_values.push_back(columns[183] + " = '" + EscapeString(items_entry.UNK132) + "'");
+		update_values.push_back(columns[183] + " = '" + Strings::Escape(items_entry.UNK132) + "'");
 		update_values.push_back(columns[184] + " = " + std::to_string(items_entry.clickunk5));
-		update_values.push_back(columns[185] + " = '" + EscapeString(items_entry.clickunk6) + "'");
+		update_values.push_back(columns[185] + " = '" + Strings::Escape(items_entry.clickunk6) + "'");
 		update_values.push_back(columns[186] + " = " + std::to_string(items_entry.clickunk7));
 		update_values.push_back(columns[187] + " = " + std::to_string(items_entry.procunk1));
 		update_values.push_back(columns[188] + " = " + std::to_string(items_entry.procunk2));
 		update_values.push_back(columns[189] + " = " + std::to_string(items_entry.procunk3));
 		update_values.push_back(columns[190] + " = " + std::to_string(items_entry.procunk4));
-		update_values.push_back(columns[191] + " = '" + EscapeString(items_entry.procunk6) + "'");
+		update_values.push_back(columns[191] + " = '" + Strings::Escape(items_entry.procunk6) + "'");
 		update_values.push_back(columns[192] + " = " + std::to_string(items_entry.procunk7));
 		update_values.push_back(columns[193] + " = " + std::to_string(items_entry.wornunk1));
 		update_values.push_back(columns[194] + " = " + std::to_string(items_entry.wornunk2));
 		update_values.push_back(columns[195] + " = " + std::to_string(items_entry.wornunk3));
 		update_values.push_back(columns[196] + " = " + std::to_string(items_entry.wornunk4));
 		update_values.push_back(columns[197] + " = " + std::to_string(items_entry.wornunk5));
-		update_values.push_back(columns[198] + " = '" + EscapeString(items_entry.wornunk6) + "'");
+		update_values.push_back(columns[198] + " = '" + Strings::Escape(items_entry.wornunk6) + "'");
 		update_values.push_back(columns[199] + " = " + std::to_string(items_entry.wornunk7));
 		update_values.push_back(columns[200] + " = " + std::to_string(items_entry.focusunk1));
 		update_values.push_back(columns[201] + " = " + std::to_string(items_entry.focusunk2));
 		update_values.push_back(columns[202] + " = " + std::to_string(items_entry.focusunk3));
 		update_values.push_back(columns[203] + " = " + std::to_string(items_entry.focusunk4));
 		update_values.push_back(columns[204] + " = " + std::to_string(items_entry.focusunk5));
-		update_values.push_back(columns[205] + " = '" + EscapeString(items_entry.focusunk6) + "'");
+		update_values.push_back(columns[205] + " = '" + Strings::Escape(items_entry.focusunk6) + "'");
 		update_values.push_back(columns[206] + " = " + std::to_string(items_entry.focusunk7));
 		update_values.push_back(columns[207] + " = " + std::to_string(items_entry.scrollunk1));
 		update_values.push_back(columns[208] + " = " + std::to_string(items_entry.scrollunk2));
 		update_values.push_back(columns[209] + " = " + std::to_string(items_entry.scrollunk3));
 		update_values.push_back(columns[210] + " = " + std::to_string(items_entry.scrollunk4));
 		update_values.push_back(columns[211] + " = " + std::to_string(items_entry.scrollunk5));
-		update_values.push_back(columns[212] + " = '" + EscapeString(items_entry.scrollunk6) + "'");
+		update_values.push_back(columns[212] + " = '" + Strings::Escape(items_entry.scrollunk6) + "'");
 		update_values.push_back(columns[213] + " = " + std::to_string(items_entry.scrollunk7));
 		update_values.push_back(columns[214] + " = " + std::to_string(items_entry.UNK193));
 		update_values.push_back(columns[215] + " = " + std::to_string(items_entry.purity));
@@ -1788,11 +1788,11 @@ public:
 		update_values.push_back(columns[217] + " = " + std::to_string(items_entry.evoid));
 		update_values.push_back(columns[218] + " = " + std::to_string(items_entry.evolvinglevel));
 		update_values.push_back(columns[219] + " = " + std::to_string(items_entry.evomax));
-		update_values.push_back(columns[220] + " = '" + EscapeString(items_entry.clickname) + "'");
-		update_values.push_back(columns[221] + " = '" + EscapeString(items_entry.procname) + "'");
-		update_values.push_back(columns[222] + " = '" + EscapeString(items_entry.wornname) + "'");
-		update_values.push_back(columns[223] + " = '" + EscapeString(items_entry.focusname) + "'");
-		update_values.push_back(columns[224] + " = '" + EscapeString(items_entry.scrollname) + "'");
+		update_values.push_back(columns[220] + " = '" + Strings::Escape(items_entry.clickname) + "'");
+		update_values.push_back(columns[221] + " = '" + Strings::Escape(items_entry.procname) + "'");
+		update_values.push_back(columns[222] + " = '" + Strings::Escape(items_entry.wornname) + "'");
+		update_values.push_back(columns[223] + " = '" + Strings::Escape(items_entry.focusname) + "'");
+		update_values.push_back(columns[224] + " = '" + Strings::Escape(items_entry.scrollname) + "'");
 		update_values.push_back(columns[225] + " = " + std::to_string(items_entry.dsmitigation));
 		update_values.push_back(columns[226] + " = " + std::to_string(items_entry.heroic_str));
 		update_values.push_back(columns[227] + " = " + std::to_string(items_entry.heroic_int));
@@ -1811,7 +1811,7 @@ public:
 		update_values.push_back(columns[240] + " = " + std::to_string(items_entry.spelldmg));
 		update_values.push_back(columns[241] + " = " + std::to_string(items_entry.clairvoyance));
 		update_values.push_back(columns[242] + " = " + std::to_string(items_entry.backstabdmg));
-		update_values.push_back(columns[243] + " = '" + EscapeString(items_entry.created) + "'");
+		update_values.push_back(columns[243] + " = '" + Strings::Escape(items_entry.created) + "'");
 		update_values.push_back(columns[244] + " = " + std::to_string(items_entry.elitematerial));
 		update_values.push_back(columns[245] + " = " + std::to_string(items_entry.ldonsellbackrate));
 		update_values.push_back(columns[246] + " = " + std::to_string(items_entry.scriptfileid));
@@ -1826,7 +1826,7 @@ public:
 		update_values.push_back(columns[255] + " = " + std::to_string(items_entry.bardunk3));
 		update_values.push_back(columns[256] + " = " + std::to_string(items_entry.bardunk4));
 		update_values.push_back(columns[257] + " = " + std::to_string(items_entry.bardunk5));
-		update_values.push_back(columns[258] + " = '" + EscapeString(items_entry.bardname) + "'");
+		update_values.push_back(columns[258] + " = '" + Strings::Escape(items_entry.bardname) + "'");
 		update_values.push_back(columns[259] + " = " + std::to_string(items_entry.bardunk7));
 		update_values.push_back(columns[260] + " = " + std::to_string(items_entry.UNK214));
 		update_values.push_back(columns[261] + " = " + std::to_string(items_entry.subtype));
@@ -1858,7 +1858,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				items_entry.id
 			)
@@ -1876,7 +1876,7 @@ public:
 
 		insert_values.push_back(std::to_string(items_entry.id));
 		insert_values.push_back(std::to_string(items_entry.minstatus));
-		insert_values.push_back("'" + EscapeString(items_entry.Name) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.Name) + "'");
 		insert_values.push_back(std::to_string(items_entry.aagi));
 		insert_values.push_back(std::to_string(items_entry.ac));
 		insert_values.push_back(std::to_string(items_entry.accuracy));
@@ -1916,11 +1916,11 @@ public:
 		insert_values.push_back(std::to_string(items_entry.book));
 		insert_values.push_back(std::to_string(items_entry.casttime));
 		insert_values.push_back(std::to_string(items_entry.casttime_));
-		insert_values.push_back("'" + EscapeString(items_entry.charmfile) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.charmfileid) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.charmfile) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.charmfileid) + "'");
 		insert_values.push_back(std::to_string(items_entry.classes));
 		insert_values.push_back(std::to_string(items_entry.color));
-		insert_values.push_back("'" + EscapeString(items_entry.combateffects) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.combateffects) + "'");
 		insert_values.push_back(std::to_string(items_entry.extradmgskill));
 		insert_values.push_back(std::to_string(items_entry.extradmgamt));
 		insert_values.push_back(std::to_string(items_entry.price));
@@ -1945,7 +1945,7 @@ public:
 		insert_values.push_back(std::to_string(items_entry.factionmod2));
 		insert_values.push_back(std::to_string(items_entry.factionmod3));
 		insert_values.push_back(std::to_string(items_entry.factionmod4));
-		insert_values.push_back("'" + EscapeString(items_entry.filename) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.filename) + "'");
 		insert_values.push_back(std::to_string(items_entry.focuseffect));
 		insert_values.push_back(std::to_string(items_entry.fr));
 		insert_values.push_back(std::to_string(items_entry.fvnodrop));
@@ -1954,14 +1954,14 @@ public:
 		insert_values.push_back(std::to_string(items_entry.hp));
 		insert_values.push_back(std::to_string(items_entry.regen));
 		insert_values.push_back(std::to_string(items_entry.icon));
-		insert_values.push_back("'" + EscapeString(items_entry.idfile) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.idfile) + "'");
 		insert_values.push_back(std::to_string(items_entry.itemclass));
 		insert_values.push_back(std::to_string(items_entry.itemtype));
 		insert_values.push_back(std::to_string(items_entry.ldonprice));
 		insert_values.push_back(std::to_string(items_entry.ldontheme));
 		insert_values.push_back(std::to_string(items_entry.ldonsold));
 		insert_values.push_back(std::to_string(items_entry.light));
-		insert_values.push_back("'" + EscapeString(items_entry.lore) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.lore) + "'");
 		insert_values.push_back(std::to_string(items_entry.loregroup));
 		insert_values.push_back(std::to_string(items_entry.magic));
 		insert_values.push_back(std::to_string(items_entry.mana));
@@ -2009,7 +2009,7 @@ public:
 		insert_values.push_back(std::to_string(items_entry.attuneable));
 		insert_values.push_back(std::to_string(items_entry.nopet));
 		insert_values.push_back("FROM_UNIXTIME(" + (items_entry.updated > 0 ? std::to_string(items_entry.updated) : "null") + ")");
-		insert_values.push_back("'" + EscapeString(items_entry.comment) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.comment) + "'");
 		insert_values.push_back(std::to_string(items_entry.UNK127));
 		insert_values.push_back(std::to_string(items_entry.pointtype));
 		insert_values.push_back(std::to_string(items_entry.potionbelt));
@@ -2017,7 +2017,7 @@ public:
 		insert_values.push_back(std::to_string(items_entry.stacksize));
 		insert_values.push_back(std::to_string(items_entry.notransfer));
 		insert_values.push_back(std::to_string(items_entry.stackable));
-		insert_values.push_back("'" + EscapeString(items_entry.UNK134) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.UNK134) + "'");
 		insert_values.push_back(std::to_string(items_entry.UNK137));
 		insert_values.push_back(std::to_string(items_entry.proceffect));
 		insert_values.push_back(std::to_string(items_entry.proctype));
@@ -2040,10 +2040,10 @@ public:
 		insert_values.push_back(std::to_string(items_entry.UNK157));
 		insert_values.push_back("FROM_UNIXTIME(" + (items_entry.serialized > 0 ? std::to_string(items_entry.serialized) : "null") + ")");
 		insert_values.push_back("FROM_UNIXTIME(" + (items_entry.verified > 0 ? std::to_string(items_entry.verified) : "null") + ")");
-		insert_values.push_back("'" + EscapeString(items_entry.serialization) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.source) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.serialization) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.source) + "'");
 		insert_values.push_back(std::to_string(items_entry.UNK033));
-		insert_values.push_back("'" + EscapeString(items_entry.lorefile) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.lorefile) + "'");
 		insert_values.push_back(std::to_string(items_entry.UNK014));
 		insert_values.push_back(std::to_string(items_entry.svcorruption));
 		insert_values.push_back(std::to_string(items_entry.skillmodmax));
@@ -2057,36 +2057,36 @@ public:
 		insert_values.push_back(std::to_string(items_entry.UNK120));
 		insert_values.push_back(std::to_string(items_entry.UNK121));
 		insert_values.push_back(std::to_string(items_entry.questitemflag));
-		insert_values.push_back("'" + EscapeString(items_entry.UNK132) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.UNK132) + "'");
 		insert_values.push_back(std::to_string(items_entry.clickunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.clickunk6) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.clickunk6) + "'");
 		insert_values.push_back(std::to_string(items_entry.clickunk7));
 		insert_values.push_back(std::to_string(items_entry.procunk1));
 		insert_values.push_back(std::to_string(items_entry.procunk2));
 		insert_values.push_back(std::to_string(items_entry.procunk3));
 		insert_values.push_back(std::to_string(items_entry.procunk4));
-		insert_values.push_back("'" + EscapeString(items_entry.procunk6) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.procunk6) + "'");
 		insert_values.push_back(std::to_string(items_entry.procunk7));
 		insert_values.push_back(std::to_string(items_entry.wornunk1));
 		insert_values.push_back(std::to_string(items_entry.wornunk2));
 		insert_values.push_back(std::to_string(items_entry.wornunk3));
 		insert_values.push_back(std::to_string(items_entry.wornunk4));
 		insert_values.push_back(std::to_string(items_entry.wornunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.wornunk6) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.wornunk6) + "'");
 		insert_values.push_back(std::to_string(items_entry.wornunk7));
 		insert_values.push_back(std::to_string(items_entry.focusunk1));
 		insert_values.push_back(std::to_string(items_entry.focusunk2));
 		insert_values.push_back(std::to_string(items_entry.focusunk3));
 		insert_values.push_back(std::to_string(items_entry.focusunk4));
 		insert_values.push_back(std::to_string(items_entry.focusunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.focusunk6) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.focusunk6) + "'");
 		insert_values.push_back(std::to_string(items_entry.focusunk7));
 		insert_values.push_back(std::to_string(items_entry.scrollunk1));
 		insert_values.push_back(std::to_string(items_entry.scrollunk2));
 		insert_values.push_back(std::to_string(items_entry.scrollunk3));
 		insert_values.push_back(std::to_string(items_entry.scrollunk4));
 		insert_values.push_back(std::to_string(items_entry.scrollunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.scrollunk6) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.scrollunk6) + "'");
 		insert_values.push_back(std::to_string(items_entry.scrollunk7));
 		insert_values.push_back(std::to_string(items_entry.UNK193));
 		insert_values.push_back(std::to_string(items_entry.purity));
@@ -2094,11 +2094,11 @@ public:
 		insert_values.push_back(std::to_string(items_entry.evoid));
 		insert_values.push_back(std::to_string(items_entry.evolvinglevel));
 		insert_values.push_back(std::to_string(items_entry.evomax));
-		insert_values.push_back("'" + EscapeString(items_entry.clickname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.procname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.wornname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.focusname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.scrollname) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.clickname) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.procname) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.wornname) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.focusname) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.scrollname) + "'");
 		insert_values.push_back(std::to_string(items_entry.dsmitigation));
 		insert_values.push_back(std::to_string(items_entry.heroic_str));
 		insert_values.push_back(std::to_string(items_entry.heroic_int));
@@ -2117,7 +2117,7 @@ public:
 		insert_values.push_back(std::to_string(items_entry.spelldmg));
 		insert_values.push_back(std::to_string(items_entry.clairvoyance));
 		insert_values.push_back(std::to_string(items_entry.backstabdmg));
-		insert_values.push_back("'" + EscapeString(items_entry.created) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.created) + "'");
 		insert_values.push_back(std::to_string(items_entry.elitematerial));
 		insert_values.push_back(std::to_string(items_entry.ldonsellbackrate));
 		insert_values.push_back(std::to_string(items_entry.scriptfileid));
@@ -2132,7 +2132,7 @@ public:
 		insert_values.push_back(std::to_string(items_entry.bardunk3));
 		insert_values.push_back(std::to_string(items_entry.bardunk4));
 		insert_values.push_back(std::to_string(items_entry.bardunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.bardname) + "'");
+		insert_values.push_back("'" + Strings::Escape(items_entry.bardname) + "'");
 		insert_values.push_back(std::to_string(items_entry.bardunk7));
 		insert_values.push_back(std::to_string(items_entry.UNK214));
 		insert_values.push_back(std::to_string(items_entry.subtype));
@@ -2164,7 +2164,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -2190,7 +2190,7 @@ public:
 
 			insert_values.push_back(std::to_string(items_entry.id));
 			insert_values.push_back(std::to_string(items_entry.minstatus));
-			insert_values.push_back("'" + EscapeString(items_entry.Name) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.Name) + "'");
 			insert_values.push_back(std::to_string(items_entry.aagi));
 			insert_values.push_back(std::to_string(items_entry.ac));
 			insert_values.push_back(std::to_string(items_entry.accuracy));
@@ -2230,11 +2230,11 @@ public:
 			insert_values.push_back(std::to_string(items_entry.book));
 			insert_values.push_back(std::to_string(items_entry.casttime));
 			insert_values.push_back(std::to_string(items_entry.casttime_));
-			insert_values.push_back("'" + EscapeString(items_entry.charmfile) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.charmfileid) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.charmfile) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.charmfileid) + "'");
 			insert_values.push_back(std::to_string(items_entry.classes));
 			insert_values.push_back(std::to_string(items_entry.color));
-			insert_values.push_back("'" + EscapeString(items_entry.combateffects) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.combateffects) + "'");
 			insert_values.push_back(std::to_string(items_entry.extradmgskill));
 			insert_values.push_back(std::to_string(items_entry.extradmgamt));
 			insert_values.push_back(std::to_string(items_entry.price));
@@ -2259,7 +2259,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.factionmod2));
 			insert_values.push_back(std::to_string(items_entry.factionmod3));
 			insert_values.push_back(std::to_string(items_entry.factionmod4));
-			insert_values.push_back("'" + EscapeString(items_entry.filename) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.filename) + "'");
 			insert_values.push_back(std::to_string(items_entry.focuseffect));
 			insert_values.push_back(std::to_string(items_entry.fr));
 			insert_values.push_back(std::to_string(items_entry.fvnodrop));
@@ -2268,14 +2268,14 @@ public:
 			insert_values.push_back(std::to_string(items_entry.hp));
 			insert_values.push_back(std::to_string(items_entry.regen));
 			insert_values.push_back(std::to_string(items_entry.icon));
-			insert_values.push_back("'" + EscapeString(items_entry.idfile) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.idfile) + "'");
 			insert_values.push_back(std::to_string(items_entry.itemclass));
 			insert_values.push_back(std::to_string(items_entry.itemtype));
 			insert_values.push_back(std::to_string(items_entry.ldonprice));
 			insert_values.push_back(std::to_string(items_entry.ldontheme));
 			insert_values.push_back(std::to_string(items_entry.ldonsold));
 			insert_values.push_back(std::to_string(items_entry.light));
-			insert_values.push_back("'" + EscapeString(items_entry.lore) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.lore) + "'");
 			insert_values.push_back(std::to_string(items_entry.loregroup));
 			insert_values.push_back(std::to_string(items_entry.magic));
 			insert_values.push_back(std::to_string(items_entry.mana));
@@ -2323,7 +2323,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.attuneable));
 			insert_values.push_back(std::to_string(items_entry.nopet));
 			insert_values.push_back("FROM_UNIXTIME(" + (items_entry.updated > 0 ? std::to_string(items_entry.updated) : "null") + ")");
-			insert_values.push_back("'" + EscapeString(items_entry.comment) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.comment) + "'");
 			insert_values.push_back(std::to_string(items_entry.UNK127));
 			insert_values.push_back(std::to_string(items_entry.pointtype));
 			insert_values.push_back(std::to_string(items_entry.potionbelt));
@@ -2331,7 +2331,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.stacksize));
 			insert_values.push_back(std::to_string(items_entry.notransfer));
 			insert_values.push_back(std::to_string(items_entry.stackable));
-			insert_values.push_back("'" + EscapeString(items_entry.UNK134) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.UNK134) + "'");
 			insert_values.push_back(std::to_string(items_entry.UNK137));
 			insert_values.push_back(std::to_string(items_entry.proceffect));
 			insert_values.push_back(std::to_string(items_entry.proctype));
@@ -2354,10 +2354,10 @@ public:
 			insert_values.push_back(std::to_string(items_entry.UNK157));
 			insert_values.push_back("FROM_UNIXTIME(" + (items_entry.serialized > 0 ? std::to_string(items_entry.serialized) : "null") + ")");
 			insert_values.push_back("FROM_UNIXTIME(" + (items_entry.verified > 0 ? std::to_string(items_entry.verified) : "null") + ")");
-			insert_values.push_back("'" + EscapeString(items_entry.serialization) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.source) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.serialization) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.source) + "'");
 			insert_values.push_back(std::to_string(items_entry.UNK033));
-			insert_values.push_back("'" + EscapeString(items_entry.lorefile) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.lorefile) + "'");
 			insert_values.push_back(std::to_string(items_entry.UNK014));
 			insert_values.push_back(std::to_string(items_entry.svcorruption));
 			insert_values.push_back(std::to_string(items_entry.skillmodmax));
@@ -2371,36 +2371,36 @@ public:
 			insert_values.push_back(std::to_string(items_entry.UNK120));
 			insert_values.push_back(std::to_string(items_entry.UNK121));
 			insert_values.push_back(std::to_string(items_entry.questitemflag));
-			insert_values.push_back("'" + EscapeString(items_entry.UNK132) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.UNK132) + "'");
 			insert_values.push_back(std::to_string(items_entry.clickunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.clickunk6) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.clickunk6) + "'");
 			insert_values.push_back(std::to_string(items_entry.clickunk7));
 			insert_values.push_back(std::to_string(items_entry.procunk1));
 			insert_values.push_back(std::to_string(items_entry.procunk2));
 			insert_values.push_back(std::to_string(items_entry.procunk3));
 			insert_values.push_back(std::to_string(items_entry.procunk4));
-			insert_values.push_back("'" + EscapeString(items_entry.procunk6) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.procunk6) + "'");
 			insert_values.push_back(std::to_string(items_entry.procunk7));
 			insert_values.push_back(std::to_string(items_entry.wornunk1));
 			insert_values.push_back(std::to_string(items_entry.wornunk2));
 			insert_values.push_back(std::to_string(items_entry.wornunk3));
 			insert_values.push_back(std::to_string(items_entry.wornunk4));
 			insert_values.push_back(std::to_string(items_entry.wornunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.wornunk6) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.wornunk6) + "'");
 			insert_values.push_back(std::to_string(items_entry.wornunk7));
 			insert_values.push_back(std::to_string(items_entry.focusunk1));
 			insert_values.push_back(std::to_string(items_entry.focusunk2));
 			insert_values.push_back(std::to_string(items_entry.focusunk3));
 			insert_values.push_back(std::to_string(items_entry.focusunk4));
 			insert_values.push_back(std::to_string(items_entry.focusunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.focusunk6) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.focusunk6) + "'");
 			insert_values.push_back(std::to_string(items_entry.focusunk7));
 			insert_values.push_back(std::to_string(items_entry.scrollunk1));
 			insert_values.push_back(std::to_string(items_entry.scrollunk2));
 			insert_values.push_back(std::to_string(items_entry.scrollunk3));
 			insert_values.push_back(std::to_string(items_entry.scrollunk4));
 			insert_values.push_back(std::to_string(items_entry.scrollunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.scrollunk6) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.scrollunk6) + "'");
 			insert_values.push_back(std::to_string(items_entry.scrollunk7));
 			insert_values.push_back(std::to_string(items_entry.UNK193));
 			insert_values.push_back(std::to_string(items_entry.purity));
@@ -2408,11 +2408,11 @@ public:
 			insert_values.push_back(std::to_string(items_entry.evoid));
 			insert_values.push_back(std::to_string(items_entry.evolvinglevel));
 			insert_values.push_back(std::to_string(items_entry.evomax));
-			insert_values.push_back("'" + EscapeString(items_entry.clickname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.procname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.wornname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.focusname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.scrollname) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.clickname) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.procname) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.wornname) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.focusname) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.scrollname) + "'");
 			insert_values.push_back(std::to_string(items_entry.dsmitigation));
 			insert_values.push_back(std::to_string(items_entry.heroic_str));
 			insert_values.push_back(std::to_string(items_entry.heroic_int));
@@ -2431,7 +2431,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.spelldmg));
 			insert_values.push_back(std::to_string(items_entry.clairvoyance));
 			insert_values.push_back(std::to_string(items_entry.backstabdmg));
-			insert_values.push_back("'" + EscapeString(items_entry.created) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.created) + "'");
 			insert_values.push_back(std::to_string(items_entry.elitematerial));
 			insert_values.push_back(std::to_string(items_entry.ldonsellbackrate));
 			insert_values.push_back(std::to_string(items_entry.scriptfileid));
@@ -2446,7 +2446,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.bardunk3));
 			insert_values.push_back(std::to_string(items_entry.bardunk4));
 			insert_values.push_back(std::to_string(items_entry.bardunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.bardname) + "'");
+			insert_values.push_back("'" + Strings::Escape(items_entry.bardname) + "'");
 			insert_values.push_back(std::to_string(items_entry.bardunk7));
 			insert_values.push_back(std::to_string(items_entry.UNK214));
 			insert_values.push_back(std::to_string(items_entry.subtype));
@@ -2474,7 +2474,7 @@ public:
 			insert_values.push_back(std::to_string(items_entry.UNK241));
 			insert_values.push_back(std::to_string(items_entry.epicitem));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -2483,7 +2483,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

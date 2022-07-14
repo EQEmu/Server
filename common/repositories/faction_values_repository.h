@@ -22,7 +22,7 @@
 #define EQEMU_FACTION_VALUES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_faction_values_repository.h"
 
 class FactionValuesRepository: public BaseFactionValuesRepository {

@@ -20,7 +20,7 @@
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
 #include "zonedb.h"
@@ -45,7 +45,7 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 		if (row[2][0] == 0)
 			continue;
 
-		auto aliases = SplitString(row[2], '|');
+		auto aliases = Strings::Split(row[2], '|');
 		for (auto iter : aliases) {
 			if (!iter.empty())
 				bot_command_settings[row[0]].second.push_back(iter);
@@ -61,7 +61,7 @@ bool BotDatabase::UpdateInjectedBotCommandSettings(const std::vector<std::pair<s
 
 		query = fmt::format(
 			"REPLACE INTO `bot_command_settings`(`bot_command`, `access`) VALUES {}",
-			implode(
+			Strings::ImplodePair(
 				",",
 				std::pair<char, char>('(', ')'),
 				join_pair(",", std::pair<char, char>('\'', '\''), injected)
@@ -89,7 +89,7 @@ bool BotDatabase::UpdateOrphanedBotCommandSettings(const std::vector<std::string
 
 		query = fmt::format(
 			"DELETE FROM `bot_command_settings` WHERE `bot_command` IN ({})",
-			implode(",", std::pair<char, char>('\'', '\''), orphaned)
+			Strings::ImplodePair(",", std::pair<char, char>('\'', '\''), orphaned)
 		);
 
 		if (!database.QueryDatabase(query).Success()) {
@@ -2361,7 +2361,7 @@ bool BotDatabase::LoadBotGroupIDByBotGroupName(const std::string& group_name, ui
 
 	query = fmt::format(
 		"SELECT `groups_index` FROM `bot_groups` WHERE `group_name` = '{}' LIMIT 1",
-		EscapeString(group_name)
+		Strings::Escape(group_name)
 	);
 
 	auto results = database.QueryDatabase(query);

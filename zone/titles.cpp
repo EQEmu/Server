@@ -17,7 +17,7 @@
 */
 
 #include "../common/eq_packet_structs.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 #include "../common/repositories/titles_repository.h"
 
@@ -235,7 +235,7 @@ void TitleManager::CreateNewPlayerTitle(Client *client, std::string title)
 
 	auto query = fmt::format(
 		"SELECT `id` FROM titles WHERE `prefix` = '{}' AND char_id = {}",
-		EscapeString(title),
+		Strings::Escape(title),
 		client->CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
@@ -246,7 +246,7 @@ void TitleManager::CreateNewPlayerTitle(Client *client, std::string title)
 	query = fmt::format(
 		"INSERT INTO titles (`char_id`, `prefix`) VALUES ({}, '{}')",
 		client->CharacterID(),
-		EscapeString(title)
+		Strings::Escape(title)
 	);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
@@ -268,7 +268,7 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, std::string suffix)
 
 	auto query = fmt::format(
 		"SELECT `id` FROM titles WHERE `suffix` = '{}' AND char_id = {}",
-		EscapeString(suffix),
+		Strings::Escape(suffix),
 		client->CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
@@ -279,7 +279,7 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, std::string suffix)
 	query = fmt::format(
 		"INSERT INTO titles (`char_id`, `suffix`) VALUES ({}, '{}')",
 		client->CharacterID(),
-		EscapeString(suffix)
+		Strings::Escape(suffix)
 	);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {

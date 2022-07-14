@@ -13,7 +13,7 @@
 #define EQEMU_BASE_TRADESKILL_RECIPE_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseTradeskillRecipeRepository {
@@ -85,12 +85,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -218,26 +218,26 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(tradeskill_recipe_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(tradeskill_recipe_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(tradeskill_recipe_entry.tradeskill));
 		update_values.push_back(columns[3] + " = " + std::to_string(tradeskill_recipe_entry.skillneeded));
 		update_values.push_back(columns[4] + " = " + std::to_string(tradeskill_recipe_entry.trivial));
 		update_values.push_back(columns[5] + " = " + std::to_string(tradeskill_recipe_entry.nofail));
 		update_values.push_back(columns[6] + " = " + std::to_string(tradeskill_recipe_entry.replace_container));
-		update_values.push_back(columns[7] + " = '" + EscapeString(tradeskill_recipe_entry.notes) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(tradeskill_recipe_entry.notes) + "'");
 		update_values.push_back(columns[8] + " = " + std::to_string(tradeskill_recipe_entry.must_learn));
 		update_values.push_back(columns[9] + " = " + std::to_string(tradeskill_recipe_entry.quest));
 		update_values.push_back(columns[10] + " = " + std::to_string(tradeskill_recipe_entry.enabled));
 		update_values.push_back(columns[11] + " = " + std::to_string(tradeskill_recipe_entry.min_expansion));
 		update_values.push_back(columns[12] + " = " + std::to_string(tradeskill_recipe_entry.max_expansion));
-		update_values.push_back(columns[13] + " = '" + EscapeString(tradeskill_recipe_entry.content_flags) + "'");
-		update_values.push_back(columns[14] + " = '" + EscapeString(tradeskill_recipe_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[13] + " = '" + Strings::Escape(tradeskill_recipe_entry.content_flags) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(tradeskill_recipe_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				tradeskill_recipe_entry.id
 			)
@@ -254,26 +254,26 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.id));
-		insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.name) + "'");
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.tradeskill));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.skillneeded));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.trivial));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.nofail));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.replace_container));
-		insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.notes) + "'");
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.notes) + "'");
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.must_learn));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.quest));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.enabled));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.min_expansion));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -298,22 +298,22 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.id));
-			insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.name) + "'");
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.tradeskill));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.skillneeded));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.trivial));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.nofail));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.replace_container));
-			insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.notes) + "'");
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.notes) + "'");
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.must_learn));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.quest));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.enabled));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.min_expansion));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -322,7 +322,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/timer.h"
 #include "../common/repositories/dynamic_zone_members_repository.h"
 #include "../common/repositories/dynamic_zones_repository.h"
@@ -485,7 +485,7 @@ void Database::BuryCorpsesInInstance(uint16 instance_id) {
 void Database::DeleteInstance(uint16 instance_id)
 {
 	std::string query;
-	
+
 	query = StringFormat("DELETE FROM instance_list_player WHERE id=%u", instance_id);
 	QueryDatabase(query);
 
@@ -580,7 +580,7 @@ void Database::PurgeExpiredInstances()
 		instance_ids.emplace_back(row[0]);
 	}
 
-	std::string imploded_instance_ids = implode(",", instance_ids);
+	std::string imploded_instance_ids = Strings::Implode(",", instance_ids);
 
 	QueryDatabase(fmt::format("DELETE FROM instance_list WHERE id IN ({})", imploded_instance_ids));
 	QueryDatabase(fmt::format("DELETE FROM instance_list_player WHERE id IN ({})", imploded_instance_ids));

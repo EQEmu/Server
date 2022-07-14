@@ -9,7 +9,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string zone_short_name = str_tolower(
+	std::string zone_short_name = Strings::ToLower(
 		sep->IsNumber(1) ?
 		ZoneName(std::stoul(sep->arg[1]), true) :
 		sep->arg[1]
@@ -44,13 +44,13 @@ void command_gmzone(Client *c, const Seperator *sep)
 		std::stoul(sep->arg[2]) :
 		0
 	);
-	
+
 	std::string instance_identifier = (
 		sep->arg[3] ?
 		sep->arg[3] :
 		"gmzone"
 	);
-	
+
 	auto bucket_key = fmt::format(
 		"{}-{}-{}-instance",
 		zone_short_name,

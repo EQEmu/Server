@@ -22,7 +22,7 @@
 #include "zonelist.h"
 #include "client.h"
 #include "worlddb.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/guilds.h"
 #include "../common/races.h"
 #include "../common/classes.h"

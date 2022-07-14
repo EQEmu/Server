@@ -10,7 +10,7 @@
 #include "login_server.h"
 #include "loginserver_webserver.h"
 #include "loginserver_command_handler.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
@@ -86,6 +86,12 @@ void LoadServerConfig()
 			false
 		)
 	);
+
+	/**
+	 * Expansion Display Settings
+	 */
+	server.options.DisplayExpansions(server.config.GetVariableBool("client_configuration", "display_expansions", false)); //disable by default
+	server.options.MaxExpansions(server.config.GetVariableInt("client_configuration", "max_expansions_mask", 67108863)); //enable display of all expansions
 
 	/**
 	 * Account
@@ -257,6 +263,9 @@ int main(int argc, char **argv)
 	LogInfo("[Config] [Logging] IsDumpInPacketsOn [{0}]", server.options.IsDumpInPacketsOn());
 	LogInfo("[Config] [Logging] IsDumpOutPacketsOn [{0}]", server.options.IsDumpOutPacketsOn());
 	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
+	LogInfo("[Config] [Client_Configuration] DisplayExpansions [{0}]", server.options.IsDisplayExpansions());
+	LogInfo("[Config] [Client_Configuration] MaxExpansions [{0}]", server.options.GetMaxExpansions());
+
 #ifdef LSPX
 	LogInfo("[Config] [Account] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
 #endif

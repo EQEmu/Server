@@ -17,7 +17,7 @@ void command_mysql(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #mysql [Help|Query] [SQL Query]");
 		return;
 	}
-	
+
 	if (is_help) {
 		c->Message(Chat::White, "Usage: #mysql query \"Query goes here quoted\"");
 		c->Message(Chat::White, "Note: To use 'LIKE \"%%something%%\"  replace the %% with a #");
@@ -32,14 +32,14 @@ void command_mysql(Client *c, const Seperator *sep)
 		}
 
 		std::string query = sep->arg[2];
-		find_replace(query, "#", "%");
+		Strings::FindReplace(query, "#", "%");
 		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
 			return;
 		}
 
-		query = sep->arg[2];		
-		find_replace(query, "#", "%%");
+		query = sep->arg[2];
+		Strings::FindReplace(query, "#", "%%");
 
 		c->Message(
 			Chat::White,

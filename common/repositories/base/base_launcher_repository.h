@@ -30,7 +30,7 @@
 #define EQEMU_BASE_LAUNCHER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 
 class BaseLauncherRepository {
 public:
@@ -54,7 +54,7 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string InsertColumnsRaw()
@@ -69,7 +69,7 @@ public:
 			insert_columns.push_back(column);
 		}
 
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", insert_columns));
 	}
 
 	static std::string TableName()
@@ -168,14 +168,14 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(launcher_entry.name) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(launcher_entry.name) + "'");
 		update_values.push_back(columns[1] + " = " + std::to_string(launcher_entry.dynamics));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				launcher_entry.name
 			)
@@ -190,14 +190,14 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + EscapeString(launcher_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(launcher_entry.name) + "'");
 		insert_values.push_back(std::to_string(launcher_entry.dynamics));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -220,10 +220,10 @@ public:
 		for (auto &launcher_entry: launcher_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + EscapeString(launcher_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(launcher_entry.name) + "'");
 			insert_values.push_back(std::to_string(launcher_entry.dynamics));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -232,7 +232,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

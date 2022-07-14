@@ -22,7 +22,7 @@
 #define EQEMU_TOOL_GAME_OBJECTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_tool_game_objects_repository.h"
 
 class ToolGameObjectsRepository: public BaseToolGameObjectsRepository {

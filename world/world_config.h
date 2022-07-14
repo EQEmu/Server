@@ -68,8 +68,6 @@ public:
 	static void SetWorldAddress(std::string addr) { if (_world_config) _world_config->WorldAddress=addr; }
 	static void SetLocalAddress(std::string addr) { if (_world_config) _world_config->LocalAddress=addr; }
 
-	static void CheckForPossibleConfigurationIssues();
-
 	void Dump() const;
 };
 

@@ -22,7 +22,7 @@
 #define EQEMU_SHARED_TASK_MEMBERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_shared_task_members_repository.h"
 
 class SharedTaskMembersRepository: public BaseSharedTaskMembersRepository {

@@ -2374,6 +2374,7 @@ void EntityList::FilteredMessageCloseString(
 	uint32 type,
 	eqFilterType filter,
 	uint32 string_id,
+	Mob *skip,
 	const char *message1,
 	const char *message2,
 	const char *message3,
@@ -2390,7 +2391,7 @@ void EntityList::FilteredMessageCloseString(
 
 	for (auto & it : client_list) {
 		c = it.second;
-		if (c && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender)) {
+		if (c && c != skip && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender)) {
 			c->FilteredMessageString(
 				sender, type, filter, string_id,
 				message1, message2, message3, message4, message5,
@@ -3335,7 +3336,7 @@ void EntityList::CorpseFix(Client* c)
 					cur->GetFixedZ(c->GetPosition()),
 					c->GetHeading()
 				);
-				
+
 				fixed_count++;
 			}
 		}
@@ -5129,7 +5130,7 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name)
 	}
 
 	for (auto bot : bot_list) {
-		if (bot->GetOwner() && str_tolower(bot->GetOwner()->GetCleanName()) == str_tolower(client_name)) {
+		if (bot->GetOwner() && Strings::ToLower(bot->GetOwner()->GetCleanName()) == Strings::ToLower(client_name)) {
 			client_bot_list.push_back(bot);
 		}
 	}

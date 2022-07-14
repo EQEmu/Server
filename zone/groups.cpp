@@ -23,7 +23,7 @@
 #include "npc_ai.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "worldserver.h"
 #include "string_ids.h"
 
@@ -180,7 +180,7 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 			members[i]->CastToClient()->MessageString(
 				Chat::MoneySplit,
 				YOU_RECEIVE_AS_SPLIT,
-				ConvertMoneyToString(
+				Strings::Money(
 					platinum_split,
 					gold_split,
 					silver_split,

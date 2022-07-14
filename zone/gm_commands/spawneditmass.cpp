@@ -63,11 +63,11 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 			Chat::Yellow,
 			fmt::format(
 				"Spawn2 ID: {} NPC ID: {} Name: {} Respawn Time: {} ({})",
-				commify(spawn2_id),
-				commify(npc_id),
+				Strings::Commify(spawn2_id),
+				Strings::Commify(npc_id),
 				npc_name,
-				ConvertSecondsToTime(std::stoi(respawn_time)),
-				commify(respawn_time)
+				Strings::SecondsToTime(std::stoi(respawn_time)),
+				Strings::Commify(respawn_time)
 			).c_str()
 		);
 
@@ -94,7 +94,7 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 			search_criteria
 		).c_str()
 	);
-	
+
 	if (!is_apply) {
 		auto edit_link = fmt::format(
 			"#spawneditmass {} {} {} apply",
@@ -107,14 +107,14 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 			Chat::Yellow,
 			fmt::format(
 				"To apply these changes, click {} or type \"{}\".",
-				EQ::SayLinkEngine::GenerateQuestSaylink(edit_link, false, "apply"),
+				Saylink::Create(edit_link, false, "apply"),
 				edit_link
 			).c_str()
 		);
 	}
 
 	if (edit_option == "respawn_time" && is_apply) {
-		auto spawn2_ids_string = implode(", ", spawn2_ids);
+		auto spawn2_ids_string = Strings::Implode(", ", spawn2_ids);
 		if (spawn2_ids_string.empty()) {
 			c->Message(
 				Chat::Yellow,
@@ -144,5 +144,5 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 				spawn2_ids.size() != 1 ? "s" : ""
 			).c_str()
 		);
-	} 
+	}
 }

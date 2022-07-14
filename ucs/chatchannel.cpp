@@ -18,7 +18,7 @@
 */
 
 #include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "chatchannel.h"
 #include "clientlist.h"
 #include "database.h"
@@ -693,7 +693,7 @@ void ServerToClient45SayLink(std::string& clientSayLink, const std::string& serv
 		return;
 	}
 
-	auto segments = SplitString(serverSayLink, '\x12');
+	auto segments = Strings::Split(serverSayLink, '\x12');
 
 	for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 		if (segment_iter & 1) {
@@ -732,7 +732,7 @@ void ServerToClient50SayLink(std::string& clientSayLink, const std::string& serv
 		return;
 	}
 
-	auto segments = SplitString(serverSayLink, '\x12');
+	auto segments = Strings::Split(serverSayLink, '\x12');
 
 	for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 		if (segment_iter & 1) {
@@ -771,7 +771,7 @@ void ServerToClient55SayLink(std::string& clientSayLink, const std::string& serv
 		return;
 	}
 
-	auto segments = SplitString(serverSayLink, '\x12');
+	auto segments = Strings::Split(serverSayLink, '\x12');
 
 	for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 		if (segment_iter & 1) {

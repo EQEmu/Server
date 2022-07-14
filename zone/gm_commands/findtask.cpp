@@ -32,12 +32,12 @@ void command_findtask(Client *c, const Seperator *sep)
 			);
 		}
 		else {
-			std::string search_criteria = str_tolower(sep->argplus[1]);
+			std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 			if (!search_criteria.empty()) {
 				int         found_count = 0;
 				for (uint32 task_id     = 1; task_id <= MAXTASKS; task_id++) {
 					auto        task_name       = task_manager->GetTaskName(task_id);
-					std::string task_name_lower = str_tolower(task_name);
+					std::string task_name_lower = Strings::ToLower(task_name);
 					if (task_name_lower.find(search_criteria) == std::string::npos) {
 						continue;
 					}

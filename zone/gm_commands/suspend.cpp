@@ -58,7 +58,7 @@ void command_suspend(Client *c, const Seperator *sep)
 	std::string query   = StringFormat(
 		"UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY), "
 		"suspend_reason = '%s' WHERE `id` = %i",
-		duration, EscapeString(message).c_str(), accountID
+		duration, Strings::Escape(message).c_str(), accountID
 	);
 	auto        results = database.QueryDatabase(query);
 

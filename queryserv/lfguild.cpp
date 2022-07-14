@@ -3,7 +3,7 @@
 #include "database.h"
 #include "worldserver.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/packet_dump.h"
 #include "../common/rulesys.h"
 

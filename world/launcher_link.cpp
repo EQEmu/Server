@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 #include "worlddb.h"
 #include "eql_config.h"

@@ -53,7 +53,7 @@
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/emu_constants.h"
@@ -5270,7 +5270,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		return;
 	}
 	std::string bot_name = sep->arg[1];
-	bot_name = ucfirst(bot_name);
+	bot_name = Strings::UcFirst(bot_name);
 	if (sep->arg[2][0] == '\0' || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Invalid Class!");
 		return;
@@ -5938,7 +5938,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		}
 
 		auto* bot = entity_list.GetBotByBotName(bots_iter.Name);
-		auto bot_spawn_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto bot_spawn_saylink = Saylink::Create(
 			fmt::format("^spawn {}", bots_iter.Name),
 			false,
 			bots_iter.Name
@@ -7318,7 +7318,7 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 				botgroups_iter.first,
 				botgroups_iter.second,
 				database.botdb.IsBotGroupAutoSpawn(botgroups_iter.first) ? " (Auto Spawn)" : "",
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					fmt::format("^botgroupload {}", botgroups_iter.first),
 					false,
 					"Load"
@@ -8825,7 +8825,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 				slot_id,
 				EQ::invslot::GetInvPossessionsSlotName(slot_id),
 				linker.GenerateLink(),
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					fmt::format("^inventoryremove {}", slot_id),
 					false,
 					"Remove"
@@ -9354,7 +9354,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
 		const char* bot_race_name = GetRaceIDName(bot_race);
 		const char* bot_class_name = GetClassIDName(bot_class);
-		std::string view_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format("^viewcombos {}", bot_race), false, "view");
+		std::string view_saylink = Saylink::Create(fmt::format("^viewcombos {}", bot_race), false, "view");
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
