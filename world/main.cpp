@@ -138,11 +138,11 @@ int main(int argc, char **argv)
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	if (!WorldBoot::LoadServerConfig()) {
+	if (WorldBoot::HandleCommandInput(argc, argv)) {
 		return 0;
 	}
 
-	if (WorldBoot::HandleCommandInput(argc, argv)) {
+	if (!WorldBoot::LoadServerConfig()) {
 		return 0;
 	}
 

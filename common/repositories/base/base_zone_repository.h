@@ -112,6 +112,7 @@ public:
 		int         underworld_teleport_index;
 		int         lava_damage;
 		int         min_lava_damage;
+		int         expansion;
 	};
 
 	static std::string PrimaryKey()
@@ -215,6 +216,7 @@ public:
 			"underworld_teleport_index",
 			"lava_damage",
 			"min_lava_damage",
+			"expansion",
 		};
 	}
 
@@ -314,6 +316,7 @@ public:
 			"underworld_teleport_index",
 			"lava_damage",
 			"min_lava_damage",
+			"expansion",
 		};
 	}
 
@@ -447,6 +450,7 @@ public:
 		entry.underworld_teleport_index = 0;
 		entry.lava_damage               = 50;
 		entry.min_lava_damage           = 10;
+		entry.expansion                 = 0;
 
 		return entry;
 	}
@@ -575,6 +579,7 @@ public:
 			entry.underworld_teleport_index = atoi(row[90]);
 			entry.lava_damage               = atoi(row[91]);
 			entry.min_lava_damage           = atoi(row[92]);
+			entry.expansion                 = atoi(row[93]);
 
 			return entry;
 		}
@@ -700,6 +705,7 @@ public:
 		update_values.push_back(columns[90] + " = " + std::to_string(zone_entry.underworld_teleport_index));
 		update_values.push_back(columns[91] + " = " + std::to_string(zone_entry.lava_damage));
 		update_values.push_back(columns[92] + " = " + std::to_string(zone_entry.min_lava_damage));
+		update_values.push_back(columns[93] + " = " + std::to_string(zone_entry.expansion));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -814,6 +820,7 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 		insert_values.push_back(std::to_string(zone_entry.lava_damage));
 		insert_values.push_back(std::to_string(zone_entry.min_lava_damage));
+		insert_values.push_back(std::to_string(zone_entry.expansion));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -936,6 +943,7 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 			insert_values.push_back(std::to_string(zone_entry.lava_damage));
 			insert_values.push_back(std::to_string(zone_entry.min_lava_damage));
+			insert_values.push_back(std::to_string(zone_entry.expansion));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -1062,6 +1070,7 @@ public:
 			entry.underworld_teleport_index = atoi(row[90]);
 			entry.lava_damage               = atoi(row[91]);
 			entry.min_lava_damage           = atoi(row[92]);
+			entry.expansion                 = atoi(row[93]);
 
 			all_entries.push_back(entry);
 		}
@@ -1179,6 +1188,7 @@ public:
 			entry.underworld_teleport_index = atoi(row[90]);
 			entry.lava_damage               = atoi(row[91]);
 			entry.min_lava_damage           = atoi(row[92]);
+			entry.expansion                 = atoi(row[93]);
 
 			all_entries.push_back(entry);
 		}
