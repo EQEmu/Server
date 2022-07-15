@@ -22,7 +22,7 @@
 #define EQEMU_SPAWN2_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_spawn2_repository.h"
 
 class Spawn2Repository: public BaseSpawn2Repository {

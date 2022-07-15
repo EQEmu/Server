@@ -22,7 +22,7 @@
 #define EQEMU_RULE_SETS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_rule_sets_repository.h"
 
 class RuleSetsRepository: public BaseRuleSetsRepository {

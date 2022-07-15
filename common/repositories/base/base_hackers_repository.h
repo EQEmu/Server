@@ -13,7 +13,7 @@
 #define EQEMU_BASE_HACKERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseHackersRepository {
@@ -58,12 +58,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -173,17 +173,17 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(hackers_entry.account) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(hackers_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(hackers_entry.hacked) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(hackers_entry.zone) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(hackers_entry.date) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(hackers_entry.account) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(hackers_entry.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(hackers_entry.hacked) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(hackers_entry.zone) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(hackers_entry.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				hackers_entry.id
 			)
@@ -200,17 +200,17 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(hackers_entry.id));
-		insert_values.push_back("'" + EscapeString(hackers_entry.account) + "'");
-		insert_values.push_back("'" + EscapeString(hackers_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(hackers_entry.hacked) + "'");
-		insert_values.push_back("'" + EscapeString(hackers_entry.zone) + "'");
-		insert_values.push_back("'" + EscapeString(hackers_entry.date) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_entry.account) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_entry.hacked) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_entry.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -235,13 +235,13 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(hackers_entry.id));
-			insert_values.push_back("'" + EscapeString(hackers_entry.account) + "'");
-			insert_values.push_back("'" + EscapeString(hackers_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(hackers_entry.hacked) + "'");
-			insert_values.push_back("'" + EscapeString(hackers_entry.zone) + "'");
-			insert_values.push_back("'" + EscapeString(hackers_entry.date) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_entry.account) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_entry.hacked) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_entry.date) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -250,7 +250,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -22,7 +22,7 @@
 #define EQEMU_ALTERNATE_CURRENCY_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_alternate_currency_repository.h"
 
 class AlternateCurrencyRepository: public BaseAlternateCurrencyRepository {

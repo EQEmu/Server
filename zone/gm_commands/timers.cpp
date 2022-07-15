@@ -25,7 +25,7 @@ void command_timers(Client *c, const Seperator *sep)
 			popup_text += fmt::format(
 				"<tr><td>{}</td><td>{}</td></tr>",
 				timer.first,
-				ConvertSecondsToTime(remaining_time)
+				Strings::SecondsToTime(remaining_time)
 			);
 		}
 	}

@@ -265,6 +265,7 @@
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
 #define DUEL_ACCEPTED				1384	//%1 has already accepted a duel with someone else.
 #define DUEL_CONSIDERING			1385	//%1 is considering a duel with someone else.
+#define PLAYER_SUMMONED				1393	//You have been summoned!
 #define PLAYER_REGAIN				1394	//You have control of yourself again.
 #define REZZ_ALREADY_PENDING		1379	//You were unable to restore the corpse to life, but you may have success with a later attempt.
 #define IN_USE						1406	//Someone else is using that. Try again later.
@@ -454,6 +455,7 @@
 #define NO_ABILITY_OUT_OF_COMBAT	9194	//You can not use this ability while out of combat.
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
 #define FACE_ACCEPTED				12028	//Facial features accepted.
+#define TRACKING_BEGIN				12040   //You begin tracking %1.
 #define SPELL_LEVEL_TO_LOW			12048	//You will have to achieve level %1 before you can scribe the %2.
 #define YOU_RECEIVE_AS_SPLIT		12071   //You receive %1 as your split.
 #define ATTACKFAILED				12158	//%1 try to %2 %3, but %4!
@@ -477,6 +479,7 @@
 #define NO_LONGER_HIDDEN			12337   //You are no longer hidden.
 #define STOP_SNEAKING				12338	//You stop sneaking
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
+#define NO_SKILL_WHILE_MOUNTED		12393	//You can not use this skill while on a mount.
 #define STAND_TO_CAST				12441	//You must be standing to cast a spell.
 #define ALREADY_CASTING				12442	//You are already casting a spell!
 #define SHIMMERS_BRIEFLY			12444	//Your %1 shimmers briefly.
@@ -517,6 +520,7 @@
 #define REPORT_ONCE					12945	//You may only submit a report once per time that you zone. Thank you.
 #define NOW_INVISIBLE				12950	//%1 is now Invisible.
 #define NOW_VISIBLE					12951	//%1 is now Visible.
+#define YOU_TAKE_DOT				12954	//You have taken %1 damage from %2 by %3
 #define GUILD_NOT_MEMBER2			12966	//You are not in a guild.
 #define HOT_HEAL_SELF				12976 	//You have been healed for %1 hit points by your %2.
 #define HOT_HEAL_OTHER				12997	//You have healed %1 for %2 hit points with your %3.

@@ -193,6 +193,7 @@ public:
 	NPC* GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc = nullptr);
 	Mob* GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob = nullptr);
 	Group *GetGroupByMob(Mob* mob);
+	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);
 	Group *GetGroupByID(uint32 id);
 	Group *GetGroupByLeaderName(const char* leader);
@@ -361,6 +362,7 @@ public:
 		uint32 type,
 		eqFilterType filter,
 		uint32 string_id,
+		Mob *skip = 0,
 		const char *message1 = 0,
 		const char *message2 = 0,
 		const char *message3 = 0,

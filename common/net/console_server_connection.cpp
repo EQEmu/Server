@@ -116,43 +116,42 @@ bool EQ::Net::ConsoleServerConnection::SendChannelMessage(const ServerChannelMes
 	}
 
 	switch (scm->chan_num) {
-		case 4: {
-			if (RuleB(Chat, ServerWideAuction)) {
-				QueueMessage(fmt::format("{0} auctions, '{1}'", scm->from, scm->message));
-				break;
-			} else { // I think we want default action in this case?
-				return false;
-			}
-		}
-
-		case 5: {
-			if (RuleB(Chat, ServerWideOOC)) {
-				QueueMessage(fmt::format("{0} says ooc, '{1}'", scm->from, scm->message));
-				break;
-			} else { // I think we want default action in this case?
-				return false;
-			}
-		}
-
-		case 6: {
-			QueueMessage(fmt::format("{0} BROADCASTS, '{1}'", scm->from, scm->message));
+		case ChatChannel_Guild: {
+			QueueMessage(fmt::format("{} tells the guild [{}], '{}'", scm->from, scm->guilddbid, scm->message));
 			break;
 		}
-
-		case 7: {
-			QueueMessage(fmt::format("[{0}] tells you, '{1}'", scm->from, scm->message));
+		case ChatChannel_Auction: {
+			if (RuleB(Chat, ServerWideAuction)) {
+				QueueMessage(fmt::format("{} auctions, '{}'", scm->from, scm->message));
+				break;
+			} else { // I think we want default action in this case?
+				return false;
+			}
+		}
+		case ChatChannel_OOC: {
+			if (RuleB(Chat, ServerWideOOC)) {
+				QueueMessage(fmt::format("{} says ooc, '{}'", scm->from, scm->message));
+				break;
+			} else { // I think we want default action in this case?
+				return false;
+			}
+		}
+		case ChatChannel_Broadcast: {
+			QueueMessage(fmt::format("{} BROADCASTS, '{}'", scm->from, scm->message));
+			break;
+		}
+		case ChatChannel_Tell: {
+			QueueMessage(fmt::format("[{}] tells {}, '{}'", scm->from, scm->to, scm->message));
 			if (onTell) {
 				onTell();
 			}
 
 			break;
 		}
-		
-		case 11: {
-			QueueMessage(fmt::format("{0} GMSAYS, '{1}'", scm->from, scm->message));
+		case ChatChannel_GMSAY: {
+			QueueMessage(fmt::format("{} GMSAYS, '{}'", scm->from, scm->message));
 			break;
 		}
-
 		default: {
 			return false;
 		}

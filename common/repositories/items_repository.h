@@ -22,7 +22,7 @@
 #define EQEMU_ITEMS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_items_repository.h"
 
 class ItemsRepository: public BaseItemsRepository {

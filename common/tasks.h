@@ -67,14 +67,17 @@ struct ActivityInformation {
 	int              deliver_to_npc;
 	std::vector<int> zone_ids;
 	std::string      zones; // IDs ; separated, ZoneID is the first in this list for older clients -- default empty string, max length 64
+	int              zone_version;
 	bool             optional;
 
-	inline bool CheckZone(int zone_id)
+	inline bool CheckZone(int zone_id, int version)
 	{
 		if (zone_ids.empty()) {
 			return true;
 		}
-		return std::find(zone_ids.begin(), zone_ids.end(), zone_id) != zone_ids.end();
+		bool found_zone = std::find(zone_ids.begin(), zone_ids.end(), zone_id) != zone_ids.end();
+
+		return found_zone && (zone_version == version || zone_version == -1);
 	}
 
 	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const

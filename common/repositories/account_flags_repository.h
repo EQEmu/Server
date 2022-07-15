@@ -22,7 +22,7 @@
 #define EQEMU_ACCOUNT_FLAGS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_account_flags_repository.h"
 
 class AccountFlagsRepository: public BaseAccountFlagsRepository {

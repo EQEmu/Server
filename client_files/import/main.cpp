@@ -23,7 +23,7 @@
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
-#include "../../common/string_util.h"
+#include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
 
 EQEmuLogSys LogSys;
@@ -146,8 +146,8 @@ void ImportSpells(SharedDatabase *db) {
 			}
 		}
 
-		std::string escaped = ::EscapeString(buffer);
-		auto split = SplitString(escaped, '^');
+		std::string escaped = ::Strings::Escape(buffer);
+		auto split = Strings::Split(escaped, '^');
 		int line_columns = (int)split.size();
 
 		std::string sql;
@@ -225,7 +225,7 @@ void ImportSkillCaps(SharedDatabase *db) {
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 4) {
 			continue;
@@ -260,7 +260,7 @@ void ImportBaseData(SharedDatabase *db) {
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 10) {
 			continue;
@@ -318,7 +318,7 @@ void ImportDBStrings(SharedDatabase *db) {
 			}
 		}
 
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 2) {
 			continue;
@@ -332,7 +332,7 @@ void ImportDBStrings(SharedDatabase *db) {
 		type = atoi(split[1].c_str());
 
 		if(split.size() >= 3) {
-			value = ::EscapeString(split[2]);
+			value = ::Strings::Escape(split[2]);
 		}
 
 		sql = StringFormat("INSERT INTO db_str(id, type, value) VALUES(%u, %u, '%s')",

@@ -33,7 +33,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 #include "../common/eq_packet_structs.h"
 #include "../common/servertalk.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "entity.h"
 #include "petitions.h"

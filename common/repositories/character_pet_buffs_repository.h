@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_PET_BUFFS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_pet_buffs_repository.h"
 
 class CharacterPetBuffsRepository: public BaseCharacterPetBuffsRepository {

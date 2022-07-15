@@ -13,7 +13,7 @@
 #define EQEMU_BASE_INVENTORY_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseInventoryRepository {
@@ -88,12 +88,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -235,7 +235,7 @@ public:
 		update_values.push_back(columns[9] + " = " + std::to_string(inventory_entry.augslot5));
 		update_values.push_back(columns[10] + " = " + std::to_string(inventory_entry.augslot6));
 		update_values.push_back(columns[11] + " = " + std::to_string(inventory_entry.instnodrop));
-		update_values.push_back(columns[12] + " = '" + EscapeString(inventory_entry.custom_data) + "'");
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(inventory_entry.custom_data) + "'");
 		update_values.push_back(columns[13] + " = " + std::to_string(inventory_entry.ornamenticon));
 		update_values.push_back(columns[14] + " = " + std::to_string(inventory_entry.ornamentidfile));
 		update_values.push_back(columns[15] + " = " + std::to_string(inventory_entry.ornament_hero_model));
@@ -244,7 +244,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				inventory_entry.charid
 			)
@@ -272,7 +272,7 @@ public:
 		insert_values.push_back(std::to_string(inventory_entry.augslot5));
 		insert_values.push_back(std::to_string(inventory_entry.augslot6));
 		insert_values.push_back(std::to_string(inventory_entry.instnodrop));
-		insert_values.push_back("'" + EscapeString(inventory_entry.custom_data) + "'");
+		insert_values.push_back("'" + Strings::Escape(inventory_entry.custom_data) + "'");
 		insert_values.push_back(std::to_string(inventory_entry.ornamenticon));
 		insert_values.push_back(std::to_string(inventory_entry.ornamentidfile));
 		insert_values.push_back(std::to_string(inventory_entry.ornament_hero_model));
@@ -281,7 +281,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -317,12 +317,12 @@ public:
 			insert_values.push_back(std::to_string(inventory_entry.augslot5));
 			insert_values.push_back(std::to_string(inventory_entry.augslot6));
 			insert_values.push_back(std::to_string(inventory_entry.instnodrop));
-			insert_values.push_back("'" + EscapeString(inventory_entry.custom_data) + "'");
+			insert_values.push_back("'" + Strings::Escape(inventory_entry.custom_data) + "'");
 			insert_values.push_back(std::to_string(inventory_entry.ornamenticon));
 			insert_values.push_back(std::to_string(inventory_entry.ornamentidfile));
 			insert_values.push_back(std::to_string(inventory_entry.ornament_hero_model));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -331,7 +331,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

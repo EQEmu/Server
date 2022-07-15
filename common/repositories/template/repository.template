@@ -22,7 +22,7 @@
 #define EQEMU_{{TABLE_NAME_UPPER}}_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_{{TABLE_NAME_VAR}}_repository.h"
 
 class {{TABLE_NAME_CLASS}}Repository: public Base{{TABLE_NAME_CLASS}}Repository {

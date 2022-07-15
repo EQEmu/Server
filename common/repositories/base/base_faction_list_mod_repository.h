@@ -13,7 +13,7 @@
 #define EQEMU_BASE_FACTION_LIST_MOD_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseFactionListModRepository {
@@ -52,12 +52,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -165,13 +165,13 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(faction_list_mod_entry.faction_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_mod_entry.mod));
-		update_values.push_back(columns[3] + " = '" + EscapeString(faction_list_mod_entry.mod_name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(faction_list_mod_entry.mod_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				faction_list_mod_entry.id
 			)
@@ -190,13 +190,13 @@ public:
 		insert_values.push_back(std::to_string(faction_list_mod_entry.id));
 		insert_values.push_back(std::to_string(faction_list_mod_entry.faction_id));
 		insert_values.push_back(std::to_string(faction_list_mod_entry.mod));
-		insert_values.push_back("'" + EscapeString(faction_list_mod_entry.mod_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(faction_list_mod_entry.mod_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -223,9 +223,9 @@ public:
 			insert_values.push_back(std::to_string(faction_list_mod_entry.id));
 			insert_values.push_back(std::to_string(faction_list_mod_entry.faction_id));
 			insert_values.push_back(std::to_string(faction_list_mod_entry.mod));
-			insert_values.push_back("'" + EscapeString(faction_list_mod_entry.mod_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(faction_list_mod_entry.mod_name) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -234,7 +234,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

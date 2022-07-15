@@ -22,7 +22,7 @@
 #define EQEMU_GROUND_SPAWNS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_ground_spawns_repository.h"
 
 class GroundSpawnsRepository: public BaseGroundSpawnsRepository {

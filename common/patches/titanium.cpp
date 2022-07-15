@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 
 #include "../eq_packet_structs.h"
 #include "../misc_functions.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../item_instance.h"
 #include "titanium_structs.h"
 
@@ -338,13 +338,13 @@ namespace Titanium
 			SerializeItem(ob, (const EQ::ItemInstance*)eq->inst, ServerToTitaniumSlot(eq->slot_id), 0);
 			if (ob.tellp() == last_pos)
 				LogNetcode("Titanium::ENCODE(OP_CharInventory) Serialization failed on item slot [{}] during OP_CharInventory.  Item skipped", eq->slot_id);
-			
+
 			last_pos = ob.tellp();
 		}
 
 		in->size = ob.size();
 		in->pBuffer = ob.detach();
-		
+
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -861,7 +861,7 @@ namespace Titanium
 
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
-		
+
 		EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
 		EQ::OutBuffer ob;
@@ -878,7 +878,7 @@ namespace Titanium
 
 		in->size = ob.size();
 		in->pBuffer = ob.detach();
-		
+
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -2845,7 +2845,7 @@ namespace Titanium
 			return;
 		}
 
-		auto segments = SplitString(server_saylink, '\x12');
+		auto segments = Strings::Split(server_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
@@ -2885,7 +2885,7 @@ namespace Titanium
 			return;
 		}
 
-		auto segments = SplitString(titanium_saylink, '\x12');
+		auto segments = Strings::Split(titanium_saylink, '\x12');
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {

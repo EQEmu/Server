@@ -1122,8 +1122,8 @@ void command_object(Client *c, const Seperator *sep)
 			app = new EQApplicationPacket();
 			o->CreateDeSpawnPacket(app);
 			entity_list.QueueClients(nullptr, app);
-
 			entity_list.RemoveObject(o->GetID());
+			safe_delete(app);
 
 			// Verifying ZoneID and Version in case someone else ended up adding an object with our ID
 			// from a different zone/version. Don't want to delete someone else's work.

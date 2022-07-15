@@ -51,6 +51,18 @@ public:
 	 * @param size
 	 */
 	void Handle_Login(const char *data, unsigned int size);
+	
+	/**
+	* Sends the expansion data packet
+	*
+	* Titanium uses the encrypted data block to contact the expansion (You own xxx:) and the max expansions (of yyy)
+	* Rof uses a seperate data packet specifically for the expansion data
+	* Live, as of July 2021 uses a similar but slightly different seperate data packet
+	*
+	* @param PlayerLoginReply_Struct
+	*
+	*/
+	void SendExpansionPacketData(PlayerLoginReply_Struct& plrs);
 
 	/**
 	 * Sends a packet to the requested server to see if the client is allowed or not

@@ -38,7 +38,7 @@
 #include "../common/opcodemgr.h"
 #include "../common/rulesys.h"
 #include "../common/ruletypes.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "world_config.h"
 #include "zoneserver.h"
 #include "zonelist.h"

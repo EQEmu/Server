@@ -13,7 +13,7 @@
 #define EQEMU_BASE_MERCHANTLIST_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseMerchantlistRepository {
@@ -76,12 +76,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -213,14 +213,14 @@ public:
 		update_values.push_back(columns[7] + " = " + std::to_string(merchantlist_entry.probability));
 		update_values.push_back(columns[8] + " = " + std::to_string(merchantlist_entry.min_expansion));
 		update_values.push_back(columns[9] + " = " + std::to_string(merchantlist_entry.max_expansion));
-		update_values.push_back(columns[10] + " = '" + EscapeString(merchantlist_entry.content_flags) + "'");
-		update_values.push_back(columns[11] + " = '" + EscapeString(merchantlist_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(merchantlist_entry.content_flags) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				merchantlist_entry.merchantid
 			)
@@ -246,14 +246,14 @@ public:
 		insert_values.push_back(std::to_string(merchantlist_entry.probability));
 		insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
 		insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(merchantlist_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(merchantlist_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -287,10 +287,10 @@ public:
 			insert_values.push_back(std::to_string(merchantlist_entry.probability));
 			insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
 			insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(merchantlist_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(merchantlist_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -299,7 +299,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

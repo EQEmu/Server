@@ -77,7 +77,7 @@ SET(common_sources
 	shareddb.cpp
 	skills.cpp
 	spdat.cpp
-	string_util.cpp
+	strings.cpp
 	struct_strategy.cpp
 	textures.cpp
 	timer.cpp
@@ -579,7 +579,7 @@ SET(common_headers
 	shareddb.h
 	skills.h
 	spdat.h
-    string_util.h
+	strings.h
 	struct_strategy.h
 	tasks.h
 	textures.h

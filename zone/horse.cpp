@@ -19,7 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/linked_list.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "entity.h"
@@ -174,6 +174,7 @@ void Client::SetHorseId(uint16 horseid_in) {
 
 void Mob::CreateHorseSpawnPacket(EQApplicationPacket* app, const char* ownername, uint16 ownerid, Mob* ForWho) {
 	app->SetOpcode(OP_NewSpawn);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(NewSpawn_Struct)];
 	app->size = sizeof(NewSpawn_Struct);
 	memset(app->pBuffer, 0, sizeof(NewSpawn_Struct));

@@ -22,7 +22,7 @@
 #define EQEMU_DISCOVERED_ITEMS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_discovered_items_repository.h"
 
 class DiscoveredItemsRepository: public BaseDiscoveredItemsRepository {

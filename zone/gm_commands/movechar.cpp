@@ -7,7 +7,7 @@ void command_movechar(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #movechar [Character ID|Character Name] [Zone ID|Zone Short Name]");
 		return;
 	}
-	
+
 	std::string character_name = (
 		sep->IsNumber(1) ?
 		database.GetCharNameByID(std::stoul(sep->arg[1])) :
@@ -27,7 +27,7 @@ void command_movechar(Client *c, const Seperator *sep)
 
 	auto account_id = database.GetAccountIDByChar(character_name.c_str());
 
-	std::string zone_short_name = str_tolower(
+	std::string zone_short_name = Strings::ToLower(
 		sep->IsNumber(2) ?
 		ZoneName(std::stoul(sep->arg[2]), true) :
 		sep->arg[2]

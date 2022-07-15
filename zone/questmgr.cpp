@@ -21,7 +21,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 
 #include "entity.h"
@@ -1183,26 +1183,12 @@ void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 pl
 			platinum
 		)
 	) {
-		initiator->AddMoneyToPP(
+		initiator->CashReward(
 			copper,
 			silver,
 			gold,
-			platinum,
-			true
+			platinum
 		);
-
-		if (initiator) {
-			initiator->MessageString(
-				Chat::MoneySplit,
-				YOU_RECEIVE,
-				ConvertMoneyToString(
-					platinum,
-					gold,
-					silver,
-					copper
-				).c_str()
-			);
-		}
 	}
 }
 
@@ -2992,7 +2978,7 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 {
 	QuestManagerCurrentQuestVars();
 
-	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+	return Saylink::Create(saylink_text, silent, link_name);
 }
 
 std::string QuestManager::getcharnamebyid(uint32 char_id) {
@@ -3401,7 +3387,7 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 }
 
 std::string QuestManager::secondstotime(int duration) {
-	return ConvertSecondsToTime(duration);
+	return Strings::SecondsToTime(duration);
 }
 
 std::string QuestManager::gethexcolorcode(std::string color_name) {
@@ -3687,4 +3673,13 @@ const SPDat_Spell_Struct* QuestManager::getspell(uint32 spell_id) {
 std::string QuestManager::getenvironmentaldamagename(uint8 damage_type) {
 	std::string environmental_damage_name = EQ::constants::GetEnvironmentalDamageName(damage_type);
 	return environmental_damage_name;
+}
+
+void QuestManager::TrackNPC(uint32 entity_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SetTrackingID(entity_id);
 }

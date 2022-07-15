@@ -22,7 +22,7 @@
 #define EQEMU_BUG_REPORTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_bug_reports_repository.h"
 
 class BugReportsRepository: public BaseBugReportsRepository {

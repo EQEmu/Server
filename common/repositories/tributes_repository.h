@@ -22,7 +22,7 @@
 #define EQEMU_TRIBUTES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_tributes_repository.h"
 
 class TributesRepository: public BaseTributesRepository {

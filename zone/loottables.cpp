@@ -473,8 +473,6 @@ void NPC::AddLootDrop(
 		}
 
 		if (foundslot == EQ::invslot::slotPrimary) {
-			if (item2->Proc.Effect != 0)
-				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = EQ::textures::weaponPrimary;
 			if (item2->Damage > 0) {
@@ -489,8 +487,6 @@ void NPC::AddLootDrop(
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->IsType1HWeapon() || item2->ItemType == EQ::item::ItemTypeShield || item2->ItemType ==  EQ::item::ItemTypeLight))
 		{
-			if (item2->Proc.Effect!=0)
-				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = EQ::textures::weaponSecondary;
 			if (item2->Damage > 0)
@@ -656,7 +652,7 @@ void ZoneDatabase::LoadGlobalLoot()
 	for (auto row    = results.begin(); row != results.end(); ++row) {
 		// checking zone limits
 		if (row[10]) {
-			auto zones = SplitString(row[10], '|');
+			auto zones = Strings::Split(row[10], '|');
 
 			auto it = std::find(zones.begin(), zones.end(), zoneid);
 			if (it == zones.end()) {  // not in here, skip
@@ -687,21 +683,21 @@ void ZoneDatabase::LoadGlobalLoot()
 		}
 
 		if (row[7]) {
-			auto races = SplitString(row[7], '|');
+			auto races = Strings::Split(row[7], '|');
 
 			for (auto &r : races)
 				e.AddRule(GlobalLoot::RuleTypes::Race, std::stoi(r));
 		}
 
 		if (row[8]) {
-			auto classes = SplitString(row[8], '|');
+			auto classes = Strings::Split(row[8], '|');
 
 			for (auto &c : classes)
 				e.AddRule(GlobalLoot::RuleTypes::Class, std::stoi(c));
 		}
 
 		if (row[9]) {
-			auto bodytypes = SplitString(row[9], '|');
+			auto bodytypes = Strings::Split(row[9], '|');
 
 			for (auto &b : bodytypes)
 				e.AddRule(GlobalLoot::RuleTypes::BodyType, std::stoi(b));

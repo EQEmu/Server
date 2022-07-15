@@ -22,7 +22,7 @@
 #define EQEMU_PETS_BEASTLORD_DATA_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_pets_beastlord_data_repository.h"
 
 class PetsBeastlordDataRepository: public BasePetsBeastlordDataRepository {

@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_ALT_CURRENCY_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_alt_currency_repository.h"
 
 class CharacterAltCurrencyRepository: public BaseCharacterAltCurrencyRepository {

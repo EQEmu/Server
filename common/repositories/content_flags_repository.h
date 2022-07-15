@@ -22,7 +22,7 @@
 #define EQEMU_CONTENT_FLAGS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_content_flags_repository.h"
 
 class ContentFlagsRepository: public BaseContentFlagsRepository {

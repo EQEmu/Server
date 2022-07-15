@@ -20,7 +20,7 @@
 #include "worlddb.h"
 #include "launcher_link.h"
 #include "launcher_list.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "world_store.h"
 #include <cstdlib>
 #include <cstring>

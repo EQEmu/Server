@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_BUFFS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_buffs_repository.h"
 
 class CharacterBuffsRepository: public BaseCharacterBuffsRepository {

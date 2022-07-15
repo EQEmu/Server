@@ -9,7 +9,7 @@ void command_nudge(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Note: Partial or mixed arguments allowed, example {}.",
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					"#nudge x=5.0",
 					false,
 					"#nudge x=5.0"

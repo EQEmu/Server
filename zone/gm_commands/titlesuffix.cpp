@@ -11,10 +11,10 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 		);
 		return;
 	}
-	
+
 	bool is_remove = !strcasecmp(sep->argplus[1], "-1");
 	std::string suffix = is_remove ? "" : sep->argplus[1];
-		
+
 	auto target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
@@ -26,7 +26,7 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 	}
 
 	if (!suffix.empty()) {
-		find_replace(suffix, "_", " ");
+		Strings::FindReplace(suffix, "_", " ");
 	}
 
 	if (is_remove) {

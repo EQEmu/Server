@@ -19,7 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "expedition.h"
 #include "queryserv.h"
@@ -491,21 +491,21 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 		zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 	} else {
-	// vesuvias - zoneing to another zone so we need to the let the world server
-	//handle things with the client for a while
-	auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
-	ZoneToZone_Struct *ztz = (ZoneToZone_Struct *)pack->pBuffer;
-	ztz->response = 0;
-	ztz->current_zone_id = zone->GetZoneID();
-	ztz->current_instance_id = zone->GetInstanceID();
-	ztz->requested_zone_id = zone_id;
-	ztz->requested_instance_id = instance_id;
-	ztz->admin = admin;
-	ztz->ignorerestrictions = ignore_r;
-	strcpy(ztz->name, GetName());
-	ztz->guild_id = GuildID();
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+		// vesuvias - zoneing to another zone so we need to the let the world server
+		//handle things with the client for a while
+		auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+		ZoneToZone_Struct *ztz = (ZoneToZone_Struct *)pack->pBuffer;
+		ztz->response = 0;
+		ztz->current_zone_id = zone->GetZoneID();
+		ztz->current_instance_id = zone->GetInstanceID();
+		ztz->requested_zone_id = zone_id;
+		ztz->requested_instance_id = instance_id;
+		ztz->admin = admin;
+		ztz->ignorerestrictions = ignore_r;
+		strcpy(ztz->name, GetName());
+		ztz->guild_id = GuildID();
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
 	}
 
 	//reset to unsolicited.
@@ -778,7 +778,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
-			safe_delete(outapp);
 		}
 		else if(zm == ZoneSolicited || zm == ZoneToSafeCoords) {
 			auto outapp =
@@ -795,7 +794,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
-			safe_delete(outapp);
 		}
 		else if(zm == EvacToSafeCoords) {
 			auto outapp =
@@ -829,7 +827,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
-			safe_delete(outapp);
 		}
 		else {
 			if(zoneID == GetZoneID()) {
@@ -854,7 +851,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			gmg->type = 0x01;	//an observed value, not sure of meaning
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
-			safe_delete(outapp);
 		}
 
 		LogDebug("Player [{}] has requested a zoning to LOC x=[{}], y=[{}], z=[{}], heading=[{}] in zoneid=[{}]", GetName(), x, y, z, heading, zoneID);
@@ -1048,7 +1044,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	for (const auto& zone_id : zone_flags) {
 		int flag_number = (flag_count + 1);
 		const char* zone_short_name = ZoneName(zone_id, true);
-		if (zone_short_name != "UNKNOWN") {
+		if (strncmp(zone_short_name, "UNKNOWN", strlen(zone_short_name)) != 0) {
 			std::string zone_long_name = ZoneLongName(zone_id);
 			float safe_x, safe_y, safe_z, safe_heading;
 			int16 min_status = AccountStatus::Player;
@@ -1077,7 +1073,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 					zone_long_name,
 					zone_short_name,
 					(
-						flag_name != "" ?
+						flag_name[0] != '\0' ?
 						fmt::format(
 							" Flag Required: {}",
 							flag_name

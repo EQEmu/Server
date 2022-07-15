@@ -22,7 +22,7 @@
 #define EQEMU_MERCHANTLIST_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_merchantlist_repository.h"
 
 class MerchantlistRepository: public BaseMerchantlistRepository {

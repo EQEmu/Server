@@ -23,7 +23,7 @@ void command_camerashake(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Sending camera shake to world with a duration of {} ({}) and an intensity of {}.",
-			ConvertMillisecondsToTime(duration),
+			Strings::MillisecondsToTime(duration),
 			duration,
 			intensity
 		).c_str()

@@ -158,6 +158,7 @@ RULE_BOOL(Character, OPClientUpdateVisualDebug, false, "Shows a pulse and forwar
 RULE_BOOL(Character, AllowCrossClassTrainers, false, "If the value is true, a player can also train with other class Guildmasters.")
 RULE_BOOL(Character, PetsUseReagents, true, "Conjuring pets consumes reagents")
 RULE_BOOL(Character, DismountWater, true, "Dismount horses when entering water")
+RULE_BOOL(Character, NoSkillsOnHorse, false, "Enabling this will prevent Bind Wound and Foraging while on a mount")
 RULE_BOOL(Character, UseNoJunkFishing, false, "Disregards junk items when fishing")
 RULE_BOOL(Character, SoftDeletes, true, "When characters are deleted in character select, they are only soft deleted")
 RULE_INT(Character, DefaultGuild, 0, "If not 0, new characters placed into the guild # indicated")
@@ -399,6 +400,7 @@ RULE_BOOL(Spells, ItemExtraSpellAmtCalcAsPercent, false, "Apply the Item stats S
 RULE_BOOL(Spells, AllowItemTGB, false, "Target group buff (/tgb) doesn't work with items on live, custom servers want it though")
 RULE_BOOL(Spells, NPCInnateProcOverride, true, "NPC innate procs override the target type to single target")
 RULE_BOOL(Spells, OldRainTargets, false, "Use old incorrectly implemented maximum targets for rains")
+RULE_REAL(Spells, CallOfTheHeroAggroClearDist, 250.0, "Distance at which CoTH will wipe aggro. To disable and always enable aggro wipe on any distance of CoTH, set to 0.")
 RULE_BOOL(Spells, NPCSpellPush, false, "Enable spell push on NPCs")
 RULE_BOOL(Spells, July242002PetResists, true, "Enable Pets using PCs resist change from July 24 2002")
 RULE_INT(Spells, AOEMaxTargets, 0, "Max number of targets a Targeted AOE spell can cast on. Set to 0 for no limit.")
@@ -418,6 +420,7 @@ RULE_BOOL(Spells, BuffsFadeOnDeath, true, "Disable to keep buffs from fading on 
 RULE_BOOL(Spells, IllusionsAlwaysPersist, false, "Allows Illusions to persist beyond death and zoning always.")
 RULE_BOOL(Spells, UseItemCastMessage, false, "Enable to use the \"item begins to glow\" messages when casting from an item.")
 RULE_BOOL(Spells, WaterMatchRequiredForLoS, false, "Enable/Disable the requirement of both the attacker/victim being both in or out of water for spells LoS to pass.")
+RULE_BOOL(Spells, TargetsTargetRequiresCombatRange, true, "Disable to remove combat range requirement from Target's Target Spell Target Type")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

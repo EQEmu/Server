@@ -143,15 +143,17 @@ public:
 	void GetItemsCount(int32 &item_count, uint32 &max_id);
 	void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 	bool LoadItems(const std::string &prefix);
-	const EQ::ItemData *IterateItems(uint32 *id);
-	const EQ::ItemData *GetItem(uint32 id);
+	const EQ::ItemData *IterateItems(uint32 *id) const;
+	const EQ::ItemData *GetItem(uint32 id) const;
 	const EvolveInfo *GetEvolveInfo(uint32 loregroup);
+	uint32 GetSharedItemsCount() { return m_shared_items_count; }
+	uint32 GetItemsCount();
 
 	/**
 	 * faction
 	 */
 	void GetFactionListInfo(uint32 &list_count, uint32 &max_lists);
-	const NPCFactionList *GetNPCFactionEntry(uint32 id);
+	const NPCFactionList *GetNPCFactionEntry(uint32 id) const;
 	void LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists);
 	bool LoadNPCFactionLists(const std::string &prefix);
 
@@ -163,16 +165,16 @@ public:
 	void LoadLootTables(void *data, uint32 size);
 	void LoadLootDrops(void *data, uint32 size);
 	bool LoadLoot(const std::string &prefix);
-	const LootTable_Struct *GetLootTable(uint32 loottable_id);
-	const LootDrop_Struct *GetLootDrop(uint32 lootdrop_id);
+	const LootTable_Struct *GetLootTable(uint32 loottable_id) const;
+	const LootDrop_Struct *GetLootDrop(uint32 lootdrop_id) const;
 
 	/**
 	 * skills
 	 */
 	void LoadSkillCaps(void *data);
 	bool LoadSkillCaps(const std::string &prefix);
-	uint16 GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level);
-	uint8 GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level);
+	uint16 GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const;
+	uint8 GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const;
 
 	/**
 	 * spells
@@ -181,6 +183,8 @@ public:
 	bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
 	void LoadSpells(void *data, int max_spells);
 	void LoadDamageShieldTypes(SPDat_Spell_Struct *sp, int32 iMaxSpellID);
+	uint32 GetSharedSpellsCount() { return m_shared_spells_count; }
+	uint32 GetSpellsCount();
 
 	/**
 	 * basedata
@@ -188,9 +192,10 @@ public:
 	int GetMaxBaseDataLevel();
 	bool LoadBaseData(const std::string &prefix);
 	void LoadBaseData(void *data, int max_level);
-	const BaseDataStruct *GetBaseData(int lvl, int cl);
+	const BaseDataStruct *GetBaseData(int lvl, int cl) const;
 
-	std::string CreateItemLink(uint32 item_id) {
+	std::string CreateItemLink(uint32 item_id) const
+	{
 		EQ::SayLinkEngine linker;
 		linker.SetLinkType(EQ::saylink::SayLinkItemData);
 		const EQ::ItemData *item = GetItem(item_id);
@@ -211,6 +216,9 @@ protected:
 	std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>  loot_drop_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                             base_data_mmf;
 	std::unique_ptr<EQ::MemoryMappedFile>                             spells_mmf;
+
+	uint32 m_shared_items_count = 0;
+	uint32 m_shared_spells_count = 0;
 };
 
 #endif /*SHAREDDB_H_*/

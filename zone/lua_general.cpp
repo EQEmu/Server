@@ -3389,17 +3389,19 @@ std::string lua_get_environmental_damage_name(uint8 damage_type) {
 }
 
 std::string lua_commify(std::string number) {
-	return commify(number);
+	return Strings::Commify(number);
 }
 
-bool lua_check_name_filter(std::string name)
-{
+bool lua_check_name_filter(std::string name) {
 	return database.CheckNameFilter(name);
 }
 
-void lua_discord_send(std::string webhook_name, std::string message)
-{
+void lua_discord_send(std::string webhook_name, std::string message) {
 	zone->SendDiscordMessage(webhook_name, message);
+}
+
+void lua_track_npc(uint32 entity_id) {
+	quest_manager.TrackNPC(entity_id);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
@@ -3857,6 +3859,7 @@ luabind::scope lua_register_general() {
 		luabind::def("commify", &lua_commify),
 		luabind::def("check_name_filter", &lua_check_name_filter),
 		luabind::def("discord_send", &lua_discord_send),
+		luabind::def("track_npc", &lua_track_npc),
 
 		/*
 			Cross Zone
