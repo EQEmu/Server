@@ -441,6 +441,7 @@
 9185|2022_05_07_discord_webhooks.sql|SHOW TABLES LIKE 'discord_webhooks'|empty|
 9186|2022_07_09_zone_expansion_deprecate.sql|SHOW COLUMNS FROM 'zone' LIKE 'expansion'|notempty|
 9187|2022_07_09_task_zone_version_matching.sql|SHOW COLUMNS FROM `task_activities` LIKE 'zone_version'|empty|
+9188|2022_07_14_zone_expansion_revert.sql|SHOW COLUMNS FROM 'zone' LIKE 'expansion'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
