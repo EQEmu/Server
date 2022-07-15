@@ -1765,6 +1765,11 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	self->QuestReward(target, quest_reward, faction);
 }
 
+void Lua_Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
+	Lua_Safe_Call_Void();
+	self->CashReward(copper, silver, gold, platinum);
+}
+
 bool Lua_Client::IsDead() {
 	Lua_Safe_Call_Bool();
 	return self->IsDead();
@@ -2568,6 +2573,7 @@ luabind::scope lua_register_client() {
 	.def("CalcCurrentWeight", &Lua_Client::CalcCurrentWeight)
 	.def("CalcPriceMod", (float(Lua_Client::*)(Lua_Mob,bool))&Lua_Client::CalcPriceMod)
 	.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
+	.def("CashReward", &Lua_Client::CashReward)
 	.def("ChangeLastName", (void(Lua_Client::*)(std::string))&Lua_Client::ChangeLastName)
 	.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 	.def("CheckIncreaseSkill", (void(Lua_Client::*)(int,Lua_Mob))&Lua_Client::CheckIncreaseSkill)

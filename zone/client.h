@@ -1632,6 +1632,7 @@ public:
 
 	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, bool faction = false);
 	void QuestReward(Mob* target, const QuestReward_Struct &reward, bool faction); // TODO: Fix faction processing
+	void CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 
 	void ResetHPUpdateTimer() { hpupdate_timer.Start(); }
 

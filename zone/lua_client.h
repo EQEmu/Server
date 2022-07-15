@@ -382,6 +382,7 @@ public:
 	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp);
 	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction);
 	void QuestReward(Lua_Mob target, luabind::adl::object reward);
+	void CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 	bool IsDead();
 	int CalcCurrentWeight();
 	int CalcATK();
