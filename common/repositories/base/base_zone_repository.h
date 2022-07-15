@@ -80,6 +80,7 @@ public:
 		int         insttype;
 		int64       shutdowndelay;
 		int         peqzone;
+		int         expansion;
 		int         suspendbuffs;
 		int         rain_chance1;
 		int         rain_chance2;
@@ -183,6 +184,7 @@ public:
 			"insttype",
 			"shutdowndelay",
 			"peqzone",
+			"expansion",
 			"suspendbuffs",
 			"rain_chance1",
 			"rain_chance2",
@@ -282,6 +284,7 @@ public:
 			"insttype",
 			"shutdowndelay",
 			"peqzone",
+			"expansion",
 			"suspendbuffs",
 			"rain_chance1",
 			"rain_chance2",
@@ -415,6 +418,7 @@ public:
 		entry.insttype                  = 0;
 		entry.shutdowndelay             = 5000;
 		entry.peqzone                   = 1;
+		entry.expansion                 = 0;
 		entry.suspendbuffs              = 0;
 		entry.rain_chance1              = 0;
 		entry.rain_chance2              = 0;
@@ -543,38 +547,39 @@ public:
 			entry.insttype                  = atoi(row[58]);
 			entry.shutdowndelay             = strtoll(row[59], nullptr, 10);
 			entry.peqzone                   = atoi(row[60]);
-			entry.suspendbuffs              = atoi(row[61]);
-			entry.rain_chance1              = atoi(row[62]);
-			entry.rain_chance2              = atoi(row[63]);
-			entry.rain_chance3              = atoi(row[64]);
-			entry.rain_chance4              = atoi(row[65]);
-			entry.rain_duration1            = atoi(row[66]);
-			entry.rain_duration2            = atoi(row[67]);
-			entry.rain_duration3            = atoi(row[68]);
-			entry.rain_duration4            = atoi(row[69]);
-			entry.snow_chance1              = atoi(row[70]);
-			entry.snow_chance2              = atoi(row[71]);
-			entry.snow_chance3              = atoi(row[72]);
-			entry.snow_chance4              = atoi(row[73]);
-			entry.snow_duration1            = atoi(row[74]);
-			entry.snow_duration2            = atoi(row[75]);
-			entry.snow_duration3            = atoi(row[76]);
-			entry.snow_duration4            = atoi(row[77]);
-			entry.gravity                   = static_cast<float>(atof(row[78]));
-			entry.type                      = atoi(row[79]);
-			entry.skylock                   = atoi(row[80]);
-			entry.fast_regen_hp             = atoi(row[81]);
-			entry.fast_regen_mana           = atoi(row[82]);
-			entry.fast_regen_endurance      = atoi(row[83]);
-			entry.npc_max_aggro_dist        = atoi(row[84]);
-			entry.max_movement_update_range = atoi(row[85]);
-			entry.min_expansion             = atoi(row[86]);
-			entry.max_expansion             = atoi(row[87]);
-			entry.content_flags             = row[88] ? row[88] : "";
-			entry.content_flags_disabled    = row[89] ? row[89] : "";
-			entry.underworld_teleport_index = atoi(row[90]);
-			entry.lava_damage               = atoi(row[91]);
-			entry.min_lava_damage           = atoi(row[92]);
+			entry.expansion                 = atoi(row[61]);
+			entry.suspendbuffs              = atoi(row[62]);
+			entry.rain_chance1              = atoi(row[63]);
+			entry.rain_chance2              = atoi(row[64]);
+			entry.rain_chance3              = atoi(row[65]);
+			entry.rain_chance4              = atoi(row[66]);
+			entry.rain_duration1            = atoi(row[67]);
+			entry.rain_duration2            = atoi(row[68]);
+			entry.rain_duration3            = atoi(row[69]);
+			entry.rain_duration4            = atoi(row[70]);
+			entry.snow_chance1              = atoi(row[71]);
+			entry.snow_chance2              = atoi(row[72]);
+			entry.snow_chance3              = atoi(row[73]);
+			entry.snow_chance4              = atoi(row[74]);
+			entry.snow_duration1            = atoi(row[75]);
+			entry.snow_duration2            = atoi(row[76]);
+			entry.snow_duration3            = atoi(row[77]);
+			entry.snow_duration4            = atoi(row[78]);
+			entry.gravity                   = static_cast<float>(atof(row[79]));
+			entry.type                      = atoi(row[80]);
+			entry.skylock                   = atoi(row[81]);
+			entry.fast_regen_hp             = atoi(row[82]);
+			entry.fast_regen_mana           = atoi(row[83]);
+			entry.fast_regen_endurance      = atoi(row[84]);
+			entry.npc_max_aggro_dist        = atoi(row[85]);
+			entry.max_movement_update_range = atoi(row[86]);
+			entry.min_expansion             = atoi(row[87]);
+			entry.max_expansion             = atoi(row[88]);
+			entry.content_flags             = row[89] ? row[89] : "";
+			entry.content_flags_disabled    = row[90] ? row[90] : "";
+			entry.underworld_teleport_index = atoi(row[91]);
+			entry.lava_damage               = atoi(row[92]);
+			entry.min_lava_damage           = atoi(row[93]);
 
 			return entry;
 		}
@@ -668,38 +673,39 @@ public:
 		update_values.push_back(columns[58] + " = " + std::to_string(zone_entry.insttype));
 		update_values.push_back(columns[59] + " = " + std::to_string(zone_entry.shutdowndelay));
 		update_values.push_back(columns[60] + " = " + std::to_string(zone_entry.peqzone));
-		update_values.push_back(columns[61] + " = " + std::to_string(zone_entry.suspendbuffs));
-		update_values.push_back(columns[62] + " = " + std::to_string(zone_entry.rain_chance1));
-		update_values.push_back(columns[63] + " = " + std::to_string(zone_entry.rain_chance2));
-		update_values.push_back(columns[64] + " = " + std::to_string(zone_entry.rain_chance3));
-		update_values.push_back(columns[65] + " = " + std::to_string(zone_entry.rain_chance4));
-		update_values.push_back(columns[66] + " = " + std::to_string(zone_entry.rain_duration1));
-		update_values.push_back(columns[67] + " = " + std::to_string(zone_entry.rain_duration2));
-		update_values.push_back(columns[68] + " = " + std::to_string(zone_entry.rain_duration3));
-		update_values.push_back(columns[69] + " = " + std::to_string(zone_entry.rain_duration4));
-		update_values.push_back(columns[70] + " = " + std::to_string(zone_entry.snow_chance1));
-		update_values.push_back(columns[71] + " = " + std::to_string(zone_entry.snow_chance2));
-		update_values.push_back(columns[72] + " = " + std::to_string(zone_entry.snow_chance3));
-		update_values.push_back(columns[73] + " = " + std::to_string(zone_entry.snow_chance4));
-		update_values.push_back(columns[74] + " = " + std::to_string(zone_entry.snow_duration1));
-		update_values.push_back(columns[75] + " = " + std::to_string(zone_entry.snow_duration2));
-		update_values.push_back(columns[76] + " = " + std::to_string(zone_entry.snow_duration3));
-		update_values.push_back(columns[77] + " = " + std::to_string(zone_entry.snow_duration4));
-		update_values.push_back(columns[78] + " = " + std::to_string(zone_entry.gravity));
-		update_values.push_back(columns[79] + " = " + std::to_string(zone_entry.type));
-		update_values.push_back(columns[80] + " = " + std::to_string(zone_entry.skylock));
-		update_values.push_back(columns[81] + " = " + std::to_string(zone_entry.fast_regen_hp));
-		update_values.push_back(columns[82] + " = " + std::to_string(zone_entry.fast_regen_mana));
-		update_values.push_back(columns[83] + " = " + std::to_string(zone_entry.fast_regen_endurance));
-		update_values.push_back(columns[84] + " = " + std::to_string(zone_entry.npc_max_aggro_dist));
-		update_values.push_back(columns[85] + " = " + std::to_string(zone_entry.max_movement_update_range));
-		update_values.push_back(columns[86] + " = " + std::to_string(zone_entry.min_expansion));
-		update_values.push_back(columns[87] + " = " + std::to_string(zone_entry.max_expansion));
-		update_values.push_back(columns[88] + " = '" + Strings::Escape(zone_entry.content_flags) + "'");
-		update_values.push_back(columns[89] + " = '" + Strings::Escape(zone_entry.content_flags_disabled) + "'");
-		update_values.push_back(columns[90] + " = " + std::to_string(zone_entry.underworld_teleport_index));
-		update_values.push_back(columns[91] + " = " + std::to_string(zone_entry.lava_damage));
-		update_values.push_back(columns[92] + " = " + std::to_string(zone_entry.min_lava_damage));
+		update_values.push_back(columns[61] + " = " + std::to_string(zone_entry.expansion));
+		update_values.push_back(columns[62] + " = " + std::to_string(zone_entry.suspendbuffs));
+		update_values.push_back(columns[63] + " = " + std::to_string(zone_entry.rain_chance1));
+		update_values.push_back(columns[64] + " = " + std::to_string(zone_entry.rain_chance2));
+		update_values.push_back(columns[65] + " = " + std::to_string(zone_entry.rain_chance3));
+		update_values.push_back(columns[66] + " = " + std::to_string(zone_entry.rain_chance4));
+		update_values.push_back(columns[67] + " = " + std::to_string(zone_entry.rain_duration1));
+		update_values.push_back(columns[68] + " = " + std::to_string(zone_entry.rain_duration2));
+		update_values.push_back(columns[69] + " = " + std::to_string(zone_entry.rain_duration3));
+		update_values.push_back(columns[70] + " = " + std::to_string(zone_entry.rain_duration4));
+		update_values.push_back(columns[71] + " = " + std::to_string(zone_entry.snow_chance1));
+		update_values.push_back(columns[72] + " = " + std::to_string(zone_entry.snow_chance2));
+		update_values.push_back(columns[73] + " = " + std::to_string(zone_entry.snow_chance3));
+		update_values.push_back(columns[74] + " = " + std::to_string(zone_entry.snow_chance4));
+		update_values.push_back(columns[75] + " = " + std::to_string(zone_entry.snow_duration1));
+		update_values.push_back(columns[76] + " = " + std::to_string(zone_entry.snow_duration2));
+		update_values.push_back(columns[77] + " = " + std::to_string(zone_entry.snow_duration3));
+		update_values.push_back(columns[78] + " = " + std::to_string(zone_entry.snow_duration4));
+		update_values.push_back(columns[79] + " = " + std::to_string(zone_entry.gravity));
+		update_values.push_back(columns[80] + " = " + std::to_string(zone_entry.type));
+		update_values.push_back(columns[81] + " = " + std::to_string(zone_entry.skylock));
+		update_values.push_back(columns[82] + " = " + std::to_string(zone_entry.fast_regen_hp));
+		update_values.push_back(columns[83] + " = " + std::to_string(zone_entry.fast_regen_mana));
+		update_values.push_back(columns[84] + " = " + std::to_string(zone_entry.fast_regen_endurance));
+		update_values.push_back(columns[85] + " = " + std::to_string(zone_entry.npc_max_aggro_dist));
+		update_values.push_back(columns[86] + " = " + std::to_string(zone_entry.max_movement_update_range));
+		update_values.push_back(columns[87] + " = " + std::to_string(zone_entry.min_expansion));
+		update_values.push_back(columns[88] + " = " + std::to_string(zone_entry.max_expansion));
+		update_values.push_back(columns[89] + " = '" + Strings::Escape(zone_entry.content_flags) + "'");
+		update_values.push_back(columns[90] + " = '" + Strings::Escape(zone_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[91] + " = " + std::to_string(zone_entry.underworld_teleport_index));
+		update_values.push_back(columns[92] + " = " + std::to_string(zone_entry.lava_damage));
+		update_values.push_back(columns[93] + " = " + std::to_string(zone_entry.min_lava_damage));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -782,6 +788,7 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.insttype));
 		insert_values.push_back(std::to_string(zone_entry.shutdowndelay));
 		insert_values.push_back(std::to_string(zone_entry.peqzone));
+		insert_values.push_back(std::to_string(zone_entry.expansion));
 		insert_values.push_back(std::to_string(zone_entry.suspendbuffs));
 		insert_values.push_back(std::to_string(zone_entry.rain_chance1));
 		insert_values.push_back(std::to_string(zone_entry.rain_chance2));
@@ -904,6 +911,7 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.insttype));
 			insert_values.push_back(std::to_string(zone_entry.shutdowndelay));
 			insert_values.push_back(std::to_string(zone_entry.peqzone));
+			insert_values.push_back(std::to_string(zone_entry.expansion));
 			insert_values.push_back(std::to_string(zone_entry.suspendbuffs));
 			insert_values.push_back(std::to_string(zone_entry.rain_chance1));
 			insert_values.push_back(std::to_string(zone_entry.rain_chance2));
@@ -1030,38 +1038,39 @@ public:
 			entry.insttype                  = atoi(row[58]);
 			entry.shutdowndelay             = strtoll(row[59], nullptr, 10);
 			entry.peqzone                   = atoi(row[60]);
-			entry.suspendbuffs              = atoi(row[61]);
-			entry.rain_chance1              = atoi(row[62]);
-			entry.rain_chance2              = atoi(row[63]);
-			entry.rain_chance3              = atoi(row[64]);
-			entry.rain_chance4              = atoi(row[65]);
-			entry.rain_duration1            = atoi(row[66]);
-			entry.rain_duration2            = atoi(row[67]);
-			entry.rain_duration3            = atoi(row[68]);
-			entry.rain_duration4            = atoi(row[69]);
-			entry.snow_chance1              = atoi(row[70]);
-			entry.snow_chance2              = atoi(row[71]);
-			entry.snow_chance3              = atoi(row[72]);
-			entry.snow_chance4              = atoi(row[73]);
-			entry.snow_duration1            = atoi(row[74]);
-			entry.snow_duration2            = atoi(row[75]);
-			entry.snow_duration3            = atoi(row[76]);
-			entry.snow_duration4            = atoi(row[77]);
-			entry.gravity                   = static_cast<float>(atof(row[78]));
-			entry.type                      = atoi(row[79]);
-			entry.skylock                   = atoi(row[80]);
-			entry.fast_regen_hp             = atoi(row[81]);
-			entry.fast_regen_mana           = atoi(row[82]);
-			entry.fast_regen_endurance      = atoi(row[83]);
-			entry.npc_max_aggro_dist        = atoi(row[84]);
-			entry.max_movement_update_range = atoi(row[85]);
-			entry.min_expansion             = atoi(row[86]);
-			entry.max_expansion             = atoi(row[87]);
-			entry.content_flags             = row[88] ? row[88] : "";
-			entry.content_flags_disabled    = row[89] ? row[89] : "";
-			entry.underworld_teleport_index = atoi(row[90]);
-			entry.lava_damage               = atoi(row[91]);
-			entry.min_lava_damage           = atoi(row[92]);
+			entry.expansion                 = atoi(row[61]);
+			entry.suspendbuffs              = atoi(row[62]);
+			entry.rain_chance1              = atoi(row[63]);
+			entry.rain_chance2              = atoi(row[64]);
+			entry.rain_chance3              = atoi(row[65]);
+			entry.rain_chance4              = atoi(row[66]);
+			entry.rain_duration1            = atoi(row[67]);
+			entry.rain_duration2            = atoi(row[68]);
+			entry.rain_duration3            = atoi(row[69]);
+			entry.rain_duration4            = atoi(row[70]);
+			entry.snow_chance1              = atoi(row[71]);
+			entry.snow_chance2              = atoi(row[72]);
+			entry.snow_chance3              = atoi(row[73]);
+			entry.snow_chance4              = atoi(row[74]);
+			entry.snow_duration1            = atoi(row[75]);
+			entry.snow_duration2            = atoi(row[76]);
+			entry.snow_duration3            = atoi(row[77]);
+			entry.snow_duration4            = atoi(row[78]);
+			entry.gravity                   = static_cast<float>(atof(row[79]));
+			entry.type                      = atoi(row[80]);
+			entry.skylock                   = atoi(row[81]);
+			entry.fast_regen_hp             = atoi(row[82]);
+			entry.fast_regen_mana           = atoi(row[83]);
+			entry.fast_regen_endurance      = atoi(row[84]);
+			entry.npc_max_aggro_dist        = atoi(row[85]);
+			entry.max_movement_update_range = atoi(row[86]);
+			entry.min_expansion             = atoi(row[87]);
+			entry.max_expansion             = atoi(row[88]);
+			entry.content_flags             = row[89] ? row[89] : "";
+			entry.content_flags_disabled    = row[90] ? row[90] : "";
+			entry.underworld_teleport_index = atoi(row[91]);
+			entry.lava_damage               = atoi(row[92]);
+			entry.min_lava_damage           = atoi(row[93]);
 
 			all_entries.push_back(entry);
 		}
@@ -1147,38 +1156,39 @@ public:
 			entry.insttype                  = atoi(row[58]);
 			entry.shutdowndelay             = strtoll(row[59], nullptr, 10);
 			entry.peqzone                   = atoi(row[60]);
-			entry.suspendbuffs              = atoi(row[61]);
-			entry.rain_chance1              = atoi(row[62]);
-			entry.rain_chance2              = atoi(row[63]);
-			entry.rain_chance3              = atoi(row[64]);
-			entry.rain_chance4              = atoi(row[65]);
-			entry.rain_duration1            = atoi(row[66]);
-			entry.rain_duration2            = atoi(row[67]);
-			entry.rain_duration3            = atoi(row[68]);
-			entry.rain_duration4            = atoi(row[69]);
-			entry.snow_chance1              = atoi(row[70]);
-			entry.snow_chance2              = atoi(row[71]);
-			entry.snow_chance3              = atoi(row[72]);
-			entry.snow_chance4              = atoi(row[73]);
-			entry.snow_duration1            = atoi(row[74]);
-			entry.snow_duration2            = atoi(row[75]);
-			entry.snow_duration3            = atoi(row[76]);
-			entry.snow_duration4            = atoi(row[77]);
-			entry.gravity                   = static_cast<float>(atof(row[78]));
-			entry.type                      = atoi(row[79]);
-			entry.skylock                   = atoi(row[80]);
-			entry.fast_regen_hp             = atoi(row[81]);
-			entry.fast_regen_mana           = atoi(row[82]);
-			entry.fast_regen_endurance      = atoi(row[83]);
-			entry.npc_max_aggro_dist        = atoi(row[84]);
-			entry.max_movement_update_range = atoi(row[85]);
-			entry.min_expansion             = atoi(row[86]);
-			entry.max_expansion             = atoi(row[87]);
-			entry.content_flags             = row[88] ? row[88] : "";
-			entry.content_flags_disabled    = row[89] ? row[89] : "";
-			entry.underworld_teleport_index = atoi(row[90]);
-			entry.lava_damage               = atoi(row[91]);
-			entry.min_lava_damage           = atoi(row[92]);
+			entry.expansion                 = atoi(row[61]);
+			entry.suspendbuffs              = atoi(row[62]);
+			entry.rain_chance1              = atoi(row[63]);
+			entry.rain_chance2              = atoi(row[64]);
+			entry.rain_chance3              = atoi(row[65]);
+			entry.rain_chance4              = atoi(row[66]);
+			entry.rain_duration1            = atoi(row[67]);
+			entry.rain_duration2            = atoi(row[68]);
+			entry.rain_duration3            = atoi(row[69]);
+			entry.rain_duration4            = atoi(row[70]);
+			entry.snow_chance1              = atoi(row[71]);
+			entry.snow_chance2              = atoi(row[72]);
+			entry.snow_chance3              = atoi(row[73]);
+			entry.snow_chance4              = atoi(row[74]);
+			entry.snow_duration1            = atoi(row[75]);
+			entry.snow_duration2            = atoi(row[76]);
+			entry.snow_duration3            = atoi(row[77]);
+			entry.snow_duration4            = atoi(row[78]);
+			entry.gravity                   = static_cast<float>(atof(row[79]));
+			entry.type                      = atoi(row[80]);
+			entry.skylock                   = atoi(row[81]);
+			entry.fast_regen_hp             = atoi(row[82]);
+			entry.fast_regen_mana           = atoi(row[83]);
+			entry.fast_regen_endurance      = atoi(row[84]);
+			entry.npc_max_aggro_dist        = atoi(row[85]);
+			entry.max_movement_update_range = atoi(row[86]);
+			entry.min_expansion             = atoi(row[87]);
+			entry.max_expansion             = atoi(row[88]);
+			entry.content_flags             = row[89] ? row[89] : "";
+			entry.content_flags_disabled    = row[90] ? row[90] : "";
+			entry.underworld_teleport_index = atoi(row[91]);
+			entry.lava_damage               = atoi(row[92]);
+			entry.min_lava_damage           = atoi(row[93]);
 
 			all_entries.push_back(entry);
 		}
