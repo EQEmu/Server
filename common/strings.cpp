@@ -19,29 +19,13 @@
 #include <algorithm>
 #include <cctype>
 
-#ifdef _WINDOWS
-#include <windows.h>
-
-#define snprintf	_snprintf
-#define strncasecmp	_strnicmp
-#define strcasecmp  _stricmp
-
-#else
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
 
-#endif
-
-#ifndef va_copy
-#define va_copy(d,s) ((d) = (s))
-#endif
-
 //Const char based
 #include "strings_legacy.cpp" // legacy c functions
 #include "strings_misc.cpp" // anything non "Strings" scoped
-#include "say_link.h"
 
 std::vector<std::string> Strings::Split(const std::string &str, const char delim)
 {
