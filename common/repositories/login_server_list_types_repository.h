@@ -22,7 +22,7 @@
 #define EQEMU_LOGIN_SERVER_LIST_TYPES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_login_server_list_types_repository.h"
 
 class LoginServerListTypesRepository: public BaseLoginServerListTypesRepository {

@@ -23,7 +23,7 @@
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/emu_versions.h"
 #include "../common/features.h"
 #include "../common/item_instance.h"
@@ -236,7 +236,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	if (npc_type_data->flymode >= 0) {
 		flymode = static_cast<GravityBehavior>(npc_type_data->flymode);
 	}
-	else if (IsBoat()) {
+	else if (GetIsBoat()) {
 		flymode = GravityBehavior::Floating;
 	}
 
@@ -703,7 +703,7 @@ void NPC::QueryLoot(Client* to, bool is_pet_query)
 				Chat::White,
 				fmt::format(
 					"Money | {}",
-					ConvertMoneyToString(
+					Strings::Money(
 						platinum,
 						gold,
 						silver,
@@ -1212,8 +1212,8 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_
 	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
-	std::string str_zoffset = numberToWords(zoffset);
-	std::string str_number = numberToWords(grid_number);
+	std::string str_zoffset = Strings::NumberToWords(zoffset);
+	std::string str_number = Strings::NumberToWords(grid_number);
 
 	strcpy(npc_type->name, str_number.c_str());
 	if (zoffset != 0) {
@@ -1551,7 +1551,7 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
 	std::string query = fmt::format(
 		"INSERT INTO spawngroup (name) VALUES('{}{}{}')",
 		zone,
-		EscapeString(spawn->GetName()),
+		Strings::Escape(spawn->GetName()),
 		Timer::GetCurrentTime()
 	);
 
@@ -1867,7 +1867,7 @@ void NPC::PickPocket(Client* thief)
 				continue;
 
 			auto item_test = database.GetItem(item_iter->item_id);
-			if (item_test->Magic || !item_test->NoDrop || item_test->IsClassBag() || thief->CheckLoreConflict(item_test))
+			if (item_test->Magic || !item_test->NoDrop || item_test->IsClassBag() || thief->CheckLoreConflict(item_test) || item_iter->equip_slot != EQ::invslot::SLOT_INVALID)
 				continue;
 
 			loot_selection.push_back(std::make_pair(item_test, ((item_test->Stackable) ? (1) : (item_iter->charges))));
@@ -1903,6 +1903,7 @@ void NPC::PickPocket(Client* thief)
 		}
 		RemoveItem(item_inst->GetID());
 		thief->SendPickPocketResponse(this, 0, PickPocketItem, item_inst->GetItem());
+		safe_delete(item_inst);
 
 		return;
 	}
@@ -2423,7 +2424,7 @@ void NPC::SetLevel(uint8 in_level, bool command)
 
 void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 {
-	std::string id  = str_tolower(identifier);
+	std::string id  = Strings::ToLower(identifier);
 	std::string val = new_value;
 
 	std::string variable_key = StringFormat("modify_stat_%s", id.c_str());
@@ -2649,7 +2650,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 
 float NPC::GetNPCStat(const char *identifier)
 {
-	std::string id = str_tolower(identifier);
+	std::string id = Strings::ToLower(identifier);
 
 	if (id == "ac") {
 		return AC;

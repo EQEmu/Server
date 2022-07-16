@@ -23,7 +23,7 @@
 #include <iterator>
 #include "database_dump_service.h"
 #include "../eqemu_logsys.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "../eqemu_config.h"
 #include "../database_schema.h"
 #include "../file_util.h"
@@ -119,7 +119,7 @@ std::string DatabaseDumpService::GetMySQLVersion()
 {
 	std::string version_output = execute("mysql --version");
 
-	return trim(version_output);
+	return Strings::Trim(version_output);
 }
 
 /**
@@ -160,7 +160,7 @@ std::string DatabaseDumpService::GetPlayerTablesList()
 		tables_list += table + " ";
 	}
 
-	return trim(tables_list);
+	return Strings::Trim(tables_list);
 }
 
 /**
@@ -174,7 +174,7 @@ std::string DatabaseDumpService::GetBotTablesList()
 		tables_list += table + " ";
 	}
 
-	return trim(tables_list);
+	return Strings::Trim(tables_list);
 }
 
 /**
@@ -188,7 +188,7 @@ std::string DatabaseDumpService::GetLoginTableList()
 		tables_list += table + " ";
 	}
 
-	return trim(tables_list);
+	return Strings::Trim(tables_list);
 }
 
 /**
@@ -202,7 +202,7 @@ std::string DatabaseDumpService::GetQueryServTables()
 		tables_list += table + " ";
 	}
 
-	return trim(tables_list);
+	return Strings::Trim(tables_list);
 }
 
 /**
@@ -222,7 +222,7 @@ std::string DatabaseDumpService::GetSystemTablesList()
 		tables_list += table + " ";
 	}
 
-	return trim(tables_list);
+	return Strings::Trim(tables_list);
 }
 /**
  * @return
@@ -236,7 +236,7 @@ std::string DatabaseDumpService::GetStateTablesList()
 		tables_list += table + " ";
 	}
 
-	return trim(tables_list);
+	return Strings::Trim(tables_list);
 }
 
 /**
@@ -251,7 +251,7 @@ std::string DatabaseDumpService::GetContentTablesList()
 		tables_list += table + " ";
 	}
 
-	return trim(tables_list);
+	return Strings::Trim(tables_list);
 }
 
 /**
@@ -331,7 +331,7 @@ void DatabaseDumpService::Dump()
 			tables_to_dump += GetPlayerTablesList() + " ";
 			dump_descriptor += "-player";
 		}
-		
+
 		if (IsDumpBotTables()) {
 			tables_to_dump += GetBotTablesList() + " ";
 			dump_descriptor += "-bots";
@@ -388,7 +388,7 @@ void DatabaseDumpService::Dump()
 	}
 
 	if (IsDumpDropTableSyntaxOnly()) {
-		std::vector<std::string> tables = SplitString(tables_to_dump, ' ');
+		std::vector<std::string> tables = Strings::Split(tables_to_dump, ' ');
 
 		for (auto &table : tables) {
 			std::cout << "DROP TABLE IF EXISTS `" << table << "`;" << std::endl;

@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_TASK_TIMERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_task_timers_repository.h"
 
 class CharacterTaskTimersRepository: public BaseCharacterTaskTimersRepository {

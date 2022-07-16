@@ -2091,6 +2091,14 @@ Group *EntityList::GetGroupByID(uint32 group_id)
 	return nullptr;
 }
 
+bool EntityList::IsInSameGroupOrRaidGroup(Client *client1, Client *client2) {
+	Group* group = entity_list.GetGroupByClient(client1);
+	Raid* raid = entity_list.GetRaidByClient(client1);
+
+	return (group && group->IsGroupMember(client2))
+		   || (raid && raid->IsRaidMember(client2->GetName()) && raid->GetGroup(client1) == raid->GetGroup(client2));
+}
+
 Group *EntityList::GetGroupByClient(Client *client)
 {
 	std::list <Group *>::iterator iterator;
@@ -2366,6 +2374,7 @@ void EntityList::FilteredMessageCloseString(
 	uint32 type,
 	eqFilterType filter,
 	uint32 string_id,
+	Mob *skip,
 	const char *message1,
 	const char *message2,
 	const char *message3,
@@ -2382,7 +2391,7 @@ void EntityList::FilteredMessageCloseString(
 
 	for (auto & it : client_list) {
 		c = it.second;
-		if (c && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender)) {
+		if (c && c != skip && DistanceSquared(c->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || c != sender)) {
 			c->FilteredMessageString(
 				sender, type, filter, string_id,
 				message1, message2, message3, message4, message5,
@@ -3327,7 +3336,7 @@ void EntityList::CorpseFix(Client* c)
 					cur->GetFixedZ(c->GetPosition()),
 					c->GetHeading()
 				);
-				
+
 				fixed_count++;
 			}
 		}
@@ -3668,46 +3677,53 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 bool EntityList::MakeTrackPacket(Client *client)
 {
 	std::list<std::pair<Mob *, float> > tracking_list;
-	uint32 distance = 0;
-	float MobDistance;
+	auto distance = static_cast<float>(client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
 
-	distance = (client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
-
-	if (distance <= 0)
+	if (distance <= 0.0f) {
 		return false;
-	if (distance < 300)
-		distance = 300;
+	}
+
+	if (distance < 300.0f) {
+		distance = 300.0f;
+	}
 
 	for (auto it = mob_list.cbegin(); it != mob_list.cend(); ++it) {
-		if (!it->second || it->second == client || !it->second->IsTrackable() ||
-				it->second->IsInvisible(client))
+		if (
+			!it->second ||
+			it->second == client ||
+			!it->second->IsTrackable() ||
+			it->second->IsInvisible(client)
+		) {
 			continue;
+		}
 
-		MobDistance = DistanceNoZ(it->second->GetPosition(), client->GetPosition());
-		if (MobDistance > distance)
+		const auto mob_distance = DistanceNoZ(it->second->GetPosition(), client->GetPosition());
+		if (mob_distance > distance) {
 			continue;
+		}
 
-		tracking_list.push_back(std::make_pair(it->second, MobDistance));
+		tracking_list.push_back(std::make_pair(it->second, mob_distance));
 	}
 
 	tracking_list.sort(
 		[](const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b) {
 			return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
-		});
+		}
+	);
+
 	auto outapp = new EQApplicationPacket(OP_Track, sizeof(Track_Struct) * tracking_list.size());
-	Tracking_Struct *outtrack = (Tracking_Struct *)outapp->pBuffer;
+	auto pack = (Tracking_Struct *) outapp->pBuffer;
 	outapp->priority = 6;
 
 	int index = 0;
 	for (auto it = tracking_list.cbegin(); it != tracking_list.cend(); ++it, ++index) {
-		Mob *cur_entity = it->first;
-		outtrack->Entrys[index].entityid = (uint32)cur_entity->GetID();
-		outtrack->Entrys[index].distance = it->second;
-		outtrack->Entrys[index].level = cur_entity->GetLevel();
-		outtrack->Entrys[index].is_npc = !cur_entity->IsClient();
-		strn0cpy(outtrack->Entrys[index].name, cur_entity->GetName(), sizeof(outtrack->Entrys[index].name));
-		outtrack->Entrys[index].is_pet = cur_entity->IsPet();
-		outtrack->Entrys[index].is_merc = cur_entity->IsMerc();
+		pack->Entrys[index].entityid = static_cast<uint32>(it->first->GetID());
+		pack->Entrys[index].distance = it->second;
+		pack->Entrys[index].level = it->first->GetLevel();
+		pack->Entrys[index].is_npc = !it->first->IsClient();
+		strn0cpy(pack->Entrys[index].name, it->first->GetName(), sizeof(pack->Entrys[index].name));
+		pack->Entrys[index].is_pet = it->first->IsPet();
+		pack->Entrys[index].is_merc = it->first->IsMerc();
 	}
 
 	client->QueuePacket(outapp);
@@ -5114,7 +5130,7 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name)
 	}
 
 	for (auto bot : bot_list) {
-		if (bot->GetOwner() && str_tolower(bot->GetOwner()->GetCleanName()) == str_tolower(client_name)) {
+		if (bot->GetOwner() && Strings::ToLower(bot->GetOwner()->GetCleanName()) == Strings::ToLower(client_name)) {
 			client_bot_list.push_back(bot);
 		}
 	}

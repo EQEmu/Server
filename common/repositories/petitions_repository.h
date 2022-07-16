@@ -22,7 +22,7 @@
 #define EQEMU_PETITIONS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_petitions_repository.h"
 
 class PetitionsRepository: public BasePetitionsRepository {

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_AA_ABILITY_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAaAbilityRepository {
@@ -82,12 +82,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -214,7 +214,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(aa_ability_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(aa_ability_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(aa_ability_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_entry.category));
 		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_entry.classes));
 		update_values.push_back(columns[4] + " = " + std::to_string(aa_ability_entry.races));
@@ -232,7 +232,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				aa_ability_entry.id
 			)
@@ -249,7 +249,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(aa_ability_entry.id));
-		insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(aa_ability_entry.name) + "'");
 		insert_values.push_back(std::to_string(aa_ability_entry.category));
 		insert_values.push_back(std::to_string(aa_ability_entry.classes));
 		insert_values.push_back(std::to_string(aa_ability_entry.races));
@@ -267,7 +267,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -292,7 +292,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(aa_ability_entry.id));
-			insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(aa_ability_entry.name) + "'");
 			insert_values.push_back(std::to_string(aa_ability_entry.category));
 			insert_values.push_back(std::to_string(aa_ability_entry.classes));
 			insert_values.push_back(std::to_string(aa_ability_entry.races));
@@ -306,7 +306,7 @@ public:
 			insert_values.push_back(std::to_string(aa_ability_entry.enabled));
 			insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -315,7 +315,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

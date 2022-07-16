@@ -22,7 +22,7 @@
 #define EQEMU_TRIBUTE_LEVELS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_tribute_levels_repository.h"
 
 class TributeLevelsRepository: public BaseTributeLevelsRepository {

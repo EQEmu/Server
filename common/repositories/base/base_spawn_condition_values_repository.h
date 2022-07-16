@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWN_CONDITION_VALUES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawnConditionValuesRepository {
@@ -52,12 +52,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -165,14 +165,14 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(spawn_condition_values_entry.id));
 		update_values.push_back(columns[1] + " = " + std::to_string(spawn_condition_values_entry.value));
-		update_values.push_back(columns[2] + " = '" + EscapeString(spawn_condition_values_entry.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spawn_condition_values_entry.zone) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(spawn_condition_values_entry.instance_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				spawn_condition_values_entry.id
 			)
@@ -190,14 +190,14 @@ public:
 
 		insert_values.push_back(std::to_string(spawn_condition_values_entry.id));
 		insert_values.push_back(std::to_string(spawn_condition_values_entry.value));
-		insert_values.push_back("'" + EscapeString(spawn_condition_values_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawn_condition_values_entry.zone) + "'");
 		insert_values.push_back(std::to_string(spawn_condition_values_entry.instance_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -223,10 +223,10 @@ public:
 
 			insert_values.push_back(std::to_string(spawn_condition_values_entry.id));
 			insert_values.push_back(std::to_string(spawn_condition_values_entry.value));
-			insert_values.push_back("'" + EscapeString(spawn_condition_values_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawn_condition_values_entry.zone) + "'");
 			insert_values.push_back(std::to_string(spawn_condition_values_entry.instance_id));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -235,7 +235,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

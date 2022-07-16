@@ -19,7 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 
 #include "client.h"
@@ -1078,6 +1078,7 @@ void Client::Trader_CustomerBrowsing(Client *Customer) {
 	sis->TraderID = Customer->GetID();
 
 	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 
@@ -1505,6 +1506,8 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* C
 			{
 				Trader_EndTrader();
 			}
+
+			safe_delete(TraderItems);
 
 			return;
 		}
@@ -2582,6 +2585,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
 		QueuePacket(outapp);
+		safe_delete(outapp);
     }
 }
 

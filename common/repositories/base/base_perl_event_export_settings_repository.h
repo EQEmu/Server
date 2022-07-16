@@ -13,7 +13,7 @@
 #define EQEMU_BASE_PERL_EVENT_EXPORT_SETTINGS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BasePerlEventExportSettingsRepository {
@@ -61,12 +61,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -179,7 +179,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(perl_event_export_settings_entry.event_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(perl_event_export_settings_entry.event_description) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(perl_event_export_settings_entry.export_qglobals));
 		update_values.push_back(columns[3] + " = " + std::to_string(perl_event_export_settings_entry.export_mob));
 		update_values.push_back(columns[4] + " = " + std::to_string(perl_event_export_settings_entry.export_zone));
@@ -190,7 +190,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				perl_event_export_settings_entry.event_id
 			)
@@ -207,7 +207,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.event_id));
-		insert_values.push_back("'" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
+		insert_values.push_back("'" + Strings::Escape(perl_event_export_settings_entry.event_description) + "'");
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_qglobals));
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_mob));
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_zone));
@@ -218,7 +218,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -243,14 +243,14 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.event_id));
-			insert_values.push_back("'" + EscapeString(perl_event_export_settings_entry.event_description) + "'");
+			insert_values.push_back("'" + Strings::Escape(perl_event_export_settings_entry.event_description) + "'");
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_qglobals));
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_mob));
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_zone));
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_item));
 			insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_event));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -259,7 +259,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_BANDOLIER_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_bandolier_repository.h"
 
 class CharacterBandolierRepository: public BaseCharacterBandolierRepository {

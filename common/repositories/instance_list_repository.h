@@ -22,7 +22,7 @@
 #define EQEMU_INSTANCE_LIST_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_instance_list_repository.h"
 
 class InstanceListRepository: public BaseInstanceListRepository {

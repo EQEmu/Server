@@ -13,7 +13,7 @@
 #define EQEMU_BASE_SPAWNGROUP_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseSpawngroupRepository {
@@ -79,12 +79,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -208,7 +208,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(spawngroup_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spawngroup_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(spawngroup_entry.spawn_limit));
 		update_values.push_back(columns[3] + " = " + std::to_string(spawngroup_entry.dist));
 		update_values.push_back(columns[4] + " = " + std::to_string(spawngroup_entry.max_x));
@@ -225,7 +225,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				spawngroup_entry.id
 			)
@@ -242,7 +242,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(spawngroup_entry.id));
-		insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spawngroup_entry.name) + "'");
 		insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
 		insert_values.push_back(std::to_string(spawngroup_entry.dist));
 		insert_values.push_back(std::to_string(spawngroup_entry.max_x));
@@ -259,7 +259,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -284,7 +284,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(spawngroup_entry.id));
-			insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spawngroup_entry.name) + "'");
 			insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
 			insert_values.push_back(std::to_string(spawngroup_entry.dist));
 			insert_values.push_back(std::to_string(spawngroup_entry.max_x));
@@ -297,7 +297,7 @@ public:
 			insert_values.push_back(std::to_string(spawngroup_entry.despawn_timer));
 			insert_values.push_back(std::to_string(spawngroup_entry.wp_spawns));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -306,7 +306,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

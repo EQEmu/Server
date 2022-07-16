@@ -227,19 +227,20 @@ bool TaskManager::LoadTasks(int single_task)
 		activity_data->target_name          = task_activity.target_name;
 		activity_data->item_list            = task_activity.item_list;
 		activity_data->skill_list           = task_activity.skill_list;
-		activity_data->skill_id             = StringIsNumber(task_activity.skill_list) ? std::stoi(task_activity.skill_list) : 0; // for older clients
+		activity_data->skill_id             = Strings::IsNumber(task_activity.skill_list) ? std::stoi(task_activity.skill_list) : 0; // for older clients
 		activity_data->spell_list           = task_activity.spell_list;
-		activity_data->spell_id             = StringIsNumber(task_activity.spell_list) ? std::stoi(task_activity.spell_list) : 0; // for older clients
+		activity_data->spell_id             = Strings::IsNumber(task_activity.spell_list) ? std::stoi(task_activity.spell_list) : 0; // for older clients
 		activity_data->description_override = task_activity.description_override;
 		activity_data->goal_id              = task_activity.goalid;
 		activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;
 		activity_data->goal_match_list      = task_activity.goal_match_list;
 		activity_data->goal_count           = task_activity.goalcount;
 		activity_data->deliver_to_npc       = task_activity.delivertonpc;
+		activity_data->zone_version         = task_activity.zone_version;
 
 		// zones
 		activity_data->zones = task_activity.zones;
-		auto zones = SplitString(
+		auto zones = Strings::Split(
 			task_activity.zones,
 			';'
 		);
@@ -1853,7 +1854,7 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, st
 				}
 
 				// Is there a zone restriction on the activity_information ?
-				if (!activity_info->CheckZone(zone->GetZoneID())) {
+				if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 					LogTasks(
 						"[HandleUpdateTasksOnKill] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
 						client->GetName(),

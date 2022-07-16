@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ACCOUNT_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseAccountRepository {
@@ -106,12 +106,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -253,33 +253,33 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(account_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(account_entry.charname) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(account_entry.charname) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(account_entry.sharedplat));
-		update_values.push_back(columns[4] + " = '" + EscapeString(account_entry.password) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(account_entry.password) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(account_entry.status));
-		update_values.push_back(columns[6] + " = '" + EscapeString(account_entry.ls_id) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(account_entry.ls_id) + "'");
 		update_values.push_back(columns[7] + " = " + std::to_string(account_entry.lsaccount_id));
 		update_values.push_back(columns[8] + " = " + std::to_string(account_entry.gmspeed));
 		update_values.push_back(columns[9] + " = " + std::to_string(account_entry.revoked));
 		update_values.push_back(columns[10] + " = " + std::to_string(account_entry.karma));
-		update_values.push_back(columns[11] + " = '" + EscapeString(account_entry.minilogin_ip) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(account_entry.minilogin_ip) + "'");
 		update_values.push_back(columns[12] + " = " + std::to_string(account_entry.hideme));
 		update_values.push_back(columns[13] + " = " + std::to_string(account_entry.rulesflag));
 		update_values.push_back(columns[14] + " = FROM_UNIXTIME(" + (account_entry.suspendeduntil > 0 ? std::to_string(account_entry.suspendeduntil) : "null") + ")");
 		update_values.push_back(columns[15] + " = " + std::to_string(account_entry.time_creation));
 		update_values.push_back(columns[16] + " = " + std::to_string(account_entry.expansion));
-		update_values.push_back(columns[17] + " = '" + EscapeString(account_entry.ban_reason) + "'");
-		update_values.push_back(columns[18] + " = '" + EscapeString(account_entry.suspend_reason) + "'");
-		update_values.push_back(columns[19] + " = '" + EscapeString(account_entry.crc_eqgame) + "'");
-		update_values.push_back(columns[20] + " = '" + EscapeString(account_entry.crc_skillcaps) + "'");
-		update_values.push_back(columns[21] + " = '" + EscapeString(account_entry.crc_basedata) + "'");
+		update_values.push_back(columns[17] + " = '" + Strings::Escape(account_entry.ban_reason) + "'");
+		update_values.push_back(columns[18] + " = '" + Strings::Escape(account_entry.suspend_reason) + "'");
+		update_values.push_back(columns[19] + " = '" + Strings::Escape(account_entry.crc_eqgame) + "'");
+		update_values.push_back(columns[20] + " = '" + Strings::Escape(account_entry.crc_skillcaps) + "'");
+		update_values.push_back(columns[21] + " = '" + Strings::Escape(account_entry.crc_basedata) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				account_entry.id
 			)
@@ -296,33 +296,33 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(account_entry.id));
-		insert_values.push_back("'" + EscapeString(account_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(account_entry.charname) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.charname) + "'");
 		insert_values.push_back(std::to_string(account_entry.sharedplat));
-		insert_values.push_back("'" + EscapeString(account_entry.password) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.password) + "'");
 		insert_values.push_back(std::to_string(account_entry.status));
-		insert_values.push_back("'" + EscapeString(account_entry.ls_id) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.ls_id) + "'");
 		insert_values.push_back(std::to_string(account_entry.lsaccount_id));
 		insert_values.push_back(std::to_string(account_entry.gmspeed));
 		insert_values.push_back(std::to_string(account_entry.revoked));
 		insert_values.push_back(std::to_string(account_entry.karma));
-		insert_values.push_back("'" + EscapeString(account_entry.minilogin_ip) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.minilogin_ip) + "'");
 		insert_values.push_back(std::to_string(account_entry.hideme));
 		insert_values.push_back(std::to_string(account_entry.rulesflag));
 		insert_values.push_back("FROM_UNIXTIME(" + (account_entry.suspendeduntil > 0 ? std::to_string(account_entry.suspendeduntil) : "null") + ")");
 		insert_values.push_back(std::to_string(account_entry.time_creation));
 		insert_values.push_back(std::to_string(account_entry.expansion));
-		insert_values.push_back("'" + EscapeString(account_entry.ban_reason) + "'");
-		insert_values.push_back("'" + EscapeString(account_entry.suspend_reason) + "'");
-		insert_values.push_back("'" + EscapeString(account_entry.crc_eqgame) + "'");
-		insert_values.push_back("'" + EscapeString(account_entry.crc_skillcaps) + "'");
-		insert_values.push_back("'" + EscapeString(account_entry.crc_basedata) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.ban_reason) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.suspend_reason) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.crc_eqgame) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.crc_skillcaps) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_entry.crc_basedata) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -347,29 +347,29 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(account_entry.id));
-			insert_values.push_back("'" + EscapeString(account_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(account_entry.charname) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.charname) + "'");
 			insert_values.push_back(std::to_string(account_entry.sharedplat));
-			insert_values.push_back("'" + EscapeString(account_entry.password) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.password) + "'");
 			insert_values.push_back(std::to_string(account_entry.status));
-			insert_values.push_back("'" + EscapeString(account_entry.ls_id) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.ls_id) + "'");
 			insert_values.push_back(std::to_string(account_entry.lsaccount_id));
 			insert_values.push_back(std::to_string(account_entry.gmspeed));
 			insert_values.push_back(std::to_string(account_entry.revoked));
 			insert_values.push_back(std::to_string(account_entry.karma));
-			insert_values.push_back("'" + EscapeString(account_entry.minilogin_ip) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.minilogin_ip) + "'");
 			insert_values.push_back(std::to_string(account_entry.hideme));
 			insert_values.push_back(std::to_string(account_entry.rulesflag));
 			insert_values.push_back("FROM_UNIXTIME(" + (account_entry.suspendeduntil > 0 ? std::to_string(account_entry.suspendeduntil) : "null") + ")");
 			insert_values.push_back(std::to_string(account_entry.time_creation));
 			insert_values.push_back(std::to_string(account_entry.expansion));
-			insert_values.push_back("'" + EscapeString(account_entry.ban_reason) + "'");
-			insert_values.push_back("'" + EscapeString(account_entry.suspend_reason) + "'");
-			insert_values.push_back("'" + EscapeString(account_entry.crc_eqgame) + "'");
-			insert_values.push_back("'" + EscapeString(account_entry.crc_skillcaps) + "'");
-			insert_values.push_back("'" + EscapeString(account_entry.crc_basedata) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.ban_reason) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.suspend_reason) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.crc_eqgame) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.crc_skillcaps) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_entry.crc_basedata) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -378,7 +378,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_TASKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseTasksRepository {
@@ -109,12 +109,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -262,9 +262,9 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(tasks_entry.type));
 		update_values.push_back(columns[2] + " = " + std::to_string(tasks_entry.duration));
 		update_values.push_back(columns[3] + " = " + std::to_string(tasks_entry.duration_code));
-		update_values.push_back(columns[4] + " = '" + EscapeString(tasks_entry.title) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(tasks_entry.description) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(tasks_entry.reward) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(tasks_entry.title) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(tasks_entry.description) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(tasks_entry.reward) + "'");
 		update_values.push_back(columns[7] + " = " + std::to_string(tasks_entry.rewardid));
 		update_values.push_back(columns[8] + " = " + std::to_string(tasks_entry.cashreward));
 		update_values.push_back(columns[9] + " = " + std::to_string(tasks_entry.xpreward));
@@ -278,7 +278,7 @@ public:
 		update_values.push_back(columns[17] + " = " + std::to_string(tasks_entry.max_players));
 		update_values.push_back(columns[18] + " = " + std::to_string(tasks_entry.repeatable));
 		update_values.push_back(columns[19] + " = " + std::to_string(tasks_entry.faction_reward));
-		update_values.push_back(columns[20] + " = '" + EscapeString(tasks_entry.completion_emote) + "'");
+		update_values.push_back(columns[20] + " = '" + Strings::Escape(tasks_entry.completion_emote) + "'");
 		update_values.push_back(columns[21] + " = " + std::to_string(tasks_entry.replay_timer_seconds));
 		update_values.push_back(columns[22] + " = " + std::to_string(tasks_entry.request_timer_seconds));
 
@@ -286,7 +286,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				tasks_entry.id
 			)
@@ -306,9 +306,9 @@ public:
 		insert_values.push_back(std::to_string(tasks_entry.type));
 		insert_values.push_back(std::to_string(tasks_entry.duration));
 		insert_values.push_back(std::to_string(tasks_entry.duration_code));
-		insert_values.push_back("'" + EscapeString(tasks_entry.title) + "'");
-		insert_values.push_back("'" + EscapeString(tasks_entry.description) + "'");
-		insert_values.push_back("'" + EscapeString(tasks_entry.reward) + "'");
+		insert_values.push_back("'" + Strings::Escape(tasks_entry.title) + "'");
+		insert_values.push_back("'" + Strings::Escape(tasks_entry.description) + "'");
+		insert_values.push_back("'" + Strings::Escape(tasks_entry.reward) + "'");
 		insert_values.push_back(std::to_string(tasks_entry.rewardid));
 		insert_values.push_back(std::to_string(tasks_entry.cashreward));
 		insert_values.push_back(std::to_string(tasks_entry.xpreward));
@@ -322,7 +322,7 @@ public:
 		insert_values.push_back(std::to_string(tasks_entry.max_players));
 		insert_values.push_back(std::to_string(tasks_entry.repeatable));
 		insert_values.push_back(std::to_string(tasks_entry.faction_reward));
-		insert_values.push_back("'" + EscapeString(tasks_entry.completion_emote) + "'");
+		insert_values.push_back("'" + Strings::Escape(tasks_entry.completion_emote) + "'");
 		insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
 		insert_values.push_back(std::to_string(tasks_entry.request_timer_seconds));
 
@@ -330,7 +330,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -358,9 +358,9 @@ public:
 			insert_values.push_back(std::to_string(tasks_entry.type));
 			insert_values.push_back(std::to_string(tasks_entry.duration));
 			insert_values.push_back(std::to_string(tasks_entry.duration_code));
-			insert_values.push_back("'" + EscapeString(tasks_entry.title) + "'");
-			insert_values.push_back("'" + EscapeString(tasks_entry.description) + "'");
-			insert_values.push_back("'" + EscapeString(tasks_entry.reward) + "'");
+			insert_values.push_back("'" + Strings::Escape(tasks_entry.title) + "'");
+			insert_values.push_back("'" + Strings::Escape(tasks_entry.description) + "'");
+			insert_values.push_back("'" + Strings::Escape(tasks_entry.reward) + "'");
 			insert_values.push_back(std::to_string(tasks_entry.rewardid));
 			insert_values.push_back(std::to_string(tasks_entry.cashreward));
 			insert_values.push_back(std::to_string(tasks_entry.xpreward));
@@ -374,11 +374,11 @@ public:
 			insert_values.push_back(std::to_string(tasks_entry.max_players));
 			insert_values.push_back(std::to_string(tasks_entry.repeatable));
 			insert_values.push_back(std::to_string(tasks_entry.faction_reward));
-			insert_values.push_back("'" + EscapeString(tasks_entry.completion_emote) + "'");
+			insert_values.push_back("'" + Strings::Escape(tasks_entry.completion_emote) + "'");
 			insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
 			insert_values.push_back(std::to_string(tasks_entry.request_timer_seconds));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -387,7 +387,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

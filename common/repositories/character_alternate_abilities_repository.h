@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_ALTERNATE_ABILITIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_alternate_abilities_repository.h"
 
 class CharacterAlternateAbilitiesRepository: public BaseCharacterAlternateAbilitiesRepository {

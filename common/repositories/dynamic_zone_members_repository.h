@@ -22,7 +22,7 @@
 #define EQEMU_DYNAMIC_ZONE_MEMBERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_dynamic_zone_members_repository.h"
 
 class DynamicZoneMembersRepository: public BaseDynamicZoneMembersRepository {
@@ -210,7 +210,7 @@ public:
 			insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
 			insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -220,7 +220,7 @@ public:
 				"INSERT INTO {} ({}) VALUES {} ON DUPLICATE KEY UPDATE id = id;",
 				TableName(),
 				ColumnsRaw(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

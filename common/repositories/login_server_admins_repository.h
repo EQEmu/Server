@@ -22,7 +22,7 @@
 #define EQEMU_LOGIN_SERVER_ADMINS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_login_server_admins_repository.h"
 
 class LoginServerAdminsRepository: public BaseLoginServerAdminsRepository {

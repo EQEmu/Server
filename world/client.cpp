@@ -31,7 +31,7 @@
 #include "../common/languages.h"
 #include "../common/skills.h"
 #include "../common/extprofile.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/emu_versions.h"
 #include "../common/random.h"
 #include "../common/shareddb.h"
@@ -768,7 +768,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 
 		if (eqs->ClientVersion() == EQ::versions::ClientVersion::Titanium) {
-			character_limit = Titanium::constants::CHARACTER_CREATION_LIMIT; 
+			character_limit = Titanium::constants::CHARACTER_CREATION_LIMIT;
 		}
 
 		auto query = fmt::format(

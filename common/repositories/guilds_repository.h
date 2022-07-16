@@ -22,7 +22,7 @@
 #define EQEMU_GUILDS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_guilds_repository.h"
 
 class GuildsRepository: public BaseGuildsRepository {

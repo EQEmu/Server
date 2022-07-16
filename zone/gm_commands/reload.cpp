@@ -61,7 +61,7 @@ void command_reload(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto pack = new ServerPacket;
+	ServerPacket* pack = nullptr;
 
 	if (is_aa) {
 		c->Message(Chat::White, "Attempting to reload Alternate Advancement Data globally.");	
@@ -282,7 +282,7 @@ void command_reload(Client *c, const Seperator *sep)
 		pack = new ServerPacket(ServerOP_ReloadZonePoints, 0);
 	}
 	
-	if (pack->opcode) {
+	if (pack) {
 		worldserver.SendPacket(pack);
 	}
 

@@ -3,7 +3,7 @@
 #include "../common/event/task_scheduler.h"
 #include "../common/event/event_loop.h"
 #include "../common/net/dns.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;
@@ -378,7 +378,7 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				}
 			);
 
-			auto s = SplitString(server.options.GetEQEmuLoginServerAddress(), ':');
+			auto s = Strings::Split(server.options.GetEQEmuLoginServerAddress(), ':');
 			if (s.size() == 2) {
 				auto address = s[0];
 				auto port    = std::stoi(s[1]);

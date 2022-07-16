@@ -42,7 +42,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "event_codes.h"
 #include "expedition.h"
 #include "guild_mgr.h"
@@ -823,10 +823,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const EQ::ItemData *item = nullptr;
 	auto merchant_list = zone->merchanttable[merchant_id];
 	auto npc = entity_list.GetMobByNpcTypeID(npcid);
-	if (!merchant_list.size() == 0) {
+	if (merchant_list.empty()) {
 		zone->LoadNewMerchantData(merchant_id);
 		merchant_list = zone->merchanttable[merchant_id];
-		if (!merchant_list.size()) {
+		if (merchant_list.empty()) {
 			return;
 		}
 	}
@@ -918,7 +918,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		// Account for merchant lists with gaps.
 		if (ml.slot >= slot_id) {
 			if (ml.slot > slot_id) {
-				LogDebug("(WARNING) Merchantlist contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", slot_id, merchant_id, npcid);
+				LogDebug("(WARNING) Merchantlist Contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", slot_id, merchant_id, npcid);
 			}
 
 			slot_id = ml.slot + 1;
@@ -967,7 +967,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	//this resets the slot
 	zone->tmpmerchanttable[npcid] = temporary_merchant_list;
 	if (npc && handy_item) {
-		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);		
+		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);
 		auto handy_id = std::to_string(greet_id);
 		if (greet_id != MERCHANT_GREETING) {
 			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName(), handy_item->Name);
@@ -1946,10 +1946,11 @@ void Client::CalcRestState()
 
 void Client::DoTracking()
 {
-	if (TrackingID == 0)
+	if (!TrackingID) {
 		return;
+	}
 
-	Mob *m = entity_list.GetMob(TrackingID);
+	auto *m = entity_list.GetMob(TrackingID);
 
 	if (!m || m->IsCorpse()) {
 		MessageString(Chat::Skills, TRACK_LOST_TARGET);
@@ -1957,29 +1958,43 @@ void Client::DoTracking()
 		return;
 	}
 
-	float RelativeHeading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
+	if (DistanceNoZ(m->GetPosition(), GetPosition()) < 10) {
+		Message(
+			Chat::Skills,
+			fmt::format(
+				"You have found {}.",
+				m->GetCleanName()
+			).c_str()
+		);
+		TrackingID = 0;
+		return;
+	}
 
-	if (RelativeHeading < 0)
-		RelativeHeading += 512;
+	float relative_heading = GetHeading() - CalculateHeadingToTarget(m->GetX(), m->GetY());
 
-	if (RelativeHeading > 480)
+	if (relative_heading < 0) {
+		relative_heading += 512;
+	}
+
+	if (relative_heading > 480) {
 		MessageString(Chat::Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
-	else if (RelativeHeading > 416)
+	} else if (relative_heading > 416) {
 		MessageString(Chat::Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "left");
-	else if (RelativeHeading > 352)
+	} else if (relative_heading > 352) {
 		MessageString(Chat::Skills, TRACK_TO_THE, m->GetCleanName(), "left");
-	else if (RelativeHeading > 288)
+	} else if (relative_heading > 288) {
 		MessageString(Chat::Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "left");
-	else if (RelativeHeading > 224)
+	} else if (relative_heading > 224) {
 		MessageString(Chat::Skills, TRACK_BEHIND_YOU, m->GetCleanName());
-	else if (RelativeHeading > 160)
+	} else if (relative_heading > 160) {
 		MessageString(Chat::Skills, TRACK_BEHIND_AND_TO, m->GetCleanName(), "right");
-	else if (RelativeHeading > 96)
+	} else if (relative_heading > 96) {
 		MessageString(Chat::Skills, TRACK_TO_THE, m->GetCleanName(), "right");
-	else if (RelativeHeading > 32)
+	} else if (relative_heading > 32) {
 		MessageString(Chat::Skills, TRACK_AHEAD_AND_TO, m->GetCleanName(), "right");
-	else if (RelativeHeading >= 0)
+	} else if (relative_heading >= 0) {
 		MessageString(Chat::Skills, TRACK_STRAIGHT_AHEAD, m->GetCleanName());
+	}
 }
 
 void Client::HandleRespawnFromHover(uint32 Option)
@@ -2038,6 +2053,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
 			{
 				LogSpells("Unexpected Rezz from hover request");
+				safe_delete(default_to_bind);
 				return;
 			}
 			SetHP(GetMaxHP() / 5);

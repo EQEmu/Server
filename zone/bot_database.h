@@ -169,7 +169,10 @@ public:
 
 
 	/* Bot group functions   */
+	bool IsBotGroupAutoSpawn(const std::string& botgroup_name);
+	bool LoadAutoSpawnBotGroupsByOwnerID(const uint32 owner_id, std::list<std::pair<uint32,std::string>>& group_list);
 	bool LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list);
+	bool ToggleBotGroupAutoSpawn(const uint32 group_id);
 
 
 	/* Bot heal rotation functions   */

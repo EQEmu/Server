@@ -22,7 +22,7 @@
 #define EQEMU_LOGIN_WORLD_SERVERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_login_world_servers_repository.h"
 
 class LoginWorldServersRepository: public BaseLoginWorldServersRepository {

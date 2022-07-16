@@ -2130,20 +2130,30 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_SummonPC:
 			{
-				if (!caster)
+				if (!caster) {
 					break;
+				}
+
 				if (IsClient()) {
+					if (caster->IsClient()) {
+						if (!entity_list.IsInSameGroupOrRaidGroup(caster->CastToClient(), CastToClient())) {
+							caster->MessageString(Chat::SpellFailure, TARGET_GROUP_MEMBER);
+							break;
+						}
+
+						// clear aggro when summoned in zone and further than aggro clear distance rule.
+						if (RuleR(Spells, CallOfTheHeroAggroClearDist) == 0 || caster->CalculateDistance(GetX(), GetY(), GetZ()) >= RuleR(Spells, CallOfTheHeroAggroClearDist)) {
+							entity_list.ClearAggro(this);
+						}
+					}
+
 					CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), caster->GetX(),
 							       caster->GetY(), caster->GetZ(), caster->GetHeading(), 2,
 							       SummonPC);
-					Message(Chat::Yellow, "You have been summoned!");
-					// only for beneficial spells like Call of the Hero
-					// This clear probably isn't actually needed, but need to investigate more
-					if (IsBeneficialSpell(spell_id))
-						entity_list.ClearAggro(this);
-				} else
+					MessageString(Chat::Spells, PLAYER_SUMMONED);
+				} else {
 					caster->Message(Chat::Red, "This spell can only be cast on players.");
-
+				}
 				break;
 			}
 
@@ -10321,7 +10331,7 @@ int Mob::GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier)
 		return 0;
 	}
 
-	std::string id = str_tolower(stat_identifier);
+	std::string id = Strings::ToLower(stat_identifier);
 
 	int buff_count = GetMaxTotalSlots();
 	for (int slot = 0; slot < buff_count; slot++) {
@@ -10342,7 +10352,7 @@ int Mob::GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier)
 		return 0;
 	}
 
-	std::string id = str_tolower(stat_identifier);
+	std::string id = Strings::ToLower(stat_identifier);
 
 	if (id == "caster_level") { return buffs[slot].casterlevel; }
 	else if (id == "spell_id") { return buffs[slot].spellid; }

@@ -22,7 +22,7 @@
 #define EQEMU_LDON_TRAP_TEMPLATES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_ldon_trap_templates_repository.h"
 
 class LdonTrapTemplatesRepository: public BaseLdonTrapTemplatesRepository {

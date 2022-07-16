@@ -26,7 +26,7 @@
 #include "../common/crash.h"
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "items.h"
 #include "npc_faction.h"
 #include "loot.h"
@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 					}
 					break;
 				case '-': {
-					auto split = SplitString(argv[i], '=');
+					auto split = Strings::Split(argv[i], '=');
 					if (split.size() >= 2) {
 						auto command  = split[0];
 						auto argument = split[1];

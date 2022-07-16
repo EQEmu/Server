@@ -22,7 +22,7 @@
 #define EQEMU_DAMAGESHIELDTYPES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_damageshieldtypes_repository.h"
 
 class DamageshieldtypesRepository: public BaseDamageshieldtypesRepository {

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ITEM_TICK_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseItemTickRepository {
@@ -58,12 +58,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -176,14 +176,14 @@ public:
 		update_values.push_back(columns[0] + " = " + std::to_string(item_tick_entry.it_itemid));
 		update_values.push_back(columns[1] + " = " + std::to_string(item_tick_entry.it_chance));
 		update_values.push_back(columns[2] + " = " + std::to_string(item_tick_entry.it_level));
-		update_values.push_back(columns[4] + " = '" + EscapeString(item_tick_entry.it_qglobal) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(item_tick_entry.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				item_tick_entry.it_id
 			)
@@ -203,14 +203,14 @@ public:
 		insert_values.push_back(std::to_string(item_tick_entry.it_chance));
 		insert_values.push_back(std::to_string(item_tick_entry.it_level));
 		insert_values.push_back(std::to_string(item_tick_entry.it_id));
-		insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
+		insert_values.push_back("'" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
 		insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -238,10 +238,10 @@ public:
 			insert_values.push_back(std::to_string(item_tick_entry.it_chance));
 			insert_values.push_back(std::to_string(item_tick_entry.it_level));
 			insert_values.push_back(std::to_string(item_tick_entry.it_id));
-			insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
+			insert_values.push_back("'" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
 			insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -250,7 +250,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
