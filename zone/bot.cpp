@@ -398,7 +398,10 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		current_hp = max_hp;
 
 	if(current_hp <= 0) {
-		BuffFadeNonPersistDeath();
+		if (RuleB(Spells, BuffsFadeOnDeath)) {
+			BuffFadeNonPersistDeath();
+		}
+
 		if (RuleB(Bots, ResurrectionSickness)) {
 			int resurrection_sickness_spell_id = (
 				RuleB(Bots, OldRaceRezEffects) &&
@@ -6788,7 +6791,7 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 	if(guildOfficer && !botName.empty()) {
 		Bot* botToUnGuild = entity_list.GetBotByBotName(botName);
 		if(botToUnGuild) {
-			if (database.botdb.SaveGuildMembership(botToUnGuild->GetBotID(), 0, 0))
+			if (database.botdb.DeleteGuildMembership(botToUnGuild->GetBotID()))
 				Result = true;
 		} else {
 			uint32 ownerId = 0;
@@ -6797,7 +6800,7 @@ bool Bot::ProcessGuildRemoval(Client* guildOfficer, std::string botName) {
 			uint32 botId = 0;
 			if (!database.botdb.LoadBotID(ownerId, botName, botId))
 				guildOfficer->Message(Chat::Red, "%s for '%s'", BotDatabase::fail::LoadBotID(), botName.c_str());
-			if (botId && database.botdb.SaveGuildMembership(botId, 0, 0))
+			if (botId && database.botdb.DeleteGuildMembership(botId))
 				Result = true;
 		}
 

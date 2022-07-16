@@ -482,22 +482,22 @@ bool Lua_Mob::IsWarriorClass() {
 	return self->IsWarriorClass();
 }
 
-int Lua_Mob::GetHP() {
+int64 Lua_Mob::GetHP() {
 	Lua_Safe_Call_Int();
 	return self->GetHP();
 }
 
-int Lua_Mob::GetMaxHP() {
+int64 Lua_Mob::GetMaxHP() {
 	Lua_Safe_Call_Int();
 	return self->GetMaxHP();
 }
 
-int Lua_Mob::GetItemHPBonuses() {
+int64 Lua_Mob::GetItemHPBonuses() {
 	Lua_Safe_Call_Int();
 	return self->GetItemHPBonuses();
 }
 
-int Lua_Mob::GetSpellHPBonuses() {
+int64 Lua_Mob::GetSpellHPBonuses() {
 	Lua_Safe_Call_Int();
 	return self->GetSpellHPBonuses();
 }
@@ -1356,9 +1356,9 @@ bool Lua_Mob::DivineAura() {
 	return self->DivineAura();
 }
 
-void Lua_Mob::SetOOCRegen(int regen) {
+void Lua_Mob::SetOOCRegen(int64 new_ooc_regen) {
 	Lua_Safe_Call_Void();
-	self->SetOOCRegen(regen);
+	self->SetOOCRegen(new_ooc_regen);
 }
 
 const char* Lua_Mob::GetEntityVariable(const char *name) {
@@ -2860,7 +2860,7 @@ luabind::scope lua_register_mob() {
 	.def("SetLevel", (void(Lua_Mob::*)(int))&Lua_Mob::SetLevel)
 	.def("SetLevel", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetLevel)
 	.def("SetMana", &Lua_Mob::SetMana)
-	.def("SetOOCRegen", (void(Lua_Mob::*)(int))&Lua_Mob::SetOOCRegen)
+	.def("SetOOCRegen", (void(Lua_Mob::*)(int64))&Lua_Mob::SetOOCRegen)
 	.def("SetPet", &Lua_Mob::SetPet)
 	.def("SetPetOrder", (void(Lua_Mob::*)(int))&Lua_Mob::SetPetOrder)
 	.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)

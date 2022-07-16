@@ -130,6 +130,7 @@ namespace Logs {
 		ChecksumVerification,
 		CombatRecord,
 		Hate,
+		Discord,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -218,12 +219,15 @@ namespace Logs {
 		"ChecksumVerification",
 		"CombatRecord",
 		"Hate",
+		"Discord",
 	};
 }
 
 #include "eqemu_logsys_log_aliases.h"
 
 class Database;
+
+constexpr uint16 MAX_DISCORD_WEBHOOK_ID = 300;
 
 class EQEmuLogSys {
 public:
@@ -287,8 +291,18 @@ public:
 		uint8 log_to_file;
 		uint8 log_to_console;
 		uint8 log_to_gmsay;
+		uint8 log_to_discord;
+		int   discord_webhook_id;
 		uint8 is_category_enabled; /* When any log output in a category > 0, set this to 1 as (Enabled) */
 	};
+
+	struct OriginationInfo {
+		std::string zone_short_name;
+		std::string zone_long_name;
+		int         instance_id;
+	};
+
+	OriginationInfo origination_info{};
 
 	/**
 	 * Internally used memory reference for all log settings per category
@@ -297,24 +311,38 @@ public:
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
+	struct DiscordWebhooks {
+		int         id;
+		std::string webhook_name;
+		std::string webhook_url;
+	};
+
+	DiscordWebhooks discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
+
 	bool file_logs_enabled = false;
 
-	int                                                                               log_platform = 0;
-	std::string                                                                       platform_file_name;
+	int         log_platform = 0;
+	std::string platform_file_name;
 
 
 	// gmsay
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	EQEmuLogSys * SetGMSayHandler(std::function<void(uint16 log_type, const std::string &)> f) {
+	EQEmuLogSys *SetGMSayHandler(std::function<void(uint16 log_type, const std::string &)> f)
+	{
 		on_log_gmsay_hook = f;
+		return this;
+	}
+
+	EQEmuLogSys *SetDiscordHandler(std::function<void(uint16 log_category, int webhook_id, const std::string &)> f)
+	{
+		on_log_discord_hook = f;
 		return this;
 	}
 
 	// console
 	void SetConsoleHandler(
 		std::function<void(
-			uint16 debug_level,
 			uint16 log_type,
 			const std::string &
 		)> f
@@ -328,18 +356,17 @@ public:
 private:
 
 	// reference to database
-	Database *m_database;
-
-	std::function<void(uint16 log_category, const std::string &)>                     on_log_gmsay_hook;
-	std::function<void(uint16 debug_level, uint16 log_category, const std::string &)> on_log_console_hook;
+	Database                                                                      *m_database;
+	std::function<void(uint16 log_category, const std::string &)>                 on_log_gmsay_hook;
+	std::function<void(uint16 log_category, int webhook_id, const std::string &)> on_log_discord_hook;
+	std::function<void(uint16 log_category, const std::string &)>                 on_log_console_hook;
 
 	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message);
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 
-	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message);
-	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message);
-	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
+	void ProcessConsoleMessage(uint16 log_category, const std::string &message);
+	void ProcessLogWrite(uint16 log_category, const std::string &message);
 	bool IsRfc5424LogCategory(uint16 log_category);
 };
 

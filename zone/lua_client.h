@@ -118,7 +118,7 @@ public:
 	void MoveZoneInstance(uint16 instance_id);
 	void MoveZoneInstanceGroup(uint16 instance_id);
 	void MoveZoneInstanceRaid(uint16 instance_id);
-	void ChangeLastName(const char *in);
+	void ChangeLastName(std::string last_name);
 	int GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc);
 	void SetFactionLevel(uint32 char_id, uint32 npc_id, int char_class, int char_race, int char_deity);
 	void SetFactionLevel2(uint32 char_id, int faction_id, int char_class, int char_race, int char_deity, int value, int temp);
@@ -265,7 +265,8 @@ public:
 	void LoadPEQZoneFlags();
 	void SendPEQZoneFlagInfo(Lua_Client to);
 	void SetPEQZoneFlag(uint32 zone_id);
-	void SetAATitle(const char *title);
+	void SetAATitle(std::string title);
+	void SetAATitle(std::string title, bool save_to_database);
 	int GetClientVersion();
 	uint32 GetClientVersionBit();
 	void SetTitleSuffix(const char *text);
@@ -422,8 +423,8 @@ public:
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 	void TaskSelector(luabind::adl::object table);
 
-	void SetClientMaxLevel(int value);
-	int GetClientMaxLevel();
+	void SetClientMaxLevel(uint8 max_level);
+	uint8 GetClientMaxLevel();
 
 	void DialogueWindow(std::string markdown);
 

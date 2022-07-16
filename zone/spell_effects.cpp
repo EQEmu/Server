@@ -6497,7 +6497,7 @@ int64 Client::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool 
 			default:
 				break;
 			}
-			MessageString(Chat::Spells, string_id, UsedItem->Name);
+			MessageString(Chat::FocusEffect, string_id, UsedItem->Name);
 		}
 	}
 
@@ -10214,8 +10214,17 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 	}
 
 	if (buffslot != -1) {
-		if (caster == this && spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE &&
-			(spellbonuses.IllusionPersistence || aabonuses.IllusionPersistence || itembonuses.IllusionPersistence)) {
+		if (
+			caster == this &&
+			spell_id != SPELL_MINOR_ILLUSION &&
+			spell_id != SPELL_ILLUSION_TREE &&
+			(
+				spellbonuses.IllusionPersistence ||
+				aabonuses.IllusionPersistence ||
+				itembonuses.IllusionPersistence ||
+				RuleB(Spells, IllusionsAlwaysPersist)
+			)
+		) {
 			buffs[buffslot].persistant_buff = 1;
 		}
 		else {
@@ -10225,9 +10234,18 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 }
 
 bool Mob::HasPersistDeathIllusion(int32 spell_id) {
-
-	if (spellbonuses.IllusionPersistence > 1 || aabonuses.IllusionPersistence > 1  || itembonuses.IllusionPersistence > 1) {
-		if (spell_id != SPELL_MINOR_ILLUSION && spell_id != SPELL_ILLUSION_TREE && IsEffectInSpell(spell_id, SE_Illusion) && IsBeneficialSpell(spell_id)) {
+	if (
+		spellbonuses.IllusionPersistence > 1 ||
+		aabonuses.IllusionPersistence > 1  ||
+		itembonuses.IllusionPersistence > 1 ||
+		RuleB(Spells, IllusionsAlwaysPersist)
+	) {
+		if (
+			spell_id != SPELL_MINOR_ILLUSION &&
+			spell_id != SPELL_ILLUSION_TREE &&
+			IsEffectInSpell(spell_id, SE_Illusion) &&
+			IsBeneficialSpell(spell_id)
+		) {
 			return true;
 		}
 	}

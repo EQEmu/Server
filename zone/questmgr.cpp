@@ -37,6 +37,7 @@
 #include "zonedb.h"
 #include "zone_store.h"
 #include "dialogue_window.h"
+#include "string_ids.h"
 
 #include <iostream>
 #include <limits.h>
@@ -1111,20 +1112,18 @@ void QuestManager::rename(std::string name) {
 	}
 }
 
-void QuestManager::surname(const char *name) {
+void QuestManager::surname(std::string last_name) {
 	QuestManagerCurrentQuestVars();
 	//Changes the last name.
-	if(initiator)
-	{
-		if(initiator->IsClient())
-		{
-			initiator->ChangeLastName(name);
-			initiator->Message(Chat::Yellow,"Your surname has been changed/set to: %s", name);
-		}
-		else
-		{
-			initiator->Message(Chat::Yellow,"Error changing/setting surname");
-		}
+	if (initiator && initiator->IsClient()) {
+		initiator->ChangeLastName(last_name);
+		initiator->Message(
+			Chat::White,
+			fmt::format(
+				"Your last name has been set to \"{}\".",
+				last_name
+			).c_str()
+		);
 	}
 }
 
@@ -1172,52 +1171,38 @@ void QuestManager::untraindiscs() {
 	initiator->UntrainDiscAll();
 }
 
-void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
+void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient() && ((copper + silver + gold + platinum) > 0))
-	{
-		initiator->AddMoneyToPP(copper, silver, gold, platinum, true);
+	if (
+		initiator &&
+		initiator->IsClient() &&
+		(
+			copper ||
+			silver ||
+			gold ||
+			platinum
+		)
+	) {
+		initiator->AddMoneyToPP(
+			copper,
+			silver,
+			gold,
+			platinum,
+			true
+		);
 
-		std::string tmp;
-		if (platinum > 0)
-		{
-			tmp = "You receive ";
-			tmp += itoa(platinum);
-			tmp += " platinum";
+		if (initiator) {
+			initiator->MessageString(
+				Chat::MoneySplit,
+				YOU_RECEIVE,
+				ConvertMoneyToString(
+					platinum,
+					gold,
+					silver,
+					copper
+				).c_str()
+			);
 		}
-		if (gold > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
-
-			tmp += itoa(gold);
-			tmp += " gold";
-		}
-		if(silver > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
-
-			tmp += itoa(silver);
-			tmp += " silver";
-		}
-		if(copper > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
-
-			tmp += itoa(copper);
-			tmp += " copper";
-		}
-		tmp += " pieces.";
-		if (initiator)
-			initiator->Message(Chat::OOC, tmp.c_str());
 	}
 }
 

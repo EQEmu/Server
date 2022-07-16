@@ -36,6 +36,7 @@
 #include "../common/memory_mapped_file.h"
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/misc.h"
 
 #include "api_service.h"
 #include "zone_config.h"
@@ -514,7 +515,7 @@ int main(int argc, char** argv) {
 
 			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
 				stream_identifier.AddStream(stream);
-				LogF(Logs::Detail, Logs::WorldServer, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
+				LogInfo("New connection from IP {}:{}", long2ip(stream->GetRemoteIP()), ntohs(stream->GetRemotePort()));
 			});
 		}
 

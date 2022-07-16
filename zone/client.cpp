@@ -282,11 +282,9 @@ Client::Client(EQStreamInterface* ieqs)
 	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
 		SetClientMaxLevel(0);
 	} else if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
-		int client_max_level = GetCharMaxLevelFromQGlobal();
-		SetClientMaxLevel(client_max_level);
+		SetClientMaxLevel(GetCharMaxLevelFromQGlobal());
 	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
-		int client_max_level = GetCharMaxLevelFromBucket();
-		SetClientMaxLevel(client_max_level);
+		SetClientMaxLevel(GetCharMaxLevelFromBucket());
 	}
 
 	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
@@ -1293,7 +1291,7 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 
 	if (senderCanTrainSelf || weAreNotSender) {
 		if ((chan_num == ChatChannel_Group) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
-			if (m_pp.languages[language] <= lang_skill)
+			if (language < MAX_PP_LANGUAGE && m_pp.languages[language] <= lang_skill)
 				CheckLanguageSkillIncrease(language, lang_skill);
 		}
 	}
@@ -2020,20 +2018,22 @@ void Client::Sit() {
     SetAppearance(eaSitting, false);
 }
 
-void Client::ChangeLastName(const char* in_lastname) {
+void Client::ChangeLastName(std::string last_name) {
 	memset(m_pp.last_name, 0, sizeof(m_pp.last_name));
-	strn0cpy(m_pp.last_name, in_lastname, sizeof(m_pp.last_name));
+	strn0cpy(m_pp.last_name, last_name.c_str(), sizeof(m_pp.last_name));
 	auto outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
-	GMLastName_Struct* gmn = (GMLastName_Struct*)outapp->pBuffer;
-	strcpy(gmn->name, name);
-	strcpy(gmn->gmname, name);
-	strcpy(gmn->lastname, in_lastname);
-	gmn->unknown[0]=1;
-	gmn->unknown[1]=1;
-	gmn->unknown[2]=1;
-	gmn->unknown[3]=1;
+	auto gmn = (GMLastName_Struct*) outapp->pBuffer;
+	strn0cpy(gmn->name, name, sizeof(gmn->name));
+	strn0cpy(gmn->gmname, name, sizeof(gmn->gmname));
+	strn0cpy(gmn->lastname, last_name.c_str(), sizeof(gmn->lastname));
+
+	gmn->unknown[0] = 1;
+	gmn->unknown[1] = 1;
+	gmn->unknown[2] = 1;
+	gmn->unknown[3] = 1;
+
 	entity_list.QueueClients(this, outapp, false);
-	// Send name update packet here... once know what it is
+
 	safe_delete(outapp);
 }
 
@@ -5531,7 +5531,6 @@ bool Client::TryReward(uint32 claim_id)
 	if (free_slot == 0xFFFFFFFF)
 		return false;
 
-	char errbuf[MYSQL_ERRMSG_SIZE];
 	std::string query = StringFormat("SELECT amount FROM account_rewards "
 					 "WHERE account_id = %i AND reward_id = %i",
 					 AccountID(), claim_id);
@@ -6520,8 +6519,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	npc_type = made_npc;
 
-	int summon_count = 0;
-	summon_count = pet.count;
+	int summon_count = pet.count;
 
 	if(summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
@@ -6542,7 +6540,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		NPC* swarm_pet_npc = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
-				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
+				GetPosition() + glm::vec4(swarmPetLocations[summon_count - 1], 0.0f, 0.0f),
 				GravityBehavior::Water);
 
 		if(!swarm_pet_npc->GetSwarmInfo()){
@@ -7997,7 +7995,6 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 
 	for (int i = 0; i < MAX_NPC_FACTIONS; i++) {
 		int32 faction_before_hit;
-		int32 faction_to_use_for_messaging;
 		FactionMods fm;
 		int32 this_faction_max;
 		int32 this_faction_min;
@@ -10293,40 +10290,45 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 }
 
 std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_level) {
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
 	std::vector<int> learnable_disciplines;
-	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
 		bool learnable = false;
-		if (!IsValidSpell(spell_id))
+		if (!IsValidSpell(spell_id)) {
 			continue;
-		if (!IsDiscipline(spell_id))
-			continue;
-		if (spells[spell_id].classes[WARRIOR] == 0)
-			continue;
-		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
-			continue;
-		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
-			continue;
-		if (spells[spell_id].skill == 52)
-			continue;
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == 10)
-			continue;
-		if (HasDisciplineLearned(spell_id))
-			continue;
+		}
 
-		if (SpellGlobalRule) {
-			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
-			if (SpellGlobalCheckResult) {
-				learnable = true;
-			}
-		} else if (SpellBucketRule) {
-			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
-			if (SpellBucketCheckResult) {
-				learnable = true;
-			}
+		if (!IsDiscipline(spell_id)) {
+			continue;
+		}
+
+		if (spells[spell_id].classes[WARRIOR] == 0) {
+			continue;
+		}
+
+		if (max_level && spells[spell_id].classes[m_pp.class_ - 1] > max_level) {
+			continue;
+		}
+
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level) {
+			continue;
+		}
+
+		if (spells[spell_id].skill == EQ::skills::SkillTigerClaw) {
+			continue;
+		}
+
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SE_CHA) {
+			continue;
+		}
+
+		if (HasDisciplineLearned(spell_id)) {
+			continue;
+		}
+
+		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
+			learnable = true;
+		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
+			learnable = true;
 		} else {
 			learnable = true;
 		}
@@ -10359,40 +10361,45 @@ std::vector<int> Client::GetMemmedSpells() {
 }
 
 std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
 	std::vector<int> scribeable_spells;
-	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
 		bool scribeable = false;
-		if (!IsValidSpell(spell_id))
+		if (!IsValidSpell(spell_id)) {
 			continue;
-		if (IsDiscipline(spell_id))
-			continue;
-		if (spells[spell_id].classes[WARRIOR] == 0)
-			continue;
-		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
-			continue;
-		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
-			continue;
-		if (spells[spell_id].skill == 52)
-			continue;
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == 10)
-			continue;
-		if (HasSpellScribed(spell_id))
-			continue;
+		}
 
-		if (SpellGlobalRule) {
-			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
-			if (SpellGlobalCheckResult) {
-				scribeable = true;
-			}
-		} else if (SpellBucketRule) {
-			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
-			if (SpellBucketCheckResult) {
-				scribeable = true;
-			}
+		if (IsDiscipline(spell_id)) {
+			continue;
+		}
+
+		if (spells[spell_id].classes[WARRIOR] == 0) {
+			continue;
+		}
+
+		if (max_level && spells[spell_id].classes[m_pp.class_ - 1] > max_level) {
+			continue;
+		}
+
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level) {
+			continue;
+		}
+
+		if (spells[spell_id].skill == EQ::skills::SkillTigerClaw) {
+			continue;
+		}
+
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == SE_CHA) {
+			continue;
+		}
+
+		if (HasSpellScribed(spell_id)) {
+			continue;
+		}
+
+		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
+			scribeable = true;
+		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
+			scribeable = true;
 		} else {
 			scribeable = true;
 		}
@@ -11727,4 +11734,22 @@ std::map<std::string,std::string> Client::GetMerchantDataBuckets()
 	}
 
 	return merchant_data_buckets;
+}
+
+void Client::Undye()
+{
+	for (uint8 slot = EQ::textures::textureBegin; slot <= EQ::textures::LastTexture; slot++) {
+		auto inventory_slot = SlotConvert(slot);
+		auto inst = m_inv.GetItem(inventory_slot);
+
+		if (inst) {
+			inst->SetColor(inst->GetItem()->Color);
+			database.SaveInventory(CharacterID(), inst, inventory_slot);
+		}
+
+		m_pp.item_tint.Slot[slot].Color = 0;
+		SendWearChange(slot);
+	}
+
+	database.DeleteCharacterDye(CharacterID());
 }

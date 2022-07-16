@@ -1163,9 +1163,9 @@ XS(XS_Client_ChangeLastName) {
 		Perl_croak(aTHX_ "Usage: Client::ChangeLastName(THIS, string last_name)"); // @categories Account and Character
 	{
 		Client *THIS;
-		char   *in_lastname = (char *) SvPV_nolen(ST(1));
+		std::string last_name = (std::string) SvPV_nolen(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->ChangeLastName(in_lastname);
+		THIS->ChangeLastName(last_name);
 	}
 	XSRETURN_EMPTY;
 }
@@ -2965,23 +2965,27 @@ XS(XS_Client_LoadZoneFlags) {
 XS(XS_Client_SetAATitle); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetAATitle) {
 	dXSARGS;
-	if ((items < 2) || (items > 3))
+	if (items < 2 || items > 3)
 		Perl_croak(aTHX_ "Usage: Client::SetAATitle(THIS, string text, [bool save = false])"); // @categories Alternative Advancement
 	{
 		Client *THIS;
-		char   *txt = (char *) SvPV_nolen(ST(1));
-		bool SaveTitle = false;
+		std::string title = (std::string) SvPV_nolen(ST(1));
+		bool save = false;
 		VALIDATE_THIS_IS_CLIENT;
-		if (strlen(txt) > 31)
-			Perl_croak(aTHX_ "Title must be 31 characters or less");
 
-		if (items == 3)
-			SaveTitle = (SvIV(ST(2)) != 0);
+		if (title.size() > 31) {
+			Perl_croak(aTHX_ "Title must be 31 characters or less.");
+		}
 
-		if (!SaveTitle)
-			THIS->SetAATitle(txt);
-		else
-			title_manager.CreateNewPlayerTitle(THIS, txt);
+		if (items == 3) {
+			save = (bool) SvTRUE(ST(2));
+		}
+
+		if (!save) {
+			THIS->SetAATitle(title);
+		} else {
+			title_manager.CreateNewPlayerTitle(THIS, title);
+		}
 	}
 	XSRETURN_EMPTY;
 }
@@ -3023,23 +3027,27 @@ XS(XS_Client_GetClientVersionBit) {
 XS(XS_Client_SetTitleSuffix);
 XS(XS_Client_SetTitleSuffix) {
 	dXSARGS;
-	if ((items < 2) || (items > 3))
-		Perl_croak(aTHX_ "Usage: Client::SetTitleSuffix(THIS, string text, [bool save = false])"); // @categories Account and Character
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::SetTitleSuffix(THIS, string suffix, [bool save = false])"); // @categories Account and Character
 	{
 		Client *THIS;
-		char   *txt = (char *) SvPV_nolen(ST(1));
-		bool SaveSuffix = false;
+		std::string suffix = (std::string) SvPV_nolen(ST(1));
+		bool save = false;
 		VALIDATE_THIS_IS_CLIENT;
-		if (strlen(txt) > 31)
-			Perl_croak(aTHX_ "Title must be 31 characters or less");
 
-		if (items == 3)
-			SaveSuffix = (SvIV(ST(2)) != 0);
+		if (suffix.size() > 31) {
+			Perl_croak(aTHX_ "Suffix must be 31 characters or less.");
+		}
 
-		if (!SaveSuffix)
-			THIS->SetTitleSuffix(txt);
-		else
-			title_manager.CreateNewPlayerSuffix(THIS, txt);
+		if (items == 3) {
+			save = (bool) SvTRUE(ST(2));
+		}
+
+		if (!save) {
+			THIS->SetTitleSuffix(suffix);
+		} else {
+			title_manager.CreateNewPlayerSuffix(THIS, suffix);
+		}
 	}
 	XSRETURN_EMPTY;
 }
@@ -4751,12 +4759,12 @@ XS(XS_Client_SetClientMaxLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetClientMaxLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetClientMaxLevel(THIS, int in_level)");
+		Perl_croak(aTHX_ "Usage: Client::SetClientMaxLevel(THIS, uint8 max_level)");
 	{
 		Client* THIS;
-		int in_level = (int)SvUV(ST(1));
+		uint8 max_level = (uint8) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetClientMaxLevel(in_level);
+		THIS->SetClientMaxLevel(max_level);
 	}
 	XSRETURN_EMPTY;
 }
@@ -4768,7 +4776,7 @@ XS(XS_Client_GetClientMaxLevel) {
 		Perl_croak(aTHX_ "Usage: Client::GetClientMaxLevel(THIS)");
 	{
 		Client* THIS;
-		int RETVAL;
+		uint8 RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetClientMaxLevel();

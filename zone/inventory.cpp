@@ -170,7 +170,7 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 	if (!item->LoreFlag) { return false; }
 	if (item->LoreGroup == 0) { return false; }
 
-	if (item->LoreGroup == 0xFFFFFFFF) // Standard lore items; look everywhere except the shared bank, return the result
+	if (item->LoreGroup == -1) // Standard lore items; look everywhere except the shared bank, return the result
 		return (m_inv.HasItem(item->ID, 0, ~invWhereSharedBank) != INVALID_INDEX);
 
 	// If the item has a lore group, we check for other items with the same group and return the result
@@ -1072,7 +1072,7 @@ void Client::SendCursorBuffer()
 	if (test_item == nullptr) { return; }
 
 	bool lore_pass = true;
-	if (test_item->LoreGroup == 0xFFFFFFFF) {
+	if (test_item->LoreGroup == -1) {
 		lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
 	}
 	else if (test_item->LoreGroup != 0) {
@@ -1799,7 +1799,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (!test_item->LoreFlag) { return true; }
 
 			bool lore_pass = true;
-			if (test_item->LoreGroup == 0xFFFFFFFF) {
+			if (test_item->LoreGroup == -1) {
 				lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
 			}
 			else if (test_item->LoreGroup != 0) {

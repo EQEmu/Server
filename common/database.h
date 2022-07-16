@@ -88,7 +88,6 @@ public:
 
 	/* Character Creation */
 
-	bool AddToNameFilter(const char *name);
 	bool CreateCharacter(
 		uint32 account_id,
 		char *name,
@@ -122,16 +121,17 @@ public:
 	/* General Information Queries */
 
 	bool	AddBannedIP(std::string banned_ip, std::string notes); //Add IP address to the banned_ips table.
+	bool	AddToNameFilter(std::string name);
 	bool	CheckBannedIPs(std::string login_ip); //Check incoming connection against banned IP table.
 	bool	CheckGMIPs(std::string login_ip, uint32 account_id);
-	bool	CheckNameFilter(const char* name, bool surname = false);
-	bool	CheckUsedName(const char* name);
+	bool	CheckNameFilter(std::string name, bool surname = false);
+	bool	CheckUsedName(std::string name);
 
 	uint32	GetAccountIDByChar(const char* charname, uint32* oCharID = 0);
 	uint32	GetAccountIDByChar(uint32 char_id);
 	uint32	GetAccountIDByName(std::string account_name, std::string loginserver, int16* status = 0, uint32* lsid = 0);
 	uint32	GetCharacterID(const char *name);
-	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0, float* oX = 0, float* oY = 0, float* oZ = 0);
+	uint32	GetCharacterInfo(std::string character_name, uint32 *account_id, uint32 *zone_id, uint32 *instance_id);
 	uint32	GetGuildIDByCharID(uint32 char_id);
 	uint32  GetGroupIDByCharID(uint32 char_id);
 	uint32  GetRaidIDByCharID(uint32 char_id);
@@ -207,8 +207,8 @@ public:
 
 	/* Groups */
 
-	char*	GetGroupLeaderForLogin(const char* name,char* leaderbuf);
-	char*	GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
+	std::string GetGroupLeaderForLogin(std::string character_name);
+	char* GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
 
 	uint32	GetGroupID(const char* name);
 
@@ -251,9 +251,8 @@ public:
 	bool	GetZoneLongName(const char* short_name, char** long_name, char* file_name = 0, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, uint32* graveyard_id = 0, uint32* maxclients = 0);
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
 
-	uint32	GetZoneGraveyardID(uint32 zone_id, uint32 version);
-
 	uint8	GetPEQZone(uint32 zone_id, uint32 version);
+	uint8	GetMinStatus(uint32 zone_id, uint32 instance_version);
 	uint8	GetRaceSkill(uint8 skillid, uint8 in_race);
 	uint8	GetServerType();
 	uint8	GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level);

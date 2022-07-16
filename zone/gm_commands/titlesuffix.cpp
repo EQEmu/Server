@@ -7,14 +7,13 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 	if (!arguments) {
 		c->Message(
 			Chat::White,
-			"Usage: #titlesuffix [Remove|Title] [Save (0 = False, 1 = True)]"
+			"Usage: #titlesuffix [Title Suffix] (use \"-1\" to remove title suffix)"
 		);
 		return;
 	}
 	
-	bool is_remove = !strcasecmp(sep->arg[1], "remove");
-	std::string suffix = is_remove ? "" : sep->arg[1];
-	bool save_suffix = sep->IsNumber(2) ? atobool(sep->arg[2]) : false;
+	bool is_remove = !strcasecmp(sep->argplus[1], "-1");
+	std::string suffix = is_remove ? "" : sep->argplus[1];
 		
 	auto target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
@@ -30,10 +29,10 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 		find_replace(suffix, "_", " ");
 	}
 
-	if (!save_suffix || is_remove) {
-		target->SetTitleSuffix(suffix.c_str());
-	} else if (save_suffix) {
-		title_manager.CreateNewPlayerSuffix(target, suffix.c_str());
+	if (is_remove) {
+		target->SetTitleSuffix(suffix);
+	} else {
+		title_manager.CreateNewPlayerSuffix(target, suffix);
 	}
 
 	target->Save();
@@ -43,7 +42,7 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 		fmt::format(
 			"Title suffix has been {}{} for {}{}",
 			is_remove ? "removed" : "changed",
-			!is_remove && save_suffix ? " and saved" : "",
+			!is_remove ? " and saved" : "",
 			c->GetTargetDescription(target),
 			(
 				is_remove ?
