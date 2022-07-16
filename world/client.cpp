@@ -156,7 +156,7 @@ void Client::SendLogServer()
 	if(RuleB(World, IsGMPetitionWindowEnabled))
 		l->enable_petition_wnd = 1;
 
-	if(RuleI(World, FVNoDropFlag) == 1 || (RuleI(World, FVNoDropFlag) == 2 && GetAdmin() >= RuleI(Character, MinStatusForNoDropExemptions)))
+	if(EQ::inventory::CanTradeNoDropItem(GetAdmin()))
 		l->enable_FV = 1;
 
 	QueuePacket(outapp);

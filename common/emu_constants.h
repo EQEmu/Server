@@ -34,6 +34,8 @@ namespace EQ
 	using RoF2::INULL;
 	
 	namespace inventory {
+
+		bool CanTradeNoDropItem(int16 admin_status);
 		
 	} /*inventory*/
 

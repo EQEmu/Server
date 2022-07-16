@@ -18,9 +18,12 @@
 */
 
 #include "emu_constants.h"
-#include "languages.h"
-#include "data_verification.h"
 #include "bodytypes.h"
+#include "data_verification.h"
+#include "eqemu_logsys.h"
+#include "eqemu_logsys_log_aliases.h"
+#include "languages.h"
+#include "rulesys.h"
 
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
 	static const int16 local_array[] = {
@@ -431,4 +434,18 @@ std::string EQ::constants::GetSpawnAnimationName(uint8 animation_id)
 	}
 
 	return std::string();
+}
+
+bool EQ::inventory::CanTradeNoDropItem(const int16 admin_status)
+{
+	const int no_drop_flag = RuleI(World, FVNoDropFlag);
+	const int no_drop_min_admin_status = RuleI(Character, MinStatusForNoDropExemptions);
+	switch (no_drop_flag) {
+	case FVNoDropFlagRule::Disabled: return false;
+	case FVNoDropFlagRule::Enabled: return true;
+	case FVNoDropFlagRule::AdminOnly: return admin_status >= no_drop_min_admin_status;
+	default:
+		LogWarning("Invalid value {0} set for FVNoDropFlag", no_drop_flag);
+		return false;
+	}
 }
