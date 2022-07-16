@@ -24,6 +24,7 @@ public:
 		int slot;
 		int type;
 		int acceptedtime;
+		int was_rewarded;
 	};
 
 	static std::string PrimaryKey()
@@ -39,6 +40,7 @@ public:
 			"slot",
 			"type",
 			"acceptedtime",
+			"was_rewarded",
 		};
 	}
 
@@ -50,6 +52,7 @@ public:
 			"slot",
 			"type",
 			"acceptedtime",
+			"was_rewarded",
 		};
 	}
 
@@ -95,6 +98,7 @@ public:
 		entry.slot         = 0;
 		entry.type         = 0;
 		entry.acceptedtime = 0;
+		entry.was_rewarded = 0;
 
 		return entry;
 	}
@@ -135,6 +139,7 @@ public:
 			entry.slot         = atoi(row[2]);
 			entry.type         = atoi(row[3]);
 			entry.acceptedtime = atoi(row[4]);
+			entry.was_rewarded = atoi(row[5]);
 
 			return entry;
 		}
@@ -173,6 +178,7 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_entry.slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_entry.type));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_entry.acceptedtime));
+		update_values.push_back(columns[5] + " = " + std::to_string(character_tasks_entry.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -199,6 +205,7 @@ public:
 		insert_values.push_back(std::to_string(character_tasks_entry.slot));
 		insert_values.push_back(std::to_string(character_tasks_entry.type));
 		insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
+		insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -233,6 +240,7 @@ public:
 			insert_values.push_back(std::to_string(character_tasks_entry.slot));
 			insert_values.push_back(std::to_string(character_tasks_entry.type));
 			insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
+			insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -271,6 +279,7 @@ public:
 			entry.slot         = atoi(row[2]);
 			entry.type         = atoi(row[3]);
 			entry.acceptedtime = atoi(row[4]);
+			entry.was_rewarded = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
@@ -300,6 +309,7 @@ public:
 			entry.slot         = atoi(row[2]);
 			entry.type         = atoi(row[3]);
 			entry.acceptedtime = atoi(row[4]);
+			entry.was_rewarded = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
