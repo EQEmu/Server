@@ -3,6 +3,7 @@
 
 #include "../common/database.h"
 #include "../common/shared_tasks.h"
+#include "../common/repositories/character_task_timers_repository.h"
 
 class DynamicZone;
 
@@ -113,6 +114,9 @@ protected:
 
 	// store a reference of active invitations that have been sent to players
 	std::vector<SharedTaskActiveInvitation> m_active_invitations{};
+
+	std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> GetCharacterTimers(
+		const std::vector<uint32_t>& character_ids, const TasksRepository::Tasks& task);
 
 	void AddReplayTimers(SharedTask *s);
 	bool CanAddPlayer(SharedTask *s, uint32_t character_id, std::string player_name, bool accepted);

@@ -2327,8 +2327,19 @@ void ClientTaskState::AcceptNewTask(
 	if (task->type != TaskType::Shared)
 	{
 		auto task_timers = CharacterTaskTimersRepository::GetWhere(database, fmt::format(
-			"character_id = {} AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
-			client->CharacterID(), task_id
+			SQL(
+				character_id = {}
+				AND (task_id = {}
+					OR (timer_group > 0 AND timer_type = {} AND timer_group = {})
+					OR (timer_group > 0 AND timer_type = {} AND timer_group = {}))
+				AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1
+			),
+			client->CharacterID(),
+			task_id,
+			static_cast<int>(TaskTimerType::Replay),
+			task->replay_timer_group,
+			static_cast<int>(TaskTimerType::Request),
+			task->request_timer_group
 		));
 
 		if (!task_timers.empty())
@@ -2426,6 +2437,7 @@ void ClientTaskState::AcceptNewTask(
 				timer.character_id = client->CharacterID();
 				timer.task_id      = task_id;
 				timer.timer_type   = static_cast<int>(TaskTimerType::Request);
+				timer.timer_group  = task->request_timer_group;
 				timer.expire_time  = expire_time;
 
 				CharacterTaskTimersRepository::InsertOne(database, timer);
@@ -2639,13 +2651,17 @@ void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& clie
 		auto timer = CharacterTaskTimersRepository::NewEntity();
 		timer.character_id = client->CharacterID();
 		timer.task_id      = client_task.task_id;
-		timer.expire_time  = expire_time;
 		timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+		timer.timer_group  = task.replay_timer_group;
+		timer.expire_time  = expire_time;
 
 		// replace any existing replay timer
 		CharacterTaskTimersRepository::DeleteWhere(database, fmt::format(
-			"task_id = {} AND timer_type = {} AND character_id = {}",
-			client_task.task_id, static_cast<int>(TaskTimerType::Replay), client->CharacterID()));
+			"(task_id = {} OR (timer_group > 0 AND timer_group = {})) AND timer_type = {} AND character_id = {}",
+			client_task.task_id,
+			task.replay_timer_group,
+			static_cast<int>(TaskTimerType::Replay),
+			client->CharacterID()));
 
 		CharacterTaskTimersRepository::InsertOne(database, timer);
 
