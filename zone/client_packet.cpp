@@ -4504,10 +4504,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		rewind_timer.Start(30000, true);
 	}
-
-
+	
 	is_client_moving = !(cy == m_Position.y && cx == m_Position.x);
-
+	moving = is_client_moving;
 
 	/**
 	 * Client aggro scanning
