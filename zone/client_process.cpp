@@ -124,7 +124,7 @@ bool Client::Process() {
 		}
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
-		if (!is_client_moving && position_update_timer.Check()) {
+		if (!moving && position_update_timer.Check()) {
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		}
 
@@ -291,7 +291,7 @@ bool Client::Process() {
 		 * Used in aggro checks
 		 */
 		if (mob_close_scan_timer.Check()) {
-			entity_list.ScanCloseMobs(close_mobs, this, is_client_moving);
+			entity_list.ScanCloseMobs(close_mobs, this, moving);
 		}
 
 		bool may_use_attacks = false;
