@@ -23,7 +23,7 @@
 //#include "races.h"
 #include "rulesys.h"
 #include "shareddb.h"
-#include "string_util.h"
+#include "strings.h"
 
 //#include "../common/light_source.h"
 

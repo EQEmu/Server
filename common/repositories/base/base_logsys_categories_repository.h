@@ -13,7 +13,7 @@
 #define EQEMU_BASE_LOGSYS_CATEGORIES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseLogsysCategoriesRepository {
@@ -61,12 +61,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -179,7 +179,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(logsys_categories_entry.log_category_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(logsys_categories_entry.log_category_description) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(logsys_categories_entry.log_category_description) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(logsys_categories_entry.log_to_console));
 		update_values.push_back(columns[3] + " = " + std::to_string(logsys_categories_entry.log_to_file));
 		update_values.push_back(columns[4] + " = " + std::to_string(logsys_categories_entry.log_to_gmsay));
@@ -190,7 +190,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				logsys_categories_entry.log_category_id
 			)
@@ -207,7 +207,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_category_id));
-		insert_values.push_back("'" + EscapeString(logsys_categories_entry.log_category_description) + "'");
+		insert_values.push_back("'" + Strings::Escape(logsys_categories_entry.log_category_description) + "'");
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_console));
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_file));
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_gmsay));
@@ -218,7 +218,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -243,14 +243,14 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_category_id));
-			insert_values.push_back("'" + EscapeString(logsys_categories_entry.log_category_description) + "'");
+			insert_values.push_back("'" + Strings::Escape(logsys_categories_entry.log_category_description) + "'");
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_console));
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_file));
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_gmsay));
 			insert_values.push_back(std::to_string(logsys_categories_entry.log_to_discord));
 			insert_values.push_back(std::to_string(logsys_categories_entry.discord_webhook_id));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -259,7 +259,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

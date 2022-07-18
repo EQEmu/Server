@@ -35,7 +35,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 				LogSchedulerDetail("Looping active event validated [{}]", e.event_type);
 				if (e.event_type == ServerEvents::EVENT_TYPE_HOT_ZONE_ACTIVE) {
 					LogScheduler("Deactivating event [{}] disabling hotzone status", e.description);
-					if (search_deliminated_string(e.event_data, zone->GetShortName()) != std::string::npos) {
+					if (Strings::SearchDelim(e.event_data, zone->GetShortName()) != std::string::npos) {
 						zone->SetIsHotzone(false);
 					}
 					RemoveActiveEvent(e);
@@ -85,7 +85,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 			// such as broadcasts, reloads
 			if (ValidateEventReadyToActivate(e) && !IsEventActive(e)) {
 				if (e.event_type == ServerEvents::EVENT_TYPE_HOT_ZONE_ACTIVE) {
-					if (search_deliminated_string(e.event_data, zone->GetShortName()) != std::string::npos) {
+					if (Strings::SearchDelim(e.event_data, zone->GetShortName()) != std::string::npos) {
 						zone->SetIsHotzone(true);
 						LogScheduler("Activating Event [{}] Enabling zone as hotzone", e.description);
 					}
@@ -93,7 +93,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 				}
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_RULE_CHANGE) {
-					auto params     = SplitString(e.event_data, '=');
+					auto params     = Strings::Split(e.event_data, '=');
 					auto rule_key   = params[0];
 					auto rule_value = params[1];
 					if (!rule_key.empty() && !rule_value.empty()) {

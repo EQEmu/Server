@@ -13,7 +13,7 @@
 #define EQEMU_BASE_DOORS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseDoorsRepository {
@@ -145,12 +145,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -319,9 +319,9 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(doors_entry.doorid));
-		update_values.push_back(columns[2] + " = '" + EscapeString(doors_entry.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(doors_entry.zone) + "'");
 		update_values.push_back(columns[3] + " = " + std::to_string(doors_entry.version));
-		update_values.push_back(columns[4] + " = '" + EscapeString(doors_entry.name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(doors_entry.name) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(doors_entry.pos_y));
 		update_values.push_back(columns[6] + " = " + std::to_string(doors_entry.pos_x));
 		update_values.push_back(columns[7] + " = " + std::to_string(doors_entry.pos_z));
@@ -336,7 +336,7 @@ public:
 		update_values.push_back(columns[16] + " = " + std::to_string(doors_entry.disable_timer));
 		update_values.push_back(columns[17] + " = " + std::to_string(doors_entry.doorisopen));
 		update_values.push_back(columns[18] + " = " + std::to_string(doors_entry.door_param));
-		update_values.push_back(columns[19] + " = '" + EscapeString(doors_entry.dest_zone) + "'");
+		update_values.push_back(columns[19] + " = '" + Strings::Escape(doors_entry.dest_zone) + "'");
 		update_values.push_back(columns[20] + " = " + std::to_string(doors_entry.dest_instance));
 		update_values.push_back(columns[21] + " = " + std::to_string(doors_entry.dest_x));
 		update_values.push_back(columns[22] + " = " + std::to_string(doors_entry.dest_y));
@@ -350,14 +350,14 @@ public:
 		update_values.push_back(columns[30] + " = " + std::to_string(doors_entry.is_ldon_door));
 		update_values.push_back(columns[31] + " = " + std::to_string(doors_entry.min_expansion));
 		update_values.push_back(columns[32] + " = " + std::to_string(doors_entry.max_expansion));
-		update_values.push_back(columns[33] + " = '" + EscapeString(doors_entry.content_flags) + "'");
-		update_values.push_back(columns[34] + " = '" + EscapeString(doors_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[33] + " = '" + Strings::Escape(doors_entry.content_flags) + "'");
+		update_values.push_back(columns[34] + " = '" + Strings::Escape(doors_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				doors_entry.id
 			)
@@ -375,9 +375,9 @@ public:
 
 		insert_values.push_back(std::to_string(doors_entry.id));
 		insert_values.push_back(std::to_string(doors_entry.doorid));
-		insert_values.push_back("'" + EscapeString(doors_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(doors_entry.zone) + "'");
 		insert_values.push_back(std::to_string(doors_entry.version));
-		insert_values.push_back("'" + EscapeString(doors_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(doors_entry.name) + "'");
 		insert_values.push_back(std::to_string(doors_entry.pos_y));
 		insert_values.push_back(std::to_string(doors_entry.pos_x));
 		insert_values.push_back(std::to_string(doors_entry.pos_z));
@@ -392,7 +392,7 @@ public:
 		insert_values.push_back(std::to_string(doors_entry.disable_timer));
 		insert_values.push_back(std::to_string(doors_entry.doorisopen));
 		insert_values.push_back(std::to_string(doors_entry.door_param));
-		insert_values.push_back("'" + EscapeString(doors_entry.dest_zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(doors_entry.dest_zone) + "'");
 		insert_values.push_back(std::to_string(doors_entry.dest_instance));
 		insert_values.push_back(std::to_string(doors_entry.dest_x));
 		insert_values.push_back(std::to_string(doors_entry.dest_y));
@@ -406,14 +406,14 @@ public:
 		insert_values.push_back(std::to_string(doors_entry.is_ldon_door));
 		insert_values.push_back(std::to_string(doors_entry.min_expansion));
 		insert_values.push_back(std::to_string(doors_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(doors_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(doors_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(doors_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(doors_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -439,9 +439,9 @@ public:
 
 			insert_values.push_back(std::to_string(doors_entry.id));
 			insert_values.push_back(std::to_string(doors_entry.doorid));
-			insert_values.push_back("'" + EscapeString(doors_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(doors_entry.zone) + "'");
 			insert_values.push_back(std::to_string(doors_entry.version));
-			insert_values.push_back("'" + EscapeString(doors_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(doors_entry.name) + "'");
 			insert_values.push_back(std::to_string(doors_entry.pos_y));
 			insert_values.push_back(std::to_string(doors_entry.pos_x));
 			insert_values.push_back(std::to_string(doors_entry.pos_z));
@@ -456,7 +456,7 @@ public:
 			insert_values.push_back(std::to_string(doors_entry.disable_timer));
 			insert_values.push_back(std::to_string(doors_entry.doorisopen));
 			insert_values.push_back(std::to_string(doors_entry.door_param));
-			insert_values.push_back("'" + EscapeString(doors_entry.dest_zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(doors_entry.dest_zone) + "'");
 			insert_values.push_back(std::to_string(doors_entry.dest_instance));
 			insert_values.push_back(std::to_string(doors_entry.dest_x));
 			insert_values.push_back(std::to_string(doors_entry.dest_y));
@@ -470,10 +470,10 @@ public:
 			insert_values.push_back(std::to_string(doors_entry.is_ldon_door));
 			insert_values.push_back(std::to_string(doors_entry.min_expansion));
 			insert_values.push_back(std::to_string(doors_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(doors_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(doors_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(doors_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(doors_entry.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -482,7 +482,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

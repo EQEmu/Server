@@ -22,7 +22,7 @@
 #define EQEMU_SERVER_SCHEDULED_EVENTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_server_scheduled_events_repository.h"
 
 class ServerScheduledEventsRepository: public BaseServerScheduledEventsRepository {

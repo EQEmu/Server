@@ -621,7 +621,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				LogTasks(
 					"[UPDATE] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
 					client->GetName(),
@@ -699,7 +699,7 @@ int ClientTaskState::ActiveSpeakTask(int npc_type_id)
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				continue;
 			}
 			// Is the activity_information to speak with this type of NPC ?
@@ -748,7 +748,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				continue;
 			}
 
@@ -809,7 +809,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activi
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				LogTasks(
 					"[UpdateTasksForItem] Error: Character [{}] activity_information type [{}] for Item [{}] failed zone check",
 					client->GetName(),
@@ -881,7 +881,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
 			if (activity_info->activity_type != TaskActivityType::Explore) {
 				continue;
 			}
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				LogTasks(
 					"[UpdateTasksOnExplore] character [{}] explore_id [{}] failed zone check",
 					client->GetName(),
@@ -977,7 +977,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				Log(
 					Logs::General, Logs::Tasks,
 					"[UPDATE] Char: %s Deliver activity_information failed zone check (current zone %i, need zone "
@@ -1039,7 +1039,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 	return is_updated;
 }
 
-void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
+void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id, uint16 version)
 {
 	// If the client has no tasks, there is nothing further to check.
 
@@ -1077,7 +1077,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
 			if (activity_info->goal_method != METHODSINGLEID) {
 				continue;
 			}
-			if (!activity_info->CheckZone(zone_id)) {
+			if (!activity_info->CheckZone(zone_id, version)) {
 				LogTasks(
 					"[UpdateTasksOnTouch] character [{}] Touch activity_information failed zone check",
 					client->GetName()
@@ -1221,13 +1221,12 @@ void ClientTaskState::IncrementDoneCount(
 		// updated in UnlockActivities. Send the completed task list to the
 		// client. This is the same sequence the packets are sent on live.
 		if (task_complete) {
-			std::string export_string = fmt::format(
-				"{} {} {}",
-				info->activity[activity_id].done_count,
-				info->activity[activity_id].activity_id,
-				info->task_id
-			);
-			parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+			// world adds timers for shared tasks
+			if (task_information->type != TaskType::Shared) {
+				AddReplayTimer(client, *info, *task_information);
+			}
+
+			DispatchEventTaskComplete(client, *info, activity_id);
 
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
@@ -1242,25 +1241,18 @@ void ClientTaskState::IncrementDoneCount(
 			}
 
 			client->SendTaskActivityComplete(info->task_id, 0, task_index, task_information->type, 0);
-			task_manager->SaveClientState(client, this);
 
 			// If Experience and/or cash rewards are set, reward them from the task even if reward_method is METHODQUEST
-			RewardTask(client, task_information);
+			RewardTask(client, task_information, *info);
 			//RemoveTask(c, TaskIndex);
 
-			// add replay timer (world adds timers to shared task members)
-			AddReplayTimer(client, *info, *task_information);
-
 			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
-			if (task_information->type == TaskType::Shared) {
-				return;
+			if (task_information->type != TaskType::Shared) {
+				task_manager->SendCompletedTasksToClient(client, this);
+
+				client->CancelTask(task_index, task_information->type);
 			}
-
-			task_manager->SendCompletedTasksToClient(client, this);
-
-			client->CancelTask(task_index, task_information->type);
 		}
-
 	}
 	else {
 		// Send an updated packet for this single activity_information
@@ -1270,16 +1262,31 @@ void ClientTaskState::IncrementDoneCount(
 			activity_id,
 			task_index
 		);
-		task_manager->SaveClientState(client, this);
 	}
+
+	task_manager->SaveClientState(client, this);
 }
 
-void ClientTaskState::RewardTask(Client *client, TaskInformation *task_information)
+void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
+{
+	std::string export_string = fmt::format(
+		"{} {} {}",
+		info.activity[activity_id].done_count,
+		info.activity[activity_id].activity_id,
+		info.task_id
+	);
+	parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+}
+
+void ClientTaskState::RewardTask(Client *client, TaskInformation *task_information, ClientTaskInformation& client_task)
 {
 
-	if (!task_information || !client) {
+	if (!task_information || !client || client_task.was_rewarded) {
 		return;
 	}
+
+	client_task.was_rewarded = true;
+	client_task.updated = true;
 
 	if (!task_information->completion_emote.empty()) {
 		client->Message(Chat::Yellow, task_information->completion_emote.c_str());
@@ -1291,7 +1298,8 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 	switch (task_information->reward_method) {
 		case METHODSINGLEID: {
 			if (task_information->reward_id) {
-				client->SummonItem(task_information->reward_id);
+				int16_t slot = client->GetInv().FindFreeSlot(true, true);
+				client->SummonItem(task_information->reward_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
 				item_data = database.GetItem(task_information->reward_id);
 				if (item_data) {
 					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
@@ -1302,7 +1310,8 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		case METHODLIST: {
 			reward_list = task_manager->m_goal_list_manager.GetListContents(task_information->reward_id);
 			for (int item_id : reward_list) {
-				client->SummonItem(item_id);
+				int16_t slot = client->GetInv().FindFreeSlot(true, true);
+				client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
 				item_data = database.GetItem(item_id);
 				if (item_data) {
 					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
@@ -1349,7 +1358,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 			client->MessageString(
 				Chat::Yellow,
 				YOU_RECEIVE,
-				ConvertMoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,
@@ -1696,7 +1705,7 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 		std::vector<std::string> update_saylinks;
 
 		for (auto &increment: update_increments) {
-			auto task_update_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			auto task_update_saylink = Saylink::Create(
 				fmt::format(
 					"#task update {} {} {}",
 					task->task_id,
@@ -1718,7 +1727,7 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 				task->activity[activity_id].done_count,
 				task->activity[activity_id].activity_state,
 				Tasks::GetActivityStateDescription(task->activity[activity_id].activity_state),
-				implode(" | ", update_saylinks)
+				Strings::Implode(" | ", update_saylinks)
 			).c_str()
 		);
 	}
@@ -1927,7 +1936,7 @@ void ClientTaskState::TaskPeriodicChecks(Client *client)
 	// the zone before we send the 'Task activity_information Completed' message.
 	//
 	if (!m_checked_touch_activities) {
-		UpdateTasksOnTouch(client, zone->GetZoneID());
+		UpdateTasksOnTouch(client, zone->GetZoneID(), zone->GetInstanceVersion());
 		m_checked_touch_activities = true;
 	}
 }
@@ -2396,6 +2405,7 @@ void ClientTaskState::AcceptNewTask(
 	active_slot->accepted_time = static_cast<int>(accept_time);
 	active_slot->updated       = true;
 	active_slot->current_step  = -1;
+	active_slot->was_rewarded  = false;
 
 	for (int activity_id = 0; activity_id < task_manager->m_task_data[task_id]->activity_count; activity_id++) {
 		active_slot->activity[activity_id].activity_id    = activity_id;
@@ -2629,8 +2639,7 @@ void ClientTaskState::ListTaskTimers(Client* client)
 
 void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, TaskInformation& task)
 {
-	// world adds timers for shared tasks and handles messages
-	if (task.type != TaskType::Shared && task.replay_timer_seconds > 0)
+	if (task.replay_timer_seconds > 0)
 	{
 		// solo task replay timers are based on completion time
 		auto expire_time = std::time(nullptr) + task.replay_timer_seconds;
@@ -2640,6 +2649,11 @@ void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& clie
 		timer.task_id      = client_task.task_id;
 		timer.expire_time  = expire_time;
 		timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+
+		// replace any existing replay timer
+		CharacterTaskTimersRepository::DeleteWhere(database, fmt::format(
+			"task_id = {} AND timer_type = {} AND character_id = {}",
+			client_task.task_id, static_cast<int>(TaskTimerType::Replay), client->CharacterID()));
 
 		CharacterTaskTimersRepository::InsertOne(database, timer);
 

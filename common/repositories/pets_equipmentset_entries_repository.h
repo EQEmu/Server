@@ -22,7 +22,7 @@
 #define EQEMU_PETS_EQUIPMENTSET_ENTRIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_pets_equipmentset_entries_repository.h"
 
 class PetsEquipmentsetEntriesRepository: public BasePetsEquipmentsetEntriesRepository {

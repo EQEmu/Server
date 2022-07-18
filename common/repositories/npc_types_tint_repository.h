@@ -22,7 +22,7 @@
 #define EQEMU_NPC_TYPES_TINT_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_npc_types_tint_repository.h"
 
 class NpcTypesTintRepository: public BaseNpcTypesTintRepository {

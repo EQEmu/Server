@@ -22,7 +22,7 @@
 #define EQEMU_LOGSYS_CATEGORIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_logsys_categories_repository.h"
 
 class LogsysCategoriesRepository: public BaseLogsysCategoriesRepository {

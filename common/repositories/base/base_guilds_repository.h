@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GUILDS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGuildsRepository {
@@ -67,12 +67,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -188,20 +188,20 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(guilds_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(guilds_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(guilds_entry.leader));
 		update_values.push_back(columns[3] + " = " + std::to_string(guilds_entry.minstatus));
-		update_values.push_back(columns[4] + " = '" + EscapeString(guilds_entry.motd) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(guilds_entry.motd) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(guilds_entry.tribute));
-		update_values.push_back(columns[6] + " = '" + EscapeString(guilds_entry.motd_setter) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(guilds_entry.channel) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(guilds_entry.url) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(guilds_entry.motd_setter) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(guilds_entry.channel) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(guilds_entry.url) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				guilds_entry.id
 			)
@@ -218,20 +218,20 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(guilds_entry.id));
-		insert_values.push_back("'" + EscapeString(guilds_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(guilds_entry.name) + "'");
 		insert_values.push_back(std::to_string(guilds_entry.leader));
 		insert_values.push_back(std::to_string(guilds_entry.minstatus));
-		insert_values.push_back("'" + EscapeString(guilds_entry.motd) + "'");
+		insert_values.push_back("'" + Strings::Escape(guilds_entry.motd) + "'");
 		insert_values.push_back(std::to_string(guilds_entry.tribute));
-		insert_values.push_back("'" + EscapeString(guilds_entry.motd_setter) + "'");
-		insert_values.push_back("'" + EscapeString(guilds_entry.channel) + "'");
-		insert_values.push_back("'" + EscapeString(guilds_entry.url) + "'");
+		insert_values.push_back("'" + Strings::Escape(guilds_entry.motd_setter) + "'");
+		insert_values.push_back("'" + Strings::Escape(guilds_entry.channel) + "'");
+		insert_values.push_back("'" + Strings::Escape(guilds_entry.url) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -256,16 +256,16 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(guilds_entry.id));
-			insert_values.push_back("'" + EscapeString(guilds_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(guilds_entry.name) + "'");
 			insert_values.push_back(std::to_string(guilds_entry.leader));
 			insert_values.push_back(std::to_string(guilds_entry.minstatus));
-			insert_values.push_back("'" + EscapeString(guilds_entry.motd) + "'");
+			insert_values.push_back("'" + Strings::Escape(guilds_entry.motd) + "'");
 			insert_values.push_back(std::to_string(guilds_entry.tribute));
-			insert_values.push_back("'" + EscapeString(guilds_entry.motd_setter) + "'");
-			insert_values.push_back("'" + EscapeString(guilds_entry.channel) + "'");
-			insert_values.push_back("'" + EscapeString(guilds_entry.url) + "'");
+			insert_values.push_back("'" + Strings::Escape(guilds_entry.motd_setter) + "'");
+			insert_values.push_back("'" + Strings::Escape(guilds_entry.channel) + "'");
+			insert_values.push_back("'" + Strings::Escape(guilds_entry.url) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -274,7 +274,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

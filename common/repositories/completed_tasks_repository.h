@@ -22,7 +22,7 @@
 #define EQEMU_COMPLETED_TASKS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_completed_tasks_repository.h"
 
 class CompletedTasksRepository: public BaseCompletedTasksRepository {

@@ -35,6 +35,8 @@
     "titanium_port": 5998,
     "titanium_opcodes": "login_opcodes.conf",
     "sod_port": 5999,
-    "sod_opcodes": "login_opcodes_sod.conf"
+    "sod_opcodes": "login_opcodes_sod.conf",
+    "display_expansions" : true,
+    "max_expansions_mask" : 524287
   }
 }

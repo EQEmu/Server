@@ -91,7 +91,7 @@ void command_roambox(Client *c, const Seperator *sep)
 					box_size,
 					c->GetTargetDescription(target),
 					spawn_group_id,
-					ConvertMillisecondsToTime(delay),
+					Strings::MillisecondsToTime(delay),
 					delay
 				).c_str()
 			);

@@ -13,7 +13,7 @@
 #define EQEMU_BASE_CHARACTER_TASKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseCharacterTasksRepository {
@@ -24,6 +24,7 @@ public:
 		int slot;
 		int type;
 		int acceptedtime;
+		int was_rewarded;
 	};
 
 	static std::string PrimaryKey()
@@ -39,6 +40,7 @@ public:
 			"slot",
 			"type",
 			"acceptedtime",
+			"was_rewarded",
 		};
 	}
 
@@ -50,17 +52,18 @@ public:
 			"slot",
 			"type",
 			"acceptedtime",
+			"was_rewarded",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -95,6 +98,7 @@ public:
 		entry.slot         = 0;
 		entry.type         = 0;
 		entry.acceptedtime = 0;
+		entry.was_rewarded = 0;
 
 		return entry;
 	}
@@ -135,6 +139,7 @@ public:
 			entry.slot         = atoi(row[2]);
 			entry.type         = atoi(row[3]);
 			entry.acceptedtime = atoi(row[4]);
+			entry.was_rewarded = atoi(row[5]);
 
 			return entry;
 		}
@@ -173,12 +178,13 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_entry.slot));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_entry.type));
 		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_entry.acceptedtime));
+		update_values.push_back(columns[5] + " = " + std::to_string(character_tasks_entry.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				character_tasks_entry.charid
 			)
@@ -199,12 +205,13 @@ public:
 		insert_values.push_back(std::to_string(character_tasks_entry.slot));
 		insert_values.push_back(std::to_string(character_tasks_entry.type));
 		insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
+		insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -233,8 +240,9 @@ public:
 			insert_values.push_back(std::to_string(character_tasks_entry.slot));
 			insert_values.push_back(std::to_string(character_tasks_entry.type));
 			insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
+			insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -243,7 +251,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -271,6 +279,7 @@ public:
 			entry.slot         = atoi(row[2]);
 			entry.type         = atoi(row[3]);
 			entry.acceptedtime = atoi(row[4]);
+			entry.was_rewarded = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
@@ -300,6 +309,7 @@ public:
 			entry.slot         = atoi(row[2]);
 			entry.type         = atoi(row[3]);
 			entry.acceptedtime = atoi(row[4]);
+			entry.was_rewarded = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}

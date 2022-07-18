@@ -1,13 +1,13 @@
 #include "../client.h"
 
 void command_nukebuffs(Client *c, const Seperator *sep)
-{	
+{
 	Mob* target = c;
 	if (c->GetTarget()) {
 		target = c->GetTarget();
 	}
 
-	std::string buff_identifier = str_tolower(sep->arg[1]);
+	std::string buff_identifier = Strings::ToLower(sep->arg[1]);
 	std::string buff_type;
 	bool is_beneficial = buff_identifier.find("beneficial") != std::string::npos;
 	bool is_detrimental = buff_identifier.find("detrimental") != std::string::npos;

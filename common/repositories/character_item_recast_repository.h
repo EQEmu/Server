@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_ITEM_RECAST_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_item_recast_repository.h"
 
 class CharacterItemRecastRepository: public BaseCharacterItemRecastRepository {

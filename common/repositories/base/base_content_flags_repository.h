@@ -13,7 +13,7 @@
 #define EQEMU_BASE_CONTENT_FLAGS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseContentFlagsRepository {
@@ -52,12 +52,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -163,15 +163,15 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(content_flags_entry.flag_name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(content_flags_entry.flag_name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(content_flags_entry.enabled));
-		update_values.push_back(columns[3] + " = '" + EscapeString(content_flags_entry.notes) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(content_flags_entry.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				content_flags_entry.id
 			)
@@ -188,15 +188,15 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(content_flags_entry.id));
-		insert_values.push_back("'" + EscapeString(content_flags_entry.flag_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(content_flags_entry.flag_name) + "'");
 		insert_values.push_back(std::to_string(content_flags_entry.enabled));
-		insert_values.push_back("'" + EscapeString(content_flags_entry.notes) + "'");
+		insert_values.push_back("'" + Strings::Escape(content_flags_entry.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -221,11 +221,11 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(content_flags_entry.id));
-			insert_values.push_back("'" + EscapeString(content_flags_entry.flag_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(content_flags_entry.flag_name) + "'");
 			insert_values.push_back(std::to_string(content_flags_entry.enabled));
-			insert_values.push_back("'" + EscapeString(content_flags_entry.notes) + "'");
+			insert_values.push_back("'" + Strings::Escape(content_flags_entry.notes) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -234,7 +234,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

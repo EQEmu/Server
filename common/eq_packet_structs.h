@@ -2192,6 +2192,14 @@ struct QuestReward_Struct
 	/*068*/
 };
 
+struct CashReward_Struct
+{
+	/*000*/ uint32 copper;
+	/*004*/ uint32 silver;
+	/*008*/ uint32 gold;
+	/*012*/ uint32 platinum;
+};
+
 // Size: 8
 struct Camera_Struct
 {

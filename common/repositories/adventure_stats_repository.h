@@ -22,7 +22,7 @@
 #define EQEMU_ADVENTURE_STATS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_adventure_stats_repository.h"
 
 class AdventureStatsRepository: public BaseAdventureStatsRepository {

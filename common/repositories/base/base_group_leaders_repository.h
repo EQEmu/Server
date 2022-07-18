@@ -13,7 +13,7 @@
 #define EQEMU_BASE_GROUP_LEADERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseGroupLeadersRepository {
@@ -67,12 +67,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -189,20 +189,20 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(group_leaders_entry.gid));
-		update_values.push_back(columns[1] + " = '" + EscapeString(group_leaders_entry.leadername) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(group_leaders_entry.marknpc) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(group_leaders_entry.leadershipaa) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(group_leaders_entry.maintank) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(group_leaders_entry.assist) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(group_leaders_entry.puller) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(group_leaders_entry.mentoree) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(group_leaders_entry.leadername) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(group_leaders_entry.marknpc) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(group_leaders_entry.leadershipaa) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(group_leaders_entry.maintank) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(group_leaders_entry.assist) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(group_leaders_entry.puller) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(group_leaders_entry.mentoree) + "'");
 		update_values.push_back(columns[8] + " = " + std::to_string(group_leaders_entry.mentor_percent));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				group_leaders_entry.gid
 			)
@@ -219,20 +219,20 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(group_leaders_entry.gid));
-		insert_values.push_back("'" + EscapeString(group_leaders_entry.leadername) + "'");
-		insert_values.push_back("'" + EscapeString(group_leaders_entry.marknpc) + "'");
-		insert_values.push_back("'" + EscapeString(group_leaders_entry.leadershipaa) + "'");
-		insert_values.push_back("'" + EscapeString(group_leaders_entry.maintank) + "'");
-		insert_values.push_back("'" + EscapeString(group_leaders_entry.assist) + "'");
-		insert_values.push_back("'" + EscapeString(group_leaders_entry.puller) + "'");
-		insert_values.push_back("'" + EscapeString(group_leaders_entry.mentoree) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_leaders_entry.leadername) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_leaders_entry.marknpc) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_leaders_entry.leadershipaa) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_leaders_entry.maintank) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_leaders_entry.assist) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_leaders_entry.puller) + "'");
+		insert_values.push_back("'" + Strings::Escape(group_leaders_entry.mentoree) + "'");
 		insert_values.push_back(std::to_string(group_leaders_entry.mentor_percent));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -257,16 +257,16 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(group_leaders_entry.gid));
-			insert_values.push_back("'" + EscapeString(group_leaders_entry.leadername) + "'");
-			insert_values.push_back("'" + EscapeString(group_leaders_entry.marknpc) + "'");
-			insert_values.push_back("'" + EscapeString(group_leaders_entry.leadershipaa) + "'");
-			insert_values.push_back("'" + EscapeString(group_leaders_entry.maintank) + "'");
-			insert_values.push_back("'" + EscapeString(group_leaders_entry.assist) + "'");
-			insert_values.push_back("'" + EscapeString(group_leaders_entry.puller) + "'");
-			insert_values.push_back("'" + EscapeString(group_leaders_entry.mentoree) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_leaders_entry.leadername) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_leaders_entry.marknpc) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_leaders_entry.leadershipaa) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_leaders_entry.maintank) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_leaders_entry.assist) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_leaders_entry.puller) + "'");
+			insert_values.push_back("'" + Strings::Escape(group_leaders_entry.mentoree) + "'");
 			insert_values.push_back(std::to_string(group_leaders_entry.mentor_percent));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -275,7 +275,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

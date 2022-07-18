@@ -22,7 +22,7 @@
 #define EQEMU_ITEM_TICK_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_item_tick_repository.h"
 
 class ItemTickRepository: public BaseItemTickRepository {

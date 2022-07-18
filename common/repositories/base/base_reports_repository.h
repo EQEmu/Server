@@ -13,7 +13,7 @@
 #define EQEMU_BASE_REPORTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseReportsRepository {
@@ -52,12 +52,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -163,15 +163,15 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(reports_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(reports_entry.reported) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(reports_entry.reported_text) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(reports_entry.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(reports_entry.reported) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(reports_entry.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				reports_entry.id
 			)
@@ -188,15 +188,15 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(reports_entry.id));
-		insert_values.push_back("'" + EscapeString(reports_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(reports_entry.reported) + "'");
-		insert_values.push_back("'" + EscapeString(reports_entry.reported_text) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_entry.reported) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_entry.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -221,11 +221,11 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(reports_entry.id));
-			insert_values.push_back("'" + EscapeString(reports_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(reports_entry.reported) + "'");
-			insert_values.push_back("'" + EscapeString(reports_entry.reported_text) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_entry.reported) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_entry.reported_text) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -234,7 +234,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

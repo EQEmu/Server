@@ -48,8 +48,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "local zone"),
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelsglobal", false, "global")
+				Saylink::Create("#door showmodelszone", false, "local zone"),
+				Saylink::Create("#door showmodelsglobal", false, "global")
 			).c_str()
 		);
 		c->Message(
@@ -61,7 +61,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | Shows available models in the current zone that you are in",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "#door showmodelszone")
+				Saylink::Create("#door showmodelszone", false, "#door showmodelszone")
 			).c_str()
 		);
 
@@ -69,7 +69,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | Shows available models globally by first listing all global model files",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelsglobal", false, "#door showmodelsglobal")
+				Saylink::Create("#door showmodelsglobal", false, "#door showmodelsglobal")
 			).c_str()
 		);
 
@@ -78,14 +78,14 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} - Brings up editing interface for selected door",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door edit", false, "#door edit")
+				Saylink::Create("#door edit", false, "#door edit")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"{} - lists doors in zone",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "#list doors")
+				Saylink::Create("#list doors", false, "#list doors")
 			).c_str()
 		);
 
@@ -104,8 +104,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					door->GetDoorName(),
 					door->GetOpenType(),
 					door->GetInvertState(),
-					EQ::SayLinkEngine::GenerateQuestSaylink("#door setinvertstate 0", false, "0"),
-					EQ::SayLinkEngine::GenerateQuestSaylink("#door setinvertstate 1", false, "1")
+					Saylink::Create("#door setinvertstate 0", false, "0"),
+					Saylink::Create("#door setinvertstate 1", false, "1")
 				).c_str()
 			);
 
@@ -135,7 +135,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			for (const auto          &move_option : move_options) {
 				if (move_option == move_x_action) {
 					move_x_options_positive.emplace_back(
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							fmt::format("#door edit {} .25", move_option),
 							false,
 							".25"
@@ -145,7 +145,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = 0; move_index <= 15; move_index += 5) {
 						int value = (move_index == 0 ? 1 : move_index);
 						move_x_options_positive.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -156,7 +156,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
 						int value = (move_index == 0 ? 1 : move_index);
 						move_x_options_negative.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -165,7 +165,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					move_x_options_negative.emplace_back(
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
 							".25"
@@ -174,7 +174,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				}
 				else if (move_option == move_y_action) {
 					move_y_options_positive.emplace_back(
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							fmt::format("#door edit {} .25", move_option),
 							false,
 							".25"
@@ -184,7 +184,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = 0; move_index <= 15; move_index += 5) {
 						int value = (move_index == 0 ? 1 : move_index);
 						move_y_options_positive.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -195,7 +195,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
 						int value = (move_index == 0 ? -1 : move_index);
 						move_y_options_negative.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -204,7 +204,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					move_y_options_negative.emplace_back(
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
 							".25"
@@ -213,7 +213,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				}
 				else if (move_option == move_z_action) {
 					move_z_options_positive.emplace_back(
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							fmt::format("#door edit {} .25", move_option),
 							false,
 							".25"
@@ -223,7 +223,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = 0; move_index <= 15; move_index += 5) {
 						int value = (move_index == 0 ? 1 : move_index);
 						move_z_options_positive.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -234,7 +234,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
 						int value = (move_index == 0 ? -1 : move_index);
 						move_z_options_negative.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -243,7 +243,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					move_z_options_negative.emplace_back(
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
 							".25"
@@ -254,7 +254,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = 0; move_index <= 50; move_index += 5) {
 						int value = (move_index == 0 ? 1 : move_index);
 						move_h_options_positive.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -265,7 +265,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = -50; move_index <= 0; move_index += 5) {
 						int value = (move_index == 0 ? -1 : move_index);
 						move_h_options_negative.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -277,7 +277,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = 0; move_index <= 100; move_index += 10) {
 						int value = (move_index == 0 ? 1 : move_index);
 						set_size_options_positive.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -288,7 +288,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					for (int move_index = -100; move_index <= 0; move_index += 10) {
 						int value = (move_index == 0 ? -1 : move_index);
 						set_size_options_negative.emplace_back(
-							EQ::SayLinkEngine::GenerateQuestSaylink(
+							Saylink::Create(
 								fmt::format("#door edit {} {}", move_option, value),
 								false,
 								fmt::format("{}", std::abs(value))
@@ -299,7 +299,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			}
 
 			// we're passing a move action here
-			if (!arg3.empty() && StringIsNumber(arg3)) {
+			if (!arg3.empty() && Strings::IsNumber(arg3)) {
 				float x_move   = 0.0f;
 				float y_move   = 0.0f;
 				float z_move   = 0.0f;
@@ -410,17 +410,17 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				fmt::format(
 					"Name [{}] [{}] [{}] [{}]",
 					door->GetDoorName(),
-					EQ::SayLinkEngine::GenerateQuestSaylink(
+					Saylink::Create(
 						"#door save",
 						false,
 						"Save"
 					),
-					EQ::SayLinkEngine::GenerateQuestSaylink(
+					Saylink::Create(
 						"#door changemodelqueue",
 						false,
 						"Change Model"
 					),
-					EQ::SayLinkEngine::GenerateQuestSaylink(
+					Saylink::Create(
 						"#door setinclineinc",
 						false,
 						"Incline"
@@ -431,40 +431,40 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"[{}] - [X] + [{}]",
-					implode(" | ", move_x_options_negative),
-					implode(" | ", move_x_options_positive)
+					Strings::Implode(" | ", move_x_options_negative),
+					Strings::Implode(" | ", move_x_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [Y] + [{}]",
-					implode(" | ", move_y_options_negative),
-					implode(" | ", move_y_options_positive)
+					Strings::Implode(" | ", move_y_options_negative),
+					Strings::Implode(" | ", move_y_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [Z] + [{}]",
-					implode(" | ", move_z_options_negative),
-					implode(" | ", move_z_options_positive)
+					Strings::Implode(" | ", move_z_options_negative),
+					Strings::Implode(" | ", move_z_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [H] + [{}]",
-					implode(" | ", move_h_options_negative),
-					implode(" | ", move_h_options_positive)
+					Strings::Implode(" | ", move_h_options_negative),
+					Strings::Implode(" | ", move_h_options_positive)
 				).c_str()
 			);
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"[{}] - [Size] + [{}]",
-					implode(" | ", set_size_options_negative),
-					implode(" | ", set_size_options_positive)
+					Strings::Implode(" | ", set_size_options_negative),
+					Strings::Implode(" | ", set_size_options_positive)
 				).c_str()
 			);
 
@@ -476,7 +476,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 	// create
 	if (arg1 == "create") {
-		std::string model     = str_toupper(arg2);
+		std::string model     = Strings::ToUpper(arg2);
 		uint16      entity_id = entity_list.CreateDoor(
 			model.c_str(),
 			c->GetPosition(),
@@ -493,7 +493,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	// set model
 	if (arg1 == "model") {
 		Doors       *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
-		std::string model = str_toupper(arg2);
+		std::string model = Strings::ToUpper(arg2);
 		if (door) {
 			door->SetDoorName(model.c_str());
 		}
@@ -505,14 +505,14 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "local zone"),
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelsglobal", false, "global")
+				Saylink::Create("#door showmodelszone", false, "local zone"),
+				Saylink::Create("#door showmodelsglobal", false, "global")
 			).c_str()
 		);
 	}
 
 	// open type
-	if (arg1 == "opentype" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "opentype" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetOpenType(std::atoi(arg2.c_str()));
@@ -520,7 +520,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	// incline
-	if (arg1 == "setincline" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "setincline" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetIncline(std::atoi(arg2.c_str()));
@@ -528,7 +528,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	// incline
-	if (arg1 == "setinvertstate" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "setinvertstate" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetInvertState(std::atoi(arg2.c_str()));
@@ -545,7 +545,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	// incline incremental
-	if (arg1 == "setinclineinc" && !arg2.empty() && StringIsNumber(arg2)) {
+	if (arg1 == "setinclineinc" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetIncline(door->GetIncline() + std::atoi(arg2.c_str()));
@@ -569,7 +569,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		std::vector<std::string> incline_negative_options;
 		for (auto                incline_value : incline_values) {
 			incline_normal_options.emplace_back(
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					fmt::format(
 						"#door setincline {}",
 						incline_value.first
@@ -583,7 +583,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		for (int incline_index = 0; incline_index <= 100; incline_index += 10) {
 			int incline_value = (incline_index == 0 ? 1 : incline_index);
 			incline_positive_options.emplace_back(
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					fmt::format(
 						"#door setinclineinc {}",
 						incline_value
@@ -597,7 +597,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		for (int incline_index = -100; incline_index <= 1; incline_index += 10) {
 			int incline_value = (incline_index == 0 ? -1 : incline_index);
 			incline_negative_options.emplace_back(
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					fmt::format(
 						"#door setinclineinc {}",
 						incline_value
@@ -612,7 +612,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"[Incline] [{}]",
-				implode(" | ", incline_normal_options)
+				Strings::Implode(" | ", incline_normal_options)
 			).c_str()
 		);
 
@@ -620,8 +620,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"[Incline Increments] [{}] - | + [{}]",
-				implode(" | ", incline_negative_options),
-				implode(" | ", incline_positive_options)
+				Strings::Implode(" | ", incline_negative_options),
+				Strings::Implode(" | ", incline_positive_options)
 			).c_str()
 		);
 	}
@@ -700,7 +700,7 @@ void DoorManipulation::DisplayObjectResultToClient(
 		say_links.emplace_back(
 			fmt::format(
 				"[{}] ",
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					fmt::format("#door model {}", g.object_name),
 					false,
 					g.object_name
@@ -733,7 +733,7 @@ void DoorManipulation::DisplayObjectResultToClient(
 	}
 
 	if (!buffered_links.empty()) {
-		c->Message(Chat::White, implode(" ", buffered_links).c_str());
+		c->Message(Chat::White, Strings::Implode(" ", buffered_links).c_str());
 	}
 }
 
@@ -748,7 +748,7 @@ void DoorManipulation::DisplayModelsFromFileResults(
 		say_links.emplace_back(
 			fmt::format(
 				"[{}] ",
-				EQ::SayLinkEngine::GenerateQuestSaylink(
+				Saylink::Create(
 					fmt::format("#door showmodelsfromfile {}", g.file_from),
 					false,
 					g.file_from
@@ -781,6 +781,6 @@ void DoorManipulation::DisplayModelsFromFileResults(
 	}
 
 	if (!buffered_links.empty()) {
-		c->Message(Chat::White, implode(" ", buffered_links).c_str());
+		c->Message(Chat::White, Strings::Implode(" ", buffered_links).c_str());
 	}
 }

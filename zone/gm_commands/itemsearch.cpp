@@ -19,7 +19,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 				std::string item_id          = std::to_string(item->ID);
 				std::string saylink_commands =
 								"[" +
-								EQ::SayLinkEngine::GenerateQuestSaylink(
+								Saylink::Create(
 									"#si " + item_id,
 									false,
 									"X"
@@ -30,7 +30,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 					std::string stack_size = std::to_string(item->StackSize);
 					saylink_commands +=
 						"[" +
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							"#si " + item_id + " " + stack_size,
 							false,
 							stack_size
@@ -77,7 +77,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 				std::string item_id          = std::to_string(item->ID);
 				std::string saylink_commands =
 								"[" +
-								EQ::SayLinkEngine::GenerateQuestSaylink(
+								Saylink::Create(
 									"#si " + item_id,
 									false,
 									"X"
@@ -87,7 +87,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 					std::string stack_size = std::to_string(item->StackSize);
 					saylink_commands +=
 						"[" +
-						EQ::SayLinkEngine::GenerateQuestSaylink(
+						Saylink::Create(
 							"#si " + item_id + " " + stack_size,
 							false,
 							stack_size

@@ -4,7 +4,7 @@ void command_feature(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (arguments < 2 || !sep->IsNumber(2)) {
-		auto feature_save_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto feature_save_link = Saylink::Create(
 			"#npcedit featuresave",
 			false,
 			"#npcedit featuresave"
@@ -67,7 +67,7 @@ void command_feature(Client *c, const Seperator *sep)
 		!is_tattoo &&
 		!is_texture
 	) {
-		auto feature_save_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		auto feature_save_link = Saylink::Create(
 			"#npcedit featuresave",
 			false,
 			"#npcedit featuresave"

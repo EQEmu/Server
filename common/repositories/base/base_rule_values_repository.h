@@ -13,7 +13,7 @@
 #define EQEMU_BASE_RULE_VALUES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseRuleValuesRepository {
@@ -52,12 +52,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -164,15 +164,15 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(rule_values_entry.ruleset_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(rule_values_entry.rule_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(rule_values_entry.rule_value) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(rule_values_entry.notes) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(rule_values_entry.rule_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(rule_values_entry.rule_value) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(rule_values_entry.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				rule_values_entry.ruleset_id
 			)
@@ -189,15 +189,15 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(rule_values_entry.ruleset_id));
-		insert_values.push_back("'" + EscapeString(rule_values_entry.rule_name) + "'");
-		insert_values.push_back("'" + EscapeString(rule_values_entry.rule_value) + "'");
-		insert_values.push_back("'" + EscapeString(rule_values_entry.notes) + "'");
+		insert_values.push_back("'" + Strings::Escape(rule_values_entry.rule_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(rule_values_entry.rule_value) + "'");
+		insert_values.push_back("'" + Strings::Escape(rule_values_entry.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -222,11 +222,11 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(rule_values_entry.ruleset_id));
-			insert_values.push_back("'" + EscapeString(rule_values_entry.rule_name) + "'");
-			insert_values.push_back("'" + EscapeString(rule_values_entry.rule_value) + "'");
-			insert_values.push_back("'" + EscapeString(rule_values_entry.notes) + "'");
+			insert_values.push_back("'" + Strings::Escape(rule_values_entry.rule_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(rule_values_entry.rule_value) + "'");
+			insert_values.push_back("'" + Strings::Escape(rule_values_entry.notes) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -235,7 +235,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

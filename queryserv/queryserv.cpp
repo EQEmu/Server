@@ -24,7 +24,7 @@
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/event/event_loop.h"
 #include "../common/timer.h"
 #include "database.h"

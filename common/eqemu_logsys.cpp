@@ -21,7 +21,7 @@
 #include "eqemu_logsys.h"
 #include "rulesys.h"
 #include "platform.h"
-#include "string_util.h"
+#include "strings.h"
 #include "misc.h"
 #include "discord/discord.h"
 #include "repositories/discord_webhooks_repository.h"
@@ -460,7 +460,7 @@ void EQEmuLogSys::Out(
 		EQEmuLogSys::ProcessConsoleMessage(log_category, output_debug_message);
 	}
 	if (log_to_gmsay) {
-		m_on_log_gmsay_hook(log_category, message);
+		m_on_log_gmsay_hook(log_category, output_message);
 	}
 	if (log_to_file) {
 		EQEmuLogSys::ProcessLogWrite(log_category, output_debug_message);
@@ -650,7 +650,7 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 
 			auto new_category = LogsysCategoriesRepository::NewEntity();
 			new_category.log_category_id          = i;
-			new_category.log_category_description = EscapeString(Logs::LogCategoryName[i]);
+			new_category.log_category_description = Strings::Escape(Logs::LogCategoryName[i]);
 			new_category.log_to_console           = log_settings[i].log_to_console;
 			new_category.log_to_gmsay             = log_settings[i].log_to_gmsay;
 			new_category.log_to_file              = log_settings[i].log_to_file;

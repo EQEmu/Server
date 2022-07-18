@@ -22,7 +22,7 @@
 #define EQEMU_ZONE_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_zone_repository.h"
 
 class ZoneRepository: public BaseZoneRepository {

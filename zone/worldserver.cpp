@@ -635,7 +635,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			} else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank) {
 				break;
 			} else {
-				std::string name = str_tolower(szp->name);
+				std::string name = Strings::ToLower(szp->name);
 				name[0] = toupper(name[0]);
 
 				SendEmoteMessage(
@@ -823,7 +823,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		ServerUptime_Struct* sus = (ServerUptime_Struct*)pack->pBuffer;
 		uint32 ms = Timer::GetCurrentTime();
-		std::string time_string = ConvertMillisecondsToTime(ms);
+		std::string time_string = Strings::MillisecondsToTime(ms);
 		SendEmoteMessage(
 			sus->adminname,
 			0,
@@ -3138,12 +3138,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (request_zone_short_name == local_zone_short_name || can_reload_global_script) {
 			zone->SetQuestHotReloadQueued(true);
 		} else if (request_zone_short_name == "all") {
-			std::string reload_quest_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			std::string reload_quest_saylink = Saylink::Create(
 				"#reload quest",
 				false,
 				"Locally"
 			);
-			std::string reload_world_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+			std::string reload_world_saylink = Saylink::Create(
 				"#reload world",
 				false,
 				"Globally"

@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_RECIPE_LIST_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 
 class CharacterRecipeListRepository {
 public:
@@ -43,7 +43,7 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string TableName()

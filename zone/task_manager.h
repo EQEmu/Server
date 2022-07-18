@@ -66,6 +66,7 @@ public:
 	int LastTaskInSet(int task_set);
 	int NextTaskInSet(int task_set, int task_id);
 	bool IsTaskRepeatable(int task_id);
+	bool IsActiveTaskComplete(ClientTaskInformation& client_task);
 
 	friend class ClientTaskState;
 

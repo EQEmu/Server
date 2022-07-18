@@ -13,7 +13,7 @@
 #define EQEMU_BASE_ZONE_POINTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseZonePointsRepository {
@@ -112,12 +112,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -263,7 +263,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(zone_points_entry.zone) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(zone_points_entry.zone) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(zone_points_entry.version));
 		update_values.push_back(columns[3] + " = " + std::to_string(zone_points_entry.number));
 		update_values.push_back(columns[4] + " = " + std::to_string(zone_points_entry.y));
@@ -281,8 +281,8 @@ public:
 		update_values.push_back(columns[16] + " = " + std::to_string(zone_points_entry.client_version_mask));
 		update_values.push_back(columns[17] + " = " + std::to_string(zone_points_entry.min_expansion));
 		update_values.push_back(columns[18] + " = " + std::to_string(zone_points_entry.max_expansion));
-		update_values.push_back(columns[19] + " = '" + EscapeString(zone_points_entry.content_flags) + "'");
-		update_values.push_back(columns[20] + " = '" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[19] + " = '" + Strings::Escape(zone_points_entry.content_flags) + "'");
+		update_values.push_back(columns[20] + " = '" + Strings::Escape(zone_points_entry.content_flags_disabled) + "'");
 		update_values.push_back(columns[21] + " = " + std::to_string(zone_points_entry.is_virtual));
 		update_values.push_back(columns[22] + " = " + std::to_string(zone_points_entry.height));
 		update_values.push_back(columns[23] + " = " + std::to_string(zone_points_entry.width));
@@ -291,7 +291,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				zone_points_entry.id
 			)
@@ -308,7 +308,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(zone_points_entry.id));
-		insert_values.push_back("'" + EscapeString(zone_points_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_points_entry.zone) + "'");
 		insert_values.push_back(std::to_string(zone_points_entry.version));
 		insert_values.push_back(std::to_string(zone_points_entry.number));
 		insert_values.push_back(std::to_string(zone_points_entry.y));
@@ -326,8 +326,8 @@ public:
 		insert_values.push_back(std::to_string(zone_points_entry.client_version_mask));
 		insert_values.push_back(std::to_string(zone_points_entry.min_expansion));
 		insert_values.push_back(std::to_string(zone_points_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_points_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(zone_points_entry.content_flags_disabled) + "'");
 		insert_values.push_back(std::to_string(zone_points_entry.is_virtual));
 		insert_values.push_back(std::to_string(zone_points_entry.height));
 		insert_values.push_back(std::to_string(zone_points_entry.width));
@@ -336,7 +336,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -361,7 +361,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(zone_points_entry.id));
-			insert_values.push_back("'" + EscapeString(zone_points_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_points_entry.zone) + "'");
 			insert_values.push_back(std::to_string(zone_points_entry.version));
 			insert_values.push_back(std::to_string(zone_points_entry.number));
 			insert_values.push_back(std::to_string(zone_points_entry.y));
@@ -379,13 +379,13 @@ public:
 			insert_values.push_back(std::to_string(zone_points_entry.client_version_mask));
 			insert_values.push_back(std::to_string(zone_points_entry.min_expansion));
 			insert_values.push_back(std::to_string(zone_points_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_points_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(zone_points_entry.content_flags_disabled) + "'");
 			insert_values.push_back(std::to_string(zone_points_entry.is_virtual));
 			insert_values.push_back(std::to_string(zone_points_entry.height));
 			insert_values.push_back(std::to_string(zone_points_entry.width));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -394,7 +394,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

@@ -22,7 +22,7 @@
 #define EQEMU_EVENTLOG_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_eventlog_repository.h"
 
 class EventlogRepository: public BaseEventlogRepository {

@@ -23,7 +23,7 @@
 
 #include "../database.h"
 #include "../expedition_lockout_timer.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_expedition_lockouts_repository.h"
 #include <unordered_map>
 
@@ -114,9 +114,9 @@ public:
 				FIELD(event_name, '{}') DESC
 		),
 			joined_character_ids,
-			EscapeString(expedition_name),
+			Strings::Escape(expedition_name),
 			joined_character_ids,
-			EscapeString(ordered_event_name)
+			Strings::Escape(ordered_event_name)
 		));
 
 		std::unordered_map<uint32_t, std::vector<ExpeditionLockoutTimer>> lockouts;

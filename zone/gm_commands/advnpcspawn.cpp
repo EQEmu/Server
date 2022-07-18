@@ -33,7 +33,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string spawn_command   = str_tolower(sep->arg[1]);
+	std::string spawn_command   = Strings::ToLower(sep->arg[1]);
 	bool        is_add_entry    = spawn_command.find("addentry") != std::string::npos;
 	bool        is_add_spawn    = spawn_command.find("addspawn") != std::string::npos;
 	bool        is_clear_box    = spawn_command.find("clearbox") != std::string::npos;

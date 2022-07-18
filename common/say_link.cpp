@@ -20,7 +20,7 @@
 #include "say_link.h"
 #include "emu_constants.h"
 
-#include "string_util.h"
+#include "strings.h"
 #include "item_instance.h"
 #include "item_data.h"
 #include "../zone/zonedb.h"
@@ -334,7 +334,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	LogSaylinkDetail("new_message pre pass 1 [{}]", new_message);
 
 	// first pass - strip existing saylinks by putting placeholder anchors on them
-	for (auto &saylink: split_string(new_message, saylink_separator)) {
+	for (auto &saylink: Strings::Split(new_message, saylink_separator)) {
 		if (!saylink.empty() && saylink.length() > saylink_length &&
 			saylink.find(saylink_partial) != std::string::npos) {
 			saylinks.emplace_back(saylink);
@@ -342,7 +342,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 			LogSaylinkDetail("Found saylink [{}]", saylink);
 
 			// replace with anchor
-			find_replace(
+			Strings::FindReplace(
 				new_message,
 				fmt::format("{}", saylink),
 				fmt::format("<saylink:{}>", saylink_index)
@@ -358,11 +358,11 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 
 	// loop through brackets until none exist
 	if (new_message.find('[') != std::string::npos) {
-		for (auto &b: split_string(new_message, "[")) {
+		for (auto &b: Strings::Split(new_message, "[")) {
 			if (!b.empty() && b.find(']') != std::string::npos) {
-				std::vector<std::string> right_split = split_string(b, "]");
+				std::vector<std::string> right_split = Strings::Split(b, "]");
 				if (!right_split.empty()) {
-					std::string bracket_message = trim(right_split[0]);
+					std::string bracket_message = Strings::Trim(right_split[0]);
 
 					// we shouldn't see a saylink fragment here, ignore this bracket
 					if (bracket_message.find(saylink_partial) != std::string::npos) {
@@ -397,7 +397,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 						}
 
 						// replace with anchor
-						find_replace(
+						Strings::FindReplace(
 							new_message,
 							fmt::format("[{}]", bracket_message),
 							fmt::format("<prelink:{}>", link_index)
@@ -413,16 +413,16 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	LogSaylinkDetail("new_message post pass 2 (post brackets) [{}]", new_message);
 
 	// strip any current delimiters of saylinks
-	find_replace(new_message, saylink_separator, "");
+	Strings::FindReplace(new_message, saylink_separator, "");
 
 	// pop links onto anchors
 	link_index = 0;
 	for (auto &link: links) {
 
 		// strip any current delimiters of saylinks
-		find_replace(link, saylink_separator, "");
+		Strings::FindReplace(link, saylink_separator, "");
 
-		find_replace(
+		Strings::FindReplace(
 			new_message,
 			fmt::format("<prelink:{}>", link_index),
 			fmt::format("[\u0012{}\u0012]", link)
@@ -436,14 +436,14 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	saylink_index = 0;
 	for (auto &link: saylinks) {
 		// strip any current delimiters of saylinks
-		find_replace(link, saylink_separator, "");
+		Strings::FindReplace(link, saylink_separator, "");
 
 		// check to see if we did a double anchor pass (existing saylink that was also inside brackets)
 		// this means we found a saylink and we're checking to see if we're already encoded before double encoding
 		if (new_message.find(fmt::format("\u0012<saylink:{}>\u0012", saylink_index)) != std::string::npos) {
 			LogSaylinkDetail("Found encoded saylink at index [{}]", saylink_index);
 
-			find_replace(
+			Strings::FindReplace(
 				new_message,
 				fmt::format("\u0012<saylink:{}>\u0012", saylink_index),
 				fmt::format("\u0012{}\u0012", link)
@@ -452,7 +452,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 			continue;
 		}
 
-		find_replace(
+		Strings::FindReplace(
 			new_message,
 			fmt::format("<saylink:{}>", saylink_index),
 			fmt::format("\u0012{}\u0012", link)
@@ -485,7 +485,7 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 
 	auto saylinks = SaylinkRepository::GetWhere(
 		database,
-		fmt::format("phrase = '{}'", EscapeString(saylink_text))
+		fmt::format("phrase = '{}'", Strings::Escape(saylink_text))
 	);
 
 	// return if found from the database
@@ -507,4 +507,9 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 	}
 
 	return {};
+}
+
+std::string Saylink::Create(std::string saylink_text, bool silent, std::string link_name)
+{
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
 }
