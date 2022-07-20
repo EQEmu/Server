@@ -389,7 +389,7 @@ namespace TaskStr {
 	constexpr uint16 NO_LONGER_MEMBER                                  = 8942; // You are no longer a member of the shared task.
 	constexpr uint16 YOU_MAY_NOT_REQUEST_EXPANSION                     = 8943; // You may not request this shared task because you do not have the required expansion.
 	constexpr uint16 PLAYER_MAY_NOT_REQUEST_EXPANSION                  = 8944; // You may not request this shared task because %1 does not have the required expansion.
-	constexpr uint16 TWO_MIN_REQ_TASK_TERMINATED                       = 8945; // If your party does not meet the requirements in two minutes, the shared task will be terminated.
+	constexpr uint16 REQS_TWO_MIN                                      = 8945; // If your party does not meet the requirements in two minutes, the shared task will be terminated.
 	constexpr uint16 YOU_REPLAY_TIMER                                  = 8946; // You may not request this shared task because you must wait %1d:%2h:%3m before you can do another task of this type.
 	constexpr uint16 PLAYER_REPLAY_TIMER                               = 8947; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can do another task of this type.
 	constexpr uint16 PLAYER_NOW_LEADER                                 = 8948; // %1 is now the leader of your shared task, '%2'.

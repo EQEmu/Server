@@ -555,6 +555,7 @@ RULE_BOOL(TaskSystem, RecordCompletedOptionalActivities, false, "Record complete
 RULE_BOOL(TaskSystem, KeepOneRecordPerCompletedTask, true, "Keep only one record per completed task")
 RULE_BOOL(TaskSystem, EnableTaskProximity, true, "Enable task proximity system")
 RULE_INT(TaskSystem, RequestCooldownTimerSeconds, 15, "Seconds between allowing characters to request tasks (live-like default: 15 seconds)")
+RULE_INT(TaskSystem, SharedTasksWorldProcessRate, 6000, "Timer interval (milliseconds) that shared tasks are processed in world")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Range)

@@ -427,6 +427,7 @@ int main(int argc, char **argv)
 		launcher_list.Process();
 		LFPGroupList.Process();
 		adventure_manager.Process();
+		shared_task_manager.Process();
 		dynamic_zone_manager.Process();
 
 		if (InterserverTimer.Check()) {
