@@ -1385,7 +1385,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_SharedTaskRequest:
 		case ServerOP_SharedTaskAddPlayer:
-		case ServerOP_SharedTaskAttemptRemove:
+		case ServerOP_SharedTaskQuit:
 		case ServerOP_SharedTaskUpdate:
 		case ServerOP_SharedTaskRequestMemberlist:
 		case ServerOP_SharedTaskRemovePlayer:

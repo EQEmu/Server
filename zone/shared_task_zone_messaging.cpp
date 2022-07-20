@@ -53,11 +53,11 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 			break;
 		}
-		case ServerOP_SharedTaskAttemptRemove: {
-			auto p = reinterpret_cast<ServerSharedTaskAttemptRemove_Struct *>(pack->pBuffer);
+		case ServerOP_SharedTaskQuit: {
+			auto p = reinterpret_cast<ServerSharedTaskQuit_Struct *>(pack->pBuffer);
 			auto c = entity_list.GetClientByCharID(p->requested_character_id);
 			if (c) {
-				LogTasks("[ServerOP_SharedTaskAttemptRemove] We're back in zone and I found [{}]", c->GetCleanName());
+				LogTasks("[ServerOP_SharedTaskQuit] We're back in zone and I found [{}]", c->GetCleanName());
 
 				c->m_requested_shared_task_removal = true;
 				c->GetTaskState()->CancelTask(

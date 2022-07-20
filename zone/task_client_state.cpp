@@ -2103,12 +2103,12 @@ void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_t
 	if (!c->m_requested_shared_task_removal && task_type == TaskType::Shared && m_active_shared_task.task_id != 0) {
 
 		// struct
-		auto pack = new ServerPacket(ServerOP_SharedTaskAttemptRemove, sizeof(ServerSharedTaskAttemptRemove_Struct));
-		auto *r   = (ServerSharedTaskAttemptRemove_Struct *) pack->pBuffer;
+		auto pack = new ServerPacket(ServerOP_SharedTaskQuit, sizeof(ServerSharedTaskQuit_Struct));
+		auto *r   = (ServerSharedTaskQuit_Struct *) pack->pBuffer;
 
 		// fill
 		r->requested_character_id = c->CharacterID();
-		r->requested_task_id      = m_active_shared_task.task_id;
+		r->task_id                = m_active_shared_task.task_id;
 		r->remove_from_db         = remove_from_db;
 
 		// send
@@ -2351,16 +2351,14 @@ void ClientTaskState::AcceptNewTask(
 			auto mins  = fmt::format_int((seconds / 60) % 60).str();
 
 			// these solo task messages are in SharedTaskMessage for convenience
-			namespace EQStr = SharedTaskMessage;
 			if (timer_type == TaskTimerType::Replay)
 			{
-				int eqstr_id = EQStr::TASK_ASSIGN_WAIT_REPLAY_TIMER;
-				client->MessageString(Chat::Red, eqstr_id, days.c_str(), hours.c_str(), mins.c_str());
+				client->MessageString(Chat::Red, TaskStr::ASSIGN_REPLAY_TIMER, days.c_str(), hours.c_str(), mins.c_str());
 			}
 			else if (timer_type == TaskTimerType::Request)
 			{
-				int eqstr_id = EQStr::TASK_ASSIGN_WAIT_REQUEST_TIMER;
-				client->Message(Chat::Red, fmt::format(EQStr::GetEQStr(eqstr_id), days, hours, mins).c_str());
+				auto eqstr = TaskStr::Get(TaskStr::ASSIGN_REQUEST_TIMER);
+				client->Message(Chat::Red, fmt::format(eqstr, days, hours, mins).c_str());
 			}
 
 			return;
@@ -2444,7 +2442,7 @@ void ClientTaskState::AcceptNewTask(
 			}
 
 			client->Message(Chat::Yellow, fmt::format(
-				SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REQUEST_TIMER),
+				TaskStr::Get(TaskStr::RECEIVED_REQUEST_TIMER),
 				task->title,
 				fmt::format_int(seconds / 86400).c_str(),       // days
 				fmt::format_int((seconds / 3600) % 24).c_str(), // hours
@@ -2625,19 +2623,19 @@ void ClientTaskState::ListTaskTimers(Client* client)
 
 			if (timer_type == TaskTimerType::Replay)
 			{
-				client->MessageString(Chat::Yellow, SharedTaskMessage::REPLAY_TIMER_REMAINING,
+				client->MessageString(Chat::Yellow, TaskStr::REPLAY_TIMER_REMAINING,
 					task->title.c_str(), days.c_str(), hours.c_str(), mins.c_str());
 			}
 			else
 			{
-				auto eqstr = SharedTaskMessage::GetEQStr(SharedTaskMessage::REQUEST_TIMER_REMAINING);
+				auto eqstr = TaskStr::Get(TaskStr::REQUEST_TIMER_REMAINING);
 				client->Message(Chat::Yellow, fmt::format(eqstr, task->title, days, hours, mins).c_str());
 			}
 		}
 	}
 
 	if (character_task_timers.empty()) {
-		client->MessageString(Chat::Yellow, SharedTaskMessage::YOU_NO_CURRENT_REPLAY_TIMERS);
+		client->MessageString(Chat::Yellow, TaskStr::NO_REPLAY_TIMERS);
 	}
 }
 
@@ -2666,7 +2664,7 @@ void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& clie
 		CharacterTaskTimersRepository::InsertOne(database, timer);
 
 		client->Message(Chat::Yellow, fmt::format(
-			SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
+			TaskStr::Get(TaskStr::RECEIVED_REPLAY_TIMER),
 			task.title,
 			fmt::format_int(task.replay_timer_seconds / 86400).c_str(),       // days
 			fmt::format_int((task.replay_timer_seconds / 3600) % 24).c_str(), // hours
