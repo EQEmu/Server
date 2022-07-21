@@ -886,7 +886,7 @@ public:
 	int16 GetSkillDmgAmt(uint16 skill);
 	int16 GetPositionalDmgAmt(Mob* defender);
 	inline bool CanBlockSpell() const { return(spellbonuses.FocusEffects[focusBlockNextSpell]); }
-	bool DoHPToManaCovert(uint16 mana_cost = 0);
+	bool DoHPToManaCovert(int32 mana_cost = 0);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect);
 	int64 GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_spell_dmg);
 	void MeleeLifeTap(int64 damage);
