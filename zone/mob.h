@@ -480,6 +480,11 @@ public:
 	bool HasTwoHanderEquipped() { return has_twohanderequipped; }
 	void SetTwoHanderEquipped(bool val) { has_twohanderequipped = val; }
 	bool HasDualWeaponsEquiped() const { return has_duelweaponsequiped; }
+	bool HasBowEquipped() const { return has_bowequipped; }
+	void SetBowEquipped(bool val) { has_bowequipped = val; }
+	bool HasArrowEquipped() const { return has_arrowequipped; }
+	void SetArrowEquipped(bool val) { has_arrowequipped = val; }
+	bool HasBowAndArrowEquipped() const { return HasBowEquipped() && HasArrowEquipped(); }
 	inline void SetDuelWeaponsEquiped(bool val) { has_duelweaponsequiped = val; }
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
@@ -1655,6 +1660,8 @@ protected:
 	bool has_twohandbluntequiped;
 	bool has_twohanderequipped;
 	bool has_duelweaponsequiped;
+	bool has_bowequipped = false;
+	bool has_arrowequipped = false;
 	bool use_double_melee_round_dmg_bonus;
 	bool can_facestab;
 	bool has_numhits;
