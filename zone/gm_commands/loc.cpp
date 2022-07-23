@@ -24,13 +24,11 @@ void command_loc(Client *c, const Seperator *sep)
 	if (!zone->zonemap) {
 		c->Message(Chat::White, "Map not loaded for this zone.");
 	} else {
-		auto z = c->GetZ() + (c->GetSize() == 0.0 ? 6 : c->GetSize()) * HEAD_POSITION;
-		auto me = glm::vec3(c->GetX(), c->GetY(), z);
+		auto z = target->GetZ() + (target->GetSize() == 0.0 ? 6 : target->GetSize()) * HEAD_POSITION;
+		auto tarloc = glm::vec3(target->GetX(), target->GetY(), z);
 		glm::vec3 hit;
-		glm::vec3 bme(me);
-		bme.z -= 500;
 
-		auto best_z = zone->zonemap->FindBestZ(me, &hit);
+		auto best_z = zone->zonemap->FindBestZ(tarloc, &hit);
 
 		if (best_z != BEST_Z_INVALID) {
 			c->Message(
