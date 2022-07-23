@@ -195,6 +195,11 @@ void Perl_Expedition_SetSecondsRemaining(Expedition* self, uint32_t seconds_rema
 	self->GetDynamicZone()->SetSecondsRemaining(seconds_remaining);
 }
 
+void Perl_Expedition_SetSwitchID(Expedition* self, int dz_switch_id)
+{
+	self->GetDynamicZone()->SetSwitchID(dz_switch_id, true);
+}
+
 void Perl_Expedition_SetZoneInLocation(Expedition* self, float x, float y, float z, float heading)
 {
 	self->GetDynamicZone()->SetZoneInLocation(x, y, z, heading, true);
@@ -250,6 +255,7 @@ void perl_register_expedition()
 	package.add("SetReplayLockoutOnMemberJoin", &Perl_Expedition_SetReplayLockoutOnMemberJoin);
 	package.add("SetSafeReturn", &Perl_Expedition_SetSafeReturn);
 	package.add("SetSecondsRemaining", &Perl_Expedition_SetSecondsRemaining);
+	package.add("SetSwitchID", &Perl_Expedition_SetSwitchID);
 	package.add("SetZoneInLocation", &Perl_Expedition_SetZoneInLocation);
 	package.add("UpdateLockoutDuration", (void(*)(Expedition*, std::string, uint32_t))&Perl_Expedition_UpdateLockoutDuration);
 	package.add("UpdateLockoutDuration", (void(*)(Expedition*, std::string, uint32_t, bool))&Perl_Expedition_UpdateLockoutDuration);

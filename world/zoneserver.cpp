@@ -1417,6 +1417,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_DzSetCompass:
 		case ServerOP_DzSetSafeReturn:
 		case ServerOP_DzSetZoneIn:
+		case ServerOP_DzSetSwitchID:
+		case ServerOP_DzMovePC:
 		case ServerOP_DzUpdateMemberStatus: {
 			DynamicZone::HandleZoneMessage(pack);
 			break;

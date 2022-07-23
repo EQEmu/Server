@@ -1405,8 +1405,9 @@ public:
 	void SetDzRemovalTimer(bool enable_timer);
 	void SendDzCompassUpdate();
 	void GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone);
-	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = true);
-	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = true);
+	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = false);
+	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = false);
+	bool TryMovePCDynamicZoneSwitch(int dz_switch_id);
 	std::vector<DynamicZone*> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
 	std::unique_ptr<EQApplicationPacket> CreateDzSwitchListPacket(const std::vector<DynamicZone*>& dzs);
 	std::unique_ptr<EQApplicationPacket> CreateCompassPacket(const std::vector<DynamicZoneCompassEntry_Struct>& entries);

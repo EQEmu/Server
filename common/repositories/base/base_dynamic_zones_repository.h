@@ -27,6 +27,7 @@ public:
 		int         leader_id;
 		int         min_players;
 		int         max_players;
+		int         dz_switch_id;
 		int         compass_zone_id;
 		float       compass_x;
 		float       compass_y;
@@ -59,6 +60,7 @@ public:
 			"leader_id",
 			"min_players",
 			"max_players",
+			"dz_switch_id",
 			"compass_zone_id",
 			"compass_x",
 			"compass_y",
@@ -87,6 +89,7 @@ public:
 			"leader_id",
 			"min_players",
 			"max_players",
+			"dz_switch_id",
 			"compass_zone_id",
 			"compass_x",
 			"compass_y",
@@ -149,6 +152,7 @@ public:
 		entry.leader_id           = 0;
 		entry.min_players         = 0;
 		entry.max_players         = 0;
+		entry.dz_switch_id        = 0;
 		entry.compass_zone_id     = 0;
 		entry.compass_x           = 0;
 		entry.compass_y           = 0;
@@ -206,20 +210,21 @@ public:
 			entry.leader_id           = atoi(row[5]);
 			entry.min_players         = atoi(row[6]);
 			entry.max_players         = atoi(row[7]);
-			entry.compass_zone_id     = atoi(row[8]);
-			entry.compass_x           = static_cast<float>(atof(row[9]));
-			entry.compass_y           = static_cast<float>(atof(row[10]));
-			entry.compass_z           = static_cast<float>(atof(row[11]));
-			entry.safe_return_zone_id = atoi(row[12]);
-			entry.safe_return_x       = static_cast<float>(atof(row[13]));
-			entry.safe_return_y       = static_cast<float>(atof(row[14]));
-			entry.safe_return_z       = static_cast<float>(atof(row[15]));
-			entry.safe_return_heading = static_cast<float>(atof(row[16]));
-			entry.zone_in_x           = static_cast<float>(atof(row[17]));
-			entry.zone_in_y           = static_cast<float>(atof(row[18]));
-			entry.zone_in_z           = static_cast<float>(atof(row[19]));
-			entry.zone_in_heading     = static_cast<float>(atof(row[20]));
-			entry.has_zone_in         = atoi(row[21]);
+			entry.dz_switch_id        = atoi(row[8]);
+			entry.compass_zone_id     = atoi(row[9]);
+			entry.compass_x           = static_cast<float>(atof(row[10]));
+			entry.compass_y           = static_cast<float>(atof(row[11]));
+			entry.compass_z           = static_cast<float>(atof(row[12]));
+			entry.safe_return_zone_id = atoi(row[13]);
+			entry.safe_return_x       = static_cast<float>(atof(row[14]));
+			entry.safe_return_y       = static_cast<float>(atof(row[15]));
+			entry.safe_return_z       = static_cast<float>(atof(row[16]));
+			entry.safe_return_heading = static_cast<float>(atof(row[17]));
+			entry.zone_in_x           = static_cast<float>(atof(row[18]));
+			entry.zone_in_y           = static_cast<float>(atof(row[19]));
+			entry.zone_in_z           = static_cast<float>(atof(row[20]));
+			entry.zone_in_heading     = static_cast<float>(atof(row[21]));
+			entry.has_zone_in         = atoi(row[22]);
 
 			return entry;
 		}
@@ -260,20 +265,21 @@ public:
 		update_values.push_back(columns[5] + " = " + std::to_string(dynamic_zones_entry.leader_id));
 		update_values.push_back(columns[6] + " = " + std::to_string(dynamic_zones_entry.min_players));
 		update_values.push_back(columns[7] + " = " + std::to_string(dynamic_zones_entry.max_players));
-		update_values.push_back(columns[8] + " = " + std::to_string(dynamic_zones_entry.compass_zone_id));
-		update_values.push_back(columns[9] + " = " + std::to_string(dynamic_zones_entry.compass_x));
-		update_values.push_back(columns[10] + " = " + std::to_string(dynamic_zones_entry.compass_y));
-		update_values.push_back(columns[11] + " = " + std::to_string(dynamic_zones_entry.compass_z));
-		update_values.push_back(columns[12] + " = " + std::to_string(dynamic_zones_entry.safe_return_zone_id));
-		update_values.push_back(columns[13] + " = " + std::to_string(dynamic_zones_entry.safe_return_x));
-		update_values.push_back(columns[14] + " = " + std::to_string(dynamic_zones_entry.safe_return_y));
-		update_values.push_back(columns[15] + " = " + std::to_string(dynamic_zones_entry.safe_return_z));
-		update_values.push_back(columns[16] + " = " + std::to_string(dynamic_zones_entry.safe_return_heading));
-		update_values.push_back(columns[17] + " = " + std::to_string(dynamic_zones_entry.zone_in_x));
-		update_values.push_back(columns[18] + " = " + std::to_string(dynamic_zones_entry.zone_in_y));
-		update_values.push_back(columns[19] + " = " + std::to_string(dynamic_zones_entry.zone_in_z));
-		update_values.push_back(columns[20] + " = " + std::to_string(dynamic_zones_entry.zone_in_heading));
-		update_values.push_back(columns[21] + " = " + std::to_string(dynamic_zones_entry.has_zone_in));
+		update_values.push_back(columns[8] + " = " + std::to_string(dynamic_zones_entry.dz_switch_id));
+		update_values.push_back(columns[9] + " = " + std::to_string(dynamic_zones_entry.compass_zone_id));
+		update_values.push_back(columns[10] + " = " + std::to_string(dynamic_zones_entry.compass_x));
+		update_values.push_back(columns[11] + " = " + std::to_string(dynamic_zones_entry.compass_y));
+		update_values.push_back(columns[12] + " = " + std::to_string(dynamic_zones_entry.compass_z));
+		update_values.push_back(columns[13] + " = " + std::to_string(dynamic_zones_entry.safe_return_zone_id));
+		update_values.push_back(columns[14] + " = " + std::to_string(dynamic_zones_entry.safe_return_x));
+		update_values.push_back(columns[15] + " = " + std::to_string(dynamic_zones_entry.safe_return_y));
+		update_values.push_back(columns[16] + " = " + std::to_string(dynamic_zones_entry.safe_return_z));
+		update_values.push_back(columns[17] + " = " + std::to_string(dynamic_zones_entry.safe_return_heading));
+		update_values.push_back(columns[18] + " = " + std::to_string(dynamic_zones_entry.zone_in_x));
+		update_values.push_back(columns[19] + " = " + std::to_string(dynamic_zones_entry.zone_in_y));
+		update_values.push_back(columns[20] + " = " + std::to_string(dynamic_zones_entry.zone_in_z));
+		update_values.push_back(columns[21] + " = " + std::to_string(dynamic_zones_entry.zone_in_heading));
+		update_values.push_back(columns[22] + " = " + std::to_string(dynamic_zones_entry.has_zone_in));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -303,6 +309,7 @@ public:
 		insert_values.push_back(std::to_string(dynamic_zones_entry.leader_id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.min_players));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.max_players));
+		insert_values.push_back(std::to_string(dynamic_zones_entry.dz_switch_id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.compass_zone_id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.compass_x));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.compass_y));
@@ -354,6 +361,7 @@ public:
 			insert_values.push_back(std::to_string(dynamic_zones_entry.leader_id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.min_players));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.max_players));
+			insert_values.push_back(std::to_string(dynamic_zones_entry.dz_switch_id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.compass_zone_id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.compass_x));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.compass_y));
@@ -409,20 +417,21 @@ public:
 			entry.leader_id           = atoi(row[5]);
 			entry.min_players         = atoi(row[6]);
 			entry.max_players         = atoi(row[7]);
-			entry.compass_zone_id     = atoi(row[8]);
-			entry.compass_x           = static_cast<float>(atof(row[9]));
-			entry.compass_y           = static_cast<float>(atof(row[10]));
-			entry.compass_z           = static_cast<float>(atof(row[11]));
-			entry.safe_return_zone_id = atoi(row[12]);
-			entry.safe_return_x       = static_cast<float>(atof(row[13]));
-			entry.safe_return_y       = static_cast<float>(atof(row[14]));
-			entry.safe_return_z       = static_cast<float>(atof(row[15]));
-			entry.safe_return_heading = static_cast<float>(atof(row[16]));
-			entry.zone_in_x           = static_cast<float>(atof(row[17]));
-			entry.zone_in_y           = static_cast<float>(atof(row[18]));
-			entry.zone_in_z           = static_cast<float>(atof(row[19]));
-			entry.zone_in_heading     = static_cast<float>(atof(row[20]));
-			entry.has_zone_in         = atoi(row[21]);
+			entry.dz_switch_id        = atoi(row[8]);
+			entry.compass_zone_id     = atoi(row[9]);
+			entry.compass_x           = static_cast<float>(atof(row[10]));
+			entry.compass_y           = static_cast<float>(atof(row[11]));
+			entry.compass_z           = static_cast<float>(atof(row[12]));
+			entry.safe_return_zone_id = atoi(row[13]);
+			entry.safe_return_x       = static_cast<float>(atof(row[14]));
+			entry.safe_return_y       = static_cast<float>(atof(row[15]));
+			entry.safe_return_z       = static_cast<float>(atof(row[16]));
+			entry.safe_return_heading = static_cast<float>(atof(row[17]));
+			entry.zone_in_x           = static_cast<float>(atof(row[18]));
+			entry.zone_in_y           = static_cast<float>(atof(row[19]));
+			entry.zone_in_z           = static_cast<float>(atof(row[20]));
+			entry.zone_in_heading     = static_cast<float>(atof(row[21]));
+			entry.has_zone_in         = atoi(row[22]);
 
 			all_entries.push_back(entry);
 		}
@@ -455,20 +464,21 @@ public:
 			entry.leader_id           = atoi(row[5]);
 			entry.min_players         = atoi(row[6]);
 			entry.max_players         = atoi(row[7]);
-			entry.compass_zone_id     = atoi(row[8]);
-			entry.compass_x           = static_cast<float>(atof(row[9]));
-			entry.compass_y           = static_cast<float>(atof(row[10]));
-			entry.compass_z           = static_cast<float>(atof(row[11]));
-			entry.safe_return_zone_id = atoi(row[12]);
-			entry.safe_return_x       = static_cast<float>(atof(row[13]));
-			entry.safe_return_y       = static_cast<float>(atof(row[14]));
-			entry.safe_return_z       = static_cast<float>(atof(row[15]));
-			entry.safe_return_heading = static_cast<float>(atof(row[16]));
-			entry.zone_in_x           = static_cast<float>(atof(row[17]));
-			entry.zone_in_y           = static_cast<float>(atof(row[18]));
-			entry.zone_in_z           = static_cast<float>(atof(row[19]));
-			entry.zone_in_heading     = static_cast<float>(atof(row[20]));
-			entry.has_zone_in         = atoi(row[21]);
+			entry.dz_switch_id        = atoi(row[8]);
+			entry.compass_zone_id     = atoi(row[9]);
+			entry.compass_x           = static_cast<float>(atof(row[10]));
+			entry.compass_y           = static_cast<float>(atof(row[11]));
+			entry.compass_z           = static_cast<float>(atof(row[12]));
+			entry.safe_return_zone_id = atoi(row[13]);
+			entry.safe_return_x       = static_cast<float>(atof(row[14]));
+			entry.safe_return_y       = static_cast<float>(atof(row[15]));
+			entry.safe_return_z       = static_cast<float>(atof(row[16]));
+			entry.safe_return_heading = static_cast<float>(atof(row[17]));
+			entry.zone_in_x           = static_cast<float>(atof(row[18]));
+			entry.zone_in_y           = static_cast<float>(atof(row[19]));
+			entry.zone_in_z           = static_cast<float>(atof(row[20]));
+			entry.zone_in_heading     = static_cast<float>(atof(row[21]));
+			entry.has_zone_in         = atoi(row[22]);
 
 			all_entries.push_back(entry);
 		}

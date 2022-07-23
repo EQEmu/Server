@@ -169,6 +169,8 @@
 #define ServerOP_DzExpireWarning              0x045b
 #define ServerOP_DzCreated                    0x045c
 #define ServerOP_DzDeleted                    0x045d
+#define ServerOP_DzSetSwitchID                0x045e
+#define ServerOP_DzMovePC                     0x045f
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -1671,6 +1673,13 @@ struct ServerDzMemberStatuses_Struct {
 	ServerDzMemberStatusEntry_Struct entries[0];
 };
 
+struct ServerDzMovePC_Struct {
+	uint32 dz_id;
+	uint16 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 character_id;
+};
+
 struct ServerExpeditionLockout_Struct {
 	uint32 expedition_id;
 	uint64 expire_time;
@@ -1750,6 +1759,11 @@ struct ServerDzLocation_Struct {
 	float  x;
 	float  z;
 	float  heading;
+};
+
+struct ServerDzSwitchID_Struct {
+	uint32 dz_id;
+	int    dz_switch_id;
 };
 
 struct ServerDzMember_Struct {

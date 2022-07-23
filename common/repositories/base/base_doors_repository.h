@@ -50,6 +50,7 @@ public:
 		float       buffer;
 		int         client_version_mask;
 		int         is_ldon_door;
+		int         dz_switch_id;
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
@@ -95,6 +96,7 @@ public:
 			"buffer",
 			"client_version_mask",
 			"is_ldon_door",
+			"dz_switch_id",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -136,6 +138,7 @@ public:
 			"buffer",
 			"client_version_mask",
 			"is_ldon_door",
+			"dz_switch_id",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -211,6 +214,7 @@ public:
 		entry.buffer                 = 0;
 		entry.client_version_mask    = 4294967295;
 		entry.is_ldon_door           = 0;
+		entry.dz_switch_id           = 0;
 		entry.min_expansion          = -1;
 		entry.max_expansion          = -1;
 		entry.content_flags          = "";
@@ -281,10 +285,11 @@ public:
 			entry.buffer                 = static_cast<float>(atof(row[28]));
 			entry.client_version_mask    = atoi(row[29]);
 			entry.is_ldon_door           = atoi(row[30]);
-			entry.min_expansion          = atoi(row[31]);
-			entry.max_expansion          = atoi(row[32]);
-			entry.content_flags          = row[33] ? row[33] : "";
-			entry.content_flags_disabled = row[34] ? row[34] : "";
+			entry.dz_switch_id           = atoi(row[31]);
+			entry.min_expansion          = atoi(row[32]);
+			entry.max_expansion          = atoi(row[33]);
+			entry.content_flags          = row[34] ? row[34] : "";
+			entry.content_flags_disabled = row[35] ? row[35] : "";
 
 			return entry;
 		}
@@ -348,10 +353,11 @@ public:
 		update_values.push_back(columns[28] + " = " + std::to_string(doors_entry.buffer));
 		update_values.push_back(columns[29] + " = " + std::to_string(doors_entry.client_version_mask));
 		update_values.push_back(columns[30] + " = " + std::to_string(doors_entry.is_ldon_door));
-		update_values.push_back(columns[31] + " = " + std::to_string(doors_entry.min_expansion));
-		update_values.push_back(columns[32] + " = " + std::to_string(doors_entry.max_expansion));
-		update_values.push_back(columns[33] + " = '" + Strings::Escape(doors_entry.content_flags) + "'");
-		update_values.push_back(columns[34] + " = '" + Strings::Escape(doors_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[31] + " = " + std::to_string(doors_entry.dz_switch_id));
+		update_values.push_back(columns[32] + " = " + std::to_string(doors_entry.min_expansion));
+		update_values.push_back(columns[33] + " = " + std::to_string(doors_entry.max_expansion));
+		update_values.push_back(columns[34] + " = '" + Strings::Escape(doors_entry.content_flags) + "'");
+		update_values.push_back(columns[35] + " = '" + Strings::Escape(doors_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -404,6 +410,7 @@ public:
 		insert_values.push_back(std::to_string(doors_entry.buffer));
 		insert_values.push_back(std::to_string(doors_entry.client_version_mask));
 		insert_values.push_back(std::to_string(doors_entry.is_ldon_door));
+		insert_values.push_back(std::to_string(doors_entry.dz_switch_id));
 		insert_values.push_back(std::to_string(doors_entry.min_expansion));
 		insert_values.push_back(std::to_string(doors_entry.max_expansion));
 		insert_values.push_back("'" + Strings::Escape(doors_entry.content_flags) + "'");
@@ -468,6 +475,7 @@ public:
 			insert_values.push_back(std::to_string(doors_entry.buffer));
 			insert_values.push_back(std::to_string(doors_entry.client_version_mask));
 			insert_values.push_back(std::to_string(doors_entry.is_ldon_door));
+			insert_values.push_back(std::to_string(doors_entry.dz_switch_id));
 			insert_values.push_back(std::to_string(doors_entry.min_expansion));
 			insert_values.push_back(std::to_string(doors_entry.max_expansion));
 			insert_values.push_back("'" + Strings::Escape(doors_entry.content_flags) + "'");
@@ -536,10 +544,11 @@ public:
 			entry.buffer                 = static_cast<float>(atof(row[28]));
 			entry.client_version_mask    = atoi(row[29]);
 			entry.is_ldon_door           = atoi(row[30]);
-			entry.min_expansion          = atoi(row[31]);
-			entry.max_expansion          = atoi(row[32]);
-			entry.content_flags          = row[33] ? row[33] : "";
-			entry.content_flags_disabled = row[34] ? row[34] : "";
+			entry.dz_switch_id           = atoi(row[31]);
+			entry.min_expansion          = atoi(row[32]);
+			entry.max_expansion          = atoi(row[33]);
+			entry.content_flags          = row[34] ? row[34] : "";
+			entry.content_flags_disabled = row[35] ? row[35] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -595,10 +604,11 @@ public:
 			entry.buffer                 = static_cast<float>(atof(row[28]));
 			entry.client_version_mask    = atoi(row[29]);
 			entry.is_ldon_door           = atoi(row[30]);
-			entry.min_expansion          = atoi(row[31]);
-			entry.max_expansion          = atoi(row[32]);
-			entry.content_flags          = row[33] ? row[33] : "";
-			entry.content_flags_disabled = row[34] ? row[34] : "";
+			entry.dz_switch_id           = atoi(row[31]);
+			entry.min_expansion          = atoi(row[32]);
+			entry.max_expansion          = atoi(row[33]);
+			entry.content_flags          = row[34] ? row[34] : "";
+			entry.content_flags_disabled = row[35] ? row[35] : "";
 
 			all_entries.push_back(entry);
 		}
