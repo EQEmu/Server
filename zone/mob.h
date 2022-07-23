@@ -883,7 +883,7 @@ public:
 	int16 GetMeleeDmgPositionMod(Mob* defender);
 	int16 GetSkillReuseTime(uint16 skill);
 	int GetCriticalChanceBonus(uint16 skill);
-	int32 GetSkillDmgAmt(uint16 skill);
+	int16 GetSkillDmgAmt(uint16 skill);
 	int16 GetPositionalDmgAmt(Mob* defender);
 	inline bool CanBlockSpell() const { return(spellbonuses.FocusEffects[focusBlockNextSpell]); }
 	bool DoHPToManaCovert(int32 mana_cost = 0);
