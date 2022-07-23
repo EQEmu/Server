@@ -163,7 +163,7 @@ struct ActivityInformation {
 			out.WriteInt32(zone_ids.empty() ? 0 : zone_ids.front());
 		}
 
-		out.WriteInt32(0); // unknown id
+		out.WriteInt32(activity_type == TaskActivityType::Touch ? goal_id : 0); // dz_switch_id (maybe add separate field)
 		out.WriteString(description_override);
 		out.WriteInt32(done_count);
 		out.WriteInt8(1); // unknown

@@ -38,7 +38,7 @@ public:
 	void UpdateTasksOnExplore(Client *client, int explore_id);
 	bool UpdateTasksOnSpeakWith(Client *client, int npc_type_id);
 	bool UpdateTasksOnDeliver(Client *client, std::list<EQ::ItemInstance *> &items, int cash, int npc_type_id);
-	void UpdateTasksOnTouch(Client *client, int zone_id, uint16 version);
+	void UpdateTasksOnTouch(Client *client, int dz_switch_id);
 	void ProcessTaskProximities(Client *client, float x, float y, float z);
 	bool TaskOutOfTime(TaskType task_type, int index);
 	void TaskPeriodicChecks(Client *client);
@@ -130,7 +130,6 @@ private:
 	std::vector<int>                      m_enabled_tasks;
 	std::vector<CompletedTaskInformation> m_completed_tasks;
 	int                                   m_last_completed_task_loaded;
-	bool                                  m_checked_touch_activities;
 
 	static void ShowClientTaskInfoMessage(ClientTaskInformation *task, Client *c);
 

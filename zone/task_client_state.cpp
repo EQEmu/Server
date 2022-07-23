@@ -22,7 +22,6 @@ ClientTaskState::ClientTaskState()
 {
 	m_active_task_count          = 0;
 	m_last_completed_task_loaded = 0;
-	m_checked_touch_activities   = false;
 
 	for (int i = 0; i < MAXACTIVEQUESTS; i++) {
 		m_active_quests[i].slot    = i;
@@ -1039,11 +1038,11 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 	return is_updated;
 }
 
-void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id, uint16 version)
+void ClientTaskState::UpdateTasksOnTouch(Client *client, int dz_switch_id)
 {
 	// If the client has no tasks, there is nothing further to check.
 
-	LogTasks("[UpdateTasksOnTouch] [{}] ", zone_id);
+	LogTasks("[UpdateTasksOnTouch] [{}] ", dz_switch_id);
 
 	if (!HasActiveTasks()) {
 		return;
@@ -1077,14 +1076,16 @@ void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id, uint16 ver
 			if (activity_info->goal_method != METHODSINGLEID) {
 				continue;
 			}
-			if (!activity_info->CheckZone(zone_id, version)) {
+			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
 				LogTasks(
 					"[UpdateTasksOnTouch] character [{}] Touch activity_information failed zone check",
 					client->GetName()
 				);
 				continue;
 			}
-
+			if (activity_info->goal_id != dz_switch_id) {
+				continue;
+			}
 			// We found an active task to zone into this zone, so set done count to goal count
 			// (Only a goal count of 1 makes sense for touch activities?)
 			LogTasks("[UpdateTasksOnTouch] Increment on Touch");
@@ -1921,15 +1922,6 @@ void ClientTaskState::TaskPeriodicChecks(Client *client)
 			// tasks fail at the same time.
 			break;
 		}
-	}
-
-	// Check for activities that require zoning into a specific zone.
-	// This is done in this method because it gives an extra few seconds for the client screen to display
-	// the zone before we send the 'Task activity_information Completed' message.
-	//
-	if (!m_checked_touch_activities) {
-		UpdateTasksOnTouch(client, zone->GetZoneID(), zone->GetInstanceVersion());
-		m_checked_touch_activities = true;
 	}
 }
 

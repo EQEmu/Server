@@ -1178,6 +1178,10 @@ public:
 		}
 		else { return false; }
 	}
+	void UpdateTasksOnTouchSwitch(int dz_switch_id)
+	{
+		if (task_state) { task_state->UpdateTasksOnTouch(this, dz_switch_id); }
+	}
 	inline void TaskSetSelector(Mob *mob, int task_set_id)
 	{
 		if (task_manager) {
