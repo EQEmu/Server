@@ -123,6 +123,7 @@ protected:
 	void ChooseNewLeader(SharedTask *s);
 	bool HandleCompletedActivities(SharedTask* s);
 	void HandleCompletedTask(SharedTask* s);
+	void LoadDynamicZoneTemplate(SharedTask* s);
 	void SendSharedTaskMemberListToAllMembers(SharedTask *s);
 	void SendSharedTaskMemberAddedToAllMembers(SharedTask *s, const std::string &player_name);
 	void SendSharedTaskMemberRemovedToAllMembers(SharedTask *s, const std::string &player_name);

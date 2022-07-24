@@ -622,3 +622,28 @@ void DynamicZoneBase::LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_
 	cereal::BinaryInputArchive archive(ss);
 	archive(*this);
 }
+
+void DynamicZoneBase::LoadTemplate(const DynamicZoneTemplatesRepository::DynamicZoneTemplates& dz_template)
+{
+	m_zone_id            = dz_template.zone_id;
+	m_zone_version       = dz_template.zone_version;
+	m_name               = dz_template.name;
+	m_min_players        = dz_template.min_players;
+	m_max_players        = dz_template.max_players;
+	m_duration           = std::chrono::seconds(dz_template.duration_seconds);
+	m_dz_switch_id       = dz_template.dz_switch_id;
+	m_compass.zone_id    = dz_template.compass_zone_id;
+	m_compass.x          = dz_template.compass_x;
+	m_compass.y          = dz_template.compass_y;
+	m_compass.z          = dz_template.compass_z;
+	m_safereturn.zone_id = dz_template.return_zone_id;
+	m_safereturn.x       = dz_template.return_x;
+	m_safereturn.y       = dz_template.return_y;
+	m_safereturn.z       = dz_template.return_z;
+	m_safereturn.heading = dz_template.return_h;
+	m_has_zonein         = dz_template.override_zone_in;
+	m_zonein.x           = dz_template.zone_in_x;
+	m_zonein.y           = dz_template.zone_in_y;
+	m_zonein.z           = dz_template.zone_in_z;
+	m_zonein.heading     = dz_template.zone_in_h;
+}

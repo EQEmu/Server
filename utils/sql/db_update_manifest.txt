@@ -448,6 +448,7 @@
 9192|2022_07_13_task_lock_activity.sql|SHOW COLUMNS FROM `tasks` LIKE 'lock_activity_id'|empty|
 9193|2022_07_16_task_timer_groups.sql|SHOW COLUMNS FROM `tasks` LIKE 'replay_timer_group'|empty|
 9194|2022_07_23_dz_switch_id.sql|SHOW COLUMNS FROM `doors` LIKE 'dz_switch_id'|empty|
+9195|2022_07_23_dz_templates.sql|SHOW TABLES like 'dynamic_zone_templates'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

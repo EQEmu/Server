@@ -1192,6 +1192,8 @@ bool Zone::Init(bool is_static) {
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 
+	LoadDynamicZoneTemplates();
+
 	LogInfo("Loading dynamic zones");
 	DynamicZone::CacheAllFromDatabase();
 
@@ -2810,5 +2812,15 @@ void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string
 
 	if (not_found) {
 		LogDiscord("[SendDiscordMessage] Did not find valid webhook by webhook name [{}]", webhook_name);
+	}
+}
+
+void Zone::LoadDynamicZoneTemplates()
+{
+	dz_template_cache.clear();
+	auto dz_templates = DynamicZoneTemplatesRepository::All(content_db);
+	for (const auto& dz_template : dz_templates)
+	{
+		dz_template_cache[dz_template.id] = dz_template;
 	}
 }

@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "queryserv.h"
 #include "world_store.h"
 #include "dynamic_zone.h"
+#include "dynamic_zone_manager.h"
 #include "expedition_message.h"
 #include "shared_task_world_messaging.h"
 #include "../common/shared_tasks.h"
@@ -1349,6 +1350,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_ReloadTasks: {
 			shared_task_manager.LoadTaskData();
+			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_ReloadDzTemplates: {
+			dynamic_zone_manager.LoadTemplates();
 			zoneserver_list.SendPacket(pack);
 			break;
 		}

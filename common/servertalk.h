@@ -244,6 +244,7 @@
 #define ServerOP_ReloadVeteranRewards 0x4118
 #define ServerOP_ReloadWorld 0x4119
 #define ServerOP_ReloadZonePoints 0x4120
+#define ServerOP_ReloadDzTemplates 0x4121
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
