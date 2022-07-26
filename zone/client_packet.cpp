@@ -4238,10 +4238,10 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	std::string export_string = fmt::format("{}", cd->doorid);
 	std::vector<EQ::Any> args;
 	args.push_back(currentdoor);
-	parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args);
-
-	currentdoor->HandleClick(this, 0);
-	return;
+	if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0)
+	{
+		currentdoor->HandleClick(this, 0);
+	}
 }
 
 void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
