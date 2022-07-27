@@ -349,7 +349,8 @@ Client::Client(EQStreamInterface* ieqs)
 		m_pp.InnateSkills[i] = InnateDisabled;
 
 	temp_pvp = false;
-	is_client_moving = false;
+
+	moving = false;
 
 	environment_damage_modifier = 0;
 	invulnerable_environment_damage = false;
