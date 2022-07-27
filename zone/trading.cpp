@@ -1152,8 +1152,8 @@ void Client::Trader_EndTrader() {
 			}
 
 			safe_delete(outapp);
-			safe_delete(gis);
 		}
+		safe_delete(gis);
 	}
 
 	database.DeleteTraderItem(CharacterID());
