@@ -333,6 +333,10 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	// load these here for now until spells and items can be truly repointed to "content_db"
+	database.SetSharedItemsCount(content_db.GetItemsCount());
+	database.SetSharedSpellsCount(content_db.GetSpellsCount());
+
 	LogInfo("Loading base data");
 	if (!database.LoadBaseData(hotfix_name)) {
 		LogError("Loading base data failed!");

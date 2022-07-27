@@ -217,6 +217,10 @@ protected:
 	std::unique_ptr<EQ::MemoryMappedFile>                             base_data_mmf;
 	std::unique_ptr<EQ::MemoryMappedFile>                             spells_mmf;
 
+public:
+	void SetSharedItemsCount(uint32 shared_items_count);
+	void SetSharedSpellsCount(uint32 shared_spells_count);
+protected:
 	uint32 m_shared_items_count = 0;
 	uint32 m_shared_spells_count = 0;
 };
