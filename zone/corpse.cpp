@@ -1309,7 +1309,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			EntityList::RemoveNumbers(corpse_name),
 			GetID()
 		);
-		std::vector<EQ::Any> args;
+		std::vector<std::any> args;
 		args.push_back(inst);
 		args.push_back(this);
 		bool prevent_loot = false;

@@ -201,7 +201,7 @@ void PerlembParser::ReloadQuests()
 
 int PerlembParser::EventCommon(
 	QuestEventID event, uint32 objid, const char *data, NPC *npcmob, EQ::ItemInstance *item_inst, const SPDat_Spell_Struct* spell, Mob *mob,
-	uint32 extradata, bool global, std::vector<EQ::Any> *extra_pointers
+	uint32 extradata, bool global, std::vector<std::any> *extra_pointers
 )
 {
 	if (!perl) {
@@ -297,7 +297,7 @@ int PerlembParser::EventCommon(
 
 int PerlembParser::EventNPC(
 	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, nullptr, init, extra_data, false, extra_pointers);
@@ -305,7 +305,7 @@ int PerlembParser::EventNPC(
 
 int PerlembParser::EventGlobalNPC(
 	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, nullptr, init, extra_data, true, extra_pointers);
@@ -313,7 +313,7 @@ int PerlembParser::EventGlobalNPC(
 
 int PerlembParser::EventPlayer(
 	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, nullptr, client, extra_data, false, extra_pointers);
@@ -321,7 +321,7 @@ int PerlembParser::EventPlayer(
 
 int PerlembParser::EventGlobalPlayer(
 	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, nullptr, client, extra_data, true, extra_pointers);
@@ -329,7 +329,7 @@ int PerlembParser::EventGlobalPlayer(
 
 int PerlembParser::EventItem(
 	QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	// needs pointer validation on 'item' argument
@@ -338,7 +338,7 @@ int PerlembParser::EventItem(
 
 int PerlembParser::EventSpell(
 	QuestEventID evt, NPC *npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, spell_id, data.c_str(), npc, nullptr, &spells[spell_id], client, extra_data, false, extra_pointers);
@@ -1308,7 +1308,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
 
 void PerlembParser::ExportEventVariables(
 	std::string &package_name, QuestEventID event, uint32 objid, const char *data,
-	NPC *npcmob, EQ::ItemInstance *item_inst, Mob *mob, uint32 extradata, std::vector<EQ::Any> *extra_pointers
+	NPC *npcmob, EQ::ItemInstance *item_inst, Mob *mob, uint32 extradata, std::vector<std::any> *extra_pointers
 )
 {
 	switch (event) {
@@ -1327,7 +1327,7 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers) {
 				size_t      sz = extra_pointers->size();
 				for (size_t i  = 0; i < sz; ++i) {
-					EQ::ItemInstance *inst = EQ::any_cast<EQ::ItemInstance *>(extra_pointers->at(i));
+					EQ::ItemInstance *inst = std::any_cast<EQ::ItemInstance *>(extra_pointers->at(i));
 
 					std::string var_name = "item";
 					var_name += std::to_string(i + 1);
