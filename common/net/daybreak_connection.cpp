@@ -1394,7 +1394,7 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 		first_header.total_size = (uint32_t)HostToNetwork((uint32_t)length);
 
 		size_t used = 0;
-		size_t sublen = m_max_packet_size - m_crc_bytes - DaybreakReliableFragmentHeader::size();
+		size_t sublen = m_max_packet_size - m_crc_bytes - DaybreakReliableFragmentHeader::size() - 1; // -1 for compress flag
 		DynamicPacket first_packet;
 		first_packet.PutSerialize(0, first_header);
 		first_packet.PutData(DaybreakReliableFragmentHeader::size(), (char*)p.Data() + used, sublen);
