@@ -471,7 +471,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	case CLIENT_CONNECTING: {
 		if (ConnectingOpcodes.count(opcode) != 1) {
 			//Hate const cast but everything in lua needs to be non-const even if i make it non-mutable
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
 
@@ -495,7 +495,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
 		if (p == nullptr) {
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
@@ -3012,7 +3012,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						if (old_aug) { // An old augment was removed in order to be replaced with the new one (augment_action 2)
 							CalcBonuses();
 
-							std::vector<EQ::Any> args;
+							std::vector<std::any> args;
 							args.push_back(old_aug);
 							parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 
@@ -3026,7 +3026,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 						aug = tobe_auged->GetAugment(in_augment->augment_index);
 						if (aug) {
-							std::vector<EQ::Any> args;
+							std::vector<std::any> args;
 							args.push_back(aug);
 							parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 
@@ -3082,7 +3082,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			case AugmentActions::Remove:
 				aug = tobe_auged->GetAugment(in_augment->augment_index);
 				if (aug) {
-					std::vector<EQ::Any> args;
+					std::vector<std::any> args;
 					args.push_back(aug);
 					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					args.assign(1, tobe_auged);
@@ -3132,7 +3132,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				// Augments can be destroyed with a right click -> Destroy at any time.
 				aug = tobe_auged->GetAugment(in_augment->augment_index);
 				if (aug) {
-					std::vector<EQ::Any> args;
+					std::vector<std::any> args;
 					args.push_back(aug);
 					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					args.assign(1, tobe_auged);
@@ -4236,7 +4236,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	}
 
 	std::string export_string = fmt::format("{}", cd->doorid);
-	std::vector<EQ::Any> args;
+	std::vector<std::any> args;
 	args.push_back(currentdoor);
 	if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0)
 	{
@@ -4259,7 +4259,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 
 		object->HandleClick(this, click_object);
 
-		std::vector<EQ::Any> args;
+		std::vector<std::any> args;
 		args.push_back(object);
 
 		std::string export_string = fmt::format("{}", click_object->drop_id);
