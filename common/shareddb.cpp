@@ -932,8 +932,6 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		return false;
 	}
 
-	m_shared_items_count = GetItemsCount();
-
 	return true;
 }
 
@@ -1784,8 +1782,6 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		LogError("Error Loading Spells: {}", ex.what());
 		return false;
 	}
-	
-	m_shared_spells_count = GetSpellsCount();
 
 	return true;
 }
@@ -2403,4 +2399,14 @@ uint32 SharedDatabase::GetItemsCount()
 	}
 
 	return 0;
+}
+
+void SharedDatabase::SetSharedItemsCount(uint32 shared_items_count)
+{
+	SharedDatabase::m_shared_items_count = shared_items_count;
+}
+
+void SharedDatabase::SetSharedSpellsCount(uint32 shared_spells_count)
+{
+	SharedDatabase::m_shared_spells_count = shared_spells_count;
 }
