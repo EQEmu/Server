@@ -569,7 +569,22 @@ void Client::CompleteConnect()
 
 	//SendAATable();
 
-	if (GetHideMe()) Message(Chat::Red, "[GM] You are currently hidden to all clients");
+	if (GetGM() && (GetHideMe() || GetGMSpeed() || GetGMInvul() || flymode != 0 || tellsoff)) {
+		std::string state = "currently ";
+
+		if (GetHideMe()) state += "hidden to all clients, ";
+		if (GetGMSpeed()) state += "running at GM speed, ";
+		if (GetGMInvul()) state += "invulnerable to all damage, ";
+		if (flymode == 1) state += "flying, ";
+		else if (flymode == 2) state += "levitating, ";
+		if (tellsoff) state += "ignoring tells, ";
+
+		if (state.size () > 0) {
+			//Remove last two characters from the string
+			state.resize (state.size () - 2);
+			Message(Chat::Red, "[GM] You are %s.", state.c_str());
+		}
+	}
 
 	uint32 raidid = database.GetRaidID(GetName());
 	Raid *raid = nullptr;
@@ -1185,7 +1200,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
 	/* Load Character Account Data: Temp until I move */
-	query = StringFormat("SELECT `status`, `name`, `ls_id`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme`, `time_creation` FROM `account` WHERE `id` = %u", AccountID());
+	query = StringFormat("SELECT `status`, `name`, `ls_id`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme`, `time_creation`, `gminvul`, `flymode` FROM `account` WHERE `id` = %u", this->AccountID());
 	auto results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		admin = atoi(row[0]);
@@ -1196,6 +1211,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		revoked = atoi(row[5]);
 		gm_hide_me = atoi(row[6]);
 		account_creation = atoul(row[7]);
+		gminvul = atoi(row[8]);
+		flymode = static_cast<GravityBehavior>(atoi(row[9]));
+		tellsoff = gm_hide_me;
 	}
 
 	/* Load Character Data */
@@ -1266,6 +1284,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* If GM, not trackable */
 	if (gm_hide_me) { trackable = false; }
+	if (gminvul) { invulnerable = true; }
+	if (flymode > 0) { SendAppearancePacket(AT_Levitate, flymode); }
 	/* Set Con State for Reporting */
 	conn_state = PlayerProfileLoaded;
 
@@ -6117,17 +6137,26 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 	BecomeNPC_Struct* bnpc = (BecomeNPC_Struct*)app->pBuffer;
 
 	Mob* cli = (Mob*)entity_list.GetMob(bnpc->id);
-	if (cli == 0)
+	if (cli == nullptr) {
 		return;
+	}
 
-	if (cli->IsClient())
-		cli->CastToClient()->QueuePacket(app);
-	cli->SendAppearancePacket(AT_NPCName, 1, true);
-	cli->CastToClient()->SetBecomeNPC(true);
-	cli->CastToClient()->SetBecomeNPCLevel(bnpc->maxlevel);
-	cli->MessageString(Chat::White, TOGGLE_OFF);
-	cli->CastToClient()->tellsoff = true;
-	//TODO: Make this toggle a BecomeNPC flag so that it gets updated when people zone in as well; Make combat work with this.
+	if (cli->IsClient()) {
+		Client* target = cli->CastToClient();
+		target->QueuePacket(app);
+		if(target->GetGM()) {
+			target->SetInvul(false);
+			target->SetHideMe(false);
+			target->SetGM(false);
+		}
+
+		cli->SendAppearancePacket(AT_NPCName, 1, true);
+		target->SetBecomeNPC(true);
+		target->SetBecomeNPCLevel(bnpc->maxlevel);
+		cli->MessageString(Chat::White, TOGGLE_OFF);
+		target->tellsoff = true;
+		target->UpdateWho();
+	}
 	return;
 }
 
@@ -6532,16 +6561,12 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 	GMToggle_Struct *ts = (GMToggle_Struct *)app->pBuffer;
 	if (ts->toggle == 0) {
 		MessageString(Chat::White, TOGGLE_OFF);
-		//Message(0, "Turning tells OFF");
 		tellsoff = true;
-	}
-	else if (ts->toggle == 1) {
-		//Message(0, "Turning tells ON");
+	} else if (ts->toggle == 1) {
 		MessageString(Chat::White, TOGGLE_ON);
 		tellsoff = false;
-	}
-	else {
-		Message(0, "Unkown value in /toggle packet");
+	} else {
+		Message(Chat::White, "Unkown value in /toggle packet");
 	}
 	UpdateWho();
 	return;

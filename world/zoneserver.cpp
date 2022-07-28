@@ -455,13 +455,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					!cle ||
 					cle->Online() < CLE_Status::Zoning ||
 					(
-						cle->TellsOff() &&
+						cle->TellsOff() && 
 						(
-							(
-								cle->Anon() == 1 &&
-								scm->fromadmin < cle->Admin()
-							) ||
-							scm->fromadmin < AccountStatus::QuestTroupe
+							scm->fromadmin < cle->Admin() 
+							|| scm->fromadmin < AccountStatus::QuestTroupe
 						)
 					)
 				) {

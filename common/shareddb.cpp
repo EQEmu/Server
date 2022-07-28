@@ -101,6 +101,28 @@ bool SharedDatabase::SetGMSpeed(uint32 account_id, uint8 gmspeed)
 	return true;
 }
 
+bool SharedDatabase::SetGMInvul(uint32 account_id, bool gminvul)
+{
+	std::string query = StringFormat("UPDATE account SET gminvul = %i WHERE id = %i", gminvul, account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool SharedDatabase::SetGMFlymode(uint32 account_id, uint8 flymode)
+{
+	std::string query = StringFormat("UPDATE account SET flymode = %i WHERE id = %i", flymode, account_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
 uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	uint32 EntitledTime = 0;
 	const std::string query = StringFormat("SELECT `time_played` FROM `character_data` WHERE `account_id` = %u", AccountID);

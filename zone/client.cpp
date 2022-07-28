@@ -220,6 +220,7 @@ Client::Client(EQStreamInterface* ieqs)
 	LFGComments[0] = '\0';
 	LFP = false;
 	gmspeed = 0;
+	gminvul = false;
 	playeraction = 0;
 	SetTarget(0);
 	auto_attack = false;
@@ -3390,15 +3391,18 @@ void Client::SetHideMe(bool flag)
 		CreateDespawnPacket(&app, false);
 		entity_list.RemoveFromTargets(this);
 		trackable = false;
+		tellsoff = true;
 	}
 	else
 	{
 		database.SetHideMe(AccountID(),false);
 		CreateSpawnPacket(&app);
 		trackable = true;
+		tellsoff = true;
 	}
 
 	entity_list.QueueClientsStatus(this, &app, true, 0, Admin()-1);
+	UpdateWho();
 }
 
 void Client::SetLanguageSkill(int langid, int value)
@@ -7092,6 +7096,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	client->Message(Chat::White, " compute_tohit: %i TotalToHit: %i", compute_tohit(skill), GetTotalToHit(skill, 0));
 	client->Message(Chat::White, " compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
 	client->Message(Chat::White, " offense: %i mitigation ac: %i", offense(skill), GetMitigationAC());
+	client->Message(Chat::White, " AFK: %i LFG: %i Anon: %i PVP: %i GM: %i Flymode: %i GMSpeed: %i Hideme: %i GMInvul: %d LD: %i ClientVersion: %i TellsOff: %i", AFK, LFG, GetAnon(), GetPVP(), GetGM(), flymode, GetGMSpeed(), GetHideMe(), GetGMInvul(), IsLD(), ClientVersionBit(), tellsoff);
 	if(CalcMaxMana() > 0)
 		client->Message(Chat::White, " Mana: %i/%i  Mana Regen: %i/%i", GetMana(), GetMaxMana(), CalcManaRegen(), CalcManaRegenCap());
 	client->Message(Chat::White, " End.: %i/%i  End. Regen: %i/%i",GetEndurance(), GetMaxEndurance(), CalcEnduranceRegen(), CalcEnduranceRegenCap());

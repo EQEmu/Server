@@ -24,6 +24,8 @@ void command_flymode(Client *c, const Seperator *sep)
 
 	target->SetFlyMode(static_cast<GravityBehavior>(flymode_id));
 	target->SendAppearancePacket(AT_Levitate, flymode_id);
+	uint32 account = c->AccountID();
+	database.SetGMFlymode(account, flymode_id);
 	c->Message(
 		Chat::White,
 		fmt::format(
