@@ -3398,7 +3398,7 @@ void Client::SetHideMe(bool flag)
 		database.SetHideMe(AccountID(),false);
 		CreateSpawnPacket(&app);
 		trackable = true;
-		tellsoff = true;
+		tellsoff = false;
 	}
 
 	entity_list.QueueClientsStatus(this, &app, true, 0, Admin()-1);
