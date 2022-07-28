@@ -3379,22 +3379,17 @@ void Client::SetTint(int16 in_slot, EQ::textures::Tint_Struct& color) {
 
 }
 
-void Client::SetHideMe(bool flag)
+void Client::SetHideMe(bool gm_hide_me)
 {
 	EQApplicationPacket app;
 
-	gm_hide_me = flag;
-
-	if(gm_hide_me)
-	{
+	if(gm_hide_me) {
 		database.SetHideMe(AccountID(),true);
 		CreateDespawnPacket(&app, false);
 		entity_list.RemoveFromTargets(this);
 		trackable = false;
 		tellsoff = true;
-	}
-	else
-	{
+	} else {
 		database.SetHideMe(AccountID(),false);
 		CreateSpawnPacket(&app);
 		trackable = true;
