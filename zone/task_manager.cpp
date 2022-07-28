@@ -1834,7 +1834,7 @@ void TaskManager::SyncClientSharedTaskStateToLocal(
 	}
 }
 
-void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, std::string npc_name)
+void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, NPC* npc)
 {
 	for (auto &c: client->GetPartyMembers()) {
 		if (!c->ClientDataLoaded() || !c->HasTaskState()) {
@@ -1900,7 +1900,10 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, st
 							std::to_string(npc_type_id)
 						) && !TaskGoalListManager::IsInMatchListPartial(
 							activity_info->goal_match_list,
-							npc_name
+							npc->GetCleanName()
+						) && !TaskGoalListManager::IsInMatchListPartial(
+							activity_info->goal_match_list,
+							npc->GetName()
 						)) {
 							LogTasksDetail("[HandleUpdateTasksOnKill] Matched list goal");
 							continue;

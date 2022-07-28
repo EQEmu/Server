@@ -73,7 +73,7 @@ public:
 	// shared tasks
 	void SyncClientSharedTaskState(Client *c, ClientTaskState *cts);
 
-	void HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, std::string npc_name);
+	void HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, NPC* npc);
 
 private:
 	TaskGoalListManager  m_goal_list_manager;
