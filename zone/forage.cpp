@@ -443,7 +443,7 @@ void Client::ForageItem(bool guarantee) {
 		}
 
 		//not an else in case theres no DB food
-		if(foragedfood == 0) {
+		if (foragedfood == 0) {
 			uint8 index = 0;
 			index = zone->random.Int(0, MAX_COMMON_FOOD_IDS-1);
 			foragedfood = common_food_ids[index];
@@ -451,12 +451,12 @@ void Client::ForageItem(bool guarantee) {
 
 		const EQ::ItemData* food_item = database.GetItem(foragedfood);
 
-		if(!food_item) {
+		if (!food_item) {
 			LogError("nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 
-		if(foragedfood == 13106) {
+		if (foragedfood == 13106) {
 			stringid = FORAGE_GRUBS;
 		} else {
 			switch(food_item->ItemType) {
@@ -464,7 +464,7 @@ void Client::ForageItem(bool guarantee) {
 				stringid = FORAGE_FOOD;
 				break;
 			case EQ::item::ItemTypeDrink:
-				if(strstr(food_item->Name, "ater")) {
+				if (strstr(food_item->Name, "ater")) {
 					stringid = FORAGE_WATER;
 				} else {
 					stringid = FORAGE_DRINK;
@@ -477,9 +477,9 @@ void Client::ForageItem(bool guarantee) {
 
 		MessageString(Chat::Skills, stringid);
 		EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
-		if(inst != nullptr) {
+		if (inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
-			if(CheckLoreConflict(inst->GetItem())) {
+			if (CheckLoreConflict(inst->GetItem())) {
 				MessageString(Chat::White, DUP_LORE);
 				safe_delete(inst);
 			} else {
@@ -493,7 +493,7 @@ void Client::ForageItem(bool guarantee) {
 				inst = m_inv.GetItem(EQ::invslot::slotCursor);
 			}
 
-			if(inst) {
+			if (inst) {
 				std::vector<std::any> args;
 				args.push_back(inst);
 				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
@@ -501,7 +501,7 @@ void Client::ForageItem(bool guarantee) {
 		}
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
-		if(!guarantee && zone->random.Roll(ChanceSecondForage)) {
+		if (!guarantee && zone->random.Roll(ChanceSecondForage)) {
 			MessageString(Chat::Skills, FORAGE_MASTERY);
 			ForageItem(true);
 		}
