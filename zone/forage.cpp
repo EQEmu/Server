@@ -419,7 +419,6 @@ void Client::GoFish()
 }
 
 void Client::ForageItem(bool guarantee) {
-
 	int skill_level = GetSkill(EQ::skills::SkillForage);
 
 	//be wary of the string ids in switch below when changing this.
@@ -439,7 +438,7 @@ void Client::ForageItem(bool guarantee) {
 		uint32 foragedfood = 0;
 		uint32 stringid = FORAGE_NOEAT;
 
-		if (zone->random.Roll(25)) {
+		if (zone->random.Roll(RuleI(Zone, ForageChance))) {
 			foragedfood = content_db.GetZoneForage(m_pp.zone_id, skill_level);
 		}
 
@@ -457,37 +456,38 @@ void Client::ForageItem(bool guarantee) {
 			return;
 		}
 
-		if(foragedfood == 13106)
+		if(foragedfood == 13106) {
 			stringid = FORAGE_GRUBS;
-		else
+		} else {
 			switch(food_item->ItemType) {
 			case EQ::item::ItemTypeFood:
 				stringid = FORAGE_FOOD;
 				break;
 			case EQ::item::ItemTypeDrink:
-				if(strstr(food_item->Name, "ater"))
+				if(strstr(food_item->Name, "ater")) {
 					stringid = FORAGE_WATER;
-				else
+				} else {
 					stringid = FORAGE_DRINK;
+				}
 				break;
 			default:
 				break;
 			}
+		}
 
 		MessageString(Chat::Skills, stringid);
 		EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
-			if(CheckLoreConflict(inst->GetItem()))
-			{
+			if(CheckLoreConflict(inst->GetItem())) {
 				MessageString(Chat::White, DUP_LORE);
 				safe_delete(inst);
-			}
-			else {
+			} else {
 				PushItemOnCursor(*inst);
 				SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
-				if(RuleB(TaskSystem, EnableTaskSystem))
+				if(RuleB(TaskSystem, EnableTaskSystem)) {
 					UpdateTasksForItem(TaskActivityType::Forage, foragedfood);
+				}
 
 				safe_delete(inst);
 				inst = m_inv.GetItem(EQ::invslot::slotCursor);
@@ -505,13 +505,10 @@ void Client::ForageItem(bool guarantee) {
 			MessageString(Chat::Skills, FORAGE_MASTERY);
 			ForageItem(true);
 		}
-
 	} else {
 		MessageString(Chat::Skills, FORAGE_FAILED);
 		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
 	}
 
 	CheckIncreaseSkill(EQ::skills::SkillForage, nullptr, 5);
-
 }
-
