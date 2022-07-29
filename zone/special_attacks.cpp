@@ -2184,8 +2184,13 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 
 int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 {
-	if (defender && (defender->GetBodyType() == BT_Humanoid) && !defender->IsClient() && GetLevel() >= 60 &&
-	    (skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing)) {
+	if (
+		defender &&
+		!defender->IsClient() &&
+		GetLevel() >= 60 &&
+		(skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing) &&
+		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids))
+	) {
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {
 			chance = 100 * chance / (chance + 3500);
