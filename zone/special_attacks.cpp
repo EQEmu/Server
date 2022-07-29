@@ -2157,7 +2157,7 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 	if (
 		defender &&
 		!defender->IsClient() &&
-	    skillInUse == EQ::skills::SkillArchery &&
+		skillInUse == EQ::skills::SkillArchery &&
 		GetTarget() == defender &&
 		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids))
 	) {
