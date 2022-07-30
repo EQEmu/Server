@@ -1340,7 +1340,6 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		int platinum, gold, silver, copper;
 
 		copper = task_information->cash_reward;
-		client->AddMoneyToPP(copper, true);
 
 		platinum = copper / 1000;
 		copper   = copper - (platinum * 1000);
@@ -1349,23 +1348,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		silver   = copper / 10;
 		copper   = copper - (silver * 10);
 
-		if (
-			copper ||
-			silver ||
-			gold ||
-			platinum
-		) {
-			client->MessageString(
-				Chat::Yellow,
-				YOU_RECEIVE,
-				Strings::Money(
-					platinum,
-					gold,
-					silver,
-					copper
-				).c_str()
-			);
-		}
+		client->CashReward(copper, silver, gold, platinum);
 	}
 	int32 experience_reward = task_information->experience_reward;
 	if (experience_reward > 0) {
@@ -1392,8 +1375,6 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 			client->AddCrystals(0, task_information->reward_points);
 		}
 	}
-
-	client->SendSound();
 }
 
 bool ClientTaskState::IsTaskActive(int task_id)
