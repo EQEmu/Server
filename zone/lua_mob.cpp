@@ -1810,17 +1810,17 @@ void Lua_Mob::ChangeDrakkinDetails(int in) {
 	self->ChangeDrakkinDetails(in);
 }
 
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity) {
+void Lua_Mob::CameraEffect(uint32 duration, float intensity) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity);
 }
 
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity, Lua_Client c) {
+void Lua_Mob::CameraEffect(uint32 duration, float intensity, Lua_Client c) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity, c);
 }
 
-void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity, Lua_Client c, bool global) {
+void Lua_Mob::CameraEffect(uint32 duration, float intensity, Lua_Client c, bool global) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity, c, global);
 }
@@ -2505,9 +2505,9 @@ luabind::scope lua_register_mob() {
 	.def("BuffFadeBySpellID", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySpellID)
 	.def("CalculateDistance", (float(Lua_Mob::*)(double,double,double))&Lua_Mob::CalculateDistance)
 	.def("CalculateHeadingToTarget", (double(Lua_Mob::*)(double,double))&Lua_Mob::CalculateHeadingToTarget)
-	.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32))&Lua_Mob::CameraEffect)
-	.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client))&Lua_Mob::CameraEffect)
-	.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client,bool))&Lua_Mob::CameraEffect)
+	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float))&Lua_Mob::CameraEffect)
+	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float,Lua_Client))&Lua_Mob::CameraEffect)
+	.def("CameraEffect", (void(Lua_Mob::*)(uint32,float,Lua_Client,bool))&Lua_Mob::CameraEffect)
 	.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
 	.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack)
 	.def("CanClassEquipItem", &Lua_Mob::CanClassEquipItem)
