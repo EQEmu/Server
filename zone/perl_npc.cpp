@@ -660,6 +660,11 @@ bool Perl_NPC_HasAISpellEffect(NPC* self, int spell_effect_id) // @categories Sp
 	return self->HasAISpellEffect(spell_effect_id);
 }
 
+bool Perl_NPC_IsRareSpawn(NPC* self)
+{
+	return self->IsRareSpawn();
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -748,6 +753,7 @@ void perl_register_npc()
 	package.add("IsGuarding", &Perl_NPC_IsGuarding);
 	package.add("IsOnHatelist", &Perl_NPC_IsOnHatelist);
 	package.add("IsRaidTarget", &Perl_NPC_IsRaidTarget);
+	package.add("IsRareSpawn", &Perl_NPC_IsRareSpawn);
 	package.add("IsTaunting", &Perl_NPC_IsTaunting);
 	package.add("MerchantCloseShop", &Perl_NPC_MerchantCloseShop);
 	package.add("MerchantOpenShop", &Perl_NPC_MerchantOpenShop);
