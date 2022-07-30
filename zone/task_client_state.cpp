@@ -1195,7 +1195,7 @@ void ClientTaskState::IncrementDoneCount(
 		// Send the updated task/activity_information list to the client
 		task_manager->SendSingleActiveTaskToClient(client, *info, task_complete, false);
 		// Inform the client the task has been updated, both by a chat message
-		client->MessageString(Chat::White, TASK_UPDATED, task_information->title.c_str());
+		client->MessageString(Chat::DefaultText, TASK_UPDATED, task_information->title.c_str());
 
 		if (!ignore_quest_update) {
 			std::string export_string = fmt::format(
@@ -1255,6 +1255,10 @@ void ClientTaskState::IncrementDoneCount(
 		}
 	}
 	else {
+		if (task_information->type != TaskType::Shared) {
+			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_information->title.c_str());
+		}
+
 		// Send an updated packet for this single activity_information
 		task_manager->SendTaskActivityLong(
 			client,
@@ -2439,7 +2443,7 @@ void ClientTaskState::AcceptNewTask(
 
 	task_manager->SendSingleActiveTaskToClient(client, *active_slot, false, true);
 	client->StartTaskRequestCooldownTimer();
-	client->MessageString(Chat::White, YOU_ASSIGNED_TASK, task->title.c_str());
+	client->MessageString(Chat::DefaultText, YOU_ASSIGNED_TASK, task->title.c_str());
 
 	task_manager->SaveClientState(client, this);
 	std::string export_string = std::to_string(task_id);
