@@ -455,26 +455,27 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					!cle ||
 					cle->Online() < CLE_Status::Zoning ||
 					(
-						cle->TellsOff() && 
+						cle->TellsOff() &&
 						(
-							scm->fromadmin < cle->Admin() 
+							scm->fromadmin < cle->Admin()
 							|| scm->fromadmin < AccountStatus::QuestTroupe
 						)
 					)
-				) {
+					) {
 					if (!scm->noreply) {
 						auto sender = client_list.FindCharacter(scm->from);
 						if (!sender || !sender->Server()) {
 							break;
 						}
 
-						scm->noreply = true;
-						scm->queued = 3; // offline
+						scm->noreply  = true;
+						scm->queued   = 3; // offline
 						scm->chan_num = ChatChannel_TellEcho;
 						strcpy(scm->deliverto, scm->from);
 						sender->Server()->SendPacket(pack);
 					}
-				} else if (cle->Online() == CLE_Status::Zoning) {
+				}
+				else if (cle->Online() == CLE_Status::Zoning) {
 					if (!scm->noreply) {
 						auto sender = client_list.FindCharacter(scm->from);
 						if (cle->TellQueueFull()) {

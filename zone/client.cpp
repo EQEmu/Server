@@ -3383,20 +3383,21 @@ void Client::SetHideMe(bool gm_hide_me)
 {
 	EQApplicationPacket app;
 
-	if(gm_hide_me) {
-		database.SetHideMe(AccountID(),true);
+	if (gm_hide_me) {
+		database.SetHideMe(AccountID(), true);
 		CreateDespawnPacket(&app, false);
 		entity_list.RemoveFromTargets(this);
 		trackable = false;
-		tellsoff = true;
-	} else {
-		database.SetHideMe(AccountID(),false);
+		tellsoff  = true;
+	}
+	else {
+		database.SetHideMe(AccountID(), false);
 		CreateSpawnPacket(&app);
 		trackable = true;
-		tellsoff = false;
+		tellsoff  = false;
 	}
 
-	entity_list.QueueClientsStatus(this, &app, true, 0, Admin()-1);
+	entity_list.QueueClientsStatus(this, &app, true, 0, Admin() - 1);
 	UpdateWho();
 }
 
