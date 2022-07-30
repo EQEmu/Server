@@ -400,6 +400,16 @@ void NPC::AddLootDrop(
 	item->trivial_max_level = loot_drop.trivial_max_level;
 	item->equip_slot        = EQ::invslot::SLOT_INVALID;
 
+
+	// unsure if required to equip, YOLO for now
+	if (item2->ItemType == EQ::item::ItemTypeBow) {
+		SetBowEquipped(true);
+	}
+
+	if (item2->ItemType == EQ::item::ItemTypeArrow) {
+		SetArrowEquipped(true);
+	}
+
 	if (loot_drop.equip_item > 0) {
 		uint8 eslot = 0xFF;
 		char newid[20];
