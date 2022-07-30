@@ -2049,6 +2049,7 @@ private:
 	bool m_bot_precombat;
 
 #endif
+	bool CanTradeFVNoDropItem();
 };
 
 #endif

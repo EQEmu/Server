@@ -120,6 +120,7 @@ private:
 	bool ChecksumVerificationCRCBaseData(uint64 checksum);
 
 	EQStreamInterface* eqs;
+	bool CanTradeFVNoDropItem();
 };
 
 bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);
