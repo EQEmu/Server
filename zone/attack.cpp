@@ -1844,11 +1844,11 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	}
 
 	if (exploss > 0 && RuleB(Character, DeathKeepLevel)) {
-		int32 totalExp = GetEXP();
-		uint32 levelMinExp = GetEXPForLevel(killed_level);
-		int32 levelExp = totalExp - levelMinExp;
-		if (exploss > levelExp) {
-			exploss = levelExp;
+		int32 total_exp = GetEXP();
+		uint32 level_min_exp = GetEXPForLevel(killed_level);
+		int32 level_exp = total_exp - level_min_exp;
+		if (exploss > level_exp) {
+			exploss = level_exp;
 		}
 	}
 
