@@ -15561,3 +15561,23 @@ void Client::SetSharedTaskId(int64 shared_task_id)
 {
 	Client::m_shared_task_id = shared_task_id;
 }
+
+bool Client::CanTradeFVNoDropItem()
+{
+	const int16 admin_status             = Admin();
+	const int   no_drop_flag             = RuleI(World, FVNoDropFlag);
+	const int   no_drop_min_admin_status = RuleI(Character, MinStatusForNoDropExemptions);
+	switch (no_drop_flag) {
+		case FVNoDropFlagRule::Disabled:
+			return false;
+		case FVNoDropFlagRule::Enabled:
+			return true;
+		case FVNoDropFlagRule::AdminOnly:
+			return admin_status >= no_drop_min_admin_status;
+		default:
+			LogWarning("Invalid value {0} set for FVNoDropFlag", no_drop_flag);
+			return false;
+	}
+
+	return false;
+}
