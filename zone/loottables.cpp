@@ -402,11 +402,13 @@ void NPC::AddLootDrop(
 
 
 	// unsure if required to equip, YOLO for now
-	if (item2->ItemType == EQ::item::ItemTypeBow)
+	if (item2->ItemType == EQ::item::ItemTypeBow) {
 		SetBowEquipped(true);
+	}
 
-	if (item2->ItemType == EQ::item::ItemTypeArrow)
+	if (item2->ItemType == EQ::item::ItemTypeArrow) {
 		SetArrowEquipped(true);
+	}
 
 	if (loot_drop.equip_item > 0) {
 		uint8 eslot = 0xFF;
