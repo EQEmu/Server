@@ -44,6 +44,7 @@ RULE_INT(Character, DeathExpLossLevel, 10, "Any level equal to or greater than t
 RULE_INT(Character, DeathExpLossMaxLevel, 255, "Every higher level will no longer lose experience at death")
 RULE_INT(Character, DeathItemLossLevel, 10, "From this level on, items are left in the corpse when LeaveCorpses is activated")
 RULE_INT(Character, DeathExpLossMultiplier, 3, "Adjust how much experience is lost. Default 3.5% (0=0.5%, 1=1.5%, 2=2.5%, 3=3.5%, 4=4.5%, 5=5.5%, 6=6.5%, 7=7.5%, 8=8.5%, 9=9.5%, 10=11%)")
+RULE_BOOL(Character, DeathKeepLevel, false, "Players can not drop below 0% experience from death.")
 RULE_BOOL(Character, UseDeathExpLossMult, false, "Setting to control whether DeathExpLossMultiplier or the code default is used: (Level x Level / 18.0) x 12000")
 RULE_BOOL(Character, UseOldRaceRezEffects, false, "Older clients had ID 757 for races with high starting STR, but it doesn't seem used anymore")
 RULE_INT(Character, CorpseDecayTimeMS, 10800000, "Time after which the corpse decays (milliseconds)")

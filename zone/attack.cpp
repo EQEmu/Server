@@ -1843,6 +1843,15 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		exploss *= zone->level_exp_mod[GetLevel()].ExpMod;
 	}
 
+	if (exploss > 0 && RuleB(Character, DeathKeepLevel)) {
+		int32 total_exp = GetEXP();
+		uint32 level_min_exp = GetEXPForLevel(killed_level);
+		int32 level_exp = total_exp - level_min_exp;
+		if (exploss > level_exp) {
+			exploss = level_exp;
+		}
+	}
+
 	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC())
 	{
 		exploss = 0;
