@@ -50,6 +50,20 @@ enum class TaskTimerType
 	Request
 };
 
+// live alt currency types, may not match current server alternate currency ids
+enum class AltCurrencyType
+{
+	RadiantCrystal       = 4,
+	EbonCrystal          = 5,
+	MarkOfValor          = 31,
+	CommemorativeCoin    = 33,
+	PieceOfEight         = 37,
+	RemnantOfTranquility = 38,
+	SathirTradeGem       = 41,
+	BathezidTradeGem     = 43,
+	FroststoneDucat      = 48,
+};
+
 struct ActivityInformation {
 	int              step_number;
 	TaskActivityType activity_type;
@@ -198,8 +212,8 @@ struct TaskInformation {
 	int                 experience_reward{};
 	int                 faction_reward{};   // just a npc_faction_id
 	TaskMethodType      reward_method;
-	int                 reward_radiant_crystals;
-	int                 reward_ebon_crystals;
+	int                 reward_points;
+	AltCurrencyType     reward_point_type;
 	int                 activity_count{};
 	SequenceType        sequence_mode;
 	int                 last_step{};
