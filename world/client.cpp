@@ -156,11 +156,31 @@ void Client::SendLogServer()
 	if(RuleB(World, IsGMPetitionWindowEnabled))
 		l->enable_petition_wnd = 1;
 
-	if((RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2) && GetAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
+	if (CanTradeFVNoDropItem()) {
 		l->enable_FV = 1;
+	}
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
+}
+
+bool Client::CanTradeFVNoDropItem()
+{
+	const int16 admin_status             = GetAdmin();
+	const int   no_drop_flag             = RuleI(World, FVNoDropFlag);
+	const int   no_drop_min_admin_status = RuleI(Character, MinStatusForNoDropExemptions);
+	switch (no_drop_flag) {
+		case FVNoDropFlagRule::Disabled:
+			return false;
+		case FVNoDropFlagRule::Enabled:
+			return true;
+		case FVNoDropFlagRule::AdminOnly:
+			return admin_status >= no_drop_min_admin_status;
+		default:
+			LogWarning("Invalid value {0} set for FVNoDropFlag", no_drop_flag);
+			return false;
+	}
+	return false;
 }
 
 void Client::SendEnterWorld(std::string name)
