@@ -354,7 +354,6 @@ public:
 	bool createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender);
 #endif
 
-	inline uint16 GetMana(uint32 spell_id) { return( spells[spell_id].mana); }
 
 private:
 	std::stack<running_quest> quests_running_;

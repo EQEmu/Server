@@ -345,9 +345,9 @@ public:
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
 		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 resist_adjust = 0,
 		uint32 aa_id = 0);
-	void CastedSpellFinished(uint16 spell_id, uint32 target_id, EQ::spells::CastingSlot slot, uint16 mana_used,
+	void CastedSpellFinished(uint16 spell_id, uint32 target_id, EQ::spells::CastingSlot slot, int mana_used,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
-	bool SpellFinished(uint16 spell_id, Mob *target, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, uint16 mana_used = 0,
+	bool SpellFinished(uint16 spell_id, Mob *target, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int mana_used = 0,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1, uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, bool from_casted_spell = false, uint32 aa_id = 0);
 	void SendBeginCast(uint16 spell_id, uint32 casttime);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, int reflect_effectiveness = 0,
@@ -886,7 +886,7 @@ public:
 	int16 GetSkillDmgAmt(uint16 skill);
 	int16 GetPositionalDmgAmt(Mob* defender);
 	inline bool CanBlockSpell() const { return(spellbonuses.FocusEffects[focusBlockNextSpell]); }
-	bool DoHPToManaCovert(uint16 mana_cost = 0);
+	bool DoHPToManaCovert(int32 mana_cost = 0);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect);
 	int64 GetExtraSpellAmt(uint16 spell_id, int64 extra_spell_amt, int64 base_spell_dmg);
 	void MeleeLifeTap(int64 damage);

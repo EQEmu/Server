@@ -7077,7 +7077,7 @@ uint16 Mob::GetSympatheticSpellProcID(uint16 spell_id)
 	return 0;
 }
 
-bool Mob::DoHPToManaCovert(uint16 mana_cost)
+bool Mob::DoHPToManaCovert(int32 mana_cost)
 {
 	if (spellbonuses.HPToManaConvert){
 		int64 hp_cost = spellbonuses.HPToManaConvert * mana_cost / 100;
