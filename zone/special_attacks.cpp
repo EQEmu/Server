@@ -1153,52 +1153,52 @@ float Mob::GetRangeDistTargetSizeMod(Mob* other)
 	return (mod + 2.0f); //Add 2.0f as buffer to prevent any chance of failures, client enforce range check regardless.
 }
 
-void NPC::RangedAttack(Mob* other)
+void NPC::RangedAttack(Mob *other)
 {
 	if (!other)
 		return;
-	//make sure the attack and ranged timers are up
-	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
-	if((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check())){
-		LogCombat("Archery canceled. Timer not up. Attack [{}], ranged [{}]", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
+	// make sure the attack and ranged timers are up
+	// if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
+	if ((attack_timer.Enabled() && !attack_timer.Check(false)) ||
+	    (ranged_timer.Enabled() && !ranged_timer.Check())) {
+		LogCombat("Archery canceled. Timer not up. Attack [{}], ranged [{}]", attack_timer.GetRemainingTime(),
+			  ranged_timer.GetRemainingTime());
 		return;
 	}
 
-	if(!CheckLosFN(other))
+	if (!HasBowAndArrowEquipped() && !GetSpecialAbility(SPECATK_RANGED_ATK))
 		return;
 
-	int attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
-	attacks = attacks > 0 ? attacks : 1;
-	for(int i = 0; i < attacks; ++i) {
+	if (!CheckLosFN(other))
+		return;
 
-		if(!GetSpecialAbility(SPECATK_RANGED_ATK))
+	int attacks = 1;
+	float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
+	float max_range = 250.0f; // needs to be longer than 200(most spells)
+
+	if (GetSpecialAbility(SPECATK_RANGED_ATK)) {
+		int temp_attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
+		attacks = temp_attacks > 0 ? temp_attacks : 1;
+
+		int temp_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); // Min Range of NPC attack
+		int temp_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); // Max Range of NPC attack
+		if (temp_max_range)
+			max_range = static_cast<float>(temp_max_range);
+		if (temp_min_range)
+			min_range = static_cast<float>(temp_min_range);
+	}
+
+	max_range *= max_range;
+	min_range *= min_range;
+
+	for (int i = 0; i < attacks; ++i) {
+		if (DistanceSquared(m_Position, other->GetPosition()) > max_range)
+			return;
+		else if (DistanceSquared(m_Position, other->GetPosition()) < min_range)
 			return;
 
-		int sa_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); //Min Range of NPC attack
-		int sa_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); //Max Range of NPC attack
-
-		float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
-		float max_range = 250; // needs to be longer than 200(most spells)
-
-		if (sa_max_range)
-			max_range = static_cast<float>(sa_max_range);
-
-		if (sa_min_range)
-			min_range = static_cast<float>(sa_min_range);
-
-		max_range *= max_range;
-		if(DistanceSquared(m_Position, other->GetPosition()) > max_range)
-			return;
-		else if(DistanceSquared(m_Position, other->GetPosition()) < (min_range * min_range))
-			return;
-
-		if(!other || !IsAttackAllowed(other) ||
-			IsCasting() ||
-			DivineAura() ||
-			IsStunned() ||
-			IsFeared() ||
-			IsMezzed() ||
-			(GetAppearance() == eaDead)){
+		if (!other || !IsAttackAllowed(other) || IsCasting() || DivineAura() || IsStunned() || IsFeared() ||
+		    IsMezzed() || (GetAppearance() == eaDead)) {
 			return;
 		}
 
