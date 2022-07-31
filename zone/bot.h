@@ -588,6 +588,7 @@ public:
 		uint32 augment_six = 0
 	);
 	uint32 CountBotItem(uint32 item_id);
+	uint32 GetBotItemBySlot(uint16 slot_id);
 	bool HasBotItem(uint32 item_id);
 	void RemoveBotItem(uint32 item_id);
 	uint32 GetTotalPlayTime();
@@ -733,7 +734,6 @@ private:
 	// Private "Inventory" Methods
 	void GetBotItems(EQ::InventoryProfile &inv, std::string* error_message);
 	void BotAddEquipItem(uint16 slot_id, uint32 item_id);
-	uint32 GetBotItemBySlot(uint16 slot_id);
 
 	// Private "Pet" Methods
 	bool LoadPet();	// Load and spawn bot pet if there is one
