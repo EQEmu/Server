@@ -42,6 +42,7 @@ public:
 		std::string completion_emote;
 		int         replay_timer_seconds;
 		int         request_timer_seconds;
+		int         lock_activity_id;
 	};
 
 	static std::string PrimaryKey()
@@ -75,6 +76,7 @@ public:
 			"completion_emote",
 			"replay_timer_seconds",
 			"request_timer_seconds",
+			"lock_activity_id",
 		};
 	}
 
@@ -104,6 +106,7 @@ public:
 			"completion_emote",
 			"replay_timer_seconds",
 			"request_timer_seconds",
+			"lock_activity_id",
 		};
 	}
 
@@ -167,6 +170,7 @@ public:
 		entry.completion_emote      = "";
 		entry.replay_timer_seconds  = 0;
 		entry.request_timer_seconds = 0;
+		entry.lock_activity_id      = -1;
 
 		return entry;
 	}
@@ -225,6 +229,7 @@ public:
 			entry.completion_emote      = row[20] ? row[20] : "";
 			entry.replay_timer_seconds  = atoi(row[21]);
 			entry.request_timer_seconds = atoi(row[22]);
+			entry.lock_activity_id      = atoi(row[23]);
 
 			return entry;
 		}
@@ -281,6 +286,7 @@ public:
 		update_values.push_back(columns[20] + " = '" + Strings::Escape(tasks_entry.completion_emote) + "'");
 		update_values.push_back(columns[21] + " = " + std::to_string(tasks_entry.replay_timer_seconds));
 		update_values.push_back(columns[22] + " = " + std::to_string(tasks_entry.request_timer_seconds));
+		update_values.push_back(columns[23] + " = " + std::to_string(tasks_entry.lock_activity_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -325,6 +331,7 @@ public:
 		insert_values.push_back("'" + Strings::Escape(tasks_entry.completion_emote) + "'");
 		insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
 		insert_values.push_back(std::to_string(tasks_entry.request_timer_seconds));
+		insert_values.push_back(std::to_string(tasks_entry.lock_activity_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -377,6 +384,7 @@ public:
 			insert_values.push_back("'" + Strings::Escape(tasks_entry.completion_emote) + "'");
 			insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
 			insert_values.push_back(std::to_string(tasks_entry.request_timer_seconds));
+			insert_values.push_back(std::to_string(tasks_entry.lock_activity_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -433,6 +441,7 @@ public:
 			entry.completion_emote      = row[20] ? row[20] : "";
 			entry.replay_timer_seconds  = atoi(row[21]);
 			entry.request_timer_seconds = atoi(row[22]);
+			entry.lock_activity_id      = atoi(row[23]);
 
 			all_entries.push_back(entry);
 		}
@@ -480,6 +489,7 @@ public:
 			entry.completion_emote      = row[20] ? row[20] : "";
 			entry.replay_timer_seconds  = atoi(row[21]);
 			entry.request_timer_seconds = atoi(row[22]);
+			entry.lock_activity_id      = atoi(row[23]);
 
 			all_entries.push_back(entry);
 		}

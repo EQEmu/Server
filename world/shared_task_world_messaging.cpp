@@ -349,6 +349,15 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskLock: {
+			auto buf = reinterpret_cast<ServerSharedTaskLock_Struct*>(pack->pBuffer);
+			auto shared_task = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->source_character_id);
+			if (shared_task)
+			{
+				shared_task_manager.LockTask(shared_task, buf->lock);
+			}
+			break;
+		}
 		default:
 			break;
 	}
