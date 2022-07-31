@@ -241,20 +241,6 @@ void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 reque
 	PrintSharedTaskState();
 }
 
-void SharedTaskManager::Terminate(SharedTask* s)
-{
-	LogTasksDetail("[Process] Terminating shared task [{}]", s->GetDbSharedTask().id);
-
-	for (const auto& member : s->GetMembers())
-	{
-		SendRemovePlayerFromSharedTaskPacket(member.character_id, s->GetTaskData().id, true);
-		client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {s->GetTaskData().title});
-	}
-
-	RemoveAllMembersFromDynamicZones(s);
-	DeleteSharedTask(s->GetDbSharedTask().id);
-}
-
 void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
 {
 	LogTasksDetail(
@@ -1679,12 +1665,19 @@ void SharedTaskManager::SetSharedTasks(const std::vector<SharedTask> &shared_tas
 
 SharedTaskManager *SharedTaskManager::PurgeExpiredSharedTasks()
 {
+	std::vector<int64_t> delete_tasks;
+
 	auto      now = std::time(nullptr);
 	for (auto &s: m_shared_tasks) {
 		if (s.GetDbSharedTask().expire_time > 0 && s.GetDbSharedTask().expire_time <= now) {
 			LogTasksDetail("[PurgeExpiredSharedTasks] Deleting expired task [{}]", s.GetDbSharedTask().id);
-			DeleteSharedTask(s.GetDbSharedTask().id);
+			delete_tasks.push_back(s.GetDbSharedTask().id);
 		}
+	}
+
+	for (int64_t shared_task_id : delete_tasks)
+	{
+		DeleteSharedTask(shared_task_id);
 	}
 
 	return this;
@@ -1764,7 +1757,7 @@ void SharedTaskManager::HandleCompletedTask(SharedTask* s)
 
 void SharedTaskManager::StartTerminateTimer(SharedTask* s)
 {
-	s->terminate_timer.Start(120000); // 2min
+	s->terminate_timer.Start(RuleI(TaskSystem, SharedTasksTerminateTimerMS));
 	SendMembersMessageID(s, Chat::Red, TaskStr::REQS_TWO_MIN);
 }
 
@@ -1775,11 +1768,27 @@ void SharedTaskManager::Process()
 		return;
 	}
 
+	std::vector<int64_t> delete_tasks;
 	for (auto& shared_task : m_shared_tasks)
 	{
-		if (shared_task.terminate_timer.Check())
+		if (shared_task.GetMembers().empty() || shared_task.terminate_timer.Check())
 		{
-			Terminate(&shared_task);
+			LogTasksDetail("[Process] Terminating shared task [{}]", shared_task.GetDbSharedTask().id);
+			for (const auto& member : shared_task.GetMembers())
+			{
+				SendRemovePlayerFromSharedTaskPacket(member.character_id, shared_task.GetTaskData().id, true);
+				client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {shared_task.GetTaskData().title});
+			}
+
+			RemoveAllMembersFromDynamicZones(&shared_task);
+
+			// avoid erasing from m_shared_tasks while iterating it
+			delete_tasks.push_back(shared_task.GetDbSharedTask().id);
 		}
+	}
+
+	for (int64_t shared_task_id : delete_tasks)
+	{
+		DeleteSharedTask(shared_task_id);
 	}
 }
