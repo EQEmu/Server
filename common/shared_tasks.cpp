@@ -7,7 +7,7 @@ std::vector<SharedTaskActivityStateEntry> SharedTask::GetActivityState() const
 	return m_shared_task_activity_state;
 }
 
-std::vector<SharedTaskMember> SharedTask::GetMembers() const
+const std::vector<SharedTaskMember>& SharedTask::GetMembers() const
 {
 	return m_members;
 }
