@@ -1040,6 +1040,7 @@ public:
 	void SendRules();
 
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
+	const bool GetGMInvul() const { return gminvul; }
 	bool CanUseReport;
 
 	//This is used to later set the buff duration of the spell, in slot to duration.
@@ -1786,6 +1787,7 @@ private:
 	bool auto_fire;
 	bool runmode;
 	uint8 gmspeed;
+	bool gminvul;
 	bool medding;
 	uint16 horseId;
 	bool revoked;

@@ -1,7 +1,6 @@
 #include "../client.h"
 
-void command_invul(Client *c, const Seperator *sep)
-{
+void command_invul(Client *c, const Seperator *sep) {
 	int arguments = sep->argnum;
 	if (!arguments) {
 		c->Message(Chat::White, "Usage: #invul [On|Off]");
@@ -15,6 +14,8 @@ void command_invul(Client *c, const Seperator *sep)
 	}
 
 	target->SetInvul(invul_flag);
+	uint32 account = target->AccountID();
+	database.SetGMInvul(account, invul_flag);
 	c->Message(
 		Chat::White,
 		fmt::format(
@@ -25,4 +26,3 @@ void command_invul(Client *c, const Seperator *sep)
 		).c_str()
 	);
 }
-
