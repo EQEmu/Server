@@ -2073,7 +2073,9 @@ void ClientTaskState::CancelAllTasks(Client *client)
 	m_active_task.task_id = TASKSLOTEMPTY;
 
 	// shared task
+	client->m_requested_shared_task_removal = true;
 	CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, false);
+	client->m_requested_shared_task_removal = false;
 	m_active_shared_task.task_id = TASKSLOTEMPTY;
 
 	// "quests"
@@ -2082,8 +2084,6 @@ void ClientTaskState::CancelAllTasks(Client *client)
 			CancelTask(client, task_index, TaskType::Quest, false);
 			m_active_quests[task_index].task_id = TASKSLOTEMPTY;
 		}
-
-	// TODO: shared
 }
 
 void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_from_db)
