@@ -433,10 +433,10 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 					ml.origslot = ml.slot;
 				}
 				if (ml.charges > 0) {
-					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
+					database.SaveMerchantTemp(npcid, ml.origslot, GetZoneID(), GetInstanceID(), item, ml.charges);
 					tmp_merlist.push_back(ml);
 				} else {
-					database.DeleteMerchantTemp(npcid, ml.origslot);
+					database.DeleteMerchantTemp(npcid, ml.origslot, GetZoneID(), GetInstanceID());
 				}
 			}
 		}
@@ -494,7 +494,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 
 		first_empty_mslot = idx;
 
-		database.SaveMerchantTemp(npcid, first_empty_slot, item, charges);
+		database.SaveMerchantTemp(npcid, first_empty_slot, GetZoneID(), GetInstanceID(), item, charges);
 		tmp_merlist = tmpmerchanttable[npcid];
 		TempMerchantList ml2;
 		ml2.charges = charges;
@@ -565,8 +565,11 @@ void Zone::LoadTempMerchantData()
 				itemid
 				FROM merchantlist_temp
 				WHERE npcid IN ({})
+				AND zone_id = {}
+				AND instance_id = {}
 			),
-			Strings::Implode(", ", npc_ids)
+			Strings::Implode(", ", npc_ids),
+			GetZoneID(), GetInstanceID()
 		)
 	);
 
