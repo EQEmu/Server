@@ -23,6 +23,7 @@ public:
 		int    character_id;
 		int    task_id;
 		int    timer_type;
+		int    timer_group;
 		time_t expire_time;
 	};
 
@@ -38,6 +39,7 @@ public:
 			"character_id",
 			"task_id",
 			"timer_type",
+			"timer_group",
 			"expire_time",
 		};
 	}
@@ -49,6 +51,7 @@ public:
 			"character_id",
 			"task_id",
 			"timer_type",
+			"timer_group",
 			"UNIX_TIMESTAMP(expire_time)",
 		};
 	}
@@ -94,6 +97,7 @@ public:
 		entry.character_id = 0;
 		entry.task_id      = 0;
 		entry.timer_type   = 0;
+		entry.timer_group  = 0;
 		entry.expire_time  = std::time(nullptr);
 
 		return entry;
@@ -134,7 +138,8 @@ public:
 			entry.character_id = atoi(row[1]);
 			entry.task_id      = atoi(row[2]);
 			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.timer_group  = atoi(row[4]);
+			entry.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			return entry;
 		}
@@ -171,7 +176,8 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(character_task_timers_entry.character_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(character_task_timers_entry.task_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(character_task_timers_entry.timer_type));
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
+		update_values.push_back(columns[4] + " = " + std::to_string(character_task_timers_entry.timer_group));
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,6 +203,7 @@ public:
 		insert_values.push_back(std::to_string(character_task_timers_entry.character_id));
 		insert_values.push_back(std::to_string(character_task_timers_entry.task_id));
 		insert_values.push_back(std::to_string(character_task_timers_entry.timer_type));
+		insert_values.push_back(std::to_string(character_task_timers_entry.timer_group));
 		insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
@@ -231,6 +238,7 @@ public:
 			insert_values.push_back(std::to_string(character_task_timers_entry.character_id));
 			insert_values.push_back(std::to_string(character_task_timers_entry.task_id));
 			insert_values.push_back(std::to_string(character_task_timers_entry.timer_type));
+			insert_values.push_back(std::to_string(character_task_timers_entry.timer_group));
 			insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_entry.expire_time > 0 ? std::to_string(character_task_timers_entry.expire_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
@@ -269,7 +277,8 @@ public:
 			entry.character_id = atoi(row[1]);
 			entry.task_id      = atoi(row[2]);
 			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.timer_group  = atoi(row[4]);
+			entry.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -298,7 +307,8 @@ public:
 			entry.character_id = atoi(row[1]);
 			entry.task_id      = atoi(row[2]);
 			entry.timer_type   = atoi(row[3]);
-			entry.expire_time  = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.timer_group  = atoi(row[4]);
+			entry.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}

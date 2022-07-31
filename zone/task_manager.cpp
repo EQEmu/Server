@@ -115,7 +115,9 @@ bool TaskManager::LoadTasks(int single_task)
 		m_task_data[task_id]->max_players             = task.max_players;
 		m_task_data[task_id]->repeatable              = task.repeatable;
 		m_task_data[task_id]->completion_emote        = task.completion_emote;
+		m_task_data[task_id]->replay_timer_group      = task.replay_timer_group;
 		m_task_data[task_id]->replay_timer_seconds    = task.replay_timer_seconds;
+		m_task_data[task_id]->request_timer_group     = task.request_timer_group;
 		m_task_data[task_id]->request_timer_seconds   = task.request_timer_seconds;
 		m_task_data[task_id]->activity_count          = 0;
 		m_task_data[task_id]->sequence_mode           = ActivitiesSequential;
@@ -125,7 +127,7 @@ bool TaskManager::LoadTasks(int single_task)
 			"[LoadTasks] (Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
 			" reward [{}] rewardid [{}] cashreward [{}] xpreward [{}] rewardmethod [{}] faction_reward [{}] minlevel [{}] "
 			" maxlevel [{}] level_spread [{}] min_players [{}] max_players [{}] repeatable [{}] completion_emote [{}]",
-			" replay_timer_seconds [{}] request_timer_seconds [{}]",
+			" replay_group [{}] replay_timer_seconds [{}] request_group [{}] request_timer_seconds [{}]",
 			task.id,
 			task.type,
 			task.duration,
@@ -145,7 +147,9 @@ bool TaskManager::LoadTasks(int single_task)
 			task.max_players,
 			task.repeatable,
 			task.completion_emote,
+			task.replay_timer_group,
 			task.replay_timer_seconds,
+			task.request_timer_group,
 			task.request_timer_seconds
 		);
 	}

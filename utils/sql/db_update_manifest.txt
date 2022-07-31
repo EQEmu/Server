@@ -446,6 +446,7 @@
 9190|2022_07_13_task_reward_points.sql|SHOW COLUMNS FROM `tasks` LIKE 'reward_points'|empty|
 9191|2022_07_28_gm_state_changes.sql|SHOW COLUMNS FROM `account` LIKE 'invulnerable'|empty|
 9192|2022_07_13_task_lock_activity.sql|SHOW COLUMNS FROM `tasks` LIKE 'lock_activity_id'|empty|
+9193|2022_07_16_task_timer_groups.sql|SHOW COLUMNS FROM `tasks` LIKE 'replay_timer_group'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

@@ -132,6 +132,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 			timer.character_id = m.character_id;
 			timer.task_id      = task.id;
 			timer.timer_type   = static_cast<int>(TaskTimerType::Request);
+			timer.timer_group  = task.request_timer_group;
 			timer.expire_time  = shared_task_entity.accepted_time + task.request_timer_seconds;
 
 			task_timers.emplace_back(timer);
@@ -1090,6 +1091,7 @@ void SharedTaskManager::AddPlayerByCharacterIdAndName(
 				timer.character_id = character_id;
 				timer.task_id      = s->GetDbSharedTask().task_id;
 				timer.timer_type   = static_cast<int>(TaskTimerType::Request);
+				timer.timer_group  = s->GetTaskData().request_timer_group;
 				timer.expire_time  = expire_time;
 
 				CharacterTaskTimersRepository::InsertOne(*m_database, timer);
@@ -1300,6 +1302,29 @@ void SharedTaskManager::SendMembersMessageID(
 	}
 }
 
+std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> SharedTaskManager::GetCharacterTimers(
+	const std::vector<uint32_t>& character_ids, const TasksRepository::Tasks& task)
+{
+	// todo: consider caching character timers in world and zone to avoid queries
+	auto task_timers = CharacterTaskTimersRepository::GetWhere(*m_database, fmt::format(
+		SQL(
+			character_id IN ({})
+			AND (task_id = {}
+				OR (timer_group > 0 AND timer_type = {} AND timer_group = {})
+				OR (timer_group > 0 AND timer_type = {} AND timer_group = {}))
+			AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1
+		),
+		fmt::join(character_ids, ","),
+		task.id,
+		static_cast<int>(TaskTimerType::Replay),
+		task.replay_timer_group,
+		static_cast<int>(TaskTimerType::Request),
+		task.request_timer_group
+	));
+
+	return task_timers;
+}
+
 bool SharedTaskManager::CanRequestSharedTask(
 	uint32_t task_id,
 	uint32_t character_id,
@@ -1395,12 +1420,7 @@ bool SharedTaskManager::CanRequestSharedTask(
 	}
 
 	// check if any party members have a replay or request timer for the task (limit 1, replay checked first)
-	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(
-		*m_database, fmt::format(
-			"character_id IN ({}) AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
-			fmt::join(request.character_ids, ","), task_id
-		)
-	);
+	auto character_task_timers = GetCharacterTimers(request.character_ids, task);
 
 	if (!character_task_timers.empty()) {
 		auto timer_type = static_cast<TaskTimerType>(character_task_timers.front().timer_type);
@@ -1523,11 +1543,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 
 	// check if player has a replay or request timer lockout
 	// todo: live allows characters with a request timer to be re-invited if they quit, but only until they zone? (investigate/edge case)
-	auto task_timers = CharacterTaskTimersRepository::GetWhere(
-		*m_database, fmt::format(
-			"character_id = {} AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
-			character_id, s->GetDbSharedTask().task_id
-		));
+	auto task_timers = GetCharacterTimers({ character_id }, s->GetTaskData());
 
 	if (!task_timers.empty()) {
 		auto timer_type = static_cast<TaskTimerType>(task_timers.front().timer_type);
@@ -1679,6 +1695,7 @@ void SharedTaskManager::AddReplayTimers(SharedTask *s)
 			timer.character_id = member_id;
 			timer.task_id      = s->GetTaskData().id;
 			timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+			timer.timer_group  = s->GetTaskData().replay_timer_group;
 			timer.expire_time  = expire_time;
 
 			task_timers.emplace_back(timer);
@@ -1701,8 +1718,9 @@ void SharedTaskManager::AddReplayTimers(SharedTask *s)
 			// this can occur if a player has a timer for being a past member of
 			// a shared task but joined another before the first was completed
 			CharacterTaskTimersRepository::DeleteWhere(*m_database, fmt::format(
-				"task_id = {} AND timer_type = {} AND character_id IN ({})",
+				"(task_id = {} OR (timer_group > 0 AND timer_group = {})) AND timer_type = {} AND character_id IN ({})",
 				s->GetTaskData().id,
+				s->GetTaskData().replay_timer_group,
 				static_cast<int>(TaskTimerType::Replay),
 				fmt::join(s->member_id_history, ",")
 			));
