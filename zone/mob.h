@@ -732,7 +732,7 @@ public:
 	std::string GetMobDescription();
 
 	//Quest
-	void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
+	void CameraEffect(uint32 duration, float intensity, Client *c = nullptr, bool global = false);
 	inline bool GetQglobal() const { return qglobal; }
 
 	//Other Packet

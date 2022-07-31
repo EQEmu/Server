@@ -1284,7 +1284,7 @@ struct ServerLeaderboardRequest_Struct
 struct ServerCameraShake_Struct
 {
 	uint32 duration; // milliseconds
-	uint32 intensity; // number from 1-10
+	float intensity;
 };
 
 struct ServerMailMessageHeader_Struct {

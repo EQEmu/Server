@@ -3149,7 +3149,7 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 	safe_delete(outapp);
 }
 
-void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global) {
+void Mob::CameraEffect(uint32 duration, float intensity, Client *c, bool global) {
 
 
 	if(global == true)
@@ -3166,7 +3166,7 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 	auto outapp = new EQApplicationPacket(OP_CameraEffect, sizeof(Camera_Struct));
 	Camera_Struct* cs = (Camera_Struct*) outapp->pBuffer;
 	cs->duration = duration;	// Duration in milliseconds
-	cs->intensity = ((intensity * 6710886) + 1023410176);	// Intensity ranges from 1023410176 to 1090519040, so simplify it from 0 to 10.
+	cs->intensity = intensity;
 
 	if(c)
 		c->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
