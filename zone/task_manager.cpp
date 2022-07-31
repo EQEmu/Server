@@ -696,11 +696,12 @@ void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const 
 
 	// check if requester already has a shared task (no need to query group/raid members if so)
 	if (client->GetTaskState()->HasActiveSharedTask()) {
-		client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_HAVE_ONE);
+		client->MessageString(Chat::Red, TaskStr::REQUEST_HAVE);
 		return;
 	}
 
 	// get group/raid member character data from db (need to query for character ids)
+	// todo: group/raids need refactored to avoid queries and ignore offline members (through world)
 	auto request = SharedTask::GetRequestCharacters(database, client->CharacterID());
 
 	// check if any group/raid member already has a shared task (already checked solo character)
@@ -713,25 +714,17 @@ void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const 
 		if (!shared_task_members.empty()) {
 			validation_failed = true;
 
-			auto it = std::find_if(
-				request.characters.begin(), request.characters.end(),
-				[&](const CharacterDataRepository::CharacterData &char_data) {
-					return char_data.id == shared_task_members.front().character_id;
-				}
-			);
+			auto it = std::find_if(request.members.begin(), request.members.end(),
+				[&](const SharedTaskMember& member) {
+					return member.character_id == shared_task_members.front().character_id;
+				});
 
-			if (it != request.characters.end()) {
+			if (it != request.members.end()) {
 				if (request.group_type == SharedTaskRequestGroupType::Group) {
-					client->MessageString(
-						Chat::Red,
-						SharedTaskMessage::NO_REQUEST_BECAUSE_GROUP_HAS_ONE,
-						it->name.c_str());
+					client->MessageString(Chat::Red, TaskStr::REQUEST_GROUP_HAS, it->character_name.c_str());
 				}
 				else {
-					client->MessageString(
-						Chat::Red,
-						SharedTaskMessage::NO_REQUEST_BECAUSE_RAID_HAS_ONE,
-						it->name.c_str());
+					client->MessageString(Chat::Red, TaskStr::REQUEST_RAID_HAS, it->character_name.c_str());
 				}
 			}
 		}
@@ -758,7 +751,7 @@ void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const 
 			SendSharedTaskSelector(client, mob, task_list_index, task_list);
 		}
 		else {
-			client->MessageString(Chat::Red, SharedTaskMessage::YOU_DO_NOT_MEET_REQ_AVAILABLE);
+			client->MessageString(Chat::Red, TaskStr::NOT_MEET_REQ);
 		}
 	}
 }
@@ -1748,7 +1741,7 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 			CharacterTasksRepository::DeleteWhere(database, delete_where);
 			CharacterActivitiesRepository::DeleteWhere(database, delete_where);
 
-			c->MessageString(Chat::Yellow, SharedTaskMessage::YOU_ARE_NO_LONGER_A_MEMBER,
+			c->MessageString(Chat::Yellow, TaskStr::NO_LONGER_MEMBER_TITLE,
 				m_task_data[cts->m_active_shared_task.task_id]->title.c_str());
 
 			// remove as active task if doesn't exist
