@@ -1283,13 +1283,13 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 		// messages for every character already in a shared task
 		for (const auto& it : shared_task_members) {
 			if (it.character_id == request.leader_id) {
-				client_list.SendCharacterMessageID(it.character_id, Chat::Red, TaskStr::REQUEST_HAVE);
+				client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_HAVE);
 			}
 			else if (request.group_type == SharedTaskRequestGroupType::Group) {
-				client_list.SendCharacterMessageID(it.character_id, Chat::Red, TaskStr::REQUEST_GROUP_HAS, {it.character_name});
+				client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_GROUP_HAS, {it.character_name});
 			}
 			else {
-				client_list.SendCharacterMessageID(it.character_id, Chat::Red, TaskStr::REQUEST_RAID_HAS, {it.character_name});
+				client_list.SendCharacterMessageID(request.leader_id, Chat::Red, TaskStr::REQUEST_RAID_HAS, {it.character_name});
 			}
 		}
 
