@@ -210,7 +210,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 
 	if (m_dz_switch_id != 0)
 	{
-		// todo: update task touch task events with matching dz switch id
+		sender->UpdateTasksOnTouchSwitch(m_dz_switch_id);
 		if (sender->TryMovePCDynamicZoneSwitch(m_dz_switch_id))
 		{
 			safe_delete(outapp);
