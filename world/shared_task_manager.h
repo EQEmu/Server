@@ -3,6 +3,7 @@
 
 #include "../common/database.h"
 #include "../common/shared_tasks.h"
+#include "../common/timer.h"
 #include "../common/repositories/character_task_timers_repository.h"
 
 class DynamicZone;
@@ -20,6 +21,8 @@ struct SharedTaskActiveInvitation {
 
 class SharedTaskManager {
 public:
+	SharedTaskManager();
+
 	SharedTaskManager *SetDatabase(Database *db);
 	SharedTaskManager *SetContentDatabase(Database *db);
 
@@ -65,6 +68,7 @@ public:
 	);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
 	void PrintSharedTaskState();
+	void Process();
 	void RemoveMember(SharedTask* s, const SharedTaskMember& member, bool remove_from_db);
 	void RemoveEveryoneFromSharedTask(SharedTask *s, uint32 requested_character_id);
 
@@ -108,6 +112,8 @@ protected:
 	// store a reference of active invitations that have been sent to players
 	std::vector<SharedTaskActiveInvitation> m_active_invitations{};
 
+	Timer m_process_timer;
+
 	std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> GetCharacterTimers(
 		const std::vector<uint32_t>& character_ids, const TasksRepository::Tasks& task);
 
@@ -124,6 +130,8 @@ protected:
 	void SendSharedTaskInvitePacket(SharedTask *s, int64 invited_character_id);
 	void RecordSharedTaskCompletion(SharedTask *s);
 	void RemoveAllMembersFromDynamicZones(SharedTask *s);
+	void StartTerminateTimer(SharedTask* s);
+	void Terminate(SharedTask* s);
 
 	// memory search
 	std::vector<SharedTaskMember> FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters);

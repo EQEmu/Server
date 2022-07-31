@@ -6,6 +6,7 @@
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "shared_task_world_messaging.h"
+#include "../common/rulesys.h"
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_task_timers_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
@@ -19,6 +20,11 @@
 
 extern ClientList client_list;
 extern ZSList     zoneserver_list;
+
+SharedTaskManager::SharedTaskManager()
+	: m_process_timer{ static_cast<uint32_t>(RuleI(TaskSystem, SharedTasksWorldProcessRate)) }
+{
+}
 
 SharedTaskManager *SharedTaskManager::SetDatabase(Database *db)
 {
@@ -196,6 +202,13 @@ void SharedTaskManager::RemoveMember(SharedTask* s, const SharedTaskMember& memb
 	if (member.is_leader) {
 		ChooseNewLeader(s);
 	}
+
+	// todo: filter requirements
+	if (s->GetMembers().size() < s->GetTaskData().min_players)
+	{
+		SendMembersMessageID(s, Chat::Red, TaskStr::MIN_PLAYERS);
+		StartTerminateTimer(s);
+	}
 }
 
 void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 requested_character_id)
@@ -224,6 +237,20 @@ void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 reque
 	DeleteSharedTask(t->GetDbSharedTask().id);
 
 	PrintSharedTaskState();
+}
+
+void SharedTaskManager::Terminate(SharedTask* s)
+{
+	LogTasksDetail("[Process] Terminating shared task [{}]", s->GetDbSharedTask().id);
+
+	for (const auto& member : s->GetMembers())
+	{
+		SendRemovePlayerFromSharedTaskPacket(member.character_id, s->GetTaskData().id, true);
+		client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {s->GetTaskData().title});
+	}
+
+	RemoveAllMembersFromDynamicZones(s);
+	DeleteSharedTask(s->GetDbSharedTask().id);
 }
 
 void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
@@ -995,6 +1022,12 @@ void SharedTaskManager::AddPlayerByCharacterIdAndName(
 		SendSharedTaskMemberList(character_id, s->GetMembers()); // new member gets full member list
 		s->AddCharacterToMemberHistory(character_id);
 
+		// min players should be the only thing to check, other failed reqs prevent player add
+		if (s->GetMembers().size() >= s->GetTaskData().min_players)
+		{
+			s->terminate_timer.Disable();
+		}
+
 		// add to dzs tied to shared task
 		for (const auto &dz_id : s->dynamic_zone_ids) {
 			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
@@ -1339,6 +1372,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 	player_name = cle->name();
 
 	// check if player is already in a shared task
+	// todo: do a memory search instead of query here
 	auto shared_task_members = SharedTaskMembersRepository::GetWhere(
 		*m_database,
 		fmt::format("character_id = {} LIMIT 1", character_id)
@@ -1399,6 +1433,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 	}
 
 	// check if task would exceed max level spread
+	// todo: cache low/high levels on SharedTask to avoid query for offline members (also usable by RemoveMember)
 	if (s->GetTaskData().level_spread > 0) {
 		auto characters = CharacterDataRepository::GetWhere(
 			*m_database,
@@ -1702,4 +1737,26 @@ void SharedTaskManager::HandleCompletedTask(SharedTask* s)
 	RecordSharedTaskCompletion(s);
 
 	AddReplayTimers(s);
+}
+
+void SharedTaskManager::StartTerminateTimer(SharedTask* s)
+{
+	s->terminate_timer.Start(120000); // 2min
+	SendMembersMessageID(s, Chat::Red, TaskStr::REQS_TWO_MIN);
+}
+
+void SharedTaskManager::Process()
+{
+	if (!m_process_timer.Check())
+	{
+		return;
+	}
+
+	for (auto& shared_task : m_shared_tasks)
+	{
+		if (shared_task.terminate_timer.Check())
+		{
+			Terminate(&shared_task);
+		}
+	}
 }
