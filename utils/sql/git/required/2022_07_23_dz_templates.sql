@@ -22,7 +22,7 @@ CREATE TABLE `dynamic_zone_templates` (
   `zone_in_z` float NOT NULL DEFAULT 0,
   `zone_in_h` float NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `tasks`
   ADD COLUMN `dz_template_id` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `request_timer_seconds`;
