@@ -9842,6 +9842,19 @@ Expedition* Client::CreateExpedition(
 	return Expedition::TryCreate(this, dz, disable_messages);
 }
 
+Expedition* Client::CreateExpeditionFromTemplate(uint32_t dz_template_id)
+{
+	Expedition* expedition = nullptr;
+	auto it = zone->dz_template_cache.find(dz_template_id);
+	if (it != zone->dz_template_cache.end())
+	{
+		DynamicZone dz(DynamicZoneType::Expedition);
+		dz.LoadTemplate(it->second);
+		expedition = Expedition::TryCreate(this, dz, false);
+	}
+	return expedition;
+}
+
 void Client::CreateTaskDynamicZone(int task_id, DynamicZone& dz_request)
 {
 	if (task_state)
@@ -11331,6 +11344,9 @@ void Client::SendReloadCommandMessages() {
 			doors_link
 		).c_str()
 	);
+
+	auto dztemplates_link = Saylink::Create("#reload dztemplates", false, "#reload dztemplates");
+	Message(Chat::White, fmt::format("Usage: {} - Reloads Dynamic Zone Templates globally", dztemplates_link).c_str());
 
 	auto ground_spawns_link = Saylink::Create(
 		"#reload ground_spawns",

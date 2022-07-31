@@ -1929,6 +1929,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		entity_list.RespawnAllDoors();
 		break;
 	}
+	case ServerOP_ReloadDzTemplates:
+	{
+		if (zone)
+		{
+			zone->SendReloadMessage("Dynamic Zone Templates");
+			zone->LoadDynamicZoneTemplates();
+		}
+		break;
+	}
 	case ServerOP_ReloadGroundSpawns:
 	{
 		zone->SendReloadMessage("Ground Spawns");

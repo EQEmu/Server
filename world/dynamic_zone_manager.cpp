@@ -164,3 +164,13 @@ void DynamicZoneManager::Process()
 			fmt::format("id IN ({})", fmt::join(dynamic_zone_ids, ",")));
 	}
 }
+
+void DynamicZoneManager::LoadTemplates()
+{
+	m_dz_templates.clear();
+	auto dz_templates = DynamicZoneTemplatesRepository::All(content_db);
+	for (const auto& dz_template : dz_templates)
+	{
+		m_dz_templates[dz_template.id] = dz_template;
+	}
+}

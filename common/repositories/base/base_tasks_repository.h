@@ -44,6 +44,7 @@ public:
 		int         replay_timer_seconds;
 		int         request_timer_group;
 		int         request_timer_seconds;
+		int         dz_template_id;
 		int         lock_activity_id;
 	};
 
@@ -80,6 +81,7 @@ public:
 			"replay_timer_seconds",
 			"request_timer_group",
 			"request_timer_seconds",
+			"dz_template_id",
 			"lock_activity_id",
 		};
 	}
@@ -112,6 +114,7 @@ public:
 			"replay_timer_seconds",
 			"request_timer_group",
 			"request_timer_seconds",
+			"dz_template_id",
 			"lock_activity_id",
 		};
 	}
@@ -178,6 +181,7 @@ public:
 		entry.replay_timer_seconds  = 0;
 		entry.request_timer_group   = 0;
 		entry.request_timer_seconds = 0;
+		entry.dz_template_id        = 0;
 		entry.lock_activity_id      = -1;
 
 		return entry;
@@ -239,7 +243,8 @@ public:
 			entry.replay_timer_seconds  = atoi(row[22]);
 			entry.request_timer_group   = atoi(row[23]);
 			entry.request_timer_seconds = atoi(row[24]);
-			entry.lock_activity_id      = atoi(row[25]);
+			entry.dz_template_id        = atoi(row[25]);
+			entry.lock_activity_id      = atoi(row[26]);
 
 			return entry;
 		}
@@ -298,7 +303,8 @@ public:
 		update_values.push_back(columns[22] + " = " + std::to_string(tasks_entry.replay_timer_seconds));
 		update_values.push_back(columns[23] + " = " + std::to_string(tasks_entry.request_timer_group));
 		update_values.push_back(columns[24] + " = " + std::to_string(tasks_entry.request_timer_seconds));
-		update_values.push_back(columns[25] + " = " + std::to_string(tasks_entry.lock_activity_id));
+		update_values.push_back(columns[25] + " = " + std::to_string(tasks_entry.dz_template_id));
+		update_values.push_back(columns[26] + " = " + std::to_string(tasks_entry.lock_activity_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -345,6 +351,7 @@ public:
 		insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
 		insert_values.push_back(std::to_string(tasks_entry.request_timer_group));
 		insert_values.push_back(std::to_string(tasks_entry.request_timer_seconds));
+		insert_values.push_back(std::to_string(tasks_entry.dz_template_id));
 		insert_values.push_back(std::to_string(tasks_entry.lock_activity_id));
 
 		auto results = db.QueryDatabase(
@@ -400,6 +407,7 @@ public:
 			insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
 			insert_values.push_back(std::to_string(tasks_entry.request_timer_group));
 			insert_values.push_back(std::to_string(tasks_entry.request_timer_seconds));
+			insert_values.push_back(std::to_string(tasks_entry.dz_template_id));
 			insert_values.push_back(std::to_string(tasks_entry.lock_activity_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
@@ -459,7 +467,8 @@ public:
 			entry.replay_timer_seconds  = atoi(row[22]);
 			entry.request_timer_group   = atoi(row[23]);
 			entry.request_timer_seconds = atoi(row[24]);
-			entry.lock_activity_id      = atoi(row[25]);
+			entry.dz_template_id        = atoi(row[25]);
+			entry.lock_activity_id      = atoi(row[26]);
 
 			all_entries.push_back(entry);
 		}
@@ -509,7 +518,8 @@ public:
 			entry.replay_timer_seconds  = atoi(row[22]);
 			entry.request_timer_group   = atoi(row[23]);
 			entry.request_timer_seconds = atoi(row[24]);
-			entry.lock_activity_id      = atoi(row[25]);
+			entry.dz_template_id        = atoi(row[25]);
+			entry.lock_activity_id      = atoi(row[26]);
 
 			all_entries.push_back(entry);
 		}

@@ -408,6 +408,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	database.PurgeExpiredInstances();
 
 	LogInfo("Loading dynamic zones");
+	dynamic_zone_manager.LoadTemplates();
 	dynamic_zone_manager.CacheAllFromDatabase();
 
 	LogInfo("Loading char create info");
