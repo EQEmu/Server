@@ -8,6 +8,14 @@
 #include <string>
 #include <algorithm>
 
+constexpr float MAX_TASK_SELECT_DISTANCE = 60.0f; // client closes window at this distance
+
+struct TaskOffer
+{
+	int task_id;
+	uint16_t npc_entity_id;
+};
+
 class ClientTaskState {
 
 public:
@@ -57,6 +65,8 @@ public:
 	void ListTaskTimers(Client* client);
 	void KickPlayersSharedTask(Client* client);
 	void LockSharedTask(Client* client, bool lock);
+	void ClearLastOffers() { m_last_offers.clear(); }
+	bool CanAcceptNewTask(Client* client, int task_id, int npc_entity_id) const;
 
 	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 
@@ -77,6 +87,7 @@ public:
 private:
 	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, TaskInformation& task);
 	void DispatchEventTaskComplete(Client* client, ClientTaskInformation& client_task, int activity_id);
+	void AddOffer(int task_id, uint16_t npc_entity_id) { m_last_offers.push_back({task_id, npc_entity_id}); };
 
 	void IncrementDoneCount(
 		Client *client,
@@ -130,6 +141,7 @@ private:
 	std::vector<int>                      m_enabled_tasks;
 	std::vector<CompletedTaskInformation> m_completed_tasks;
 	int                                   m_last_completed_task_loaded;
+	std::vector<TaskOffer>                m_last_offers;
 
 	static void ShowClientTaskInfoMessage(ClientTaskInformation *task, Client *c);
 

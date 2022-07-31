@@ -2747,3 +2747,39 @@ void ClientTaskState::LockSharedTask(Client* client, bool lock)
 		worldserver.SendPacket(&pack);
 	}
 }
+
+bool ClientTaskState::CanAcceptNewTask(Client* client, int task_id, int npc_entity_id) const
+{
+	auto it = std::find_if(m_last_offers.begin(), m_last_offers.end(),
+		[&](const TaskOffer& offer) { return offer.task_id == task_id; });
+
+	if (it == m_last_offers.end())
+	{
+		LogTasks("Client [{}] accepted unoffered task [{}]", client->GetName(), task_id);
+		return false;
+	}
+
+	if (npc_entity_id != it->npc_entity_id)
+	{
+		LogTasks("Client [{}] accepted task [{}] with wrong npc entity id [{}] vs offered [{}]",
+			client->GetName(), task_id, npc_entity_id, it->npc_entity_id);
+		return false;
+	}
+
+	NPC* npc = entity_list.GetID(it->npc_entity_id)->CastToNPC();
+	if (!npc) // client window disappears in this case
+	{
+		LogTasks("Client [{}] accepted task [{}] from missing npc", client->GetName(), task_id);
+		return false;
+	}
+
+	auto dist = npc->CalculateDistance(client->GetX(), client->GetY(), client->GetZ());
+	if (dist > MAX_TASK_SELECT_DISTANCE)
+	{
+		LogTasks("Client [{}] accepted task [{}] from npc [{}] out of range [{}]",
+			client->GetName(), task_id, npc->GetCleanName(), dist);
+		return false;
+	}
+
+	return true;
+}

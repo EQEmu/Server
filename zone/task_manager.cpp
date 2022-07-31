@@ -761,6 +761,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 {
 	LogTasks("TaskSelector for [{}] Tasks", task_count);
 	int player_level = client->GetLevel();
+	client->GetTaskState()->ClearLastOffers();
 
 	// Check if any of the tasks exist
 	for (int i = 0; i < task_count; i++) {
@@ -809,6 +810,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 
 		buf.WriteUInt32(task_list[i]); // task_id
 		m_task_data[task_list[i]]->SerializeSelector(buf, client->ClientVersion());
+		client->GetTaskState()->AddOffer(task_list[i], mob->GetID());
 	}
 
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskSelectWindow, buf);
@@ -821,6 +823,7 @@ void TaskManager::SendSharedTaskSelector(Client *client, Mob *mob, int task_coun
 
 	// request timer is only set when shared task selection shown (not for failed validations)
 	client->StartTaskRequestCooldownTimer();
+	client->GetTaskState()->ClearLastOffers();
 
 	SerializeBuffer buf;
 
@@ -833,6 +836,7 @@ void TaskManager::SendSharedTaskSelector(Client *client, Mob *mob, int task_coun
 		int task_id = task_list[i];
 		buf.WriteUInt32(task_id);
 		m_task_data[task_id]->SerializeSelector(buf, client->ClientVersion());
+		client->GetTaskState()->AddOffer(task_id, mob->GetID());
 	}
 
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_SharedTaskSelectWindow, buf);
