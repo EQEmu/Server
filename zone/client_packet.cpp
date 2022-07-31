@@ -581,10 +581,10 @@ void Client::CompleteConnect()
 		if (GetGMInvul()) {
 			state.emplace_back("invulnerable to all damage");
 		}
-		if (flymode == 1) {
+		if (flymode == GravityBehavior::Flying) {
 			state.emplace_back("flying");
 		}
-		else if (flymode == 2) {
+		else if (flymode == GravityBehavior::Levitating) {
 			state.emplace_back("levitating");
 		}
 		if (tellsoff) {

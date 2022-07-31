@@ -111,7 +111,7 @@ bool SharedDatabase::SetGMFlymode(uint32 account_id, uint8 flymode)
 {
 	auto a = AccountRepository::FindOne(*this, account_id);
 	if (a.id > 0) {
-		a.flymode = flymode ? 1 : 0;
+		a.flymode = flymode;
 		AccountRepository::UpdateOne(*this, a);
 	}
 
