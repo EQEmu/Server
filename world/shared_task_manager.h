@@ -33,15 +33,8 @@ public:
 	TasksRepository::Tasks GetSharedTaskDataByTaskId(uint32 task_id);
 	std::vector<TaskActivitiesRepository::TaskActivities> GetSharedTaskActivityDataByTaskId(uint32 task_id);
 
-	// gets group / raid members belonging to requested character
-	std::vector<SharedTaskMember> GetRequestMembers(
-		uint32 requestor_character_id,
-		const std::vector<CharacterDataRepository::CharacterData> &characters
-	);
-
 	// client attempting to create a shared task
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id, uint32 npc_type_id);
-	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id, bool remove_from_db);
 
 	// shared task activity update middleware
 	void SharedTaskActivityUpdate(
@@ -72,7 +65,7 @@ public:
 	);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
 	void PrintSharedTaskState();
-	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string &character_name);
+	void RemoveMember(SharedTask* s, const SharedTaskMember& member, bool remove_from_db);
 	void RemoveEveryoneFromSharedTask(SharedTask *s, uint32 requested_character_id);
 
 	void MakeLeaderByPlayerName(SharedTask *s, const std::string &character_name);
@@ -120,7 +113,7 @@ protected:
 
 	void AddReplayTimers(SharedTask *s);
 	bool CanAddPlayer(SharedTask *s, uint32_t character_id, std::string player_name, bool accepted);
-	bool CanRequestSharedTask(uint32_t task_id, uint32_t character_id, const SharedTaskRequestCharacters &request);
+	bool CanRequestSharedTask(uint32_t task_id, const SharedTaskRequest& request);
 	void ChooseNewLeader(SharedTask *s);
 	bool HandleCompletedActivities(SharedTask* s);
 	void HandleCompletedTask(SharedTask* s);
@@ -133,7 +126,7 @@ protected:
 	void RemoveAllMembersFromDynamicZones(SharedTask *s);
 
 	// memory search
-	std::vector<uint32_t> FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters);
+	std::vector<SharedTaskMember> FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H

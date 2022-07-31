@@ -16,7 +16,7 @@
 #define ServerOP_SharedTaskAddPlayer                0x0301 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
 #define ServerOP_SharedTaskMakeLeader               0x0302 // zone -> world -> zone
 #define ServerOP_SharedTaskRemovePlayer             0x0303 // zone -> world -> zone
-#define ServerOP_SharedTaskAttemptRemove            0x0304 // zone -> world. Player trying to delete task
+#define ServerOP_SharedTaskQuit                     0x0304 // zone -> world. Player trying to delete task
 #define ServerOP_SharedTaskUpdate                   0x0305 // zone -> world. Client sending task update to world. Relayed world -> zone on confirmation
 #define ServerOP_SharedTaskMemberlist               0x0306 // world -> zone. Send shared task memberlist
 #define ServerOP_SharedTaskRequestMemberlist        0x0307 // zone -> world. Send shared task memberlist (zone in initial for now, could change)
@@ -55,11 +55,11 @@ struct ServerSharedTaskInvitePlayer_Struct {
 	char   inviter_name[64];
 };
 
-// ServerOP_SharedTaskAttemptRemove
+// ServerOP_SharedTaskQuit
 // gets re-used when sent back to clients
-struct ServerSharedTaskAttemptRemove_Struct {
+struct ServerSharedTaskQuit_Struct {
 	uint32 requested_character_id;
-	uint32 requested_task_id;
+	uint32 task_id;
 	bool   remove_from_db;
 };
 
@@ -77,12 +77,13 @@ struct SharedTaskMember {
 };
 
 // used in shared task requests to validate group/raid members
-struct SharedTaskRequestCharacters {
+struct SharedTaskRequest {
 	int  lowest_level;
 	int  highest_level;
+	uint32_t leader_id;
 	SharedTaskRequestGroupType group_type;
 	std::vector<uint32_t> character_ids;
-	std::vector<CharacterDataRepository::CharacterData> characters;
+	std::vector<SharedTaskMember> members;
 };
 
 // ServerOP_SharedTaskMemberlist
@@ -174,7 +175,7 @@ struct ServerSharedTaskLock_Struct {
 class SharedTask {
 public:
 	// used in both zone and world validation
-	static SharedTaskRequestCharacters GetRequestCharacters(Database& db, uint32_t requested_character_id);
+	static SharedTaskRequest GetRequestCharacters(Database& db, uint32_t requested_character_id);
 
 	void AddCharacterToMemberHistory(uint32_t character_id);
 	SharedTaskMember FindMemberFromCharacterID(uint32_t character_id) const;
