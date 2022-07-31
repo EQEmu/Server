@@ -1781,6 +1781,11 @@ Expedition* Perl_Client_CreateExpedition(Client* self, perl::reference table_ref
 		dz.SetZoneInLocation(zonein);
 	}
 
+	if (table.exists("switchid"))
+	{
+		dz.SetSwitchID(table["switchid"].as<int>());
+	}
+
 	if (expedition.exists("disable_messages"))
 	{
 		return self->CreateExpedition(dz, expedition["disable_messages"].as<bool>());
@@ -1827,6 +1832,11 @@ void Perl_Client_CreateTaskDynamicZone(Client* self, int task_id, perl::referenc
 	{
 		auto zonein = GetDynamicZoneLocationFromHash(table["zonein"]);
 		dz.SetZoneInLocation(zonein);
+	}
+
+	if (table.exists("switchid"))
+	{
+		dz.SetSwitchID(table["switchid"].as<int>());
 	}
 
 	self->CreateTaskDynamicZone(task_id, dz);

@@ -10103,12 +10103,23 @@ void Client::SendDzCompassUpdate()
 	// client may be associated with multiple dynamic zone compasses in this zone
 	std::vector<DynamicZoneCompassEntry_Struct> compass_entries;
 
+	// need to sort by local doorid in case multiple have same dz switch id (live only sends first)
+	// todo: just store zone's door list ordered and ditch this
+	std::vector<Doors*> switches;
+	switches.reserve(entity_list.GetDoorsList().size());
+	for (const auto& door_pair : entity_list.GetDoorsList())
+	{
+		switches.push_back(door_pair.second);
+	}
+	std::sort(switches.begin(), switches.end(),
+		[](Doors* lhs, Doors* rhs) { return lhs->GetDoorID() < rhs->GetDoorID(); });
+
 	for (const auto& client_dz : GetDynamicZones())
 	{
 		auto compass = client_dz->GetCompassLocation();
 		if (zone && zone->IsZone(compass.zone_id, 0))
 		{
-			DynamicZoneCompassEntry_Struct entry;
+			DynamicZoneCompassEntry_Struct entry{};
 			entry.dz_zone_id = client_dz->GetZoneID();
 			entry.dz_instance_id = client_dz->GetInstanceID();
 			entry.dz_type = static_cast<uint32_t>(client_dz->GetType());
@@ -10118,12 +10129,36 @@ void Client::SendDzCompassUpdate()
 
 			compass_entries.emplace_back(entry);
 		}
+
+		// if client has a dz with a switch id add compass to any switch locs that share it
+		if (client_dz->GetSwitchID() != 0)
+		{
+			// live only sends one if multiple in zone have the same switch id
+			auto it = std::find_if(switches.begin(), switches.end(),
+				[&](const auto& eqswitch) {
+					return eqswitch->GetDzSwitchID() == client_dz->GetSwitchID();
+				});
+
+			if (it != switches.end())
+			{
+				DynamicZoneCompassEntry_Struct entry{};
+				entry.dz_zone_id = client_dz->GetZoneID();
+				entry.dz_instance_id = client_dz->GetInstanceID();
+				entry.dz_type = static_cast<uint32_t>(client_dz->GetType());
+				entry.dz_switch_id = client_dz->GetSwitchID();
+				entry.x = (*it)->GetX();
+				entry.y = (*it)->GetY();
+				entry.z = (*it)->GetZ();
+
+				compass_entries.emplace_back(entry);
+			}
+		}
 	}
 
 	// compass set via MarkSingleCompassLocation()
 	if (m_has_quest_compass)
 	{
-		DynamicZoneCompassEntry_Struct entry;
+		DynamicZoneCompassEntry_Struct entry{};
 		entry.dz_zone_id = 0;
 		entry.dz_instance_id = 0;
 		entry.dz_type = 0;
@@ -10251,6 +10286,27 @@ void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_inv
 		// client has more than one dz for this zone, send out the switchlist window
 		QueuePacket(CreateDzSwitchListPacket(client_dzs).get());
 	}
+}
+
+bool Client::TryMovePCDynamicZoneSwitch(int dz_switch_id)
+{
+	auto client_dzs = GetDynamicZones();
+
+	std::vector<DynamicZone*> switch_dzs;
+	auto it = std::copy_if(client_dzs.begin(), client_dzs.end(), std::back_inserter(switch_dzs),
+		[&](const DynamicZone* dz) { return dz->GetSwitchID() == dz_switch_id; });
+
+	if (switch_dzs.size() == 1)
+	{
+		LogDynamicZonesDetail("Moving client [{}] to dz with switch id [{}]", GetName(), dz_switch_id);
+		switch_dzs.front()->MovePCInto(this, true);
+	}
+	else if (switch_dzs.size() > 1)
+	{
+		QueuePacket(CreateDzSwitchListPacket(switch_dzs).get());
+	}
+
+	return !switch_dzs.empty();
 }
 
 std::unique_ptr<EQApplicationPacket> Client::CreateDzSwitchListPacket(

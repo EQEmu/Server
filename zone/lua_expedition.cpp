@@ -212,6 +212,12 @@ void Lua_Expedition::SetSecondsRemaining(uint32_t seconds_remaining)
 	self->GetDynamicZone()->SetSecondsRemaining(seconds_remaining);
 }
 
+void Lua_Expedition::SetSwitchID(int dz_switch_id)
+{
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetSwitchID(dz_switch_id, true);
+}
+
 void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
 	self->GetDynamicZone()->SetZoneInLocation(x, y, z, heading, true);
@@ -269,6 +275,7 @@ luabind::scope lua_register_expedition() {
 	.def("SetSafeReturn", (void(Lua_Expedition::*)(uint32_t, float, float, float, float))&Lua_Expedition::SetSafeReturn)
 	.def("SetSafeReturn", (void(Lua_Expedition::*)(std::string, float, float, float, float))&Lua_Expedition::SetSafeReturn)
 	.def("SetSecondsRemaining", &Lua_Expedition::SetSecondsRemaining)
+	.def("SetSwitchID", &Lua_Expedition::SetSwitchID)
 	.def("SetZoneInLocation", (void(Lua_Expedition::*)(float, float, float, float))&Lua_Expedition::SetZoneInLocation)
 	.def("UpdateLockoutDuration", (void(Lua_Expedition::*)(std::string, uint32_t))&Lua_Expedition::UpdateLockoutDuration)
 	.def("UpdateLockoutDuration", (void(Lua_Expedition::*)(std::string, uint32_t, bool))&Lua_Expedition::UpdateLockoutDuration);
