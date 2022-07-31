@@ -177,6 +177,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	// check if task should immediately lock
 	HandleCompletedActivities(&inserted);
 
+	LoadDynamicZoneTemplate(&inserted);
+
 	LogTasks(
 		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
 		new_shared_task.GetDbSharedTask().id,
@@ -1142,6 +1144,27 @@ void SharedTaskManager::CreateDynamicZone(SharedTask *shared_task, DynamicZone &
 		SharedTaskDynamicZonesRepository::InsertOne(*m_database, shared_task_dz);
 
 		shared_task->dynamic_zone_ids.emplace_back(new_dz->GetID());
+	}
+}
+
+void SharedTaskManager::LoadDynamicZoneTemplate(SharedTask* s)
+{
+	const auto& task = s->GetTaskData();
+	if (task.dz_template_id != 0)
+	{
+		auto it = dynamic_zone_manager.GetTemplates().find(task.dz_template_id);
+		if (it != dynamic_zone_manager.GetTemplates().end())
+		{
+			DynamicZone dz(DynamicZoneType::Mission);
+			dz.LoadTemplate(it->second);
+			dz.SetMinPlayers(task.min_players);
+			dz.SetMaxPlayers(task.max_players);
+			if (task.duration > dz.GetDuration())
+			{
+				dz.SetDuration(task.duration);
+			}
+			CreateDynamicZone(s, dz);
+		}
 	}
 }
 

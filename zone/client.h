@@ -1389,6 +1389,7 @@ public:
 	Expedition* CreateExpedition(const std::string& zone_name,
 		uint32 version, uint32 duration, const std::string& expedition_name,
 		uint32 min_players, uint32 max_players, bool disable_messages = false);
+	Expedition* CreateExpeditionFromTemplate(uint32_t dz_template_id);
 	Expedition* GetExpedition() const;
 	uint32 GetExpeditionID() const { return m_expedition_id; }
 	const ExpeditionLockoutTimer* GetExpeditionLockout(

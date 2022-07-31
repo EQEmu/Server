@@ -189,6 +189,7 @@ namespace DatabaseSchema {
 			"char_create_point_allocations",
 			"damageshieldtypes",
 			"doors",
+			"dynamic_zone_templates",
 			"faction_base_data",
 			"faction_list",
 			"faction_list_mod",

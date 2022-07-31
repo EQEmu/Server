@@ -5,6 +5,7 @@
 #include "net/packet.h"
 #include "repositories/dynamic_zones_repository.h"
 #include "repositories/dynamic_zone_members_repository.h"
+#include "repositories/dynamic_zone_templates_repository.h"
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -74,6 +75,7 @@ public:
 
 	virtual void SetSecondsRemaining(uint32_t seconds_remaining) = 0;
 
+	int GetDuration() const { return static_cast<int>(m_duration.count()); }
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); }
@@ -113,6 +115,7 @@ public:
 	bool IsValid() const { return m_instance_id != 0; }
 	bool IsSameDz(uint32_t zone_id, uint32_t instance_id) const { return zone_id == m_zone_id && instance_id == m_instance_id; }
 	void LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size);
+	void LoadTemplate(const DynamicZoneTemplatesRepository::DynamicZoneTemplates& dz_template);
 	void RemoveAllMembers();
 	bool RemoveMember(uint32_t character_id);
 	bool RemoveMember(const std::string& character_name);
