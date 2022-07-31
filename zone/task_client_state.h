@@ -56,6 +56,7 @@ public:
 	void CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz);
 	void ListTaskTimers(Client* client);
 	void KickPlayersSharedTask(Client* client);
+	void LockSharedTask(Client* client, bool lock);
 
 	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 

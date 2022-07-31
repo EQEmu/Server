@@ -1408,6 +1408,11 @@ bool Perl_Client_IsTaskActivityActive(Client* self, int task_id, int activity_id
 	return self->IsTaskActivityActive(task_id, activity_id);
 }
 
+void Perl_Client_LockSharedTask(Client* self, bool lock)
+{
+	return self->LockSharedTask(lock);
+}
+
 uint32_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
 {
 	return self->GetCorpseCount();
@@ -2621,6 +2626,7 @@ void perl_register_client()
 	package.add("LeaveGroup", &Perl_Client_LeaveGroup);
 	package.add("LoadPEQZoneFlags", &Perl_Client_LoadPEQZoneFlags);
 	package.add("LoadZoneFlags", &Perl_Client_LoadZoneFlags);
+	package.add("LockSharedTask", &Perl_Client_LockSharedTask);
 	package.add("MarkCompassLoc", &Perl_Client_MarkCompassLoc);
 	package.add("MaxSkill", (int(*)(Client*, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16))&Perl_Client_MaxSkill);

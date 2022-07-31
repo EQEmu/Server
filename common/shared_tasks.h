@@ -28,6 +28,7 @@
 #define ServerOP_SharedTaskPlayerList               0x0313 // zone -> world /taskplayerlist command
 #define ServerOP_SharedTaskMemberChange             0x0314 // world -> zone. Send shared task single member added/removed (client also handles message)
 #define ServerOP_SharedTaskKickPlayers              0x0315 // zone -> world /kickplayers task
+#define ServerOP_SharedTaskLock                     0x0316 // zone -> world
 
 enum class SharedTaskRequestGroupType {
 	Solo = 0,
@@ -105,6 +106,8 @@ struct SharedTaskActivityStateEntry {
 	uint32 max_done_count; // goalcount
 	uint32 updated_time;
 	uint32 completed_time;
+	int    step;
+	bool   optional;
 };
 
 struct ServerSharedTaskActivityUpdate_Struct {
@@ -160,6 +163,12 @@ struct ServerSharedTaskPlayerList_Struct {
 struct ServerSharedTaskKickPlayers_Struct {
 	uint32 source_character_id;
 	uint32 task_id;
+};
+
+struct ServerSharedTaskLock_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+	bool   lock;
 };
 
 class SharedTask {

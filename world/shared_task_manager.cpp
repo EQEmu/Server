@@ -14,6 +14,7 @@
 #include "../common/repositories/completed_shared_task_members_repository.h"
 #include "../common/repositories/completed_shared_task_activity_state_repository.h"
 #include "../common/repositories/shared_task_dynamic_zones_repository.h"
+#include <array>
 #include <ctime>
 
 extern ClientList client_list;
@@ -153,6 +154,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		e.activity_id    = a.activityid;
 		e.done_count     = 0;
 		e.max_done_count = a.goalcount;
+		e.step           = a.step;
+		e.optional       = a.optional;
 
 		shared_task_activity_state.emplace_back(e);
 	}
@@ -182,7 +185,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	new_shared_task.SetMembers(request_members);
 
 	// add to shared tasks list
-	m_shared_tasks.emplace_back(new_shared_task);
+	auto& inserted = m_shared_tasks.emplace_back(new_shared_task);
 
 	// send accept to members
 	for (auto &m: request_members) {
@@ -196,6 +199,9 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		);
 	}
 	SendSharedTaskMemberListToAllMembers(&new_shared_task);
+
+	// check if task should immediately lock
+	HandleCompletedActivities(&inserted);
 
 	LogTasks(
 		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
@@ -395,6 +401,8 @@ void SharedTaskManager::LoadSharedTaskState()
 						e.max_done_count = ad.goalcount;
 						e.completed_time = sta.completed_time;
 						e.updated_time   = sta.updated_time;
+						e.step           = ad.step;
+						e.optional       = ad.optional;
 					}
 				}
 
@@ -618,35 +626,10 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 			}
 		}
 
-		// check if completed
-		bool      is_shared_task_completed = true;
-		for (auto &a : shared_task->m_shared_task_activity_state) {
-			if (a.done_count != a.max_done_count) {
-				is_shared_task_completed = false;
-			}
-		}
-
-		// mark completed
+		// handle task locking and completion
+		bool is_shared_task_completed = HandleCompletedActivities(shared_task);
 		if (is_shared_task_completed) {
-			auto t = shared_task->GetDbSharedTask();
-			if (t.id > 0) {
-				LogTasksDetail(
-					"[SharedTaskActivityUpdate] Marking shared task [{}] completed",
-					shared_task->GetDbSharedTask().id
-				);
-
-				// set record
-				t.completion_time = std::time(nullptr);
-				t.is_locked       = true;
-				// update database
-				SharedTasksRepository::UpdateOne(*m_database, t);
-				// update internally
-				shared_task->SetDbSharedTask(t);
-				// record completion
-				RecordSharedTaskCompletion(shared_task);
-				// replay timer lockouts
-				AddReplayTimers(shared_task);
-			}
+			HandleCompletedTask(shared_task);
 		}
 	}
 }
@@ -1814,4 +1797,76 @@ SharedTaskManager *SharedTaskManager::PurgeExpiredSharedTasks()
 	}
 
 	return this;
+}
+
+void SharedTaskManager::LockTask(SharedTask* s, bool lock)
+{
+	bool is_locked = (s->GetDbSharedTask().is_locked != 0);
+	if (is_locked != lock)
+	{
+		auto db_task = s->GetDbSharedTask();
+		db_task.is_locked = lock;
+		SharedTasksRepository::UpdateOne(*m_database, db_task);
+		s->SetDbSharedTask(db_task);
+
+		if (lock)
+		{
+			SendLeaderMessageID(s, Chat::Yellow, SharedTaskMessage::YOUR_TASK_NOW_LOCKED);
+		}
+	}
+}
+
+bool SharedTaskManager::HandleCompletedActivities(SharedTask* s)
+{
+	bool is_task_complete = true;
+	bool lock_task = false;
+
+	std::array<bool, MAXACTIVITIESPERTASK> completed_steps;
+	completed_steps.fill(true);
+
+	// multiple activity ids may share a step, sort so previous step completions can be checked
+	auto activity_states = s->GetActivityState();
+	std::sort(activity_states.begin(), activity_states.end(),
+		[](const auto& lhs, const auto& rhs) { return lhs.step < rhs.step; });
+
+	for (const auto& a : activity_states)
+	{
+		if (a.done_count != a.max_done_count && !a.optional)
+		{
+			is_task_complete = false;
+			if (a.step > 0 && a.step <= MAXACTIVITIESPERTASK)
+			{
+				completed_steps[a.step - 1] = false;
+			}
+		}
+
+		int lock_index = s->GetTaskData().lock_activity_id;
+		if (a.activity_id == lock_index && a.step > 0 && a.step <= MAXACTIVITIESPERTASK)
+		{
+			// lock if element is active (on first step or previous step completed)
+			lock_task = (a.step == 1 || completed_steps[a.step - 2]);
+		}
+	}
+
+	// completion locks are silent
+	if (!is_task_complete && lock_task)
+	{
+		LockTask(s, true);
+	}
+
+	return is_task_complete;
+}
+
+void SharedTaskManager::HandleCompletedTask(SharedTask* s)
+{
+	auto db_task = s->GetDbSharedTask();
+	LogTasksDetail("[HandleCompletedTask] Marking shared task [{}] completed", db_task.id);
+	db_task.completion_time = std::time(nullptr);
+	db_task.is_locked = true;
+	SharedTasksRepository::UpdateOne(*m_database, db_task);
+	s->SetDbSharedTask(db_task);
+
+	RecordSharedTaskCompletion(s);
+
+	AddReplayTimers(s);
 }
