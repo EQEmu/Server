@@ -2,9 +2,24 @@
 #include "eqemu_logsys.h"
 #include "crash.h"
 
+inline std::string random_string(size_t length)
+{
+	auto        randchar = []() -> char {
+		const char   charset[] = "0123456789"
+								 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+								 "abcdefghijklmnopqrstuvwxyz";
+		const size_t max_index = (sizeof(charset) - 1);
+		return charset[static_cast<size_t>(std::rand()) % max_index];
+	};
+	std::string str(length, 0);
+	std::generate_n(str.begin(), length, randchar);
+	return str;
+}
+
 std::string execute(const std::string &cmd, bool return_result = true)
 {
-	const char *file_name = "exec-result";
+	std::string random     = "/tmp/" + random_string(25);
+	const char  *file_name = random.c_str();
 
 	if (return_result) {
 #ifdef _WINDOWS
@@ -154,18 +169,22 @@ void print_trace()
 {
 	bool does_gdb_exist = execute("gdb -v").find("GNU") != std::string::npos;
 	if (!does_gdb_exist) {
-		LogCrash("[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed");
+		LogCrash(
+			"[Error] GDB is not installed, if you want crash dumps on Linux to work properly you will need GDB installed"
+		);
 		std::exit(1);
 	}
 
-	auto uid = geteuid();
+	auto        uid              = geteuid();
 	std::string temp_output_file = "/tmp/dump-output";
 
 	// check for passwordless sudo if not root
 	if (uid != 0) {
 		bool has_passwordless_sudo = execute("sudo -n true").find("a password is required") == std::string::npos;
 		if (!has_passwordless_sudo) {
-			LogCrash("[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root.");
+			LogCrash(
+				"[Error] Current user does not have passwordless sudo installed. It is required to automatically process crash dumps with GDB as non-root."
+			);
 			std::exit(1);
 		}
 	}
