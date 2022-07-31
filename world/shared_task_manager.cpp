@@ -1824,6 +1824,7 @@ bool SharedTaskManager::HandleCompletedActivities(SharedTask* s)
 	std::array<bool, MAXACTIVITIESPERTASK> completed_steps;
 	completed_steps.fill(true);
 
+	// multiple activity ids may share a step, sort so previous step completions can be checked
 	auto activity_states = s->GetActivityState();
 	std::sort(activity_states.begin(), activity_states.end(),
 		[](const auto& lhs, const auto& rhs) { return lhs.step < rhs.step; });
