@@ -6,6 +6,7 @@
 
 #include "bot.h"
 #include "lua_bot.h"
+#include "lua_iteminst.h"
 #include "lua_mob.h"
 
 void Lua_Bot::AddBotItem(uint16 slot_id, uint32 item_id) {
@@ -73,6 +74,16 @@ void Lua_Bot::RemoveBotItem(uint32 item_id) {
 	self->RemoveBotItem(item_id);
 }
 
+Lua_ItemInst Lua_Bot::GetBotItem(uint16 slot_id) {
+	Lua_Safe_Call_Class(Lua_ItemInst);
+	return self->GetBotItem(slot_id);
+}
+
+uint32 Lua_Bot::GetBotItemIDBySlot(uint16 slot_id) {
+	Lua_Safe_Call_Int();
+	return self->GetBotItemBySlot(slot_id);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -86,6 +97,8 @@ luabind::scope lua_register_bot() {
 	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32,uint32,uint32,uint32,uint32))&Lua_Bot::AddBotItem)
 	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32,uint32,uint32,uint32,uint32,uint32))&Lua_Bot::AddBotItem)
 	.def("CountBotItem", (uint32(Lua_Bot::*)(uint32))&Lua_Bot::CountBotItem)
+	.def("GetBotItem", (Lua_ItemInst(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItem)
+	.def("GetBotItemIDBySlot", (uint32(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItemIDBySlot)
 	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void))&Lua_Bot::GetOwner)
 	.def("HasBotItem", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasBotItem)
 	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32))&Lua_Bot::RemoveBotItem);
