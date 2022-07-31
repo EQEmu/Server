@@ -1949,6 +1949,11 @@ Lua_Expedition Lua_Client::CreateExpedition(luabind::object expedition_table) {
 		dz.SetZoneInLocation(zonein_loc);
 	}
 
+	if (luabind::type(expedition_table["switchid"]) == LUA_TNUMBER)
+	{
+		dz.SetSwitchID(luabind::object_cast<int>(expedition_table["switchid"]));
+	}
+
 	bool disable_messages = false;
 	if (luabind::type(expedition_info["disable_messages"]) == LUA_TBOOLEAN)
 	{
@@ -2138,6 +2143,11 @@ void Lua_Client::CreateTaskDynamicZone(int task_id, luabind::object dz_table) {
 	{
 		auto zonein_loc = GetDynamicZoneLocationFromTable(dz_table["zonein"]);
 		dz.SetZoneInLocation(zonein_loc);
+	}
+
+	if (luabind::type(dz_table["switchid"]) == LUA_TNUMBER)
+	{
+		dz.SetSwitchID(luabind::object_cast<int>(dz_table["switchid"]));
 	}
 
 	self->CreateTaskDynamicZone(task_id, dz);

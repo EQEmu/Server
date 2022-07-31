@@ -3227,9 +3227,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_DzSetCompass:
 	case ServerOP_DzSetSafeReturn:
 	case ServerOP_DzSetZoneIn:
+	case ServerOP_DzSetSwitchID:
 	case ServerOP_DzUpdateMemberStatus:
 	case ServerOP_DzLeaderChanged:
 	case ServerOP_DzExpireWarning:
+	case ServerOP_DzMovePC:
 	{
 		DynamicZone::HandleWorldMessage(pack);
 		break;
