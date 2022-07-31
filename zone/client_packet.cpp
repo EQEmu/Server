@@ -571,19 +571,28 @@ void Client::CompleteConnect()
 	//SendAATable();
 
 	if (GetGM() && (GetHideMe() || GetGMSpeed() || GetGMInvul() || flymode != 0 || tellsoff)) {
-		std::string state = "currently ";
+		std::vector<std::string> state = {"currently"};
+		if (GetHideMe()) {
+			state.emplace_back("hidden to all clients");
+		}
+		if (GetGMSpeed()) {
+			state.emplace_back("running at GM speed");
+		}
+		if (GetGMInvul()) {
+			state.emplace_back("invulnerable to all damage");
+		}
+		if (flymode == 1) {
+			state.emplace_back("flying");
+		}
+		else if (flymode == 2) {
+			state.emplace_back("levitating");
+		}
+		if (tellsoff) {
+			state.emplace_back("ignoring tells");
+		}
 
-		if (GetHideMe()) state += "hidden to all clients, ";
-		if (GetGMSpeed()) state += "running at GM speed, ";
-		if (GetGMInvul()) state += "invulnerable to all damage, ";
-		if (flymode == 1) state += "flying, ";
-		else if (flymode == 2) state += "levitating, ";
-		if (tellsoff) state += "ignoring tells, ";
-
-		if (state.size () > 0) {
-			//Remove last two characters from the string
-			state.resize (state.size () - 2);
-			Message(Chat::Red, "[GM] You are %s.", state.c_str());
+		if (!state.empty()) {
+			Message(Chat::Red, "[GM] You are %s.", Strings::Join(state, ", ").c_str());
 		}
 	}
 
