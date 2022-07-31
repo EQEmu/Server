@@ -183,7 +183,7 @@ public:
 	SharedTaskMember FindMemberFromCharacterName(const std::string& character_name) const;
 	SharedTaskMember GetLeader() const;
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
-	std::vector<SharedTaskMember> GetMembers() const;
+	const std::vector<SharedTaskMember>& GetMembers() const;
 
 	// getters
 	const std::vector<TaskActivitiesRepository::TaskActivities> &GetTaskActivityData() const;

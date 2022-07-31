@@ -132,7 +132,6 @@ protected:
 	void RecordSharedTaskCompletion(SharedTask *s);
 	void RemoveAllMembersFromDynamicZones(SharedTask *s);
 	void StartTerminateTimer(SharedTask* s);
-	void Terminate(SharedTask* s);
 
 	// memory search
 	std::vector<SharedTaskMember> FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters);
