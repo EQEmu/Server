@@ -105,6 +105,7 @@ void command_globalview(Client *c, const Seperator *sep);
 void command_gm(Client *c, const Seperator *sep);
 void command_gmspeed(Client *c, const Seperator *sep);
 void command_gmzone(Client *c, const Seperator *sep);
+void command_godmode(Client* c, const Seperator *sep);
 void command_goto(Client *c, const Seperator *sep);
 void command_grid(Client *c, const Seperator *sep);
 void command_guild(Client *c, const Seperator *sep);
