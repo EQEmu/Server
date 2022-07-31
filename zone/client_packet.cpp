@@ -571,7 +571,7 @@ void Client::CompleteConnect()
 	//SendAATable();
 
 	if (GetGM() && (GetHideMe() || GetGMSpeed() || GetGMInvul() || flymode != 0 || tellsoff)) {
-		std::vector<std::string> state = {"currently"};
+		std::vector<std::string> state;
 		if (GetHideMe()) {
 			state.emplace_back("hidden to all clients");
 		}
@@ -592,7 +592,7 @@ void Client::CompleteConnect()
 		}
 
 		if (!state.empty()) {
-			Message(Chat::Red, "[GM] You are %s.", Strings::Join(state, ", ").c_str());
+			Message(Chat::Red, "[GM] You are currently %s.", Strings::Join(state, ", ").c_str());
 		}
 	}
 
