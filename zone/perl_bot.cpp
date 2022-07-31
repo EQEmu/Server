@@ -71,6 +71,16 @@ void Perl_Bot_RemoveBotItem(Bot* self, uint32 item_id)
 	return self->RemoveBotItem(item_id);
 }
 
+EQ::ItemInstance* Perl_Bot_GetBotItem(Bot* self, uint16 slot_id)
+{
+	return self->GetBotItem(slot_id);
+}
+
+uint32 Perl_Bot_GetBotItemIDBySlot(Bot* self, uint16 slot_id)
+{
+	return self->GetBotItemBySlot(slot_id);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -87,6 +97,8 @@ void perl_register_bot()
 	package.add("AddBotItem", (void(*)(Bot*, uint16, uint32, uint16, bool, uint32, uint32, uint32, uint32, uint32))&Perl_Bot_AddBotItem);
 	package.add("AddBotItem", (void(*)(Bot*, uint16, uint32, uint16, bool, uint32, uint32, uint32, uint32, uint32, uint32))&Perl_Bot_AddBotItem);
 	package.add("CountBotItem", &Perl_Bot_CountBotItem);
+	package.add("GetBotItem", &Perl_Bot_GetBotItem);
+	package.add("GetBotItemIDBySlot", &Perl_Bot_GetBotItemIDBySlot);
 	package.add("GetOwner", &Perl_Bot_GetOwner);
 	package.add("HasBotItem", &Perl_Bot_HasBotItem);
 	package.add("RemoveBotItem", &Perl_Bot_RemoveBotItem);
