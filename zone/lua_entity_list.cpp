@@ -227,7 +227,16 @@ void Lua_EntityList::MessageStatus(uint32 guild_dbid, int min_status, uint32 typ
 
 void Lua_EntityList::MessageClose(Lua_Mob sender, bool skip_sender, float dist, uint32 type, const char *message) {
 	Lua_Safe_Call_Void();
-	self->MessageClose(sender, skip_sender, dist, type, message);
+
+	if (RuleB(Chat, AutoInjectSaylinksToClientMessage))
+	{
+		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
+		self->MessageClose(sender, skip_sender, dist, type, new_message.c_str());
+	}
+	else
+	{
+		self->MessageClose(sender, skip_sender, dist, type, message);
+	}
 }
 
 void Lua_EntityList::FilteredMessageClose(Lua_Mob sender, bool skip_sender, float dist, uint32 type, int filter, const char *message)

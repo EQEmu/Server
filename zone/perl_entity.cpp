@@ -2,10 +2,12 @@
 
 #ifdef EMBPERL_XS_CLASSES
 
-#include "../common/global_define.h"
-#include "../common/strings.h"
 #include "embperl.h"
 #include "entity.h"
+#include "../common/global_define.h"
+#include "../common/rulesys.h"
+#include "../common/say_link.h"
+#include "../common/strings.h"
 #include <list>
 
 Mob* Perl_EntityList_GetMobID(EntityList* self, uint16_t mob_id) // @categories Script Utility
@@ -255,7 +257,15 @@ void Perl_EntityList_MessageStatus(EntityList* self, uint32 guild_id, int to_min
 
 void Perl_EntityList_MessageClose(EntityList* self, Mob* sender, bool skip_sender, float distance, uint32 color_type, const char* message)
 {
-	self->MessageClose(sender, skip_sender, distance, color_type, message);
+	if (RuleB(Chat, AutoInjectSaylinksToClientMessage))
+	{
+		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
+		self->MessageClose(sender, skip_sender, distance, color_type, new_message.c_str());
+	}
+	else
+	{
+		self->MessageClose(sender, skip_sender, distance, color_type, message);
+	}
 }
 
 void Perl_EntityList_RemoveFromTargets(EntityList* self, Mob* mob) // @categories Script Utility
