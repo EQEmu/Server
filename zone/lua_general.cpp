@@ -605,21 +605,15 @@ void lua_task_selector(luabind::adl::object table) {
 	int tasks[MAXCHOOSERENTRIES] = { 0 };
 	int count = 0;
 
-	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
-		auto cur = table[i];
-		int cur_value = 0;
-		if(luabind::type(cur) != LUA_TNIL) {
-			try {
-				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
-			}
-		} else {
-			count = i - 1;
-			break;
+	for (int i = 1; i <= MAXCHOOSERENTRIES; ++i)
+	{
+		if (luabind::type(table[i]) == LUA_TNUMBER)
+		{
+			tasks[i - 1] = luabind::object_cast<int>(table[i]);
+			++count;
 		}
-
-		tasks[i - 1] = cur_value;
 	}
+
 	quest_manager.taskselector(count, tasks);
 }
 
