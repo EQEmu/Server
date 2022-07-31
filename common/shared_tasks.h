@@ -2,6 +2,7 @@
 #define EQEMU_SHARED_TASKS_H
 
 #include "database.h"
+#include "timer.h"
 #include "types.h"
 #include "repositories/character_data_repository.h"
 #include "repositories/tasks_repository.h"
@@ -202,6 +203,8 @@ public:
 	std::vector<SharedTaskMember>             m_members;
 	std::vector<uint32_t>                     member_id_history; // past and present members for replay timers
 	std::vector<uint32_t>                     dynamic_zone_ids;
+
+	Timer terminate_timer;
 
 protected:
 	SharedTasksRepository::SharedTasks m_db_shared_task;
