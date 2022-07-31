@@ -2204,7 +2204,7 @@ struct CashReward_Struct
 struct Camera_Struct
 {
 	uint32	duration;	// Duration in ms
-	uint32	intensity;	// Between 1023410176 and 1090519040
+	float intensity;
 };
 
 struct ZonePoint_Entry {

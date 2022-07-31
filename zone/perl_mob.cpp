@@ -1851,20 +1851,20 @@ void Perl_Mob_SendIllusion(Mob* self, uint16 race, uint8 gender, uint8 texture, 
 
 void Perl_Mob_CameraEffect(Mob* self, uint32 duration) // @categories Script Utility
 {
-	self->CameraEffect(duration, 0);
+	self->CameraEffect(duration, 0.03125f);
 }
 
-void Perl_Mob_CameraEffect(Mob* self, uint32 duration, uint32 intensity) // @categories Script Utility
+void Perl_Mob_CameraEffect(Mob* self, uint32 duration, float intensity) // @categories Script Utility
 {
 	self->CameraEffect(duration, intensity);
 }
 
-void Perl_Mob_CameraEffect(Mob* self, uint32 duration, uint32 intensity, Client* client) // @categories Script Utility
+void Perl_Mob_CameraEffect(Mob* self, uint32 duration, float intensity, Client* client) // @categories Script Utility
 {
 	self->CameraEffect(duration, intensity, client);
 }
 
-void Perl_Mob_CameraEffect(Mob* self, uint32 duration, uint32 intensity, perl::nullable<Client*> client, bool global) // @categories Script Utility
+void Perl_Mob_CameraEffect(Mob* self, uint32 duration, float intensity, perl::nullable<Client*> client, bool global) // @categories Script Utility
 {
 	self->CameraEffect(duration, intensity, client.get(), global);
 }
@@ -2490,9 +2490,9 @@ void perl_register_mob()
 	package.add("CalculateDistance", &Perl_Mob_CalculateDistance);
 	package.add("CalculateHeadingToTarget", &Perl_Mob_CalculateHeadingToTarget);
 	package.add("CameraEffect", (void(*)(Mob*, uint32))&Perl_Mob_CameraEffect);
-	package.add("CameraEffect", (void(*)(Mob*, uint32, uint32))&Perl_Mob_CameraEffect);
-	package.add("CameraEffect", (void(*)(Mob*, uint32, uint32, Client*))&Perl_Mob_CameraEffect);
-	package.add("CameraEffect", (void(*)(Mob*, uint32, uint32, perl::nullable<Client*>, bool))&Perl_Mob_CameraEffect);
+	package.add("CameraEffect", (void(*)(Mob*, uint32, float))&Perl_Mob_CameraEffect);
+	package.add("CameraEffect", (void(*)(Mob*, uint32, float, Client*))&Perl_Mob_CameraEffect);
+	package.add("CameraEffect", (void(*)(Mob*, uint32, float, perl::nullable<Client*>, bool))&Perl_Mob_CameraEffect);
 	package.add("CanBuffStack", (bool(*)(Mob*, uint16, uint8))&Perl_Mob_CanBuffStack);
 	package.add("CanBuffStack", (bool(*)(Mob*, uint16, uint8, bool))&Perl_Mob_CanBuffStack);
 	package.add("CanClassEquipItem", &Perl_Mob_CanClassEquipItem);
