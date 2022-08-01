@@ -316,6 +316,11 @@ int main(int argc, char** argv) {
 		LogError("Loading npcs faction lists failed!");
 		return 1;
 	}
+	LogInfo("Loading splash faction hits");
+	if (!database.LoadSplashFaction(hotfix_name)) {
+		LogError("Loading splash faction hits failed!");
+		return 1;
+	}
 	LogInfo("Loading loot tables");
 	if (!database.LoadLoot(hotfix_name)) {
 		LogError("Loading loot failed!");
