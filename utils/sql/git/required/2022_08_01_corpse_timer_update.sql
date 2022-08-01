@@ -1,0 +1,5 @@
+ALTER TABLE `character_corpses`
+    ADD COLUMN `rez_time` INT(11) UNSIGNED NULL DEFAULT '0' AFTER `wc_9`,
+    ADD COLUMN `gmexp` INT(11) UNSIGNED NULL DEFAULT '0' AFTER `rez_time`,
+    ADD COLUMN `killedby` TINYINT(11) UNSIGNED NULL DEFAULT '0' AFTER `gmexp`,
+    ADD COLUMN `rezzable` TINYINT(11) UNSIGNED NULL DEFAULT '1' AFTER `killedby`;

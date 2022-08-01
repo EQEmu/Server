@@ -4237,7 +4237,8 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
                                     "`hair_style`  = %u, `face` = %u, `beard` = %u, `drakkin_heritage` = %u, "
                                     "`drakkin_tattoo`  = %u, `drakkin_details` = %u, `wc_1` = %u, "
                                     "`wc_2` = %u, `wc_3` = %u, `wc_4` = %u, `wc_5` = %u, `wc_6` = %u, "
-                                    "`wc_7` = %u, `wc_8` = %u, `wc_9` = %u "
+                                    "`wc_7` = %u, `wc_8` = %u, `wc_9` = %u, `killedby` = %u, `rezzable` = %d, "
+                                    "`rez_time` = %u, `is_rezzed` = %u "
                                     "WHERE `id` = %u",
                                     Strings::Escape(char_name).c_str(), zone_id, instance_id, char_id,
                                     position.x, position.y, position.z, position.w, guild_id,
@@ -4250,6 +4251,7 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(uint32 db_id, uint32 char_id, const c
                                     dbpc->item_tint.Head.Color, dbpc->item_tint.Chest.Color, dbpc->item_tint.Arms.Color,
                                     dbpc->item_tint.Wrist.Color, dbpc->item_tint.Hands.Color, dbpc->item_tint.Legs.Color,
                                     dbpc->item_tint.Feet.Color, dbpc->item_tint.Primary.Color, dbpc->item_tint.Secondary.Color,
+                                    dbpc->killedby, dbpc->rezzable, dbpc->rez_time, is_rezzed,
                                     db_id);
 	auto results = QueryDatabase(query);
 
@@ -4315,7 +4317,10 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 		"`wc_6` = %u, "
 		"`wc_7` = %u, "
 		"`wc_8` = %u, "
-		"`wc_9`	= %u ",
+		"`wc_9`	= %u, "
+		"`killedby` = %u, "
+		"`rezzable` = %d, "
+		"`rez_time` = %u",
 		Strings::Escape(charname).c_str(),
 		zoneid,
 		instanceid,
@@ -4357,7 +4362,10 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 		dbpc->item_tint.Legs.Color,
 		dbpc->item_tint.Feet.Color,
 		dbpc->item_tint.Primary.Color,
-		dbpc->item_tint.Secondary.Color
+		dbpc->item_tint.Secondary.Color,
+		dbpc->killedby,
+		dbpc->rezzable,
+		dbpc->rez_time
 	);
 	auto results = QueryDatabase(query);
 	uint32 last_insert_id = results.LastInsertedID();
@@ -4496,7 +4504,10 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		"wc_6,            \n"
 		"wc_7,            \n"
 		"wc_8,            \n"
-		"wc_9             \n"
+		"wc_9,            \n"
+		"killedby,        \n"
+		"rezzable,        \n"
+		"rez_time         \n"
 		"FROM             \n"
 		"character_corpses\n"
 		"WHERE `id` = %u  LIMIT 1\n",
@@ -4538,6 +4549,9 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, PlayerCorpse_Struct
 		pcs->item_tint.Feet.Color = atoul(row[i++]);		// wc_7,
 		pcs->item_tint.Primary.Color = atoul(row[i++]);		// wc_8,
 		pcs->item_tint.Secondary.Color = atoul(row[i++]);	// wc_9
+		pcs->killedby = atoi(row[i++]);						// killedby
+		pcs->rezzable = atoi(row[i++]);						// rezzable
+		pcs->rez_time = atoul(row[i++]);					// rez_time
 	}
 	query = StringFormat(
 		"SELECT                       \n"

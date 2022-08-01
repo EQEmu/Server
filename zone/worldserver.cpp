@@ -1231,6 +1231,22 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_IsOwnerOnline: {
+		ServerIsOwnerOnline_Struct* online = (ServerIsOwnerOnline_Struct*)pack->pBuffer;
+		if (zone) {
+			if (online->zoneid != zone->GetZoneID()) {
+				break;
+			}
+
+			Corpse* corpse = entity_list.GetCorpseByID(online->corpseid);
+			if (corpse && online->online == 1) {
+				corpse->SetOwnerOnline(true);
+			} else if (corpse) {
+				corpse->SetOwnerOnline(false);
+			}
+		}
+		break;
+	}
 	case ServerOP_OOZGroupMessage: {
 		ServerGroupChannelMessage_Struct* gcm = (ServerGroupChannelMessage_Struct*)pack->pBuffer;
 		if (zone) {

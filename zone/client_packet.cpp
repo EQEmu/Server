@@ -4889,13 +4889,19 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		);
 
 		if (target->IsPlayerCorpse()) {
-			Message(
+			uint32 rez_time = target->GetRemainingRezTime();
+			if (rez_time > 0) {
+				auto rez_time_string = Strings::SecondsToTime(rez_time, true);
+				Message(
 				Chat::NPCQuestSay,
 				fmt::format(
-					"This corpse {} be resurrected.",
-					target->IsRezzed() ? "cannot" : "can"
+					"This corpse's resurrection time will expire in {}",
+					rez_time_string
 				).c_str()
 			);
+			} else {
+				Message(Chat::NPCQuestSay, "This corpse is too old to be resurrected.");
+			}
 		}
 	} else {
 		MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);

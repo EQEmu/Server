@@ -1684,16 +1684,19 @@ void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::Skill
 	}
 }
 
-bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, uint8 killedby)
 {
-	if (!ClientFinishedLoading())
+	if (!ClientFinishedLoading()) {
 		return false;
+	}
 
-	if (dead)
+	if (dead) {
 		return false;	//cant die more than once...
+	}
 
-	if (!spell)
+	if (!spell) {
 		spell = SPELL_UNKNOWN;
+	}
 
 	std::string export_string = fmt::format(
 		"{} {} {} {}",
@@ -1778,10 +1781,12 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
 
 			mod_client_death_npc(killerMob);
+			killedby = Killed_NPC;
 
 			uint16 emoteid = killerMob->GetEmoteID();
-			if (emoteid != 0)
+			if (emoteid != 0) {
 				killerMob->CastToNPC()->DoNPCEmote(KILLEDPC, emoteid);
+			}
 			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 
@@ -1796,7 +1801,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 				entity_list.DuelMessage(killerMob, this, false);
 
 				mod_client_death_duel(killerMob);
-
+				killedby = Killed_DUEL;
 			}
 			else {
 				//otherwise, we just died, end the duel.
@@ -1806,6 +1811,8 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 					who->CastToClient()->SetDuelTarget(0);
 				}
 			}
+		} else if(killerMob->IsClient()) {
+			killedby = Killed_PVP;
 		}
 	}
 
@@ -1917,7 +1924,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		if ((RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) || RuleB(Character, LeaveNakedCorpses))
 		{
 			// creating the corpse takes the cash/items off the player too
-			auto new_corpse = new Corpse(this, exploss);
+			auto new_corpse = new Corpse(this, exploss, killedby);
 
 			std::string tmp;
 			database.GetVariable("ServerType", tmp);
@@ -2289,7 +2296,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 	}
 }
 
-bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, uint8 killedby)
 {
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
 		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);

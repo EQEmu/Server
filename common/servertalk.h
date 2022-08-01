@@ -83,6 +83,7 @@
 #define ServerOP_UpdateSpawn		0x003f
 #define ServerOP_SpawnStatusChange	0x0040
 #define ServerOP_DropClient         0x0041	// DropClient
+#define ServerOP_IsOwnerOnline		0x0042
 #define ServerOP_DepopAllPlayersCorpses	0x0060
 #define ServerOP_QGlobalUpdate		0x0061
 #define ServerOP_QGlobalDelete		0x0062
@@ -1631,6 +1632,13 @@ struct HotReloadQuestsStruct {
 
 struct ServerRequestTellQueue_Struct {
 	char name[64];
+};
+
+struct ServerIsOwnerOnline_Struct {
+	char   name[64];
+	uint32 corpseid;
+	uint16 zoneid;
+	uint8  online;
 };
 
 struct UCSServerStatus_Struct {

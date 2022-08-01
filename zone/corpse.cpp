@@ -109,11 +109,16 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 			     pcs->texture,     // uint8 in_texture
 			     pcs->helmtexture, // uint8 in_helmtexture
 			     pcs->exp,	 // uint32 in_rezexp
+			     pcs->gmexp,			   // uint32 in_gmrezexp
+			     pcs->killedby,		   // uint8 in_killedby
+			     pcs->rezzable,		   // bool rezzable
+			     pcs->rez_time,		   // uint32 rez_time
 			     was_at_graveyard  // bool wasAtGraveyard
 			     );
 
-	if (pcs->locked)
+	if (pcs->locked) {
 		pc->Lock();
+	}
 
 	/* Load Item Tints */
 	pc->item_tint.Head.Color = pcs->item_tint.Head.Color;
@@ -154,7 +159,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	in_npc->GetDeity(),in_npc->GetLevel(),in_npc->GetNPCTypeID(),in_npc->GetSize(),0,
 	in_npc->GetPosition(), in_npc->GetInnateLightType(), in_npc->GetTexture(),in_npc->GetHelmTexture(),
 	0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,EQ::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,EQ::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	(*in_npctypedata)->use_model, false),
 	corpse_decay_timer(in_decaytime),
 	corpse_rez_timer(0),
@@ -209,7 +214,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	loot_request_type = LootRequestType::Forbidden;
 }
 
-Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
+Corpse::Corpse(Client* client, int32 in_rezexp, uint8 in_killedby) : Mob (
 	"Unnamed_Corpse",				  // const char*	in_name,
 	"",								  // const char*	in_lastname,
 	0,								  // int32		in_cur_hp,
@@ -310,6 +315,15 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	silver			= 0;
 	gold			= 0;
 	platinum		= 0;
+	killedby		= in_killedby;
+	rezzable		= true;
+	rez_time		= 0;
+	is_owner_online = false; // We can't assume they are online just because they just died. Perhaps they rage smashed their router.
+
+	owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTimeMS));
+
+	corpse_rez_timer.Disable();
+	SetRezTimer(true);
 
 	strcpy(corpse_name, pp->name);
 	strcpy(name, pp->name);
@@ -449,7 +463,7 @@ void Corpse::MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equi
 }
 
 // To be called from LoadFromDBData
-Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard)
+Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, uint32 in_gmrezexp, uint8 in_killedby, bool in_rezzable, uint32 in_rez_time, bool wasAtGraveyard)
 : Mob("Unnamed_Corpse",
 "",
 0,
@@ -503,6 +517,7 @@ EQ::TintProfile(),
 0,
 0,
 0,
+0,
 false),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
@@ -535,6 +550,16 @@ false),
 	platinum = in_plat;
 
 	rez_experience = in_rezexp;
+	gm_rez_experience = in_gmrezexp;
+	killedby = in_killedby;
+	rezzable = in_rezzable;
+	rez_time = in_rez_time;
+	is_owner_online = false;
+
+	owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTimeMS));
+
+	corpse_rez_timer.Disable();
+	SetRezTimer();
 
 	for (int i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
@@ -604,6 +629,10 @@ bool Corpse::Save() {
 	dbpc->texture = texture;
 	dbpc->helmtexture = helmtexture;
 	dbpc->exp = rez_experience;
+	dbpc->gmexp = gm_rez_experience;
+	dbpc->killedby = killedby;
+	dbpc->rezzable = rezzable;
+	dbpc->rez_time = rez_time;
 
 	memcpy(&dbpc->item_tint.Slot, &item_tint.Slot, sizeof(dbpc->item_tint));
 	dbpc->haircolor = haircolor;
@@ -854,12 +883,18 @@ bool Corpse::IsEmpty() const {
 }
 
 bool Corpse::Process() {
-	if (player_corpse_depop)
+	if (player_corpse_depop) {
 		return false;
+	}
+
+	if (owner_online_timer.Check() || rezzable) {
+		IsOwnerOnline();
+	}
 
 	if (corpse_delay_timer.Check()) {
-		for (int i = 0; i < MAX_LOOTERS; i++)
+		for (int i = 0; i < MAX_LOOTERS; i++) {
 			allowed_looters[i] = 0;
+		}
 		corpse_delay_timer.Disable();
 		return true;
 	}
@@ -869,12 +904,26 @@ bool Corpse::Process() {
 		corpse_graveyard_timer.Disable();
 		return false;
 	}
-	/*
-	if(corpse_res_timer.Check()) {
-		can_rez = false;
-		corpse_res_timer.Disable();
+	
+	//Player is offline. If rez timer is enabled, disable it and save corpse.
+	if (!is_owner_online && rezzable) {
+		if (corpse_rez_timer.Enabled()) {
+			rez_time = corpse_rez_timer.GetRemainingTime();
+			corpse_rez_timer.Disable();
+			is_corpse_changed = true;
+			Save();
+		}
+	} else if (is_owner_online && rezzable) { //Player is online. If rez timer is disabled, enable it.
+		if (corpse_rez_timer.Enabled()) {
+			rez_time = corpse_rez_timer.GetRemainingTime();
+		} else {
+			SetRezTimer();
+		}
 	}
-	*/
+
+	if (corpse_rez_timer.Check()) {
+		CompleteResurrection(true);
+	}
 
 	/* This is when a corpse hits decay timer and does checks*/
 	if (corpse_decay_timer.Check()) {
@@ -1683,7 +1732,16 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 	return true;
 }
 
-void Corpse::CompleteResurrection(){
+void Corpse::CompleteResurrection(bool timer_expired) {
+	if (timer_expired) {
+		rez_time = 0;
+		rezzable = false; // Players can no longer rez this corpse.
+		corpse_rez_timer.Disable();
+	} else {
+		rez_time = corpse_rez_timer.GetRemainingTime();
+	}
+
+	IsRezzed(true); // Players can rez this corpse for no XP (corpse gate) provided rezzable is true.
 	rez_experience = 0;
 	is_corpse_changed = true;
 	Save();
@@ -1855,4 +1913,56 @@ std::vector<int> Corpse::GetLootList() {
 		corpse_items.push_back(loot_item->item_id);
 	}
 	return corpse_items;
+}
+
+void Corpse::SetRezTimer(bool initial_timer) {
+	if (!rezzable) {
+		if(corpse_rez_timer.Enabled()) {
+			corpse_rez_timer.Disable();
+		}
+		return;
+	}
+
+	IsOwnerOnline();
+	if (!is_owner_online && !initial_timer) {
+		if(corpse_rez_timer.Enabled()) {
+			corpse_rez_timer.Disable();
+		}
+		return;
+	}
+
+	if (corpse_rez_timer.Enabled() && !initial_timer) {
+		return;
+	}
+
+	if (initial_timer) {
+		uint32 timer = RuleI(Character, CorpseResTimeMS);
+		if (killedby == Killed_DUEL) {
+			timer = RuleI(Character, DuelCorpseResTimeMS);
+		}
+		rez_time = timer;
+	}
+
+	if (rez_time < 1) {
+		// Corpse is no longer rezzable
+		CompleteResurrection(true);
+		return;
+	}
+	corpse_rez_timer.SetTimer(rez_time);
+}
+
+void Corpse::IsOwnerOnline() {
+	Client* client = entity_list.GetClientByCharID(GetCharID());
+	if (!client) {
+		// Client is not in the corpse's zone, send a packet to world to have it check.
+		ServerPacket* pack = new ServerPacket(ServerOP_IsOwnerOnline, sizeof(ServerIsOwnerOnline_Struct));
+		ServerIsOwnerOnline_Struct* online = (ServerIsOwnerOnline_Struct*)pack->pBuffer;
+		strncpy(online->name, GetOwnerName(), 64);
+		online->corpseid = GetID();
+		online->zoneid = zone->GetZoneID();
+		online->online = 0;
+		worldserver.SendPacket(pack);
+	} else {
+		SetOwnerOnline(true);
+	}
 }

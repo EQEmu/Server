@@ -1659,9 +1659,16 @@ void Mob::ShowStats(Client* client)
 			client->Message(
 				Chat::White,
 				fmt::format(
-					"Player Corpse | Character ID: {}  ID: {}",
+					"Player Corpse | Character ID: {}  ID: {} Empty: {} Rezed: {} Exp: {} GMExp: {} KilledBy: {} Rez Time: {} Owner Online: {}",
 					CastToCorpse()->GetCharID(),
-					CastToCorpse()->GetCorpseDBID()
+					CastToCorpse()->GetCorpseDBID(),
+					CastToCorpse()->IsEmpty(),
+					CastToCorpse()->IsRezzed(),
+					CastToCorpse()->GetRezExp(),
+					CastToCorpse()->GetGMRezExp(),
+					CastToCorpse()->GetKilledBy(),
+					CastToCorpse()->GetRemainingRezTime(),
+					CastToCorpse()->GetOwnerOnline()
 				).c_str()
 			);
 		} else {

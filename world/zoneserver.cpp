@@ -901,6 +901,20 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			break;
 		}
+		case ServerOP_IsOwnerOnline: {
+			if (pack->size != sizeof(ServerIsOwnerOnline_Struct)) {
+				break;
+			}
+			ServerIsOwnerOnline_Struct* online = (ServerIsOwnerOnline_Struct*) pack->pBuffer;
+			ClientListEntry* cle = client_list.FindCharacter(online->name);
+			if (cle) {
+				online->online = 1;
+			} else {
+				online->online = 0;
+			}
+			zoneserver_list.FindByZoneID(online->zoneid)->SendPacket(pack);
+			break;
+		}
 		case ServerOP_DeleteGuild:
 		case ServerOP_GuildCharRefresh:
 		case ServerOP_GuildMemberUpdate:
