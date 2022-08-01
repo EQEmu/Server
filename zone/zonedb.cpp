@@ -2561,6 +2561,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->exp_mod                = n.exp_mod;
 		t->skip_auto_scale        = false; // hardcoded here for now
 		t->hp_regen_per_second    = n.hp_regen_per_second;
+		t->faction_amount         = n.faction_amount;
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.

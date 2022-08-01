@@ -271,6 +271,9 @@ public:
 	inline int32 GetPrimaryFaction() const
 	{ return primary_faction; }
 
+	inline int32 GetFactionAmount() const
+	{ return faction_amount; }
+
 	int64 GetNPCHate(Mob *in_ent)
 	{ return hate_list.GetEntHateAmount(in_ent); }
 
@@ -554,6 +557,7 @@ protected:
 
 	int32	npc_faction_id;
 	int32	primary_faction;
+	int32	faction_amount;
 
 	Timer	attacked_timer;		//running while we are being attacked (damaged)
 	Timer	swarm_timer;
