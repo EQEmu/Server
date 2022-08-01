@@ -122,6 +122,7 @@ public:
 	int GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc);
 	void SetFactionLevel(uint32 char_id, uint32 npc_id, int char_class, int char_race, int char_deity);
 	void SetFactionLevel2(uint32 char_id, int faction_id, int char_class, int char_race, int char_deity, int value, int temp);
+	void RewardFaction(int id, int amount);
 	int GetRawItemAC();
 	uint32 AccountID();
 	const char *AccountName();

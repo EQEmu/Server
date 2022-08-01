@@ -8753,7 +8753,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
 			qr->faction = target->CastToNPC()->GetPrimaryFaction();
-			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+			qr->faction_mod = 1; // Too lazy to get real value, not even used by client anyhow.
 		}
 	}
 
@@ -8773,7 +8773,7 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 	memcpy(qr, &reward, sizeof(QuestReward_Struct));
 
 	// not set in caller because reasons
-	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
+	qr->mob_id = target ? target->GetID() : 0; // Entity ID for the from mob name, tasks won't set this
 
 	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0)
 		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum);
@@ -8782,6 +8782,12 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 		if (reward.item_id[i] > 0)
 			SummonItem(reward.item_id[i], 0, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
 
+	// only process if both are valid
+	// if we don't have a target here, we want to just reward, but if there is a target, need to check charm
+	if (reward.faction && reward.faction_mod && (target == nullptr || !target->IsCharmed()))
+		RewardFaction(reward.faction, reward.faction_mod);
+
+	// legacy support
 	if (faction)
 	{
 		if (target && target->IsNPC() && !target->IsCharmed())
@@ -8789,11 +8795,11 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
 			qr->faction = target->CastToNPC()->GetPrimaryFaction();
-			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+			qr->faction_mod = 1; // Too lazy to get real value, not even used by client anyhow.
 		}
 	}
 
-	if (reward.exp_reward> 0)
+	if (reward.exp_reward > 0)
 		AddEXP(reward.exp_reward);
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
@@ -8812,6 +8818,37 @@ void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platin
 	AddMoneyToPP(copper, silver, gold, platinum);
 
 	QueuePacket(outapp.get());
+}
+
+void Client::RewardFaction(int id, int amount)
+{
+	auto splash_hits = database.GetSplashFactionHit(id);
+	// needs to be populated!!
+	if (!splash_hits) {
+		LogFaction("Tried to get splash faction for ID {} but there isn't one defined!", id);
+		return;
+	}
+
+	// first we hit the primary faction
+	SetFactionLevel2(CharacterID(), id, GetClass(), GetBaseRace(), GetDeity(), amount, false);
+
+	// now hit them in order
+	for (int i = 0; i < MAX_SPLASH_FACTION ; ++i) {
+		if (splash_hits->hits[i].id <= 0) // we don't allow later entries
+			break;
+		if (splash_hits->hits[i].multiplier == 0.0f) {
+			LogFaction("Bad multiplier for ID {} entry {}", id, i + 1);
+			continue;
+		}
+
+		// value is truncated and min clamped to 1 (or -1)
+		float temp = splash_hits->hits[i].multiplier * amount;
+		int sign = temp < 0.0f ? -1 : 1;
+		int32 new_amount = std::max(1, static_cast<int32>(std::abs(temp))) * sign;
+
+		SetFactionLevel2(CharacterID(), splash_hits->hits[i].id, GetClass(), GetBaseRace(), GetDeity(),
+				 new_amount, false);
+	}
 }
 
 void Client::SendHPUpdateMarquee(){

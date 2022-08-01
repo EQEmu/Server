@@ -256,6 +256,7 @@ void command_spawneditmass(Client *c, const Seperator *sep);
 void command_spawnfix(Client *c, const Seperator *sep);
 void command_spawnstatus(Client *c, const Seperator *sep);
 void command_spellinfo(Client *c, const Seperator *sep);
+void command_splash_faction(Client *c, const Seperator *sep);
 void command_stun(Client *c, const Seperator *sep);
 void command_summon(Client *c, const Seperator *sep);
 void command_summonburiedplayercorpse(Client *c, const Seperator *sep);

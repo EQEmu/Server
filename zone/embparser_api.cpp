@@ -684,9 +684,9 @@ void Perl__faction(int faction_id, int value)
 	quest_manager.faction(faction_id, value, 0);
 }
 
-void Perl__faction(int faction_id, int value, int temp)
+void Perl__rewardfaction(int faction_id, int value)
 {
-	quest_manager.faction(faction_id, value, temp);
+	quest_manager.rewardfaction(faction_id, value);
 }
 
 void Perl__setsky(uint8 new_sky)
@@ -4136,6 +4136,7 @@ void perl_register_quest()
 	package.add("resettaskactivity", &Perl__resettaskactivity);
 	package.add("respawn", &Perl__respawn);
 	package.add("resume", &Perl__resume);
+	package.add("rewardfaction", &Perl__rewardfaction);
 	package.add("safemove", &Perl__safemove);
 	package.add("save", &Perl__save);
 	package.add("say", (void(*)(const char*))&Perl__say);

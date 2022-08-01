@@ -150,6 +150,7 @@ public:
 	void attacknpctype(int npc_type_id);
 	void save();
 	void faction(int faction_id, int faction_value, int temp);
+	void rewardfaction(int faction_id, int faction_value);
 	void setsky(uint8 new_sky);
 	void setguild(uint32 new_guild_id, uint8 new_rank);
 	void CreateGuild(const char *guild_name, const char *leader);
