@@ -131,6 +131,7 @@ namespace Logs {
 		CombatRecord,
 		Hate,
 		Discord,
+		Faction,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -220,6 +221,7 @@ namespace Logs {
 		"CombatRecord",
 		"Hate",
 		"Discord",
+		"Faction",
 	};
 }
 
