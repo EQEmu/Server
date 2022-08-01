@@ -232,6 +232,7 @@ namespace DatabaseSchema {
 			"spawnentry",
 			"spawngroup",
 			"spells_new",
+			"splash_faction",
 			"start_zones",
 			"starting_items",
 			"task_activities",

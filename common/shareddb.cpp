@@ -1448,6 +1448,105 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 	return true;
 }
 
+void SharedDatabase::GetSplashFactionInfo(uint32 &list_count, uint32 &max_lists)
+{
+	list_count = 0;
+	max_lists = 0;
+
+	const std::string query = "SELECT COUNT(*), MAX(id) FROM splash_faction";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
+
+	if (results.RowCount() == 0)
+		return;
+
+	auto row = results.begin();
+
+	list_count = static_cast<uint32>(atoul(row[0]));
+	max_lists = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
+}
+
+const SplashFactions *SharedDatabase::GetSplashFactionHit(int id)
+{
+	if (!splash_faction_hash) {
+		return nullptr;
+	}
+
+	if (splash_faction_hash->exists(id)) {
+		return &(splash_faction_hash->at(id));
+	}
+
+	return nullptr;
+}
+
+void SharedDatabase::LoadSplashFaction(void *data, uint32 size, uint32 list_count, uint32 max_lists)
+{
+	EQ::FixedMemoryHashSet<SplashFactions> hash(reinterpret_cast<uint8 *>(data), size, list_count, max_lists);
+	SplashFactions faction;
+
+	// yes, this table is kind of shit, but it works and given how VI wrote somethings *cough* spells *cough* it's
+	// probably what they do :P
+	const std::string query =
+	    "SELECT id, splash_id1, splash_mod1, splash_id2, splash_mod2, splash_id3, splash_mod3, splash_id4, "
+	    "splash_mod4, splash_id5, splash_mod5, splash_id6, splash_mod6, splash_id7, splash_mod7, splash_id8, "
+	    "splash_mod8, splash_id9, splash_mod9, splash_id10, splash_mod10 FROM splash_faction";
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		int id = atoi(row[0]);
+		faction.hits[0].id = atoi(row[1]);
+		faction.hits[0].multiplier = atof(row[2]);
+		faction.hits[1].id = atoi(row[3]);
+		faction.hits[1].multiplier = atof(row[4]);
+		faction.hits[2].id = atoi(row[5]);
+		faction.hits[2].multiplier = atof(row[6]);
+		faction.hits[3].id = atoi(row[7]);
+		faction.hits[3].multiplier = atof(row[8]);
+		faction.hits[4].id = atoi(row[9]);
+		faction.hits[4].multiplier = atof(row[10]);
+		faction.hits[5].id = atoi(row[11]);
+		faction.hits[5].multiplier = atof(row[12]);
+		faction.hits[6].id = atoi(row[13]);
+		faction.hits[6].multiplier = atof(row[14]);
+		faction.hits[7].id = atoi(row[15]);
+		faction.hits[7].multiplier = atof(row[16]);
+		faction.hits[8].id = atoi(row[17]);
+		faction.hits[8].multiplier = atof(row[18]);
+		faction.hits[9].id = atoi(row[19]);
+		faction.hits[9].multiplier = atof(row[20]);
+
+		hash.insert(id, faction);
+	}
+}
+
+bool SharedDatabase::LoadSplashFaction(const std::string &prefix)
+{
+	splash_faction_mmf.reset(nullptr);
+	splash_faction_hash.reset(nullptr);
+
+	try {
+		auto Config = EQEmuConfig::get();
+		EQ::IPCMutex mutex("splashfaction");
+		mutex.Lock();
+		std::string file_name = Config->SharedMemDir + prefix + std::string("splashfaction");
+		splash_faction_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
+		splash_faction_hash = std::unique_ptr<EQ::FixedMemoryHashSet<SplashFactions>>(
+		    new EQ::FixedMemoryHashSet<SplashFactions>(reinterpret_cast<uint8 *>(splash_faction_mmf->Get()),
+								  splash_faction_mmf->Size()));
+		mutex.Unlock();
+	} catch (std::exception &ex) {
+		LogError("Error Loading splash factions: {}", ex.what());
+		return false;
+	}
+
+	return true;
+}
+
 // Create appropriate EQ::ItemInstance class
 EQ::ItemInstance* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {

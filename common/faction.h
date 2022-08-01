@@ -75,6 +75,23 @@ struct NPCFaction
 	uint8 temp;
 };
 
+// SplashFactions give a much more live like faction system
+// Basically the primary faction and magnitude of a faction hit will generate the rest of them
+
+// Largest faction I could find quickly was Lord Inquisitor Seru with 9 total hits (8 splash) so 8 + 2 for max for now
+#define MAX_SPLASH_FACTION 10
+
+// this is the ID of a splash faction and it's multiplier
+struct SplashFactionHit {
+	int id;
+	float multiplier;
+};
+
+struct SplashFactions {
+	// maybe there should be more data here, fine for now
+	SplashFactionHit hits[MAX_SPLASH_FACTION];
+};
+
 const char *FactionValueToString(FACTION_VALUE faction_value);
 FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value);
 #endif

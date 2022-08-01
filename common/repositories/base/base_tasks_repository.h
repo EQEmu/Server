@@ -39,6 +39,7 @@ public:
 		int         max_players;
 		int         repeatable;
 		int         faction_reward;
+		int         faction_amount;
 		std::string completion_emote;
 		int         replay_timer_group;
 		int         replay_timer_seconds;
@@ -76,6 +77,7 @@ public:
 			"max_players",
 			"repeatable",
 			"faction_reward",
+			"faction_amount",
 			"completion_emote",
 			"replay_timer_group",
 			"replay_timer_seconds",
@@ -176,6 +178,7 @@ public:
 		entry.max_players           = 0;
 		entry.repeatable            = 1;
 		entry.faction_reward        = 0;
+		entry.faction_amount         = 0;
 		entry.completion_emote      = "";
 		entry.replay_timer_group    = 0;
 		entry.replay_timer_seconds  = 0;
@@ -238,13 +241,14 @@ public:
 			entry.max_players           = atoi(row[17]);
 			entry.repeatable            = atoi(row[18]);
 			entry.faction_reward        = atoi(row[19]);
-			entry.completion_emote      = row[20] ? row[20] : "";
-			entry.replay_timer_group    = atoi(row[21]);
-			entry.replay_timer_seconds  = atoi(row[22]);
-			entry.request_timer_group   = atoi(row[23]);
-			entry.request_timer_seconds = atoi(row[24]);
-			entry.dz_template_id        = atoi(row[25]);
-			entry.lock_activity_id      = atoi(row[26]);
+			entry.faction_amount         = atoi(row[20]);
+			entry.completion_emote      = row[21] ? row[21] : "";
+			entry.replay_timer_group    = atoi(row[22]);
+			entry.replay_timer_seconds  = atoi(row[23]);
+			entry.request_timer_group   = atoi(row[24]);
+			entry.request_timer_seconds = atoi(row[25]);
+			entry.dz_template_id        = atoi(row[26]);
+			entry.lock_activity_id      = atoi(row[27]);
 
 			return entry;
 		}
@@ -298,13 +302,14 @@ public:
 		update_values.push_back(columns[17] + " = " + std::to_string(tasks_entry.max_players));
 		update_values.push_back(columns[18] + " = " + std::to_string(tasks_entry.repeatable));
 		update_values.push_back(columns[19] + " = " + std::to_string(tasks_entry.faction_reward));
-		update_values.push_back(columns[20] + " = '" + Strings::Escape(tasks_entry.completion_emote) + "'");
-		update_values.push_back(columns[21] + " = " + std::to_string(tasks_entry.replay_timer_group));
-		update_values.push_back(columns[22] + " = " + std::to_string(tasks_entry.replay_timer_seconds));
-		update_values.push_back(columns[23] + " = " + std::to_string(tasks_entry.request_timer_group));
-		update_values.push_back(columns[24] + " = " + std::to_string(tasks_entry.request_timer_seconds));
-		update_values.push_back(columns[25] + " = " + std::to_string(tasks_entry.dz_template_id));
-		update_values.push_back(columns[26] + " = " + std::to_string(tasks_entry.lock_activity_id));
+		update_values.push_back(columns[20] + " = " + std::to_string(tasks_entry.faction_amount));
+		update_values.push_back(columns[21] + " = '" + Strings::Escape(tasks_entry.completion_emote) + "'");
+		update_values.push_back(columns[22] + " = " + std::to_string(tasks_entry.replay_timer_group));
+		update_values.push_back(columns[23] + " = " + std::to_string(tasks_entry.replay_timer_seconds));
+		update_values.push_back(columns[24] + " = " + std::to_string(tasks_entry.request_timer_group));
+		update_values.push_back(columns[25] + " = " + std::to_string(tasks_entry.request_timer_seconds));
+		update_values.push_back(columns[26] + " = " + std::to_string(tasks_entry.dz_template_id));
+		update_values.push_back(columns[27] + " = " + std::to_string(tasks_entry.lock_activity_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -346,6 +351,7 @@ public:
 		insert_values.push_back(std::to_string(tasks_entry.max_players));
 		insert_values.push_back(std::to_string(tasks_entry.repeatable));
 		insert_values.push_back(std::to_string(tasks_entry.faction_reward));
+		insert_values.push_back(std::to_string(tasks_entry.faction_amount));
 		insert_values.push_back("'" + Strings::Escape(tasks_entry.completion_emote) + "'");
 		insert_values.push_back(std::to_string(tasks_entry.replay_timer_group));
 		insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
@@ -402,6 +408,7 @@ public:
 			insert_values.push_back(std::to_string(tasks_entry.max_players));
 			insert_values.push_back(std::to_string(tasks_entry.repeatable));
 			insert_values.push_back(std::to_string(tasks_entry.faction_reward));
+			insert_values.push_back(std::to_string(tasks_entry.faction_amount));
 			insert_values.push_back("'" + Strings::Escape(tasks_entry.completion_emote) + "'");
 			insert_values.push_back(std::to_string(tasks_entry.replay_timer_group));
 			insert_values.push_back(std::to_string(tasks_entry.replay_timer_seconds));
@@ -462,13 +469,14 @@ public:
 			entry.max_players           = atoi(row[17]);
 			entry.repeatable            = atoi(row[18]);
 			entry.faction_reward        = atoi(row[19]);
-			entry.completion_emote      = row[20] ? row[20] : "";
-			entry.replay_timer_group    = atoi(row[21]);
-			entry.replay_timer_seconds  = atoi(row[22]);
-			entry.request_timer_group   = atoi(row[23]);
-			entry.request_timer_seconds = atoi(row[24]);
-			entry.dz_template_id        = atoi(row[25]);
-			entry.lock_activity_id      = atoi(row[26]);
+			entry.faction_amount        = atoi(row[20]);
+			entry.completion_emote      = row[21] ? row[21] : "";
+			entry.replay_timer_group    = atoi(row[22]);
+			entry.replay_timer_seconds  = atoi(row[23]);
+			entry.request_timer_group   = atoi(row[24]);
+			entry.request_timer_seconds = atoi(row[25]);
+			entry.dz_template_id        = atoi(row[26]);
+			entry.lock_activity_id      = atoi(row[27]);
 
 			all_entries.push_back(entry);
 		}
@@ -513,13 +521,14 @@ public:
 			entry.max_players           = atoi(row[17]);
 			entry.repeatable            = atoi(row[18]);
 			entry.faction_reward        = atoi(row[19]);
-			entry.completion_emote      = row[20] ? row[20] : "";
-			entry.replay_timer_group    = atoi(row[21]);
-			entry.replay_timer_seconds  = atoi(row[22]);
-			entry.request_timer_group   = atoi(row[23]);
-			entry.request_timer_seconds = atoi(row[24]);
-			entry.dz_template_id        = atoi(row[25]);
-			entry.lock_activity_id      = atoi(row[26]);
+			entry.faction_amount        = atoi(row[20]);
+			entry.completion_emote      = row[21] ? row[21] : "";
+			entry.replay_timer_group    = atoi(row[22]);
+			entry.replay_timer_seconds  = atoi(row[23]);
+			entry.request_timer_group   = atoi(row[24]);
+			entry.request_timer_seconds = atoi(row[25]);
+			entry.dz_template_id        = atoi(row[26]);
+			entry.lock_activity_id      = atoi(row[27]);
 
 			all_entries.push_back(entry);
 		}

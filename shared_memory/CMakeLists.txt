@@ -8,6 +8,7 @@ SET(shared_memory_sources
 	npc_faction.cpp
 	spells.cpp
 	skill_caps.cpp
+	splash_faction.cpp
 )
 
 SET(shared_memory_headers
@@ -17,6 +18,7 @@ SET(shared_memory_headers
 	npc_faction.h
 	spells.h
 	skill_caps.h
+	splash_faction.h
 )
 
 ADD_EXECUTABLE(shared_memory ${shared_memory_sources} ${shared_memory_headers})

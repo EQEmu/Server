@@ -277,6 +277,7 @@ SET(repositories
 	repositories/base/base_spells_new_repository.h
 	repositories/base/base_spell_buckets_repository.h
 	repositories/base/base_spell_globals_repository.h
+	repositories/base/base_splash_faction_repository.h
 	repositories/base/base_starting_items_repository.h
 	repositories/base/base_start_zones_repository.h
 	repositories/base/base_tasks_repository.h
@@ -451,6 +452,7 @@ SET(repositories
 	repositories/spells_new_repository.h
 	repositories/spell_buckets_repository.h
 	repositories/spell_globals_repository.h
+	repositories/splash_faction_repository.h
 	repositories/starting_items_repository.h
 	repositories/start_zones_repository.h
 	repositories/tasks_repository.h
