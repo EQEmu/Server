@@ -3185,7 +3185,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 
 		LogInfo("Loading splash faction lists");
-		if (!database.LoadSplashFaction(hotfix_name)) {
+		if (!content_db.LoadSplashFaction(hotfix_name)) {
 			LogError("Loading splash faction hits failed!");
 		}
 
