@@ -317,7 +317,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	LogInfo("Loading splash faction hits");
-	if (!database.LoadSplashFaction(hotfix_name)) {
+	if (!content_db.LoadSplashFaction(hotfix_name)) {
 		LogError("Loading splash faction hits failed!");
 		return 1;
 	}

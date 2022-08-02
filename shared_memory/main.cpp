@@ -307,7 +307,7 @@ int main(int argc, char **argv)
 	if(load_all || load_splash_factions) {
 		LogInfo("Loading splash factions");
 		try {
-			LoadSplashFaction(&database, hotfix_name);
+			LoadSplashFaction(&content_db, hotfix_name);
 		} catch(std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;

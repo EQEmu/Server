@@ -8822,7 +8822,7 @@ void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platin
 
 void Client::RewardFaction(int id, int amount)
 {
-	auto splash_hits = database.GetSplashFactionHit(id);
+	auto splash_hits = content_db.GetSplashFactionHit(id);
 	// needs to be populated!!
 	if (!splash_hits) {
 		LogFaction("Tried to get splash faction for ID {} but there isn't one defined!", id);
