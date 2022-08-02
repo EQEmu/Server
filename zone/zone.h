@@ -23,7 +23,7 @@
 #include "../common/rulesys.h"
 #include "../common/types.h"
 #include "../common/random.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "zonedb.h"
 #include "zone_store.h"
 #include "../common/repositories/grid_repository.h"
@@ -37,6 +37,7 @@
 #include "global_loot_manager.h"
 #include "queryserv.h"
 #include "../common/discord/discord.h"
+#include "../common/repositories/dynamic_zone_templates_repository.h"
 
 class DynamicZone;
 
@@ -227,6 +228,7 @@ public:
 
 	std::unordered_map<uint32, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 	std::unordered_map<uint32, std::unique_ptr<Expedition>>  expedition_cache;
+	std::unordered_map<uint32, DynamicZoneTemplatesRepository::DynamicZoneTemplates> dz_template_cache;
 
 	time_t weather_timer;
 	Timer  spawn2_timer;
@@ -267,6 +269,7 @@ public:
 	void LoadAdventureFlavor();
 	void LoadAlternateAdvancement();
 	void LoadAlternateCurrencies();
+	void LoadDynamicZoneTemplates();
 	void LoadZoneBlockedSpells();
 	void LoadLDoNTrapEntries();
 	void LoadLDoNTraps();
@@ -328,10 +331,10 @@ public:
 		/**
 		 * Replace Occurrences of % or MessageStatus will crash
 		 */
-		find_replace(message, std::string("%"), std::string("."));
+		Strings::FindReplace(message, std::string("%"), std::string("."));
 
 		if (message.find('\n') != std::string::npos) {
-			auto message_split = SplitString(message, '\n');
+			auto message_split = Strings::Split(message, '\n');
 			entity_list.MessageStatus(
 				0,
 				AccountStatus::QuestTroupe,

@@ -31,7 +31,7 @@ void command_stun(Client *c, const Seperator *sep)
 			fmt::format(
 				"You stunned {} for {}.",
 				c->GetTargetDescription(target),
-				ConvertMillisecondsToTime(duration)
+				Strings::MillisecondsToTime(duration)
 			) :
 			fmt::format(
 				"You unstunned {}.",

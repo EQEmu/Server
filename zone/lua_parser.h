@@ -37,19 +37,19 @@ public:
 	~LuaParser();
 
 	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int EventGlobalNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 
 	virtual bool HasQuestSub(uint32 npc_id, QuestEventID evt);
 	virtual bool HasGlobalQuestSub(QuestEventID evt);
@@ -75,13 +75,13 @@ public:
     virtual uint32 GetIdentifier() { return 0xb0712acc; }
 
 	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 
 	static LuaParser* Instance() {
 		static LuaParser inst;
@@ -107,15 +107,15 @@ private:
 	LuaParser& operator=(const LuaParser&);
 
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventItem(std::string package_name, QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data,
-		uint32 extra_data, std::vector<EQ::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		uint32 extra_data, std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
-		std::vector<EQ::Any> *extra_pointers);
+		std::vector<std::any> *extra_pointers);
 
 	void LoadScript(std::string filename, std::string package_name);
 	void MapFunctions(lua_State *L);

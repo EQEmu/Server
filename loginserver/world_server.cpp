@@ -2,7 +2,7 @@
 #include "login_server.h"
 #include "login_types.h"
 #include "../common/ip_util.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern LoginServer server;
 
@@ -63,7 +63,7 @@ WorldServer::~WorldServer() = default;
 
 void WorldServer::Reset()
 {
-	m_server_id;
+	m_server_id            = 0;
 	m_zones_booted         = 0;
 	m_players_online       = 0;
 	m_server_status        = 0;
@@ -448,7 +448,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 		name.assign(loginserver_update->useraccount);
 		password.assign(loginserver_update->userpassword);
 
-		if (loginserver_update->user_email) {
+		if (loginserver_update->user_email[0] != '\0') {
 			email.assign(loginserver_update->user_email);
 		}
 
@@ -1360,12 +1360,12 @@ void WorldServer::OnKeepAlive(EQ::Timer *t)
 void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 {
 	std::string server_long_name = name;
-	server_long_name = trim(server_long_name);
+	server_long_name = Strings::Trim(server_long_name);
 
 	bool name_set_to_bottom = false;
 	if (server_list_type == LS::ServerType::Standard) {
 		if (server.options.IsWorldDevTestServersListBottom()) {
-			std::string s = str_tolower(server_long_name);
+			std::string s = Strings::ToLower(server_long_name);
 			if (s.find("dev") != std::string::npos) {
 				server_long_name   = fmt::format("|D| {}", server_long_name);
 				name_set_to_bottom = true;

@@ -229,8 +229,6 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	bool is_client_moving;
-
 	void ReconnectUCS();
 
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
@@ -409,7 +407,7 @@ public:
 	inline void SetBaseRace(uint32 i) { m_pp.race=i; }
 	inline void SetBaseGender(uint32 i) { m_pp.gender=i; }
 	inline void SetDeity(uint32 i) {m_pp.deity=i;deity=i;}
-	
+
 	void SetTrackingID(uint32 entity_id);
 
 	inline uint8 GetLevel2() const { return m_pp.level2; }
@@ -1042,6 +1040,7 @@ public:
 	void SendRules();
 
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
+	const bool GetGMInvul() const { return gminvul; }
 	bool CanUseReport;
 
 	//This is used to later set the buff duration of the spell, in slot to duration.
@@ -1179,6 +1178,10 @@ public:
 		}
 		else { return false; }
 	}
+	void UpdateTasksOnTouchSwitch(int dz_switch_id)
+	{
+		if (task_state) { task_state->UpdateTasksOnTouch(this, dz_switch_id); }
+	}
 	inline void TaskSetSelector(Mob *mob, int task_set_id)
 	{
 		if (task_manager) {
@@ -1303,6 +1306,7 @@ public:
 		return (task_state ? task_state->CompletedTasksInSet(task_set_id) : 0);
 	}
 	void PurgeTaskTimers();
+	void LockSharedTask(bool lock) { if (task_state) { task_state->LockSharedTask(this, lock); } }
 
 	// shared task shims / middleware
 	// these variables are used as a shim to intercept normal localized task functionality
@@ -1385,6 +1389,7 @@ public:
 	Expedition* CreateExpedition(const std::string& zone_name,
 		uint32 version, uint32 duration, const std::string& expedition_name,
 		uint32 min_players, uint32 max_players, bool disable_messages = false);
+	Expedition* CreateExpeditionFromTemplate(uint32_t dz_template_id);
 	Expedition* GetExpedition() const;
 	uint32 GetExpeditionID() const { return m_expedition_id; }
 	const ExpeditionLockoutTimer* GetExpeditionLockout(
@@ -1405,8 +1410,9 @@ public:
 	void SetDzRemovalTimer(bool enable_timer);
 	void SendDzCompassUpdate();
 	void GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone);
-	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = true);
-	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = true);
+	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = false);
+	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = false);
+	bool TryMovePCDynamicZoneSwitch(int dz_switch_id);
 	std::vector<DynamicZone*> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
 	std::unique_ptr<EQApplicationPacket> CreateDzSwitchListPacket(const std::vector<DynamicZone*>& dzs);
 	std::unique_ptr<EQApplicationPacket> CreateCompassPacket(const std::vector<DynamicZoneCompassEntry_Struct>& entries);
@@ -1632,6 +1638,7 @@ public:
 
 	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, bool faction = false);
 	void QuestReward(Mob* target, const QuestReward_Struct &reward, bool faction); // TODO: Fix faction processing
+	void CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 
 	void ResetHPUpdateTimer() { hpupdate_timer.Start(); }
 
@@ -1787,6 +1794,7 @@ private:
 	bool auto_fire;
 	bool runmode;
 	uint8 gmspeed;
+	bool gminvul;
 	bool medding;
 	uint16 horseId;
 	bool revoked;
@@ -2050,6 +2058,7 @@ private:
 	bool m_bot_precombat;
 
 #endif
+	bool CanTradeFVNoDropItem();
 };
 
 #endif

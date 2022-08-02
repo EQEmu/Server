@@ -18,7 +18,7 @@
 
 #include "../common/global_define.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/types.h"
 
 #include "entity.h"

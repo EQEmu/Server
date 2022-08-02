@@ -333,6 +333,7 @@ public:
 	bool IsTaskCompleted(int task);
 	bool IsTaskActive(int task);
 	bool IsTaskActivityActive(int task, int activity);
+	void LockSharedTask(bool lock);
 	int GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);
@@ -382,6 +383,7 @@ public:
 	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp);
 	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction);
 	void QuestReward(Lua_Mob target, luabind::adl::object reward);
+	void CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 	bool IsDead();
 	int CalcCurrentWeight();
 	int CalcATK();
@@ -431,6 +433,7 @@ public:
 	Lua_Expedition  CreateExpedition(luabind::object expedition_info);
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool disable_messages);
+	Lua_Expedition  CreateExpeditionFromTemplate(uint32_t dz_template_id);
 	Lua_Expedition  GetExpedition();
 	luabind::object GetExpeditionLockouts(lua_State* L);
 	luabind::object GetExpeditionLockouts(lua_State* L, std::string expedition_name);

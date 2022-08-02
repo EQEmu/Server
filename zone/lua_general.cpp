@@ -75,7 +75,7 @@ void load_encounter_with_data(std::string name, std::string info_str) {
 	entity_list.AddEncounter(enc);
 	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
-	std::vector<EQ::Any> info_ptrs;
+	std::vector<std::any> info_ptrs;
 	info_ptrs.push_back(&info_str);
 	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &info_ptrs);
 }
@@ -137,7 +137,7 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 	lua_encounters[name]->Depop();
 	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
-	std::vector<EQ::Any> info_ptrs;
+	std::vector<std::any> info_ptrs;
 	info_ptrs.push_back(&info_str);
 	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &info_ptrs);
 }
@@ -605,21 +605,15 @@ void lua_task_selector(luabind::adl::object table) {
 	int tasks[MAXCHOOSERENTRIES] = { 0 };
 	int count = 0;
 
-	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
-		auto cur = table[i];
-		int cur_value = 0;
-		if(luabind::type(cur) != LUA_TNIL) {
-			try {
-				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
-			}
-		} else {
-			count = i - 1;
-			break;
+	for (int i = 1; i <= MAXCHOOSERENTRIES; ++i)
+	{
+		if (luabind::type(table[i]) == LUA_TNUMBER)
+		{
+			tasks[i - 1] = luabind::object_cast<int>(table[i]);
+			++count;
 		}
-
-		tasks[i - 1] = cur_value;
 	}
+
 	quest_manager.taskselector(count, tasks);
 }
 
@@ -3389,7 +3383,7 @@ std::string lua_get_environmental_damage_name(uint8 damage_type) {
 }
 
 std::string lua_commify(std::string number) {
-	return commify(number);
+	return Strings::Commify(number);
 }
 
 bool lua_check_name_filter(std::string name) {

@@ -2192,11 +2192,19 @@ struct QuestReward_Struct
 	/*068*/
 };
 
+struct CashReward_Struct
+{
+	/*000*/ uint32 copper;
+	/*004*/ uint32 silver;
+	/*008*/ uint32 gold;
+	/*012*/ uint32 platinum;
+};
+
 // Size: 8
 struct Camera_Struct
 {
 	uint32	duration;	// Duration in ms
-	uint32	intensity;	// Between 1023410176 and 1090519040
+	float intensity;
 };
 
 struct ZonePoint_Entry {
@@ -4998,7 +5006,7 @@ struct DynamicZoneCompassEntry_Struct
 /*000*/ uint16 dz_zone_id;      // target dz id pair
 /*002*/ uint16 dz_instance_id;
 /*004*/ uint32 dz_type;         // 1: Expedition, 2: Tutorial (purple), 3: Task, 4: Mission, 5: Quest (green)
-/*008*/ uint32 unknown008;
+/*008*/ uint32 dz_switch_id;
 /*012*/ float y;
 /*016*/ float x;
 /*020*/ float z;

@@ -150,7 +150,7 @@ bool TaskGoalListManager::IsInList(int list_id, int entry)
 
 bool TaskGoalListManager::IsInMatchList(const std::string& match_list, const std::string& entry)
 {
-	for (auto &s: SplitString(match_list, '|')) {
+	for (auto &s: Strings::Split(match_list, '|')) {
 		if (s == entry) {
 			return true;
 		}
@@ -161,9 +161,9 @@ bool TaskGoalListManager::IsInMatchList(const std::string& match_list, const std
 
 bool TaskGoalListManager::IsInMatchListPartial(const std::string &match_list, const std::string &entry)
 {
-	std::string entry_match = str_tolower(entry);
-	for (auto &s: SplitString(match_list, '|')) {
-		if (entry_match.find(str_tolower(s)) != std::string::npos) {
+	std::string entry_match = Strings::ToLower(entry);
+	for (auto &s: Strings::Split(match_list, '|')) {
+		if (entry_match.find(Strings::ToLower(s)) != std::string::npos) {
 			return true;
 		}
 	}

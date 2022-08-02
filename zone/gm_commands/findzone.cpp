@@ -27,8 +27,8 @@ void command_findzone(Client *c, const Seperator *sep)
 		if (id == 0) {
 			query = fmt::format(
 				"SELECT zoneidnumber, short_name, long_name, version FROM zone WHERE long_name LIKE '%{}%' OR `short_name` LIKE '%{}%'",
-				EscapeString(sep->arg[1]),
-				EscapeString(sep->arg[1])
+				Strings::Escape(sep->arg[1]),
+				Strings::Escape(sep->arg[1])
 			);
 		}
 		else {
@@ -60,8 +60,8 @@ void command_findzone(Client *c, const Seperator *sep)
 			break;
 		}
 
-		std::string command_zone   = EQ::SayLinkEngine::GenerateQuestSaylink("#zone " + short_name, false, "zone");
-		std::string command_gmzone = EQ::SayLinkEngine::GenerateQuestSaylink(
+		std::string command_zone   = Saylink::Create("#zone " + short_name, false, "zone");
+		std::string command_gmzone = Saylink::Create(
 			fmt::format("#gmzone {} {}", short_name, version),
 			false,
 			"gmzone"

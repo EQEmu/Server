@@ -13,7 +13,7 @@
 #define EQEMU_BASE_TRAPS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseTrapsRepository {
@@ -115,12 +115,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -268,7 +268,7 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(traps_entry.zone) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(traps_entry.zone) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(traps_entry.version));
 		update_values.push_back(columns[3] + " = " + std::to_string(traps_entry.x));
 		update_values.push_back(columns[4] + " = " + std::to_string(traps_entry.y));
@@ -279,7 +279,7 @@ public:
 		update_values.push_back(columns[9] + " = " + std::to_string(traps_entry.effect));
 		update_values.push_back(columns[10] + " = " + std::to_string(traps_entry.effectvalue));
 		update_values.push_back(columns[11] + " = " + std::to_string(traps_entry.effectvalue2));
-		update_values.push_back(columns[12] + " = '" + EscapeString(traps_entry.message) + "'");
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(traps_entry.message) + "'");
 		update_values.push_back(columns[13] + " = " + std::to_string(traps_entry.skill));
 		update_values.push_back(columns[14] + " = " + std::to_string(traps_entry.level));
 		update_values.push_back(columns[15] + " = " + std::to_string(traps_entry.respawn_time));
@@ -290,14 +290,14 @@ public:
 		update_values.push_back(columns[20] + " = " + std::to_string(traps_entry.undetectable));
 		update_values.push_back(columns[21] + " = " + std::to_string(traps_entry.min_expansion));
 		update_values.push_back(columns[22] + " = " + std::to_string(traps_entry.max_expansion));
-		update_values.push_back(columns[23] + " = '" + EscapeString(traps_entry.content_flags) + "'");
-		update_values.push_back(columns[24] + " = '" + EscapeString(traps_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[23] + " = '" + Strings::Escape(traps_entry.content_flags) + "'");
+		update_values.push_back(columns[24] + " = '" + Strings::Escape(traps_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				traps_entry.id
 			)
@@ -314,7 +314,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(traps_entry.id));
-		insert_values.push_back("'" + EscapeString(traps_entry.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(traps_entry.zone) + "'");
 		insert_values.push_back(std::to_string(traps_entry.version));
 		insert_values.push_back(std::to_string(traps_entry.x));
 		insert_values.push_back(std::to_string(traps_entry.y));
@@ -325,7 +325,7 @@ public:
 		insert_values.push_back(std::to_string(traps_entry.effect));
 		insert_values.push_back(std::to_string(traps_entry.effectvalue));
 		insert_values.push_back(std::to_string(traps_entry.effectvalue2));
-		insert_values.push_back("'" + EscapeString(traps_entry.message) + "'");
+		insert_values.push_back("'" + Strings::Escape(traps_entry.message) + "'");
 		insert_values.push_back(std::to_string(traps_entry.skill));
 		insert_values.push_back(std::to_string(traps_entry.level));
 		insert_values.push_back(std::to_string(traps_entry.respawn_time));
@@ -336,14 +336,14 @@ public:
 		insert_values.push_back(std::to_string(traps_entry.undetectable));
 		insert_values.push_back(std::to_string(traps_entry.min_expansion));
 		insert_values.push_back(std::to_string(traps_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(traps_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(traps_entry.content_flags_disabled) + "'");
+		insert_values.push_back("'" + Strings::Escape(traps_entry.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(traps_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -368,7 +368,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(traps_entry.id));
-			insert_values.push_back("'" + EscapeString(traps_entry.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(traps_entry.zone) + "'");
 			insert_values.push_back(std::to_string(traps_entry.version));
 			insert_values.push_back(std::to_string(traps_entry.x));
 			insert_values.push_back(std::to_string(traps_entry.y));
@@ -379,7 +379,7 @@ public:
 			insert_values.push_back(std::to_string(traps_entry.effect));
 			insert_values.push_back(std::to_string(traps_entry.effectvalue));
 			insert_values.push_back(std::to_string(traps_entry.effectvalue2));
-			insert_values.push_back("'" + EscapeString(traps_entry.message) + "'");
+			insert_values.push_back("'" + Strings::Escape(traps_entry.message) + "'");
 			insert_values.push_back(std::to_string(traps_entry.skill));
 			insert_values.push_back(std::to_string(traps_entry.level));
 			insert_values.push_back(std::to_string(traps_entry.respawn_time));
@@ -390,10 +390,10 @@ public:
 			insert_values.push_back(std::to_string(traps_entry.undetectable));
 			insert_values.push_back(std::to_string(traps_entry.min_expansion));
 			insert_values.push_back(std::to_string(traps_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(traps_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(traps_entry.content_flags_disabled) + "'");
+			insert_values.push_back("'" + Strings::Escape(traps_entry.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(traps_entry.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -402,7 +402,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

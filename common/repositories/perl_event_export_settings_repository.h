@@ -22,7 +22,7 @@
 #define EQEMU_PERL_EVENT_EXPORT_SETTINGS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_perl_event_export_settings_repository.h"
 
 class PerlEventExportSettingsRepository: public BasePerlEventExportSettingsRepository {

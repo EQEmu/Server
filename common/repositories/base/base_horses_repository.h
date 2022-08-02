@@ -13,7 +13,7 @@
 #define EQEMU_BASE_HORSES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseHorsesRepository {
@@ -61,12 +61,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -178,18 +178,18 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(horses_entry.filename) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(horses_entry.filename) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(horses_entry.race));
 		update_values.push_back(columns[3] + " = " + std::to_string(horses_entry.gender));
 		update_values.push_back(columns[4] + " = " + std::to_string(horses_entry.texture));
 		update_values.push_back(columns[5] + " = " + std::to_string(horses_entry.mountspeed));
-		update_values.push_back(columns[6] + " = '" + EscapeString(horses_entry.notes) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(horses_entry.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				horses_entry.id
 			)
@@ -206,18 +206,18 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(horses_entry.id));
-		insert_values.push_back("'" + EscapeString(horses_entry.filename) + "'");
+		insert_values.push_back("'" + Strings::Escape(horses_entry.filename) + "'");
 		insert_values.push_back(std::to_string(horses_entry.race));
 		insert_values.push_back(std::to_string(horses_entry.gender));
 		insert_values.push_back(std::to_string(horses_entry.texture));
 		insert_values.push_back(std::to_string(horses_entry.mountspeed));
-		insert_values.push_back("'" + EscapeString(horses_entry.notes) + "'");
+		insert_values.push_back("'" + Strings::Escape(horses_entry.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -242,14 +242,14 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(horses_entry.id));
-			insert_values.push_back("'" + EscapeString(horses_entry.filename) + "'");
+			insert_values.push_back("'" + Strings::Escape(horses_entry.filename) + "'");
 			insert_values.push_back(std::to_string(horses_entry.race));
 			insert_values.push_back(std::to_string(horses_entry.gender));
 			insert_values.push_back(std::to_string(horses_entry.texture));
 			insert_values.push_back(std::to_string(horses_entry.mountspeed));
-			insert_values.push_back("'" + EscapeString(horses_entry.notes) + "'");
+			insert_values.push_back("'" + Strings::Escape(horses_entry.notes) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -258,7 +258,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

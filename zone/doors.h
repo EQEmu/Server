@@ -25,6 +25,7 @@ public:
 	char *GetDoorName() { return door_name; }
 	const glm::vec4 GetDestination() const { return m_Destination; }
 	const glm::vec4 &GetPosition() const { return m_Position; }
+	int GetDzSwitchID() const { return m_dz_switch_id; }
 	int GetIncline() { return incline; }
 	int GetInvertState() { return invert_state; }
 	uint8 GetDoorID() { return door_id; }
@@ -91,6 +92,7 @@ private:
 	int       destination_instance_id;
 	glm::vec4 m_Destination;
 	uint8     is_ldon_door;
+	int       m_dz_switch_id = 0;
 	uint32    client_version_mask;
 };
 #endif

@@ -1009,4 +1009,11 @@ enum StartZoneIndex {
     SharVahl
 };
 
+enum FVNoDropFlagRule
+{
+	Disabled = 0,
+	Enabled = 1,
+	AdminOnly = 2
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

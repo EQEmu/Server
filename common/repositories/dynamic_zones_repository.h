@@ -22,7 +22,7 @@
 #define EQEMU_DYNAMIC_ZONES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_dynamic_zones_repository.h"
 
 class DynamicZonesRepository: public BaseDynamicZonesRepository {
@@ -75,6 +75,7 @@ public:
 		int      max_players;
 		int      instance_id;
 		int      type;
+		int      dz_switch_id;
 		int      compass_zone_id;
 		float    compass_x;
 		float    compass_y;
@@ -109,6 +110,7 @@ public:
 				dynamic_zones.max_players,
 				dynamic_zones.instance_id,
 				dynamic_zones.type,
+				dynamic_zones.dz_switch_id,
 				dynamic_zones.compass_zone_id,
 				dynamic_zones.compass_x,
 				dynamic_zones.compass_y,
@@ -147,6 +149,7 @@ public:
 		entry.max_players         = strtol(row[col++], nullptr, 10);
 		entry.instance_id         = strtol(row[col++], nullptr, 10);
 		entry.type                = strtol(row[col++], nullptr, 10);
+		entry.dz_switch_id        = strtol(row[col++], nullptr, 10);
 		entry.compass_zone_id     = strtol(row[col++], nullptr, 10);
 		entry.compass_x           = strtof(row[col++], nullptr);
 		entry.compass_y           = strtof(row[col++], nullptr);
@@ -256,6 +259,18 @@ public:
 			std::string query = fmt::format(SQL(
 				UPDATE {} SET leader_id = {} WHERE {} = {};
 			), TableName(), leader_id, PrimaryKey(), dz_id);
+
+			db.QueryDatabase(query);
+		}
+	}
+
+	static void UpdateSwitchID(Database& db, uint32_t dz_id, int dz_switch_id)
+	{
+		if (dz_id != 0)
+		{
+			std::string query = fmt::format(SQL(
+				UPDATE {} SET dz_switch_id = {} WHERE {} = {};
+			), TableName(), dz_switch_id, PrimaryKey(), dz_id);
 
 			db.QueryDatabase(query);
 		}

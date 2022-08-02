@@ -22,7 +22,7 @@
 #define EQEMU_COMPLETED_SHARED_TASK_ACTIVITY_STATE_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_completed_shared_task_activity_state_repository.h"
 
 class CompletedSharedTaskActivityStateRepository: public BaseCompletedSharedTaskActivityStateRepository {

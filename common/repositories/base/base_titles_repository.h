@@ -13,7 +13,7 @@
 #define EQEMU_BASE_TITLES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseTitlesRepository {
@@ -82,12 +82,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -223,15 +223,15 @@ public:
 		update_values.push_back(columns[8] + " = " + std::to_string(titles_entry.char_id));
 		update_values.push_back(columns[9] + " = " + std::to_string(titles_entry.status));
 		update_values.push_back(columns[10] + " = " + std::to_string(titles_entry.item_id));
-		update_values.push_back(columns[11] + " = '" + EscapeString(titles_entry.prefix) + "'");
-		update_values.push_back(columns[12] + " = '" + EscapeString(titles_entry.suffix) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(titles_entry.prefix) + "'");
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(titles_entry.suffix) + "'");
 		update_values.push_back(columns[13] + " = " + std::to_string(titles_entry.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				titles_entry.id
 			)
@@ -258,15 +258,15 @@ public:
 		insert_values.push_back(std::to_string(titles_entry.char_id));
 		insert_values.push_back(std::to_string(titles_entry.status));
 		insert_values.push_back(std::to_string(titles_entry.item_id));
-		insert_values.push_back("'" + EscapeString(titles_entry.prefix) + "'");
-		insert_values.push_back("'" + EscapeString(titles_entry.suffix) + "'");
+		insert_values.push_back("'" + Strings::Escape(titles_entry.prefix) + "'");
+		insert_values.push_back("'" + Strings::Escape(titles_entry.suffix) + "'");
 		insert_values.push_back(std::to_string(titles_entry.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -301,11 +301,11 @@ public:
 			insert_values.push_back(std::to_string(titles_entry.char_id));
 			insert_values.push_back(std::to_string(titles_entry.status));
 			insert_values.push_back(std::to_string(titles_entry.item_id));
-			insert_values.push_back("'" + EscapeString(titles_entry.prefix) + "'");
-			insert_values.push_back("'" + EscapeString(titles_entry.suffix) + "'");
+			insert_values.push_back("'" + Strings::Escape(titles_entry.prefix) + "'");
+			insert_values.push_back("'" + Strings::Escape(titles_entry.suffix) + "'");
 			insert_values.push_back(std::to_string(titles_entry.title_set));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -314,7 +314,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

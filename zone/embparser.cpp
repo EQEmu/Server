@@ -21,7 +21,7 @@
 #include "../common/global_define.h"
 #include "../common/seperator.h"
 #include "../common/misc_functions.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/features.h"
 #include "masterentity.h"
 #include "embparser.h"
@@ -32,6 +32,31 @@
 #include <sstream>
 
 extern Zone *zone;
+
+#ifdef EMBPERL_XS
+void perl_register_quest();
+#ifdef EMBPERL_XS_CLASSES
+void perl_register_mob();
+void perl_register_npc();
+void perl_register_client();
+void perl_register_corpse();
+void perl_register_entitylist();
+void perl_register_perlpacket();
+void perl_register_group();
+void perl_register_raid();
+void perl_register_inventory();
+void perl_register_questitem();
+void perl_register_spell();
+void perl_register_hateentry();
+void perl_register_object();
+void perl_register_doors();
+void perl_register_expedition();
+void perl_register_expedition_lock_messages();
+#ifdef BOTS
+void perl_register_bot();
+#endif // BOTS
+#endif // EMBPERL_XS_CLASSES
+#endif // EMBPERL_XS
 
 const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_SAY",
@@ -176,7 +201,7 @@ void PerlembParser::ReloadQuests()
 
 int PerlembParser::EventCommon(
 	QuestEventID event, uint32 objid, const char *data, NPC *npcmob, EQ::ItemInstance *item_inst, const SPDat_Spell_Struct* spell, Mob *mob,
-	uint32 extradata, bool global, std::vector<EQ::Any> *extra_pointers
+	uint32 extradata, bool global, std::vector<std::any> *extra_pointers
 )
 {
 	if (!perl) {
@@ -272,7 +297,7 @@ int PerlembParser::EventCommon(
 
 int PerlembParser::EventNPC(
 	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, nullptr, init, extra_data, false, extra_pointers);
@@ -280,7 +305,7 @@ int PerlembParser::EventNPC(
 
 int PerlembParser::EventGlobalNPC(
 	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, nullptr, init, extra_data, true, extra_pointers);
@@ -288,7 +313,7 @@ int PerlembParser::EventGlobalNPC(
 
 int PerlembParser::EventPlayer(
 	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, nullptr, client, extra_data, false, extra_pointers);
@@ -296,7 +321,7 @@ int PerlembParser::EventPlayer(
 
 int PerlembParser::EventGlobalPlayer(
 	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, nullptr, client, extra_data, true, extra_pointers);
@@ -304,7 +329,7 @@ int PerlembParser::EventGlobalPlayer(
 
 int PerlembParser::EventItem(
 	QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	// needs pointer validation on 'item' argument
@@ -313,7 +338,7 @@ int PerlembParser::EventItem(
 
 int PerlembParser::EventSpell(
 	QuestEventID evt, NPC *npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-	std::vector<EQ::Any> *extra_pointers
+	std::vector<std::any> *extra_pointers
 )
 {
 	return EventCommon(evt, spell_id, data.c_str(), npc, nullptr, &spells[spell_id], client, extra_data, false, extra_pointers);
@@ -804,7 +829,7 @@ int PerlembParser::SendCommands(
 		perl->eval(cmd.c_str());
 
 #ifdef EMBPERL_XS_CLASSES
-
+		dTHX;
 		{
 			std::string cl  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::client";
 			std::string np  = (std::string) "$" + (std::string) pkgprefix + (std::string) "::npc";
@@ -909,7 +934,7 @@ int PerlembParser::SendCommands(
 				"Script Error | Package [{}] Event [{}] Error [{}]",
 				pkgprefix,
 				event,
-				trim(e)
+				Strings::Trim(e)
 			)
 		);
 	}
@@ -946,76 +971,31 @@ int PerlembParser::SendCommands(
 
 void PerlembParser::MapFunctions()
 {
+	dTHX;
 	_empty_sv = newSV(0);
 
-	perl->eval(
-		"{"
-		"package quest;"
-		"&boot_quest;"            //load our quest XS
-		#ifdef EMBPERL_XS_CLASSES
-		"package Mob;"
-		"&boot_Mob;"            //load our Mob XS
-
-		"package Client;"
-		"our @ISA = qw(Mob);"    //client inherits mob.
-		"&boot_Mob;"            //load our Mob XS
-		"&boot_Client;"            //load our Client XS
-
-		"package NPC;"
-		"our @ISA = qw(Mob);"    //NPC inherits mob.
-		"&boot_Mob;"            //load our Mob XS
-		"&boot_NPC;"            //load our NPC XS
-
-		"package Corpse;"
-		"our @ISA = qw(Mob);"    //Corpse inherits mob.
-		"&boot_Mob;"            //load our Mob XS
-		"&boot_Corpse;"            //load our Mob XS
-
-		"package EntityList;"
-		"&boot_EntityList;"        //load our EntityList XS
-
-		"package PerlPacket;"
-		"&boot_PerlPacket;"        //load our PerlPacket XS
-
-		"package Group;"
-		"&boot_Group;"        //load our Group XS
-
-		"package Raid;"
-		"&boot_Raid;"        //load our Raid XS
-
-		"package Inventory;"
-		"&boot_Inventory;" // load inventory XS
-
-		"package QuestItem;"
-		"&boot_QuestItem;"    // load quest Item XS
-
-		"package Spell;"
-		"&boot_Spell;"    // load quest Spell XS
-
-		"package HateEntry;"
-		"&boot_HateEntry;"    // load quest Hate XS
-
-		"package Object;"
-		"&boot_Object;"    // load quest Object XS
-
-		"package Doors;"
-		"&boot_Doors;"    // load quest Doors XS
-
-		"package Expedition;"
-		"&boot_Expedition;"
-
+	perl_register_quest();
+#ifdef EMBPERL_XS_CLASSES
+	perl_register_mob();
+	perl_register_npc();
+	perl_register_client();
+	perl_register_corpse();
+	perl_register_entitylist();
+	perl_register_perlpacket();
+	perl_register_group();
+	perl_register_raid();
+	perl_register_inventory();
+	perl_register_questitem();
+	perl_register_spell();
+	perl_register_hateentry();
+	perl_register_object();
+	perl_register_doors();
+	perl_register_expedition();
+	perl_register_expedition_lock_messages();
 #ifdef BOTS
-		"package Bot;"
-		"our @ISA = qw(NPC);" // Bot inherits NPC
-		"&boot_Mob;" // load our Mob XS
-		"&boot_NPC;" // load our NPC XS
-		"&boot_Bot;" // load our Bot XS
-#endif
-
-		#endif
-		"package main;"
-		"}"
-	);
+	perl_register_bot();
+#endif // BOTS
+#endif // EMBPERL_XS_CLASSES
 }
 
 void PerlembParser::GetQuestTypes(
@@ -1328,7 +1308,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
 
 void PerlembParser::ExportEventVariables(
 	std::string &package_name, QuestEventID event, uint32 objid, const char *data,
-	NPC *npcmob, EQ::ItemInstance *item_inst, Mob *mob, uint32 extradata, std::vector<EQ::Any> *extra_pointers
+	NPC *npcmob, EQ::ItemInstance *item_inst, Mob *mob, uint32 extradata, std::vector<std::any> *extra_pointers
 )
 {
 	switch (event) {
@@ -1347,7 +1327,7 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers) {
 				size_t      sz = extra_pointers->size();
 				for (size_t i  = 0; i < sz; ++i) {
-					EQ::ItemInstance *inst = EQ::any_cast<EQ::ItemInstance *>(extra_pointers->at(i));
+					EQ::ItemInstance *inst = std::any_cast<EQ::ItemInstance *>(extra_pointers->at(i));
 
 					std::string var_name = "item";
 					var_name += std::to_string(i + 1);
@@ -1433,7 +1413,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
 			break;
 		}
-		
+
 		case EVENT_LOOT_ZONE:
 		case EVENT_LOOT: {
 			Seperator sep(data);
@@ -1686,12 +1666,12 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "from_z", sep.arg[2]);
 			break;
 		}
-    
+
 		case EVENT_CONSIDER: {
 			ExportVar(package_name.c_str(), "entity_id", std::stoi(data));
 			break;
 		}
-    
+
 		case EVENT_CONSIDER_CORPSE: {
 			ExportVar(package_name.c_str(), "corpse_entity_id", std::stoi(data));
 			break;

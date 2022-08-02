@@ -16,7 +16,7 @@
 #include "../common/features.h"
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/net/eqstream.h"
 #include "../common/file_util.h"
@@ -166,6 +166,7 @@ int command_init(void)
 		command_add("gm", "[On|Off] - Modify your or your target's GM Flag", AccountStatus::QuestTroupe, command_gm) ||
 		command_add("gmspeed", "[On|Off] - Turn GM Speed On or Off for you or your player target", AccountStatus::GMAdmin, command_gmspeed) ||
 		command_add("gmzone", "[Zone ID|Zone Short Name] [Version] [Instance Identifier] - Zones to a private GM instance (Version defaults to 0 and Instance Identifier defaults to 'gmzone' if not used)", AccountStatus::GMAdmin, command_gmzone) ||
+		command_add("godmode", "[on/off] - Turns on/off hideme, gmspeed, invul, and flymode.", AccountStatus::GMMgmt, command_godmode) ||
 		command_add("goto", "[playername] or [x y z] [h] - Teleport to the provided coordinates or to your target", AccountStatus::Steward, command_goto) ||
 		command_add("grid", "[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid", AccountStatus::GMAreas, command_grid) ||
 		command_add("guild", "Guild manipulation commands. Use argument help for more info.", AccountStatus::Steward, command_guild) ||
@@ -592,7 +593,7 @@ void command_help(Client *c, const Seperator *sep)
 {
 	int found_count = 0;
 	std::string command_link;
-	std::string search_criteria = str_tolower(sep->argplus[1]);
+	std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 
 	for (const auto& cur : commandlist) {
 		if (!search_criteria.empty()) {
@@ -605,7 +606,7 @@ void command_help(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		command_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		command_link = Saylink::Create(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
@@ -664,7 +665,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string search_criteria = str_tolower(sep->argplus[1]);
+	std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 
 	auto find_iter = commandaliases.find(search_criteria);
 	if (find_iter == commandaliases.end()) {
@@ -687,7 +688,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto current_commmand_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto current_commmand_link = Saylink::Create(
 		fmt::format(
 			"{}{}",
 			COMMAND_CHAR,
@@ -712,7 +713,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		alias_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+		alias_link = Saylink::Create(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
@@ -752,6 +753,46 @@ void command_findaliases(Client *c, const Seperator *sep)
 
 void command_hotfix(Client *c, const Seperator *sep)
 {
+	auto items_count = database.GetItemsCount();
+	auto shared_items_count = database.GetSharedItemsCount();
+	if (items_count != shared_items_count) {
+		c->Message(Chat::Yellow, "Your database does not have the same item count as your shared memory.");
+
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Database Count: {} Shared Memory Count: {}",
+				items_count,
+				shared_items_count
+			).c_str()
+		);
+
+		c->Message(Chat::Yellow, "If you want to be able to add new items to your server while it is online, you need to create placeholder entries in the database ahead of time and do not add or remove rows/entries. Only modify the existing placeholder rows/entries to safely use #hotfix.");
+
+		return;
+	}
+
+	auto spells_count = database.GetSpellsCount();
+	auto shared_spells_count = database.GetSharedSpellsCount();
+	if (spells_count != shared_spells_count) {
+		c->Message(Chat::Yellow, "Your database does not have the same spell count as your shared memory.");
+
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Database Count: {} Shared Memory Count: {}",
+				spells_count,
+				shared_spells_count
+			).c_str()
+		);
+
+		c->Message(Chat::Yellow, "If you want to be able to add new spells to your server while it is online, you need to create placeholder entries in the database ahead of time and do not add or remove rows/entries. Only modify the existing placeholder rows/entries to safely use #hotfix.");
+
+		c->Message(Chat::Yellow, "Note: You may still have to distribute a spell file, even with dynamic changes.");
+
+		return;
+	}
+
 	std::string hotfix;
 	database.GetVariable("hotfix_name", hotfix);
 
@@ -967,6 +1008,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/gm.cpp"
 #include "gm_commands/gmspeed.cpp"
 #include "gm_commands/gmzone.cpp"
+#include "gm_commands/godmode.cpp"
 #include "gm_commands/goto.cpp"
 #include "gm_commands/grid.cpp"
 #include "gm_commands/guild.cpp"

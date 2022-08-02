@@ -22,7 +22,7 @@
 #define EQEMU_TRADESKILL_RECIPE_ENTRIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_tradeskill_recipe_entries_repository.h"
 
 class TradeskillRecipeEntriesRepository: public BaseTradeskillRecipeEntriesRepository {

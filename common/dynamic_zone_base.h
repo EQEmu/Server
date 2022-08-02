@@ -5,6 +5,7 @@
 #include "net/packet.h"
 #include "repositories/dynamic_zones_repository.h"
 #include "repositories/dynamic_zone_members_repository.h"
+#include "repositories/dynamic_zone_templates_repository.h"
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -74,6 +75,7 @@ public:
 
 	virtual void SetSecondsRemaining(uint32_t seconds_remaining) = 0;
 
+	int GetDuration() const { return static_cast<int>(m_duration.count()); }
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); }
@@ -85,6 +87,7 @@ public:
 	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_zone_id); }
 	uint32_t GetZoneIndex() const { return (m_instance_id << 16) | (m_zone_id & 0xffff); }
 	uint32_t GetZoneVersion() const { return m_zone_version; }
+	int GetSwitchID() const { return m_dz_switch_id; }
 	DynamicZoneType GetType() const { return m_type; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
 	const std::string& GetName() const { return m_name; }
@@ -112,6 +115,7 @@ public:
 	bool IsValid() const { return m_instance_id != 0; }
 	bool IsSameDz(uint32_t zone_id, uint32_t instance_id) const { return zone_id == m_zone_id && instance_id == m_instance_id; }
 	void LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size);
+	void LoadTemplate(const DynamicZoneTemplatesRepository::DynamicZoneTemplates& dz_template);
 	void RemoveAllMembers();
 	bool RemoveMember(uint32_t character_id);
 	bool RemoveMember(const std::string& character_name);
@@ -127,6 +131,7 @@ public:
 	void SetName(const std::string& name) { m_name = name; }
 	void SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
 	void SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
+	void SetSwitchID(int dz_switch_id, bool update_db = false);
 	void SetType(DynamicZoneType type) { m_type = type; }
 	void SetUUID(std::string uuid) { m_uuid = std::move(uuid); }
 	void SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
@@ -141,6 +146,7 @@ protected:
 	virtual void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed);
 	virtual bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status);
 	virtual void ProcessRemoveAllMembers(bool silent = false) { m_members.clear(); }
+	virtual void ProcessSetSwitchID(int dz_switch_id) { m_dz_switch_id = dz_switch_id; }
 	virtual bool SendServerPacket(ServerPacket* packet) = 0;
 
 	void AddInternalMember(const DynamicZoneMember& member);
@@ -153,6 +159,7 @@ protected:
 
 	std::unique_ptr<ServerPacket> CreateServerDzCreatePacket(uint16_t origin_zone_id, uint16_t origin_instance_id);
 	std::unique_ptr<ServerPacket> CreateServerDzLocationPacket(uint16_t server_opcode, const DynamicZoneLocation& location);
+	std::unique_ptr<ServerPacket> CreateServerDzSwitchIDPacket();
 	std::unique_ptr<ServerPacket> CreateServerMemberAddRemovePacket(const DynamicZoneMember& member, bool removed);
 	std::unique_ptr<ServerPacket> CreateServerMemberStatusPacket(uint32_t character_id, DynamicZoneMemberStatus status);
 	std::unique_ptr<ServerPacket> CreateServerMemberSwapPacket(const DynamicZoneMember& remove_member, const DynamicZoneMember& add_member);
@@ -164,6 +171,7 @@ protected:
 	uint32_t m_zone_version = 0;
 	uint32_t m_min_players = 0;
 	uint32_t m_max_players = 0;
+	int m_dz_switch_id = 0;
 	bool m_never_expires = false;
 	bool m_has_zonein = false;
 	bool m_has_member_statuses = false;
@@ -190,6 +198,7 @@ public:
 			m_zone_version,
 			m_min_players,
 			m_max_players,
+			m_dz_switch_id,
 			m_never_expires,
 			m_has_zonein,
 			m_has_member_statuses,

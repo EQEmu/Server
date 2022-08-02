@@ -1,5 +1,5 @@
 /*	EQEMu:  Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -18,9 +18,12 @@
 */
 
 #include "emu_constants.h"
-#include "languages.h"
-#include "data_verification.h"
 #include "bodytypes.h"
+#include "data_verification.h"
+#include "eqemu_logsys.h"
+#include "eqemu_logsys_log_aliases.h"
+#include "languages.h"
+#include "rulesys.h"
 
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
 	static const int16 local_array[] = {
@@ -117,7 +120,7 @@ EQ::bug::CategoryID EQ::bug::CategoryNameToCategoryID(const char* category_name)
 		return catLoNTCG;
 	if (!strcmp(category_name, "Mercenaries"))
 		return catMercenaries;
-	
+
 	return catOther;
 }
 
@@ -221,7 +224,7 @@ std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 		return EQ::constants::GetLDoNThemeMap().find(theme_id)->second;
 	}
 
-	return std::string();	
+	return std::string();
 }
 
 const std::map<int8, std::string>& EQ::constants::GetFlyModeMap()
@@ -321,7 +324,7 @@ const std::map<uint8, std::string>& EQ::constants::GetAccountStatusMap()
 		{ AccountStatus::GMAreas, "GM Areas" },
 		{ AccountStatus::GMCoder, "GM Coder" },
 		{ AccountStatus::GMMgmt, "GM Mgmt" },
-		{ AccountStatus::GMImpossible, "GM Impossible" },	
+		{ AccountStatus::GMImpossible, "GM Impossible" },
 		{ AccountStatus::Max, "GM Max" }
 	};
 

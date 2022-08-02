@@ -362,7 +362,7 @@ public:
 	static void ProcessBotGroupDisband(Client* c, std::string botName);
 	static void BotOrderCampAll(Client* c);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
-	static void LoadAndSpawnAllZonedBots(Client* botOwner);
+	static void LoadAndSpawnAllZonedBots(Client* bot_owner);
 	static bool GroupHasBot(Group* group);
 	static Bot* GetFirstBotInGroup(Group* group);
 	static void ProcessClientZoneChange(Client* botOwner);
@@ -561,6 +561,8 @@ public:
 	void SetDrakkinTattoo(uint32 value) { drakkin_tattoo = value; }
 	bool DyeArmor(int16 slot_id, uint32 rgb, bool all_flag = false, bool save_flag = true);
 
+	static void SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id);
+
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
 	// Class Destructors
@@ -586,6 +588,7 @@ public:
 		uint32 augment_six = 0
 	);
 	uint32 CountBotItem(uint32 item_id);
+	uint32 GetBotItemBySlot(uint16 slot_id);
 	bool HasBotItem(uint32 item_id);
 	void RemoveBotItem(uint32 item_id);
 	uint32 GetTotalPlayTime();
@@ -731,7 +734,6 @@ private:
 	// Private "Inventory" Methods
 	void GetBotItems(EQ::InventoryProfile &inv, std::string* error_message);
 	void BotAddEquipItem(uint16 slot_id, uint32 item_id);
-	uint32 GetBotItemBySlot(uint16 slot_id);
 
 	// Private "Pet" Methods
 	bool LoadPet();	// Load and spawn bot pet if there is one

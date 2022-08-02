@@ -22,7 +22,7 @@
 #define EQEMU_DATA_BUCKETS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_data_buckets_repository.h"
 
 class DataBucketsRepository: public BaseDataBucketsRepository {

@@ -45,7 +45,7 @@
 #include "database.h"
 #include "eq_packet_structs.h"
 #include "extprofile.h"
-#include "string_util.h"
+#include "strings.h"
 #include "database_schema.h"
 #include "http/httplib.h"
 #include "http/uri.h"
@@ -107,7 +107,7 @@ uint32 Database::CheckLogin(const char* name, const char* password, const char *
 		"SELECT id, status FROM account WHERE `name` = '{}' AND ls_id = '{}' AND password is NOT NULL "
 		"AND length(password) > 0 AND (password = '{}' OR password = MD5('{}'))",
 		temporary_username,
-		EscapeString(loginserver),
+		Strings::Escape(loginserver),
 		temporary_password,
 		temporary_password
 	);
@@ -148,8 +148,8 @@ bool Database::CheckBannedIPs(std::string login_ip)
 bool Database::AddBannedIP(std::string banned_ip, std::string notes) {
 	auto query = fmt::format(
 		"INSERT into banned_ips SET ip_address = '{}', notes = '{}'",
-		EscapeString(banned_ip),
-		EscapeString(notes)
+		Strings::Escape(banned_ip),
+		Strings::Escape(notes)
 	);
 	auto results = QueryDatabase(query);
 
@@ -280,7 +280,7 @@ bool Database::DeleteAccount(const char* name, const char *loginserver) {
 }
 
 bool Database::SetLocalPassword(uint32 accid, const char* password) {
-	std::string query = StringFormat("UPDATE account SET password=MD5('%s') where id=%i;", EscapeString(password).c_str(), accid);
+	std::string query = StringFormat("UPDATE account SET password=MD5('%s') where id=%i;", Strings::Escape(password).c_str(), accid);
 
 	auto results = QueryDatabase(query);
 
@@ -619,8 +619,8 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
-		EscapeString(pp->name).c_str(),	  // " `name`,                    "
-		EscapeString(pp->last_name).c_str(), // " last_name,              "
+		Strings::Escape(pp->name).c_str(),	  // " `name`,                    "
+		Strings::Escape(pp->last_name).c_str(), // " last_name,              "
 		pp->gender,						  // " gender,                    "
 		pp->race,						  // " race,                      "
 		pp->class_,						  // " class,                     "
@@ -644,8 +644,8 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->ability_number,				  // " ability_number,            "
 		pp->ability_time_minutes,		  // " ability_time_minutes,      "
 		pp->ability_time_hours,			  // " ability_time_hours,        "
-		EscapeString(pp->title).c_str(),  // " title,                     "
-		EscapeString(pp->suffix).c_str(), // " suffix,                    "
+		Strings::Escape(pp->title).c_str(),  // " title,                     "
+		Strings::Escape(pp->suffix).c_str(), // " suffix,                    "
 		pp->exp,						  // " exp,                       "
 		pp->points,						  // " points,                    "
 		pp->mana,						  // " mana,                      "
@@ -781,7 +781,7 @@ uint32 Database::GetCharacterID(const char *name) {
 	Zero will also be returned if there is a database error.
 */
 uint32 Database::GetAccountIDByChar(const char* charname, uint32* oCharID) {
-	std::string query = StringFormat("SELECT `account_id`, `id` FROM `character_data` WHERE name='%s'", EscapeString(charname).c_str());
+	std::string query = StringFormat("SELECT `account_id`, `id` FROM `character_data` WHERE name='%s'", Strings::Escape(charname).c_str());
 
 	auto results = QueryDatabase(query);
 
@@ -825,8 +825,8 @@ uint32 Database::GetAccountIDByName(std::string account_name, std::string logins
 
 	auto query = fmt::format(
 		"SELECT `id`, `status`, `lsaccount_id` FROM `account` WHERE `name` = '{}' AND `ls_id` = '{}' LIMIT 1",
-		EscapeString(account_name),
-		EscapeString(loginserver)
+		Strings::Escape(account_name),
+		Strings::Escape(loginserver)
 	);
 	auto results = QueryDatabase(query);
 
@@ -982,8 +982,8 @@ bool Database::GetVariable(std::string varname, std::string &varvalue)
 
 bool Database::SetVariable(const std::string varname, const std::string &varvalue)
 {
-	std::string escaped_name = EscapeString(varname);
-	std::string escaped_value = EscapeString(varvalue);
+	std::string escaped_name = Strings::Escape(varname);
+	std::string escaped_value = Strings::Escape(varvalue);
 	std::string query = StringFormat("Update variables set value='%s' WHERE varname like '%s'", escaped_value.c_str(), escaped_name.c_str());
 	auto results = QueryDatabase(query);
 
@@ -1156,7 +1156,7 @@ uint8 Database::GetPEQZone(uint32 zone_id, uint32 version){
 
 bool Database::CheckNameFilter(std::string name, bool surname)
 {
-	name = str_tolower(name);
+	name = Strings::ToLower(name);
 
 	// the minimum 4 is enforced by the client too
 	if (name.empty() || name.size() < 4) {
@@ -1196,7 +1196,7 @@ bool Database::CheckNameFilter(std::string name, bool surname)
 	}
 
 	for (auto row : results) {
-		std::string current_row = str_tolower(row[0]);
+		std::string current_row = Strings::ToLower(row[0]);
 		if (name.find(current_row) != std::string::npos) {
 			return false;
 		}
@@ -1473,7 +1473,7 @@ uint32 Database::GetCharacterInfo(std::string character_name, uint32 *account_id
 {
 	auto query = fmt::format(
 		"SELECT `id`, `account_id`, `zone_id`, `zone_instance` FROM `character_data` WHERE `name` = '{}'",
-		EscapeString(character_name)
+		Strings::Escape(character_name)
 	);
 
 	auto results = QueryDatabase(query);
@@ -1546,7 +1546,7 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	auto escape_str = new char[lines.size() * 2 + 1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
-	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", EscapeString(who).c_str(), EscapeString(against).c_str(), escape_str);
+	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", Strings::Escape(who).c_str(), Strings::Escape(against).c_str(), escape_str);
 	QueryDatabase(query);
 	safe_delete_array(escape_str);
 }
@@ -1644,7 +1644,7 @@ std::string Database::GetGroupLeaderForLogin(std::string character_name) {
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) {
-	std::string query = StringFormat("UPDATE group_leaders SET leadername = '%s' WHERE gid = %u", EscapeString(name).c_str(), gid);
+	std::string query = StringFormat("UPDATE group_leaders SET leadername = '%s' WHERE gid = %u", Strings::Escape(name).c_str(), gid);
 	auto result = QueryDatabase(query);
 
 	if(result.RowsAffected() != 0) {
@@ -1652,7 +1652,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	}
 
 	query = StringFormat("REPLACE INTO group_leaders(gid, leadername, marknpc, leadershipaa, maintank, assist, puller, mentoree, mentor_percent) VALUES(%u, '%s', '', '', '', '', '', '', '0')",
-						 gid, EscapeString(name).c_str());
+						 gid, Strings::Escape(name).c_str());
 	result = QueryDatabase(query);
 
 	if(!result.Success()) {
@@ -2358,7 +2358,7 @@ bool Database::CopyCharacter(
 		results = QueryDatabase(
 			fmt::format(
 				"SELECT {} FROM {} WHERE {} = {}",
-				implode(",", wrap(columns, "`")),
+				Strings::Implode(",", Strings::Wrap(columns, "`")),
 				table_name,
 				character_id_column_name,
 				source_character_id
@@ -2394,7 +2394,7 @@ bool Database::CopyCharacter(
 		std::vector<std::string> insert_rows;
 
 		for (auto &r: new_rows) {
-			std::string insert_row = "(" + implode(",", wrap(r, "'")) + ")";
+			std::string insert_row = "(" + Strings::Implode(",", Strings::Wrap(r, "'")) + ")";
 			insert_rows.emplace_back(insert_row);
 		}
 
@@ -2412,8 +2412,8 @@ bool Database::CopyCharacter(
 				fmt::format(
 					"INSERT INTO {} ({}) VALUES {}",
 					table_name,
-					implode(",", wrap(columns, "`")),
-					implode(",", insert_rows)
+					Strings::Implode(",", Strings::Wrap(columns, "`")),
+					Strings::Implode(",", insert_rows)
 				)
 			);
 
@@ -2465,8 +2465,8 @@ void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string ur
 
 			if (auto res = cli.Get(request_uri.get_path().c_str())) {
 				if (res->status == 200) {
-					for (auto &s: SplitString(res->body, ';')) {
-						if (!trim(s).empty()) {
+					for (auto &s: Strings::Split(res->body, ';')) {
+						if (!Strings::Trim(s).empty()) {
 							auto results = QueryDatabase(s);
 							if (!results.ErrorMessage().empty()) {
 								LogError("Error sourcing SQL [{}]", results.ErrorMessage());

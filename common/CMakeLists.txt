@@ -77,7 +77,7 @@ SET(common_sources
 	shareddb.cpp
 	skills.cpp
 	spdat.cpp
-	string_util.cpp
+	strings.cpp
 	struct_strategy.cpp
 	textures.cpp
 	timer.cpp
@@ -185,6 +185,7 @@ SET(repositories
 	repositories/base/base_doors_repository.h
 	repositories/base/base_dynamic_zones_repository.h
 	repositories/base/base_dynamic_zone_members_repository.h
+	repositories/base/base_dynamic_zone_templates_repository.h
 	repositories/base/base_eventlog_repository.h
 	repositories/base/base_expeditions_repository.h
 	repositories/base/base_expedition_lockouts_repository.h
@@ -358,6 +359,7 @@ SET(repositories
 	repositories/doors_repository.h
 	repositories/dynamic_zones_repository.h
 	repositories/dynamic_zone_members_repository.h
+	repositories/dynamic_zone_templates_repository.h
 	repositories/eventlog_repository.h
 	repositories/expeditions_repository.h
 	repositories/expedition_lockouts_repository.h
@@ -472,7 +474,6 @@ SET(repositories
 
 SET(common_headers
 	additive_lagged_fibonacci_engine.h
-	any.h
 	base_packet.h
 	base_data.h
 	bodytypes.h
@@ -579,7 +580,7 @@ SET(common_headers
 	shareddb.h
 	skills.h
 	spdat.h
-    string_util.h
+	strings.h
 	struct_strategy.h
 	tasks.h
 	textures.h

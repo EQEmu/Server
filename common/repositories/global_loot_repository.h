@@ -22,7 +22,7 @@
 #define EQEMU_GLOBAL_LOOT_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_global_loot_repository.h"
 
 class GlobalLootRepository: public BaseGlobalLootRepository {

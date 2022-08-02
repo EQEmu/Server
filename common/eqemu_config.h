@@ -58,6 +58,7 @@ class EQEmuConfig
 		uint16 WorldHTTPPort;
 		std::string WorldHTTPMimeFile;
 		std::string SharedKey;
+		bool DisableConfigChecks;
 
 		// From <chatserver/>
 		std::string ChatHost;
@@ -130,7 +131,7 @@ class EQEmuConfig
 		void parse_config();
 
 		EQEmuConfig()
-		{			
+		{
 
 		}
 		virtual ~EQEmuConfig() {}
@@ -174,7 +175,7 @@ class EQEmuConfig
 			}
 			catch (std::exception &) {
 				return false;
-			}			
+			}
 			return true;
 		}
 

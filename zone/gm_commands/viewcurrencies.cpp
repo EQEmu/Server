@@ -1,7 +1,7 @@
 #include "../client.h"
 
 void command_viewcurrencies(Client *c, const Seperator *sep)
-{	
+{
 	Client *target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
@@ -13,19 +13,19 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 		target->GetMoney(3, 2) +
 		target->GetMoney(3, 3)
 	);
-	
+
 	auto gold = (
 		target->GetMoney(2, 0) +
 		target->GetMoney(2, 1) +
 		target->GetMoney(2, 2)
 	);
-	
+
 	auto silver = (
 		target->GetMoney(1, 0) +
 		target->GetMoney(1, 1) +
 		target->GetMoney(1, 2)
 	);
-	
+
 	auto copper = (
 		target->GetMoney(0, 0) +
 		target->GetMoney(0, 1) +
@@ -43,7 +43,7 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			fmt::format(
 				"Money for {} | {}",
 				c->GetTargetDescription(target, TargetDescriptionType::UCSelf),
-				ConvertMoneyToString(
+				Strings::Money(
 					platinum,
 					gold,
 					silver,

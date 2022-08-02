@@ -41,13 +41,13 @@ void command_findrace(Client *c, const Seperator *sep)
 			);
 		}
 	} else {
-		auto search_criteria = str_tolower(sep->argplus[1]);
+		auto search_criteria = Strings::ToLower(sep->argplus[1]);
 		int found_count = 0;
 		for (uint16 race_id = RACE_HUMAN_1; race_id <= RACE_PEGASUS_732; race_id++) {
 			std::string race_name = GetRaceIDName(race_id);
-			auto race_name_lower = str_tolower(race_name);
+			auto race_name_lower = Strings::ToLower(race_name);
 			if (
-				search_criteria.length() && 
+				search_criteria.length() &&
 				race_name_lower.find(search_criteria) == std::string::npos
 			) {
 				continue;

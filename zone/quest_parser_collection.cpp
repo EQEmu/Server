@@ -246,7 +246,7 @@ bool QuestParserCollection::ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID 
 }
 
 int QuestParserCollection::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
-									std::vector<EQ::Any> *extra_pointers) {
+									std::vector<std::any> *extra_pointers) {
 	int rd = DispatchEventNPC(evt, npc, init, data, extra_data, extra_pointers);
 	int rl = EventNPCLocal(evt, npc, init, data, extra_data, extra_pointers);
 	int rg = EventNPCGlobal(evt, npc, init, data, extra_data, extra_pointers);
@@ -264,7 +264,7 @@ int QuestParserCollection::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::
 }
 
 int QuestParserCollection::EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-										 std::vector<EQ::Any> *extra_pointers) {
+										 std::vector<std::any> *extra_pointers) {
 	auto iter = _npc_quest_status.find(npc->GetNPCTypeID());
 	if(iter != _npc_quest_status.end()) {
 		//loaded or failed to load
@@ -287,7 +287,7 @@ int QuestParserCollection::EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, 
 }
 
 int QuestParserCollection::EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-										  std::vector<EQ::Any> *extra_pointers) {
+										  std::vector<std::any> *extra_pointers) {
 	if(_global_npc_quest_status != QuestUnloaded && _global_npc_quest_status != QuestFailedToLoad) {
 		auto qiter = _interfaces.find(_global_npc_quest_status);
 		return qiter->second->EventGlobalNPC(evt, npc, init, data, extra_data, extra_pointers);
@@ -307,7 +307,7 @@ int QuestParserCollection::EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init,
 }
 
 int QuestParserCollection::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-									   std::vector<EQ::Any> *extra_pointers) {
+									   std::vector<std::any> *extra_pointers) {
 	int rd = DispatchEventPlayer(evt, client, data, extra_data, extra_pointers);
 	int rl = EventPlayerLocal(evt, client, data, extra_data, extra_pointers);
 	int rg = EventPlayerGlobal(evt, client, data, extra_data, extra_pointers);
@@ -325,7 +325,7 @@ int QuestParserCollection::EventPlayer(QuestEventID evt, Client *client, std::st
 }
 
 int QuestParserCollection::EventPlayerLocal(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-											std::vector<EQ::Any> *extra_pointers) {
+											std::vector<std::any> *extra_pointers) {
 	if(_player_quest_status == QuestUnloaded) {
 		std::string filename;
 		QuestInterface *qi = GetQIByPlayerQuest(filename);
@@ -344,7 +344,7 @@ int QuestParserCollection::EventPlayerLocal(QuestEventID evt, Client *client, st
 }
 
 int QuestParserCollection::EventPlayerGlobal(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-											 std::vector<EQ::Any> *extra_pointers) {
+											 std::vector<std::any> *extra_pointers) {
 	if(_global_player_quest_status == QuestUnloaded) {
 		std::string filename;
 		QuestInterface *qi = GetQIByGlobalPlayerQuest(filename);
@@ -363,7 +363,7 @@ int QuestParserCollection::EventPlayerGlobal(QuestEventID evt, Client *client, s
 }
 
 int QuestParserCollection::EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-									 std::vector<EQ::Any> *extra_pointers) {
+									 std::vector<std::any> *extra_pointers) {
 	// needs pointer validation check on 'item' argument
 	
 	std::string item_script;
@@ -411,7 +411,7 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, EQ::ItemI
 }
 
 int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-									  std::vector<EQ::Any> *extra_pointers) {
+									  std::vector<std::any> *extra_pointers) {
 	auto iter = _spell_quest_status.find(spell_id);
 	if(iter != _spell_quest_status.end()) {
 		//loaded or failed to load
@@ -448,7 +448,7 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 }
 
 int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
-										  std::vector<EQ::Any> *extra_pointers) {
+										  std::vector<std::any> *extra_pointers) {
 	auto iter = _encounter_quest_status.find(encounter_name);
 	if(iter != _encounter_quest_status.end()) {
 		//loaded or failed to load
@@ -1001,7 +1001,7 @@ void QuestParserCollection::GetErrors(std::list<std::string> &quest_errors) {
 }
 
 int QuestParserCollection::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-											 std::vector<EQ::Any> *extra_pointers) {
+											 std::vector<std::any> *extra_pointers) {
     int ret = 0;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
@@ -1015,7 +1015,7 @@ int QuestParserCollection::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *ini
 }
 
 int QuestParserCollection::DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-												std::vector<EQ::Any> *extra_pointers) {
+												std::vector<std::any> *extra_pointers) {
     int ret = 0;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
@@ -1029,7 +1029,7 @@ int QuestParserCollection::DispatchEventPlayer(QuestEventID evt, Client *client,
 }
 
 int QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data,
-											  uint32 extra_data, std::vector<EQ::Any> *extra_pointers) {
+											  uint32 extra_data, std::vector<std::any> *extra_pointers) {
     int ret = 0;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
@@ -1043,7 +1043,7 @@ int QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, E
 }
 
 int QuestParserCollection::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-											   std::vector<EQ::Any> *extra_pointers) {
+											   std::vector<std::any> *extra_pointers) {
     int ret = 0;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {

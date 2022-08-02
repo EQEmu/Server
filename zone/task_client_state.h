@@ -8,6 +8,14 @@
 #include <string>
 #include <algorithm>
 
+constexpr float MAX_TASK_SELECT_DISTANCE = 60.0f; // client closes window at this distance
+
+struct TaskOffer
+{
+	int task_id;
+	uint16_t npc_entity_id;
+};
+
 class ClientTaskState {
 
 public:
@@ -38,12 +46,12 @@ public:
 	void UpdateTasksOnExplore(Client *client, int explore_id);
 	bool UpdateTasksOnSpeakWith(Client *client, int npc_type_id);
 	bool UpdateTasksOnDeliver(Client *client, std::list<EQ::ItemInstance *> &items, int cash, int npc_type_id);
-	void UpdateTasksOnTouch(Client *client, int zone_id);
+	void UpdateTasksOnTouch(Client *client, int dz_switch_id);
 	void ProcessTaskProximities(Client *client, float x, float y, float z);
 	bool TaskOutOfTime(TaskType task_type, int index);
 	void TaskPeriodicChecks(Client *client);
 	void SendTaskHistory(Client *client, int task_index);
-	void RewardTask(Client *client, TaskInformation *task_information);
+	void RewardTask(Client *client, TaskInformation *task_information, ClientTaskInformation& client_task);
 	void EnableTask(int character_id, int task_count, int *task_list);
 	void DisableTask(int character_id, int task_count, int *task_list);
 	bool IsTaskEnabled(int task_id);
@@ -56,6 +64,9 @@ public:
 	void CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz);
 	void ListTaskTimers(Client* client);
 	void KickPlayersSharedTask(Client* client);
+	void LockSharedTask(Client* client, bool lock);
+	void ClearLastOffers() { m_last_offers.clear(); }
+	bool CanAcceptNewTask(Client* client, int task_id, int npc_entity_id) const;
 
 	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 
@@ -75,6 +86,8 @@ public:
 
 private:
 	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, TaskInformation& task);
+	void DispatchEventTaskComplete(Client* client, ClientTaskInformation& client_task, int activity_id);
+	void AddOffer(int task_id, uint16_t npc_entity_id) { m_last_offers.push_back({task_id, npc_entity_id}); };
 
 	void IncrementDoneCount(
 		Client *client,
@@ -128,7 +141,7 @@ private:
 	std::vector<int>                      m_enabled_tasks;
 	std::vector<CompletedTaskInformation> m_completed_tasks;
 	int                                   m_last_completed_task_loaded;
-	bool                                  m_checked_touch_activities;
+	std::vector<TaskOffer>                m_last_offers;
 
 	static void ShowClientTaskInfoMessage(ClientTaskInformation *task, Client *c);
 

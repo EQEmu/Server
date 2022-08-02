@@ -22,7 +22,7 @@
 #define EQEMU_SPELL_BUCKETS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_spell_buckets_repository.h"
 
 class SpellBucketsRepository: public BaseSpellBucketsRepository {

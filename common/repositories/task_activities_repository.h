@@ -22,7 +22,7 @@
 #define EQEMU_TASK_ACTIVITIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_task_activities_repository.h"
 
 class TaskActivitiesRepository: public BaseTaskActivitiesRepository {

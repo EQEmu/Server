@@ -273,7 +273,7 @@ foreach my $table_to_generate (@tables) {
 
         # update one
         if ($extra ne "auto_increment") {
-            my $query_value = sprintf('\'" + EscapeString(%s_entry.%s) + "\'");', $table_name, $column_name_formatted);
+            my $query_value = sprintf('\'" + Strings::Escape(%s_entry.%s) + "\'");', $table_name, $column_name_formatted);
             if ($data_type =~ /int|float|double|decimal/) {
                 $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name_formatted);
             }
@@ -289,7 +289,7 @@ foreach my $table_to_generate (@tables) {
         }
 
         # insert
-        my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name_formatted);
+        my $value = sprintf("\"'\" + Strings::Escape(%s_entry.%s) + \"'\"", $table_name, $column_name_formatted);
         if ($data_type =~ /int|float|double|decimal/) {
             $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name_formatted);
         }

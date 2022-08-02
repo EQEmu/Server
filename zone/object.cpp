@@ -17,7 +17,7 @@
 */
 
 #include "../common/global_define.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "entity.h"
@@ -412,6 +412,7 @@ EQ::ItemInstance* Object::PopItem(uint8 index)
 void Object::CreateSpawnPacket(EQApplicationPacket* app)
 {
 	app->SetOpcode(OP_GroundSpawn);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(Object_Struct)];
 	app->size = sizeof(Object_Struct);
 	memcpy(app->pBuffer, &m_data, sizeof(Object_Struct));
@@ -420,6 +421,7 @@ void Object::CreateSpawnPacket(EQApplicationPacket* app)
 void Object::CreateDeSpawnPacket(EQApplicationPacket* app)
 {
 	app->SetOpcode(OP_ClickObject);
+	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(ClickObject_Struct)];
 	app->size = sizeof(ClickObject_Struct);
 	memset(app->pBuffer, 0, sizeof(ClickObject_Struct));
@@ -510,7 +512,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				    database.GetItemRecastTimestamp(sender->CharacterID(), item->RecastType));
 
 			std::string export_string = fmt::format("{}", item->ID);
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(m_inst);
 			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, export_string, GetID(), &args))
 			{

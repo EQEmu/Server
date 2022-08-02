@@ -363,6 +363,16 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_DzSetSwitchID:
+	{
+		auto buf = reinterpret_cast<ServerDzSwitchID_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			dz->ProcessSetSwitchID(buf->dz_switch_id);
+		}
+		break;
+	}
 	case ServerOP_DzGetMemberStatuses:
 	{
 		// reply from world for online member statuses request for async zone member updates
@@ -411,6 +421,20 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		if (dz)
 		{
 			dz->SendMembersExpireWarning(buf->minutes_remaining);
+		}
+		break;
+	}
+	case ServerOP_DzMovePC:
+	{
+		auto buf = reinterpret_cast<ServerDzMovePC_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			Client* client = entity_list.GetClientByCharID(buf->character_id);
+			if (client)
+			{
+				dz->MovePCInto(client, false);
+			}
 		}
 		break;
 	}
@@ -515,6 +539,12 @@ void DynamicZone::SendCompassUpdateToZoneMembers()
 			member_client->SendDzCompassUpdate();
 		}
 	}
+}
+
+void DynamicZone::ProcessSetSwitchID(int dz_switch_id)
+{
+	DynamicZoneBase::ProcessSetSwitchID(dz_switch_id);
+	SendCompassUpdateToZoneMembers();
 }
 
 void DynamicZone::SendLeaderNameToZoneMembers()
@@ -776,4 +806,24 @@ bool DynamicZone::CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint
 	}
 
 	return true;
+}
+
+void DynamicZone::MovePCInto(Client* client, bool world_verify) const
+{
+	if (!world_verify)
+	{
+		DynamicZoneLocation zonein = GetZoneInLocation();
+		ZoneMode zone_mode = HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		client->MovePC(GetZoneID(), GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
+	}
+	else
+	{
+		ServerPacket pack(ServerOP_DzMovePC, sizeof(ServerDzMovePC_Struct));
+		auto buf = reinterpret_cast<ServerDzMovePC_Struct*>(pack.pBuffer);
+		buf->dz_id = GetID();
+		buf->sender_zone_id = static_cast<uint16_t>(zone->GetZoneID());
+		buf->sender_instance_id = static_cast<uint16_t>(zone->GetInstanceID());
+		buf->character_id = client->CharacterID();
+		worldserver.SendPacket(&pack);
+	}
 }

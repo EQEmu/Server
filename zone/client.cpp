@@ -36,7 +36,7 @@ extern volatile bool RunLoops;
 #include "../common/spdat.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/data_verification.h"
 #include "../common/profanity_manager.h"
 #include "data_bucket.h"
@@ -220,6 +220,7 @@ Client::Client(EQStreamInterface* ieqs)
 	LFGComments[0] = '\0';
 	LFP = false;
 	gmspeed = 0;
+	gminvul = false;
 	playeraction = 0;
 	SetTarget(0);
 	auto_attack = false;
@@ -349,7 +350,8 @@ Client::Client(EQStreamInterface* ieqs)
 		m_pp.InnateSkills[i] = InnateDisabled;
 
 	temp_pvp = false;
-	is_client_moving = false;
+
+	moving = false;
 
 	environment_damage_modifier = 0;
 	invulnerable_environment_damage = false;
@@ -3377,27 +3379,26 @@ void Client::SetTint(int16 in_slot, EQ::textures::Tint_Struct& color) {
 
 }
 
-void Client::SetHideMe(bool flag)
+void Client::SetHideMe(bool gm_hide_me)
 {
 	EQApplicationPacket app;
 
-	gm_hide_me = flag;
-
-	if(gm_hide_me)
-	{
-		database.SetHideMe(AccountID(),true);
+	if (gm_hide_me) {
+		database.SetHideMe(AccountID(), true);
 		CreateDespawnPacket(&app, false);
 		entity_list.RemoveFromTargets(this);
 		trackable = false;
+		tellsoff  = true;
 	}
-	else
-	{
-		database.SetHideMe(AccountID(),false);
+	else {
+		database.SetHideMe(AccountID(), false);
 		CreateSpawnPacket(&app);
 		trackable = true;
+		tellsoff  = false;
 	}
 
-	entity_list.QueueClientsStatus(this, &app, true, 0, Admin()-1);
+	entity_list.QueueClientsStatus(this, &app, true, 0, Admin() - 1);
+	UpdateWho();
 }
 
 void Client::SetLanguageSkill(int langid, int value)
@@ -3901,7 +3902,7 @@ void Client::EnteringMessages(Client* client)
 	if (database.GetVariable("Rules", rules)) {
 		uint8 flag = database.GetAgreementFlag(client->AccountID());
 		if (!flag) {
-			auto rules_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+			auto rules_link = Saylink::Create(
 				"#serverrules",
 				false,
 				"rules"
@@ -3928,7 +3929,7 @@ void Client::SendRules()
 		return;
 	}
 
-	auto lines = split_string(rules, "|");
+	auto lines = Strings::Split(rules, "|");
 	auto line_number = 1;
 	for (auto&& line : lines) {
 		Message(
@@ -6337,7 +6338,7 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 		return;
 	}
 
-	std::string spawn_type = str_tolower(identifier);
+	std::string spawn_type = Strings::ToLower(identifier);
 	bool is_add = spawn_type.find("add") != std::string::npos;
 	bool is_create = spawn_type.find("create") != std::string::npos;
 	bool is_delete = spawn_type.find("delete") != std::string::npos;
@@ -6517,8 +6518,6 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	}
 	made_npc->loottable_id = 0;
 
-	npc_type = made_npc;
-
 	int summon_count = pet.count;
 
 	if(summon_count > MAX_SWARM_PETS)
@@ -6531,14 +6530,11 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	};
 
 	while(summon_count > 0) {
-		NPCType *npc_dup = nullptr;
-		if(made_npc != nullptr) {
-			npc_dup = new NPCType;
-			memcpy(npc_dup, made_npc, sizeof(NPCType));
-		}
+		auto npc_type_copy = new NPCType;
+		memcpy(npc_type_copy, made_npc, sizeof(NPCType));
 
 		NPC* swarm_pet_npc = new NPC(
-				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
+				npc_type_copy,
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count - 1], 0.0f, 0.0f),
 				GravityBehavior::Water);
@@ -6563,12 +6559,13 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		swarm_pet_npc->GetSwarmInfo()->target = 0;
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if(npc_dup != nullptr)
-			swarm_pet_npc->GiveNPCTypeData(npc_dup);
+		swarm_pet_npc->GiveNPCTypeData(npc_type_copy);
 
 		entity_list.AddNPC(swarm_pet_npc);
 		summon_count--;
 	}
+
+	safe_delete(made_npc);
 }
 
 void Client::AssignToInstance(uint16 instance_id)
@@ -7095,6 +7092,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	client->Message(Chat::White, " compute_tohit: %i TotalToHit: %i", compute_tohit(skill), GetTotalToHit(skill, 0));
 	client->Message(Chat::White, " compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
 	client->Message(Chat::White, " offense: %i mitigation ac: %i", offense(skill), GetMitigationAC());
+	client->Message(Chat::White, " AFK: %i LFG: %i Anon: %i PVP: %i GM: %i Flymode: %i GMSpeed: %i Hideme: %i GMInvul: %d LD: %i ClientVersion: %i TellsOff: %i", AFK, LFG, GetAnon(), GetPVP(), GetGM(), flymode, GetGMSpeed(), GetHideMe(), GetGMInvul(), IsLD(), ClientVersionBit(), tellsoff);
 	if(CalcMaxMana() > 0)
 		client->Message(Chat::White, " Mana: %i/%i  Mana Regen: %i/%i", GetMana(), GetMaxMana(), CalcManaRegen(), CalcManaRegenCap());
 	client->Message(Chat::White, " End.: %i/%i  End. Regen: %i/%i",GetEndurance(), GetMaxEndurance(), CalcEnduranceRegen(), CalcEnduranceRegenCap());
@@ -8802,6 +8800,20 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 	safe_delete(outapp);
 }
 
+void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum)
+{
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_CashReward, sizeof(CashReward_Struct));
+	auto outbuf = reinterpret_cast<CashReward_Struct *>(outapp->pBuffer);
+	outbuf->copper = copper;
+	outbuf->silver = silver;
+	outbuf->gold = gold;
+	outbuf->platinum = platinum;
+
+	AddMoneyToPP(copper, silver, gold, platinum);
+
+	QueuePacket(outapp.get());
+}
+
 void Client::SendHPUpdateMarquee(){
 	if (!this || !IsClient() || !current_hp || !max_hp)
 		return;
@@ -9526,60 +9538,60 @@ void Client::ShowDevToolsMenu()
 	/**
 	 * Search entity commands
 	 */
-	menu_search += EQ::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses");
-	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors");
-	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#finditem", false, "Items");
-	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC");
-	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects");
-	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players");
-	menu_search += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#findzone", false, "Zones");
+	menu_search += Saylink::Create("#list corpses", false, "Corpses");
+	menu_search += " | " + Saylink::Create("#list doors", false, "Doors");
+	menu_search += " | " + Saylink::Create("#finditem", false, "Items");
+	menu_search += " | " + Saylink::Create("#list npcs", false, "NPC");
+	menu_search += " | " + Saylink::Create("#list objects", false, "Objects");
+	menu_search += " | " + Saylink::Create("#list players", false, "Players");
+	menu_search += " | " + Saylink::Create("#findzone", false, "Zones");
 
 	/**
 	 * Show
 	 */
-	menu_show += EQ::SayLinkEngine::GenerateQuestSaylink("#showzonepoints", false, "Zone Points");
-	menu_show += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#showzonegloballoot", false, "Zone Global Loot");
+	menu_show += Saylink::Create("#showzonepoints", false, "Zone Points");
+	menu_show += " | " + Saylink::Create("#showzonegloballoot", false, "Zone Global Loot");
 
 	/**
 	 * Reload
 	 */
-	menu_reload_one += EQ::SayLinkEngine::GenerateQuestSaylink("#reload aa", false, "AAs");
-	menu_reload_one += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload alternate_currencies", false, "Alternate Currencies");
-	menu_reload_one += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload blocked_spells", false, "Blocked Spells");
-	menu_reload_one += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload content_flags", false, "Content Flags");
+	menu_reload_one += Saylink::Create("#reload aa", false, "AAs");
+	menu_reload_one += " | " + Saylink::Create("#reload alternate_currencies", false, "Alternate Currencies");
+	menu_reload_one += " | " + Saylink::Create("#reload blocked_spells", false, "Blocked Spells");
+	menu_reload_one += " | " + Saylink::Create("#reload content_flags", false, "Content Flags");
 
-	menu_reload_two += EQ::SayLinkEngine::GenerateQuestSaylink("#reload doors", false, "Doors");
-	menu_reload_two += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload ground_spawns", false, "Ground Spawns");
+	menu_reload_two += Saylink::Create("#reload doors", false, "Doors");
+	menu_reload_two += " | " + Saylink::Create("#reload ground_spawns", false, "Ground Spawns");
 
-	menu_reload_three += EQ::SayLinkEngine::GenerateQuestSaylink("#reload logs", false, "Level Based Experience Modifiers");
-	menu_reload_three += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload logs", false, "Log Settings");
+	menu_reload_three += Saylink::Create("#reload logs", false, "Level Based Experience Modifiers");
+	menu_reload_three += " | " + Saylink::Create("#reload logs", false, "Log Settings");
 
-	menu_reload_four += EQ::SayLinkEngine::GenerateQuestSaylink("#reload merchants", false, "Merchants");
-	menu_reload_four += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload npc_emotes", false, "NPC Emotes");
-	menu_reload_four += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload objects", false, "Objects");
+	menu_reload_four += Saylink::Create("#reload merchants", false, "Merchants");
+	menu_reload_four += " | " + Saylink::Create("#reload npc_emotes", false, "NPC Emotes");
+	menu_reload_four += " | " + Saylink::Create("#reload objects", false, "Objects");
 
-	menu_reload_five += EQ::SayLinkEngine::GenerateQuestSaylink("#reload perl_export", false, "Perl Event Export Settings");
-	menu_reload_five += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload quest", false, "Quests");
+	menu_reload_five += Saylink::Create("#reload perl_export", false, "Perl Event Export Settings");
+	menu_reload_five += " | " + Saylink::Create("#reload quest", false, "Quests");
 
-	menu_reload_six += EQ::SayLinkEngine::GenerateQuestSaylink("#reload rules", false, "Rules");
-	menu_reload_six += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload static", false, "Static Zone Data");
-	menu_reload_six += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload tasks", false, "Tasks");
-	
-	menu_reload_seven += EQ::SayLinkEngine::GenerateQuestSaylink("#reload titles", false, "Titles");
-	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload traps 1", false, "Traps");
-	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload variables", false, "Variables");
-	menu_reload_seven += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload veteran_rewards", false, "Veteran Rewards");
-	
-	menu_reload_eight += EQ::SayLinkEngine::GenerateQuestSaylink("#reload world", false, "World");
-	menu_reload_eight += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload zone", false, "Zone");
-	menu_reload_eight += " | " + EQ::SayLinkEngine::GenerateQuestSaylink("#reload zone_points", false, "Zone Points");
+	menu_reload_six += Saylink::Create("#reload rules", false, "Rules");
+	menu_reload_six += " | " + Saylink::Create("#reload static", false, "Static Zone Data");
+	menu_reload_six += " | " + Saylink::Create("#reload tasks", false, "Tasks");
+
+	menu_reload_seven += Saylink::Create("#reload titles", false, "Titles");
+	menu_reload_seven += " | " + Saylink::Create("#reload traps 1", false, "Traps");
+	menu_reload_seven += " | " + Saylink::Create("#reload variables", false, "Variables");
+	menu_reload_seven += " | " + Saylink::Create("#reload veteran_rewards", false, "Veteran Rewards");
+
+	menu_reload_eight += Saylink::Create("#reload world", false, "World");
+	menu_reload_eight += " | " + Saylink::Create("#reload zone", false, "Zone");
+	menu_reload_eight += " | " + Saylink::Create("#reload zone_points", false, "Zone Points");
 
 	/**
 	 * Show window status
 	 */
-	menu_toggle = EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable", false, "Enable");
+	menu_toggle = Saylink::Create("#devtools enable", false, "Enable");
 	if (IsDevToolsEnabled()) {
-		menu_toggle = EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable", false, "Disable");
+		menu_toggle = Saylink::Create("#devtools disable", false, "Disable");
 	}
 
 	/**
@@ -9601,7 +9613,7 @@ void Client::ShowDevToolsMenu()
 		Chat::White,
 		fmt::format(
 			"Show Menu | {}",
-			EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev")
+			Saylink::Create("#dev", false, "#dev")
 		).c_str()
 	);
 
@@ -9693,7 +9705,7 @@ void Client::ShowDevToolsMenu()
 		).c_str()
 	);
 
-	auto help_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto help_link = Saylink::Create(
 		"#help",
 		false,
 		"#help"
@@ -9828,6 +9840,19 @@ Expedition* Client::CreateExpedition(
 	dz.SetMaxPlayers(max_players);
 
 	return Expedition::TryCreate(this, dz, disable_messages);
+}
+
+Expedition* Client::CreateExpeditionFromTemplate(uint32_t dz_template_id)
+{
+	Expedition* expedition = nullptr;
+	auto it = zone->dz_template_cache.find(dz_template_id);
+	if (it != zone->dz_template_cache.end())
+	{
+		DynamicZone dz(DynamicZoneType::Expedition);
+		dz.LoadTemplate(it->second);
+		expedition = Expedition::TryCreate(this, dz, false);
+	}
+	return expedition;
 }
 
 void Client::CreateTaskDynamicZone(int task_id, DynamicZone& dz_request)
@@ -10091,12 +10116,23 @@ void Client::SendDzCompassUpdate()
 	// client may be associated with multiple dynamic zone compasses in this zone
 	std::vector<DynamicZoneCompassEntry_Struct> compass_entries;
 
+	// need to sort by local doorid in case multiple have same dz switch id (live only sends first)
+	// todo: just store zone's door list ordered and ditch this
+	std::vector<Doors*> switches;
+	switches.reserve(entity_list.GetDoorsList().size());
+	for (const auto& door_pair : entity_list.GetDoorsList())
+	{
+		switches.push_back(door_pair.second);
+	}
+	std::sort(switches.begin(), switches.end(),
+		[](Doors* lhs, Doors* rhs) { return lhs->GetDoorID() < rhs->GetDoorID(); });
+
 	for (const auto& client_dz : GetDynamicZones())
 	{
 		auto compass = client_dz->GetCompassLocation();
 		if (zone && zone->IsZone(compass.zone_id, 0))
 		{
-			DynamicZoneCompassEntry_Struct entry;
+			DynamicZoneCompassEntry_Struct entry{};
 			entry.dz_zone_id = client_dz->GetZoneID();
 			entry.dz_instance_id = client_dz->GetInstanceID();
 			entry.dz_type = static_cast<uint32_t>(client_dz->GetType());
@@ -10106,12 +10142,36 @@ void Client::SendDzCompassUpdate()
 
 			compass_entries.emplace_back(entry);
 		}
+
+		// if client has a dz with a switch id add compass to any switch locs that share it
+		if (client_dz->GetSwitchID() != 0)
+		{
+			// live only sends one if multiple in zone have the same switch id
+			auto it = std::find_if(switches.begin(), switches.end(),
+				[&](const auto& eqswitch) {
+					return eqswitch->GetDzSwitchID() == client_dz->GetSwitchID();
+				});
+
+			if (it != switches.end())
+			{
+				DynamicZoneCompassEntry_Struct entry{};
+				entry.dz_zone_id = client_dz->GetZoneID();
+				entry.dz_instance_id = client_dz->GetInstanceID();
+				entry.dz_type = static_cast<uint32_t>(client_dz->GetType());
+				entry.dz_switch_id = client_dz->GetSwitchID();
+				entry.x = (*it)->GetX();
+				entry.y = (*it)->GetY();
+				entry.z = (*it)->GetZ();
+
+				compass_entries.emplace_back(entry);
+			}
+		}
 	}
 
 	// compass set via MarkSingleCompassLocation()
 	if (m_has_quest_compass)
 	{
-		DynamicZoneCompassEntry_Struct entry;
+		DynamicZoneCompassEntry_Struct entry{};
 		entry.dz_zone_id = 0;
 		entry.dz_instance_id = 0;
 		entry.dz_type = 0;
@@ -10241,6 +10301,27 @@ void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_inv
 	}
 }
 
+bool Client::TryMovePCDynamicZoneSwitch(int dz_switch_id)
+{
+	auto client_dzs = GetDynamicZones();
+
+	std::vector<DynamicZone*> switch_dzs;
+	auto it = std::copy_if(client_dzs.begin(), client_dzs.end(), std::back_inserter(switch_dzs),
+		[&](const DynamicZone* dz) { return dz->GetSwitchID() == dz_switch_id; });
+
+	if (switch_dzs.size() == 1)
+	{
+		LogDynamicZonesDetail("Moving client [{}] to dz with switch id [{}]", GetName(), dz_switch_id);
+		switch_dzs.front()->MovePCInto(this, true);
+	}
+	else if (switch_dzs.size() > 1)
+	{
+		QueuePacket(CreateDzSwitchListPacket(switch_dzs).get());
+	}
+
+	return !switch_dzs.empty();
+}
+
 std::unique_ptr<EQApplicationPacket> Client::CreateDzSwitchListPacket(
 	const std::vector<DynamicZone*>& client_dzs)
 {
@@ -10292,7 +10373,7 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_level) {
 	std::vector<int> learnable_disciplines;
 	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
-		bool learnable = false;
+		bool learnable = true;
 		if (!IsValidSpell(spell_id)) {
 			continue;
 		}
@@ -10325,12 +10406,10 @@ std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_leve
 			continue;
 		}
 
-		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
-			learnable = true;
-		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
-			learnable = true;
-		} else {
-			learnable = true;
+		if (RuleB(Spells, EnableSpellGlobals) && !SpellGlobalCheck(spell_id, CharacterID())) {
+			learnable = false;
+		} else if (RuleB(Spells, EnableSpellBuckets) && !SpellBucketCheck(spell_id, CharacterID())) {
+			learnable = false;
 		}
 
 		if (learnable) {
@@ -10363,7 +10442,7 @@ std::vector<int> Client::GetMemmedSpells() {
 std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 	std::vector<int> scribeable_spells;
 	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
-		bool scribeable = false;
+		bool scribeable = true;
 		if (!IsValidSpell(spell_id)) {
 			continue;
 		}
@@ -10396,12 +10475,10 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		}
 
-		if (RuleB(Spells, EnableSpellGlobals) && SpellGlobalCheck(spell_id, CharacterID())) {
-			scribeable = true;
-		} else if (RuleB(Spells, EnableSpellBuckets) && SpellBucketCheck(spell_id, CharacterID())) {
-			scribeable = true;
-		} else {
-			scribeable = true;
+		if (RuleB(Spells, EnableSpellGlobals) && !SpellGlobalCheck(spell_id, CharacterID())) {
+			scribeable = false;
+		} else if (RuleB(Spells, EnableSpellBuckets) && !SpellBucketCheck(spell_id, CharacterID())) {
+			scribeable = false;
 		}
 
 		if (scribeable) {
@@ -10447,7 +10524,7 @@ void Client::SetAFK(uint8 afk_flag) {
 
 void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
 	uint32 zone_id = ZoneID(zone_short_name);
-	std::string current_instance_type = str_tolower(instance_type);
+	std::string current_instance_type = Strings::ToLower(instance_type);
 	std::string instance_type_name = "public";
 	if (current_instance_type.find("solo") != std::string::npos) {
 		instance_type_name = GetCleanName();
@@ -11198,7 +11275,7 @@ void Client::ReconnectUCS()
 void Client::SendReloadCommandMessages() {
 	SendChatLineBreak();
 
-	auto aa_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto aa_link = Saylink::Create(
 		"#reload aa",
 		false,
 		"#reload aa"
@@ -11212,7 +11289,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto alternate_currencies_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto alternate_currencies_link = Saylink::Create(
 		"#reload alternate_currencies",
 		false,
 		"#reload alternate_currencies"
@@ -11226,7 +11303,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto blocked_spells_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto blocked_spells_link = Saylink::Create(
 		"#reload blocked_spells",
 		false,
 		"#reload blocked_spells"
@@ -11240,7 +11317,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto content_flags_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto content_flags_link = Saylink::Create(
 		"#reload content_flags",
 		false,
 		"#reload content_flags"
@@ -11254,7 +11331,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto doors_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto doors_link = Saylink::Create(
 		"#reload doors",
 		false,
 		"#reload doors"
@@ -11268,7 +11345,10 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto ground_spawns_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto dztemplates_link = Saylink::Create("#reload dztemplates", false, "#reload dztemplates");
+	Message(Chat::White, fmt::format("Usage: {} - Reloads Dynamic Zone Templates globally", dztemplates_link).c_str());
+
+	auto ground_spawns_link = Saylink::Create(
 		"#reload ground_spawns",
 		false,
 		"#reload ground_spawns"
@@ -11282,7 +11362,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto level_mods_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto level_mods_link = Saylink::Create(
 		"#reload level_mods",
 		false,
 		"#reload level_mods"
@@ -11296,7 +11376,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto logs_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto logs_link = Saylink::Create(
 		"#reload logs",
 		false,
 		"#reload logs"
@@ -11310,7 +11390,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto merchants_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto merchants_link = Saylink::Create(
 		"#reload merchants",
 		false,
 		"#reload merchants"
@@ -11324,7 +11404,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto npc_emotes_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto npc_emotes_link = Saylink::Create(
 		"#reload npc_emotes",
 		false,
 		"#reload npc_emotes"
@@ -11338,7 +11418,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto objects_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto objects_link = Saylink::Create(
 		"#reload objects",
 		false,
 		"#reload objects"
@@ -11352,7 +11432,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto perl_export_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto perl_export_link = Saylink::Create(
 		"#reload perl_export",
 		false,
 		"#reload perl_export"
@@ -11366,19 +11446,19 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto quest_link_one = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto quest_link_one = Saylink::Create(
 		"#reload quest",
 		false,
 		"#reload quest"
 	);
 
-	auto quest_link_two = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto quest_link_two = Saylink::Create(
 		"#reload quest",
 		false,
 		"0"
 	);
 
-	auto quest_link_three = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto quest_link_three = Saylink::Create(
 		"#reload quest 1",
 		false,
 		"1"
@@ -11394,7 +11474,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto rules_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto rules_link = Saylink::Create(
 		"#reload rules",
 		false,
 		"#reload rules"
@@ -11408,7 +11488,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto static_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto static_link = Saylink::Create(
 		"#reload static",
 		false,
 		"#reload static"
@@ -11422,7 +11502,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto tasks_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto tasks_link = Saylink::Create(
 		"#reload tasks",
 		false,
 		"#reload tasks"
@@ -11436,7 +11516,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto titles_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto titles_link = Saylink::Create(
 		"#reload titles",
 		false,
 		"#reload titles"
@@ -11450,19 +11530,19 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto traps_link_one = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto traps_link_one = Saylink::Create(
 		"#reload traps",
 		false,
 		"#reload traps"
 	);
 
-	auto traps_link_two = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto traps_link_two = Saylink::Create(
 		"#reload traps",
 		false,
 		"0"
 	);
 
-	auto traps_link_three = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto traps_link_three = Saylink::Create(
 		"#reload traps 1",
 		false,
 		"1"
@@ -11478,7 +11558,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto variables_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto variables_link = Saylink::Create(
 		"#reload variables",
 		false,
 		"#reload variables"
@@ -11492,7 +11572,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto veteran_rewards_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto veteran_rewards_link = Saylink::Create(
 		"#reload veteran_rewards",
 		false,
 		"#reload veteran_rewards"
@@ -11506,25 +11586,25 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto world_link_one = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto world_link_one = Saylink::Create(
 		"#reload world",
 		false,
 		"#reload world"
 	);
 
-	auto world_link_two = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto world_link_two = Saylink::Create(
 		"#reload world",
 		false,
 		"0"
 	);
 
-	auto world_link_three = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto world_link_three = Saylink::Create(
 		"#reload world 1",
 		false,
 		"1"
 	);
 
-	auto world_link_four = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto world_link_four = Saylink::Create(
 		"#reload world 2",
 		false,
 		"2"
@@ -11541,7 +11621,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto zone_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto zone_link = Saylink::Create(
 		"#reload zone",
 		false,
 		"#reload zone"
@@ -11555,7 +11635,7 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto zone_points_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+	auto zone_points_link = Saylink::Create(
 		"#reload zone_points",
 		false,
 		"#reload zone_points"
@@ -11631,12 +11711,12 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			}
 
 			passes = true;
-			
+
 			break;
 		}
 		case MerchantBucketComparison::BucketIsAny:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11657,7 +11737,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsNotAny:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11678,7 +11758,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsBetween:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11695,7 +11775,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 		}
 		case MerchantBucketComparison::BucketIsNotBetween:
 		{
-			bucket_checks = split_string(bucket_value, "|");
+			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
 				break;
 			}
@@ -11721,7 +11801,7 @@ std::map<std::string,std::string> Client::GetMerchantDataBuckets()
 
 	auto query = fmt::format(
 		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		EscapeString(GetBucketKey())
+		Strings::Escape(GetBucketKey())
 	);
 	auto results = database.QueryDatabase(query);
 

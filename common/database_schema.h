@@ -189,6 +189,7 @@ namespace DatabaseSchema {
 			"char_create_point_allocations",
 			"damageshieldtypes",
 			"doors",
+			"dynamic_zone_templates",
 			"faction_base_data",
 			"faction_list",
 			"faction_list_mod",
@@ -318,6 +319,7 @@ namespace DatabaseSchema {
 			"completed_shared_task_activity_state",
 			"completed_shared_task_members",
 			"completed_shared_tasks",
+			"discord_webhooks",
 			"dynamic_zone_members",
 			"dynamic_zones",
 			"eventlog",
@@ -375,7 +377,7 @@ namespace DatabaseSchema {
 			"inventory_versions",
 		};
 	}
-	
+
 	/**
 	 * @description Gets all player bot tables
 	 * @note These tables have no content in the PEQ daily dump

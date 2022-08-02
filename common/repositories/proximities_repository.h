@@ -22,7 +22,7 @@
 #define EQEMU_PROXIMITIES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_proximities_repository.h"
 
 class ProximitiesRepository: public BaseProximitiesRepository {

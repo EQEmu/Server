@@ -42,7 +42,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "event_codes.h"
 #include "expedition.h"
 #include "guild_mgr.h"
@@ -124,7 +124,7 @@ bool Client::Process() {
 		}
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
-		if (!is_client_moving && position_update_timer.Check()) {
+		if (!IsMoving() && position_update_timer.Check()) {
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		}
 
@@ -291,7 +291,7 @@ bool Client::Process() {
 		 * Used in aggro checks
 		 */
 		if (mob_close_scan_timer.Check()) {
-			entity_list.ScanCloseMobs(close_mobs, this, is_client_moving);
+			entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 		}
 
 		bool may_use_attacks = false;
@@ -918,7 +918,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		// Account for merchant lists with gaps.
 		if (ml.slot >= slot_id) {
 			if (ml.slot > slot_id) {
-				LogDebug("(WARNING) Merchantlist contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", slot_id, merchant_id, npcid);
+				LogDebug("(WARNING) Merchantlist Contains gap at slot [{}]. Merchant: [{}], NPC: [{}]", slot_id, merchant_id, npcid);
 			}
 
 			slot_id = ml.slot + 1;
@@ -967,7 +967,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	//this resets the slot
 	zone->tmpmerchanttable[npcid] = temporary_merchant_list;
 	if (npc && handy_item) {
-		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);		
+		int greet_id = zone->random.Int(MERCHANT_GREETING, MERCHANT_HANDY_ITEM4);
 		auto handy_id = std::to_string(greet_id);
 		if (greet_id != MERCHANT_GREETING) {
 			MessageString(Chat::NPCQuestSay, GENERIC_STRINGID_SAY, npc->GetCleanName(), handy_id.c_str(), GetName(), handy_item->Name);
@@ -2053,6 +2053,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			if (PendingRezzXP < 0 || PendingRezzSpellID == 0)
 			{
 				LogSpells("Unexpected Rezz from hover request");
+				safe_delete(default_to_bind);
 				return;
 			}
 			SetHP(GetMaxHP() / 5);

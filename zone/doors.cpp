@@ -18,7 +18,7 @@
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "client.h"
 #include "doors.h"
@@ -67,6 +67,7 @@ Doors::Doors(const DoorsRepository::Doors& door) :
 	invert_state            = door.invert_state;
 	destination_instance_id = door.dest_instance;
 	is_ldon_door            = door.is_ldon_door;
+	m_dz_switch_id          = door.dz_switch_id;
 	client_version_mask     = door.client_version_mask;
 
 	SetOpenState(false);
@@ -207,7 +208,15 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		}
 	}
 
-	// todo: if IsDzDoor() call Client::MovePCDynamicZone(target_zone_id) (for systems that use dzs)
+	if (m_dz_switch_id != 0)
+	{
+		sender->UpdateTasksOnTouchSwitch(m_dz_switch_id);
+		if (sender->TryMovePCDynamicZoneSwitch(m_dz_switch_id))
+		{
+			safe_delete(outapp);
+			return;
+		}
+	}
 
 	uint32 required_key_item       = GetKeyItem();
 	uint8  disable_add_to_key_ring = GetNoKeyring();

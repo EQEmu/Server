@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -32,10 +32,6 @@ namespace EQ
 {
 	using RoF2::IINVALID;
 	using RoF2::INULL;
-	
-	namespace inventory {
-		
-	} /*inventory*/
 
 	namespace invtype {
 		using namespace RoF2::invtype::enum_;
@@ -201,7 +197,7 @@ namespace EQ
 		using RoF2::constants::EXPANSIONS_MASK;
 
 		using RoF2::constants::CHARACTER_CREATION_LIMIT;
-		
+
 		const size_t SAY_LINK_OPENER_SIZE = 1;
 		using RoF2::constants::SAY_LINK_BODY_SIZE;
 		const size_t SAY_LINK_TEXT_SIZE = 256; // this may be varied until it breaks something (tested:374) - the others are constant
@@ -260,7 +256,7 @@ namespace EQ
 
 		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
 		std::string GetLDoNThemeName(uint32 theme_id);
-    
+
 		extern const std::map<int8, std::string>& GetFlyModeMap();
 		std::string GetFlyModeName(int8 flymode_id);
 
@@ -291,7 +287,7 @@ namespace EQ
 	namespace profile {
 		using RoF2::profile::BANDOLIERS_SIZE;
 		using RoF2::profile::BANDOLIER_ITEM_COUNT;
-		
+
 		using RoF2::profile::POTION_BELT_SIZE;
 
 		using RoF2::profile::SKILL_ARRAY_SIZE;

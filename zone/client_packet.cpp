@@ -45,7 +45,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/zone_numbers.h"
 #include "data_bucket.h"
 #include "event_codes.h"
@@ -68,6 +68,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/shared_tasks.h"
 #include "gm_commands/door_manipulation.h"
 #include "client.h"
+#include "../common/repositories/account_repository.h"
 
 
 #ifdef BOTS
@@ -471,7 +472,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	case CLIENT_CONNECTING: {
 		if (ConnectingOpcodes.count(opcode) != 1) {
 			//Hate const cast but everything in lua needs to be non-const even if i make it non-mutable
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
 
@@ -495,7 +496,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
 		if (p == nullptr) {
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
@@ -569,7 +570,31 @@ void Client::CompleteConnect()
 
 	//SendAATable();
 
-	if (GetHideMe()) Message(Chat::Red, "[GM] You are currently hidden to all clients");
+	if (GetGM() && (GetHideMe() || GetGMSpeed() || GetGMInvul() || flymode != 0 || tellsoff)) {
+		std::vector<std::string> state;
+		if (GetHideMe()) {
+			state.emplace_back("hidden to all clients");
+		}
+		if (GetGMSpeed()) {
+			state.emplace_back("running at GM speed");
+		}
+		if (GetGMInvul()) {
+			state.emplace_back("invulnerable to all damage");
+		}
+		if (flymode == GravityBehavior::Flying) {
+			state.emplace_back("flying");
+		}
+		else if (flymode == GravityBehavior::Levitating) {
+			state.emplace_back("levitating");
+		}
+		if (tellsoff) {
+			state.emplace_back("ignoring tells");
+		}
+
+		if (!state.empty()) {
+			Message(Chat::Red, "[GM] You are currently %s.", Strings::Join(state, ", ").c_str());
+		}
+	}
 
 	uint32 raidid = database.GetRaidID(GetName());
 	Raid *raid = nullptr;
@@ -795,7 +820,7 @@ void Client::CompleteConnect()
 	if (zone && zone->GetInstanceTimer()) {
 		bool is_permanent = false;
 		uint32 remaining_time = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
-		auto time_string = ConvertSecondsToTime(remaining_time);
+		auto time_string = Strings::SecondsToTime(remaining_time);
 		Message(
 			Chat::Yellow,
 			fmt::format(
@@ -1184,23 +1209,25 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.RemoveTempFactions(this);
 	database.LoadCharacterFactionValues(cid, factionvalues);
 
-	/* Load Character Account Data: Temp until I move */
-	query = StringFormat("SELECT `status`, `name`, `ls_id`, `lsaccount_id`, `gmspeed`, `revoked`, `hideme`, `time_creation` FROM `account` WHERE `id` = %u", AccountID());
-	auto results = database.QueryDatabase(query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		admin = atoi(row[0]);
-		strn0cpy(account_name, row[1], sizeof(account_name));
-		strn0cpy(loginserver, row[2], sizeof(loginserver));
-		lsaccountid = atoi(row[3]);
-		gmspeed = atoi(row[4]);
-		revoked = atoi(row[5]);
-		gm_hide_me = atoi(row[6]);
-		account_creation = atoul(row[7]);
+	auto a = AccountRepository::FindOne(database, AccountID());
+	if (a.id > 0) {
+		strn0cpy(account_name, a.name.c_str(), sizeof(account_name));
+		strn0cpy(loginserver, a.ls_id.c_str(), sizeof(loginserver));
+
+		admin            = a.status;
+		lsaccountid      = a.lsaccount_id;
+		gmspeed          = a.gmspeed;
+		revoked          = a.revoked;
+		gm_hide_me       = a.hideme;
+		account_creation = a.time_creation;
+		gminvul          = a.invulnerable;
+		flymode          = static_cast<GravityBehavior>(a.flymode);
+		tellsoff         = gm_hide_me;
 	}
 
 	/* Load Character Data */
 	query = StringFormat("SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = %i", cid);
-	results = database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (row[4] && atoi(row[4]) > 0) {
 			guild_id = atoi(row[4]);
@@ -1266,6 +1293,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* If GM, not trackable */
 	if (gm_hide_me) { trackable = false; }
+	if (gminvul) { invulnerable = true; }
+	if (flymode > 0) { SendAppearancePacket(AT_Levitate, flymode); }
 	/* Set Con State for Reporting */
 	conn_state = PlayerProfileLoaded;
 
@@ -1808,7 +1837,13 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 	AcceptNewTask_Struct *ant = (AcceptNewTask_Struct*)app->pBuffer;
 
 	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state)
-		task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id, std::time(nullptr));
+	{
+		if (task_state->CanAcceptNewTask(this, ant->task_id, ant->task_master_id))
+		{
+			task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id, std::time(nullptr));
+		}
+		task_state->ClearLastOffers();
+	}
 }
 
 void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)
@@ -2041,6 +2076,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	{
 		PutLootInInventory(EQ::invslot::slotCursor, *inst);
 	}
+	safe_delete(inst);
 	Save(1);
 }
 
@@ -2551,6 +2587,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 		{
 			PutLootInInventory(EQ::invslot::slotCursor, *inst);
 		}
+		safe_delete(inst);
 
 		Save(1);
 	}
@@ -3018,7 +3055,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 						if (old_aug) { // An old augment was removed in order to be replaced with the new one (augment_action 2)
 							CalcBonuses();
 
-							std::vector<EQ::Any> args;
+							std::vector<std::any> args;
 							args.push_back(old_aug);
 							parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 
@@ -3032,7 +3069,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 						aug = tobe_auged->GetAugment(in_augment->augment_index);
 						if (aug) {
-							std::vector<EQ::Any> args;
+							std::vector<std::any> args;
 							args.push_back(aug);
 							parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 
@@ -3088,7 +3125,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			case AugmentActions::Remove:
 				aug = tobe_auged->GetAugment(in_augment->augment_index);
 				if (aug) {
-					std::vector<EQ::Any> args;
+					std::vector<std::any> args;
 					args.push_back(aug);
 					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					args.assign(1, tobe_auged);
@@ -3138,7 +3175,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				// Augments can be destroyed with a right click -> Destroy at any time.
 				aug = tobe_auged->GetAugment(in_augment->augment_index);
 				if (aug) {
-					std::vector<EQ::Any> args;
+					std::vector<std::any> args;
 					args.push_back(aug);
 					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
 					args.assign(1, tobe_auged);
@@ -3680,12 +3717,18 @@ void Client::Handle_OP_Bind_Wound(const EQApplicationPacket *app)
 		LogError("Size mismatch for Bind wound packet");
 		DumpPacket(app);
 	}
+
+	// Not allowed to forage while mounted
+	if (RuleB(Character, NoSkillsOnHorse) && GetHorseId()) {
+		MessageString(Chat::Skills, NO_SKILL_WHILE_MOUNTED);
+		return;
+	}
+
 	BindWound_Struct* bind_in = (BindWound_Struct*)app->pBuffer;
 	Mob* bindmob = entity_list.GetMob(bind_in->to);
 	if (!bindmob) {
 		LogError("Bindwound on non-exsistant mob from [{}]", GetName());
-	}
-	else {
+	} else {
 		LogDebug("BindWound in: to:\'[{}]\' from=\'[{}]\'", bindmob->GetName(), GetName());
 		BindWound(bindmob, true);
 	}
@@ -4230,18 +4273,18 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 			fmt::format(
 				"Door ({}) [{}]",
 				currentdoor->GetEntityID(),
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door edit", false, "#door edit")
+				Saylink::Create("#door edit", false, "#door edit")
 			).c_str()
 		);
 	}
 
 	std::string export_string = fmt::format("{}", cd->doorid);
-	std::vector<EQ::Any> args;
+	std::vector<std::any> args;
 	args.push_back(currentdoor);
-	parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args);
-
-	currentdoor->HandleClick(this, 0);
-	return;
+	if (parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args) == 0)
+	{
+		currentdoor->HandleClick(this, 0);
+	}
 }
 
 void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
@@ -4259,7 +4302,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 
 		object->HandleClick(this, click_object);
 
-		std::vector<EQ::Any> args;
+		std::vector<std::any> args;
 		args.push_back(object);
 
 		std::string export_string = fmt::format("{}", click_object->drop_id);
@@ -4505,9 +4548,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		rewind_timer.Start(30000, true);
 	}
 
-
-	is_client_moving = !(cy == m_Position.y && cx == m_Position.x);
-
+	SetMoving(!(cy == m_Position.y && cx == m_Position.x));
 
 	/**
 	 * Client aggro scanning
@@ -4518,11 +4559,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	LogAggroDetail(
 		"ClientUpdate [{}] {}moving, scan timer [{}]",
 		GetCleanName(),
-		is_client_moving ? "" : "NOT ",
+		IsMoving() ? "" : "NOT ",
 		client_scan_npc_aggro_timer.GetRemainingTime()
 	);
 
-	if (is_client_moving) {
+	if (IsMoving()) {
 		if (client_scan_npc_aggro_timer.GetRemainingTime() > client_scan_npc_aggro_timer_moving) {
 			LogAggroDetail("Client [{}] Restarting with moving timer", GetCleanName());
 			client_scan_npc_aggro_timer.Disable();
@@ -4545,11 +4586,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	LogAIScanCloseDetail(
 		"Client [{}] {}moving, scan timer [{}]",
 		GetCleanName(),
-		is_client_moving ? "" : "NOT ",
+		IsMoving() ? "" : "NOT ",
 		mob_close_scan_timer.GetRemainingTime()
 	);
 
-	if (is_client_moving) {
+	if (IsMoving()) {
 		if (mob_close_scan_timer.GetRemainingTime() > client_mob_close_scan_timer_moving) {
 			LogAIScanCloseDetail("Client [{}] Restarting with moving timer", GetCleanName());
 			mob_close_scan_timer.Disable();
@@ -4579,7 +4620,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
 	);
 
-	if (is_client_moving && is_ready_to_update) {
+	if (IsMoving() && is_ready_to_update) {
 		LogDebug("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
 
 		auto &mob_movement_manager = MobMovementManager::Get();
@@ -4622,7 +4663,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	}
 
 	/* Only feed real time updates when client is moving */
-	if (is_client_moving || new_heading != m_Position.w || new_animation != animation) {
+	if (IsMoving() || new_heading != m_Position.w || new_animation != animation) {
 
 		animation = ppu->animation;
 		m_Position.w = new_heading;
@@ -4852,7 +4893,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 
 	uint32 decay_time = target->GetDecayTime();
 	if (decay_time) {
-		auto time_string = ConvertSecondsToTime(decay_time, true);
+		auto time_string = Strings::SecondsToTime(decay_time, true);
 		Message(
 			Chat::NPCQuestSay,
 			fmt::format(
@@ -6063,6 +6104,13 @@ void Client::Handle_OP_Forage(const EQApplicationPacket *app)
 		Message(Chat::Red, "Ability recovery time not yet met.");
 		return;
 	}
+
+	// Not allowed to forage while mounted
+	if (RuleB(Character, NoSkillsOnHorse) && GetHorseId()) {
+		MessageString(Chat::Skills, NO_SKILL_WHILE_MOUNTED);
+		return;
+	}
+
 	p_timers.Start(pTimerForaging, ForagingReuseTime - 1);
 
 	ForageItem();
@@ -6112,17 +6160,26 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 	BecomeNPC_Struct* bnpc = (BecomeNPC_Struct*)app->pBuffer;
 
 	Mob* cli = (Mob*)entity_list.GetMob(bnpc->id);
-	if (cli == 0)
+	if (cli == nullptr) {
 		return;
+	}
 
-	if (cli->IsClient())
-		cli->CastToClient()->QueuePacket(app);
-	cli->SendAppearancePacket(AT_NPCName, 1, true);
-	cli->CastToClient()->SetBecomeNPC(true);
-	cli->CastToClient()->SetBecomeNPCLevel(bnpc->maxlevel);
-	cli->MessageString(Chat::White, TOGGLE_OFF);
-	cli->CastToClient()->tellsoff = true;
-	//TODO: Make this toggle a BecomeNPC flag so that it gets updated when people zone in as well; Make combat work with this.
+	if (cli->IsClient()) {
+		Client* target = cli->CastToClient();
+		target->QueuePacket(app);
+		if(target->GetGM()) {
+			target->SetInvul(false);
+			target->SetHideMe(false);
+			target->SetGM(false);
+		}
+
+		cli->SendAppearancePacket(AT_NPCName, 1, true);
+		target->SetBecomeNPC(true);
+		target->SetBecomeNPCLevel(bnpc->maxlevel);
+		cli->MessageString(Chat::White, TOGGLE_OFF);
+		target->tellsoff = true;
+		target->UpdateWho();
+	}
 	return;
 }
 
@@ -6527,16 +6584,12 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 	GMToggle_Struct *ts = (GMToggle_Struct *)app->pBuffer;
 	if (ts->toggle == 0) {
 		MessageString(Chat::White, TOGGLE_OFF);
-		//Message(0, "Turning tells OFF");
 		tellsoff = true;
-	}
-	else if (ts->toggle == 1) {
-		//Message(0, "Turning tells ON");
+	} else if (ts->toggle == 1) {
 		MessageString(Chat::White, TOGGLE_ON);
 		tellsoff = false;
-	}
-	else {
-		Message(0, "Unkown value in /toggle packet");
+	} else {
+		Message(Chat::White, "Unkown value in /toggle packet");
 	}
 	UpdateWho();
 	return;
@@ -11066,35 +11119,30 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 		return;
 
 	p_timers.Start(pTimerBeggingPickPocket, 8);
-	auto outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
-	sPickPocket_Struct* pick_out = (sPickPocket_Struct*)outapp->pBuffer;
-	pick_out->coin = 0;
-	pick_out->from = victim->GetID();
-	pick_out->to = GetID();
-	pick_out->myskill = GetSkill(EQ::skills::SkillPickPockets);
-	pick_out->type = 0;
-	//if we do not send this packet the client will lock up and require the player to relog.
 
 	if (victim == this) {
-		Message(0, "You catch yourself red-handed.");
+		Message(Chat::White, "You catch yourself red-handed.");
 	}
 	else if (victim->GetOwnerID()) {
-		Message(0, "You cannot steal from pets!");
+		Message(Chat::White, "You cannot steal from pets!");
+	}
+	else if (victim->IsClient()) {
+		Message(Chat::White, "Stealing from clients not yet supported.");
 	}
 	else if (Distance(GetPosition(), victim->GetPosition()) > 20) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
 		database.SetMQDetectionFlag(AccountName(), GetName(), "OP_PickPocket was sent from outside combat range.", zone->GetShortName());
 	}
 	else if (victim->IsNPC()) {
-		safe_delete(outapp);
-		victim->CastToNPC()->PickPocket(this);
-		return;
+		auto body = victim->GetBodyType();
+		if (body == BT_Humanoid || body == BT_Monster || body == BT_Giant ||
+			body == BT_Lycanthrope) {
+			victim->CastToNPC()->PickPocket(this);
+			return;
+		}
 	}
-	else {
-		Message(0, "Stealing from clients not yet supported.");
-	}
-	QueuePacket(outapp);
-	safe_delete(outapp);
+
+	SendPickPocketResponse(victim, 0, PickPocketFailed);
 }
 
 void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
@@ -12942,7 +12990,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 			Chat::White,
 			fmt::format(
 				"You can use the ability /shield in {}.",
-				ConvertSecondsToTime(remaining_time)
+				Strings::SecondsToTime(remaining_time)
 			).c_str()
 		);
 		return;
@@ -13097,7 +13145,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		auto hacker_str = fmt::format("Vendor Cheat: attempted to buy {} of {}: {} that cost {} cp but only has {} pp {} gp {} sp {} cp",
 			mpo->quantity, item->ID, item->Name,
 			mpo->price, m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
-		database.SetMQDetectionFlag(AccountName(), GetName(), EscapeString(hacker_str), zone->GetShortName());
+		database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
 		safe_delete(outapp);
 		safe_delete(inst);
 		return;
@@ -14024,7 +14072,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			{
 				auto hacker_str = fmt::format("{} attempting to target something untargetable, {} bodytype: {}",
 					GetName(), GetTarget()->GetName(), (int)GetTarget()->GetBodyType());
-				database.SetMQDetectionFlag(AccountName(), GetName(), EscapeString(hacker_str), zone->GetShortName());
+				database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
 				SetTarget((Mob*)nullptr);
 				return;
 			}
@@ -14061,7 +14109,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 						    (zone->newzone_data.maxclip * zone->newzone_data.maxclip), GetX(),
 						    GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
 						    GetTarget()->GetY(), GetTarget()->GetZ());
-						database.SetMQDetectionFlag(AccountName(), GetName(), EscapeString(hacker_str), zone->GetShortName());
+						database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
 						SetTarget(nullptr);
 						return;
 					}
@@ -14075,7 +14123,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 						GetName(), (zone->newzone_data.maxclip * zone->newzone_data.maxclip),
 						GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
 						GetTarget()->GetY(), GetTarget()->GetZ());
-				database.SetMQDetectionFlag(AccountName(), GetName(), EscapeString(hacker_str), zone->GetShortName());
+				database.SetMQDetectionFlag(AccountName(), GetName(), Strings::Escape(hacker_str), zone->GetShortName());
 				SetTarget(nullptr);
 				return;
 			}
@@ -14457,6 +14505,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 			if (!TradeItemsValid) {
 				Trader_EndTrader();
+				safe_delete(gis);
 				return;
 			}
 
@@ -15384,7 +15433,7 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
 
 	if (!GetTaskState()->HasActiveSharedTask()) {
 		// this message is generated client-side in newer clients
-		Message(Chat::System, SharedTaskMessage::GetEQStr(SharedTaskMessage::COULD_NOT_USE_COMMAND));
+		Message(Chat::System, TaskStr::Get(TaskStr::COULD_NOT_USE_COMMAND));
 	}
 	else {
 		// struct
@@ -15516,8 +15565,13 @@ void Client::Handle_OP_SharedTaskAccept(const EQApplicationPacket* app)
 		buf->task_id
 	);
 
-	if (buf->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state) {
-		task_state->AcceptNewTask(this, buf->task_id, buf->npc_entity_id, std::time(nullptr));
+	if (buf->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state)
+	{
+		if (task_state->CanAcceptNewTask(this, buf->task_id, buf->npc_entity_id))
+		{
+			task_state->AcceptNewTask(this, buf->task_id, buf->npc_entity_id, std::time(nullptr));
+		}
+		task_state->ClearLastOffers();
 	}
 }
 
@@ -15556,4 +15610,24 @@ int64 Client::GetSharedTaskId() const
 void Client::SetSharedTaskId(int64 shared_task_id)
 {
 	Client::m_shared_task_id = shared_task_id;
+}
+
+bool Client::CanTradeFVNoDropItem()
+{
+	const int16 admin_status             = Admin();
+	const int   no_drop_flag             = RuleI(World, FVNoDropFlag);
+	const int   no_drop_min_admin_status = RuleI(Character, MinStatusForNoDropExemptions);
+	switch (no_drop_flag) {
+		case FVNoDropFlagRule::Disabled:
+			return false;
+		case FVNoDropFlagRule::Enabled:
+			return true;
+		case FVNoDropFlagRule::AdminOnly:
+			return admin_status >= no_drop_min_admin_status;
+		default:
+			LogWarning("Invalid value {0} set for FVNoDropFlag", no_drop_flag);
+			return false;
+	}
+
+	return false;
 }

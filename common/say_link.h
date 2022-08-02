@@ -127,4 +127,9 @@ namespace EQ
 
 } /*EQEmu*/
 
+class Saylink {
+public:
+	static std::string Create(std::string saylink_text, bool silent, std::string link_name);
+};
+
 #endif /*COMMON_SAY_LINK_H*/

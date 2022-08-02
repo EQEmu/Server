@@ -34,7 +34,7 @@
 #include "../common/features.h"
 #include "../common/rulesys.h"
 #include "../common/seperator.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 
 #include "expedition.h"
@@ -433,10 +433,10 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 					ml.origslot = ml.slot;
 				}
 				if (ml.charges > 0) {
-					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
+					database.SaveMerchantTemp(npcid, ml.origslot, GetZoneID(), GetInstanceID(), item, ml.charges);
 					tmp_merlist.push_back(ml);
 				} else {
-					database.DeleteMerchantTemp(npcid, ml.origslot);
+					database.DeleteMerchantTemp(npcid, ml.origslot, GetZoneID(), GetInstanceID());
 				}
 			}
 		}
@@ -494,7 +494,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 
 		first_empty_mslot = idx;
 
-		database.SaveMerchantTemp(npcid, first_empty_slot, item, charges);
+		database.SaveMerchantTemp(npcid, first_empty_slot, GetZoneID(), GetInstanceID(), item, charges);
 		tmp_merlist = tmpmerchanttable[npcid];
 		TempMerchantList ml2;
 		ml2.charges = charges;
@@ -565,8 +565,11 @@ void Zone::LoadTempMerchantData()
 				itemid
 				FROM merchantlist_temp
 				WHERE npcid IN ({})
+				AND zone_id = {}
+				AND instance_id = {}
 			),
-			implode(", ", npc_ids)
+			Strings::Implode(", ", npc_ids),
+			GetZoneID(), GetInstanceID()
 		)
 	);
 
@@ -1191,6 +1194,8 @@ bool Zone::Init(bool is_static) {
 
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
+
+	LoadDynamicZoneTemplates();
 
 	LogInfo("Loading dynamic zones");
 	DynamicZone::CacheAllFromDatabase();
@@ -2799,7 +2804,9 @@ void Zone::SendDiscordMessage(int webhook_id, const std::string& message)
 void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string &message)
 {
 	bool not_found = true;
-	for (auto & w : LogSys.discord_webhooks) {
+
+	for (int i= 0; i < MAX_DISCORD_WEBHOOK_ID; i++) {
+		auto &w = LogSys.GetDiscordWebhooks()[i];
 		if (w.webhook_name == webhook_name) {
 			SendDiscordMessage(w.id, message + "\n");
 			not_found = false;
@@ -2808,5 +2815,15 @@ void Zone::SendDiscordMessage(const std::string& webhook_name, const std::string
 
 	if (not_found) {
 		LogDiscord("[SendDiscordMessage] Did not find valid webhook by webhook name [{}]", webhook_name);
+	}
+}
+
+void Zone::LoadDynamicZoneTemplates()
+{
+	dz_template_cache.clear();
+	auto dz_templates = DynamicZoneTemplatesRepository::All(content_db);
+	for (const auto& dz_template : dz_templates)
+	{
+		dz_template_cache[dz_template.id] = dz_template;
 	}
 }

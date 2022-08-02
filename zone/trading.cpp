@@ -19,7 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 
 #include "client.h"
@@ -499,7 +499,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					LogTrading("Giving container [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
-					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
+					if (
+						inst->GetItem()->NoDrop != 0 ||
+						CanTradeFVNoDropItem() ||
+						other == this
+					) {
 						int16 free_slot = other->GetInv().FindFreeSlotForTradeItem(inst);
 
 						if (free_slot != INVALID_INDEX) {
@@ -717,7 +721,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					LogTrading("Giving item [{}] ([{}]) in slot [{}] to [{}]", inst->GetItem()->Name, inst->GetItem()->ID, trade_slot, other->GetName());
 
 					// TODO: need to check bag items/augments for no drop..everything for attuned...
-					if (inst->GetItem()->NoDrop != 0 || Admin() >= RuleI(Character, MinStatusForNoDropExemptions) || RuleI(World, FVNoDropFlag) == 1 || other == this) {
+					if (inst->GetItem()->NoDrop != 0 || CanTradeFVNoDropItem() || other == this) {
 						int16 free_slot = other->GetInv().FindFreeSlotForTradeItem(inst);
 
 						if (free_slot != INVALID_INDEX) {
@@ -876,7 +880,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			quest_npc = true;
 		}
 
-		std::vector<EQ::Any> item_list;
+		std::vector<std::any> item_list;
 		std::list<EQ::ItemInstance*> items;
 		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; ++i) {
 			EQ::ItemInstance *inst = m_inv.GetItem(i);
@@ -1078,6 +1082,7 @@ void Client::Trader_CustomerBrowsing(Client *Customer) {
 	sis->TraderID = Customer->GetID();
 
 	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 
@@ -1151,8 +1156,8 @@ void Client::Trader_EndTrader() {
 			}
 
 			safe_delete(outapp);
-			safe_delete(gis);
 		}
+		safe_delete(gis);
 	}
 
 	database.DeleteTraderItem(CharacterID());
@@ -2584,6 +2589,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
 
 		QueuePacket(outapp);
+		safe_delete(outapp);
     }
 }
 

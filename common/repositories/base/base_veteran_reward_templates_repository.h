@@ -13,7 +13,7 @@
 #define EQEMU_BASE_VETERAN_REWARD_TEMPLATES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
 #include <ctime>
 
 class BaseVeteranRewardTemplatesRepository {
@@ -55,12 +55,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
 	static std::string SelectColumnsRaw()
 	{
-		return std::string(implode(", ", SelectColumns()));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -169,7 +169,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(veteran_reward_templates_entry.claim_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(veteran_reward_templates_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(veteran_reward_templates_entry.item_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(veteran_reward_templates_entry.charges));
 		update_values.push_back(columns[4] + " = " + std::to_string(veteran_reward_templates_entry.reward_slot));
@@ -178,7 +178,7 @@ public:
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", update_values),
 				PrimaryKey(),
 				veteran_reward_templates_entry.claim_id
 			)
@@ -195,7 +195,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.claim_id));
-		insert_values.push_back("'" + EscapeString(veteran_reward_templates_entry.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.item_id));
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.charges));
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.reward_slot));
@@ -204,7 +204,7 @@ public:
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", insert_values)
 			)
 		);
 
@@ -229,12 +229,12 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.claim_id));
-			insert_values.push_back("'" + EscapeString(veteran_reward_templates_entry.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.item_id));
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.charges));
 			insert_values.push_back(std::to_string(veteran_reward_templates_entry.reward_slot));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
@@ -243,7 +243,7 @@ public:
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 

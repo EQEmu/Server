@@ -50,6 +50,20 @@ enum class TaskTimerType
 	Request
 };
 
+// live alt currency types, may not match current server alternate currency ids
+enum class AltCurrencyType
+{
+	RadiantCrystal       = 4,
+	EbonCrystal          = 5,
+	MarkOfValor          = 31,
+	CommemorativeCoin    = 33,
+	PieceOfEight         = 37,
+	RemnantOfTranquility = 38,
+	SathirTradeGem       = 41,
+	BathezidTradeGem     = 43,
+	FroststoneDucat      = 48,
+};
+
 struct ActivityInformation {
 	int              step_number;
 	TaskActivityType activity_type;
@@ -67,14 +81,17 @@ struct ActivityInformation {
 	int              deliver_to_npc;
 	std::vector<int> zone_ids;
 	std::string      zones; // IDs ; separated, ZoneID is the first in this list for older clients -- default empty string, max length 64
+	int              zone_version;
 	bool             optional;
 
-	inline bool CheckZone(int zone_id)
+	inline bool CheckZone(int zone_id, int version)
 	{
 		if (zone_ids.empty()) {
 			return true;
 		}
-		return std::find(zone_ids.begin(), zone_ids.end(), zone_id) != zone_ids.end();
+		bool found_zone = std::find(zone_ids.begin(), zone_ids.end(), zone_id) != zone_ids.end();
+
+		return found_zone && (zone_version == version || zone_version == -1);
 	}
 
 	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const
@@ -146,7 +163,7 @@ struct ActivityInformation {
 			out.WriteInt32(zone_ids.empty() ? 0 : zone_ids.front());
 		}
 
-		out.WriteInt32(0); // unknown id
+		out.WriteInt32(activity_type == TaskActivityType::Touch ? goal_id : 0); // dz_switch_id (maybe add separate field)
 		out.WriteString(description_override);
 		out.WriteInt32(done_count);
 		out.WriteInt8(1); // unknown
@@ -195,8 +212,8 @@ struct TaskInformation {
 	int                 experience_reward{};
 	int                 faction_reward{};   // just a npc_faction_id
 	TaskMethodType      reward_method;
-	int                 reward_radiant_crystals;
-	int                 reward_ebon_crystals;
+	int                 reward_points;
+	AltCurrencyType     reward_point_type;
 	int                 activity_count{};
 	SequenceType        sequence_mode;
 	int                 last_step{};
@@ -206,7 +223,9 @@ struct TaskInformation {
 	int                 min_players;
 	int                 max_players;
 	bool                repeatable{};
+	int                 replay_timer_group;
 	int                 replay_timer_seconds;
+	int                 request_timer_group;
 	int                 request_timer_seconds;
 	ActivityInformation activity_information[MAXACTIVITIESPERTASK];
 
@@ -254,6 +273,7 @@ struct ClientTaskInformation {
 	int                       current_step;
 	int                       accepted_time;
 	bool                      updated;
+	bool                      was_rewarded; // character has received reward for this task
 	ClientActivityInformation activity[MAXACTIVITIESPERTASK];
 };
 
@@ -324,15 +344,15 @@ namespace Tasks {
 	}
 }
 
-namespace SharedTaskMessage {
-	constexpr uint16 TASK_ASSIGN_WAIT_REPLAY_TIMER                     = 8017; // This task can not be assigned to you because you must wait %1d:%2h:%3m before you can do another task of this type.
+namespace TaskStr {
+	constexpr uint16 ASSIGN_REPLAY_TIMER                               = 8017; // This task can not be assigned to you because you must wait %1d:%2h:%3m before you can do another task of this type.
 	constexpr uint16 COULD_NOT_USE_COMMAND                             = 8272; // You could not use this command because you are not currently assigned to a shared task.
-	constexpr uint16 AVG_LVL_LOW                                       = 8553; // You can not be assigned this shared task because your party's average level is too low.
-	constexpr uint16 AVG_LVL_HIGH                                      = 8889; // You can not be assigned this shared task because your party's average level is too high.
+	constexpr uint16 LVL_TOO_LOW                                       = 8553; // You can not be assigned this shared task because your party's average level is too low.
+	constexpr uint16 LVL_TOO_HIGH                                      = 8889; // You can not be assigned this shared task because your party's average level is too high.
 	constexpr uint16 LVL_SPREAD_HIGH                                   = 8890; // You can not be assigned this shared task because your party's level spread is too high.
-	constexpr uint16 PARTY_EXCEED_MAX_PLAYER                           = 8891; // You can not be assigned this shared task because your party exceeds the maximum allowed number of players.
+	constexpr uint16 MAX_PLAYERS                                       = 8891; // You can not be assigned this shared task because your party exceeds the maximum allowed number of players.
 	constexpr uint16 LEADER_NOT_MEET_REQUIREMENTS                      = 8892; // You can not be assigned this shared task because the leader does not meet the shared task requirements.
-	constexpr uint16 SHARED_TASK_NOT_MEET_MIN_NUM_PLAYER               = 8895; // You can not be assigned this shared task because your party does not contain the minimum required number of players.
+	constexpr uint16 MIN_PLAYERS                                       = 8895; // You can not be assigned this shared task because your party does not contain the minimum required number of players.
 	constexpr uint16 WILL_REMOVE_ZONE_TWO_MIN_RAID_NOT_MIN_NUM_PLAYER  = 8908; // %1 will be removed from their zone in two minutes because your raid does not meet the minimum requirement of qualified players.
 	constexpr uint16 WILL_REMOVE_ZONE_TWO_MIN_GROUP_NOT_MIN_NUM_PLAYER = 8909; // %1 will be removed from their zone in two minutes because your group does not meet the minimum requirement of qualified players.
 	constexpr uint16 WILL_REMOVE_AREA_TWO_MIN_RAID_NOT_MIN_NUM_PLAYER  = 8910; // %1 will be removed from their area in two minutes because your raid does not meet the minimum requirement of qualified players.
@@ -343,12 +363,12 @@ namespace SharedTaskMessage {
 	constexpr uint16 HAS_REMOVED_AREA_TWO_MIN_GROUP_NOT_MIN_NUM_PLAYER = 8915; // %1 has been removed from their area because your group does not meet the minimum requirement of qualified players.
 	constexpr uint16 SEND_INVITE_TO                                    = 8916; // Sending a shared task invitation to %1.
 	constexpr uint16 COULD_NOT_BE_INVITED                              = 8917; // %1 could not be invited to join you.
-	constexpr uint16 YOU_ARE_NOT_LEADER_COMMAND_ISSUE                  = 8919; // You are not the shared task leader.  Only %1 can issue this command.
+	constexpr uint16 NOT_LEADER                                        = 8919; // You are not the shared task leader.  Only %1 can issue this command.
 	constexpr uint16 SWAP_SENDING_INVITATION_TO                        = 8920; // Sending an invitation to: %1.  They must accept in order to swap party members.
 	constexpr uint16 SWAP_ACCEPTED_OFFER                               = 8921; // %1 has accepted your offer to join your shared task.  Swapping %1 for %2.
 	constexpr uint16 IS_NOT_MEMBER                                     = 8922; // %1 is not a member of this shared task.
 	constexpr uint16 NOT_ALLOW_PLAYER_REMOVE                           = 8923; // The shared task is not allowing players to be removed from it at this time.
-	constexpr uint16 PLAYER_HAS_BEEN_REMOVED                           = 8924; // %1 has been removed from your shared task, '%2'.
+	constexpr uint16 PLAYER_REMOVED                                    = 8924; // %1 has been removed from your shared task, '%2'.
 	constexpr uint16 TRANSFER_LEADERSHIP_NOT_ONLINE                    = 8925; // %1 is not currently online.  You can only transfer leadership to an online member of the shared task.
 	constexpr uint16 MADE_LEADER                                       = 8926; // %1 has been made the leader for this shared task.
 	constexpr uint16 YOU_MADE_LEADER                                   = 8927; // You have been made the leader of this shared task.
@@ -356,43 +376,43 @@ namespace SharedTaskMessage {
 	constexpr uint16 MEMBERS_PRINT                                     = 8929; // Shared Task Members: %1
 	constexpr uint16 PLAYER_ACCEPTED_OFFER_JOIN                        = 8930; // %1 has accepted your offer to join your shared task.
 	constexpr uint16 PLAYER_HAS_BEEN_ADDED                             = 8931; // %1 has been added to your shared task, '%2'.
-	constexpr uint16 ACCEPTED_OFFER_TO_JOIN_BUT_COULD_NOT              = 8932; // %1 accepted your offer to join your shared task but could not.
+	constexpr uint16 COULD_NOT_JOIN                                    = 8932; // %1 accepted your offer to join your shared task but could not.
 	constexpr uint16 PLAYER_DECLINED_OFFER                             = 8933; // %1 has declined your offer to join your shared task.
 	constexpr uint16 PLAYER_HAS_ASKED_YOU_TO_JOIN                      = 8934; // %1 has asked you to join the shared task '%2'.        Would you like to join?
-	constexpr uint16 NO_REQUEST_BECAUSE_HAVE_ONE                       = 8935; // You may not request a shared task because you already have one.
-	constexpr uint16 NO_REQUEST_BECAUSE_RAID_HAS_ONE                   = 8936; // You may not request a shared task because someone in your raid, %1, already has one.
-	constexpr uint16 NO_REQUEST_BECAUSE_GROUP_HAS_ONE                  = 8937; // You may not request a shared task because someone in your group, %1, already has one.
-	constexpr uint16 YOU_DO_NOT_MEET_REQ_AVAILABLE                     = 8938; // You do not meet the requirements for any available shared tasks.
+	constexpr uint16 REQUEST_HAVE                                      = 8935; // You may not request a shared task because you already have one.
+	constexpr uint16 REQUEST_RAID_HAS                                  = 8936; // You may not request a shared task because someone in your raid, %1, already has one.
+	constexpr uint16 REQUEST_GROUP_HAS                                 = 8937; // You may not request a shared task because someone in your group, %1, already has one.
+	constexpr uint16 NOT_MEET_REQ                                      = 8938; // You do not meet the requirements for any available shared tasks.
 	constexpr uint16 YOUR_RAID_DOES_NOT_MEET_REQ                       = 8939; // Your raid does not meet the requirements for any available shared tasks.
 	constexpr uint16 YOUR_GROUP_DOES_NOT_MEET_REQ                      = 8940; // Your group does not meet the requirements for any available shared tasks.
 	constexpr uint16 YOUR_GROUP__RAID_DOES_NOT_MEET_REQ                = 8941; // You can not be assigned this shared task because the raid or group does not meet the shared task requirements.
-	constexpr uint16 YOU_NO_LONGER_MEMBER                              = 8942; // You are no longer a member of the shared task.
+	constexpr uint16 NO_LONGER_MEMBER                                  = 8942; // You are no longer a member of the shared task.
 	constexpr uint16 YOU_MAY_NOT_REQUEST_EXPANSION                     = 8943; // You may not request this shared task because you do not have the required expansion.
 	constexpr uint16 PLAYER_MAY_NOT_REQUEST_EXPANSION                  = 8944; // You may not request this shared task because %1 does not have the required expansion.
-	constexpr uint16 TWO_MIN_REQ_TASK_TERMINATED                       = 8945; // If your party does not meet the requirements in two minutes, the shared task will be terminated.
-	constexpr uint16 YOU_MUST_WAIT_REPLAY_TIMER                        = 8946; // You may not request this shared task because you must wait %1d:%2h:%3m before you can do another task of this type.
-	constexpr uint16 PLAYER_MUST_WAIT_REPLAY_TIMER                     = 8947; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can do another task of this type.
+	constexpr uint16 REQS_TWO_MIN                                      = 8945; // If your party does not meet the requirements in two minutes, the shared task will be terminated.
+	constexpr uint16 YOU_REPLAY_TIMER                                  = 8946; // You may not request this shared task because you must wait %1d:%2h:%3m before you can do another task of this type.
+	constexpr uint16 PLAYER_REPLAY_TIMER                               = 8947; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can do another task of this type.
 	constexpr uint16 PLAYER_NOW_LEADER                                 = 8948; // %1 is now the leader of your shared task, '%2'.
 	constexpr uint16 HAS_ENDED                                         = 8951; // Your shared task, '%1', has ended.
 	constexpr uint16 YOU_ALREADY_LEADER                                = 8952; // You are already the leader of the shared task.
 	constexpr uint16 TASK_NO_LONGER_ACTIVE                             = 8953; // Your shared task, '%1', is no longer active.
 	constexpr uint16 YOU_HAVE_BEEN_ADDED_TO_TASK                       = 8954; // You have been added to the shared task '%1'.
 	constexpr uint16 YOU_ARE_NOW_LEADER                                = 8955; // You are now the leader of your shared task, '%1'.
-	constexpr uint16 YOU_HAVE_BEEN_REMOVED                             = 8956; // You have been removed from the shared task '%1'.
-	constexpr uint16 YOU_ARE_NO_LONGER_A_MEMBER                        = 8960; // You are no longer a member of the shared task, '%1'.
-	constexpr uint16 YOUR_TASK_NOW_LOCKED                              = 8961; // Your shared task is now locked.  You may no longer add or remove players.
-	constexpr uint16 TASK_NOT_ALLOWING_PLAYERS_AT_TIME                 = 8962; // The shared task is not allowing players to be added at this time.
-	constexpr uint16 PLAYER_NOT_ONLINE_TO_ADD                          = 8963; // %1 is not currently online.  A player needs to be online to be added to a shared task.
-	constexpr uint16 CANT_ADD_PLAYER_ALREADY_MEMBER                    = 8964; // You can not add %1 because they are already a member of this shared task.
-	constexpr uint16 CANT_ADD_PLAYER_ALREADY_ASSIGNED                  = 8965; // You can not add %1 because they are already assigned to another shared task.
-	constexpr uint16 PLAYER_ALREADY_OUTSTANDING_INVITATION_THIS        = 8966; // %1 already has an outstanding invitation to join this shared task.
-	constexpr uint16 PLAYER_ALREADY_OUTSTANDING_ANOTHER                = 8967; // %1 already has an outstanding invitation to join another shared task.  Players may only have one invitation outstanding.
-	constexpr uint16 CANT_ADD_PLAYER_MAX_PLAYERS                       = 8968; // You can not add another player since you currently have the maximum number of players allowed (%1) in this shared task.
-	constexpr uint16 CANT_ADD_PLAYER_MAX_LEVEL_SPREAD                  = 8969; // You can not add this player because you would exceed the maximum level spread (%1) for this shared task.
-	constexpr uint16 CANT_ADD_PLAYER_MAX_AVERAGE_LEVEL                 = 8970; // You can not add this player because you would exceed the maximum average level for this shared task.
-	constexpr uint16 CANT_ADD_PLAYER_FALL_MIN_AVG_LEVEL                = 8971; // You can not add this player because you would fall below the minimum average level for this shared task.
+	constexpr uint16 YOU_REMOVED                                       = 8956; // You have been removed from the shared task '%1'.
+	constexpr uint16 NO_LONGER_MEMBER_TITLE                            = 8960; // You are no longer a member of the shared task, '%1'.
+	constexpr uint16 TASK_LOCKED                                       = 8961; // Your shared task is now locked.  You may no longer add or remove players.
+	constexpr uint16 NOT_ALLOWING_PLAYERS                              = 8962; // The shared task is not allowing players to be added at this time.
+	constexpr uint16 PLAYER_NOT_ONLINE                                 = 8963; // %1 is not currently online.  A player needs to be online to be added to a shared task.
+	constexpr uint16 PLAYER_ALREADY_MEMBER                             = 8964; // You can not add %1 because they are already a member of this shared task.
+	constexpr uint16 PLAYER_ALREADY_ASSIGNED                           = 8965; // You can not add %1 because they are already assigned to another shared task.
+	constexpr uint16 PLAYER_INVITED                                    = 8966; // %1 already has an outstanding invitation to join this shared task.
+	constexpr uint16 PLAYER_INVITED_OTHER                              = 8967; // %1 already has an outstanding invitation to join another shared task.  Players may only have one invitation outstanding.
+	constexpr uint16 CANT_ADD_MAX_PLAYERS                              = 8968; // You can not add another player since you currently have the maximum number of players allowed (%1) in this shared task.
+	constexpr uint16 CANT_ADD_LVL_SPREAD                               = 8969; // You can not add this player because you would exceed the maximum level spread (%1) for this shared task.
+	constexpr uint16 CANT_ADD_MAX_LEVEL                                = 8970; // You can not add this player because you would exceed the maximum average level for this shared task.
+	constexpr uint16 CANT_ADD_MIN_LEVEL                                = 8971; // You can not add this player because you would fall below the minimum average level for this shared task.
 	constexpr uint16 PLAYER_DOES_NOT_OWN_EXPANSION                     = 8972; // %1 does not own the expansion needed for this shared task.
-	constexpr uint16 CANT_ADD_PLAYER_PARTY_FILTER_REQ_FOR_TASK         = 8973; // You can not add this player because your party would no longer meet the filter requirements for this shared task.
+	constexpr uint16 CANT_ADD_FILTER_REQS                              = 8973; // You can not add this player because your party would no longer meet the filter requirements for this shared task.
 	constexpr uint16 CANT_ADD_PLAYER_ONE_OF_GROUP_RAID_HAS_TASK        = 8977; // You can not add %1 because they or one of their group or raid members is in another shared task.
 	constexpr uint16 CANT_JOIN_GROUP_ACTIVE_TASK                       = 8978; // You can not join that group because you have an active shared task.
 	constexpr uint16 CANT_ADD_PLAYER_REPLAY_TIMER                      = 8979; // You may not add %1 because they must wait %2d:%3h:%4m before they can do another task of this type.
@@ -403,40 +423,48 @@ namespace SharedTaskMessage {
 	constexpr uint16 PLAYER_CANT_ADD_RAID_BECAUSE_DIFF_TASK            = 8984; // %1 can not be added to the raid because they are in a different shared task.
 	constexpr uint16 YOU_CANT_ADD_RAID_BECAUSE_DIFF_TASK               = 8985; // You can not be added to the raid because you are in a different shared task.
 	constexpr uint16 REPLAY_TIMER_REMAINING                            = 8987; // '%1' replay timer:  %2d:%3h:%4m remaining.
-	constexpr uint16 YOU_NO_CURRENT_REPLAY_TIMERS                      = 8989; // You do not currently have any task replay timers.
+	constexpr uint16 NO_REPLAY_TIMERS                                  = 8989; // You do not currently have any task replay timers.
 	constexpr uint16 SURE_QUIT_TASK                                    = 8995; // Are you sure you want to quit the task '%1'?
 	constexpr uint16 SURE_REMOVE_SELF_FROM_TASK                        = 8996; // Are you sure you want to remove yourself from the shared task '%1'
-	constexpr uint16 TASK_ASSIGN_WAIT_REQUEST_TIMER                    = 14506; // This task can not be assigned to you because you must wait %1d:%2h:%3m before you can request another task of this type.
+	constexpr uint16 ASSIGN_REQUEST_TIMER                              = 14506; // This task can not be assigned to you because you must wait %1d:%2h:%3m before you can request another task of this type.
 	constexpr uint16 REQUEST_TIMER_REMAINING                           = 14507; // '%1' request timer:  %2d:%3h:%4m remaining.
-	constexpr uint16 YOU_MUST_WAIT_REQUEST_TIMER                       = 14508; // You may not request this shared task because you must wait %1d:%2h:%3m before you can request another task of this type.
+	constexpr uint16 YOU_REQUEST_TIMER                                 = 14508; // You may not request this shared task because you must wait %1d:%2h:%3m before you can request another task of this type.
 	constexpr uint16 RECEIVED_REQUEST_TIMER                            = 14509; // You have received a request timer for '%1': %2d:%3h:%4m remaining.
 	constexpr uint16 RECEIVED_REPLAY_TIMER                             = 14510; // You have received a replay timer for '%1': %2d:%3h:%4m remaining.
-	constexpr uint16 PLAYER_MUST_WAIT_REQUEST_TIMER                    = 14511; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can request another task of this type.
+	constexpr uint16 PLAYER_REQUEST_TIMER                              = 14511; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can request another task of this type.
 	constexpr uint16 CANT_ADD_PLAYER_REQUEST_TIMER                     = 14512; // You may not add %1 because they must wait %2d:%3h:%4m before they can request another task of this type.
 
 	// for eqstrs not in current emu clients (some are also used by non-shared tasks)
-	constexpr auto GetEQStr(uint16 eqstr_id)
+	constexpr auto Get(uint16 eqstr_id)
 	{
 		switch (eqstr_id)
 		{
-		case SharedTaskMessage::COULD_NOT_USE_COMMAND:
+		case TaskStr::LVL_TOO_LOW:
+			return "You can not be assigned this shared task because your party's minimum level is too low.";
+		case TaskStr::LVL_TOO_HIGH:
+			return "You can not be assigned this shared task because your party's maximum level is too high.";
+		case TaskStr::COULD_NOT_USE_COMMAND:
 			return "You could not use this command because you are not currently assigned to a shared task.";
-		case SharedTaskMessage::TASK_ASSIGN_WAIT_REQUEST_TIMER:
+		case TaskStr::CANT_ADD_MAX_LEVEL:
+			return "You can not add this player because their level exceeds the maximum level limit for this shared task.";
+		case TaskStr::CANT_ADD_MIN_LEVEL:
+			return "You can not add this player because their level is below the minimum required level for this shared task.";
+		case TaskStr::ASSIGN_REQUEST_TIMER:
 			return "This task can not be assigned to you because you must wait {}d:{}h:{}m before you can request another task of this type.";
-		case SharedTaskMessage::REQUEST_TIMER_REMAINING:
+		case TaskStr::REQUEST_TIMER_REMAINING:
 			return "'{}' request timer:  {}d:{}h:{}m remaining.";
-		case SharedTaskMessage::YOU_MUST_WAIT_REQUEST_TIMER:
+		case TaskStr::YOU_REQUEST_TIMER:
 			return "You may not request this shared task because you must wait {}d:{}h:{}m before you can request another task of this type.";
-		case SharedTaskMessage::RECEIVED_REQUEST_TIMER:
+		case TaskStr::RECEIVED_REQUEST_TIMER:
 			return "You have received a request timer for '{}': {}d:{}h:{}m remaining.";
-		case SharedTaskMessage::RECEIVED_REPLAY_TIMER:
+		case TaskStr::RECEIVED_REPLAY_TIMER:
 			return "You have received a replay timer for '{}': {}d:{}h:{}m remaining.";
-		case SharedTaskMessage::PLAYER_MUST_WAIT_REQUEST_TIMER:
+		case TaskStr::PLAYER_REQUEST_TIMER:
 			return "You may not request this shared task because {} must wait {}d:{}h:{}m before they can request another task of this type.";
-		case SharedTaskMessage::CANT_ADD_PLAYER_REQUEST_TIMER:
+		case TaskStr::CANT_ADD_PLAYER_REQUEST_TIMER:
 			return "You may not add {} because they must wait {}d:{}h:{}m before they can request another task of this type.";
 		default:
-			LogTasks("[GetEQStr] Unhandled eqstr id [{}]", eqstr_id);
+			LogTasks("[TaskStr::Get] Unhandled eqstr id [{}]", eqstr_id);
 			break;
 		}
 		return "Unknown EQStr";

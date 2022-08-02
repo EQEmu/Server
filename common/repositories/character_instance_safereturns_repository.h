@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_INSTANCE_SAFERETURNS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_instance_safereturns_repository.h"
 
 class CharacterInstanceSafereturnsRepository: public BaseCharacterInstanceSafereturnsRepository {
@@ -92,7 +92,7 @@ public:
 				safe_heading     = VALUES(safe_heading)
 		),
 			BaseInsert(),
-			implode(",", insert_values)
+			Strings::Implode(",", insert_values)
 		));
 
 		if (results.Success())

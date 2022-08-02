@@ -22,7 +22,7 @@
 #define EQEMU_AA_RANK_PREREQS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_aa_rank_prereqs_repository.h"
 
 class AaRankPrereqsRepository: public BaseAaRankPrereqsRepository {

@@ -22,7 +22,7 @@
 #define EQEMU_BLOCKED_SPELLS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_blocked_spells_repository.h"
 
 class BlockedSpellsRepository: public BaseBlockedSpellsRepository {

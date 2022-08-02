@@ -22,7 +22,7 @@
 #define EQEMU_CHARACTER_EXP_MODIFIERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_exp_modifiers_repository.h"
 
 class CharacterExpModifiersRepository: public BaseCharacterExpModifiersRepository {

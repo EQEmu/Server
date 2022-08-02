@@ -22,7 +22,7 @@
 #define EQEMU_RULE_VALUES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_rule_values_repository.h"
 
 class RuleValuesRepository: public BaseRuleValuesRepository {
