@@ -684,6 +684,11 @@ void Perl__faction(int faction_id, int value)
 	quest_manager.faction(faction_id, value, 0);
 }
 
+void Perl__faction(int faction_id, int value, int temp)
+{
+	quest_manager.faction(faction_id, value, temp);
+}
+
 void Perl__rewardfaction(int faction_id, int value)
 {
 	quest_manager.rewardfaction(faction_id, value);
