@@ -3388,9 +3388,10 @@ void Client::SetHideMe(bool gm_hide_me)
 		CreateDespawnPacket(&app, false);
 		entity_list.RemoveFromTargets(this);
 		trackable = false;
-		tellsoff  = true;
-	}
-	else {
+		if (RuleB(Command, HideMeCommandDisablesTells)) {
+			tellsoff  = true;
+		}
+	} else {
 		database.SetHideMe(AccountID(), false);
 		CreateSpawnPacket(&app);
 		trackable = true;
