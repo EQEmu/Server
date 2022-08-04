@@ -809,6 +809,7 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(Command)
 RULE_BOOL(Command, DyeCommandRequiresDyes, false, "Enable this to require a Prismatic Dye (32557) each time someone uses #dye.")
+RULE_BOOL(Command, HideMeCommandDisablesTells, true, "Disable this to allow tells to be received when using #hideme.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Doors)
