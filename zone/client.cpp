@@ -1193,7 +1193,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
 
 					if(RuleB(TaskSystem, EnableTaskSystem)) {
-						if(UpdateTasksOnSpeakWith(tar->GetNPCTypeID())) {
+						if (UpdateTasksOnSpeakWith(tar)) {
 							tar->DoQuestPause(this);
 						}
 					}
