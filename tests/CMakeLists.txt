@@ -16,6 +16,7 @@ SET(tests_headers
 	memory_mapped_file_test.h
 	string_util_test.h
 	skills_util_test.h
+	task_state_test.h
 )
 
 ADD_EXECUTABLE(tests ${tests_sources} ${tests_headers})

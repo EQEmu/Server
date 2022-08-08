@@ -2,6 +2,8 @@
 #define EQEMU_TASKS_H
 
 #include "serialize_buffer.h"
+#include <algorithm>
+#include <array>
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
@@ -65,7 +67,8 @@ enum class AltCurrencyType
 };
 
 struct ActivityInformation {
-	int              step_number;
+	int              req_activity_id;
+	int              step;
 	TaskActivityType activity_type;
 	std::string      target_name; // name mob, location -- default empty, max length 64
 	std::string      item_list; // likely defaults to empty
@@ -175,11 +178,6 @@ struct ActivityInformation {
 	}
 };
 
-typedef enum {
-	ActivitiesSequential = 0,
-	ActivitiesStepped    = 1
-} SequenceType;
-
 enum class TaskType {
 	Task   = 0,        // can have at max 1
 	Shared = 1,        // can have at max 1
@@ -215,8 +213,6 @@ struct TaskInformation {
 	int                 reward_points;
 	AltCurrencyType     reward_point_type;
 	int                 activity_count{};
-	SequenceType        sequence_mode;
-	int                 last_step{};
 	short               min_level{};
 	short               max_level{};
 	int                 level_spread;
@@ -270,7 +266,6 @@ struct ClientActivityInformation {
 struct ClientTaskInformation {
 	int                       slot; // intrusive, but makes things easier :P
 	int                       task_id;
-	int                       current_step;
 	int                       accepted_time;
 	bool                      updated;
 	bool                      was_rewarded; // character has received reward for this task
@@ -341,6 +336,79 @@ namespace Tasks {
 			default:
 				return "Task";
 		}
+	}
+
+	struct ActiveElements
+	{
+		bool is_task_complete;
+		std::vector<int> active;
+	};
+
+	// Processes task activity states and returns those currently active
+	// It is templated to support the different structs used by zone and world
+	template <typename Td, typename Ts>
+	ActiveElements GetActiveElements(const Td& activity_data, const Ts& activity_states, size_t activity_count)
+	{
+		ActiveElements result;
+		result.is_task_complete = true;
+		result.active.reserve(activity_count);
+
+		std::array<bool, MAXACTIVITIESPERTASK> completed_ids;
+		completed_ids.fill(false);
+		std::fill_n(completed_ids.begin(), activity_count, true);
+
+		bool sequence_mode = true;
+		int current_step = std::numeric_limits<int>::max(); // lowest step not completed
+
+		// fill non-completed elements and find the current task step
+		for (int i = 0; i < activity_count; ++i)
+		{
+			const auto& el = activity_data[i];
+
+			if (activity_states[i].activity_state != ActivityCompleted)
+			{
+				completed_ids[i] = false;
+				current_step = std::min(current_step, el.step);
+				if (!el.optional)
+				{
+					result.is_task_complete = false;
+				}
+			}
+
+			// if all steps are 0 treat each as a separate step (previously called "sequential" mode)
+			if (el.step != 0)
+			{
+				sequence_mode = false;
+			}
+		}
+
+		// fill active elements based on current step and req activity ids
+		bool added_sequence = false;
+		for (int i = 0; i < activity_count; ++i)
+		{
+			const auto& el = activity_data[i];
+
+			if (activity_states[i].activity_state != ActivityCompleted)
+			{
+				bool has_req_id = el.req_activity_id >= 0 && el.req_activity_id < activity_count;
+
+				// if a valid requirement is set then it's active if its req is completed
+				// in non-sequence mode all on current step and optionals in previous steps are active
+				// in sequence mode the first non-complete is active (and any optionals up to it)
+				if ((has_req_id && completed_ids[el.req_activity_id]) ||
+				    (!has_req_id && !sequence_mode && el.step <= current_step) ||
+				    (!has_req_id && sequence_mode && !added_sequence))
+				{
+					result.active.push_back(i);
+					if (!has_req_id && sequence_mode)
+					{
+						added_sequence = !el.optional;
+					}
+				}
+			}
+		}
+
+		return result;
 	}
 }
 
