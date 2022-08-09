@@ -5473,7 +5473,7 @@ int16 Mob::GetSkillReuseTime(uint16 skill)
 	return skill_reduction;
 }
 
-int16 Mob::GetSkillDmgAmt(uint16 skill)
+int Mob::GetSkillDmgAmt(uint16 skill)
 {
 	int skill_dmg = 0;
 
