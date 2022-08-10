@@ -2328,7 +2328,7 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, const std::pair<size_t,
 
 
 /* Bot bot-group functions   */
-bool BotDatabase::QueryBotGroupExistence(const std::string& group_name, bool& extant_flag)
+bool BotDatabase::QueryBotGroupExistence(const std::string& group_name)
 {
 	if (group_name.empty()) {
 		return false;
@@ -2340,15 +2340,9 @@ bool BotDatabase::QueryBotGroupExistence(const std::string& group_name, bool& ex
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return false;
 	}
-
-	if (!results.RowCount()) {
-		return true;
-	}
-
-	extant_flag = true;
 
 	return true;
 }
@@ -2541,13 +2535,8 @@ bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 lea
 		return false;
 	}
 
-	bool extant_flag = false;
-	if (!QueryBotGroupExistence(group_name, extant_flag)) {
+	if (!QueryBotGroupExistence(group_name)) {
 		return false;
-	}
-
-	if (extant_flag) {
-		return true;
 	}
 
 	query = fmt::format(

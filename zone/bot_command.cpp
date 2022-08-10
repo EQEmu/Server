@@ -7021,19 +7021,7 @@ void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	bool extant_flag = false;
-	if (!database.botdb.QueryBotGroupExistence(botgroup_name, extant_flag)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to query bot-group existence for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (extant_flag) {
+	if (database.botdb.QueryBotGroupExistence(botgroup_name)) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -7362,23 +7350,11 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 		return;
 	}
 
-	bool extant_flag = false;
-	if (!database.botdb.QueryBotGroupExistence(botgroup_name, extant_flag)) {
+	if (!database.botdb.QueryBotGroupExistence(botgroup_name)) {
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Failed to query bot-group existence for '{}'.",
-				botgroup_name
-			).c_str()
-		);
-		return;
-	}
-
-	if (!extant_flag) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Bot-group {} does not exist.",
 				botgroup_name
 			).c_str()
 		);
