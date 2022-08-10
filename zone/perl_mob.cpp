@@ -2447,6 +2447,11 @@ void Perl_Mob_ApplySpellBuff(Mob* self, int spell_id, int duration) // @categori
 	self->ApplySpellBuff(spell_id, duration);
 }
 
+int Perl_Mob_GetSkillDmgAmt(Mob* self, uint16 skill_id)
+{
+	return self->GetSkillDmgAmt(skill_id);
+}
+
 #ifdef BOTS
 Bot* Perl_Mob_CastToBot(Mob* self)
 {
@@ -2695,6 +2700,7 @@ void perl_register_mob()
 	package.add("GetSTR", &Perl_Mob_GetSTR);
 	package.add("GetSize", &Perl_Mob_GetSize);
 	package.add("GetSkill", &Perl_Mob_GetSkill);
+	package.add("GetSkillDmgAmt", &Perl_Mob_GetSkillDmgAmt);
 	package.add("GetSkillDmgTaken", &Perl_Mob_GetSkillDmgTaken);
 	package.add("GetSpecialAbility", &Perl_Mob_GetSpecialAbility);
 	package.add("GetSpecialAbilityParam", &Perl_Mob_GetSpecialAbilityParam);
