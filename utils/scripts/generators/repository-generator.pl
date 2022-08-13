@@ -130,8 +130,7 @@ foreach my $table_to_generate (@tables) {
     # These tables don't have a typical schema
     my @table_ignore_list = (
         "character_enabledtasks",
-        "grid",         # Manually created
-        "grid_entries", # Manually created
+        # "grid",         # Manually created
         # "tradeskill_recipe",     # Manually created
         # "character_recipe_list", # Manually created
         "guild_bank",
@@ -260,7 +259,7 @@ foreach my $table_to_generate (@tables) {
         $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name_formatted);
 
         # new entity
-        $default_entries .= sprintf("\t\tentry.%-${longest_column_length}s = %s;\n", $column_name_formatted, $default_value);
+        $default_entries .= sprintf("\t\te.%-${longest_column_length}s = %s;\n", $column_name_formatted, $default_value);
 
         # column names (string)
         $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", format_column_name_for_mysql($column_name));
@@ -273,53 +272,53 @@ foreach my $table_to_generate (@tables) {
 
         # update one
         if ($extra ne "auto_increment") {
-            my $query_value = sprintf('\'" + Strings::Escape(%s_entry.%s) + "\'");', $table_name, $column_name_formatted);
+            my $query_value = sprintf('\'" + Strings::Escape(e.%s) + "\'");', $column_name_formatted);
             if ($data_type =~ /int|float|double|decimal/) {
-                $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name_formatted);
+                $query_value = sprintf('" + std::to_string(e.%s));', $column_name_formatted);
             }
             elsif ($data_type =~ /datetime/) {
-                $query_value = sprintf('FROM_UNIXTIME(" + (%s_entry.%s > 0 ? std::to_string(%s_entry.%s) : "null") + ")");', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
+                $query_value = sprintf('FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")");', $column_name_formatted, $column_name_formatted);
             }
 
             $update_one_entries .= sprintf(
-                "\t\t" . 'update_values.push_back(columns[%s] + " = %s' . "\n",
+                "\t\t" . 'v.push_back(columns[%s] + " = %s' . "\n",
                 $index,
                 $query_value
             );
         }
 
         # insert
-        my $value = sprintf("\"'\" + Strings::Escape(%s_entry.%s) + \"'\"", $table_name, $column_name_formatted);
+        my $value = sprintf("\"'\" + Strings::Escape(e.%s) + \"'\"", $column_name_formatted);
         if ($data_type =~ /int|float|double|decimal/) {
-            $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name_formatted);
+            $value = sprintf('std::to_string(e.%s)', $column_name_formatted);
         }
         elsif ($data_type =~ /datetime/) {
-            $value = sprintf('"FROM_UNIXTIME(" + (%s_entry.%s > 0 ? std::to_string(%s_entry.%s) : "null") + ")"', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
+            $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")"', $column_name_formatted, $column_name_formatted);
         }
 
-        $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
-        $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
+        $insert_one_entries  .= sprintf("\t\tv.push_back(%s);\n", $value);
+        $insert_many_entries .= sprintf("\t\t\tv.push_back(%s);\n", $value);
 
         # find one / all (select)
         if ($data_type =~ /bigint/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
         }
         elsif ($data_type =~ /datetime/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
         }
         elsif ($data_type =~ /int/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
         }
         elsif ($data_type =~ /float|double|decimal/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
         }
         else {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
         }
 
         # print $column_name . "\n";

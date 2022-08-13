@@ -214,60 +214,60 @@ public:
 
 	static CharacterCorpses NewEntity()
 	{
-		CharacterCorpses entry{};
+		CharacterCorpses e{};
 
-		entry.id               = 0;
-		entry.charid           = 0;
-		entry.charname         = "";
-		entry.zone_id          = 0;
-		entry.instance_id      = 0;
-		entry.x                = 0;
-		entry.y                = 0;
-		entry.z                = 0;
-		entry.heading          = 0;
-		entry.time_of_death    = 0;
-		entry.guild_consent_id = 0;
-		entry.is_rezzed        = 0;
-		entry.is_buried        = 0;
-		entry.was_at_graveyard = 0;
-		entry.is_locked        = 0;
-		entry.exp              = 0;
-		entry.size             = 0;
-		entry.level            = 0;
-		entry.race             = 0;
-		entry.gender           = 0;
-		entry.class_           = 0;
-		entry.deity            = 0;
-		entry.texture          = 0;
-		entry.helm_texture     = 0;
-		entry.copper           = 0;
-		entry.silver           = 0;
-		entry.gold             = 0;
-		entry.platinum         = 0;
-		entry.hair_color       = 0;
-		entry.beard_color      = 0;
-		entry.eye_color_1      = 0;
-		entry.eye_color_2      = 0;
-		entry.hair_style       = 0;
-		entry.face             = 0;
-		entry.beard            = 0;
-		entry.drakkin_heritage = 0;
-		entry.drakkin_tattoo   = 0;
-		entry.drakkin_details  = 0;
-		entry.wc_1             = 0;
-		entry.wc_2             = 0;
-		entry.wc_3             = 0;
-		entry.wc_4             = 0;
-		entry.wc_5             = 0;
-		entry.wc_6             = 0;
-		entry.wc_7             = 0;
-		entry.wc_8             = 0;
-		entry.wc_9             = 0;
+		e.id               = 0;
+		e.charid           = 0;
+		e.charname         = "";
+		e.zone_id          = 0;
+		e.instance_id      = 0;
+		e.x                = 0;
+		e.y                = 0;
+		e.z                = 0;
+		e.heading          = 0;
+		e.time_of_death    = 0;
+		e.guild_consent_id = 0;
+		e.is_rezzed        = 0;
+		e.is_buried        = 0;
+		e.was_at_graveyard = 0;
+		e.is_locked        = 0;
+		e.exp              = 0;
+		e.size             = 0;
+		e.level            = 0;
+		e.race             = 0;
+		e.gender           = 0;
+		e.class_           = 0;
+		e.deity            = 0;
+		e.texture          = 0;
+		e.helm_texture     = 0;
+		e.copper           = 0;
+		e.silver           = 0;
+		e.gold             = 0;
+		e.platinum         = 0;
+		e.hair_color       = 0;
+		e.beard_color      = 0;
+		e.eye_color_1      = 0;
+		e.eye_color_2      = 0;
+		e.hair_style       = 0;
+		e.face             = 0;
+		e.beard            = 0;
+		e.drakkin_heritage = 0;
+		e.drakkin_tattoo   = 0;
+		e.drakkin_details  = 0;
+		e.wc_1             = 0;
+		e.wc_2             = 0;
+		e.wc_3             = 0;
+		e.wc_4             = 0;
+		e.wc_5             = 0;
+		e.wc_6             = 0;
+		e.wc_7             = 0;
+		e.wc_8             = 0;
+		e.wc_9             = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterCorpses GetCharacterCorpsesEntry(
+	static CharacterCorpses GetCharacterCorpses(
 		const std::vector<CharacterCorpses> &character_corpsess,
 		int character_corpses_id
 	)
@@ -296,57 +296,57 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterCorpses entry{};
+			CharacterCorpses e{};
 
-			entry.id               = atoi(row[0]);
-			entry.charid           = atoi(row[1]);
-			entry.charname         = row[2] ? row[2] : "";
-			entry.zone_id          = atoi(row[3]);
-			entry.instance_id      = atoi(row[4]);
-			entry.x                = static_cast<float>(atof(row[5]));
-			entry.y                = static_cast<float>(atof(row[6]));
-			entry.z                = static_cast<float>(atof(row[7]));
-			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
-			entry.guild_consent_id = atoi(row[10]);
-			entry.is_rezzed        = atoi(row[11]);
-			entry.is_buried        = atoi(row[12]);
-			entry.was_at_graveyard = atoi(row[13]);
-			entry.is_locked        = atoi(row[14]);
-			entry.exp              = atoi(row[15]);
-			entry.size             = atoi(row[16]);
-			entry.level            = atoi(row[17]);
-			entry.race             = atoi(row[18]);
-			entry.gender           = atoi(row[19]);
-			entry.class_           = atoi(row[20]);
-			entry.deity            = atoi(row[21]);
-			entry.texture          = atoi(row[22]);
-			entry.helm_texture     = atoi(row[23]);
-			entry.copper           = atoi(row[24]);
-			entry.silver           = atoi(row[25]);
-			entry.gold             = atoi(row[26]);
-			entry.platinum         = atoi(row[27]);
-			entry.hair_color       = atoi(row[28]);
-			entry.beard_color      = atoi(row[29]);
-			entry.eye_color_1      = atoi(row[30]);
-			entry.eye_color_2      = atoi(row[31]);
-			entry.hair_style       = atoi(row[32]);
-			entry.face             = atoi(row[33]);
-			entry.beard            = atoi(row[34]);
-			entry.drakkin_heritage = atoi(row[35]);
-			entry.drakkin_tattoo   = atoi(row[36]);
-			entry.drakkin_details  = atoi(row[37]);
-			entry.wc_1             = atoi(row[38]);
-			entry.wc_2             = atoi(row[39]);
-			entry.wc_3             = atoi(row[40]);
-			entry.wc_4             = atoi(row[41]);
-			entry.wc_5             = atoi(row[42]);
-			entry.wc_6             = atoi(row[43]);
-			entry.wc_7             = atoi(row[44]);
-			entry.wc_8             = atoi(row[45]);
-			entry.wc_9             = atoi(row[46]);
+			e.id               = atoi(row[0]);
+			e.charid           = atoi(row[1]);
+			e.charname         = row[2] ? row[2] : "";
+			e.zone_id          = atoi(row[3]);
+			e.instance_id      = atoi(row[4]);
+			e.x                = static_cast<float>(atof(row[5]));
+			e.y                = static_cast<float>(atof(row[6]));
+			e.z                = static_cast<float>(atof(row[7]));
+			e.heading          = static_cast<float>(atof(row[8]));
+			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
+			e.guild_consent_id = atoi(row[10]);
+			e.is_rezzed        = atoi(row[11]);
+			e.is_buried        = atoi(row[12]);
+			e.was_at_graveyard = atoi(row[13]);
+			e.is_locked        = atoi(row[14]);
+			e.exp              = atoi(row[15]);
+			e.size             = atoi(row[16]);
+			e.level            = atoi(row[17]);
+			e.race             = atoi(row[18]);
+			e.gender           = atoi(row[19]);
+			e.class_           = atoi(row[20]);
+			e.deity            = atoi(row[21]);
+			e.texture          = atoi(row[22]);
+			e.helm_texture     = atoi(row[23]);
+			e.copper           = atoi(row[24]);
+			e.silver           = atoi(row[25]);
+			e.gold             = atoi(row[26]);
+			e.platinum         = atoi(row[27]);
+			e.hair_color       = atoi(row[28]);
+			e.beard_color      = atoi(row[29]);
+			e.eye_color_1      = atoi(row[30]);
+			e.eye_color_2      = atoi(row[31]);
+			e.hair_style       = atoi(row[32]);
+			e.face             = atoi(row[33]);
+			e.beard            = atoi(row[34]);
+			e.drakkin_heritage = atoi(row[35]);
+			e.drakkin_tattoo   = atoi(row[36]);
+			e.drakkin_details  = atoi(row[37]);
+			e.wc_1             = atoi(row[38]);
+			e.wc_2             = atoi(row[39]);
+			e.wc_3             = atoi(row[40]);
+			e.wc_4             = atoi(row[41]);
+			e.wc_5             = atoi(row[42]);
+			e.wc_6             = atoi(row[43]);
+			e.wc_7             = atoi(row[44]);
+			e.wc_8             = atoi(row[45]);
+			e.wc_9             = atoi(row[46]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -371,67 +371,67 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterCorpses character_corpses_entry
+		const CharacterCorpses &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_corpses_entry.charid));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(character_corpses_entry.charname) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(character_corpses_entry.zone_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_corpses_entry.instance_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_corpses_entry.x));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_corpses_entry.y));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_corpses_entry.z));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_corpses_entry.heading));
-		update_values.push_back(columns[9] + " = FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
-		update_values.push_back(columns[10] + " = " + std::to_string(character_corpses_entry.guild_consent_id));
-		update_values.push_back(columns[11] + " = " + std::to_string(character_corpses_entry.is_rezzed));
-		update_values.push_back(columns[12] + " = " + std::to_string(character_corpses_entry.is_buried));
-		update_values.push_back(columns[13] + " = " + std::to_string(character_corpses_entry.was_at_graveyard));
-		update_values.push_back(columns[14] + " = " + std::to_string(character_corpses_entry.is_locked));
-		update_values.push_back(columns[15] + " = " + std::to_string(character_corpses_entry.exp));
-		update_values.push_back(columns[16] + " = " + std::to_string(character_corpses_entry.size));
-		update_values.push_back(columns[17] + " = " + std::to_string(character_corpses_entry.level));
-		update_values.push_back(columns[18] + " = " + std::to_string(character_corpses_entry.race));
-		update_values.push_back(columns[19] + " = " + std::to_string(character_corpses_entry.gender));
-		update_values.push_back(columns[20] + " = " + std::to_string(character_corpses_entry.class_));
-		update_values.push_back(columns[21] + " = " + std::to_string(character_corpses_entry.deity));
-		update_values.push_back(columns[22] + " = " + std::to_string(character_corpses_entry.texture));
-		update_values.push_back(columns[23] + " = " + std::to_string(character_corpses_entry.helm_texture));
-		update_values.push_back(columns[24] + " = " + std::to_string(character_corpses_entry.copper));
-		update_values.push_back(columns[25] + " = " + std::to_string(character_corpses_entry.silver));
-		update_values.push_back(columns[26] + " = " + std::to_string(character_corpses_entry.gold));
-		update_values.push_back(columns[27] + " = " + std::to_string(character_corpses_entry.platinum));
-		update_values.push_back(columns[28] + " = " + std::to_string(character_corpses_entry.hair_color));
-		update_values.push_back(columns[29] + " = " + std::to_string(character_corpses_entry.beard_color));
-		update_values.push_back(columns[30] + " = " + std::to_string(character_corpses_entry.eye_color_1));
-		update_values.push_back(columns[31] + " = " + std::to_string(character_corpses_entry.eye_color_2));
-		update_values.push_back(columns[32] + " = " + std::to_string(character_corpses_entry.hair_style));
-		update_values.push_back(columns[33] + " = " + std::to_string(character_corpses_entry.face));
-		update_values.push_back(columns[34] + " = " + std::to_string(character_corpses_entry.beard));
-		update_values.push_back(columns[35] + " = " + std::to_string(character_corpses_entry.drakkin_heritage));
-		update_values.push_back(columns[36] + " = " + std::to_string(character_corpses_entry.drakkin_tattoo));
-		update_values.push_back(columns[37] + " = " + std::to_string(character_corpses_entry.drakkin_details));
-		update_values.push_back(columns[38] + " = " + std::to_string(character_corpses_entry.wc_1));
-		update_values.push_back(columns[39] + " = " + std::to_string(character_corpses_entry.wc_2));
-		update_values.push_back(columns[40] + " = " + std::to_string(character_corpses_entry.wc_3));
-		update_values.push_back(columns[41] + " = " + std::to_string(character_corpses_entry.wc_4));
-		update_values.push_back(columns[42] + " = " + std::to_string(character_corpses_entry.wc_5));
-		update_values.push_back(columns[43] + " = " + std::to_string(character_corpses_entry.wc_6));
-		update_values.push_back(columns[44] + " = " + std::to_string(character_corpses_entry.wc_7));
-		update_values.push_back(columns[45] + " = " + std::to_string(character_corpses_entry.wc_8));
-		update_values.push_back(columns[46] + " = " + std::to_string(character_corpses_entry.wc_9));
+		v.push_back(columns[1] + " = " + std::to_string(e.charid));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.charname) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.zone_id));
+		v.push_back(columns[4] + " = " + std::to_string(e.instance_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.x));
+		v.push_back(columns[6] + " = " + std::to_string(e.y));
+		v.push_back(columns[7] + " = " + std::to_string(e.z));
+		v.push_back(columns[8] + " = " + std::to_string(e.heading));
+		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back(columns[10] + " = " + std::to_string(e.guild_consent_id));
+		v.push_back(columns[11] + " = " + std::to_string(e.is_rezzed));
+		v.push_back(columns[12] + " = " + std::to_string(e.is_buried));
+		v.push_back(columns[13] + " = " + std::to_string(e.was_at_graveyard));
+		v.push_back(columns[14] + " = " + std::to_string(e.is_locked));
+		v.push_back(columns[15] + " = " + std::to_string(e.exp));
+		v.push_back(columns[16] + " = " + std::to_string(e.size));
+		v.push_back(columns[17] + " = " + std::to_string(e.level));
+		v.push_back(columns[18] + " = " + std::to_string(e.race));
+		v.push_back(columns[19] + " = " + std::to_string(e.gender));
+		v.push_back(columns[20] + " = " + std::to_string(e.class_));
+		v.push_back(columns[21] + " = " + std::to_string(e.deity));
+		v.push_back(columns[22] + " = " + std::to_string(e.texture));
+		v.push_back(columns[23] + " = " + std::to_string(e.helm_texture));
+		v.push_back(columns[24] + " = " + std::to_string(e.copper));
+		v.push_back(columns[25] + " = " + std::to_string(e.silver));
+		v.push_back(columns[26] + " = " + std::to_string(e.gold));
+		v.push_back(columns[27] + " = " + std::to_string(e.platinum));
+		v.push_back(columns[28] + " = " + std::to_string(e.hair_color));
+		v.push_back(columns[29] + " = " + std::to_string(e.beard_color));
+		v.push_back(columns[30] + " = " + std::to_string(e.eye_color_1));
+		v.push_back(columns[31] + " = " + std::to_string(e.eye_color_2));
+		v.push_back(columns[32] + " = " + std::to_string(e.hair_style));
+		v.push_back(columns[33] + " = " + std::to_string(e.face));
+		v.push_back(columns[34] + " = " + std::to_string(e.beard));
+		v.push_back(columns[35] + " = " + std::to_string(e.drakkin_heritage));
+		v.push_back(columns[36] + " = " + std::to_string(e.drakkin_tattoo));
+		v.push_back(columns[37] + " = " + std::to_string(e.drakkin_details));
+		v.push_back(columns[38] + " = " + std::to_string(e.wc_1));
+		v.push_back(columns[39] + " = " + std::to_string(e.wc_2));
+		v.push_back(columns[40] + " = " + std::to_string(e.wc_3));
+		v.push_back(columns[41] + " = " + std::to_string(e.wc_4));
+		v.push_back(columns[42] + " = " + std::to_string(e.wc_5));
+		v.push_back(columns[43] + " = " + std::to_string(e.wc_6));
+		v.push_back(columns[44] + " = " + std::to_string(e.wc_7));
+		v.push_back(columns[45] + " = " + std::to_string(e.wc_8));
+		v.push_back(columns[46] + " = " + std::to_string(e.wc_9));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_corpses_entry.id
+				e.id
 			)
 		);
 
@@ -440,139 +440,139 @@ public:
 
 	static CharacterCorpses InsertOne(
 		Database& db,
-		CharacterCorpses character_corpses_entry
+		CharacterCorpses e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_corpses_entry.id));
-		insert_values.push_back(std::to_string(character_corpses_entry.charid));
-		insert_values.push_back("'" + Strings::Escape(character_corpses_entry.charname) + "'");
-		insert_values.push_back(std::to_string(character_corpses_entry.zone_id));
-		insert_values.push_back(std::to_string(character_corpses_entry.instance_id));
-		insert_values.push_back(std::to_string(character_corpses_entry.x));
-		insert_values.push_back(std::to_string(character_corpses_entry.y));
-		insert_values.push_back(std::to_string(character_corpses_entry.z));
-		insert_values.push_back(std::to_string(character_corpses_entry.heading));
-		insert_values.push_back("FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
-		insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
-		insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
-		insert_values.push_back(std::to_string(character_corpses_entry.is_buried));
-		insert_values.push_back(std::to_string(character_corpses_entry.was_at_graveyard));
-		insert_values.push_back(std::to_string(character_corpses_entry.is_locked));
-		insert_values.push_back(std::to_string(character_corpses_entry.exp));
-		insert_values.push_back(std::to_string(character_corpses_entry.size));
-		insert_values.push_back(std::to_string(character_corpses_entry.level));
-		insert_values.push_back(std::to_string(character_corpses_entry.race));
-		insert_values.push_back(std::to_string(character_corpses_entry.gender));
-		insert_values.push_back(std::to_string(character_corpses_entry.class_));
-		insert_values.push_back(std::to_string(character_corpses_entry.deity));
-		insert_values.push_back(std::to_string(character_corpses_entry.texture));
-		insert_values.push_back(std::to_string(character_corpses_entry.helm_texture));
-		insert_values.push_back(std::to_string(character_corpses_entry.copper));
-		insert_values.push_back(std::to_string(character_corpses_entry.silver));
-		insert_values.push_back(std::to_string(character_corpses_entry.gold));
-		insert_values.push_back(std::to_string(character_corpses_entry.platinum));
-		insert_values.push_back(std::to_string(character_corpses_entry.hair_color));
-		insert_values.push_back(std::to_string(character_corpses_entry.beard_color));
-		insert_values.push_back(std::to_string(character_corpses_entry.eye_color_1));
-		insert_values.push_back(std::to_string(character_corpses_entry.eye_color_2));
-		insert_values.push_back(std::to_string(character_corpses_entry.hair_style));
-		insert_values.push_back(std::to_string(character_corpses_entry.face));
-		insert_values.push_back(std::to_string(character_corpses_entry.beard));
-		insert_values.push_back(std::to_string(character_corpses_entry.drakkin_heritage));
-		insert_values.push_back(std::to_string(character_corpses_entry.drakkin_tattoo));
-		insert_values.push_back(std::to_string(character_corpses_entry.drakkin_details));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_1));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_2));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_3));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_4));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_5));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_6));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_7));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_8));
-		insert_values.push_back(std::to_string(character_corpses_entry.wc_9));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.charid));
+		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back(std::to_string(e.guild_consent_id));
+		v.push_back(std::to_string(e.is_rezzed));
+		v.push_back(std::to_string(e.is_buried));
+		v.push_back(std::to_string(e.was_at_graveyard));
+		v.push_back(std::to_string(e.is_locked));
+		v.push_back(std::to_string(e.exp));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.texture));
+		v.push_back(std::to_string(e.helm_texture));
+		v.push_back(std::to_string(e.copper));
+		v.push_back(std::to_string(e.silver));
+		v.push_back(std::to_string(e.gold));
+		v.push_back(std::to_string(e.platinum));
+		v.push_back(std::to_string(e.hair_color));
+		v.push_back(std::to_string(e.beard_color));
+		v.push_back(std::to_string(e.eye_color_1));
+		v.push_back(std::to_string(e.eye_color_2));
+		v.push_back(std::to_string(e.hair_style));
+		v.push_back(std::to_string(e.face));
+		v.push_back(std::to_string(e.beard));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.drakkin_tattoo));
+		v.push_back(std::to_string(e.drakkin_details));
+		v.push_back(std::to_string(e.wc_1));
+		v.push_back(std::to_string(e.wc_2));
+		v.push_back(std::to_string(e.wc_3));
+		v.push_back(std::to_string(e.wc_4));
+		v.push_back(std::to_string(e.wc_5));
+		v.push_back(std::to_string(e.wc_6));
+		v.push_back(std::to_string(e.wc_7));
+		v.push_back(std::to_string(e.wc_8));
+		v.push_back(std::to_string(e.wc_9));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_corpses_entry.id = results.LastInsertedID();
-			return character_corpses_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_corpses_entry = NewEntity();
+		e = NewEntity();
 
-		return character_corpses_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterCorpses> character_corpses_entries
+		const std::vector<CharacterCorpses> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_corpses_entry: character_corpses_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_corpses_entry.id));
-			insert_values.push_back(std::to_string(character_corpses_entry.charid));
-			insert_values.push_back("'" + Strings::Escape(character_corpses_entry.charname) + "'");
-			insert_values.push_back(std::to_string(character_corpses_entry.zone_id));
-			insert_values.push_back(std::to_string(character_corpses_entry.instance_id));
-			insert_values.push_back(std::to_string(character_corpses_entry.x));
-			insert_values.push_back(std::to_string(character_corpses_entry.y));
-			insert_values.push_back(std::to_string(character_corpses_entry.z));
-			insert_values.push_back(std::to_string(character_corpses_entry.heading));
-			insert_values.push_back("FROM_UNIXTIME(" + (character_corpses_entry.time_of_death > 0 ? std::to_string(character_corpses_entry.time_of_death) : "null") + ")");
-			insert_values.push_back(std::to_string(character_corpses_entry.guild_consent_id));
-			insert_values.push_back(std::to_string(character_corpses_entry.is_rezzed));
-			insert_values.push_back(std::to_string(character_corpses_entry.is_buried));
-			insert_values.push_back(std::to_string(character_corpses_entry.was_at_graveyard));
-			insert_values.push_back(std::to_string(character_corpses_entry.is_locked));
-			insert_values.push_back(std::to_string(character_corpses_entry.exp));
-			insert_values.push_back(std::to_string(character_corpses_entry.size));
-			insert_values.push_back(std::to_string(character_corpses_entry.level));
-			insert_values.push_back(std::to_string(character_corpses_entry.race));
-			insert_values.push_back(std::to_string(character_corpses_entry.gender));
-			insert_values.push_back(std::to_string(character_corpses_entry.class_));
-			insert_values.push_back(std::to_string(character_corpses_entry.deity));
-			insert_values.push_back(std::to_string(character_corpses_entry.texture));
-			insert_values.push_back(std::to_string(character_corpses_entry.helm_texture));
-			insert_values.push_back(std::to_string(character_corpses_entry.copper));
-			insert_values.push_back(std::to_string(character_corpses_entry.silver));
-			insert_values.push_back(std::to_string(character_corpses_entry.gold));
-			insert_values.push_back(std::to_string(character_corpses_entry.platinum));
-			insert_values.push_back(std::to_string(character_corpses_entry.hair_color));
-			insert_values.push_back(std::to_string(character_corpses_entry.beard_color));
-			insert_values.push_back(std::to_string(character_corpses_entry.eye_color_1));
-			insert_values.push_back(std::to_string(character_corpses_entry.eye_color_2));
-			insert_values.push_back(std::to_string(character_corpses_entry.hair_style));
-			insert_values.push_back(std::to_string(character_corpses_entry.face));
-			insert_values.push_back(std::to_string(character_corpses_entry.beard));
-			insert_values.push_back(std::to_string(character_corpses_entry.drakkin_heritage));
-			insert_values.push_back(std::to_string(character_corpses_entry.drakkin_tattoo));
-			insert_values.push_back(std::to_string(character_corpses_entry.drakkin_details));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_1));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_2));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_3));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_4));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_5));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_6));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_7));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_8));
-			insert_values.push_back(std::to_string(character_corpses_entry.wc_9));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.charid));
+			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+			v.push_back(std::to_string(e.guild_consent_id));
+			v.push_back(std::to_string(e.is_rezzed));
+			v.push_back(std::to_string(e.is_buried));
+			v.push_back(std::to_string(e.was_at_graveyard));
+			v.push_back(std::to_string(e.is_locked));
+			v.push_back(std::to_string(e.exp));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.texture));
+			v.push_back(std::to_string(e.helm_texture));
+			v.push_back(std::to_string(e.copper));
+			v.push_back(std::to_string(e.silver));
+			v.push_back(std::to_string(e.gold));
+			v.push_back(std::to_string(e.platinum));
+			v.push_back(std::to_string(e.hair_color));
+			v.push_back(std::to_string(e.beard_color));
+			v.push_back(std::to_string(e.eye_color_1));
+			v.push_back(std::to_string(e.eye_color_2));
+			v.push_back(std::to_string(e.hair_style));
+			v.push_back(std::to_string(e.face));
+			v.push_back(std::to_string(e.beard));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.drakkin_tattoo));
+			v.push_back(std::to_string(e.drakkin_details));
+			v.push_back(std::to_string(e.wc_1));
+			v.push_back(std::to_string(e.wc_2));
+			v.push_back(std::to_string(e.wc_3));
+			v.push_back(std::to_string(e.wc_4));
+			v.push_back(std::to_string(e.wc_5));
+			v.push_back(std::to_string(e.wc_6));
+			v.push_back(std::to_string(e.wc_7));
+			v.push_back(std::to_string(e.wc_8));
+			v.push_back(std::to_string(e.wc_9));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -599,63 +599,63 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterCorpses entry{};
+			CharacterCorpses e{};
 
-			entry.id               = atoi(row[0]);
-			entry.charid           = atoi(row[1]);
-			entry.charname         = row[2] ? row[2] : "";
-			entry.zone_id          = atoi(row[3]);
-			entry.instance_id      = atoi(row[4]);
-			entry.x                = static_cast<float>(atof(row[5]));
-			entry.y                = static_cast<float>(atof(row[6]));
-			entry.z                = static_cast<float>(atof(row[7]));
-			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
-			entry.guild_consent_id = atoi(row[10]);
-			entry.is_rezzed        = atoi(row[11]);
-			entry.is_buried        = atoi(row[12]);
-			entry.was_at_graveyard = atoi(row[13]);
-			entry.is_locked        = atoi(row[14]);
-			entry.exp              = atoi(row[15]);
-			entry.size             = atoi(row[16]);
-			entry.level            = atoi(row[17]);
-			entry.race             = atoi(row[18]);
-			entry.gender           = atoi(row[19]);
-			entry.class_           = atoi(row[20]);
-			entry.deity            = atoi(row[21]);
-			entry.texture          = atoi(row[22]);
-			entry.helm_texture     = atoi(row[23]);
-			entry.copper           = atoi(row[24]);
-			entry.silver           = atoi(row[25]);
-			entry.gold             = atoi(row[26]);
-			entry.platinum         = atoi(row[27]);
-			entry.hair_color       = atoi(row[28]);
-			entry.beard_color      = atoi(row[29]);
-			entry.eye_color_1      = atoi(row[30]);
-			entry.eye_color_2      = atoi(row[31]);
-			entry.hair_style       = atoi(row[32]);
-			entry.face             = atoi(row[33]);
-			entry.beard            = atoi(row[34]);
-			entry.drakkin_heritage = atoi(row[35]);
-			entry.drakkin_tattoo   = atoi(row[36]);
-			entry.drakkin_details  = atoi(row[37]);
-			entry.wc_1             = atoi(row[38]);
-			entry.wc_2             = atoi(row[39]);
-			entry.wc_3             = atoi(row[40]);
-			entry.wc_4             = atoi(row[41]);
-			entry.wc_5             = atoi(row[42]);
-			entry.wc_6             = atoi(row[43]);
-			entry.wc_7             = atoi(row[44]);
-			entry.wc_8             = atoi(row[45]);
-			entry.wc_9             = atoi(row[46]);
+			e.id               = atoi(row[0]);
+			e.charid           = atoi(row[1]);
+			e.charname         = row[2] ? row[2] : "";
+			e.zone_id          = atoi(row[3]);
+			e.instance_id      = atoi(row[4]);
+			e.x                = static_cast<float>(atof(row[5]));
+			e.y                = static_cast<float>(atof(row[6]));
+			e.z                = static_cast<float>(atof(row[7]));
+			e.heading          = static_cast<float>(atof(row[8]));
+			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
+			e.guild_consent_id = atoi(row[10]);
+			e.is_rezzed        = atoi(row[11]);
+			e.is_buried        = atoi(row[12]);
+			e.was_at_graveyard = atoi(row[13]);
+			e.is_locked        = atoi(row[14]);
+			e.exp              = atoi(row[15]);
+			e.size             = atoi(row[16]);
+			e.level            = atoi(row[17]);
+			e.race             = atoi(row[18]);
+			e.gender           = atoi(row[19]);
+			e.class_           = atoi(row[20]);
+			e.deity            = atoi(row[21]);
+			e.texture          = atoi(row[22]);
+			e.helm_texture     = atoi(row[23]);
+			e.copper           = atoi(row[24]);
+			e.silver           = atoi(row[25]);
+			e.gold             = atoi(row[26]);
+			e.platinum         = atoi(row[27]);
+			e.hair_color       = atoi(row[28]);
+			e.beard_color      = atoi(row[29]);
+			e.eye_color_1      = atoi(row[30]);
+			e.eye_color_2      = atoi(row[31]);
+			e.hair_style       = atoi(row[32]);
+			e.face             = atoi(row[33]);
+			e.beard            = atoi(row[34]);
+			e.drakkin_heritage = atoi(row[35]);
+			e.drakkin_tattoo   = atoi(row[36]);
+			e.drakkin_details  = atoi(row[37]);
+			e.wc_1             = atoi(row[38]);
+			e.wc_2             = atoi(row[39]);
+			e.wc_3             = atoi(row[40]);
+			e.wc_4             = atoi(row[41]);
+			e.wc_5             = atoi(row[42]);
+			e.wc_6             = atoi(row[43]);
+			e.wc_7             = atoi(row[44]);
+			e.wc_8             = atoi(row[45]);
+			e.wc_9             = atoi(row[46]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterCorpses> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterCorpses> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterCorpses> all_entries;
 
@@ -670,63 +670,63 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterCorpses entry{};
+			CharacterCorpses e{};
 
-			entry.id               = atoi(row[0]);
-			entry.charid           = atoi(row[1]);
-			entry.charname         = row[2] ? row[2] : "";
-			entry.zone_id          = atoi(row[3]);
-			entry.instance_id      = atoi(row[4]);
-			entry.x                = static_cast<float>(atof(row[5]));
-			entry.y                = static_cast<float>(atof(row[6]));
-			entry.z                = static_cast<float>(atof(row[7]));
-			entry.heading          = static_cast<float>(atof(row[8]));
-			entry.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
-			entry.guild_consent_id = atoi(row[10]);
-			entry.is_rezzed        = atoi(row[11]);
-			entry.is_buried        = atoi(row[12]);
-			entry.was_at_graveyard = atoi(row[13]);
-			entry.is_locked        = atoi(row[14]);
-			entry.exp              = atoi(row[15]);
-			entry.size             = atoi(row[16]);
-			entry.level            = atoi(row[17]);
-			entry.race             = atoi(row[18]);
-			entry.gender           = atoi(row[19]);
-			entry.class_           = atoi(row[20]);
-			entry.deity            = atoi(row[21]);
-			entry.texture          = atoi(row[22]);
-			entry.helm_texture     = atoi(row[23]);
-			entry.copper           = atoi(row[24]);
-			entry.silver           = atoi(row[25]);
-			entry.gold             = atoi(row[26]);
-			entry.platinum         = atoi(row[27]);
-			entry.hair_color       = atoi(row[28]);
-			entry.beard_color      = atoi(row[29]);
-			entry.eye_color_1      = atoi(row[30]);
-			entry.eye_color_2      = atoi(row[31]);
-			entry.hair_style       = atoi(row[32]);
-			entry.face             = atoi(row[33]);
-			entry.beard            = atoi(row[34]);
-			entry.drakkin_heritage = atoi(row[35]);
-			entry.drakkin_tattoo   = atoi(row[36]);
-			entry.drakkin_details  = atoi(row[37]);
-			entry.wc_1             = atoi(row[38]);
-			entry.wc_2             = atoi(row[39]);
-			entry.wc_3             = atoi(row[40]);
-			entry.wc_4             = atoi(row[41]);
-			entry.wc_5             = atoi(row[42]);
-			entry.wc_6             = atoi(row[43]);
-			entry.wc_7             = atoi(row[44]);
-			entry.wc_8             = atoi(row[45]);
-			entry.wc_9             = atoi(row[46]);
+			e.id               = atoi(row[0]);
+			e.charid           = atoi(row[1]);
+			e.charname         = row[2] ? row[2] : "";
+			e.zone_id          = atoi(row[3]);
+			e.instance_id      = atoi(row[4]);
+			e.x                = static_cast<float>(atof(row[5]));
+			e.y                = static_cast<float>(atof(row[6]));
+			e.z                = static_cast<float>(atof(row[7]));
+			e.heading          = static_cast<float>(atof(row[8]));
+			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
+			e.guild_consent_id = atoi(row[10]);
+			e.is_rezzed        = atoi(row[11]);
+			e.is_buried        = atoi(row[12]);
+			e.was_at_graveyard = atoi(row[13]);
+			e.is_locked        = atoi(row[14]);
+			e.exp              = atoi(row[15]);
+			e.size             = atoi(row[16]);
+			e.level            = atoi(row[17]);
+			e.race             = atoi(row[18]);
+			e.gender           = atoi(row[19]);
+			e.class_           = atoi(row[20]);
+			e.deity            = atoi(row[21]);
+			e.texture          = atoi(row[22]);
+			e.helm_texture     = atoi(row[23]);
+			e.copper           = atoi(row[24]);
+			e.silver           = atoi(row[25]);
+			e.gold             = atoi(row[26]);
+			e.platinum         = atoi(row[27]);
+			e.hair_color       = atoi(row[28]);
+			e.beard_color      = atoi(row[29]);
+			e.eye_color_1      = atoi(row[30]);
+			e.eye_color_2      = atoi(row[31]);
+			e.hair_style       = atoi(row[32]);
+			e.face             = atoi(row[33]);
+			e.beard            = atoi(row[34]);
+			e.drakkin_heritage = atoi(row[35]);
+			e.drakkin_tattoo   = atoi(row[36]);
+			e.drakkin_details  = atoi(row[37]);
+			e.wc_1             = atoi(row[38]);
+			e.wc_2             = atoi(row[39]);
+			e.wc_3             = atoi(row[40]);
+			e.wc_4             = atoi(row[41]);
+			e.wc_5             = atoi(row[42]);
+			e.wc_6             = atoi(row[43]);
+			e.wc_7             = atoi(row[44]);
+			e.wc_8             = atoi(row[45]);
+			e.wc_9             = atoi(row[46]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -749,6 +749,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

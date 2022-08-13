@@ -9,59 +9,38 @@
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
 
-#ifndef EQEMU_BASE_CHARACTER_PET_INFO_REPOSITORY_H
-#define EQEMU_BASE_CHARACTER_PET_INFO_REPOSITORY_H
+#ifndef EQEMU_BASE_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
+#define EQEMU_BASE_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
 
-class BaseCharacterPetInfoRepository {
+class BaseCharacterPeqzoneFlagsRepository {
 public:
-	struct CharacterPetInfo {
-		int         char_id;
-		int         pet;
-		std::string petname;
-		int         petpower;
-		int         spell_id;
-		int         hp;
-		int         mana;
-		float       size;
-		int         taunting;
+	struct CharacterPeqzoneFlags {
+		int id;
+		int zone_id;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("char_id");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"char_id",
-			"pet",
-			"petname",
-			"petpower",
-			"spell_id",
-			"hp",
-			"mana",
-			"size",
-			"taunting",
+			"id",
+			"zone_id",
 		};
 	}
 
 	static std::vector<std::string> SelectColumns()
 	{
 		return {
-			"char_id",
-			"pet",
-			"petname",
-			"petpower",
-			"spell_id",
-			"hp",
-			"mana",
-			"size",
-			"taunting",
+			"id",
+			"zone_id",
 		};
 	}
 
@@ -77,7 +56,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("character_pet_info");
+		return std::string("character_peqzone_flags");
 	}
 
 	static std::string BaseSelect()
@@ -98,63 +77,49 @@ public:
 		);
 	}
 
-	static CharacterPetInfo NewEntity()
+	static CharacterPeqzoneFlags NewEntity()
 	{
-		CharacterPetInfo e{};
+		CharacterPeqzoneFlags e{};
 
-		e.char_id  = 0;
-		e.pet      = 0;
-		e.petname  = "";
-		e.petpower = 0;
-		e.spell_id = 0;
-		e.hp       = 0;
-		e.mana     = 0;
-		e.size     = 0;
-		e.taunting = 1;
+		e.id      = 0;
+		e.zone_id = 0;
 
 		return e;
 	}
 
-	static CharacterPetInfo GetCharacterPetInfo(
-		const std::vector<CharacterPetInfo> &character_pet_infos,
-		int character_pet_info_id
+	static CharacterPeqzoneFlags GetCharacterPeqzoneFlags(
+		const std::vector<CharacterPeqzoneFlags> &character_peqzone_flagss,
+		int character_peqzone_flags_id
 	)
 	{
-		for (auto &character_pet_info : character_pet_infos) {
-			if (character_pet_info.char_id == character_pet_info_id) {
-				return character_pet_info;
+		for (auto &character_peqzone_flags : character_peqzone_flagss) {
+			if (character_peqzone_flags.id == character_peqzone_flags_id) {
+				return character_peqzone_flags;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static CharacterPetInfo FindOne(
+	static CharacterPeqzoneFlags FindOne(
 		Database& db,
-		int character_pet_info_id
+		int character_peqzone_flags_id
 	)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				character_pet_info_id
+				character_peqzone_flags_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterPetInfo e{};
+			CharacterPeqzoneFlags e{};
 
-			e.char_id  = atoi(row[0]);
-			e.pet      = atoi(row[1]);
-			e.petname  = row[2] ? row[2] : "";
-			e.petpower = atoi(row[3]);
-			e.spell_id = atoi(row[4]);
-			e.hp       = atoi(row[5]);
-			e.mana     = atoi(row[6]);
-			e.size     = static_cast<float>(atof(row[7]));
-			e.taunting = atoi(row[8]);
+			e.id      = atoi(row[0]);
+			e.zone_id = atoi(row[1]);
 
 			return e;
 		}
@@ -164,7 +129,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int character_pet_info_id
+		int character_peqzone_flags_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -172,7 +137,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				character_pet_info_id
+				character_peqzone_flags_id
 			)
 		);
 
@@ -181,22 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const CharacterPetInfo &e
+		const CharacterPeqzoneFlags &e
 	)
 	{
 		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
-		v.push_back(columns[1] + " = " + std::to_string(e.pet));
-		v.push_back(columns[2] + " = '" + Strings::Escape(e.petname) + "'");
-		v.push_back(columns[3] + " = " + std::to_string(e.petpower));
-		v.push_back(columns[4] + " = " + std::to_string(e.spell_id));
-		v.push_back(columns[5] + " = " + std::to_string(e.hp));
-		v.push_back(columns[6] + " = " + std::to_string(e.mana));
-		v.push_back(columns[7] + " = " + std::to_string(e.size));
-		v.push_back(columns[8] + " = " + std::to_string(e.taunting));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -204,29 +162,22 @@ public:
 				TableName(),
 				Strings::Implode(", ", v),
 				PrimaryKey(),
-				e.char_id
+				e.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static CharacterPetInfo InsertOne(
+	static CharacterPeqzoneFlags InsertOne(
 		Database& db,
-		CharacterPetInfo e
+		CharacterPeqzoneFlags e
 	)
 	{
 		std::vector<std::string> v;
 
-		v.push_back(std::to_string(e.char_id));
-		v.push_back(std::to_string(e.pet));
-		v.push_back("'" + Strings::Escape(e.petname) + "'");
-		v.push_back(std::to_string(e.petpower));
-		v.push_back(std::to_string(e.spell_id));
-		v.push_back(std::to_string(e.hp));
-		v.push_back(std::to_string(e.mana));
-		v.push_back(std::to_string(e.size));
-		v.push_back(std::to_string(e.taunting));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -237,7 +188,7 @@ public:
 		);
 
 		if (results.Success()) {
-			e.char_id = results.LastInsertedID();
+			e.id = results.LastInsertedID();
 			return e;
 		}
 
@@ -248,7 +199,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<CharacterPetInfo> &entries
+		const std::vector<CharacterPeqzoneFlags> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -256,15 +207,8 @@ public:
 		for (auto &e: entries) {
 			std::vector<std::string> v;
 
-			v.push_back(std::to_string(e.char_id));
-			v.push_back(std::to_string(e.pet));
-			v.push_back("'" + Strings::Escape(e.petname) + "'");
-			v.push_back(std::to_string(e.petpower));
-			v.push_back(std::to_string(e.spell_id));
-			v.push_back(std::to_string(e.hp));
-			v.push_back(std::to_string(e.mana));
-			v.push_back(std::to_string(e.size));
-			v.push_back(std::to_string(e.taunting));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.zone_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -282,9 +226,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<CharacterPetInfo> All(Database& db)
+	static std::vector<CharacterPeqzoneFlags> All(Database& db)
 	{
-		std::vector<CharacterPetInfo> all_entries;
+		std::vector<CharacterPeqzoneFlags> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -296,17 +240,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetInfo e{};
+			CharacterPeqzoneFlags e{};
 
-			e.char_id  = atoi(row[0]);
-			e.pet      = atoi(row[1]);
-			e.petname  = row[2] ? row[2] : "";
-			e.petpower = atoi(row[3]);
-			e.spell_id = atoi(row[4]);
-			e.hp       = atoi(row[5]);
-			e.mana     = atoi(row[6]);
-			e.size     = static_cast<float>(atof(row[7]));
-			e.taunting = atoi(row[8]);
+			e.id      = atoi(row[0]);
+			e.zone_id = atoi(row[1]);
 
 			all_entries.push_back(e);
 		}
@@ -314,9 +251,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterPetInfo> GetWhere(Database& db, const std::string &where_filter)
+	static std::vector<CharacterPeqzoneFlags> GetWhere(Database& db, const std::string &where_filter)
 	{
-		std::vector<CharacterPetInfo> all_entries;
+		std::vector<CharacterPeqzoneFlags> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -329,17 +266,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetInfo e{};
+			CharacterPeqzoneFlags e{};
 
-			e.char_id  = atoi(row[0]);
-			e.pet      = atoi(row[1]);
-			e.petname  = row[2] ? row[2] : "";
-			e.petpower = atoi(row[3]);
-			e.spell_id = atoi(row[4]);
-			e.hp       = atoi(row[5]);
-			e.mana     = atoi(row[6]);
-			e.size     = static_cast<float>(atof(row[7]));
-			e.taunting = atoi(row[8]);
+			e.id      = atoi(row[0]);
+			e.zone_id = atoi(row[1]);
 
 			all_entries.push_back(e);
 		}
@@ -400,4 +330,4 @@ public:
 
 };
 
-#endif //EQEMU_BASE_CHARACTER_PET_INFO_REPOSITORY_H
+#endif //EQEMU_BASE_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
