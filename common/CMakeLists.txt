@@ -120,6 +120,9 @@ SET(repositories
     # Criteria
     repositories/criteria/content_filter_criteria.h
 
+    repositories/base/base_grid_repository.h
+    repositories/base/base_grid_entries_repository.h
+
     # Base Repositories
     repositories/base/base_aa_ability_repository.h
     repositories/base/base_aa_ranks_repository.h

@@ -2667,8 +2667,8 @@ void Zone::SetQuestHotReloadQueued(bool in_quest_hot_reload_queued)
 
 void Zone::LoadGrids()
 {
-	zone_grids        = GridRepository::GetZoneGrids(GetZoneID());
-	zone_grid_entries = GridEntriesRepository::GetZoneGridEntries(GetZoneID());
+	zone_grids        = GridRepository::GetZoneGrids(content_db, GetZoneID());
+	zone_grid_entries = GridEntriesRepository::GetZoneGridEntries(content_db, GetZoneID());
 }
 
 Timer Zone::GetInitgridsTimer()
