@@ -399,7 +399,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	qGlobals = nullptr;
 
-	SetEmoteID(static_cast<uint16>(npc_type_data->emoteid));
+	SetEmoteID(static_cast<uint32>(npc_type_data->emoteid));
 	InitializeBuffSlots();
 	CalcBonuses();
 
@@ -1087,7 +1087,7 @@ void NPC::UpdateEquipmentLight()
 }
 
 void NPC::Depop(bool StartSpawnTimer) {
-	uint16 emoteid = GetEmoteID();
+	uint32 emoteid = GetEmoteID();
 	if(emoteid != 0)
 		DoNPCEmote(ONDESPAWN,emoteid);
 	p_depop = true;
@@ -3012,7 +3012,7 @@ void NPC::SignalNPC(int _signal_id)
 	signal_q.push_back(_signal_id);
 }
 
-NPC_Emote_Struct* NPC::GetNPCEmote(uint16 emoteid, uint8 event_) {
+NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
 	LinkedListIterator<NPC_Emote_Struct*> iterator(zone->NPCEmoteList);
 	iterator.Reset();
 	while(iterator.MoreElements())
@@ -3026,7 +3026,7 @@ NPC_Emote_Struct* NPC::GetNPCEmote(uint16 emoteid, uint8 event_) {
 	return (nullptr);
 }
 
-void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
+void NPC::DoNPCEmote(uint8 event_, uint32 emoteid)
 {
 	if(this == nullptr || emoteid == 0)
 	{
