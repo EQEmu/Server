@@ -82,16 +82,16 @@ public:
 
 	static CharacterDisciplines NewEntity()
 	{
-		CharacterDisciplines entry{};
+		CharacterDisciplines e{};
 
-		entry.id      = 0;
-		entry.slot_id = 0;
-		entry.disc_id = 0;
+		e.id      = 0;
+		e.slot_id = 0;
+		e.disc_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterDisciplines GetCharacterDisciplinesEntry(
+	static CharacterDisciplines GetCharacterDisciplinese(
 		const std::vector<CharacterDisciplines> &character_discipliness,
 		int character_disciplines_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterDisciplines entry{};
+			CharacterDisciplines e{};
 
-			entry.id      = atoi(row[0]);
-			entry.slot_id = atoi(row[1]);
-			entry.disc_id = atoi(row[2]);
+			e.id      = atoi(row[0]);
+			e.slot_id = atoi(row[1]);
+			e.disc_id = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterDisciplines character_disciplines_entry
+		CharacterDisciplines character_disciplines_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_disciplines_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_disciplines_entry.slot_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_disciplines_entry.disc_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_disciplines_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_disciplines_e.slot_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_disciplines_e.disc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_disciplines_entry.id
+				character_disciplines_e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CharacterDisciplines InsertOne(
 		Database& db,
-		CharacterDisciplines character_disciplines_entry
+		CharacterDisciplines character_disciplines_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_disciplines_entry.id));
-		insert_values.push_back(std::to_string(character_disciplines_entry.slot_id));
-		insert_values.push_back(std::to_string(character_disciplines_entry.disc_id));
+		insert_values.push_back(std::to_string(character_disciplines_e.id));
+		insert_values.push_back(std::to_string(character_disciplines_e.slot_id));
+		insert_values.push_back(std::to_string(character_disciplines_e.disc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_disciplines_entry.id = results.LastInsertedID();
-			return character_disciplines_entry;
+			character_disciplines_e.id = results.LastInsertedID();
+			return character_disciplines_e;
 		}
 
-		character_disciplines_entry = NewEntity();
+		character_disciplines_e = NewEntity();
 
-		return character_disciplines_entry;
+		return character_disciplines_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_disciplines_entry: character_disciplines_entries) {
+		for (auto &character_disciplines_e: character_disciplines_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_disciplines_entry.id));
-			insert_values.push_back(std::to_string(character_disciplines_entry.slot_id));
-			insert_values.push_back(std::to_string(character_disciplines_entry.disc_id));
+			insert_values.push_back(std::to_string(character_disciplines_e.id));
+			insert_values.push_back(std::to_string(character_disciplines_e.slot_id));
+			insert_values.push_back(std::to_string(character_disciplines_e.disc_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterDisciplines entry{};
+			CharacterDisciplines e{};
 
-			entry.id      = atoi(row[0]);
-			entry.slot_id = atoi(row[1]);
-			entry.disc_id = atoi(row[2]);
+			e.id      = atoi(row[0]);
+			e.slot_id = atoi(row[1]);
+			e.disc_id = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterDisciplines entry{};
+			CharacterDisciplines e{};
 
-			entry.id      = atoi(row[0]);
-			entry.slot_id = atoi(row[1]);
-			entry.disc_id = atoi(row[2]);
+			e.id      = atoi(row[0]);
+			e.slot_id = atoi(row[1]);
+			e.disc_id = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

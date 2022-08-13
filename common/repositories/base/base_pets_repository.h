@@ -100,22 +100,22 @@ public:
 
 	static Pets NewEntity()
 	{
-		Pets entry{};
+		Pets e{};
 
-		entry.id           = 0;
-		entry.type         = "";
-		entry.petpower     = 0;
-		entry.npcID        = 0;
-		entry.temp         = 0;
-		entry.petcontrol   = 0;
-		entry.petnaming    = 0;
-		entry.monsterflag  = 0;
-		entry.equipmentset = -1;
+		e.id           = 0;
+		e.type         = "";
+		e.petpower     = 0;
+		e.npcID        = 0;
+		e.temp         = 0;
+		e.petcontrol   = 0;
+		e.petnaming    = 0;
+		e.monsterflag  = 0;
+		e.equipmentset = -1;
 
-		return entry;
+		return e;
 	}
 
-	static Pets GetPetsEntry(
+	static Pets GetPetse(
 		const std::vector<Pets> &petss,
 		int pets_id
 	)
@@ -144,19 +144,19 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Pets entry{};
+			Pets e{};
 
-			entry.id           = atoi(row[0]);
-			entry.type         = row[1] ? row[1] : "";
-			entry.petpower     = atoi(row[2]);
-			entry.npcID        = atoi(row[3]);
-			entry.temp         = atoi(row[4]);
-			entry.petcontrol   = atoi(row[5]);
-			entry.petnaming    = atoi(row[6]);
-			entry.monsterflag  = atoi(row[7]);
-			entry.equipmentset = atoi(row[8]);
+			e.id           = atoi(row[0]);
+			e.type         = row[1] ? row[1] : "";
+			e.petpower     = atoi(row[2]);
+			e.npcID        = atoi(row[3]);
+			e.temp         = atoi(row[4]);
+			e.petcontrol   = atoi(row[5]);
+			e.petnaming    = atoi(row[6]);
+			e.monsterflag  = atoi(row[7]);
+			e.equipmentset = atoi(row[8]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Pets pets_entry
+		Pets pets_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(pets_entry.type) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_entry.petpower));
-		update_values.push_back(columns[3] + " = " + std::to_string(pets_entry.npcID));
-		update_values.push_back(columns[4] + " = " + std::to_string(pets_entry.temp));
-		update_values.push_back(columns[5] + " = " + std::to_string(pets_entry.petcontrol));
-		update_values.push_back(columns[6] + " = " + std::to_string(pets_entry.petnaming));
-		update_values.push_back(columns[7] + " = " + std::to_string(pets_entry.monsterflag));
-		update_values.push_back(columns[8] + " = " + std::to_string(pets_entry.equipmentset));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(pets_e.type) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(pets_e.petpower));
+		update_values.push_back(columns[3] + " = " + std::to_string(pets_e.npcID));
+		update_values.push_back(columns[4] + " = " + std::to_string(pets_e.temp));
+		update_values.push_back(columns[5] + " = " + std::to_string(pets_e.petcontrol));
+		update_values.push_back(columns[6] + " = " + std::to_string(pets_e.petnaming));
+		update_values.push_back(columns[7] + " = " + std::to_string(pets_e.monsterflag));
+		update_values.push_back(columns[8] + " = " + std::to_string(pets_e.equipmentset));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				pets_entry.id
+				pets_e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static Pets InsertOne(
 		Database& db,
-		Pets pets_entry
+		Pets pets_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(pets_entry.id));
-		insert_values.push_back("'" + Strings::Escape(pets_entry.type) + "'");
-		insert_values.push_back(std::to_string(pets_entry.petpower));
-		insert_values.push_back(std::to_string(pets_entry.npcID));
-		insert_values.push_back(std::to_string(pets_entry.temp));
-		insert_values.push_back(std::to_string(pets_entry.petcontrol));
-		insert_values.push_back(std::to_string(pets_entry.petnaming));
-		insert_values.push_back(std::to_string(pets_entry.monsterflag));
-		insert_values.push_back(std::to_string(pets_entry.equipmentset));
+		insert_values.push_back(std::to_string(pets_e.id));
+		insert_values.push_back("'" + Strings::Escape(pets_e.type) + "'");
+		insert_values.push_back(std::to_string(pets_e.petpower));
+		insert_values.push_back(std::to_string(pets_e.npcID));
+		insert_values.push_back(std::to_string(pets_e.temp));
+		insert_values.push_back(std::to_string(pets_e.petcontrol));
+		insert_values.push_back(std::to_string(pets_e.petnaming));
+		insert_values.push_back(std::to_string(pets_e.monsterflag));
+		insert_values.push_back(std::to_string(pets_e.equipmentset));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,13 +236,13 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_entry.id = results.LastInsertedID();
-			return pets_entry;
+			pets_e.id = results.LastInsertedID();
+			return pets_e;
 		}
 
-		pets_entry = NewEntity();
+		pets_e = NewEntity();
 
-		return pets_entry;
+		return pets_e;
 	}
 
 	static int InsertMany(
@@ -252,18 +252,18 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &pets_entry: pets_entries) {
+		for (auto &pets_e: pets_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(pets_entry.id));
-			insert_values.push_back("'" + Strings::Escape(pets_entry.type) + "'");
-			insert_values.push_back(std::to_string(pets_entry.petpower));
-			insert_values.push_back(std::to_string(pets_entry.npcID));
-			insert_values.push_back(std::to_string(pets_entry.temp));
-			insert_values.push_back(std::to_string(pets_entry.petcontrol));
-			insert_values.push_back(std::to_string(pets_entry.petnaming));
-			insert_values.push_back(std::to_string(pets_entry.monsterflag));
-			insert_values.push_back(std::to_string(pets_entry.equipmentset));
+			insert_values.push_back(std::to_string(pets_e.id));
+			insert_values.push_back("'" + Strings::Escape(pets_e.type) + "'");
+			insert_values.push_back(std::to_string(pets_e.petpower));
+			insert_values.push_back(std::to_string(pets_e.npcID));
+			insert_values.push_back(std::to_string(pets_e.temp));
+			insert_values.push_back(std::to_string(pets_e.petcontrol));
+			insert_values.push_back(std::to_string(pets_e.petnaming));
+			insert_values.push_back(std::to_string(pets_e.monsterflag));
+			insert_values.push_back(std::to_string(pets_e.equipmentset));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -295,19 +295,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Pets entry{};
+			Pets e{};
 
-			entry.id           = atoi(row[0]);
-			entry.type         = row[1] ? row[1] : "";
-			entry.petpower     = atoi(row[2]);
-			entry.npcID        = atoi(row[3]);
-			entry.temp         = atoi(row[4]);
-			entry.petcontrol   = atoi(row[5]);
-			entry.petnaming    = atoi(row[6]);
-			entry.monsterflag  = atoi(row[7]);
-			entry.equipmentset = atoi(row[8]);
+			e.id           = atoi(row[0]);
+			e.type         = row[1] ? row[1] : "";
+			e.petpower     = atoi(row[2]);
+			e.npcID        = atoi(row[3]);
+			e.temp         = atoi(row[4]);
+			e.petcontrol   = atoi(row[5]);
+			e.petnaming    = atoi(row[6]);
+			e.monsterflag  = atoi(row[7]);
+			e.equipmentset = atoi(row[8]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -328,19 +328,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Pets entry{};
+			Pets e{};
 
-			entry.id           = atoi(row[0]);
-			entry.type         = row[1] ? row[1] : "";
-			entry.petpower     = atoi(row[2]);
-			entry.npcID        = atoi(row[3]);
-			entry.temp         = atoi(row[4]);
-			entry.petcontrol   = atoi(row[5]);
-			entry.petnaming    = atoi(row[6]);
-			entry.monsterflag  = atoi(row[7]);
-			entry.equipmentset = atoi(row[8]);
+			e.id           = atoi(row[0]);
+			e.type         = row[1] ? row[1] : "";
+			e.petpower     = atoi(row[2]);
+			e.npcID        = atoi(row[3]);
+			e.temp         = atoi(row[4]);
+			e.petcontrol   = atoi(row[5]);
+			e.petnaming    = atoi(row[6]);
+			e.monsterflag  = atoi(row[7]);
+			e.equipmentset = atoi(row[8]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

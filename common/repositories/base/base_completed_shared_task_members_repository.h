@@ -82,16 +82,16 @@ public:
 
 	static CompletedSharedTaskMembers NewEntity()
 	{
-		CompletedSharedTaskMembers entry{};
+		CompletedSharedTaskMembers e{};
 
-		entry.shared_task_id = 0;
-		entry.character_id   = 0;
-		entry.is_leader      = 0;
+		e.shared_task_id = 0;
+		e.character_id   = 0;
+		e.is_leader      = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CompletedSharedTaskMembers GetCompletedSharedTaskMembersEntry(
+	static CompletedSharedTaskMembers GetCompletedSharedTaskMemberse(
 		const std::vector<CompletedSharedTaskMembers> &completed_shared_task_memberss,
 		int completed_shared_task_members_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CompletedSharedTaskMembers entry{};
+			CompletedSharedTaskMembers e{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.character_id   = strtoll(row[1], nullptr, 10);
-			entry.is_leader      = atoi(row[2]);
+			e.shared_task_id = strtoll(row[0], nullptr, 10);
+			e.character_id   = strtoll(row[1], nullptr, 10);
+			e.is_leader      = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CompletedSharedTaskMembers completed_shared_task_members_entry
+		CompletedSharedTaskMembers completed_shared_task_members_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(completed_shared_task_members_entry.shared_task_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(completed_shared_task_members_entry.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(completed_shared_task_members_entry.is_leader));
+		update_values.push_back(columns[0] + " = " + std::to_string(completed_shared_task_members_e.shared_task_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(completed_shared_task_members_e.character_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(completed_shared_task_members_e.is_leader));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				completed_shared_task_members_entry.shared_task_id
+				completed_shared_task_members_e.shared_task_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CompletedSharedTaskMembers InsertOne(
 		Database& db,
-		CompletedSharedTaskMembers completed_shared_task_members_entry
+		CompletedSharedTaskMembers completed_shared_task_members_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(completed_shared_task_members_entry.shared_task_id));
-		insert_values.push_back(std::to_string(completed_shared_task_members_entry.character_id));
-		insert_values.push_back(std::to_string(completed_shared_task_members_entry.is_leader));
+		insert_values.push_back(std::to_string(completed_shared_task_members_e.shared_task_id));
+		insert_values.push_back(std::to_string(completed_shared_task_members_e.character_id));
+		insert_values.push_back(std::to_string(completed_shared_task_members_e.is_leader));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			completed_shared_task_members_entry.shared_task_id = results.LastInsertedID();
-			return completed_shared_task_members_entry;
+			completed_shared_task_members_e.shared_task_id = results.LastInsertedID();
+			return completed_shared_task_members_e;
 		}
 
-		completed_shared_task_members_entry = NewEntity();
+		completed_shared_task_members_e = NewEntity();
 
-		return completed_shared_task_members_entry;
+		return completed_shared_task_members_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &completed_shared_task_members_entry: completed_shared_task_members_entries) {
+		for (auto &completed_shared_task_members_e: completed_shared_task_members_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(completed_shared_task_members_entry.shared_task_id));
-			insert_values.push_back(std::to_string(completed_shared_task_members_entry.character_id));
-			insert_values.push_back(std::to_string(completed_shared_task_members_entry.is_leader));
+			insert_values.push_back(std::to_string(completed_shared_task_members_e.shared_task_id));
+			insert_values.push_back(std::to_string(completed_shared_task_members_e.character_id));
+			insert_values.push_back(std::to_string(completed_shared_task_members_e.is_leader));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CompletedSharedTaskMembers entry{};
+			CompletedSharedTaskMembers e{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.character_id   = strtoll(row[1], nullptr, 10);
-			entry.is_leader      = atoi(row[2]);
+			e.shared_task_id = strtoll(row[0], nullptr, 10);
+			e.character_id   = strtoll(row[1], nullptr, 10);
+			e.is_leader      = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CompletedSharedTaskMembers entry{};
+			CompletedSharedTaskMembers e{};
 
-			entry.shared_task_id = strtoll(row[0], nullptr, 10);
-			entry.character_id   = strtoll(row[1], nullptr, 10);
-			entry.is_leader      = atoi(row[2]);
+			e.shared_task_id = strtoll(row[0], nullptr, 10);
+			e.character_id   = strtoll(row[1], nullptr, 10);
+			e.is_leader      = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

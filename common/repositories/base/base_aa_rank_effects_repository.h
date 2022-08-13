@@ -88,18 +88,18 @@ public:
 
 	static AaRankEffects NewEntity()
 	{
-		AaRankEffects entry{};
+		AaRankEffects e{};
 
-		entry.rank_id   = 0;
-		entry.slot      = 1;
-		entry.effect_id = 0;
-		entry.base1     = 0;
-		entry.base2     = 0;
+		e.rank_id   = 0;
+		e.slot      = 1;
+		e.effect_id = 0;
+		e.base1     = 0;
+		e.base2     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AaRankEffects GetAaRankEffectsEntry(
+	static AaRankEffects GetAaRankEffectse(
 		const std::vector<AaRankEffects> &aa_rank_effectss,
 		int aa_rank_effects_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AaRankEffects entry{};
+			AaRankEffects e{};
 
-			entry.rank_id   = atoi(row[0]);
-			entry.slot      = atoi(row[1]);
-			entry.effect_id = atoi(row[2]);
-			entry.base1     = atoi(row[3]);
-			entry.base2     = atoi(row[4]);
+			e.rank_id   = atoi(row[0]);
+			e.slot      = atoi(row[1]);
+			e.effect_id = atoi(row[2]);
+			e.base1     = atoi(row[3]);
+			e.base2     = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRankEffects aa_rank_effects_entry
+		AaRankEffects aa_rank_effects_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_effects_entry.rank_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_effects_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_effects_entry.effect_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_rank_effects_entry.base1));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_rank_effects_entry.base2));
+		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_effects_e.rank_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_effects_e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_effects_e.effect_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(aa_rank_effects_e.base1));
+		update_values.push_back(columns[4] + " = " + std::to_string(aa_rank_effects_e.base2));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				aa_rank_effects_entry.rank_id
+				aa_rank_effects_e.rank_id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static AaRankEffects InsertOne(
 		Database& db,
-		AaRankEffects aa_rank_effects_entry
+		AaRankEffects aa_rank_effects_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(aa_rank_effects_entry.rank_id));
-		insert_values.push_back(std::to_string(aa_rank_effects_entry.slot));
-		insert_values.push_back(std::to_string(aa_rank_effects_entry.effect_id));
-		insert_values.push_back(std::to_string(aa_rank_effects_entry.base1));
-		insert_values.push_back(std::to_string(aa_rank_effects_entry.base2));
+		insert_values.push_back(std::to_string(aa_rank_effects_e.rank_id));
+		insert_values.push_back(std::to_string(aa_rank_effects_e.slot));
+		insert_values.push_back(std::to_string(aa_rank_effects_e.effect_id));
+		insert_values.push_back(std::to_string(aa_rank_effects_e.base1));
+		insert_values.push_back(std::to_string(aa_rank_effects_e.base2));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_rank_effects_entry.rank_id = results.LastInsertedID();
-			return aa_rank_effects_entry;
+			aa_rank_effects_e.rank_id = results.LastInsertedID();
+			return aa_rank_effects_e;
 		}
 
-		aa_rank_effects_entry = NewEntity();
+		aa_rank_effects_e = NewEntity();
 
-		return aa_rank_effects_entry;
+		return aa_rank_effects_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_rank_effects_entry: aa_rank_effects_entries) {
+		for (auto &aa_rank_effects_e: aa_rank_effects_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(aa_rank_effects_entry.rank_id));
-			insert_values.push_back(std::to_string(aa_rank_effects_entry.slot));
-			insert_values.push_back(std::to_string(aa_rank_effects_entry.effect_id));
-			insert_values.push_back(std::to_string(aa_rank_effects_entry.base1));
-			insert_values.push_back(std::to_string(aa_rank_effects_entry.base2));
+			insert_values.push_back(std::to_string(aa_rank_effects_e.rank_id));
+			insert_values.push_back(std::to_string(aa_rank_effects_e.slot));
+			insert_values.push_back(std::to_string(aa_rank_effects_e.effect_id));
+			insert_values.push_back(std::to_string(aa_rank_effects_e.base1));
+			insert_values.push_back(std::to_string(aa_rank_effects_e.base2));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaRankEffects entry{};
+			AaRankEffects e{};
 
-			entry.rank_id   = atoi(row[0]);
-			entry.slot      = atoi(row[1]);
-			entry.effect_id = atoi(row[2]);
-			entry.base1     = atoi(row[3]);
-			entry.base2     = atoi(row[4]);
+			e.rank_id   = atoi(row[0]);
+			e.slot      = atoi(row[1]);
+			e.effect_id = atoi(row[2]);
+			e.base1     = atoi(row[3]);
+			e.base2     = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaRankEffects entry{};
+			AaRankEffects e{};
 
-			entry.rank_id   = atoi(row[0]);
-			entry.slot      = atoi(row[1]);
-			entry.effect_id = atoi(row[2]);
-			entry.base1     = atoi(row[3]);
-			entry.base2     = atoi(row[4]);
+			e.rank_id   = atoi(row[0]);
+			e.slot      = atoi(row[1]);
+			e.effect_id = atoi(row[2]);
+			e.base1     = atoi(row[3]);
+			e.base2     = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

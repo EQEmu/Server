@@ -85,17 +85,17 @@ public:
 
 	static RaidDetails NewEntity()
 	{
-		RaidDetails entry{};
+		RaidDetails e{};
 
-		entry.raidid   = 0;
-		entry.loottype = 0;
-		entry.locked   = 0;
-		entry.motd     = "";
+		e.raidid   = 0;
+		e.loottype = 0;
+		e.locked   = 0;
+		e.motd     = "";
 
-		return entry;
+		return e;
 	}
 
-	static RaidDetails GetRaidDetailsEntry(
+	static RaidDetails GetRaidDetailse(
 		const std::vector<RaidDetails> &raid_detailss,
 		int raid_details_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			RaidDetails entry{};
+			RaidDetails e{};
 
-			entry.raidid   = atoi(row[0]);
-			entry.loottype = atoi(row[1]);
-			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3] ? row[3] : "";
+			e.raidid   = atoi(row[0]);
+			e.loottype = atoi(row[1]);
+			e.locked   = atoi(row[2]);
+			e.motd     = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RaidDetails raid_details_entry
+		RaidDetails raid_details_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(raid_details_entry.raidid));
-		update_values.push_back(columns[1] + " = " + std::to_string(raid_details_entry.loottype));
-		update_values.push_back(columns[2] + " = " + std::to_string(raid_details_entry.locked));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(raid_details_entry.motd) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(raid_details_e.raidid));
+		update_values.push_back(columns[1] + " = " + std::to_string(raid_details_e.loottype));
+		update_values.push_back(columns[2] + " = " + std::to_string(raid_details_e.locked));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(raid_details_e.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				raid_details_entry.raidid
+				raid_details_e.raidid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static RaidDetails InsertOne(
 		Database& db,
-		RaidDetails raid_details_entry
+		RaidDetails raid_details_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(raid_details_entry.raidid));
-		insert_values.push_back(std::to_string(raid_details_entry.loottype));
-		insert_values.push_back(std::to_string(raid_details_entry.locked));
-		insert_values.push_back("'" + Strings::Escape(raid_details_entry.motd) + "'");
+		insert_values.push_back(std::to_string(raid_details_e.raidid));
+		insert_values.push_back(std::to_string(raid_details_e.loottype));
+		insert_values.push_back(std::to_string(raid_details_e.locked));
+		insert_values.push_back("'" + Strings::Escape(raid_details_e.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			raid_details_entry.raidid = results.LastInsertedID();
-			return raid_details_entry;
+			raid_details_e.raidid = results.LastInsertedID();
+			return raid_details_e;
 		}
 
-		raid_details_entry = NewEntity();
+		raid_details_e = NewEntity();
 
-		return raid_details_entry;
+		return raid_details_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &raid_details_entry: raid_details_entries) {
+		for (auto &raid_details_e: raid_details_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(raid_details_entry.raidid));
-			insert_values.push_back(std::to_string(raid_details_entry.loottype));
-			insert_values.push_back(std::to_string(raid_details_entry.locked));
-			insert_values.push_back("'" + Strings::Escape(raid_details_entry.motd) + "'");
+			insert_values.push_back(std::to_string(raid_details_e.raidid));
+			insert_values.push_back(std::to_string(raid_details_e.loottype));
+			insert_values.push_back(std::to_string(raid_details_e.locked));
+			insert_values.push_back("'" + Strings::Escape(raid_details_e.motd) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RaidDetails entry{};
+			RaidDetails e{};
 
-			entry.raidid   = atoi(row[0]);
-			entry.loottype = atoi(row[1]);
-			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3] ? row[3] : "";
+			e.raidid   = atoi(row[0]);
+			e.loottype = atoi(row[1]);
+			e.locked   = atoi(row[2]);
+			e.motd     = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RaidDetails entry{};
+			RaidDetails e{};
 
-			entry.raidid   = atoi(row[0]);
-			entry.loottype = atoi(row[1]);
-			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3] ? row[3] : "";
+			e.raidid   = atoi(row[0]);
+			e.loottype = atoi(row[1]);
+			e.locked   = atoi(row[2]);
+			e.motd     = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

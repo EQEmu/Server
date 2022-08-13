@@ -100,22 +100,22 @@ public:
 
 	static Guilds NewEntity()
 	{
-		Guilds entry{};
+		Guilds e{};
 
-		entry.id          = 0;
-		entry.name        = "";
-		entry.leader      = 0;
-		entry.minstatus   = 0;
-		entry.motd        = "";
-		entry.tribute     = 0;
-		entry.motd_setter = "";
-		entry.channel     = "";
-		entry.url         = "";
+		e.id          = 0;
+		e.name        = "";
+		e.leader      = 0;
+		e.minstatus   = 0;
+		e.motd        = "";
+		e.tribute     = 0;
+		e.motd_setter = "";
+		e.channel     = "";
+		e.url         = "";
 
-		return entry;
+		return e;
 	}
 
-	static Guilds GetGuildsEntry(
+	static Guilds GetGuildse(
 		const std::vector<Guilds> &guildss,
 		int guilds_id
 	)
@@ -144,19 +144,19 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Guilds entry{};
+			Guilds e{};
 
-			entry.id          = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.leader      = atoi(row[2]);
-			entry.minstatus   = atoi(row[3]);
-			entry.motd        = row[4] ? row[4] : "";
-			entry.tribute     = atoi(row[5]);
-			entry.motd_setter = row[6] ? row[6] : "";
-			entry.channel     = row[7] ? row[7] : "";
-			entry.url         = row[8] ? row[8] : "";
+			e.id          = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.leader      = atoi(row[2]);
+			e.minstatus   = atoi(row[3]);
+			e.motd        = row[4] ? row[4] : "";
+			e.tribute     = atoi(row[5]);
+			e.motd_setter = row[6] ? row[6] : "";
+			e.channel     = row[7] ? row[7] : "";
+			e.url         = row[8] ? row[8] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Guilds guilds_entry
+		Guilds guilds_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(guilds_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(guilds_entry.leader));
-		update_values.push_back(columns[3] + " = " + std::to_string(guilds_entry.minstatus));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(guilds_entry.motd) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(guilds_entry.tribute));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(guilds_entry.motd_setter) + "'");
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(guilds_entry.channel) + "'");
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(guilds_entry.url) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(guilds_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(guilds_e.leader));
+		update_values.push_back(columns[3] + " = " + std::to_string(guilds_e.minstatus));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(guilds_e.motd) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(guilds_e.tribute));
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(guilds_e.motd_setter) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(guilds_e.channel) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(guilds_e.url) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				guilds_entry.id
+				guilds_e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static Guilds InsertOne(
 		Database& db,
-		Guilds guilds_entry
+		Guilds guilds_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(guilds_entry.id));
-		insert_values.push_back("'" + Strings::Escape(guilds_entry.name) + "'");
-		insert_values.push_back(std::to_string(guilds_entry.leader));
-		insert_values.push_back(std::to_string(guilds_entry.minstatus));
-		insert_values.push_back("'" + Strings::Escape(guilds_entry.motd) + "'");
-		insert_values.push_back(std::to_string(guilds_entry.tribute));
-		insert_values.push_back("'" + Strings::Escape(guilds_entry.motd_setter) + "'");
-		insert_values.push_back("'" + Strings::Escape(guilds_entry.channel) + "'");
-		insert_values.push_back("'" + Strings::Escape(guilds_entry.url) + "'");
+		insert_values.push_back(std::to_string(guilds_e.id));
+		insert_values.push_back("'" + Strings::Escape(guilds_e.name) + "'");
+		insert_values.push_back(std::to_string(guilds_e.leader));
+		insert_values.push_back(std::to_string(guilds_e.minstatus));
+		insert_values.push_back("'" + Strings::Escape(guilds_e.motd) + "'");
+		insert_values.push_back(std::to_string(guilds_e.tribute));
+		insert_values.push_back("'" + Strings::Escape(guilds_e.motd_setter) + "'");
+		insert_values.push_back("'" + Strings::Escape(guilds_e.channel) + "'");
+		insert_values.push_back("'" + Strings::Escape(guilds_e.url) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,13 +236,13 @@ public:
 		);
 
 		if (results.Success()) {
-			guilds_entry.id = results.LastInsertedID();
-			return guilds_entry;
+			guilds_e.id = results.LastInsertedID();
+			return guilds_e;
 		}
 
-		guilds_entry = NewEntity();
+		guilds_e = NewEntity();
 
-		return guilds_entry;
+		return guilds_e;
 	}
 
 	static int InsertMany(
@@ -252,18 +252,18 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &guilds_entry: guilds_entries) {
+		for (auto &guilds_e: guilds_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(guilds_entry.id));
-			insert_values.push_back("'" + Strings::Escape(guilds_entry.name) + "'");
-			insert_values.push_back(std::to_string(guilds_entry.leader));
-			insert_values.push_back(std::to_string(guilds_entry.minstatus));
-			insert_values.push_back("'" + Strings::Escape(guilds_entry.motd) + "'");
-			insert_values.push_back(std::to_string(guilds_entry.tribute));
-			insert_values.push_back("'" + Strings::Escape(guilds_entry.motd_setter) + "'");
-			insert_values.push_back("'" + Strings::Escape(guilds_entry.channel) + "'");
-			insert_values.push_back("'" + Strings::Escape(guilds_entry.url) + "'");
+			insert_values.push_back(std::to_string(guilds_e.id));
+			insert_values.push_back("'" + Strings::Escape(guilds_e.name) + "'");
+			insert_values.push_back(std::to_string(guilds_e.leader));
+			insert_values.push_back(std::to_string(guilds_e.minstatus));
+			insert_values.push_back("'" + Strings::Escape(guilds_e.motd) + "'");
+			insert_values.push_back(std::to_string(guilds_e.tribute));
+			insert_values.push_back("'" + Strings::Escape(guilds_e.motd_setter) + "'");
+			insert_values.push_back("'" + Strings::Escape(guilds_e.channel) + "'");
+			insert_values.push_back("'" + Strings::Escape(guilds_e.url) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -295,19 +295,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Guilds entry{};
+			Guilds e{};
 
-			entry.id          = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.leader      = atoi(row[2]);
-			entry.minstatus   = atoi(row[3]);
-			entry.motd        = row[4] ? row[4] : "";
-			entry.tribute     = atoi(row[5]);
-			entry.motd_setter = row[6] ? row[6] : "";
-			entry.channel     = row[7] ? row[7] : "";
-			entry.url         = row[8] ? row[8] : "";
+			e.id          = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.leader      = atoi(row[2]);
+			e.minstatus   = atoi(row[3]);
+			e.motd        = row[4] ? row[4] : "";
+			e.tribute     = atoi(row[5]);
+			e.motd_setter = row[6] ? row[6] : "";
+			e.channel     = row[7] ? row[7] : "";
+			e.url         = row[8] ? row[8] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -328,19 +328,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Guilds entry{};
+			Guilds e{};
 
-			entry.id          = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.leader      = atoi(row[2]);
-			entry.minstatus   = atoi(row[3]);
-			entry.motd        = row[4] ? row[4] : "";
-			entry.tribute     = atoi(row[5]);
-			entry.motd_setter = row[6] ? row[6] : "";
-			entry.channel     = row[7] ? row[7] : "";
-			entry.url         = row[8] ? row[8] : "";
+			e.id          = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.leader      = atoi(row[2]);
+			e.minstatus   = atoi(row[3]);
+			e.motd        = row[4] ? row[4] : "";
+			e.tribute     = atoi(row[5]);
+			e.motd_setter = row[6] ? row[6] : "";
+			e.channel     = row[7] ? row[7] : "";
+			e.url         = row[8] ? row[8] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

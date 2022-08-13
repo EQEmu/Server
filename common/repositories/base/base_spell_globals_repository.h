@@ -85,17 +85,17 @@ public:
 
 	static SpellGlobals NewEntity()
 	{
-		SpellGlobals entry{};
+		SpellGlobals e{};
 
-		entry.spellid    = 0;
-		entry.spell_name = "";
-		entry.qglobal    = "";
-		entry.value      = "";
+		e.spellid    = 0;
+		e.spell_name = "";
+		e.qglobal    = "";
+		e.value      = "";
 
-		return entry;
+		return e;
 	}
 
-	static SpellGlobals GetSpellGlobalsEntry(
+	static SpellGlobals GetSpellGlobalse(
 		const std::vector<SpellGlobals> &spell_globalss,
 		int spell_globals_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SpellGlobals entry{};
+			SpellGlobals e{};
 
-			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1] ? row[1] : "";
-			entry.qglobal    = row[2] ? row[2] : "";
-			entry.value      = row[3] ? row[3] : "";
+			e.spellid    = atoi(row[0]);
+			e.spell_name = row[1] ? row[1] : "";
+			e.qglobal    = row[2] ? row[2] : "";
+			e.value      = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SpellGlobals spell_globals_entry
+		SpellGlobals spell_globals_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(spell_globals_entry.spellid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_globals_entry.spell_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_globals_entry.qglobal) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(spell_globals_entry.value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(spell_globals_e.spellid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_globals_e.spell_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_globals_e.qglobal) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(spell_globals_e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spell_globals_entry.spellid
+				spell_globals_e.spellid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static SpellGlobals InsertOne(
 		Database& db,
-		SpellGlobals spell_globals_entry
+		SpellGlobals spell_globals_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spell_globals_entry.spellid));
-		insert_values.push_back("'" + Strings::Escape(spell_globals_entry.spell_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(spell_globals_entry.qglobal) + "'");
-		insert_values.push_back("'" + Strings::Escape(spell_globals_entry.value) + "'");
+		insert_values.push_back(std::to_string(spell_globals_e.spellid));
+		insert_values.push_back("'" + Strings::Escape(spell_globals_e.spell_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_globals_e.qglobal) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_globals_e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			spell_globals_entry.spellid = results.LastInsertedID();
-			return spell_globals_entry;
+			spell_globals_e.spellid = results.LastInsertedID();
+			return spell_globals_e;
 		}
 
-		spell_globals_entry = NewEntity();
+		spell_globals_e = NewEntity();
 
-		return spell_globals_entry;
+		return spell_globals_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spell_globals_entry: spell_globals_entries) {
+		for (auto &spell_globals_e: spell_globals_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spell_globals_entry.spellid));
-			insert_values.push_back("'" + Strings::Escape(spell_globals_entry.spell_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(spell_globals_entry.qglobal) + "'");
-			insert_values.push_back("'" + Strings::Escape(spell_globals_entry.value) + "'");
+			insert_values.push_back(std::to_string(spell_globals_e.spellid));
+			insert_values.push_back("'" + Strings::Escape(spell_globals_e.spell_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_globals_e.qglobal) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_globals_e.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpellGlobals entry{};
+			SpellGlobals e{};
 
-			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1] ? row[1] : "";
-			entry.qglobal    = row[2] ? row[2] : "";
-			entry.value      = row[3] ? row[3] : "";
+			e.spellid    = atoi(row[0]);
+			e.spell_name = row[1] ? row[1] : "";
+			e.qglobal    = row[2] ? row[2] : "";
+			e.value      = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpellGlobals entry{};
+			SpellGlobals e{};
 
-			entry.spellid    = atoi(row[0]);
-			entry.spell_name = row[1] ? row[1] : "";
-			entry.qglobal    = row[2] ? row[2] : "";
-			entry.value      = row[3] ? row[3] : "";
+			e.spellid    = atoi(row[0]);
+			e.spell_name = row[1] ? row[1] : "";
+			e.qglobal    = row[2] ? row[2] : "";
+			e.value      = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

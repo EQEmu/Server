@@ -118,28 +118,28 @@ public:
 
 	static CharCreatePointAllocations NewEntity()
 	{
-		CharCreatePointAllocations entry{};
+		CharCreatePointAllocations e{};
 
-		entry.id        = 0;
-		entry.base_str  = 0;
-		entry.base_sta  = 0;
-		entry.base_dex  = 0;
-		entry.base_agi  = 0;
-		entry.base_int  = 0;
-		entry.base_wis  = 0;
-		entry.base_cha  = 0;
-		entry.alloc_str = 0;
-		entry.alloc_sta = 0;
-		entry.alloc_dex = 0;
-		entry.alloc_agi = 0;
-		entry.alloc_int = 0;
-		entry.alloc_wis = 0;
-		entry.alloc_cha = 0;
+		e.id        = 0;
+		e.base_str  = 0;
+		e.base_sta  = 0;
+		e.base_dex  = 0;
+		e.base_agi  = 0;
+		e.base_int  = 0;
+		e.base_wis  = 0;
+		e.base_cha  = 0;
+		e.alloc_str = 0;
+		e.alloc_sta = 0;
+		e.alloc_dex = 0;
+		e.alloc_agi = 0;
+		e.alloc_int = 0;
+		e.alloc_wis = 0;
+		e.alloc_cha = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharCreatePointAllocations GetCharCreatePointAllocationsEntry(
+	static CharCreatePointAllocations GetCharCreatePointAllocationse(
 		const std::vector<CharCreatePointAllocations> &char_create_point_allocationss,
 		int char_create_point_allocations_id
 	)
@@ -168,25 +168,25 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharCreatePointAllocations entry{};
+			CharCreatePointAllocations e{};
 
-			entry.id        = atoi(row[0]);
-			entry.base_str  = atoi(row[1]);
-			entry.base_sta  = atoi(row[2]);
-			entry.base_dex  = atoi(row[3]);
-			entry.base_agi  = atoi(row[4]);
-			entry.base_int  = atoi(row[5]);
-			entry.base_wis  = atoi(row[6]);
-			entry.base_cha  = atoi(row[7]);
-			entry.alloc_str = atoi(row[8]);
-			entry.alloc_sta = atoi(row[9]);
-			entry.alloc_dex = atoi(row[10]);
-			entry.alloc_agi = atoi(row[11]);
-			entry.alloc_int = atoi(row[12]);
-			entry.alloc_wis = atoi(row[13]);
-			entry.alloc_cha = atoi(row[14]);
+			e.id        = atoi(row[0]);
+			e.base_str  = atoi(row[1]);
+			e.base_sta  = atoi(row[2]);
+			e.base_dex  = atoi(row[3]);
+			e.base_agi  = atoi(row[4]);
+			e.base_int  = atoi(row[5]);
+			e.base_wis  = atoi(row[6]);
+			e.base_cha  = atoi(row[7]);
+			e.alloc_str = atoi(row[8]);
+			e.alloc_sta = atoi(row[9]);
+			e.alloc_dex = atoi(row[10]);
+			e.alloc_agi = atoi(row[11]);
+			e.alloc_int = atoi(row[12]);
+			e.alloc_wis = atoi(row[13]);
+			e.alloc_cha = atoi(row[14]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -211,28 +211,28 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharCreatePointAllocations char_create_point_allocations_entry
+		CharCreatePointAllocations char_create_point_allocations_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(char_create_point_allocations_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(char_create_point_allocations_entry.base_str));
-		update_values.push_back(columns[2] + " = " + std::to_string(char_create_point_allocations_entry.base_sta));
-		update_values.push_back(columns[3] + " = " + std::to_string(char_create_point_allocations_entry.base_dex));
-		update_values.push_back(columns[4] + " = " + std::to_string(char_create_point_allocations_entry.base_agi));
-		update_values.push_back(columns[5] + " = " + std::to_string(char_create_point_allocations_entry.base_int));
-		update_values.push_back(columns[6] + " = " + std::to_string(char_create_point_allocations_entry.base_wis));
-		update_values.push_back(columns[7] + " = " + std::to_string(char_create_point_allocations_entry.base_cha));
-		update_values.push_back(columns[8] + " = " + std::to_string(char_create_point_allocations_entry.alloc_str));
-		update_values.push_back(columns[9] + " = " + std::to_string(char_create_point_allocations_entry.alloc_sta));
-		update_values.push_back(columns[10] + " = " + std::to_string(char_create_point_allocations_entry.alloc_dex));
-		update_values.push_back(columns[11] + " = " + std::to_string(char_create_point_allocations_entry.alloc_agi));
-		update_values.push_back(columns[12] + " = " + std::to_string(char_create_point_allocations_entry.alloc_int));
-		update_values.push_back(columns[13] + " = " + std::to_string(char_create_point_allocations_entry.alloc_wis));
-		update_values.push_back(columns[14] + " = " + std::to_string(char_create_point_allocations_entry.alloc_cha));
+		update_values.push_back(columns[0] + " = " + std::to_string(char_create_point_allocations_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(char_create_point_allocations_e.base_str));
+		update_values.push_back(columns[2] + " = " + std::to_string(char_create_point_allocations_e.base_sta));
+		update_values.push_back(columns[3] + " = " + std::to_string(char_create_point_allocations_e.base_dex));
+		update_values.push_back(columns[4] + " = " + std::to_string(char_create_point_allocations_e.base_agi));
+		update_values.push_back(columns[5] + " = " + std::to_string(char_create_point_allocations_e.base_int));
+		update_values.push_back(columns[6] + " = " + std::to_string(char_create_point_allocations_e.base_wis));
+		update_values.push_back(columns[7] + " = " + std::to_string(char_create_point_allocations_e.base_cha));
+		update_values.push_back(columns[8] + " = " + std::to_string(char_create_point_allocations_e.alloc_str));
+		update_values.push_back(columns[9] + " = " + std::to_string(char_create_point_allocations_e.alloc_sta));
+		update_values.push_back(columns[10] + " = " + std::to_string(char_create_point_allocations_e.alloc_dex));
+		update_values.push_back(columns[11] + " = " + std::to_string(char_create_point_allocations_e.alloc_agi));
+		update_values.push_back(columns[12] + " = " + std::to_string(char_create_point_allocations_e.alloc_int));
+		update_values.push_back(columns[13] + " = " + std::to_string(char_create_point_allocations_e.alloc_wis));
+		update_values.push_back(columns[14] + " = " + std::to_string(char_create_point_allocations_e.alloc_cha));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,7 +240,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				char_create_point_allocations_entry.id
+				char_create_point_allocations_e.id
 			)
 		);
 
@@ -249,26 +249,26 @@ public:
 
 	static CharCreatePointAllocations InsertOne(
 		Database& db,
-		CharCreatePointAllocations char_create_point_allocations_entry
+		CharCreatePointAllocations char_create_point_allocations_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.id));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_str));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_sta));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_dex));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_agi));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_int));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_wis));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_cha));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_str));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_sta));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_dex));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_agi));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_int));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_wis));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_cha));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.id));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_str));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_sta));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_dex));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_agi));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_int));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_wis));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_cha));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_str));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_sta));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_dex));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_agi));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_int));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_wis));
+		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_cha));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -279,13 +279,13 @@ public:
 		);
 
 		if (results.Success()) {
-			char_create_point_allocations_entry.id = results.LastInsertedID();
-			return char_create_point_allocations_entry;
+			char_create_point_allocations_e.id = results.LastInsertedID();
+			return char_create_point_allocations_e;
 		}
 
-		char_create_point_allocations_entry = NewEntity();
+		char_create_point_allocations_e = NewEntity();
 
-		return char_create_point_allocations_entry;
+		return char_create_point_allocations_e;
 	}
 
 	static int InsertMany(
@@ -295,24 +295,24 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &char_create_point_allocations_entry: char_create_point_allocations_entries) {
+		for (auto &char_create_point_allocations_e: char_create_point_allocations_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.id));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_str));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_sta));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_dex));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_agi));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_int));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_wis));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_cha));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_str));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_sta));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_dex));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_agi));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_int));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_wis));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_cha));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.id));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_str));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_sta));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_dex));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_agi));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_int));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_wis));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_cha));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_str));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_sta));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_dex));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_agi));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_int));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_wis));
+			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_cha));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -344,25 +344,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharCreatePointAllocations entry{};
+			CharCreatePointAllocations e{};
 
-			entry.id        = atoi(row[0]);
-			entry.base_str  = atoi(row[1]);
-			entry.base_sta  = atoi(row[2]);
-			entry.base_dex  = atoi(row[3]);
-			entry.base_agi  = atoi(row[4]);
-			entry.base_int  = atoi(row[5]);
-			entry.base_wis  = atoi(row[6]);
-			entry.base_cha  = atoi(row[7]);
-			entry.alloc_str = atoi(row[8]);
-			entry.alloc_sta = atoi(row[9]);
-			entry.alloc_dex = atoi(row[10]);
-			entry.alloc_agi = atoi(row[11]);
-			entry.alloc_int = atoi(row[12]);
-			entry.alloc_wis = atoi(row[13]);
-			entry.alloc_cha = atoi(row[14]);
+			e.id        = atoi(row[0]);
+			e.base_str  = atoi(row[1]);
+			e.base_sta  = atoi(row[2]);
+			e.base_dex  = atoi(row[3]);
+			e.base_agi  = atoi(row[4]);
+			e.base_int  = atoi(row[5]);
+			e.base_wis  = atoi(row[6]);
+			e.base_cha  = atoi(row[7]);
+			e.alloc_str = atoi(row[8]);
+			e.alloc_sta = atoi(row[9]);
+			e.alloc_dex = atoi(row[10]);
+			e.alloc_agi = atoi(row[11]);
+			e.alloc_int = atoi(row[12]);
+			e.alloc_wis = atoi(row[13]);
+			e.alloc_cha = atoi(row[14]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -383,25 +383,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharCreatePointAllocations entry{};
+			CharCreatePointAllocations e{};
 
-			entry.id        = atoi(row[0]);
-			entry.base_str  = atoi(row[1]);
-			entry.base_sta  = atoi(row[2]);
-			entry.base_dex  = atoi(row[3]);
-			entry.base_agi  = atoi(row[4]);
-			entry.base_int  = atoi(row[5]);
-			entry.base_wis  = atoi(row[6]);
-			entry.base_cha  = atoi(row[7]);
-			entry.alloc_str = atoi(row[8]);
-			entry.alloc_sta = atoi(row[9]);
-			entry.alloc_dex = atoi(row[10]);
-			entry.alloc_agi = atoi(row[11]);
-			entry.alloc_int = atoi(row[12]);
-			entry.alloc_wis = atoi(row[13]);
-			entry.alloc_cha = atoi(row[14]);
+			e.id        = atoi(row[0]);
+			e.base_str  = atoi(row[1]);
+			e.base_sta  = atoi(row[2]);
+			e.base_dex  = atoi(row[3]);
+			e.base_agi  = atoi(row[4]);
+			e.base_int  = atoi(row[5]);
+			e.base_wis  = atoi(row[6]);
+			e.base_cha  = atoi(row[7]);
+			e.alloc_str = atoi(row[8]);
+			e.alloc_sta = atoi(row[9]);
+			e.alloc_dex = atoi(row[10]);
+			e.alloc_agi = atoi(row[11]);
+			e.alloc_int = atoi(row[12]);
+			e.alloc_wis = atoi(row[13]);
+			e.alloc_cha = atoi(row[14]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

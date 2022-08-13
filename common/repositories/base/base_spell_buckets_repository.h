@@ -82,16 +82,16 @@ public:
 
 	static SpellBuckets NewEntity()
 	{
-		SpellBuckets entry{};
+		SpellBuckets e{};
 
-		entry.spellid = 0;
-		entry.key     = "";
-		entry.value   = "";
+		e.spellid = 0;
+		e.key     = "";
+		e.value   = "";
 
-		return entry;
+		return e;
 	}
 
-	static SpellBuckets GetSpellBucketsEntry(
+	static SpellBuckets GetSpellBucketse(
 		const std::vector<SpellBuckets> &spell_bucketss,
 		int spell_buckets_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SpellBuckets entry{};
+			SpellBuckets e{};
 
-			entry.spellid = strtoll(row[0], nullptr, 10);
-			entry.key     = row[1] ? row[1] : "";
-			entry.value   = row[2] ? row[2] : "";
+			e.spellid = strtoll(row[0], nullptr, 10);
+			e.key     = row[1] ? row[1] : "";
+			e.value   = row[2] ? row[2] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SpellBuckets spell_buckets_entry
+		SpellBuckets spell_buckets_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(spell_buckets_entry.spellid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_buckets_entry.key) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_buckets_entry.value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(spell_buckets_e.spellid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_buckets_e.key) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_buckets_e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spell_buckets_entry.spellid
+				spell_buckets_e.spellid
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static SpellBuckets InsertOne(
 		Database& db,
-		SpellBuckets spell_buckets_entry
+		SpellBuckets spell_buckets_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spell_buckets_entry.spellid));
-		insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.key) + "'");
-		insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.value) + "'");
+		insert_values.push_back(std::to_string(spell_buckets_e.spellid));
+		insert_values.push_back("'" + Strings::Escape(spell_buckets_e.key) + "'");
+		insert_values.push_back("'" + Strings::Escape(spell_buckets_e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			spell_buckets_entry.spellid = results.LastInsertedID();
-			return spell_buckets_entry;
+			spell_buckets_e.spellid = results.LastInsertedID();
+			return spell_buckets_e;
 		}
 
-		spell_buckets_entry = NewEntity();
+		spell_buckets_e = NewEntity();
 
-		return spell_buckets_entry;
+		return spell_buckets_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spell_buckets_entry: spell_buckets_entries) {
+		for (auto &spell_buckets_e: spell_buckets_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spell_buckets_entry.spellid));
-			insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.key) + "'");
-			insert_values.push_back("'" + Strings::Escape(spell_buckets_entry.value) + "'");
+			insert_values.push_back(std::to_string(spell_buckets_e.spellid));
+			insert_values.push_back("'" + Strings::Escape(spell_buckets_e.key) + "'");
+			insert_values.push_back("'" + Strings::Escape(spell_buckets_e.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpellBuckets entry{};
+			SpellBuckets e{};
 
-			entry.spellid = strtoll(row[0], nullptr, 10);
-			entry.key     = row[1] ? row[1] : "";
-			entry.value   = row[2] ? row[2] : "";
+			e.spellid = strtoll(row[0], nullptr, 10);
+			e.key     = row[1] ? row[1] : "";
+			e.value   = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpellBuckets entry{};
+			SpellBuckets e{};
 
-			entry.spellid = strtoll(row[0], nullptr, 10);
-			entry.key     = row[1] ? row[1] : "";
-			entry.value   = row[2] ? row[2] : "";
+			e.spellid = strtoll(row[0], nullptr, 10);
+			e.key     = row[1] ? row[1] : "";
+			e.value   = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

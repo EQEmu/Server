@@ -79,15 +79,15 @@ public:
 
 	static Goallists NewEntity()
 	{
-		Goallists entry{};
+		Goallists e{};
 
-		entry.listid = 0;
-		entry.entry  = 0;
+		e.listid = 0;
+		e.entry  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Goallists GetGoallistsEntry(
+	static Goallists GetGoallistse(
 		const std::vector<Goallists> &goallistss,
 		int goallists_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Goallists entry{};
+			Goallists e{};
 
-			entry.listid = atoi(row[0]);
-			entry.entry  = atoi(row[1]);
+			e.listid = atoi(row[0]);
+			e.entry  = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Goallists goallists_entry
+		Goallists goallists_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(goallists_entry.listid));
-		update_values.push_back(columns[1] + " = " + std::to_string(goallists_entry.entry));
+		update_values.push_back(columns[0] + " = " + std::to_string(goallists_e.listid));
+		update_values.push_back(columns[1] + " = " + std::to_string(goallists_e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				goallists_entry.listid
+				goallists_e.listid
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static Goallists InsertOne(
 		Database& db,
-		Goallists goallists_entry
+		Goallists goallists_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(goallists_entry.listid));
-		insert_values.push_back(std::to_string(goallists_entry.entry));
+		insert_values.push_back(std::to_string(goallists_e.listid));
+		insert_values.push_back(std::to_string(goallists_e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			goallists_entry.listid = results.LastInsertedID();
-			return goallists_entry;
+			goallists_e.listid = results.LastInsertedID();
+			return goallists_e;
 		}
 
-		goallists_entry = NewEntity();
+		goallists_e = NewEntity();
 
-		return goallists_entry;
+		return goallists_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &goallists_entry: goallists_entries) {
+		for (auto &goallists_e: goallists_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(goallists_entry.listid));
-			insert_values.push_back(std::to_string(goallists_entry.entry));
+			insert_values.push_back(std::to_string(goallists_e.listid));
+			insert_values.push_back(std::to_string(goallists_e.entry));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Goallists entry{};
+			Goallists e{};
 
-			entry.listid = atoi(row[0]);
-			entry.entry  = atoi(row[1]);
+			e.listid = atoi(row[0]);
+			e.entry  = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Goallists entry{};
+			Goallists e{};
 
-			entry.listid = atoi(row[0]);
-			entry.entry  = atoi(row[1]);
+			e.listid = atoi(row[0]);
+			e.entry  = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

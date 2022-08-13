@@ -82,16 +82,16 @@ public:
 
 	static IpExemptions NewEntity()
 	{
-		IpExemptions entry{};
+		IpExemptions e{};
 
-		entry.exemption_id     = 0;
-		entry.exemption_ip     = "";
-		entry.exemption_amount = 0;
+		e.exemption_id     = 0;
+		e.exemption_ip     = "";
+		e.exemption_amount = 0;
 
-		return entry;
+		return e;
 	}
 
-	static IpExemptions GetIpExemptionsEntry(
+	static IpExemptions GetIpExemptionse(
 		const std::vector<IpExemptions> &ip_exemptionss,
 		int ip_exemptions_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			IpExemptions entry{};
+			IpExemptions e{};
 
-			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1] ? row[1] : "";
-			entry.exemption_amount = atoi(row[2]);
+			e.exemption_id     = atoi(row[0]);
+			e.exemption_ip     = row[1] ? row[1] : "";
+			e.exemption_amount = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		IpExemptions ip_exemptions_entry
+		IpExemptions ip_exemptions_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(ip_exemptions_entry.exemption_ip) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(ip_exemptions_entry.exemption_amount));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(ip_exemptions_e.exemption_ip) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(ip_exemptions_e.exemption_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				ip_exemptions_entry.exemption_id
+				ip_exemptions_e.exemption_id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static IpExemptions InsertOne(
 		Database& db,
-		IpExemptions ip_exemptions_entry
+		IpExemptions ip_exemptions_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_id));
-		insert_values.push_back("'" + Strings::Escape(ip_exemptions_entry.exemption_ip) + "'");
-		insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
+		insert_values.push_back(std::to_string(ip_exemptions_e.exemption_id));
+		insert_values.push_back("'" + Strings::Escape(ip_exemptions_e.exemption_ip) + "'");
+		insert_values.push_back(std::to_string(ip_exemptions_e.exemption_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,13 +194,13 @@ public:
 		);
 
 		if (results.Success()) {
-			ip_exemptions_entry.exemption_id = results.LastInsertedID();
-			return ip_exemptions_entry;
+			ip_exemptions_e.exemption_id = results.LastInsertedID();
+			return ip_exemptions_e;
 		}
 
-		ip_exemptions_entry = NewEntity();
+		ip_exemptions_e = NewEntity();
 
-		return ip_exemptions_entry;
+		return ip_exemptions_e;
 	}
 
 	static int InsertMany(
@@ -210,12 +210,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &ip_exemptions_entry: ip_exemptions_entries) {
+		for (auto &ip_exemptions_e: ip_exemptions_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_id));
-			insert_values.push_back("'" + Strings::Escape(ip_exemptions_entry.exemption_ip) + "'");
-			insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
+			insert_values.push_back(std::to_string(ip_exemptions_e.exemption_id));
+			insert_values.push_back("'" + Strings::Escape(ip_exemptions_e.exemption_ip) + "'");
+			insert_values.push_back(std::to_string(ip_exemptions_e.exemption_amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -247,13 +247,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			IpExemptions entry{};
+			IpExemptions e{};
 
-			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1] ? row[1] : "";
-			entry.exemption_amount = atoi(row[2]);
+			e.exemption_id     = atoi(row[0]);
+			e.exemption_ip     = row[1] ? row[1] : "";
+			e.exemption_amount = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -274,13 +274,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			IpExemptions entry{};
+			IpExemptions e{};
 
-			entry.exemption_id     = atoi(row[0]);
-			entry.exemption_ip     = row[1] ? row[1] : "";
-			entry.exemption_amount = atoi(row[2]);
+			e.exemption_id     = atoi(row[0]);
+			e.exemption_ip     = row[1] ? row[1] : "";
+			e.exemption_amount = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

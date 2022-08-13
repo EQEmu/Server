@@ -82,16 +82,16 @@ public:
 
 	static GmIps NewEntity()
 	{
-		GmIps entry{};
+		GmIps e{};
 
-		entry.name       = "";
-		entry.account_id = 0;
-		entry.ip_address = "";
+		e.name       = "";
+		e.account_id = 0;
+		e.ip_address = "";
 
-		return entry;
+		return e;
 	}
 
-	static GmIps GetGmIpsEntry(
+	static GmIps GetGmIpse(
 		const std::vector<GmIps> &gm_ipss,
 		int gm_ips_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GmIps entry{};
+			GmIps e{};
 
-			entry.name       = row[0] ? row[0] : "";
-			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2] ? row[2] : "";
+			e.name       = row[0] ? row[0] : "";
+			e.account_id = atoi(row[1]);
+			e.ip_address = row[2] ? row[2] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GmIps gm_ips_entry
+		GmIps gm_ips_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + Strings::Escape(gm_ips_entry.name) + "'");
-		update_values.push_back(columns[1] + " = " + std::to_string(gm_ips_entry.account_id));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(gm_ips_entry.ip_address) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(gm_ips_e.name) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(gm_ips_e.account_id));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(gm_ips_e.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				gm_ips_entry.account_id
+				gm_ips_e.account_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static GmIps InsertOne(
 		Database& db,
-		GmIps gm_ips_entry
+		GmIps gm_ips_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + Strings::Escape(gm_ips_entry.name) + "'");
-		insert_values.push_back(std::to_string(gm_ips_entry.account_id));
-		insert_values.push_back("'" + Strings::Escape(gm_ips_entry.ip_address) + "'");
+		insert_values.push_back("'" + Strings::Escape(gm_ips_e.name) + "'");
+		insert_values.push_back(std::to_string(gm_ips_e.account_id));
+		insert_values.push_back("'" + Strings::Escape(gm_ips_e.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			gm_ips_entry.account_id = results.LastInsertedID();
-			return gm_ips_entry;
+			gm_ips_e.account_id = results.LastInsertedID();
+			return gm_ips_e;
 		}
 
-		gm_ips_entry = NewEntity();
+		gm_ips_e = NewEntity();
 
-		return gm_ips_entry;
+		return gm_ips_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &gm_ips_entry: gm_ips_entries) {
+		for (auto &gm_ips_e: gm_ips_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + Strings::Escape(gm_ips_entry.name) + "'");
-			insert_values.push_back(std::to_string(gm_ips_entry.account_id));
-			insert_values.push_back("'" + Strings::Escape(gm_ips_entry.ip_address) + "'");
+			insert_values.push_back("'" + Strings::Escape(gm_ips_e.name) + "'");
+			insert_values.push_back(std::to_string(gm_ips_e.account_id));
+			insert_values.push_back("'" + Strings::Escape(gm_ips_e.ip_address) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GmIps entry{};
+			GmIps e{};
 
-			entry.name       = row[0] ? row[0] : "";
-			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2] ? row[2] : "";
+			e.name       = row[0] ? row[0] : "";
+			e.account_id = atoi(row[1]);
+			e.ip_address = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GmIps entry{};
+			GmIps e{};
 
-			entry.name       = row[0] ? row[0] : "";
-			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2] ? row[2] : "";
+			e.name       = row[0] ? row[0] : "";
+			e.account_id = atoi(row[1]);
+			e.ip_address = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

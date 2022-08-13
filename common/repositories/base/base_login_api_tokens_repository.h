@@ -91,19 +91,19 @@ public:
 
 	static LoginApiTokens NewEntity()
 	{
-		LoginApiTokens entry{};
+		LoginApiTokens e{};
 
-		entry.id         = 0;
-		entry.token      = "";
-		entry.can_write  = 0;
-		entry.can_read   = 0;
-		entry.created_at = 0;
-		entry.updated_at = std::time(nullptr);
+		e.id         = 0;
+		e.token      = "";
+		e.can_write  = 0;
+		e.can_read   = 0;
+		e.created_at = 0;
+		e.updated_at = std::time(nullptr);
 
-		return entry;
+		return e;
 	}
 
-	static LoginApiTokens GetLoginApiTokensEntry(
+	static LoginApiTokens GetLoginApiTokense(
 		const std::vector<LoginApiTokens> &login_api_tokenss,
 		int login_api_tokens_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LoginApiTokens entry{};
+			LoginApiTokens e{};
 
-			entry.id         = atoi(row[0]);
-			entry.token      = row[1] ? row[1] : "";
-			entry.can_write  = atoi(row[2]);
-			entry.can_read   = atoi(row[3]);
-			entry.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			entry.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.id         = atoi(row[0]);
+			e.token      = row[1] ? row[1] : "";
+			e.can_write  = atoi(row[2]);
+			e.can_read   = atoi(row[3]);
+			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoginApiTokens login_api_tokens_entry
+		LoginApiTokens login_api_tokens_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_api_tokens_entry.token) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_entry.can_write));
-		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_entry.can_read));
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (login_api_tokens_entry.updated_at > 0 ? std::to_string(login_api_tokens_entry.updated_at) : "null") + ")");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_api_tokens_e.token) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_e.can_write));
+		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_e.can_read));
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (login_api_tokens_e.created_at > 0 ? std::to_string(login_api_tokens_e.created_at) : "null") + ")");
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (login_api_tokens_e.updated_at > 0 ? std::to_string(login_api_tokens_e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				login_api_tokens_entry.id
+				login_api_tokens_e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static LoginApiTokens InsertOne(
 		Database& db,
-		LoginApiTokens login_api_tokens_entry
+		LoginApiTokens login_api_tokens_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(login_api_tokens_entry.id));
-		insert_values.push_back("'" + Strings::Escape(login_api_tokens_entry.token) + "'");
-		insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
-		insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
-		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.updated_at > 0 ? std::to_string(login_api_tokens_entry.updated_at) : "null") + ")");
+		insert_values.push_back(std::to_string(login_api_tokens_e.id));
+		insert_values.push_back("'" + Strings::Escape(login_api_tokens_e.token) + "'");
+		insert_values.push_back(std::to_string(login_api_tokens_e.can_write));
+		insert_values.push_back(std::to_string(login_api_tokens_e.can_read));
+		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.created_at > 0 ? std::to_string(login_api_tokens_e.created_at) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.updated_at > 0 ? std::to_string(login_api_tokens_e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,13 +215,13 @@ public:
 		);
 
 		if (results.Success()) {
-			login_api_tokens_entry.id = results.LastInsertedID();
-			return login_api_tokens_entry;
+			login_api_tokens_e.id = results.LastInsertedID();
+			return login_api_tokens_e;
 		}
 
-		login_api_tokens_entry = NewEntity();
+		login_api_tokens_e = NewEntity();
 
-		return login_api_tokens_entry;
+		return login_api_tokens_e;
 	}
 
 	static int InsertMany(
@@ -231,15 +231,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &login_api_tokens_entry: login_api_tokens_entries) {
+		for (auto &login_api_tokens_e: login_api_tokens_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(login_api_tokens_entry.id));
-			insert_values.push_back("'" + Strings::Escape(login_api_tokens_entry.token) + "'");
-			insert_values.push_back(std::to_string(login_api_tokens_entry.can_write));
-			insert_values.push_back(std::to_string(login_api_tokens_entry.can_read));
-			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.created_at > 0 ? std::to_string(login_api_tokens_entry.created_at) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_entry.updated_at > 0 ? std::to_string(login_api_tokens_entry.updated_at) : "null") + ")");
+			insert_values.push_back(std::to_string(login_api_tokens_e.id));
+			insert_values.push_back("'" + Strings::Escape(login_api_tokens_e.token) + "'");
+			insert_values.push_back(std::to_string(login_api_tokens_e.can_write));
+			insert_values.push_back(std::to_string(login_api_tokens_e.can_read));
+			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.created_at > 0 ? std::to_string(login_api_tokens_e.created_at) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.updated_at > 0 ? std::to_string(login_api_tokens_e.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -271,16 +271,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginApiTokens entry{};
+			LoginApiTokens e{};
 
-			entry.id         = atoi(row[0]);
-			entry.token      = row[1] ? row[1] : "";
-			entry.can_write  = atoi(row[2]);
-			entry.can_read   = atoi(row[3]);
-			entry.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			entry.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.id         = atoi(row[0]);
+			e.token      = row[1] ? row[1] : "";
+			e.can_write  = atoi(row[2]);
+			e.can_read   = atoi(row[3]);
+			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -301,16 +301,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginApiTokens entry{};
+			LoginApiTokens e{};
 
-			entry.id         = atoi(row[0]);
-			entry.token      = row[1] ? row[1] : "";
-			entry.can_write  = atoi(row[2]);
-			entry.can_read   = atoi(row[3]);
-			entry.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			entry.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.id         = atoi(row[0]);
+			e.token      = row[1] ? row[1] : "";
+			e.can_write  = atoi(row[2]);
+			e.can_read   = atoi(row[3]);
+			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

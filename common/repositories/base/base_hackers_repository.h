@@ -91,19 +91,19 @@ public:
 
 	static Hackers NewEntity()
 	{
-		Hackers entry{};
+		Hackers e{};
 
-		entry.id      = 0;
-		entry.account = "";
-		entry.name    = "";
-		entry.hacked  = "";
-		entry.zone    = "";
-		entry.date    = std::time(nullptr);
+		e.id      = 0;
+		e.account = "";
+		e.name    = "";
+		e.hacked  = "";
+		e.zone    = "";
+		e.date    = std::time(nullptr);
 
-		return entry;
+		return e;
 	}
 
-	static Hackers GetHackersEntry(
+	static Hackers GetHackerse(
 		const std::vector<Hackers> &hackerss,
 		int hackers_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Hackers entry{};
+			Hackers e{};
 
-			entry.id      = atoi(row[0]);
-			entry.account = row[1] ? row[1] : "";
-			entry.name    = row[2] ? row[2] : "";
-			entry.hacked  = row[3] ? row[3] : "";
-			entry.zone    = row[4] ? row[4] : "";
-			entry.date    = row[5] ? row[5] : "";
+			e.id      = atoi(row[0]);
+			e.account = row[1] ? row[1] : "";
+			e.name    = row[2] ? row[2] : "";
+			e.hacked  = row[3] ? row[3] : "";
+			e.zone    = row[4] ? row[4] : "";
+			e.date    = row[5] ? row[5] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Hackers hackers_entry
+		Hackers hackers_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(hackers_entry.account) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(hackers_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(hackers_entry.hacked) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(hackers_entry.zone) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(hackers_entry.date) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(hackers_e.account) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(hackers_e.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(hackers_e.hacked) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(hackers_e.zone) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(hackers_e.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				hackers_entry.id
+				hackers_e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static Hackers InsertOne(
 		Database& db,
-		Hackers hackers_entry
+		Hackers hackers_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(hackers_entry.id));
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.account) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.hacked) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.zone) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.date) + "'");
+		insert_values.push_back(std::to_string(hackers_e.id));
+		insert_values.push_back("'" + Strings::Escape(hackers_e.account) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_e.hacked) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_e.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(hackers_e.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,13 +215,13 @@ public:
 		);
 
 		if (results.Success()) {
-			hackers_entry.id = results.LastInsertedID();
-			return hackers_entry;
+			hackers_e.id = results.LastInsertedID();
+			return hackers_e;
 		}
 
-		hackers_entry = NewEntity();
+		hackers_e = NewEntity();
 
-		return hackers_entry;
+		return hackers_e;
 	}
 
 	static int InsertMany(
@@ -231,15 +231,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &hackers_entry: hackers_entries) {
+		for (auto &hackers_e: hackers_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(hackers_entry.id));
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.account) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.hacked) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.zone) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.date) + "'");
+			insert_values.push_back(std::to_string(hackers_e.id));
+			insert_values.push_back("'" + Strings::Escape(hackers_e.account) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_e.hacked) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_e.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(hackers_e.date) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -271,16 +271,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Hackers entry{};
+			Hackers e{};
 
-			entry.id      = atoi(row[0]);
-			entry.account = row[1] ? row[1] : "";
-			entry.name    = row[2] ? row[2] : "";
-			entry.hacked  = row[3] ? row[3] : "";
-			entry.zone    = row[4] ? row[4] : "";
-			entry.date    = row[5] ? row[5] : "";
+			e.id      = atoi(row[0]);
+			e.account = row[1] ? row[1] : "";
+			e.name    = row[2] ? row[2] : "";
+			e.hacked  = row[3] ? row[3] : "";
+			e.zone    = row[4] ? row[4] : "";
+			e.date    = row[5] ? row[5] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -301,16 +301,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Hackers entry{};
+			Hackers e{};
 
-			entry.id      = atoi(row[0]);
-			entry.account = row[1] ? row[1] : "";
-			entry.name    = row[2] ? row[2] : "";
-			entry.hacked  = row[3] ? row[3] : "";
-			entry.zone    = row[4] ? row[4] : "";
-			entry.date    = row[5] ? row[5] : "";
+			e.id      = atoi(row[0]);
+			e.account = row[1] ? row[1] : "";
+			e.name    = row[2] ? row[2] : "";
+			e.hacked  = row[3] ? row[3] : "";
+			e.zone    = row[4] ? row[4] : "";
+			e.date    = row[5] ? row[5] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

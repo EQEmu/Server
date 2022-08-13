@@ -103,23 +103,23 @@ public:
 
 	static Eventlog NewEntity()
 	{
-		Eventlog entry{};
+		Eventlog e{};
 
-		entry.id              = 0;
-		entry.accountname     = "";
-		entry.accountid       = 0;
-		entry.status          = 0;
-		entry.charname        = "";
-		entry.target          = "None";
-		entry.time            = std::time(nullptr);
-		entry.descriptiontype = "";
-		entry.description     = "";
-		entry.event_nid       = 0;
+		e.id              = 0;
+		e.accountname     = "";
+		e.accountid       = 0;
+		e.status          = 0;
+		e.charname        = "";
+		e.target          = "None";
+		e.time            = std::time(nullptr);
+		e.descriptiontype = "";
+		e.description     = "";
+		e.event_nid       = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Eventlog GetEventlogEntry(
+	static Eventlog GetEventloge(
 		const std::vector<Eventlog> &eventlogs,
 		int eventlog_id
 	)
@@ -148,20 +148,20 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Eventlog entry{};
+			Eventlog e{};
 
-			entry.id              = atoi(row[0]);
-			entry.accountname     = row[1] ? row[1] : "";
-			entry.accountid       = atoi(row[2]);
-			entry.status          = atoi(row[3]);
-			entry.charname        = row[4] ? row[4] : "";
-			entry.target          = row[5] ? row[5] : "";
-			entry.time            = row[6] ? row[6] : "";
-			entry.descriptiontype = row[7] ? row[7] : "";
-			entry.description     = row[8] ? row[8] : "";
-			entry.event_nid       = atoi(row[9]);
+			e.id              = atoi(row[0]);
+			e.accountname     = row[1] ? row[1] : "";
+			e.accountid       = atoi(row[2]);
+			e.status          = atoi(row[3]);
+			e.charname        = row[4] ? row[4] : "";
+			e.target          = row[5] ? row[5] : "";
+			e.time            = row[6] ? row[6] : "";
+			e.descriptiontype = row[7] ? row[7] : "";
+			e.description     = row[8] ? row[8] : "";
+			e.event_nid       = atoi(row[9]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -186,22 +186,22 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Eventlog eventlog_entry
+		Eventlog eventlog_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(eventlog_entry.accountname) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(eventlog_entry.accountid));
-		update_values.push_back(columns[3] + " = " + std::to_string(eventlog_entry.status));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(eventlog_entry.charname) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(eventlog_entry.target) + "'");
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(eventlog_entry.time) + "'");
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(eventlog_entry.descriptiontype) + "'");
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(eventlog_entry.description) + "'");
-		update_values.push_back(columns[9] + " = " + std::to_string(eventlog_entry.event_nid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(eventlog_e.accountname) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(eventlog_e.accountid));
+		update_values.push_back(columns[3] + " = " + std::to_string(eventlog_e.status));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(eventlog_e.charname) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(eventlog_e.target) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(eventlog_e.time) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(eventlog_e.descriptiontype) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(eventlog_e.description) + "'");
+		update_values.push_back(columns[9] + " = " + std::to_string(eventlog_e.event_nid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,7 +209,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				eventlog_entry.id
+				eventlog_e.id
 			)
 		);
 
@@ -218,21 +218,21 @@ public:
 
 	static Eventlog InsertOne(
 		Database& db,
-		Eventlog eventlog_entry
+		Eventlog eventlog_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(eventlog_entry.id));
-		insert_values.push_back("'" + Strings::Escape(eventlog_entry.accountname) + "'");
-		insert_values.push_back(std::to_string(eventlog_entry.accountid));
-		insert_values.push_back(std::to_string(eventlog_entry.status));
-		insert_values.push_back("'" + Strings::Escape(eventlog_entry.charname) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_entry.target) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_entry.time) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_entry.descriptiontype) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_entry.description) + "'");
-		insert_values.push_back(std::to_string(eventlog_entry.event_nid));
+		insert_values.push_back(std::to_string(eventlog_e.id));
+		insert_values.push_back("'" + Strings::Escape(eventlog_e.accountname) + "'");
+		insert_values.push_back(std::to_string(eventlog_e.accountid));
+		insert_values.push_back(std::to_string(eventlog_e.status));
+		insert_values.push_back("'" + Strings::Escape(eventlog_e.charname) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_e.target) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_e.time) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_e.descriptiontype) + "'");
+		insert_values.push_back("'" + Strings::Escape(eventlog_e.description) + "'");
+		insert_values.push_back(std::to_string(eventlog_e.event_nid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -243,13 +243,13 @@ public:
 		);
 
 		if (results.Success()) {
-			eventlog_entry.id = results.LastInsertedID();
-			return eventlog_entry;
+			eventlog_e.id = results.LastInsertedID();
+			return eventlog_e;
 		}
 
-		eventlog_entry = NewEntity();
+		eventlog_e = NewEntity();
 
-		return eventlog_entry;
+		return eventlog_e;
 	}
 
 	static int InsertMany(
@@ -259,19 +259,19 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &eventlog_entry: eventlog_entries) {
+		for (auto &eventlog_e: eventlog_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(eventlog_entry.id));
-			insert_values.push_back("'" + Strings::Escape(eventlog_entry.accountname) + "'");
-			insert_values.push_back(std::to_string(eventlog_entry.accountid));
-			insert_values.push_back(std::to_string(eventlog_entry.status));
-			insert_values.push_back("'" + Strings::Escape(eventlog_entry.charname) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_entry.target) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_entry.time) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_entry.descriptiontype) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_entry.description) + "'");
-			insert_values.push_back(std::to_string(eventlog_entry.event_nid));
+			insert_values.push_back(std::to_string(eventlog_e.id));
+			insert_values.push_back("'" + Strings::Escape(eventlog_e.accountname) + "'");
+			insert_values.push_back(std::to_string(eventlog_e.accountid));
+			insert_values.push_back(std::to_string(eventlog_e.status));
+			insert_values.push_back("'" + Strings::Escape(eventlog_e.charname) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_e.target) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_e.time) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_e.descriptiontype) + "'");
+			insert_values.push_back("'" + Strings::Escape(eventlog_e.description) + "'");
+			insert_values.push_back(std::to_string(eventlog_e.event_nid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -303,20 +303,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Eventlog entry{};
+			Eventlog e{};
 
-			entry.id              = atoi(row[0]);
-			entry.accountname     = row[1] ? row[1] : "";
-			entry.accountid       = atoi(row[2]);
-			entry.status          = atoi(row[3]);
-			entry.charname        = row[4] ? row[4] : "";
-			entry.target          = row[5] ? row[5] : "";
-			entry.time            = row[6] ? row[6] : "";
-			entry.descriptiontype = row[7] ? row[7] : "";
-			entry.description     = row[8] ? row[8] : "";
-			entry.event_nid       = atoi(row[9]);
+			e.id              = atoi(row[0]);
+			e.accountname     = row[1] ? row[1] : "";
+			e.accountid       = atoi(row[2]);
+			e.status          = atoi(row[3]);
+			e.charname        = row[4] ? row[4] : "";
+			e.target          = row[5] ? row[5] : "";
+			e.time            = row[6] ? row[6] : "";
+			e.descriptiontype = row[7] ? row[7] : "";
+			e.description     = row[8] ? row[8] : "";
+			e.event_nid       = atoi(row[9]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -337,20 +337,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Eventlog entry{};
+			Eventlog e{};
 
-			entry.id              = atoi(row[0]);
-			entry.accountname     = row[1] ? row[1] : "";
-			entry.accountid       = atoi(row[2]);
-			entry.status          = atoi(row[3]);
-			entry.charname        = row[4] ? row[4] : "";
-			entry.target          = row[5] ? row[5] : "";
-			entry.time            = row[6] ? row[6] : "";
-			entry.descriptiontype = row[7] ? row[7] : "";
-			entry.description     = row[8] ? row[8] : "";
-			entry.event_nid       = atoi(row[9]);
+			e.id              = atoi(row[0]);
+			e.accountname     = row[1] ? row[1] : "";
+			e.accountid       = atoi(row[2]);
+			e.status          = atoi(row[3]);
+			e.charname        = row[4] ? row[4] : "";
+			e.target          = row[5] ? row[5] : "";
+			e.time            = row[6] ? row[6] : "";
+			e.descriptiontype = row[7] ? row[7] : "";
+			e.description     = row[8] ? row[8] : "";
+			e.event_nid       = atoi(row[9]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

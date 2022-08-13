@@ -106,24 +106,24 @@ public:
 
 	static CharacterPetBuffs NewEntity()
 	{
-		CharacterPetBuffs entry{};
+		CharacterPetBuffs e{};
 
-		entry.char_id        = 0;
-		entry.pet            = 0;
-		entry.slot           = 0;
-		entry.spell_id       = 0;
-		entry.caster_level   = 0;
-		entry.castername     = "";
-		entry.ticsremaining  = 0;
-		entry.counters       = 0;
-		entry.numhits        = 0;
-		entry.rune           = 0;
-		entry.instrument_mod = 10;
+		e.char_id        = 0;
+		e.pet            = 0;
+		e.slot           = 0;
+		e.spell_id       = 0;
+		e.caster_level   = 0;
+		e.castername     = "";
+		e.ticsremaining  = 0;
+		e.counters       = 0;
+		e.numhits        = 0;
+		e.rune           = 0;
+		e.instrument_mod = 10;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterPetBuffs GetCharacterPetBuffsEntry(
+	static CharacterPetBuffs GetCharacterPetBuffse(
 		const std::vector<CharacterPetBuffs> &character_pet_buffss,
 		int character_pet_buffs_id
 	)
@@ -152,21 +152,21 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterPetBuffs entry{};
+			CharacterPetBuffs e{};
 
-			entry.char_id        = atoi(row[0]);
-			entry.pet            = atoi(row[1]);
-			entry.slot           = atoi(row[2]);
-			entry.spell_id       = atoi(row[3]);
-			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5] ? row[5] : "";
-			entry.ticsremaining  = atoi(row[6]);
-			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
-			entry.rune           = atoi(row[9]);
-			entry.instrument_mod = atoi(row[10]);
+			e.char_id        = atoi(row[0]);
+			e.pet            = atoi(row[1]);
+			e.slot           = atoi(row[2]);
+			e.spell_id       = atoi(row[3]);
+			e.caster_level   = atoi(row[4]);
+			e.castername     = row[5] ? row[5] : "";
+			e.ticsremaining  = atoi(row[6]);
+			e.counters       = atoi(row[7]);
+			e.numhits        = atoi(row[8]);
+			e.rune           = atoi(row[9]);
+			e.instrument_mod = atoi(row[10]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -191,24 +191,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterPetBuffs character_pet_buffs_entry
+		CharacterPetBuffs character_pet_buffs_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_buffs_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_buffs_entry.pet));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_pet_buffs_entry.slot));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_buffs_entry.spell_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_pet_buffs_entry.caster_level));
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(character_pet_buffs_entry.castername) + "'");
-		update_values.push_back(columns[6] + " = " + std::to_string(character_pet_buffs_entry.ticsremaining));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_pet_buffs_entry.counters));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_pet_buffs_entry.numhits));
-		update_values.push_back(columns[9] + " = " + std::to_string(character_pet_buffs_entry.rune));
-		update_values.push_back(columns[10] + " = " + std::to_string(character_pet_buffs_entry.instrument_mod));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_buffs_e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_buffs_e.pet));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_pet_buffs_e.slot));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_buffs_e.spell_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(character_pet_buffs_e.caster_level));
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(character_pet_buffs_e.castername) + "'");
+		update_values.push_back(columns[6] + " = " + std::to_string(character_pet_buffs_e.ticsremaining));
+		update_values.push_back(columns[7] + " = " + std::to_string(character_pet_buffs_e.counters));
+		update_values.push_back(columns[8] + " = " + std::to_string(character_pet_buffs_e.numhits));
+		update_values.push_back(columns[9] + " = " + std::to_string(character_pet_buffs_e.rune));
+		update_values.push_back(columns[10] + " = " + std::to_string(character_pet_buffs_e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +216,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_pet_buffs_entry.char_id
+				character_pet_buffs_e.char_id
 			)
 		);
 
@@ -225,22 +225,22 @@ public:
 
 	static CharacterPetBuffs InsertOne(
 		Database& db,
-		CharacterPetBuffs character_pet_buffs_entry
+		CharacterPetBuffs character_pet_buffs_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.char_id));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.pet));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.slot));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.spell_id));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.caster_level));
-		insert_values.push_back("'" + Strings::Escape(character_pet_buffs_entry.castername) + "'");
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.ticsremaining));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.counters));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.numhits));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.rune));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.instrument_mod));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.char_id));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.pet));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.slot));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.spell_id));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.caster_level));
+		insert_values.push_back("'" + Strings::Escape(character_pet_buffs_e.castername) + "'");
+		insert_values.push_back(std::to_string(character_pet_buffs_e.ticsremaining));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.counters));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.numhits));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.rune));
+		insert_values.push_back(std::to_string(character_pet_buffs_e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -251,13 +251,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_pet_buffs_entry.char_id = results.LastInsertedID();
-			return character_pet_buffs_entry;
+			character_pet_buffs_e.char_id = results.LastInsertedID();
+			return character_pet_buffs_e;
 		}
 
-		character_pet_buffs_entry = NewEntity();
+		character_pet_buffs_e = NewEntity();
 
-		return character_pet_buffs_entry;
+		return character_pet_buffs_e;
 	}
 
 	static int InsertMany(
@@ -267,20 +267,20 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_pet_buffs_entry: character_pet_buffs_entries) {
+		for (auto &character_pet_buffs_e: character_pet_buffs_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.char_id));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.pet));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.slot));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.spell_id));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.caster_level));
-			insert_values.push_back("'" + Strings::Escape(character_pet_buffs_entry.castername) + "'");
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.ticsremaining));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.counters));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.numhits));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.rune));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.instrument_mod));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.char_id));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.pet));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.slot));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.spell_id));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.caster_level));
+			insert_values.push_back("'" + Strings::Escape(character_pet_buffs_e.castername) + "'");
+			insert_values.push_back(std::to_string(character_pet_buffs_e.ticsremaining));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.counters));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.numhits));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.rune));
+			insert_values.push_back(std::to_string(character_pet_buffs_e.instrument_mod));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -312,21 +312,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetBuffs entry{};
+			CharacterPetBuffs e{};
 
-			entry.char_id        = atoi(row[0]);
-			entry.pet            = atoi(row[1]);
-			entry.slot           = atoi(row[2]);
-			entry.spell_id       = atoi(row[3]);
-			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5] ? row[5] : "";
-			entry.ticsremaining  = atoi(row[6]);
-			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
-			entry.rune           = atoi(row[9]);
-			entry.instrument_mod = atoi(row[10]);
+			e.char_id        = atoi(row[0]);
+			e.pet            = atoi(row[1]);
+			e.slot           = atoi(row[2]);
+			e.spell_id       = atoi(row[3]);
+			e.caster_level   = atoi(row[4]);
+			e.castername     = row[5] ? row[5] : "";
+			e.ticsremaining  = atoi(row[6]);
+			e.counters       = atoi(row[7]);
+			e.numhits        = atoi(row[8]);
+			e.rune           = atoi(row[9]);
+			e.instrument_mod = atoi(row[10]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -347,21 +347,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetBuffs entry{};
+			CharacterPetBuffs e{};
 
-			entry.char_id        = atoi(row[0]);
-			entry.pet            = atoi(row[1]);
-			entry.slot           = atoi(row[2]);
-			entry.spell_id       = atoi(row[3]);
-			entry.caster_level   = atoi(row[4]);
-			entry.castername     = row[5] ? row[5] : "";
-			entry.ticsremaining  = atoi(row[6]);
-			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
-			entry.rune           = atoi(row[9]);
-			entry.instrument_mod = atoi(row[10]);
+			e.char_id        = atoi(row[0]);
+			e.pet            = atoi(row[1]);
+			e.slot           = atoi(row[2]);
+			e.spell_id       = atoi(row[3]);
+			e.caster_level   = atoi(row[4]);
+			e.castername     = row[5] ? row[5] : "";
+			e.ticsremaining  = atoi(row[6]);
+			e.counters       = atoi(row[7]);
+			e.numhits        = atoi(row[8]);
+			e.rune           = atoi(row[9]);
+			e.instrument_mod = atoi(row[10]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

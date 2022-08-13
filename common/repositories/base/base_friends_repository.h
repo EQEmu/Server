@@ -82,16 +82,16 @@ public:
 
 	static Friends NewEntity()
 	{
-		Friends entry{};
+		Friends e{};
 
-		entry.charid = 0;
-		entry.type   = 1;
-		entry.name   = "";
+		e.charid = 0;
+		e.type   = 1;
+		e.name   = "";
 
-		return entry;
+		return e;
 	}
 
-	static Friends GetFriendsEntry(
+	static Friends GetFriendse(
 		const std::vector<Friends> &friendss,
 		int friends_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Friends entry{};
+			Friends e{};
 
-			entry.charid = atoi(row[0]);
-			entry.type   = atoi(row[1]);
-			entry.name   = row[2] ? row[2] : "";
+			e.charid = atoi(row[0]);
+			e.type   = atoi(row[1]);
+			e.name   = row[2] ? row[2] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Friends friends_entry
+		Friends friends_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(friends_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(friends_entry.type));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(friends_entry.name) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(friends_e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(friends_e.type));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(friends_e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				friends_entry.charid
+				friends_e.charid
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static Friends InsertOne(
 		Database& db,
-		Friends friends_entry
+		Friends friends_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(friends_entry.charid));
-		insert_values.push_back(std::to_string(friends_entry.type));
-		insert_values.push_back("'" + Strings::Escape(friends_entry.name) + "'");
+		insert_values.push_back(std::to_string(friends_e.charid));
+		insert_values.push_back(std::to_string(friends_e.type));
+		insert_values.push_back("'" + Strings::Escape(friends_e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			friends_entry.charid = results.LastInsertedID();
-			return friends_entry;
+			friends_e.charid = results.LastInsertedID();
+			return friends_e;
 		}
 
-		friends_entry = NewEntity();
+		friends_e = NewEntity();
 
-		return friends_entry;
+		return friends_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &friends_entry: friends_entries) {
+		for (auto &friends_e: friends_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(friends_entry.charid));
-			insert_values.push_back(std::to_string(friends_entry.type));
-			insert_values.push_back("'" + Strings::Escape(friends_entry.name) + "'");
+			insert_values.push_back(std::to_string(friends_e.charid));
+			insert_values.push_back(std::to_string(friends_e.type));
+			insert_values.push_back("'" + Strings::Escape(friends_e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Friends entry{};
+			Friends e{};
 
-			entry.charid = atoi(row[0]);
-			entry.type   = atoi(row[1]);
-			entry.name   = row[2] ? row[2] : "";
+			e.charid = atoi(row[0]);
+			e.type   = atoi(row[1]);
+			e.name   = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Friends entry{};
+			Friends e{};
 
-			entry.charid = atoi(row[0]);
-			entry.type   = atoi(row[1]);
-			entry.name   = row[2] ? row[2] : "";
+			e.charid = atoi(row[0]);
+			e.type   = atoi(row[1]);
+			e.name   = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

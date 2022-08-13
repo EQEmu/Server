@@ -94,20 +94,20 @@ public:
 
 	static Horses NewEntity()
 	{
-		Horses entry{};
+		Horses e{};
 
-		entry.id         = 0;
-		entry.filename   = "";
-		entry.race       = 216;
-		entry.gender     = 0;
-		entry.texture    = 0;
-		entry.mountspeed = 0.75;
-		entry.notes      = "Notes";
+		e.id         = 0;
+		e.filename   = "";
+		e.race       = 216;
+		e.gender     = 0;
+		e.texture    = 0;
+		e.mountspeed = 0.75;
+		e.notes      = "Notes";
 
-		return entry;
+		return e;
 	}
 
-	static Horses GetHorsesEntry(
+	static Horses GetHorsese(
 		const std::vector<Horses> &horsess,
 		int horses_id
 	)
@@ -136,17 +136,17 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Horses entry{};
+			Horses e{};
 
-			entry.id         = atoi(row[0]);
-			entry.filename   = row[1] ? row[1] : "";
-			entry.race       = atoi(row[2]);
-			entry.gender     = atoi(row[3]);
-			entry.texture    = atoi(row[4]);
-			entry.mountspeed = static_cast<float>(atof(row[5]));
-			entry.notes      = row[6] ? row[6] : "";
+			e.id         = atoi(row[0]);
+			e.filename   = row[1] ? row[1] : "";
+			e.race       = atoi(row[2]);
+			e.gender     = atoi(row[3]);
+			e.texture    = atoi(row[4]);
+			e.mountspeed = static_cast<float>(atof(row[5]));
+			e.notes      = row[6] ? row[6] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -171,19 +171,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Horses horses_entry
+		Horses horses_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(horses_entry.filename) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(horses_entry.race));
-		update_values.push_back(columns[3] + " = " + std::to_string(horses_entry.gender));
-		update_values.push_back(columns[4] + " = " + std::to_string(horses_entry.texture));
-		update_values.push_back(columns[5] + " = " + std::to_string(horses_entry.mountspeed));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(horses_entry.notes) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(horses_e.filename) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(horses_e.race));
+		update_values.push_back(columns[3] + " = " + std::to_string(horses_e.gender));
+		update_values.push_back(columns[4] + " = " + std::to_string(horses_e.texture));
+		update_values.push_back(columns[5] + " = " + std::to_string(horses_e.mountspeed));
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(horses_e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -191,7 +191,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				horses_entry.id
+				horses_e.id
 			)
 		);
 
@@ -200,18 +200,18 @@ public:
 
 	static Horses InsertOne(
 		Database& db,
-		Horses horses_entry
+		Horses horses_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(horses_entry.id));
-		insert_values.push_back("'" + Strings::Escape(horses_entry.filename) + "'");
-		insert_values.push_back(std::to_string(horses_entry.race));
-		insert_values.push_back(std::to_string(horses_entry.gender));
-		insert_values.push_back(std::to_string(horses_entry.texture));
-		insert_values.push_back(std::to_string(horses_entry.mountspeed));
-		insert_values.push_back("'" + Strings::Escape(horses_entry.notes) + "'");
+		insert_values.push_back(std::to_string(horses_e.id));
+		insert_values.push_back("'" + Strings::Escape(horses_e.filename) + "'");
+		insert_values.push_back(std::to_string(horses_e.race));
+		insert_values.push_back(std::to_string(horses_e.gender));
+		insert_values.push_back(std::to_string(horses_e.texture));
+		insert_values.push_back(std::to_string(horses_e.mountspeed));
+		insert_values.push_back("'" + Strings::Escape(horses_e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,13 +222,13 @@ public:
 		);
 
 		if (results.Success()) {
-			horses_entry.id = results.LastInsertedID();
-			return horses_entry;
+			horses_e.id = results.LastInsertedID();
+			return horses_e;
 		}
 
-		horses_entry = NewEntity();
+		horses_e = NewEntity();
 
-		return horses_entry;
+		return horses_e;
 	}
 
 	static int InsertMany(
@@ -238,16 +238,16 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &horses_entry: horses_entries) {
+		for (auto &horses_e: horses_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(horses_entry.id));
-			insert_values.push_back("'" + Strings::Escape(horses_entry.filename) + "'");
-			insert_values.push_back(std::to_string(horses_entry.race));
-			insert_values.push_back(std::to_string(horses_entry.gender));
-			insert_values.push_back(std::to_string(horses_entry.texture));
-			insert_values.push_back(std::to_string(horses_entry.mountspeed));
-			insert_values.push_back("'" + Strings::Escape(horses_entry.notes) + "'");
+			insert_values.push_back(std::to_string(horses_e.id));
+			insert_values.push_back("'" + Strings::Escape(horses_e.filename) + "'");
+			insert_values.push_back(std::to_string(horses_e.race));
+			insert_values.push_back(std::to_string(horses_e.gender));
+			insert_values.push_back(std::to_string(horses_e.texture));
+			insert_values.push_back(std::to_string(horses_e.mountspeed));
+			insert_values.push_back("'" + Strings::Escape(horses_e.notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -279,17 +279,17 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Horses entry{};
+			Horses e{};
 
-			entry.id         = atoi(row[0]);
-			entry.filename   = row[1] ? row[1] : "";
-			entry.race       = atoi(row[2]);
-			entry.gender     = atoi(row[3]);
-			entry.texture    = atoi(row[4]);
-			entry.mountspeed = static_cast<float>(atof(row[5]));
-			entry.notes      = row[6] ? row[6] : "";
+			e.id         = atoi(row[0]);
+			e.filename   = row[1] ? row[1] : "";
+			e.race       = atoi(row[2]);
+			e.gender     = atoi(row[3]);
+			e.texture    = atoi(row[4]);
+			e.mountspeed = static_cast<float>(atof(row[5]));
+			e.notes      = row[6] ? row[6] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -310,17 +310,17 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Horses entry{};
+			Horses e{};
 
-			entry.id         = atoi(row[0]);
-			entry.filename   = row[1] ? row[1] : "";
-			entry.race       = atoi(row[2]);
-			entry.gender     = atoi(row[3]);
-			entry.texture    = atoi(row[4]);
-			entry.mountspeed = static_cast<float>(atof(row[5]));
-			entry.notes      = row[6] ? row[6] : "";
+			e.id         = atoi(row[0]);
+			e.filename   = row[1] ? row[1] : "";
+			e.race       = atoi(row[2]);
+			e.gender     = atoi(row[3]);
+			e.texture    = atoi(row[4]);
+			e.mountspeed = static_cast<float>(atof(row[5]));
+			e.notes      = row[6] ? row[6] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

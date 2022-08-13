@@ -118,28 +118,28 @@ public:
 
 	static Merchantlist NewEntity()
 	{
-		Merchantlist entry{};
+		Merchantlist e{};
 
-		entry.merchantid             = 0;
-		entry.slot                   = 0;
-		entry.item                   = 0;
-		entry.faction_required       = -100;
-		entry.level_required         = 0;
-		entry.alt_currency_cost      = 0;
-		entry.classes_required       = 65535;
-		entry.probability            = 100;
-		entry.bucket_name            = "";
-		entry.bucket_value           = "";
-		entry.bucket_comparison      = 0;
-		entry.min_expansion          = -1;
-		entry.max_expansion          = -1;
-		entry.content_flags          = "";
-		entry.content_flags_disabled = "";
+		e.merchantid             = 0;
+		e.slot                   = 0;
+		e.item                   = 0;
+		e.faction_required       = -100;
+		e.level_required         = 0;
+		e.alt_currency_cost      = 0;
+		e.classes_required       = 65535;
+		e.probability            = 100;
+		e.bucket_name            = "";
+		e.bucket_value           = "";
+		e.bucket_comparison      = 0;
+		e.min_expansion          = -1;
+		e.max_expansion          = -1;
+		e.content_flags          = "";
+		e.content_flags_disabled = "";
 
-		return entry;
+		return e;
 	}
 
-	static Merchantlist GetMerchantlistEntry(
+	static Merchantlist GetMerchantliste(
 		const std::vector<Merchantlist> &merchantlists,
 		int merchantlist_id
 	)
@@ -168,25 +168,25 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Merchantlist entry{};
+			Merchantlist e{};
 
-			entry.merchantid             = atoi(row[0]);
-			entry.slot                   = atoi(row[1]);
-			entry.item                   = atoi(row[2]);
-			entry.faction_required       = atoi(row[3]);
-			entry.level_required         = atoi(row[4]);
-			entry.alt_currency_cost      = atoi(row[5]);
-			entry.classes_required       = atoi(row[6]);
-			entry.probability            = atoi(row[7]);
-			entry.bucket_name            = row[8] ? row[8] : "";
-			entry.bucket_value           = row[9] ? row[9] : "";
-			entry.bucket_comparison      = atoi(row[10]);
-			entry.min_expansion          = atoi(row[11]);
-			entry.max_expansion          = atoi(row[12]);
-			entry.content_flags          = row[13] ? row[13] : "";
-			entry.content_flags_disabled = row[14] ? row[14] : "";
+			e.merchantid             = atoi(row[0]);
+			e.slot                   = atoi(row[1]);
+			e.item                   = atoi(row[2]);
+			e.faction_required       = atoi(row[3]);
+			e.level_required         = atoi(row[4]);
+			e.alt_currency_cost      = atoi(row[5]);
+			e.classes_required       = atoi(row[6]);
+			e.probability            = atoi(row[7]);
+			e.bucket_name            = row[8] ? row[8] : "";
+			e.bucket_value           = row[9] ? row[9] : "";
+			e.bucket_comparison      = atoi(row[10]);
+			e.min_expansion          = atoi(row[11]);
+			e.max_expansion          = atoi(row[12]);
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -211,28 +211,28 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Merchantlist merchantlist_entry
+		Merchantlist merchantlist_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_entry.merchantid));
-		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_entry.item));
-		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_entry.faction_required));
-		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_entry.level_required));
-		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_entry.alt_currency_cost));
-		update_values.push_back(columns[6] + " = " + std::to_string(merchantlist_entry.classes_required));
-		update_values.push_back(columns[7] + " = " + std::to_string(merchantlist_entry.probability));
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(merchantlist_entry.bucket_name) + "'");
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(merchantlist_entry.bucket_value) + "'");
-		update_values.push_back(columns[10] + " = " + std::to_string(merchantlist_entry.bucket_comparison));
-		update_values.push_back(columns[11] + " = " + std::to_string(merchantlist_entry.min_expansion));
-		update_values.push_back(columns[12] + " = " + std::to_string(merchantlist_entry.max_expansion));
-		update_values.push_back(columns[13] + " = '" + Strings::Escape(merchantlist_entry.content_flags) + "'");
-		update_values.push_back(columns[14] + " = '" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_e.merchantid));
+		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_e.item));
+		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_e.faction_required));
+		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_e.level_required));
+		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_e.alt_currency_cost));
+		update_values.push_back(columns[6] + " = " + std::to_string(merchantlist_e.classes_required));
+		update_values.push_back(columns[7] + " = " + std::to_string(merchantlist_e.probability));
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(merchantlist_e.bucket_name) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(merchantlist_e.bucket_value) + "'");
+		update_values.push_back(columns[10] + " = " + std::to_string(merchantlist_e.bucket_comparison));
+		update_values.push_back(columns[11] + " = " + std::to_string(merchantlist_e.min_expansion));
+		update_values.push_back(columns[12] + " = " + std::to_string(merchantlist_e.max_expansion));
+		update_values.push_back(columns[13] + " = '" + Strings::Escape(merchantlist_e.content_flags) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(merchantlist_e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,7 +240,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				merchantlist_entry.merchantid
+				merchantlist_e.merchantid
 			)
 		);
 
@@ -249,26 +249,26 @@ public:
 
 	static Merchantlist InsertOne(
 		Database& db,
-		Merchantlist merchantlist_entry
+		Merchantlist merchantlist_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(merchantlist_entry.merchantid));
-		insert_values.push_back(std::to_string(merchantlist_entry.slot));
-		insert_values.push_back(std::to_string(merchantlist_entry.item));
-		insert_values.push_back(std::to_string(merchantlist_entry.faction_required));
-		insert_values.push_back(std::to_string(merchantlist_entry.level_required));
-		insert_values.push_back(std::to_string(merchantlist_entry.alt_currency_cost));
-		insert_values.push_back(std::to_string(merchantlist_entry.classes_required));
-		insert_values.push_back(std::to_string(merchantlist_entry.probability));
-		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_value) + "'");
-		insert_values.push_back(std::to_string(merchantlist_entry.bucket_comparison));
-		insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
-		insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(merchantlist_e.merchantid));
+		insert_values.push_back(std::to_string(merchantlist_e.slot));
+		insert_values.push_back(std::to_string(merchantlist_e.item));
+		insert_values.push_back(std::to_string(merchantlist_e.faction_required));
+		insert_values.push_back(std::to_string(merchantlist_e.level_required));
+		insert_values.push_back(std::to_string(merchantlist_e.alt_currency_cost));
+		insert_values.push_back(std::to_string(merchantlist_e.classes_required));
+		insert_values.push_back(std::to_string(merchantlist_e.probability));
+		insert_values.push_back("'" + Strings::Escape(merchantlist_e.bucket_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(merchantlist_e.bucket_value) + "'");
+		insert_values.push_back(std::to_string(merchantlist_e.bucket_comparison));
+		insert_values.push_back(std::to_string(merchantlist_e.min_expansion));
+		insert_values.push_back(std::to_string(merchantlist_e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(merchantlist_e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(merchantlist_e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -279,13 +279,13 @@ public:
 		);
 
 		if (results.Success()) {
-			merchantlist_entry.merchantid = results.LastInsertedID();
-			return merchantlist_entry;
+			merchantlist_e.merchantid = results.LastInsertedID();
+			return merchantlist_e;
 		}
 
-		merchantlist_entry = NewEntity();
+		merchantlist_e = NewEntity();
 
-		return merchantlist_entry;
+		return merchantlist_e;
 	}
 
 	static int InsertMany(
@@ -295,24 +295,24 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &merchantlist_entry: merchantlist_entries) {
+		for (auto &merchantlist_e: merchantlist_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(merchantlist_entry.merchantid));
-			insert_values.push_back(std::to_string(merchantlist_entry.slot));
-			insert_values.push_back(std::to_string(merchantlist_entry.item));
-			insert_values.push_back(std::to_string(merchantlist_entry.faction_required));
-			insert_values.push_back(std::to_string(merchantlist_entry.level_required));
-			insert_values.push_back(std::to_string(merchantlist_entry.alt_currency_cost));
-			insert_values.push_back(std::to_string(merchantlist_entry.classes_required));
-			insert_values.push_back(std::to_string(merchantlist_entry.probability));
-			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_value) + "'");
-			insert_values.push_back(std::to_string(merchantlist_entry.bucket_comparison));
-			insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
-			insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(merchantlist_e.merchantid));
+			insert_values.push_back(std::to_string(merchantlist_e.slot));
+			insert_values.push_back(std::to_string(merchantlist_e.item));
+			insert_values.push_back(std::to_string(merchantlist_e.faction_required));
+			insert_values.push_back(std::to_string(merchantlist_e.level_required));
+			insert_values.push_back(std::to_string(merchantlist_e.alt_currency_cost));
+			insert_values.push_back(std::to_string(merchantlist_e.classes_required));
+			insert_values.push_back(std::to_string(merchantlist_e.probability));
+			insert_values.push_back("'" + Strings::Escape(merchantlist_e.bucket_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(merchantlist_e.bucket_value) + "'");
+			insert_values.push_back(std::to_string(merchantlist_e.bucket_comparison));
+			insert_values.push_back(std::to_string(merchantlist_e.min_expansion));
+			insert_values.push_back(std::to_string(merchantlist_e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(merchantlist_e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(merchantlist_e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -344,25 +344,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Merchantlist entry{};
+			Merchantlist e{};
 
-			entry.merchantid             = atoi(row[0]);
-			entry.slot                   = atoi(row[1]);
-			entry.item                   = atoi(row[2]);
-			entry.faction_required       = atoi(row[3]);
-			entry.level_required         = atoi(row[4]);
-			entry.alt_currency_cost      = atoi(row[5]);
-			entry.classes_required       = atoi(row[6]);
-			entry.probability            = atoi(row[7]);
-			entry.bucket_name            = row[8] ? row[8] : "";
-			entry.bucket_value           = row[9] ? row[9] : "";
-			entry.bucket_comparison      = atoi(row[10]);
-			entry.min_expansion          = atoi(row[11]);
-			entry.max_expansion          = atoi(row[12]);
-			entry.content_flags          = row[13] ? row[13] : "";
-			entry.content_flags_disabled = row[14] ? row[14] : "";
+			e.merchantid             = atoi(row[0]);
+			e.slot                   = atoi(row[1]);
+			e.item                   = atoi(row[2]);
+			e.faction_required       = atoi(row[3]);
+			e.level_required         = atoi(row[4]);
+			e.alt_currency_cost      = atoi(row[5]);
+			e.classes_required       = atoi(row[6]);
+			e.probability            = atoi(row[7]);
+			e.bucket_name            = row[8] ? row[8] : "";
+			e.bucket_value           = row[9] ? row[9] : "";
+			e.bucket_comparison      = atoi(row[10]);
+			e.min_expansion          = atoi(row[11]);
+			e.max_expansion          = atoi(row[12]);
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -383,25 +383,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Merchantlist entry{};
+			Merchantlist e{};
 
-			entry.merchantid             = atoi(row[0]);
-			entry.slot                   = atoi(row[1]);
-			entry.item                   = atoi(row[2]);
-			entry.faction_required       = atoi(row[3]);
-			entry.level_required         = atoi(row[4]);
-			entry.alt_currency_cost      = atoi(row[5]);
-			entry.classes_required       = atoi(row[6]);
-			entry.probability            = atoi(row[7]);
-			entry.bucket_name            = row[8] ? row[8] : "";
-			entry.bucket_value           = row[9] ? row[9] : "";
-			entry.bucket_comparison      = atoi(row[10]);
-			entry.min_expansion          = atoi(row[11]);
-			entry.max_expansion          = atoi(row[12]);
-			entry.content_flags          = row[13] ? row[13] : "";
-			entry.content_flags_disabled = row[14] ? row[14] : "";
+			e.merchantid             = atoi(row[0]);
+			e.slot                   = atoi(row[1]);
+			e.item                   = atoi(row[2]);
+			e.faction_required       = atoi(row[3]);
+			e.level_required         = atoi(row[4]);
+			e.alt_currency_cost      = atoi(row[5]);
+			e.classes_required       = atoi(row[6]);
+			e.probability            = atoi(row[7]);
+			e.bucket_name            = row[8] ? row[8] : "";
+			e.bucket_value           = row[9] ? row[9] : "";
+			e.bucket_comparison      = atoi(row[10]);
+			e.min_expansion          = atoi(row[11]);
+			e.max_expansion          = atoi(row[12]);
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

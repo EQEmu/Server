@@ -88,18 +88,18 @@ public:
 
 	static CharacterActivities NewEntity()
 	{
-		CharacterActivities entry{};
+		CharacterActivities e{};
 
-		entry.charid     = 0;
-		entry.taskid     = 0;
-		entry.activityid = 0;
-		entry.donecount  = 0;
-		entry.completed  = 0;
+		e.charid     = 0;
+		e.taskid     = 0;
+		e.activityid = 0;
+		e.donecount  = 0;
+		e.completed  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterActivities GetCharacterActivitiesEntry(
+	static CharacterActivities GetCharacterActivitiese(
 		const std::vector<CharacterActivities> &character_activitiess,
 		int character_activities_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterActivities entry{};
+			CharacterActivities e{};
 
-			entry.charid     = atoi(row[0]);
-			entry.taskid     = atoi(row[1]);
-			entry.activityid = atoi(row[2]);
-			entry.donecount  = atoi(row[3]);
-			entry.completed  = atoi(row[4]);
+			e.charid     = atoi(row[0]);
+			e.taskid     = atoi(row[1]);
+			e.activityid = atoi(row[2]);
+			e.donecount  = atoi(row[3]);
+			e.completed  = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterActivities character_activities_entry
+		CharacterActivities character_activities_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_activities_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_activities_entry.taskid));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_activities_entry.activityid));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_activities_entry.donecount));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_activities_entry.completed));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_activities_e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_activities_e.taskid));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_activities_e.activityid));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_activities_e.donecount));
+		update_values.push_back(columns[4] + " = " + std::to_string(character_activities_e.completed));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_activities_entry.charid
+				character_activities_e.charid
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static CharacterActivities InsertOne(
 		Database& db,
-		CharacterActivities character_activities_entry
+		CharacterActivities character_activities_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_activities_entry.charid));
-		insert_values.push_back(std::to_string(character_activities_entry.taskid));
-		insert_values.push_back(std::to_string(character_activities_entry.activityid));
-		insert_values.push_back(std::to_string(character_activities_entry.donecount));
-		insert_values.push_back(std::to_string(character_activities_entry.completed));
+		insert_values.push_back(std::to_string(character_activities_e.charid));
+		insert_values.push_back(std::to_string(character_activities_e.taskid));
+		insert_values.push_back(std::to_string(character_activities_e.activityid));
+		insert_values.push_back(std::to_string(character_activities_e.donecount));
+		insert_values.push_back(std::to_string(character_activities_e.completed));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_activities_entry.charid = results.LastInsertedID();
-			return character_activities_entry;
+			character_activities_e.charid = results.LastInsertedID();
+			return character_activities_e;
 		}
 
-		character_activities_entry = NewEntity();
+		character_activities_e = NewEntity();
 
-		return character_activities_entry;
+		return character_activities_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_activities_entry: character_activities_entries) {
+		for (auto &character_activities_e: character_activities_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_activities_entry.charid));
-			insert_values.push_back(std::to_string(character_activities_entry.taskid));
-			insert_values.push_back(std::to_string(character_activities_entry.activityid));
-			insert_values.push_back(std::to_string(character_activities_entry.donecount));
-			insert_values.push_back(std::to_string(character_activities_entry.completed));
+			insert_values.push_back(std::to_string(character_activities_e.charid));
+			insert_values.push_back(std::to_string(character_activities_e.taskid));
+			insert_values.push_back(std::to_string(character_activities_e.activityid));
+			insert_values.push_back(std::to_string(character_activities_e.donecount));
+			insert_values.push_back(std::to_string(character_activities_e.completed));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterActivities entry{};
+			CharacterActivities e{};
 
-			entry.charid     = atoi(row[0]);
-			entry.taskid     = atoi(row[1]);
-			entry.activityid = atoi(row[2]);
-			entry.donecount  = atoi(row[3]);
-			entry.completed  = atoi(row[4]);
+			e.charid     = atoi(row[0]);
+			e.taskid     = atoi(row[1]);
+			e.activityid = atoi(row[2]);
+			e.donecount  = atoi(row[3]);
+			e.completed  = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterActivities entry{};
+			CharacterActivities e{};
 
-			entry.charid     = atoi(row[0]);
-			entry.taskid     = atoi(row[1]);
-			entry.activityid = atoi(row[2]);
-			entry.donecount  = atoi(row[3]);
-			entry.completed  = atoi(row[4]);
+			e.charid     = atoi(row[0]);
+			e.taskid     = atoi(row[1]);
+			e.activityid = atoi(row[2]);
+			e.donecount  = atoi(row[3]);
+			e.completed  = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

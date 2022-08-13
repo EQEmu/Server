@@ -97,21 +97,21 @@ public:
 
 	static Mail NewEntity()
 	{
-		Mail entry{};
+		Mail e{};
 
-		entry.msgid     = 0;
-		entry.charid    = 0;
-		entry.timestamp = 0;
-		entry.from      = "";
-		entry.subject   = "";
-		entry.body      = "";
-		entry.to        = "";
-		entry.status    = 0;
+		e.msgid     = 0;
+		e.charid    = 0;
+		e.timestamp = 0;
+		e.from      = "";
+		e.subject   = "";
+		e.body      = "";
+		e.to        = "";
+		e.status    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Mail GetMailEntry(
+	static Mail GetMaile(
 		const std::vector<Mail> &mails,
 		int mail_id
 	)
@@ -140,18 +140,18 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Mail entry{};
+			Mail e{};
 
-			entry.msgid     = atoi(row[0]);
-			entry.charid    = atoi(row[1]);
-			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3] ? row[3] : "";
-			entry.subject   = row[4] ? row[4] : "";
-			entry.body      = row[5] ? row[5] : "";
-			entry.to        = row[6] ? row[6] : "";
-			entry.status    = atoi(row[7]);
+			e.msgid     = atoi(row[0]);
+			e.charid    = atoi(row[1]);
+			e.timestamp = atoi(row[2]);
+			e.from      = row[3] ? row[3] : "";
+			e.subject   = row[4] ? row[4] : "";
+			e.body      = row[5] ? row[5] : "";
+			e.to        = row[6] ? row[6] : "";
+			e.status    = atoi(row[7]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -176,20 +176,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Mail mail_entry
+		Mail mail_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(mail_entry.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(mail_entry.timestamp));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(mail_entry.from) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(mail_entry.subject) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(mail_entry.body) + "'");
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(mail_entry.to) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(mail_entry.status));
+		update_values.push_back(columns[1] + " = " + std::to_string(mail_e.charid));
+		update_values.push_back(columns[2] + " = " + std::to_string(mail_e.timestamp));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(mail_e.from) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(mail_e.subject) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(mail_e.body) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(mail_e.to) + "'");
+		update_values.push_back(columns[7] + " = " + std::to_string(mail_e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				mail_entry.msgid
+				mail_e.msgid
 			)
 		);
 
@@ -206,19 +206,19 @@ public:
 
 	static Mail InsertOne(
 		Database& db,
-		Mail mail_entry
+		Mail mail_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(mail_entry.msgid));
-		insert_values.push_back(std::to_string(mail_entry.charid));
-		insert_values.push_back(std::to_string(mail_entry.timestamp));
-		insert_values.push_back("'" + Strings::Escape(mail_entry.from) + "'");
-		insert_values.push_back("'" + Strings::Escape(mail_entry.subject) + "'");
-		insert_values.push_back("'" + Strings::Escape(mail_entry.body) + "'");
-		insert_values.push_back("'" + Strings::Escape(mail_entry.to) + "'");
-		insert_values.push_back(std::to_string(mail_entry.status));
+		insert_values.push_back(std::to_string(mail_e.msgid));
+		insert_values.push_back(std::to_string(mail_e.charid));
+		insert_values.push_back(std::to_string(mail_e.timestamp));
+		insert_values.push_back("'" + Strings::Escape(mail_e.from) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_e.subject) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_e.body) + "'");
+		insert_values.push_back("'" + Strings::Escape(mail_e.to) + "'");
+		insert_values.push_back(std::to_string(mail_e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,13 +229,13 @@ public:
 		);
 
 		if (results.Success()) {
-			mail_entry.msgid = results.LastInsertedID();
-			return mail_entry;
+			mail_e.msgid = results.LastInsertedID();
+			return mail_e;
 		}
 
-		mail_entry = NewEntity();
+		mail_e = NewEntity();
 
-		return mail_entry;
+		return mail_e;
 	}
 
 	static int InsertMany(
@@ -245,17 +245,17 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &mail_entry: mail_entries) {
+		for (auto &mail_e: mail_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(mail_entry.msgid));
-			insert_values.push_back(std::to_string(mail_entry.charid));
-			insert_values.push_back(std::to_string(mail_entry.timestamp));
-			insert_values.push_back("'" + Strings::Escape(mail_entry.from) + "'");
-			insert_values.push_back("'" + Strings::Escape(mail_entry.subject) + "'");
-			insert_values.push_back("'" + Strings::Escape(mail_entry.body) + "'");
-			insert_values.push_back("'" + Strings::Escape(mail_entry.to) + "'");
-			insert_values.push_back(std::to_string(mail_entry.status));
+			insert_values.push_back(std::to_string(mail_e.msgid));
+			insert_values.push_back(std::to_string(mail_e.charid));
+			insert_values.push_back(std::to_string(mail_e.timestamp));
+			insert_values.push_back("'" + Strings::Escape(mail_e.from) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_e.subject) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_e.body) + "'");
+			insert_values.push_back("'" + Strings::Escape(mail_e.to) + "'");
+			insert_values.push_back(std::to_string(mail_e.status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -287,18 +287,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Mail entry{};
+			Mail e{};
 
-			entry.msgid     = atoi(row[0]);
-			entry.charid    = atoi(row[1]);
-			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3] ? row[3] : "";
-			entry.subject   = row[4] ? row[4] : "";
-			entry.body      = row[5] ? row[5] : "";
-			entry.to        = row[6] ? row[6] : "";
-			entry.status    = atoi(row[7]);
+			e.msgid     = atoi(row[0]);
+			e.charid    = atoi(row[1]);
+			e.timestamp = atoi(row[2]);
+			e.from      = row[3] ? row[3] : "";
+			e.subject   = row[4] ? row[4] : "";
+			e.body      = row[5] ? row[5] : "";
+			e.to        = row[6] ? row[6] : "";
+			e.status    = atoi(row[7]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -319,18 +319,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Mail entry{};
+			Mail e{};
 
-			entry.msgid     = atoi(row[0]);
-			entry.charid    = atoi(row[1]);
-			entry.timestamp = atoi(row[2]);
-			entry.from      = row[3] ? row[3] : "";
-			entry.subject   = row[4] ? row[4] : "";
-			entry.body      = row[5] ? row[5] : "";
-			entry.to        = row[6] ? row[6] : "";
-			entry.status    = atoi(row[7]);
+			e.msgid     = atoi(row[0]);
+			e.charid    = atoi(row[1]);
+			e.timestamp = atoi(row[2]);
+			e.from      = row[3] ? row[3] : "";
+			e.subject   = row[4] ? row[4] : "";
+			e.body      = row[5] ? row[5] : "";
+			e.to        = row[6] ? row[6] : "";
+			e.status    = atoi(row[7]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

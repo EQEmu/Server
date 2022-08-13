@@ -79,15 +79,15 @@ public:
 
 	static NameFilter NewEntity()
 	{
-		NameFilter entry{};
+		NameFilter e{};
 
-		entry.id   = 0;
-		entry.name = "";
+		e.id   = 0;
+		e.name = "";
 
-		return entry;
+		return e;
 	}
 
-	static NameFilter GetNameFilterEntry(
+	static NameFilter GetNameFiltere(
 		const std::vector<NameFilter> &name_filters,
 		int name_filter_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			NameFilter entry{};
+			NameFilter e{};
 
-			entry.id   = atoi(row[0]);
-			entry.name = row[1] ? row[1] : "";
+			e.id   = atoi(row[0]);
+			e.name = row[1] ? row[1] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,14 +146,14 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NameFilter name_filter_entry
+		NameFilter name_filter_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(name_filter_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(name_filter_e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -161,7 +161,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				name_filter_entry.id
+				name_filter_e.id
 			)
 		);
 
@@ -170,13 +170,13 @@ public:
 
 	static NameFilter InsertOne(
 		Database& db,
-		NameFilter name_filter_entry
+		NameFilter name_filter_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(name_filter_entry.id));
-		insert_values.push_back("'" + Strings::Escape(name_filter_entry.name) + "'");
+		insert_values.push_back(std::to_string(name_filter_e.id));
+		insert_values.push_back("'" + Strings::Escape(name_filter_e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -187,13 +187,13 @@ public:
 		);
 
 		if (results.Success()) {
-			name_filter_entry.id = results.LastInsertedID();
-			return name_filter_entry;
+			name_filter_e.id = results.LastInsertedID();
+			return name_filter_e;
 		}
 
-		name_filter_entry = NewEntity();
+		name_filter_e = NewEntity();
 
-		return name_filter_entry;
+		return name_filter_e;
 	}
 
 	static int InsertMany(
@@ -203,11 +203,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &name_filter_entry: name_filter_entries) {
+		for (auto &name_filter_e: name_filter_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(name_filter_entry.id));
-			insert_values.push_back("'" + Strings::Escape(name_filter_entry.name) + "'");
+			insert_values.push_back(std::to_string(name_filter_e.id));
+			insert_values.push_back("'" + Strings::Escape(name_filter_e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -239,12 +239,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NameFilter entry{};
+			NameFilter e{};
 
-			entry.id   = atoi(row[0]);
-			entry.name = row[1] ? row[1] : "";
+			e.id   = atoi(row[0]);
+			e.name = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -265,12 +265,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NameFilter entry{};
+			NameFilter e{};
 
-			entry.id   = atoi(row[0]);
-			entry.name = row[1] ? row[1] : "";
+			e.id   = atoi(row[0]);
+			e.name = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

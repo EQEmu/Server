@@ -91,19 +91,19 @@ public:
 
 	static ItemTick NewEntity()
 	{
-		ItemTick entry{};
+		ItemTick e{};
 
-		entry.it_itemid  = 0;
-		entry.it_chance  = 0;
-		entry.it_level   = 0;
-		entry.it_id      = 0;
-		entry.it_qglobal = "";
-		entry.it_bagslot = 0;
+		e.it_itemid  = 0;
+		e.it_chance  = 0;
+		e.it_level   = 0;
+		e.it_id      = 0;
+		e.it_qglobal = "";
+		e.it_bagslot = 0;
 
-		return entry;
+		return e;
 	}
 
-	static ItemTick GetItemTickEntry(
+	static ItemTick GetItemTicke(
 		const std::vector<ItemTick> &item_ticks,
 		int item_tick_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			ItemTick entry{};
+			ItemTick e{};
 
-			entry.it_itemid  = atoi(row[0]);
-			entry.it_chance  = atoi(row[1]);
-			entry.it_level   = atoi(row[2]);
-			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4] ? row[4] : "";
-			entry.it_bagslot = atoi(row[5]);
+			e.it_itemid  = atoi(row[0]);
+			e.it_chance  = atoi(row[1]);
+			e.it_level   = atoi(row[2]);
+			e.it_id      = atoi(row[3]);
+			e.it_qglobal = row[4] ? row[4] : "";
+			e.it_bagslot = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ItemTick item_tick_entry
+		ItemTick item_tick_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(item_tick_entry.it_itemid));
-		update_values.push_back(columns[1] + " = " + std::to_string(item_tick_entry.it_chance));
-		update_values.push_back(columns[2] + " = " + std::to_string(item_tick_entry.it_level));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(item_tick_entry.it_bagslot));
+		update_values.push_back(columns[0] + " = " + std::to_string(item_tick_e.it_itemid));
+		update_values.push_back(columns[1] + " = " + std::to_string(item_tick_e.it_chance));
+		update_values.push_back(columns[2] + " = " + std::to_string(item_tick_e.it_level));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(item_tick_e.it_qglobal) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(item_tick_e.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				item_tick_entry.it_id
+				item_tick_e.it_id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static ItemTick InsertOne(
 		Database& db,
-		ItemTick item_tick_entry
+		ItemTick item_tick_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(item_tick_entry.it_itemid));
-		insert_values.push_back(std::to_string(item_tick_entry.it_chance));
-		insert_values.push_back(std::to_string(item_tick_entry.it_level));
-		insert_values.push_back(std::to_string(item_tick_entry.it_id));
-		insert_values.push_back("'" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
-		insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
+		insert_values.push_back(std::to_string(item_tick_e.it_itemid));
+		insert_values.push_back(std::to_string(item_tick_e.it_chance));
+		insert_values.push_back(std::to_string(item_tick_e.it_level));
+		insert_values.push_back(std::to_string(item_tick_e.it_id));
+		insert_values.push_back("'" + Strings::Escape(item_tick_e.it_qglobal) + "'");
+		insert_values.push_back(std::to_string(item_tick_e.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,13 +215,13 @@ public:
 		);
 
 		if (results.Success()) {
-			item_tick_entry.it_id = results.LastInsertedID();
-			return item_tick_entry;
+			item_tick_e.it_id = results.LastInsertedID();
+			return item_tick_e;
 		}
 
-		item_tick_entry = NewEntity();
+		item_tick_e = NewEntity();
 
-		return item_tick_entry;
+		return item_tick_e;
 	}
 
 	static int InsertMany(
@@ -231,15 +231,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &item_tick_entry: item_tick_entries) {
+		for (auto &item_tick_e: item_tick_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(item_tick_entry.it_itemid));
-			insert_values.push_back(std::to_string(item_tick_entry.it_chance));
-			insert_values.push_back(std::to_string(item_tick_entry.it_level));
-			insert_values.push_back(std::to_string(item_tick_entry.it_id));
-			insert_values.push_back("'" + Strings::Escape(item_tick_entry.it_qglobal) + "'");
-			insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
+			insert_values.push_back(std::to_string(item_tick_e.it_itemid));
+			insert_values.push_back(std::to_string(item_tick_e.it_chance));
+			insert_values.push_back(std::to_string(item_tick_e.it_level));
+			insert_values.push_back(std::to_string(item_tick_e.it_id));
+			insert_values.push_back("'" + Strings::Escape(item_tick_e.it_qglobal) + "'");
+			insert_values.push_back(std::to_string(item_tick_e.it_bagslot));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -271,16 +271,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ItemTick entry{};
+			ItemTick e{};
 
-			entry.it_itemid  = atoi(row[0]);
-			entry.it_chance  = atoi(row[1]);
-			entry.it_level   = atoi(row[2]);
-			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4] ? row[4] : "";
-			entry.it_bagslot = atoi(row[5]);
+			e.it_itemid  = atoi(row[0]);
+			e.it_chance  = atoi(row[1]);
+			e.it_level   = atoi(row[2]);
+			e.it_id      = atoi(row[3]);
+			e.it_qglobal = row[4] ? row[4] : "";
+			e.it_bagslot = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -301,16 +301,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ItemTick entry{};
+			ItemTick e{};
 
-			entry.it_itemid  = atoi(row[0]);
-			entry.it_chance  = atoi(row[1]);
-			entry.it_level   = atoi(row[2]);
-			entry.it_id      = atoi(row[3]);
-			entry.it_qglobal = row[4] ? row[4] : "";
-			entry.it_bagslot = atoi(row[5]);
+			e.it_itemid  = atoi(row[0]);
+			e.it_chance  = atoi(row[1]);
+			e.it_level   = atoi(row[2]);
+			e.it_id      = atoi(row[3]);
+			e.it_qglobal = row[4] ? row[4] : "";
+			e.it_bagslot = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -79,15 +79,15 @@ public:
 
 	static AdventureTemplateEntryFlavor NewEntity()
 	{
-		AdventureTemplateEntryFlavor entry{};
+		AdventureTemplateEntryFlavor e{};
 
-		entry.id   = 0;
-		entry.text = "";
+		e.id   = 0;
+		e.text = "";
 
-		return entry;
+		return e;
 	}
 
-	static AdventureTemplateEntryFlavor GetAdventureTemplateEntryFlavorEntry(
+	static AdventureTemplateEntryFlavor GetAdventureTemplateEntryFlavore(
 		const std::vector<AdventureTemplateEntryFlavor> &adventure_template_entry_flavors,
 		int adventure_template_entry_flavor_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AdventureTemplateEntryFlavor entry{};
+			AdventureTemplateEntryFlavor e{};
 
-			entry.id   = atoi(row[0]);
-			entry.text = row[1] ? row[1] : "";
+			e.id   = atoi(row[0]);
+			e.text = row[1] ? row[1] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureTemplateEntryFlavor adventure_template_entry_flavor_entry
+		AdventureTemplateEntryFlavor adventure_template_entry_flavor_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_flavor_entry.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(adventure_template_entry_flavor_entry.text) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_flavor_e.id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(adventure_template_entry_flavor_e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				adventure_template_entry_flavor_entry.id
+				adventure_template_entry_flavor_e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static AdventureTemplateEntryFlavor InsertOne(
 		Database& db,
-		AdventureTemplateEntryFlavor adventure_template_entry_flavor_entry
+		AdventureTemplateEntryFlavor adventure_template_entry_flavor_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
-		insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_entry.text) + "'");
+		insert_values.push_back(std::to_string(adventure_template_entry_flavor_e.id));
+		insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			adventure_template_entry_flavor_entry.id = results.LastInsertedID();
-			return adventure_template_entry_flavor_entry;
+			adventure_template_entry_flavor_e.id = results.LastInsertedID();
+			return adventure_template_entry_flavor_e;
 		}
 
-		adventure_template_entry_flavor_entry = NewEntity();
+		adventure_template_entry_flavor_e = NewEntity();
 
-		return adventure_template_entry_flavor_entry;
+		return adventure_template_entry_flavor_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &adventure_template_entry_flavor_entry: adventure_template_entry_flavor_entries) {
+		for (auto &adventure_template_entry_flavor_e: adventure_template_entry_flavor_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
-			insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_entry.text) + "'");
+			insert_values.push_back(std::to_string(adventure_template_entry_flavor_e.id));
+			insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_e.text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntryFlavor entry{};
+			AdventureTemplateEntryFlavor e{};
 
-			entry.id   = atoi(row[0]);
-			entry.text = row[1] ? row[1] : "";
+			e.id   = atoi(row[0]);
+			e.text = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntryFlavor entry{};
+			AdventureTemplateEntryFlavor e{};
 
-			entry.id   = atoi(row[0]);
-			entry.text = row[1] ? row[1] : "";
+			e.id   = atoi(row[0]);
+			e.text = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

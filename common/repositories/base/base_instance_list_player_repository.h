@@ -79,15 +79,15 @@ public:
 
 	static InstanceListPlayer NewEntity()
 	{
-		InstanceListPlayer entry{};
+		InstanceListPlayer e{};
 
-		entry.id     = 0;
-		entry.charid = 0;
+		e.id     = 0;
+		e.charid = 0;
 
-		return entry;
+		return e;
 	}
 
-	static InstanceListPlayer GetInstanceListPlayerEntry(
+	static InstanceListPlayer GetInstanceListPlayere(
 		const std::vector<InstanceListPlayer> &instance_list_players,
 		int instance_list_player_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InstanceListPlayer entry{};
+			InstanceListPlayer e{};
 
-			entry.id     = atoi(row[0]);
-			entry.charid = atoi(row[1]);
+			e.id     = atoi(row[0]);
+			e.charid = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		InstanceListPlayer instance_list_player_entry
+		InstanceListPlayer instance_list_player_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(instance_list_player_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_player_entry.charid));
+		update_values.push_back(columns[0] + " = " + std::to_string(instance_list_player_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_player_e.charid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_player_entry.id
+				instance_list_player_e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static InstanceListPlayer InsertOne(
 		Database& db,
-		InstanceListPlayer instance_list_player_entry
+		InstanceListPlayer instance_list_player_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_player_entry.id));
-		insert_values.push_back(std::to_string(instance_list_player_entry.charid));
+		insert_values.push_back(std::to_string(instance_list_player_e.id));
+		insert_values.push_back(std::to_string(instance_list_player_e.charid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_player_entry.id = results.LastInsertedID();
-			return instance_list_player_entry;
+			instance_list_player_e.id = results.LastInsertedID();
+			return instance_list_player_e;
 		}
 
-		instance_list_player_entry = NewEntity();
+		instance_list_player_e = NewEntity();
 
-		return instance_list_player_entry;
+		return instance_list_player_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_player_entry: instance_list_player_entries) {
+		for (auto &instance_list_player_e: instance_list_player_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_player_entry.id));
-			insert_values.push_back(std::to_string(instance_list_player_entry.charid));
+			insert_values.push_back(std::to_string(instance_list_player_e.id));
+			insert_values.push_back(std::to_string(instance_list_player_e.charid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceListPlayer entry{};
+			InstanceListPlayer e{};
 
-			entry.id     = atoi(row[0]);
-			entry.charid = atoi(row[1]);
+			e.id     = atoi(row[0]);
+			e.charid = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InstanceListPlayer entry{};
+			InstanceListPlayer e{};
 
-			entry.id     = atoi(row[0]);
-			entry.charid = atoi(row[1]);
+			e.id     = atoi(row[0]);
+			e.charid = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

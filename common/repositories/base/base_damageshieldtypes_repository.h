@@ -79,15 +79,15 @@ public:
 
 	static Damageshieldtypes NewEntity()
 	{
-		Damageshieldtypes entry{};
+		Damageshieldtypes e{};
 
-		entry.spellid = 0;
-		entry.type    = 0;
+		e.spellid = 0;
+		e.type    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Damageshieldtypes GetDamageshieldtypesEntry(
+	static Damageshieldtypes GetDamageshieldtypese(
 		const std::vector<Damageshieldtypes> &damageshieldtypess,
 		int damageshieldtypes_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Damageshieldtypes entry{};
+			Damageshieldtypes e{};
 
-			entry.spellid = atoi(row[0]);
-			entry.type    = atoi(row[1]);
+			e.spellid = atoi(row[0]);
+			e.type    = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Damageshieldtypes damageshieldtypes_entry
+		Damageshieldtypes damageshieldtypes_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(damageshieldtypes_entry.spellid));
-		update_values.push_back(columns[1] + " = " + std::to_string(damageshieldtypes_entry.type));
+		update_values.push_back(columns[0] + " = " + std::to_string(damageshieldtypes_e.spellid));
+		update_values.push_back(columns[1] + " = " + std::to_string(damageshieldtypes_e.type));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				damageshieldtypes_entry.spellid
+				damageshieldtypes_e.spellid
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static Damageshieldtypes InsertOne(
 		Database& db,
-		Damageshieldtypes damageshieldtypes_entry
+		Damageshieldtypes damageshieldtypes_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(damageshieldtypes_entry.spellid));
-		insert_values.push_back(std::to_string(damageshieldtypes_entry.type));
+		insert_values.push_back(std::to_string(damageshieldtypes_e.spellid));
+		insert_values.push_back(std::to_string(damageshieldtypes_e.type));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			damageshieldtypes_entry.spellid = results.LastInsertedID();
-			return damageshieldtypes_entry;
+			damageshieldtypes_e.spellid = results.LastInsertedID();
+			return damageshieldtypes_e;
 		}
 
-		damageshieldtypes_entry = NewEntity();
+		damageshieldtypes_e = NewEntity();
 
-		return damageshieldtypes_entry;
+		return damageshieldtypes_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &damageshieldtypes_entry: damageshieldtypes_entries) {
+		for (auto &damageshieldtypes_e: damageshieldtypes_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(damageshieldtypes_entry.spellid));
-			insert_values.push_back(std::to_string(damageshieldtypes_entry.type));
+			insert_values.push_back(std::to_string(damageshieldtypes_e.spellid));
+			insert_values.push_back(std::to_string(damageshieldtypes_e.type));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Damageshieldtypes entry{};
+			Damageshieldtypes e{};
 
-			entry.spellid = atoi(row[0]);
-			entry.type    = atoi(row[1]);
+			e.spellid = atoi(row[0]);
+			e.type    = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Damageshieldtypes entry{};
+			Damageshieldtypes e{};
 
-			entry.spellid = atoi(row[0]);
-			entry.type    = atoi(row[1]);
+			e.spellid = atoi(row[0]);
+			e.type    = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

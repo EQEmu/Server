@@ -79,15 +79,15 @@ public:
 
 	static CharacterPeqzoneFlags NewEntity()
 	{
-		CharacterPeqzoneFlags entry{};
+		CharacterPeqzoneFlags e{};
 
-		entry.id      = 0;
-		entry.zone_id = 0;
+		e.id      = 0;
+		e.zone_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterPeqzoneFlags GetCharacterPeqzoneFlagsEntry(
+	static CharacterPeqzoneFlags GetCharacterPeqzoneFlagse(
 		const std::vector<CharacterPeqzoneFlags> &character_peqzone_flagss,
 		int character_peqzone_flags_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterPeqzoneFlags entry{};
+			CharacterPeqzoneFlags e{};
 
-			entry.id      = atoi(row[0]);
-			entry.zone_id = atoi(row[1]);
+			e.id      = atoi(row[0]);
+			e.zone_id = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterPeqzoneFlags character_peqzone_flags_entry
+		CharacterPeqzoneFlags character_peqzone_flags_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_peqzone_flags_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_peqzone_flags_entry.zone_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_peqzone_flags_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_peqzone_flags_e.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_peqzone_flags_entry.id
+				character_peqzone_flags_e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static CharacterPeqzoneFlags InsertOne(
 		Database& db,
-		CharacterPeqzoneFlags character_peqzone_flags_entry
+		CharacterPeqzoneFlags character_peqzone_flags_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_peqzone_flags_entry.id));
-		insert_values.push_back(std::to_string(character_peqzone_flags_entry.zone_id));
+		insert_values.push_back(std::to_string(character_peqzone_flags_e.id));
+		insert_values.push_back(std::to_string(character_peqzone_flags_e.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_peqzone_flags_entry.id = results.LastInsertedID();
-			return character_peqzone_flags_entry;
+			character_peqzone_flags_e.id = results.LastInsertedID();
+			return character_peqzone_flags_e;
 		}
 
-		character_peqzone_flags_entry = NewEntity();
+		character_peqzone_flags_e = NewEntity();
 
-		return character_peqzone_flags_entry;
+		return character_peqzone_flags_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_peqzone_flags_entry: character_peqzone_flags_entries) {
+		for (auto &character_peqzone_flags_e: character_peqzone_flags_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_peqzone_flags_entry.id));
-			insert_values.push_back(std::to_string(character_peqzone_flags_entry.zone_id));
+			insert_values.push_back(std::to_string(character_peqzone_flags_e.id));
+			insert_values.push_back(std::to_string(character_peqzone_flags_e.zone_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPeqzoneFlags entry{};
+			CharacterPeqzoneFlags e{};
 
-			entry.id      = atoi(row[0]);
-			entry.zone_id = atoi(row[1]);
+			e.id      = atoi(row[0]);
+			e.zone_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPeqzoneFlags entry{};
+			CharacterPeqzoneFlags e{};
 
-			entry.id      = atoi(row[0]);
-			entry.zone_id = atoi(row[1]);
+			e.id      = atoi(row[0]);
+			e.zone_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

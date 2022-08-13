@@ -82,16 +82,16 @@ public:
 
 	static NpcSpellsEffects NewEntity()
 	{
-		NpcSpellsEffects entry{};
+		NpcSpellsEffects e{};
 
-		entry.id          = 0;
-		entry.name        = "";
-		entry.parent_list = 0;
+		e.id          = 0;
+		e.name        = "";
+		e.parent_list = 0;
 
-		return entry;
+		return e;
 	}
 
-	static NpcSpellsEffects GetNpcSpellsEffectsEntry(
+	static NpcSpellsEffects GetNpcSpellsEffectse(
 		const std::vector<NpcSpellsEffects> &npc_spells_effectss,
 		int npc_spells_effects_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			NpcSpellsEffects entry{};
+			NpcSpellsEffects e{};
 
-			entry.id          = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.parent_list = atoi(row[2]);
+			e.id          = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.parent_list = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcSpellsEffects npc_spells_effects_entry
+		NpcSpellsEffects npc_spells_effects_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_spells_effects_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_spells_effects_entry.parent_list));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_spells_effects_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(npc_spells_effects_e.parent_list));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_spells_effects_entry.id
+				npc_spells_effects_e.id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static NpcSpellsEffects InsertOne(
 		Database& db,
-		NpcSpellsEffects npc_spells_effects_entry
+		NpcSpellsEffects npc_spells_effects_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_spells_effects_entry.id));
-		insert_values.push_back("'" + Strings::Escape(npc_spells_effects_entry.name) + "'");
-		insert_values.push_back(std::to_string(npc_spells_effects_entry.parent_list));
+		insert_values.push_back(std::to_string(npc_spells_effects_e.id));
+		insert_values.push_back("'" + Strings::Escape(npc_spells_effects_e.name) + "'");
+		insert_values.push_back(std::to_string(npc_spells_effects_e.parent_list));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,13 +194,13 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_spells_effects_entry.id = results.LastInsertedID();
-			return npc_spells_effects_entry;
+			npc_spells_effects_e.id = results.LastInsertedID();
+			return npc_spells_effects_e;
 		}
 
-		npc_spells_effects_entry = NewEntity();
+		npc_spells_effects_e = NewEntity();
 
-		return npc_spells_effects_entry;
+		return npc_spells_effects_e;
 	}
 
 	static int InsertMany(
@@ -210,12 +210,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_spells_effects_entry: npc_spells_effects_entries) {
+		for (auto &npc_spells_effects_e: npc_spells_effects_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_spells_effects_entry.id));
-			insert_values.push_back("'" + Strings::Escape(npc_spells_effects_entry.name) + "'");
-			insert_values.push_back(std::to_string(npc_spells_effects_entry.parent_list));
+			insert_values.push_back(std::to_string(npc_spells_effects_e.id));
+			insert_values.push_back("'" + Strings::Escape(npc_spells_effects_e.name) + "'");
+			insert_values.push_back(std::to_string(npc_spells_effects_e.parent_list));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -247,13 +247,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcSpellsEffects entry{};
+			NpcSpellsEffects e{};
 
-			entry.id          = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.parent_list = atoi(row[2]);
+			e.id          = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.parent_list = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -274,13 +274,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcSpellsEffects entry{};
+			NpcSpellsEffects e{};
 
-			entry.id          = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.parent_list = atoi(row[2]);
+			e.id          = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.parent_list = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

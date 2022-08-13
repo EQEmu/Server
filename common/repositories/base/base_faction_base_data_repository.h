@@ -91,19 +91,19 @@ public:
 
 	static FactionBaseData NewEntity()
 	{
-		FactionBaseData entry{};
+		FactionBaseData e{};
 
-		entry.client_faction_id = 0;
-		entry.min               = -2000;
-		entry.max               = 2000;
-		entry.unk_hero1         = 0;
-		entry.unk_hero2         = 0;
-		entry.unk_hero3         = 0;
+		e.client_faction_id = 0;
+		e.min               = -2000;
+		e.max               = 2000;
+		e.unk_hero1         = 0;
+		e.unk_hero2         = 0;
+		e.unk_hero3         = 0;
 
-		return entry;
+		return e;
 	}
 
-	static FactionBaseData GetFactionBaseDataEntry(
+	static FactionBaseData GetFactionBaseDatae(
 		const std::vector<FactionBaseData> &faction_base_datas,
 		int faction_base_data_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			FactionBaseData entry{};
+			FactionBaseData e{};
 
-			entry.client_faction_id = atoi(row[0]);
-			entry.min               = atoi(row[1]);
-			entry.max               = atoi(row[2]);
-			entry.unk_hero1         = atoi(row[3]);
-			entry.unk_hero2         = atoi(row[4]);
-			entry.unk_hero3         = atoi(row[5]);
+			e.client_faction_id = atoi(row[0]);
+			e.min               = atoi(row[1]);
+			e.max               = atoi(row[2]);
+			e.unk_hero1         = atoi(row[3]);
+			e.unk_hero2         = atoi(row[4]);
+			e.unk_hero3         = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionBaseData faction_base_data_entry
+		FactionBaseData faction_base_data_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(faction_base_data_entry.client_faction_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(faction_base_data_entry.min));
-		update_values.push_back(columns[2] + " = " + std::to_string(faction_base_data_entry.max));
-		update_values.push_back(columns[3] + " = " + std::to_string(faction_base_data_entry.unk_hero1));
-		update_values.push_back(columns[4] + " = " + std::to_string(faction_base_data_entry.unk_hero2));
-		update_values.push_back(columns[5] + " = " + std::to_string(faction_base_data_entry.unk_hero3));
+		update_values.push_back(columns[0] + " = " + std::to_string(faction_base_data_e.client_faction_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(faction_base_data_e.min));
+		update_values.push_back(columns[2] + " = " + std::to_string(faction_base_data_e.max));
+		update_values.push_back(columns[3] + " = " + std::to_string(faction_base_data_e.unk_hero1));
+		update_values.push_back(columns[4] + " = " + std::to_string(faction_base_data_e.unk_hero2));
+		update_values.push_back(columns[5] + " = " + std::to_string(faction_base_data_e.unk_hero3));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				faction_base_data_entry.client_faction_id
+				faction_base_data_e.client_faction_id
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static FactionBaseData InsertOne(
 		Database& db,
-		FactionBaseData faction_base_data_entry
+		FactionBaseData faction_base_data_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(faction_base_data_entry.client_faction_id));
-		insert_values.push_back(std::to_string(faction_base_data_entry.min));
-		insert_values.push_back(std::to_string(faction_base_data_entry.max));
-		insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero1));
-		insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero2));
-		insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero3));
+		insert_values.push_back(std::to_string(faction_base_data_e.client_faction_id));
+		insert_values.push_back(std::to_string(faction_base_data_e.min));
+		insert_values.push_back(std::to_string(faction_base_data_e.max));
+		insert_values.push_back(std::to_string(faction_base_data_e.unk_hero1));
+		insert_values.push_back(std::to_string(faction_base_data_e.unk_hero2));
+		insert_values.push_back(std::to_string(faction_base_data_e.unk_hero3));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,13 +216,13 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_base_data_entry.client_faction_id = results.LastInsertedID();
-			return faction_base_data_entry;
+			faction_base_data_e.client_faction_id = results.LastInsertedID();
+			return faction_base_data_e;
 		}
 
-		faction_base_data_entry = NewEntity();
+		faction_base_data_e = NewEntity();
 
-		return faction_base_data_entry;
+		return faction_base_data_e;
 	}
 
 	static int InsertMany(
@@ -232,15 +232,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &faction_base_data_entry: faction_base_data_entries) {
+		for (auto &faction_base_data_e: faction_base_data_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(faction_base_data_entry.client_faction_id));
-			insert_values.push_back(std::to_string(faction_base_data_entry.min));
-			insert_values.push_back(std::to_string(faction_base_data_entry.max));
-			insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero1));
-			insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero2));
-			insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero3));
+			insert_values.push_back(std::to_string(faction_base_data_e.client_faction_id));
+			insert_values.push_back(std::to_string(faction_base_data_e.min));
+			insert_values.push_back(std::to_string(faction_base_data_e.max));
+			insert_values.push_back(std::to_string(faction_base_data_e.unk_hero1));
+			insert_values.push_back(std::to_string(faction_base_data_e.unk_hero2));
+			insert_values.push_back(std::to_string(faction_base_data_e.unk_hero3));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -272,16 +272,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionBaseData entry{};
+			FactionBaseData e{};
 
-			entry.client_faction_id = atoi(row[0]);
-			entry.min               = atoi(row[1]);
-			entry.max               = atoi(row[2]);
-			entry.unk_hero1         = atoi(row[3]);
-			entry.unk_hero2         = atoi(row[4]);
-			entry.unk_hero3         = atoi(row[5]);
+			e.client_faction_id = atoi(row[0]);
+			e.min               = atoi(row[1]);
+			e.max               = atoi(row[2]);
+			e.unk_hero1         = atoi(row[3]);
+			e.unk_hero2         = atoi(row[4]);
+			e.unk_hero3         = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -302,16 +302,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionBaseData entry{};
+			FactionBaseData e{};
 
-			entry.client_faction_id = atoi(row[0]);
-			entry.min               = atoi(row[1]);
-			entry.max               = atoi(row[2]);
-			entry.unk_hero1         = atoi(row[3]);
-			entry.unk_hero2         = atoi(row[4]);
-			entry.unk_hero3         = atoi(row[5]);
+			e.client_faction_id = atoi(row[0]);
+			e.min               = atoi(row[1]);
+			e.max               = atoi(row[2]);
+			e.unk_hero1         = atoi(row[3]);
+			e.unk_hero2         = atoi(row[4]);
+			e.unk_hero3         = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

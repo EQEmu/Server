@@ -82,16 +82,16 @@ public:
 
 	static AccountRewards NewEntity()
 	{
-		AccountRewards entry{};
+		AccountRewards e{};
 
-		entry.account_id = 0;
-		entry.reward_id  = 0;
-		entry.amount     = 0;
+		e.account_id = 0;
+		e.reward_id  = 0;
+		e.amount     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AccountRewards GetAccountRewardsEntry(
+	static AccountRewards GetAccountRewardse(
 		const std::vector<AccountRewards> &account_rewardss,
 		int account_rewards_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AccountRewards entry{};
+			AccountRewards e{};
 
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
+			e.account_id = atoi(row[0]);
+			e.reward_id  = atoi(row[1]);
+			e.amount     = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountRewards account_rewards_entry
+		AccountRewards account_rewards_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_rewards_entry.account_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(account_rewards_entry.reward_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(account_rewards_entry.amount));
+		update_values.push_back(columns[0] + " = " + std::to_string(account_rewards_e.account_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(account_rewards_e.reward_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(account_rewards_e.amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				account_rewards_entry.account_id
+				account_rewards_e.account_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static AccountRewards InsertOne(
 		Database& db,
-		AccountRewards account_rewards_entry
+		AccountRewards account_rewards_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(account_rewards_entry.account_id));
-		insert_values.push_back(std::to_string(account_rewards_entry.reward_id));
-		insert_values.push_back(std::to_string(account_rewards_entry.amount));
+		insert_values.push_back(std::to_string(account_rewards_e.account_id));
+		insert_values.push_back(std::to_string(account_rewards_e.reward_id));
+		insert_values.push_back(std::to_string(account_rewards_e.amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			account_rewards_entry.account_id = results.LastInsertedID();
-			return account_rewards_entry;
+			account_rewards_e.account_id = results.LastInsertedID();
+			return account_rewards_e;
 		}
 
-		account_rewards_entry = NewEntity();
+		account_rewards_e = NewEntity();
 
-		return account_rewards_entry;
+		return account_rewards_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_rewards_entry: account_rewards_entries) {
+		for (auto &account_rewards_e: account_rewards_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(account_rewards_entry.account_id));
-			insert_values.push_back(std::to_string(account_rewards_entry.reward_id));
-			insert_values.push_back(std::to_string(account_rewards_entry.amount));
+			insert_values.push_back(std::to_string(account_rewards_e.account_id));
+			insert_values.push_back(std::to_string(account_rewards_e.reward_id));
+			insert_values.push_back(std::to_string(account_rewards_e.amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountRewards entry{};
+			AccountRewards e{};
 
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
+			e.account_id = atoi(row[0]);
+			e.reward_id  = atoi(row[1]);
+			e.amount     = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountRewards entry{};
+			AccountRewards e{};
 
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
+			e.account_id = atoi(row[0]);
+			e.reward_id  = atoi(row[1]);
+			e.amount     = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

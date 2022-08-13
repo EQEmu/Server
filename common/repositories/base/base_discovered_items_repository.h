@@ -85,17 +85,17 @@ public:
 
 	static DiscoveredItems NewEntity()
 	{
-		DiscoveredItems entry{};
+		DiscoveredItems e{};
 
-		entry.item_id         = 0;
-		entry.char_name       = "";
-		entry.discovered_date = 0;
-		entry.account_status  = 0;
+		e.item_id         = 0;
+		e.char_name       = "";
+		e.discovered_date = 0;
+		e.account_status  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static DiscoveredItems GetDiscoveredItemsEntry(
+	static DiscoveredItems GetDiscoveredItemse(
 		const std::vector<DiscoveredItems> &discovered_itemss,
 		int discovered_items_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			DiscoveredItems entry{};
+			DiscoveredItems e{};
 
-			entry.item_id         = atoi(row[0]);
-			entry.char_name       = row[1] ? row[1] : "";
-			entry.discovered_date = atoi(row[2]);
-			entry.account_status  = atoi(row[3]);
+			e.item_id         = atoi(row[0]);
+			e.char_name       = row[1] ? row[1] : "";
+			e.discovered_date = atoi(row[2]);
+			e.account_status  = atoi(row[3]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DiscoveredItems discovered_items_entry
+		DiscoveredItems discovered_items_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(discovered_items_entry.item_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(discovered_items_entry.char_name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(discovered_items_entry.discovered_date));
-		update_values.push_back(columns[3] + " = " + std::to_string(discovered_items_entry.account_status));
+		update_values.push_back(columns[0] + " = " + std::to_string(discovered_items_e.item_id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(discovered_items_e.char_name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(discovered_items_e.discovered_date));
+		update_values.push_back(columns[3] + " = " + std::to_string(discovered_items_e.account_status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				discovered_items_entry.item_id
+				discovered_items_e.item_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static DiscoveredItems InsertOne(
 		Database& db,
-		DiscoveredItems discovered_items_entry
+		DiscoveredItems discovered_items_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(discovered_items_entry.item_id));
-		insert_values.push_back("'" + Strings::Escape(discovered_items_entry.char_name) + "'");
-		insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
-		insert_values.push_back(std::to_string(discovered_items_entry.account_status));
+		insert_values.push_back(std::to_string(discovered_items_e.item_id));
+		insert_values.push_back("'" + Strings::Escape(discovered_items_e.char_name) + "'");
+		insert_values.push_back(std::to_string(discovered_items_e.discovered_date));
+		insert_values.push_back(std::to_string(discovered_items_e.account_status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			discovered_items_entry.item_id = results.LastInsertedID();
-			return discovered_items_entry;
+			discovered_items_e.item_id = results.LastInsertedID();
+			return discovered_items_e;
 		}
 
-		discovered_items_entry = NewEntity();
+		discovered_items_e = NewEntity();
 
-		return discovered_items_entry;
+		return discovered_items_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &discovered_items_entry: discovered_items_entries) {
+		for (auto &discovered_items_e: discovered_items_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(discovered_items_entry.item_id));
-			insert_values.push_back("'" + Strings::Escape(discovered_items_entry.char_name) + "'");
-			insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
-			insert_values.push_back(std::to_string(discovered_items_entry.account_status));
+			insert_values.push_back(std::to_string(discovered_items_e.item_id));
+			insert_values.push_back("'" + Strings::Escape(discovered_items_e.char_name) + "'");
+			insert_values.push_back(std::to_string(discovered_items_e.discovered_date));
+			insert_values.push_back(std::to_string(discovered_items_e.account_status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DiscoveredItems entry{};
+			DiscoveredItems e{};
 
-			entry.item_id         = atoi(row[0]);
-			entry.char_name       = row[1] ? row[1] : "";
-			entry.discovered_date = atoi(row[2]);
-			entry.account_status  = atoi(row[3]);
+			e.item_id         = atoi(row[0]);
+			e.char_name       = row[1] ? row[1] : "";
+			e.discovered_date = atoi(row[2]);
+			e.account_status  = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DiscoveredItems entry{};
+			DiscoveredItems e{};
 
-			entry.item_id         = atoi(row[0]);
-			entry.char_name       = row[1] ? row[1] : "";
-			entry.discovered_date = atoi(row[2]);
-			entry.account_status  = atoi(row[3]);
+			e.item_id         = atoi(row[0]);
+			e.char_name       = row[1] ? row[1] : "";
+			e.discovered_date = atoi(row[2]);
+			e.account_status  = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -82,16 +82,16 @@ public:
 
 	static LevelExpMods NewEntity()
 	{
-		LevelExpMods entry{};
+		LevelExpMods e{};
 
-		entry.level      = 0;
-		entry.exp_mod    = 0;
-		entry.aa_exp_mod = 0;
+		e.level      = 0;
+		e.exp_mod    = 0;
+		e.aa_exp_mod = 0;
 
-		return entry;
+		return e;
 	}
 
-	static LevelExpMods GetLevelExpModsEntry(
+	static LevelExpMods GetLevelExpModse(
 		const std::vector<LevelExpMods> &level_exp_modss,
 		int level_exp_mods_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LevelExpMods entry{};
+			LevelExpMods e{};
 
-			entry.level      = atoi(row[0]);
-			entry.exp_mod    = static_cast<float>(atof(row[1]));
-			entry.aa_exp_mod = static_cast<float>(atof(row[2]));
+			e.level      = atoi(row[0]);
+			e.exp_mod    = static_cast<float>(atof(row[1]));
+			e.aa_exp_mod = static_cast<float>(atof(row[2]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LevelExpMods level_exp_mods_entry
+		LevelExpMods level_exp_mods_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(level_exp_mods_entry.level));
-		update_values.push_back(columns[1] + " = " + std::to_string(level_exp_mods_entry.exp_mod));
-		update_values.push_back(columns[2] + " = " + std::to_string(level_exp_mods_entry.aa_exp_mod));
+		update_values.push_back(columns[0] + " = " + std::to_string(level_exp_mods_e.level));
+		update_values.push_back(columns[1] + " = " + std::to_string(level_exp_mods_e.exp_mod));
+		update_values.push_back(columns[2] + " = " + std::to_string(level_exp_mods_e.aa_exp_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				level_exp_mods_entry.level
+				level_exp_mods_e.level
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static LevelExpMods InsertOne(
 		Database& db,
-		LevelExpMods level_exp_mods_entry
+		LevelExpMods level_exp_mods_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(level_exp_mods_entry.level));
-		insert_values.push_back(std::to_string(level_exp_mods_entry.exp_mod));
-		insert_values.push_back(std::to_string(level_exp_mods_entry.aa_exp_mod));
+		insert_values.push_back(std::to_string(level_exp_mods_e.level));
+		insert_values.push_back(std::to_string(level_exp_mods_e.exp_mod));
+		insert_values.push_back(std::to_string(level_exp_mods_e.aa_exp_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			level_exp_mods_entry.level = results.LastInsertedID();
-			return level_exp_mods_entry;
+			level_exp_mods_e.level = results.LastInsertedID();
+			return level_exp_mods_e;
 		}
 
-		level_exp_mods_entry = NewEntity();
+		level_exp_mods_e = NewEntity();
 
-		return level_exp_mods_entry;
+		return level_exp_mods_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &level_exp_mods_entry: level_exp_mods_entries) {
+		for (auto &level_exp_mods_e: level_exp_mods_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(level_exp_mods_entry.level));
-			insert_values.push_back(std::to_string(level_exp_mods_entry.exp_mod));
-			insert_values.push_back(std::to_string(level_exp_mods_entry.aa_exp_mod));
+			insert_values.push_back(std::to_string(level_exp_mods_e.level));
+			insert_values.push_back(std::to_string(level_exp_mods_e.exp_mod));
+			insert_values.push_back(std::to_string(level_exp_mods_e.aa_exp_mod));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LevelExpMods entry{};
+			LevelExpMods e{};
 
-			entry.level      = atoi(row[0]);
-			entry.exp_mod    = static_cast<float>(atof(row[1]));
-			entry.aa_exp_mod = static_cast<float>(atof(row[2]));
+			e.level      = atoi(row[0]);
+			e.exp_mod    = static_cast<float>(atof(row[1]));
+			e.aa_exp_mod = static_cast<float>(atof(row[2]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LevelExpMods entry{};
+			LevelExpMods e{};
 
-			entry.level      = atoi(row[0]);
-			entry.exp_mod    = static_cast<float>(atof(row[1]));
-			entry.aa_exp_mod = static_cast<float>(atof(row[2]));
+			e.level      = atoi(row[0]);
+			e.exp_mod    = static_cast<float>(atof(row[1]));
+			e.aa_exp_mod = static_cast<float>(atof(row[2]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -112,26 +112,26 @@ public:
 
 	static Bugs NewEntity()
 	{
-		Bugs entry{};
+		Bugs e{};
 
-		entry.id     = 0;
-		entry.zone   = "";
-		entry.name   = "";
-		entry.ui     = "";
-		entry.x      = 0;
-		entry.y      = 0;
-		entry.z      = 0;
-		entry.type   = "";
-		entry.flag   = 0;
-		entry.target = "";
-		entry.bug    = "";
-		entry.date   = 0;
-		entry.status = 0;
+		e.id     = 0;
+		e.zone   = "";
+		e.name   = "";
+		e.ui     = "";
+		e.x      = 0;
+		e.y      = 0;
+		e.z      = 0;
+		e.type   = "";
+		e.flag   = 0;
+		e.target = "";
+		e.bug    = "";
+		e.date   = 0;
+		e.status = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Bugs GetBugsEntry(
+	static Bugs GetBugse(
 		const std::vector<Bugs> &bugss,
 		int bugs_id
 	)
@@ -160,23 +160,23 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Bugs entry{};
+			Bugs e{};
 
-			entry.id     = atoi(row[0]);
-			entry.zone   = row[1] ? row[1] : "";
-			entry.name   = row[2] ? row[2] : "";
-			entry.ui     = row[3] ? row[3] : "";
-			entry.x      = static_cast<float>(atof(row[4]));
-			entry.y      = static_cast<float>(atof(row[5]));
-			entry.z      = static_cast<float>(atof(row[6]));
-			entry.type   = row[7] ? row[7] : "";
-			entry.flag   = atoi(row[8]);
-			entry.target = row[9] ? row[9] : "";
-			entry.bug    = row[10] ? row[10] : "";
-			entry.date   = row[11] ? row[11] : "";
-			entry.status = atoi(row[12]);
+			e.id     = atoi(row[0]);
+			e.zone   = row[1] ? row[1] : "";
+			e.name   = row[2] ? row[2] : "";
+			e.ui     = row[3] ? row[3] : "";
+			e.x      = static_cast<float>(atof(row[4]));
+			e.y      = static_cast<float>(atof(row[5]));
+			e.z      = static_cast<float>(atof(row[6]));
+			e.type   = row[7] ? row[7] : "";
+			e.flag   = atoi(row[8]);
+			e.target = row[9] ? row[9] : "";
+			e.bug    = row[10] ? row[10] : "";
+			e.date   = row[11] ? row[11] : "";
+			e.status = atoi(row[12]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -201,25 +201,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Bugs bugs_entry
+		Bugs bugs_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(bugs_entry.zone) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(bugs_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(bugs_entry.ui) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(bugs_entry.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(bugs_entry.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(bugs_entry.z));
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(bugs_entry.type) + "'");
-		update_values.push_back(columns[8] + " = " + std::to_string(bugs_entry.flag));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(bugs_entry.target) + "'");
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(bugs_entry.bug) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(bugs_entry.date) + "'");
-		update_values.push_back(columns[12] + " = " + std::to_string(bugs_entry.status));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(bugs_e.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(bugs_e.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(bugs_e.ui) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(bugs_e.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(bugs_e.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(bugs_e.z));
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(bugs_e.type) + "'");
+		update_values.push_back(columns[8] + " = " + std::to_string(bugs_e.flag));
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(bugs_e.target) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(bugs_e.bug) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(bugs_e.date) + "'");
+		update_values.push_back(columns[12] + " = " + std::to_string(bugs_e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -227,7 +227,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				bugs_entry.id
+				bugs_e.id
 			)
 		);
 
@@ -236,24 +236,24 @@ public:
 
 	static Bugs InsertOne(
 		Database& db,
-		Bugs bugs_entry
+		Bugs bugs_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(bugs_entry.id));
-		insert_values.push_back("'" + Strings::Escape(bugs_entry.zone) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_entry.ui) + "'");
-		insert_values.push_back(std::to_string(bugs_entry.x));
-		insert_values.push_back(std::to_string(bugs_entry.y));
-		insert_values.push_back(std::to_string(bugs_entry.z));
-		insert_values.push_back("'" + Strings::Escape(bugs_entry.type) + "'");
-		insert_values.push_back(std::to_string(bugs_entry.flag));
-		insert_values.push_back("'" + Strings::Escape(bugs_entry.target) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_entry.bug) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_entry.date) + "'");
-		insert_values.push_back(std::to_string(bugs_entry.status));
+		insert_values.push_back(std::to_string(bugs_e.id));
+		insert_values.push_back("'" + Strings::Escape(bugs_e.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_e.ui) + "'");
+		insert_values.push_back(std::to_string(bugs_e.x));
+		insert_values.push_back(std::to_string(bugs_e.y));
+		insert_values.push_back(std::to_string(bugs_e.z));
+		insert_values.push_back("'" + Strings::Escape(bugs_e.type) + "'");
+		insert_values.push_back(std::to_string(bugs_e.flag));
+		insert_values.push_back("'" + Strings::Escape(bugs_e.target) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_e.bug) + "'");
+		insert_values.push_back("'" + Strings::Escape(bugs_e.date) + "'");
+		insert_values.push_back(std::to_string(bugs_e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -264,13 +264,13 @@ public:
 		);
 
 		if (results.Success()) {
-			bugs_entry.id = results.LastInsertedID();
-			return bugs_entry;
+			bugs_e.id = results.LastInsertedID();
+			return bugs_e;
 		}
 
-		bugs_entry = NewEntity();
+		bugs_e = NewEntity();
 
-		return bugs_entry;
+		return bugs_e;
 	}
 
 	static int InsertMany(
@@ -280,22 +280,22 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &bugs_entry: bugs_entries) {
+		for (auto &bugs_e: bugs_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(bugs_entry.id));
-			insert_values.push_back("'" + Strings::Escape(bugs_entry.zone) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_entry.ui) + "'");
-			insert_values.push_back(std::to_string(bugs_entry.x));
-			insert_values.push_back(std::to_string(bugs_entry.y));
-			insert_values.push_back(std::to_string(bugs_entry.z));
-			insert_values.push_back("'" + Strings::Escape(bugs_entry.type) + "'");
-			insert_values.push_back(std::to_string(bugs_entry.flag));
-			insert_values.push_back("'" + Strings::Escape(bugs_entry.target) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_entry.bug) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_entry.date) + "'");
-			insert_values.push_back(std::to_string(bugs_entry.status));
+			insert_values.push_back(std::to_string(bugs_e.id));
+			insert_values.push_back("'" + Strings::Escape(bugs_e.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_e.ui) + "'");
+			insert_values.push_back(std::to_string(bugs_e.x));
+			insert_values.push_back(std::to_string(bugs_e.y));
+			insert_values.push_back(std::to_string(bugs_e.z));
+			insert_values.push_back("'" + Strings::Escape(bugs_e.type) + "'");
+			insert_values.push_back(std::to_string(bugs_e.flag));
+			insert_values.push_back("'" + Strings::Escape(bugs_e.target) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_e.bug) + "'");
+			insert_values.push_back("'" + Strings::Escape(bugs_e.date) + "'");
+			insert_values.push_back(std::to_string(bugs_e.status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -327,23 +327,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Bugs entry{};
+			Bugs e{};
 
-			entry.id     = atoi(row[0]);
-			entry.zone   = row[1] ? row[1] : "";
-			entry.name   = row[2] ? row[2] : "";
-			entry.ui     = row[3] ? row[3] : "";
-			entry.x      = static_cast<float>(atof(row[4]));
-			entry.y      = static_cast<float>(atof(row[5]));
-			entry.z      = static_cast<float>(atof(row[6]));
-			entry.type   = row[7] ? row[7] : "";
-			entry.flag   = atoi(row[8]);
-			entry.target = row[9] ? row[9] : "";
-			entry.bug    = row[10] ? row[10] : "";
-			entry.date   = row[11] ? row[11] : "";
-			entry.status = atoi(row[12]);
+			e.id     = atoi(row[0]);
+			e.zone   = row[1] ? row[1] : "";
+			e.name   = row[2] ? row[2] : "";
+			e.ui     = row[3] ? row[3] : "";
+			e.x      = static_cast<float>(atof(row[4]));
+			e.y      = static_cast<float>(atof(row[5]));
+			e.z      = static_cast<float>(atof(row[6]));
+			e.type   = row[7] ? row[7] : "";
+			e.flag   = atoi(row[8]);
+			e.target = row[9] ? row[9] : "";
+			e.bug    = row[10] ? row[10] : "";
+			e.date   = row[11] ? row[11] : "";
+			e.status = atoi(row[12]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -364,23 +364,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Bugs entry{};
+			Bugs e{};
 
-			entry.id     = atoi(row[0]);
-			entry.zone   = row[1] ? row[1] : "";
-			entry.name   = row[2] ? row[2] : "";
-			entry.ui     = row[3] ? row[3] : "";
-			entry.x      = static_cast<float>(atof(row[4]));
-			entry.y      = static_cast<float>(atof(row[5]));
-			entry.z      = static_cast<float>(atof(row[6]));
-			entry.type   = row[7] ? row[7] : "";
-			entry.flag   = atoi(row[8]);
-			entry.target = row[9] ? row[9] : "";
-			entry.bug    = row[10] ? row[10] : "";
-			entry.date   = row[11] ? row[11] : "";
-			entry.status = atoi(row[12]);
+			e.id     = atoi(row[0]);
+			e.zone   = row[1] ? row[1] : "";
+			e.name   = row[2] ? row[2] : "";
+			e.ui     = row[3] ? row[3] : "";
+			e.x      = static_cast<float>(atof(row[4]));
+			e.y      = static_cast<float>(atof(row[5]));
+			e.z      = static_cast<float>(atof(row[6]));
+			e.type   = row[7] ? row[7] : "";
+			e.flag   = atoi(row[8]);
+			e.target = row[9] ? row[9] : "";
+			e.bug    = row[10] ? row[10] : "";
+			e.date   = row[11] ? row[11] : "";
+			e.status = atoi(row[12]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

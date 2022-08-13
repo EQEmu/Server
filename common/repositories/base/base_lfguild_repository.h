@@ -100,22 +100,22 @@ public:
 
 	static Lfguild NewEntity()
 	{
-		Lfguild entry{};
+		Lfguild e{};
 
-		entry.type       = 0;
-		entry.name       = "";
-		entry.comment    = "";
-		entry.fromlevel  = 0;
-		entry.tolevel    = 0;
-		entry.classes    = 0;
-		entry.aacount    = 0;
-		entry.timezone   = 0;
-		entry.timeposted = 0;
+		e.type       = 0;
+		e.name       = "";
+		e.comment    = "";
+		e.fromlevel  = 0;
+		e.tolevel    = 0;
+		e.classes    = 0;
+		e.aacount    = 0;
+		e.timezone   = 0;
+		e.timeposted = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Lfguild GetLfguildEntry(
+	static Lfguild GetLfguilde(
 		const std::vector<Lfguild> &lfguilds,
 		int lfguild_id
 	)
@@ -144,19 +144,19 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Lfguild entry{};
+			Lfguild e{};
 
-			entry.type       = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
-			entry.comment    = row[2] ? row[2] : "";
-			entry.fromlevel  = atoi(row[3]);
-			entry.tolevel    = atoi(row[4]);
-			entry.classes    = atoi(row[5]);
-			entry.aacount    = atoi(row[6]);
-			entry.timezone   = atoi(row[7]);
-			entry.timeposted = atoi(row[8]);
+			e.type       = atoi(row[0]);
+			e.name       = row[1] ? row[1] : "";
+			e.comment    = row[2] ? row[2] : "";
+			e.fromlevel  = atoi(row[3]);
+			e.tolevel    = atoi(row[4]);
+			e.classes    = atoi(row[5]);
+			e.aacount    = atoi(row[6]);
+			e.timezone   = atoi(row[7]);
+			e.timeposted = atoi(row[8]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -181,22 +181,22 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Lfguild lfguild_entry
+		Lfguild lfguild_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(lfguild_entry.type));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(lfguild_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(lfguild_entry.comment) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(lfguild_entry.fromlevel));
-		update_values.push_back(columns[4] + " = " + std::to_string(lfguild_entry.tolevel));
-		update_values.push_back(columns[5] + " = " + std::to_string(lfguild_entry.classes));
-		update_values.push_back(columns[6] + " = " + std::to_string(lfguild_entry.aacount));
-		update_values.push_back(columns[7] + " = " + std::to_string(lfguild_entry.timezone));
-		update_values.push_back(columns[8] + " = " + std::to_string(lfguild_entry.timeposted));
+		update_values.push_back(columns[0] + " = " + std::to_string(lfguild_e.type));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(lfguild_e.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(lfguild_e.comment) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(lfguild_e.fromlevel));
+		update_values.push_back(columns[4] + " = " + std::to_string(lfguild_e.tolevel));
+		update_values.push_back(columns[5] + " = " + std::to_string(lfguild_e.classes));
+		update_values.push_back(columns[6] + " = " + std::to_string(lfguild_e.aacount));
+		update_values.push_back(columns[7] + " = " + std::to_string(lfguild_e.timezone));
+		update_values.push_back(columns[8] + " = " + std::to_string(lfguild_e.timeposted));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -204,7 +204,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				lfguild_entry.type
+				lfguild_e.type
 			)
 		);
 
@@ -213,20 +213,20 @@ public:
 
 	static Lfguild InsertOne(
 		Database& db,
-		Lfguild lfguild_entry
+		Lfguild lfguild_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(lfguild_entry.type));
-		insert_values.push_back("'" + Strings::Escape(lfguild_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(lfguild_entry.comment) + "'");
-		insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
-		insert_values.push_back(std::to_string(lfguild_entry.tolevel));
-		insert_values.push_back(std::to_string(lfguild_entry.classes));
-		insert_values.push_back(std::to_string(lfguild_entry.aacount));
-		insert_values.push_back(std::to_string(lfguild_entry.timezone));
-		insert_values.push_back(std::to_string(lfguild_entry.timeposted));
+		insert_values.push_back(std::to_string(lfguild_e.type));
+		insert_values.push_back("'" + Strings::Escape(lfguild_e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(lfguild_e.comment) + "'");
+		insert_values.push_back(std::to_string(lfguild_e.fromlevel));
+		insert_values.push_back(std::to_string(lfguild_e.tolevel));
+		insert_values.push_back(std::to_string(lfguild_e.classes));
+		insert_values.push_back(std::to_string(lfguild_e.aacount));
+		insert_values.push_back(std::to_string(lfguild_e.timezone));
+		insert_values.push_back(std::to_string(lfguild_e.timeposted));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -237,13 +237,13 @@ public:
 		);
 
 		if (results.Success()) {
-			lfguild_entry.type = results.LastInsertedID();
-			return lfguild_entry;
+			lfguild_e.type = results.LastInsertedID();
+			return lfguild_e;
 		}
 
-		lfguild_entry = NewEntity();
+		lfguild_e = NewEntity();
 
-		return lfguild_entry;
+		return lfguild_e;
 	}
 
 	static int InsertMany(
@@ -253,18 +253,18 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &lfguild_entry: lfguild_entries) {
+		for (auto &lfguild_e: lfguild_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(lfguild_entry.type));
-			insert_values.push_back("'" + Strings::Escape(lfguild_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(lfguild_entry.comment) + "'");
-			insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
-			insert_values.push_back(std::to_string(lfguild_entry.tolevel));
-			insert_values.push_back(std::to_string(lfguild_entry.classes));
-			insert_values.push_back(std::to_string(lfguild_entry.aacount));
-			insert_values.push_back(std::to_string(lfguild_entry.timezone));
-			insert_values.push_back(std::to_string(lfguild_entry.timeposted));
+			insert_values.push_back(std::to_string(lfguild_e.type));
+			insert_values.push_back("'" + Strings::Escape(lfguild_e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(lfguild_e.comment) + "'");
+			insert_values.push_back(std::to_string(lfguild_e.fromlevel));
+			insert_values.push_back(std::to_string(lfguild_e.tolevel));
+			insert_values.push_back(std::to_string(lfguild_e.classes));
+			insert_values.push_back(std::to_string(lfguild_e.aacount));
+			insert_values.push_back(std::to_string(lfguild_e.timezone));
+			insert_values.push_back(std::to_string(lfguild_e.timeposted));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -296,19 +296,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Lfguild entry{};
+			Lfguild e{};
 
-			entry.type       = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
-			entry.comment    = row[2] ? row[2] : "";
-			entry.fromlevel  = atoi(row[3]);
-			entry.tolevel    = atoi(row[4]);
-			entry.classes    = atoi(row[5]);
-			entry.aacount    = atoi(row[6]);
-			entry.timezone   = atoi(row[7]);
-			entry.timeposted = atoi(row[8]);
+			e.type       = atoi(row[0]);
+			e.name       = row[1] ? row[1] : "";
+			e.comment    = row[2] ? row[2] : "";
+			e.fromlevel  = atoi(row[3]);
+			e.tolevel    = atoi(row[4]);
+			e.classes    = atoi(row[5]);
+			e.aacount    = atoi(row[6]);
+			e.timezone   = atoi(row[7]);
+			e.timeposted = atoi(row[8]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -329,19 +329,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Lfguild entry{};
+			Lfguild e{};
 
-			entry.type       = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
-			entry.comment    = row[2] ? row[2] : "";
-			entry.fromlevel  = atoi(row[3]);
-			entry.tolevel    = atoi(row[4]);
-			entry.classes    = atoi(row[5]);
-			entry.aacount    = atoi(row[6]);
-			entry.timezone   = atoi(row[7]);
-			entry.timeposted = atoi(row[8]);
+			e.type       = atoi(row[0]);
+			e.name       = row[1] ? row[1] : "";
+			e.comment    = row[2] ? row[2] : "";
+			e.fromlevel  = atoi(row[3]);
+			e.tolevel    = atoi(row[4]);
+			e.classes    = atoi(row[5]);
+			e.aacount    = atoi(row[6]);
+			e.timezone   = atoi(row[7]);
+			e.timeposted = atoi(row[8]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -79,15 +79,15 @@ public:
 
 	static CharacterInspectMessages NewEntity()
 	{
-		CharacterInspectMessages entry{};
+		CharacterInspectMessages e{};
 
-		entry.id              = 0;
-		entry.inspect_message = "";
+		e.id              = 0;
+		e.inspect_message = "";
 
-		return entry;
+		return e;
 	}
 
-	static CharacterInspectMessages GetCharacterInspectMessagesEntry(
+	static CharacterInspectMessages GetCharacterInspectMessagese(
 		const std::vector<CharacterInspectMessages> &character_inspect_messagess,
 		int character_inspect_messages_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterInspectMessages entry{};
+			CharacterInspectMessages e{};
 
-			entry.id              = atoi(row[0]);
-			entry.inspect_message = row[1] ? row[1] : "";
+			e.id              = atoi(row[0]);
+			e.inspect_message = row[1] ? row[1] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterInspectMessages character_inspect_messages_entry
+		CharacterInspectMessages character_inspect_messages_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_inspect_messages_entry.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(character_inspect_messages_entry.inspect_message) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(character_inspect_messages_e.id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(character_inspect_messages_e.inspect_message) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_inspect_messages_entry.id
+				character_inspect_messages_e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static CharacterInspectMessages InsertOne(
 		Database& db,
-		CharacterInspectMessages character_inspect_messages_entry
+		CharacterInspectMessages character_inspect_messages_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_inspect_messages_entry.id));
-		insert_values.push_back("'" + Strings::Escape(character_inspect_messages_entry.inspect_message) + "'");
+		insert_values.push_back(std::to_string(character_inspect_messages_e.id));
+		insert_values.push_back("'" + Strings::Escape(character_inspect_messages_e.inspect_message) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_inspect_messages_entry.id = results.LastInsertedID();
-			return character_inspect_messages_entry;
+			character_inspect_messages_e.id = results.LastInsertedID();
+			return character_inspect_messages_e;
 		}
 
-		character_inspect_messages_entry = NewEntity();
+		character_inspect_messages_e = NewEntity();
 
-		return character_inspect_messages_entry;
+		return character_inspect_messages_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_inspect_messages_entry: character_inspect_messages_entries) {
+		for (auto &character_inspect_messages_e: character_inspect_messages_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_inspect_messages_entry.id));
-			insert_values.push_back("'" + Strings::Escape(character_inspect_messages_entry.inspect_message) + "'");
+			insert_values.push_back(std::to_string(character_inspect_messages_e.id));
+			insert_values.push_back("'" + Strings::Escape(character_inspect_messages_e.inspect_message) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterInspectMessages entry{};
+			CharacterInspectMessages e{};
 
-			entry.id              = atoi(row[0]);
-			entry.inspect_message = row[1] ? row[1] : "";
+			e.id              = atoi(row[0]);
+			e.inspect_message = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterInspectMessages entry{};
+			CharacterInspectMessages e{};
 
-			entry.id              = atoi(row[0]);
-			entry.inspect_message = row[1] ? row[1] : "";
+			e.id              = atoi(row[0]);
+			e.inspect_message = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

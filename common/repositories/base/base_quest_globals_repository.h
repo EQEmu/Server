@@ -91,19 +91,19 @@ public:
 
 	static QuestGlobals NewEntity()
 	{
-		QuestGlobals entry{};
+		QuestGlobals e{};
 
-		entry.charid  = 0;
-		entry.npcid   = 0;
-		entry.zoneid  = 0;
-		entry.name    = "";
-		entry.value   = "?";
-		entry.expdate = 0;
+		e.charid  = 0;
+		e.npcid   = 0;
+		e.zoneid  = 0;
+		e.name    = "";
+		e.value   = "?";
+		e.expdate = 0;
 
-		return entry;
+		return e;
 	}
 
-	static QuestGlobals GetQuestGlobalsEntry(
+	static QuestGlobals GetQuestGlobalse(
 		const std::vector<QuestGlobals> &quest_globalss,
 		int quest_globals_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			QuestGlobals entry{};
+			QuestGlobals e{};
 
-			entry.charid  = atoi(row[0]);
-			entry.npcid   = atoi(row[1]);
-			entry.zoneid  = atoi(row[2]);
-			entry.name    = row[3] ? row[3] : "";
-			entry.value   = row[4] ? row[4] : "";
-			entry.expdate = atoi(row[5]);
+			e.charid  = atoi(row[0]);
+			e.npcid   = atoi(row[1]);
+			e.zoneid  = atoi(row[2]);
+			e.name    = row[3] ? row[3] : "";
+			e.value   = row[4] ? row[4] : "";
+			e.expdate = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		QuestGlobals quest_globals_entry
+		QuestGlobals quest_globals_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(quest_globals_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(quest_globals_entry.npcid));
-		update_values.push_back(columns[2] + " = " + std::to_string(quest_globals_entry.zoneid));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(quest_globals_entry.name) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(quest_globals_entry.value) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(quest_globals_entry.expdate));
+		update_values.push_back(columns[0] + " = " + std::to_string(quest_globals_e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(quest_globals_e.npcid));
+		update_values.push_back(columns[2] + " = " + std::to_string(quest_globals_e.zoneid));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(quest_globals_e.name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(quest_globals_e.value) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(quest_globals_e.expdate));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				quest_globals_entry.charid
+				quest_globals_e.charid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static QuestGlobals InsertOne(
 		Database& db,
-		QuestGlobals quest_globals_entry
+		QuestGlobals quest_globals_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(quest_globals_entry.charid));
-		insert_values.push_back(std::to_string(quest_globals_entry.npcid));
-		insert_values.push_back(std::to_string(quest_globals_entry.zoneid));
-		insert_values.push_back("'" + Strings::Escape(quest_globals_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(quest_globals_entry.value) + "'");
-		insert_values.push_back(std::to_string(quest_globals_entry.expdate));
+		insert_values.push_back(std::to_string(quest_globals_e.charid));
+		insert_values.push_back(std::to_string(quest_globals_e.npcid));
+		insert_values.push_back(std::to_string(quest_globals_e.zoneid));
+		insert_values.push_back("'" + Strings::Escape(quest_globals_e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(quest_globals_e.value) + "'");
+		insert_values.push_back(std::to_string(quest_globals_e.expdate));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,13 +216,13 @@ public:
 		);
 
 		if (results.Success()) {
-			quest_globals_entry.charid = results.LastInsertedID();
-			return quest_globals_entry;
+			quest_globals_e.charid = results.LastInsertedID();
+			return quest_globals_e;
 		}
 
-		quest_globals_entry = NewEntity();
+		quest_globals_e = NewEntity();
 
-		return quest_globals_entry;
+		return quest_globals_e;
 	}
 
 	static int InsertMany(
@@ -232,15 +232,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &quest_globals_entry: quest_globals_entries) {
+		for (auto &quest_globals_e: quest_globals_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(quest_globals_entry.charid));
-			insert_values.push_back(std::to_string(quest_globals_entry.npcid));
-			insert_values.push_back(std::to_string(quest_globals_entry.zoneid));
-			insert_values.push_back("'" + Strings::Escape(quest_globals_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(quest_globals_entry.value) + "'");
-			insert_values.push_back(std::to_string(quest_globals_entry.expdate));
+			insert_values.push_back(std::to_string(quest_globals_e.charid));
+			insert_values.push_back(std::to_string(quest_globals_e.npcid));
+			insert_values.push_back(std::to_string(quest_globals_e.zoneid));
+			insert_values.push_back("'" + Strings::Escape(quest_globals_e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(quest_globals_e.value) + "'");
+			insert_values.push_back(std::to_string(quest_globals_e.expdate));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -272,16 +272,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			QuestGlobals entry{};
+			QuestGlobals e{};
 
-			entry.charid  = atoi(row[0]);
-			entry.npcid   = atoi(row[1]);
-			entry.zoneid  = atoi(row[2]);
-			entry.name    = row[3] ? row[3] : "";
-			entry.value   = row[4] ? row[4] : "";
-			entry.expdate = atoi(row[5]);
+			e.charid  = atoi(row[0]);
+			e.npcid   = atoi(row[1]);
+			e.zoneid  = atoi(row[2]);
+			e.name    = row[3] ? row[3] : "";
+			e.value   = row[4] ? row[4] : "";
+			e.expdate = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -302,16 +302,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			QuestGlobals entry{};
+			QuestGlobals e{};
 
-			entry.charid  = atoi(row[0]);
-			entry.npcid   = atoi(row[1]);
-			entry.zoneid  = atoi(row[2]);
-			entry.name    = row[3] ? row[3] : "";
-			entry.value   = row[4] ? row[4] : "";
-			entry.expdate = atoi(row[5]);
+			e.charid  = atoi(row[0]);
+			e.npcid   = atoi(row[1]);
+			e.zoneid  = atoi(row[2]);
+			e.name    = row[3] ? row[3] : "";
+			e.value   = row[4] ? row[4] : "";
+			e.expdate = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

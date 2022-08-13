@@ -82,16 +82,16 @@ public:
 
 	static GuildRelations NewEntity()
 	{
-		GuildRelations entry{};
+		GuildRelations e{};
 
-		entry.guild1   = 0;
-		entry.guild2   = 0;
-		entry.relation = 0;
+		e.guild1   = 0;
+		e.guild2   = 0;
+		e.relation = 0;
 
-		return entry;
+		return e;
 	}
 
-	static GuildRelations GetGuildRelationsEntry(
+	static GuildRelations GetGuildRelationse(
 		const std::vector<GuildRelations> &guild_relationss,
 		int guild_relations_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GuildRelations entry{};
+			GuildRelations e{};
 
-			entry.guild1   = atoi(row[0]);
-			entry.guild2   = atoi(row[1]);
-			entry.relation = atoi(row[2]);
+			e.guild1   = atoi(row[0]);
+			e.guild2   = atoi(row[1]);
+			e.relation = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GuildRelations guild_relations_entry
+		GuildRelations guild_relations_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(guild_relations_entry.guild1));
-		update_values.push_back(columns[1] + " = " + std::to_string(guild_relations_entry.guild2));
-		update_values.push_back(columns[2] + " = " + std::to_string(guild_relations_entry.relation));
+		update_values.push_back(columns[0] + " = " + std::to_string(guild_relations_e.guild1));
+		update_values.push_back(columns[1] + " = " + std::to_string(guild_relations_e.guild2));
+		update_values.push_back(columns[2] + " = " + std::to_string(guild_relations_e.relation));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				guild_relations_entry.guild1
+				guild_relations_e.guild1
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static GuildRelations InsertOne(
 		Database& db,
-		GuildRelations guild_relations_entry
+		GuildRelations guild_relations_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(guild_relations_entry.guild1));
-		insert_values.push_back(std::to_string(guild_relations_entry.guild2));
-		insert_values.push_back(std::to_string(guild_relations_entry.relation));
+		insert_values.push_back(std::to_string(guild_relations_e.guild1));
+		insert_values.push_back(std::to_string(guild_relations_e.guild2));
+		insert_values.push_back(std::to_string(guild_relations_e.relation));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			guild_relations_entry.guild1 = results.LastInsertedID();
-			return guild_relations_entry;
+			guild_relations_e.guild1 = results.LastInsertedID();
+			return guild_relations_e;
 		}
 
-		guild_relations_entry = NewEntity();
+		guild_relations_e = NewEntity();
 
-		return guild_relations_entry;
+		return guild_relations_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &guild_relations_entry: guild_relations_entries) {
+		for (auto &guild_relations_e: guild_relations_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(guild_relations_entry.guild1));
-			insert_values.push_back(std::to_string(guild_relations_entry.guild2));
-			insert_values.push_back(std::to_string(guild_relations_entry.relation));
+			insert_values.push_back(std::to_string(guild_relations_e.guild1));
+			insert_values.push_back(std::to_string(guild_relations_e.guild2));
+			insert_values.push_back(std::to_string(guild_relations_e.relation));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRelations entry{};
+			GuildRelations e{};
 
-			entry.guild1   = atoi(row[0]);
-			entry.guild2   = atoi(row[1]);
-			entry.relation = atoi(row[2]);
+			e.guild1   = atoi(row[0]);
+			e.guild2   = atoi(row[1]);
+			e.relation = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRelations entry{};
+			GuildRelations e{};
 
-			entry.guild1   = atoi(row[0]);
-			entry.guild2   = atoi(row[1]);
-			entry.relation = atoi(row[2]);
+			e.guild1   = atoi(row[0]);
+			e.guild2   = atoi(row[1]);
+			e.relation = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -85,17 +85,17 @@ public:
 
 	static Reports NewEntity()
 	{
-		Reports entry{};
+		Reports e{};
 
-		entry.id            = 0;
-		entry.name          = "";
-		entry.reported      = "";
-		entry.reported_text = "";
+		e.id            = 0;
+		e.name          = "";
+		e.reported      = "";
+		e.reported_text = "";
 
-		return entry;
+		return e;
 	}
 
-	static Reports GetReportsEntry(
+	static Reports GetReportse(
 		const std::vector<Reports> &reportss,
 		int reports_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Reports entry{};
+			Reports e{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.reported      = row[2] ? row[2] : "";
-			entry.reported_text = row[3] ? row[3] : "";
+			e.id            = atoi(row[0]);
+			e.name          = row[1] ? row[1] : "";
+			e.reported      = row[2] ? row[2] : "";
+			e.reported_text = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Reports reports_entry
+		Reports reports_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(reports_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(reports_entry.reported) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(reports_entry.reported_text) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(reports_e.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(reports_e.reported) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(reports_e.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				reports_entry.id
+				reports_e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static Reports InsertOne(
 		Database& db,
-		Reports reports_entry
+		Reports reports_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(reports_entry.id));
-		insert_values.push_back("'" + Strings::Escape(reports_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(reports_entry.reported) + "'");
-		insert_values.push_back("'" + Strings::Escape(reports_entry.reported_text) + "'");
+		insert_values.push_back(std::to_string(reports_e.id));
+		insert_values.push_back("'" + Strings::Escape(reports_e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_e.reported) + "'");
+		insert_values.push_back("'" + Strings::Escape(reports_e.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,13 +201,13 @@ public:
 		);
 
 		if (results.Success()) {
-			reports_entry.id = results.LastInsertedID();
-			return reports_entry;
+			reports_e.id = results.LastInsertedID();
+			return reports_e;
 		}
 
-		reports_entry = NewEntity();
+		reports_e = NewEntity();
 
-		return reports_entry;
+		return reports_e;
 	}
 
 	static int InsertMany(
@@ -217,13 +217,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &reports_entry: reports_entries) {
+		for (auto &reports_e: reports_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(reports_entry.id));
-			insert_values.push_back("'" + Strings::Escape(reports_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(reports_entry.reported) + "'");
-			insert_values.push_back("'" + Strings::Escape(reports_entry.reported_text) + "'");
+			insert_values.push_back(std::to_string(reports_e.id));
+			insert_values.push_back("'" + Strings::Escape(reports_e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_e.reported) + "'");
+			insert_values.push_back("'" + Strings::Escape(reports_e.reported_text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -255,14 +255,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Reports entry{};
+			Reports e{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.reported      = row[2] ? row[2] : "";
-			entry.reported_text = row[3] ? row[3] : "";
+			e.id            = atoi(row[0]);
+			e.name          = row[1] ? row[1] : "";
+			e.reported      = row[2] ? row[2] : "";
+			e.reported_text = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -283,14 +283,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Reports entry{};
+			Reports e{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.reported      = row[2] ? row[2] : "";
-			entry.reported_text = row[3] ? row[3] : "";
+			e.id            = atoi(row[0]);
+			e.name          = row[1] ? row[1] : "";
+			e.reported      = row[2] ? row[2] : "";
+			e.reported_text = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

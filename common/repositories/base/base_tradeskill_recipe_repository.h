@@ -118,28 +118,28 @@ public:
 
 	static TradeskillRecipe NewEntity()
 	{
-		TradeskillRecipe entry{};
+		TradeskillRecipe e{};
 
-		entry.id                     = 0;
-		entry.name                   = "";
-		entry.tradeskill             = 0;
-		entry.skillneeded            = 0;
-		entry.trivial                = 0;
-		entry.nofail                 = 0;
-		entry.replace_container      = 0;
-		entry.notes                  = "";
-		entry.must_learn             = 0;
-		entry.quest                  = 0;
-		entry.enabled                = 1;
-		entry.min_expansion          = -1;
-		entry.max_expansion          = -1;
-		entry.content_flags          = "";
-		entry.content_flags_disabled = "";
+		e.id                     = 0;
+		e.name                   = "";
+		e.tradeskill             = 0;
+		e.skillneeded            = 0;
+		e.trivial                = 0;
+		e.nofail                 = 0;
+		e.replace_container      = 0;
+		e.notes                  = "";
+		e.must_learn             = 0;
+		e.quest                  = 0;
+		e.enabled                = 1;
+		e.min_expansion          = -1;
+		e.max_expansion          = -1;
+		e.content_flags          = "";
+		e.content_flags_disabled = "";
 
-		return entry;
+		return e;
 	}
 
-	static TradeskillRecipe GetTradeskillRecipeEntry(
+	static TradeskillRecipe GetTradeskillRecipee(
 		const std::vector<TradeskillRecipe> &tradeskill_recipes,
 		int tradeskill_recipe_id
 	)
@@ -168,25 +168,25 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			TradeskillRecipe entry{};
+			TradeskillRecipe e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1] ? row[1] : "";
-			entry.tradeskill             = atoi(row[2]);
-			entry.skillneeded            = atoi(row[3]);
-			entry.trivial                = atoi(row[4]);
-			entry.nofail                 = atoi(row[5]);
-			entry.replace_container      = atoi(row[6]);
-			entry.notes                  = row[7] ? row[7] : "";
-			entry.must_learn             = atoi(row[8]);
-			entry.quest                  = atoi(row[9]);
-			entry.enabled                = atoi(row[10]);
-			entry.min_expansion          = atoi(row[11]);
-			entry.max_expansion          = atoi(row[12]);
-			entry.content_flags          = row[13] ? row[13] : "";
-			entry.content_flags_disabled = row[14] ? row[14] : "";
+			e.id                     = atoi(row[0]);
+			e.name                   = row[1] ? row[1] : "";
+			e.tradeskill             = atoi(row[2]);
+			e.skillneeded            = atoi(row[3]);
+			e.trivial                = atoi(row[4]);
+			e.nofail                 = atoi(row[5]);
+			e.replace_container      = atoi(row[6]);
+			e.notes                  = row[7] ? row[7] : "";
+			e.must_learn             = atoi(row[8]);
+			e.quest                  = atoi(row[9]);
+			e.enabled                = atoi(row[10]);
+			e.min_expansion          = atoi(row[11]);
+			e.max_expansion          = atoi(row[12]);
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -211,27 +211,27 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		TradeskillRecipe tradeskill_recipe_entry
+		TradeskillRecipe tradeskill_recipe_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(tradeskill_recipe_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(tradeskill_recipe_entry.tradeskill));
-		update_values.push_back(columns[3] + " = " + std::to_string(tradeskill_recipe_entry.skillneeded));
-		update_values.push_back(columns[4] + " = " + std::to_string(tradeskill_recipe_entry.trivial));
-		update_values.push_back(columns[5] + " = " + std::to_string(tradeskill_recipe_entry.nofail));
-		update_values.push_back(columns[6] + " = " + std::to_string(tradeskill_recipe_entry.replace_container));
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(tradeskill_recipe_entry.notes) + "'");
-		update_values.push_back(columns[8] + " = " + std::to_string(tradeskill_recipe_entry.must_learn));
-		update_values.push_back(columns[9] + " = " + std::to_string(tradeskill_recipe_entry.quest));
-		update_values.push_back(columns[10] + " = " + std::to_string(tradeskill_recipe_entry.enabled));
-		update_values.push_back(columns[11] + " = " + std::to_string(tradeskill_recipe_entry.min_expansion));
-		update_values.push_back(columns[12] + " = " + std::to_string(tradeskill_recipe_entry.max_expansion));
-		update_values.push_back(columns[13] + " = '" + Strings::Escape(tradeskill_recipe_entry.content_flags) + "'");
-		update_values.push_back(columns[14] + " = '" + Strings::Escape(tradeskill_recipe_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(tradeskill_recipe_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(tradeskill_recipe_e.tradeskill));
+		update_values.push_back(columns[3] + " = " + std::to_string(tradeskill_recipe_e.skillneeded));
+		update_values.push_back(columns[4] + " = " + std::to_string(tradeskill_recipe_e.trivial));
+		update_values.push_back(columns[5] + " = " + std::to_string(tradeskill_recipe_e.nofail));
+		update_values.push_back(columns[6] + " = " + std::to_string(tradeskill_recipe_e.replace_container));
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(tradeskill_recipe_e.notes) + "'");
+		update_values.push_back(columns[8] + " = " + std::to_string(tradeskill_recipe_e.must_learn));
+		update_values.push_back(columns[9] + " = " + std::to_string(tradeskill_recipe_e.quest));
+		update_values.push_back(columns[10] + " = " + std::to_string(tradeskill_recipe_e.enabled));
+		update_values.push_back(columns[11] + " = " + std::to_string(tradeskill_recipe_e.min_expansion));
+		update_values.push_back(columns[12] + " = " + std::to_string(tradeskill_recipe_e.max_expansion));
+		update_values.push_back(columns[13] + " = '" + Strings::Escape(tradeskill_recipe_e.content_flags) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(tradeskill_recipe_e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -239,7 +239,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				tradeskill_recipe_entry.id
+				tradeskill_recipe_e.id
 			)
 		);
 
@@ -248,26 +248,26 @@ public:
 
 	static TradeskillRecipe InsertOne(
 		Database& db,
-		TradeskillRecipe tradeskill_recipe_entry
+		TradeskillRecipe tradeskill_recipe_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.id));
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.name) + "'");
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.tradeskill));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.skillneeded));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.trivial));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.nofail));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.replace_container));
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.notes) + "'");
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.must_learn));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.quest));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.enabled));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.min_expansion));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entry.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.id));
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.name) + "'");
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.tradeskill));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.skillneeded));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.trivial));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.nofail));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.replace_container));
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.notes) + "'");
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.must_learn));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.quest));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.enabled));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.min_expansion));
+		insert_values.push_back(std::to_string(tradeskill_recipe_e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -278,13 +278,13 @@ public:
 		);
 
 		if (results.Success()) {
-			tradeskill_recipe_entry.id = results.LastInsertedID();
-			return tradeskill_recipe_entry;
+			tradeskill_recipe_e.id = results.LastInsertedID();
+			return tradeskill_recipe_e;
 		}
 
-		tradeskill_recipe_entry = NewEntity();
+		tradeskill_recipe_e = NewEntity();
 
-		return tradeskill_recipe_entry;
+		return tradeskill_recipe_e;
 	}
 
 	static int InsertMany(
@@ -294,24 +294,24 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tradeskill_recipe_entry: tradeskill_recipe_entries) {
+		for (auto &tradeskill_recipe_e: tradeskill_recipe_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.id));
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.name) + "'");
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.tradeskill));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.skillneeded));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.trivial));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.nofail));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.replace_container));
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.notes) + "'");
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.must_learn));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.quest));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.enabled));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.min_expansion));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entry.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_entry.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.id));
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.name) + "'");
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.tradeskill));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.skillneeded));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.trivial));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.nofail));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.replace_container));
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.notes) + "'");
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.must_learn));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.quest));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.enabled));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.min_expansion));
+			insert_values.push_back(std::to_string(tradeskill_recipe_e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -343,25 +343,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			TradeskillRecipe entry{};
+			TradeskillRecipe e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1] ? row[1] : "";
-			entry.tradeskill             = atoi(row[2]);
-			entry.skillneeded            = atoi(row[3]);
-			entry.trivial                = atoi(row[4]);
-			entry.nofail                 = atoi(row[5]);
-			entry.replace_container      = atoi(row[6]);
-			entry.notes                  = row[7] ? row[7] : "";
-			entry.must_learn             = atoi(row[8]);
-			entry.quest                  = atoi(row[9]);
-			entry.enabled                = atoi(row[10]);
-			entry.min_expansion          = atoi(row[11]);
-			entry.max_expansion          = atoi(row[12]);
-			entry.content_flags          = row[13] ? row[13] : "";
-			entry.content_flags_disabled = row[14] ? row[14] : "";
+			e.id                     = atoi(row[0]);
+			e.name                   = row[1] ? row[1] : "";
+			e.tradeskill             = atoi(row[2]);
+			e.skillneeded            = atoi(row[3]);
+			e.trivial                = atoi(row[4]);
+			e.nofail                 = atoi(row[5]);
+			e.replace_container      = atoi(row[6]);
+			e.notes                  = row[7] ? row[7] : "";
+			e.must_learn             = atoi(row[8]);
+			e.quest                  = atoi(row[9]);
+			e.enabled                = atoi(row[10]);
+			e.min_expansion          = atoi(row[11]);
+			e.max_expansion          = atoi(row[12]);
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -382,25 +382,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			TradeskillRecipe entry{};
+			TradeskillRecipe e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1] ? row[1] : "";
-			entry.tradeskill             = atoi(row[2]);
-			entry.skillneeded            = atoi(row[3]);
-			entry.trivial                = atoi(row[4]);
-			entry.nofail                 = atoi(row[5]);
-			entry.replace_container      = atoi(row[6]);
-			entry.notes                  = row[7] ? row[7] : "";
-			entry.must_learn             = atoi(row[8]);
-			entry.quest                  = atoi(row[9]);
-			entry.enabled                = atoi(row[10]);
-			entry.min_expansion          = atoi(row[11]);
-			entry.max_expansion          = atoi(row[12]);
-			entry.content_flags          = row[13] ? row[13] : "";
-			entry.content_flags_disabled = row[14] ? row[14] : "";
+			e.id                     = atoi(row[0]);
+			e.name                   = row[1] ? row[1] : "";
+			e.tradeskill             = atoi(row[2]);
+			e.skillneeded            = atoi(row[3]);
+			e.trivial                = atoi(row[4]);
+			e.nofail                 = atoi(row[5]);
+			e.replace_container      = atoi(row[6]);
+			e.notes                  = row[7] ? row[7] : "";
+			e.must_learn             = atoi(row[8]);
+			e.quest                  = atoi(row[9]);
+			e.enabled                = atoi(row[10]);
+			e.min_expansion          = atoi(row[11]);
+			e.max_expansion          = atoi(row[12]);
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

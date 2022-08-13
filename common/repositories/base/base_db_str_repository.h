@@ -82,16 +82,16 @@ public:
 
 	static DbStr NewEntity()
 	{
-		DbStr entry{};
+		DbStr e{};
 
-		entry.id    = 0;
-		entry.type  = 0;
-		entry.value = "";
+		e.id    = 0;
+		e.type  = 0;
+		e.value = "";
 
-		return entry;
+		return e;
 	}
 
-	static DbStr GetDbStrEntry(
+	static DbStr GetDbStre(
 		const std::vector<DbStr> &db_strs,
 		int db_str_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			DbStr entry{};
+			DbStr e{};
 
-			entry.id    = atoi(row[0]);
-			entry.type  = atoi(row[1]);
-			entry.value = row[2] ? row[2] : "";
+			e.id    = atoi(row[0]);
+			e.type  = atoi(row[1]);
+			e.value = row[2] ? row[2] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DbStr db_str_entry
+		DbStr db_str_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(db_str_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(db_str_entry.type));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(db_str_entry.value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(db_str_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(db_str_e.type));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(db_str_e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				db_str_entry.id
+				db_str_e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static DbStr InsertOne(
 		Database& db,
-		DbStr db_str_entry
+		DbStr db_str_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(db_str_entry.id));
-		insert_values.push_back(std::to_string(db_str_entry.type));
-		insert_values.push_back("'" + Strings::Escape(db_str_entry.value) + "'");
+		insert_values.push_back(std::to_string(db_str_e.id));
+		insert_values.push_back(std::to_string(db_str_e.type));
+		insert_values.push_back("'" + Strings::Escape(db_str_e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			db_str_entry.id = results.LastInsertedID();
-			return db_str_entry;
+			db_str_e.id = results.LastInsertedID();
+			return db_str_e;
 		}
 
-		db_str_entry = NewEntity();
+		db_str_e = NewEntity();
 
-		return db_str_entry;
+		return db_str_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &db_str_entry: db_str_entries) {
+		for (auto &db_str_e: db_str_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(db_str_entry.id));
-			insert_values.push_back(std::to_string(db_str_entry.type));
-			insert_values.push_back("'" + Strings::Escape(db_str_entry.value) + "'");
+			insert_values.push_back(std::to_string(db_str_e.id));
+			insert_values.push_back(std::to_string(db_str_e.type));
+			insert_values.push_back("'" + Strings::Escape(db_str_e.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DbStr entry{};
+			DbStr e{};
 
-			entry.id    = atoi(row[0]);
-			entry.type  = atoi(row[1]);
-			entry.value = row[2] ? row[2] : "";
+			e.id    = atoi(row[0]);
+			e.type  = atoi(row[1]);
+			e.value = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DbStr entry{};
+			DbStr e{};
 
-			entry.id    = atoi(row[0]);
-			entry.type  = atoi(row[1]);
-			entry.value = row[2] ? row[2] : "";
+			e.id    = atoi(row[0]);
+			e.type  = atoi(row[1]);
+			e.value = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

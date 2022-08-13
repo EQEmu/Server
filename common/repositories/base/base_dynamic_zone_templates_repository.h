@@ -139,35 +139,35 @@ public:
 
 	static DynamicZoneTemplates NewEntity()
 	{
-		DynamicZoneTemplates entry{};
+		DynamicZoneTemplates e{};
 
-		entry.id               = 0;
-		entry.zone_id          = 0;
-		entry.zone_version     = 0;
-		entry.name             = "";
-		entry.min_players      = 0;
-		entry.max_players      = 0;
-		entry.duration_seconds = 0;
-		entry.dz_switch_id     = 0;
-		entry.compass_zone_id  = 0;
-		entry.compass_x        = 0;
-		entry.compass_y        = 0;
-		entry.compass_z        = 0;
-		entry.return_zone_id   = 0;
-		entry.return_x         = 0;
-		entry.return_y         = 0;
-		entry.return_z         = 0;
-		entry.return_h         = 0;
-		entry.override_zone_in = 0;
-		entry.zone_in_x        = 0;
-		entry.zone_in_y        = 0;
-		entry.zone_in_z        = 0;
-		entry.zone_in_h        = 0;
+		e.id               = 0;
+		e.zone_id          = 0;
+		e.zone_version     = 0;
+		e.name             = "";
+		e.min_players      = 0;
+		e.max_players      = 0;
+		e.duration_seconds = 0;
+		e.dz_switch_id     = 0;
+		e.compass_zone_id  = 0;
+		e.compass_x        = 0;
+		e.compass_y        = 0;
+		e.compass_z        = 0;
+		e.return_zone_id   = 0;
+		e.return_x         = 0;
+		e.return_y         = 0;
+		e.return_z         = 0;
+		e.return_h         = 0;
+		e.override_zone_in = 0;
+		e.zone_in_x        = 0;
+		e.zone_in_y        = 0;
+		e.zone_in_z        = 0;
+		e.zone_in_h        = 0;
 
-		return entry;
+		return e;
 	}
 
-	static DynamicZoneTemplates GetDynamicZoneTemplatesEntry(
+	static DynamicZoneTemplates GetDynamicZoneTemplatese(
 		const std::vector<DynamicZoneTemplates> &dynamic_zone_templatess,
 		int dynamic_zone_templates_id
 	)
@@ -196,32 +196,32 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			DynamicZoneTemplates entry{};
+			DynamicZoneTemplates e{};
 
-			entry.id               = atoi(row[0]);
-			entry.zone_id          = atoi(row[1]);
-			entry.zone_version     = atoi(row[2]);
-			entry.name             = row[3] ? row[3] : "";
-			entry.min_players      = atoi(row[4]);
-			entry.max_players      = atoi(row[5]);
-			entry.duration_seconds = atoi(row[6]);
-			entry.dz_switch_id     = atoi(row[7]);
-			entry.compass_zone_id  = atoi(row[8]);
-			entry.compass_x        = static_cast<float>(atof(row[9]));
-			entry.compass_y        = static_cast<float>(atof(row[10]));
-			entry.compass_z        = static_cast<float>(atof(row[11]));
-			entry.return_zone_id   = atoi(row[12]);
-			entry.return_x         = static_cast<float>(atof(row[13]));
-			entry.return_y         = static_cast<float>(atof(row[14]));
-			entry.return_z         = static_cast<float>(atof(row[15]));
-			entry.return_h         = static_cast<float>(atof(row[16]));
-			entry.override_zone_in = atoi(row[17]);
-			entry.zone_in_x        = static_cast<float>(atof(row[18]));
-			entry.zone_in_y        = static_cast<float>(atof(row[19]));
-			entry.zone_in_z        = static_cast<float>(atof(row[20]));
-			entry.zone_in_h        = static_cast<float>(atof(row[21]));
+			e.id               = atoi(row[0]);
+			e.zone_id          = atoi(row[1]);
+			e.zone_version     = atoi(row[2]);
+			e.name             = row[3] ? row[3] : "";
+			e.min_players      = atoi(row[4]);
+			e.max_players      = atoi(row[5]);
+			e.duration_seconds = atoi(row[6]);
+			e.dz_switch_id     = atoi(row[7]);
+			e.compass_zone_id  = atoi(row[8]);
+			e.compass_x        = static_cast<float>(atof(row[9]));
+			e.compass_y        = static_cast<float>(atof(row[10]));
+			e.compass_z        = static_cast<float>(atof(row[11]));
+			e.return_zone_id   = atoi(row[12]);
+			e.return_x         = static_cast<float>(atof(row[13]));
+			e.return_y         = static_cast<float>(atof(row[14]));
+			e.return_z         = static_cast<float>(atof(row[15]));
+			e.return_h         = static_cast<float>(atof(row[16]));
+			e.override_zone_in = atoi(row[17]);
+			e.zone_in_x        = static_cast<float>(atof(row[18]));
+			e.zone_in_y        = static_cast<float>(atof(row[19]));
+			e.zone_in_z        = static_cast<float>(atof(row[20]));
+			e.zone_in_h        = static_cast<float>(atof(row[21]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -246,34 +246,34 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DynamicZoneTemplates dynamic_zone_templates_entry
+		DynamicZoneTemplates dynamic_zone_templates_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zone_templates_entry.zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zone_templates_entry.zone_version));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(dynamic_zone_templates_entry.name) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(dynamic_zone_templates_entry.min_players));
-		update_values.push_back(columns[5] + " = " + std::to_string(dynamic_zone_templates_entry.max_players));
-		update_values.push_back(columns[6] + " = " + std::to_string(dynamic_zone_templates_entry.duration_seconds));
-		update_values.push_back(columns[7] + " = " + std::to_string(dynamic_zone_templates_entry.dz_switch_id));
-		update_values.push_back(columns[8] + " = " + std::to_string(dynamic_zone_templates_entry.compass_zone_id));
-		update_values.push_back(columns[9] + " = " + std::to_string(dynamic_zone_templates_entry.compass_x));
-		update_values.push_back(columns[10] + " = " + std::to_string(dynamic_zone_templates_entry.compass_y));
-		update_values.push_back(columns[11] + " = " + std::to_string(dynamic_zone_templates_entry.compass_z));
-		update_values.push_back(columns[12] + " = " + std::to_string(dynamic_zone_templates_entry.return_zone_id));
-		update_values.push_back(columns[13] + " = " + std::to_string(dynamic_zone_templates_entry.return_x));
-		update_values.push_back(columns[14] + " = " + std::to_string(dynamic_zone_templates_entry.return_y));
-		update_values.push_back(columns[15] + " = " + std::to_string(dynamic_zone_templates_entry.return_z));
-		update_values.push_back(columns[16] + " = " + std::to_string(dynamic_zone_templates_entry.return_h));
-		update_values.push_back(columns[17] + " = " + std::to_string(dynamic_zone_templates_entry.override_zone_in));
-		update_values.push_back(columns[18] + " = " + std::to_string(dynamic_zone_templates_entry.zone_in_x));
-		update_values.push_back(columns[19] + " = " + std::to_string(dynamic_zone_templates_entry.zone_in_y));
-		update_values.push_back(columns[20] + " = " + std::to_string(dynamic_zone_templates_entry.zone_in_z));
-		update_values.push_back(columns[21] + " = " + std::to_string(dynamic_zone_templates_entry.zone_in_h));
+		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zone_templates_e.zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zone_templates_e.zone_version));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(dynamic_zone_templates_e.name) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(dynamic_zone_templates_e.min_players));
+		update_values.push_back(columns[5] + " = " + std::to_string(dynamic_zone_templates_e.max_players));
+		update_values.push_back(columns[6] + " = " + std::to_string(dynamic_zone_templates_e.duration_seconds));
+		update_values.push_back(columns[7] + " = " + std::to_string(dynamic_zone_templates_e.dz_switch_id));
+		update_values.push_back(columns[8] + " = " + std::to_string(dynamic_zone_templates_e.compass_zone_id));
+		update_values.push_back(columns[9] + " = " + std::to_string(dynamic_zone_templates_e.compass_x));
+		update_values.push_back(columns[10] + " = " + std::to_string(dynamic_zone_templates_e.compass_y));
+		update_values.push_back(columns[11] + " = " + std::to_string(dynamic_zone_templates_e.compass_z));
+		update_values.push_back(columns[12] + " = " + std::to_string(dynamic_zone_templates_e.return_zone_id));
+		update_values.push_back(columns[13] + " = " + std::to_string(dynamic_zone_templates_e.return_x));
+		update_values.push_back(columns[14] + " = " + std::to_string(dynamic_zone_templates_e.return_y));
+		update_values.push_back(columns[15] + " = " + std::to_string(dynamic_zone_templates_e.return_z));
+		update_values.push_back(columns[16] + " = " + std::to_string(dynamic_zone_templates_e.return_h));
+		update_values.push_back(columns[17] + " = " + std::to_string(dynamic_zone_templates_e.override_zone_in));
+		update_values.push_back(columns[18] + " = " + std::to_string(dynamic_zone_templates_e.zone_in_x));
+		update_values.push_back(columns[19] + " = " + std::to_string(dynamic_zone_templates_e.zone_in_y));
+		update_values.push_back(columns[20] + " = " + std::to_string(dynamic_zone_templates_e.zone_in_z));
+		update_values.push_back(columns[21] + " = " + std::to_string(dynamic_zone_templates_e.zone_in_h));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -281,7 +281,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				dynamic_zone_templates_entry.id
+				dynamic_zone_templates_e.id
 			)
 		);
 
@@ -290,33 +290,33 @@ public:
 
 	static DynamicZoneTemplates InsertOne(
 		Database& db,
-		DynamicZoneTemplates dynamic_zone_templates_entry
+		DynamicZoneTemplates dynamic_zone_templates_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.id));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_id));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_version));
-		insert_values.push_back("'" + Strings::Escape(dynamic_zone_templates_entry.name) + "'");
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.min_players));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.max_players));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.duration_seconds));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.dz_switch_id));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_zone_id));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_x));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_y));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_z));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_zone_id));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_x));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_y));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_z));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_h));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.override_zone_in));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_x));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_y));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_z));
-		insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_h));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.id));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_id));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_version));
+		insert_values.push_back("'" + Strings::Escape(dynamic_zone_templates_e.name) + "'");
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.min_players));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.max_players));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.duration_seconds));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.dz_switch_id));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_zone_id));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_x));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_y));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_z));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_zone_id));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_x));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_y));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_z));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_h));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.override_zone_in));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_x));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_y));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_z));
+		insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_h));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -327,13 +327,13 @@ public:
 		);
 
 		if (results.Success()) {
-			dynamic_zone_templates_entry.id = results.LastInsertedID();
-			return dynamic_zone_templates_entry;
+			dynamic_zone_templates_e.id = results.LastInsertedID();
+			return dynamic_zone_templates_e;
 		}
 
-		dynamic_zone_templates_entry = NewEntity();
+		dynamic_zone_templates_e = NewEntity();
 
-		return dynamic_zone_templates_entry;
+		return dynamic_zone_templates_e;
 	}
 
 	static int InsertMany(
@@ -343,31 +343,31 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &dynamic_zone_templates_entry: dynamic_zone_templates_entries) {
+		for (auto &dynamic_zone_templates_e: dynamic_zone_templates_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.id));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_id));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_version));
-			insert_values.push_back("'" + Strings::Escape(dynamic_zone_templates_entry.name) + "'");
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.min_players));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.max_players));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.duration_seconds));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.dz_switch_id));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_zone_id));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_x));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_y));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.compass_z));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_zone_id));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_x));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_y));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_z));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.return_h));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.override_zone_in));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_x));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_y));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_z));
-			insert_values.push_back(std::to_string(dynamic_zone_templates_entry.zone_in_h));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.id));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_id));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_version));
+			insert_values.push_back("'" + Strings::Escape(dynamic_zone_templates_e.name) + "'");
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.min_players));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.max_players));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.duration_seconds));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.dz_switch_id));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_zone_id));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_x));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_y));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.compass_z));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_zone_id));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_x));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_y));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_z));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.return_h));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.override_zone_in));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_x));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_y));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_z));
+			insert_values.push_back(std::to_string(dynamic_zone_templates_e.zone_in_h));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -399,32 +399,32 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DynamicZoneTemplates entry{};
+			DynamicZoneTemplates e{};
 
-			entry.id               = atoi(row[0]);
-			entry.zone_id          = atoi(row[1]);
-			entry.zone_version     = atoi(row[2]);
-			entry.name             = row[3] ? row[3] : "";
-			entry.min_players      = atoi(row[4]);
-			entry.max_players      = atoi(row[5]);
-			entry.duration_seconds = atoi(row[6]);
-			entry.dz_switch_id     = atoi(row[7]);
-			entry.compass_zone_id  = atoi(row[8]);
-			entry.compass_x        = static_cast<float>(atof(row[9]));
-			entry.compass_y        = static_cast<float>(atof(row[10]));
-			entry.compass_z        = static_cast<float>(atof(row[11]));
-			entry.return_zone_id   = atoi(row[12]);
-			entry.return_x         = static_cast<float>(atof(row[13]));
-			entry.return_y         = static_cast<float>(atof(row[14]));
-			entry.return_z         = static_cast<float>(atof(row[15]));
-			entry.return_h         = static_cast<float>(atof(row[16]));
-			entry.override_zone_in = atoi(row[17]);
-			entry.zone_in_x        = static_cast<float>(atof(row[18]));
-			entry.zone_in_y        = static_cast<float>(atof(row[19]));
-			entry.zone_in_z        = static_cast<float>(atof(row[20]));
-			entry.zone_in_h        = static_cast<float>(atof(row[21]));
+			e.id               = atoi(row[0]);
+			e.zone_id          = atoi(row[1]);
+			e.zone_version     = atoi(row[2]);
+			e.name             = row[3] ? row[3] : "";
+			e.min_players      = atoi(row[4]);
+			e.max_players      = atoi(row[5]);
+			e.duration_seconds = atoi(row[6]);
+			e.dz_switch_id     = atoi(row[7]);
+			e.compass_zone_id  = atoi(row[8]);
+			e.compass_x        = static_cast<float>(atof(row[9]));
+			e.compass_y        = static_cast<float>(atof(row[10]));
+			e.compass_z        = static_cast<float>(atof(row[11]));
+			e.return_zone_id   = atoi(row[12]);
+			e.return_x         = static_cast<float>(atof(row[13]));
+			e.return_y         = static_cast<float>(atof(row[14]));
+			e.return_z         = static_cast<float>(atof(row[15]));
+			e.return_h         = static_cast<float>(atof(row[16]));
+			e.override_zone_in = atoi(row[17]);
+			e.zone_in_x        = static_cast<float>(atof(row[18]));
+			e.zone_in_y        = static_cast<float>(atof(row[19]));
+			e.zone_in_z        = static_cast<float>(atof(row[20]));
+			e.zone_in_h        = static_cast<float>(atof(row[21]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -445,32 +445,32 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DynamicZoneTemplates entry{};
+			DynamicZoneTemplates e{};
 
-			entry.id               = atoi(row[0]);
-			entry.zone_id          = atoi(row[1]);
-			entry.zone_version     = atoi(row[2]);
-			entry.name             = row[3] ? row[3] : "";
-			entry.min_players      = atoi(row[4]);
-			entry.max_players      = atoi(row[5]);
-			entry.duration_seconds = atoi(row[6]);
-			entry.dz_switch_id     = atoi(row[7]);
-			entry.compass_zone_id  = atoi(row[8]);
-			entry.compass_x        = static_cast<float>(atof(row[9]));
-			entry.compass_y        = static_cast<float>(atof(row[10]));
-			entry.compass_z        = static_cast<float>(atof(row[11]));
-			entry.return_zone_id   = atoi(row[12]);
-			entry.return_x         = static_cast<float>(atof(row[13]));
-			entry.return_y         = static_cast<float>(atof(row[14]));
-			entry.return_z         = static_cast<float>(atof(row[15]));
-			entry.return_h         = static_cast<float>(atof(row[16]));
-			entry.override_zone_in = atoi(row[17]);
-			entry.zone_in_x        = static_cast<float>(atof(row[18]));
-			entry.zone_in_y        = static_cast<float>(atof(row[19]));
-			entry.zone_in_z        = static_cast<float>(atof(row[20]));
-			entry.zone_in_h        = static_cast<float>(atof(row[21]));
+			e.id               = atoi(row[0]);
+			e.zone_id          = atoi(row[1]);
+			e.zone_version     = atoi(row[2]);
+			e.name             = row[3] ? row[3] : "";
+			e.min_players      = atoi(row[4]);
+			e.max_players      = atoi(row[5]);
+			e.duration_seconds = atoi(row[6]);
+			e.dz_switch_id     = atoi(row[7]);
+			e.compass_zone_id  = atoi(row[8]);
+			e.compass_x        = static_cast<float>(atof(row[9]));
+			e.compass_y        = static_cast<float>(atof(row[10]));
+			e.compass_z        = static_cast<float>(atof(row[11]));
+			e.return_zone_id   = atoi(row[12]);
+			e.return_x         = static_cast<float>(atof(row[13]));
+			e.return_y         = static_cast<float>(atof(row[14]));
+			e.return_z         = static_cast<float>(atof(row[15]));
+			e.return_h         = static_cast<float>(atof(row[16]));
+			e.override_zone_in = atoi(row[17]);
+			e.zone_in_x        = static_cast<float>(atof(row[18]));
+			e.zone_in_y        = static_cast<float>(atof(row[19]));
+			e.zone_in_z        = static_cast<float>(atof(row[20]));
+			e.zone_in_h        = static_cast<float>(atof(row[21]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

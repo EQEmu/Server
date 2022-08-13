@@ -79,15 +79,15 @@ public:
 
 	static LdonTrapEntries NewEntity()
 	{
-		LdonTrapEntries entry{};
+		LdonTrapEntries e{};
 
-		entry.id      = 0;
-		entry.trap_id = 0;
+		e.id      = 0;
+		e.trap_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static LdonTrapEntries GetLdonTrapEntriesEntry(
+	static LdonTrapEntries GetLdonTrapEntriese(
 		const std::vector<LdonTrapEntries> &ldon_trap_entriess,
 		int ldon_trap_entries_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LdonTrapEntries entry{};
+			LdonTrapEntries e{};
 
-			entry.id      = atoi(row[0]);
-			entry.trap_id = atoi(row[1]);
+			e.id      = atoi(row[0]);
+			e.trap_id = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LdonTrapEntries ldon_trap_entries_entry
+		LdonTrapEntries ldon_trap_entries_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(ldon_trap_entries_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(ldon_trap_entries_entry.trap_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(ldon_trap_entries_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(ldon_trap_entries_e.trap_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				ldon_trap_entries_entry.id
+				ldon_trap_entries_e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static LdonTrapEntries InsertOne(
 		Database& db,
-		LdonTrapEntries ldon_trap_entries_entry
+		LdonTrapEntries ldon_trap_entries_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(ldon_trap_entries_entry.id));
-		insert_values.push_back(std::to_string(ldon_trap_entries_entry.trap_id));
+		insert_values.push_back(std::to_string(ldon_trap_entries_e.id));
+		insert_values.push_back(std::to_string(ldon_trap_entries_e.trap_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			ldon_trap_entries_entry.id = results.LastInsertedID();
-			return ldon_trap_entries_entry;
+			ldon_trap_entries_e.id = results.LastInsertedID();
+			return ldon_trap_entries_e;
 		}
 
-		ldon_trap_entries_entry = NewEntity();
+		ldon_trap_entries_e = NewEntity();
 
-		return ldon_trap_entries_entry;
+		return ldon_trap_entries_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &ldon_trap_entries_entry: ldon_trap_entries_entries) {
+		for (auto &ldon_trap_entries_e: ldon_trap_entries_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(ldon_trap_entries_entry.id));
-			insert_values.push_back(std::to_string(ldon_trap_entries_entry.trap_id));
+			insert_values.push_back(std::to_string(ldon_trap_entries_e.id));
+			insert_values.push_back(std::to_string(ldon_trap_entries_e.trap_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LdonTrapEntries entry{};
+			LdonTrapEntries e{};
 
-			entry.id      = atoi(row[0]);
-			entry.trap_id = atoi(row[1]);
+			e.id      = atoi(row[0]);
+			e.trap_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LdonTrapEntries entry{};
+			LdonTrapEntries e{};
 
-			entry.id      = atoi(row[0]);
-			entry.trap_id = atoi(row[1]);
+			e.id      = atoi(row[0]);
+			e.trap_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -91,19 +91,19 @@ public:
 
 	static LoottableEntries NewEntity()
 	{
-		LoottableEntries entry{};
+		LoottableEntries e{};
 
-		entry.loottable_id = 0;
-		entry.lootdrop_id  = 0;
-		entry.multiplier   = 1;
-		entry.droplimit    = 0;
-		entry.mindrop      = 0;
-		entry.probability  = 100;
+		e.loottable_id = 0;
+		e.lootdrop_id  = 0;
+		e.multiplier   = 1;
+		e.droplimit    = 0;
+		e.mindrop      = 0;
+		e.probability  = 100;
 
-		return entry;
+		return e;
 	}
 
-	static LoottableEntries GetLoottableEntriesEntry(
+	static LoottableEntries GetLoottableEntriese(
 		const std::vector<LoottableEntries> &loottable_entriess,
 		int loottable_entries_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LoottableEntries entry{};
+			LoottableEntries e{};
 
-			entry.loottable_id = atoi(row[0]);
-			entry.lootdrop_id  = atoi(row[1]);
-			entry.multiplier   = atoi(row[2]);
-			entry.droplimit    = atoi(row[3]);
-			entry.mindrop      = atoi(row[4]);
-			entry.probability  = static_cast<float>(atof(row[5]));
+			e.loottable_id = atoi(row[0]);
+			e.lootdrop_id  = atoi(row[1]);
+			e.multiplier   = atoi(row[2]);
+			e.droplimit    = atoi(row[3]);
+			e.mindrop      = atoi(row[4]);
+			e.probability  = static_cast<float>(atof(row[5]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoottableEntries loottable_entries_entry
+		LoottableEntries loottable_entries_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(loottable_entries_entry.loottable_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(loottable_entries_entry.lootdrop_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(loottable_entries_entry.multiplier));
-		update_values.push_back(columns[3] + " = " + std::to_string(loottable_entries_entry.droplimit));
-		update_values.push_back(columns[4] + " = " + std::to_string(loottable_entries_entry.mindrop));
-		update_values.push_back(columns[5] + " = " + std::to_string(loottable_entries_entry.probability));
+		update_values.push_back(columns[0] + " = " + std::to_string(loottable_entries_e.loottable_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(loottable_entries_e.lootdrop_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(loottable_entries_e.multiplier));
+		update_values.push_back(columns[3] + " = " + std::to_string(loottable_entries_e.droplimit));
+		update_values.push_back(columns[4] + " = " + std::to_string(loottable_entries_e.mindrop));
+		update_values.push_back(columns[5] + " = " + std::to_string(loottable_entries_e.probability));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				loottable_entries_entry.loottable_id
+				loottable_entries_e.loottable_id
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static LoottableEntries InsertOne(
 		Database& db,
-		LoottableEntries loottable_entries_entry
+		LoottableEntries loottable_entries_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(loottable_entries_entry.loottable_id));
-		insert_values.push_back(std::to_string(loottable_entries_entry.lootdrop_id));
-		insert_values.push_back(std::to_string(loottable_entries_entry.multiplier));
-		insert_values.push_back(std::to_string(loottable_entries_entry.droplimit));
-		insert_values.push_back(std::to_string(loottable_entries_entry.mindrop));
-		insert_values.push_back(std::to_string(loottable_entries_entry.probability));
+		insert_values.push_back(std::to_string(loottable_entries_e.loottable_id));
+		insert_values.push_back(std::to_string(loottable_entries_e.lootdrop_id));
+		insert_values.push_back(std::to_string(loottable_entries_e.multiplier));
+		insert_values.push_back(std::to_string(loottable_entries_e.droplimit));
+		insert_values.push_back(std::to_string(loottable_entries_e.mindrop));
+		insert_values.push_back(std::to_string(loottable_entries_e.probability));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,13 +216,13 @@ public:
 		);
 
 		if (results.Success()) {
-			loottable_entries_entry.loottable_id = results.LastInsertedID();
-			return loottable_entries_entry;
+			loottable_entries_e.loottable_id = results.LastInsertedID();
+			return loottable_entries_e;
 		}
 
-		loottable_entries_entry = NewEntity();
+		loottable_entries_e = NewEntity();
 
-		return loottable_entries_entry;
+		return loottable_entries_e;
 	}
 
 	static int InsertMany(
@@ -232,15 +232,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &loottable_entries_entry: loottable_entries_entries) {
+		for (auto &loottable_entries_e: loottable_entries_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(loottable_entries_entry.loottable_id));
-			insert_values.push_back(std::to_string(loottable_entries_entry.lootdrop_id));
-			insert_values.push_back(std::to_string(loottable_entries_entry.multiplier));
-			insert_values.push_back(std::to_string(loottable_entries_entry.droplimit));
-			insert_values.push_back(std::to_string(loottable_entries_entry.mindrop));
-			insert_values.push_back(std::to_string(loottable_entries_entry.probability));
+			insert_values.push_back(std::to_string(loottable_entries_e.loottable_id));
+			insert_values.push_back(std::to_string(loottable_entries_e.lootdrop_id));
+			insert_values.push_back(std::to_string(loottable_entries_e.multiplier));
+			insert_values.push_back(std::to_string(loottable_entries_e.droplimit));
+			insert_values.push_back(std::to_string(loottable_entries_e.mindrop));
+			insert_values.push_back(std::to_string(loottable_entries_e.probability));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -272,16 +272,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoottableEntries entry{};
+			LoottableEntries e{};
 
-			entry.loottable_id = atoi(row[0]);
-			entry.lootdrop_id  = atoi(row[1]);
-			entry.multiplier   = atoi(row[2]);
-			entry.droplimit    = atoi(row[3]);
-			entry.mindrop      = atoi(row[4]);
-			entry.probability  = static_cast<float>(atof(row[5]));
+			e.loottable_id = atoi(row[0]);
+			e.lootdrop_id  = atoi(row[1]);
+			e.multiplier   = atoi(row[2]);
+			e.droplimit    = atoi(row[3]);
+			e.mindrop      = atoi(row[4]);
+			e.probability  = static_cast<float>(atof(row[5]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -302,16 +302,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoottableEntries entry{};
+			LoottableEntries e{};
 
-			entry.loottable_id = atoi(row[0]);
-			entry.lootdrop_id  = atoi(row[1]);
-			entry.multiplier   = atoi(row[2]);
-			entry.droplimit    = atoi(row[3]);
-			entry.mindrop      = atoi(row[4]);
-			entry.probability  = static_cast<float>(atof(row[5]));
+			e.loottable_id = atoi(row[0]);
+			e.lootdrop_id  = atoi(row[1]);
+			e.multiplier   = atoi(row[2]);
+			e.droplimit    = atoi(row[3]);
+			e.mindrop      = atoi(row[4]);
+			e.probability  = static_cast<float>(atof(row[5]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

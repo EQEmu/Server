@@ -124,30 +124,30 @@ public:
 
 	static CharacterBuffs NewEntity()
 	{
-		CharacterBuffs entry{};
+		CharacterBuffs e{};
 
-		entry.character_id   = 0;
-		entry.slot_id        = 0;
-		entry.spell_id       = 0;
-		entry.caster_level   = 0;
-		entry.caster_name    = "";
-		entry.ticsremaining  = 0;
-		entry.counters       = 0;
-		entry.numhits        = 0;
-		entry.melee_rune     = 0;
-		entry.magic_rune     = 0;
-		entry.persistent     = 0;
-		entry.dot_rune       = 0;
-		entry.caston_x       = 0;
-		entry.caston_y       = 0;
-		entry.caston_z       = 0;
-		entry.ExtraDIChance  = 0;
-		entry.instrument_mod = 10;
+		e.character_id   = 0;
+		e.slot_id        = 0;
+		e.spell_id       = 0;
+		e.caster_level   = 0;
+		e.caster_name    = "";
+		e.ticsremaining  = 0;
+		e.counters       = 0;
+		e.numhits        = 0;
+		e.melee_rune     = 0;
+		e.magic_rune     = 0;
+		e.persistent     = 0;
+		e.dot_rune       = 0;
+		e.caston_x       = 0;
+		e.caston_y       = 0;
+		e.caston_z       = 0;
+		e.ExtraDIChance  = 0;
+		e.instrument_mod = 10;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterBuffs GetCharacterBuffsEntry(
+	static CharacterBuffs GetCharacterBuffse(
 		const std::vector<CharacterBuffs> &character_buffss,
 		int character_buffs_id
 	)
@@ -176,27 +176,27 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterBuffs entry{};
+			CharacterBuffs e{};
 
-			entry.character_id   = atoi(row[0]);
-			entry.slot_id        = atoi(row[1]);
-			entry.spell_id       = atoi(row[2]);
-			entry.caster_level   = atoi(row[3]);
-			entry.caster_name    = row[4] ? row[4] : "";
-			entry.ticsremaining  = atoi(row[5]);
-			entry.counters       = atoi(row[6]);
-			entry.numhits        = atoi(row[7]);
-			entry.melee_rune     = atoi(row[8]);
-			entry.magic_rune     = atoi(row[9]);
-			entry.persistent     = atoi(row[10]);
-			entry.dot_rune       = atoi(row[11]);
-			entry.caston_x       = atoi(row[12]);
-			entry.caston_y       = atoi(row[13]);
-			entry.caston_z       = atoi(row[14]);
-			entry.ExtraDIChance  = atoi(row[15]);
-			entry.instrument_mod = atoi(row[16]);
+			e.character_id   = atoi(row[0]);
+			e.slot_id        = atoi(row[1]);
+			e.spell_id       = atoi(row[2]);
+			e.caster_level   = atoi(row[3]);
+			e.caster_name    = row[4] ? row[4] : "";
+			e.ticsremaining  = atoi(row[5]);
+			e.counters       = atoi(row[6]);
+			e.numhits        = atoi(row[7]);
+			e.melee_rune     = atoi(row[8]);
+			e.magic_rune     = atoi(row[9]);
+			e.persistent     = atoi(row[10]);
+			e.dot_rune       = atoi(row[11]);
+			e.caston_x       = atoi(row[12]);
+			e.caston_y       = atoi(row[13]);
+			e.caston_z       = atoi(row[14]);
+			e.ExtraDIChance  = atoi(row[15]);
+			e.instrument_mod = atoi(row[16]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -221,30 +221,30 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterBuffs character_buffs_entry
+		CharacterBuffs character_buffs_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_buffs_entry.character_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_buffs_entry.slot_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_buffs_entry.spell_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_buffs_entry.caster_level));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(character_buffs_entry.caster_name) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(character_buffs_entry.ticsremaining));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_buffs_entry.counters));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_buffs_entry.numhits));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_buffs_entry.melee_rune));
-		update_values.push_back(columns[9] + " = " + std::to_string(character_buffs_entry.magic_rune));
-		update_values.push_back(columns[10] + " = " + std::to_string(character_buffs_entry.persistent));
-		update_values.push_back(columns[11] + " = " + std::to_string(character_buffs_entry.dot_rune));
-		update_values.push_back(columns[12] + " = " + std::to_string(character_buffs_entry.caston_x));
-		update_values.push_back(columns[13] + " = " + std::to_string(character_buffs_entry.caston_y));
-		update_values.push_back(columns[14] + " = " + std::to_string(character_buffs_entry.caston_z));
-		update_values.push_back(columns[15] + " = " + std::to_string(character_buffs_entry.ExtraDIChance));
-		update_values.push_back(columns[16] + " = " + std::to_string(character_buffs_entry.instrument_mod));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_buffs_e.character_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_buffs_e.slot_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_buffs_e.spell_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_buffs_e.caster_level));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(character_buffs_e.caster_name) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(character_buffs_e.ticsremaining));
+		update_values.push_back(columns[6] + " = " + std::to_string(character_buffs_e.counters));
+		update_values.push_back(columns[7] + " = " + std::to_string(character_buffs_e.numhits));
+		update_values.push_back(columns[8] + " = " + std::to_string(character_buffs_e.melee_rune));
+		update_values.push_back(columns[9] + " = " + std::to_string(character_buffs_e.magic_rune));
+		update_values.push_back(columns[10] + " = " + std::to_string(character_buffs_e.persistent));
+		update_values.push_back(columns[11] + " = " + std::to_string(character_buffs_e.dot_rune));
+		update_values.push_back(columns[12] + " = " + std::to_string(character_buffs_e.caston_x));
+		update_values.push_back(columns[13] + " = " + std::to_string(character_buffs_e.caston_y));
+		update_values.push_back(columns[14] + " = " + std::to_string(character_buffs_e.caston_z));
+		update_values.push_back(columns[15] + " = " + std::to_string(character_buffs_e.ExtraDIChance));
+		update_values.push_back(columns[16] + " = " + std::to_string(character_buffs_e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -252,7 +252,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_buffs_entry.character_id
+				character_buffs_e.character_id
 			)
 		);
 
@@ -261,28 +261,28 @@ public:
 
 	static CharacterBuffs InsertOne(
 		Database& db,
-		CharacterBuffs character_buffs_entry
+		CharacterBuffs character_buffs_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_buffs_entry.character_id));
-		insert_values.push_back(std::to_string(character_buffs_entry.slot_id));
-		insert_values.push_back(std::to_string(character_buffs_entry.spell_id));
-		insert_values.push_back(std::to_string(character_buffs_entry.caster_level));
-		insert_values.push_back("'" + Strings::Escape(character_buffs_entry.caster_name) + "'");
-		insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
-		insert_values.push_back(std::to_string(character_buffs_entry.counters));
-		insert_values.push_back(std::to_string(character_buffs_entry.numhits));
-		insert_values.push_back(std::to_string(character_buffs_entry.melee_rune));
-		insert_values.push_back(std::to_string(character_buffs_entry.magic_rune));
-		insert_values.push_back(std::to_string(character_buffs_entry.persistent));
-		insert_values.push_back(std::to_string(character_buffs_entry.dot_rune));
-		insert_values.push_back(std::to_string(character_buffs_entry.caston_x));
-		insert_values.push_back(std::to_string(character_buffs_entry.caston_y));
-		insert_values.push_back(std::to_string(character_buffs_entry.caston_z));
-		insert_values.push_back(std::to_string(character_buffs_entry.ExtraDIChance));
-		insert_values.push_back(std::to_string(character_buffs_entry.instrument_mod));
+		insert_values.push_back(std::to_string(character_buffs_e.character_id));
+		insert_values.push_back(std::to_string(character_buffs_e.slot_id));
+		insert_values.push_back(std::to_string(character_buffs_e.spell_id));
+		insert_values.push_back(std::to_string(character_buffs_e.caster_level));
+		insert_values.push_back("'" + Strings::Escape(character_buffs_e.caster_name) + "'");
+		insert_values.push_back(std::to_string(character_buffs_e.ticsremaining));
+		insert_values.push_back(std::to_string(character_buffs_e.counters));
+		insert_values.push_back(std::to_string(character_buffs_e.numhits));
+		insert_values.push_back(std::to_string(character_buffs_e.melee_rune));
+		insert_values.push_back(std::to_string(character_buffs_e.magic_rune));
+		insert_values.push_back(std::to_string(character_buffs_e.persistent));
+		insert_values.push_back(std::to_string(character_buffs_e.dot_rune));
+		insert_values.push_back(std::to_string(character_buffs_e.caston_x));
+		insert_values.push_back(std::to_string(character_buffs_e.caston_y));
+		insert_values.push_back(std::to_string(character_buffs_e.caston_z));
+		insert_values.push_back(std::to_string(character_buffs_e.ExtraDIChance));
+		insert_values.push_back(std::to_string(character_buffs_e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -293,13 +293,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_buffs_entry.character_id = results.LastInsertedID();
-			return character_buffs_entry;
+			character_buffs_e.character_id = results.LastInsertedID();
+			return character_buffs_e;
 		}
 
-		character_buffs_entry = NewEntity();
+		character_buffs_e = NewEntity();
 
-		return character_buffs_entry;
+		return character_buffs_e;
 	}
 
 	static int InsertMany(
@@ -309,26 +309,26 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_buffs_entry: character_buffs_entries) {
+		for (auto &character_buffs_e: character_buffs_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_buffs_entry.character_id));
-			insert_values.push_back(std::to_string(character_buffs_entry.slot_id));
-			insert_values.push_back(std::to_string(character_buffs_entry.spell_id));
-			insert_values.push_back(std::to_string(character_buffs_entry.caster_level));
-			insert_values.push_back("'" + Strings::Escape(character_buffs_entry.caster_name) + "'");
-			insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
-			insert_values.push_back(std::to_string(character_buffs_entry.counters));
-			insert_values.push_back(std::to_string(character_buffs_entry.numhits));
-			insert_values.push_back(std::to_string(character_buffs_entry.melee_rune));
-			insert_values.push_back(std::to_string(character_buffs_entry.magic_rune));
-			insert_values.push_back(std::to_string(character_buffs_entry.persistent));
-			insert_values.push_back(std::to_string(character_buffs_entry.dot_rune));
-			insert_values.push_back(std::to_string(character_buffs_entry.caston_x));
-			insert_values.push_back(std::to_string(character_buffs_entry.caston_y));
-			insert_values.push_back(std::to_string(character_buffs_entry.caston_z));
-			insert_values.push_back(std::to_string(character_buffs_entry.ExtraDIChance));
-			insert_values.push_back(std::to_string(character_buffs_entry.instrument_mod));
+			insert_values.push_back(std::to_string(character_buffs_e.character_id));
+			insert_values.push_back(std::to_string(character_buffs_e.slot_id));
+			insert_values.push_back(std::to_string(character_buffs_e.spell_id));
+			insert_values.push_back(std::to_string(character_buffs_e.caster_level));
+			insert_values.push_back("'" + Strings::Escape(character_buffs_e.caster_name) + "'");
+			insert_values.push_back(std::to_string(character_buffs_e.ticsremaining));
+			insert_values.push_back(std::to_string(character_buffs_e.counters));
+			insert_values.push_back(std::to_string(character_buffs_e.numhits));
+			insert_values.push_back(std::to_string(character_buffs_e.melee_rune));
+			insert_values.push_back(std::to_string(character_buffs_e.magic_rune));
+			insert_values.push_back(std::to_string(character_buffs_e.persistent));
+			insert_values.push_back(std::to_string(character_buffs_e.dot_rune));
+			insert_values.push_back(std::to_string(character_buffs_e.caston_x));
+			insert_values.push_back(std::to_string(character_buffs_e.caston_y));
+			insert_values.push_back(std::to_string(character_buffs_e.caston_z));
+			insert_values.push_back(std::to_string(character_buffs_e.ExtraDIChance));
+			insert_values.push_back(std::to_string(character_buffs_e.instrument_mod));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -360,27 +360,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterBuffs entry{};
+			CharacterBuffs e{};
 
-			entry.character_id   = atoi(row[0]);
-			entry.slot_id        = atoi(row[1]);
-			entry.spell_id       = atoi(row[2]);
-			entry.caster_level   = atoi(row[3]);
-			entry.caster_name    = row[4] ? row[4] : "";
-			entry.ticsremaining  = atoi(row[5]);
-			entry.counters       = atoi(row[6]);
-			entry.numhits        = atoi(row[7]);
-			entry.melee_rune     = atoi(row[8]);
-			entry.magic_rune     = atoi(row[9]);
-			entry.persistent     = atoi(row[10]);
-			entry.dot_rune       = atoi(row[11]);
-			entry.caston_x       = atoi(row[12]);
-			entry.caston_y       = atoi(row[13]);
-			entry.caston_z       = atoi(row[14]);
-			entry.ExtraDIChance  = atoi(row[15]);
-			entry.instrument_mod = atoi(row[16]);
+			e.character_id   = atoi(row[0]);
+			e.slot_id        = atoi(row[1]);
+			e.spell_id       = atoi(row[2]);
+			e.caster_level   = atoi(row[3]);
+			e.caster_name    = row[4] ? row[4] : "";
+			e.ticsremaining  = atoi(row[5]);
+			e.counters       = atoi(row[6]);
+			e.numhits        = atoi(row[7]);
+			e.melee_rune     = atoi(row[8]);
+			e.magic_rune     = atoi(row[9]);
+			e.persistent     = atoi(row[10]);
+			e.dot_rune       = atoi(row[11]);
+			e.caston_x       = atoi(row[12]);
+			e.caston_y       = atoi(row[13]);
+			e.caston_z       = atoi(row[14]);
+			e.ExtraDIChance  = atoi(row[15]);
+			e.instrument_mod = atoi(row[16]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -401,27 +401,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterBuffs entry{};
+			CharacterBuffs e{};
 
-			entry.character_id   = atoi(row[0]);
-			entry.slot_id        = atoi(row[1]);
-			entry.spell_id       = atoi(row[2]);
-			entry.caster_level   = atoi(row[3]);
-			entry.caster_name    = row[4] ? row[4] : "";
-			entry.ticsremaining  = atoi(row[5]);
-			entry.counters       = atoi(row[6]);
-			entry.numhits        = atoi(row[7]);
-			entry.melee_rune     = atoi(row[8]);
-			entry.magic_rune     = atoi(row[9]);
-			entry.persistent     = atoi(row[10]);
-			entry.dot_rune       = atoi(row[11]);
-			entry.caston_x       = atoi(row[12]);
-			entry.caston_y       = atoi(row[13]);
-			entry.caston_z       = atoi(row[14]);
-			entry.ExtraDIChance  = atoi(row[15]);
-			entry.instrument_mod = atoi(row[16]);
+			e.character_id   = atoi(row[0]);
+			e.slot_id        = atoi(row[1]);
+			e.spell_id       = atoi(row[2]);
+			e.caster_level   = atoi(row[3]);
+			e.caster_name    = row[4] ? row[4] : "";
+			e.ticsremaining  = atoi(row[5]);
+			e.counters       = atoi(row[6]);
+			e.numhits        = atoi(row[7]);
+			e.melee_rune     = atoi(row[8]);
+			e.magic_rune     = atoi(row[9]);
+			e.persistent     = atoi(row[10]);
+			e.dot_rune       = atoi(row[11]);
+			e.caston_x       = atoi(row[12]);
+			e.caston_y       = atoi(row[13]);
+			e.caston_z       = atoi(row[14]);
+			e.ExtraDIChance  = atoi(row[15]);
+			e.instrument_mod = atoi(row[16]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -85,17 +85,17 @@ public:
 
 	static CharacterAlternateAbilities NewEntity()
 	{
-		CharacterAlternateAbilities entry{};
+		CharacterAlternateAbilities e{};
 
-		entry.id       = 0;
-		entry.aa_id    = 0;
-		entry.aa_value = 0;
-		entry.charges  = 0;
+		e.id       = 0;
+		e.aa_id    = 0;
+		e.aa_value = 0;
+		e.charges  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterAlternateAbilities GetCharacterAlternateAbilitiesEntry(
+	static CharacterAlternateAbilities GetCharacterAlternateAbilitiese(
 		const std::vector<CharacterAlternateAbilities> &character_alternate_abilitiess,
 		int character_alternate_abilities_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterAlternateAbilities entry{};
+			CharacterAlternateAbilities e{};
 
-			entry.id       = atoi(row[0]);
-			entry.aa_id    = atoi(row[1]);
-			entry.aa_value = atoi(row[2]);
-			entry.charges  = atoi(row[3]);
+			e.id       = atoi(row[0]);
+			e.aa_id    = atoi(row[1]);
+			e.aa_value = atoi(row[2]);
+			e.charges  = atoi(row[3]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterAlternateAbilities character_alternate_abilities_entry
+		CharacterAlternateAbilities character_alternate_abilities_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_alternate_abilities_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_alternate_abilities_entry.aa_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_alternate_abilities_entry.aa_value));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_alternate_abilities_entry.charges));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_alternate_abilities_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_alternate_abilities_e.aa_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_alternate_abilities_e.aa_value));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_alternate_abilities_e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_alternate_abilities_entry.id
+				character_alternate_abilities_e.id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static CharacterAlternateAbilities InsertOne(
 		Database& db,
-		CharacterAlternateAbilities character_alternate_abilities_entry
+		CharacterAlternateAbilities character_alternate_abilities_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_alternate_abilities_entry.id));
-		insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_id));
-		insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_value));
-		insert_values.push_back(std::to_string(character_alternate_abilities_entry.charges));
+		insert_values.push_back(std::to_string(character_alternate_abilities_e.id));
+		insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_id));
+		insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_value));
+		insert_values.push_back(std::to_string(character_alternate_abilities_e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_alternate_abilities_entry.id = results.LastInsertedID();
-			return character_alternate_abilities_entry;
+			character_alternate_abilities_e.id = results.LastInsertedID();
+			return character_alternate_abilities_e;
 		}
 
-		character_alternate_abilities_entry = NewEntity();
+		character_alternate_abilities_e = NewEntity();
 
-		return character_alternate_abilities_entry;
+		return character_alternate_abilities_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_alternate_abilities_entry: character_alternate_abilities_entries) {
+		for (auto &character_alternate_abilities_e: character_alternate_abilities_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_alternate_abilities_entry.id));
-			insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_id));
-			insert_values.push_back(std::to_string(character_alternate_abilities_entry.aa_value));
-			insert_values.push_back(std::to_string(character_alternate_abilities_entry.charges));
+			insert_values.push_back(std::to_string(character_alternate_abilities_e.id));
+			insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_id));
+			insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_value));
+			insert_values.push_back(std::to_string(character_alternate_abilities_e.charges));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterAlternateAbilities entry{};
+			CharacterAlternateAbilities e{};
 
-			entry.id       = atoi(row[0]);
-			entry.aa_id    = atoi(row[1]);
-			entry.aa_value = atoi(row[2]);
-			entry.charges  = atoi(row[3]);
+			e.id       = atoi(row[0]);
+			e.aa_id    = atoi(row[1]);
+			e.aa_value = atoi(row[2]);
+			e.charges  = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterAlternateAbilities entry{};
+			CharacterAlternateAbilities e{};
 
-			entry.id       = atoi(row[0]);
-			entry.aa_id    = atoi(row[1]);
-			entry.aa_value = atoi(row[2]);
-			entry.charges  = atoi(row[3]);
+			e.id       = atoi(row[0]);
+			e.aa_id    = atoi(row[1]);
+			e.aa_value = atoi(row[2]);
+			e.charges  = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

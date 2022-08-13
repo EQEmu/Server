@@ -94,20 +94,20 @@ public:
 
 	static PetsBeastlordData NewEntity()
 	{
-		PetsBeastlordData entry{};
+		PetsBeastlordData e{};
 
-		entry.player_race   = 1;
-		entry.pet_race      = 42;
-		entry.texture       = 0;
-		entry.helm_texture  = 0;
-		entry.gender        = 2;
-		entry.size_modifier = 1;
-		entry.face          = 0;
+		e.player_race   = 1;
+		e.pet_race      = 42;
+		e.texture       = 0;
+		e.helm_texture  = 0;
+		e.gender        = 2;
+		e.size_modifier = 1;
+		e.face          = 0;
 
-		return entry;
+		return e;
 	}
 
-	static PetsBeastlordData GetPetsBeastlordDataEntry(
+	static PetsBeastlordData GetPetsBeastlordDatae(
 		const std::vector<PetsBeastlordData> &pets_beastlord_datas,
 		int pets_beastlord_data_id
 	)
@@ -136,17 +136,17 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			PetsBeastlordData entry{};
+			PetsBeastlordData e{};
 
-			entry.player_race   = atoi(row[0]);
-			entry.pet_race      = atoi(row[1]);
-			entry.texture       = atoi(row[2]);
-			entry.helm_texture  = atoi(row[3]);
-			entry.gender        = atoi(row[4]);
-			entry.size_modifier = static_cast<float>(atof(row[5]));
-			entry.face          = atoi(row[6]);
+			e.player_race   = atoi(row[0]);
+			e.pet_race      = atoi(row[1]);
+			e.texture       = atoi(row[2]);
+			e.helm_texture  = atoi(row[3]);
+			e.gender        = atoi(row[4]);
+			e.size_modifier = static_cast<float>(atof(row[5]));
+			e.face          = atoi(row[6]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -171,20 +171,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		PetsBeastlordData pets_beastlord_data_entry
+		PetsBeastlordData pets_beastlord_data_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(pets_beastlord_data_entry.player_race));
-		update_values.push_back(columns[1] + " = " + std::to_string(pets_beastlord_data_entry.pet_race));
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_beastlord_data_entry.texture));
-		update_values.push_back(columns[3] + " = " + std::to_string(pets_beastlord_data_entry.helm_texture));
-		update_values.push_back(columns[4] + " = " + std::to_string(pets_beastlord_data_entry.gender));
-		update_values.push_back(columns[5] + " = " + std::to_string(pets_beastlord_data_entry.size_modifier));
-		update_values.push_back(columns[6] + " = " + std::to_string(pets_beastlord_data_entry.face));
+		update_values.push_back(columns[0] + " = " + std::to_string(pets_beastlord_data_e.player_race));
+		update_values.push_back(columns[1] + " = " + std::to_string(pets_beastlord_data_e.pet_race));
+		update_values.push_back(columns[2] + " = " + std::to_string(pets_beastlord_data_e.texture));
+		update_values.push_back(columns[3] + " = " + std::to_string(pets_beastlord_data_e.helm_texture));
+		update_values.push_back(columns[4] + " = " + std::to_string(pets_beastlord_data_e.gender));
+		update_values.push_back(columns[5] + " = " + std::to_string(pets_beastlord_data_e.size_modifier));
+		update_values.push_back(columns[6] + " = " + std::to_string(pets_beastlord_data_e.face));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -192,7 +192,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				pets_beastlord_data_entry.player_race
+				pets_beastlord_data_e.player_race
 			)
 		);
 
@@ -201,18 +201,18 @@ public:
 
 	static PetsBeastlordData InsertOne(
 		Database& db,
-		PetsBeastlordData pets_beastlord_data_entry
+		PetsBeastlordData pets_beastlord_data_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(pets_beastlord_data_entry.player_race));
-		insert_values.push_back(std::to_string(pets_beastlord_data_entry.pet_race));
-		insert_values.push_back(std::to_string(pets_beastlord_data_entry.texture));
-		insert_values.push_back(std::to_string(pets_beastlord_data_entry.helm_texture));
-		insert_values.push_back(std::to_string(pets_beastlord_data_entry.gender));
-		insert_values.push_back(std::to_string(pets_beastlord_data_entry.size_modifier));
-		insert_values.push_back(std::to_string(pets_beastlord_data_entry.face));
+		insert_values.push_back(std::to_string(pets_beastlord_data_e.player_race));
+		insert_values.push_back(std::to_string(pets_beastlord_data_e.pet_race));
+		insert_values.push_back(std::to_string(pets_beastlord_data_e.texture));
+		insert_values.push_back(std::to_string(pets_beastlord_data_e.helm_texture));
+		insert_values.push_back(std::to_string(pets_beastlord_data_e.gender));
+		insert_values.push_back(std::to_string(pets_beastlord_data_e.size_modifier));
+		insert_values.push_back(std::to_string(pets_beastlord_data_e.face));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -223,13 +223,13 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_beastlord_data_entry.player_race = results.LastInsertedID();
-			return pets_beastlord_data_entry;
+			pets_beastlord_data_e.player_race = results.LastInsertedID();
+			return pets_beastlord_data_e;
 		}
 
-		pets_beastlord_data_entry = NewEntity();
+		pets_beastlord_data_e = NewEntity();
 
-		return pets_beastlord_data_entry;
+		return pets_beastlord_data_e;
 	}
 
 	static int InsertMany(
@@ -239,16 +239,16 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &pets_beastlord_data_entry: pets_beastlord_data_entries) {
+		for (auto &pets_beastlord_data_e: pets_beastlord_data_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(pets_beastlord_data_entry.player_race));
-			insert_values.push_back(std::to_string(pets_beastlord_data_entry.pet_race));
-			insert_values.push_back(std::to_string(pets_beastlord_data_entry.texture));
-			insert_values.push_back(std::to_string(pets_beastlord_data_entry.helm_texture));
-			insert_values.push_back(std::to_string(pets_beastlord_data_entry.gender));
-			insert_values.push_back(std::to_string(pets_beastlord_data_entry.size_modifier));
-			insert_values.push_back(std::to_string(pets_beastlord_data_entry.face));
+			insert_values.push_back(std::to_string(pets_beastlord_data_e.player_race));
+			insert_values.push_back(std::to_string(pets_beastlord_data_e.pet_race));
+			insert_values.push_back(std::to_string(pets_beastlord_data_e.texture));
+			insert_values.push_back(std::to_string(pets_beastlord_data_e.helm_texture));
+			insert_values.push_back(std::to_string(pets_beastlord_data_e.gender));
+			insert_values.push_back(std::to_string(pets_beastlord_data_e.size_modifier));
+			insert_values.push_back(std::to_string(pets_beastlord_data_e.face));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -280,17 +280,17 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			PetsBeastlordData entry{};
+			PetsBeastlordData e{};
 
-			entry.player_race   = atoi(row[0]);
-			entry.pet_race      = atoi(row[1]);
-			entry.texture       = atoi(row[2]);
-			entry.helm_texture  = atoi(row[3]);
-			entry.gender        = atoi(row[4]);
-			entry.size_modifier = static_cast<float>(atof(row[5]));
-			entry.face          = atoi(row[6]);
+			e.player_race   = atoi(row[0]);
+			e.pet_race      = atoi(row[1]);
+			e.texture       = atoi(row[2]);
+			e.helm_texture  = atoi(row[3]);
+			e.gender        = atoi(row[4]);
+			e.size_modifier = static_cast<float>(atof(row[5]));
+			e.face          = atoi(row[6]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -311,17 +311,17 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			PetsBeastlordData entry{};
+			PetsBeastlordData e{};
 
-			entry.player_race   = atoi(row[0]);
-			entry.pet_race      = atoi(row[1]);
-			entry.texture       = atoi(row[2]);
-			entry.helm_texture  = atoi(row[3]);
-			entry.gender        = atoi(row[4]);
-			entry.size_modifier = static_cast<float>(atof(row[5]));
-			entry.face          = atoi(row[6]);
+			e.player_race   = atoi(row[0]);
+			e.pet_race      = atoi(row[1]);
+			e.texture       = atoi(row[2]);
+			e.helm_texture  = atoi(row[3]);
+			e.gender        = atoi(row[4]);
+			e.size_modifier = static_cast<float>(atof(row[5]));
+			e.face          = atoi(row[6]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

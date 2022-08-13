@@ -91,19 +91,19 @@ public:
 
 	static Trader NewEntity()
 	{
-		Trader entry{};
+		Trader e{};
 
-		entry.char_id      = 0;
-		entry.item_id      = 0;
-		entry.serialnumber = 0;
-		entry.charges      = 0;
-		entry.item_cost    = 0;
-		entry.slot_id      = 0;
+		e.char_id      = 0;
+		e.item_id      = 0;
+		e.serialnumber = 0;
+		e.charges      = 0;
+		e.item_cost    = 0;
+		e.slot_id      = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Trader GetTraderEntry(
+	static Trader GetTradere(
 		const std::vector<Trader> &traders,
 		int trader_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Trader entry{};
+			Trader e{};
 
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
+			e.char_id      = atoi(row[0]);
+			e.item_id      = atoi(row[1]);
+			e.serialnumber = atoi(row[2]);
+			e.charges      = atoi(row[3]);
+			e.item_cost    = atoi(row[4]);
+			e.slot_id      = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Trader trader_entry
+		Trader trader_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(trader_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(trader_entry.item_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(trader_entry.serialnumber));
-		update_values.push_back(columns[3] + " = " + std::to_string(trader_entry.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(trader_entry.item_cost));
-		update_values.push_back(columns[5] + " = " + std::to_string(trader_entry.slot_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(trader_e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(trader_e.item_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(trader_e.serialnumber));
+		update_values.push_back(columns[3] + " = " + std::to_string(trader_e.charges));
+		update_values.push_back(columns[4] + " = " + std::to_string(trader_e.item_cost));
+		update_values.push_back(columns[5] + " = " + std::to_string(trader_e.slot_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				trader_entry.char_id
+				trader_e.char_id
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static Trader InsertOne(
 		Database& db,
-		Trader trader_entry
+		Trader trader_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(trader_entry.char_id));
-		insert_values.push_back(std::to_string(trader_entry.item_id));
-		insert_values.push_back(std::to_string(trader_entry.serialnumber));
-		insert_values.push_back(std::to_string(trader_entry.charges));
-		insert_values.push_back(std::to_string(trader_entry.item_cost));
-		insert_values.push_back(std::to_string(trader_entry.slot_id));
+		insert_values.push_back(std::to_string(trader_e.char_id));
+		insert_values.push_back(std::to_string(trader_e.item_id));
+		insert_values.push_back(std::to_string(trader_e.serialnumber));
+		insert_values.push_back(std::to_string(trader_e.charges));
+		insert_values.push_back(std::to_string(trader_e.item_cost));
+		insert_values.push_back(std::to_string(trader_e.slot_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,13 +216,13 @@ public:
 		);
 
 		if (results.Success()) {
-			trader_entry.char_id = results.LastInsertedID();
-			return trader_entry;
+			trader_e.char_id = results.LastInsertedID();
+			return trader_e;
 		}
 
-		trader_entry = NewEntity();
+		trader_e = NewEntity();
 
-		return trader_entry;
+		return trader_e;
 	}
 
 	static int InsertMany(
@@ -232,15 +232,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &trader_entry: trader_entries) {
+		for (auto &trader_e: trader_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(trader_entry.char_id));
-			insert_values.push_back(std::to_string(trader_entry.item_id));
-			insert_values.push_back(std::to_string(trader_entry.serialnumber));
-			insert_values.push_back(std::to_string(trader_entry.charges));
-			insert_values.push_back(std::to_string(trader_entry.item_cost));
-			insert_values.push_back(std::to_string(trader_entry.slot_id));
+			insert_values.push_back(std::to_string(trader_e.char_id));
+			insert_values.push_back(std::to_string(trader_e.item_id));
+			insert_values.push_back(std::to_string(trader_e.serialnumber));
+			insert_values.push_back(std::to_string(trader_e.charges));
+			insert_values.push_back(std::to_string(trader_e.item_cost));
+			insert_values.push_back(std::to_string(trader_e.slot_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -272,16 +272,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Trader entry{};
+			Trader e{};
 
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
+			e.char_id      = atoi(row[0]);
+			e.item_id      = atoi(row[1]);
+			e.serialnumber = atoi(row[2]);
+			e.charges      = atoi(row[3]);
+			e.item_cost    = atoi(row[4]);
+			e.slot_id      = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -302,16 +302,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Trader entry{};
+			Trader e{};
 
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
+			e.char_id      = atoi(row[0]);
+			e.item_id      = atoi(row[1]);
+			e.serialnumber = atoi(row[2]);
+			e.charges      = atoi(row[3]);
+			e.item_cost    = atoi(row[4]);
+			e.slot_id      = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -82,16 +82,16 @@ public:
 
 	static AccountFlags NewEntity()
 	{
-		AccountFlags entry{};
+		AccountFlags e{};
 
-		entry.p_accid = 0;
-		entry.p_flag  = "";
-		entry.p_value = "";
+		e.p_accid = 0;
+		e.p_flag  = "";
+		e.p_value = "";
 
-		return entry;
+		return e;
 	}
 
-	static AccountFlags GetAccountFlagsEntry(
+	static AccountFlags GetAccountFlagse(
 		const std::vector<AccountFlags> &account_flagss,
 		int account_flags_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AccountFlags entry{};
+			AccountFlags e{};
 
-			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1] ? row[1] : "";
-			entry.p_value = row[2] ? row[2] : "";
+			e.p_accid = atoi(row[0]);
+			e.p_flag  = row[1] ? row[1] : "";
+			e.p_value = row[2] ? row[2] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountFlags account_flags_entry
+		AccountFlags account_flags_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_flags_entry.p_accid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_flags_entry.p_flag) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(account_flags_entry.p_value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(account_flags_e.p_accid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_flags_e.p_flag) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(account_flags_e.p_value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				account_flags_entry.p_accid
+				account_flags_e.p_accid
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static AccountFlags InsertOne(
 		Database& db,
-		AccountFlags account_flags_entry
+		AccountFlags account_flags_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(account_flags_entry.p_accid));
-		insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_flag) + "'");
-		insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_value) + "'");
+		insert_values.push_back(std::to_string(account_flags_e.p_accid));
+		insert_values.push_back("'" + Strings::Escape(account_flags_e.p_flag) + "'");
+		insert_values.push_back("'" + Strings::Escape(account_flags_e.p_value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			account_flags_entry.p_accid = results.LastInsertedID();
-			return account_flags_entry;
+			account_flags_e.p_accid = results.LastInsertedID();
+			return account_flags_e;
 		}
 
-		account_flags_entry = NewEntity();
+		account_flags_e = NewEntity();
 
-		return account_flags_entry;
+		return account_flags_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_flags_entry: account_flags_entries) {
+		for (auto &account_flags_e: account_flags_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(account_flags_entry.p_accid));
-			insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_flag) + "'");
-			insert_values.push_back("'" + Strings::Escape(account_flags_entry.p_value) + "'");
+			insert_values.push_back(std::to_string(account_flags_e.p_accid));
+			insert_values.push_back("'" + Strings::Escape(account_flags_e.p_flag) + "'");
+			insert_values.push_back("'" + Strings::Escape(account_flags_e.p_value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountFlags entry{};
+			AccountFlags e{};
 
-			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1] ? row[1] : "";
-			entry.p_value = row[2] ? row[2] : "";
+			e.p_accid = atoi(row[0]);
+			e.p_flag  = row[1] ? row[1] : "";
+			e.p_value = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountFlags entry{};
+			AccountFlags e{};
 
-			entry.p_accid = atoi(row[0]);
-			entry.p_flag  = row[1] ? row[1] : "";
-			entry.p_value = row[2] ? row[2] : "";
+			e.p_accid = atoi(row[0]);
+			e.p_flag  = row[1] ? row[1] : "";
+			e.p_value = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -124,30 +124,30 @@ public:
 
 	static InventorySnapshots NewEntity()
 	{
-		InventorySnapshots entry{};
+		InventorySnapshots e{};
 
-		entry.time_index          = 0;
-		entry.charid              = 0;
-		entry.slotid              = 0;
-		entry.itemid              = 0;
-		entry.charges             = 0;
-		entry.color               = 0;
-		entry.augslot1            = 0;
-		entry.augslot2            = 0;
-		entry.augslot3            = 0;
-		entry.augslot4            = 0;
-		entry.augslot5            = 0;
-		entry.augslot6            = 0;
-		entry.instnodrop          = 0;
-		entry.custom_data         = "";
-		entry.ornamenticon        = 0;
-		entry.ornamentidfile      = 0;
-		entry.ornament_hero_model = 0;
+		e.time_index          = 0;
+		e.charid              = 0;
+		e.slotid              = 0;
+		e.itemid              = 0;
+		e.charges             = 0;
+		e.color               = 0;
+		e.augslot1            = 0;
+		e.augslot2            = 0;
+		e.augslot3            = 0;
+		e.augslot4            = 0;
+		e.augslot5            = 0;
+		e.augslot6            = 0;
+		e.instnodrop          = 0;
+		e.custom_data         = "";
+		e.ornamenticon        = 0;
+		e.ornamentidfile      = 0;
+		e.ornament_hero_model = 0;
 
-		return entry;
+		return e;
 	}
 
-	static InventorySnapshots GetInventorySnapshotsEntry(
+	static InventorySnapshots GetInventorySnapshotse(
 		const std::vector<InventorySnapshots> &inventory_snapshotss,
 		int inventory_snapshots_id
 	)
@@ -176,27 +176,27 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			InventorySnapshots entry{};
+			InventorySnapshots e{};
 
-			entry.time_index          = atoi(row[0]);
-			entry.charid              = atoi(row[1]);
-			entry.slotid              = atoi(row[2]);
-			entry.itemid              = atoi(row[3]);
-			entry.charges             = atoi(row[4]);
-			entry.color               = atoi(row[5]);
-			entry.augslot1            = atoi(row[6]);
-			entry.augslot2            = atoi(row[7]);
-			entry.augslot3            = atoi(row[8]);
-			entry.augslot4            = atoi(row[9]);
-			entry.augslot5            = atoi(row[10]);
-			entry.augslot6            = atoi(row[11]);
-			entry.instnodrop          = atoi(row[12]);
-			entry.custom_data         = row[13] ? row[13] : "";
-			entry.ornamenticon        = atoi(row[14]);
-			entry.ornamentidfile      = atoi(row[15]);
-			entry.ornament_hero_model = atoi(row[16]);
+			e.time_index          = atoi(row[0]);
+			e.charid              = atoi(row[1]);
+			e.slotid              = atoi(row[2]);
+			e.itemid              = atoi(row[3]);
+			e.charges             = atoi(row[4]);
+			e.color               = atoi(row[5]);
+			e.augslot1            = atoi(row[6]);
+			e.augslot2            = atoi(row[7]);
+			e.augslot3            = atoi(row[8]);
+			e.augslot4            = atoi(row[9]);
+			e.augslot5            = atoi(row[10]);
+			e.augslot6            = atoi(row[11]);
+			e.instnodrop          = atoi(row[12]);
+			e.custom_data         = row[13] ? row[13] : "";
+			e.ornamenticon        = atoi(row[14]);
+			e.ornamentidfile      = atoi(row[15]);
+			e.ornament_hero_model = atoi(row[16]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -221,30 +221,30 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		InventorySnapshots inventory_snapshots_entry
+		InventorySnapshots inventory_snapshots_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(inventory_snapshots_entry.time_index));
-		update_values.push_back(columns[1] + " = " + std::to_string(inventory_snapshots_entry.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(inventory_snapshots_entry.slotid));
-		update_values.push_back(columns[3] + " = " + std::to_string(inventory_snapshots_entry.itemid));
-		update_values.push_back(columns[4] + " = " + std::to_string(inventory_snapshots_entry.charges));
-		update_values.push_back(columns[5] + " = " + std::to_string(inventory_snapshots_entry.color));
-		update_values.push_back(columns[6] + " = " + std::to_string(inventory_snapshots_entry.augslot1));
-		update_values.push_back(columns[7] + " = " + std::to_string(inventory_snapshots_entry.augslot2));
-		update_values.push_back(columns[8] + " = " + std::to_string(inventory_snapshots_entry.augslot3));
-		update_values.push_back(columns[9] + " = " + std::to_string(inventory_snapshots_entry.augslot4));
-		update_values.push_back(columns[10] + " = " + std::to_string(inventory_snapshots_entry.augslot5));
-		update_values.push_back(columns[11] + " = " + std::to_string(inventory_snapshots_entry.augslot6));
-		update_values.push_back(columns[12] + " = " + std::to_string(inventory_snapshots_entry.instnodrop));
-		update_values.push_back(columns[13] + " = '" + Strings::Escape(inventory_snapshots_entry.custom_data) + "'");
-		update_values.push_back(columns[14] + " = " + std::to_string(inventory_snapshots_entry.ornamenticon));
-		update_values.push_back(columns[15] + " = " + std::to_string(inventory_snapshots_entry.ornamentidfile));
-		update_values.push_back(columns[16] + " = " + std::to_string(inventory_snapshots_entry.ornament_hero_model));
+		update_values.push_back(columns[0] + " = " + std::to_string(inventory_snapshots_e.time_index));
+		update_values.push_back(columns[1] + " = " + std::to_string(inventory_snapshots_e.charid));
+		update_values.push_back(columns[2] + " = " + std::to_string(inventory_snapshots_e.slotid));
+		update_values.push_back(columns[3] + " = " + std::to_string(inventory_snapshots_e.itemid));
+		update_values.push_back(columns[4] + " = " + std::to_string(inventory_snapshots_e.charges));
+		update_values.push_back(columns[5] + " = " + std::to_string(inventory_snapshots_e.color));
+		update_values.push_back(columns[6] + " = " + std::to_string(inventory_snapshots_e.augslot1));
+		update_values.push_back(columns[7] + " = " + std::to_string(inventory_snapshots_e.augslot2));
+		update_values.push_back(columns[8] + " = " + std::to_string(inventory_snapshots_e.augslot3));
+		update_values.push_back(columns[9] + " = " + std::to_string(inventory_snapshots_e.augslot4));
+		update_values.push_back(columns[10] + " = " + std::to_string(inventory_snapshots_e.augslot5));
+		update_values.push_back(columns[11] + " = " + std::to_string(inventory_snapshots_e.augslot6));
+		update_values.push_back(columns[12] + " = " + std::to_string(inventory_snapshots_e.instnodrop));
+		update_values.push_back(columns[13] + " = '" + Strings::Escape(inventory_snapshots_e.custom_data) + "'");
+		update_values.push_back(columns[14] + " = " + std::to_string(inventory_snapshots_e.ornamenticon));
+		update_values.push_back(columns[15] + " = " + std::to_string(inventory_snapshots_e.ornamentidfile));
+		update_values.push_back(columns[16] + " = " + std::to_string(inventory_snapshots_e.ornament_hero_model));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -252,7 +252,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				inventory_snapshots_entry.time_index
+				inventory_snapshots_e.time_index
 			)
 		);
 
@@ -261,28 +261,28 @@ public:
 
 	static InventorySnapshots InsertOne(
 		Database& db,
-		InventorySnapshots inventory_snapshots_entry
+		InventorySnapshots inventory_snapshots_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.time_index));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.charid));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.slotid));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.itemid));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.charges));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.color));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot1));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot2));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot3));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot4));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot5));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot6));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.instnodrop));
-		insert_values.push_back("'" + Strings::Escape(inventory_snapshots_entry.custom_data) + "'");
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.ornamenticon));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.ornamentidfile));
-		insert_values.push_back(std::to_string(inventory_snapshots_entry.ornament_hero_model));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.time_index));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.charid));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.slotid));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.itemid));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.charges));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.color));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.augslot1));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.augslot2));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.augslot3));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.augslot4));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.augslot5));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.augslot6));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.instnodrop));
+		insert_values.push_back("'" + Strings::Escape(inventory_snapshots_e.custom_data) + "'");
+		insert_values.push_back(std::to_string(inventory_snapshots_e.ornamenticon));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.ornamentidfile));
+		insert_values.push_back(std::to_string(inventory_snapshots_e.ornament_hero_model));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -293,13 +293,13 @@ public:
 		);
 
 		if (results.Success()) {
-			inventory_snapshots_entry.time_index = results.LastInsertedID();
-			return inventory_snapshots_entry;
+			inventory_snapshots_e.time_index = results.LastInsertedID();
+			return inventory_snapshots_e;
 		}
 
-		inventory_snapshots_entry = NewEntity();
+		inventory_snapshots_e = NewEntity();
 
-		return inventory_snapshots_entry;
+		return inventory_snapshots_e;
 	}
 
 	static int InsertMany(
@@ -309,26 +309,26 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &inventory_snapshots_entry: inventory_snapshots_entries) {
+		for (auto &inventory_snapshots_e: inventory_snapshots_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.time_index));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.charid));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.slotid));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.itemid));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.charges));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.color));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot1));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot2));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot3));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot4));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot5));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.augslot6));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.instnodrop));
-			insert_values.push_back("'" + Strings::Escape(inventory_snapshots_entry.custom_data) + "'");
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.ornamenticon));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.ornamentidfile));
-			insert_values.push_back(std::to_string(inventory_snapshots_entry.ornament_hero_model));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.time_index));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.charid));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.slotid));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.itemid));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.charges));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.color));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.augslot1));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.augslot2));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.augslot3));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.augslot4));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.augslot5));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.augslot6));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.instnodrop));
+			insert_values.push_back("'" + Strings::Escape(inventory_snapshots_e.custom_data) + "'");
+			insert_values.push_back(std::to_string(inventory_snapshots_e.ornamenticon));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.ornamentidfile));
+			insert_values.push_back(std::to_string(inventory_snapshots_e.ornament_hero_model));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -360,27 +360,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InventorySnapshots entry{};
+			InventorySnapshots e{};
 
-			entry.time_index          = atoi(row[0]);
-			entry.charid              = atoi(row[1]);
-			entry.slotid              = atoi(row[2]);
-			entry.itemid              = atoi(row[3]);
-			entry.charges             = atoi(row[4]);
-			entry.color               = atoi(row[5]);
-			entry.augslot1            = atoi(row[6]);
-			entry.augslot2            = atoi(row[7]);
-			entry.augslot3            = atoi(row[8]);
-			entry.augslot4            = atoi(row[9]);
-			entry.augslot5            = atoi(row[10]);
-			entry.augslot6            = atoi(row[11]);
-			entry.instnodrop          = atoi(row[12]);
-			entry.custom_data         = row[13] ? row[13] : "";
-			entry.ornamenticon        = atoi(row[14]);
-			entry.ornamentidfile      = atoi(row[15]);
-			entry.ornament_hero_model = atoi(row[16]);
+			e.time_index          = atoi(row[0]);
+			e.charid              = atoi(row[1]);
+			e.slotid              = atoi(row[2]);
+			e.itemid              = atoi(row[3]);
+			e.charges             = atoi(row[4]);
+			e.color               = atoi(row[5]);
+			e.augslot1            = atoi(row[6]);
+			e.augslot2            = atoi(row[7]);
+			e.augslot3            = atoi(row[8]);
+			e.augslot4            = atoi(row[9]);
+			e.augslot5            = atoi(row[10]);
+			e.augslot6            = atoi(row[11]);
+			e.instnodrop          = atoi(row[12]);
+			e.custom_data         = row[13] ? row[13] : "";
+			e.ornamenticon        = atoi(row[14]);
+			e.ornamentidfile      = atoi(row[15]);
+			e.ornament_hero_model = atoi(row[16]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -401,27 +401,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			InventorySnapshots entry{};
+			InventorySnapshots e{};
 
-			entry.time_index          = atoi(row[0]);
-			entry.charid              = atoi(row[1]);
-			entry.slotid              = atoi(row[2]);
-			entry.itemid              = atoi(row[3]);
-			entry.charges             = atoi(row[4]);
-			entry.color               = atoi(row[5]);
-			entry.augslot1            = atoi(row[6]);
-			entry.augslot2            = atoi(row[7]);
-			entry.augslot3            = atoi(row[8]);
-			entry.augslot4            = atoi(row[9]);
-			entry.augslot5            = atoi(row[10]);
-			entry.augslot6            = atoi(row[11]);
-			entry.instnodrop          = atoi(row[12]);
-			entry.custom_data         = row[13] ? row[13] : "";
-			entry.ornamenticon        = atoi(row[14]);
-			entry.ornamentidfile      = atoi(row[15]);
-			entry.ornament_hero_model = atoi(row[16]);
+			e.time_index          = atoi(row[0]);
+			e.charid              = atoi(row[1]);
+			e.slotid              = atoi(row[2]);
+			e.itemid              = atoi(row[3]);
+			e.charges             = atoi(row[4]);
+			e.color               = atoi(row[5]);
+			e.augslot1            = atoi(row[6]);
+			e.augslot2            = atoi(row[7]);
+			e.augslot3            = atoi(row[8]);
+			e.augslot4            = atoi(row[9]);
+			e.augslot5            = atoi(row[10]);
+			e.augslot6            = atoi(row[11]);
+			e.instnodrop          = atoi(row[12]);
+			e.custom_data         = row[13] ? row[13] : "";
+			e.ornamenticon        = atoi(row[14]);
+			e.ornamentidfile      = atoi(row[15]);
+			e.ornament_hero_model = atoi(row[16]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

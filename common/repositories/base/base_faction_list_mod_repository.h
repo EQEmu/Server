@@ -85,17 +85,17 @@ public:
 
 	static FactionListMod NewEntity()
 	{
-		FactionListMod entry{};
+		FactionListMod e{};
 
-		entry.id         = 0;
-		entry.faction_id = 0;
-		entry.mod        = 0;
-		entry.mod_name   = "";
+		e.id         = 0;
+		e.faction_id = 0;
+		e.mod        = 0;
+		e.mod_name   = "";
 
-		return entry;
+		return e;
 	}
 
-	static FactionListMod GetFactionListModEntry(
+	static FactionListMod GetFactionListMode(
 		const std::vector<FactionListMod> &faction_list_mods,
 		int faction_list_mod_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			FactionListMod entry{};
+			FactionListMod e{};
 
-			entry.id         = atoi(row[0]);
-			entry.faction_id = atoi(row[1]);
-			entry.mod        = atoi(row[2]);
-			entry.mod_name   = row[3] ? row[3] : "";
+			e.id         = atoi(row[0]);
+			e.faction_id = atoi(row[1]);
+			e.mod        = atoi(row[2]);
+			e.mod_name   = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionListMod faction_list_mod_entry
+		FactionListMod faction_list_mod_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(faction_list_mod_entry.faction_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_mod_entry.mod));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(faction_list_mod_entry.mod_name) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(faction_list_mod_e.faction_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_mod_e.mod));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(faction_list_mod_e.mod_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				faction_list_mod_entry.id
+				faction_list_mod_e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static FactionListMod InsertOne(
 		Database& db,
-		FactionListMod faction_list_mod_entry
+		FactionListMod faction_list_mod_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(faction_list_mod_entry.id));
-		insert_values.push_back(std::to_string(faction_list_mod_entry.faction_id));
-		insert_values.push_back(std::to_string(faction_list_mod_entry.mod));
-		insert_values.push_back("'" + Strings::Escape(faction_list_mod_entry.mod_name) + "'");
+		insert_values.push_back(std::to_string(faction_list_mod_e.id));
+		insert_values.push_back(std::to_string(faction_list_mod_e.faction_id));
+		insert_values.push_back(std::to_string(faction_list_mod_e.mod));
+		insert_values.push_back("'" + Strings::Escape(faction_list_mod_e.mod_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,13 +201,13 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_list_mod_entry.id = results.LastInsertedID();
-			return faction_list_mod_entry;
+			faction_list_mod_e.id = results.LastInsertedID();
+			return faction_list_mod_e;
 		}
 
-		faction_list_mod_entry = NewEntity();
+		faction_list_mod_e = NewEntity();
 
-		return faction_list_mod_entry;
+		return faction_list_mod_e;
 	}
 
 	static int InsertMany(
@@ -217,13 +217,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &faction_list_mod_entry: faction_list_mod_entries) {
+		for (auto &faction_list_mod_e: faction_list_mod_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(faction_list_mod_entry.id));
-			insert_values.push_back(std::to_string(faction_list_mod_entry.faction_id));
-			insert_values.push_back(std::to_string(faction_list_mod_entry.mod));
-			insert_values.push_back("'" + Strings::Escape(faction_list_mod_entry.mod_name) + "'");
+			insert_values.push_back(std::to_string(faction_list_mod_e.id));
+			insert_values.push_back(std::to_string(faction_list_mod_e.faction_id));
+			insert_values.push_back(std::to_string(faction_list_mod_e.mod));
+			insert_values.push_back("'" + Strings::Escape(faction_list_mod_e.mod_name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -255,14 +255,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionListMod entry{};
+			FactionListMod e{};
 
-			entry.id         = atoi(row[0]);
-			entry.faction_id = atoi(row[1]);
-			entry.mod        = atoi(row[2]);
-			entry.mod_name   = row[3] ? row[3] : "";
+			e.id         = atoi(row[0]);
+			e.faction_id = atoi(row[1]);
+			e.mod        = atoi(row[2]);
+			e.mod_name   = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -283,14 +283,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionListMod entry{};
+			FactionListMod e{};
 
-			entry.id         = atoi(row[0]);
-			entry.faction_id = atoi(row[1]);
-			entry.mod        = atoi(row[2]);
-			entry.mod_name   = row[3] ? row[3] : "";
+			e.id         = atoi(row[0]);
+			e.faction_id = atoi(row[1]);
+			e.mod        = atoi(row[2]);
+			e.mod_name   = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -85,17 +85,17 @@ public:
 
 	static Books NewEntity()
 	{
-		Books entry{};
+		Books e{};
 
-		entry.id       = 0;
-		entry.name     = "";
-		entry.txtfile  = "";
-		entry.language = 0;
+		e.id       = 0;
+		e.name     = "";
+		e.txtfile  = "";
+		e.language = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Books GetBooksEntry(
+	static Books GetBookse(
 		const std::vector<Books> &bookss,
 		int books_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Books entry{};
+			Books e{};
 
-			entry.id       = atoi(row[0]);
-			entry.name     = row[1] ? row[1] : "";
-			entry.txtfile  = row[2] ? row[2] : "";
-			entry.language = atoi(row[3]);
+			e.id       = atoi(row[0]);
+			e.name     = row[1] ? row[1] : "";
+			e.txtfile  = row[2] ? row[2] : "";
+			e.language = atoi(row[3]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Books books_entry
+		Books books_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(books_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(books_entry.txtfile) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(books_entry.language));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(books_e.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(books_e.txtfile) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(books_e.language));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				books_entry.id
+				books_e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static Books InsertOne(
 		Database& db,
-		Books books_entry
+		Books books_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(books_entry.id));
-		insert_values.push_back("'" + Strings::Escape(books_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(books_entry.txtfile) + "'");
-		insert_values.push_back(std::to_string(books_entry.language));
+		insert_values.push_back(std::to_string(books_e.id));
+		insert_values.push_back("'" + Strings::Escape(books_e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(books_e.txtfile) + "'");
+		insert_values.push_back(std::to_string(books_e.language));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,13 +201,13 @@ public:
 		);
 
 		if (results.Success()) {
-			books_entry.id = results.LastInsertedID();
-			return books_entry;
+			books_e.id = results.LastInsertedID();
+			return books_e;
 		}
 
-		books_entry = NewEntity();
+		books_e = NewEntity();
 
-		return books_entry;
+		return books_e;
 	}
 
 	static int InsertMany(
@@ -217,13 +217,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &books_entry: books_entries) {
+		for (auto &books_e: books_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(books_entry.id));
-			insert_values.push_back("'" + Strings::Escape(books_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(books_entry.txtfile) + "'");
-			insert_values.push_back(std::to_string(books_entry.language));
+			insert_values.push_back(std::to_string(books_e.id));
+			insert_values.push_back("'" + Strings::Escape(books_e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(books_e.txtfile) + "'");
+			insert_values.push_back(std::to_string(books_e.language));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -255,14 +255,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Books entry{};
+			Books e{};
 
-			entry.id       = atoi(row[0]);
-			entry.name     = row[1] ? row[1] : "";
-			entry.txtfile  = row[2] ? row[2] : "";
-			entry.language = atoi(row[3]);
+			e.id       = atoi(row[0]);
+			e.name     = row[1] ? row[1] : "";
+			e.txtfile  = row[2] ? row[2] : "";
+			e.language = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -283,14 +283,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Books entry{};
+			Books e{};
 
-			entry.id       = atoi(row[0]);
-			entry.name     = row[1] ? row[1] : "";
-			entry.txtfile  = row[2] ? row[2] : "";
-			entry.language = atoi(row[3]);
+			e.id       = atoi(row[0]);
+			e.name     = row[1] ? row[1] : "";
+			e.txtfile  = row[2] ? row[2] : "";
+			e.language = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

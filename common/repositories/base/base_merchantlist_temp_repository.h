@@ -91,19 +91,19 @@ public:
 
 	static MerchantlistTemp NewEntity()
 	{
-		MerchantlistTemp entry{};
+		MerchantlistTemp e{};
 
-		entry.npcid       = 0;
-		entry.slot        = 0;
-		entry.zone_id     = 0;
-		entry.instance_id = 0;
-		entry.itemid      = 0;
-		entry.charges     = 1;
+		e.npcid       = 0;
+		e.slot        = 0;
+		e.zone_id     = 0;
+		e.instance_id = 0;
+		e.itemid      = 0;
+		e.charges     = 1;
 
-		return entry;
+		return e;
 	}
 
-	static MerchantlistTemp GetMerchantlistTempEntry(
+	static MerchantlistTemp GetMerchantlistTempe(
 		const std::vector<MerchantlistTemp> &merchantlist_temps,
 		int merchantlist_temp_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			MerchantlistTemp entry{};
+			MerchantlistTemp e{};
 
-			entry.npcid       = atoi(row[0]);
-			entry.slot        = atoi(row[1]);
-			entry.zone_id     = atoi(row[2]);
-			entry.instance_id = atoi(row[3]);
-			entry.itemid      = atoi(row[4]);
-			entry.charges     = atoi(row[5]);
+			e.npcid       = atoi(row[0]);
+			e.slot        = atoi(row[1]);
+			e.zone_id     = atoi(row[2]);
+			e.instance_id = atoi(row[3]);
+			e.itemid      = atoi(row[4]);
+			e.charges     = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		MerchantlistTemp merchantlist_temp_entry
+		MerchantlistTemp merchantlist_temp_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_temp_entry.npcid));
-		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_temp_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_temp_entry.zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_temp_entry.instance_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_temp_entry.itemid));
-		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_temp_entry.charges));
+		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_temp_e.npcid));
+		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_temp_e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_temp_e.zone_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_temp_e.instance_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_temp_e.itemid));
+		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_temp_e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				merchantlist_temp_entry.npcid
+				merchantlist_temp_e.npcid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static MerchantlistTemp InsertOne(
 		Database& db,
-		MerchantlistTemp merchantlist_temp_entry
+		MerchantlistTemp merchantlist_temp_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(merchantlist_temp_entry.npcid));
-		insert_values.push_back(std::to_string(merchantlist_temp_entry.slot));
-		insert_values.push_back(std::to_string(merchantlist_temp_entry.zone_id));
-		insert_values.push_back(std::to_string(merchantlist_temp_entry.instance_id));
-		insert_values.push_back(std::to_string(merchantlist_temp_entry.itemid));
-		insert_values.push_back(std::to_string(merchantlist_temp_entry.charges));
+		insert_values.push_back(std::to_string(merchantlist_temp_e.npcid));
+		insert_values.push_back(std::to_string(merchantlist_temp_e.slot));
+		insert_values.push_back(std::to_string(merchantlist_temp_e.zone_id));
+		insert_values.push_back(std::to_string(merchantlist_temp_e.instance_id));
+		insert_values.push_back(std::to_string(merchantlist_temp_e.itemid));
+		insert_values.push_back(std::to_string(merchantlist_temp_e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,13 +216,13 @@ public:
 		);
 
 		if (results.Success()) {
-			merchantlist_temp_entry.npcid = results.LastInsertedID();
-			return merchantlist_temp_entry;
+			merchantlist_temp_e.npcid = results.LastInsertedID();
+			return merchantlist_temp_e;
 		}
 
-		merchantlist_temp_entry = NewEntity();
+		merchantlist_temp_e = NewEntity();
 
-		return merchantlist_temp_entry;
+		return merchantlist_temp_e;
 	}
 
 	static int InsertMany(
@@ -232,15 +232,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &merchantlist_temp_entry: merchantlist_temp_entries) {
+		for (auto &merchantlist_temp_e: merchantlist_temp_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(merchantlist_temp_entry.npcid));
-			insert_values.push_back(std::to_string(merchantlist_temp_entry.slot));
-			insert_values.push_back(std::to_string(merchantlist_temp_entry.zone_id));
-			insert_values.push_back(std::to_string(merchantlist_temp_entry.instance_id));
-			insert_values.push_back(std::to_string(merchantlist_temp_entry.itemid));
-			insert_values.push_back(std::to_string(merchantlist_temp_entry.charges));
+			insert_values.push_back(std::to_string(merchantlist_temp_e.npcid));
+			insert_values.push_back(std::to_string(merchantlist_temp_e.slot));
+			insert_values.push_back(std::to_string(merchantlist_temp_e.zone_id));
+			insert_values.push_back(std::to_string(merchantlist_temp_e.instance_id));
+			insert_values.push_back(std::to_string(merchantlist_temp_e.itemid));
+			insert_values.push_back(std::to_string(merchantlist_temp_e.charges));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -272,16 +272,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			MerchantlistTemp entry{};
+			MerchantlistTemp e{};
 
-			entry.npcid       = atoi(row[0]);
-			entry.slot        = atoi(row[1]);
-			entry.zone_id     = atoi(row[2]);
-			entry.instance_id = atoi(row[3]);
-			entry.itemid      = atoi(row[4]);
-			entry.charges     = atoi(row[5]);
+			e.npcid       = atoi(row[0]);
+			e.slot        = atoi(row[1]);
+			e.zone_id     = atoi(row[2]);
+			e.instance_id = atoi(row[3]);
+			e.itemid      = atoi(row[4]);
+			e.charges     = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -302,16 +302,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			MerchantlistTemp entry{};
+			MerchantlistTemp e{};
 
-			entry.npcid       = atoi(row[0]);
-			entry.slot        = atoi(row[1]);
-			entry.zone_id     = atoi(row[2]);
-			entry.instance_id = atoi(row[3]);
-			entry.itemid      = atoi(row[4]);
-			entry.charges     = atoi(row[5]);
+			e.npcid       = atoi(row[0]);
+			e.slot        = atoi(row[1]);
+			e.zone_id     = atoi(row[2]);
+			e.instance_id = atoi(row[3]);
+			e.itemid      = atoi(row[4]);
+			e.charges     = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

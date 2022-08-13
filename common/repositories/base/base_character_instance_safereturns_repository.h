@@ -100,22 +100,22 @@ public:
 
 	static CharacterInstanceSafereturns NewEntity()
 	{
-		CharacterInstanceSafereturns entry{};
+		CharacterInstanceSafereturns e{};
 
-		entry.id               = 0;
-		entry.character_id     = 0;
-		entry.instance_zone_id = 0;
-		entry.instance_id      = 0;
-		entry.safe_zone_id     = 0;
-		entry.safe_x           = 0;
-		entry.safe_y           = 0;
-		entry.safe_z           = 0;
-		entry.safe_heading     = 0;
+		e.id               = 0;
+		e.character_id     = 0;
+		e.instance_zone_id = 0;
+		e.instance_id      = 0;
+		e.safe_zone_id     = 0;
+		e.safe_x           = 0;
+		e.safe_y           = 0;
+		e.safe_z           = 0;
+		e.safe_heading     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterInstanceSafereturns GetCharacterInstanceSafereturnsEntry(
+	static CharacterInstanceSafereturns GetCharacterInstanceSafereturnse(
 		const std::vector<CharacterInstanceSafereturns> &character_instance_safereturnss,
 		int character_instance_safereturns_id
 	)
@@ -144,19 +144,19 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterInstanceSafereturns entry{};
+			CharacterInstanceSafereturns e{};
 
-			entry.id               = atoi(row[0]);
-			entry.character_id     = atoi(row[1]);
-			entry.instance_zone_id = atoi(row[2]);
-			entry.instance_id      = atoi(row[3]);
-			entry.safe_zone_id     = atoi(row[4]);
-			entry.safe_x           = static_cast<float>(atof(row[5]));
-			entry.safe_y           = static_cast<float>(atof(row[6]));
-			entry.safe_z           = static_cast<float>(atof(row[7]));
-			entry.safe_heading     = static_cast<float>(atof(row[8]));
+			e.id               = atoi(row[0]);
+			e.character_id     = atoi(row[1]);
+			e.instance_zone_id = atoi(row[2]);
+			e.instance_id      = atoi(row[3]);
+			e.safe_zone_id     = atoi(row[4]);
+			e.safe_x           = static_cast<float>(atof(row[5]));
+			e.safe_y           = static_cast<float>(atof(row[6]));
+			e.safe_z           = static_cast<float>(atof(row[7]));
+			e.safe_heading     = static_cast<float>(atof(row[8]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterInstanceSafereturns character_instance_safereturns_entry
+		CharacterInstanceSafereturns character_instance_safereturns_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_instance_safereturns_entry.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_instance_safereturns_entry.instance_zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_instance_safereturns_entry.instance_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_instance_safereturns_entry.safe_zone_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_instance_safereturns_entry.safe_x));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_instance_safereturns_entry.safe_y));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_instance_safereturns_entry.safe_z));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_instance_safereturns_entry.safe_heading));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_instance_safereturns_e.character_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_instance_safereturns_e.instance_zone_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_instance_safereturns_e.instance_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(character_instance_safereturns_e.safe_zone_id));
+		update_values.push_back(columns[5] + " = " + std::to_string(character_instance_safereturns_e.safe_x));
+		update_values.push_back(columns[6] + " = " + std::to_string(character_instance_safereturns_e.safe_y));
+		update_values.push_back(columns[7] + " = " + std::to_string(character_instance_safereturns_e.safe_z));
+		update_values.push_back(columns[8] + " = " + std::to_string(character_instance_safereturns_e.safe_heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_instance_safereturns_entry.id
+				character_instance_safereturns_e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static CharacterInstanceSafereturns InsertOne(
 		Database& db,
-		CharacterInstanceSafereturns character_instance_safereturns_entry
+		CharacterInstanceSafereturns character_instance_safereturns_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.character_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.instance_zone_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.instance_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_zone_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_x));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_y));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_z));
-		insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_heading));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.id));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.character_id));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_zone_id));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_id));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_zone_id));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_x));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_y));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_z));
+		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,13 +236,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_instance_safereturns_entry.id = results.LastInsertedID();
-			return character_instance_safereturns_entry;
+			character_instance_safereturns_e.id = results.LastInsertedID();
+			return character_instance_safereturns_e;
 		}
 
-		character_instance_safereturns_entry = NewEntity();
+		character_instance_safereturns_e = NewEntity();
 
-		return character_instance_safereturns_entry;
+		return character_instance_safereturns_e;
 	}
 
 	static int InsertMany(
@@ -252,18 +252,18 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_instance_safereturns_entry: character_instance_safereturns_entries) {
+		for (auto &character_instance_safereturns_e: character_instance_safereturns_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.character_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.instance_zone_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.instance_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_zone_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_x));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_y));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_z));
-			insert_values.push_back(std::to_string(character_instance_safereturns_entry.safe_heading));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.id));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.character_id));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_zone_id));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_id));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_zone_id));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_x));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_y));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_z));
+			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_heading));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -295,19 +295,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterInstanceSafereturns entry{};
+			CharacterInstanceSafereturns e{};
 
-			entry.id               = atoi(row[0]);
-			entry.character_id     = atoi(row[1]);
-			entry.instance_zone_id = atoi(row[2]);
-			entry.instance_id      = atoi(row[3]);
-			entry.safe_zone_id     = atoi(row[4]);
-			entry.safe_x           = static_cast<float>(atof(row[5]));
-			entry.safe_y           = static_cast<float>(atof(row[6]));
-			entry.safe_z           = static_cast<float>(atof(row[7]));
-			entry.safe_heading     = static_cast<float>(atof(row[8]));
+			e.id               = atoi(row[0]);
+			e.character_id     = atoi(row[1]);
+			e.instance_zone_id = atoi(row[2]);
+			e.instance_id      = atoi(row[3]);
+			e.safe_zone_id     = atoi(row[4]);
+			e.safe_x           = static_cast<float>(atof(row[5]));
+			e.safe_y           = static_cast<float>(atof(row[6]));
+			e.safe_z           = static_cast<float>(atof(row[7]));
+			e.safe_heading     = static_cast<float>(atof(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -328,19 +328,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterInstanceSafereturns entry{};
+			CharacterInstanceSafereturns e{};
 
-			entry.id               = atoi(row[0]);
-			entry.character_id     = atoi(row[1]);
-			entry.instance_zone_id = atoi(row[2]);
-			entry.instance_id      = atoi(row[3]);
-			entry.safe_zone_id     = atoi(row[4]);
-			entry.safe_x           = static_cast<float>(atof(row[5]));
-			entry.safe_y           = static_cast<float>(atof(row[6]));
-			entry.safe_z           = static_cast<float>(atof(row[7]));
-			entry.safe_heading     = static_cast<float>(atof(row[8]));
+			e.id               = atoi(row[0]);
+			e.character_id     = atoi(row[1]);
+			e.instance_zone_id = atoi(row[2]);
+			e.instance_id      = atoi(row[3]);
+			e.safe_zone_id     = atoi(row[4]);
+			e.safe_x           = static_cast<float>(atof(row[5]));
+			e.safe_y           = static_cast<float>(atof(row[6]));
+			e.safe_z           = static_cast<float>(atof(row[7]));
+			e.safe_heading     = static_cast<float>(atof(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

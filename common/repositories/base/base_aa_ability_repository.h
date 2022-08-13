@@ -115,27 +115,27 @@ public:
 
 	static AaAbility NewEntity()
 	{
-		AaAbility entry{};
+		AaAbility e{};
 
-		entry.id               = 0;
-		entry.name             = "";
-		entry.category         = -1;
-		entry.classes          = 131070;
-		entry.races            = 65535;
-		entry.drakkin_heritage = 127;
-		entry.deities          = 131071;
-		entry.status           = 0;
-		entry.type             = 0;
-		entry.charges          = 0;
-		entry.grant_only       = 0;
-		entry.first_rank_id    = -1;
-		entry.enabled          = 1;
-		entry.reset_on_death   = 0;
+		e.id               = 0;
+		e.name             = "";
+		e.category         = -1;
+		e.classes          = 131070;
+		e.races            = 65535;
+		e.drakkin_heritage = 127;
+		e.deities          = 131071;
+		e.status           = 0;
+		e.type             = 0;
+		e.charges          = 0;
+		e.grant_only       = 0;
+		e.first_rank_id    = -1;
+		e.enabled          = 1;
+		e.reset_on_death   = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AaAbility GetAaAbilityEntry(
+	static AaAbility GetAaAbilitye(
 		const std::vector<AaAbility> &aa_abilitys,
 		int aa_ability_id
 	)
@@ -164,24 +164,24 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AaAbility entry{};
+			AaAbility e{};
 
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
+			e.id               = atoi(row[0]);
+			e.name             = row[1] ? row[1] : "";
+			e.category         = atoi(row[2]);
+			e.classes          = atoi(row[3]);
+			e.races            = atoi(row[4]);
+			e.drakkin_heritage = atoi(row[5]);
+			e.deities          = atoi(row[6]);
+			e.status           = atoi(row[7]);
+			e.type             = atoi(row[8]);
+			e.charges          = atoi(row[9]);
+			e.grant_only       = atoi(row[10]);
+			e.first_rank_id    = atoi(row[11]);
+			e.enabled          = atoi(row[12]);
+			e.reset_on_death   = atoi(row[13]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -206,27 +206,27 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaAbility aa_ability_entry
+		AaAbility aa_ability_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_ability_entry.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(aa_ability_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_entry.category));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_entry.classes));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_ability_entry.races));
-		update_values.push_back(columns[5] + " = " + std::to_string(aa_ability_entry.drakkin_heritage));
-		update_values.push_back(columns[6] + " = " + std::to_string(aa_ability_entry.deities));
-		update_values.push_back(columns[7] + " = " + std::to_string(aa_ability_entry.status));
-		update_values.push_back(columns[8] + " = " + std::to_string(aa_ability_entry.type));
-		update_values.push_back(columns[9] + " = " + std::to_string(aa_ability_entry.charges));
-		update_values.push_back(columns[10] + " = " + std::to_string(aa_ability_entry.grant_only));
-		update_values.push_back(columns[11] + " = " + std::to_string(aa_ability_entry.first_rank_id));
-		update_values.push_back(columns[12] + " = " + std::to_string(aa_ability_entry.enabled));
-		update_values.push_back(columns[13] + " = " + std::to_string(aa_ability_entry.reset_on_death));
+		update_values.push_back(columns[0] + " = " + std::to_string(aa_ability_e.id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(aa_ability_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_e.category));
+		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_e.classes));
+		update_values.push_back(columns[4] + " = " + std::to_string(aa_ability_e.races));
+		update_values.push_back(columns[5] + " = " + std::to_string(aa_ability_e.drakkin_heritage));
+		update_values.push_back(columns[6] + " = " + std::to_string(aa_ability_e.deities));
+		update_values.push_back(columns[7] + " = " + std::to_string(aa_ability_e.status));
+		update_values.push_back(columns[8] + " = " + std::to_string(aa_ability_e.type));
+		update_values.push_back(columns[9] + " = " + std::to_string(aa_ability_e.charges));
+		update_values.push_back(columns[10] + " = " + std::to_string(aa_ability_e.grant_only));
+		update_values.push_back(columns[11] + " = " + std::to_string(aa_ability_e.first_rank_id));
+		update_values.push_back(columns[12] + " = " + std::to_string(aa_ability_e.enabled));
+		update_values.push_back(columns[13] + " = " + std::to_string(aa_ability_e.reset_on_death));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -234,7 +234,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				aa_ability_entry.id
+				aa_ability_e.id
 			)
 		);
 
@@ -243,25 +243,25 @@ public:
 
 	static AaAbility InsertOne(
 		Database& db,
-		AaAbility aa_ability_entry
+		AaAbility aa_ability_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(aa_ability_entry.id));
-		insert_values.push_back("'" + Strings::Escape(aa_ability_entry.name) + "'");
-		insert_values.push_back(std::to_string(aa_ability_entry.category));
-		insert_values.push_back(std::to_string(aa_ability_entry.classes));
-		insert_values.push_back(std::to_string(aa_ability_entry.races));
-		insert_values.push_back(std::to_string(aa_ability_entry.drakkin_heritage));
-		insert_values.push_back(std::to_string(aa_ability_entry.deities));
-		insert_values.push_back(std::to_string(aa_ability_entry.status));
-		insert_values.push_back(std::to_string(aa_ability_entry.type));
-		insert_values.push_back(std::to_string(aa_ability_entry.charges));
-		insert_values.push_back(std::to_string(aa_ability_entry.grant_only));
-		insert_values.push_back(std::to_string(aa_ability_entry.first_rank_id));
-		insert_values.push_back(std::to_string(aa_ability_entry.enabled));
-		insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
+		insert_values.push_back(std::to_string(aa_ability_e.id));
+		insert_values.push_back("'" + Strings::Escape(aa_ability_e.name) + "'");
+		insert_values.push_back(std::to_string(aa_ability_e.category));
+		insert_values.push_back(std::to_string(aa_ability_e.classes));
+		insert_values.push_back(std::to_string(aa_ability_e.races));
+		insert_values.push_back(std::to_string(aa_ability_e.drakkin_heritage));
+		insert_values.push_back(std::to_string(aa_ability_e.deities));
+		insert_values.push_back(std::to_string(aa_ability_e.status));
+		insert_values.push_back(std::to_string(aa_ability_e.type));
+		insert_values.push_back(std::to_string(aa_ability_e.charges));
+		insert_values.push_back(std::to_string(aa_ability_e.grant_only));
+		insert_values.push_back(std::to_string(aa_ability_e.first_rank_id));
+		insert_values.push_back(std::to_string(aa_ability_e.enabled));
+		insert_values.push_back(std::to_string(aa_ability_e.reset_on_death));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -272,13 +272,13 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_ability_entry.id = results.LastInsertedID();
-			return aa_ability_entry;
+			aa_ability_e.id = results.LastInsertedID();
+			return aa_ability_e;
 		}
 
-		aa_ability_entry = NewEntity();
+		aa_ability_e = NewEntity();
 
-		return aa_ability_entry;
+		return aa_ability_e;
 	}
 
 	static int InsertMany(
@@ -288,23 +288,23 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_ability_entry: aa_ability_entries) {
+		for (auto &aa_ability_e: aa_ability_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(aa_ability_entry.id));
-			insert_values.push_back("'" + Strings::Escape(aa_ability_entry.name) + "'");
-			insert_values.push_back(std::to_string(aa_ability_entry.category));
-			insert_values.push_back(std::to_string(aa_ability_entry.classes));
-			insert_values.push_back(std::to_string(aa_ability_entry.races));
-			insert_values.push_back(std::to_string(aa_ability_entry.drakkin_heritage));
-			insert_values.push_back(std::to_string(aa_ability_entry.deities));
-			insert_values.push_back(std::to_string(aa_ability_entry.status));
-			insert_values.push_back(std::to_string(aa_ability_entry.type));
-			insert_values.push_back(std::to_string(aa_ability_entry.charges));
-			insert_values.push_back(std::to_string(aa_ability_entry.grant_only));
-			insert_values.push_back(std::to_string(aa_ability_entry.first_rank_id));
-			insert_values.push_back(std::to_string(aa_ability_entry.enabled));
-			insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
+			insert_values.push_back(std::to_string(aa_ability_e.id));
+			insert_values.push_back("'" + Strings::Escape(aa_ability_e.name) + "'");
+			insert_values.push_back(std::to_string(aa_ability_e.category));
+			insert_values.push_back(std::to_string(aa_ability_e.classes));
+			insert_values.push_back(std::to_string(aa_ability_e.races));
+			insert_values.push_back(std::to_string(aa_ability_e.drakkin_heritage));
+			insert_values.push_back(std::to_string(aa_ability_e.deities));
+			insert_values.push_back(std::to_string(aa_ability_e.status));
+			insert_values.push_back(std::to_string(aa_ability_e.type));
+			insert_values.push_back(std::to_string(aa_ability_e.charges));
+			insert_values.push_back(std::to_string(aa_ability_e.grant_only));
+			insert_values.push_back(std::to_string(aa_ability_e.first_rank_id));
+			insert_values.push_back(std::to_string(aa_ability_e.enabled));
+			insert_values.push_back(std::to_string(aa_ability_e.reset_on_death));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -336,24 +336,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaAbility entry{};
+			AaAbility e{};
 
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
+			e.id               = atoi(row[0]);
+			e.name             = row[1] ? row[1] : "";
+			e.category         = atoi(row[2]);
+			e.classes          = atoi(row[3]);
+			e.races            = atoi(row[4]);
+			e.drakkin_heritage = atoi(row[5]);
+			e.deities          = atoi(row[6]);
+			e.status           = atoi(row[7]);
+			e.type             = atoi(row[8]);
+			e.charges          = atoi(row[9]);
+			e.grant_only       = atoi(row[10]);
+			e.first_rank_id    = atoi(row[11]);
+			e.enabled          = atoi(row[12]);
+			e.reset_on_death   = atoi(row[13]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -374,24 +374,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaAbility entry{};
+			AaAbility e{};
 
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
+			e.id               = atoi(row[0]);
+			e.name             = row[1] ? row[1] : "";
+			e.category         = atoi(row[2]);
+			e.classes          = atoi(row[3]);
+			e.races            = atoi(row[4]);
+			e.drakkin_heritage = atoi(row[5]);
+			e.deities          = atoi(row[6]);
+			e.status           = atoi(row[7]);
+			e.type             = atoi(row[8]);
+			e.charges          = atoi(row[9]);
+			e.grant_only       = atoi(row[10]);
+			e.first_rank_id    = atoi(row[11]);
+			e.enabled          = atoi(row[12]);
+			e.reset_on_death   = atoi(row[13]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

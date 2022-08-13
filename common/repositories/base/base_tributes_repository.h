@@ -88,18 +88,18 @@ public:
 
 	static Tributes NewEntity()
 	{
-		Tributes entry{};
+		Tributes e{};
 
-		entry.id      = 0;
-		entry.unknown = 0;
-		entry.name    = "";
-		entry.descr   = "";
-		entry.isguild = 0;
+		e.id      = 0;
+		e.unknown = 0;
+		e.name    = "";
+		e.descr   = "";
+		e.isguild = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Tributes GetTributesEntry(
+	static Tributes GetTributese(
 		const std::vector<Tributes> &tributess,
 		int tributes_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Tributes entry{};
+			Tributes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.unknown = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.descr   = row[3] ? row[3] : "";
-			entry.isguild = atoi(row[4]);
+			e.id      = atoi(row[0]);
+			e.unknown = atoi(row[1]);
+			e.name    = row[2] ? row[2] : "";
+			e.descr   = row[3] ? row[3] : "";
+			e.isguild = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Tributes tributes_entry
+		Tributes tributes_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(tributes_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(tributes_entry.unknown));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(tributes_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(tributes_entry.descr) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(tributes_entry.isguild));
+		update_values.push_back(columns[0] + " = " + std::to_string(tributes_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(tributes_e.unknown));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(tributes_e.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(tributes_e.descr) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(tributes_e.isguild));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				tributes_entry.id
+				tributes_e.id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static Tributes InsertOne(
 		Database& db,
-		Tributes tributes_entry
+		Tributes tributes_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(tributes_entry.id));
-		insert_values.push_back(std::to_string(tributes_entry.unknown));
-		insert_values.push_back("'" + Strings::Escape(tributes_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(tributes_entry.descr) + "'");
-		insert_values.push_back(std::to_string(tributes_entry.isguild));
+		insert_values.push_back(std::to_string(tributes_e.id));
+		insert_values.push_back(std::to_string(tributes_e.unknown));
+		insert_values.push_back("'" + Strings::Escape(tributes_e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(tributes_e.descr) + "'");
+		insert_values.push_back(std::to_string(tributes_e.isguild));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			tributes_entry.id = results.LastInsertedID();
-			return tributes_entry;
+			tributes_e.id = results.LastInsertedID();
+			return tributes_e;
 		}
 
-		tributes_entry = NewEntity();
+		tributes_e = NewEntity();
 
-		return tributes_entry;
+		return tributes_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tributes_entry: tributes_entries) {
+		for (auto &tributes_e: tributes_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(tributes_entry.id));
-			insert_values.push_back(std::to_string(tributes_entry.unknown));
-			insert_values.push_back("'" + Strings::Escape(tributes_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(tributes_entry.descr) + "'");
-			insert_values.push_back(std::to_string(tributes_entry.isguild));
+			insert_values.push_back(std::to_string(tributes_e.id));
+			insert_values.push_back(std::to_string(tributes_e.unknown));
+			insert_values.push_back("'" + Strings::Escape(tributes_e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(tributes_e.descr) + "'");
+			insert_values.push_back(std::to_string(tributes_e.isguild));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Tributes entry{};
+			Tributes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.unknown = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.descr   = row[3] ? row[3] : "";
-			entry.isguild = atoi(row[4]);
+			e.id      = atoi(row[0]);
+			e.unknown = atoi(row[1]);
+			e.name    = row[2] ? row[2] : "";
+			e.descr   = row[3] ? row[3] : "";
+			e.isguild = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Tributes entry{};
+			Tributes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.unknown = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.descr   = row[3] ? row[3] : "";
-			entry.isguild = atoi(row[4]);
+			e.id      = atoi(row[0]);
+			e.unknown = atoi(row[1]);
+			e.name    = row[2] ? row[2] : "";
+			e.descr   = row[3] ? row[3] : "";
+			e.isguild = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

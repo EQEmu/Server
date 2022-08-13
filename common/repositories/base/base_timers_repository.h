@@ -88,18 +88,18 @@ public:
 
 	static Timers NewEntity()
 	{
-		Timers entry{};
+		Timers e{};
 
-		entry.char_id  = 0;
-		entry.type     = 0;
-		entry.start    = 0;
-		entry.duration = 0;
-		entry.enable   = 0;
+		e.char_id  = 0;
+		e.type     = 0;
+		e.start    = 0;
+		e.duration = 0;
+		e.enable   = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Timers GetTimersEntry(
+	static Timers GetTimerse(
 		const std::vector<Timers> &timerss,
 		int timers_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Timers entry{};
+			Timers e{};
 
-			entry.char_id  = atoi(row[0]);
-			entry.type     = atoi(row[1]);
-			entry.start    = atoi(row[2]);
-			entry.duration = atoi(row[3]);
-			entry.enable   = atoi(row[4]);
+			e.char_id  = atoi(row[0]);
+			e.type     = atoi(row[1]);
+			e.start    = atoi(row[2]);
+			e.duration = atoi(row[3]);
+			e.enable   = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Timers timers_entry
+		Timers timers_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(timers_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(timers_entry.type));
-		update_values.push_back(columns[2] + " = " + std::to_string(timers_entry.start));
-		update_values.push_back(columns[3] + " = " + std::to_string(timers_entry.duration));
-		update_values.push_back(columns[4] + " = " + std::to_string(timers_entry.enable));
+		update_values.push_back(columns[0] + " = " + std::to_string(timers_e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(timers_e.type));
+		update_values.push_back(columns[2] + " = " + std::to_string(timers_e.start));
+		update_values.push_back(columns[3] + " = " + std::to_string(timers_e.duration));
+		update_values.push_back(columns[4] + " = " + std::to_string(timers_e.enable));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				timers_entry.char_id
+				timers_e.char_id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static Timers InsertOne(
 		Database& db,
-		Timers timers_entry
+		Timers timers_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(timers_entry.char_id));
-		insert_values.push_back(std::to_string(timers_entry.type));
-		insert_values.push_back(std::to_string(timers_entry.start));
-		insert_values.push_back(std::to_string(timers_entry.duration));
-		insert_values.push_back(std::to_string(timers_entry.enable));
+		insert_values.push_back(std::to_string(timers_e.char_id));
+		insert_values.push_back(std::to_string(timers_e.type));
+		insert_values.push_back(std::to_string(timers_e.start));
+		insert_values.push_back(std::to_string(timers_e.duration));
+		insert_values.push_back(std::to_string(timers_e.enable));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			timers_entry.char_id = results.LastInsertedID();
-			return timers_entry;
+			timers_e.char_id = results.LastInsertedID();
+			return timers_e;
 		}
 
-		timers_entry = NewEntity();
+		timers_e = NewEntity();
 
-		return timers_entry;
+		return timers_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &timers_entry: timers_entries) {
+		for (auto &timers_e: timers_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(timers_entry.char_id));
-			insert_values.push_back(std::to_string(timers_entry.type));
-			insert_values.push_back(std::to_string(timers_entry.start));
-			insert_values.push_back(std::to_string(timers_entry.duration));
-			insert_values.push_back(std::to_string(timers_entry.enable));
+			insert_values.push_back(std::to_string(timers_e.char_id));
+			insert_values.push_back(std::to_string(timers_e.type));
+			insert_values.push_back(std::to_string(timers_e.start));
+			insert_values.push_back(std::to_string(timers_e.duration));
+			insert_values.push_back(std::to_string(timers_e.enable));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Timers entry{};
+			Timers e{};
 
-			entry.char_id  = atoi(row[0]);
-			entry.type     = atoi(row[1]);
-			entry.start    = atoi(row[2]);
-			entry.duration = atoi(row[3]);
-			entry.enable   = atoi(row[4]);
+			e.char_id  = atoi(row[0]);
+			e.type     = atoi(row[1]);
+			e.start    = atoi(row[2]);
+			e.duration = atoi(row[3]);
+			e.enable   = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Timers entry{};
+			Timers e{};
 
-			entry.char_id  = atoi(row[0]);
-			entry.type     = atoi(row[1]);
-			entry.start    = atoi(row[2]);
-			entry.duration = atoi(row[3]);
-			entry.enable   = atoi(row[4]);
+			e.char_id  = atoi(row[0]);
+			e.type     = atoi(row[1]);
+			e.start    = atoi(row[2]);
+			e.duration = atoi(row[3]);
+			e.enable   = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

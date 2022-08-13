@@ -88,18 +88,18 @@ public:
 
 	static NpcFactionEntries NewEntity()
 	{
-		NpcFactionEntries entry{};
+		NpcFactionEntries e{};
 
-		entry.npc_faction_id = 0;
-		entry.faction_id     = 0;
-		entry.value          = 0;
-		entry.npc_value      = 0;
-		entry.temp           = 0;
+		e.npc_faction_id = 0;
+		e.faction_id     = 0;
+		e.value          = 0;
+		e.npc_value      = 0;
+		e.temp           = 0;
 
-		return entry;
+		return e;
 	}
 
-	static NpcFactionEntries GetNpcFactionEntriesEntry(
+	static NpcFactionEntries GetNpcFactionEntriese(
 		const std::vector<NpcFactionEntries> &npc_faction_entriess,
 		int npc_faction_entries_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			NpcFactionEntries entry{};
+			NpcFactionEntries e{};
 
-			entry.npc_faction_id = atoi(row[0]);
-			entry.faction_id     = atoi(row[1]);
-			entry.value          = atoi(row[2]);
-			entry.npc_value      = atoi(row[3]);
-			entry.temp           = atoi(row[4]);
+			e.npc_faction_id = atoi(row[0]);
+			e.faction_id     = atoi(row[1]);
+			e.value          = atoi(row[2]);
+			e.npc_value      = atoi(row[3]);
+			e.temp           = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcFactionEntries npc_faction_entries_entry
+		NpcFactionEntries npc_faction_entries_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(npc_faction_entries_entry.npc_faction_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(npc_faction_entries_entry.faction_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_faction_entries_entry.value));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_faction_entries_entry.npc_value));
-		update_values.push_back(columns[4] + " = " + std::to_string(npc_faction_entries_entry.temp));
+		update_values.push_back(columns[0] + " = " + std::to_string(npc_faction_entries_e.npc_faction_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(npc_faction_entries_e.faction_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(npc_faction_entries_e.value));
+		update_values.push_back(columns[3] + " = " + std::to_string(npc_faction_entries_e.npc_value));
+		update_values.push_back(columns[4] + " = " + std::to_string(npc_faction_entries_e.temp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_faction_entries_entry.npc_faction_id
+				npc_faction_entries_e.npc_faction_id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static NpcFactionEntries InsertOne(
 		Database& db,
-		NpcFactionEntries npc_faction_entries_entry
+		NpcFactionEntries npc_faction_entries_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_faction_id));
-		insert_values.push_back(std::to_string(npc_faction_entries_entry.faction_id));
-		insert_values.push_back(std::to_string(npc_faction_entries_entry.value));
-		insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_value));
-		insert_values.push_back(std::to_string(npc_faction_entries_entry.temp));
+		insert_values.push_back(std::to_string(npc_faction_entries_e.npc_faction_id));
+		insert_values.push_back(std::to_string(npc_faction_entries_e.faction_id));
+		insert_values.push_back(std::to_string(npc_faction_entries_e.value));
+		insert_values.push_back(std::to_string(npc_faction_entries_e.npc_value));
+		insert_values.push_back(std::to_string(npc_faction_entries_e.temp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_faction_entries_entry.npc_faction_id = results.LastInsertedID();
-			return npc_faction_entries_entry;
+			npc_faction_entries_e.npc_faction_id = results.LastInsertedID();
+			return npc_faction_entries_e;
 		}
 
-		npc_faction_entries_entry = NewEntity();
+		npc_faction_entries_e = NewEntity();
 
-		return npc_faction_entries_entry;
+		return npc_faction_entries_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_faction_entries_entry: npc_faction_entries_entries) {
+		for (auto &npc_faction_entries_e: npc_faction_entries_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_faction_id));
-			insert_values.push_back(std::to_string(npc_faction_entries_entry.faction_id));
-			insert_values.push_back(std::to_string(npc_faction_entries_entry.value));
-			insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_value));
-			insert_values.push_back(std::to_string(npc_faction_entries_entry.temp));
+			insert_values.push_back(std::to_string(npc_faction_entries_e.npc_faction_id));
+			insert_values.push_back(std::to_string(npc_faction_entries_e.faction_id));
+			insert_values.push_back(std::to_string(npc_faction_entries_e.value));
+			insert_values.push_back(std::to_string(npc_faction_entries_e.npc_value));
+			insert_values.push_back(std::to_string(npc_faction_entries_e.temp));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcFactionEntries entry{};
+			NpcFactionEntries e{};
 
-			entry.npc_faction_id = atoi(row[0]);
-			entry.faction_id     = atoi(row[1]);
-			entry.value          = atoi(row[2]);
-			entry.npc_value      = atoi(row[3]);
-			entry.temp           = atoi(row[4]);
+			e.npc_faction_id = atoi(row[0]);
+			e.faction_id     = atoi(row[1]);
+			e.value          = atoi(row[2]);
+			e.npc_value      = atoi(row[3]);
+			e.temp           = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcFactionEntries entry{};
+			NpcFactionEntries e{};
 
-			entry.npc_faction_id = atoi(row[0]);
-			entry.faction_id     = atoi(row[1]);
-			entry.value          = atoi(row[2]);
-			entry.npc_value      = atoi(row[3]);
-			entry.temp           = atoi(row[4]);
+			e.npc_faction_id = atoi(row[0]);
+			e.faction_id     = atoi(row[1]);
+			e.value          = atoi(row[2]);
+			e.npc_value      = atoi(row[3]);
+			e.temp           = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

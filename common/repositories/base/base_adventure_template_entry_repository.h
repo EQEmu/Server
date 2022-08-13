@@ -79,15 +79,15 @@ public:
 
 	static AdventureTemplateEntry NewEntity()
 	{
-		AdventureTemplateEntry entry{};
+		AdventureTemplateEntry e{};
 
-		entry.id          = 0;
-		entry.template_id = 0;
+		e.id          = 0;
+		e.template_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AdventureTemplateEntry GetAdventureTemplateEntryEntry(
+	static AdventureTemplateEntry GetAdventureTemplateEntrye(
 		const std::vector<AdventureTemplateEntry> &adventure_template_entrys,
 		int adventure_template_entry_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AdventureTemplateEntry entry{};
+			AdventureTemplateEntry e{};
 
-			entry.id          = atoi(row[0]);
-			entry.template_id = atoi(row[1]);
+			e.id          = atoi(row[0]);
+			e.template_id = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureTemplateEntry adventure_template_entry_entry
+		AdventureTemplateEntry adventure_template_entry_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(adventure_template_entry_entry.template_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(adventure_template_entry_e.template_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				adventure_template_entry_entry.id
+				adventure_template_entry_e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static AdventureTemplateEntry InsertOne(
 		Database& db,
-		AdventureTemplateEntry adventure_template_entry_entry
+		AdventureTemplateEntry adventure_template_entry_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(adventure_template_entry_entry.id));
-		insert_values.push_back(std::to_string(adventure_template_entry_entry.template_id));
+		insert_values.push_back(std::to_string(adventure_template_entry_e.id));
+		insert_values.push_back(std::to_string(adventure_template_entry_e.template_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			adventure_template_entry_entry.id = results.LastInsertedID();
-			return adventure_template_entry_entry;
+			adventure_template_entry_e.id = results.LastInsertedID();
+			return adventure_template_entry_e;
 		}
 
-		adventure_template_entry_entry = NewEntity();
+		adventure_template_entry_e = NewEntity();
 
-		return adventure_template_entry_entry;
+		return adventure_template_entry_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &adventure_template_entry_entry: adventure_template_entry_entries) {
+		for (auto &adventure_template_entry_e: adventure_template_entry_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(adventure_template_entry_entry.id));
-			insert_values.push_back(std::to_string(adventure_template_entry_entry.template_id));
+			insert_values.push_back(std::to_string(adventure_template_entry_e.id));
+			insert_values.push_back(std::to_string(adventure_template_entry_e.template_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntry entry{};
+			AdventureTemplateEntry e{};
 
-			entry.id          = atoi(row[0]);
-			entry.template_id = atoi(row[1]);
+			e.id          = atoi(row[0]);
+			e.template_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AdventureTemplateEntry entry{};
+			AdventureTemplateEntry e{};
 
-			entry.id          = atoi(row[0]);
-			entry.template_id = atoi(row[1]);
+			e.id          = atoi(row[0]);
+			e.template_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

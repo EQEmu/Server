@@ -85,17 +85,17 @@ public:
 
 	static ContentFlags NewEntity()
 	{
-		ContentFlags entry{};
+		ContentFlags e{};
 
-		entry.id        = 0;
-		entry.flag_name = "";
-		entry.enabled   = 0;
-		entry.notes     = "";
+		e.id        = 0;
+		e.flag_name = "";
+		e.enabled   = 0;
+		e.notes     = "";
 
-		return entry;
+		return e;
 	}
 
-	static ContentFlags GetContentFlagsEntry(
+	static ContentFlags GetContentFlagse(
 		const std::vector<ContentFlags> &content_flagss,
 		int content_flags_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			ContentFlags entry{};
+			ContentFlags e{};
 
-			entry.id        = atoi(row[0]);
-			entry.flag_name = row[1] ? row[1] : "";
-			entry.enabled   = atoi(row[2]);
-			entry.notes     = row[3] ? row[3] : "";
+			e.id        = atoi(row[0]);
+			e.flag_name = row[1] ? row[1] : "";
+			e.enabled   = atoi(row[2]);
+			e.notes     = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ContentFlags content_flags_entry
+		ContentFlags content_flags_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(content_flags_entry.flag_name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(content_flags_entry.enabled));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(content_flags_entry.notes) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(content_flags_e.flag_name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(content_flags_e.enabled));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(content_flags_e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				content_flags_entry.id
+				content_flags_e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static ContentFlags InsertOne(
 		Database& db,
-		ContentFlags content_flags_entry
+		ContentFlags content_flags_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(content_flags_entry.id));
-		insert_values.push_back("'" + Strings::Escape(content_flags_entry.flag_name) + "'");
-		insert_values.push_back(std::to_string(content_flags_entry.enabled));
-		insert_values.push_back("'" + Strings::Escape(content_flags_entry.notes) + "'");
+		insert_values.push_back(std::to_string(content_flags_e.id));
+		insert_values.push_back("'" + Strings::Escape(content_flags_e.flag_name) + "'");
+		insert_values.push_back(std::to_string(content_flags_e.enabled));
+		insert_values.push_back("'" + Strings::Escape(content_flags_e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,13 +201,13 @@ public:
 		);
 
 		if (results.Success()) {
-			content_flags_entry.id = results.LastInsertedID();
-			return content_flags_entry;
+			content_flags_e.id = results.LastInsertedID();
+			return content_flags_e;
 		}
 
-		content_flags_entry = NewEntity();
+		content_flags_e = NewEntity();
 
-		return content_flags_entry;
+		return content_flags_e;
 	}
 
 	static int InsertMany(
@@ -217,13 +217,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &content_flags_entry: content_flags_entries) {
+		for (auto &content_flags_e: content_flags_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(content_flags_entry.id));
-			insert_values.push_back("'" + Strings::Escape(content_flags_entry.flag_name) + "'");
-			insert_values.push_back(std::to_string(content_flags_entry.enabled));
-			insert_values.push_back("'" + Strings::Escape(content_flags_entry.notes) + "'");
+			insert_values.push_back(std::to_string(content_flags_e.id));
+			insert_values.push_back("'" + Strings::Escape(content_flags_e.flag_name) + "'");
+			insert_values.push_back(std::to_string(content_flags_e.enabled));
+			insert_values.push_back("'" + Strings::Escape(content_flags_e.notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -255,14 +255,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ContentFlags entry{};
+			ContentFlags e{};
 
-			entry.id        = atoi(row[0]);
-			entry.flag_name = row[1] ? row[1] : "";
-			entry.enabled   = atoi(row[2]);
-			entry.notes     = row[3] ? row[3] : "";
+			e.id        = atoi(row[0]);
+			e.flag_name = row[1] ? row[1] : "";
+			e.enabled   = atoi(row[2]);
+			e.notes     = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -283,14 +283,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ContentFlags entry{};
+			ContentFlags e{};
 
-			entry.id        = atoi(row[0]);
-			entry.flag_name = row[1] ? row[1] : "";
-			entry.enabled   = atoi(row[2]);
-			entry.notes     = row[3] ? row[3] : "";
+			e.id        = atoi(row[0]);
+			e.flag_name = row[1] ? row[1] : "";
+			e.enabled   = atoi(row[2]);
+			e.notes     = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

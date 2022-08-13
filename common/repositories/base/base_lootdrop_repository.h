@@ -91,19 +91,19 @@ public:
 
 	static Lootdrop NewEntity()
 	{
-		Lootdrop entry{};
+		Lootdrop e{};
 
-		entry.id                     = 0;
-		entry.name                   = "";
-		entry.min_expansion          = -1;
-		entry.max_expansion          = -1;
-		entry.content_flags          = "";
-		entry.content_flags_disabled = "";
+		e.id                     = 0;
+		e.name                   = "";
+		e.min_expansion          = -1;
+		e.max_expansion          = -1;
+		e.content_flags          = "";
+		e.content_flags_disabled = "";
 
-		return entry;
+		return e;
 	}
 
-	static Lootdrop GetLootdropEntry(
+	static Lootdrop GetLootdrope(
 		const std::vector<Lootdrop> &lootdrops,
 		int lootdrop_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Lootdrop entry{};
+			Lootdrop e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1] ? row[1] : "";
-			entry.min_expansion          = atoi(row[2]);
-			entry.max_expansion          = atoi(row[3]);
-			entry.content_flags          = row[4] ? row[4] : "";
-			entry.content_flags_disabled = row[5] ? row[5] : "";
+			e.id                     = atoi(row[0]);
+			e.name                   = row[1] ? row[1] : "";
+			e.min_expansion          = atoi(row[2]);
+			e.max_expansion          = atoi(row[3]);
+			e.content_flags          = row[4] ? row[4] : "";
+			e.content_flags_disabled = row[5] ? row[5] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Lootdrop lootdrop_entry
+		Lootdrop lootdrop_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(lootdrop_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_entry.min_expansion));
-		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entry.max_expansion));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(lootdrop_entry.content_flags) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(lootdrop_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(lootdrop_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_e.min_expansion));
+		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_e.max_expansion));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(lootdrop_e.content_flags) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(lootdrop_e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				lootdrop_entry.id
+				lootdrop_e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static Lootdrop InsertOne(
 		Database& db,
-		Lootdrop lootdrop_entry
+		Lootdrop lootdrop_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(lootdrop_entry.id));
-		insert_values.push_back("'" + Strings::Escape(lootdrop_entry.name) + "'");
-		insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
-		insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(lootdrop_e.id));
+		insert_values.push_back("'" + Strings::Escape(lootdrop_e.name) + "'");
+		insert_values.push_back(std::to_string(lootdrop_e.min_expansion));
+		insert_values.push_back(std::to_string(lootdrop_e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,13 +215,13 @@ public:
 		);
 
 		if (results.Success()) {
-			lootdrop_entry.id = results.LastInsertedID();
-			return lootdrop_entry;
+			lootdrop_e.id = results.LastInsertedID();
+			return lootdrop_e;
 		}
 
-		lootdrop_entry = NewEntity();
+		lootdrop_e = NewEntity();
 
-		return lootdrop_entry;
+		return lootdrop_e;
 	}
 
 	static int InsertMany(
@@ -231,15 +231,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &lootdrop_entry: lootdrop_entries) {
+		for (auto &lootdrop_e: lootdrop_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(lootdrop_entry.id));
-			insert_values.push_back("'" + Strings::Escape(lootdrop_entry.name) + "'");
-			insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
-			insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(lootdrop_entry.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(lootdrop_e.id));
+			insert_values.push_back("'" + Strings::Escape(lootdrop_e.name) + "'");
+			insert_values.push_back(std::to_string(lootdrop_e.min_expansion));
+			insert_values.push_back(std::to_string(lootdrop_e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -271,16 +271,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Lootdrop entry{};
+			Lootdrop e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1] ? row[1] : "";
-			entry.min_expansion          = atoi(row[2]);
-			entry.max_expansion          = atoi(row[3]);
-			entry.content_flags          = row[4] ? row[4] : "";
-			entry.content_flags_disabled = row[5] ? row[5] : "";
+			e.id                     = atoi(row[0]);
+			e.name                   = row[1] ? row[1] : "";
+			e.min_expansion          = atoi(row[2]);
+			e.max_expansion          = atoi(row[3]);
+			e.content_flags          = row[4] ? row[4] : "";
+			e.content_flags_disabled = row[5] ? row[5] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -301,16 +301,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Lootdrop entry{};
+			Lootdrop e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.name                   = row[1] ? row[1] : "";
-			entry.min_expansion          = atoi(row[2]);
-			entry.max_expansion          = atoi(row[3]);
-			entry.content_flags          = row[4] ? row[4] : "";
-			entry.content_flags_disabled = row[5] ? row[5] : "";
+			e.id                     = atoi(row[0]);
+			e.name                   = row[1] ? row[1] : "";
+			e.min_expansion          = atoi(row[2]);
+			e.max_expansion          = atoi(row[3]);
+			e.content_flags          = row[4] ? row[4] : "";
+			e.content_flags_disabled = row[5] ? row[5] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -85,17 +85,17 @@ public:
 
 	static CharacterPetInventory NewEntity()
 	{
-		CharacterPetInventory entry{};
+		CharacterPetInventory e{};
 
-		entry.char_id = 0;
-		entry.pet     = 0;
-		entry.slot    = 0;
-		entry.item_id = 0;
+		e.char_id = 0;
+		e.pet     = 0;
+		e.slot    = 0;
+		e.item_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterPetInventory GetCharacterPetInventoryEntry(
+	static CharacterPetInventory GetCharacterPetInventorye(
 		const std::vector<CharacterPetInventory> &character_pet_inventorys,
 		int character_pet_inventory_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterPetInventory entry{};
+			CharacterPetInventory e{};
 
-			entry.char_id = atoi(row[0]);
-			entry.pet     = atoi(row[1]);
-			entry.slot    = atoi(row[2]);
-			entry.item_id = atoi(row[3]);
+			e.char_id = atoi(row[0]);
+			e.pet     = atoi(row[1]);
+			e.slot    = atoi(row[2]);
+			e.item_id = atoi(row[3]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterPetInventory character_pet_inventory_entry
+		CharacterPetInventory character_pet_inventory_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_inventory_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_inventory_entry.pet));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_pet_inventory_entry.slot));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_inventory_entry.item_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_inventory_e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_inventory_e.pet));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_pet_inventory_e.slot));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_inventory_e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_pet_inventory_entry.char_id
+				character_pet_inventory_e.char_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static CharacterPetInventory InsertOne(
 		Database& db,
-		CharacterPetInventory character_pet_inventory_entry
+		CharacterPetInventory character_pet_inventory_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_pet_inventory_entry.char_id));
-		insert_values.push_back(std::to_string(character_pet_inventory_entry.pet));
-		insert_values.push_back(std::to_string(character_pet_inventory_entry.slot));
-		insert_values.push_back(std::to_string(character_pet_inventory_entry.item_id));
+		insert_values.push_back(std::to_string(character_pet_inventory_e.char_id));
+		insert_values.push_back(std::to_string(character_pet_inventory_e.pet));
+		insert_values.push_back(std::to_string(character_pet_inventory_e.slot));
+		insert_values.push_back(std::to_string(character_pet_inventory_e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_pet_inventory_entry.char_id = results.LastInsertedID();
-			return character_pet_inventory_entry;
+			character_pet_inventory_e.char_id = results.LastInsertedID();
+			return character_pet_inventory_e;
 		}
 
-		character_pet_inventory_entry = NewEntity();
+		character_pet_inventory_e = NewEntity();
 
-		return character_pet_inventory_entry;
+		return character_pet_inventory_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_pet_inventory_entry: character_pet_inventory_entries) {
+		for (auto &character_pet_inventory_e: character_pet_inventory_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_pet_inventory_entry.char_id));
-			insert_values.push_back(std::to_string(character_pet_inventory_entry.pet));
-			insert_values.push_back(std::to_string(character_pet_inventory_entry.slot));
-			insert_values.push_back(std::to_string(character_pet_inventory_entry.item_id));
+			insert_values.push_back(std::to_string(character_pet_inventory_e.char_id));
+			insert_values.push_back(std::to_string(character_pet_inventory_e.pet));
+			insert_values.push_back(std::to_string(character_pet_inventory_e.slot));
+			insert_values.push_back(std::to_string(character_pet_inventory_e.item_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetInventory entry{};
+			CharacterPetInventory e{};
 
-			entry.char_id = atoi(row[0]);
-			entry.pet     = atoi(row[1]);
-			entry.slot    = atoi(row[2]);
-			entry.item_id = atoi(row[3]);
+			e.char_id = atoi(row[0]);
+			e.pet     = atoi(row[1]);
+			e.slot    = atoi(row[2]);
+			e.item_id = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetInventory entry{};
+			CharacterPetInventory e{};
 
-			entry.char_id = atoi(row[0]);
-			entry.pet     = atoi(row[1]);
-			entry.slot    = atoi(row[2]);
-			entry.item_id = atoi(row[3]);
+			e.char_id = atoi(row[0]);
+			e.pet     = atoi(row[1]);
+			e.slot    = atoi(row[2]);
+			e.item_id = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

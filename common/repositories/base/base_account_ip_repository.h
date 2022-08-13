@@ -85,17 +85,17 @@ public:
 
 	static AccountIp NewEntity()
 	{
-		AccountIp entry{};
+		AccountIp e{};
 
-		entry.accid    = 0;
-		entry.ip       = "";
-		entry.count    = 1;
-		entry.lastused = std::time(nullptr);
+		e.accid    = 0;
+		e.ip       = "";
+		e.count    = 1;
+		e.lastused = std::time(nullptr);
 
-		return entry;
+		return e;
 	}
 
-	static AccountIp GetAccountIpEntry(
+	static AccountIp GetAccountIpe(
 		const std::vector<AccountIp> &account_ips,
 		int account_ip_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AccountIp entry{};
+			AccountIp e{};
 
-			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1] ? row[1] : "";
-			entry.count    = atoi(row[2]);
-			entry.lastused = row[3] ? row[3] : "";
+			e.accid    = atoi(row[0]);
+			e.ip       = row[1] ? row[1] : "";
+			e.count    = atoi(row[2]);
+			e.lastused = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountIp account_ip_entry
+		AccountIp account_ip_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_ip_entry.accid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_ip_entry.ip) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(account_ip_entry.count));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(account_ip_entry.lastused) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(account_ip_e.accid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_ip_e.ip) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(account_ip_e.count));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(account_ip_e.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				account_ip_entry.accid
+				account_ip_e.accid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static AccountIp InsertOne(
 		Database& db,
-		AccountIp account_ip_entry
+		AccountIp account_ip_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(account_ip_entry.accid));
-		insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
-		insert_values.push_back(std::to_string(account_ip_entry.count));
-		insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
+		insert_values.push_back(std::to_string(account_ip_e.accid));
+		insert_values.push_back("'" + Strings::Escape(account_ip_e.ip) + "'");
+		insert_values.push_back(std::to_string(account_ip_e.count));
+		insert_values.push_back("'" + Strings::Escape(account_ip_e.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			account_ip_entry.accid = results.LastInsertedID();
-			return account_ip_entry;
+			account_ip_e.accid = results.LastInsertedID();
+			return account_ip_e;
 		}
 
-		account_ip_entry = NewEntity();
+		account_ip_e = NewEntity();
 
-		return account_ip_entry;
+		return account_ip_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_ip_entry: account_ip_entries) {
+		for (auto &account_ip_e: account_ip_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(account_ip_entry.accid));
-			insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
-			insert_values.push_back(std::to_string(account_ip_entry.count));
-			insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
+			insert_values.push_back(std::to_string(account_ip_e.accid));
+			insert_values.push_back("'" + Strings::Escape(account_ip_e.ip) + "'");
+			insert_values.push_back(std::to_string(account_ip_e.count));
+			insert_values.push_back("'" + Strings::Escape(account_ip_e.lastused) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountIp entry{};
+			AccountIp e{};
 
-			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1] ? row[1] : "";
-			entry.count    = atoi(row[2]);
-			entry.lastused = row[3] ? row[3] : "";
+			e.accid    = atoi(row[0]);
+			e.ip       = row[1] ? row[1] : "";
+			e.count    = atoi(row[2]);
+			e.lastused = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountIp entry{};
+			AccountIp e{};
 
-			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1] ? row[1] : "";
-			entry.count    = atoi(row[2]);
-			entry.lastused = row[3] ? row[3] : "";
+			e.accid    = atoi(row[0]);
+			e.ip       = row[1] ? row[1] : "";
+			e.count    = atoi(row[2]);
+			e.lastused = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

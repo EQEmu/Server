@@ -112,26 +112,26 @@ public:
 
 	static Spawngroup NewEntity()
 	{
-		Spawngroup entry{};
+		Spawngroup e{};
 
-		entry.id            = 0;
-		entry.name          = "";
-		entry.spawn_limit   = 0;
-		entry.dist          = 0;
-		entry.max_x         = 0;
-		entry.min_x         = 0;
-		entry.max_y         = 0;
-		entry.min_y         = 0;
-		entry.delay         = 45000;
-		entry.mindelay      = 15000;
-		entry.despawn       = 0;
-		entry.despawn_timer = 100;
-		entry.wp_spawns     = 0;
+		e.id            = 0;
+		e.name          = "";
+		e.spawn_limit   = 0;
+		e.dist          = 0;
+		e.max_x         = 0;
+		e.min_x         = 0;
+		e.max_y         = 0;
+		e.min_y         = 0;
+		e.delay         = 45000;
+		e.mindelay      = 15000;
+		e.despawn       = 0;
+		e.despawn_timer = 100;
+		e.wp_spawns     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Spawngroup GetSpawngroupEntry(
+	static Spawngroup GetSpawngroupe(
 		const std::vector<Spawngroup> &spawngroups,
 		int spawngroup_id
 	)
@@ -160,23 +160,23 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Spawngroup entry{};
+			Spawngroup e{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.spawn_limit   = atoi(row[2]);
-			entry.dist          = static_cast<float>(atof(row[3]));
-			entry.max_x         = static_cast<float>(atof(row[4]));
-			entry.min_x         = static_cast<float>(atof(row[5]));
-			entry.max_y         = static_cast<float>(atof(row[6]));
-			entry.min_y         = static_cast<float>(atof(row[7]));
-			entry.delay         = atoi(row[8]);
-			entry.mindelay      = atoi(row[9]);
-			entry.despawn       = atoi(row[10]);
-			entry.despawn_timer = atoi(row[11]);
-			entry.wp_spawns     = atoi(row[12]);
+			e.id            = atoi(row[0]);
+			e.name          = row[1] ? row[1] : "";
+			e.spawn_limit   = atoi(row[2]);
+			e.dist          = static_cast<float>(atof(row[3]));
+			e.max_x         = static_cast<float>(atof(row[4]));
+			e.min_x         = static_cast<float>(atof(row[5]));
+			e.max_y         = static_cast<float>(atof(row[6]));
+			e.min_y         = static_cast<float>(atof(row[7]));
+			e.delay         = atoi(row[8]);
+			e.mindelay      = atoi(row[9]);
+			e.despawn       = atoi(row[10]);
+			e.despawn_timer = atoi(row[11]);
+			e.wp_spawns     = atoi(row[12]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -201,25 +201,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Spawngroup spawngroup_entry
+		Spawngroup spawngroup_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(spawngroup_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(spawngroup_entry.spawn_limit));
-		update_values.push_back(columns[3] + " = " + std::to_string(spawngroup_entry.dist));
-		update_values.push_back(columns[4] + " = " + std::to_string(spawngroup_entry.max_x));
-		update_values.push_back(columns[5] + " = " + std::to_string(spawngroup_entry.min_x));
-		update_values.push_back(columns[6] + " = " + std::to_string(spawngroup_entry.max_y));
-		update_values.push_back(columns[7] + " = " + std::to_string(spawngroup_entry.min_y));
-		update_values.push_back(columns[8] + " = " + std::to_string(spawngroup_entry.delay));
-		update_values.push_back(columns[9] + " = " + std::to_string(spawngroup_entry.mindelay));
-		update_values.push_back(columns[10] + " = " + std::to_string(spawngroup_entry.despawn));
-		update_values.push_back(columns[11] + " = " + std::to_string(spawngroup_entry.despawn_timer));
-		update_values.push_back(columns[12] + " = " + std::to_string(spawngroup_entry.wp_spawns));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(spawngroup_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(spawngroup_e.spawn_limit));
+		update_values.push_back(columns[3] + " = " + std::to_string(spawngroup_e.dist));
+		update_values.push_back(columns[4] + " = " + std::to_string(spawngroup_e.max_x));
+		update_values.push_back(columns[5] + " = " + std::to_string(spawngroup_e.min_x));
+		update_values.push_back(columns[6] + " = " + std::to_string(spawngroup_e.max_y));
+		update_values.push_back(columns[7] + " = " + std::to_string(spawngroup_e.min_y));
+		update_values.push_back(columns[8] + " = " + std::to_string(spawngroup_e.delay));
+		update_values.push_back(columns[9] + " = " + std::to_string(spawngroup_e.mindelay));
+		update_values.push_back(columns[10] + " = " + std::to_string(spawngroup_e.despawn));
+		update_values.push_back(columns[11] + " = " + std::to_string(spawngroup_e.despawn_timer));
+		update_values.push_back(columns[12] + " = " + std::to_string(spawngroup_e.wp_spawns));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -227,7 +227,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spawngroup_entry.id
+				spawngroup_e.id
 			)
 		);
 
@@ -236,24 +236,24 @@ public:
 
 	static Spawngroup InsertOne(
 		Database& db,
-		Spawngroup spawngroup_entry
+		Spawngroup spawngroup_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spawngroup_entry.id));
-		insert_values.push_back("'" + Strings::Escape(spawngroup_entry.name) + "'");
-		insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
-		insert_values.push_back(std::to_string(spawngroup_entry.dist));
-		insert_values.push_back(std::to_string(spawngroup_entry.max_x));
-		insert_values.push_back(std::to_string(spawngroup_entry.min_x));
-		insert_values.push_back(std::to_string(spawngroup_entry.max_y));
-		insert_values.push_back(std::to_string(spawngroup_entry.min_y));
-		insert_values.push_back(std::to_string(spawngroup_entry.delay));
-		insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
-		insert_values.push_back(std::to_string(spawngroup_entry.despawn));
-		insert_values.push_back(std::to_string(spawngroup_entry.despawn_timer));
-		insert_values.push_back(std::to_string(spawngroup_entry.wp_spawns));
+		insert_values.push_back(std::to_string(spawngroup_e.id));
+		insert_values.push_back("'" + Strings::Escape(spawngroup_e.name) + "'");
+		insert_values.push_back(std::to_string(spawngroup_e.spawn_limit));
+		insert_values.push_back(std::to_string(spawngroup_e.dist));
+		insert_values.push_back(std::to_string(spawngroup_e.max_x));
+		insert_values.push_back(std::to_string(spawngroup_e.min_x));
+		insert_values.push_back(std::to_string(spawngroup_e.max_y));
+		insert_values.push_back(std::to_string(spawngroup_e.min_y));
+		insert_values.push_back(std::to_string(spawngroup_e.delay));
+		insert_values.push_back(std::to_string(spawngroup_e.mindelay));
+		insert_values.push_back(std::to_string(spawngroup_e.despawn));
+		insert_values.push_back(std::to_string(spawngroup_e.despawn_timer));
+		insert_values.push_back(std::to_string(spawngroup_e.wp_spawns));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -264,13 +264,13 @@ public:
 		);
 
 		if (results.Success()) {
-			spawngroup_entry.id = results.LastInsertedID();
-			return spawngroup_entry;
+			spawngroup_e.id = results.LastInsertedID();
+			return spawngroup_e;
 		}
 
-		spawngroup_entry = NewEntity();
+		spawngroup_e = NewEntity();
 
-		return spawngroup_entry;
+		return spawngroup_e;
 	}
 
 	static int InsertMany(
@@ -280,22 +280,22 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spawngroup_entry: spawngroup_entries) {
+		for (auto &spawngroup_e: spawngroup_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spawngroup_entry.id));
-			insert_values.push_back("'" + Strings::Escape(spawngroup_entry.name) + "'");
-			insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
-			insert_values.push_back(std::to_string(spawngroup_entry.dist));
-			insert_values.push_back(std::to_string(spawngroup_entry.max_x));
-			insert_values.push_back(std::to_string(spawngroup_entry.min_x));
-			insert_values.push_back(std::to_string(spawngroup_entry.max_y));
-			insert_values.push_back(std::to_string(spawngroup_entry.min_y));
-			insert_values.push_back(std::to_string(spawngroup_entry.delay));
-			insert_values.push_back(std::to_string(spawngroup_entry.mindelay));
-			insert_values.push_back(std::to_string(spawngroup_entry.despawn));
-			insert_values.push_back(std::to_string(spawngroup_entry.despawn_timer));
-			insert_values.push_back(std::to_string(spawngroup_entry.wp_spawns));
+			insert_values.push_back(std::to_string(spawngroup_e.id));
+			insert_values.push_back("'" + Strings::Escape(spawngroup_e.name) + "'");
+			insert_values.push_back(std::to_string(spawngroup_e.spawn_limit));
+			insert_values.push_back(std::to_string(spawngroup_e.dist));
+			insert_values.push_back(std::to_string(spawngroup_e.max_x));
+			insert_values.push_back(std::to_string(spawngroup_e.min_x));
+			insert_values.push_back(std::to_string(spawngroup_e.max_y));
+			insert_values.push_back(std::to_string(spawngroup_e.min_y));
+			insert_values.push_back(std::to_string(spawngroup_e.delay));
+			insert_values.push_back(std::to_string(spawngroup_e.mindelay));
+			insert_values.push_back(std::to_string(spawngroup_e.despawn));
+			insert_values.push_back(std::to_string(spawngroup_e.despawn_timer));
+			insert_values.push_back(std::to_string(spawngroup_e.wp_spawns));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -327,23 +327,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Spawngroup entry{};
+			Spawngroup e{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.spawn_limit   = atoi(row[2]);
-			entry.dist          = static_cast<float>(atof(row[3]));
-			entry.max_x         = static_cast<float>(atof(row[4]));
-			entry.min_x         = static_cast<float>(atof(row[5]));
-			entry.max_y         = static_cast<float>(atof(row[6]));
-			entry.min_y         = static_cast<float>(atof(row[7]));
-			entry.delay         = atoi(row[8]);
-			entry.mindelay      = atoi(row[9]);
-			entry.despawn       = atoi(row[10]);
-			entry.despawn_timer = atoi(row[11]);
-			entry.wp_spawns     = atoi(row[12]);
+			e.id            = atoi(row[0]);
+			e.name          = row[1] ? row[1] : "";
+			e.spawn_limit   = atoi(row[2]);
+			e.dist          = static_cast<float>(atof(row[3]));
+			e.max_x         = static_cast<float>(atof(row[4]));
+			e.min_x         = static_cast<float>(atof(row[5]));
+			e.max_y         = static_cast<float>(atof(row[6]));
+			e.min_y         = static_cast<float>(atof(row[7]));
+			e.delay         = atoi(row[8]);
+			e.mindelay      = atoi(row[9]);
+			e.despawn       = atoi(row[10]);
+			e.despawn_timer = atoi(row[11]);
+			e.wp_spawns     = atoi(row[12]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -364,23 +364,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Spawngroup entry{};
+			Spawngroup e{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.spawn_limit   = atoi(row[2]);
-			entry.dist          = static_cast<float>(atof(row[3]));
-			entry.max_x         = static_cast<float>(atof(row[4]));
-			entry.min_x         = static_cast<float>(atof(row[5]));
-			entry.max_y         = static_cast<float>(atof(row[6]));
-			entry.min_y         = static_cast<float>(atof(row[7]));
-			entry.delay         = atoi(row[8]);
-			entry.mindelay      = atoi(row[9]);
-			entry.despawn       = atoi(row[10]);
-			entry.despawn_timer = atoi(row[11]);
-			entry.wp_spawns     = atoi(row[12]);
+			e.id            = atoi(row[0]);
+			e.name          = row[1] ? row[1] : "";
+			e.spawn_limit   = atoi(row[2]);
+			e.dist          = static_cast<float>(atof(row[3]));
+			e.max_x         = static_cast<float>(atof(row[4]));
+			e.min_x         = static_cast<float>(atof(row[5]));
+			e.max_y         = static_cast<float>(atof(row[6]));
+			e.min_y         = static_cast<float>(atof(row[7]));
+			e.delay         = atoi(row[8]);
+			e.mindelay      = atoi(row[9]);
+			e.despawn       = atoi(row[10]);
+			e.despawn_timer = atoi(row[11]);
+			e.wp_spawns     = atoi(row[12]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -85,17 +85,17 @@ public:
 
 	static Expeditions NewEntity()
 	{
-		Expeditions entry{};
+		Expeditions e{};
 
-		entry.id                 = 0;
-		entry.dynamic_zone_id    = 0;
-		entry.add_replay_on_join = 1;
-		entry.is_locked          = 0;
+		e.id                 = 0;
+		e.dynamic_zone_id    = 0;
+		e.add_replay_on_join = 1;
+		e.is_locked          = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Expeditions GetExpeditionsEntry(
+	static Expeditions GetExpeditionse(
 		const std::vector<Expeditions> &expeditionss,
 		int expeditions_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Expeditions entry{};
+			Expeditions e{};
 
-			entry.id                 = atoi(row[0]);
-			entry.dynamic_zone_id    = atoi(row[1]);
-			entry.add_replay_on_join = atoi(row[2]);
-			entry.is_locked          = atoi(row[3]);
+			e.id                 = atoi(row[0]);
+			e.dynamic_zone_id    = atoi(row[1]);
+			e.add_replay_on_join = atoi(row[2]);
+			e.is_locked          = atoi(row[3]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Expeditions expeditions_entry
+		Expeditions expeditions_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(expeditions_entry.dynamic_zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(expeditions_entry.add_replay_on_join));
-		update_values.push_back(columns[3] + " = " + std::to_string(expeditions_entry.is_locked));
+		update_values.push_back(columns[1] + " = " + std::to_string(expeditions_e.dynamic_zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(expeditions_e.add_replay_on_join));
+		update_values.push_back(columns[3] + " = " + std::to_string(expeditions_e.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				expeditions_entry.id
+				expeditions_e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static Expeditions InsertOne(
 		Database& db,
-		Expeditions expeditions_entry
+		Expeditions expeditions_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(expeditions_entry.id));
-		insert_values.push_back(std::to_string(expeditions_entry.dynamic_zone_id));
-		insert_values.push_back(std::to_string(expeditions_entry.add_replay_on_join));
-		insert_values.push_back(std::to_string(expeditions_entry.is_locked));
+		insert_values.push_back(std::to_string(expeditions_e.id));
+		insert_values.push_back(std::to_string(expeditions_e.dynamic_zone_id));
+		insert_values.push_back(std::to_string(expeditions_e.add_replay_on_join));
+		insert_values.push_back(std::to_string(expeditions_e.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,13 +201,13 @@ public:
 		);
 
 		if (results.Success()) {
-			expeditions_entry.id = results.LastInsertedID();
-			return expeditions_entry;
+			expeditions_e.id = results.LastInsertedID();
+			return expeditions_e;
 		}
 
-		expeditions_entry = NewEntity();
+		expeditions_e = NewEntity();
 
-		return expeditions_entry;
+		return expeditions_e;
 	}
 
 	static int InsertMany(
@@ -217,13 +217,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &expeditions_entry: expeditions_entries) {
+		for (auto &expeditions_e: expeditions_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(expeditions_entry.id));
-			insert_values.push_back(std::to_string(expeditions_entry.dynamic_zone_id));
-			insert_values.push_back(std::to_string(expeditions_entry.add_replay_on_join));
-			insert_values.push_back(std::to_string(expeditions_entry.is_locked));
+			insert_values.push_back(std::to_string(expeditions_e.id));
+			insert_values.push_back(std::to_string(expeditions_e.dynamic_zone_id));
+			insert_values.push_back(std::to_string(expeditions_e.add_replay_on_join));
+			insert_values.push_back(std::to_string(expeditions_e.is_locked));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -255,14 +255,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Expeditions entry{};
+			Expeditions e{};
 
-			entry.id                 = atoi(row[0]);
-			entry.dynamic_zone_id    = atoi(row[1]);
-			entry.add_replay_on_join = atoi(row[2]);
-			entry.is_locked          = atoi(row[3]);
+			e.id                 = atoi(row[0]);
+			e.dynamic_zone_id    = atoi(row[1]);
+			e.add_replay_on_join = atoi(row[2]);
+			e.is_locked          = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -283,14 +283,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Expeditions entry{};
+			Expeditions e{};
 
-			entry.id                 = atoi(row[0]);
-			entry.dynamic_zone_id    = atoi(row[1]);
-			entry.add_replay_on_join = atoi(row[2]);
-			entry.is_locked          = atoi(row[3]);
+			e.id                 = atoi(row[0]);
+			e.dynamic_zone_id    = atoi(row[1]);
+			e.add_replay_on_join = atoi(row[2]);
+			e.is_locked          = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

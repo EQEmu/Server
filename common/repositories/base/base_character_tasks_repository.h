@@ -91,19 +91,19 @@ public:
 
 	static CharacterTasks NewEntity()
 	{
-		CharacterTasks entry{};
+		CharacterTasks e{};
 
-		entry.charid       = 0;
-		entry.taskid       = 0;
-		entry.slot         = 0;
-		entry.type         = 0;
-		entry.acceptedtime = 0;
-		entry.was_rewarded = 0;
+		e.charid       = 0;
+		e.taskid       = 0;
+		e.slot         = 0;
+		e.type         = 0;
+		e.acceptedtime = 0;
+		e.was_rewarded = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterTasks GetCharacterTasksEntry(
+	static CharacterTasks GetCharacterTaskse(
 		const std::vector<CharacterTasks> &character_taskss,
 		int character_tasks_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
-			entry.was_rewarded = atoi(row[5]);
+			e.charid       = atoi(row[0]);
+			e.taskid       = atoi(row[1]);
+			e.slot         = atoi(row[2]);
+			e.type         = atoi(row[3]);
+			e.acceptedtime = atoi(row[4]);
+			e.was_rewarded = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterTasks character_tasks_entry
+		CharacterTasks character_tasks_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_tasks_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_tasks_entry.taskid));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_entry.slot));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_entry.type));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_entry.acceptedtime));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_tasks_entry.was_rewarded));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_tasks_e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_tasks_e.taskid));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_e.slot));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_e.type));
+		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_e.acceptedtime));
+		update_values.push_back(columns[5] + " = " + std::to_string(character_tasks_e.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_tasks_entry.charid
+				character_tasks_e.charid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static CharacterTasks InsertOne(
 		Database& db,
-		CharacterTasks character_tasks_entry
+		CharacterTasks character_tasks_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_tasks_entry.charid));
-		insert_values.push_back(std::to_string(character_tasks_entry.taskid));
-		insert_values.push_back(std::to_string(character_tasks_entry.slot));
-		insert_values.push_back(std::to_string(character_tasks_entry.type));
-		insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
-		insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
+		insert_values.push_back(std::to_string(character_tasks_e.charid));
+		insert_values.push_back(std::to_string(character_tasks_e.taskid));
+		insert_values.push_back(std::to_string(character_tasks_e.slot));
+		insert_values.push_back(std::to_string(character_tasks_e.type));
+		insert_values.push_back(std::to_string(character_tasks_e.acceptedtime));
+		insert_values.push_back(std::to_string(character_tasks_e.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,13 +216,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_tasks_entry.charid = results.LastInsertedID();
-			return character_tasks_entry;
+			character_tasks_e.charid = results.LastInsertedID();
+			return character_tasks_e;
 		}
 
-		character_tasks_entry = NewEntity();
+		character_tasks_e = NewEntity();
 
-		return character_tasks_entry;
+		return character_tasks_e;
 	}
 
 	static int InsertMany(
@@ -232,15 +232,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_tasks_entry: character_tasks_entries) {
+		for (auto &character_tasks_e: character_tasks_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_tasks_entry.charid));
-			insert_values.push_back(std::to_string(character_tasks_entry.taskid));
-			insert_values.push_back(std::to_string(character_tasks_entry.slot));
-			insert_values.push_back(std::to_string(character_tasks_entry.type));
-			insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
-			insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
+			insert_values.push_back(std::to_string(character_tasks_e.charid));
+			insert_values.push_back(std::to_string(character_tasks_e.taskid));
+			insert_values.push_back(std::to_string(character_tasks_e.slot));
+			insert_values.push_back(std::to_string(character_tasks_e.type));
+			insert_values.push_back(std::to_string(character_tasks_e.acceptedtime));
+			insert_values.push_back(std::to_string(character_tasks_e.was_rewarded));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -272,16 +272,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
-			entry.was_rewarded = atoi(row[5]);
+			e.charid       = atoi(row[0]);
+			e.taskid       = atoi(row[1]);
+			e.slot         = atoi(row[2]);
+			e.type         = atoi(row[3]);
+			e.acceptedtime = atoi(row[4]);
+			e.was_rewarded = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -302,16 +302,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
-			entry.was_rewarded = atoi(row[5]);
+			e.charid       = atoi(row[0]);
+			e.taskid       = atoi(row[1]);
+			e.slot         = atoi(row[2]);
+			e.type         = atoi(row[3]);
+			e.acceptedtime = atoi(row[4]);
+			e.was_rewarded = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

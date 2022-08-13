@@ -109,25 +109,25 @@ public:
 
 	static BlockedSpells NewEntity()
 	{
-		BlockedSpells entry{};
+		BlockedSpells e{};
 
-		entry.id          = 0;
-		entry.spellid     = 0;
-		entry.type        = 0;
-		entry.zoneid      = 0;
-		entry.x           = 0;
-		entry.y           = 0;
-		entry.z           = 0;
-		entry.x_diff      = 0;
-		entry.y_diff      = 0;
-		entry.z_diff      = 0;
-		entry.message     = "";
-		entry.description = "";
+		e.id          = 0;
+		e.spellid     = 0;
+		e.type        = 0;
+		e.zoneid      = 0;
+		e.x           = 0;
+		e.y           = 0;
+		e.z           = 0;
+		e.x_diff      = 0;
+		e.y_diff      = 0;
+		e.z_diff      = 0;
+		e.message     = "";
+		e.description = "";
 
-		return entry;
+		return e;
 	}
 
-	static BlockedSpells GetBlockedSpellsEntry(
+	static BlockedSpells GetBlockedSpellse(
 		const std::vector<BlockedSpells> &blocked_spellss,
 		int blocked_spells_id
 	)
@@ -156,22 +156,22 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			BlockedSpells entry{};
+			BlockedSpells e{};
 
-			entry.id          = atoi(row[0]);
-			entry.spellid     = atoi(row[1]);
-			entry.type        = atoi(row[2]);
-			entry.zoneid      = atoi(row[3]);
-			entry.x           = static_cast<float>(atof(row[4]));
-			entry.y           = static_cast<float>(atof(row[5]));
-			entry.z           = static_cast<float>(atof(row[6]));
-			entry.x_diff      = static_cast<float>(atof(row[7]));
-			entry.y_diff      = static_cast<float>(atof(row[8]));
-			entry.z_diff      = static_cast<float>(atof(row[9]));
-			entry.message     = row[10] ? row[10] : "";
-			entry.description = row[11] ? row[11] : "";
+			e.id          = atoi(row[0]);
+			e.spellid     = atoi(row[1]);
+			e.type        = atoi(row[2]);
+			e.zoneid      = atoi(row[3]);
+			e.x           = static_cast<float>(atof(row[4]));
+			e.y           = static_cast<float>(atof(row[5]));
+			e.z           = static_cast<float>(atof(row[6]));
+			e.x_diff      = static_cast<float>(atof(row[7]));
+			e.y_diff      = static_cast<float>(atof(row[8]));
+			e.z_diff      = static_cast<float>(atof(row[9]));
+			e.message     = row[10] ? row[10] : "";
+			e.description = row[11] ? row[11] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -196,24 +196,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		BlockedSpells blocked_spells_entry
+		BlockedSpells blocked_spells_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(blocked_spells_entry.spellid));
-		update_values.push_back(columns[2] + " = " + std::to_string(blocked_spells_entry.type));
-		update_values.push_back(columns[3] + " = " + std::to_string(blocked_spells_entry.zoneid));
-		update_values.push_back(columns[4] + " = " + std::to_string(blocked_spells_entry.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(blocked_spells_entry.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(blocked_spells_entry.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(blocked_spells_entry.x_diff));
-		update_values.push_back(columns[8] + " = " + std::to_string(blocked_spells_entry.y_diff));
-		update_values.push_back(columns[9] + " = " + std::to_string(blocked_spells_entry.z_diff));
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(blocked_spells_entry.message) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(blocked_spells_entry.description) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(blocked_spells_e.spellid));
+		update_values.push_back(columns[2] + " = " + std::to_string(blocked_spells_e.type));
+		update_values.push_back(columns[3] + " = " + std::to_string(blocked_spells_e.zoneid));
+		update_values.push_back(columns[4] + " = " + std::to_string(blocked_spells_e.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(blocked_spells_e.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(blocked_spells_e.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(blocked_spells_e.x_diff));
+		update_values.push_back(columns[8] + " = " + std::to_string(blocked_spells_e.y_diff));
+		update_values.push_back(columns[9] + " = " + std::to_string(blocked_spells_e.z_diff));
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(blocked_spells_e.message) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(blocked_spells_e.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -221,7 +221,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				blocked_spells_entry.id
+				blocked_spells_e.id
 			)
 		);
 
@@ -230,23 +230,23 @@ public:
 
 	static BlockedSpells InsertOne(
 		Database& db,
-		BlockedSpells blocked_spells_entry
+		BlockedSpells blocked_spells_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(blocked_spells_entry.id));
-		insert_values.push_back(std::to_string(blocked_spells_entry.spellid));
-		insert_values.push_back(std::to_string(blocked_spells_entry.type));
-		insert_values.push_back(std::to_string(blocked_spells_entry.zoneid));
-		insert_values.push_back(std::to_string(blocked_spells_entry.x));
-		insert_values.push_back(std::to_string(blocked_spells_entry.y));
-		insert_values.push_back(std::to_string(blocked_spells_entry.z));
-		insert_values.push_back(std::to_string(blocked_spells_entry.x_diff));
-		insert_values.push_back(std::to_string(blocked_spells_entry.y_diff));
-		insert_values.push_back(std::to_string(blocked_spells_entry.z_diff));
-		insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.message) + "'");
-		insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.description) + "'");
+		insert_values.push_back(std::to_string(blocked_spells_e.id));
+		insert_values.push_back(std::to_string(blocked_spells_e.spellid));
+		insert_values.push_back(std::to_string(blocked_spells_e.type));
+		insert_values.push_back(std::to_string(blocked_spells_e.zoneid));
+		insert_values.push_back(std::to_string(blocked_spells_e.x));
+		insert_values.push_back(std::to_string(blocked_spells_e.y));
+		insert_values.push_back(std::to_string(blocked_spells_e.z));
+		insert_values.push_back(std::to_string(blocked_spells_e.x_diff));
+		insert_values.push_back(std::to_string(blocked_spells_e.y_diff));
+		insert_values.push_back(std::to_string(blocked_spells_e.z_diff));
+		insert_values.push_back("'" + Strings::Escape(blocked_spells_e.message) + "'");
+		insert_values.push_back("'" + Strings::Escape(blocked_spells_e.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -257,13 +257,13 @@ public:
 		);
 
 		if (results.Success()) {
-			blocked_spells_entry.id = results.LastInsertedID();
-			return blocked_spells_entry;
+			blocked_spells_e.id = results.LastInsertedID();
+			return blocked_spells_e;
 		}
 
-		blocked_spells_entry = NewEntity();
+		blocked_spells_e = NewEntity();
 
-		return blocked_spells_entry;
+		return blocked_spells_e;
 	}
 
 	static int InsertMany(
@@ -273,21 +273,21 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &blocked_spells_entry: blocked_spells_entries) {
+		for (auto &blocked_spells_e: blocked_spells_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(blocked_spells_entry.id));
-			insert_values.push_back(std::to_string(blocked_spells_entry.spellid));
-			insert_values.push_back(std::to_string(blocked_spells_entry.type));
-			insert_values.push_back(std::to_string(blocked_spells_entry.zoneid));
-			insert_values.push_back(std::to_string(blocked_spells_entry.x));
-			insert_values.push_back(std::to_string(blocked_spells_entry.y));
-			insert_values.push_back(std::to_string(blocked_spells_entry.z));
-			insert_values.push_back(std::to_string(blocked_spells_entry.x_diff));
-			insert_values.push_back(std::to_string(blocked_spells_entry.y_diff));
-			insert_values.push_back(std::to_string(blocked_spells_entry.z_diff));
-			insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.message) + "'");
-			insert_values.push_back("'" + Strings::Escape(blocked_spells_entry.description) + "'");
+			insert_values.push_back(std::to_string(blocked_spells_e.id));
+			insert_values.push_back(std::to_string(blocked_spells_e.spellid));
+			insert_values.push_back(std::to_string(blocked_spells_e.type));
+			insert_values.push_back(std::to_string(blocked_spells_e.zoneid));
+			insert_values.push_back(std::to_string(blocked_spells_e.x));
+			insert_values.push_back(std::to_string(blocked_spells_e.y));
+			insert_values.push_back(std::to_string(blocked_spells_e.z));
+			insert_values.push_back(std::to_string(blocked_spells_e.x_diff));
+			insert_values.push_back(std::to_string(blocked_spells_e.y_diff));
+			insert_values.push_back(std::to_string(blocked_spells_e.z_diff));
+			insert_values.push_back("'" + Strings::Escape(blocked_spells_e.message) + "'");
+			insert_values.push_back("'" + Strings::Escape(blocked_spells_e.description) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -319,22 +319,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			BlockedSpells entry{};
+			BlockedSpells e{};
 
-			entry.id          = atoi(row[0]);
-			entry.spellid     = atoi(row[1]);
-			entry.type        = atoi(row[2]);
-			entry.zoneid      = atoi(row[3]);
-			entry.x           = static_cast<float>(atof(row[4]));
-			entry.y           = static_cast<float>(atof(row[5]));
-			entry.z           = static_cast<float>(atof(row[6]));
-			entry.x_diff      = static_cast<float>(atof(row[7]));
-			entry.y_diff      = static_cast<float>(atof(row[8]));
-			entry.z_diff      = static_cast<float>(atof(row[9]));
-			entry.message     = row[10] ? row[10] : "";
-			entry.description = row[11] ? row[11] : "";
+			e.id          = atoi(row[0]);
+			e.spellid     = atoi(row[1]);
+			e.type        = atoi(row[2]);
+			e.zoneid      = atoi(row[3]);
+			e.x           = static_cast<float>(atof(row[4]));
+			e.y           = static_cast<float>(atof(row[5]));
+			e.z           = static_cast<float>(atof(row[6]));
+			e.x_diff      = static_cast<float>(atof(row[7]));
+			e.y_diff      = static_cast<float>(atof(row[8]));
+			e.z_diff      = static_cast<float>(atof(row[9]));
+			e.message     = row[10] ? row[10] : "";
+			e.description = row[11] ? row[11] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -355,22 +355,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			BlockedSpells entry{};
+			BlockedSpells e{};
 
-			entry.id          = atoi(row[0]);
-			entry.spellid     = atoi(row[1]);
-			entry.type        = atoi(row[2]);
-			entry.zoneid      = atoi(row[3]);
-			entry.x           = static_cast<float>(atof(row[4]));
-			entry.y           = static_cast<float>(atof(row[5]));
-			entry.z           = static_cast<float>(atof(row[6]));
-			entry.x_diff      = static_cast<float>(atof(row[7]));
-			entry.y_diff      = static_cast<float>(atof(row[8]));
-			entry.z_diff      = static_cast<float>(atof(row[9]));
-			entry.message     = row[10] ? row[10] : "";
-			entry.description = row[11] ? row[11] : "";
+			e.id          = atoi(row[0]);
+			e.spellid     = atoi(row[1]);
+			e.type        = atoi(row[2]);
+			e.zoneid      = atoi(row[3]);
+			e.x           = static_cast<float>(atof(row[4]));
+			e.y           = static_cast<float>(atof(row[5]));
+			e.z           = static_cast<float>(atof(row[6]));
+			e.x_diff      = static_cast<float>(atof(row[7]));
+			e.y_diff      = static_cast<float>(atof(row[8]));
+			e.z_diff      = static_cast<float>(atof(row[9]));
+			e.message     = row[10] ? row[10] : "";
+			e.description = row[11] ? row[11] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

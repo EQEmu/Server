@@ -88,18 +88,18 @@ public:
 
 	static SkillCaps NewEntity()
 	{
-		SkillCaps entry{};
+		SkillCaps e{};
 
-		entry.skillID = 0;
-		entry.class_  = 0;
-		entry.level   = 0;
-		entry.cap     = 0;
-		entry.class_  = 0;
+		e.skillID = 0;
+		e.class_  = 0;
+		e.level   = 0;
+		e.cap     = 0;
+		e.class_  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static SkillCaps GetSkillCapsEntry(
+	static SkillCaps GetSkillCapse(
 		const std::vector<SkillCaps> &skill_capss,
 		int skill_caps_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SkillCaps entry{};
+			SkillCaps e{};
 
-			entry.skillID = atoi(row[0]);
-			entry.class_  = atoi(row[1]);
-			entry.level   = atoi(row[2]);
-			entry.cap     = atoi(row[3]);
-			entry.class_  = atoi(row[4]);
+			e.skillID = atoi(row[0]);
+			e.class_  = atoi(row[1]);
+			e.level   = atoi(row[2]);
+			e.cap     = atoi(row[3]);
+			e.class_  = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SkillCaps skill_caps_entry
+		SkillCaps skill_caps_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(skill_caps_entry.skillID));
-		update_values.push_back(columns[1] + " = " + std::to_string(skill_caps_entry.class_));
-		update_values.push_back(columns[2] + " = " + std::to_string(skill_caps_entry.level));
-		update_values.push_back(columns[3] + " = " + std::to_string(skill_caps_entry.cap));
-		update_values.push_back(columns[4] + " = " + std::to_string(skill_caps_entry.class_));
+		update_values.push_back(columns[0] + " = " + std::to_string(skill_caps_e.skillID));
+		update_values.push_back(columns[1] + " = " + std::to_string(skill_caps_e.class_));
+		update_values.push_back(columns[2] + " = " + std::to_string(skill_caps_e.level));
+		update_values.push_back(columns[3] + " = " + std::to_string(skill_caps_e.cap));
+		update_values.push_back(columns[4] + " = " + std::to_string(skill_caps_e.class_));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				skill_caps_entry.skillID
+				skill_caps_e.skillID
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static SkillCaps InsertOne(
 		Database& db,
-		SkillCaps skill_caps_entry
+		SkillCaps skill_caps_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(skill_caps_entry.skillID));
-		insert_values.push_back(std::to_string(skill_caps_entry.class_));
-		insert_values.push_back(std::to_string(skill_caps_entry.level));
-		insert_values.push_back(std::to_string(skill_caps_entry.cap));
-		insert_values.push_back(std::to_string(skill_caps_entry.class_));
+		insert_values.push_back(std::to_string(skill_caps_e.skillID));
+		insert_values.push_back(std::to_string(skill_caps_e.class_));
+		insert_values.push_back(std::to_string(skill_caps_e.level));
+		insert_values.push_back(std::to_string(skill_caps_e.cap));
+		insert_values.push_back(std::to_string(skill_caps_e.class_));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			skill_caps_entry.skillID = results.LastInsertedID();
-			return skill_caps_entry;
+			skill_caps_e.skillID = results.LastInsertedID();
+			return skill_caps_e;
 		}
 
-		skill_caps_entry = NewEntity();
+		skill_caps_e = NewEntity();
 
-		return skill_caps_entry;
+		return skill_caps_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &skill_caps_entry: skill_caps_entries) {
+		for (auto &skill_caps_e: skill_caps_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(skill_caps_entry.skillID));
-			insert_values.push_back(std::to_string(skill_caps_entry.class_));
-			insert_values.push_back(std::to_string(skill_caps_entry.level));
-			insert_values.push_back(std::to_string(skill_caps_entry.cap));
-			insert_values.push_back(std::to_string(skill_caps_entry.class_));
+			insert_values.push_back(std::to_string(skill_caps_e.skillID));
+			insert_values.push_back(std::to_string(skill_caps_e.class_));
+			insert_values.push_back(std::to_string(skill_caps_e.level));
+			insert_values.push_back(std::to_string(skill_caps_e.cap));
+			insert_values.push_back(std::to_string(skill_caps_e.class_));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SkillCaps entry{};
+			SkillCaps e{};
 
-			entry.skillID = atoi(row[0]);
-			entry.class_  = atoi(row[1]);
-			entry.level   = atoi(row[2]);
-			entry.cap     = atoi(row[3]);
-			entry.class_  = atoi(row[4]);
+			e.skillID = atoi(row[0]);
+			e.class_  = atoi(row[1]);
+			e.level   = atoi(row[2]);
+			e.cap     = atoi(row[3]);
+			e.class_  = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SkillCaps entry{};
+			SkillCaps e{};
 
-			entry.skillID = atoi(row[0]);
-			entry.class_  = atoi(row[1]);
-			entry.level   = atoi(row[2]);
-			entry.cap     = atoi(row[3]);
-			entry.class_  = atoi(row[4]);
+			e.skillID = atoi(row[0]);
+			e.class_  = atoi(row[1]);
+			e.level   = atoi(row[2]);
+			e.cap     = atoi(row[3]);
+			e.class_  = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -97,21 +97,21 @@ public:
 
 	static CharacterBind NewEntity()
 	{
-		CharacterBind entry{};
+		CharacterBind e{};
 
-		entry.id          = 0;
-		entry.slot        = 0;
-		entry.zone_id     = 0;
-		entry.instance_id = 0;
-		entry.x           = 0;
-		entry.y           = 0;
-		entry.z           = 0;
-		entry.heading     = 0;
+		e.id          = 0;
+		e.slot        = 0;
+		e.zone_id     = 0;
+		e.instance_id = 0;
+		e.x           = 0;
+		e.y           = 0;
+		e.z           = 0;
+		e.heading     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterBind GetCharacterBindEntry(
+	static CharacterBind GetCharacterBinde(
 		const std::vector<CharacterBind> &character_binds,
 		int character_bind_id
 	)
@@ -140,18 +140,18 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterBind entry{};
+			CharacterBind e{};
 
-			entry.id          = atoi(row[0]);
-			entry.slot        = atoi(row[1]);
-			entry.zone_id     = atoi(row[2]);
-			entry.instance_id = atoi(row[3]);
-			entry.x           = static_cast<float>(atof(row[4]));
-			entry.y           = static_cast<float>(atof(row[5]));
-			entry.z           = static_cast<float>(atof(row[6]));
-			entry.heading     = static_cast<float>(atof(row[7]));
+			e.id          = atoi(row[0]);
+			e.slot        = atoi(row[1]);
+			e.zone_id     = atoi(row[2]);
+			e.instance_id = atoi(row[3]);
+			e.x           = static_cast<float>(atof(row[4]));
+			e.y           = static_cast<float>(atof(row[5]));
+			e.z           = static_cast<float>(atof(row[6]));
+			e.heading     = static_cast<float>(atof(row[7]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -176,20 +176,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterBind character_bind_entry
+		CharacterBind character_bind_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_bind_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_bind_entry.zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_bind_entry.instance_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_bind_entry.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_bind_entry.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_bind_entry.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_bind_entry.heading));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_bind_e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_bind_e.zone_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_bind_e.instance_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(character_bind_e.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(character_bind_e.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(character_bind_e.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(character_bind_e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_bind_entry.id
+				character_bind_e.id
 			)
 		);
 
@@ -206,19 +206,19 @@ public:
 
 	static CharacterBind InsertOne(
 		Database& db,
-		CharacterBind character_bind_entry
+		CharacterBind character_bind_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_bind_entry.id));
-		insert_values.push_back(std::to_string(character_bind_entry.slot));
-		insert_values.push_back(std::to_string(character_bind_entry.zone_id));
-		insert_values.push_back(std::to_string(character_bind_entry.instance_id));
-		insert_values.push_back(std::to_string(character_bind_entry.x));
-		insert_values.push_back(std::to_string(character_bind_entry.y));
-		insert_values.push_back(std::to_string(character_bind_entry.z));
-		insert_values.push_back(std::to_string(character_bind_entry.heading));
+		insert_values.push_back(std::to_string(character_bind_e.id));
+		insert_values.push_back(std::to_string(character_bind_e.slot));
+		insert_values.push_back(std::to_string(character_bind_e.zone_id));
+		insert_values.push_back(std::to_string(character_bind_e.instance_id));
+		insert_values.push_back(std::to_string(character_bind_e.x));
+		insert_values.push_back(std::to_string(character_bind_e.y));
+		insert_values.push_back(std::to_string(character_bind_e.z));
+		insert_values.push_back(std::to_string(character_bind_e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,13 +229,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_bind_entry.id = results.LastInsertedID();
-			return character_bind_entry;
+			character_bind_e.id = results.LastInsertedID();
+			return character_bind_e;
 		}
 
-		character_bind_entry = NewEntity();
+		character_bind_e = NewEntity();
 
-		return character_bind_entry;
+		return character_bind_e;
 	}
 
 	static int InsertMany(
@@ -245,17 +245,17 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_bind_entry: character_bind_entries) {
+		for (auto &character_bind_e: character_bind_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_bind_entry.id));
-			insert_values.push_back(std::to_string(character_bind_entry.slot));
-			insert_values.push_back(std::to_string(character_bind_entry.zone_id));
-			insert_values.push_back(std::to_string(character_bind_entry.instance_id));
-			insert_values.push_back(std::to_string(character_bind_entry.x));
-			insert_values.push_back(std::to_string(character_bind_entry.y));
-			insert_values.push_back(std::to_string(character_bind_entry.z));
-			insert_values.push_back(std::to_string(character_bind_entry.heading));
+			insert_values.push_back(std::to_string(character_bind_e.id));
+			insert_values.push_back(std::to_string(character_bind_e.slot));
+			insert_values.push_back(std::to_string(character_bind_e.zone_id));
+			insert_values.push_back(std::to_string(character_bind_e.instance_id));
+			insert_values.push_back(std::to_string(character_bind_e.x));
+			insert_values.push_back(std::to_string(character_bind_e.y));
+			insert_values.push_back(std::to_string(character_bind_e.z));
+			insert_values.push_back(std::to_string(character_bind_e.heading));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -287,18 +287,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterBind entry{};
+			CharacterBind e{};
 
-			entry.id          = atoi(row[0]);
-			entry.slot        = atoi(row[1]);
-			entry.zone_id     = atoi(row[2]);
-			entry.instance_id = atoi(row[3]);
-			entry.x           = static_cast<float>(atof(row[4]));
-			entry.y           = static_cast<float>(atof(row[5]));
-			entry.z           = static_cast<float>(atof(row[6]));
-			entry.heading     = static_cast<float>(atof(row[7]));
+			e.id          = atoi(row[0]);
+			e.slot        = atoi(row[1]);
+			e.zone_id     = atoi(row[2]);
+			e.instance_id = atoi(row[3]);
+			e.x           = static_cast<float>(atof(row[4]));
+			e.y           = static_cast<float>(atof(row[5]));
+			e.z           = static_cast<float>(atof(row[6]));
+			e.heading     = static_cast<float>(atof(row[7]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -319,18 +319,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterBind entry{};
+			CharacterBind e{};
 
-			entry.id          = atoi(row[0]);
-			entry.slot        = atoi(row[1]);
-			entry.zone_id     = atoi(row[2]);
-			entry.instance_id = atoi(row[3]);
-			entry.x           = static_cast<float>(atof(row[4]));
-			entry.y           = static_cast<float>(atof(row[5]));
-			entry.z           = static_cast<float>(atof(row[6]));
-			entry.heading     = static_cast<float>(atof(row[7]));
+			e.id          = atoi(row[0]);
+			e.slot        = atoi(row[1]);
+			e.zone_id     = atoi(row[2]);
+			e.instance_id = atoi(row[3]);
+			e.x           = static_cast<float>(atof(row[4]));
+			e.y           = static_cast<float>(atof(row[5]));
+			e.z           = static_cast<float>(atof(row[6]));
+			e.heading     = static_cast<float>(atof(row[7]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

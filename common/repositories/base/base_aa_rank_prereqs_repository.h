@@ -82,16 +82,16 @@ public:
 
 	static AaRankPrereqs NewEntity()
 	{
-		AaRankPrereqs entry{};
+		AaRankPrereqs e{};
 
-		entry.rank_id = 0;
-		entry.aa_id   = 0;
-		entry.points  = 0;
+		e.rank_id = 0;
+		e.aa_id   = 0;
+		e.points  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AaRankPrereqs GetAaRankPrereqsEntry(
+	static AaRankPrereqs GetAaRankPrereqse(
 		const std::vector<AaRankPrereqs> &aa_rank_prereqss,
 		int aa_rank_prereqs_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AaRankPrereqs entry{};
+			AaRankPrereqs e{};
 
-			entry.rank_id = atoi(row[0]);
-			entry.aa_id   = atoi(row[1]);
-			entry.points  = atoi(row[2]);
+			e.rank_id = atoi(row[0]);
+			e.aa_id   = atoi(row[1]);
+			e.points  = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRankPrereqs aa_rank_prereqs_entry
+		AaRankPrereqs aa_rank_prereqs_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_prereqs_entry.rank_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_prereqs_entry.aa_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_prereqs_entry.points));
+		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_prereqs_e.rank_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_prereqs_e.aa_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_prereqs_e.points));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				aa_rank_prereqs_entry.rank_id
+				aa_rank_prereqs_e.rank_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static AaRankPrereqs InsertOne(
 		Database& db,
-		AaRankPrereqs aa_rank_prereqs_entry
+		AaRankPrereqs aa_rank_prereqs_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.rank_id));
-		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.aa_id));
-		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.points));
+		insert_values.push_back(std::to_string(aa_rank_prereqs_e.rank_id));
+		insert_values.push_back(std::to_string(aa_rank_prereqs_e.aa_id));
+		insert_values.push_back(std::to_string(aa_rank_prereqs_e.points));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_rank_prereqs_entry.rank_id = results.LastInsertedID();
-			return aa_rank_prereqs_entry;
+			aa_rank_prereqs_e.rank_id = results.LastInsertedID();
+			return aa_rank_prereqs_e;
 		}
 
-		aa_rank_prereqs_entry = NewEntity();
+		aa_rank_prereqs_e = NewEntity();
 
-		return aa_rank_prereqs_entry;
+		return aa_rank_prereqs_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_rank_prereqs_entry: aa_rank_prereqs_entries) {
+		for (auto &aa_rank_prereqs_e: aa_rank_prereqs_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.rank_id));
-			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.aa_id));
-			insert_values.push_back(std::to_string(aa_rank_prereqs_entry.points));
+			insert_values.push_back(std::to_string(aa_rank_prereqs_e.rank_id));
+			insert_values.push_back(std::to_string(aa_rank_prereqs_e.aa_id));
+			insert_values.push_back(std::to_string(aa_rank_prereqs_e.points));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaRankPrereqs entry{};
+			AaRankPrereqs e{};
 
-			entry.rank_id = atoi(row[0]);
-			entry.aa_id   = atoi(row[1]);
-			entry.points  = atoi(row[2]);
+			e.rank_id = atoi(row[0]);
+			e.aa_id   = atoi(row[1]);
+			e.points  = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaRankPrereqs entry{};
+			AaRankPrereqs e{};
 
-			entry.rank_id = atoi(row[0]);
-			entry.aa_id   = atoi(row[1]);
-			entry.points  = atoi(row[2]);
+			e.rank_id = atoi(row[0]);
+			e.aa_id   = atoi(row[1]);
+			e.points  = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

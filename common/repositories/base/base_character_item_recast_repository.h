@@ -82,16 +82,16 @@ public:
 
 	static CharacterItemRecast NewEntity()
 	{
-		CharacterItemRecast entry{};
+		CharacterItemRecast e{};
 
-		entry.id          = 0;
-		entry.recast_type = 0;
-		entry.timestamp   = 0;
+		e.id          = 0;
+		e.recast_type = 0;
+		e.timestamp   = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterItemRecast GetCharacterItemRecastEntry(
+	static CharacterItemRecast GetCharacterItemRecaste(
 		const std::vector<CharacterItemRecast> &character_item_recasts,
 		int character_item_recast_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterItemRecast entry{};
+			CharacterItemRecast e{};
 
-			entry.id          = atoi(row[0]);
-			entry.recast_type = atoi(row[1]);
-			entry.timestamp   = atoi(row[2]);
+			e.id          = atoi(row[0]);
+			e.recast_type = atoi(row[1]);
+			e.timestamp   = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterItemRecast character_item_recast_entry
+		CharacterItemRecast character_item_recast_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_item_recast_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_item_recast_entry.recast_type));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_item_recast_entry.timestamp));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_item_recast_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_item_recast_e.recast_type));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_item_recast_e.timestamp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_item_recast_entry.id
+				character_item_recast_e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CharacterItemRecast InsertOne(
 		Database& db,
-		CharacterItemRecast character_item_recast_entry
+		CharacterItemRecast character_item_recast_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_item_recast_entry.id));
-		insert_values.push_back(std::to_string(character_item_recast_entry.recast_type));
-		insert_values.push_back(std::to_string(character_item_recast_entry.timestamp));
+		insert_values.push_back(std::to_string(character_item_recast_e.id));
+		insert_values.push_back(std::to_string(character_item_recast_e.recast_type));
+		insert_values.push_back(std::to_string(character_item_recast_e.timestamp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_item_recast_entry.id = results.LastInsertedID();
-			return character_item_recast_entry;
+			character_item_recast_e.id = results.LastInsertedID();
+			return character_item_recast_e;
 		}
 
-		character_item_recast_entry = NewEntity();
+		character_item_recast_e = NewEntity();
 
-		return character_item_recast_entry;
+		return character_item_recast_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_item_recast_entry: character_item_recast_entries) {
+		for (auto &character_item_recast_e: character_item_recast_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_item_recast_entry.id));
-			insert_values.push_back(std::to_string(character_item_recast_entry.recast_type));
-			insert_values.push_back(std::to_string(character_item_recast_entry.timestamp));
+			insert_values.push_back(std::to_string(character_item_recast_e.id));
+			insert_values.push_back(std::to_string(character_item_recast_e.recast_type));
+			insert_values.push_back(std::to_string(character_item_recast_e.timestamp));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterItemRecast entry{};
+			CharacterItemRecast e{};
 
-			entry.id          = atoi(row[0]);
-			entry.recast_type = atoi(row[1]);
-			entry.timestamp   = atoi(row[2]);
+			e.id          = atoi(row[0]);
+			e.recast_type = atoi(row[1]);
+			e.timestamp   = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterItemRecast entry{};
+			CharacterItemRecast e{};
 
-			entry.id          = atoi(row[0]);
-			entry.recast_type = atoi(row[1]);
-			entry.timestamp   = atoi(row[2]);
+			e.id          = atoi(row[0]);
+			e.recast_type = atoi(row[1]);
+			e.timestamp   = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

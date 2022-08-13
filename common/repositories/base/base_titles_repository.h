@@ -115,27 +115,27 @@ public:
 
 	static Titles NewEntity()
 	{
-		Titles entry{};
+		Titles e{};
 
-		entry.id              = 0;
-		entry.skill_id        = -1;
-		entry.min_skill_value = -1;
-		entry.max_skill_value = -1;
-		entry.min_aa_points   = -1;
-		entry.max_aa_points   = -1;
-		entry.class_          = -1;
-		entry.gender          = -1;
-		entry.char_id         = -1;
-		entry.status          = -1;
-		entry.item_id         = -1;
-		entry.prefix          = "";
-		entry.suffix          = "";
-		entry.title_set       = 0;
+		e.id              = 0;
+		e.skill_id        = -1;
+		e.min_skill_value = -1;
+		e.max_skill_value = -1;
+		e.min_aa_points   = -1;
+		e.max_aa_points   = -1;
+		e.class_          = -1;
+		e.gender          = -1;
+		e.char_id         = -1;
+		e.status          = -1;
+		e.item_id         = -1;
+		e.prefix          = "";
+		e.suffix          = "";
+		e.title_set       = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Titles GetTitlesEntry(
+	static Titles GetTitlese(
 		const std::vector<Titles> &titless,
 		int titles_id
 	)
@@ -164,24 +164,24 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Titles entry{};
+			Titles e{};
 
-			entry.id              = atoi(row[0]);
-			entry.skill_id        = atoi(row[1]);
-			entry.min_skill_value = atoi(row[2]);
-			entry.max_skill_value = atoi(row[3]);
-			entry.min_aa_points   = atoi(row[4]);
-			entry.max_aa_points   = atoi(row[5]);
-			entry.class_          = atoi(row[6]);
-			entry.gender          = atoi(row[7]);
-			entry.char_id         = atoi(row[8]);
-			entry.status          = atoi(row[9]);
-			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11] ? row[11] : "";
-			entry.suffix          = row[12] ? row[12] : "";
-			entry.title_set       = atoi(row[13]);
+			e.id              = atoi(row[0]);
+			e.skill_id        = atoi(row[1]);
+			e.min_skill_value = atoi(row[2]);
+			e.max_skill_value = atoi(row[3]);
+			e.min_aa_points   = atoi(row[4]);
+			e.max_aa_points   = atoi(row[5]);
+			e.class_          = atoi(row[6]);
+			e.gender          = atoi(row[7]);
+			e.char_id         = atoi(row[8]);
+			e.status          = atoi(row[9]);
+			e.item_id         = atoi(row[10]);
+			e.prefix          = row[11] ? row[11] : "";
+			e.suffix          = row[12] ? row[12] : "";
+			e.title_set       = atoi(row[13]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -206,26 +206,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Titles titles_entry
+		Titles titles_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(titles_entry.skill_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(titles_entry.min_skill_value));
-		update_values.push_back(columns[3] + " = " + std::to_string(titles_entry.max_skill_value));
-		update_values.push_back(columns[4] + " = " + std::to_string(titles_entry.min_aa_points));
-		update_values.push_back(columns[5] + " = " + std::to_string(titles_entry.max_aa_points));
-		update_values.push_back(columns[6] + " = " + std::to_string(titles_entry.class_));
-		update_values.push_back(columns[7] + " = " + std::to_string(titles_entry.gender));
-		update_values.push_back(columns[8] + " = " + std::to_string(titles_entry.char_id));
-		update_values.push_back(columns[9] + " = " + std::to_string(titles_entry.status));
-		update_values.push_back(columns[10] + " = " + std::to_string(titles_entry.item_id));
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(titles_entry.prefix) + "'");
-		update_values.push_back(columns[12] + " = '" + Strings::Escape(titles_entry.suffix) + "'");
-		update_values.push_back(columns[13] + " = " + std::to_string(titles_entry.title_set));
+		update_values.push_back(columns[1] + " = " + std::to_string(titles_e.skill_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(titles_e.min_skill_value));
+		update_values.push_back(columns[3] + " = " + std::to_string(titles_e.max_skill_value));
+		update_values.push_back(columns[4] + " = " + std::to_string(titles_e.min_aa_points));
+		update_values.push_back(columns[5] + " = " + std::to_string(titles_e.max_aa_points));
+		update_values.push_back(columns[6] + " = " + std::to_string(titles_e.class_));
+		update_values.push_back(columns[7] + " = " + std::to_string(titles_e.gender));
+		update_values.push_back(columns[8] + " = " + std::to_string(titles_e.char_id));
+		update_values.push_back(columns[9] + " = " + std::to_string(titles_e.status));
+		update_values.push_back(columns[10] + " = " + std::to_string(titles_e.item_id));
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(titles_e.prefix) + "'");
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(titles_e.suffix) + "'");
+		update_values.push_back(columns[13] + " = " + std::to_string(titles_e.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -233,7 +233,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				titles_entry.id
+				titles_e.id
 			)
 		);
 
@@ -242,25 +242,25 @@ public:
 
 	static Titles InsertOne(
 		Database& db,
-		Titles titles_entry
+		Titles titles_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(titles_entry.id));
-		insert_values.push_back(std::to_string(titles_entry.skill_id));
-		insert_values.push_back(std::to_string(titles_entry.min_skill_value));
-		insert_values.push_back(std::to_string(titles_entry.max_skill_value));
-		insert_values.push_back(std::to_string(titles_entry.min_aa_points));
-		insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-		insert_values.push_back(std::to_string(titles_entry.class_));
-		insert_values.push_back(std::to_string(titles_entry.gender));
-		insert_values.push_back(std::to_string(titles_entry.char_id));
-		insert_values.push_back(std::to_string(titles_entry.status));
-		insert_values.push_back(std::to_string(titles_entry.item_id));
-		insert_values.push_back("'" + Strings::Escape(titles_entry.prefix) + "'");
-		insert_values.push_back("'" + Strings::Escape(titles_entry.suffix) + "'");
-		insert_values.push_back(std::to_string(titles_entry.title_set));
+		insert_values.push_back(std::to_string(titles_e.id));
+		insert_values.push_back(std::to_string(titles_e.skill_id));
+		insert_values.push_back(std::to_string(titles_e.min_skill_value));
+		insert_values.push_back(std::to_string(titles_e.max_skill_value));
+		insert_values.push_back(std::to_string(titles_e.min_aa_points));
+		insert_values.push_back(std::to_string(titles_e.max_aa_points));
+		insert_values.push_back(std::to_string(titles_e.class_));
+		insert_values.push_back(std::to_string(titles_e.gender));
+		insert_values.push_back(std::to_string(titles_e.char_id));
+		insert_values.push_back(std::to_string(titles_e.status));
+		insert_values.push_back(std::to_string(titles_e.item_id));
+		insert_values.push_back("'" + Strings::Escape(titles_e.prefix) + "'");
+		insert_values.push_back("'" + Strings::Escape(titles_e.suffix) + "'");
+		insert_values.push_back(std::to_string(titles_e.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -271,13 +271,13 @@ public:
 		);
 
 		if (results.Success()) {
-			titles_entry.id = results.LastInsertedID();
-			return titles_entry;
+			titles_e.id = results.LastInsertedID();
+			return titles_e;
 		}
 
-		titles_entry = NewEntity();
+		titles_e = NewEntity();
 
-		return titles_entry;
+		return titles_e;
 	}
 
 	static int InsertMany(
@@ -287,23 +287,23 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &titles_entry: titles_entries) {
+		for (auto &titles_e: titles_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(titles_entry.id));
-			insert_values.push_back(std::to_string(titles_entry.skill_id));
-			insert_values.push_back(std::to_string(titles_entry.min_skill_value));
-			insert_values.push_back(std::to_string(titles_entry.max_skill_value));
-			insert_values.push_back(std::to_string(titles_entry.min_aa_points));
-			insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-			insert_values.push_back(std::to_string(titles_entry.class_));
-			insert_values.push_back(std::to_string(titles_entry.gender));
-			insert_values.push_back(std::to_string(titles_entry.char_id));
-			insert_values.push_back(std::to_string(titles_entry.status));
-			insert_values.push_back(std::to_string(titles_entry.item_id));
-			insert_values.push_back("'" + Strings::Escape(titles_entry.prefix) + "'");
-			insert_values.push_back("'" + Strings::Escape(titles_entry.suffix) + "'");
-			insert_values.push_back(std::to_string(titles_entry.title_set));
+			insert_values.push_back(std::to_string(titles_e.id));
+			insert_values.push_back(std::to_string(titles_e.skill_id));
+			insert_values.push_back(std::to_string(titles_e.min_skill_value));
+			insert_values.push_back(std::to_string(titles_e.max_skill_value));
+			insert_values.push_back(std::to_string(titles_e.min_aa_points));
+			insert_values.push_back(std::to_string(titles_e.max_aa_points));
+			insert_values.push_back(std::to_string(titles_e.class_));
+			insert_values.push_back(std::to_string(titles_e.gender));
+			insert_values.push_back(std::to_string(titles_e.char_id));
+			insert_values.push_back(std::to_string(titles_e.status));
+			insert_values.push_back(std::to_string(titles_e.item_id));
+			insert_values.push_back("'" + Strings::Escape(titles_e.prefix) + "'");
+			insert_values.push_back("'" + Strings::Escape(titles_e.suffix) + "'");
+			insert_values.push_back(std::to_string(titles_e.title_set));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -335,24 +335,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Titles entry{};
+			Titles e{};
 
-			entry.id              = atoi(row[0]);
-			entry.skill_id        = atoi(row[1]);
-			entry.min_skill_value = atoi(row[2]);
-			entry.max_skill_value = atoi(row[3]);
-			entry.min_aa_points   = atoi(row[4]);
-			entry.max_aa_points   = atoi(row[5]);
-			entry.class_          = atoi(row[6]);
-			entry.gender          = atoi(row[7]);
-			entry.char_id         = atoi(row[8]);
-			entry.status          = atoi(row[9]);
-			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11] ? row[11] : "";
-			entry.suffix          = row[12] ? row[12] : "";
-			entry.title_set       = atoi(row[13]);
+			e.id              = atoi(row[0]);
+			e.skill_id        = atoi(row[1]);
+			e.min_skill_value = atoi(row[2]);
+			e.max_skill_value = atoi(row[3]);
+			e.min_aa_points   = atoi(row[4]);
+			e.max_aa_points   = atoi(row[5]);
+			e.class_          = atoi(row[6]);
+			e.gender          = atoi(row[7]);
+			e.char_id         = atoi(row[8]);
+			e.status          = atoi(row[9]);
+			e.item_id         = atoi(row[10]);
+			e.prefix          = row[11] ? row[11] : "";
+			e.suffix          = row[12] ? row[12] : "";
+			e.title_set       = atoi(row[13]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -373,24 +373,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Titles entry{};
+			Titles e{};
 
-			entry.id              = atoi(row[0]);
-			entry.skill_id        = atoi(row[1]);
-			entry.min_skill_value = atoi(row[2]);
-			entry.max_skill_value = atoi(row[3]);
-			entry.min_aa_points   = atoi(row[4]);
-			entry.max_aa_points   = atoi(row[5]);
-			entry.class_          = atoi(row[6]);
-			entry.gender          = atoi(row[7]);
-			entry.char_id         = atoi(row[8]);
-			entry.status          = atoi(row[9]);
-			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11] ? row[11] : "";
-			entry.suffix          = row[12] ? row[12] : "";
-			entry.title_set       = atoi(row[13]);
+			e.id              = atoi(row[0]);
+			e.skill_id        = atoi(row[1]);
+			e.min_skill_value = atoi(row[2]);
+			e.max_skill_value = atoi(row[3]);
+			e.min_aa_points   = atoi(row[4]);
+			e.max_aa_points   = atoi(row[5]);
+			e.class_          = atoi(row[6]);
+			e.gender          = atoi(row[7]);
+			e.char_id         = atoi(row[8]);
+			e.status          = atoi(row[9]);
+			e.item_id         = atoi(row[10]);
+			e.prefix          = row[11] ? row[11] : "";
+			e.suffix          = row[12] ? row[12] : "";
+			e.title_set       = atoi(row[13]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -85,17 +85,17 @@ public:
 
 	static CharacterExpModifiers NewEntity()
 	{
-		CharacterExpModifiers entry{};
+		CharacterExpModifiers e{};
 
-		entry.character_id = 0;
-		entry.zone_id      = 0;
-		entry.aa_modifier  = 0;
-		entry.exp_modifier = 0;
+		e.character_id = 0;
+		e.zone_id      = 0;
+		e.aa_modifier  = 0;
+		e.exp_modifier = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterExpModifiers GetCharacterExpModifiersEntry(
+	static CharacterExpModifiers GetCharacterExpModifierse(
 		const std::vector<CharacterExpModifiers> &character_exp_modifierss,
 		int character_exp_modifiers_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterExpModifiers entry{};
+			CharacterExpModifiers e{};
 
-			entry.character_id = atoi(row[0]);
-			entry.zone_id      = atoi(row[1]);
-			entry.aa_modifier  = static_cast<float>(atof(row[2]));
-			entry.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id = atoi(row[0]);
+			e.zone_id      = atoi(row[1]);
+			e.aa_modifier  = static_cast<float>(atof(row[2]));
+			e.exp_modifier = static_cast<float>(atof(row[3]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterExpModifiers character_exp_modifiers_entry
+		CharacterExpModifiers character_exp_modifiers_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_exp_modifiers_entry.character_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_exp_modifiers_entry.zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_exp_modifiers_entry.aa_modifier));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_exp_modifiers_entry.exp_modifier));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_exp_modifiers_e.character_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_exp_modifiers_e.zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_exp_modifiers_e.aa_modifier));
+		update_values.push_back(columns[3] + " = " + std::to_string(character_exp_modifiers_e.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_exp_modifiers_entry.character_id
+				character_exp_modifiers_e.character_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static CharacterExpModifiers InsertOne(
 		Database& db,
-		CharacterExpModifiers character_exp_modifiers_entry
+		CharacterExpModifiers character_exp_modifiers_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.character_id));
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.zone_id));
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.aa_modifier));
-		insert_values.push_back(std::to_string(character_exp_modifiers_entry.exp_modifier));
+		insert_values.push_back(std::to_string(character_exp_modifiers_e.character_id));
+		insert_values.push_back(std::to_string(character_exp_modifiers_e.zone_id));
+		insert_values.push_back(std::to_string(character_exp_modifiers_e.aa_modifier));
+		insert_values.push_back(std::to_string(character_exp_modifiers_e.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_exp_modifiers_entry.character_id = results.LastInsertedID();
-			return character_exp_modifiers_entry;
+			character_exp_modifiers_e.character_id = results.LastInsertedID();
+			return character_exp_modifiers_e;
 		}
 
-		character_exp_modifiers_entry = NewEntity();
+		character_exp_modifiers_e = NewEntity();
 
-		return character_exp_modifiers_entry;
+		return character_exp_modifiers_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_exp_modifiers_entry: character_exp_modifiers_entries) {
+		for (auto &character_exp_modifiers_e: character_exp_modifiers_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.character_id));
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.zone_id));
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.aa_modifier));
-			insert_values.push_back(std::to_string(character_exp_modifiers_entry.exp_modifier));
+			insert_values.push_back(std::to_string(character_exp_modifiers_e.character_id));
+			insert_values.push_back(std::to_string(character_exp_modifiers_e.zone_id));
+			insert_values.push_back(std::to_string(character_exp_modifiers_e.aa_modifier));
+			insert_values.push_back(std::to_string(character_exp_modifiers_e.exp_modifier));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterExpModifiers entry{};
+			CharacterExpModifiers e{};
 
-			entry.character_id = atoi(row[0]);
-			entry.zone_id      = atoi(row[1]);
-			entry.aa_modifier  = static_cast<float>(atof(row[2]));
-			entry.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id = atoi(row[0]);
+			e.zone_id      = atoi(row[1]);
+			e.aa_modifier  = static_cast<float>(atof(row[2]));
+			e.exp_modifier = static_cast<float>(atof(row[3]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterExpModifiers entry{};
+			CharacterExpModifiers e{};
 
-			entry.character_id = atoi(row[0]);
-			entry.zone_id      = atoi(row[1]);
-			entry.aa_modifier  = static_cast<float>(atof(row[2]));
-			entry.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id = atoi(row[0]);
+			e.zone_id      = atoi(row[1]);
+			e.aa_modifier  = static_cast<float>(atof(row[2]));
+			e.exp_modifier = static_cast<float>(atof(row[3]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

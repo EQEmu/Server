@@ -76,14 +76,14 @@ public:
 
 	static {{TABLE_NAME_STRUCT}} NewEntity()
 	{
-		{{TABLE_NAME_STRUCT}} entry{};
+		{{TABLE_NAME_STRUCT}} e{};
 
 {{DEFAULT_ENTRIES}}
 
-		return entry;
+		return e;
 	}
 
-	static {{TABLE_NAME_STRUCT}} Get{{TABLE_NAME_STRUCT}}Entry(
+	static {{TABLE_NAME_STRUCT}} Get{{TABLE_NAME_STRUCT}}e(
 		const std::vector<{{TABLE_NAME_STRUCT}}> &{{TABLE_NAME_VAR}}s,
 		int {{TABLE_NAME_VAR}}_id
 	)
@@ -112,10 +112,10 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			{{TABLE_NAME_STRUCT}} entry{};
+			{{TABLE_NAME_STRUCT}} e{};
 
 {{FIND_ONE_ENTRIES}}
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -140,7 +140,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		{{TABLE_NAME_STRUCT}} {{TABLE_NAME_VAR}}_entry
+		{{TABLE_NAME_STRUCT}} {{TABLE_NAME_VAR}}_e
 	)
 	{
 		std::vector<std::string> update_values;
@@ -155,7 +155,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				{{TABLE_NAME_VAR}}_entry.{{PRIMARY_KEY_STRING}}
+				{{TABLE_NAME_VAR}}_e.{{PRIMARY_KEY_STRING}}
 			)
 		);
 
@@ -164,7 +164,7 @@ public:
 
 	static {{TABLE_NAME_STRUCT}} InsertOne(
 		Database& db,
-		{{TABLE_NAME_STRUCT}} {{TABLE_NAME_VAR}}_entry
+		{{TABLE_NAME_STRUCT}} {{TABLE_NAME_VAR}}_e
 	)
 	{
 		std::vector<std::string> insert_values;
@@ -180,13 +180,13 @@ public:
 		);
 
 		if (results.Success()) {
-			{{TABLE_NAME_VAR}}_entry.{{PRIMARY_KEY_STRING}} = results.LastInsertedID();
-			return {{TABLE_NAME_VAR}}_entry;
+			{{TABLE_NAME_VAR}}_e.{{PRIMARY_KEY_STRING}} = results.LastInsertedID();
+			return {{TABLE_NAME_VAR}}_e;
 		}
 
-		{{TABLE_NAME_VAR}}_entry = NewEntity();
+		{{TABLE_NAME_VAR}}_e = NewEntity();
 
-		return {{TABLE_NAME_VAR}}_entry;
+		return {{TABLE_NAME_VAR}}_e;
 	}
 
 	static int InsertMany(
@@ -196,7 +196,7 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &{{TABLE_NAME_VAR}}_entry: {{TABLE_NAME_VAR}}_entries) {
+		for (auto &{{TABLE_NAME_VAR}}_e: {{TABLE_NAME_VAR}}_entries) {
 			std::vector<std::string> insert_values;
 
 {{INSERT_MANY_ENTRIES}}
@@ -231,11 +231,11 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			{{TABLE_NAME_STRUCT}} entry{};
+			{{TABLE_NAME_STRUCT}} e{};
 
 {{ALL_ENTRIES}}
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -256,11 +256,11 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			{{TABLE_NAME_STRUCT}} entry{};
+			{{TABLE_NAME_STRUCT}} e{};
 
 {{ALL_ENTRIES}}
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

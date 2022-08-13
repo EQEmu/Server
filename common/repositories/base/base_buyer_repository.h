@@ -91,19 +91,19 @@ public:
 
 	static Buyer NewEntity()
 	{
-		Buyer entry{};
+		Buyer e{};
 
-		entry.charid   = 0;
-		entry.buyslot  = 0;
-		entry.itemid   = 0;
-		entry.itemname = "";
-		entry.quantity = 0;
-		entry.price    = 0;
+		e.charid   = 0;
+		e.buyslot  = 0;
+		e.itemid   = 0;
+		e.itemname = "";
+		e.quantity = 0;
+		e.price    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Buyer GetBuyerEntry(
+	static Buyer GetBuyere(
 		const std::vector<Buyer> &buyers,
 		int buyer_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.charid   = atoi(row[0]);
+			e.buyslot  = atoi(row[1]);
+			e.itemid   = atoi(row[2]);
+			e.itemname = row[3] ? row[3] : "";
+			e.quantity = atoi(row[4]);
+			e.price    = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Buyer buyer_entry
+		Buyer buyer_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(buyer_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(buyer_entry.buyslot));
-		update_values.push_back(columns[2] + " = " + std::to_string(buyer_entry.itemid));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(buyer_entry.itemname) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(buyer_entry.quantity));
-		update_values.push_back(columns[5] + " = " + std::to_string(buyer_entry.price));
+		update_values.push_back(columns[0] + " = " + std::to_string(buyer_e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(buyer_e.buyslot));
+		update_values.push_back(columns[2] + " = " + std::to_string(buyer_e.itemid));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(buyer_e.itemname) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(buyer_e.quantity));
+		update_values.push_back(columns[5] + " = " + std::to_string(buyer_e.price));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				buyer_entry.charid
+				buyer_e.charid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static Buyer InsertOne(
 		Database& db,
-		Buyer buyer_entry
+		Buyer buyer_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(buyer_entry.charid));
-		insert_values.push_back(std::to_string(buyer_entry.buyslot));
-		insert_values.push_back(std::to_string(buyer_entry.itemid));
-		insert_values.push_back("'" + Strings::Escape(buyer_entry.itemname) + "'");
-		insert_values.push_back(std::to_string(buyer_entry.quantity));
-		insert_values.push_back(std::to_string(buyer_entry.price));
+		insert_values.push_back(std::to_string(buyer_e.charid));
+		insert_values.push_back(std::to_string(buyer_e.buyslot));
+		insert_values.push_back(std::to_string(buyer_e.itemid));
+		insert_values.push_back("'" + Strings::Escape(buyer_e.itemname) + "'");
+		insert_values.push_back(std::to_string(buyer_e.quantity));
+		insert_values.push_back(std::to_string(buyer_e.price));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,13 +216,13 @@ public:
 		);
 
 		if (results.Success()) {
-			buyer_entry.charid = results.LastInsertedID();
-			return buyer_entry;
+			buyer_e.charid = results.LastInsertedID();
+			return buyer_e;
 		}
 
-		buyer_entry = NewEntity();
+		buyer_e = NewEntity();
 
-		return buyer_entry;
+		return buyer_e;
 	}
 
 	static int InsertMany(
@@ -232,15 +232,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &buyer_entry: buyer_entries) {
+		for (auto &buyer_e: buyer_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(buyer_entry.charid));
-			insert_values.push_back(std::to_string(buyer_entry.buyslot));
-			insert_values.push_back(std::to_string(buyer_entry.itemid));
-			insert_values.push_back("'" + Strings::Escape(buyer_entry.itemname) + "'");
-			insert_values.push_back(std::to_string(buyer_entry.quantity));
-			insert_values.push_back(std::to_string(buyer_entry.price));
+			insert_values.push_back(std::to_string(buyer_e.charid));
+			insert_values.push_back(std::to_string(buyer_e.buyslot));
+			insert_values.push_back(std::to_string(buyer_e.itemid));
+			insert_values.push_back("'" + Strings::Escape(buyer_e.itemname) + "'");
+			insert_values.push_back(std::to_string(buyer_e.quantity));
+			insert_values.push_back(std::to_string(buyer_e.price));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -272,16 +272,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.charid   = atoi(row[0]);
+			e.buyslot  = atoi(row[1]);
+			e.itemid   = atoi(row[2]);
+			e.itemname = row[3] ? row[3] : "";
+			e.quantity = atoi(row[4]);
+			e.price    = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -302,16 +302,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.charid   = atoi(row[0]);
+			e.buyslot  = atoi(row[1]);
+			e.itemid   = atoi(row[2]);
+			e.itemname = row[3] ? row[3] : "";
+			e.quantity = atoi(row[4]);
+			e.price    = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

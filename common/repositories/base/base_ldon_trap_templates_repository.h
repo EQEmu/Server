@@ -88,18 +88,18 @@ public:
 
 	static LdonTrapTemplates NewEntity()
 	{
-		LdonTrapTemplates entry{};
+		LdonTrapTemplates e{};
 
-		entry.id       = 0;
-		entry.type     = 1;
-		entry.spell_id = 0;
-		entry.skill    = 0;
-		entry.locked   = 0;
+		e.id       = 0;
+		e.type     = 1;
+		e.spell_id = 0;
+		e.skill    = 0;
+		e.locked   = 0;
 
-		return entry;
+		return e;
 	}
 
-	static LdonTrapTemplates GetLdonTrapTemplatesEntry(
+	static LdonTrapTemplates GetLdonTrapTemplatese(
 		const std::vector<LdonTrapTemplates> &ldon_trap_templatess,
 		int ldon_trap_templates_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LdonTrapTemplates entry{};
+			LdonTrapTemplates e{};
 
-			entry.id       = atoi(row[0]);
-			entry.type     = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
-			entry.skill    = atoi(row[3]);
-			entry.locked   = atoi(row[4]);
+			e.id       = atoi(row[0]);
+			e.type     = atoi(row[1]);
+			e.spell_id = atoi(row[2]);
+			e.skill    = atoi(row[3]);
+			e.locked   = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LdonTrapTemplates ldon_trap_templates_entry
+		LdonTrapTemplates ldon_trap_templates_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(ldon_trap_templates_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(ldon_trap_templates_entry.type));
-		update_values.push_back(columns[2] + " = " + std::to_string(ldon_trap_templates_entry.spell_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(ldon_trap_templates_entry.skill));
-		update_values.push_back(columns[4] + " = " + std::to_string(ldon_trap_templates_entry.locked));
+		update_values.push_back(columns[0] + " = " + std::to_string(ldon_trap_templates_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(ldon_trap_templates_e.type));
+		update_values.push_back(columns[2] + " = " + std::to_string(ldon_trap_templates_e.spell_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(ldon_trap_templates_e.skill));
+		update_values.push_back(columns[4] + " = " + std::to_string(ldon_trap_templates_e.locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				ldon_trap_templates_entry.id
+				ldon_trap_templates_e.id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static LdonTrapTemplates InsertOne(
 		Database& db,
-		LdonTrapTemplates ldon_trap_templates_entry
+		LdonTrapTemplates ldon_trap_templates_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(ldon_trap_templates_entry.id));
-		insert_values.push_back(std::to_string(ldon_trap_templates_entry.type));
-		insert_values.push_back(std::to_string(ldon_trap_templates_entry.spell_id));
-		insert_values.push_back(std::to_string(ldon_trap_templates_entry.skill));
-		insert_values.push_back(std::to_string(ldon_trap_templates_entry.locked));
+		insert_values.push_back(std::to_string(ldon_trap_templates_e.id));
+		insert_values.push_back(std::to_string(ldon_trap_templates_e.type));
+		insert_values.push_back(std::to_string(ldon_trap_templates_e.spell_id));
+		insert_values.push_back(std::to_string(ldon_trap_templates_e.skill));
+		insert_values.push_back(std::to_string(ldon_trap_templates_e.locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			ldon_trap_templates_entry.id = results.LastInsertedID();
-			return ldon_trap_templates_entry;
+			ldon_trap_templates_e.id = results.LastInsertedID();
+			return ldon_trap_templates_e;
 		}
 
-		ldon_trap_templates_entry = NewEntity();
+		ldon_trap_templates_e = NewEntity();
 
-		return ldon_trap_templates_entry;
+		return ldon_trap_templates_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &ldon_trap_templates_entry: ldon_trap_templates_entries) {
+		for (auto &ldon_trap_templates_e: ldon_trap_templates_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(ldon_trap_templates_entry.id));
-			insert_values.push_back(std::to_string(ldon_trap_templates_entry.type));
-			insert_values.push_back(std::to_string(ldon_trap_templates_entry.spell_id));
-			insert_values.push_back(std::to_string(ldon_trap_templates_entry.skill));
-			insert_values.push_back(std::to_string(ldon_trap_templates_entry.locked));
+			insert_values.push_back(std::to_string(ldon_trap_templates_e.id));
+			insert_values.push_back(std::to_string(ldon_trap_templates_e.type));
+			insert_values.push_back(std::to_string(ldon_trap_templates_e.spell_id));
+			insert_values.push_back(std::to_string(ldon_trap_templates_e.skill));
+			insert_values.push_back(std::to_string(ldon_trap_templates_e.locked));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LdonTrapTemplates entry{};
+			LdonTrapTemplates e{};
 
-			entry.id       = atoi(row[0]);
-			entry.type     = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
-			entry.skill    = atoi(row[3]);
-			entry.locked   = atoi(row[4]);
+			e.id       = atoi(row[0]);
+			e.type     = atoi(row[1]);
+			e.spell_id = atoi(row[2]);
+			e.skill    = atoi(row[3]);
+			e.locked   = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LdonTrapTemplates entry{};
+			LdonTrapTemplates e{};
 
-			entry.id       = atoi(row[0]);
-			entry.type     = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
-			entry.skill    = atoi(row[3]);
-			entry.locked   = atoi(row[4]);
+			e.id       = atoi(row[0]);
+			e.type     = atoi(row[1]);
+			e.spell_id = atoi(row[2]);
+			e.skill    = atoi(row[3]);
+			e.locked   = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

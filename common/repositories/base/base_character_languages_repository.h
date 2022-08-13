@@ -82,16 +82,16 @@ public:
 
 	static CharacterLanguages NewEntity()
 	{
-		CharacterLanguages entry{};
+		CharacterLanguages e{};
 
-		entry.id      = 0;
-		entry.lang_id = 0;
-		entry.value   = 0;
+		e.id      = 0;
+		e.lang_id = 0;
+		e.value   = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterLanguages GetCharacterLanguagesEntry(
+	static CharacterLanguages GetCharacterLanguagese(
 		const std::vector<CharacterLanguages> &character_languagess,
 		int character_languages_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterLanguages entry{};
+			CharacterLanguages e{};
 
-			entry.id      = atoi(row[0]);
-			entry.lang_id = atoi(row[1]);
-			entry.value   = atoi(row[2]);
+			e.id      = atoi(row[0]);
+			e.lang_id = atoi(row[1]);
+			e.value   = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterLanguages character_languages_entry
+		CharacterLanguages character_languages_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_languages_entry.lang_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_languages_entry.value));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_languages_e.lang_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_languages_e.value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_languages_entry.id
+				character_languages_e.id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static CharacterLanguages InsertOne(
 		Database& db,
-		CharacterLanguages character_languages_entry
+		CharacterLanguages character_languages_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_languages_entry.id));
-		insert_values.push_back(std::to_string(character_languages_entry.lang_id));
-		insert_values.push_back(std::to_string(character_languages_entry.value));
+		insert_values.push_back(std::to_string(character_languages_e.id));
+		insert_values.push_back(std::to_string(character_languages_e.lang_id));
+		insert_values.push_back(std::to_string(character_languages_e.value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,13 +194,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_languages_entry.id = results.LastInsertedID();
-			return character_languages_entry;
+			character_languages_e.id = results.LastInsertedID();
+			return character_languages_e;
 		}
 
-		character_languages_entry = NewEntity();
+		character_languages_e = NewEntity();
 
-		return character_languages_entry;
+		return character_languages_e;
 	}
 
 	static int InsertMany(
@@ -210,12 +210,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_languages_entry: character_languages_entries) {
+		for (auto &character_languages_e: character_languages_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_languages_entry.id));
-			insert_values.push_back(std::to_string(character_languages_entry.lang_id));
-			insert_values.push_back(std::to_string(character_languages_entry.value));
+			insert_values.push_back(std::to_string(character_languages_e.id));
+			insert_values.push_back(std::to_string(character_languages_e.lang_id));
+			insert_values.push_back(std::to_string(character_languages_e.value));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -247,13 +247,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterLanguages entry{};
+			CharacterLanguages e{};
 
-			entry.id      = atoi(row[0]);
-			entry.lang_id = atoi(row[1]);
-			entry.value   = atoi(row[2]);
+			e.id      = atoi(row[0]);
+			e.lang_id = atoi(row[1]);
+			e.value   = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -274,13 +274,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterLanguages entry{};
+			CharacterLanguages e{};
 
-			entry.id      = atoi(row[0]);
-			entry.lang_id = atoi(row[1]);
-			entry.value   = atoi(row[2]);
+			e.id      = atoi(row[0]);
+			e.lang_id = atoi(row[1]);
+			e.value   = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

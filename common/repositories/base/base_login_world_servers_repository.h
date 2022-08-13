@@ -103,23 +103,23 @@ public:
 
 	static LoginWorldServers NewEntity()
 	{
-		LoginWorldServers entry{};
+		LoginWorldServers e{};
 
-		entry.id                        = 0;
-		entry.long_name                 = "";
-		entry.short_name                = "";
-		entry.tag_description           = "";
-		entry.login_server_list_type_id = 0;
-		entry.last_login_date           = 0;
-		entry.last_ip_address           = "";
-		entry.login_server_admin_id     = 0;
-		entry.is_server_trusted         = 0;
-		entry.note                      = "";
+		e.id                        = 0;
+		e.long_name                 = "";
+		e.short_name                = "";
+		e.tag_description           = "";
+		e.login_server_list_type_id = 0;
+		e.last_login_date           = 0;
+		e.last_ip_address           = "";
+		e.login_server_admin_id     = 0;
+		e.is_server_trusted         = 0;
+		e.note                      = "";
 
-		return entry;
+		return e;
 	}
 
-	static LoginWorldServers GetLoginWorldServersEntry(
+	static LoginWorldServers GetLoginWorldServerse(
 		const std::vector<LoginWorldServers> &login_world_serverss,
 		int login_world_servers_id
 	)
@@ -148,20 +148,20 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LoginWorldServers entry{};
+			LoginWorldServers e{};
 
-			entry.id                        = atoi(row[0]);
-			entry.long_name                 = row[1] ? row[1] : "";
-			entry.short_name                = row[2] ? row[2] : "";
-			entry.tag_description           = row[3] ? row[3] : "";
-			entry.login_server_list_type_id = atoi(row[4]);
-			entry.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			entry.last_ip_address           = row[6] ? row[6] : "";
-			entry.login_server_admin_id     = atoi(row[7]);
-			entry.is_server_trusted         = atoi(row[8]);
-			entry.note                      = row[9] ? row[9] : "";
+			e.id                        = atoi(row[0]);
+			e.long_name                 = row[1] ? row[1] : "";
+			e.short_name                = row[2] ? row[2] : "";
+			e.tag_description           = row[3] ? row[3] : "";
+			e.login_server_list_type_id = atoi(row[4]);
+			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.last_ip_address           = row[6] ? row[6] : "";
+			e.login_server_admin_id     = atoi(row[7]);
+			e.is_server_trusted         = atoi(row[8]);
+			e.note                      = row[9] ? row[9] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -186,22 +186,22 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoginWorldServers login_world_servers_entry
+		LoginWorldServers login_world_servers_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_world_servers_entry.long_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(login_world_servers_entry.short_name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(login_world_servers_entry.tag_description) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(login_world_servers_entry.login_server_list_type_id));
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (login_world_servers_entry.last_login_date > 0 ? std::to_string(login_world_servers_entry.last_login_date) : "null") + ")");
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(login_world_servers_entry.last_ip_address) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(login_world_servers_entry.login_server_admin_id));
-		update_values.push_back(columns[8] + " = " + std::to_string(login_world_servers_entry.is_server_trusted));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(login_world_servers_entry.note) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_world_servers_e.long_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(login_world_servers_e.short_name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(login_world_servers_e.tag_description) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(login_world_servers_e.login_server_list_type_id));
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (login_world_servers_e.last_login_date > 0 ? std::to_string(login_world_servers_e.last_login_date) : "null") + ")");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(login_world_servers_e.last_ip_address) + "'");
+		update_values.push_back(columns[7] + " = " + std::to_string(login_world_servers_e.login_server_admin_id));
+		update_values.push_back(columns[8] + " = " + std::to_string(login_world_servers_e.is_server_trusted));
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(login_world_servers_e.note) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,7 +209,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				login_world_servers_entry.id
+				login_world_servers_e.id
 			)
 		);
 
@@ -218,21 +218,21 @@ public:
 
 	static LoginWorldServers InsertOne(
 		Database& db,
-		LoginWorldServers login_world_servers_entry
+		LoginWorldServers login_world_servers_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(login_world_servers_entry.id));
-		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.long_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.short_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.tag_description) + "'");
-		insert_values.push_back(std::to_string(login_world_servers_entry.login_server_list_type_id));
-		insert_values.push_back("FROM_UNIXTIME(" + (login_world_servers_entry.last_login_date > 0 ? std::to_string(login_world_servers_entry.last_login_date) : "null") + ")");
-		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.last_ip_address) + "'");
-		insert_values.push_back(std::to_string(login_world_servers_entry.login_server_admin_id));
-		insert_values.push_back(std::to_string(login_world_servers_entry.is_server_trusted));
-		insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.note) + "'");
+		insert_values.push_back(std::to_string(login_world_servers_e.id));
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_e.long_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_e.short_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_e.tag_description) + "'");
+		insert_values.push_back(std::to_string(login_world_servers_e.login_server_list_type_id));
+		insert_values.push_back("FROM_UNIXTIME(" + (login_world_servers_e.last_login_date > 0 ? std::to_string(login_world_servers_e.last_login_date) : "null") + ")");
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_e.last_ip_address) + "'");
+		insert_values.push_back(std::to_string(login_world_servers_e.login_server_admin_id));
+		insert_values.push_back(std::to_string(login_world_servers_e.is_server_trusted));
+		insert_values.push_back("'" + Strings::Escape(login_world_servers_e.note) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -243,13 +243,13 @@ public:
 		);
 
 		if (results.Success()) {
-			login_world_servers_entry.id = results.LastInsertedID();
-			return login_world_servers_entry;
+			login_world_servers_e.id = results.LastInsertedID();
+			return login_world_servers_e;
 		}
 
-		login_world_servers_entry = NewEntity();
+		login_world_servers_e = NewEntity();
 
-		return login_world_servers_entry;
+		return login_world_servers_e;
 	}
 
 	static int InsertMany(
@@ -259,19 +259,19 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &login_world_servers_entry: login_world_servers_entries) {
+		for (auto &login_world_servers_e: login_world_servers_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(login_world_servers_entry.id));
-			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.long_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.short_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.tag_description) + "'");
-			insert_values.push_back(std::to_string(login_world_servers_entry.login_server_list_type_id));
-			insert_values.push_back("FROM_UNIXTIME(" + (login_world_servers_entry.last_login_date > 0 ? std::to_string(login_world_servers_entry.last_login_date) : "null") + ")");
-			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.last_ip_address) + "'");
-			insert_values.push_back(std::to_string(login_world_servers_entry.login_server_admin_id));
-			insert_values.push_back(std::to_string(login_world_servers_entry.is_server_trusted));
-			insert_values.push_back("'" + Strings::Escape(login_world_servers_entry.note) + "'");
+			insert_values.push_back(std::to_string(login_world_servers_e.id));
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_e.long_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_e.short_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_e.tag_description) + "'");
+			insert_values.push_back(std::to_string(login_world_servers_e.login_server_list_type_id));
+			insert_values.push_back("FROM_UNIXTIME(" + (login_world_servers_e.last_login_date > 0 ? std::to_string(login_world_servers_e.last_login_date) : "null") + ")");
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_e.last_ip_address) + "'");
+			insert_values.push_back(std::to_string(login_world_servers_e.login_server_admin_id));
+			insert_values.push_back(std::to_string(login_world_servers_e.is_server_trusted));
+			insert_values.push_back("'" + Strings::Escape(login_world_servers_e.note) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -303,20 +303,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginWorldServers entry{};
+			LoginWorldServers e{};
 
-			entry.id                        = atoi(row[0]);
-			entry.long_name                 = row[1] ? row[1] : "";
-			entry.short_name                = row[2] ? row[2] : "";
-			entry.tag_description           = row[3] ? row[3] : "";
-			entry.login_server_list_type_id = atoi(row[4]);
-			entry.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			entry.last_ip_address           = row[6] ? row[6] : "";
-			entry.login_server_admin_id     = atoi(row[7]);
-			entry.is_server_trusted         = atoi(row[8]);
-			entry.note                      = row[9] ? row[9] : "";
+			e.id                        = atoi(row[0]);
+			e.long_name                 = row[1] ? row[1] : "";
+			e.short_name                = row[2] ? row[2] : "";
+			e.tag_description           = row[3] ? row[3] : "";
+			e.login_server_list_type_id = atoi(row[4]);
+			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.last_ip_address           = row[6] ? row[6] : "";
+			e.login_server_admin_id     = atoi(row[7]);
+			e.is_server_trusted         = atoi(row[8]);
+			e.note                      = row[9] ? row[9] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -337,20 +337,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginWorldServers entry{};
+			LoginWorldServers e{};
 
-			entry.id                        = atoi(row[0]);
-			entry.long_name                 = row[1] ? row[1] : "";
-			entry.short_name                = row[2] ? row[2] : "";
-			entry.tag_description           = row[3] ? row[3] : "";
-			entry.login_server_list_type_id = atoi(row[4]);
-			entry.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			entry.last_ip_address           = row[6] ? row[6] : "";
-			entry.login_server_admin_id     = atoi(row[7]);
-			entry.is_server_trusted         = atoi(row[8]);
-			entry.note                      = row[9] ? row[9] : "";
+			e.id                        = atoi(row[0]);
+			e.long_name                 = row[1] ? row[1] : "";
+			e.short_name                = row[2] ? row[2] : "";
+			e.tag_description           = row[3] ? row[3] : "";
+			e.login_server_list_type_id = atoi(row[4]);
+			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.last_ip_address           = row[6] ? row[6] : "";
+			e.login_server_admin_id     = atoi(row[7]);
+			e.is_server_trusted         = atoi(row[8]);
+			e.note                      = row[9] ? row[9] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

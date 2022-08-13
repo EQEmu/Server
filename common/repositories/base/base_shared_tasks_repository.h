@@ -91,19 +91,19 @@ public:
 
 	static SharedTasks NewEntity()
 	{
-		SharedTasks entry{};
+		SharedTasks e{};
 
-		entry.id              = 0;
-		entry.task_id         = 0;
-		entry.accepted_time   = 0;
-		entry.expire_time     = 0;
-		entry.completion_time = 0;
-		entry.is_locked       = 0;
+		e.id              = 0;
+		e.task_id         = 0;
+		e.accepted_time   = 0;
+		e.expire_time     = 0;
+		e.completion_time = 0;
+		e.is_locked       = 0;
 
-		return entry;
+		return e;
 	}
 
-	static SharedTasks GetSharedTasksEntry(
+	static SharedTasks GetSharedTaskse(
 		const std::vector<SharedTasks> &shared_taskss,
 		int shared_tasks_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SharedTasks entry{};
+			SharedTasks e{};
 
-			entry.id              = strtoll(row[0], nullptr, 10);
-			entry.task_id         = atoi(row[1]);
-			entry.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
-			entry.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			entry.is_locked       = atoi(row[5]);
+			e.id              = strtoll(row[0], nullptr, 10);
+			e.task_id         = atoi(row[1]);
+			e.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
+			e.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.is_locked       = atoi(row[5]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SharedTasks shared_tasks_entry
+		SharedTasks shared_tasks_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(shared_tasks_entry.task_id));
-		update_values.push_back(columns[2] + " = FROM_UNIXTIME(" + (shared_tasks_entry.accepted_time > 0 ? std::to_string(shared_tasks_entry.accepted_time) : "null") + ")");
-		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (shared_tasks_entry.expire_time > 0 ? std::to_string(shared_tasks_entry.expire_time) : "null") + ")");
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (shared_tasks_entry.completion_time > 0 ? std::to_string(shared_tasks_entry.completion_time) : "null") + ")");
-		update_values.push_back(columns[5] + " = " + std::to_string(shared_tasks_entry.is_locked));
+		update_values.push_back(columns[1] + " = " + std::to_string(shared_tasks_e.task_id));
+		update_values.push_back(columns[2] + " = FROM_UNIXTIME(" + (shared_tasks_e.accepted_time > 0 ? std::to_string(shared_tasks_e.accepted_time) : "null") + ")");
+		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (shared_tasks_e.expire_time > 0 ? std::to_string(shared_tasks_e.expire_time) : "null") + ")");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (shared_tasks_e.completion_time > 0 ? std::to_string(shared_tasks_e.completion_time) : "null") + ")");
+		update_values.push_back(columns[5] + " = " + std::to_string(shared_tasks_e.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				shared_tasks_entry.id
+				shared_tasks_e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static SharedTasks InsertOne(
 		Database& db,
-		SharedTasks shared_tasks_entry
+		SharedTasks shared_tasks_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(shared_tasks_entry.id));
-		insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
-		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.accepted_time > 0 ? std::to_string(shared_tasks_entry.accepted_time) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.expire_time > 0 ? std::to_string(shared_tasks_entry.expire_time) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.completion_time > 0 ? std::to_string(shared_tasks_entry.completion_time) : "null") + ")");
-		insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
+		insert_values.push_back(std::to_string(shared_tasks_e.id));
+		insert_values.push_back(std::to_string(shared_tasks_e.task_id));
+		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_e.accepted_time > 0 ? std::to_string(shared_tasks_e.accepted_time) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_e.expire_time > 0 ? std::to_string(shared_tasks_e.expire_time) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_e.completion_time > 0 ? std::to_string(shared_tasks_e.completion_time) : "null") + ")");
+		insert_values.push_back(std::to_string(shared_tasks_e.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,13 +215,13 @@ public:
 		);
 
 		if (results.Success()) {
-			shared_tasks_entry.id = results.LastInsertedID();
-			return shared_tasks_entry;
+			shared_tasks_e.id = results.LastInsertedID();
+			return shared_tasks_e;
 		}
 
-		shared_tasks_entry = NewEntity();
+		shared_tasks_e = NewEntity();
 
-		return shared_tasks_entry;
+		return shared_tasks_e;
 	}
 
 	static int InsertMany(
@@ -231,15 +231,15 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &shared_tasks_entry: shared_tasks_entries) {
+		for (auto &shared_tasks_e: shared_tasks_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(shared_tasks_entry.id));
-			insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
-			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.accepted_time > 0 ? std::to_string(shared_tasks_entry.accepted_time) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.expire_time > 0 ? std::to_string(shared_tasks_entry.expire_time) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.completion_time > 0 ? std::to_string(shared_tasks_entry.completion_time) : "null") + ")");
-			insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
+			insert_values.push_back(std::to_string(shared_tasks_e.id));
+			insert_values.push_back(std::to_string(shared_tasks_e.task_id));
+			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_e.accepted_time > 0 ? std::to_string(shared_tasks_e.accepted_time) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_e.expire_time > 0 ? std::to_string(shared_tasks_e.expire_time) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_e.completion_time > 0 ? std::to_string(shared_tasks_e.completion_time) : "null") + ")");
+			insert_values.push_back(std::to_string(shared_tasks_e.is_locked));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -271,16 +271,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTasks entry{};
+			SharedTasks e{};
 
-			entry.id              = strtoll(row[0], nullptr, 10);
-			entry.task_id         = atoi(row[1]);
-			entry.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
-			entry.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			entry.is_locked       = atoi(row[5]);
+			e.id              = strtoll(row[0], nullptr, 10);
+			e.task_id         = atoi(row[1]);
+			e.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
+			e.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.is_locked       = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -301,16 +301,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTasks entry{};
+			SharedTasks e{};
 
-			entry.id              = strtoll(row[0], nullptr, 10);
-			entry.task_id         = atoi(row[1]);
-			entry.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
-			entry.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			entry.is_locked       = atoi(row[5]);
+			e.id              = strtoll(row[0], nullptr, 10);
+			e.task_id         = atoi(row[1]);
+			e.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
+			e.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.is_locked       = atoi(row[5]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

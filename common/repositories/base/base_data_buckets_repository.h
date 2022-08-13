@@ -85,17 +85,17 @@ public:
 
 	static DataBuckets NewEntity()
 	{
-		DataBuckets entry{};
+		DataBuckets e{};
 
-		entry.id      = 0;
-		entry.key     = "";
-		entry.value   = "";
-		entry.expires = 0;
+		e.id      = 0;
+		e.key     = "";
+		e.value   = "";
+		e.expires = 0;
 
-		return entry;
+		return e;
 	}
 
-	static DataBuckets GetDataBucketsEntry(
+	static DataBuckets GetDataBucketse(
 		const std::vector<DataBuckets> &data_bucketss,
 		int data_buckets_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			DataBuckets entry{};
+			DataBuckets e{};
 
-			entry.id      = strtoll(row[0], nullptr, 10);
-			entry.key     = row[1] ? row[1] : "";
-			entry.value   = row[2] ? row[2] : "";
-			entry.expires = atoi(row[3]);
+			e.id      = strtoll(row[0], nullptr, 10);
+			e.key     = row[1] ? row[1] : "";
+			e.value   = row[2] ? row[2] : "";
+			e.expires = atoi(row[3]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DataBuckets data_buckets_entry
+		DataBuckets data_buckets_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(data_buckets_entry.key) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(data_buckets_entry.value) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(data_buckets_entry.expires));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(data_buckets_e.key) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(data_buckets_e.value) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(data_buckets_e.expires));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				data_buckets_entry.id
+				data_buckets_e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static DataBuckets InsertOne(
 		Database& db,
-		DataBuckets data_buckets_entry
+		DataBuckets data_buckets_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(data_buckets_entry.id));
-		insert_values.push_back("'" + Strings::Escape(data_buckets_entry.key) + "'");
-		insert_values.push_back("'" + Strings::Escape(data_buckets_entry.value) + "'");
-		insert_values.push_back(std::to_string(data_buckets_entry.expires));
+		insert_values.push_back(std::to_string(data_buckets_e.id));
+		insert_values.push_back("'" + Strings::Escape(data_buckets_e.key) + "'");
+		insert_values.push_back("'" + Strings::Escape(data_buckets_e.value) + "'");
+		insert_values.push_back(std::to_string(data_buckets_e.expires));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,13 +201,13 @@ public:
 		);
 
 		if (results.Success()) {
-			data_buckets_entry.id = results.LastInsertedID();
-			return data_buckets_entry;
+			data_buckets_e.id = results.LastInsertedID();
+			return data_buckets_e;
 		}
 
-		data_buckets_entry = NewEntity();
+		data_buckets_e = NewEntity();
 
-		return data_buckets_entry;
+		return data_buckets_e;
 	}
 
 	static int InsertMany(
@@ -217,13 +217,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &data_buckets_entry: data_buckets_entries) {
+		for (auto &data_buckets_e: data_buckets_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(data_buckets_entry.id));
-			insert_values.push_back("'" + Strings::Escape(data_buckets_entry.key) + "'");
-			insert_values.push_back("'" + Strings::Escape(data_buckets_entry.value) + "'");
-			insert_values.push_back(std::to_string(data_buckets_entry.expires));
+			insert_values.push_back(std::to_string(data_buckets_e.id));
+			insert_values.push_back("'" + Strings::Escape(data_buckets_e.key) + "'");
+			insert_values.push_back("'" + Strings::Escape(data_buckets_e.value) + "'");
+			insert_values.push_back(std::to_string(data_buckets_e.expires));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -255,14 +255,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DataBuckets entry{};
+			DataBuckets e{};
 
-			entry.id      = strtoll(row[0], nullptr, 10);
-			entry.key     = row[1] ? row[1] : "";
-			entry.value   = row[2] ? row[2] : "";
-			entry.expires = atoi(row[3]);
+			e.id      = strtoll(row[0], nullptr, 10);
+			e.key     = row[1] ? row[1] : "";
+			e.value   = row[2] ? row[2] : "";
+			e.expires = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -283,14 +283,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DataBuckets entry{};
+			DataBuckets e{};
 
-			entry.id      = strtoll(row[0], nullptr, 10);
-			entry.key     = row[1] ? row[1] : "";
-			entry.value   = row[2] ? row[2] : "";
-			entry.expires = atoi(row[3]);
+			e.id      = strtoll(row[0], nullptr, 10);
+			e.key     = row[1] ? row[1] : "";
+			e.value   = row[2] ? row[2] : "";
+			e.expires = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

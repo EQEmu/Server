@@ -82,16 +82,16 @@ public:
 
 	static CharacterMemmedSpells NewEntity()
 	{
-		CharacterMemmedSpells entry{};
+		CharacterMemmedSpells e{};
 
-		entry.id       = 0;
-		entry.slot_id  = 0;
-		entry.spell_id = 0;
+		e.id       = 0;
+		e.slot_id  = 0;
+		e.spell_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterMemmedSpells GetCharacterMemmedSpellsEntry(
+	static CharacterMemmedSpells GetCharacterMemmedSpellse(
 		const std::vector<CharacterMemmedSpells> &character_memmed_spellss,
 		int character_memmed_spells_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterMemmedSpells entry{};
+			CharacterMemmedSpells e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot_id  = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
+			e.id       = atoi(row[0]);
+			e.slot_id  = atoi(row[1]);
+			e.spell_id = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterMemmedSpells character_memmed_spells_entry
+		CharacterMemmedSpells character_memmed_spells_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_memmed_spells_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_memmed_spells_entry.slot_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_memmed_spells_entry.spell_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_memmed_spells_e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_memmed_spells_e.slot_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(character_memmed_spells_e.spell_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_memmed_spells_entry.id
+				character_memmed_spells_e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CharacterMemmedSpells InsertOne(
 		Database& db,
-		CharacterMemmedSpells character_memmed_spells_entry
+		CharacterMemmedSpells character_memmed_spells_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_memmed_spells_entry.id));
-		insert_values.push_back(std::to_string(character_memmed_spells_entry.slot_id));
-		insert_values.push_back(std::to_string(character_memmed_spells_entry.spell_id));
+		insert_values.push_back(std::to_string(character_memmed_spells_e.id));
+		insert_values.push_back(std::to_string(character_memmed_spells_e.slot_id));
+		insert_values.push_back(std::to_string(character_memmed_spells_e.spell_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			character_memmed_spells_entry.id = results.LastInsertedID();
-			return character_memmed_spells_entry;
+			character_memmed_spells_e.id = results.LastInsertedID();
+			return character_memmed_spells_e;
 		}
 
-		character_memmed_spells_entry = NewEntity();
+		character_memmed_spells_e = NewEntity();
 
-		return character_memmed_spells_entry;
+		return character_memmed_spells_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_memmed_spells_entry: character_memmed_spells_entries) {
+		for (auto &character_memmed_spells_e: character_memmed_spells_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_memmed_spells_entry.id));
-			insert_values.push_back(std::to_string(character_memmed_spells_entry.slot_id));
-			insert_values.push_back(std::to_string(character_memmed_spells_entry.spell_id));
+			insert_values.push_back(std::to_string(character_memmed_spells_e.id));
+			insert_values.push_back(std::to_string(character_memmed_spells_e.slot_id));
+			insert_values.push_back(std::to_string(character_memmed_spells_e.spell_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterMemmedSpells entry{};
+			CharacterMemmedSpells e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot_id  = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
+			e.id       = atoi(row[0]);
+			e.slot_id  = atoi(row[1]);
+			e.spell_id = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterMemmedSpells entry{};
+			CharacterMemmedSpells e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot_id  = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
+			e.id       = atoi(row[0]);
+			e.slot_id  = atoi(row[1]);
+			e.spell_id = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

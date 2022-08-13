@@ -79,15 +79,15 @@ public:
 
 	static SharedTaskDynamicZones NewEntity()
 	{
-		SharedTaskDynamicZones entry{};
+		SharedTaskDynamicZones e{};
 
-		entry.shared_task_id  = 0;
-		entry.dynamic_zone_id = 0;
+		e.shared_task_id  = 0;
+		e.dynamic_zone_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static SharedTaskDynamicZones GetSharedTaskDynamicZonesEntry(
+	static SharedTaskDynamicZones GetSharedTaskDynamicZonese(
 		const std::vector<SharedTaskDynamicZones> &shared_task_dynamic_zoness,
 		int shared_task_dynamic_zones_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SharedTaskDynamicZones entry{};
+			SharedTaskDynamicZones e{};
 
-			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
-			entry.dynamic_zone_id = atoi(row[1]);
+			e.shared_task_id  = strtoll(row[0], nullptr, 10);
+			e.dynamic_zone_id = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SharedTaskDynamicZones shared_task_dynamic_zones_entry
+		SharedTaskDynamicZones shared_task_dynamic_zones_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(shared_task_dynamic_zones_entry.shared_task_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_dynamic_zones_entry.dynamic_zone_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(shared_task_dynamic_zones_e.shared_task_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_dynamic_zones_e.dynamic_zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				shared_task_dynamic_zones_entry.shared_task_id
+				shared_task_dynamic_zones_e.shared_task_id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static SharedTaskDynamicZones InsertOne(
 		Database& db,
-		SharedTaskDynamicZones shared_task_dynamic_zones_entry
+		SharedTaskDynamicZones shared_task_dynamic_zones_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.shared_task_id));
-		insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.dynamic_zone_id));
+		insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.shared_task_id));
+		insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.dynamic_zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,13 +188,13 @@ public:
 		);
 
 		if (results.Success()) {
-			shared_task_dynamic_zones_entry.shared_task_id = results.LastInsertedID();
-			return shared_task_dynamic_zones_entry;
+			shared_task_dynamic_zones_e.shared_task_id = results.LastInsertedID();
+			return shared_task_dynamic_zones_e;
 		}
 
-		shared_task_dynamic_zones_entry = NewEntity();
+		shared_task_dynamic_zones_e = NewEntity();
 
-		return shared_task_dynamic_zones_entry;
+		return shared_task_dynamic_zones_e;
 	}
 
 	static int InsertMany(
@@ -204,11 +204,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &shared_task_dynamic_zones_entry: shared_task_dynamic_zones_entries) {
+		for (auto &shared_task_dynamic_zones_e: shared_task_dynamic_zones_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.shared_task_id));
-			insert_values.push_back(std::to_string(shared_task_dynamic_zones_entry.dynamic_zone_id));
+			insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.shared_task_id));
+			insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.dynamic_zone_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -240,12 +240,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTaskDynamicZones entry{};
+			SharedTaskDynamicZones e{};
 
-			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
-			entry.dynamic_zone_id = atoi(row[1]);
+			e.shared_task_id  = strtoll(row[0], nullptr, 10);
+			e.dynamic_zone_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -266,12 +266,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SharedTaskDynamicZones entry{};
+			SharedTaskDynamicZones e{};
 
-			entry.shared_task_id  = strtoll(row[0], nullptr, 10);
-			entry.dynamic_zone_id = atoi(row[1]);
+			e.shared_task_id  = strtoll(row[0], nullptr, 10);
+			e.dynamic_zone_id = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

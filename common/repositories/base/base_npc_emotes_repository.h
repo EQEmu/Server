@@ -88,18 +88,18 @@ public:
 
 	static NpcEmotes NewEntity()
 	{
-		NpcEmotes entry{};
+		NpcEmotes e{};
 
-		entry.id      = 0;
-		entry.emoteid = 0;
-		entry.event_  = 0;
-		entry.type    = 0;
-		entry.text    = "";
+		e.id      = 0;
+		e.emoteid = 0;
+		e.event_  = 0;
+		e.type    = 0;
+		e.text    = "";
 
-		return entry;
+		return e;
 	}
 
-	static NpcEmotes GetNpcEmotesEntry(
+	static NpcEmotes GetNpcEmotese(
 		const std::vector<NpcEmotes> &npc_emotess,
 		int npc_emotes_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			NpcEmotes entry{};
+			NpcEmotes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.emoteid = atoi(row[1]);
-			entry.event_  = atoi(row[2]);
-			entry.type    = atoi(row[3]);
-			entry.text    = row[4] ? row[4] : "";
+			e.id      = atoi(row[0]);
+			e.emoteid = atoi(row[1]);
+			e.event_  = atoi(row[2]);
+			e.type    = atoi(row[3]);
+			e.text    = row[4] ? row[4] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,17 +161,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcEmotes npc_emotes_entry
+		NpcEmotes npc_emotes_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(npc_emotes_entry.emoteid));
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_emotes_entry.event_));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_emotes_entry.type));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(npc_emotes_entry.text) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(npc_emotes_e.emoteid));
+		update_values.push_back(columns[2] + " = " + std::to_string(npc_emotes_e.event_));
+		update_values.push_back(columns[3] + " = " + std::to_string(npc_emotes_e.type));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(npc_emotes_e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -179,7 +179,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_emotes_entry.id
+				npc_emotes_e.id
 			)
 		);
 
@@ -188,16 +188,16 @@ public:
 
 	static NpcEmotes InsertOne(
 		Database& db,
-		NpcEmotes npc_emotes_entry
+		NpcEmotes npc_emotes_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_emotes_entry.id));
-		insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
-		insert_values.push_back(std::to_string(npc_emotes_entry.event_));
-		insert_values.push_back(std::to_string(npc_emotes_entry.type));
-		insert_values.push_back("'" + Strings::Escape(npc_emotes_entry.text) + "'");
+		insert_values.push_back(std::to_string(npc_emotes_e.id));
+		insert_values.push_back(std::to_string(npc_emotes_e.emoteid));
+		insert_values.push_back(std::to_string(npc_emotes_e.event_));
+		insert_values.push_back(std::to_string(npc_emotes_e.type));
+		insert_values.push_back("'" + Strings::Escape(npc_emotes_e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -208,13 +208,13 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_emotes_entry.id = results.LastInsertedID();
-			return npc_emotes_entry;
+			npc_emotes_e.id = results.LastInsertedID();
+			return npc_emotes_e;
 		}
 
-		npc_emotes_entry = NewEntity();
+		npc_emotes_e = NewEntity();
 
-		return npc_emotes_entry;
+		return npc_emotes_e;
 	}
 
 	static int InsertMany(
@@ -224,14 +224,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_emotes_entry: npc_emotes_entries) {
+		for (auto &npc_emotes_e: npc_emotes_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_emotes_entry.id));
-			insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
-			insert_values.push_back(std::to_string(npc_emotes_entry.event_));
-			insert_values.push_back(std::to_string(npc_emotes_entry.type));
-			insert_values.push_back("'" + Strings::Escape(npc_emotes_entry.text) + "'");
+			insert_values.push_back(std::to_string(npc_emotes_e.id));
+			insert_values.push_back(std::to_string(npc_emotes_e.emoteid));
+			insert_values.push_back(std::to_string(npc_emotes_e.event_));
+			insert_values.push_back(std::to_string(npc_emotes_e.type));
+			insert_values.push_back("'" + Strings::Escape(npc_emotes_e.text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -263,15 +263,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcEmotes entry{};
+			NpcEmotes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.emoteid = atoi(row[1]);
-			entry.event_  = atoi(row[2]);
-			entry.type    = atoi(row[3]);
-			entry.text    = row[4] ? row[4] : "";
+			e.id      = atoi(row[0]);
+			e.emoteid = atoi(row[1]);
+			e.event_  = atoi(row[2]);
+			e.type    = atoi(row[3]);
+			e.text    = row[4] ? row[4] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -292,15 +292,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcEmotes entry{};
+			NpcEmotes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.emoteid = atoi(row[1]);
-			entry.event_  = atoi(row[2]);
-			entry.type    = atoi(row[3]);
-			entry.text    = row[4] ? row[4] : "";
+			e.id      = atoi(row[0]);
+			e.emoteid = atoi(row[1]);
+			e.event_  = atoi(row[2]);
+			e.type    = atoi(row[3]);
+			e.text    = row[4] ? row[4] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

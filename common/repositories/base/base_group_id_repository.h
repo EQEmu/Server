@@ -85,17 +85,17 @@ public:
 
 	static GroupId NewEntity()
 	{
-		GroupId entry{};
+		GroupId e{};
 
-		entry.groupid = 0;
-		entry.charid  = 0;
-		entry.name    = "";
-		entry.ismerc  = 0;
+		e.groupid = 0;
+		e.charid  = 0;
+		e.name    = "";
+		e.ismerc  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static GroupId GetGroupIdEntry(
+	static GroupId GetGroupIde(
 		const std::vector<GroupId> &group_ids,
 		int group_id_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GroupId entry{};
+			GroupId e{};
 
-			entry.groupid = atoi(row[0]);
-			entry.charid  = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.ismerc  = atoi(row[3]);
+			e.groupid = atoi(row[0]);
+			e.charid  = atoi(row[1]);
+			e.name    = row[2] ? row[2] : "";
+			e.ismerc  = atoi(row[3]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GroupId group_id_entry
+		GroupId group_id_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(group_id_entry.groupid));
-		update_values.push_back(columns[1] + " = " + std::to_string(group_id_entry.charid));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(group_id_entry.name) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(group_id_entry.ismerc));
+		update_values.push_back(columns[0] + " = " + std::to_string(group_id_e.groupid));
+		update_values.push_back(columns[1] + " = " + std::to_string(group_id_e.charid));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(group_id_e.name) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(group_id_e.ismerc));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				group_id_entry.groupid
+				group_id_e.groupid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static GroupId InsertOne(
 		Database& db,
-		GroupId group_id_entry
+		GroupId group_id_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(group_id_entry.groupid));
-		insert_values.push_back(std::to_string(group_id_entry.charid));
-		insert_values.push_back("'" + Strings::Escape(group_id_entry.name) + "'");
-		insert_values.push_back(std::to_string(group_id_entry.ismerc));
+		insert_values.push_back(std::to_string(group_id_e.groupid));
+		insert_values.push_back(std::to_string(group_id_e.charid));
+		insert_values.push_back("'" + Strings::Escape(group_id_e.name) + "'");
+		insert_values.push_back(std::to_string(group_id_e.ismerc));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,13 +202,13 @@ public:
 		);
 
 		if (results.Success()) {
-			group_id_entry.groupid = results.LastInsertedID();
-			return group_id_entry;
+			group_id_e.groupid = results.LastInsertedID();
+			return group_id_e;
 		}
 
-		group_id_entry = NewEntity();
+		group_id_e = NewEntity();
 
-		return group_id_entry;
+		return group_id_e;
 	}
 
 	static int InsertMany(
@@ -218,13 +218,13 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &group_id_entry: group_id_entries) {
+		for (auto &group_id_e: group_id_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(group_id_entry.groupid));
-			insert_values.push_back(std::to_string(group_id_entry.charid));
-			insert_values.push_back("'" + Strings::Escape(group_id_entry.name) + "'");
-			insert_values.push_back(std::to_string(group_id_entry.ismerc));
+			insert_values.push_back(std::to_string(group_id_e.groupid));
+			insert_values.push_back(std::to_string(group_id_e.charid));
+			insert_values.push_back("'" + Strings::Escape(group_id_e.name) + "'");
+			insert_values.push_back(std::to_string(group_id_e.ismerc));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -256,14 +256,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GroupId entry{};
+			GroupId e{};
 
-			entry.groupid = atoi(row[0]);
-			entry.charid  = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.ismerc  = atoi(row[3]);
+			e.groupid = atoi(row[0]);
+			e.charid  = atoi(row[1]);
+			e.name    = row[2] ? row[2] : "";
+			e.ismerc  = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -284,14 +284,14 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GroupId entry{};
+			GroupId e{};
 
-			entry.groupid = atoi(row[0]);
-			entry.charid  = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.ismerc  = atoi(row[3]);
+			e.groupid = atoi(row[0]);
+			e.charid  = atoi(row[1]);
+			e.name    = row[2] ? row[2] : "";
+			e.ismerc  = atoi(row[3]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

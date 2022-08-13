@@ -79,15 +79,15 @@ public:
 
 	static RuleSets NewEntity()
 	{
-		RuleSets entry{};
+		RuleSets e{};
 
-		entry.ruleset_id = 0;
-		entry.name       = "";
+		e.ruleset_id = 0;
+		e.name       = "";
 
-		return entry;
+		return e;
 	}
 
-	static RuleSets GetRuleSetsEntry(
+	static RuleSets GetRuleSetse(
 		const std::vector<RuleSets> &rule_setss,
 		int rule_sets_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			RuleSets entry{};
+			RuleSets e{};
 
-			entry.ruleset_id = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
+			e.ruleset_id = atoi(row[0]);
+			e.name       = row[1] ? row[1] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,14 +146,14 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RuleSets rule_sets_entry
+		RuleSets rule_sets_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(rule_sets_entry.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(rule_sets_e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -161,7 +161,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				rule_sets_entry.ruleset_id
+				rule_sets_e.ruleset_id
 			)
 		);
 
@@ -170,13 +170,13 @@ public:
 
 	static RuleSets InsertOne(
 		Database& db,
-		RuleSets rule_sets_entry
+		RuleSets rule_sets_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(rule_sets_entry.ruleset_id));
-		insert_values.push_back("'" + Strings::Escape(rule_sets_entry.name) + "'");
+		insert_values.push_back(std::to_string(rule_sets_e.ruleset_id));
+		insert_values.push_back("'" + Strings::Escape(rule_sets_e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -187,13 +187,13 @@ public:
 		);
 
 		if (results.Success()) {
-			rule_sets_entry.ruleset_id = results.LastInsertedID();
-			return rule_sets_entry;
+			rule_sets_e.ruleset_id = results.LastInsertedID();
+			return rule_sets_e;
 		}
 
-		rule_sets_entry = NewEntity();
+		rule_sets_e = NewEntity();
 
-		return rule_sets_entry;
+		return rule_sets_e;
 	}
 
 	static int InsertMany(
@@ -203,11 +203,11 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &rule_sets_entry: rule_sets_entries) {
+		for (auto &rule_sets_e: rule_sets_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(rule_sets_entry.ruleset_id));
-			insert_values.push_back("'" + Strings::Escape(rule_sets_entry.name) + "'");
+			insert_values.push_back(std::to_string(rule_sets_e.ruleset_id));
+			insert_values.push_back("'" + Strings::Escape(rule_sets_e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -239,12 +239,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RuleSets entry{};
+			RuleSets e{};
 
-			entry.ruleset_id = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
+			e.ruleset_id = atoi(row[0]);
+			e.name       = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -265,12 +265,12 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RuleSets entry{};
+			RuleSets e{};
 
-			entry.ruleset_id = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
+			e.ruleset_id = atoi(row[0]);
+			e.name       = row[1] ? row[1] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -88,18 +88,18 @@ public:
 
 	static VeteranRewardTemplates NewEntity()
 	{
-		VeteranRewardTemplates entry{};
+		VeteranRewardTemplates e{};
 
-		entry.claim_id    = 0;
-		entry.name        = "";
-		entry.item_id     = 0;
-		entry.charges     = 0;
-		entry.reward_slot = 0;
+		e.claim_id    = 0;
+		e.name        = "";
+		e.item_id     = 0;
+		e.charges     = 0;
+		e.reward_slot = 0;
 
-		return entry;
+		return e;
 	}
 
-	static VeteranRewardTemplates GetVeteranRewardTemplatesEntry(
+	static VeteranRewardTemplates GetVeteranRewardTemplatese(
 		const std::vector<VeteranRewardTemplates> &veteran_reward_templatess,
 		int veteran_reward_templates_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			VeteranRewardTemplates entry{};
+			VeteranRewardTemplates e{};
 
-			entry.claim_id    = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.item_id     = atoi(row[2]);
-			entry.charges     = atoi(row[3]);
-			entry.reward_slot = atoi(row[4]);
+			e.claim_id    = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.item_id     = atoi(row[2]);
+			e.charges     = atoi(row[3]);
+			e.reward_slot = atoi(row[4]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		VeteranRewardTemplates veteran_reward_templates_entry
+		VeteranRewardTemplates veteran_reward_templates_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(veteran_reward_templates_entry.claim_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(veteran_reward_templates_entry.item_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(veteran_reward_templates_entry.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(veteran_reward_templates_entry.reward_slot));
+		update_values.push_back(columns[0] + " = " + std::to_string(veteran_reward_templates_e.claim_id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(veteran_reward_templates_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(veteran_reward_templates_e.item_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(veteran_reward_templates_e.charges));
+		update_values.push_back(columns[4] + " = " + std::to_string(veteran_reward_templates_e.reward_slot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				veteran_reward_templates_entry.claim_id
+				veteran_reward_templates_e.claim_id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static VeteranRewardTemplates InsertOne(
 		Database& db,
-		VeteranRewardTemplates veteran_reward_templates_entry
+		VeteranRewardTemplates veteran_reward_templates_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(veteran_reward_templates_entry.claim_id));
-		insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
-		insert_values.push_back(std::to_string(veteran_reward_templates_entry.item_id));
-		insert_values.push_back(std::to_string(veteran_reward_templates_entry.charges));
-		insert_values.push_back(std::to_string(veteran_reward_templates_entry.reward_slot));
+		insert_values.push_back(std::to_string(veteran_reward_templates_e.claim_id));
+		insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_e.name) + "'");
+		insert_values.push_back(std::to_string(veteran_reward_templates_e.item_id));
+		insert_values.push_back(std::to_string(veteran_reward_templates_e.charges));
+		insert_values.push_back(std::to_string(veteran_reward_templates_e.reward_slot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,13 +209,13 @@ public:
 		);
 
 		if (results.Success()) {
-			veteran_reward_templates_entry.claim_id = results.LastInsertedID();
-			return veteran_reward_templates_entry;
+			veteran_reward_templates_e.claim_id = results.LastInsertedID();
+			return veteran_reward_templates_e;
 		}
 
-		veteran_reward_templates_entry = NewEntity();
+		veteran_reward_templates_e = NewEntity();
 
-		return veteran_reward_templates_entry;
+		return veteran_reward_templates_e;
 	}
 
 	static int InsertMany(
@@ -225,14 +225,14 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &veteran_reward_templates_entry: veteran_reward_templates_entries) {
+		for (auto &veteran_reward_templates_e: veteran_reward_templates_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(veteran_reward_templates_entry.claim_id));
-			insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_entry.name) + "'");
-			insert_values.push_back(std::to_string(veteran_reward_templates_entry.item_id));
-			insert_values.push_back(std::to_string(veteran_reward_templates_entry.charges));
-			insert_values.push_back(std::to_string(veteran_reward_templates_entry.reward_slot));
+			insert_values.push_back(std::to_string(veteran_reward_templates_e.claim_id));
+			insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_e.name) + "'");
+			insert_values.push_back(std::to_string(veteran_reward_templates_e.item_id));
+			insert_values.push_back(std::to_string(veteran_reward_templates_e.charges));
+			insert_values.push_back(std::to_string(veteran_reward_templates_e.reward_slot));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -264,15 +264,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			VeteranRewardTemplates entry{};
+			VeteranRewardTemplates e{};
 
-			entry.claim_id    = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.item_id     = atoi(row[2]);
-			entry.charges     = atoi(row[3]);
-			entry.reward_slot = atoi(row[4]);
+			e.claim_id    = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.item_id     = atoi(row[2]);
+			e.charges     = atoi(row[3]);
+			e.reward_slot = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -293,15 +293,15 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			VeteranRewardTemplates entry{};
+			VeteranRewardTemplates e{};
 
-			entry.claim_id    = atoi(row[0]);
-			entry.name        = row[1] ? row[1] : "";
-			entry.item_id     = atoi(row[2]);
-			entry.charges     = atoi(row[3]);
-			entry.reward_slot = atoi(row[4]);
+			e.claim_id    = atoi(row[0]);
+			e.name        = row[1] ? row[1] : "";
+			e.item_id     = atoi(row[2]);
+			e.charges     = atoi(row[3]);
+			e.reward_slot = atoi(row[4]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

@@ -82,16 +82,16 @@ public:
 
 	static FactionList NewEntity()
 	{
-		FactionList entry{};
+		FactionList e{};
 
-		entry.id   = 0;
-		entry.name = "";
-		entry.base = 0;
+		e.id   = 0;
+		e.name = "";
+		e.base = 0;
 
-		return entry;
+		return e;
 	}
 
-	static FactionList GetFactionListEntry(
+	static FactionList GetFactionListe(
 		const std::vector<FactionList> &faction_lists,
 		int faction_list_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			FactionList entry{};
+			FactionList e{};
 
-			entry.id   = atoi(row[0]);
-			entry.name = row[1] ? row[1] : "";
-			entry.base = atoi(row[2]);
+			e.id   = atoi(row[0]);
+			e.name = row[1] ? row[1] : "";
+			e.base = atoi(row[2]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionList faction_list_entry
+		FactionList faction_list_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(faction_list_entry.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(faction_list_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_entry.base));
+		update_values.push_back(columns[0] + " = " + std::to_string(faction_list_e.id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(faction_list_e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_e.base));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				faction_list_entry.id
+				faction_list_e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static FactionList InsertOne(
 		Database& db,
-		FactionList faction_list_entry
+		FactionList faction_list_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(faction_list_entry.id));
-		insert_values.push_back("'" + Strings::Escape(faction_list_entry.name) + "'");
-		insert_values.push_back(std::to_string(faction_list_entry.base));
+		insert_values.push_back(std::to_string(faction_list_e.id));
+		insert_values.push_back("'" + Strings::Escape(faction_list_e.name) + "'");
+		insert_values.push_back(std::to_string(faction_list_e.base));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,13 +195,13 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_list_entry.id = results.LastInsertedID();
-			return faction_list_entry;
+			faction_list_e.id = results.LastInsertedID();
+			return faction_list_e;
 		}
 
-		faction_list_entry = NewEntity();
+		faction_list_e = NewEntity();
 
-		return faction_list_entry;
+		return faction_list_e;
 	}
 
 	static int InsertMany(
@@ -211,12 +211,12 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &faction_list_entry: faction_list_entries) {
+		for (auto &faction_list_e: faction_list_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(faction_list_entry.id));
-			insert_values.push_back("'" + Strings::Escape(faction_list_entry.name) + "'");
-			insert_values.push_back(std::to_string(faction_list_entry.base));
+			insert_values.push_back(std::to_string(faction_list_e.id));
+			insert_values.push_back("'" + Strings::Escape(faction_list_e.name) + "'");
+			insert_values.push_back(std::to_string(faction_list_e.base));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -248,13 +248,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionList entry{};
+			FactionList e{};
 
-			entry.id   = atoi(row[0]);
-			entry.name = row[1] ? row[1] : "";
-			entry.base = atoi(row[2]);
+			e.id   = atoi(row[0]);
+			e.name = row[1] ? row[1] : "";
+			e.base = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -275,13 +275,13 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionList entry{};
+			FactionList e{};
 
-			entry.id   = atoi(row[0]);
-			entry.name = row[1] ? row[1] : "";
-			entry.base = atoi(row[2]);
+			e.id   = atoi(row[0]);
+			e.name = row[1] ? row[1] : "";
+			e.base = atoi(row[2]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;

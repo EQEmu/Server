@@ -109,25 +109,25 @@ public:
 
 	static ObjectContents NewEntity()
 	{
-		ObjectContents entry{};
+		ObjectContents e{};
 
-		entry.zoneid   = 0;
-		entry.parentid = 0;
-		entry.bagidx   = 0;
-		entry.itemid   = 0;
-		entry.charges  = 0;
-		entry.droptime = 0;
-		entry.augslot1 = 0;
-		entry.augslot2 = 0;
-		entry.augslot3 = 0;
-		entry.augslot4 = 0;
-		entry.augslot5 = 0;
-		entry.augslot6 = 0;
+		e.zoneid   = 0;
+		e.parentid = 0;
+		e.bagidx   = 0;
+		e.itemid   = 0;
+		e.charges  = 0;
+		e.droptime = 0;
+		e.augslot1 = 0;
+		e.augslot2 = 0;
+		e.augslot3 = 0;
+		e.augslot4 = 0;
+		e.augslot5 = 0;
+		e.augslot6 = 0;
 
-		return entry;
+		return e;
 	}
 
-	static ObjectContents GetObjectContentsEntry(
+	static ObjectContents GetObjectContentse(
 		const std::vector<ObjectContents> &object_contentss,
 		int object_contents_id
 	)
@@ -156,22 +156,22 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			ObjectContents entry{};
+			ObjectContents e{};
 
-			entry.zoneid   = atoi(row[0]);
-			entry.parentid = atoi(row[1]);
-			entry.bagidx   = atoi(row[2]);
-			entry.itemid   = atoi(row[3]);
-			entry.charges  = atoi(row[4]);
-			entry.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			entry.augslot1 = atoi(row[6]);
-			entry.augslot2 = atoi(row[7]);
-			entry.augslot3 = atoi(row[8]);
-			entry.augslot4 = atoi(row[9]);
-			entry.augslot5 = atoi(row[10]);
-			entry.augslot6 = atoi(row[11]);
+			e.zoneid   = atoi(row[0]);
+			e.parentid = atoi(row[1]);
+			e.bagidx   = atoi(row[2]);
+			e.itemid   = atoi(row[3]);
+			e.charges  = atoi(row[4]);
+			e.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.augslot1 = atoi(row[6]);
+			e.augslot2 = atoi(row[7]);
+			e.augslot3 = atoi(row[8]);
+			e.augslot4 = atoi(row[9]);
+			e.augslot5 = atoi(row[10]);
+			e.augslot6 = atoi(row[11]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -196,25 +196,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ObjectContents object_contents_entry
+		ObjectContents object_contents_e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(object_contents_entry.zoneid));
-		update_values.push_back(columns[1] + " = " + std::to_string(object_contents_entry.parentid));
-		update_values.push_back(columns[2] + " = " + std::to_string(object_contents_entry.bagidx));
-		update_values.push_back(columns[3] + " = " + std::to_string(object_contents_entry.itemid));
-		update_values.push_back(columns[4] + " = " + std::to_string(object_contents_entry.charges));
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (object_contents_entry.droptime > 0 ? std::to_string(object_contents_entry.droptime) : "null") + ")");
-		update_values.push_back(columns[6] + " = " + std::to_string(object_contents_entry.augslot1));
-		update_values.push_back(columns[7] + " = " + std::to_string(object_contents_entry.augslot2));
-		update_values.push_back(columns[8] + " = " + std::to_string(object_contents_entry.augslot3));
-		update_values.push_back(columns[9] + " = " + std::to_string(object_contents_entry.augslot4));
-		update_values.push_back(columns[10] + " = " + std::to_string(object_contents_entry.augslot5));
-		update_values.push_back(columns[11] + " = " + std::to_string(object_contents_entry.augslot6));
+		update_values.push_back(columns[0] + " = " + std::to_string(object_contents_e.zoneid));
+		update_values.push_back(columns[1] + " = " + std::to_string(object_contents_e.parentid));
+		update_values.push_back(columns[2] + " = " + std::to_string(object_contents_e.bagidx));
+		update_values.push_back(columns[3] + " = " + std::to_string(object_contents_e.itemid));
+		update_values.push_back(columns[4] + " = " + std::to_string(object_contents_e.charges));
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (object_contents_e.droptime > 0 ? std::to_string(object_contents_e.droptime) : "null") + ")");
+		update_values.push_back(columns[6] + " = " + std::to_string(object_contents_e.augslot1));
+		update_values.push_back(columns[7] + " = " + std::to_string(object_contents_e.augslot2));
+		update_values.push_back(columns[8] + " = " + std::to_string(object_contents_e.augslot3));
+		update_values.push_back(columns[9] + " = " + std::to_string(object_contents_e.augslot4));
+		update_values.push_back(columns[10] + " = " + std::to_string(object_contents_e.augslot5));
+		update_values.push_back(columns[11] + " = " + std::to_string(object_contents_e.augslot6));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,7 +222,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				object_contents_entry.parentid
+				object_contents_e.parentid
 			)
 		);
 
@@ -231,23 +231,23 @@ public:
 
 	static ObjectContents InsertOne(
 		Database& db,
-		ObjectContents object_contents_entry
+		ObjectContents object_contents_e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(object_contents_entry.zoneid));
-		insert_values.push_back(std::to_string(object_contents_entry.parentid));
-		insert_values.push_back(std::to_string(object_contents_entry.bagidx));
-		insert_values.push_back(std::to_string(object_contents_entry.itemid));
-		insert_values.push_back(std::to_string(object_contents_entry.charges));
-		insert_values.push_back("FROM_UNIXTIME(" + (object_contents_entry.droptime > 0 ? std::to_string(object_contents_entry.droptime) : "null") + ")");
-		insert_values.push_back(std::to_string(object_contents_entry.augslot1));
-		insert_values.push_back(std::to_string(object_contents_entry.augslot2));
-		insert_values.push_back(std::to_string(object_contents_entry.augslot3));
-		insert_values.push_back(std::to_string(object_contents_entry.augslot4));
-		insert_values.push_back(std::to_string(object_contents_entry.augslot5));
-		insert_values.push_back(std::to_string(object_contents_entry.augslot6));
+		insert_values.push_back(std::to_string(object_contents_e.zoneid));
+		insert_values.push_back(std::to_string(object_contents_e.parentid));
+		insert_values.push_back(std::to_string(object_contents_e.bagidx));
+		insert_values.push_back(std::to_string(object_contents_e.itemid));
+		insert_values.push_back(std::to_string(object_contents_e.charges));
+		insert_values.push_back("FROM_UNIXTIME(" + (object_contents_e.droptime > 0 ? std::to_string(object_contents_e.droptime) : "null") + ")");
+		insert_values.push_back(std::to_string(object_contents_e.augslot1));
+		insert_values.push_back(std::to_string(object_contents_e.augslot2));
+		insert_values.push_back(std::to_string(object_contents_e.augslot3));
+		insert_values.push_back(std::to_string(object_contents_e.augslot4));
+		insert_values.push_back(std::to_string(object_contents_e.augslot5));
+		insert_values.push_back(std::to_string(object_contents_e.augslot6));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -258,13 +258,13 @@ public:
 		);
 
 		if (results.Success()) {
-			object_contents_entry.parentid = results.LastInsertedID();
-			return object_contents_entry;
+			object_contents_e.parentid = results.LastInsertedID();
+			return object_contents_e;
 		}
 
-		object_contents_entry = NewEntity();
+		object_contents_e = NewEntity();
 
-		return object_contents_entry;
+		return object_contents_e;
 	}
 
 	static int InsertMany(
@@ -274,21 +274,21 @@ public:
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &object_contents_entry: object_contents_entries) {
+		for (auto &object_contents_e: object_contents_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(object_contents_entry.zoneid));
-			insert_values.push_back(std::to_string(object_contents_entry.parentid));
-			insert_values.push_back(std::to_string(object_contents_entry.bagidx));
-			insert_values.push_back(std::to_string(object_contents_entry.itemid));
-			insert_values.push_back(std::to_string(object_contents_entry.charges));
-			insert_values.push_back("FROM_UNIXTIME(" + (object_contents_entry.droptime > 0 ? std::to_string(object_contents_entry.droptime) : "null") + ")");
-			insert_values.push_back(std::to_string(object_contents_entry.augslot1));
-			insert_values.push_back(std::to_string(object_contents_entry.augslot2));
-			insert_values.push_back(std::to_string(object_contents_entry.augslot3));
-			insert_values.push_back(std::to_string(object_contents_entry.augslot4));
-			insert_values.push_back(std::to_string(object_contents_entry.augslot5));
-			insert_values.push_back(std::to_string(object_contents_entry.augslot6));
+			insert_values.push_back(std::to_string(object_contents_e.zoneid));
+			insert_values.push_back(std::to_string(object_contents_e.parentid));
+			insert_values.push_back(std::to_string(object_contents_e.bagidx));
+			insert_values.push_back(std::to_string(object_contents_e.itemid));
+			insert_values.push_back(std::to_string(object_contents_e.charges));
+			insert_values.push_back("FROM_UNIXTIME(" + (object_contents_e.droptime > 0 ? std::to_string(object_contents_e.droptime) : "null") + ")");
+			insert_values.push_back(std::to_string(object_contents_e.augslot1));
+			insert_values.push_back(std::to_string(object_contents_e.augslot2));
+			insert_values.push_back(std::to_string(object_contents_e.augslot3));
+			insert_values.push_back(std::to_string(object_contents_e.augslot4));
+			insert_values.push_back(std::to_string(object_contents_e.augslot5));
+			insert_values.push_back(std::to_string(object_contents_e.augslot6));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -320,22 +320,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ObjectContents entry{};
+			ObjectContents e{};
 
-			entry.zoneid   = atoi(row[0]);
-			entry.parentid = atoi(row[1]);
-			entry.bagidx   = atoi(row[2]);
-			entry.itemid   = atoi(row[3]);
-			entry.charges  = atoi(row[4]);
-			entry.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			entry.augslot1 = atoi(row[6]);
-			entry.augslot2 = atoi(row[7]);
-			entry.augslot3 = atoi(row[8]);
-			entry.augslot4 = atoi(row[9]);
-			entry.augslot5 = atoi(row[10]);
-			entry.augslot6 = atoi(row[11]);
+			e.zoneid   = atoi(row[0]);
+			e.parentid = atoi(row[1]);
+			e.bagidx   = atoi(row[2]);
+			e.itemid   = atoi(row[3]);
+			e.charges  = atoi(row[4]);
+			e.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.augslot1 = atoi(row[6]);
+			e.augslot2 = atoi(row[7]);
+			e.augslot3 = atoi(row[8]);
+			e.augslot4 = atoi(row[9]);
+			e.augslot5 = atoi(row[10]);
+			e.augslot6 = atoi(row[11]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
@@ -356,22 +356,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ObjectContents entry{};
+			ObjectContents e{};
 
-			entry.zoneid   = atoi(row[0]);
-			entry.parentid = atoi(row[1]);
-			entry.bagidx   = atoi(row[2]);
-			entry.itemid   = atoi(row[3]);
-			entry.charges  = atoi(row[4]);
-			entry.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			entry.augslot1 = atoi(row[6]);
-			entry.augslot2 = atoi(row[7]);
-			entry.augslot3 = atoi(row[8]);
-			entry.augslot4 = atoi(row[9]);
-			entry.augslot5 = atoi(row[10]);
-			entry.augslot6 = atoi(row[11]);
+			e.zoneid   = atoi(row[0]);
+			e.parentid = atoi(row[1]);
+			e.bagidx   = atoi(row[2]);
+			e.itemid   = atoi(row[3]);
+			e.charges  = atoi(row[4]);
+			e.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
+			e.augslot1 = atoi(row[6]);
+			e.augslot2 = atoi(row[7]);
+			e.augslot3 = atoi(row[8]);
+			e.augslot4 = atoi(row[9]);
+			e.augslot5 = atoi(row[10]);
+			e.augslot6 = atoi(row[11]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
