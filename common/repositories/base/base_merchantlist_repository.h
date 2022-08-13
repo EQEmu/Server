@@ -27,6 +27,9 @@ public:
 		int         alt_currency_cost;
 		int         classes_required;
 		int         probability;
+		std::string bucket_name;
+		std::string bucket_value;
+		int         bucket_comparison;
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
@@ -49,6 +52,9 @@ public:
 			"alt_currency_cost",
 			"classes_required",
 			"probability",
+			"bucket_name",
+			"bucket_value",
+			"bucket_comparison",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -67,6 +73,9 @@ public:
 			"alt_currency_cost",
 			"classes_required",
 			"probability",
+			"bucket_name",
+			"bucket_value",
+			"bucket_comparison",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -119,6 +128,9 @@ public:
 		entry.alt_currency_cost      = 0;
 		entry.classes_required       = 65535;
 		entry.probability            = 100;
+		entry.bucket_name            = "";
+		entry.bucket_value           = "";
+		entry.bucket_comparison      = 0;
 		entry.min_expansion          = -1;
 		entry.max_expansion          = -1;
 		entry.content_flags          = "";
@@ -166,10 +178,13 @@ public:
 			entry.alt_currency_cost      = atoi(row[5]);
 			entry.classes_required       = atoi(row[6]);
 			entry.probability            = atoi(row[7]);
-			entry.min_expansion          = atoi(row[8]);
-			entry.max_expansion          = atoi(row[9]);
-			entry.content_flags          = row[10] ? row[10] : "";
-			entry.content_flags_disabled = row[11] ? row[11] : "";
+			entry.bucket_name            = row[8] ? row[8] : "";
+			entry.bucket_value           = row[9] ? row[9] : "";
+			entry.bucket_comparison      = atoi(row[10]);
+			entry.min_expansion          = atoi(row[11]);
+			entry.max_expansion          = atoi(row[12]);
+			entry.content_flags          = row[13] ? row[13] : "";
+			entry.content_flags_disabled = row[14] ? row[14] : "";
 
 			return entry;
 		}
@@ -211,10 +226,13 @@ public:
 		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_entry.alt_currency_cost));
 		update_values.push_back(columns[6] + " = " + std::to_string(merchantlist_entry.classes_required));
 		update_values.push_back(columns[7] + " = " + std::to_string(merchantlist_entry.probability));
-		update_values.push_back(columns[8] + " = " + std::to_string(merchantlist_entry.min_expansion));
-		update_values.push_back(columns[9] + " = " + std::to_string(merchantlist_entry.max_expansion));
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(merchantlist_entry.content_flags) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(merchantlist_entry.bucket_name) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(merchantlist_entry.bucket_value) + "'");
+		update_values.push_back(columns[10] + " = " + std::to_string(merchantlist_entry.bucket_comparison));
+		update_values.push_back(columns[11] + " = " + std::to_string(merchantlist_entry.min_expansion));
+		update_values.push_back(columns[12] + " = " + std::to_string(merchantlist_entry.max_expansion));
+		update_values.push_back(columns[13] + " = '" + Strings::Escape(merchantlist_entry.content_flags) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -244,6 +262,9 @@ public:
 		insert_values.push_back(std::to_string(merchantlist_entry.alt_currency_cost));
 		insert_values.push_back(std::to_string(merchantlist_entry.classes_required));
 		insert_values.push_back(std::to_string(merchantlist_entry.probability));
+		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_value) + "'");
+		insert_values.push_back(std::to_string(merchantlist_entry.bucket_comparison));
 		insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
 		insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
 		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
@@ -285,6 +306,9 @@ public:
 			insert_values.push_back(std::to_string(merchantlist_entry.alt_currency_cost));
 			insert_values.push_back(std::to_string(merchantlist_entry.classes_required));
 			insert_values.push_back(std::to_string(merchantlist_entry.probability));
+			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.bucket_value) + "'");
+			insert_values.push_back(std::to_string(merchantlist_entry.bucket_comparison));
 			insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
 			insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
 			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
@@ -330,10 +354,13 @@ public:
 			entry.alt_currency_cost      = atoi(row[5]);
 			entry.classes_required       = atoi(row[6]);
 			entry.probability            = atoi(row[7]);
-			entry.min_expansion          = atoi(row[8]);
-			entry.max_expansion          = atoi(row[9]);
-			entry.content_flags          = row[10] ? row[10] : "";
-			entry.content_flags_disabled = row[11] ? row[11] : "";
+			entry.bucket_name            = row[8] ? row[8] : "";
+			entry.bucket_value           = row[9] ? row[9] : "";
+			entry.bucket_comparison      = atoi(row[10]);
+			entry.min_expansion          = atoi(row[11]);
+			entry.max_expansion          = atoi(row[12]);
+			entry.content_flags          = row[13] ? row[13] : "";
+			entry.content_flags_disabled = row[14] ? row[14] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -366,10 +393,13 @@ public:
 			entry.alt_currency_cost      = atoi(row[5]);
 			entry.classes_required       = atoi(row[6]);
 			entry.probability            = atoi(row[7]);
-			entry.min_expansion          = atoi(row[8]);
-			entry.max_expansion          = atoi(row[9]);
-			entry.content_flags          = row[10] ? row[10] : "";
-			entry.content_flags_disabled = row[11] ? row[11] : "";
+			entry.bucket_name            = row[8] ? row[8] : "";
+			entry.bucket_value           = row[9] ? row[9] : "";
+			entry.bucket_comparison      = atoi(row[10]);
+			entry.min_expansion          = atoi(row[11]);
+			entry.max_expansion          = atoi(row[12]);
+			entry.content_flags          = row[13] ? row[13] : "";
+			entry.content_flags_disabled = row[14] ? row[14] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -400,6 +430,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT MAX({}) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string& where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

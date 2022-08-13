@@ -200,7 +200,7 @@ namespace WorldserverCommandHandler {
 		for (const auto          &table: version_tables) {
 			version_tables_json.append(table);
 		}
-		
+
 		Json::Value              bot_tables_json;
 		std::vector<std::string> bot_tables = DatabaseSchema::GetBotTables();
 		for (const auto          &table: bot_tables) {
@@ -429,7 +429,7 @@ namespace WorldserverCommandHandler {
 		}
 
 		/**
-		 * Fetch all
+		 * Insert Many
 		 */
 		int inserted_count = InstanceListRepository::InsertMany(database, instance_lists);
 
@@ -438,6 +438,11 @@ namespace WorldserverCommandHandler {
 		for (auto &entry: InstanceListRepository::GetWhere(database, fmt::format("zone = {}", 999))) {
 			LogInfo("Iterating through entry id [{}] zone [{}]", entry.id, entry.zone);
 		}
+
+		LogInfo("[Max ID] {}", InstanceListRepository::GetMaxId(database));
+		LogInfo("[Count] {}", InstanceListRepository::Count(database));
+		LogInfo("[Count Where] {}", InstanceListRepository::Count(database, "zone = 999"));
+		LogInfo("[Count Where] {}", InstanceListRepository::Count(database, "zone = 777"));
 
 		/**
 		 * Delete where

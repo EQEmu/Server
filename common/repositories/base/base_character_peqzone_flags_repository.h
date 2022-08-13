@@ -9,20 +9,18 @@
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
 
-#ifndef EQEMU_BASE_NPC_FACTION_REPOSITORY_H
-#define EQEMU_BASE_NPC_FACTION_REPOSITORY_H
+#ifndef EQEMU_BASE_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
+#define EQEMU_BASE_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
 
-class BaseNpcFactionRepository {
+class BaseCharacterPeqzoneFlagsRepository {
 public:
-	struct NpcFaction {
-		int         id;
-		std::string name;
-		int         primaryfaction;
-		int         ignore_primary_assist;
+	struct CharacterPeqzoneFlags {
+		int id;
+		int zone_id;
 	};
 
 	static std::string PrimaryKey()
@@ -34,9 +32,7 @@ public:
 	{
 		return {
 			"id",
-			"name",
-			"primaryfaction",
-			"ignore_primary_assist",
+			"zone_id",
 		};
 	}
 
@@ -44,9 +40,7 @@ public:
 	{
 		return {
 			"id",
-			"name",
-			"primaryfaction",
-			"ignore_primary_assist",
+			"zone_id",
 		};
 	}
 
@@ -62,7 +56,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("npc_faction");
+		return std::string("character_peqzone_flags");
 	}
 
 	static std::string BaseSelect()
@@ -83,53 +77,49 @@ public:
 		);
 	}
 
-	static NpcFaction NewEntity()
+	static CharacterPeqzoneFlags NewEntity()
 	{
-		NpcFaction entry{};
+		CharacterPeqzoneFlags entry{};
 
-		entry.id                    = 0;
-		entry.name                  = "";
-		entry.primaryfaction        = 0;
-		entry.ignore_primary_assist = 0;
+		entry.id      = 0;
+		entry.zone_id = 0;
 
 		return entry;
 	}
 
-	static NpcFaction GetNpcFactionEntry(
-		const std::vector<NpcFaction> &npc_factions,
-		int npc_faction_id
+	static CharacterPeqzoneFlags GetCharacterPeqzoneFlagsEntry(
+		const std::vector<CharacterPeqzoneFlags> &character_peqzone_flagss,
+		int character_peqzone_flags_id
 	)
 	{
-		for (auto &npc_faction : npc_factions) {
-			if (npc_faction.id == npc_faction_id) {
-				return npc_faction;
+		for (auto &character_peqzone_flags : character_peqzone_flagss) {
+			if (character_peqzone_flags.id == character_peqzone_flags_id) {
+				return character_peqzone_flags;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static NpcFaction FindOne(
+	static CharacterPeqzoneFlags FindOne(
 		Database& db,
-		int npc_faction_id
+		int character_peqzone_flags_id
 	)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				npc_faction_id
+				character_peqzone_flags_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			NpcFaction entry{};
+			CharacterPeqzoneFlags entry{};
 
-			entry.id                    = atoi(row[0]);
-			entry.name                  = row[1] ? row[1] : "";
-			entry.primaryfaction        = atoi(row[2]);
-			entry.ignore_primary_assist = atoi(row[3]);
+			entry.id      = atoi(row[0]);
+			entry.zone_id = atoi(row[1]);
 
 			return entry;
 		}
@@ -139,7 +129,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int npc_faction_id
+		int character_peqzone_flags_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -147,7 +137,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				npc_faction_id
+				character_peqzone_flags_id
 			)
 		);
 
@@ -156,16 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcFaction npc_faction_entry
+		CharacterPeqzoneFlags character_peqzone_flags_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_faction_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_faction_entry.primaryfaction));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_faction_entry.ignore_primary_assist));
+		update_values.push_back(columns[0] + " = " + std::to_string(character_peqzone_flags_entry.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(character_peqzone_flags_entry.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,24 +162,22 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_faction_entry.id
+				character_peqzone_flags_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static NpcFaction InsertOne(
+	static CharacterPeqzoneFlags InsertOne(
 		Database& db,
-		NpcFaction npc_faction_entry
+		CharacterPeqzoneFlags character_peqzone_flags_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_faction_entry.id));
-		insert_values.push_back("'" + Strings::Escape(npc_faction_entry.name) + "'");
-		insert_values.push_back(std::to_string(npc_faction_entry.primaryfaction));
-		insert_values.push_back(std::to_string(npc_faction_entry.ignore_primary_assist));
+		insert_values.push_back(std::to_string(character_peqzone_flags_entry.id));
+		insert_values.push_back(std::to_string(character_peqzone_flags_entry.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_faction_entry.id = results.LastInsertedID();
-			return npc_faction_entry;
+			character_peqzone_flags_entry.id = results.LastInsertedID();
+			return character_peqzone_flags_entry;
 		}
 
-		npc_faction_entry = NewEntity();
+		character_peqzone_flags_entry = NewEntity();
 
-		return npc_faction_entry;
+		return character_peqzone_flags_entry;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcFaction> npc_faction_entries
+		std::vector<CharacterPeqzoneFlags> character_peqzone_flags_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_faction_entry: npc_faction_entries) {
+		for (auto &character_peqzone_flags_entry: character_peqzone_flags_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_faction_entry.id));
-			insert_values.push_back("'" + Strings::Escape(npc_faction_entry.name) + "'");
-			insert_values.push_back(std::to_string(npc_faction_entry.primaryfaction));
-			insert_values.push_back(std::to_string(npc_faction_entry.ignore_primary_assist));
+			insert_values.push_back(std::to_string(character_peqzone_flags_entry.id));
+			insert_values.push_back(std::to_string(character_peqzone_flags_entry.zone_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
@@ -241,9 +226,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<NpcFaction> All(Database& db)
+	static std::vector<CharacterPeqzoneFlags> All(Database& db)
 	{
-		std::vector<NpcFaction> all_entries;
+		std::vector<CharacterPeqzoneFlags> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -255,12 +240,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcFaction entry{};
+			CharacterPeqzoneFlags entry{};
 
-			entry.id                    = atoi(row[0]);
-			entry.name                  = row[1] ? row[1] : "";
-			entry.primaryfaction        = atoi(row[2]);
-			entry.ignore_primary_assist = atoi(row[3]);
+			entry.id      = atoi(row[0]);
+			entry.zone_id = atoi(row[1]);
 
 			all_entries.push_back(entry);
 		}
@@ -268,9 +251,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<NpcFaction> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterPeqzoneFlags> GetWhere(Database& db, std::string where_filter)
 	{
-		std::vector<NpcFaction> all_entries;
+		std::vector<CharacterPeqzoneFlags> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -283,12 +266,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcFaction entry{};
+			CharacterPeqzoneFlags entry{};
 
-			entry.id                    = atoi(row[0]);
-			entry.name                  = row[1] ? row[1] : "";
-			entry.primaryfaction        = atoi(row[2]);
-			entry.ignore_primary_assist = atoi(row[3]);
+			entry.id      = atoi(row[0]);
+			entry.zone_id = atoi(row[1]);
 
 			all_entries.push_back(entry);
 		}
@@ -349,4 +330,4 @@ public:
 
 };
 
-#endif //EQEMU_BASE_NPC_FACTION_REPOSITORY_H
+#endif //EQEMU_BASE_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H

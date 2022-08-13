@@ -21,6 +21,8 @@ public:
 	struct MerchantlistTemp {
 		int npcid;
 		int slot;
+		int zone_id;
+		int instance_id;
 		int itemid;
 		int charges;
 	};
@@ -35,6 +37,8 @@ public:
 		return {
 			"npcid",
 			"slot",
+			"zone_id",
+			"instance_id",
 			"itemid",
 			"charges",
 		};
@@ -45,6 +49,8 @@ public:
 		return {
 			"npcid",
 			"slot",
+			"zone_id",
+			"instance_id",
 			"itemid",
 			"charges",
 		};
@@ -87,10 +93,12 @@ public:
 	{
 		MerchantlistTemp entry{};
 
-		entry.npcid   = 0;
-		entry.slot    = 0;
-		entry.itemid  = 0;
-		entry.charges = 1;
+		entry.npcid       = 0;
+		entry.slot        = 0;
+		entry.zone_id     = 0;
+		entry.instance_id = 0;
+		entry.itemid      = 0;
+		entry.charges     = 1;
 
 		return entry;
 	}
@@ -126,10 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			MerchantlistTemp entry{};
 
-			entry.npcid   = atoi(row[0]);
-			entry.slot    = atoi(row[1]);
-			entry.itemid  = atoi(row[2]);
-			entry.charges = atoi(row[3]);
+			entry.npcid       = atoi(row[0]);
+			entry.slot        = atoi(row[1]);
+			entry.zone_id     = atoi(row[2]);
+			entry.instance_id = atoi(row[3]);
+			entry.itemid      = atoi(row[4]);
+			entry.charges     = atoi(row[5]);
 
 			return entry;
 		}
@@ -165,8 +175,10 @@ public:
 
 		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_temp_entry.npcid));
 		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_temp_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_temp_entry.itemid));
-		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_temp_entry.charges));
+		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_temp_entry.zone_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_temp_entry.instance_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_temp_entry.itemid));
+		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_temp_entry.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -190,6 +202,8 @@ public:
 
 		insert_values.push_back(std::to_string(merchantlist_temp_entry.npcid));
 		insert_values.push_back(std::to_string(merchantlist_temp_entry.slot));
+		insert_values.push_back(std::to_string(merchantlist_temp_entry.zone_id));
+		insert_values.push_back(std::to_string(merchantlist_temp_entry.instance_id));
 		insert_values.push_back(std::to_string(merchantlist_temp_entry.itemid));
 		insert_values.push_back(std::to_string(merchantlist_temp_entry.charges));
 
@@ -223,6 +237,8 @@ public:
 
 			insert_values.push_back(std::to_string(merchantlist_temp_entry.npcid));
 			insert_values.push_back(std::to_string(merchantlist_temp_entry.slot));
+			insert_values.push_back(std::to_string(merchantlist_temp_entry.zone_id));
+			insert_values.push_back(std::to_string(merchantlist_temp_entry.instance_id));
 			insert_values.push_back(std::to_string(merchantlist_temp_entry.itemid));
 			insert_values.push_back(std::to_string(merchantlist_temp_entry.charges));
 
@@ -258,10 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MerchantlistTemp entry{};
 
-			entry.npcid   = atoi(row[0]);
-			entry.slot    = atoi(row[1]);
-			entry.itemid  = atoi(row[2]);
-			entry.charges = atoi(row[3]);
+			entry.npcid       = atoi(row[0]);
+			entry.slot        = atoi(row[1]);
+			entry.zone_id     = atoi(row[2]);
+			entry.instance_id = atoi(row[3]);
+			entry.itemid      = atoi(row[4]);
+			entry.charges     = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
@@ -286,10 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MerchantlistTemp entry{};
 
-			entry.npcid   = atoi(row[0]);
-			entry.slot    = atoi(row[1]);
-			entry.itemid  = atoi(row[2]);
-			entry.charges = atoi(row[3]);
+			entry.npcid       = atoi(row[0]);
+			entry.slot        = atoi(row[1]);
+			entry.zone_id     = atoi(row[2]);
+			entry.instance_id = atoi(row[3]);
+			entry.itemid      = atoi(row[4]);
+			entry.charges     = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
@@ -320,6 +340,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT MAX({}) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string& where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

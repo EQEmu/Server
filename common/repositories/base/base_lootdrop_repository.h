@@ -341,6 +341,32 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT MAX({}) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string& where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
 };
 
 #endif //EQEMU_BASE_LOOTDROP_REPOSITORY_H
