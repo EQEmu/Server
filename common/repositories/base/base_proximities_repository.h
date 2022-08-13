@@ -97,21 +97,21 @@ public:
 
 	static Proximities NewEntity()
 	{
-		Proximities entry{};
+		Proximities e{};
 
-		entry.zoneid    = 0;
-		entry.exploreid = 0;
-		entry.minx      = 0.000000;
-		entry.maxx      = 0.000000;
-		entry.miny      = 0.000000;
-		entry.maxy      = 0.000000;
-		entry.minz      = 0.000000;
-		entry.maxz      = 0.000000;
+		e.zoneid    = 0;
+		e.exploreid = 0;
+		e.minx      = 0.000000;
+		e.maxx      = 0.000000;
+		e.miny      = 0.000000;
+		e.maxy      = 0.000000;
+		e.minz      = 0.000000;
+		e.maxz      = 0.000000;
 
-		return entry;
+		return e;
 	}
 
-	static Proximities GetProximitiesEntry(
+	static Proximities GetProximities(
 		const std::vector<Proximities> &proximitiess,
 		int proximities_id
 	)
@@ -140,18 +140,18 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Proximities entry{};
+			Proximities e{};
 
-			entry.zoneid    = atoi(row[0]);
-			entry.exploreid = atoi(row[1]);
-			entry.minx      = static_cast<float>(atof(row[2]));
-			entry.maxx      = static_cast<float>(atof(row[3]));
-			entry.miny      = static_cast<float>(atof(row[4]));
-			entry.maxy      = static_cast<float>(atof(row[5]));
-			entry.minz      = static_cast<float>(atof(row[6]));
-			entry.maxz      = static_cast<float>(atof(row[7]));
+			e.zoneid    = atoi(row[0]);
+			e.exploreid = atoi(row[1]);
+			e.minx      = static_cast<float>(atof(row[2]));
+			e.maxx      = static_cast<float>(atof(row[3]));
+			e.miny      = static_cast<float>(atof(row[4]));
+			e.maxy      = static_cast<float>(atof(row[5]));
+			e.minz      = static_cast<float>(atof(row[6]));
+			e.maxz      = static_cast<float>(atof(row[7]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -176,29 +176,29 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Proximities proximities_entry
+		const Proximities &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(proximities_entry.zoneid));
-		update_values.push_back(columns[1] + " = " + std::to_string(proximities_entry.exploreid));
-		update_values.push_back(columns[2] + " = " + std::to_string(proximities_entry.minx));
-		update_values.push_back(columns[3] + " = " + std::to_string(proximities_entry.maxx));
-		update_values.push_back(columns[4] + " = " + std::to_string(proximities_entry.miny));
-		update_values.push_back(columns[5] + " = " + std::to_string(proximities_entry.maxy));
-		update_values.push_back(columns[6] + " = " + std::to_string(proximities_entry.minz));
-		update_values.push_back(columns[7] + " = " + std::to_string(proximities_entry.maxz));
+		v.push_back(columns[0] + " = " + std::to_string(e.zoneid));
+		v.push_back(columns[1] + " = " + std::to_string(e.exploreid));
+		v.push_back(columns[2] + " = " + std::to_string(e.minx));
+		v.push_back(columns[3] + " = " + std::to_string(e.maxx));
+		v.push_back(columns[4] + " = " + std::to_string(e.miny));
+		v.push_back(columns[5] + " = " + std::to_string(e.maxy));
+		v.push_back(columns[6] + " = " + std::to_string(e.minz));
+		v.push_back(columns[7] + " = " + std::to_string(e.maxz));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				proximities_entry.zoneid
+				e.zoneid
 			)
 		);
 
@@ -207,61 +207,61 @@ public:
 
 	static Proximities InsertOne(
 		Database& db,
-		Proximities proximities_entry
+		Proximities e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(proximities_entry.zoneid));
-		insert_values.push_back(std::to_string(proximities_entry.exploreid));
-		insert_values.push_back(std::to_string(proximities_entry.minx));
-		insert_values.push_back(std::to_string(proximities_entry.maxx));
-		insert_values.push_back(std::to_string(proximities_entry.miny));
-		insert_values.push_back(std::to_string(proximities_entry.maxy));
-		insert_values.push_back(std::to_string(proximities_entry.minz));
-		insert_values.push_back(std::to_string(proximities_entry.maxz));
+		v.push_back(std::to_string(e.zoneid));
+		v.push_back(std::to_string(e.exploreid));
+		v.push_back(std::to_string(e.minx));
+		v.push_back(std::to_string(e.maxx));
+		v.push_back(std::to_string(e.miny));
+		v.push_back(std::to_string(e.maxy));
+		v.push_back(std::to_string(e.minz));
+		v.push_back(std::to_string(e.maxz));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			proximities_entry.zoneid = results.LastInsertedID();
-			return proximities_entry;
+			e.zoneid = results.LastInsertedID();
+			return e;
 		}
 
-		proximities_entry = NewEntity();
+		e = NewEntity();
 
-		return proximities_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Proximities> proximities_entries
+		const std::vector<Proximities> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &proximities_entry: proximities_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(proximities_entry.zoneid));
-			insert_values.push_back(std::to_string(proximities_entry.exploreid));
-			insert_values.push_back(std::to_string(proximities_entry.minx));
-			insert_values.push_back(std::to_string(proximities_entry.maxx));
-			insert_values.push_back(std::to_string(proximities_entry.miny));
-			insert_values.push_back(std::to_string(proximities_entry.maxy));
-			insert_values.push_back(std::to_string(proximities_entry.minz));
-			insert_values.push_back(std::to_string(proximities_entry.maxz));
+			v.push_back(std::to_string(e.zoneid));
+			v.push_back(std::to_string(e.exploreid));
+			v.push_back(std::to_string(e.minx));
+			v.push_back(std::to_string(e.maxx));
+			v.push_back(std::to_string(e.miny));
+			v.push_back(std::to_string(e.maxy));
+			v.push_back(std::to_string(e.minz));
+			v.push_back(std::to_string(e.maxz));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -288,24 +288,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Proximities entry{};
+			Proximities e{};
 
-			entry.zoneid    = atoi(row[0]);
-			entry.exploreid = atoi(row[1]);
-			entry.minx      = static_cast<float>(atof(row[2]));
-			entry.maxx      = static_cast<float>(atof(row[3]));
-			entry.miny      = static_cast<float>(atof(row[4]));
-			entry.maxy      = static_cast<float>(atof(row[5]));
-			entry.minz      = static_cast<float>(atof(row[6]));
-			entry.maxz      = static_cast<float>(atof(row[7]));
+			e.zoneid    = atoi(row[0]);
+			e.exploreid = atoi(row[1]);
+			e.minx      = static_cast<float>(atof(row[2]));
+			e.maxx      = static_cast<float>(atof(row[3]));
+			e.miny      = static_cast<float>(atof(row[4]));
+			e.maxy      = static_cast<float>(atof(row[5]));
+			e.minz      = static_cast<float>(atof(row[6]));
+			e.maxz      = static_cast<float>(atof(row[7]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Proximities> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Proximities> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Proximities> all_entries;
 
@@ -320,24 +320,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Proximities entry{};
+			Proximities e{};
 
-			entry.zoneid    = atoi(row[0]);
-			entry.exploreid = atoi(row[1]);
-			entry.minx      = static_cast<float>(atof(row[2]));
-			entry.maxx      = static_cast<float>(atof(row[3]));
-			entry.miny      = static_cast<float>(atof(row[4]));
-			entry.maxy      = static_cast<float>(atof(row[5]));
-			entry.minz      = static_cast<float>(atof(row[6]));
-			entry.maxz      = static_cast<float>(atof(row[7]));
+			e.zoneid    = atoi(row[0]);
+			e.exploreid = atoi(row[1]);
+			e.minx      = static_cast<float>(atof(row[2]));
+			e.maxx      = static_cast<float>(atof(row[3]));
+			e.miny      = static_cast<float>(atof(row[4]));
+			e.maxy      = static_cast<float>(atof(row[5]));
+			e.minz      = static_cast<float>(atof(row[6]));
+			e.maxz      = static_cast<float>(atof(row[7]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -360,6 +360,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

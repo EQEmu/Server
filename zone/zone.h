@@ -223,8 +223,8 @@ public:
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>>    aa_ranks;
 
-	std::vector<GridRepository::Grid>             zone_grids;
-	std::vector<GridEntriesRepository::GridEntry> zone_grid_entries;
+	std::vector<GridRepository::Grid>               zone_grids;
+	std::vector<GridEntriesRepository::GridEntries> zone_grid_entries;
 
 	std::unordered_map<uint32, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 	std::unordered_map<uint32, std::unique_ptr<Expedition>>  expedition_cache;

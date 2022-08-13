@@ -1,11 +1,11 @@
-#ifndef EQEMU_FACTION_LIST_MOD_REPOSITORY_H
-#define EQEMU_FACTION_LIST_MOD_REPOSITORY_H
+#ifndef EQEMU_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
+#define EQEMU_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
 
 #include "../database.h"
 #include "../strings.h"
-#include "base/base_faction_list_mod_repository.h"
+#include "base/base_character_peqzone_flags_repository.h"
 
-class FactionListModRepository: public BaseFactionListModRepository {
+class CharacterPeqzoneFlagsRepository: public BaseCharacterPeqzoneFlagsRepository {
 public:
 
     /**
@@ -32,10 +32,10 @@ public:
      *
      * Example custom methods in a repository
      *
-     * FactionListModRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * FactionListModRepository::GetWhereNeverExpires()
-     * FactionListModRepository::GetWhereXAndY()
-     * FactionListModRepository::DeleteWhereXAndY()
+     * CharacterPeqzoneFlagsRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * CharacterPeqzoneFlagsRepository::GetWhereNeverExpires()
+     * CharacterPeqzoneFlagsRepository::GetWhereXAndY()
+     * CharacterPeqzoneFlagsRepository::DeleteWhereXAndY()
      *
      * Most of the above could be covered by base methods, but if you as a developer
      * find yourself re-using logic for other parts of the code, its best to just make a
@@ -47,4 +47,4 @@ public:
 
 };
 
-#endif //EQEMU_FACTION_LIST_MOD_REPOSITORY_H
+#endif //EQEMU_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H

@@ -79,15 +79,15 @@ public:
 
 	static Goallists NewEntity()
 	{
-		Goallists entry{};
+		Goallists e{};
 
-		entry.listid = 0;
-		entry.entry  = 0;
+		e.listid = 0;
+		e.entry  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Goallists GetGoallistsEntry(
+	static Goallists GetGoallists(
 		const std::vector<Goallists> &goallistss,
 		int goallists_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Goallists entry{};
+			Goallists e{};
 
-			entry.listid = atoi(row[0]);
-			entry.entry  = atoi(row[1]);
+			e.listid = atoi(row[0]);
+			e.entry  = atoi(row[1]);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,23 +146,23 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Goallists goallists_entry
+		const Goallists &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(goallists_entry.listid));
-		update_values.push_back(columns[1] + " = " + std::to_string(goallists_entry.entry));
+		v.push_back(columns[0] + " = " + std::to_string(e.listid));
+		v.push_back(columns[1] + " = " + std::to_string(e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				goallists_entry.listid
+				e.listid
 			)
 		);
 
@@ -171,49 +171,49 @@ public:
 
 	static Goallists InsertOne(
 		Database& db,
-		Goallists goallists_entry
+		Goallists e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(goallists_entry.listid));
-		insert_values.push_back(std::to_string(goallists_entry.entry));
+		v.push_back(std::to_string(e.listid));
+		v.push_back(std::to_string(e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			goallists_entry.listid = results.LastInsertedID();
-			return goallists_entry;
+			e.listid = results.LastInsertedID();
+			return e;
 		}
 
-		goallists_entry = NewEntity();
+		e = NewEntity();
 
-		return goallists_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Goallists> goallists_entries
+		const std::vector<Goallists> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &goallists_entry: goallists_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(goallists_entry.listid));
-			insert_values.push_back(std::to_string(goallists_entry.entry));
+			v.push_back(std::to_string(e.listid));
+			v.push_back(std::to_string(e.entry));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,18 +240,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Goallists entry{};
+			Goallists e{};
 
-			entry.listid = atoi(row[0]);
-			entry.entry  = atoi(row[1]);
+			e.listid = atoi(row[0]);
+			e.entry  = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Goallists> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Goallists> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Goallists> all_entries;
 
@@ -266,18 +266,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Goallists entry{};
+			Goallists e{};
 
-			entry.listid = atoi(row[0]);
-			entry.entry  = atoi(row[1]);
+			e.listid = atoi(row[0]);
+			e.entry  = atoi(row[1]);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -300,6 +300,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };
