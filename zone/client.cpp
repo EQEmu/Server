@@ -6233,7 +6233,7 @@ void Client::CheckEmoteHail(Mob *target, const char* message)
 	{
 		return;
 	}
-	uint16 emoteid = target->GetEmoteID();
+	uint32 emoteid = target->GetEmoteID();
 	if(emoteid != 0)
 		target->CastToNPC()->DoNPCEmote(HAILED,emoteid);
 }

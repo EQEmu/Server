@@ -10,7 +10,7 @@ void command_emotesearch(Client *c, const Seperator *sep)
 		int        count            = 0;
 
 		if (Seperator::IsNumber(search_criteria)) {
-			uint16                                 emoteid = atoi(search_criteria);
+			uint32                                 emoteid = atoi(search_criteria);
 			LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
 			iterator.Reset();
 			while (iterator.MoreElements()) {
