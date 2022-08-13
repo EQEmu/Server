@@ -162,8 +162,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					door->GetDoorName(),
 					door->GetOpenType(),
 					door->GetInvertState(),
-					Saylink::Create("#door setinvertstate 0", true, "0"),
-					Saylink::Create("#door setinvertstate 1", true, "1")
+					Saylink::Silent("#door setinvertstate 0", "0"),
+					Saylink::Silent("#door setinvertstate 1", "1")
 				).c_str()
 			);
 
@@ -195,17 +195,17 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				for (const auto &o: move_options) {
 					if (o == move_x_action) {
 						move_x_options_positive.emplace_back(
-							Saylink::Create(fmt::format("#door edit {} {}", o, v), true, v)
+							Saylink::Silent(fmt::format("#door edit {} {}", o, v), v)
 						);
 					}
 					else if (o == move_y_action) {
 						move_y_options_positive.emplace_back(
-							Saylink::Create(fmt::format("#door edit {} {}", o, v), true, v)
+							Saylink::Silent(fmt::format("#door edit {} {}", o, v), v)
 						);
 					}
 					else if (o == move_z_action) {
 						move_z_options_positive.emplace_back(
-							Saylink::Create(fmt::format("#door edit {} {}", o, v), true, v)
+							Saylink::Silent(fmt::format("#door edit {} {}", o, v), v)
 						);
 					}
 				}
@@ -217,17 +217,17 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				for (const auto &o: move_options) {
 					if (o == move_x_action) {
 						move_x_options_negative.emplace_back(
-							Saylink::Create(fmt::format("#door edit {} -{}", o, *v), true, *v)
+							Saylink::Silent(fmt::format("#door edit {} -{}", o, *v), *v)
 						);
 					}
 					else if (o == move_y_action) {
 						move_y_options_negative.emplace_back(
-							Saylink::Create(fmt::format("#door edit {} -{}", o, *v), true, *v)
+							Saylink::Silent(fmt::format("#door edit {} -{}", o, *v), *v)
 						);
 					}
 					else if (o == move_z_action) {
 						move_z_options_negative.emplace_back(
-							Saylink::Create(fmt::format("#door edit {} -{}", o, *v), true, *v)
+							Saylink::Silent(fmt::format("#door edit {} -{}", o, *v), *v)
 						);
 					}
 				}
@@ -240,7 +240,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			// build positive options h
 			for (const auto &v: heading_values) {
 				move_h_options_positive.emplace_back(
-					Saylink::Create(fmt::format("#door edit {} {}", move_h_action, v), true, v)
+					Saylink::Silent(fmt::format("#door edit {} {}", move_h_action, v), v)
 				);
 			}
 
@@ -248,7 +248,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			// build negative options h
 			for (auto v = heading_values.rbegin(); v != heading_values.rend(); ++v) {
 				move_h_options_negative.emplace_back(
-					Saylink::Create(fmt::format("#door edit {} -{}", move_h_action, *v), true, *v)
+					Saylink::Silent(fmt::format("#door edit {} -{}", move_h_action, *v), *v)
 				);
 			}
 
@@ -259,7 +259,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			// build positive options size
 			for (const auto &v: size_values) {
 				set_size_options_positive.emplace_back(
-					Saylink::Create(fmt::format("#door edit {} {}", set_size_action, v), true, v)
+					Saylink::Silent(fmt::format("#door edit {} {}", set_size_action, v), v)
 				);
 			}
 
@@ -267,7 +267,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			// build negative options size
 			for (auto v = size_values.rbegin(); v != size_values.rend(); ++v) {
 				set_size_options_negative.emplace_back(
-					Saylink::Create(fmt::format("#door edit {} -{}", set_size_action, *v), true, *v)
+					Saylink::Silent(fmt::format("#door edit {} -{}", set_size_action, *v), *v)
 				);
 			}
 
@@ -276,21 +276,9 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				fmt::format(
 					"Name [{}] [{}] [{}] [{}]",
 					door->GetDoorName(),
-					Saylink::Create(
-						"#door save",
-						true,
-						"Save"
-					),
-					Saylink::Create(
-						"#door changemodelqueue",
-						true,
-						"Change Model"
-					),
-					Saylink::Create(
-						"#door setinclineinc",
-						true,
-						"Incline"
-					)
+					Saylink::Silent("#door save", "Save"),
+					Saylink::Silent("#door changemodelqueue", "Change Model"),
+					Saylink::Silent("#door setinclineinc", "Incline")
 				).c_str()
 			);
 			c->Message(
@@ -371,8 +359,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
-				Saylink::Create("#door showmodelszone", true, "local zone"),
-				Saylink::Create("#door showmodelsglobal", true, "global")
+				Saylink::Silent("#door showmodelszone", "local zone"),
+				Saylink::Silent("#door showmodelsglobal", "global")
 			).c_str()
 		);
 	}
@@ -436,12 +424,11 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		std::vector<std::string> incline_negative_options;
 		for (auto                incline_value: incline_values) {
 			incline_normal_options.emplace_back(
-				Saylink::Create(
+				Saylink::Silent(
 					fmt::format(
 						"#door setincline {}",
 						incline_value.first
 					),
-					true,
 					incline_value.second
 				)
 			);
@@ -450,12 +437,11 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		for (int incline_index = 0; incline_index <= 100; incline_index += 10) {
 			int incline_value = (incline_index == 0 ? 1 : incline_index);
 			incline_positive_options.emplace_back(
-				Saylink::Create(
+				Saylink::Silent(
 					fmt::format(
 						"#door setinclineinc {}",
 						incline_value
 					),
-					true,
 					itoa(std::abs(incline_value))
 				)
 			);
@@ -464,12 +450,11 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		for (int incline_index = -100; incline_index <= 1; incline_index += 10) {
 			int incline_value = (incline_index == 0 ? -1 : incline_index);
 			incline_negative_options.emplace_back(
-				Saylink::Create(
+				Saylink::Silent(
 					fmt::format(
 						"#door setinclineinc {}",
 						incline_value
 					),
-					true,
 					itoa(std::abs(incline_value))
 				)
 			);
@@ -562,8 +547,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
-				Saylink::Create("#door showmodelszone", true, "local zone"),
-				Saylink::Create("#door showmodelsglobal", true, "global")
+				Saylink::Silent("#door showmodelszone", "local zone"),
+				Saylink::Silent("#door showmodelsglobal", "global")
 			).c_str()
 		);
 		c->Message(
@@ -575,7 +560,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | Shows available models in the current zone that you are in",
-				Saylink::Create("#door showmodelszone", true, "#door showmodelszone")
+				Saylink::Silent("#door showmodelszone", "#door showmodelszone")
 			).c_str()
 		);
 
@@ -583,7 +568,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | Shows available models globally by first listing all global model files",
-				Saylink::Create("#door showmodelsglobal", true, "#door showmodelsglobal")
+				Saylink::Silent("#door showmodelsglobal", "#door showmodelsglobal")
 			).c_str()
 		);
 
@@ -592,14 +577,14 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} - Brings up editing interface for selected door",
-				Saylink::Create("#door edit", true, "#door edit")
+				Saylink::Silent("#door edit", "#door edit")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"{} - lists doors in zone",
-				Saylink::Create("#list doors", true, "#list doors")
+				Saylink::Silent("#list doors", "#list doors")
 			).c_str()
 		);
 
@@ -625,9 +610,8 @@ void DoorManipulation::DisplayObjectResultToClient(
 		say_links.emplace_back(
 			fmt::format(
 				"[{}] ",
-				Saylink::Create(
+				Saylink::Silent(
 					fmt::format("#door model {}", g.object_name),
-					true,
 					g.object_name
 				)
 			)
@@ -673,9 +657,8 @@ void DoorManipulation::DisplayModelsFromFileResults(
 		say_links.emplace_back(
 			fmt::format(
 				"[{}] ",
-				Saylink::Create(
+				Saylink::Silent(
 					fmt::format("#door showmodelsfromfile {}", g.file_from),
-					true,
 					g.file_from
 				)
 			)

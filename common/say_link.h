@@ -130,7 +130,7 @@ namespace EQ
 class Saylink {
 public:
 	static std::string Create(const std::string &saylink_text, bool silent, const std::string &link_name);
-	std::string Silent(const std::string &saylink_text, const std::string &link_name);
+	static std::string Silent(const std::string &saylink_text, const std::string &link_name);
 };
 
 #endif /*COMMON_SAY_LINK_H*/
