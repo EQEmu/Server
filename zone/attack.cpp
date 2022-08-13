@@ -1779,7 +1779,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 			mod_client_death_npc(killerMob);
 
-			uint16 emoteid = killerMob->GetEmoteID();
+			uint32 emoteid = killerMob->GetEmoteID();
 			if (emoteid != 0)
 				killerMob->CastToNPC()->DoNPCEmote(KILLEDPC, emoteid);
 			killerMob->TrySpellOnKill(killed_level, spell);
@@ -2610,7 +2610,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		entity_list.RemoveFromAutoXTargets(this);
 
-		uint16 emoteid = GetEmoteID();
+		uint32 emoteid = GetEmoteID();
 		auto corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,
 			level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS)
 			: RuleI(NPC, MinorNPCCorpseDecayTimeMS));
@@ -2708,12 +2708,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	if (oos) {
 		mod_npc_killed(oos);
 
-		uint16 emoteid = GetEmoteID();
+		uint32 emoteid = GetEmoteID();
 		if (emoteid != 0)
 			DoNPCEmote(ONDEATH, emoteid);
 		if (oos->IsNPC()) {
 			parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
-			uint16 emoteid = oos->GetEmoteID();
+			uint32 emoteid = oos->GetEmoteID();
 			if (emoteid != 0)
 				oos->CastToNPC()->DoNPCEmote(KILLEDNPC, emoteid);
 			killer_mob->TrySpellOnKill(killed_level, spell);
