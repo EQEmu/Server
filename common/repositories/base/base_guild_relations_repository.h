@@ -154,19 +154,19 @@ public:
 		GuildRelations e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.guild1));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.guild2));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.relation));
+		v.push_back(columns[0] + " = " + std::to_string(e.guild1));
+		v.push_back(columns[1] + " = " + std::to_string(e.guild2));
+		v.push_back(columns[2] + " = " + std::to_string(e.relation));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.guild1
 			)
@@ -180,17 +180,17 @@ public:
 		GuildRelations e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.guild1));
-		insert_values.push_back(std::to_string(e.guild2));
-		insert_values.push_back(std::to_string(e.relation));
+		v.push_back(std::to_string(e.guild1));
+		v.push_back(std::to_string(e.guild2));
+		v.push_back(std::to_string(e.relation));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -212,16 +212,16 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.guild1));
-			insert_values.push_back(std::to_string(e.guild2));
-			insert_values.push_back(std::to_string(e.relation));
+			v.push_back(std::to_string(e.guild1));
+			v.push_back(std::to_string(e.guild2));
+			v.push_back(std::to_string(e.relation));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -234,35 +234,35 @@ public:
 		StartZones e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.x));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.y));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.z));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.heading));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.zone_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.bind_id));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.player_choice));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.player_class));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.player_deity));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.player_race));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.start_zone));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.bind_x));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.bind_y));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.bind_z));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.select_rank));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.min_expansion));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.max_expansion));
-		update_values.push_back(columns[17] + " = '" + Strings::Escape(e.content_flags) + "'");
-		update_values.push_back(columns[18] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.x));
+		v.push_back(columns[1] + " = " + std::to_string(e.y));
+		v.push_back(columns[2] + " = " + std::to_string(e.z));
+		v.push_back(columns[3] + " = " + std::to_string(e.heading));
+		v.push_back(columns[4] + " = " + std::to_string(e.zone_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.bind_id));
+		v.push_back(columns[6] + " = " + std::to_string(e.player_choice));
+		v.push_back(columns[7] + " = " + std::to_string(e.player_class));
+		v.push_back(columns[8] + " = " + std::to_string(e.player_deity));
+		v.push_back(columns[9] + " = " + std::to_string(e.player_race));
+		v.push_back(columns[10] + " = " + std::to_string(e.start_zone));
+		v.push_back(columns[11] + " = " + std::to_string(e.bind_x));
+		v.push_back(columns[12] + " = " + std::to_string(e.bind_y));
+		v.push_back(columns[13] + " = " + std::to_string(e.bind_z));
+		v.push_back(columns[14] + " = " + std::to_string(e.select_rank));
+		v.push_back(columns[15] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[16] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[17] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[18] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.player_choice
 			)
@@ -276,33 +276,33 @@ public:
 		StartZones e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.x));
-		insert_values.push_back(std::to_string(e.y));
-		insert_values.push_back(std::to_string(e.z));
-		insert_values.push_back(std::to_string(e.heading));
-		insert_values.push_back(std::to_string(e.zone_id));
-		insert_values.push_back(std::to_string(e.bind_id));
-		insert_values.push_back(std::to_string(e.player_choice));
-		insert_values.push_back(std::to_string(e.player_class));
-		insert_values.push_back(std::to_string(e.player_deity));
-		insert_values.push_back(std::to_string(e.player_race));
-		insert_values.push_back(std::to_string(e.start_zone));
-		insert_values.push_back(std::to_string(e.bind_x));
-		insert_values.push_back(std::to_string(e.bind_y));
-		insert_values.push_back(std::to_string(e.bind_z));
-		insert_values.push_back(std::to_string(e.select_rank));
-		insert_values.push_back(std::to_string(e.min_expansion));
-		insert_values.push_back(std::to_string(e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.bind_id));
+		v.push_back(std::to_string(e.player_choice));
+		v.push_back(std::to_string(e.player_class));
+		v.push_back(std::to_string(e.player_deity));
+		v.push_back(std::to_string(e.player_race));
+		v.push_back(std::to_string(e.start_zone));
+		v.push_back(std::to_string(e.bind_x));
+		v.push_back(std::to_string(e.bind_y));
+		v.push_back(std::to_string(e.bind_z));
+		v.push_back(std::to_string(e.select_rank));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -324,32 +324,32 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.x));
-			insert_values.push_back(std::to_string(e.y));
-			insert_values.push_back(std::to_string(e.z));
-			insert_values.push_back(std::to_string(e.heading));
-			insert_values.push_back(std::to_string(e.zone_id));
-			insert_values.push_back(std::to_string(e.bind_id));
-			insert_values.push_back(std::to_string(e.player_choice));
-			insert_values.push_back(std::to_string(e.player_class));
-			insert_values.push_back(std::to_string(e.player_deity));
-			insert_values.push_back(std::to_string(e.player_race));
-			insert_values.push_back(std::to_string(e.start_zone));
-			insert_values.push_back(std::to_string(e.bind_x));
-			insert_values.push_back(std::to_string(e.bind_y));
-			insert_values.push_back(std::to_string(e.bind_z));
-			insert_values.push_back(std::to_string(e.select_rank));
-			insert_values.push_back(std::to_string(e.min_expansion));
-			insert_values.push_back(std::to_string(e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.bind_id));
+			v.push_back(std::to_string(e.player_choice));
+			v.push_back(std::to_string(e.player_class));
+			v.push_back(std::to_string(e.player_deity));
+			v.push_back(std::to_string(e.player_race));
+			v.push_back(std::to_string(e.start_zone));
+			v.push_back(std::to_string(e.bind_x));
+			v.push_back(std::to_string(e.bind_y));
+			v.push_back(std::to_string(e.bind_z));
+			v.push_back(std::to_string(e.select_rank));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

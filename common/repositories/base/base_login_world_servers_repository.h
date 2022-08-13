@@ -189,25 +189,25 @@ public:
 		LoginWorldServers e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.long_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.short_name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.tag_description) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(e.login_server_list_type_id));
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.last_ip_address) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(e.login_server_admin_id));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.is_server_trusted));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.note) + "'");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.long_name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.short_name) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.tag_description) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.login_server_list_type_id));
+		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back(columns[6] + " = '" + Strings::Escape(e.last_ip_address) + "'");
+		v.push_back(columns[7] + " = " + std::to_string(e.login_server_admin_id));
+		v.push_back(columns[8] + " = " + std::to_string(e.is_server_trusted));
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.note) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -221,24 +221,24 @@ public:
 		LoginWorldServers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back("'" + Strings::Escape(e.long_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.short_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.tag_description) + "'");
-		insert_values.push_back(std::to_string(e.login_server_list_type_id));
-		insert_values.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
-		insert_values.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
-		insert_values.push_back(std::to_string(e.login_server_admin_id));
-		insert_values.push_back(std::to_string(e.is_server_trusted));
-		insert_values.push_back("'" + Strings::Escape(e.note) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.long_name) + "'");
+		v.push_back("'" + Strings::Escape(e.short_name) + "'");
+		v.push_back("'" + Strings::Escape(e.tag_description) + "'");
+		v.push_back(std::to_string(e.login_server_list_type_id));
+		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+		v.push_back(std::to_string(e.login_server_admin_id));
+		v.push_back(std::to_string(e.is_server_trusted));
+		v.push_back("'" + Strings::Escape(e.note) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -260,23 +260,23 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back("'" + Strings::Escape(e.long_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.short_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.tag_description) + "'");
-			insert_values.push_back(std::to_string(e.login_server_list_type_id));
-			insert_values.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
-			insert_values.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
-			insert_values.push_back(std::to_string(e.login_server_admin_id));
-			insert_values.push_back(std::to_string(e.is_server_trusted));
-			insert_values.push_back("'" + Strings::Escape(e.note) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.long_name) + "'");
+			v.push_back("'" + Strings::Escape(e.short_name) + "'");
+			v.push_back("'" + Strings::Escape(e.tag_description) + "'");
+			v.push_back(std::to_string(e.login_server_list_type_id));
+			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+			v.push_back(std::to_string(e.login_server_admin_id));
+			v.push_back(std::to_string(e.is_server_trusted));
+			v.push_back("'" + Strings::Escape(e.note) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

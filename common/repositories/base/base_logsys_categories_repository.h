@@ -174,23 +174,23 @@ public:
 		LogsysCategories e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.log_category_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.log_category_description) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(e.log_to_console));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.log_to_file));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.log_to_gmsay));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.log_to_discord));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.discord_webhook_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.log_category_id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.log_category_description) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.log_to_console));
+		v.push_back(columns[3] + " = " + std::to_string(e.log_to_file));
+		v.push_back(columns[4] + " = " + std::to_string(e.log_to_gmsay));
+		v.push_back(columns[5] + " = " + std::to_string(e.log_to_discord));
+		v.push_back(columns[6] + " = " + std::to_string(e.discord_webhook_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.log_category_id
 			)
@@ -204,21 +204,21 @@ public:
 		LogsysCategories e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.log_category_id));
-		insert_values.push_back("'" + Strings::Escape(e.log_category_description) + "'");
-		insert_values.push_back(std::to_string(e.log_to_console));
-		insert_values.push_back(std::to_string(e.log_to_file));
-		insert_values.push_back(std::to_string(e.log_to_gmsay));
-		insert_values.push_back(std::to_string(e.log_to_discord));
-		insert_values.push_back(std::to_string(e.discord_webhook_id));
+		v.push_back(std::to_string(e.log_category_id));
+		v.push_back("'" + Strings::Escape(e.log_category_description) + "'");
+		v.push_back(std::to_string(e.log_to_console));
+		v.push_back(std::to_string(e.log_to_file));
+		v.push_back(std::to_string(e.log_to_gmsay));
+		v.push_back(std::to_string(e.log_to_discord));
+		v.push_back(std::to_string(e.discord_webhook_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -240,20 +240,20 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.log_category_id));
-			insert_values.push_back("'" + Strings::Escape(e.log_category_description) + "'");
-			insert_values.push_back(std::to_string(e.log_to_console));
-			insert_values.push_back(std::to_string(e.log_to_file));
-			insert_values.push_back(std::to_string(e.log_to_gmsay));
-			insert_values.push_back(std::to_string(e.log_to_discord));
-			insert_values.push_back(std::to_string(e.discord_webhook_id));
+			v.push_back(std::to_string(e.log_category_id));
+			v.push_back("'" + Strings::Escape(e.log_category_description) + "'");
+			v.push_back(std::to_string(e.log_to_console));
+			v.push_back(std::to_string(e.log_to_file));
+			v.push_back(std::to_string(e.log_to_gmsay));
+			v.push_back(std::to_string(e.log_to_discord));
+			v.push_back(std::to_string(e.discord_webhook_id));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

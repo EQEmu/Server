@@ -179,23 +179,23 @@ public:
 		CharacterBind e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.instance_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.heading));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.zone_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.instance_id));
+		v.push_back(columns[4] + " = " + std::to_string(e.x));
+		v.push_back(columns[5] + " = " + std::to_string(e.y));
+		v.push_back(columns[6] + " = " + std::to_string(e.z));
+		v.push_back(columns[7] + " = " + std::to_string(e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -209,22 +209,22 @@ public:
 		CharacterBind e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back(std::to_string(e.slot));
-		insert_values.push_back(std::to_string(e.zone_id));
-		insert_values.push_back(std::to_string(e.instance_id));
-		insert_values.push_back(std::to_string(e.x));
-		insert_values.push_back(std::to_string(e.y));
-		insert_values.push_back(std::to_string(e.z));
-		insert_values.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -246,21 +246,21 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back(std::to_string(e.slot));
-			insert_values.push_back(std::to_string(e.zone_id));
-			insert_values.push_back(std::to_string(e.instance_id));
-			insert_values.push_back(std::to_string(e.x));
-			insert_values.push_back(std::to_string(e.y));
-			insert_values.push_back(std::to_string(e.z));
-			insert_values.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

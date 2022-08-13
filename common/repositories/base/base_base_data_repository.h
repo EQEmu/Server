@@ -189,26 +189,26 @@ public:
 		BaseData e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.level));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.class_));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.hp));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.mana));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.end));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.unk1));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.unk2));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.hp_fac));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.mana_fac));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.end_fac));
+		v.push_back(columns[0] + " = " + std::to_string(e.level));
+		v.push_back(columns[1] + " = " + std::to_string(e.class_));
+		v.push_back(columns[2] + " = " + std::to_string(e.hp));
+		v.push_back(columns[3] + " = " + std::to_string(e.mana));
+		v.push_back(columns[4] + " = " + std::to_string(e.end));
+		v.push_back(columns[5] + " = " + std::to_string(e.unk1));
+		v.push_back(columns[6] + " = " + std::to_string(e.unk2));
+		v.push_back(columns[7] + " = " + std::to_string(e.hp_fac));
+		v.push_back(columns[8] + " = " + std::to_string(e.mana_fac));
+		v.push_back(columns[9] + " = " + std::to_string(e.end_fac));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.level
 			)
@@ -222,24 +222,24 @@ public:
 		BaseData e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.level));
-		insert_values.push_back(std::to_string(e.class_));
-		insert_values.push_back(std::to_string(e.hp));
-		insert_values.push_back(std::to_string(e.mana));
-		insert_values.push_back(std::to_string(e.end));
-		insert_values.push_back(std::to_string(e.unk1));
-		insert_values.push_back(std::to_string(e.unk2));
-		insert_values.push_back(std::to_string(e.hp_fac));
-		insert_values.push_back(std::to_string(e.mana_fac));
-		insert_values.push_back(std::to_string(e.end_fac));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.end));
+		v.push_back(std::to_string(e.unk1));
+		v.push_back(std::to_string(e.unk2));
+		v.push_back(std::to_string(e.hp_fac));
+		v.push_back(std::to_string(e.mana_fac));
+		v.push_back(std::to_string(e.end_fac));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -261,23 +261,23 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.level));
-			insert_values.push_back(std::to_string(e.class_));
-			insert_values.push_back(std::to_string(e.hp));
-			insert_values.push_back(std::to_string(e.mana));
-			insert_values.push_back(std::to_string(e.end));
-			insert_values.push_back(std::to_string(e.unk1));
-			insert_values.push_back(std::to_string(e.unk2));
-			insert_values.push_back(std::to_string(e.hp_fac));
-			insert_values.push_back(std::to_string(e.mana_fac));
-			insert_values.push_back(std::to_string(e.end_fac));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.end));
+			v.push_back(std::to_string(e.unk1));
+			v.push_back(std::to_string(e.unk2));
+			v.push_back(std::to_string(e.hp_fac));
+			v.push_back(std::to_string(e.mana_fac));
+			v.push_back(std::to_string(e.end_fac));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -204,28 +204,28 @@ public:
 		Spawngroup e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(e.spawn_limit));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.dist));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.max_x));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.min_x));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.max_y));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.min_y));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.delay));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.mindelay));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.despawn));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.despawn_timer));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.wp_spawns));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.spawn_limit));
+		v.push_back(columns[3] + " = " + std::to_string(e.dist));
+		v.push_back(columns[4] + " = " + std::to_string(e.max_x));
+		v.push_back(columns[5] + " = " + std::to_string(e.min_x));
+		v.push_back(columns[6] + " = " + std::to_string(e.max_y));
+		v.push_back(columns[7] + " = " + std::to_string(e.min_y));
+		v.push_back(columns[8] + " = " + std::to_string(e.delay));
+		v.push_back(columns[9] + " = " + std::to_string(e.mindelay));
+		v.push_back(columns[10] + " = " + std::to_string(e.despawn));
+		v.push_back(columns[11] + " = " + std::to_string(e.despawn_timer));
+		v.push_back(columns[12] + " = " + std::to_string(e.wp_spawns));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -239,27 +239,27 @@ public:
 		Spawngroup e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
-		insert_values.push_back(std::to_string(e.spawn_limit));
-		insert_values.push_back(std::to_string(e.dist));
-		insert_values.push_back(std::to_string(e.max_x));
-		insert_values.push_back(std::to_string(e.min_x));
-		insert_values.push_back(std::to_string(e.max_y));
-		insert_values.push_back(std::to_string(e.min_y));
-		insert_values.push_back(std::to_string(e.delay));
-		insert_values.push_back(std::to_string(e.mindelay));
-		insert_values.push_back(std::to_string(e.despawn));
-		insert_values.push_back(std::to_string(e.despawn_timer));
-		insert_values.push_back(std::to_string(e.wp_spawns));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.spawn_limit));
+		v.push_back(std::to_string(e.dist));
+		v.push_back(std::to_string(e.max_x));
+		v.push_back(std::to_string(e.min_x));
+		v.push_back(std::to_string(e.max_y));
+		v.push_back(std::to_string(e.min_y));
+		v.push_back(std::to_string(e.delay));
+		v.push_back(std::to_string(e.mindelay));
+		v.push_back(std::to_string(e.despawn));
+		v.push_back(std::to_string(e.despawn_timer));
+		v.push_back(std::to_string(e.wp_spawns));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -281,26 +281,26 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
-			insert_values.push_back(std::to_string(e.spawn_limit));
-			insert_values.push_back(std::to_string(e.dist));
-			insert_values.push_back(std::to_string(e.max_x));
-			insert_values.push_back(std::to_string(e.min_x));
-			insert_values.push_back(std::to_string(e.max_y));
-			insert_values.push_back(std::to_string(e.min_y));
-			insert_values.push_back(std::to_string(e.delay));
-			insert_values.push_back(std::to_string(e.mindelay));
-			insert_values.push_back(std::to_string(e.despawn));
-			insert_values.push_back(std::to_string(e.despawn_timer));
-			insert_values.push_back(std::to_string(e.wp_spawns));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.spawn_limit));
+			v.push_back(std::to_string(e.dist));
+			v.push_back(std::to_string(e.max_x));
+			v.push_back(std::to_string(e.min_x));
+			v.push_back(std::to_string(e.max_y));
+			v.push_back(std::to_string(e.min_y));
+			v.push_back(std::to_string(e.delay));
+			v.push_back(std::to_string(e.mindelay));
+			v.push_back(std::to_string(e.despawn));
+			v.push_back(std::to_string(e.despawn_timer));
+			v.push_back(std::to_string(e.wp_spawns));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

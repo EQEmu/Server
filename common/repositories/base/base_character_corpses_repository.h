@@ -374,62 +374,62 @@ public:
 		CharacterCorpses e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.charname) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(e.zone_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.instance_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.x));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.y));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.z));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.heading));
-		update_values.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
-		update_values.push_back(columns[10] + " = " + std::to_string(e.guild_consent_id));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.is_rezzed));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.is_buried));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.was_at_graveyard));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.is_locked));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.exp));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.size));
-		update_values.push_back(columns[17] + " = " + std::to_string(e.level));
-		update_values.push_back(columns[18] + " = " + std::to_string(e.race));
-		update_values.push_back(columns[19] + " = " + std::to_string(e.gender));
-		update_values.push_back(columns[20] + " = " + std::to_string(e.class_));
-		update_values.push_back(columns[21] + " = " + std::to_string(e.deity));
-		update_values.push_back(columns[22] + " = " + std::to_string(e.texture));
-		update_values.push_back(columns[23] + " = " + std::to_string(e.helm_texture));
-		update_values.push_back(columns[24] + " = " + std::to_string(e.copper));
-		update_values.push_back(columns[25] + " = " + std::to_string(e.silver));
-		update_values.push_back(columns[26] + " = " + std::to_string(e.gold));
-		update_values.push_back(columns[27] + " = " + std::to_string(e.platinum));
-		update_values.push_back(columns[28] + " = " + std::to_string(e.hair_color));
-		update_values.push_back(columns[29] + " = " + std::to_string(e.beard_color));
-		update_values.push_back(columns[30] + " = " + std::to_string(e.eye_color_1));
-		update_values.push_back(columns[31] + " = " + std::to_string(e.eye_color_2));
-		update_values.push_back(columns[32] + " = " + std::to_string(e.hair_style));
-		update_values.push_back(columns[33] + " = " + std::to_string(e.face));
-		update_values.push_back(columns[34] + " = " + std::to_string(e.beard));
-		update_values.push_back(columns[35] + " = " + std::to_string(e.drakkin_heritage));
-		update_values.push_back(columns[36] + " = " + std::to_string(e.drakkin_tattoo));
-		update_values.push_back(columns[37] + " = " + std::to_string(e.drakkin_details));
-		update_values.push_back(columns[38] + " = " + std::to_string(e.wc_1));
-		update_values.push_back(columns[39] + " = " + std::to_string(e.wc_2));
-		update_values.push_back(columns[40] + " = " + std::to_string(e.wc_3));
-		update_values.push_back(columns[41] + " = " + std::to_string(e.wc_4));
-		update_values.push_back(columns[42] + " = " + std::to_string(e.wc_5));
-		update_values.push_back(columns[43] + " = " + std::to_string(e.wc_6));
-		update_values.push_back(columns[44] + " = " + std::to_string(e.wc_7));
-		update_values.push_back(columns[45] + " = " + std::to_string(e.wc_8));
-		update_values.push_back(columns[46] + " = " + std::to_string(e.wc_9));
+		v.push_back(columns[1] + " = " + std::to_string(e.charid));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.charname) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.zone_id));
+		v.push_back(columns[4] + " = " + std::to_string(e.instance_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.x));
+		v.push_back(columns[6] + " = " + std::to_string(e.y));
+		v.push_back(columns[7] + " = " + std::to_string(e.z));
+		v.push_back(columns[8] + " = " + std::to_string(e.heading));
+		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back(columns[10] + " = " + std::to_string(e.guild_consent_id));
+		v.push_back(columns[11] + " = " + std::to_string(e.is_rezzed));
+		v.push_back(columns[12] + " = " + std::to_string(e.is_buried));
+		v.push_back(columns[13] + " = " + std::to_string(e.was_at_graveyard));
+		v.push_back(columns[14] + " = " + std::to_string(e.is_locked));
+		v.push_back(columns[15] + " = " + std::to_string(e.exp));
+		v.push_back(columns[16] + " = " + std::to_string(e.size));
+		v.push_back(columns[17] + " = " + std::to_string(e.level));
+		v.push_back(columns[18] + " = " + std::to_string(e.race));
+		v.push_back(columns[19] + " = " + std::to_string(e.gender));
+		v.push_back(columns[20] + " = " + std::to_string(e.class_));
+		v.push_back(columns[21] + " = " + std::to_string(e.deity));
+		v.push_back(columns[22] + " = " + std::to_string(e.texture));
+		v.push_back(columns[23] + " = " + std::to_string(e.helm_texture));
+		v.push_back(columns[24] + " = " + std::to_string(e.copper));
+		v.push_back(columns[25] + " = " + std::to_string(e.silver));
+		v.push_back(columns[26] + " = " + std::to_string(e.gold));
+		v.push_back(columns[27] + " = " + std::to_string(e.platinum));
+		v.push_back(columns[28] + " = " + std::to_string(e.hair_color));
+		v.push_back(columns[29] + " = " + std::to_string(e.beard_color));
+		v.push_back(columns[30] + " = " + std::to_string(e.eye_color_1));
+		v.push_back(columns[31] + " = " + std::to_string(e.eye_color_2));
+		v.push_back(columns[32] + " = " + std::to_string(e.hair_style));
+		v.push_back(columns[33] + " = " + std::to_string(e.face));
+		v.push_back(columns[34] + " = " + std::to_string(e.beard));
+		v.push_back(columns[35] + " = " + std::to_string(e.drakkin_heritage));
+		v.push_back(columns[36] + " = " + std::to_string(e.drakkin_tattoo));
+		v.push_back(columns[37] + " = " + std::to_string(e.drakkin_details));
+		v.push_back(columns[38] + " = " + std::to_string(e.wc_1));
+		v.push_back(columns[39] + " = " + std::to_string(e.wc_2));
+		v.push_back(columns[40] + " = " + std::to_string(e.wc_3));
+		v.push_back(columns[41] + " = " + std::to_string(e.wc_4));
+		v.push_back(columns[42] + " = " + std::to_string(e.wc_5));
+		v.push_back(columns[43] + " = " + std::to_string(e.wc_6));
+		v.push_back(columns[44] + " = " + std::to_string(e.wc_7));
+		v.push_back(columns[45] + " = " + std::to_string(e.wc_8));
+		v.push_back(columns[46] + " = " + std::to_string(e.wc_9));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -443,61 +443,61 @@ public:
 		CharacterCorpses e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back(std::to_string(e.charid));
-		insert_values.push_back("'" + Strings::Escape(e.charname) + "'");
-		insert_values.push_back(std::to_string(e.zone_id));
-		insert_values.push_back(std::to_string(e.instance_id));
-		insert_values.push_back(std::to_string(e.x));
-		insert_values.push_back(std::to_string(e.y));
-		insert_values.push_back(std::to_string(e.z));
-		insert_values.push_back(std::to_string(e.heading));
-		insert_values.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
-		insert_values.push_back(std::to_string(e.guild_consent_id));
-		insert_values.push_back(std::to_string(e.is_rezzed));
-		insert_values.push_back(std::to_string(e.is_buried));
-		insert_values.push_back(std::to_string(e.was_at_graveyard));
-		insert_values.push_back(std::to_string(e.is_locked));
-		insert_values.push_back(std::to_string(e.exp));
-		insert_values.push_back(std::to_string(e.size));
-		insert_values.push_back(std::to_string(e.level));
-		insert_values.push_back(std::to_string(e.race));
-		insert_values.push_back(std::to_string(e.gender));
-		insert_values.push_back(std::to_string(e.class_));
-		insert_values.push_back(std::to_string(e.deity));
-		insert_values.push_back(std::to_string(e.texture));
-		insert_values.push_back(std::to_string(e.helm_texture));
-		insert_values.push_back(std::to_string(e.copper));
-		insert_values.push_back(std::to_string(e.silver));
-		insert_values.push_back(std::to_string(e.gold));
-		insert_values.push_back(std::to_string(e.platinum));
-		insert_values.push_back(std::to_string(e.hair_color));
-		insert_values.push_back(std::to_string(e.beard_color));
-		insert_values.push_back(std::to_string(e.eye_color_1));
-		insert_values.push_back(std::to_string(e.eye_color_2));
-		insert_values.push_back(std::to_string(e.hair_style));
-		insert_values.push_back(std::to_string(e.face));
-		insert_values.push_back(std::to_string(e.beard));
-		insert_values.push_back(std::to_string(e.drakkin_heritage));
-		insert_values.push_back(std::to_string(e.drakkin_tattoo));
-		insert_values.push_back(std::to_string(e.drakkin_details));
-		insert_values.push_back(std::to_string(e.wc_1));
-		insert_values.push_back(std::to_string(e.wc_2));
-		insert_values.push_back(std::to_string(e.wc_3));
-		insert_values.push_back(std::to_string(e.wc_4));
-		insert_values.push_back(std::to_string(e.wc_5));
-		insert_values.push_back(std::to_string(e.wc_6));
-		insert_values.push_back(std::to_string(e.wc_7));
-		insert_values.push_back(std::to_string(e.wc_8));
-		insert_values.push_back(std::to_string(e.wc_9));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.charid));
+		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back(std::to_string(e.guild_consent_id));
+		v.push_back(std::to_string(e.is_rezzed));
+		v.push_back(std::to_string(e.is_buried));
+		v.push_back(std::to_string(e.was_at_graveyard));
+		v.push_back(std::to_string(e.is_locked));
+		v.push_back(std::to_string(e.exp));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.texture));
+		v.push_back(std::to_string(e.helm_texture));
+		v.push_back(std::to_string(e.copper));
+		v.push_back(std::to_string(e.silver));
+		v.push_back(std::to_string(e.gold));
+		v.push_back(std::to_string(e.platinum));
+		v.push_back(std::to_string(e.hair_color));
+		v.push_back(std::to_string(e.beard_color));
+		v.push_back(std::to_string(e.eye_color_1));
+		v.push_back(std::to_string(e.eye_color_2));
+		v.push_back(std::to_string(e.hair_style));
+		v.push_back(std::to_string(e.face));
+		v.push_back(std::to_string(e.beard));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.drakkin_tattoo));
+		v.push_back(std::to_string(e.drakkin_details));
+		v.push_back(std::to_string(e.wc_1));
+		v.push_back(std::to_string(e.wc_2));
+		v.push_back(std::to_string(e.wc_3));
+		v.push_back(std::to_string(e.wc_4));
+		v.push_back(std::to_string(e.wc_5));
+		v.push_back(std::to_string(e.wc_6));
+		v.push_back(std::to_string(e.wc_7));
+		v.push_back(std::to_string(e.wc_8));
+		v.push_back(std::to_string(e.wc_9));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -519,60 +519,60 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back(std::to_string(e.charid));
-			insert_values.push_back("'" + Strings::Escape(e.charname) + "'");
-			insert_values.push_back(std::to_string(e.zone_id));
-			insert_values.push_back(std::to_string(e.instance_id));
-			insert_values.push_back(std::to_string(e.x));
-			insert_values.push_back(std::to_string(e.y));
-			insert_values.push_back(std::to_string(e.z));
-			insert_values.push_back(std::to_string(e.heading));
-			insert_values.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
-			insert_values.push_back(std::to_string(e.guild_consent_id));
-			insert_values.push_back(std::to_string(e.is_rezzed));
-			insert_values.push_back(std::to_string(e.is_buried));
-			insert_values.push_back(std::to_string(e.was_at_graveyard));
-			insert_values.push_back(std::to_string(e.is_locked));
-			insert_values.push_back(std::to_string(e.exp));
-			insert_values.push_back(std::to_string(e.size));
-			insert_values.push_back(std::to_string(e.level));
-			insert_values.push_back(std::to_string(e.race));
-			insert_values.push_back(std::to_string(e.gender));
-			insert_values.push_back(std::to_string(e.class_));
-			insert_values.push_back(std::to_string(e.deity));
-			insert_values.push_back(std::to_string(e.texture));
-			insert_values.push_back(std::to_string(e.helm_texture));
-			insert_values.push_back(std::to_string(e.copper));
-			insert_values.push_back(std::to_string(e.silver));
-			insert_values.push_back(std::to_string(e.gold));
-			insert_values.push_back(std::to_string(e.platinum));
-			insert_values.push_back(std::to_string(e.hair_color));
-			insert_values.push_back(std::to_string(e.beard_color));
-			insert_values.push_back(std::to_string(e.eye_color_1));
-			insert_values.push_back(std::to_string(e.eye_color_2));
-			insert_values.push_back(std::to_string(e.hair_style));
-			insert_values.push_back(std::to_string(e.face));
-			insert_values.push_back(std::to_string(e.beard));
-			insert_values.push_back(std::to_string(e.drakkin_heritage));
-			insert_values.push_back(std::to_string(e.drakkin_tattoo));
-			insert_values.push_back(std::to_string(e.drakkin_details));
-			insert_values.push_back(std::to_string(e.wc_1));
-			insert_values.push_back(std::to_string(e.wc_2));
-			insert_values.push_back(std::to_string(e.wc_3));
-			insert_values.push_back(std::to_string(e.wc_4));
-			insert_values.push_back(std::to_string(e.wc_5));
-			insert_values.push_back(std::to_string(e.wc_6));
-			insert_values.push_back(std::to_string(e.wc_7));
-			insert_values.push_back(std::to_string(e.wc_8));
-			insert_values.push_back(std::to_string(e.wc_9));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.charid));
+			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+			v.push_back(std::to_string(e.guild_consent_id));
+			v.push_back(std::to_string(e.is_rezzed));
+			v.push_back(std::to_string(e.is_buried));
+			v.push_back(std::to_string(e.was_at_graveyard));
+			v.push_back(std::to_string(e.is_locked));
+			v.push_back(std::to_string(e.exp));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.texture));
+			v.push_back(std::to_string(e.helm_texture));
+			v.push_back(std::to_string(e.copper));
+			v.push_back(std::to_string(e.silver));
+			v.push_back(std::to_string(e.gold));
+			v.push_back(std::to_string(e.platinum));
+			v.push_back(std::to_string(e.hair_color));
+			v.push_back(std::to_string(e.beard_color));
+			v.push_back(std::to_string(e.eye_color_1));
+			v.push_back(std::to_string(e.eye_color_2));
+			v.push_back(std::to_string(e.hair_style));
+			v.push_back(std::to_string(e.face));
+			v.push_back(std::to_string(e.beard));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.drakkin_tattoo));
+			v.push_back(std::to_string(e.drakkin_details));
+			v.push_back(std::to_string(e.wc_1));
+			v.push_back(std::to_string(e.wc_2));
+			v.push_back(std::to_string(e.wc_3));
+			v.push_back(std::to_string(e.wc_4));
+			v.push_back(std::to_string(e.wc_5));
+			v.push_back(std::to_string(e.wc_6));
+			v.push_back(std::to_string(e.wc_7));
+			v.push_back(std::to_string(e.wc_8));
+			v.push_back(std::to_string(e.wc_9));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

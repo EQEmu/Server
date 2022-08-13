@@ -179,23 +179,23 @@ public:
 		Mail e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.timestamp));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.from) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.subject) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(e.body) + "'");
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.to) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(e.status));
+		v.push_back(columns[1] + " = " + std::to_string(e.charid));
+		v.push_back(columns[2] + " = " + std::to_string(e.timestamp));
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.from) + "'");
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.subject) + "'");
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.body) + "'");
+		v.push_back(columns[6] + " = '" + Strings::Escape(e.to) + "'");
+		v.push_back(columns[7] + " = " + std::to_string(e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.msgid
 			)
@@ -209,22 +209,22 @@ public:
 		Mail e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.msgid));
-		insert_values.push_back(std::to_string(e.charid));
-		insert_values.push_back(std::to_string(e.timestamp));
-		insert_values.push_back("'" + Strings::Escape(e.from) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.subject) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.body) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.to) + "'");
-		insert_values.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.msgid));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.timestamp));
+		v.push_back("'" + Strings::Escape(e.from) + "'");
+		v.push_back("'" + Strings::Escape(e.subject) + "'");
+		v.push_back("'" + Strings::Escape(e.body) + "'");
+		v.push_back("'" + Strings::Escape(e.to) + "'");
+		v.push_back(std::to_string(e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -246,21 +246,21 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.msgid));
-			insert_values.push_back(std::to_string(e.charid));
-			insert_values.push_back(std::to_string(e.timestamp));
-			insert_values.push_back("'" + Strings::Escape(e.from) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.subject) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.body) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.to) + "'");
-			insert_values.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.msgid));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.timestamp));
+			v.push_back("'" + Strings::Escape(e.from) + "'");
+			v.push_back("'" + Strings::Escape(e.subject) + "'");
+			v.push_back("'" + Strings::Escape(e.body) + "'");
+			v.push_back("'" + Strings::Escape(e.to) + "'");
+			v.push_back(std::to_string(e.status));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -224,32 +224,32 @@ public:
 		GlobalLoot e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.description) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(e.loottable_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.enabled));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.min_level));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.max_level));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.rare));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.raid));
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(e.race) + "'");
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.class_) + "'");
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(e.bodytype) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(e.zone) + "'");
-		update_values.push_back(columns[12] + " = " + std::to_string(e.hot_zone));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.min_expansion));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.max_expansion));
-		update_values.push_back(columns[15] + " = '" + Strings::Escape(e.content_flags) + "'");
-		update_values.push_back(columns[16] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.description) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.loottable_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.enabled));
+		v.push_back(columns[4] + " = " + std::to_string(e.min_level));
+		v.push_back(columns[5] + " = " + std::to_string(e.max_level));
+		v.push_back(columns[6] + " = " + std::to_string(e.rare));
+		v.push_back(columns[7] + " = " + std::to_string(e.raid));
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.race) + "'");
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.class_) + "'");
+		v.push_back(columns[10] + " = '" + Strings::Escape(e.bodytype) + "'");
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.zone) + "'");
+		v.push_back(columns[12] + " = " + std::to_string(e.hot_zone));
+		v.push_back(columns[13] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[14] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[15] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[16] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -263,31 +263,31 @@ public:
 		GlobalLoot e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back("'" + Strings::Escape(e.description) + "'");
-		insert_values.push_back(std::to_string(e.loottable_id));
-		insert_values.push_back(std::to_string(e.enabled));
-		insert_values.push_back(std::to_string(e.min_level));
-		insert_values.push_back(std::to_string(e.max_level));
-		insert_values.push_back(std::to_string(e.rare));
-		insert_values.push_back(std::to_string(e.raid));
-		insert_values.push_back("'" + Strings::Escape(e.race) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.class_) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.bodytype) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-		insert_values.push_back(std::to_string(e.hot_zone));
-		insert_values.push_back(std::to_string(e.min_expansion));
-		insert_values.push_back(std::to_string(e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.description) + "'");
+		v.push_back(std::to_string(e.loottable_id));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.min_level));
+		v.push_back(std::to_string(e.max_level));
+		v.push_back(std::to_string(e.rare));
+		v.push_back(std::to_string(e.raid));
+		v.push_back("'" + Strings::Escape(e.race) + "'");
+		v.push_back("'" + Strings::Escape(e.class_) + "'");
+		v.push_back("'" + Strings::Escape(e.bodytype) + "'");
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.hot_zone));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -309,30 +309,30 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back("'" + Strings::Escape(e.description) + "'");
-			insert_values.push_back(std::to_string(e.loottable_id));
-			insert_values.push_back(std::to_string(e.enabled));
-			insert_values.push_back(std::to_string(e.min_level));
-			insert_values.push_back(std::to_string(e.max_level));
-			insert_values.push_back(std::to_string(e.rare));
-			insert_values.push_back(std::to_string(e.raid));
-			insert_values.push_back("'" + Strings::Escape(e.race) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.class_) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.bodytype) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-			insert_values.push_back(std::to_string(e.hot_zone));
-			insert_values.push_back(std::to_string(e.min_expansion));
-			insert_values.push_back(std::to_string(e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.description) + "'");
+			v.push_back(std::to_string(e.loottable_id));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.min_level));
+			v.push_back(std::to_string(e.max_level));
+			v.push_back(std::to_string(e.rare));
+			v.push_back(std::to_string(e.raid));
+			v.push_back("'" + Strings::Escape(e.race) + "'");
+			v.push_back("'" + Strings::Escape(e.class_) + "'");
+			v.push_back("'" + Strings::Escape(e.bodytype) + "'");
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.hot_zone));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

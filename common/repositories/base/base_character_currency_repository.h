@@ -224,33 +224,33 @@ public:
 		CharacterCurrency e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.platinum));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.gold));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.silver));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.copper));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.platinum_bank));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.gold_bank));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.silver_bank));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.copper_bank));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.platinum_cursor));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.gold_cursor));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.silver_cursor));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.copper_cursor));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.radiant_crystals));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.career_radiant_crystals));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.ebon_crystals));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.career_ebon_crystals));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.platinum));
+		v.push_back(columns[2] + " = " + std::to_string(e.gold));
+		v.push_back(columns[3] + " = " + std::to_string(e.silver));
+		v.push_back(columns[4] + " = " + std::to_string(e.copper));
+		v.push_back(columns[5] + " = " + std::to_string(e.platinum_bank));
+		v.push_back(columns[6] + " = " + std::to_string(e.gold_bank));
+		v.push_back(columns[7] + " = " + std::to_string(e.silver_bank));
+		v.push_back(columns[8] + " = " + std::to_string(e.copper_bank));
+		v.push_back(columns[9] + " = " + std::to_string(e.platinum_cursor));
+		v.push_back(columns[10] + " = " + std::to_string(e.gold_cursor));
+		v.push_back(columns[11] + " = " + std::to_string(e.silver_cursor));
+		v.push_back(columns[12] + " = " + std::to_string(e.copper_cursor));
+		v.push_back(columns[13] + " = " + std::to_string(e.radiant_crystals));
+		v.push_back(columns[14] + " = " + std::to_string(e.career_radiant_crystals));
+		v.push_back(columns[15] + " = " + std::to_string(e.ebon_crystals));
+		v.push_back(columns[16] + " = " + std::to_string(e.career_ebon_crystals));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -264,31 +264,31 @@ public:
 		CharacterCurrency e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back(std::to_string(e.platinum));
-		insert_values.push_back(std::to_string(e.gold));
-		insert_values.push_back(std::to_string(e.silver));
-		insert_values.push_back(std::to_string(e.copper));
-		insert_values.push_back(std::to_string(e.platinum_bank));
-		insert_values.push_back(std::to_string(e.gold_bank));
-		insert_values.push_back(std::to_string(e.silver_bank));
-		insert_values.push_back(std::to_string(e.copper_bank));
-		insert_values.push_back(std::to_string(e.platinum_cursor));
-		insert_values.push_back(std::to_string(e.gold_cursor));
-		insert_values.push_back(std::to_string(e.silver_cursor));
-		insert_values.push_back(std::to_string(e.copper_cursor));
-		insert_values.push_back(std::to_string(e.radiant_crystals));
-		insert_values.push_back(std::to_string(e.career_radiant_crystals));
-		insert_values.push_back(std::to_string(e.ebon_crystals));
-		insert_values.push_back(std::to_string(e.career_ebon_crystals));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.platinum));
+		v.push_back(std::to_string(e.gold));
+		v.push_back(std::to_string(e.silver));
+		v.push_back(std::to_string(e.copper));
+		v.push_back(std::to_string(e.platinum_bank));
+		v.push_back(std::to_string(e.gold_bank));
+		v.push_back(std::to_string(e.silver_bank));
+		v.push_back(std::to_string(e.copper_bank));
+		v.push_back(std::to_string(e.platinum_cursor));
+		v.push_back(std::to_string(e.gold_cursor));
+		v.push_back(std::to_string(e.silver_cursor));
+		v.push_back(std::to_string(e.copper_cursor));
+		v.push_back(std::to_string(e.radiant_crystals));
+		v.push_back(std::to_string(e.career_radiant_crystals));
+		v.push_back(std::to_string(e.ebon_crystals));
+		v.push_back(std::to_string(e.career_ebon_crystals));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -310,30 +310,30 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back(std::to_string(e.platinum));
-			insert_values.push_back(std::to_string(e.gold));
-			insert_values.push_back(std::to_string(e.silver));
-			insert_values.push_back(std::to_string(e.copper));
-			insert_values.push_back(std::to_string(e.platinum_bank));
-			insert_values.push_back(std::to_string(e.gold_bank));
-			insert_values.push_back(std::to_string(e.silver_bank));
-			insert_values.push_back(std::to_string(e.copper_bank));
-			insert_values.push_back(std::to_string(e.platinum_cursor));
-			insert_values.push_back(std::to_string(e.gold_cursor));
-			insert_values.push_back(std::to_string(e.silver_cursor));
-			insert_values.push_back(std::to_string(e.copper_cursor));
-			insert_values.push_back(std::to_string(e.radiant_crystals));
-			insert_values.push_back(std::to_string(e.career_radiant_crystals));
-			insert_values.push_back(std::to_string(e.ebon_crystals));
-			insert_values.push_back(std::to_string(e.career_ebon_crystals));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.platinum));
+			v.push_back(std::to_string(e.gold));
+			v.push_back(std::to_string(e.silver));
+			v.push_back(std::to_string(e.copper));
+			v.push_back(std::to_string(e.platinum_bank));
+			v.push_back(std::to_string(e.gold_bank));
+			v.push_back(std::to_string(e.silver_bank));
+			v.push_back(std::to_string(e.copper_bank));
+			v.push_back(std::to_string(e.platinum_cursor));
+			v.push_back(std::to_string(e.gold_cursor));
+			v.push_back(std::to_string(e.silver_cursor));
+			v.push_back(std::to_string(e.copper_cursor));
+			v.push_back(std::to_string(e.radiant_crystals));
+			v.push_back(std::to_string(e.career_radiant_crystals));
+			v.push_back(std::to_string(e.ebon_crystals));
+			v.push_back(std::to_string(e.career_ebon_crystals));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

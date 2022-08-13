@@ -284,45 +284,45 @@ public:
 		NpcTypesTint e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.tint_set_name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(e.red1h));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.grn1h));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.blu1h));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.red2c));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.grn2c));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.blu2c));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.red3a));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.grn3a));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.blu3a));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.red4b));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.grn4b));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.blu4b));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.red5g));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.grn5g));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.blu5g));
-		update_values.push_back(columns[17] + " = " + std::to_string(e.red6l));
-		update_values.push_back(columns[18] + " = " + std::to_string(e.grn6l));
-		update_values.push_back(columns[19] + " = " + std::to_string(e.blu6l));
-		update_values.push_back(columns[20] + " = " + std::to_string(e.red7f));
-		update_values.push_back(columns[21] + " = " + std::to_string(e.grn7f));
-		update_values.push_back(columns[22] + " = " + std::to_string(e.blu7f));
-		update_values.push_back(columns[23] + " = " + std::to_string(e.red8x));
-		update_values.push_back(columns[24] + " = " + std::to_string(e.grn8x));
-		update_values.push_back(columns[25] + " = " + std::to_string(e.blu8x));
-		update_values.push_back(columns[26] + " = " + std::to_string(e.red9x));
-		update_values.push_back(columns[27] + " = " + std::to_string(e.grn9x));
-		update_values.push_back(columns[28] + " = " + std::to_string(e.blu9x));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.tint_set_name) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.red1h));
+		v.push_back(columns[3] + " = " + std::to_string(e.grn1h));
+		v.push_back(columns[4] + " = " + std::to_string(e.blu1h));
+		v.push_back(columns[5] + " = " + std::to_string(e.red2c));
+		v.push_back(columns[6] + " = " + std::to_string(e.grn2c));
+		v.push_back(columns[7] + " = " + std::to_string(e.blu2c));
+		v.push_back(columns[8] + " = " + std::to_string(e.red3a));
+		v.push_back(columns[9] + " = " + std::to_string(e.grn3a));
+		v.push_back(columns[10] + " = " + std::to_string(e.blu3a));
+		v.push_back(columns[11] + " = " + std::to_string(e.red4b));
+		v.push_back(columns[12] + " = " + std::to_string(e.grn4b));
+		v.push_back(columns[13] + " = " + std::to_string(e.blu4b));
+		v.push_back(columns[14] + " = " + std::to_string(e.red5g));
+		v.push_back(columns[15] + " = " + std::to_string(e.grn5g));
+		v.push_back(columns[16] + " = " + std::to_string(e.blu5g));
+		v.push_back(columns[17] + " = " + std::to_string(e.red6l));
+		v.push_back(columns[18] + " = " + std::to_string(e.grn6l));
+		v.push_back(columns[19] + " = " + std::to_string(e.blu6l));
+		v.push_back(columns[20] + " = " + std::to_string(e.red7f));
+		v.push_back(columns[21] + " = " + std::to_string(e.grn7f));
+		v.push_back(columns[22] + " = " + std::to_string(e.blu7f));
+		v.push_back(columns[23] + " = " + std::to_string(e.red8x));
+		v.push_back(columns[24] + " = " + std::to_string(e.grn8x));
+		v.push_back(columns[25] + " = " + std::to_string(e.blu8x));
+		v.push_back(columns[26] + " = " + std::to_string(e.red9x));
+		v.push_back(columns[27] + " = " + std::to_string(e.grn9x));
+		v.push_back(columns[28] + " = " + std::to_string(e.blu9x));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -336,43 +336,43 @@ public:
 		NpcTypesTint e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back("'" + Strings::Escape(e.tint_set_name) + "'");
-		insert_values.push_back(std::to_string(e.red1h));
-		insert_values.push_back(std::to_string(e.grn1h));
-		insert_values.push_back(std::to_string(e.blu1h));
-		insert_values.push_back(std::to_string(e.red2c));
-		insert_values.push_back(std::to_string(e.grn2c));
-		insert_values.push_back(std::to_string(e.blu2c));
-		insert_values.push_back(std::to_string(e.red3a));
-		insert_values.push_back(std::to_string(e.grn3a));
-		insert_values.push_back(std::to_string(e.blu3a));
-		insert_values.push_back(std::to_string(e.red4b));
-		insert_values.push_back(std::to_string(e.grn4b));
-		insert_values.push_back(std::to_string(e.blu4b));
-		insert_values.push_back(std::to_string(e.red5g));
-		insert_values.push_back(std::to_string(e.grn5g));
-		insert_values.push_back(std::to_string(e.blu5g));
-		insert_values.push_back(std::to_string(e.red6l));
-		insert_values.push_back(std::to_string(e.grn6l));
-		insert_values.push_back(std::to_string(e.blu6l));
-		insert_values.push_back(std::to_string(e.red7f));
-		insert_values.push_back(std::to_string(e.grn7f));
-		insert_values.push_back(std::to_string(e.blu7f));
-		insert_values.push_back(std::to_string(e.red8x));
-		insert_values.push_back(std::to_string(e.grn8x));
-		insert_values.push_back(std::to_string(e.blu8x));
-		insert_values.push_back(std::to_string(e.red9x));
-		insert_values.push_back(std::to_string(e.grn9x));
-		insert_values.push_back(std::to_string(e.blu9x));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.tint_set_name) + "'");
+		v.push_back(std::to_string(e.red1h));
+		v.push_back(std::to_string(e.grn1h));
+		v.push_back(std::to_string(e.blu1h));
+		v.push_back(std::to_string(e.red2c));
+		v.push_back(std::to_string(e.grn2c));
+		v.push_back(std::to_string(e.blu2c));
+		v.push_back(std::to_string(e.red3a));
+		v.push_back(std::to_string(e.grn3a));
+		v.push_back(std::to_string(e.blu3a));
+		v.push_back(std::to_string(e.red4b));
+		v.push_back(std::to_string(e.grn4b));
+		v.push_back(std::to_string(e.blu4b));
+		v.push_back(std::to_string(e.red5g));
+		v.push_back(std::to_string(e.grn5g));
+		v.push_back(std::to_string(e.blu5g));
+		v.push_back(std::to_string(e.red6l));
+		v.push_back(std::to_string(e.grn6l));
+		v.push_back(std::to_string(e.blu6l));
+		v.push_back(std::to_string(e.red7f));
+		v.push_back(std::to_string(e.grn7f));
+		v.push_back(std::to_string(e.blu7f));
+		v.push_back(std::to_string(e.red8x));
+		v.push_back(std::to_string(e.grn8x));
+		v.push_back(std::to_string(e.blu8x));
+		v.push_back(std::to_string(e.red9x));
+		v.push_back(std::to_string(e.grn9x));
+		v.push_back(std::to_string(e.blu9x));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -394,42 +394,42 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back("'" + Strings::Escape(e.tint_set_name) + "'");
-			insert_values.push_back(std::to_string(e.red1h));
-			insert_values.push_back(std::to_string(e.grn1h));
-			insert_values.push_back(std::to_string(e.blu1h));
-			insert_values.push_back(std::to_string(e.red2c));
-			insert_values.push_back(std::to_string(e.grn2c));
-			insert_values.push_back(std::to_string(e.blu2c));
-			insert_values.push_back(std::to_string(e.red3a));
-			insert_values.push_back(std::to_string(e.grn3a));
-			insert_values.push_back(std::to_string(e.blu3a));
-			insert_values.push_back(std::to_string(e.red4b));
-			insert_values.push_back(std::to_string(e.grn4b));
-			insert_values.push_back(std::to_string(e.blu4b));
-			insert_values.push_back(std::to_string(e.red5g));
-			insert_values.push_back(std::to_string(e.grn5g));
-			insert_values.push_back(std::to_string(e.blu5g));
-			insert_values.push_back(std::to_string(e.red6l));
-			insert_values.push_back(std::to_string(e.grn6l));
-			insert_values.push_back(std::to_string(e.blu6l));
-			insert_values.push_back(std::to_string(e.red7f));
-			insert_values.push_back(std::to_string(e.grn7f));
-			insert_values.push_back(std::to_string(e.blu7f));
-			insert_values.push_back(std::to_string(e.red8x));
-			insert_values.push_back(std::to_string(e.grn8x));
-			insert_values.push_back(std::to_string(e.blu8x));
-			insert_values.push_back(std::to_string(e.red9x));
-			insert_values.push_back(std::to_string(e.grn9x));
-			insert_values.push_back(std::to_string(e.blu9x));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.tint_set_name) + "'");
+			v.push_back(std::to_string(e.red1h));
+			v.push_back(std::to_string(e.grn1h));
+			v.push_back(std::to_string(e.blu1h));
+			v.push_back(std::to_string(e.red2c));
+			v.push_back(std::to_string(e.grn2c));
+			v.push_back(std::to_string(e.blu2c));
+			v.push_back(std::to_string(e.red3a));
+			v.push_back(std::to_string(e.grn3a));
+			v.push_back(std::to_string(e.blu3a));
+			v.push_back(std::to_string(e.red4b));
+			v.push_back(std::to_string(e.grn4b));
+			v.push_back(std::to_string(e.blu4b));
+			v.push_back(std::to_string(e.red5g));
+			v.push_back(std::to_string(e.grn5g));
+			v.push_back(std::to_string(e.blu5g));
+			v.push_back(std::to_string(e.red6l));
+			v.push_back(std::to_string(e.grn6l));
+			v.push_back(std::to_string(e.blu6l));
+			v.push_back(std::to_string(e.red7f));
+			v.push_back(std::to_string(e.grn7f));
+			v.push_back(std::to_string(e.blu7f));
+			v.push_back(std::to_string(e.red8x));
+			v.push_back(std::to_string(e.grn8x));
+			v.push_back(std::to_string(e.blu8x));
+			v.push_back(std::to_string(e.red9x));
+			v.push_back(std::to_string(e.grn9x));
+			v.push_back(std::to_string(e.blu9x));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

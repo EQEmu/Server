@@ -194,27 +194,27 @@ public:
 		GuildRanks e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.guild_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.rank));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(e.can_hear));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.can_speak));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.can_invite));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.can_remove));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.can_promote));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.can_demote));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.can_motd));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.can_warpeace));
+		v.push_back(columns[0] + " = " + std::to_string(e.guild_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.rank));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.can_hear));
+		v.push_back(columns[4] + " = " + std::to_string(e.can_speak));
+		v.push_back(columns[5] + " = " + std::to_string(e.can_invite));
+		v.push_back(columns[6] + " = " + std::to_string(e.can_remove));
+		v.push_back(columns[7] + " = " + std::to_string(e.can_promote));
+		v.push_back(columns[8] + " = " + std::to_string(e.can_demote));
+		v.push_back(columns[9] + " = " + std::to_string(e.can_motd));
+		v.push_back(columns[10] + " = " + std::to_string(e.can_warpeace));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.guild_id
 			)
@@ -228,25 +228,25 @@ public:
 		GuildRanks e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.guild_id));
-		insert_values.push_back(std::to_string(e.rank));
-		insert_values.push_back("'" + Strings::Escape(e.title) + "'");
-		insert_values.push_back(std::to_string(e.can_hear));
-		insert_values.push_back(std::to_string(e.can_speak));
-		insert_values.push_back(std::to_string(e.can_invite));
-		insert_values.push_back(std::to_string(e.can_remove));
-		insert_values.push_back(std::to_string(e.can_promote));
-		insert_values.push_back(std::to_string(e.can_demote));
-		insert_values.push_back(std::to_string(e.can_motd));
-		insert_values.push_back(std::to_string(e.can_warpeace));
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.rank));
+		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back(std::to_string(e.can_hear));
+		v.push_back(std::to_string(e.can_speak));
+		v.push_back(std::to_string(e.can_invite));
+		v.push_back(std::to_string(e.can_remove));
+		v.push_back(std::to_string(e.can_promote));
+		v.push_back(std::to_string(e.can_demote));
+		v.push_back(std::to_string(e.can_motd));
+		v.push_back(std::to_string(e.can_warpeace));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -268,24 +268,24 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.guild_id));
-			insert_values.push_back(std::to_string(e.rank));
-			insert_values.push_back("'" + Strings::Escape(e.title) + "'");
-			insert_values.push_back(std::to_string(e.can_hear));
-			insert_values.push_back(std::to_string(e.can_speak));
-			insert_values.push_back(std::to_string(e.can_invite));
-			insert_values.push_back(std::to_string(e.can_remove));
-			insert_values.push_back(std::to_string(e.can_promote));
-			insert_values.push_back(std::to_string(e.can_demote));
-			insert_values.push_back(std::to_string(e.can_motd));
-			insert_values.push_back(std::to_string(e.can_warpeace));
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.rank));
+			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back(std::to_string(e.can_hear));
+			v.push_back(std::to_string(e.can_speak));
+			v.push_back(std::to_string(e.can_invite));
+			v.push_back(std::to_string(e.can_remove));
+			v.push_back(std::to_string(e.can_promote));
+			v.push_back(std::to_string(e.can_demote));
+			v.push_back(std::to_string(e.can_motd));
+			v.push_back(std::to_string(e.can_warpeace));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

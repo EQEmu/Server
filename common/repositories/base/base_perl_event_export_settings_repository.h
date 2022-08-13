@@ -174,23 +174,23 @@ public:
 		PerlEventExportSettings e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.event_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.event_description) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(e.export_qglobals));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.export_mob));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.export_zone));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.export_item));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.export_event));
+		v.push_back(columns[0] + " = " + std::to_string(e.event_id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.event_description) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.export_qglobals));
+		v.push_back(columns[3] + " = " + std::to_string(e.export_mob));
+		v.push_back(columns[4] + " = " + std::to_string(e.export_zone));
+		v.push_back(columns[5] + " = " + std::to_string(e.export_item));
+		v.push_back(columns[6] + " = " + std::to_string(e.export_event));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.event_id
 			)
@@ -204,21 +204,21 @@ public:
 		PerlEventExportSettings e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.event_id));
-		insert_values.push_back("'" + Strings::Escape(e.event_description) + "'");
-		insert_values.push_back(std::to_string(e.export_qglobals));
-		insert_values.push_back(std::to_string(e.export_mob));
-		insert_values.push_back(std::to_string(e.export_zone));
-		insert_values.push_back(std::to_string(e.export_item));
-		insert_values.push_back(std::to_string(e.export_event));
+		v.push_back(std::to_string(e.event_id));
+		v.push_back("'" + Strings::Escape(e.event_description) + "'");
+		v.push_back(std::to_string(e.export_qglobals));
+		v.push_back(std::to_string(e.export_mob));
+		v.push_back(std::to_string(e.export_zone));
+		v.push_back(std::to_string(e.export_item));
+		v.push_back(std::to_string(e.export_event));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -240,20 +240,20 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.event_id));
-			insert_values.push_back("'" + Strings::Escape(e.event_description) + "'");
-			insert_values.push_back(std::to_string(e.export_qglobals));
-			insert_values.push_back(std::to_string(e.export_mob));
-			insert_values.push_back(std::to_string(e.export_zone));
-			insert_values.push_back(std::to_string(e.export_item));
-			insert_values.push_back(std::to_string(e.export_event));
+			v.push_back(std::to_string(e.event_id));
+			v.push_back("'" + Strings::Escape(e.event_description) + "'");
+			v.push_back(std::to_string(e.export_qglobals));
+			v.push_back(std::to_string(e.export_mob));
+			v.push_back(std::to_string(e.export_zone));
+			v.push_back(std::to_string(e.export_item));
+			v.push_back(std::to_string(e.export_event));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

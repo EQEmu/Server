@@ -264,40 +264,40 @@ public:
 		Traps e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(e.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.x));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.y));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.z));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.chance));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.maxzdiff));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.radius));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.effect));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.effectvalue));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.effectvalue2));
-		update_values.push_back(columns[12] + " = '" + Strings::Escape(e.message) + "'");
-		update_values.push_back(columns[13] + " = " + std::to_string(e.skill));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.level));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.respawn_time));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.respawn_var));
-		update_values.push_back(columns[17] + " = " + std::to_string(e.triggered_number));
-		update_values.push_back(columns[18] + " = " + std::to_string(e.group));
-		update_values.push_back(columns[19] + " = " + std::to_string(e.despawn_when_triggered));
-		update_values.push_back(columns[20] + " = " + std::to_string(e.undetectable));
-		update_values.push_back(columns[21] + " = " + std::to_string(e.min_expansion));
-		update_values.push_back(columns[22] + " = " + std::to_string(e.max_expansion));
-		update_values.push_back(columns[23] + " = '" + Strings::Escape(e.content_flags) + "'");
-		update_values.push_back(columns[24] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.version));
+		v.push_back(columns[3] + " = " + std::to_string(e.x));
+		v.push_back(columns[4] + " = " + std::to_string(e.y));
+		v.push_back(columns[5] + " = " + std::to_string(e.z));
+		v.push_back(columns[6] + " = " + std::to_string(e.chance));
+		v.push_back(columns[7] + " = " + std::to_string(e.maxzdiff));
+		v.push_back(columns[8] + " = " + std::to_string(e.radius));
+		v.push_back(columns[9] + " = " + std::to_string(e.effect));
+		v.push_back(columns[10] + " = " + std::to_string(e.effectvalue));
+		v.push_back(columns[11] + " = " + std::to_string(e.effectvalue2));
+		v.push_back(columns[12] + " = '" + Strings::Escape(e.message) + "'");
+		v.push_back(columns[13] + " = " + std::to_string(e.skill));
+		v.push_back(columns[14] + " = " + std::to_string(e.level));
+		v.push_back(columns[15] + " = " + std::to_string(e.respawn_time));
+		v.push_back(columns[16] + " = " + std::to_string(e.respawn_var));
+		v.push_back(columns[17] + " = " + std::to_string(e.triggered_number));
+		v.push_back(columns[18] + " = " + std::to_string(e.group));
+		v.push_back(columns[19] + " = " + std::to_string(e.despawn_when_triggered));
+		v.push_back(columns[20] + " = " + std::to_string(e.undetectable));
+		v.push_back(columns[21] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[22] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[23] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[24] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -311,39 +311,39 @@ public:
 		Traps e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-		insert_values.push_back(std::to_string(e.version));
-		insert_values.push_back(std::to_string(e.x));
-		insert_values.push_back(std::to_string(e.y));
-		insert_values.push_back(std::to_string(e.z));
-		insert_values.push_back(std::to_string(e.chance));
-		insert_values.push_back(std::to_string(e.maxzdiff));
-		insert_values.push_back(std::to_string(e.radius));
-		insert_values.push_back(std::to_string(e.effect));
-		insert_values.push_back(std::to_string(e.effectvalue));
-		insert_values.push_back(std::to_string(e.effectvalue2));
-		insert_values.push_back("'" + Strings::Escape(e.message) + "'");
-		insert_values.push_back(std::to_string(e.skill));
-		insert_values.push_back(std::to_string(e.level));
-		insert_values.push_back(std::to_string(e.respawn_time));
-		insert_values.push_back(std::to_string(e.respawn_var));
-		insert_values.push_back(std::to_string(e.triggered_number));
-		insert_values.push_back(std::to_string(e.group));
-		insert_values.push_back(std::to_string(e.despawn_when_triggered));
-		insert_values.push_back(std::to_string(e.undetectable));
-		insert_values.push_back(std::to_string(e.min_expansion));
-		insert_values.push_back(std::to_string(e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.chance));
+		v.push_back(std::to_string(e.maxzdiff));
+		v.push_back(std::to_string(e.radius));
+		v.push_back(std::to_string(e.effect));
+		v.push_back(std::to_string(e.effectvalue));
+		v.push_back(std::to_string(e.effectvalue2));
+		v.push_back("'" + Strings::Escape(e.message) + "'");
+		v.push_back(std::to_string(e.skill));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.respawn_time));
+		v.push_back(std::to_string(e.respawn_var));
+		v.push_back(std::to_string(e.triggered_number));
+		v.push_back(std::to_string(e.group));
+		v.push_back(std::to_string(e.despawn_when_triggered));
+		v.push_back(std::to_string(e.undetectable));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -365,38 +365,38 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-			insert_values.push_back(std::to_string(e.version));
-			insert_values.push_back(std::to_string(e.x));
-			insert_values.push_back(std::to_string(e.y));
-			insert_values.push_back(std::to_string(e.z));
-			insert_values.push_back(std::to_string(e.chance));
-			insert_values.push_back(std::to_string(e.maxzdiff));
-			insert_values.push_back(std::to_string(e.radius));
-			insert_values.push_back(std::to_string(e.effect));
-			insert_values.push_back(std::to_string(e.effectvalue));
-			insert_values.push_back(std::to_string(e.effectvalue2));
-			insert_values.push_back("'" + Strings::Escape(e.message) + "'");
-			insert_values.push_back(std::to_string(e.skill));
-			insert_values.push_back(std::to_string(e.level));
-			insert_values.push_back(std::to_string(e.respawn_time));
-			insert_values.push_back(std::to_string(e.respawn_var));
-			insert_values.push_back(std::to_string(e.triggered_number));
-			insert_values.push_back(std::to_string(e.group));
-			insert_values.push_back(std::to_string(e.despawn_when_triggered));
-			insert_values.push_back(std::to_string(e.undetectable));
-			insert_values.push_back(std::to_string(e.min_expansion));
-			insert_values.push_back(std::to_string(e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.chance));
+			v.push_back(std::to_string(e.maxzdiff));
+			v.push_back(std::to_string(e.radius));
+			v.push_back(std::to_string(e.effect));
+			v.push_back(std::to_string(e.effectvalue));
+			v.push_back(std::to_string(e.effectvalue2));
+			v.push_back("'" + Strings::Escape(e.message) + "'");
+			v.push_back(std::to_string(e.skill));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.respawn_time));
+			v.push_back(std::to_string(e.respawn_var));
+			v.push_back(std::to_string(e.triggered_number));
+			v.push_back(std::to_string(e.group));
+			v.push_back(std::to_string(e.despawn_when_triggered));
+			v.push_back(std::to_string(e.undetectable));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

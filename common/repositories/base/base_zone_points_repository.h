@@ -259,39 +259,39 @@ public:
 		ZonePoints e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(e.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.number));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.y));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.x));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.heading));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.target_y));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.target_x));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.target_z));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.target_heading));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.zoneinst));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.target_zone_id));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.target_instance));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.buffer));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.client_version_mask));
-		update_values.push_back(columns[17] + " = " + std::to_string(e.min_expansion));
-		update_values.push_back(columns[18] + " = " + std::to_string(e.max_expansion));
-		update_values.push_back(columns[19] + " = '" + Strings::Escape(e.content_flags) + "'");
-		update_values.push_back(columns[20] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
-		update_values.push_back(columns[21] + " = " + std::to_string(e.is_virtual));
-		update_values.push_back(columns[22] + " = " + std::to_string(e.height));
-		update_values.push_back(columns[23] + " = " + std::to_string(e.width));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.version));
+		v.push_back(columns[3] + " = " + std::to_string(e.number));
+		v.push_back(columns[4] + " = " + std::to_string(e.y));
+		v.push_back(columns[5] + " = " + std::to_string(e.x));
+		v.push_back(columns[6] + " = " + std::to_string(e.z));
+		v.push_back(columns[7] + " = " + std::to_string(e.heading));
+		v.push_back(columns[8] + " = " + std::to_string(e.target_y));
+		v.push_back(columns[9] + " = " + std::to_string(e.target_x));
+		v.push_back(columns[10] + " = " + std::to_string(e.target_z));
+		v.push_back(columns[11] + " = " + std::to_string(e.target_heading));
+		v.push_back(columns[12] + " = " + std::to_string(e.zoneinst));
+		v.push_back(columns[13] + " = " + std::to_string(e.target_zone_id));
+		v.push_back(columns[14] + " = " + std::to_string(e.target_instance));
+		v.push_back(columns[15] + " = " + std::to_string(e.buffer));
+		v.push_back(columns[16] + " = " + std::to_string(e.client_version_mask));
+		v.push_back(columns[17] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[18] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[19] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[20] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[21] + " = " + std::to_string(e.is_virtual));
+		v.push_back(columns[22] + " = " + std::to_string(e.height));
+		v.push_back(columns[23] + " = " + std::to_string(e.width));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -305,38 +305,38 @@ public:
 		ZonePoints e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-		insert_values.push_back(std::to_string(e.version));
-		insert_values.push_back(std::to_string(e.number));
-		insert_values.push_back(std::to_string(e.y));
-		insert_values.push_back(std::to_string(e.x));
-		insert_values.push_back(std::to_string(e.z));
-		insert_values.push_back(std::to_string(e.heading));
-		insert_values.push_back(std::to_string(e.target_y));
-		insert_values.push_back(std::to_string(e.target_x));
-		insert_values.push_back(std::to_string(e.target_z));
-		insert_values.push_back(std::to_string(e.target_heading));
-		insert_values.push_back(std::to_string(e.zoneinst));
-		insert_values.push_back(std::to_string(e.target_zone_id));
-		insert_values.push_back(std::to_string(e.target_instance));
-		insert_values.push_back(std::to_string(e.buffer));
-		insert_values.push_back(std::to_string(e.client_version_mask));
-		insert_values.push_back(std::to_string(e.min_expansion));
-		insert_values.push_back(std::to_string(e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
-		insert_values.push_back(std::to_string(e.is_virtual));
-		insert_values.push_back(std::to_string(e.height));
-		insert_values.push_back(std::to_string(e.width));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.number));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.target_y));
+		v.push_back(std::to_string(e.target_x));
+		v.push_back(std::to_string(e.target_z));
+		v.push_back(std::to_string(e.target_heading));
+		v.push_back(std::to_string(e.zoneinst));
+		v.push_back(std::to_string(e.target_zone_id));
+		v.push_back(std::to_string(e.target_instance));
+		v.push_back(std::to_string(e.buffer));
+		v.push_back(std::to_string(e.client_version_mask));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.is_virtual));
+		v.push_back(std::to_string(e.height));
+		v.push_back(std::to_string(e.width));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -358,37 +358,37 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-			insert_values.push_back(std::to_string(e.version));
-			insert_values.push_back(std::to_string(e.number));
-			insert_values.push_back(std::to_string(e.y));
-			insert_values.push_back(std::to_string(e.x));
-			insert_values.push_back(std::to_string(e.z));
-			insert_values.push_back(std::to_string(e.heading));
-			insert_values.push_back(std::to_string(e.target_y));
-			insert_values.push_back(std::to_string(e.target_x));
-			insert_values.push_back(std::to_string(e.target_z));
-			insert_values.push_back(std::to_string(e.target_heading));
-			insert_values.push_back(std::to_string(e.zoneinst));
-			insert_values.push_back(std::to_string(e.target_zone_id));
-			insert_values.push_back(std::to_string(e.target_instance));
-			insert_values.push_back(std::to_string(e.buffer));
-			insert_values.push_back(std::to_string(e.client_version_mask));
-			insert_values.push_back(std::to_string(e.min_expansion));
-			insert_values.push_back(std::to_string(e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
-			insert_values.push_back(std::to_string(e.is_virtual));
-			insert_values.push_back(std::to_string(e.height));
-			insert_values.push_back(std::to_string(e.width));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.number));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.target_y));
+			v.push_back(std::to_string(e.target_x));
+			v.push_back(std::to_string(e.target_z));
+			v.push_back(std::to_string(e.target_heading));
+			v.push_back(std::to_string(e.zoneinst));
+			v.push_back(std::to_string(e.target_zone_id));
+			v.push_back(std::to_string(e.target_instance));
+			v.push_back(std::to_string(e.buffer));
+			v.push_back(std::to_string(e.client_version_mask));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.is_virtual));
+			v.push_back(std::to_string(e.height));
+			v.push_back(std::to_string(e.width));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -154,19 +154,19 @@ public:
 		LevelExpMods e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.level));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.exp_mod));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.aa_exp_mod));
+		v.push_back(columns[0] + " = " + std::to_string(e.level));
+		v.push_back(columns[1] + " = " + std::to_string(e.exp_mod));
+		v.push_back(columns[2] + " = " + std::to_string(e.aa_exp_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.level
 			)
@@ -180,17 +180,17 @@ public:
 		LevelExpMods e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.level));
-		insert_values.push_back(std::to_string(e.exp_mod));
-		insert_values.push_back(std::to_string(e.aa_exp_mod));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.exp_mod));
+		v.push_back(std::to_string(e.aa_exp_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -212,16 +212,16 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.level));
-			insert_values.push_back(std::to_string(e.exp_mod));
-			insert_values.push_back(std::to_string(e.aa_exp_mod));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.exp_mod));
+			v.push_back(std::to_string(e.aa_exp_mod));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

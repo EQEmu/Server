@@ -214,31 +214,31 @@ public:
 		Merchantlist e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.merchantid));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.item));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.faction_required));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.level_required));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.alt_currency_cost));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.classes_required));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.probability));
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(e.bucket_name) + "'");
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.bucket_value) + "'");
-		update_values.push_back(columns[10] + " = " + std::to_string(e.bucket_comparison));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.min_expansion));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.max_expansion));
-		update_values.push_back(columns[13] + " = '" + Strings::Escape(e.content_flags) + "'");
-		update_values.push_back(columns[14] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.merchantid));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.item));
+		v.push_back(columns[3] + " = " + std::to_string(e.faction_required));
+		v.push_back(columns[4] + " = " + std::to_string(e.level_required));
+		v.push_back(columns[5] + " = " + std::to_string(e.alt_currency_cost));
+		v.push_back(columns[6] + " = " + std::to_string(e.classes_required));
+		v.push_back(columns[7] + " = " + std::to_string(e.probability));
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.bucket_name) + "'");
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.bucket_value) + "'");
+		v.push_back(columns[10] + " = " + std::to_string(e.bucket_comparison));
+		v.push_back(columns[11] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[12] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[13] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[14] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.merchantid
 			)
@@ -252,29 +252,29 @@ public:
 		Merchantlist e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.merchantid));
-		insert_values.push_back(std::to_string(e.slot));
-		insert_values.push_back(std::to_string(e.item));
-		insert_values.push_back(std::to_string(e.faction_required));
-		insert_values.push_back(std::to_string(e.level_required));
-		insert_values.push_back(std::to_string(e.alt_currency_cost));
-		insert_values.push_back(std::to_string(e.classes_required));
-		insert_values.push_back(std::to_string(e.probability));
-		insert_values.push_back("'" + Strings::Escape(e.bucket_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.bucket_value) + "'");
-		insert_values.push_back(std::to_string(e.bucket_comparison));
-		insert_values.push_back(std::to_string(e.min_expansion));
-		insert_values.push_back(std::to_string(e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.merchantid));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.item));
+		v.push_back(std::to_string(e.faction_required));
+		v.push_back(std::to_string(e.level_required));
+		v.push_back(std::to_string(e.alt_currency_cost));
+		v.push_back(std::to_string(e.classes_required));
+		v.push_back(std::to_string(e.probability));
+		v.push_back("'" + Strings::Escape(e.bucket_name) + "'");
+		v.push_back("'" + Strings::Escape(e.bucket_value) + "'");
+		v.push_back(std::to_string(e.bucket_comparison));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -296,28 +296,28 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.merchantid));
-			insert_values.push_back(std::to_string(e.slot));
-			insert_values.push_back(std::to_string(e.item));
-			insert_values.push_back(std::to_string(e.faction_required));
-			insert_values.push_back(std::to_string(e.level_required));
-			insert_values.push_back(std::to_string(e.alt_currency_cost));
-			insert_values.push_back(std::to_string(e.classes_required));
-			insert_values.push_back(std::to_string(e.probability));
-			insert_values.push_back("'" + Strings::Escape(e.bucket_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.bucket_value) + "'");
-			insert_values.push_back(std::to_string(e.bucket_comparison));
-			insert_values.push_back(std::to_string(e.min_expansion));
-			insert_values.push_back(std::to_string(e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.merchantid));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.item));
+			v.push_back(std::to_string(e.faction_required));
+			v.push_back(std::to_string(e.level_required));
+			v.push_back(std::to_string(e.alt_currency_cost));
+			v.push_back(std::to_string(e.classes_required));
+			v.push_back(std::to_string(e.probability));
+			v.push_back("'" + Strings::Escape(e.bucket_name) + "'");
+			v.push_back("'" + Strings::Escape(e.bucket_value) + "'");
+			v.push_back(std::to_string(e.bucket_comparison));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

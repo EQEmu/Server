@@ -149,18 +149,18 @@ public:
 		Goallists e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.listid));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.entry));
+		v.push_back(columns[0] + " = " + std::to_string(e.listid));
+		v.push_back(columns[1] + " = " + std::to_string(e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.listid
 			)
@@ -174,16 +174,16 @@ public:
 		Goallists e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.listid));
-		insert_values.push_back(std::to_string(e.entry));
+		v.push_back(std::to_string(e.listid));
+		v.push_back(std::to_string(e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -205,15 +205,15 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.listid));
-			insert_values.push_back(std::to_string(e.entry));
+			v.push_back(std::to_string(e.listid));
+			v.push_back(std::to_string(e.entry));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -259,39 +259,39 @@ public:
 		Account e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.charname) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(e.sharedplat));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.password) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(e.status));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.ls_id) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(e.lsaccount_id));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.gmspeed));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.invulnerable));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.flymode));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.ignore_tells));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.revoked));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.karma));
-		update_values.push_back(columns[14] + " = '" + Strings::Escape(e.minilogin_ip) + "'");
-		update_values.push_back(columns[15] + " = " + std::to_string(e.hideme));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.rulesflag));
-		update_values.push_back(columns[17] + " = FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
-		update_values.push_back(columns[18] + " = " + std::to_string(e.time_creation));
-		update_values.push_back(columns[19] + " = '" + Strings::Escape(e.ban_reason) + "'");
-		update_values.push_back(columns[20] + " = '" + Strings::Escape(e.suspend_reason) + "'");
-		update_values.push_back(columns[21] + " = '" + Strings::Escape(e.crc_eqgame) + "'");
-		update_values.push_back(columns[22] + " = '" + Strings::Escape(e.crc_skillcaps) + "'");
-		update_values.push_back(columns[23] + " = '" + Strings::Escape(e.crc_basedata) + "'");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.charname) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.sharedplat));
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.password) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.status));
+		v.push_back(columns[6] + " = '" + Strings::Escape(e.ls_id) + "'");
+		v.push_back(columns[7] + " = " + std::to_string(e.lsaccount_id));
+		v.push_back(columns[8] + " = " + std::to_string(e.gmspeed));
+		v.push_back(columns[9] + " = " + std::to_string(e.invulnerable));
+		v.push_back(columns[10] + " = " + std::to_string(e.flymode));
+		v.push_back(columns[11] + " = " + std::to_string(e.ignore_tells));
+		v.push_back(columns[12] + " = " + std::to_string(e.revoked));
+		v.push_back(columns[13] + " = " + std::to_string(e.karma));
+		v.push_back(columns[14] + " = '" + Strings::Escape(e.minilogin_ip) + "'");
+		v.push_back(columns[15] + " = " + std::to_string(e.hideme));
+		v.push_back(columns[16] + " = " + std::to_string(e.rulesflag));
+		v.push_back(columns[17] + " = FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+		v.push_back(columns[18] + " = " + std::to_string(e.time_creation));
+		v.push_back(columns[19] + " = '" + Strings::Escape(e.ban_reason) + "'");
+		v.push_back(columns[20] + " = '" + Strings::Escape(e.suspend_reason) + "'");
+		v.push_back(columns[21] + " = '" + Strings::Escape(e.crc_eqgame) + "'");
+		v.push_back(columns[22] + " = '" + Strings::Escape(e.crc_skillcaps) + "'");
+		v.push_back(columns[23] + " = '" + Strings::Escape(e.crc_basedata) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -305,38 +305,38 @@ public:
 		Account e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.charname) + "'");
-		insert_values.push_back(std::to_string(e.sharedplat));
-		insert_values.push_back("'" + Strings::Escape(e.password) + "'");
-		insert_values.push_back(std::to_string(e.status));
-		insert_values.push_back("'" + Strings::Escape(e.ls_id) + "'");
-		insert_values.push_back(std::to_string(e.lsaccount_id));
-		insert_values.push_back(std::to_string(e.gmspeed));
-		insert_values.push_back(std::to_string(e.invulnerable));
-		insert_values.push_back(std::to_string(e.flymode));
-		insert_values.push_back(std::to_string(e.ignore_tells));
-		insert_values.push_back(std::to_string(e.revoked));
-		insert_values.push_back(std::to_string(e.karma));
-		insert_values.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
-		insert_values.push_back(std::to_string(e.hideme));
-		insert_values.push_back(std::to_string(e.rulesflag));
-		insert_values.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
-		insert_values.push_back(std::to_string(e.time_creation));
-		insert_values.push_back("'" + Strings::Escape(e.ban_reason) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.crc_eqgame) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.crc_skillcaps) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.crc_basedata) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back(std::to_string(e.sharedplat));
+		v.push_back("'" + Strings::Escape(e.password) + "'");
+		v.push_back(std::to_string(e.status));
+		v.push_back("'" + Strings::Escape(e.ls_id) + "'");
+		v.push_back(std::to_string(e.lsaccount_id));
+		v.push_back(std::to_string(e.gmspeed));
+		v.push_back(std::to_string(e.invulnerable));
+		v.push_back(std::to_string(e.flymode));
+		v.push_back(std::to_string(e.ignore_tells));
+		v.push_back(std::to_string(e.revoked));
+		v.push_back(std::to_string(e.karma));
+		v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
+		v.push_back(std::to_string(e.hideme));
+		v.push_back(std::to_string(e.rulesflag));
+		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+		v.push_back(std::to_string(e.time_creation));
+		v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
+		v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
+		v.push_back("'" + Strings::Escape(e.crc_eqgame) + "'");
+		v.push_back("'" + Strings::Escape(e.crc_skillcaps) + "'");
+		v.push_back("'" + Strings::Escape(e.crc_basedata) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -358,37 +358,37 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.charname) + "'");
-			insert_values.push_back(std::to_string(e.sharedplat));
-			insert_values.push_back("'" + Strings::Escape(e.password) + "'");
-			insert_values.push_back(std::to_string(e.status));
-			insert_values.push_back("'" + Strings::Escape(e.ls_id) + "'");
-			insert_values.push_back(std::to_string(e.lsaccount_id));
-			insert_values.push_back(std::to_string(e.gmspeed));
-			insert_values.push_back(std::to_string(e.invulnerable));
-			insert_values.push_back(std::to_string(e.flymode));
-			insert_values.push_back(std::to_string(e.ignore_tells));
-			insert_values.push_back(std::to_string(e.revoked));
-			insert_values.push_back(std::to_string(e.karma));
-			insert_values.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
-			insert_values.push_back(std::to_string(e.hideme));
-			insert_values.push_back(std::to_string(e.rulesflag));
-			insert_values.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
-			insert_values.push_back(std::to_string(e.time_creation));
-			insert_values.push_back("'" + Strings::Escape(e.ban_reason) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.crc_eqgame) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.crc_skillcaps) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.crc_basedata) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back(std::to_string(e.sharedplat));
+			v.push_back("'" + Strings::Escape(e.password) + "'");
+			v.push_back(std::to_string(e.status));
+			v.push_back("'" + Strings::Escape(e.ls_id) + "'");
+			v.push_back(std::to_string(e.lsaccount_id));
+			v.push_back(std::to_string(e.gmspeed));
+			v.push_back(std::to_string(e.invulnerable));
+			v.push_back(std::to_string(e.flymode));
+			v.push_back(std::to_string(e.ignore_tells));
+			v.push_back(std::to_string(e.revoked));
+			v.push_back(std::to_string(e.karma));
+			v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
+			v.push_back(std::to_string(e.hideme));
+			v.push_back(std::to_string(e.rulesflag));
+			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+			v.push_back(std::to_string(e.time_creation));
+			v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
+			v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
+			v.push_back("'" + Strings::Escape(e.crc_eqgame) + "'");
+			v.push_back("'" + Strings::Escape(e.crc_skillcaps) + "'");
+			v.push_back("'" + Strings::Escape(e.crc_basedata) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -239,35 +239,35 @@ public:
 		Spawn2 e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(e.spawngroupID));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.zone) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(e.version));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.heading));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.respawntime));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.variance));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.pathgrid));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.path_when_zone_idle));
-		update_values.push_back(columns[12] + " = " + std::to_string(e._condition));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.cond_value));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.enabled));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.animation));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.min_expansion));
-		update_values.push_back(columns[17] + " = " + std::to_string(e.max_expansion));
-		update_values.push_back(columns[18] + " = '" + Strings::Escape(e.content_flags) + "'");
-		update_values.push_back(columns[19] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.spawngroupID));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.zone) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.version));
+		v.push_back(columns[4] + " = " + std::to_string(e.x));
+		v.push_back(columns[5] + " = " + std::to_string(e.y));
+		v.push_back(columns[6] + " = " + std::to_string(e.z));
+		v.push_back(columns[7] + " = " + std::to_string(e.heading));
+		v.push_back(columns[8] + " = " + std::to_string(e.respawntime));
+		v.push_back(columns[9] + " = " + std::to_string(e.variance));
+		v.push_back(columns[10] + " = " + std::to_string(e.pathgrid));
+		v.push_back(columns[11] + " = " + std::to_string(e.path_when_zone_idle));
+		v.push_back(columns[12] + " = " + std::to_string(e._condition));
+		v.push_back(columns[13] + " = " + std::to_string(e.cond_value));
+		v.push_back(columns[14] + " = " + std::to_string(e.enabled));
+		v.push_back(columns[15] + " = " + std::to_string(e.animation));
+		v.push_back(columns[16] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[17] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[18] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[19] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -281,34 +281,34 @@ public:
 		Spawn2 e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back(std::to_string(e.spawngroupID));
-		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-		insert_values.push_back(std::to_string(e.version));
-		insert_values.push_back(std::to_string(e.x));
-		insert_values.push_back(std::to_string(e.y));
-		insert_values.push_back(std::to_string(e.z));
-		insert_values.push_back(std::to_string(e.heading));
-		insert_values.push_back(std::to_string(e.respawntime));
-		insert_values.push_back(std::to_string(e.variance));
-		insert_values.push_back(std::to_string(e.pathgrid));
-		insert_values.push_back(std::to_string(e.path_when_zone_idle));
-		insert_values.push_back(std::to_string(e._condition));
-		insert_values.push_back(std::to_string(e.cond_value));
-		insert_values.push_back(std::to_string(e.enabled));
-		insert_values.push_back(std::to_string(e.animation));
-		insert_values.push_back(std::to_string(e.min_expansion));
-		insert_values.push_back(std::to_string(e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.spawngroupID));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.respawntime));
+		v.push_back(std::to_string(e.variance));
+		v.push_back(std::to_string(e.pathgrid));
+		v.push_back(std::to_string(e.path_when_zone_idle));
+		v.push_back(std::to_string(e._condition));
+		v.push_back(std::to_string(e.cond_value));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.animation));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -330,33 +330,33 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back(std::to_string(e.spawngroupID));
-			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
-			insert_values.push_back(std::to_string(e.version));
-			insert_values.push_back(std::to_string(e.x));
-			insert_values.push_back(std::to_string(e.y));
-			insert_values.push_back(std::to_string(e.z));
-			insert_values.push_back(std::to_string(e.heading));
-			insert_values.push_back(std::to_string(e.respawntime));
-			insert_values.push_back(std::to_string(e.variance));
-			insert_values.push_back(std::to_string(e.pathgrid));
-			insert_values.push_back(std::to_string(e.path_when_zone_idle));
-			insert_values.push_back(std::to_string(e._condition));
-			insert_values.push_back(std::to_string(e.cond_value));
-			insert_values.push_back(std::to_string(e.enabled));
-			insert_values.push_back(std::to_string(e.animation));
-			insert_values.push_back(std::to_string(e.min_expansion));
-			insert_values.push_back(std::to_string(e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.spawngroupID));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.respawntime));
+			v.push_back(std::to_string(e.variance));
+			v.push_back(std::to_string(e.pathgrid));
+			v.push_back(std::to_string(e.path_when_zone_idle));
+			v.push_back(std::to_string(e._condition));
+			v.push_back(std::to_string(e.cond_value));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.animation));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

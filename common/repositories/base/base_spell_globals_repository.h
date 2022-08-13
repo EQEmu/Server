@@ -159,20 +159,20 @@ public:
 		SpellGlobals e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.spellid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.spell_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.qglobal) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.value) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.spellid));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.spell_name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.qglobal) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.spellid
 			)
@@ -186,18 +186,18 @@ public:
 		SpellGlobals e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.spellid));
-		insert_values.push_back("'" + Strings::Escape(e.spell_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.qglobal) + "'");
-		insert_values.push_back("'" + Strings::Escape(e.value) + "'");
+		v.push_back(std::to_string(e.spellid));
+		v.push_back("'" + Strings::Escape(e.spell_name) + "'");
+		v.push_back("'" + Strings::Escape(e.qglobal) + "'");
+		v.push_back("'" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -219,17 +219,17 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.spellid));
-			insert_values.push_back("'" + Strings::Escape(e.spell_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.qglobal) + "'");
-			insert_values.push_back("'" + Strings::Escape(e.value) + "'");
+			v.push_back(std::to_string(e.spellid));
+			v.push_back("'" + Strings::Escape(e.spell_name) + "'");
+			v.push_back("'" + Strings::Escape(e.qglobal) + "'");
+			v.push_back("'" + Strings::Escape(e.value) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -282,7 +282,7 @@ foreach my $table_to_generate (@tables) {
             }
 
             $update_one_entries .= sprintf(
-                "\t\t" . 'update_values.push_back(columns[%s] + " = %s' . "\n",
+                "\t\t" . 'v.push_back(columns[%s] + " = %s' . "\n",
                 $index,
                 $query_value
             );
@@ -297,8 +297,8 @@ foreach my $table_to_generate (@tables) {
             $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")"', $column_name_formatted, $column_name_formatted);
         }
 
-        $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
-        $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
+        $insert_one_entries  .= sprintf("\t\tv.push_back(%s);\n", $value);
+        $insert_many_entries .= sprintf("\t\t\tv.push_back(%s);\n", $value);
 
         # find one / all (select)
         if ($data_type =~ /bigint/) {

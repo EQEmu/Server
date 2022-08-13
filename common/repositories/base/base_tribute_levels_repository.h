@@ -159,20 +159,20 @@ public:
 		TributeLevels e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.tribute_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.level));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.cost));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.tribute_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.level));
+		v.push_back(columns[2] + " = " + std::to_string(e.cost));
+		v.push_back(columns[3] + " = " + std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.tribute_id
 			)
@@ -186,18 +186,18 @@ public:
 		TributeLevels e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.tribute_id));
-		insert_values.push_back(std::to_string(e.level));
-		insert_values.push_back(std::to_string(e.cost));
-		insert_values.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.tribute_id));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.cost));
+		v.push_back(std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -219,17 +219,17 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.tribute_id));
-			insert_values.push_back(std::to_string(e.level));
-			insert_values.push_back(std::to_string(e.cost));
-			insert_values.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.tribute_id));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.cost));
+			v.push_back(std::to_string(e.item_id));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

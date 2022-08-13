@@ -224,33 +224,33 @@ public:
 		CharacterBuffs e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.character_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.slot_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.spell_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.caster_level));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.caster_name) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(e.ticsremaining));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.counters));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.numhits));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.melee_rune));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.magic_rune));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.persistent));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.dot_rune));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.caston_x));
-		update_values.push_back(columns[13] + " = " + std::to_string(e.caston_y));
-		update_values.push_back(columns[14] + " = " + std::to_string(e.caston_z));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.ExtraDIChance));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.instrument_mod));
+		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.spell_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.caster_level));
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.caster_name) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.ticsremaining));
+		v.push_back(columns[6] + " = " + std::to_string(e.counters));
+		v.push_back(columns[7] + " = " + std::to_string(e.numhits));
+		v.push_back(columns[8] + " = " + std::to_string(e.melee_rune));
+		v.push_back(columns[9] + " = " + std::to_string(e.magic_rune));
+		v.push_back(columns[10] + " = " + std::to_string(e.persistent));
+		v.push_back(columns[11] + " = " + std::to_string(e.dot_rune));
+		v.push_back(columns[12] + " = " + std::to_string(e.caston_x));
+		v.push_back(columns[13] + " = " + std::to_string(e.caston_y));
+		v.push_back(columns[14] + " = " + std::to_string(e.caston_z));
+		v.push_back(columns[15] + " = " + std::to_string(e.ExtraDIChance));
+		v.push_back(columns[16] + " = " + std::to_string(e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.character_id
 			)
@@ -264,31 +264,31 @@ public:
 		CharacterBuffs e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.character_id));
-		insert_values.push_back(std::to_string(e.slot_id));
-		insert_values.push_back(std::to_string(e.spell_id));
-		insert_values.push_back(std::to_string(e.caster_level));
-		insert_values.push_back("'" + Strings::Escape(e.caster_name) + "'");
-		insert_values.push_back(std::to_string(e.ticsremaining));
-		insert_values.push_back(std::to_string(e.counters));
-		insert_values.push_back(std::to_string(e.numhits));
-		insert_values.push_back(std::to_string(e.melee_rune));
-		insert_values.push_back(std::to_string(e.magic_rune));
-		insert_values.push_back(std::to_string(e.persistent));
-		insert_values.push_back(std::to_string(e.dot_rune));
-		insert_values.push_back(std::to_string(e.caston_x));
-		insert_values.push_back(std::to_string(e.caston_y));
-		insert_values.push_back(std::to_string(e.caston_z));
-		insert_values.push_back(std::to_string(e.ExtraDIChance));
-		insert_values.push_back(std::to_string(e.instrument_mod));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.caster_level));
+		v.push_back("'" + Strings::Escape(e.caster_name) + "'");
+		v.push_back(std::to_string(e.ticsremaining));
+		v.push_back(std::to_string(e.counters));
+		v.push_back(std::to_string(e.numhits));
+		v.push_back(std::to_string(e.melee_rune));
+		v.push_back(std::to_string(e.magic_rune));
+		v.push_back(std::to_string(e.persistent));
+		v.push_back(std::to_string(e.dot_rune));
+		v.push_back(std::to_string(e.caston_x));
+		v.push_back(std::to_string(e.caston_y));
+		v.push_back(std::to_string(e.caston_z));
+		v.push_back(std::to_string(e.ExtraDIChance));
+		v.push_back(std::to_string(e.instrument_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -310,30 +310,30 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.character_id));
-			insert_values.push_back(std::to_string(e.slot_id));
-			insert_values.push_back(std::to_string(e.spell_id));
-			insert_values.push_back(std::to_string(e.caster_level));
-			insert_values.push_back("'" + Strings::Escape(e.caster_name) + "'");
-			insert_values.push_back(std::to_string(e.ticsremaining));
-			insert_values.push_back(std::to_string(e.counters));
-			insert_values.push_back(std::to_string(e.numhits));
-			insert_values.push_back(std::to_string(e.melee_rune));
-			insert_values.push_back(std::to_string(e.magic_rune));
-			insert_values.push_back(std::to_string(e.persistent));
-			insert_values.push_back(std::to_string(e.dot_rune));
-			insert_values.push_back(std::to_string(e.caston_x));
-			insert_values.push_back(std::to_string(e.caston_y));
-			insert_values.push_back(std::to_string(e.caston_z));
-			insert_values.push_back(std::to_string(e.ExtraDIChance));
-			insert_values.push_back(std::to_string(e.instrument_mod));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.caster_level));
+			v.push_back("'" + Strings::Escape(e.caster_name) + "'");
+			v.push_back(std::to_string(e.ticsremaining));
+			v.push_back(std::to_string(e.counters));
+			v.push_back(std::to_string(e.numhits));
+			v.push_back(std::to_string(e.melee_rune));
+			v.push_back(std::to_string(e.magic_rune));
+			v.push_back(std::to_string(e.persistent));
+			v.push_back(std::to_string(e.dot_rune));
+			v.push_back(std::to_string(e.caston_x));
+			v.push_back(std::to_string(e.caston_y));
+			v.push_back(std::to_string(e.caston_z));
+			v.push_back(std::to_string(e.ExtraDIChance));
+			v.push_back(std::to_string(e.instrument_mod));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -224,33 +224,33 @@ public:
 		InventorySnapshots e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.time_index));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.slotid));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.itemid));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.charges));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.color));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.augslot1));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.augslot2));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.augslot3));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.augslot4));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.augslot5));
-		update_values.push_back(columns[11] + " = " + std::to_string(e.augslot6));
-		update_values.push_back(columns[12] + " = " + std::to_string(e.instnodrop));
-		update_values.push_back(columns[13] + " = '" + Strings::Escape(e.custom_data) + "'");
-		update_values.push_back(columns[14] + " = " + std::to_string(e.ornamenticon));
-		update_values.push_back(columns[15] + " = " + std::to_string(e.ornamentidfile));
-		update_values.push_back(columns[16] + " = " + std::to_string(e.ornament_hero_model));
+		v.push_back(columns[0] + " = " + std::to_string(e.time_index));
+		v.push_back(columns[1] + " = " + std::to_string(e.charid));
+		v.push_back(columns[2] + " = " + std::to_string(e.slotid));
+		v.push_back(columns[3] + " = " + std::to_string(e.itemid));
+		v.push_back(columns[4] + " = " + std::to_string(e.charges));
+		v.push_back(columns[5] + " = " + std::to_string(e.color));
+		v.push_back(columns[6] + " = " + std::to_string(e.augslot1));
+		v.push_back(columns[7] + " = " + std::to_string(e.augslot2));
+		v.push_back(columns[8] + " = " + std::to_string(e.augslot3));
+		v.push_back(columns[9] + " = " + std::to_string(e.augslot4));
+		v.push_back(columns[10] + " = " + std::to_string(e.augslot5));
+		v.push_back(columns[11] + " = " + std::to_string(e.augslot6));
+		v.push_back(columns[12] + " = " + std::to_string(e.instnodrop));
+		v.push_back(columns[13] + " = '" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(columns[14] + " = " + std::to_string(e.ornamenticon));
+		v.push_back(columns[15] + " = " + std::to_string(e.ornamentidfile));
+		v.push_back(columns[16] + " = " + std::to_string(e.ornament_hero_model));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.time_index
 			)
@@ -264,31 +264,31 @@ public:
 		InventorySnapshots e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.time_index));
-		insert_values.push_back(std::to_string(e.charid));
-		insert_values.push_back(std::to_string(e.slotid));
-		insert_values.push_back(std::to_string(e.itemid));
-		insert_values.push_back(std::to_string(e.charges));
-		insert_values.push_back(std::to_string(e.color));
-		insert_values.push_back(std::to_string(e.augslot1));
-		insert_values.push_back(std::to_string(e.augslot2));
-		insert_values.push_back(std::to_string(e.augslot3));
-		insert_values.push_back(std::to_string(e.augslot4));
-		insert_values.push_back(std::to_string(e.augslot5));
-		insert_values.push_back(std::to_string(e.augslot6));
-		insert_values.push_back(std::to_string(e.instnodrop));
-		insert_values.push_back("'" + Strings::Escape(e.custom_data) + "'");
-		insert_values.push_back(std::to_string(e.ornamenticon));
-		insert_values.push_back(std::to_string(e.ornamentidfile));
-		insert_values.push_back(std::to_string(e.ornament_hero_model));
+		v.push_back(std::to_string(e.time_index));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.slotid));
+		v.push_back(std::to_string(e.itemid));
+		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.color));
+		v.push_back(std::to_string(e.augslot1));
+		v.push_back(std::to_string(e.augslot2));
+		v.push_back(std::to_string(e.augslot3));
+		v.push_back(std::to_string(e.augslot4));
+		v.push_back(std::to_string(e.augslot5));
+		v.push_back(std::to_string(e.augslot6));
+		v.push_back(std::to_string(e.instnodrop));
+		v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(std::to_string(e.ornamenticon));
+		v.push_back(std::to_string(e.ornamentidfile));
+		v.push_back(std::to_string(e.ornament_hero_model));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -310,30 +310,30 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.time_index));
-			insert_values.push_back(std::to_string(e.charid));
-			insert_values.push_back(std::to_string(e.slotid));
-			insert_values.push_back(std::to_string(e.itemid));
-			insert_values.push_back(std::to_string(e.charges));
-			insert_values.push_back(std::to_string(e.color));
-			insert_values.push_back(std::to_string(e.augslot1));
-			insert_values.push_back(std::to_string(e.augslot2));
-			insert_values.push_back(std::to_string(e.augslot3));
-			insert_values.push_back(std::to_string(e.augslot4));
-			insert_values.push_back(std::to_string(e.augslot5));
-			insert_values.push_back(std::to_string(e.augslot6));
-			insert_values.push_back(std::to_string(e.instnodrop));
-			insert_values.push_back("'" + Strings::Escape(e.custom_data) + "'");
-			insert_values.push_back(std::to_string(e.ornamenticon));
-			insert_values.push_back(std::to_string(e.ornamentidfile));
-			insert_values.push_back(std::to_string(e.ornament_hero_model));
+			v.push_back(std::to_string(e.time_index));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.slotid));
+			v.push_back(std::to_string(e.itemid));
+			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.color));
+			v.push_back(std::to_string(e.augslot1));
+			v.push_back(std::to_string(e.augslot2));
+			v.push_back(std::to_string(e.augslot3));
+			v.push_back(std::to_string(e.augslot4));
+			v.push_back(std::to_string(e.augslot5));
+			v.push_back(std::to_string(e.augslot6));
+			v.push_back(std::to_string(e.instnodrop));
+			v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+			v.push_back(std::to_string(e.ornamenticon));
+			v.push_back(std::to_string(e.ornamentidfile));
+			v.push_back(std::to_string(e.ornament_hero_model));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

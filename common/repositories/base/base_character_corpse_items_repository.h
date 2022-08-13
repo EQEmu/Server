@@ -194,27 +194,27 @@ public:
 		CharacterCorpseItems e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.corpse_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.equip_slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.item_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.aug_1));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.aug_2));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.aug_3));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.aug_4));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.aug_5));
-		update_values.push_back(columns[9] + " = " + std::to_string(e.aug_6));
-		update_values.push_back(columns[10] + " = " + std::to_string(e.attuned));
+		v.push_back(columns[0] + " = " + std::to_string(e.corpse_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.equip_slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.charges));
+		v.push_back(columns[4] + " = " + std::to_string(e.aug_1));
+		v.push_back(columns[5] + " = " + std::to_string(e.aug_2));
+		v.push_back(columns[6] + " = " + std::to_string(e.aug_3));
+		v.push_back(columns[7] + " = " + std::to_string(e.aug_4));
+		v.push_back(columns[8] + " = " + std::to_string(e.aug_5));
+		v.push_back(columns[9] + " = " + std::to_string(e.aug_6));
+		v.push_back(columns[10] + " = " + std::to_string(e.attuned));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.corpse_id
 			)
@@ -228,25 +228,25 @@ public:
 		CharacterCorpseItems e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.corpse_id));
-		insert_values.push_back(std::to_string(e.equip_slot));
-		insert_values.push_back(std::to_string(e.item_id));
-		insert_values.push_back(std::to_string(e.charges));
-		insert_values.push_back(std::to_string(e.aug_1));
-		insert_values.push_back(std::to_string(e.aug_2));
-		insert_values.push_back(std::to_string(e.aug_3));
-		insert_values.push_back(std::to_string(e.aug_4));
-		insert_values.push_back(std::to_string(e.aug_5));
-		insert_values.push_back(std::to_string(e.aug_6));
-		insert_values.push_back(std::to_string(e.attuned));
+		v.push_back(std::to_string(e.corpse_id));
+		v.push_back(std::to_string(e.equip_slot));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.aug_1));
+		v.push_back(std::to_string(e.aug_2));
+		v.push_back(std::to_string(e.aug_3));
+		v.push_back(std::to_string(e.aug_4));
+		v.push_back(std::to_string(e.aug_5));
+		v.push_back(std::to_string(e.aug_6));
+		v.push_back(std::to_string(e.attuned));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -268,24 +268,24 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.corpse_id));
-			insert_values.push_back(std::to_string(e.equip_slot));
-			insert_values.push_back(std::to_string(e.item_id));
-			insert_values.push_back(std::to_string(e.charges));
-			insert_values.push_back(std::to_string(e.aug_1));
-			insert_values.push_back(std::to_string(e.aug_2));
-			insert_values.push_back(std::to_string(e.aug_3));
-			insert_values.push_back(std::to_string(e.aug_4));
-			insert_values.push_back(std::to_string(e.aug_5));
-			insert_values.push_back(std::to_string(e.aug_6));
-			insert_values.push_back(std::to_string(e.attuned));
+			v.push_back(std::to_string(e.corpse_id));
+			v.push_back(std::to_string(e.equip_slot));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.aug_1));
+			v.push_back(std::to_string(e.aug_2));
+			v.push_back(std::to_string(e.aug_3));
+			v.push_back(std::to_string(e.aug_4));
+			v.push_back(std::to_string(e.aug_5));
+			v.push_back(std::to_string(e.aug_6));
+			v.push_back(std::to_string(e.attuned));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

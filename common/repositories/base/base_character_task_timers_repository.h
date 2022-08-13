@@ -169,21 +169,21 @@ public:
 		CharacterTaskTimers e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(e.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(e.task_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(e.timer_type));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.timer_group));
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(columns[1] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.task_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.timer_type));
+		v.push_back(columns[4] + " = " + std::to_string(e.timer_group));
+		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.id
 			)
@@ -197,20 +197,20 @@ public:
 		CharacterTaskTimers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.id));
-		insert_values.push_back(std::to_string(e.character_id));
-		insert_values.push_back(std::to_string(e.task_id));
-		insert_values.push_back(std::to_string(e.timer_type));
-		insert_values.push_back(std::to_string(e.timer_group));
-		insert_values.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.task_id));
+		v.push_back(std::to_string(e.timer_type));
+		v.push_back(std::to_string(e.timer_group));
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -232,19 +232,19 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.id));
-			insert_values.push_back(std::to_string(e.character_id));
-			insert_values.push_back(std::to_string(e.task_id));
-			insert_values.push_back(std::to_string(e.timer_type));
-			insert_values.push_back(std::to_string(e.timer_group));
-			insert_values.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.task_id));
+			v.push_back(std::to_string(e.timer_type));
+			v.push_back(std::to_string(e.timer_group));
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(

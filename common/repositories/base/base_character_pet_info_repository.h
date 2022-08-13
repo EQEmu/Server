@@ -184,25 +184,25 @@ public:
 		CharacterPetInfo e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(e.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(e.pet));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.petname) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(e.petpower));
-		update_values.push_back(columns[4] + " = " + std::to_string(e.spell_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(e.hp));
-		update_values.push_back(columns[6] + " = " + std::to_string(e.mana));
-		update_values.push_back(columns[7] + " = " + std::to_string(e.size));
-		update_values.push_back(columns[8] + " = " + std::to_string(e.taunting));
+		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.pet));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.petname) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.petpower));
+		v.push_back(columns[4] + " = " + std::to_string(e.spell_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.hp));
+		v.push_back(columns[6] + " = " + std::to_string(e.mana));
+		v.push_back(columns[7] + " = " + std::to_string(e.size));
+		v.push_back(columns[8] + " = " + std::to_string(e.taunting));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
 				e.char_id
 			)
@@ -216,23 +216,23 @@ public:
 		CharacterPetInfo e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(e.char_id));
-		insert_values.push_back(std::to_string(e.pet));
-		insert_values.push_back("'" + Strings::Escape(e.petname) + "'");
-		insert_values.push_back(std::to_string(e.petpower));
-		insert_values.push_back(std::to_string(e.spell_id));
-		insert_values.push_back(std::to_string(e.hp));
-		insert_values.push_back(std::to_string(e.mana));
-		insert_values.push_back(std::to_string(e.size));
-		insert_values.push_back(std::to_string(e.taunting));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.pet));
+		v.push_back("'" + Strings::Escape(e.petname) + "'");
+		v.push_back(std::to_string(e.petpower));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.taunting));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
@@ -254,22 +254,22 @@ public:
 		std::vector<std::string> insert_chunks;
 
 		for (auto &e: entries) {
-			std::vector<std::string> insert_values;
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(e.char_id));
-			insert_values.push_back(std::to_string(e.pet));
-			insert_values.push_back("'" + Strings::Escape(e.petname) + "'");
-			insert_values.push_back(std::to_string(e.petpower));
-			insert_values.push_back(std::to_string(e.spell_id));
-			insert_values.push_back(std::to_string(e.hp));
-			insert_values.push_back(std::to_string(e.mana));
-			insert_values.push_back(std::to_string(e.size));
-			insert_values.push_back(std::to_string(e.taunting));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.pet));
+			v.push_back("'" + Strings::Escape(e.petname) + "'");
+			v.push_back(std::to_string(e.petpower));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.taunting));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
