@@ -103,7 +103,7 @@ public:
 		return e;
 	}
 
-	static Graveyard GetGraveyarde(
+	static Graveyard GetGraveyard(
 		const std::vector<Graveyard> &graveyards,
 		int graveyard_id
 	)
@@ -166,7 +166,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Graveyard e
+		const Graveyard &e
 	)
 	{
 		std::vector<std::string> v;
@@ -226,7 +226,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Graveyard> entries
+		const std::vector<Graveyard> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -286,7 +286,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Graveyard> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Graveyard> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Graveyard> all_entries;
 
@@ -316,7 +316,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -354,7 +354,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

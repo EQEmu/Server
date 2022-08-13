@@ -107,7 +107,7 @@ public:
 		return e;
 	}
 
-	static LogsysCategories GetLogsysCategoriese(
+	static LogsysCategories GetLogsysCategories(
 		const std::vector<LogsysCategories> &logsys_categoriess,
 		int logsys_categories_id
 	)
@@ -171,7 +171,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LogsysCategories e
+		const LogsysCategories &e
 	)
 	{
 		std::vector<std::string> v;
@@ -234,7 +234,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LogsysCategories> entries
+		const std::vector<LogsysCategories> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -296,7 +296,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<LogsysCategories> GetWhere(Database& db, std::string where_filter)
+	static std::vector<LogsysCategories> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<LogsysCategories> all_entries;
 
@@ -327,7 +327,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -365,7 +365,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

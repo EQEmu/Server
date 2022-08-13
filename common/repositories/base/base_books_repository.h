@@ -95,7 +95,7 @@ public:
 		return e;
 	}
 
-	static Books GetBookse(
+	static Books GetBooks(
 		const std::vector<Books> &bookss,
 		int books_id
 	)
@@ -156,7 +156,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Books e
+		const Books &e
 	)
 	{
 		std::vector<std::string> v;
@@ -212,7 +212,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Books> entries
+		const std::vector<Books> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -268,7 +268,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Books> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Books> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Books> all_entries;
 
@@ -296,7 +296,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -334,7 +334,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -95,7 +95,7 @@ public:
 		return e;
 	}
 
-	static AccountIp GetAccountIpe(
+	static AccountIp GetAccountIp(
 		const std::vector<AccountIp> &account_ips,
 		int account_ip_id
 	)
@@ -156,7 +156,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountIp e
+		const AccountIp &e
 	)
 	{
 		std::vector<std::string> v;
@@ -213,7 +213,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AccountIp> entries
+		const std::vector<AccountIp> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -269,7 +269,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<AccountIp> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AccountIp> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AccountIp> all_entries;
 
@@ -297,7 +297,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -335,7 +335,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

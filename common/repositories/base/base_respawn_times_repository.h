@@ -95,7 +95,7 @@ public:
 		return e;
 	}
 
-	static RespawnTimes GetRespawnTimese(
+	static RespawnTimes GetRespawnTimes(
 		const std::vector<RespawnTimes> &respawn_timess,
 		int respawn_times_id
 	)
@@ -156,7 +156,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RespawnTimes e
+		const RespawnTimes &e
 	)
 	{
 		std::vector<std::string> v;
@@ -213,7 +213,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RespawnTimes> entries
+		const std::vector<RespawnTimes> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -269,7 +269,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<RespawnTimes> GetWhere(Database& db, std::string where_filter)
+	static std::vector<RespawnTimes> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<RespawnTimes> all_entries;
 
@@ -297,7 +297,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -335,7 +335,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

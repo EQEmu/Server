@@ -151,7 +151,7 @@ public:
 		return e;
 	}
 
-	static GroundSpawns GetGroundSpawnse(
+	static GroundSpawns GetGroundSpawns(
 		const std::vector<GroundSpawns> &ground_spawnss,
 		int ground_spawns_id
 	)
@@ -226,7 +226,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GroundSpawns e
+		const GroundSpawns &e
 	)
 	{
 		std::vector<std::string> v;
@@ -310,7 +310,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GroundSpawns> entries
+		const std::vector<GroundSpawns> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -394,7 +394,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<GroundSpawns> GetWhere(Database& db, std::string where_filter)
+	static std::vector<GroundSpawns> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<GroundSpawns> all_entries;
 
@@ -436,7 +436,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -474,7 +474,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

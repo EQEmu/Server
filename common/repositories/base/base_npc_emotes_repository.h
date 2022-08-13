@@ -99,7 +99,7 @@ public:
 		return e;
 	}
 
-	static NpcEmotes GetNpcEmotese(
+	static NpcEmotes GetNpcEmotes(
 		const std::vector<NpcEmotes> &npc_emotess,
 		int npc_emotes_id
 	)
@@ -161,7 +161,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcEmotes e
+		const NpcEmotes &e
 	)
 	{
 		std::vector<std::string> v;
@@ -219,7 +219,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcEmotes> entries
+		const std::vector<NpcEmotes> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -277,7 +277,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<NpcEmotes> GetWhere(Database& db, std::string where_filter)
+	static std::vector<NpcEmotes> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<NpcEmotes> all_entries;
 
@@ -306,7 +306,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -344,7 +344,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

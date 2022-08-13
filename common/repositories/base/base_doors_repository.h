@@ -223,7 +223,7 @@ public:
 		return e;
 	}
 
-	static Doors GetDoorse(
+	static Doors GetDoors(
 		const std::vector<Doors> &doorss,
 		int doors_id
 	)
@@ -316,7 +316,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Doors e
+		const Doors &e
 	)
 	{
 		std::vector<std::string> v;
@@ -436,7 +436,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Doors> entries
+		const std::vector<Doors> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -556,7 +556,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Doors> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Doors> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Doors> all_entries;
 
@@ -616,7 +616,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -654,7 +654,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

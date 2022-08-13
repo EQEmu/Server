@@ -103,7 +103,7 @@ public:
 		return e;
 	}
 
-	static ExpeditionLockouts GetExpeditionLockoutse(
+	static ExpeditionLockouts GetExpeditionLockouts(
 		const std::vector<ExpeditionLockouts> &expedition_lockoutss,
 		int expedition_lockouts_id
 	)
@@ -166,7 +166,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ExpeditionLockouts e
+		const ExpeditionLockouts &e
 	)
 	{
 		std::vector<std::string> v;
@@ -226,7 +226,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ExpeditionLockouts> entries
+		const std::vector<ExpeditionLockouts> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -286,7 +286,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<ExpeditionLockouts> GetWhere(Database& db, std::string where_filter)
+	static std::vector<ExpeditionLockouts> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<ExpeditionLockouts> all_entries;
 
@@ -316,7 +316,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -354,7 +354,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

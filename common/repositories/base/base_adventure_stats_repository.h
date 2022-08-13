@@ -123,7 +123,7 @@ public:
 		return e;
 	}
 
-	static AdventureStats GetAdventureStatse(
+	static AdventureStats GetAdventureStats(
 		const std::vector<AdventureStats> &adventure_statss,
 		int adventure_stats_id
 	)
@@ -191,7 +191,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureStats e
+		const AdventureStats &e
 	)
 	{
 		std::vector<std::string> v;
@@ -262,7 +262,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AdventureStats> entries
+		const std::vector<AdventureStats> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -332,7 +332,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<AdventureStats> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AdventureStats> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AdventureStats> all_entries;
 
@@ -367,7 +367,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -405,7 +405,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

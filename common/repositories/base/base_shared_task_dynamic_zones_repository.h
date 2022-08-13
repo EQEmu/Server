@@ -87,7 +87,7 @@ public:
 		return e;
 	}
 
-	static SharedTaskDynamicZones GetSharedTaskDynamicZonese(
+	static SharedTaskDynamicZones GetSharedTaskDynamicZones(
 		const std::vector<SharedTaskDynamicZones> &shared_task_dynamic_zoness,
 		int shared_task_dynamic_zones_id
 	)
@@ -146,7 +146,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SharedTaskDynamicZones e
+		const SharedTaskDynamicZones &e
 	)
 	{
 		std::vector<std::string> v;
@@ -199,7 +199,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SharedTaskDynamicZones> entries
+		const std::vector<SharedTaskDynamicZones> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -251,7 +251,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<SharedTaskDynamicZones> GetWhere(Database& db, std::string where_filter)
+	static std::vector<SharedTaskDynamicZones> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<SharedTaskDynamicZones> all_entries;
 
@@ -277,7 +277,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -315,7 +315,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -135,7 +135,7 @@ public:
 		return e;
 	}
 
-	static SpawnEvents GetSpawnEventse(
+	static SpawnEvents GetSpawnEvents(
 		const std::vector<SpawnEvents> &spawn_eventss,
 		int spawn_events_id
 	)
@@ -206,7 +206,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SpawnEvents e
+		const SpawnEvents &e
 	)
 	{
 		std::vector<std::string> v;
@@ -282,7 +282,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SpawnEvents> entries
+		const std::vector<SpawnEvents> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -358,7 +358,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<SpawnEvents> GetWhere(Database& db, std::string where_filter)
+	static std::vector<SpawnEvents> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<SpawnEvents> all_entries;
 
@@ -396,7 +396,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -434,7 +434,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

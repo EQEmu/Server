@@ -123,7 +123,7 @@ public:
 		return e;
 	}
 
-	static Auras GetAurase(
+	static Auras GetAuras(
 		const std::vector<Auras> &aurass,
 		int auras_id
 	)
@@ -191,7 +191,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Auras e
+		const Auras &e
 	)
 	{
 		std::vector<std::string> v;
@@ -262,7 +262,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Auras> entries
+		const std::vector<Auras> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -332,7 +332,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Auras> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Auras> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Auras> all_entries;
 
@@ -367,7 +367,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -405,7 +405,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

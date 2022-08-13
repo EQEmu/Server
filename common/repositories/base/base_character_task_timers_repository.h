@@ -103,7 +103,7 @@ public:
 		return e;
 	}
 
-	static CharacterTaskTimers GetCharacterTaskTimerse(
+	static CharacterTaskTimers GetCharacterTaskTimers(
 		const std::vector<CharacterTaskTimers> &character_task_timerss,
 		int character_task_timers_id
 	)
@@ -166,7 +166,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterTaskTimers e
+		const CharacterTaskTimers &e
 	)
 	{
 		std::vector<std::string> v;
@@ -226,7 +226,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterTaskTimers> entries
+		const std::vector<CharacterTaskTimers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -286,7 +286,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterTaskTimers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterTaskTimers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterTaskTimers> all_entries;
 
@@ -316,7 +316,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -354,7 +354,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

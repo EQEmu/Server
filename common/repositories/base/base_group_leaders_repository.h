@@ -115,7 +115,7 @@ public:
 		return e;
 	}
 
-	static GroupLeaders GetGroupLeaderse(
+	static GroupLeaders GetGroupLeaders(
 		const std::vector<GroupLeaders> &group_leaderss,
 		int group_leaders_id
 	)
@@ -181,7 +181,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GroupLeaders e
+		const GroupLeaders &e
 	)
 	{
 		std::vector<std::string> v;
@@ -248,7 +248,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GroupLeaders> entries
+		const std::vector<GroupLeaders> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -314,7 +314,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<GroupLeaders> GetWhere(Database& db, std::string where_filter)
+	static std::vector<GroupLeaders> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<GroupLeaders> all_entries;
 
@@ -347,7 +347,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -385,7 +385,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -175,7 +175,7 @@ public:
 		return e;
 	}
 
-	static Account GetAccounte(
+	static Account GetAccount(
 		const std::vector<Account> &accounts,
 		int account_id
 	)
@@ -256,7 +256,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Account e
+		const Account &e
 	)
 	{
 		std::vector<std::string> v;
@@ -352,7 +352,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Account> entries
+		const std::vector<Account> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -448,7 +448,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Account> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Account> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Account> all_entries;
 
@@ -496,7 +496,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -534,7 +534,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

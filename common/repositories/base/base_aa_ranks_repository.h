@@ -131,7 +131,7 @@ public:
 		return e;
 	}
 
-	static AaRanks GetAaRankse(
+	static AaRanks GetAaRanks(
 		const std::vector<AaRanks> &aa_rankss,
 		int aa_ranks_id
 	)
@@ -201,7 +201,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRanks e
+		const AaRanks &e
 	)
 	{
 		std::vector<std::string> v;
@@ -276,7 +276,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaRanks> entries
+		const std::vector<AaRanks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -350,7 +350,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<AaRanks> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AaRanks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AaRanks> all_entries;
 
@@ -387,7 +387,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -425,7 +425,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

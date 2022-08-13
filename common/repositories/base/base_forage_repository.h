@@ -115,7 +115,7 @@ public:
 		return e;
 	}
 
-	static Forage GetForagee(
+	static Forage GetForage(
 		const std::vector<Forage> &forages,
 		int forage_id
 	)
@@ -181,7 +181,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Forage e
+		const Forage &e
 	)
 	{
 		std::vector<std::string> v;
@@ -247,7 +247,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Forage> entries
+		const std::vector<Forage> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -313,7 +313,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Forage> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Forage> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Forage> all_entries;
 
@@ -346,7 +346,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -384,7 +384,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

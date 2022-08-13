@@ -111,7 +111,7 @@ public:
 		return e;
 	}
 
-	static LoginServerAdmins GetLoginServerAdminse(
+	static LoginServerAdmins GetLoginServerAdmins(
 		const std::vector<LoginServerAdmins> &login_server_adminss,
 		int login_server_admins_id
 	)
@@ -176,7 +176,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoginServerAdmins e
+		const LoginServerAdmins &e
 	)
 	{
 		std::vector<std::string> v;
@@ -240,7 +240,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LoginServerAdmins> entries
+		const std::vector<LoginServerAdmins> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -304,7 +304,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<LoginServerAdmins> GetWhere(Database& db, std::string where_filter)
+	static std::vector<LoginServerAdmins> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<LoginServerAdmins> all_entries;
 
@@ -336,7 +336,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -374,7 +374,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

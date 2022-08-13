@@ -87,7 +87,7 @@ public:
 		return e;
 	}
 
-	static NameFilter GetNameFiltere(
+	static NameFilter GetNameFilter(
 		const std::vector<NameFilter> &name_filters,
 		int name_filter_id
 	)
@@ -146,7 +146,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NameFilter e
+		const NameFilter &e
 	)
 	{
 		std::vector<std::string> v;
@@ -198,7 +198,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NameFilter> entries
+		const std::vector<NameFilter> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -250,7 +250,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<NameFilter> GetWhere(Database& db, std::string where_filter)
+	static std::vector<NameFilter> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<NameFilter> all_entries;
 
@@ -276,7 +276,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -314,7 +314,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

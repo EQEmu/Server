@@ -95,7 +95,7 @@ public:
 		return e;
 	}
 
-	static ContentFlags GetContentFlagse(
+	static ContentFlags GetContentFlags(
 		const std::vector<ContentFlags> &content_flagss,
 		int content_flags_id
 	)
@@ -156,7 +156,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ContentFlags e
+		const ContentFlags &e
 	)
 	{
 		std::vector<std::string> v;
@@ -212,7 +212,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ContentFlags> entries
+		const std::vector<ContentFlags> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -268,7 +268,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<ContentFlags> GetWhere(Database& db, std::string where_filter)
+	static std::vector<ContentFlags> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<ContentFlags> all_entries;
 
@@ -296,7 +296,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -334,7 +334,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

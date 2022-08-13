@@ -91,7 +91,7 @@ public:
 		return e;
 	}
 
-	static CharacterSpells GetCharacterSpellse(
+	static CharacterSpells GetCharacterSpells(
 		const std::vector<CharacterSpells> &character_spellss,
 		int character_spells_id
 	)
@@ -151,7 +151,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterSpells e
+		const CharacterSpells &e
 	)
 	{
 		std::vector<std::string> v;
@@ -205,7 +205,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterSpells> entries
+		const std::vector<CharacterSpells> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -259,7 +259,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterSpells> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterSpells> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterSpells> all_entries;
 
@@ -286,7 +286,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -324,7 +324,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

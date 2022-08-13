@@ -91,7 +91,7 @@ public:
 		return e;
 	}
 
-	static CompletedSharedTaskMembers GetCompletedSharedTaskMemberse(
+	static CompletedSharedTaskMembers GetCompletedSharedTaskMembers(
 		const std::vector<CompletedSharedTaskMembers> &completed_shared_task_memberss,
 		int completed_shared_task_members_id
 	)
@@ -151,7 +151,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CompletedSharedTaskMembers e
+		const CompletedSharedTaskMembers &e
 	)
 	{
 		std::vector<std::string> v;
@@ -206,7 +206,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CompletedSharedTaskMembers> entries
+		const std::vector<CompletedSharedTaskMembers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -260,7 +260,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CompletedSharedTaskMembers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CompletedSharedTaskMembers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CompletedSharedTaskMembers> all_entries;
 
@@ -287,7 +287,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -325,7 +325,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

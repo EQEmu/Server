@@ -87,7 +87,7 @@ public:
 		return e;
 	}
 
-	static InstanceListPlayer GetInstanceListPlayere(
+	static InstanceListPlayer GetInstanceListPlayer(
 		const std::vector<InstanceListPlayer> &instance_list_players,
 		int instance_list_player_id
 	)
@@ -146,7 +146,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		InstanceListPlayer e
+		const InstanceListPlayer &e
 	)
 	{
 		std::vector<std::string> v;
@@ -199,7 +199,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<InstanceListPlayer> entries
+		const std::vector<InstanceListPlayer> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -251,7 +251,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<InstanceListPlayer> GetWhere(Database& db, std::string where_filter)
+	static std::vector<InstanceListPlayer> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<InstanceListPlayer> all_entries;
 
@@ -277,7 +277,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -315,7 +315,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

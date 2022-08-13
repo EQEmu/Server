@@ -103,7 +103,7 @@ public:
 		return e;
 	}
 
-	static LoginApiTokens GetLoginApiTokense(
+	static LoginApiTokens GetLoginApiTokens(
 		const std::vector<LoginApiTokens> &login_api_tokenss,
 		int login_api_tokens_id
 	)
@@ -166,7 +166,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoginApiTokens e
+		const LoginApiTokens &e
 	)
 	{
 		std::vector<std::string> v;
@@ -226,7 +226,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LoginApiTokens> entries
+		const std::vector<LoginApiTokens> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -286,7 +286,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<LoginApiTokens> GetWhere(Database& db, std::string where_filter)
+	static std::vector<LoginApiTokens> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<LoginApiTokens> all_entries;
 
@@ -316,7 +316,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -354,7 +354,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

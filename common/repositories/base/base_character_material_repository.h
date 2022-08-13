@@ -107,7 +107,7 @@ public:
 		return e;
 	}
 
-	static CharacterMaterial GetCharacterMateriale(
+	static CharacterMaterial GetCharacterMaterial(
 		const std::vector<CharacterMaterial> &character_materials,
 		int character_material_id
 	)
@@ -171,7 +171,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterMaterial e
+		const CharacterMaterial &e
 	)
 	{
 		std::vector<std::string> v;
@@ -233,7 +233,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterMaterial> entries
+		const std::vector<CharacterMaterial> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -295,7 +295,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterMaterial> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterMaterial> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterMaterial> all_entries;
 
@@ -326,7 +326,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -364,7 +364,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

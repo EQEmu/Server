@@ -487,7 +487,7 @@ public:
 		return e;
 	}
 
-	static CharacterData GetCharacterDatae(
+	static CharacterData GetCharacterData(
 		const std::vector<CharacterData> &character_datas,
 		int character_data_id
 	)
@@ -646,7 +646,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterData e
+		const CharacterData &e
 	)
 	{
 		std::vector<std::string> v;
@@ -898,7 +898,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterData> entries
+		const std::vector<CharacterData> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -1150,7 +1150,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterData> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterData> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterData> all_entries;
 
@@ -1276,7 +1276,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1314,7 +1314,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

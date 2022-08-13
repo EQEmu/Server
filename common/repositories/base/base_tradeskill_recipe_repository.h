@@ -139,7 +139,7 @@ public:
 		return e;
 	}
 
-	static TradeskillRecipe GetTradeskillRecipee(
+	static TradeskillRecipe GetTradeskillRecipe(
 		const std::vector<TradeskillRecipe> &tradeskill_recipes,
 		int tradeskill_recipe_id
 	)
@@ -211,7 +211,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		TradeskillRecipe e
+		const TradeskillRecipe &e
 	)
 	{
 		std::vector<std::string> v;
@@ -289,7 +289,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<TradeskillRecipe> entries
+		const std::vector<TradeskillRecipe> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -367,7 +367,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<TradeskillRecipe> GetWhere(Database& db, std::string where_filter)
+	static std::vector<TradeskillRecipe> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<TradeskillRecipe> all_entries;
 
@@ -406,7 +406,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -444,7 +444,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

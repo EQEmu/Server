@@ -147,7 +147,7 @@ public:
 		return e;
 	}
 
-	static CharacterCurrency GetCharacterCurrencye(
+	static CharacterCurrency GetCharacterCurrency(
 		const std::vector<CharacterCurrency> &character_currencys,
 		int character_currency_id
 	)
@@ -221,7 +221,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterCurrency e
+		const CharacterCurrency &e
 	)
 	{
 		std::vector<std::string> v;
@@ -304,7 +304,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterCurrency> entries
+		const std::vector<CharacterCurrency> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -386,7 +386,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterCurrency> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterCurrency> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterCurrency> all_entries;
 
@@ -427,7 +427,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -465,7 +465,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

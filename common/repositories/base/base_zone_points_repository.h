@@ -175,7 +175,7 @@ public:
 		return e;
 	}
 
-	static ZonePoints GetZonePointse(
+	static ZonePoints GetZonePoints(
 		const std::vector<ZonePoints> &zone_pointss,
 		int zone_points_id
 	)
@@ -256,7 +256,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ZonePoints e
+		const ZonePoints &e
 	)
 	{
 		std::vector<std::string> v;
@@ -352,7 +352,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ZonePoints> entries
+		const std::vector<ZonePoints> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -448,7 +448,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<ZonePoints> GetWhere(Database& db, std::string where_filter)
+	static std::vector<ZonePoints> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<ZonePoints> all_entries;
 
@@ -496,7 +496,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -534,7 +534,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

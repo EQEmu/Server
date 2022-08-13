@@ -139,7 +139,7 @@ public:
 		return e;
 	}
 
-	static Merchantlist GetMerchantliste(
+	static Merchantlist GetMerchantlist(
 		const std::vector<Merchantlist> &merchantlists,
 		int merchantlist_id
 	)
@@ -211,7 +211,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Merchantlist e
+		const Merchantlist &e
 	)
 	{
 		std::vector<std::string> v;
@@ -290,7 +290,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Merchantlist> entries
+		const std::vector<Merchantlist> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -368,7 +368,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Merchantlist> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Merchantlist> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Merchantlist> all_entries;
 
@@ -407,7 +407,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -445,7 +445,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

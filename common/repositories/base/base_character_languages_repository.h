@@ -91,7 +91,7 @@ public:
 		return e;
 	}
 
-	static CharacterLanguages GetCharacterLanguagese(
+	static CharacterLanguages GetCharacterLanguages(
 		const std::vector<CharacterLanguages> &character_languagess,
 		int character_languages_id
 	)
@@ -151,7 +151,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterLanguages e
+		const CharacterLanguages &e
 	)
 	{
 		std::vector<std::string> v;
@@ -205,7 +205,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterLanguages> entries
+		const std::vector<CharacterLanguages> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -259,7 +259,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterLanguages> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterLanguages> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterLanguages> all_entries;
 
@@ -286,7 +286,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -324,7 +324,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

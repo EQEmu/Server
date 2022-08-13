@@ -99,7 +99,7 @@ public:
 		return e;
 	}
 
-	static AaRankEffects GetAaRankEffectse(
+	static AaRankEffects GetAaRankEffects(
 		const std::vector<AaRankEffects> &aa_rank_effectss,
 		int aa_rank_effects_id
 	)
@@ -161,7 +161,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRankEffects e
+		const AaRankEffects &e
 	)
 	{
 		std::vector<std::string> v;
@@ -220,7 +220,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaRankEffects> entries
+		const std::vector<AaRankEffects> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -278,7 +278,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<AaRankEffects> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AaRankEffects> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AaRankEffects> all_entries;
 
@@ -307,7 +307,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -345,7 +345,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

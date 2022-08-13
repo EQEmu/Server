@@ -91,7 +91,7 @@ public:
 		return e;
 	}
 
-	static AccountRewards GetAccountRewardse(
+	static AccountRewards GetAccountRewards(
 		const std::vector<AccountRewards> &account_rewardss,
 		int account_rewards_id
 	)
@@ -151,7 +151,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountRewards e
+		const AccountRewards &e
 	)
 	{
 		std::vector<std::string> v;
@@ -206,7 +206,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AccountRewards> entries
+		const std::vector<AccountRewards> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -260,7 +260,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<AccountRewards> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AccountRewards> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AccountRewards> all_entries;
 
@@ -287,7 +287,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -325,7 +325,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

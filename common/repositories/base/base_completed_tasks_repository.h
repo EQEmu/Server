@@ -95,7 +95,7 @@ public:
 		return e;
 	}
 
-	static CompletedTasks GetCompletedTaskse(
+	static CompletedTasks GetCompletedTasks(
 		const std::vector<CompletedTasks> &completed_taskss,
 		int completed_tasks_id
 	)
@@ -156,7 +156,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CompletedTasks e
+		const CompletedTasks &e
 	)
 	{
 		std::vector<std::string> v;
@@ -213,7 +213,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CompletedTasks> entries
+		const std::vector<CompletedTasks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -269,7 +269,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CompletedTasks> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CompletedTasks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CompletedTasks> all_entries;
 
@@ -297,7 +297,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -335,7 +335,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

@@ -95,7 +95,7 @@ public:
 		return e;
 	}
 
-	static FactionListMod GetFactionListMode(
+	static FactionListMod GetFactionListMod(
 		const std::vector<FactionListMod> &faction_list_mods,
 		int faction_list_mod_id
 	)
@@ -156,7 +156,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionListMod e
+		const FactionListMod &e
 	)
 	{
 		std::vector<std::string> v;
@@ -212,7 +212,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<FactionListMod> entries
+		const std::vector<FactionListMod> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -268,7 +268,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<FactionListMod> GetWhere(Database& db, std::string where_filter)
+	static std::vector<FactionListMod> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<FactionListMod> all_entries;
 
@@ -296,7 +296,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -334,7 +334,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

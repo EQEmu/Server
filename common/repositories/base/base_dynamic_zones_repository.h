@@ -171,7 +171,7 @@ public:
 		return e;
 	}
 
-	static DynamicZones GetDynamicZonese(
+	static DynamicZones GetDynamicZones(
 		const std::vector<DynamicZones> &dynamic_zoness,
 		int dynamic_zones_id
 	)
@@ -251,7 +251,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DynamicZones e
+		const DynamicZones &e
 	)
 	{
 		std::vector<std::string> v;
@@ -345,7 +345,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DynamicZones> entries
+		const std::vector<DynamicZones> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -439,7 +439,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<DynamicZones> GetWhere(Database& db, std::string where_filter)
+	static std::vector<DynamicZones> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<DynamicZones> all_entries;
 
@@ -486,7 +486,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -524,7 +524,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

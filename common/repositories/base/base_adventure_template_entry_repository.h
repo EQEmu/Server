@@ -87,7 +87,7 @@ public:
 		return e;
 	}
 
-	static AdventureTemplateEntry GetAdventureTemplateEntrye(
+	static AdventureTemplateEntry GetAdventureTemplateEntry(
 		const std::vector<AdventureTemplateEntry> &adventure_template_entrys,
 		int adventure_template_entry_id
 	)
@@ -146,7 +146,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureTemplateEntry e
+		const AdventureTemplateEntry &e
 	)
 	{
 		std::vector<std::string> v;
@@ -199,7 +199,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AdventureTemplateEntry> entries
+		const std::vector<AdventureTemplateEntry> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -251,7 +251,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<AdventureTemplateEntry> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AdventureTemplateEntry> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AdventureTemplateEntry> all_entries;
 
@@ -277,7 +277,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -315,7 +315,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

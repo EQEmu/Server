@@ -139,7 +139,7 @@ public:
 		return e;
 	}
 
-	static CharCreatePointAllocations GetCharCreatePointAllocationse(
+	static CharCreatePointAllocations GetCharCreatePointAllocations(
 		const std::vector<CharCreatePointAllocations> &char_create_point_allocationss,
 		int char_create_point_allocations_id
 	)
@@ -211,7 +211,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharCreatePointAllocations e
+		const CharCreatePointAllocations &e
 	)
 	{
 		std::vector<std::string> v;
@@ -290,7 +290,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharCreatePointAllocations> entries
+		const std::vector<CharCreatePointAllocations> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -368,7 +368,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharCreatePointAllocations> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharCreatePointAllocations> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharCreatePointAllocations> all_entries;
 
@@ -407,7 +407,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -445,7 +445,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(

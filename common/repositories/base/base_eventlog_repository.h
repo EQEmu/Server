@@ -119,7 +119,7 @@ public:
 		return e;
 	}
 
-	static Eventlog GetEventloge(
+	static Eventlog GetEventlog(
 		const std::vector<Eventlog> &eventlogs,
 		int eventlog_id
 	)
@@ -186,7 +186,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Eventlog e
+		const Eventlog &e
 	)
 	{
 		std::vector<std::string> v;
@@ -254,7 +254,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Eventlog> entries
+		const std::vector<Eventlog> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -322,7 +322,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Eventlog> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Eventlog> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Eventlog> all_entries;
 
@@ -356,7 +356,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -394,7 +394,7 @@ public:
 		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
