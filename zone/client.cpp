@@ -1111,8 +1111,8 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		break;
 	}
 	case ChatChannel_Say: { /* Say */
-		if(message[0] == COMMAND_CHAR) {
-			if(command_dispatch(this, message) == -2) {
+		if (message[0] == COMMAND_CHAR) {
+			if (command_dispatch(this, message) == -2) {
 				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
 					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {

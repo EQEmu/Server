@@ -4265,7 +4265,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 			fmt::format(
 				"Door ({}) [{}]",
 				currentdoor->GetEntityID(),
-				Saylink::Create("#door edit", false, "#door edit")
+				Saylink::Create("#door edit", true, "#door edit")
 			).c_str()
 		);
 	}
@@ -8523,7 +8523,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			response = row[0];
 		}
 
-		if ((response).size() > 0) {
+		if (!response.empty()) {
 			if (!mod_saylink(response, silentsaylink)) {
 				return;
 			}
@@ -8531,43 +8531,21 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			if (GetTarget() && GetTarget()->IsNPC()) {
 				if (silentsaylink) {
 					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response, 0);
-
-					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
-					}
-#ifdef BOTS
-					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
-					}
-#endif
-					else {
-						parse->EventPlayer(EVENT_SAY, this, response, 0);
-					}
 				}
 				else {
 					Message(Chat::LightGray, "You say, '%s'", response.c_str());
-					ChannelMessageReceived(8, 0, 100, response.c_str());
 				}
+
+				ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str());
+
 				return;
 			}
 			else {
-				if (silentsaylink) {
-					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
-					}
-#ifdef BOTS
-					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
-					}
-#endif
-					else {
-						parse->EventPlayer(EVENT_SAY, this, response, 0);
-					}
-				}
-				else {
+				ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str());
+				if (!silentsaylink) {
 					Message(Chat::LightGray, "You say, '%s'", response.c_str());
-					ChannelMessageReceived(8, 0, 100, response.c_str());
 				}
+
 				return;
 			}
 		}
@@ -8584,7 +8562,6 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
 	}
-	return;
 }
 
 void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app)
