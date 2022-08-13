@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SpawnConditionValues spawn_condition_values_e
+		SpawnConditionValues e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(spawn_condition_values_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(spawn_condition_values_e.value));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(spawn_condition_values_e.zone) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(spawn_condition_values_e.instance_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.value));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.zone) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.instance_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spawn_condition_values_e.id
+				e.id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static SpawnConditionValues InsertOne(
 		Database& db,
-		SpawnConditionValues spawn_condition_values_e
+		SpawnConditionValues e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spawn_condition_values_e.id));
-		insert_values.push_back(std::to_string(spawn_condition_values_e.value));
-		insert_values.push_back("'" + Strings::Escape(spawn_condition_values_e.zone) + "'");
-		insert_values.push_back(std::to_string(spawn_condition_values_e.instance_id));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.value));
+		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+		insert_values.push_back(std::to_string(e.instance_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			spawn_condition_values_e.id = results.LastInsertedID();
-			return spawn_condition_values_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		spawn_condition_values_e = NewEntity();
+		e = NewEntity();
 
-		return spawn_condition_values_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SpawnConditionValues> spawn_condition_values_entries
+		std::vector<SpawnConditionValues> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spawn_condition_values_e: spawn_condition_values_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spawn_condition_values_e.id));
-			insert_values.push_back(std::to_string(spawn_condition_values_e.value));
-			insert_values.push_back("'" + Strings::Escape(spawn_condition_values_e.zone) + "'");
-			insert_values.push_back(std::to_string(spawn_condition_values_e.instance_id));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.value));
+			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+			insert_values.push_back(std::to_string(e.instance_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

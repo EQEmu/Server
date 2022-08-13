@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RaidDetails raid_details_e
+		RaidDetails e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(raid_details_e.raidid));
-		update_values.push_back(columns[1] + " = " + std::to_string(raid_details_e.loottype));
-		update_values.push_back(columns[2] + " = " + std::to_string(raid_details_e.locked));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(raid_details_e.motd) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.raidid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.loottype));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.locked));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				raid_details_e.raidid
+				e.raidid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static RaidDetails InsertOne(
 		Database& db,
-		RaidDetails raid_details_e
+		RaidDetails e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(raid_details_e.raidid));
-		insert_values.push_back(std::to_string(raid_details_e.loottype));
-		insert_values.push_back(std::to_string(raid_details_e.locked));
-		insert_values.push_back("'" + Strings::Escape(raid_details_e.motd) + "'");
+		insert_values.push_back(std::to_string(e.raidid));
+		insert_values.push_back(std::to_string(e.loottype));
+		insert_values.push_back(std::to_string(e.locked));
+		insert_values.push_back("'" + Strings::Escape(e.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			raid_details_e.raidid = results.LastInsertedID();
-			return raid_details_e;
+			e.raidid = results.LastInsertedID();
+			return e;
 		}
 
-		raid_details_e = NewEntity();
+		e = NewEntity();
 
-		return raid_details_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RaidDetails> raid_details_entries
+		std::vector<RaidDetails> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &raid_details_e: raid_details_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(raid_details_e.raidid));
-			insert_values.push_back(std::to_string(raid_details_e.loottype));
-			insert_values.push_back(std::to_string(raid_details_e.locked));
-			insert_values.push_back("'" + Strings::Escape(raid_details_e.motd) + "'");
+			insert_values.push_back(std::to_string(e.raidid));
+			insert_values.push_back(std::to_string(e.loottype));
+			insert_values.push_back(std::to_string(e.locked));
+			insert_values.push_back("'" + Strings::Escape(e.motd) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

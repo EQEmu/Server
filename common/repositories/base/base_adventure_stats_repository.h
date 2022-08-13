@@ -191,24 +191,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureStats adventure_stats_e
+		AdventureStats e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(adventure_stats_e.player_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(adventure_stats_e.guk_wins));
-		update_values.push_back(columns[2] + " = " + std::to_string(adventure_stats_e.mir_wins));
-		update_values.push_back(columns[3] + " = " + std::to_string(adventure_stats_e.mmc_wins));
-		update_values.push_back(columns[4] + " = " + std::to_string(adventure_stats_e.ruj_wins));
-		update_values.push_back(columns[5] + " = " + std::to_string(adventure_stats_e.tak_wins));
-		update_values.push_back(columns[6] + " = " + std::to_string(adventure_stats_e.guk_losses));
-		update_values.push_back(columns[7] + " = " + std::to_string(adventure_stats_e.mir_losses));
-		update_values.push_back(columns[8] + " = " + std::to_string(adventure_stats_e.mmc_losses));
-		update_values.push_back(columns[9] + " = " + std::to_string(adventure_stats_e.ruj_losses));
-		update_values.push_back(columns[10] + " = " + std::to_string(adventure_stats_e.tak_losses));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.player_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.guk_wins));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.mir_wins));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.mmc_wins));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.ruj_wins));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.tak_wins));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.guk_losses));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.mir_losses));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.mmc_losses));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.ruj_losses));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.tak_losses));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +216,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				adventure_stats_e.player_id
+				e.player_id
 			)
 		);
 
@@ -225,22 +225,22 @@ public:
 
 	static AdventureStats InsertOne(
 		Database& db,
-		AdventureStats adventure_stats_e
+		AdventureStats e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(adventure_stats_e.player_id));
-		insert_values.push_back(std::to_string(adventure_stats_e.guk_wins));
-		insert_values.push_back(std::to_string(adventure_stats_e.mir_wins));
-		insert_values.push_back(std::to_string(adventure_stats_e.mmc_wins));
-		insert_values.push_back(std::to_string(adventure_stats_e.ruj_wins));
-		insert_values.push_back(std::to_string(adventure_stats_e.tak_wins));
-		insert_values.push_back(std::to_string(adventure_stats_e.guk_losses));
-		insert_values.push_back(std::to_string(adventure_stats_e.mir_losses));
-		insert_values.push_back(std::to_string(adventure_stats_e.mmc_losses));
-		insert_values.push_back(std::to_string(adventure_stats_e.ruj_losses));
-		insert_values.push_back(std::to_string(adventure_stats_e.tak_losses));
+		insert_values.push_back(std::to_string(e.player_id));
+		insert_values.push_back(std::to_string(e.guk_wins));
+		insert_values.push_back(std::to_string(e.mir_wins));
+		insert_values.push_back(std::to_string(e.mmc_wins));
+		insert_values.push_back(std::to_string(e.ruj_wins));
+		insert_values.push_back(std::to_string(e.tak_wins));
+		insert_values.push_back(std::to_string(e.guk_losses));
+		insert_values.push_back(std::to_string(e.mir_losses));
+		insert_values.push_back(std::to_string(e.mmc_losses));
+		insert_values.push_back(std::to_string(e.ruj_losses));
+		insert_values.push_back(std::to_string(e.tak_losses));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -251,36 +251,36 @@ public:
 		);
 
 		if (results.Success()) {
-			adventure_stats_e.player_id = results.LastInsertedID();
-			return adventure_stats_e;
+			e.player_id = results.LastInsertedID();
+			return e;
 		}
 
-		adventure_stats_e = NewEntity();
+		e = NewEntity();
 
-		return adventure_stats_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AdventureStats> adventure_stats_entries
+		std::vector<AdventureStats> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &adventure_stats_e: adventure_stats_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(adventure_stats_e.player_id));
-			insert_values.push_back(std::to_string(adventure_stats_e.guk_wins));
-			insert_values.push_back(std::to_string(adventure_stats_e.mir_wins));
-			insert_values.push_back(std::to_string(adventure_stats_e.mmc_wins));
-			insert_values.push_back(std::to_string(adventure_stats_e.ruj_wins));
-			insert_values.push_back(std::to_string(adventure_stats_e.tak_wins));
-			insert_values.push_back(std::to_string(adventure_stats_e.guk_losses));
-			insert_values.push_back(std::to_string(adventure_stats_e.mir_losses));
-			insert_values.push_back(std::to_string(adventure_stats_e.mmc_losses));
-			insert_values.push_back(std::to_string(adventure_stats_e.ruj_losses));
-			insert_values.push_back(std::to_string(adventure_stats_e.tak_losses));
+			insert_values.push_back(std::to_string(e.player_id));
+			insert_values.push_back(std::to_string(e.guk_wins));
+			insert_values.push_back(std::to_string(e.mir_wins));
+			insert_values.push_back(std::to_string(e.mmc_wins));
+			insert_values.push_back(std::to_string(e.ruj_wins));
+			insert_values.push_back(std::to_string(e.tak_wins));
+			insert_values.push_back(std::to_string(e.guk_losses));
+			insert_values.push_back(std::to_string(e.mir_losses));
+			insert_values.push_back(std::to_string(e.mmc_losses));
+			insert_values.push_back(std::to_string(e.ruj_losses));
+			insert_values.push_back(std::to_string(e.tak_losses));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

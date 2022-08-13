@@ -201,25 +201,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Bugs bugs_e
+		Bugs e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(bugs_e.zone) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(bugs_e.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(bugs_e.ui) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(bugs_e.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(bugs_e.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(bugs_e.z));
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(bugs_e.type) + "'");
-		update_values.push_back(columns[8] + " = " + std::to_string(bugs_e.flag));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(bugs_e.target) + "'");
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(bugs_e.bug) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(bugs_e.date) + "'");
-		update_values.push_back(columns[12] + " = " + std::to_string(bugs_e.status));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.ui) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(e.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.z));
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(e.type) + "'");
+		update_values.push_back(columns[8] + " = " + std::to_string(e.flag));
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.target) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(e.bug) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(e.date) + "'");
+		update_values.push_back(columns[12] + " = " + std::to_string(e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -227,7 +227,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				bugs_e.id
+				e.id
 			)
 		);
 
@@ -236,24 +236,24 @@ public:
 
 	static Bugs InsertOne(
 		Database& db,
-		Bugs bugs_e
+		Bugs e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(bugs_e.id));
-		insert_values.push_back("'" + Strings::Escape(bugs_e.zone) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_e.ui) + "'");
-		insert_values.push_back(std::to_string(bugs_e.x));
-		insert_values.push_back(std::to_string(bugs_e.y));
-		insert_values.push_back(std::to_string(bugs_e.z));
-		insert_values.push_back("'" + Strings::Escape(bugs_e.type) + "'");
-		insert_values.push_back(std::to_string(bugs_e.flag));
-		insert_values.push_back("'" + Strings::Escape(bugs_e.target) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_e.bug) + "'");
-		insert_values.push_back("'" + Strings::Escape(bugs_e.date) + "'");
-		insert_values.push_back(std::to_string(bugs_e.status));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.ui) + "'");
+		insert_values.push_back(std::to_string(e.x));
+		insert_values.push_back(std::to_string(e.y));
+		insert_values.push_back(std::to_string(e.z));
+		insert_values.push_back("'" + Strings::Escape(e.type) + "'");
+		insert_values.push_back(std::to_string(e.flag));
+		insert_values.push_back("'" + Strings::Escape(e.target) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.bug) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.date) + "'");
+		insert_values.push_back(std::to_string(e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -264,38 +264,38 @@ public:
 		);
 
 		if (results.Success()) {
-			bugs_e.id = results.LastInsertedID();
-			return bugs_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		bugs_e = NewEntity();
+		e = NewEntity();
 
-		return bugs_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Bugs> bugs_entries
+		std::vector<Bugs> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &bugs_e: bugs_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(bugs_e.id));
-			insert_values.push_back("'" + Strings::Escape(bugs_e.zone) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_e.ui) + "'");
-			insert_values.push_back(std::to_string(bugs_e.x));
-			insert_values.push_back(std::to_string(bugs_e.y));
-			insert_values.push_back(std::to_string(bugs_e.z));
-			insert_values.push_back("'" + Strings::Escape(bugs_e.type) + "'");
-			insert_values.push_back(std::to_string(bugs_e.flag));
-			insert_values.push_back("'" + Strings::Escape(bugs_e.target) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_e.bug) + "'");
-			insert_values.push_back("'" + Strings::Escape(bugs_e.date) + "'");
-			insert_values.push_back(std::to_string(bugs_e.status));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.ui) + "'");
+			insert_values.push_back(std::to_string(e.x));
+			insert_values.push_back(std::to_string(e.y));
+			insert_values.push_back(std::to_string(e.z));
+			insert_values.push_back("'" + Strings::Escape(e.type) + "'");
+			insert_values.push_back(std::to_string(e.flag));
+			insert_values.push_back("'" + Strings::Escape(e.target) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.bug) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.date) + "'");
+			insert_values.push_back(std::to_string(e.status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

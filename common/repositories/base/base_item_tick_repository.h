@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ItemTick item_tick_e
+		ItemTick e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(item_tick_e.it_itemid));
-		update_values.push_back(columns[1] + " = " + std::to_string(item_tick_e.it_chance));
-		update_values.push_back(columns[2] + " = " + std::to_string(item_tick_e.it_level));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(item_tick_e.it_qglobal) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(item_tick_e.it_bagslot));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.it_itemid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.it_chance));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.it_level));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.it_qglobal) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(e.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				item_tick_e.it_id
+				e.it_id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static ItemTick InsertOne(
 		Database& db,
-		ItemTick item_tick_e
+		ItemTick e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(item_tick_e.it_itemid));
-		insert_values.push_back(std::to_string(item_tick_e.it_chance));
-		insert_values.push_back(std::to_string(item_tick_e.it_level));
-		insert_values.push_back(std::to_string(item_tick_e.it_id));
-		insert_values.push_back("'" + Strings::Escape(item_tick_e.it_qglobal) + "'");
-		insert_values.push_back(std::to_string(item_tick_e.it_bagslot));
+		insert_values.push_back(std::to_string(e.it_itemid));
+		insert_values.push_back(std::to_string(e.it_chance));
+		insert_values.push_back(std::to_string(e.it_level));
+		insert_values.push_back(std::to_string(e.it_id));
+		insert_values.push_back("'" + Strings::Escape(e.it_qglobal) + "'");
+		insert_values.push_back(std::to_string(e.it_bagslot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,31 +215,31 @@ public:
 		);
 
 		if (results.Success()) {
-			item_tick_e.it_id = results.LastInsertedID();
-			return item_tick_e;
+			e.it_id = results.LastInsertedID();
+			return e;
 		}
 
-		item_tick_e = NewEntity();
+		e = NewEntity();
 
-		return item_tick_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ItemTick> item_tick_entries
+		std::vector<ItemTick> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &item_tick_e: item_tick_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(item_tick_e.it_itemid));
-			insert_values.push_back(std::to_string(item_tick_e.it_chance));
-			insert_values.push_back(std::to_string(item_tick_e.it_level));
-			insert_values.push_back(std::to_string(item_tick_e.it_id));
-			insert_values.push_back("'" + Strings::Escape(item_tick_e.it_qglobal) + "'");
-			insert_values.push_back(std::to_string(item_tick_e.it_bagslot));
+			insert_values.push_back(std::to_string(e.it_itemid));
+			insert_values.push_back(std::to_string(e.it_chance));
+			insert_values.push_back(std::to_string(e.it_level));
+			insert_values.push_back(std::to_string(e.it_id));
+			insert_values.push_back("'" + Strings::Escape(e.it_qglobal) + "'");
+			insert_values.push_back(std::to_string(e.it_bagslot));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

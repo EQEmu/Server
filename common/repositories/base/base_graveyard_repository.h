@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Graveyard graveyard_e
+		Graveyard e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(graveyard_e.zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(graveyard_e.x));
-		update_values.push_back(columns[3] + " = " + std::to_string(graveyard_e.y));
-		update_values.push_back(columns[4] + " = " + std::to_string(graveyard_e.z));
-		update_values.push_back(columns[5] + " = " + std::to_string(graveyard_e.heading));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.x));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.y));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.z));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				graveyard_e.id
+				e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static Graveyard InsertOne(
 		Database& db,
-		Graveyard graveyard_e
+		Graveyard e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(graveyard_e.id));
-		insert_values.push_back(std::to_string(graveyard_e.zone_id));
-		insert_values.push_back(std::to_string(graveyard_e.x));
-		insert_values.push_back(std::to_string(graveyard_e.y));
-		insert_values.push_back(std::to_string(graveyard_e.z));
-		insert_values.push_back(std::to_string(graveyard_e.heading));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.zone_id));
+		insert_values.push_back(std::to_string(e.x));
+		insert_values.push_back(std::to_string(e.y));
+		insert_values.push_back(std::to_string(e.z));
+		insert_values.push_back(std::to_string(e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,31 +215,31 @@ public:
 		);
 
 		if (results.Success()) {
-			graveyard_e.id = results.LastInsertedID();
-			return graveyard_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		graveyard_e = NewEntity();
+		e = NewEntity();
 
-		return graveyard_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Graveyard> graveyard_entries
+		std::vector<Graveyard> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &graveyard_e: graveyard_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(graveyard_e.id));
-			insert_values.push_back(std::to_string(graveyard_e.zone_id));
-			insert_values.push_back(std::to_string(graveyard_e.x));
-			insert_values.push_back(std::to_string(graveyard_e.y));
-			insert_values.push_back(std::to_string(graveyard_e.z));
-			insert_values.push_back(std::to_string(graveyard_e.heading));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.zone_id));
+			insert_values.push_back(std::to_string(e.x));
+			insert_values.push_back(std::to_string(e.y));
+			insert_values.push_back(std::to_string(e.z));
+			insert_values.push_back(std::to_string(e.heading));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		PetsEquipmentsetEntries pets_equipmentset_entries_e
+		PetsEquipmentsetEntries e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(pets_equipmentset_entries_e.set_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(pets_equipmentset_entries_e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_equipmentset_entries_e.item_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.set_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				pets_equipmentset_entries_e.set_id
+				e.set_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static PetsEquipmentsetEntries InsertOne(
 		Database& db,
-		PetsEquipmentsetEntries pets_equipmentset_entries_e
+		PetsEquipmentsetEntries e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(pets_equipmentset_entries_e.set_id));
-		insert_values.push_back(std::to_string(pets_equipmentset_entries_e.slot));
-		insert_values.push_back(std::to_string(pets_equipmentset_entries_e.item_id));
+		insert_values.push_back(std::to_string(e.set_id));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_equipmentset_entries_e.set_id = results.LastInsertedID();
-			return pets_equipmentset_entries_e;
+			e.set_id = results.LastInsertedID();
+			return e;
 		}
 
-		pets_equipmentset_entries_e = NewEntity();
+		e = NewEntity();
 
-		return pets_equipmentset_entries_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<PetsEquipmentsetEntries> pets_equipmentset_entries_entries
+		std::vector<PetsEquipmentsetEntries> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &pets_equipmentset_entries_e: pets_equipmentset_entries_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(pets_equipmentset_entries_e.set_id));
-			insert_values.push_back(std::to_string(pets_equipmentset_entries_e.slot));
-			insert_values.push_back(std::to_string(pets_equipmentset_entries_e.item_id));
+			insert_values.push_back(std::to_string(e.set_id));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.item_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

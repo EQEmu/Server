@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Friends friends_e
+		Friends e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(friends_e.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(friends_e.type));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(friends_e.name) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				friends_e.charid
+				e.charid
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static Friends InsertOne(
 		Database& db,
-		Friends friends_e
+		Friends e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(friends_e.charid));
-		insert_values.push_back(std::to_string(friends_e.type));
-		insert_values.push_back("'" + Strings::Escape(friends_e.name) + "'");
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			friends_e.charid = results.LastInsertedID();
-			return friends_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		friends_e = NewEntity();
+		e = NewEntity();
 
-		return friends_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Friends> friends_entries
+		std::vector<Friends> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &friends_e: friends_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(friends_e.charid));
-			insert_values.push_back(std::to_string(friends_e.type));
-			insert_values.push_back("'" + Strings::Escape(friends_e.name) + "'");
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Forage forage_e
+		Forage e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(forage_e.zoneid));
-		update_values.push_back(columns[2] + " = " + std::to_string(forage_e.Itemid));
-		update_values.push_back(columns[3] + " = " + std::to_string(forage_e.level));
-		update_values.push_back(columns[4] + " = " + std::to_string(forage_e.chance));
-		update_values.push_back(columns[5] + " = " + std::to_string(forage_e.min_expansion));
-		update_values.push_back(columns[6] + " = " + std::to_string(forage_e.max_expansion));
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(forage_e.content_flags) + "'");
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(forage_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.Itemid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.level));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.chance));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				forage_e.id
+				e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static Forage InsertOne(
 		Database& db,
-		Forage forage_e
+		Forage e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(forage_e.id));
-		insert_values.push_back(std::to_string(forage_e.zoneid));
-		insert_values.push_back(std::to_string(forage_e.Itemid));
-		insert_values.push_back(std::to_string(forage_e.level));
-		insert_values.push_back(std::to_string(forage_e.chance));
-		insert_values.push_back(std::to_string(forage_e.min_expansion));
-		insert_values.push_back(std::to_string(forage_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(forage_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(forage_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.Itemid));
+		insert_values.push_back(std::to_string(e.level));
+		insert_values.push_back(std::to_string(e.chance));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,34 +236,34 @@ public:
 		);
 
 		if (results.Success()) {
-			forage_e.id = results.LastInsertedID();
-			return forage_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		forage_e = NewEntity();
+		e = NewEntity();
 
-		return forage_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Forage> forage_entries
+		std::vector<Forage> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &forage_e: forage_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(forage_e.id));
-			insert_values.push_back(std::to_string(forage_e.zoneid));
-			insert_values.push_back(std::to_string(forage_e.Itemid));
-			insert_values.push_back(std::to_string(forage_e.level));
-			insert_values.push_back(std::to_string(forage_e.chance));
-			insert_values.push_back(std::to_string(forage_e.min_expansion));
-			insert_values.push_back(std::to_string(forage_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(forage_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(forage_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.Itemid));
+			insert_values.push_back(std::to_string(e.level));
+			insert_values.push_back(std::to_string(e.chance));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

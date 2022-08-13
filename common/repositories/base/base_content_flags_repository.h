@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ContentFlags content_flags_e
+		ContentFlags e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(content_flags_e.flag_name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(content_flags_e.enabled));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(content_flags_e.notes) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.flag_name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.enabled));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				content_flags_e.id
+				e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static ContentFlags InsertOne(
 		Database& db,
-		ContentFlags content_flags_e
+		ContentFlags e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(content_flags_e.id));
-		insert_values.push_back("'" + Strings::Escape(content_flags_e.flag_name) + "'");
-		insert_values.push_back(std::to_string(content_flags_e.enabled));
-		insert_values.push_back("'" + Strings::Escape(content_flags_e.notes) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.flag_name) + "'");
+		insert_values.push_back(std::to_string(e.enabled));
+		insert_values.push_back("'" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +201,29 @@ public:
 		);
 
 		if (results.Success()) {
-			content_flags_e.id = results.LastInsertedID();
-			return content_flags_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		content_flags_e = NewEntity();
+		e = NewEntity();
 
-		return content_flags_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ContentFlags> content_flags_entries
+		std::vector<ContentFlags> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &content_flags_e: content_flags_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(content_flags_e.id));
-			insert_values.push_back("'" + Strings::Escape(content_flags_e.flag_name) + "'");
-			insert_values.push_back(std::to_string(content_flags_e.enabled));
-			insert_values.push_back("'" + Strings::Escape(content_flags_e.notes) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.flag_name) + "'");
+			insert_values.push_back(std::to_string(e.enabled));
+			insert_values.push_back("'" + Strings::Escape(e.notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionList faction_list_e
+		FactionList e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(faction_list_e.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(faction_list_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_e.base));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.base));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				faction_list_e.id
+				e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static FactionList InsertOne(
 		Database& db,
-		FactionList faction_list_e
+		FactionList e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(faction_list_e.id));
-		insert_values.push_back("'" + Strings::Escape(faction_list_e.name) + "'");
-		insert_values.push_back(std::to_string(faction_list_e.base));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.base));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_list_e.id = results.LastInsertedID();
-			return faction_list_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		faction_list_e = NewEntity();
+		e = NewEntity();
 
-		return faction_list_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<FactionList> faction_list_entries
+		std::vector<FactionList> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &faction_list_e: faction_list_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(faction_list_e.id));
-			insert_values.push_back("'" + Strings::Escape(faction_list_e.name) + "'");
-			insert_values.push_back(std::to_string(faction_list_e.base));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.base));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

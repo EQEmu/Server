@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LdonTrapEntries ldon_trap_entries_e
+		LdonTrapEntries e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(ldon_trap_entries_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(ldon_trap_entries_e.trap_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.trap_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				ldon_trap_entries_e.id
+				e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static LdonTrapEntries InsertOne(
 		Database& db,
-		LdonTrapEntries ldon_trap_entries_e
+		LdonTrapEntries e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(ldon_trap_entries_e.id));
-		insert_values.push_back(std::to_string(ldon_trap_entries_e.trap_id));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.trap_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			ldon_trap_entries_e.id = results.LastInsertedID();
-			return ldon_trap_entries_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		ldon_trap_entries_e = NewEntity();
+		e = NewEntity();
 
-		return ldon_trap_entries_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LdonTrapEntries> ldon_trap_entries_entries
+		std::vector<LdonTrapEntries> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &ldon_trap_entries_e: ldon_trap_entries_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(ldon_trap_entries_e.id));
-			insert_values.push_back(std::to_string(ldon_trap_entries_e.trap_id));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.trap_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

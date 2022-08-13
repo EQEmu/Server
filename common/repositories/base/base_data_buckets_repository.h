@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DataBuckets data_buckets_e
+		DataBuckets e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(data_buckets_e.key) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(data_buckets_e.value) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(data_buckets_e.expires));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.key) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.expires));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				data_buckets_e.id
+				e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static DataBuckets InsertOne(
 		Database& db,
-		DataBuckets data_buckets_e
+		DataBuckets e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(data_buckets_e.id));
-		insert_values.push_back("'" + Strings::Escape(data_buckets_e.key) + "'");
-		insert_values.push_back("'" + Strings::Escape(data_buckets_e.value) + "'");
-		insert_values.push_back(std::to_string(data_buckets_e.expires));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.key) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.value) + "'");
+		insert_values.push_back(std::to_string(e.expires));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +201,29 @@ public:
 		);
 
 		if (results.Success()) {
-			data_buckets_e.id = results.LastInsertedID();
-			return data_buckets_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		data_buckets_e = NewEntity();
+		e = NewEntity();
 
-		return data_buckets_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DataBuckets> data_buckets_entries
+		std::vector<DataBuckets> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &data_buckets_e: data_buckets_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(data_buckets_e.id));
-			insert_values.push_back("'" + Strings::Escape(data_buckets_e.key) + "'");
-			insert_values.push_back("'" + Strings::Escape(data_buckets_e.value) + "'");
-			insert_values.push_back(std::to_string(data_buckets_e.expires));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.key) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.value) + "'");
+			insert_values.push_back(std::to_string(e.expires));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

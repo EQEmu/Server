@@ -201,26 +201,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRanks aa_ranks_e
+		AaRanks e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_ranks_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(aa_ranks_e.upper_hotkey_sid));
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_ranks_e.lower_hotkey_sid));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_ranks_e.title_sid));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_ranks_e.desc_sid));
-		update_values.push_back(columns[5] + " = " + std::to_string(aa_ranks_e.cost));
-		update_values.push_back(columns[6] + " = " + std::to_string(aa_ranks_e.level_req));
-		update_values.push_back(columns[7] + " = " + std::to_string(aa_ranks_e.spell));
-		update_values.push_back(columns[8] + " = " + std::to_string(aa_ranks_e.spell_type));
-		update_values.push_back(columns[9] + " = " + std::to_string(aa_ranks_e.recast_time));
-		update_values.push_back(columns[10] + " = " + std::to_string(aa_ranks_e.expansion));
-		update_values.push_back(columns[11] + " = " + std::to_string(aa_ranks_e.prev_id));
-		update_values.push_back(columns[12] + " = " + std::to_string(aa_ranks_e.next_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.upper_hotkey_sid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.lower_hotkey_sid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.title_sid));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.desc_sid));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.cost));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.level_req));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.spell));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.spell_type));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.recast_time));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.expansion));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.prev_id));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.next_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -228,7 +228,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				aa_ranks_e.id
+				e.id
 			)
 		);
 
@@ -237,24 +237,24 @@ public:
 
 	static AaRanks InsertOne(
 		Database& db,
-		AaRanks aa_ranks_e
+		AaRanks e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(aa_ranks_e.id));
-		insert_values.push_back(std::to_string(aa_ranks_e.upper_hotkey_sid));
-		insert_values.push_back(std::to_string(aa_ranks_e.lower_hotkey_sid));
-		insert_values.push_back(std::to_string(aa_ranks_e.title_sid));
-		insert_values.push_back(std::to_string(aa_ranks_e.desc_sid));
-		insert_values.push_back(std::to_string(aa_ranks_e.cost));
-		insert_values.push_back(std::to_string(aa_ranks_e.level_req));
-		insert_values.push_back(std::to_string(aa_ranks_e.spell));
-		insert_values.push_back(std::to_string(aa_ranks_e.spell_type));
-		insert_values.push_back(std::to_string(aa_ranks_e.recast_time));
-		insert_values.push_back(std::to_string(aa_ranks_e.expansion));
-		insert_values.push_back(std::to_string(aa_ranks_e.prev_id));
-		insert_values.push_back(std::to_string(aa_ranks_e.next_id));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.upper_hotkey_sid));
+		insert_values.push_back(std::to_string(e.lower_hotkey_sid));
+		insert_values.push_back(std::to_string(e.title_sid));
+		insert_values.push_back(std::to_string(e.desc_sid));
+		insert_values.push_back(std::to_string(e.cost));
+		insert_values.push_back(std::to_string(e.level_req));
+		insert_values.push_back(std::to_string(e.spell));
+		insert_values.push_back(std::to_string(e.spell_type));
+		insert_values.push_back(std::to_string(e.recast_time));
+		insert_values.push_back(std::to_string(e.expansion));
+		insert_values.push_back(std::to_string(e.prev_id));
+		insert_values.push_back(std::to_string(e.next_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -265,38 +265,38 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_ranks_e.id = results.LastInsertedID();
-			return aa_ranks_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		aa_ranks_e = NewEntity();
+		e = NewEntity();
 
-		return aa_ranks_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaRanks> aa_ranks_entries
+		std::vector<AaRanks> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_ranks_e: aa_ranks_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(aa_ranks_e.id));
-			insert_values.push_back(std::to_string(aa_ranks_e.upper_hotkey_sid));
-			insert_values.push_back(std::to_string(aa_ranks_e.lower_hotkey_sid));
-			insert_values.push_back(std::to_string(aa_ranks_e.title_sid));
-			insert_values.push_back(std::to_string(aa_ranks_e.desc_sid));
-			insert_values.push_back(std::to_string(aa_ranks_e.cost));
-			insert_values.push_back(std::to_string(aa_ranks_e.level_req));
-			insert_values.push_back(std::to_string(aa_ranks_e.spell));
-			insert_values.push_back(std::to_string(aa_ranks_e.spell_type));
-			insert_values.push_back(std::to_string(aa_ranks_e.recast_time));
-			insert_values.push_back(std::to_string(aa_ranks_e.expansion));
-			insert_values.push_back(std::to_string(aa_ranks_e.prev_id));
-			insert_values.push_back(std::to_string(aa_ranks_e.next_id));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.upper_hotkey_sid));
+			insert_values.push_back(std::to_string(e.lower_hotkey_sid));
+			insert_values.push_back(std::to_string(e.title_sid));
+			insert_values.push_back(std::to_string(e.desc_sid));
+			insert_values.push_back(std::to_string(e.cost));
+			insert_values.push_back(std::to_string(e.level_req));
+			insert_values.push_back(std::to_string(e.spell));
+			insert_values.push_back(std::to_string(e.spell_type));
+			insert_values.push_back(std::to_string(e.recast_time));
+			insert_values.push_back(std::to_string(e.expansion));
+			insert_values.push_back(std::to_string(e.prev_id));
+			insert_values.push_back(std::to_string(e.next_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

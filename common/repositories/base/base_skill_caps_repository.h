@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SkillCaps skill_caps_e
+		SkillCaps e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(skill_caps_e.skillID));
-		update_values.push_back(columns[1] + " = " + std::to_string(skill_caps_e.class_));
-		update_values.push_back(columns[2] + " = " + std::to_string(skill_caps_e.level));
-		update_values.push_back(columns[3] + " = " + std::to_string(skill_caps_e.cap));
-		update_values.push_back(columns[4] + " = " + std::to_string(skill_caps_e.class_));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.skillID));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.class_));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.level));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.cap));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.class_));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				skill_caps_e.skillID
+				e.skillID
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static SkillCaps InsertOne(
 		Database& db,
-		SkillCaps skill_caps_e
+		SkillCaps e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(skill_caps_e.skillID));
-		insert_values.push_back(std::to_string(skill_caps_e.class_));
-		insert_values.push_back(std::to_string(skill_caps_e.level));
-		insert_values.push_back(std::to_string(skill_caps_e.cap));
-		insert_values.push_back(std::to_string(skill_caps_e.class_));
+		insert_values.push_back(std::to_string(e.skillID));
+		insert_values.push_back(std::to_string(e.class_));
+		insert_values.push_back(std::to_string(e.level));
+		insert_values.push_back(std::to_string(e.cap));
+		insert_values.push_back(std::to_string(e.class_));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,30 +209,30 @@ public:
 		);
 
 		if (results.Success()) {
-			skill_caps_e.skillID = results.LastInsertedID();
-			return skill_caps_e;
+			e.skillID = results.LastInsertedID();
+			return e;
 		}
 
-		skill_caps_e = NewEntity();
+		e = NewEntity();
 
-		return skill_caps_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SkillCaps> skill_caps_entries
+		std::vector<SkillCaps> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &skill_caps_e: skill_caps_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(skill_caps_e.skillID));
-			insert_values.push_back(std::to_string(skill_caps_e.class_));
-			insert_values.push_back(std::to_string(skill_caps_e.level));
-			insert_values.push_back(std::to_string(skill_caps_e.cap));
-			insert_values.push_back(std::to_string(skill_caps_e.class_));
+			insert_values.push_back(std::to_string(e.skillID));
+			insert_values.push_back(std::to_string(e.class_));
+			insert_values.push_back(std::to_string(e.level));
+			insert_values.push_back(std::to_string(e.cap));
+			insert_values.push_back(std::to_string(e.class_));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

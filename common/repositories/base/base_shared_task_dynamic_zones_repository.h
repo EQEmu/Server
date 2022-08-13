@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SharedTaskDynamicZones shared_task_dynamic_zones_e
+		SharedTaskDynamicZones e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(shared_task_dynamic_zones_e.shared_task_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_dynamic_zones_e.dynamic_zone_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.shared_task_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.dynamic_zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				shared_task_dynamic_zones_e.shared_task_id
+				e.shared_task_id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static SharedTaskDynamicZones InsertOne(
 		Database& db,
-		SharedTaskDynamicZones shared_task_dynamic_zones_e
+		SharedTaskDynamicZones e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.shared_task_id));
-		insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.dynamic_zone_id));
+		insert_values.push_back(std::to_string(e.shared_task_id));
+		insert_values.push_back(std::to_string(e.dynamic_zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			shared_task_dynamic_zones_e.shared_task_id = results.LastInsertedID();
-			return shared_task_dynamic_zones_e;
+			e.shared_task_id = results.LastInsertedID();
+			return e;
 		}
 
-		shared_task_dynamic_zones_e = NewEntity();
+		e = NewEntity();
 
-		return shared_task_dynamic_zones_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SharedTaskDynamicZones> shared_task_dynamic_zones_entries
+		std::vector<SharedTaskDynamicZones> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &shared_task_dynamic_zones_e: shared_task_dynamic_zones_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.shared_task_id));
-			insert_values.push_back(std::to_string(shared_task_dynamic_zones_e.dynamic_zone_id));
+			insert_values.push_back(std::to_string(e.shared_task_id));
+			insert_values.push_back(std::to_string(e.dynamic_zone_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

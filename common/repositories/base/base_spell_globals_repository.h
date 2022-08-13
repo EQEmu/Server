@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SpellGlobals spell_globals_e
+		SpellGlobals e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(spell_globals_e.spellid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_globals_e.spell_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_globals_e.qglobal) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(spell_globals_e.value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.spellid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.spell_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.qglobal) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spell_globals_e.spellid
+				e.spellid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static SpellGlobals InsertOne(
 		Database& db,
-		SpellGlobals spell_globals_e
+		SpellGlobals e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spell_globals_e.spellid));
-		insert_values.push_back("'" + Strings::Escape(spell_globals_e.spell_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(spell_globals_e.qglobal) + "'");
-		insert_values.push_back("'" + Strings::Escape(spell_globals_e.value) + "'");
+		insert_values.push_back(std::to_string(e.spellid));
+		insert_values.push_back("'" + Strings::Escape(e.spell_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.qglobal) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			spell_globals_e.spellid = results.LastInsertedID();
-			return spell_globals_e;
+			e.spellid = results.LastInsertedID();
+			return e;
 		}
 
-		spell_globals_e = NewEntity();
+		e = NewEntity();
 
-		return spell_globals_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SpellGlobals> spell_globals_entries
+		std::vector<SpellGlobals> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spell_globals_e: spell_globals_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spell_globals_e.spellid));
-			insert_values.push_back("'" + Strings::Escape(spell_globals_e.spell_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(spell_globals_e.qglobal) + "'");
-			insert_values.push_back("'" + Strings::Escape(spell_globals_e.value) + "'");
+			insert_values.push_back(std::to_string(e.spellid));
+			insert_values.push_back("'" + Strings::Escape(e.spell_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.qglobal) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

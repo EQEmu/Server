@@ -186,22 +186,22 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Eventlog eventlog_e
+		Eventlog e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(eventlog_e.accountname) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(eventlog_e.accountid));
-		update_values.push_back(columns[3] + " = " + std::to_string(eventlog_e.status));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(eventlog_e.charname) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(eventlog_e.target) + "'");
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(eventlog_e.time) + "'");
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(eventlog_e.descriptiontype) + "'");
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(eventlog_e.description) + "'");
-		update_values.push_back(columns[9] + " = " + std::to_string(eventlog_e.event_nid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.accountname) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.accountid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.status));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.charname) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(e.target) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.time) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(e.descriptiontype) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(e.description) + "'");
+		update_values.push_back(columns[9] + " = " + std::to_string(e.event_nid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,7 +209,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				eventlog_e.id
+				e.id
 			)
 		);
 
@@ -218,21 +218,21 @@ public:
 
 	static Eventlog InsertOne(
 		Database& db,
-		Eventlog eventlog_e
+		Eventlog e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(eventlog_e.id));
-		insert_values.push_back("'" + Strings::Escape(eventlog_e.accountname) + "'");
-		insert_values.push_back(std::to_string(eventlog_e.accountid));
-		insert_values.push_back(std::to_string(eventlog_e.status));
-		insert_values.push_back("'" + Strings::Escape(eventlog_e.charname) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_e.target) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_e.time) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_e.descriptiontype) + "'");
-		insert_values.push_back("'" + Strings::Escape(eventlog_e.description) + "'");
-		insert_values.push_back(std::to_string(eventlog_e.event_nid));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.accountname) + "'");
+		insert_values.push_back(std::to_string(e.accountid));
+		insert_values.push_back(std::to_string(e.status));
+		insert_values.push_back("'" + Strings::Escape(e.charname) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.target) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.time) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.descriptiontype) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.description) + "'");
+		insert_values.push_back(std::to_string(e.event_nid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -243,35 +243,35 @@ public:
 		);
 
 		if (results.Success()) {
-			eventlog_e.id = results.LastInsertedID();
-			return eventlog_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		eventlog_e = NewEntity();
+		e = NewEntity();
 
-		return eventlog_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Eventlog> eventlog_entries
+		std::vector<Eventlog> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &eventlog_e: eventlog_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(eventlog_e.id));
-			insert_values.push_back("'" + Strings::Escape(eventlog_e.accountname) + "'");
-			insert_values.push_back(std::to_string(eventlog_e.accountid));
-			insert_values.push_back(std::to_string(eventlog_e.status));
-			insert_values.push_back("'" + Strings::Escape(eventlog_e.charname) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_e.target) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_e.time) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_e.descriptiontype) + "'");
-			insert_values.push_back("'" + Strings::Escape(eventlog_e.description) + "'");
-			insert_values.push_back(std::to_string(eventlog_e.event_nid));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.accountname) + "'");
+			insert_values.push_back(std::to_string(e.accountid));
+			insert_values.push_back(std::to_string(e.status));
+			insert_values.push_back("'" + Strings::Escape(e.charname) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.target) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.time) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.descriptiontype) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.description) + "'");
+			insert_values.push_back(std::to_string(e.event_nid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

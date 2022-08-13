@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcFaction npc_faction_e
+		NpcFaction e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_faction_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_faction_e.primaryfaction));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_faction_e.ignore_primary_assist));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.primaryfaction));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.ignore_primary_assist));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_faction_e.id
+				e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static NpcFaction InsertOne(
 		Database& db,
-		NpcFaction npc_faction_e
+		NpcFaction e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_faction_e.id));
-		insert_values.push_back("'" + Strings::Escape(npc_faction_e.name) + "'");
-		insert_values.push_back(std::to_string(npc_faction_e.primaryfaction));
-		insert_values.push_back(std::to_string(npc_faction_e.ignore_primary_assist));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.primaryfaction));
+		insert_values.push_back(std::to_string(e.ignore_primary_assist));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +201,29 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_faction_e.id = results.LastInsertedID();
-			return npc_faction_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		npc_faction_e = NewEntity();
+		e = NewEntity();
 
-		return npc_faction_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcFaction> npc_faction_entries
+		std::vector<NpcFaction> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_faction_e: npc_faction_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_faction_e.id));
-			insert_values.push_back("'" + Strings::Escape(npc_faction_e.name) + "'");
-			insert_values.push_back(std::to_string(npc_faction_e.primaryfaction));
-			insert_values.push_back(std::to_string(npc_faction_e.ignore_primary_assist));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.primaryfaction));
+			insert_values.push_back(std::to_string(e.ignore_primary_assist));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

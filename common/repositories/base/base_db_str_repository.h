@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DbStr db_str_e
+		DbStr e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(db_str_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(db_str_e.type));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(db_str_e.value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				db_str_e.id
+				e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static DbStr InsertOne(
 		Database& db,
-		DbStr db_str_e
+		DbStr e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(db_str_e.id));
-		insert_values.push_back(std::to_string(db_str_e.type));
-		insert_values.push_back("'" + Strings::Escape(db_str_e.value) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back("'" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			db_str_e.id = results.LastInsertedID();
-			return db_str_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		db_str_e = NewEntity();
+		e = NewEntity();
 
-		return db_str_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DbStr> db_str_entries
+		std::vector<DbStr> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &db_str_e: db_str_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(db_str_e.id));
-			insert_values.push_back(std::to_string(db_str_e.type));
-			insert_values.push_back("'" + Strings::Escape(db_str_e.value) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back("'" + Strings::Escape(e.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

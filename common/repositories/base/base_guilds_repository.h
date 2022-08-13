@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Guilds guilds_e
+		Guilds e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(guilds_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(guilds_e.leader));
-		update_values.push_back(columns[3] + " = " + std::to_string(guilds_e.minstatus));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(guilds_e.motd) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(guilds_e.tribute));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(guilds_e.motd_setter) + "'");
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(guilds_e.channel) + "'");
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(guilds_e.url) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.leader));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.minstatus));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.motd) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(e.tribute));
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.motd_setter) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(e.channel) + "'");
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(e.url) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				guilds_e.id
+				e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static Guilds InsertOne(
 		Database& db,
-		Guilds guilds_e
+		Guilds e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(guilds_e.id));
-		insert_values.push_back("'" + Strings::Escape(guilds_e.name) + "'");
-		insert_values.push_back(std::to_string(guilds_e.leader));
-		insert_values.push_back(std::to_string(guilds_e.minstatus));
-		insert_values.push_back("'" + Strings::Escape(guilds_e.motd) + "'");
-		insert_values.push_back(std::to_string(guilds_e.tribute));
-		insert_values.push_back("'" + Strings::Escape(guilds_e.motd_setter) + "'");
-		insert_values.push_back("'" + Strings::Escape(guilds_e.channel) + "'");
-		insert_values.push_back("'" + Strings::Escape(guilds_e.url) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.leader));
+		insert_values.push_back(std::to_string(e.minstatus));
+		insert_values.push_back("'" + Strings::Escape(e.motd) + "'");
+		insert_values.push_back(std::to_string(e.tribute));
+		insert_values.push_back("'" + Strings::Escape(e.motd_setter) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.channel) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.url) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,34 +236,34 @@ public:
 		);
 
 		if (results.Success()) {
-			guilds_e.id = results.LastInsertedID();
-			return guilds_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		guilds_e = NewEntity();
+		e = NewEntity();
 
-		return guilds_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Guilds> guilds_entries
+		std::vector<Guilds> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &guilds_e: guilds_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(guilds_e.id));
-			insert_values.push_back("'" + Strings::Escape(guilds_e.name) + "'");
-			insert_values.push_back(std::to_string(guilds_e.leader));
-			insert_values.push_back(std::to_string(guilds_e.minstatus));
-			insert_values.push_back("'" + Strings::Escape(guilds_e.motd) + "'");
-			insert_values.push_back(std::to_string(guilds_e.tribute));
-			insert_values.push_back("'" + Strings::Escape(guilds_e.motd_setter) + "'");
-			insert_values.push_back("'" + Strings::Escape(guilds_e.channel) + "'");
-			insert_values.push_back("'" + Strings::Escape(guilds_e.url) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.leader));
+			insert_values.push_back(std::to_string(e.minstatus));
+			insert_values.push_back("'" + Strings::Escape(e.motd) + "'");
+			insert_values.push_back(std::to_string(e.tribute));
+			insert_values.push_back("'" + Strings::Escape(e.motd_setter) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.channel) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.url) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

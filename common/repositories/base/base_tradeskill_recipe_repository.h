@@ -211,27 +211,27 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		TradeskillRecipe tradeskill_recipe_e
+		TradeskillRecipe e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(tradeskill_recipe_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(tradeskill_recipe_e.tradeskill));
-		update_values.push_back(columns[3] + " = " + std::to_string(tradeskill_recipe_e.skillneeded));
-		update_values.push_back(columns[4] + " = " + std::to_string(tradeskill_recipe_e.trivial));
-		update_values.push_back(columns[5] + " = " + std::to_string(tradeskill_recipe_e.nofail));
-		update_values.push_back(columns[6] + " = " + std::to_string(tradeskill_recipe_e.replace_container));
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(tradeskill_recipe_e.notes) + "'");
-		update_values.push_back(columns[8] + " = " + std::to_string(tradeskill_recipe_e.must_learn));
-		update_values.push_back(columns[9] + " = " + std::to_string(tradeskill_recipe_e.quest));
-		update_values.push_back(columns[10] + " = " + std::to_string(tradeskill_recipe_e.enabled));
-		update_values.push_back(columns[11] + " = " + std::to_string(tradeskill_recipe_e.min_expansion));
-		update_values.push_back(columns[12] + " = " + std::to_string(tradeskill_recipe_e.max_expansion));
-		update_values.push_back(columns[13] + " = '" + Strings::Escape(tradeskill_recipe_e.content_flags) + "'");
-		update_values.push_back(columns[14] + " = '" + Strings::Escape(tradeskill_recipe_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.tradeskill));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.skillneeded));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.trivial));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.nofail));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.replace_container));
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(e.notes) + "'");
+		update_values.push_back(columns[8] + " = " + std::to_string(e.must_learn));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.quest));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.enabled));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[13] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[14] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -239,7 +239,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				tradeskill_recipe_e.id
+				e.id
 			)
 		);
 
@@ -248,26 +248,26 @@ public:
 
 	static TradeskillRecipe InsertOne(
 		Database& db,
-		TradeskillRecipe tradeskill_recipe_e
+		TradeskillRecipe e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.id));
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.name) + "'");
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.tradeskill));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.skillneeded));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.trivial));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.nofail));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.replace_container));
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.notes) + "'");
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.must_learn));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.quest));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.enabled));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.min_expansion));
-		insert_values.push_back(std::to_string(tradeskill_recipe_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.tradeskill));
+		insert_values.push_back(std::to_string(e.skillneeded));
+		insert_values.push_back(std::to_string(e.trivial));
+		insert_values.push_back(std::to_string(e.nofail));
+		insert_values.push_back(std::to_string(e.replace_container));
+		insert_values.push_back("'" + Strings::Escape(e.notes) + "'");
+		insert_values.push_back(std::to_string(e.must_learn));
+		insert_values.push_back(std::to_string(e.quest));
+		insert_values.push_back(std::to_string(e.enabled));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -278,40 +278,40 @@ public:
 		);
 
 		if (results.Success()) {
-			tradeskill_recipe_e.id = results.LastInsertedID();
-			return tradeskill_recipe_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		tradeskill_recipe_e = NewEntity();
+		e = NewEntity();
 
-		return tradeskill_recipe_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<TradeskillRecipe> tradeskill_recipe_entries
+		std::vector<TradeskillRecipe> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tradeskill_recipe_e: tradeskill_recipe_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.id));
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.name) + "'");
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.tradeskill));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.skillneeded));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.trivial));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.nofail));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.replace_container));
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.notes) + "'");
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.must_learn));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.quest));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.enabled));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.min_expansion));
-			insert_values.push_back(std::to_string(tradeskill_recipe_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(tradeskill_recipe_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.tradeskill));
+			insert_values.push_back(std::to_string(e.skillneeded));
+			insert_values.push_back(std::to_string(e.trivial));
+			insert_values.push_back(std::to_string(e.nofail));
+			insert_values.push_back(std::to_string(e.replace_container));
+			insert_values.push_back("'" + Strings::Escape(e.notes) + "'");
+			insert_values.push_back(std::to_string(e.must_learn));
+			insert_values.push_back(std::to_string(e.quest));
+			insert_values.push_back(std::to_string(e.enabled));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -171,19 +171,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Horses horses_e
+		Horses e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(horses_e.filename) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(horses_e.race));
-		update_values.push_back(columns[3] + " = " + std::to_string(horses_e.gender));
-		update_values.push_back(columns[4] + " = " + std::to_string(horses_e.texture));
-		update_values.push_back(columns[5] + " = " + std::to_string(horses_e.mountspeed));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(horses_e.notes) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.filename) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.race));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.gender));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.texture));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.mountspeed));
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -191,7 +191,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				horses_e.id
+				e.id
 			)
 		);
 
@@ -200,18 +200,18 @@ public:
 
 	static Horses InsertOne(
 		Database& db,
-		Horses horses_e
+		Horses e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(horses_e.id));
-		insert_values.push_back("'" + Strings::Escape(horses_e.filename) + "'");
-		insert_values.push_back(std::to_string(horses_e.race));
-		insert_values.push_back(std::to_string(horses_e.gender));
-		insert_values.push_back(std::to_string(horses_e.texture));
-		insert_values.push_back(std::to_string(horses_e.mountspeed));
-		insert_values.push_back("'" + Strings::Escape(horses_e.notes) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.filename) + "'");
+		insert_values.push_back(std::to_string(e.race));
+		insert_values.push_back(std::to_string(e.gender));
+		insert_values.push_back(std::to_string(e.texture));
+		insert_values.push_back(std::to_string(e.mountspeed));
+		insert_values.push_back("'" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,32 +222,32 @@ public:
 		);
 
 		if (results.Success()) {
-			horses_e.id = results.LastInsertedID();
-			return horses_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		horses_e = NewEntity();
+		e = NewEntity();
 
-		return horses_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Horses> horses_entries
+		std::vector<Horses> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &horses_e: horses_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(horses_e.id));
-			insert_values.push_back("'" + Strings::Escape(horses_e.filename) + "'");
-			insert_values.push_back(std::to_string(horses_e.race));
-			insert_values.push_back(std::to_string(horses_e.gender));
-			insert_values.push_back(std::to_string(horses_e.texture));
-			insert_values.push_back(std::to_string(horses_e.mountspeed));
-			insert_values.push_back("'" + Strings::Escape(horses_e.notes) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.filename) + "'");
+			insert_values.push_back(std::to_string(e.race));
+			insert_values.push_back(std::to_string(e.gender));
+			insert_values.push_back(std::to_string(e.texture));
+			insert_values.push_back(std::to_string(e.mountspeed));
+			insert_values.push_back("'" + Strings::Escape(e.notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LevelExpMods level_exp_mods_e
+		LevelExpMods e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(level_exp_mods_e.level));
-		update_values.push_back(columns[1] + " = " + std::to_string(level_exp_mods_e.exp_mod));
-		update_values.push_back(columns[2] + " = " + std::to_string(level_exp_mods_e.aa_exp_mod));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.level));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.exp_mod));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.aa_exp_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				level_exp_mods_e.level
+				e.level
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static LevelExpMods InsertOne(
 		Database& db,
-		LevelExpMods level_exp_mods_e
+		LevelExpMods e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(level_exp_mods_e.level));
-		insert_values.push_back(std::to_string(level_exp_mods_e.exp_mod));
-		insert_values.push_back(std::to_string(level_exp_mods_e.aa_exp_mod));
+		insert_values.push_back(std::to_string(e.level));
+		insert_values.push_back(std::to_string(e.exp_mod));
+		insert_values.push_back(std::to_string(e.aa_exp_mod));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			level_exp_mods_e.level = results.LastInsertedID();
-			return level_exp_mods_e;
+			e.level = results.LastInsertedID();
+			return e;
 		}
 
-		level_exp_mods_e = NewEntity();
+		e = NewEntity();
 
-		return level_exp_mods_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LevelExpMods> level_exp_mods_entries
+		std::vector<LevelExpMods> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &level_exp_mods_e: level_exp_mods_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(level_exp_mods_e.level));
-			insert_values.push_back(std::to_string(level_exp_mods_e.exp_mod));
-			insert_values.push_back(std::to_string(level_exp_mods_e.aa_exp_mod));
+			insert_values.push_back(std::to_string(e.level));
+			insert_values.push_back(std::to_string(e.exp_mod));
+			insert_values.push_back(std::to_string(e.aa_exp_mod));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

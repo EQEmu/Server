@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SpellBuckets spell_buckets_e
+		SpellBuckets e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(spell_buckets_e.spellid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(spell_buckets_e.key) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(spell_buckets_e.value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.spellid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.key) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spell_buckets_e.spellid
+				e.spellid
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static SpellBuckets InsertOne(
 		Database& db,
-		SpellBuckets spell_buckets_e
+		SpellBuckets e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spell_buckets_e.spellid));
-		insert_values.push_back("'" + Strings::Escape(spell_buckets_e.key) + "'");
-		insert_values.push_back("'" + Strings::Escape(spell_buckets_e.value) + "'");
+		insert_values.push_back(std::to_string(e.spellid));
+		insert_values.push_back("'" + Strings::Escape(e.key) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			spell_buckets_e.spellid = results.LastInsertedID();
-			return spell_buckets_e;
+			e.spellid = results.LastInsertedID();
+			return e;
 		}
 
-		spell_buckets_e = NewEntity();
+		e = NewEntity();
 
-		return spell_buckets_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SpellBuckets> spell_buckets_entries
+		std::vector<SpellBuckets> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spell_buckets_e: spell_buckets_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spell_buckets_e.spellid));
-			insert_values.push_back("'" + Strings::Escape(spell_buckets_e.key) + "'");
-			insert_values.push_back("'" + Strings::Escape(spell_buckets_e.value) + "'");
+			insert_values.push_back(std::to_string(e.spellid));
+			insert_values.push_back("'" + Strings::Escape(e.key) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

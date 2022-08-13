@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRankEffects aa_rank_effects_e
+		AaRankEffects e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_effects_e.rank_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_effects_e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_effects_e.effect_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_rank_effects_e.base1));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_rank_effects_e.base2));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.rank_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.effect_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.base1));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.base2));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				aa_rank_effects_e.rank_id
+				e.rank_id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static AaRankEffects InsertOne(
 		Database& db,
-		AaRankEffects aa_rank_effects_e
+		AaRankEffects e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(aa_rank_effects_e.rank_id));
-		insert_values.push_back(std::to_string(aa_rank_effects_e.slot));
-		insert_values.push_back(std::to_string(aa_rank_effects_e.effect_id));
-		insert_values.push_back(std::to_string(aa_rank_effects_e.base1));
-		insert_values.push_back(std::to_string(aa_rank_effects_e.base2));
+		insert_values.push_back(std::to_string(e.rank_id));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.effect_id));
+		insert_values.push_back(std::to_string(e.base1));
+		insert_values.push_back(std::to_string(e.base2));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,30 +209,30 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_rank_effects_e.rank_id = results.LastInsertedID();
-			return aa_rank_effects_e;
+			e.rank_id = results.LastInsertedID();
+			return e;
 		}
 
-		aa_rank_effects_e = NewEntity();
+		e = NewEntity();
 
-		return aa_rank_effects_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaRankEffects> aa_rank_effects_entries
+		std::vector<AaRankEffects> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_rank_effects_e: aa_rank_effects_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(aa_rank_effects_e.rank_id));
-			insert_values.push_back(std::to_string(aa_rank_effects_e.slot));
-			insert_values.push_back(std::to_string(aa_rank_effects_e.effect_id));
-			insert_values.push_back(std::to_string(aa_rank_effects_e.base1));
-			insert_values.push_back(std::to_string(aa_rank_effects_e.base2));
+			insert_values.push_back(std::to_string(e.rank_id));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.effect_id));
+			insert_values.push_back(std::to_string(e.base1));
+			insert_values.push_back(std::to_string(e.base2));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

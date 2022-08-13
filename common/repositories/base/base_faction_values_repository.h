@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionValues faction_values_e
+		FactionValues e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(faction_values_e.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(faction_values_e.faction_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(faction_values_e.current_value));
-		update_values.push_back(columns[3] + " = " + std::to_string(faction_values_e.temp));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.faction_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.current_value));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.temp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				faction_values_e.char_id
+				e.char_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static FactionValues InsertOne(
 		Database& db,
-		FactionValues faction_values_e
+		FactionValues e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(faction_values_e.char_id));
-		insert_values.push_back(std::to_string(faction_values_e.faction_id));
-		insert_values.push_back(std::to_string(faction_values_e.current_value));
-		insert_values.push_back(std::to_string(faction_values_e.temp));
+		insert_values.push_back(std::to_string(e.char_id));
+		insert_values.push_back(std::to_string(e.faction_id));
+		insert_values.push_back(std::to_string(e.current_value));
+		insert_values.push_back(std::to_string(e.temp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_values_e.char_id = results.LastInsertedID();
-			return faction_values_e;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		faction_values_e = NewEntity();
+		e = NewEntity();
 
-		return faction_values_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<FactionValues> faction_values_entries
+		std::vector<FactionValues> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &faction_values_e: faction_values_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(faction_values_e.char_id));
-			insert_values.push_back(std::to_string(faction_values_e.faction_id));
-			insert_values.push_back(std::to_string(faction_values_e.current_value));
-			insert_values.push_back(std::to_string(faction_values_e.temp));
+			insert_values.push_back(std::to_string(e.char_id));
+			insert_values.push_back(std::to_string(e.faction_id));
+			insert_values.push_back(std::to_string(e.current_value));
+			insert_values.push_back(std::to_string(e.temp));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

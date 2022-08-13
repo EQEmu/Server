@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DynamicZoneMembers dynamic_zone_members_e
+		DynamicZoneMembers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zone_members_e.dynamic_zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zone_members_e.character_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.dynamic_zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.character_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				dynamic_zone_members_e.id
+				e.id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static DynamicZoneMembers InsertOne(
 		Database& db,
-		DynamicZoneMembers dynamic_zone_members_e
+		DynamicZoneMembers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(dynamic_zone_members_e.id));
-		insert_values.push_back(std::to_string(dynamic_zone_members_e.dynamic_zone_id));
-		insert_values.push_back(std::to_string(dynamic_zone_members_e.character_id));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.dynamic_zone_id));
+		insert_values.push_back(std::to_string(e.character_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,28 +194,28 @@ public:
 		);
 
 		if (results.Success()) {
-			dynamic_zone_members_e.id = results.LastInsertedID();
-			return dynamic_zone_members_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		dynamic_zone_members_e = NewEntity();
+		e = NewEntity();
 
-		return dynamic_zone_members_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DynamicZoneMembers> dynamic_zone_members_entries
+		std::vector<DynamicZoneMembers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &dynamic_zone_members_e: dynamic_zone_members_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(dynamic_zone_members_e.id));
-			insert_values.push_back(std::to_string(dynamic_zone_members_e.dynamic_zone_id));
-			insert_values.push_back(std::to_string(dynamic_zone_members_e.character_id));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.dynamic_zone_id));
+			insert_values.push_back(std::to_string(e.character_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

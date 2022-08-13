@@ -316,48 +316,48 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Doors doors_e
+		Doors e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(doors_e.doorid));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(doors_e.zone) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(doors_e.version));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(doors_e.name) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(doors_e.pos_y));
-		update_values.push_back(columns[6] + " = " + std::to_string(doors_e.pos_x));
-		update_values.push_back(columns[7] + " = " + std::to_string(doors_e.pos_z));
-		update_values.push_back(columns[8] + " = " + std::to_string(doors_e.heading));
-		update_values.push_back(columns[9] + " = " + std::to_string(doors_e.opentype));
-		update_values.push_back(columns[10] + " = " + std::to_string(doors_e.guild));
-		update_values.push_back(columns[11] + " = " + std::to_string(doors_e.lockpick));
-		update_values.push_back(columns[12] + " = " + std::to_string(doors_e.keyitem));
-		update_values.push_back(columns[13] + " = " + std::to_string(doors_e.nokeyring));
-		update_values.push_back(columns[14] + " = " + std::to_string(doors_e.triggerdoor));
-		update_values.push_back(columns[15] + " = " + std::to_string(doors_e.triggertype));
-		update_values.push_back(columns[16] + " = " + std::to_string(doors_e.disable_timer));
-		update_values.push_back(columns[17] + " = " + std::to_string(doors_e.doorisopen));
-		update_values.push_back(columns[18] + " = " + std::to_string(doors_e.door_param));
-		update_values.push_back(columns[19] + " = '" + Strings::Escape(doors_e.dest_zone) + "'");
-		update_values.push_back(columns[20] + " = " + std::to_string(doors_e.dest_instance));
-		update_values.push_back(columns[21] + " = " + std::to_string(doors_e.dest_x));
-		update_values.push_back(columns[22] + " = " + std::to_string(doors_e.dest_y));
-		update_values.push_back(columns[23] + " = " + std::to_string(doors_e.dest_z));
-		update_values.push_back(columns[24] + " = " + std::to_string(doors_e.dest_heading));
-		update_values.push_back(columns[25] + " = " + std::to_string(doors_e.invert_state));
-		update_values.push_back(columns[26] + " = " + std::to_string(doors_e.incline));
-		update_values.push_back(columns[27] + " = " + std::to_string(doors_e.size));
-		update_values.push_back(columns[28] + " = " + std::to_string(doors_e.buffer));
-		update_values.push_back(columns[29] + " = " + std::to_string(doors_e.client_version_mask));
-		update_values.push_back(columns[30] + " = " + std::to_string(doors_e.is_ldon_door));
-		update_values.push_back(columns[31] + " = " + std::to_string(doors_e.dz_switch_id));
-		update_values.push_back(columns[32] + " = " + std::to_string(doors_e.min_expansion));
-		update_values.push_back(columns[33] + " = " + std::to_string(doors_e.max_expansion));
-		update_values.push_back(columns[34] + " = '" + Strings::Escape(doors_e.content_flags) + "'");
-		update_values.push_back(columns[35] + " = '" + Strings::Escape(doors_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.doorid));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.zone) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.version));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(e.pos_y));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.pos_x));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.pos_z));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.heading));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.opentype));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.guild));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.lockpick));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.keyitem));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.nokeyring));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.triggerdoor));
+		update_values.push_back(columns[15] + " = " + std::to_string(e.triggertype));
+		update_values.push_back(columns[16] + " = " + std::to_string(e.disable_timer));
+		update_values.push_back(columns[17] + " = " + std::to_string(e.doorisopen));
+		update_values.push_back(columns[18] + " = " + std::to_string(e.door_param));
+		update_values.push_back(columns[19] + " = '" + Strings::Escape(e.dest_zone) + "'");
+		update_values.push_back(columns[20] + " = " + std::to_string(e.dest_instance));
+		update_values.push_back(columns[21] + " = " + std::to_string(e.dest_x));
+		update_values.push_back(columns[22] + " = " + std::to_string(e.dest_y));
+		update_values.push_back(columns[23] + " = " + std::to_string(e.dest_z));
+		update_values.push_back(columns[24] + " = " + std::to_string(e.dest_heading));
+		update_values.push_back(columns[25] + " = " + std::to_string(e.invert_state));
+		update_values.push_back(columns[26] + " = " + std::to_string(e.incline));
+		update_values.push_back(columns[27] + " = " + std::to_string(e.size));
+		update_values.push_back(columns[28] + " = " + std::to_string(e.buffer));
+		update_values.push_back(columns[29] + " = " + std::to_string(e.client_version_mask));
+		update_values.push_back(columns[30] + " = " + std::to_string(e.is_ldon_door));
+		update_values.push_back(columns[31] + " = " + std::to_string(e.dz_switch_id));
+		update_values.push_back(columns[32] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[33] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[34] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[35] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -365,7 +365,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				doors_e.id
+				e.id
 			)
 		);
 
@@ -374,47 +374,47 @@ public:
 
 	static Doors InsertOne(
 		Database& db,
-		Doors doors_e
+		Doors e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(doors_e.id));
-		insert_values.push_back(std::to_string(doors_e.doorid));
-		insert_values.push_back("'" + Strings::Escape(doors_e.zone) + "'");
-		insert_values.push_back(std::to_string(doors_e.version));
-		insert_values.push_back("'" + Strings::Escape(doors_e.name) + "'");
-		insert_values.push_back(std::to_string(doors_e.pos_y));
-		insert_values.push_back(std::to_string(doors_e.pos_x));
-		insert_values.push_back(std::to_string(doors_e.pos_z));
-		insert_values.push_back(std::to_string(doors_e.heading));
-		insert_values.push_back(std::to_string(doors_e.opentype));
-		insert_values.push_back(std::to_string(doors_e.guild));
-		insert_values.push_back(std::to_string(doors_e.lockpick));
-		insert_values.push_back(std::to_string(doors_e.keyitem));
-		insert_values.push_back(std::to_string(doors_e.nokeyring));
-		insert_values.push_back(std::to_string(doors_e.triggerdoor));
-		insert_values.push_back(std::to_string(doors_e.triggertype));
-		insert_values.push_back(std::to_string(doors_e.disable_timer));
-		insert_values.push_back(std::to_string(doors_e.doorisopen));
-		insert_values.push_back(std::to_string(doors_e.door_param));
-		insert_values.push_back("'" + Strings::Escape(doors_e.dest_zone) + "'");
-		insert_values.push_back(std::to_string(doors_e.dest_instance));
-		insert_values.push_back(std::to_string(doors_e.dest_x));
-		insert_values.push_back(std::to_string(doors_e.dest_y));
-		insert_values.push_back(std::to_string(doors_e.dest_z));
-		insert_values.push_back(std::to_string(doors_e.dest_heading));
-		insert_values.push_back(std::to_string(doors_e.invert_state));
-		insert_values.push_back(std::to_string(doors_e.incline));
-		insert_values.push_back(std::to_string(doors_e.size));
-		insert_values.push_back(std::to_string(doors_e.buffer));
-		insert_values.push_back(std::to_string(doors_e.client_version_mask));
-		insert_values.push_back(std::to_string(doors_e.is_ldon_door));
-		insert_values.push_back(std::to_string(doors_e.dz_switch_id));
-		insert_values.push_back(std::to_string(doors_e.min_expansion));
-		insert_values.push_back(std::to_string(doors_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(doors_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(doors_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.doorid));
+		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+		insert_values.push_back(std::to_string(e.version));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.pos_y));
+		insert_values.push_back(std::to_string(e.pos_x));
+		insert_values.push_back(std::to_string(e.pos_z));
+		insert_values.push_back(std::to_string(e.heading));
+		insert_values.push_back(std::to_string(e.opentype));
+		insert_values.push_back(std::to_string(e.guild));
+		insert_values.push_back(std::to_string(e.lockpick));
+		insert_values.push_back(std::to_string(e.keyitem));
+		insert_values.push_back(std::to_string(e.nokeyring));
+		insert_values.push_back(std::to_string(e.triggerdoor));
+		insert_values.push_back(std::to_string(e.triggertype));
+		insert_values.push_back(std::to_string(e.disable_timer));
+		insert_values.push_back(std::to_string(e.doorisopen));
+		insert_values.push_back(std::to_string(e.door_param));
+		insert_values.push_back("'" + Strings::Escape(e.dest_zone) + "'");
+		insert_values.push_back(std::to_string(e.dest_instance));
+		insert_values.push_back(std::to_string(e.dest_x));
+		insert_values.push_back(std::to_string(e.dest_y));
+		insert_values.push_back(std::to_string(e.dest_z));
+		insert_values.push_back(std::to_string(e.dest_heading));
+		insert_values.push_back(std::to_string(e.invert_state));
+		insert_values.push_back(std::to_string(e.incline));
+		insert_values.push_back(std::to_string(e.size));
+		insert_values.push_back(std::to_string(e.buffer));
+		insert_values.push_back(std::to_string(e.client_version_mask));
+		insert_values.push_back(std::to_string(e.is_ldon_door));
+		insert_values.push_back(std::to_string(e.dz_switch_id));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -425,61 +425,61 @@ public:
 		);
 
 		if (results.Success()) {
-			doors_e.id = results.LastInsertedID();
-			return doors_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		doors_e = NewEntity();
+		e = NewEntity();
 
-		return doors_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Doors> doors_entries
+		std::vector<Doors> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &doors_e: doors_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(doors_e.id));
-			insert_values.push_back(std::to_string(doors_e.doorid));
-			insert_values.push_back("'" + Strings::Escape(doors_e.zone) + "'");
-			insert_values.push_back(std::to_string(doors_e.version));
-			insert_values.push_back("'" + Strings::Escape(doors_e.name) + "'");
-			insert_values.push_back(std::to_string(doors_e.pos_y));
-			insert_values.push_back(std::to_string(doors_e.pos_x));
-			insert_values.push_back(std::to_string(doors_e.pos_z));
-			insert_values.push_back(std::to_string(doors_e.heading));
-			insert_values.push_back(std::to_string(doors_e.opentype));
-			insert_values.push_back(std::to_string(doors_e.guild));
-			insert_values.push_back(std::to_string(doors_e.lockpick));
-			insert_values.push_back(std::to_string(doors_e.keyitem));
-			insert_values.push_back(std::to_string(doors_e.nokeyring));
-			insert_values.push_back(std::to_string(doors_e.triggerdoor));
-			insert_values.push_back(std::to_string(doors_e.triggertype));
-			insert_values.push_back(std::to_string(doors_e.disable_timer));
-			insert_values.push_back(std::to_string(doors_e.doorisopen));
-			insert_values.push_back(std::to_string(doors_e.door_param));
-			insert_values.push_back("'" + Strings::Escape(doors_e.dest_zone) + "'");
-			insert_values.push_back(std::to_string(doors_e.dest_instance));
-			insert_values.push_back(std::to_string(doors_e.dest_x));
-			insert_values.push_back(std::to_string(doors_e.dest_y));
-			insert_values.push_back(std::to_string(doors_e.dest_z));
-			insert_values.push_back(std::to_string(doors_e.dest_heading));
-			insert_values.push_back(std::to_string(doors_e.invert_state));
-			insert_values.push_back(std::to_string(doors_e.incline));
-			insert_values.push_back(std::to_string(doors_e.size));
-			insert_values.push_back(std::to_string(doors_e.buffer));
-			insert_values.push_back(std::to_string(doors_e.client_version_mask));
-			insert_values.push_back(std::to_string(doors_e.is_ldon_door));
-			insert_values.push_back(std::to_string(doors_e.dz_switch_id));
-			insert_values.push_back(std::to_string(doors_e.min_expansion));
-			insert_values.push_back(std::to_string(doors_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(doors_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(doors_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.doorid));
+			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+			insert_values.push_back(std::to_string(e.version));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.pos_y));
+			insert_values.push_back(std::to_string(e.pos_x));
+			insert_values.push_back(std::to_string(e.pos_z));
+			insert_values.push_back(std::to_string(e.heading));
+			insert_values.push_back(std::to_string(e.opentype));
+			insert_values.push_back(std::to_string(e.guild));
+			insert_values.push_back(std::to_string(e.lockpick));
+			insert_values.push_back(std::to_string(e.keyitem));
+			insert_values.push_back(std::to_string(e.nokeyring));
+			insert_values.push_back(std::to_string(e.triggerdoor));
+			insert_values.push_back(std::to_string(e.triggertype));
+			insert_values.push_back(std::to_string(e.disable_timer));
+			insert_values.push_back(std::to_string(e.doorisopen));
+			insert_values.push_back(std::to_string(e.door_param));
+			insert_values.push_back("'" + Strings::Escape(e.dest_zone) + "'");
+			insert_values.push_back(std::to_string(e.dest_instance));
+			insert_values.push_back(std::to_string(e.dest_x));
+			insert_values.push_back(std::to_string(e.dest_y));
+			insert_values.push_back(std::to_string(e.dest_z));
+			insert_values.push_back(std::to_string(e.dest_heading));
+			insert_values.push_back(std::to_string(e.invert_state));
+			insert_values.push_back(std::to_string(e.incline));
+			insert_values.push_back(std::to_string(e.size));
+			insert_values.push_back(std::to_string(e.buffer));
+			insert_values.push_back(std::to_string(e.client_version_mask));
+			insert_values.push_back(std::to_string(e.is_ldon_door));
+			insert_values.push_back(std::to_string(e.dz_switch_id));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

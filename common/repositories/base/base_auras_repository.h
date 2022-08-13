@@ -191,24 +191,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Auras auras_e
+		Auras e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(auras_e.type));
-		update_values.push_back(columns[1] + " = " + std::to_string(auras_e.npc_type));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(auras_e.name) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(auras_e.spell_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(auras_e.distance));
-		update_values.push_back(columns[5] + " = " + std::to_string(auras_e.aura_type));
-		update_values.push_back(columns[6] + " = " + std::to_string(auras_e.spawn_type));
-		update_values.push_back(columns[7] + " = " + std::to_string(auras_e.movement));
-		update_values.push_back(columns[8] + " = " + std::to_string(auras_e.duration));
-		update_values.push_back(columns[9] + " = " + std::to_string(auras_e.icon));
-		update_values.push_back(columns[10] + " = " + std::to_string(auras_e.cast_time));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.npc_type));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.spell_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.distance));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.aura_type));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.spawn_type));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.movement));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.duration));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.icon));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.cast_time));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +216,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				auras_e.type
+				e.type
 			)
 		);
 
@@ -225,22 +225,22 @@ public:
 
 	static Auras InsertOne(
 		Database& db,
-		Auras auras_e
+		Auras e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(auras_e.type));
-		insert_values.push_back(std::to_string(auras_e.npc_type));
-		insert_values.push_back("'" + Strings::Escape(auras_e.name) + "'");
-		insert_values.push_back(std::to_string(auras_e.spell_id));
-		insert_values.push_back(std::to_string(auras_e.distance));
-		insert_values.push_back(std::to_string(auras_e.aura_type));
-		insert_values.push_back(std::to_string(auras_e.spawn_type));
-		insert_values.push_back(std::to_string(auras_e.movement));
-		insert_values.push_back(std::to_string(auras_e.duration));
-		insert_values.push_back(std::to_string(auras_e.icon));
-		insert_values.push_back(std::to_string(auras_e.cast_time));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.npc_type));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.spell_id));
+		insert_values.push_back(std::to_string(e.distance));
+		insert_values.push_back(std::to_string(e.aura_type));
+		insert_values.push_back(std::to_string(e.spawn_type));
+		insert_values.push_back(std::to_string(e.movement));
+		insert_values.push_back(std::to_string(e.duration));
+		insert_values.push_back(std::to_string(e.icon));
+		insert_values.push_back(std::to_string(e.cast_time));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -251,36 +251,36 @@ public:
 		);
 
 		if (results.Success()) {
-			auras_e.type = results.LastInsertedID();
-			return auras_e;
+			e.type = results.LastInsertedID();
+			return e;
 		}
 
-		auras_e = NewEntity();
+		e = NewEntity();
 
-		return auras_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Auras> auras_entries
+		std::vector<Auras> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &auras_e: auras_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(auras_e.type));
-			insert_values.push_back(std::to_string(auras_e.npc_type));
-			insert_values.push_back("'" + Strings::Escape(auras_e.name) + "'");
-			insert_values.push_back(std::to_string(auras_e.spell_id));
-			insert_values.push_back(std::to_string(auras_e.distance));
-			insert_values.push_back(std::to_string(auras_e.aura_type));
-			insert_values.push_back(std::to_string(auras_e.spawn_type));
-			insert_values.push_back(std::to_string(auras_e.movement));
-			insert_values.push_back(std::to_string(auras_e.duration));
-			insert_values.push_back(std::to_string(auras_e.icon));
-			insert_values.push_back(std::to_string(auras_e.cast_time));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.npc_type));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.spell_id));
+			insert_values.push_back(std::to_string(e.distance));
+			insert_values.push_back(std::to_string(e.aura_type));
+			insert_values.push_back(std::to_string(e.spawn_type));
+			insert_values.push_back(std::to_string(e.movement));
+			insert_values.push_back(std::to_string(e.duration));
+			insert_values.push_back(std::to_string(e.icon));
+			insert_values.push_back(std::to_string(e.cast_time));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -206,26 +206,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Titles titles_e
+		Titles e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(titles_e.skill_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(titles_e.min_skill_value));
-		update_values.push_back(columns[3] + " = " + std::to_string(titles_e.max_skill_value));
-		update_values.push_back(columns[4] + " = " + std::to_string(titles_e.min_aa_points));
-		update_values.push_back(columns[5] + " = " + std::to_string(titles_e.max_aa_points));
-		update_values.push_back(columns[6] + " = " + std::to_string(titles_e.class_));
-		update_values.push_back(columns[7] + " = " + std::to_string(titles_e.gender));
-		update_values.push_back(columns[8] + " = " + std::to_string(titles_e.char_id));
-		update_values.push_back(columns[9] + " = " + std::to_string(titles_e.status));
-		update_values.push_back(columns[10] + " = " + std::to_string(titles_e.item_id));
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(titles_e.prefix) + "'");
-		update_values.push_back(columns[12] + " = '" + Strings::Escape(titles_e.suffix) + "'");
-		update_values.push_back(columns[13] + " = " + std::to_string(titles_e.title_set));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.skill_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.min_skill_value));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.max_skill_value));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.min_aa_points));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.max_aa_points));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.class_));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.gender));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.char_id));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.status));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.item_id));
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(e.prefix) + "'");
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(e.suffix) + "'");
+		update_values.push_back(columns[13] + " = " + std::to_string(e.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -233,7 +233,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				titles_e.id
+				e.id
 			)
 		);
 
@@ -242,25 +242,25 @@ public:
 
 	static Titles InsertOne(
 		Database& db,
-		Titles titles_e
+		Titles e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(titles_e.id));
-		insert_values.push_back(std::to_string(titles_e.skill_id));
-		insert_values.push_back(std::to_string(titles_e.min_skill_value));
-		insert_values.push_back(std::to_string(titles_e.max_skill_value));
-		insert_values.push_back(std::to_string(titles_e.min_aa_points));
-		insert_values.push_back(std::to_string(titles_e.max_aa_points));
-		insert_values.push_back(std::to_string(titles_e.class_));
-		insert_values.push_back(std::to_string(titles_e.gender));
-		insert_values.push_back(std::to_string(titles_e.char_id));
-		insert_values.push_back(std::to_string(titles_e.status));
-		insert_values.push_back(std::to_string(titles_e.item_id));
-		insert_values.push_back("'" + Strings::Escape(titles_e.prefix) + "'");
-		insert_values.push_back("'" + Strings::Escape(titles_e.suffix) + "'");
-		insert_values.push_back(std::to_string(titles_e.title_set));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.skill_id));
+		insert_values.push_back(std::to_string(e.min_skill_value));
+		insert_values.push_back(std::to_string(e.max_skill_value));
+		insert_values.push_back(std::to_string(e.min_aa_points));
+		insert_values.push_back(std::to_string(e.max_aa_points));
+		insert_values.push_back(std::to_string(e.class_));
+		insert_values.push_back(std::to_string(e.gender));
+		insert_values.push_back(std::to_string(e.char_id));
+		insert_values.push_back(std::to_string(e.status));
+		insert_values.push_back(std::to_string(e.item_id));
+		insert_values.push_back("'" + Strings::Escape(e.prefix) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.suffix) + "'");
+		insert_values.push_back(std::to_string(e.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -271,39 +271,39 @@ public:
 		);
 
 		if (results.Success()) {
-			titles_e.id = results.LastInsertedID();
-			return titles_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		titles_e = NewEntity();
+		e = NewEntity();
 
-		return titles_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Titles> titles_entries
+		std::vector<Titles> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &titles_e: titles_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(titles_e.id));
-			insert_values.push_back(std::to_string(titles_e.skill_id));
-			insert_values.push_back(std::to_string(titles_e.min_skill_value));
-			insert_values.push_back(std::to_string(titles_e.max_skill_value));
-			insert_values.push_back(std::to_string(titles_e.min_aa_points));
-			insert_values.push_back(std::to_string(titles_e.max_aa_points));
-			insert_values.push_back(std::to_string(titles_e.class_));
-			insert_values.push_back(std::to_string(titles_e.gender));
-			insert_values.push_back(std::to_string(titles_e.char_id));
-			insert_values.push_back(std::to_string(titles_e.status));
-			insert_values.push_back(std::to_string(titles_e.item_id));
-			insert_values.push_back("'" + Strings::Escape(titles_e.prefix) + "'");
-			insert_values.push_back("'" + Strings::Escape(titles_e.suffix) + "'");
-			insert_values.push_back(std::to_string(titles_e.title_set));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.skill_id));
+			insert_values.push_back(std::to_string(e.min_skill_value));
+			insert_values.push_back(std::to_string(e.max_skill_value));
+			insert_values.push_back(std::to_string(e.min_aa_points));
+			insert_values.push_back(std::to_string(e.max_aa_points));
+			insert_values.push_back(std::to_string(e.class_));
+			insert_values.push_back(std::to_string(e.gender));
+			insert_values.push_back(std::to_string(e.char_id));
+			insert_values.push_back(std::to_string(e.status));
+			insert_values.push_back(std::to_string(e.item_id));
+			insert_values.push_back("'" + Strings::Escape(e.prefix) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.suffix) + "'");
+			insert_values.push_back(std::to_string(e.title_set));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

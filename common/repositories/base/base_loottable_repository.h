@@ -186,22 +186,22 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Loottable loottable_e
+		Loottable e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(loottable_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(loottable_e.mincash));
-		update_values.push_back(columns[3] + " = " + std::to_string(loottable_e.maxcash));
-		update_values.push_back(columns[4] + " = " + std::to_string(loottable_e.avgcoin));
-		update_values.push_back(columns[5] + " = " + std::to_string(loottable_e.done));
-		update_values.push_back(columns[6] + " = " + std::to_string(loottable_e.min_expansion));
-		update_values.push_back(columns[7] + " = " + std::to_string(loottable_e.max_expansion));
-		update_values.push_back(columns[8] + " = '" + Strings::Escape(loottable_e.content_flags) + "'");
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(loottable_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.mincash));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.maxcash));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.avgcoin));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.done));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[8] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,7 +209,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				loottable_e.id
+				e.id
 			)
 		);
 
@@ -218,21 +218,21 @@ public:
 
 	static Loottable InsertOne(
 		Database& db,
-		Loottable loottable_e
+		Loottable e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(loottable_e.id));
-		insert_values.push_back("'" + Strings::Escape(loottable_e.name) + "'");
-		insert_values.push_back(std::to_string(loottable_e.mincash));
-		insert_values.push_back(std::to_string(loottable_e.maxcash));
-		insert_values.push_back(std::to_string(loottable_e.avgcoin));
-		insert_values.push_back(std::to_string(loottable_e.done));
-		insert_values.push_back(std::to_string(loottable_e.min_expansion));
-		insert_values.push_back(std::to_string(loottable_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(loottable_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(loottable_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.mincash));
+		insert_values.push_back(std::to_string(e.maxcash));
+		insert_values.push_back(std::to_string(e.avgcoin));
+		insert_values.push_back(std::to_string(e.done));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -243,35 +243,35 @@ public:
 		);
 
 		if (results.Success()) {
-			loottable_e.id = results.LastInsertedID();
-			return loottable_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		loottable_e = NewEntity();
+		e = NewEntity();
 
-		return loottable_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Loottable> loottable_entries
+		std::vector<Loottable> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &loottable_e: loottable_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(loottable_e.id));
-			insert_values.push_back("'" + Strings::Escape(loottable_e.name) + "'");
-			insert_values.push_back(std::to_string(loottable_e.mincash));
-			insert_values.push_back(std::to_string(loottable_e.maxcash));
-			insert_values.push_back(std::to_string(loottable_e.avgcoin));
-			insert_values.push_back(std::to_string(loottable_e.done));
-			insert_values.push_back(std::to_string(loottable_e.min_expansion));
-			insert_values.push_back(std::to_string(loottable_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(loottable_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(loottable_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.mincash));
+			insert_values.push_back(std::to_string(e.maxcash));
+			insert_values.push_back(std::to_string(e.avgcoin));
+			insert_values.push_back(std::to_string(e.done));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Tasksets tasksets_e
+		Tasksets e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(tasksets_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(tasksets_e.taskid));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.taskid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				tasksets_e.id
+				e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static Tasksets InsertOne(
 		Database& db,
-		Tasksets tasksets_e
+		Tasksets e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(tasksets_e.id));
-		insert_values.push_back(std::to_string(tasksets_e.taskid));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.taskid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			tasksets_e.id = results.LastInsertedID();
-			return tasksets_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		tasksets_e = NewEntity();
+		e = NewEntity();
 
-		return tasksets_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Tasksets> tasksets_entries
+		std::vector<Tasksets> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tasksets_e: tasksets_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(tasksets_e.id));
-			insert_values.push_back(std::to_string(tasksets_e.taskid));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.taskid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

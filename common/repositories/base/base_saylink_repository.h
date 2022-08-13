@@ -146,14 +146,14 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Saylink saylink_e
+		Saylink e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(saylink_e.phrase) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.phrase) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -161,7 +161,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				saylink_e.id
+				e.id
 			)
 		);
 
@@ -170,13 +170,13 @@ public:
 
 	static Saylink InsertOne(
 		Database& db,
-		Saylink saylink_e
+		Saylink e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(saylink_e.id));
-		insert_values.push_back("'" + Strings::Escape(saylink_e.phrase) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.phrase) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -187,27 +187,27 @@ public:
 		);
 
 		if (results.Success()) {
-			saylink_e.id = results.LastInsertedID();
-			return saylink_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		saylink_e = NewEntity();
+		e = NewEntity();
 
-		return saylink_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Saylink> saylink_entries
+		std::vector<Saylink> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &saylink_e: saylink_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(saylink_e.id));
-			insert_values.push_back("'" + Strings::Escape(saylink_e.phrase) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.phrase) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

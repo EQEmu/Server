@@ -236,32 +236,32 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Spawn2 spawn2_e
+		Spawn2 e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(spawn2_e.spawngroupID));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(spawn2_e.zone) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(spawn2_e.version));
-		update_values.push_back(columns[4] + " = " + std::to_string(spawn2_e.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(spawn2_e.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(spawn2_e.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(spawn2_e.heading));
-		update_values.push_back(columns[8] + " = " + std::to_string(spawn2_e.respawntime));
-		update_values.push_back(columns[9] + " = " + std::to_string(spawn2_e.variance));
-		update_values.push_back(columns[10] + " = " + std::to_string(spawn2_e.pathgrid));
-		update_values.push_back(columns[11] + " = " + std::to_string(spawn2_e.path_when_zone_idle));
-		update_values.push_back(columns[12] + " = " + std::to_string(spawn2_e._condition));
-		update_values.push_back(columns[13] + " = " + std::to_string(spawn2_e.cond_value));
-		update_values.push_back(columns[14] + " = " + std::to_string(spawn2_e.enabled));
-		update_values.push_back(columns[15] + " = " + std::to_string(spawn2_e.animation));
-		update_values.push_back(columns[16] + " = " + std::to_string(spawn2_e.min_expansion));
-		update_values.push_back(columns[17] + " = " + std::to_string(spawn2_e.max_expansion));
-		update_values.push_back(columns[18] + " = '" + Strings::Escape(spawn2_e.content_flags) + "'");
-		update_values.push_back(columns[19] + " = '" + Strings::Escape(spawn2_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.spawngroupID));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.zone) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.version));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.heading));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.respawntime));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.variance));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.pathgrid));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.path_when_zone_idle));
+		update_values.push_back(columns[12] + " = " + std::to_string(e._condition));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.cond_value));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.enabled));
+		update_values.push_back(columns[15] + " = " + std::to_string(e.animation));
+		update_values.push_back(columns[16] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[17] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[18] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[19] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -269,7 +269,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spawn2_e.id
+				e.id
 			)
 		);
 
@@ -278,31 +278,31 @@ public:
 
 	static Spawn2 InsertOne(
 		Database& db,
-		Spawn2 spawn2_e
+		Spawn2 e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spawn2_e.id));
-		insert_values.push_back(std::to_string(spawn2_e.spawngroupID));
-		insert_values.push_back("'" + Strings::Escape(spawn2_e.zone) + "'");
-		insert_values.push_back(std::to_string(spawn2_e.version));
-		insert_values.push_back(std::to_string(spawn2_e.x));
-		insert_values.push_back(std::to_string(spawn2_e.y));
-		insert_values.push_back(std::to_string(spawn2_e.z));
-		insert_values.push_back(std::to_string(spawn2_e.heading));
-		insert_values.push_back(std::to_string(spawn2_e.respawntime));
-		insert_values.push_back(std::to_string(spawn2_e.variance));
-		insert_values.push_back(std::to_string(spawn2_e.pathgrid));
-		insert_values.push_back(std::to_string(spawn2_e.path_when_zone_idle));
-		insert_values.push_back(std::to_string(spawn2_e._condition));
-		insert_values.push_back(std::to_string(spawn2_e.cond_value));
-		insert_values.push_back(std::to_string(spawn2_e.enabled));
-		insert_values.push_back(std::to_string(spawn2_e.animation));
-		insert_values.push_back(std::to_string(spawn2_e.min_expansion));
-		insert_values.push_back(std::to_string(spawn2_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(spawn2_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(spawn2_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.spawngroupID));
+		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+		insert_values.push_back(std::to_string(e.version));
+		insert_values.push_back(std::to_string(e.x));
+		insert_values.push_back(std::to_string(e.y));
+		insert_values.push_back(std::to_string(e.z));
+		insert_values.push_back(std::to_string(e.heading));
+		insert_values.push_back(std::to_string(e.respawntime));
+		insert_values.push_back(std::to_string(e.variance));
+		insert_values.push_back(std::to_string(e.pathgrid));
+		insert_values.push_back(std::to_string(e.path_when_zone_idle));
+		insert_values.push_back(std::to_string(e._condition));
+		insert_values.push_back(std::to_string(e.cond_value));
+		insert_values.push_back(std::to_string(e.enabled));
+		insert_values.push_back(std::to_string(e.animation));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -313,45 +313,45 @@ public:
 		);
 
 		if (results.Success()) {
-			spawn2_e.id = results.LastInsertedID();
-			return spawn2_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		spawn2_e = NewEntity();
+		e = NewEntity();
 
-		return spawn2_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Spawn2> spawn2_entries
+		std::vector<Spawn2> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spawn2_e: spawn2_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spawn2_e.id));
-			insert_values.push_back(std::to_string(spawn2_e.spawngroupID));
-			insert_values.push_back("'" + Strings::Escape(spawn2_e.zone) + "'");
-			insert_values.push_back(std::to_string(spawn2_e.version));
-			insert_values.push_back(std::to_string(spawn2_e.x));
-			insert_values.push_back(std::to_string(spawn2_e.y));
-			insert_values.push_back(std::to_string(spawn2_e.z));
-			insert_values.push_back(std::to_string(spawn2_e.heading));
-			insert_values.push_back(std::to_string(spawn2_e.respawntime));
-			insert_values.push_back(std::to_string(spawn2_e.variance));
-			insert_values.push_back(std::to_string(spawn2_e.pathgrid));
-			insert_values.push_back(std::to_string(spawn2_e.path_when_zone_idle));
-			insert_values.push_back(std::to_string(spawn2_e._condition));
-			insert_values.push_back(std::to_string(spawn2_e.cond_value));
-			insert_values.push_back(std::to_string(spawn2_e.enabled));
-			insert_values.push_back(std::to_string(spawn2_e.animation));
-			insert_values.push_back(std::to_string(spawn2_e.min_expansion));
-			insert_values.push_back(std::to_string(spawn2_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(spawn2_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(spawn2_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.spawngroupID));
+			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+			insert_values.push_back(std::to_string(e.version));
+			insert_values.push_back(std::to_string(e.x));
+			insert_values.push_back(std::to_string(e.y));
+			insert_values.push_back(std::to_string(e.z));
+			insert_values.push_back(std::to_string(e.heading));
+			insert_values.push_back(std::to_string(e.respawntime));
+			insert_values.push_back(std::to_string(e.variance));
+			insert_values.push_back(std::to_string(e.pathgrid));
+			insert_values.push_back(std::to_string(e.path_when_zone_idle));
+			insert_values.push_back(std::to_string(e._condition));
+			insert_values.push_back(std::to_string(e.cond_value));
+			insert_values.push_back(std::to_string(e.enabled));
+			insert_values.push_back(std::to_string(e.animation));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

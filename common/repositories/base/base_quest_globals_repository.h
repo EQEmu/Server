@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		QuestGlobals quest_globals_e
+		QuestGlobals e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(quest_globals_e.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(quest_globals_e.npcid));
-		update_values.push_back(columns[2] + " = " + std::to_string(quest_globals_e.zoneid));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(quest_globals_e.name) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(quest_globals_e.value) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(quest_globals_e.expdate));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.npcid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.value) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(e.expdate));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				quest_globals_e.charid
+				e.charid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static QuestGlobals InsertOne(
 		Database& db,
-		QuestGlobals quest_globals_e
+		QuestGlobals e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(quest_globals_e.charid));
-		insert_values.push_back(std::to_string(quest_globals_e.npcid));
-		insert_values.push_back(std::to_string(quest_globals_e.zoneid));
-		insert_values.push_back("'" + Strings::Escape(quest_globals_e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(quest_globals_e.value) + "'");
-		insert_values.push_back(std::to_string(quest_globals_e.expdate));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.npcid));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.value) + "'");
+		insert_values.push_back(std::to_string(e.expdate));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,31 +216,31 @@ public:
 		);
 
 		if (results.Success()) {
-			quest_globals_e.charid = results.LastInsertedID();
-			return quest_globals_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		quest_globals_e = NewEntity();
+		e = NewEntity();
 
-		return quest_globals_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<QuestGlobals> quest_globals_entries
+		std::vector<QuestGlobals> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &quest_globals_e: quest_globals_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(quest_globals_e.charid));
-			insert_values.push_back(std::to_string(quest_globals_e.npcid));
-			insert_values.push_back(std::to_string(quest_globals_e.zoneid));
-			insert_values.push_back("'" + Strings::Escape(quest_globals_e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(quest_globals_e.value) + "'");
-			insert_values.push_back(std::to_string(quest_globals_e.expdate));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.npcid));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.value) + "'");
+			insert_values.push_back(std::to_string(e.expdate));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

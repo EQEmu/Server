@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterExpModifiers character_exp_modifiers_e
+		CharacterExpModifiers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_exp_modifiers_e.character_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_exp_modifiers_e.zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_exp_modifiers_e.aa_modifier));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_exp_modifiers_e.exp_modifier));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.character_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.aa_modifier));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_exp_modifiers_e.character_id
+				e.character_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static CharacterExpModifiers InsertOne(
 		Database& db,
-		CharacterExpModifiers character_exp_modifiers_e
+		CharacterExpModifiers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_exp_modifiers_e.character_id));
-		insert_values.push_back(std::to_string(character_exp_modifiers_e.zone_id));
-		insert_values.push_back(std::to_string(character_exp_modifiers_e.aa_modifier));
-		insert_values.push_back(std::to_string(character_exp_modifiers_e.exp_modifier));
+		insert_values.push_back(std::to_string(e.character_id));
+		insert_values.push_back(std::to_string(e.zone_id));
+		insert_values.push_back(std::to_string(e.aa_modifier));
+		insert_values.push_back(std::to_string(e.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			character_exp_modifiers_e.character_id = results.LastInsertedID();
-			return character_exp_modifiers_e;
+			e.character_id = results.LastInsertedID();
+			return e;
 		}
 
-		character_exp_modifiers_e = NewEntity();
+		e = NewEntity();
 
-		return character_exp_modifiers_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterExpModifiers> character_exp_modifiers_entries
+		std::vector<CharacterExpModifiers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_exp_modifiers_e: character_exp_modifiers_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_exp_modifiers_e.character_id));
-			insert_values.push_back(std::to_string(character_exp_modifiers_e.zone_id));
-			insert_values.push_back(std::to_string(character_exp_modifiers_e.aa_modifier));
-			insert_values.push_back(std::to_string(character_exp_modifiers_e.exp_modifier));
+			insert_values.push_back(std::to_string(e.character_id));
+			insert_values.push_back(std::to_string(e.zone_id));
+			insert_values.push_back(std::to_string(e.aa_modifier));
+			insert_values.push_back(std::to_string(e.exp_modifier));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

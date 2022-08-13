@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Pets pets_e
+		Pets e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(pets_e.type) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_e.petpower));
-		update_values.push_back(columns[3] + " = " + std::to_string(pets_e.npcID));
-		update_values.push_back(columns[4] + " = " + std::to_string(pets_e.temp));
-		update_values.push_back(columns[5] + " = " + std::to_string(pets_e.petcontrol));
-		update_values.push_back(columns[6] + " = " + std::to_string(pets_e.petnaming));
-		update_values.push_back(columns[7] + " = " + std::to_string(pets_e.monsterflag));
-		update_values.push_back(columns[8] + " = " + std::to_string(pets_e.equipmentset));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.type) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.petpower));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.npcID));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.temp));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.petcontrol));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.petnaming));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.monsterflag));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.equipmentset));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				pets_e.id
+				e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static Pets InsertOne(
 		Database& db,
-		Pets pets_e
+		Pets e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(pets_e.id));
-		insert_values.push_back("'" + Strings::Escape(pets_e.type) + "'");
-		insert_values.push_back(std::to_string(pets_e.petpower));
-		insert_values.push_back(std::to_string(pets_e.npcID));
-		insert_values.push_back(std::to_string(pets_e.temp));
-		insert_values.push_back(std::to_string(pets_e.petcontrol));
-		insert_values.push_back(std::to_string(pets_e.petnaming));
-		insert_values.push_back(std::to_string(pets_e.monsterflag));
-		insert_values.push_back(std::to_string(pets_e.equipmentset));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.type) + "'");
+		insert_values.push_back(std::to_string(e.petpower));
+		insert_values.push_back(std::to_string(e.npcID));
+		insert_values.push_back(std::to_string(e.temp));
+		insert_values.push_back(std::to_string(e.petcontrol));
+		insert_values.push_back(std::to_string(e.petnaming));
+		insert_values.push_back(std::to_string(e.monsterflag));
+		insert_values.push_back(std::to_string(e.equipmentset));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,34 +236,34 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_e.id = results.LastInsertedID();
-			return pets_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		pets_e = NewEntity();
+		e = NewEntity();
 
-		return pets_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Pets> pets_entries
+		std::vector<Pets> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &pets_e: pets_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(pets_e.id));
-			insert_values.push_back("'" + Strings::Escape(pets_e.type) + "'");
-			insert_values.push_back(std::to_string(pets_e.petpower));
-			insert_values.push_back(std::to_string(pets_e.npcID));
-			insert_values.push_back(std::to_string(pets_e.temp));
-			insert_values.push_back(std::to_string(pets_e.petcontrol));
-			insert_values.push_back(std::to_string(pets_e.petnaming));
-			insert_values.push_back(std::to_string(pets_e.monsterflag));
-			insert_values.push_back(std::to_string(pets_e.equipmentset));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.type) + "'");
+			insert_values.push_back(std::to_string(e.petpower));
+			insert_values.push_back(std::to_string(e.npcID));
+			insert_values.push_back(std::to_string(e.temp));
+			insert_values.push_back(std::to_string(e.petcontrol));
+			insert_values.push_back(std::to_string(e.petnaming));
+			insert_values.push_back(std::to_string(e.monsterflag));
+			insert_values.push_back(std::to_string(e.equipmentset));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

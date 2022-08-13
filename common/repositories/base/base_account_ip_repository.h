@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountIp account_ip_e
+		AccountIp e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_ip_e.accid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_ip_e.ip) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(account_ip_e.count));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(account_ip_e.lastused) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.accid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.ip) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.count));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				account_ip_e.accid
+				e.accid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static AccountIp InsertOne(
 		Database& db,
-		AccountIp account_ip_e
+		AccountIp e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(account_ip_e.accid));
-		insert_values.push_back("'" + Strings::Escape(account_ip_e.ip) + "'");
-		insert_values.push_back(std::to_string(account_ip_e.count));
-		insert_values.push_back("'" + Strings::Escape(account_ip_e.lastused) + "'");
+		insert_values.push_back(std::to_string(e.accid));
+		insert_values.push_back("'" + Strings::Escape(e.ip) + "'");
+		insert_values.push_back(std::to_string(e.count));
+		insert_values.push_back("'" + Strings::Escape(e.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			account_ip_e.accid = results.LastInsertedID();
-			return account_ip_e;
+			e.accid = results.LastInsertedID();
+			return e;
 		}
 
-		account_ip_e = NewEntity();
+		e = NewEntity();
 
-		return account_ip_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AccountIp> account_ip_entries
+		std::vector<AccountIp> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_ip_e: account_ip_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(account_ip_e.accid));
-			insert_values.push_back("'" + Strings::Escape(account_ip_e.ip) + "'");
-			insert_values.push_back(std::to_string(account_ip_e.count));
-			insert_values.push_back("'" + Strings::Escape(account_ip_e.lastused) + "'");
+			insert_values.push_back(std::to_string(e.accid));
+			insert_values.push_back("'" + Strings::Escape(e.ip) + "'");
+			insert_values.push_back(std::to_string(e.count));
+			insert_values.push_back("'" + Strings::Escape(e.lastused) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

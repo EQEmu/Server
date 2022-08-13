@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Trader trader_e
+		Trader e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(trader_e.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(trader_e.item_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(trader_e.serialnumber));
-		update_values.push_back(columns[3] + " = " + std::to_string(trader_e.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(trader_e.item_cost));
-		update_values.push_back(columns[5] + " = " + std::to_string(trader_e.slot_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.item_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.serialnumber));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.charges));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.item_cost));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.slot_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				trader_e.char_id
+				e.char_id
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static Trader InsertOne(
 		Database& db,
-		Trader trader_e
+		Trader e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(trader_e.char_id));
-		insert_values.push_back(std::to_string(trader_e.item_id));
-		insert_values.push_back(std::to_string(trader_e.serialnumber));
-		insert_values.push_back(std::to_string(trader_e.charges));
-		insert_values.push_back(std::to_string(trader_e.item_cost));
-		insert_values.push_back(std::to_string(trader_e.slot_id));
+		insert_values.push_back(std::to_string(e.char_id));
+		insert_values.push_back(std::to_string(e.item_id));
+		insert_values.push_back(std::to_string(e.serialnumber));
+		insert_values.push_back(std::to_string(e.charges));
+		insert_values.push_back(std::to_string(e.item_cost));
+		insert_values.push_back(std::to_string(e.slot_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,31 +216,31 @@ public:
 		);
 
 		if (results.Success()) {
-			trader_e.char_id = results.LastInsertedID();
-			return trader_e;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		trader_e = NewEntity();
+		e = NewEntity();
 
-		return trader_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Trader> trader_entries
+		std::vector<Trader> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &trader_e: trader_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(trader_e.char_id));
-			insert_values.push_back(std::to_string(trader_e.item_id));
-			insert_values.push_back(std::to_string(trader_e.serialnumber));
-			insert_values.push_back(std::to_string(trader_e.charges));
-			insert_values.push_back(std::to_string(trader_e.item_cost));
-			insert_values.push_back(std::to_string(trader_e.slot_id));
+			insert_values.push_back(std::to_string(e.char_id));
+			insert_values.push_back(std::to_string(e.item_id));
+			insert_values.push_back(std::to_string(e.serialnumber));
+			insert_values.push_back(std::to_string(e.charges));
+			insert_values.push_back(std::to_string(e.item_cost));
+			insert_values.push_back(std::to_string(e.slot_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

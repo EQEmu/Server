@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		TributeLevels tribute_levels_e
+		TributeLevels e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(tribute_levels_e.tribute_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(tribute_levels_e.level));
-		update_values.push_back(columns[2] + " = " + std::to_string(tribute_levels_e.cost));
-		update_values.push_back(columns[3] + " = " + std::to_string(tribute_levels_e.item_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.tribute_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.level));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.cost));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				tribute_levels_e.tribute_id
+				e.tribute_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static TributeLevels InsertOne(
 		Database& db,
-		TributeLevels tribute_levels_e
+		TributeLevels e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(tribute_levels_e.tribute_id));
-		insert_values.push_back(std::to_string(tribute_levels_e.level));
-		insert_values.push_back(std::to_string(tribute_levels_e.cost));
-		insert_values.push_back(std::to_string(tribute_levels_e.item_id));
+		insert_values.push_back(std::to_string(e.tribute_id));
+		insert_values.push_back(std::to_string(e.level));
+		insert_values.push_back(std::to_string(e.cost));
+		insert_values.push_back(std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			tribute_levels_e.tribute_id = results.LastInsertedID();
-			return tribute_levels_e;
+			e.tribute_id = results.LastInsertedID();
+			return e;
 		}
 
-		tribute_levels_e = NewEntity();
+		e = NewEntity();
 
-		return tribute_levels_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<TributeLevels> tribute_levels_entries
+		std::vector<TributeLevels> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tribute_levels_e: tribute_levels_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(tribute_levels_e.tribute_id));
-			insert_values.push_back(std::to_string(tribute_levels_e.level));
-			insert_values.push_back(std::to_string(tribute_levels_e.cost));
-			insert_values.push_back(std::to_string(tribute_levels_e.item_id));
+			insert_values.push_back(std::to_string(e.tribute_id));
+			insert_values.push_back(std::to_string(e.level));
+			insert_values.push_back(std::to_string(e.cost));
+			insert_values.push_back(std::to_string(e.item_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

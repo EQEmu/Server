@@ -196,24 +196,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		BlockedSpells blocked_spells_e
+		BlockedSpells e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(blocked_spells_e.spellid));
-		update_values.push_back(columns[2] + " = " + std::to_string(blocked_spells_e.type));
-		update_values.push_back(columns[3] + " = " + std::to_string(blocked_spells_e.zoneid));
-		update_values.push_back(columns[4] + " = " + std::to_string(blocked_spells_e.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(blocked_spells_e.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(blocked_spells_e.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(blocked_spells_e.x_diff));
-		update_values.push_back(columns[8] + " = " + std::to_string(blocked_spells_e.y_diff));
-		update_values.push_back(columns[9] + " = " + std::to_string(blocked_spells_e.z_diff));
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(blocked_spells_e.message) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(blocked_spells_e.description) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.spellid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.x_diff));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.y_diff));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.z_diff));
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(e.message) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(e.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -221,7 +221,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				blocked_spells_e.id
+				e.id
 			)
 		);
 
@@ -230,23 +230,23 @@ public:
 
 	static BlockedSpells InsertOne(
 		Database& db,
-		BlockedSpells blocked_spells_e
+		BlockedSpells e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(blocked_spells_e.id));
-		insert_values.push_back(std::to_string(blocked_spells_e.spellid));
-		insert_values.push_back(std::to_string(blocked_spells_e.type));
-		insert_values.push_back(std::to_string(blocked_spells_e.zoneid));
-		insert_values.push_back(std::to_string(blocked_spells_e.x));
-		insert_values.push_back(std::to_string(blocked_spells_e.y));
-		insert_values.push_back(std::to_string(blocked_spells_e.z));
-		insert_values.push_back(std::to_string(blocked_spells_e.x_diff));
-		insert_values.push_back(std::to_string(blocked_spells_e.y_diff));
-		insert_values.push_back(std::to_string(blocked_spells_e.z_diff));
-		insert_values.push_back("'" + Strings::Escape(blocked_spells_e.message) + "'");
-		insert_values.push_back("'" + Strings::Escape(blocked_spells_e.description) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.spellid));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.x));
+		insert_values.push_back(std::to_string(e.y));
+		insert_values.push_back(std::to_string(e.z));
+		insert_values.push_back(std::to_string(e.x_diff));
+		insert_values.push_back(std::to_string(e.y_diff));
+		insert_values.push_back(std::to_string(e.z_diff));
+		insert_values.push_back("'" + Strings::Escape(e.message) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.description) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -257,37 +257,37 @@ public:
 		);
 
 		if (results.Success()) {
-			blocked_spells_e.id = results.LastInsertedID();
-			return blocked_spells_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		blocked_spells_e = NewEntity();
+		e = NewEntity();
 
-		return blocked_spells_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<BlockedSpells> blocked_spells_entries
+		std::vector<BlockedSpells> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &blocked_spells_e: blocked_spells_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(blocked_spells_e.id));
-			insert_values.push_back(std::to_string(blocked_spells_e.spellid));
-			insert_values.push_back(std::to_string(blocked_spells_e.type));
-			insert_values.push_back(std::to_string(blocked_spells_e.zoneid));
-			insert_values.push_back(std::to_string(blocked_spells_e.x));
-			insert_values.push_back(std::to_string(blocked_spells_e.y));
-			insert_values.push_back(std::to_string(blocked_spells_e.z));
-			insert_values.push_back(std::to_string(blocked_spells_e.x_diff));
-			insert_values.push_back(std::to_string(blocked_spells_e.y_diff));
-			insert_values.push_back(std::to_string(blocked_spells_e.z_diff));
-			insert_values.push_back("'" + Strings::Escape(blocked_spells_e.message) + "'");
-			insert_values.push_back("'" + Strings::Escape(blocked_spells_e.description) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.spellid));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.x));
+			insert_values.push_back(std::to_string(e.y));
+			insert_values.push_back(std::to_string(e.z));
+			insert_values.push_back(std::to_string(e.x_diff));
+			insert_values.push_back(std::to_string(e.y_diff));
+			insert_values.push_back(std::to_string(e.z_diff));
+			insert_values.push_back("'" + Strings::Escape(e.message) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.description) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

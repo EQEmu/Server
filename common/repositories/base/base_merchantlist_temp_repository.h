@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		MerchantlistTemp merchantlist_temp_e
+		MerchantlistTemp e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_temp_e.npcid));
-		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_temp_e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_temp_e.zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_temp_e.instance_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_temp_e.itemid));
-		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_temp_e.charges));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.npcid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.zone_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.instance_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.itemid));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				merchantlist_temp_e.npcid
+				e.npcid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static MerchantlistTemp InsertOne(
 		Database& db,
-		MerchantlistTemp merchantlist_temp_e
+		MerchantlistTemp e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(merchantlist_temp_e.npcid));
-		insert_values.push_back(std::to_string(merchantlist_temp_e.slot));
-		insert_values.push_back(std::to_string(merchantlist_temp_e.zone_id));
-		insert_values.push_back(std::to_string(merchantlist_temp_e.instance_id));
-		insert_values.push_back(std::to_string(merchantlist_temp_e.itemid));
-		insert_values.push_back(std::to_string(merchantlist_temp_e.charges));
+		insert_values.push_back(std::to_string(e.npcid));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.zone_id));
+		insert_values.push_back(std::to_string(e.instance_id));
+		insert_values.push_back(std::to_string(e.itemid));
+		insert_values.push_back(std::to_string(e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,31 +216,31 @@ public:
 		);
 
 		if (results.Success()) {
-			merchantlist_temp_e.npcid = results.LastInsertedID();
-			return merchantlist_temp_e;
+			e.npcid = results.LastInsertedID();
+			return e;
 		}
 
-		merchantlist_temp_e = NewEntity();
+		e = NewEntity();
 
-		return merchantlist_temp_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<MerchantlistTemp> merchantlist_temp_entries
+		std::vector<MerchantlistTemp> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &merchantlist_temp_e: merchantlist_temp_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(merchantlist_temp_e.npcid));
-			insert_values.push_back(std::to_string(merchantlist_temp_e.slot));
-			insert_values.push_back(std::to_string(merchantlist_temp_e.zone_id));
-			insert_values.push_back(std::to_string(merchantlist_temp_e.instance_id));
-			insert_values.push_back(std::to_string(merchantlist_temp_e.itemid));
-			insert_values.push_back(std::to_string(merchantlist_temp_e.charges));
+			insert_values.push_back(std::to_string(e.npcid));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.zone_id));
+			insert_values.push_back(std::to_string(e.instance_id));
+			insert_values.push_back(std::to_string(e.itemid));
+			insert_values.push_back(std::to_string(e.charges));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

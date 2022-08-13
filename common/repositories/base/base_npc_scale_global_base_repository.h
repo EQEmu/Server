@@ -276,41 +276,41 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcScaleGlobalBase npc_scale_global_base_e
+		NpcScaleGlobalBase e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(npc_scale_global_base_e.type));
-		update_values.push_back(columns[1] + " = " + std::to_string(npc_scale_global_base_e.level));
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_scale_global_base_e.ac));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_scale_global_base_e.hp));
-		update_values.push_back(columns[4] + " = " + std::to_string(npc_scale_global_base_e.accuracy));
-		update_values.push_back(columns[5] + " = " + std::to_string(npc_scale_global_base_e.slow_mitigation));
-		update_values.push_back(columns[6] + " = " + std::to_string(npc_scale_global_base_e.attack));
-		update_values.push_back(columns[7] + " = " + std::to_string(npc_scale_global_base_e.strength));
-		update_values.push_back(columns[8] + " = " + std::to_string(npc_scale_global_base_e.stamina));
-		update_values.push_back(columns[9] + " = " + std::to_string(npc_scale_global_base_e.dexterity));
-		update_values.push_back(columns[10] + " = " + std::to_string(npc_scale_global_base_e.agility));
-		update_values.push_back(columns[11] + " = " + std::to_string(npc_scale_global_base_e.intelligence));
-		update_values.push_back(columns[12] + " = " + std::to_string(npc_scale_global_base_e.wisdom));
-		update_values.push_back(columns[13] + " = " + std::to_string(npc_scale_global_base_e.charisma));
-		update_values.push_back(columns[14] + " = " + std::to_string(npc_scale_global_base_e.magic_resist));
-		update_values.push_back(columns[15] + " = " + std::to_string(npc_scale_global_base_e.cold_resist));
-		update_values.push_back(columns[16] + " = " + std::to_string(npc_scale_global_base_e.fire_resist));
-		update_values.push_back(columns[17] + " = " + std::to_string(npc_scale_global_base_e.poison_resist));
-		update_values.push_back(columns[18] + " = " + std::to_string(npc_scale_global_base_e.disease_resist));
-		update_values.push_back(columns[19] + " = " + std::to_string(npc_scale_global_base_e.corruption_resist));
-		update_values.push_back(columns[20] + " = " + std::to_string(npc_scale_global_base_e.physical_resist));
-		update_values.push_back(columns[21] + " = " + std::to_string(npc_scale_global_base_e.min_dmg));
-		update_values.push_back(columns[22] + " = " + std::to_string(npc_scale_global_base_e.max_dmg));
-		update_values.push_back(columns[23] + " = " + std::to_string(npc_scale_global_base_e.hp_regen_rate));
-		update_values.push_back(columns[24] + " = " + std::to_string(npc_scale_global_base_e.attack_delay));
-		update_values.push_back(columns[25] + " = " + std::to_string(npc_scale_global_base_e.spell_scale));
-		update_values.push_back(columns[26] + " = " + std::to_string(npc_scale_global_base_e.heal_scale));
-		update_values.push_back(columns[27] + " = '" + Strings::Escape(npc_scale_global_base_e.special_abilities) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.level));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.ac));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.hp));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.accuracy));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.slow_mitigation));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.attack));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.strength));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.stamina));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.dexterity));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.agility));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.intelligence));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.wisdom));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.charisma));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.magic_resist));
+		update_values.push_back(columns[15] + " = " + std::to_string(e.cold_resist));
+		update_values.push_back(columns[16] + " = " + std::to_string(e.fire_resist));
+		update_values.push_back(columns[17] + " = " + std::to_string(e.poison_resist));
+		update_values.push_back(columns[18] + " = " + std::to_string(e.disease_resist));
+		update_values.push_back(columns[19] + " = " + std::to_string(e.corruption_resist));
+		update_values.push_back(columns[20] + " = " + std::to_string(e.physical_resist));
+		update_values.push_back(columns[21] + " = " + std::to_string(e.min_dmg));
+		update_values.push_back(columns[22] + " = " + std::to_string(e.max_dmg));
+		update_values.push_back(columns[23] + " = " + std::to_string(e.hp_regen_rate));
+		update_values.push_back(columns[24] + " = " + std::to_string(e.attack_delay));
+		update_values.push_back(columns[25] + " = " + std::to_string(e.spell_scale));
+		update_values.push_back(columns[26] + " = " + std::to_string(e.heal_scale));
+		update_values.push_back(columns[27] + " = '" + Strings::Escape(e.special_abilities) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -318,7 +318,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_scale_global_base_e.type
+				e.type
 			)
 		);
 
@@ -327,39 +327,39 @@ public:
 
 	static NpcScaleGlobalBase InsertOne(
 		Database& db,
-		NpcScaleGlobalBase npc_scale_global_base_e
+		NpcScaleGlobalBase e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.type));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.level));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.ac));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.hp));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.accuracy));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.slow_mitigation));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.attack));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.strength));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.stamina));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.dexterity));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.agility));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.intelligence));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.wisdom));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.charisma));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.magic_resist));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.cold_resist));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.fire_resist));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.poison_resist));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.disease_resist));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.corruption_resist));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.physical_resist));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.min_dmg));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.max_dmg));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.hp_regen_rate));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.attack_delay));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.spell_scale));
-		insert_values.push_back(std::to_string(npc_scale_global_base_e.heal_scale));
-		insert_values.push_back("'" + Strings::Escape(npc_scale_global_base_e.special_abilities) + "'");
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.level));
+		insert_values.push_back(std::to_string(e.ac));
+		insert_values.push_back(std::to_string(e.hp));
+		insert_values.push_back(std::to_string(e.accuracy));
+		insert_values.push_back(std::to_string(e.slow_mitigation));
+		insert_values.push_back(std::to_string(e.attack));
+		insert_values.push_back(std::to_string(e.strength));
+		insert_values.push_back(std::to_string(e.stamina));
+		insert_values.push_back(std::to_string(e.dexterity));
+		insert_values.push_back(std::to_string(e.agility));
+		insert_values.push_back(std::to_string(e.intelligence));
+		insert_values.push_back(std::to_string(e.wisdom));
+		insert_values.push_back(std::to_string(e.charisma));
+		insert_values.push_back(std::to_string(e.magic_resist));
+		insert_values.push_back(std::to_string(e.cold_resist));
+		insert_values.push_back(std::to_string(e.fire_resist));
+		insert_values.push_back(std::to_string(e.poison_resist));
+		insert_values.push_back(std::to_string(e.disease_resist));
+		insert_values.push_back(std::to_string(e.corruption_resist));
+		insert_values.push_back(std::to_string(e.physical_resist));
+		insert_values.push_back(std::to_string(e.min_dmg));
+		insert_values.push_back(std::to_string(e.max_dmg));
+		insert_values.push_back(std::to_string(e.hp_regen_rate));
+		insert_values.push_back(std::to_string(e.attack_delay));
+		insert_values.push_back(std::to_string(e.spell_scale));
+		insert_values.push_back(std::to_string(e.heal_scale));
+		insert_values.push_back("'" + Strings::Escape(e.special_abilities) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -370,53 +370,53 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_scale_global_base_e.type = results.LastInsertedID();
-			return npc_scale_global_base_e;
+			e.type = results.LastInsertedID();
+			return e;
 		}
 
-		npc_scale_global_base_e = NewEntity();
+		e = NewEntity();
 
-		return npc_scale_global_base_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcScaleGlobalBase> npc_scale_global_base_entries
+		std::vector<NpcScaleGlobalBase> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_scale_global_base_e: npc_scale_global_base_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.type));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.level));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.ac));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.hp));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.accuracy));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.slow_mitigation));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.attack));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.strength));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.stamina));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.dexterity));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.agility));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.intelligence));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.wisdom));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.charisma));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.magic_resist));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.cold_resist));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.fire_resist));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.poison_resist));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.disease_resist));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.corruption_resist));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.physical_resist));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.min_dmg));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.max_dmg));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.hp_regen_rate));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.attack_delay));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.spell_scale));
-			insert_values.push_back(std::to_string(npc_scale_global_base_e.heal_scale));
-			insert_values.push_back("'" + Strings::Escape(npc_scale_global_base_e.special_abilities) + "'");
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.level));
+			insert_values.push_back(std::to_string(e.ac));
+			insert_values.push_back(std::to_string(e.hp));
+			insert_values.push_back(std::to_string(e.accuracy));
+			insert_values.push_back(std::to_string(e.slow_mitigation));
+			insert_values.push_back(std::to_string(e.attack));
+			insert_values.push_back(std::to_string(e.strength));
+			insert_values.push_back(std::to_string(e.stamina));
+			insert_values.push_back(std::to_string(e.dexterity));
+			insert_values.push_back(std::to_string(e.agility));
+			insert_values.push_back(std::to_string(e.intelligence));
+			insert_values.push_back(std::to_string(e.wisdom));
+			insert_values.push_back(std::to_string(e.charisma));
+			insert_values.push_back(std::to_string(e.magic_resist));
+			insert_values.push_back(std::to_string(e.cold_resist));
+			insert_values.push_back(std::to_string(e.fire_resist));
+			insert_values.push_back(std::to_string(e.poison_resist));
+			insert_values.push_back(std::to_string(e.disease_resist));
+			insert_values.push_back(std::to_string(e.corruption_resist));
+			insert_values.push_back(std::to_string(e.physical_resist));
+			insert_values.push_back(std::to_string(e.min_dmg));
+			insert_values.push_back(std::to_string(e.max_dmg));
+			insert_values.push_back(std::to_string(e.hp_regen_rate));
+			insert_values.push_back(std::to_string(e.attack_delay));
+			insert_values.push_back(std::to_string(e.spell_scale));
+			insert_values.push_back(std::to_string(e.heal_scale));
+			insert_values.push_back("'" + Strings::Escape(e.special_abilities) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Expeditions expeditions_e
+		Expeditions e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(expeditions_e.dynamic_zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(expeditions_e.add_replay_on_join));
-		update_values.push_back(columns[3] + " = " + std::to_string(expeditions_e.is_locked));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.dynamic_zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.add_replay_on_join));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				expeditions_e.id
+				e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static Expeditions InsertOne(
 		Database& db,
-		Expeditions expeditions_e
+		Expeditions e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(expeditions_e.id));
-		insert_values.push_back(std::to_string(expeditions_e.dynamic_zone_id));
-		insert_values.push_back(std::to_string(expeditions_e.add_replay_on_join));
-		insert_values.push_back(std::to_string(expeditions_e.is_locked));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.dynamic_zone_id));
+		insert_values.push_back(std::to_string(e.add_replay_on_join));
+		insert_values.push_back(std::to_string(e.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +201,29 @@ public:
 		);
 
 		if (results.Success()) {
-			expeditions_e.id = results.LastInsertedID();
-			return expeditions_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		expeditions_e = NewEntity();
+		e = NewEntity();
 
-		return expeditions_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Expeditions> expeditions_entries
+		std::vector<Expeditions> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &expeditions_e: expeditions_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(expeditions_e.id));
-			insert_values.push_back(std::to_string(expeditions_e.dynamic_zone_id));
-			insert_values.push_back(std::to_string(expeditions_e.add_replay_on_join));
-			insert_values.push_back(std::to_string(expeditions_e.is_locked));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.dynamic_zone_id));
+			insert_values.push_back(std::to_string(e.add_replay_on_join));
+			insert_values.push_back(std::to_string(e.is_locked));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

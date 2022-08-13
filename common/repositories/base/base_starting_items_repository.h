@@ -201,25 +201,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		StartingItems starting_items_e
+		StartingItems e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(starting_items_e.race));
-		update_values.push_back(columns[2] + " = " + std::to_string(starting_items_e.class_));
-		update_values.push_back(columns[3] + " = " + std::to_string(starting_items_e.deityid));
-		update_values.push_back(columns[4] + " = " + std::to_string(starting_items_e.zoneid));
-		update_values.push_back(columns[5] + " = " + std::to_string(starting_items_e.itemid));
-		update_values.push_back(columns[6] + " = " + std::to_string(starting_items_e.item_charges));
-		update_values.push_back(columns[7] + " = " + std::to_string(starting_items_e.gm));
-		update_values.push_back(columns[8] + " = " + std::to_string(starting_items_e.slot));
-		update_values.push_back(columns[9] + " = " + std::to_string(starting_items_e.min_expansion));
-		update_values.push_back(columns[10] + " = " + std::to_string(starting_items_e.max_expansion));
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(starting_items_e.content_flags) + "'");
-		update_values.push_back(columns[12] + " = '" + Strings::Escape(starting_items_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.race));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.class_));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.deityid));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.itemid));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.item_charges));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.gm));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -227,7 +227,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				starting_items_e.id
+				e.id
 			)
 		);
 
@@ -236,24 +236,24 @@ public:
 
 	static StartingItems InsertOne(
 		Database& db,
-		StartingItems starting_items_e
+		StartingItems e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(starting_items_e.id));
-		insert_values.push_back(std::to_string(starting_items_e.race));
-		insert_values.push_back(std::to_string(starting_items_e.class_));
-		insert_values.push_back(std::to_string(starting_items_e.deityid));
-		insert_values.push_back(std::to_string(starting_items_e.zoneid));
-		insert_values.push_back(std::to_string(starting_items_e.itemid));
-		insert_values.push_back(std::to_string(starting_items_e.item_charges));
-		insert_values.push_back(std::to_string(starting_items_e.gm));
-		insert_values.push_back(std::to_string(starting_items_e.slot));
-		insert_values.push_back(std::to_string(starting_items_e.min_expansion));
-		insert_values.push_back(std::to_string(starting_items_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(starting_items_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(starting_items_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.race));
+		insert_values.push_back(std::to_string(e.class_));
+		insert_values.push_back(std::to_string(e.deityid));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.itemid));
+		insert_values.push_back(std::to_string(e.item_charges));
+		insert_values.push_back(std::to_string(e.gm));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -264,38 +264,38 @@ public:
 		);
 
 		if (results.Success()) {
-			starting_items_e.id = results.LastInsertedID();
-			return starting_items_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		starting_items_e = NewEntity();
+		e = NewEntity();
 
-		return starting_items_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<StartingItems> starting_items_entries
+		std::vector<StartingItems> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &starting_items_e: starting_items_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(starting_items_e.id));
-			insert_values.push_back(std::to_string(starting_items_e.race));
-			insert_values.push_back(std::to_string(starting_items_e.class_));
-			insert_values.push_back(std::to_string(starting_items_e.deityid));
-			insert_values.push_back(std::to_string(starting_items_e.zoneid));
-			insert_values.push_back(std::to_string(starting_items_e.itemid));
-			insert_values.push_back(std::to_string(starting_items_e.item_charges));
-			insert_values.push_back(std::to_string(starting_items_e.gm));
-			insert_values.push_back(std::to_string(starting_items_e.slot));
-			insert_values.push_back(std::to_string(starting_items_e.min_expansion));
-			insert_values.push_back(std::to_string(starting_items_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(starting_items_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(starting_items_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.race));
+			insert_values.push_back(std::to_string(e.class_));
+			insert_values.push_back(std::to_string(e.deityid));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.itemid));
+			insert_values.push_back(std::to_string(e.item_charges));
+			insert_values.push_back(std::to_string(e.gm));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

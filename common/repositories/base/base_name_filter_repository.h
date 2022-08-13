@@ -146,14 +146,14 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NameFilter name_filter_e
+		NameFilter e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(name_filter_e.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -161,7 +161,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				name_filter_e.id
+				e.id
 			)
 		);
 
@@ -170,13 +170,13 @@ public:
 
 	static NameFilter InsertOne(
 		Database& db,
-		NameFilter name_filter_e
+		NameFilter e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(name_filter_e.id));
-		insert_values.push_back("'" + Strings::Escape(name_filter_e.name) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -187,27 +187,27 @@ public:
 		);
 
 		if (results.Success()) {
-			name_filter_e.id = results.LastInsertedID();
-			return name_filter_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		name_filter_e = NewEntity();
+		e = NewEntity();
 
-		return name_filter_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NameFilter> name_filter_entries
+		std::vector<NameFilter> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &name_filter_e: name_filter_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(name_filter_e.id));
-			insert_values.push_back("'" + Strings::Escape(name_filter_e.name) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

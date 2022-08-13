@@ -286,42 +286,42 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Object object_e
+		Object e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(object_e.zoneid));
-		update_values.push_back(columns[2] + " = " + std::to_string(object_e.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(object_e.xpos));
-		update_values.push_back(columns[4] + " = " + std::to_string(object_e.ypos));
-		update_values.push_back(columns[5] + " = " + std::to_string(object_e.zpos));
-		update_values.push_back(columns[6] + " = " + std::to_string(object_e.heading));
-		update_values.push_back(columns[7] + " = " + std::to_string(object_e.itemid));
-		update_values.push_back(columns[8] + " = " + std::to_string(object_e.charges));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(object_e.objectname) + "'");
-		update_values.push_back(columns[10] + " = " + std::to_string(object_e.type));
-		update_values.push_back(columns[11] + " = " + std::to_string(object_e.icon));
-		update_values.push_back(columns[12] + " = " + std::to_string(object_e.unknown08));
-		update_values.push_back(columns[13] + " = " + std::to_string(object_e.unknown10));
-		update_values.push_back(columns[14] + " = " + std::to_string(object_e.unknown20));
-		update_values.push_back(columns[15] + " = " + std::to_string(object_e.unknown24));
-		update_values.push_back(columns[16] + " = " + std::to_string(object_e.unknown60));
-		update_values.push_back(columns[17] + " = " + std::to_string(object_e.unknown64));
-		update_values.push_back(columns[18] + " = " + std::to_string(object_e.unknown68));
-		update_values.push_back(columns[19] + " = " + std::to_string(object_e.unknown72));
-		update_values.push_back(columns[20] + " = " + std::to_string(object_e.unknown76));
-		update_values.push_back(columns[21] + " = " + std::to_string(object_e.unknown84));
-		update_values.push_back(columns[22] + " = " + std::to_string(object_e.size));
-		update_values.push_back(columns[23] + " = " + std::to_string(object_e.tilt_x));
-		update_values.push_back(columns[24] + " = " + std::to_string(object_e.tilt_y));
-		update_values.push_back(columns[25] + " = '" + Strings::Escape(object_e.display_name) + "'");
-		update_values.push_back(columns[26] + " = " + std::to_string(object_e.min_expansion));
-		update_values.push_back(columns[27] + " = " + std::to_string(object_e.max_expansion));
-		update_values.push_back(columns[28] + " = '" + Strings::Escape(object_e.content_flags) + "'");
-		update_values.push_back(columns[29] + " = '" + Strings::Escape(object_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.version));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.xpos));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.ypos));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.zpos));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.heading));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.itemid));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.charges));
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.objectname) + "'");
+		update_values.push_back(columns[10] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.icon));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.unknown08));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.unknown10));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.unknown20));
+		update_values.push_back(columns[15] + " = " + std::to_string(e.unknown24));
+		update_values.push_back(columns[16] + " = " + std::to_string(e.unknown60));
+		update_values.push_back(columns[17] + " = " + std::to_string(e.unknown64));
+		update_values.push_back(columns[18] + " = " + std::to_string(e.unknown68));
+		update_values.push_back(columns[19] + " = " + std::to_string(e.unknown72));
+		update_values.push_back(columns[20] + " = " + std::to_string(e.unknown76));
+		update_values.push_back(columns[21] + " = " + std::to_string(e.unknown84));
+		update_values.push_back(columns[22] + " = " + std::to_string(e.size));
+		update_values.push_back(columns[23] + " = " + std::to_string(e.tilt_x));
+		update_values.push_back(columns[24] + " = " + std::to_string(e.tilt_y));
+		update_values.push_back(columns[25] + " = '" + Strings::Escape(e.display_name) + "'");
+		update_values.push_back(columns[26] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[27] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[28] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[29] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -329,7 +329,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				object_e.id
+				e.id
 			)
 		);
 
@@ -338,41 +338,41 @@ public:
 
 	static Object InsertOne(
 		Database& db,
-		Object object_e
+		Object e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(object_e.id));
-		insert_values.push_back(std::to_string(object_e.zoneid));
-		insert_values.push_back(std::to_string(object_e.version));
-		insert_values.push_back(std::to_string(object_e.xpos));
-		insert_values.push_back(std::to_string(object_e.ypos));
-		insert_values.push_back(std::to_string(object_e.zpos));
-		insert_values.push_back(std::to_string(object_e.heading));
-		insert_values.push_back(std::to_string(object_e.itemid));
-		insert_values.push_back(std::to_string(object_e.charges));
-		insert_values.push_back("'" + Strings::Escape(object_e.objectname) + "'");
-		insert_values.push_back(std::to_string(object_e.type));
-		insert_values.push_back(std::to_string(object_e.icon));
-		insert_values.push_back(std::to_string(object_e.unknown08));
-		insert_values.push_back(std::to_string(object_e.unknown10));
-		insert_values.push_back(std::to_string(object_e.unknown20));
-		insert_values.push_back(std::to_string(object_e.unknown24));
-		insert_values.push_back(std::to_string(object_e.unknown60));
-		insert_values.push_back(std::to_string(object_e.unknown64));
-		insert_values.push_back(std::to_string(object_e.unknown68));
-		insert_values.push_back(std::to_string(object_e.unknown72));
-		insert_values.push_back(std::to_string(object_e.unknown76));
-		insert_values.push_back(std::to_string(object_e.unknown84));
-		insert_values.push_back(std::to_string(object_e.size));
-		insert_values.push_back(std::to_string(object_e.tilt_x));
-		insert_values.push_back(std::to_string(object_e.tilt_y));
-		insert_values.push_back("'" + Strings::Escape(object_e.display_name) + "'");
-		insert_values.push_back(std::to_string(object_e.min_expansion));
-		insert_values.push_back(std::to_string(object_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(object_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(object_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.version));
+		insert_values.push_back(std::to_string(e.xpos));
+		insert_values.push_back(std::to_string(e.ypos));
+		insert_values.push_back(std::to_string(e.zpos));
+		insert_values.push_back(std::to_string(e.heading));
+		insert_values.push_back(std::to_string(e.itemid));
+		insert_values.push_back(std::to_string(e.charges));
+		insert_values.push_back("'" + Strings::Escape(e.objectname) + "'");
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.icon));
+		insert_values.push_back(std::to_string(e.unknown08));
+		insert_values.push_back(std::to_string(e.unknown10));
+		insert_values.push_back(std::to_string(e.unknown20));
+		insert_values.push_back(std::to_string(e.unknown24));
+		insert_values.push_back(std::to_string(e.unknown60));
+		insert_values.push_back(std::to_string(e.unknown64));
+		insert_values.push_back(std::to_string(e.unknown68));
+		insert_values.push_back(std::to_string(e.unknown72));
+		insert_values.push_back(std::to_string(e.unknown76));
+		insert_values.push_back(std::to_string(e.unknown84));
+		insert_values.push_back(std::to_string(e.size));
+		insert_values.push_back(std::to_string(e.tilt_x));
+		insert_values.push_back(std::to_string(e.tilt_y));
+		insert_values.push_back("'" + Strings::Escape(e.display_name) + "'");
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -383,55 +383,55 @@ public:
 		);
 
 		if (results.Success()) {
-			object_e.id = results.LastInsertedID();
-			return object_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		object_e = NewEntity();
+		e = NewEntity();
 
-		return object_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Object> object_entries
+		std::vector<Object> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &object_e: object_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(object_e.id));
-			insert_values.push_back(std::to_string(object_e.zoneid));
-			insert_values.push_back(std::to_string(object_e.version));
-			insert_values.push_back(std::to_string(object_e.xpos));
-			insert_values.push_back(std::to_string(object_e.ypos));
-			insert_values.push_back(std::to_string(object_e.zpos));
-			insert_values.push_back(std::to_string(object_e.heading));
-			insert_values.push_back(std::to_string(object_e.itemid));
-			insert_values.push_back(std::to_string(object_e.charges));
-			insert_values.push_back("'" + Strings::Escape(object_e.objectname) + "'");
-			insert_values.push_back(std::to_string(object_e.type));
-			insert_values.push_back(std::to_string(object_e.icon));
-			insert_values.push_back(std::to_string(object_e.unknown08));
-			insert_values.push_back(std::to_string(object_e.unknown10));
-			insert_values.push_back(std::to_string(object_e.unknown20));
-			insert_values.push_back(std::to_string(object_e.unknown24));
-			insert_values.push_back(std::to_string(object_e.unknown60));
-			insert_values.push_back(std::to_string(object_e.unknown64));
-			insert_values.push_back(std::to_string(object_e.unknown68));
-			insert_values.push_back(std::to_string(object_e.unknown72));
-			insert_values.push_back(std::to_string(object_e.unknown76));
-			insert_values.push_back(std::to_string(object_e.unknown84));
-			insert_values.push_back(std::to_string(object_e.size));
-			insert_values.push_back(std::to_string(object_e.tilt_x));
-			insert_values.push_back(std::to_string(object_e.tilt_y));
-			insert_values.push_back("'" + Strings::Escape(object_e.display_name) + "'");
-			insert_values.push_back(std::to_string(object_e.min_expansion));
-			insert_values.push_back(std::to_string(object_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(object_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(object_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.version));
+			insert_values.push_back(std::to_string(e.xpos));
+			insert_values.push_back(std::to_string(e.ypos));
+			insert_values.push_back(std::to_string(e.zpos));
+			insert_values.push_back(std::to_string(e.heading));
+			insert_values.push_back(std::to_string(e.itemid));
+			insert_values.push_back(std::to_string(e.charges));
+			insert_values.push_back("'" + Strings::Escape(e.objectname) + "'");
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.icon));
+			insert_values.push_back(std::to_string(e.unknown08));
+			insert_values.push_back(std::to_string(e.unknown10));
+			insert_values.push_back(std::to_string(e.unknown20));
+			insert_values.push_back(std::to_string(e.unknown24));
+			insert_values.push_back(std::to_string(e.unknown60));
+			insert_values.push_back(std::to_string(e.unknown64));
+			insert_values.push_back(std::to_string(e.unknown68));
+			insert_values.push_back(std::to_string(e.unknown72));
+			insert_values.push_back(std::to_string(e.unknown76));
+			insert_values.push_back(std::to_string(e.unknown84));
+			insert_values.push_back(std::to_string(e.size));
+			insert_values.push_back(std::to_string(e.tilt_x));
+			insert_values.push_back(std::to_string(e.tilt_y));
+			insert_values.push_back("'" + Strings::Escape(e.display_name) + "'");
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

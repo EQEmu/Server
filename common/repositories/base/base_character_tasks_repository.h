@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterTasks character_tasks_e
+		CharacterTasks e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_tasks_e.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_tasks_e.taskid));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_e.slot));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_e.type));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_e.acceptedtime));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_tasks_e.was_rewarded));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.taskid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.acceptedtime));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_tasks_e.charid
+				e.charid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static CharacterTasks InsertOne(
 		Database& db,
-		CharacterTasks character_tasks_e
+		CharacterTasks e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_tasks_e.charid));
-		insert_values.push_back(std::to_string(character_tasks_e.taskid));
-		insert_values.push_back(std::to_string(character_tasks_e.slot));
-		insert_values.push_back(std::to_string(character_tasks_e.type));
-		insert_values.push_back(std::to_string(character_tasks_e.acceptedtime));
-		insert_values.push_back(std::to_string(character_tasks_e.was_rewarded));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.taskid));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.acceptedtime));
+		insert_values.push_back(std::to_string(e.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,31 +216,31 @@ public:
 		);
 
 		if (results.Success()) {
-			character_tasks_e.charid = results.LastInsertedID();
-			return character_tasks_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		character_tasks_e = NewEntity();
+		e = NewEntity();
 
-		return character_tasks_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterTasks> character_tasks_entries
+		std::vector<CharacterTasks> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_tasks_e: character_tasks_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_tasks_e.charid));
-			insert_values.push_back(std::to_string(character_tasks_e.taskid));
-			insert_values.push_back(std::to_string(character_tasks_e.slot));
-			insert_values.push_back(std::to_string(character_tasks_e.type));
-			insert_values.push_back(std::to_string(character_tasks_e.acceptedtime));
-			insert_values.push_back(std::to_string(character_tasks_e.was_rewarded));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.taskid));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.acceptedtime));
+			insert_values.push_back(std::to_string(e.was_rewarded));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

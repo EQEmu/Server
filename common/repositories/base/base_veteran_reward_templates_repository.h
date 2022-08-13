@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		VeteranRewardTemplates veteran_reward_templates_e
+		VeteranRewardTemplates e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(veteran_reward_templates_e.claim_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(veteran_reward_templates_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(veteran_reward_templates_e.item_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(veteran_reward_templates_e.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(veteran_reward_templates_e.reward_slot));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.claim_id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.item_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.charges));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.reward_slot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				veteran_reward_templates_e.claim_id
+				e.claim_id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static VeteranRewardTemplates InsertOne(
 		Database& db,
-		VeteranRewardTemplates veteran_reward_templates_e
+		VeteranRewardTemplates e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(veteran_reward_templates_e.claim_id));
-		insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_e.name) + "'");
-		insert_values.push_back(std::to_string(veteran_reward_templates_e.item_id));
-		insert_values.push_back(std::to_string(veteran_reward_templates_e.charges));
-		insert_values.push_back(std::to_string(veteran_reward_templates_e.reward_slot));
+		insert_values.push_back(std::to_string(e.claim_id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.item_id));
+		insert_values.push_back(std::to_string(e.charges));
+		insert_values.push_back(std::to_string(e.reward_slot));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,30 +209,30 @@ public:
 		);
 
 		if (results.Success()) {
-			veteran_reward_templates_e.claim_id = results.LastInsertedID();
-			return veteran_reward_templates_e;
+			e.claim_id = results.LastInsertedID();
+			return e;
 		}
 
-		veteran_reward_templates_e = NewEntity();
+		e = NewEntity();
 
-		return veteran_reward_templates_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<VeteranRewardTemplates> veteran_reward_templates_entries
+		std::vector<VeteranRewardTemplates> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &veteran_reward_templates_e: veteran_reward_templates_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(veteran_reward_templates_e.claim_id));
-			insert_values.push_back("'" + Strings::Escape(veteran_reward_templates_e.name) + "'");
-			insert_values.push_back(std::to_string(veteran_reward_templates_e.item_id));
-			insert_values.push_back(std::to_string(veteran_reward_templates_e.charges));
-			insert_values.push_back(std::to_string(veteran_reward_templates_e.reward_slot));
+			insert_values.push_back(std::to_string(e.claim_id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.item_id));
+			insert_values.push_back(std::to_string(e.charges));
+			insert_values.push_back(std::to_string(e.reward_slot));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

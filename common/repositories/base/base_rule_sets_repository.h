@@ -146,14 +146,14 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RuleSets rule_sets_e
+		RuleSets e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(rule_sets_e.name) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -161,7 +161,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				rule_sets_e.ruleset_id
+				e.ruleset_id
 			)
 		);
 
@@ -170,13 +170,13 @@ public:
 
 	static RuleSets InsertOne(
 		Database& db,
-		RuleSets rule_sets_e
+		RuleSets e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(rule_sets_e.ruleset_id));
-		insert_values.push_back("'" + Strings::Escape(rule_sets_e.name) + "'");
+		insert_values.push_back(std::to_string(e.ruleset_id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -187,27 +187,27 @@ public:
 		);
 
 		if (results.Success()) {
-			rule_sets_e.ruleset_id = results.LastInsertedID();
-			return rule_sets_e;
+			e.ruleset_id = results.LastInsertedID();
+			return e;
 		}
 
-		rule_sets_e = NewEntity();
+		e = NewEntity();
 
-		return rule_sets_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RuleSets> rule_sets_entries
+		std::vector<RuleSets> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &rule_sets_e: rule_sets_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(rule_sets_e.ruleset_id));
-			insert_values.push_back("'" + Strings::Escape(rule_sets_e.name) + "'");
+			insert_values.push_back(std::to_string(e.ruleset_id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

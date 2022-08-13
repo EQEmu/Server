@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterItemRecast character_item_recast_e
+		CharacterItemRecast e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_item_recast_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_item_recast_e.recast_type));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_item_recast_e.timestamp));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.recast_type));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.timestamp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_item_recast_e.id
+				e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CharacterItemRecast InsertOne(
 		Database& db,
-		CharacterItemRecast character_item_recast_e
+		CharacterItemRecast e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_item_recast_e.id));
-		insert_values.push_back(std::to_string(character_item_recast_e.recast_type));
-		insert_values.push_back(std::to_string(character_item_recast_e.timestamp));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.recast_type));
+		insert_values.push_back(std::to_string(e.timestamp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			character_item_recast_e.id = results.LastInsertedID();
-			return character_item_recast_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_item_recast_e = NewEntity();
+		e = NewEntity();
 
-		return character_item_recast_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterItemRecast> character_item_recast_entries
+		std::vector<CharacterItemRecast> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_item_recast_e: character_item_recast_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_item_recast_e.id));
-			insert_values.push_back(std::to_string(character_item_recast_e.recast_type));
-			insert_values.push_back(std::to_string(character_item_recast_e.timestamp));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.recast_type));
+			insert_values.push_back(std::to_string(e.timestamp));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -176,20 +176,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Mail mail_e
+		Mail e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(mail_e.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(mail_e.timestamp));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(mail_e.from) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(mail_e.subject) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(mail_e.body) + "'");
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(mail_e.to) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(mail_e.status));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.timestamp));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.from) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.subject) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(e.body) + "'");
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.to) + "'");
+		update_values.push_back(columns[7] + " = " + std::to_string(e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				mail_e.msgid
+				e.msgid
 			)
 		);
 
@@ -206,19 +206,19 @@ public:
 
 	static Mail InsertOne(
 		Database& db,
-		Mail mail_e
+		Mail e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(mail_e.msgid));
-		insert_values.push_back(std::to_string(mail_e.charid));
-		insert_values.push_back(std::to_string(mail_e.timestamp));
-		insert_values.push_back("'" + Strings::Escape(mail_e.from) + "'");
-		insert_values.push_back("'" + Strings::Escape(mail_e.subject) + "'");
-		insert_values.push_back("'" + Strings::Escape(mail_e.body) + "'");
-		insert_values.push_back("'" + Strings::Escape(mail_e.to) + "'");
-		insert_values.push_back(std::to_string(mail_e.status));
+		insert_values.push_back(std::to_string(e.msgid));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.timestamp));
+		insert_values.push_back("'" + Strings::Escape(e.from) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.subject) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.body) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.to) + "'");
+		insert_values.push_back(std::to_string(e.status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,33 +229,33 @@ public:
 		);
 
 		if (results.Success()) {
-			mail_e.msgid = results.LastInsertedID();
-			return mail_e;
+			e.msgid = results.LastInsertedID();
+			return e;
 		}
 
-		mail_e = NewEntity();
+		e = NewEntity();
 
-		return mail_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Mail> mail_entries
+		std::vector<Mail> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &mail_e: mail_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(mail_e.msgid));
-			insert_values.push_back(std::to_string(mail_e.charid));
-			insert_values.push_back(std::to_string(mail_e.timestamp));
-			insert_values.push_back("'" + Strings::Escape(mail_e.from) + "'");
-			insert_values.push_back("'" + Strings::Escape(mail_e.subject) + "'");
-			insert_values.push_back("'" + Strings::Escape(mail_e.body) + "'");
-			insert_values.push_back("'" + Strings::Escape(mail_e.to) + "'");
-			insert_values.push_back(std::to_string(mail_e.status));
+			insert_values.push_back(std::to_string(e.msgid));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.timestamp));
+			insert_values.push_back("'" + Strings::Escape(e.from) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.subject) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.body) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.to) + "'");
+			insert_values.push_back(std::to_string(e.status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

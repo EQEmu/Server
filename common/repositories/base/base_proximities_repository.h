@@ -176,21 +176,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Proximities proximities_e
+		Proximities e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(proximities_e.zoneid));
-		update_values.push_back(columns[1] + " = " + std::to_string(proximities_e.exploreid));
-		update_values.push_back(columns[2] + " = " + std::to_string(proximities_e.minx));
-		update_values.push_back(columns[3] + " = " + std::to_string(proximities_e.maxx));
-		update_values.push_back(columns[4] + " = " + std::to_string(proximities_e.miny));
-		update_values.push_back(columns[5] + " = " + std::to_string(proximities_e.maxy));
-		update_values.push_back(columns[6] + " = " + std::to_string(proximities_e.minz));
-		update_values.push_back(columns[7] + " = " + std::to_string(proximities_e.maxz));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.exploreid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.minx));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.maxx));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.miny));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.maxy));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.minz));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.maxz));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -198,7 +198,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				proximities_e.zoneid
+				e.zoneid
 			)
 		);
 
@@ -207,19 +207,19 @@ public:
 
 	static Proximities InsertOne(
 		Database& db,
-		Proximities proximities_e
+		Proximities e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(proximities_e.zoneid));
-		insert_values.push_back(std::to_string(proximities_e.exploreid));
-		insert_values.push_back(std::to_string(proximities_e.minx));
-		insert_values.push_back(std::to_string(proximities_e.maxx));
-		insert_values.push_back(std::to_string(proximities_e.miny));
-		insert_values.push_back(std::to_string(proximities_e.maxy));
-		insert_values.push_back(std::to_string(proximities_e.minz));
-		insert_values.push_back(std::to_string(proximities_e.maxz));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.exploreid));
+		insert_values.push_back(std::to_string(e.minx));
+		insert_values.push_back(std::to_string(e.maxx));
+		insert_values.push_back(std::to_string(e.miny));
+		insert_values.push_back(std::to_string(e.maxy));
+		insert_values.push_back(std::to_string(e.minz));
+		insert_values.push_back(std::to_string(e.maxz));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -230,33 +230,33 @@ public:
 		);
 
 		if (results.Success()) {
-			proximities_e.zoneid = results.LastInsertedID();
-			return proximities_e;
+			e.zoneid = results.LastInsertedID();
+			return e;
 		}
 
-		proximities_e = NewEntity();
+		e = NewEntity();
 
-		return proximities_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Proximities> proximities_entries
+		std::vector<Proximities> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &proximities_e: proximities_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(proximities_e.zoneid));
-			insert_values.push_back(std::to_string(proximities_e.exploreid));
-			insert_values.push_back(std::to_string(proximities_e.minx));
-			insert_values.push_back(std::to_string(proximities_e.maxx));
-			insert_values.push_back(std::to_string(proximities_e.miny));
-			insert_values.push_back(std::to_string(proximities_e.maxy));
-			insert_values.push_back(std::to_string(proximities_e.minz));
-			insert_values.push_back(std::to_string(proximities_e.maxz));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.exploreid));
+			insert_values.push_back(std::to_string(e.minx));
+			insert_values.push_back(std::to_string(e.maxx));
+			insert_values.push_back(std::to_string(e.miny));
+			insert_values.push_back(std::to_string(e.maxy));
+			insert_values.push_back(std::to_string(e.minz));
+			insert_values.push_back(std::to_string(e.maxz));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

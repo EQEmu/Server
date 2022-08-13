@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureMembers adventure_members_e
+		AdventureMembers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(adventure_members_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(adventure_members_e.charid));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				adventure_members_e.charid
+				e.charid
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static AdventureMembers InsertOne(
 		Database& db,
-		AdventureMembers adventure_members_e
+		AdventureMembers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(adventure_members_e.id));
-		insert_values.push_back(std::to_string(adventure_members_e.charid));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.charid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			adventure_members_e.charid = results.LastInsertedID();
-			return adventure_members_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		adventure_members_e = NewEntity();
+		e = NewEntity();
 
-		return adventure_members_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AdventureMembers> adventure_members_entries
+		std::vector<AdventureMembers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &adventure_members_e: adventure_members_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(adventure_members_e.id));
-			insert_values.push_back(std::to_string(adventure_members_e.charid));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.charid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

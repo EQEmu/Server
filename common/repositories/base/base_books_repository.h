@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Books books_e
+		Books e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(books_e.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(books_e.txtfile) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(books_e.language));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.txtfile) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.language));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				books_e.id
+				e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static Books InsertOne(
 		Database& db,
-		Books books_e
+		Books e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(books_e.id));
-		insert_values.push_back("'" + Strings::Escape(books_e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(books_e.txtfile) + "'");
-		insert_values.push_back(std::to_string(books_e.language));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.txtfile) + "'");
+		insert_values.push_back(std::to_string(e.language));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +201,29 @@ public:
 		);
 
 		if (results.Success()) {
-			books_e.id = results.LastInsertedID();
-			return books_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		books_e = NewEntity();
+		e = NewEntity();
 
-		return books_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Books> books_entries
+		std::vector<Books> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &books_e: books_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(books_e.id));
-			insert_values.push_back("'" + Strings::Escape(books_e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(books_e.txtfile) + "'");
-			insert_values.push_back(std::to_string(books_e.language));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.txtfile) + "'");
+			insert_values.push_back(std::to_string(e.language));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

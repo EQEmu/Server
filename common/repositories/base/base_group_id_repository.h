@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GroupId group_id_e
+		GroupId e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(group_id_e.groupid));
-		update_values.push_back(columns[1] + " = " + std::to_string(group_id_e.charid));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(group_id_e.name) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(group_id_e.ismerc));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.groupid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.ismerc));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				group_id_e.groupid
+				e.groupid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static GroupId InsertOne(
 		Database& db,
-		GroupId group_id_e
+		GroupId e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(group_id_e.groupid));
-		insert_values.push_back(std::to_string(group_id_e.charid));
-		insert_values.push_back("'" + Strings::Escape(group_id_e.name) + "'");
-		insert_values.push_back(std::to_string(group_id_e.ismerc));
+		insert_values.push_back(std::to_string(e.groupid));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.ismerc));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			group_id_e.groupid = results.LastInsertedID();
-			return group_id_e;
+			e.groupid = results.LastInsertedID();
+			return e;
 		}
 
-		group_id_e = NewEntity();
+		e = NewEntity();
 
-		return group_id_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GroupId> group_id_entries
+		std::vector<GroupId> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &group_id_e: group_id_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(group_id_e.groupid));
-			insert_values.push_back(std::to_string(group_id_e.charid));
-			insert_values.push_back("'" + Strings::Escape(group_id_e.name) + "'");
-			insert_values.push_back(std::to_string(group_id_e.ismerc));
+			insert_values.push_back(std::to_string(e.groupid));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.ismerc));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

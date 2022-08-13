@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterTaskTimers character_task_timers_e
+		CharacterTaskTimers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_task_timers_e.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_task_timers_e.task_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_task_timers_e.timer_type));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_task_timers_e.timer_group));
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (character_task_timers_e.expire_time > 0 ? std::to_string(character_task_timers_e.expire_time) : "null") + ")");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.character_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.task_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.timer_type));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.timer_group));
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_task_timers_e.id
+				e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static CharacterTaskTimers InsertOne(
 		Database& db,
-		CharacterTaskTimers character_task_timers_e
+		CharacterTaskTimers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_task_timers_e.id));
-		insert_values.push_back(std::to_string(character_task_timers_e.character_id));
-		insert_values.push_back(std::to_string(character_task_timers_e.task_id));
-		insert_values.push_back(std::to_string(character_task_timers_e.timer_type));
-		insert_values.push_back(std::to_string(character_task_timers_e.timer_group));
-		insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_e.expire_time > 0 ? std::to_string(character_task_timers_e.expire_time) : "null") + ")");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.character_id));
+		insert_values.push_back(std::to_string(e.task_id));
+		insert_values.push_back(std::to_string(e.timer_type));
+		insert_values.push_back(std::to_string(e.timer_group));
+		insert_values.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,31 +215,31 @@ public:
 		);
 
 		if (results.Success()) {
-			character_task_timers_e.id = results.LastInsertedID();
-			return character_task_timers_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_task_timers_e = NewEntity();
+		e = NewEntity();
 
-		return character_task_timers_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterTaskTimers> character_task_timers_entries
+		std::vector<CharacterTaskTimers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_task_timers_e: character_task_timers_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_task_timers_e.id));
-			insert_values.push_back(std::to_string(character_task_timers_e.character_id));
-			insert_values.push_back(std::to_string(character_task_timers_e.task_id));
-			insert_values.push_back(std::to_string(character_task_timers_e.timer_type));
-			insert_values.push_back(std::to_string(character_task_timers_e.timer_group));
-			insert_values.push_back("FROM_UNIXTIME(" + (character_task_timers_e.expire_time > 0 ? std::to_string(character_task_timers_e.expire_time) : "null") + ")");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.character_id));
+			insert_values.push_back(std::to_string(e.task_id));
+			insert_values.push_back(std::to_string(e.timer_type));
+			insert_values.push_back(std::to_string(e.timer_group));
+			insert_values.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -181,22 +181,22 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RaidMembers raid_members_e
+		RaidMembers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(raid_members_e.raidid));
-		update_values.push_back(columns[1] + " = " + std::to_string(raid_members_e.charid));
-		update_values.push_back(columns[2] + " = " + std::to_string(raid_members_e.groupid));
-		update_values.push_back(columns[3] + " = " + std::to_string(raid_members_e._class));
-		update_values.push_back(columns[4] + " = " + std::to_string(raid_members_e.level));
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(raid_members_e.name) + "'");
-		update_values.push_back(columns[6] + " = " + std::to_string(raid_members_e.isgroupleader));
-		update_values.push_back(columns[7] + " = " + std::to_string(raid_members_e.israidleader));
-		update_values.push_back(columns[8] + " = " + std::to_string(raid_members_e.islooter));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.raidid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.groupid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e._class));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.level));
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[6] + " = " + std::to_string(e.isgroupleader));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.israidleader));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.islooter));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -204,7 +204,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				raid_members_e.charid
+				e.charid
 			)
 		);
 
@@ -213,20 +213,20 @@ public:
 
 	static RaidMembers InsertOne(
 		Database& db,
-		RaidMembers raid_members_e
+		RaidMembers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(raid_members_e.raidid));
-		insert_values.push_back(std::to_string(raid_members_e.charid));
-		insert_values.push_back(std::to_string(raid_members_e.groupid));
-		insert_values.push_back(std::to_string(raid_members_e._class));
-		insert_values.push_back(std::to_string(raid_members_e.level));
-		insert_values.push_back("'" + Strings::Escape(raid_members_e.name) + "'");
-		insert_values.push_back(std::to_string(raid_members_e.isgroupleader));
-		insert_values.push_back(std::to_string(raid_members_e.israidleader));
-		insert_values.push_back(std::to_string(raid_members_e.islooter));
+		insert_values.push_back(std::to_string(e.raidid));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.groupid));
+		insert_values.push_back(std::to_string(e._class));
+		insert_values.push_back(std::to_string(e.level));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.isgroupleader));
+		insert_values.push_back(std::to_string(e.israidleader));
+		insert_values.push_back(std::to_string(e.islooter));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -237,34 +237,34 @@ public:
 		);
 
 		if (results.Success()) {
-			raid_members_e.charid = results.LastInsertedID();
-			return raid_members_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		raid_members_e = NewEntity();
+		e = NewEntity();
 
-		return raid_members_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RaidMembers> raid_members_entries
+		std::vector<RaidMembers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &raid_members_e: raid_members_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(raid_members_e.raidid));
-			insert_values.push_back(std::to_string(raid_members_e.charid));
-			insert_values.push_back(std::to_string(raid_members_e.groupid));
-			insert_values.push_back(std::to_string(raid_members_e._class));
-			insert_values.push_back(std::to_string(raid_members_e.level));
-			insert_values.push_back("'" + Strings::Escape(raid_members_e.name) + "'");
-			insert_values.push_back(std::to_string(raid_members_e.isgroupleader));
-			insert_values.push_back(std::to_string(raid_members_e.israidleader));
-			insert_values.push_back(std::to_string(raid_members_e.islooter));
+			insert_values.push_back(std::to_string(e.raidid));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.groupid));
+			insert_values.push_back(std::to_string(e._class));
+			insert_values.push_back(std::to_string(e.level));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.isgroupleader));
+			insert_values.push_back(std::to_string(e.israidleader));
+			insert_values.push_back(std::to_string(e.islooter));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

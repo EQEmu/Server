@@ -181,22 +181,22 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Lfguild lfguild_e
+		Lfguild e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(lfguild_e.type));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(lfguild_e.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(lfguild_e.comment) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(lfguild_e.fromlevel));
-		update_values.push_back(columns[4] + " = " + std::to_string(lfguild_e.tolevel));
-		update_values.push_back(columns[5] + " = " + std::to_string(lfguild_e.classes));
-		update_values.push_back(columns[6] + " = " + std::to_string(lfguild_e.aacount));
-		update_values.push_back(columns[7] + " = " + std::to_string(lfguild_e.timezone));
-		update_values.push_back(columns[8] + " = " + std::to_string(lfguild_e.timeposted));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.comment) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(e.fromlevel));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.tolevel));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.classes));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.aacount));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.timezone));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.timeposted));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -204,7 +204,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				lfguild_e.type
+				e.type
 			)
 		);
 
@@ -213,20 +213,20 @@ public:
 
 	static Lfguild InsertOne(
 		Database& db,
-		Lfguild lfguild_e
+		Lfguild e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(lfguild_e.type));
-		insert_values.push_back("'" + Strings::Escape(lfguild_e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(lfguild_e.comment) + "'");
-		insert_values.push_back(std::to_string(lfguild_e.fromlevel));
-		insert_values.push_back(std::to_string(lfguild_e.tolevel));
-		insert_values.push_back(std::to_string(lfguild_e.classes));
-		insert_values.push_back(std::to_string(lfguild_e.aacount));
-		insert_values.push_back(std::to_string(lfguild_e.timezone));
-		insert_values.push_back(std::to_string(lfguild_e.timeposted));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.comment) + "'");
+		insert_values.push_back(std::to_string(e.fromlevel));
+		insert_values.push_back(std::to_string(e.tolevel));
+		insert_values.push_back(std::to_string(e.classes));
+		insert_values.push_back(std::to_string(e.aacount));
+		insert_values.push_back(std::to_string(e.timezone));
+		insert_values.push_back(std::to_string(e.timeposted));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -237,34 +237,34 @@ public:
 		);
 
 		if (results.Success()) {
-			lfguild_e.type = results.LastInsertedID();
-			return lfguild_e;
+			e.type = results.LastInsertedID();
+			return e;
 		}
 
-		lfguild_e = NewEntity();
+		e = NewEntity();
 
-		return lfguild_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Lfguild> lfguild_entries
+		std::vector<Lfguild> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &lfguild_e: lfguild_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(lfguild_e.type));
-			insert_values.push_back("'" + Strings::Escape(lfguild_e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(lfguild_e.comment) + "'");
-			insert_values.push_back(std::to_string(lfguild_e.fromlevel));
-			insert_values.push_back(std::to_string(lfguild_e.tolevel));
-			insert_values.push_back(std::to_string(lfguild_e.classes));
-			insert_values.push_back(std::to_string(lfguild_e.aacount));
-			insert_values.push_back(std::to_string(lfguild_e.timezone));
-			insert_values.push_back(std::to_string(lfguild_e.timeposted));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.comment) + "'");
+			insert_values.push_back(std::to_string(e.fromlevel));
+			insert_values.push_back(std::to_string(e.tolevel));
+			insert_values.push_back(std::to_string(e.classes));
+			insert_values.push_back(std::to_string(e.aacount));
+			insert_values.push_back(std::to_string(e.timezone));
+			insert_values.push_back(std::to_string(e.timeposted));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

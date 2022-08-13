@@ -191,23 +191,23 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Fishing fishing_e
+		Fishing e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(fishing_e.zoneid));
-		update_values.push_back(columns[2] + " = " + std::to_string(fishing_e.Itemid));
-		update_values.push_back(columns[3] + " = " + std::to_string(fishing_e.skill_level));
-		update_values.push_back(columns[4] + " = " + std::to_string(fishing_e.chance));
-		update_values.push_back(columns[5] + " = " + std::to_string(fishing_e.npc_id));
-		update_values.push_back(columns[6] + " = " + std::to_string(fishing_e.npc_chance));
-		update_values.push_back(columns[7] + " = " + std::to_string(fishing_e.min_expansion));
-		update_values.push_back(columns[8] + " = " + std::to_string(fishing_e.max_expansion));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(fishing_e.content_flags) + "'");
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(fishing_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.Itemid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.skill_level));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.chance));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.npc_id));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.npc_chance));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,7 +215,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				fishing_e.id
+				e.id
 			)
 		);
 
@@ -224,22 +224,22 @@ public:
 
 	static Fishing InsertOne(
 		Database& db,
-		Fishing fishing_e
+		Fishing e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(fishing_e.id));
-		insert_values.push_back(std::to_string(fishing_e.zoneid));
-		insert_values.push_back(std::to_string(fishing_e.Itemid));
-		insert_values.push_back(std::to_string(fishing_e.skill_level));
-		insert_values.push_back(std::to_string(fishing_e.chance));
-		insert_values.push_back(std::to_string(fishing_e.npc_id));
-		insert_values.push_back(std::to_string(fishing_e.npc_chance));
-		insert_values.push_back(std::to_string(fishing_e.min_expansion));
-		insert_values.push_back(std::to_string(fishing_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(fishing_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(fishing_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.Itemid));
+		insert_values.push_back(std::to_string(e.skill_level));
+		insert_values.push_back(std::to_string(e.chance));
+		insert_values.push_back(std::to_string(e.npc_id));
+		insert_values.push_back(std::to_string(e.npc_chance));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -250,36 +250,36 @@ public:
 		);
 
 		if (results.Success()) {
-			fishing_e.id = results.LastInsertedID();
-			return fishing_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		fishing_e = NewEntity();
+		e = NewEntity();
 
-		return fishing_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Fishing> fishing_entries
+		std::vector<Fishing> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &fishing_e: fishing_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(fishing_e.id));
-			insert_values.push_back(std::to_string(fishing_e.zoneid));
-			insert_values.push_back(std::to_string(fishing_e.Itemid));
-			insert_values.push_back(std::to_string(fishing_e.skill_level));
-			insert_values.push_back(std::to_string(fishing_e.chance));
-			insert_values.push_back(std::to_string(fishing_e.npc_id));
-			insert_values.push_back(std::to_string(fishing_e.npc_chance));
-			insert_values.push_back(std::to_string(fishing_e.min_expansion));
-			insert_values.push_back(std::to_string(fishing_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(fishing_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(fishing_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.Itemid));
+			insert_values.push_back(std::to_string(e.skill_level));
+			insert_values.push_back(std::to_string(e.chance));
+			insert_values.push_back(std::to_string(e.npc_id));
+			insert_values.push_back(std::to_string(e.npc_chance));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

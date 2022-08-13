@@ -191,24 +191,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LootdropEntries lootdrop_entries_e
+		LootdropEntries e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(lootdrop_entries_e.lootdrop_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(lootdrop_entries_e.item_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_entries_e.item_charges));
-		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entries_e.equip_item));
-		update_values.push_back(columns[4] + " = " + std::to_string(lootdrop_entries_e.chance));
-		update_values.push_back(columns[5] + " = " + std::to_string(lootdrop_entries_e.disabled_chance));
-		update_values.push_back(columns[6] + " = " + std::to_string(lootdrop_entries_e.trivial_min_level));
-		update_values.push_back(columns[7] + " = " + std::to_string(lootdrop_entries_e.trivial_max_level));
-		update_values.push_back(columns[8] + " = " + std::to_string(lootdrop_entries_e.multiplier));
-		update_values.push_back(columns[9] + " = " + std::to_string(lootdrop_entries_e.npc_min_level));
-		update_values.push_back(columns[10] + " = " + std::to_string(lootdrop_entries_e.npc_max_level));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.lootdrop_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.item_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.item_charges));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.equip_item));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.chance));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.disabled_chance));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.trivial_min_level));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.trivial_max_level));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.multiplier));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.npc_min_level));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.npc_max_level));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +216,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				lootdrop_entries_e.lootdrop_id
+				e.lootdrop_id
 			)
 		);
 
@@ -225,22 +225,22 @@ public:
 
 	static LootdropEntries InsertOne(
 		Database& db,
-		LootdropEntries lootdrop_entries_e
+		LootdropEntries e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(lootdrop_entries_e.lootdrop_id));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.item_id));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.item_charges));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.equip_item));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.chance));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.disabled_chance));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.trivial_min_level));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.trivial_max_level));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.multiplier));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.npc_min_level));
-		insert_values.push_back(std::to_string(lootdrop_entries_e.npc_max_level));
+		insert_values.push_back(std::to_string(e.lootdrop_id));
+		insert_values.push_back(std::to_string(e.item_id));
+		insert_values.push_back(std::to_string(e.item_charges));
+		insert_values.push_back(std::to_string(e.equip_item));
+		insert_values.push_back(std::to_string(e.chance));
+		insert_values.push_back(std::to_string(e.disabled_chance));
+		insert_values.push_back(std::to_string(e.trivial_min_level));
+		insert_values.push_back(std::to_string(e.trivial_max_level));
+		insert_values.push_back(std::to_string(e.multiplier));
+		insert_values.push_back(std::to_string(e.npc_min_level));
+		insert_values.push_back(std::to_string(e.npc_max_level));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -251,36 +251,36 @@ public:
 		);
 
 		if (results.Success()) {
-			lootdrop_entries_e.lootdrop_id = results.LastInsertedID();
-			return lootdrop_entries_e;
+			e.lootdrop_id = results.LastInsertedID();
+			return e;
 		}
 
-		lootdrop_entries_e = NewEntity();
+		e = NewEntity();
 
-		return lootdrop_entries_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LootdropEntries> lootdrop_entries_entries
+		std::vector<LootdropEntries> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &lootdrop_entries_e: lootdrop_entries_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(lootdrop_entries_e.lootdrop_id));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.item_id));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.item_charges));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.equip_item));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.chance));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.disabled_chance));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.trivial_min_level));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.trivial_max_level));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.multiplier));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.npc_min_level));
-			insert_values.push_back(std::to_string(lootdrop_entries_e.npc_max_level));
+			insert_values.push_back(std::to_string(e.lootdrop_id));
+			insert_values.push_back(std::to_string(e.item_id));
+			insert_values.push_back(std::to_string(e.item_charges));
+			insert_values.push_back(std::to_string(e.equip_item));
+			insert_values.push_back(std::to_string(e.chance));
+			insert_values.push_back(std::to_string(e.disabled_chance));
+			insert_values.push_back(std::to_string(e.trivial_min_level));
+			insert_values.push_back(std::to_string(e.trivial_max_level));
+			insert_values.push_back(std::to_string(e.multiplier));
+			insert_values.push_back(std::to_string(e.npc_min_level));
+			insert_values.push_back(std::to_string(e.npc_max_level));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

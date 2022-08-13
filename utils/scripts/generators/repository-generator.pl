@@ -273,12 +273,12 @@ foreach my $table_to_generate (@tables) {
 
         # update one
         if ($extra ne "auto_increment") {
-            my $query_value = sprintf('\'" + Strings::Escape(%s_e.%s) + "\'");', $table_name, $column_name_formatted);
+            my $query_value = sprintf('\'" + Strings::Escape(e.%s) + "\'");', $column_name_formatted);
             if ($data_type =~ /int|float|double|decimal/) {
-                $query_value = sprintf('" + std::to_string(%s_e.%s));', $table_name, $column_name_formatted);
+                $query_value = sprintf('" + std::to_string(e.%s));', $column_name_formatted);
             }
             elsif ($data_type =~ /datetime/) {
-                $query_value = sprintf('FROM_UNIXTIME(" + (%s_e.%s > 0 ? std::to_string(%s_e.%s) : "null") + ")");', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
+                $query_value = sprintf('FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")");', $column_name_formatted, $column_name_formatted);
             }
 
             $update_one_entries .= sprintf(
@@ -289,12 +289,12 @@ foreach my $table_to_generate (@tables) {
         }
 
         # insert
-        my $value = sprintf("\"'\" + Strings::Escape(%s_e.%s) + \"'\"", $table_name, $column_name_formatted);
+        my $value = sprintf("\"'\" + Strings::Escape(e.%s) + \"'\"", $column_name_formatted);
         if ($data_type =~ /int|float|double|decimal/) {
-            $value = sprintf('std::to_string(%s_e.%s)', $table_name, $column_name_formatted);
+            $value = sprintf('std::to_string(e.%s)', $column_name_formatted);
         }
         elsif ($data_type =~ /datetime/) {
-            $value = sprintf('"FROM_UNIXTIME(" + (%s_e.%s > 0 ? std::to_string(%s_e.%s) : "null") + ")"', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
+            $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")"', $column_name_formatted, $column_name_formatted);
         }
 
         $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);

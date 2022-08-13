@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GuildRelations guild_relations_e
+		GuildRelations e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(guild_relations_e.guild1));
-		update_values.push_back(columns[1] + " = " + std::to_string(guild_relations_e.guild2));
-		update_values.push_back(columns[2] + " = " + std::to_string(guild_relations_e.relation));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.guild1));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.guild2));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.relation));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				guild_relations_e.guild1
+				e.guild1
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static GuildRelations InsertOne(
 		Database& db,
-		GuildRelations guild_relations_e
+		GuildRelations e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(guild_relations_e.guild1));
-		insert_values.push_back(std::to_string(guild_relations_e.guild2));
-		insert_values.push_back(std::to_string(guild_relations_e.relation));
+		insert_values.push_back(std::to_string(e.guild1));
+		insert_values.push_back(std::to_string(e.guild2));
+		insert_values.push_back(std::to_string(e.relation));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			guild_relations_e.guild1 = results.LastInsertedID();
-			return guild_relations_e;
+			e.guild1 = results.LastInsertedID();
+			return e;
 		}
 
-		guild_relations_e = NewEntity();
+		e = NewEntity();
 
-		return guild_relations_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GuildRelations> guild_relations_entries
+		std::vector<GuildRelations> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &guild_relations_e: guild_relations_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(guild_relations_e.guild1));
-			insert_values.push_back(std::to_string(guild_relations_e.guild2));
-			insert_values.push_back(std::to_string(guild_relations_e.relation));
+			insert_values.push_back(std::to_string(e.guild1));
+			insert_values.push_back(std::to_string(e.guild2));
+			insert_values.push_back(std::to_string(e.relation));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

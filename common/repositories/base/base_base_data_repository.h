@@ -186,23 +186,23 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		BaseData base_data_e
+		BaseData e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(base_data_e.level));
-		update_values.push_back(columns[1] + " = " + std::to_string(base_data_e.class_));
-		update_values.push_back(columns[2] + " = " + std::to_string(base_data_e.hp));
-		update_values.push_back(columns[3] + " = " + std::to_string(base_data_e.mana));
-		update_values.push_back(columns[4] + " = " + std::to_string(base_data_e.end));
-		update_values.push_back(columns[5] + " = " + std::to_string(base_data_e.unk1));
-		update_values.push_back(columns[6] + " = " + std::to_string(base_data_e.unk2));
-		update_values.push_back(columns[7] + " = " + std::to_string(base_data_e.hp_fac));
-		update_values.push_back(columns[8] + " = " + std::to_string(base_data_e.mana_fac));
-		update_values.push_back(columns[9] + " = " + std::to_string(base_data_e.end_fac));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.level));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.class_));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.hp));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.mana));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.end));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.unk1));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.unk2));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.hp_fac));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.mana_fac));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.end_fac));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -210,7 +210,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				base_data_e.level
+				e.level
 			)
 		);
 
@@ -219,21 +219,21 @@ public:
 
 	static BaseData InsertOne(
 		Database& db,
-		BaseData base_data_e
+		BaseData e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(base_data_e.level));
-		insert_values.push_back(std::to_string(base_data_e.class_));
-		insert_values.push_back(std::to_string(base_data_e.hp));
-		insert_values.push_back(std::to_string(base_data_e.mana));
-		insert_values.push_back(std::to_string(base_data_e.end));
-		insert_values.push_back(std::to_string(base_data_e.unk1));
-		insert_values.push_back(std::to_string(base_data_e.unk2));
-		insert_values.push_back(std::to_string(base_data_e.hp_fac));
-		insert_values.push_back(std::to_string(base_data_e.mana_fac));
-		insert_values.push_back(std::to_string(base_data_e.end_fac));
+		insert_values.push_back(std::to_string(e.level));
+		insert_values.push_back(std::to_string(e.class_));
+		insert_values.push_back(std::to_string(e.hp));
+		insert_values.push_back(std::to_string(e.mana));
+		insert_values.push_back(std::to_string(e.end));
+		insert_values.push_back(std::to_string(e.unk1));
+		insert_values.push_back(std::to_string(e.unk2));
+		insert_values.push_back(std::to_string(e.hp_fac));
+		insert_values.push_back(std::to_string(e.mana_fac));
+		insert_values.push_back(std::to_string(e.end_fac));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -244,35 +244,35 @@ public:
 		);
 
 		if (results.Success()) {
-			base_data_e.level = results.LastInsertedID();
-			return base_data_e;
+			e.level = results.LastInsertedID();
+			return e;
 		}
 
-		base_data_e = NewEntity();
+		e = NewEntity();
 
-		return base_data_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<BaseData> base_data_entries
+		std::vector<BaseData> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &base_data_e: base_data_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(base_data_e.level));
-			insert_values.push_back(std::to_string(base_data_e.class_));
-			insert_values.push_back(std::to_string(base_data_e.hp));
-			insert_values.push_back(std::to_string(base_data_e.mana));
-			insert_values.push_back(std::to_string(base_data_e.end));
-			insert_values.push_back(std::to_string(base_data_e.unk1));
-			insert_values.push_back(std::to_string(base_data_e.unk2));
-			insert_values.push_back(std::to_string(base_data_e.hp_fac));
-			insert_values.push_back(std::to_string(base_data_e.mana_fac));
-			insert_values.push_back(std::to_string(base_data_e.end_fac));
+			insert_values.push_back(std::to_string(e.level));
+			insert_values.push_back(std::to_string(e.class_));
+			insert_values.push_back(std::to_string(e.hp));
+			insert_values.push_back(std::to_string(e.mana));
+			insert_values.push_back(std::to_string(e.end));
+			insert_values.push_back(std::to_string(e.unk1));
+			insert_values.push_back(std::to_string(e.unk2));
+			insert_values.push_back(std::to_string(e.hp_fac));
+			insert_values.push_back(std::to_string(e.mana_fac));
+			insert_values.push_back(std::to_string(e.end_fac));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

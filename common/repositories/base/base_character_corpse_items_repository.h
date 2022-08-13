@@ -191,24 +191,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterCorpseItems character_corpse_items_e
+		CharacterCorpseItems e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_corpse_items_e.corpse_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_corpse_items_e.equip_slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_corpse_items_e.item_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_corpse_items_e.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_corpse_items_e.aug_1));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_corpse_items_e.aug_2));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_corpse_items_e.aug_3));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_corpse_items_e.aug_4));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_corpse_items_e.aug_5));
-		update_values.push_back(columns[9] + " = " + std::to_string(character_corpse_items_e.aug_6));
-		update_values.push_back(columns[10] + " = " + std::to_string(character_corpse_items_e.attuned));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.corpse_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.equip_slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.item_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.charges));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.aug_1));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.aug_2));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.aug_3));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.aug_4));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.aug_5));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.aug_6));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.attuned));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +216,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_corpse_items_e.corpse_id
+				e.corpse_id
 			)
 		);
 
@@ -225,22 +225,22 @@ public:
 
 	static CharacterCorpseItems InsertOne(
 		Database& db,
-		CharacterCorpseItems character_corpse_items_e
+		CharacterCorpseItems e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_corpse_items_e.corpse_id));
-		insert_values.push_back(std::to_string(character_corpse_items_e.equip_slot));
-		insert_values.push_back(std::to_string(character_corpse_items_e.item_id));
-		insert_values.push_back(std::to_string(character_corpse_items_e.charges));
-		insert_values.push_back(std::to_string(character_corpse_items_e.aug_1));
-		insert_values.push_back(std::to_string(character_corpse_items_e.aug_2));
-		insert_values.push_back(std::to_string(character_corpse_items_e.aug_3));
-		insert_values.push_back(std::to_string(character_corpse_items_e.aug_4));
-		insert_values.push_back(std::to_string(character_corpse_items_e.aug_5));
-		insert_values.push_back(std::to_string(character_corpse_items_e.aug_6));
-		insert_values.push_back(std::to_string(character_corpse_items_e.attuned));
+		insert_values.push_back(std::to_string(e.corpse_id));
+		insert_values.push_back(std::to_string(e.equip_slot));
+		insert_values.push_back(std::to_string(e.item_id));
+		insert_values.push_back(std::to_string(e.charges));
+		insert_values.push_back(std::to_string(e.aug_1));
+		insert_values.push_back(std::to_string(e.aug_2));
+		insert_values.push_back(std::to_string(e.aug_3));
+		insert_values.push_back(std::to_string(e.aug_4));
+		insert_values.push_back(std::to_string(e.aug_5));
+		insert_values.push_back(std::to_string(e.aug_6));
+		insert_values.push_back(std::to_string(e.attuned));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -251,36 +251,36 @@ public:
 		);
 
 		if (results.Success()) {
-			character_corpse_items_e.corpse_id = results.LastInsertedID();
-			return character_corpse_items_e;
+			e.corpse_id = results.LastInsertedID();
+			return e;
 		}
 
-		character_corpse_items_e = NewEntity();
+		e = NewEntity();
 
-		return character_corpse_items_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterCorpseItems> character_corpse_items_entries
+		std::vector<CharacterCorpseItems> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_corpse_items_e: character_corpse_items_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_corpse_items_e.corpse_id));
-			insert_values.push_back(std::to_string(character_corpse_items_e.equip_slot));
-			insert_values.push_back(std::to_string(character_corpse_items_e.item_id));
-			insert_values.push_back(std::to_string(character_corpse_items_e.charges));
-			insert_values.push_back(std::to_string(character_corpse_items_e.aug_1));
-			insert_values.push_back(std::to_string(character_corpse_items_e.aug_2));
-			insert_values.push_back(std::to_string(character_corpse_items_e.aug_3));
-			insert_values.push_back(std::to_string(character_corpse_items_e.aug_4));
-			insert_values.push_back(std::to_string(character_corpse_items_e.aug_5));
-			insert_values.push_back(std::to_string(character_corpse_items_e.aug_6));
-			insert_values.push_back(std::to_string(character_corpse_items_e.attuned));
+			insert_values.push_back(std::to_string(e.corpse_id));
+			insert_values.push_back(std::to_string(e.equip_slot));
+			insert_values.push_back(std::to_string(e.item_id));
+			insert_values.push_back(std::to_string(e.charges));
+			insert_values.push_back(std::to_string(e.aug_1));
+			insert_values.push_back(std::to_string(e.aug_2));
+			insert_values.push_back(std::to_string(e.aug_3));
+			insert_values.push_back(std::to_string(e.aug_4));
+			insert_values.push_back(std::to_string(e.aug_5));
+			insert_values.push_back(std::to_string(e.aug_6));
+			insert_values.push_back(std::to_string(e.attuned));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

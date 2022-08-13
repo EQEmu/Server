@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Timers timers_e
+		Timers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(timers_e.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(timers_e.type));
-		update_values.push_back(columns[2] + " = " + std::to_string(timers_e.start));
-		update_values.push_back(columns[3] + " = " + std::to_string(timers_e.duration));
-		update_values.push_back(columns[4] + " = " + std::to_string(timers_e.enable));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.start));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.duration));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.enable));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				timers_e.char_id
+				e.char_id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static Timers InsertOne(
 		Database& db,
-		Timers timers_e
+		Timers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(timers_e.char_id));
-		insert_values.push_back(std::to_string(timers_e.type));
-		insert_values.push_back(std::to_string(timers_e.start));
-		insert_values.push_back(std::to_string(timers_e.duration));
-		insert_values.push_back(std::to_string(timers_e.enable));
+		insert_values.push_back(std::to_string(e.char_id));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.start));
+		insert_values.push_back(std::to_string(e.duration));
+		insert_values.push_back(std::to_string(e.enable));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,30 +209,30 @@ public:
 		);
 
 		if (results.Success()) {
-			timers_e.char_id = results.LastInsertedID();
-			return timers_e;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		timers_e = NewEntity();
+		e = NewEntity();
 
-		return timers_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Timers> timers_entries
+		std::vector<Timers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &timers_e: timers_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(timers_e.char_id));
-			insert_values.push_back(std::to_string(timers_e.type));
-			insert_values.push_back(std::to_string(timers_e.start));
-			insert_values.push_back(std::to_string(timers_e.duration));
-			insert_values.push_back(std::to_string(timers_e.enable));
+			insert_values.push_back(std::to_string(e.char_id));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.start));
+			insert_values.push_back(std::to_string(e.duration));
+			insert_values.push_back(std::to_string(e.enable));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RespawnTimes respawn_times_e
+		RespawnTimes e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(respawn_times_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(respawn_times_e.start));
-		update_values.push_back(columns[2] + " = " + std::to_string(respawn_times_e.duration));
-		update_values.push_back(columns[3] + " = " + std::to_string(respawn_times_e.instance_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.start));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.duration));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.instance_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				respawn_times_e.id
+				e.id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static RespawnTimes InsertOne(
 		Database& db,
-		RespawnTimes respawn_times_e
+		RespawnTimes e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(respawn_times_e.id));
-		insert_values.push_back(std::to_string(respawn_times_e.start));
-		insert_values.push_back(std::to_string(respawn_times_e.duration));
-		insert_values.push_back(std::to_string(respawn_times_e.instance_id));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.start));
+		insert_values.push_back(std::to_string(e.duration));
+		insert_values.push_back(std::to_string(e.instance_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			respawn_times_e.id = results.LastInsertedID();
-			return respawn_times_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		respawn_times_e = NewEntity();
+		e = NewEntity();
 
-		return respawn_times_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RespawnTimes> respawn_times_entries
+		std::vector<RespawnTimes> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &respawn_times_e: respawn_times_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(respawn_times_e.id));
-			insert_values.push_back(std::to_string(respawn_times_e.start));
-			insert_values.push_back(std::to_string(respawn_times_e.duration));
-			insert_values.push_back(std::to_string(respawn_times_e.instance_id));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.start));
+			insert_values.push_back(std::to_string(e.duration));
+			insert_values.push_back(std::to_string(e.instance_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

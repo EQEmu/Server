@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoginApiTokens login_api_tokens_e
+		LoginApiTokens e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_api_tokens_e.token) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(login_api_tokens_e.can_write));
-		update_values.push_back(columns[3] + " = " + std::to_string(login_api_tokens_e.can_read));
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (login_api_tokens_e.created_at > 0 ? std::to_string(login_api_tokens_e.created_at) : "null") + ")");
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (login_api_tokens_e.updated_at > 0 ? std::to_string(login_api_tokens_e.updated_at) : "null") + ")");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.token) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.can_write));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.can_read));
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				login_api_tokens_e.id
+				e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static LoginApiTokens InsertOne(
 		Database& db,
-		LoginApiTokens login_api_tokens_e
+		LoginApiTokens e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(login_api_tokens_e.id));
-		insert_values.push_back("'" + Strings::Escape(login_api_tokens_e.token) + "'");
-		insert_values.push_back(std::to_string(login_api_tokens_e.can_write));
-		insert_values.push_back(std::to_string(login_api_tokens_e.can_read));
-		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.created_at > 0 ? std::to_string(login_api_tokens_e.created_at) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.updated_at > 0 ? std::to_string(login_api_tokens_e.updated_at) : "null") + ")");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.token) + "'");
+		insert_values.push_back(std::to_string(e.can_write));
+		insert_values.push_back(std::to_string(e.can_read));
+		insert_values.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,31 +215,31 @@ public:
 		);
 
 		if (results.Success()) {
-			login_api_tokens_e.id = results.LastInsertedID();
-			return login_api_tokens_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		login_api_tokens_e = NewEntity();
+		e = NewEntity();
 
-		return login_api_tokens_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LoginApiTokens> login_api_tokens_entries
+		std::vector<LoginApiTokens> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &login_api_tokens_e: login_api_tokens_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(login_api_tokens_e.id));
-			insert_values.push_back("'" + Strings::Escape(login_api_tokens_e.token) + "'");
-			insert_values.push_back(std::to_string(login_api_tokens_e.can_write));
-			insert_values.push_back(std::to_string(login_api_tokens_e.can_read));
-			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.created_at > 0 ? std::to_string(login_api_tokens_e.created_at) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (login_api_tokens_e.updated_at > 0 ? std::to_string(login_api_tokens_e.updated_at) : "null") + ")");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.token) + "'");
+			insert_values.push_back(std::to_string(e.can_write));
+			insert_values.push_back(std::to_string(e.can_read));
+			insert_values.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

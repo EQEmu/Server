@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterDisciplines character_disciplines_e
+		CharacterDisciplines e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_disciplines_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_disciplines_e.slot_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_disciplines_e.disc_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.slot_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.disc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_disciplines_e.id
+				e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CharacterDisciplines InsertOne(
 		Database& db,
-		CharacterDisciplines character_disciplines_e
+		CharacterDisciplines e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_disciplines_e.id));
-		insert_values.push_back(std::to_string(character_disciplines_e.slot_id));
-		insert_values.push_back(std::to_string(character_disciplines_e.disc_id));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.slot_id));
+		insert_values.push_back(std::to_string(e.disc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			character_disciplines_e.id = results.LastInsertedID();
-			return character_disciplines_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_disciplines_e = NewEntity();
+		e = NewEntity();
 
-		return character_disciplines_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterDisciplines> character_disciplines_entries
+		std::vector<CharacterDisciplines> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_disciplines_e: character_disciplines_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_disciplines_e.id));
-			insert_values.push_back(std::to_string(character_disciplines_e.slot_id));
-			insert_values.push_back(std::to_string(character_disciplines_e.disc_id));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.slot_id));
+			insert_values.push_back(std::to_string(e.disc_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

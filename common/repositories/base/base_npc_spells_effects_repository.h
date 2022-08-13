@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcSpellsEffects npc_spells_effects_e
+		NpcSpellsEffects e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(npc_spells_effects_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_spells_effects_e.parent_list));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.parent_list));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_spells_effects_e.id
+				e.id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static NpcSpellsEffects InsertOne(
 		Database& db,
-		NpcSpellsEffects npc_spells_effects_e
+		NpcSpellsEffects e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_spells_effects_e.id));
-		insert_values.push_back("'" + Strings::Escape(npc_spells_effects_e.name) + "'");
-		insert_values.push_back(std::to_string(npc_spells_effects_e.parent_list));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.parent_list));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,28 +194,28 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_spells_effects_e.id = results.LastInsertedID();
-			return npc_spells_effects_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		npc_spells_effects_e = NewEntity();
+		e = NewEntity();
 
-		return npc_spells_effects_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcSpellsEffects> npc_spells_effects_entries
+		std::vector<NpcSpellsEffects> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_spells_effects_e: npc_spells_effects_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_spells_effects_e.id));
-			insert_values.push_back("'" + Strings::Escape(npc_spells_effects_e.name) + "'");
-			insert_values.push_back(std::to_string(npc_spells_effects_e.parent_list));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.parent_list));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

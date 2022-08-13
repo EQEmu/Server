@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CompletedSharedTaskMembers completed_shared_task_members_e
+		CompletedSharedTaskMembers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(completed_shared_task_members_e.shared_task_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(completed_shared_task_members_e.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(completed_shared_task_members_e.is_leader));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.shared_task_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.character_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.is_leader));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				completed_shared_task_members_e.shared_task_id
+				e.shared_task_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CompletedSharedTaskMembers InsertOne(
 		Database& db,
-		CompletedSharedTaskMembers completed_shared_task_members_e
+		CompletedSharedTaskMembers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(completed_shared_task_members_e.shared_task_id));
-		insert_values.push_back(std::to_string(completed_shared_task_members_e.character_id));
-		insert_values.push_back(std::to_string(completed_shared_task_members_e.is_leader));
+		insert_values.push_back(std::to_string(e.shared_task_id));
+		insert_values.push_back(std::to_string(e.character_id));
+		insert_values.push_back(std::to_string(e.is_leader));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			completed_shared_task_members_e.shared_task_id = results.LastInsertedID();
-			return completed_shared_task_members_e;
+			e.shared_task_id = results.LastInsertedID();
+			return e;
 		}
 
-		completed_shared_task_members_e = NewEntity();
+		e = NewEntity();
 
-		return completed_shared_task_members_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CompletedSharedTaskMembers> completed_shared_task_members_entries
+		std::vector<CompletedSharedTaskMembers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &completed_shared_task_members_e: completed_shared_task_members_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(completed_shared_task_members_e.shared_task_id));
-			insert_values.push_back(std::to_string(completed_shared_task_members_e.character_id));
-			insert_values.push_back(std::to_string(completed_shared_task_members_e.is_leader));
+			insert_values.push_back(std::to_string(e.shared_task_id));
+			insert_values.push_back(std::to_string(e.character_id));
+			insert_values.push_back(std::to_string(e.is_leader));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

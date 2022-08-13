@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterLanguages character_languages_e
+		CharacterLanguages e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_languages_e.lang_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_languages_e.value));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.lang_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_languages_e.id
+				e.id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static CharacterLanguages InsertOne(
 		Database& db,
-		CharacterLanguages character_languages_e
+		CharacterLanguages e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_languages_e.id));
-		insert_values.push_back(std::to_string(character_languages_e.lang_id));
-		insert_values.push_back(std::to_string(character_languages_e.value));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.lang_id));
+		insert_values.push_back(std::to_string(e.value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,28 +194,28 @@ public:
 		);
 
 		if (results.Success()) {
-			character_languages_e.id = results.LastInsertedID();
-			return character_languages_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_languages_e = NewEntity();
+		e = NewEntity();
 
-		return character_languages_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterLanguages> character_languages_entries
+		std::vector<CharacterLanguages> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_languages_e: character_languages_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_languages_e.id));
-			insert_values.push_back(std::to_string(character_languages_e.lang_id));
-			insert_values.push_back(std::to_string(character_languages_e.value));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.lang_id));
+			insert_values.push_back(std::to_string(e.value));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

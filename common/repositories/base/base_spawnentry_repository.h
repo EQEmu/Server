@@ -176,21 +176,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Spawnentry spawnentry_e
+		Spawnentry e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(spawnentry_e.spawngroupID));
-		update_values.push_back(columns[1] + " = " + std::to_string(spawnentry_e.npcID));
-		update_values.push_back(columns[2] + " = " + std::to_string(spawnentry_e.chance));
-		update_values.push_back(columns[3] + " = " + std::to_string(spawnentry_e.condition_value_filter));
-		update_values.push_back(columns[4] + " = " + std::to_string(spawnentry_e.min_expansion));
-		update_values.push_back(columns[5] + " = " + std::to_string(spawnentry_e.max_expansion));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(spawnentry_e.content_flags) + "'");
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(spawnentry_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.spawngroupID));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.npcID));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.chance));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.condition_value_filter));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -198,7 +198,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spawnentry_e.spawngroupID
+				e.spawngroupID
 			)
 		);
 
@@ -207,19 +207,19 @@ public:
 
 	static Spawnentry InsertOne(
 		Database& db,
-		Spawnentry spawnentry_e
+		Spawnentry e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spawnentry_e.spawngroupID));
-		insert_values.push_back(std::to_string(spawnentry_e.npcID));
-		insert_values.push_back(std::to_string(spawnentry_e.chance));
-		insert_values.push_back(std::to_string(spawnentry_e.condition_value_filter));
-		insert_values.push_back(std::to_string(spawnentry_e.min_expansion));
-		insert_values.push_back(std::to_string(spawnentry_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(spawnentry_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(spawnentry_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.spawngroupID));
+		insert_values.push_back(std::to_string(e.npcID));
+		insert_values.push_back(std::to_string(e.chance));
+		insert_values.push_back(std::to_string(e.condition_value_filter));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -230,33 +230,33 @@ public:
 		);
 
 		if (results.Success()) {
-			spawnentry_e.spawngroupID = results.LastInsertedID();
-			return spawnentry_e;
+			e.spawngroupID = results.LastInsertedID();
+			return e;
 		}
 
-		spawnentry_e = NewEntity();
+		e = NewEntity();
 
-		return spawnentry_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Spawnentry> spawnentry_entries
+		std::vector<Spawnentry> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spawnentry_e: spawnentry_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spawnentry_e.spawngroupID));
-			insert_values.push_back(std::to_string(spawnentry_e.npcID));
-			insert_values.push_back(std::to_string(spawnentry_e.chance));
-			insert_values.push_back(std::to_string(spawnentry_e.condition_value_filter));
-			insert_values.push_back(std::to_string(spawnentry_e.min_expansion));
-			insert_values.push_back(std::to_string(spawnentry_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(spawnentry_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(spawnentry_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.spawngroupID));
+			insert_values.push_back(std::to_string(e.npcID));
+			insert_values.push_back(std::to_string(e.chance));
+			insert_values.push_back(std::to_string(e.condition_value_filter));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

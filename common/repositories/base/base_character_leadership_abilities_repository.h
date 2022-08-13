@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterLeadershipAbilities character_leadership_abilities_e
+		CharacterLeadershipAbilities e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_leadership_abilities_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_leadership_abilities_e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_leadership_abilities_e.rank));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.rank));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_leadership_abilities_e.id
+				e.id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CharacterLeadershipAbilities InsertOne(
 		Database& db,
-		CharacterLeadershipAbilities character_leadership_abilities_e
+		CharacterLeadershipAbilities e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_leadership_abilities_e.id));
-		insert_values.push_back(std::to_string(character_leadership_abilities_e.slot));
-		insert_values.push_back(std::to_string(character_leadership_abilities_e.rank));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.rank));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			character_leadership_abilities_e.id = results.LastInsertedID();
-			return character_leadership_abilities_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_leadership_abilities_e = NewEntity();
+		e = NewEntity();
 
-		return character_leadership_abilities_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterLeadershipAbilities> character_leadership_abilities_entries
+		std::vector<CharacterLeadershipAbilities> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_leadership_abilities_e: character_leadership_abilities_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_leadership_abilities_e.id));
-			insert_values.push_back(std::to_string(character_leadership_abilities_e.slot));
-			insert_values.push_back(std::to_string(character_leadership_abilities_e.rank));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.rank));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

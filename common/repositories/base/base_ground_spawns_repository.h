@@ -226,30 +226,30 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GroundSpawns ground_spawns_e
+		GroundSpawns e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(ground_spawns_e.zoneid));
-		update_values.push_back(columns[2] + " = " + std::to_string(ground_spawns_e.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(ground_spawns_e.max_x));
-		update_values.push_back(columns[4] + " = " + std::to_string(ground_spawns_e.max_y));
-		update_values.push_back(columns[5] + " = " + std::to_string(ground_spawns_e.max_z));
-		update_values.push_back(columns[6] + " = " + std::to_string(ground_spawns_e.min_x));
-		update_values.push_back(columns[7] + " = " + std::to_string(ground_spawns_e.min_y));
-		update_values.push_back(columns[8] + " = " + std::to_string(ground_spawns_e.heading));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(ground_spawns_e.name) + "'");
-		update_values.push_back(columns[10] + " = " + std::to_string(ground_spawns_e.item));
-		update_values.push_back(columns[11] + " = " + std::to_string(ground_spawns_e.max_allowed));
-		update_values.push_back(columns[12] + " = '" + Strings::Escape(ground_spawns_e.comment) + "'");
-		update_values.push_back(columns[13] + " = " + std::to_string(ground_spawns_e.respawn_timer));
-		update_values.push_back(columns[14] + " = " + std::to_string(ground_spawns_e.min_expansion));
-		update_values.push_back(columns[15] + " = " + std::to_string(ground_spawns_e.max_expansion));
-		update_values.push_back(columns[16] + " = '" + Strings::Escape(ground_spawns_e.content_flags) + "'");
-		update_values.push_back(columns[17] + " = '" + Strings::Escape(ground_spawns_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.version));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.max_x));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.max_y));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.max_z));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.min_x));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.min_y));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.heading));
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[10] + " = " + std::to_string(e.item));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.max_allowed));
+		update_values.push_back(columns[12] + " = '" + Strings::Escape(e.comment) + "'");
+		update_values.push_back(columns[13] + " = " + std::to_string(e.respawn_timer));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[15] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[16] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[17] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -257,7 +257,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				ground_spawns_e.id
+				e.id
 			)
 		);
 
@@ -266,29 +266,29 @@ public:
 
 	static GroundSpawns InsertOne(
 		Database& db,
-		GroundSpawns ground_spawns_e
+		GroundSpawns e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(ground_spawns_e.id));
-		insert_values.push_back(std::to_string(ground_spawns_e.zoneid));
-		insert_values.push_back(std::to_string(ground_spawns_e.version));
-		insert_values.push_back(std::to_string(ground_spawns_e.max_x));
-		insert_values.push_back(std::to_string(ground_spawns_e.max_y));
-		insert_values.push_back(std::to_string(ground_spawns_e.max_z));
-		insert_values.push_back(std::to_string(ground_spawns_e.min_x));
-		insert_values.push_back(std::to_string(ground_spawns_e.min_y));
-		insert_values.push_back(std::to_string(ground_spawns_e.heading));
-		insert_values.push_back("'" + Strings::Escape(ground_spawns_e.name) + "'");
-		insert_values.push_back(std::to_string(ground_spawns_e.item));
-		insert_values.push_back(std::to_string(ground_spawns_e.max_allowed));
-		insert_values.push_back("'" + Strings::Escape(ground_spawns_e.comment) + "'");
-		insert_values.push_back(std::to_string(ground_spawns_e.respawn_timer));
-		insert_values.push_back(std::to_string(ground_spawns_e.min_expansion));
-		insert_values.push_back(std::to_string(ground_spawns_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(ground_spawns_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(ground_spawns_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.version));
+		insert_values.push_back(std::to_string(e.max_x));
+		insert_values.push_back(std::to_string(e.max_y));
+		insert_values.push_back(std::to_string(e.max_z));
+		insert_values.push_back(std::to_string(e.min_x));
+		insert_values.push_back(std::to_string(e.min_y));
+		insert_values.push_back(std::to_string(e.heading));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.item));
+		insert_values.push_back(std::to_string(e.max_allowed));
+		insert_values.push_back("'" + Strings::Escape(e.comment) + "'");
+		insert_values.push_back(std::to_string(e.respawn_timer));
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -299,43 +299,43 @@ public:
 		);
 
 		if (results.Success()) {
-			ground_spawns_e.id = results.LastInsertedID();
-			return ground_spawns_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		ground_spawns_e = NewEntity();
+		e = NewEntity();
 
-		return ground_spawns_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GroundSpawns> ground_spawns_entries
+		std::vector<GroundSpawns> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &ground_spawns_e: ground_spawns_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(ground_spawns_e.id));
-			insert_values.push_back(std::to_string(ground_spawns_e.zoneid));
-			insert_values.push_back(std::to_string(ground_spawns_e.version));
-			insert_values.push_back(std::to_string(ground_spawns_e.max_x));
-			insert_values.push_back(std::to_string(ground_spawns_e.max_y));
-			insert_values.push_back(std::to_string(ground_spawns_e.max_z));
-			insert_values.push_back(std::to_string(ground_spawns_e.min_x));
-			insert_values.push_back(std::to_string(ground_spawns_e.min_y));
-			insert_values.push_back(std::to_string(ground_spawns_e.heading));
-			insert_values.push_back("'" + Strings::Escape(ground_spawns_e.name) + "'");
-			insert_values.push_back(std::to_string(ground_spawns_e.item));
-			insert_values.push_back(std::to_string(ground_spawns_e.max_allowed));
-			insert_values.push_back("'" + Strings::Escape(ground_spawns_e.comment) + "'");
-			insert_values.push_back(std::to_string(ground_spawns_e.respawn_timer));
-			insert_values.push_back(std::to_string(ground_spawns_e.min_expansion));
-			insert_values.push_back(std::to_string(ground_spawns_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(ground_spawns_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(ground_spawns_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.version));
+			insert_values.push_back(std::to_string(e.max_x));
+			insert_values.push_back(std::to_string(e.max_y));
+			insert_values.push_back(std::to_string(e.max_z));
+			insert_values.push_back(std::to_string(e.min_x));
+			insert_values.push_back(std::to_string(e.min_y));
+			insert_values.push_back(std::to_string(e.heading));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.item));
+			insert_values.push_back(std::to_string(e.max_allowed));
+			insert_values.push_back("'" + Strings::Escape(e.comment) + "'");
+			insert_values.push_back(std::to_string(e.respawn_timer));
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

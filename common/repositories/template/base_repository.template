@@ -140,7 +140,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		{{TABLE_NAME_STRUCT}} {{TABLE_NAME_VAR}}_e
+		{{TABLE_NAME_STRUCT}} e
 	)
 	{
 		std::vector<std::string> update_values;
@@ -155,7 +155,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				{{TABLE_NAME_VAR}}_e.{{PRIMARY_KEY_STRING}}
+				e.{{PRIMARY_KEY_STRING}}
 			)
 		);
 
@@ -164,7 +164,7 @@ public:
 
 	static {{TABLE_NAME_STRUCT}} InsertOne(
 		Database& db,
-		{{TABLE_NAME_STRUCT}} {{TABLE_NAME_VAR}}_e
+		{{TABLE_NAME_STRUCT}} e
 	)
 	{
 		std::vector<std::string> insert_values;
@@ -180,23 +180,23 @@ public:
 		);
 
 		if (results.Success()) {
-			{{TABLE_NAME_VAR}}_e.{{PRIMARY_KEY_STRING}} = results.LastInsertedID();
-			return {{TABLE_NAME_VAR}}_e;
+			e.{{PRIMARY_KEY_STRING}} = results.LastInsertedID();
+			return e;
 		}
 
-		{{TABLE_NAME_VAR}}_e = NewEntity();
+		e = NewEntity();
 
-		return {{TABLE_NAME_VAR}}_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<{{TABLE_NAME_STRUCT}}> {{TABLE_NAME_VAR}}_entries
+		std::vector<{{TABLE_NAME_STRUCT}}> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &{{TABLE_NAME_VAR}}_e: {{TABLE_NAME_VAR}}_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
 {{INSERT_MANY_ENTRIES}}

@@ -206,26 +206,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		SpawnEvents spawn_events_e
+		SpawnEvents e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(spawn_events_e.zone) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(spawn_events_e.cond_id));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(spawn_events_e.name) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(spawn_events_e.period));
-		update_values.push_back(columns[5] + " = " + std::to_string(spawn_events_e.next_minute));
-		update_values.push_back(columns[6] + " = " + std::to_string(spawn_events_e.next_hour));
-		update_values.push_back(columns[7] + " = " + std::to_string(spawn_events_e.next_day));
-		update_values.push_back(columns[8] + " = " + std::to_string(spawn_events_e.next_month));
-		update_values.push_back(columns[9] + " = " + std::to_string(spawn_events_e.next_year));
-		update_values.push_back(columns[10] + " = " + std::to_string(spawn_events_e.enabled));
-		update_values.push_back(columns[11] + " = " + std::to_string(spawn_events_e.action));
-		update_values.push_back(columns[12] + " = " + std::to_string(spawn_events_e.argument));
-		update_values.push_back(columns[13] + " = " + std::to_string(spawn_events_e.strict));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.cond_id));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(e.period));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.next_minute));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.next_hour));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.next_day));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.next_month));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.next_year));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.enabled));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.action));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.argument));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.strict));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -233,7 +233,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				spawn_events_e.id
+				e.id
 			)
 		);
 
@@ -242,25 +242,25 @@ public:
 
 	static SpawnEvents InsertOne(
 		Database& db,
-		SpawnEvents spawn_events_e
+		SpawnEvents e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(spawn_events_e.id));
-		insert_values.push_back("'" + Strings::Escape(spawn_events_e.zone) + "'");
-		insert_values.push_back(std::to_string(spawn_events_e.cond_id));
-		insert_values.push_back("'" + Strings::Escape(spawn_events_e.name) + "'");
-		insert_values.push_back(std::to_string(spawn_events_e.period));
-		insert_values.push_back(std::to_string(spawn_events_e.next_minute));
-		insert_values.push_back(std::to_string(spawn_events_e.next_hour));
-		insert_values.push_back(std::to_string(spawn_events_e.next_day));
-		insert_values.push_back(std::to_string(spawn_events_e.next_month));
-		insert_values.push_back(std::to_string(spawn_events_e.next_year));
-		insert_values.push_back(std::to_string(spawn_events_e.enabled));
-		insert_values.push_back(std::to_string(spawn_events_e.action));
-		insert_values.push_back(std::to_string(spawn_events_e.argument));
-		insert_values.push_back(std::to_string(spawn_events_e.strict));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+		insert_values.push_back(std::to_string(e.cond_id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.period));
+		insert_values.push_back(std::to_string(e.next_minute));
+		insert_values.push_back(std::to_string(e.next_hour));
+		insert_values.push_back(std::to_string(e.next_day));
+		insert_values.push_back(std::to_string(e.next_month));
+		insert_values.push_back(std::to_string(e.next_year));
+		insert_values.push_back(std::to_string(e.enabled));
+		insert_values.push_back(std::to_string(e.action));
+		insert_values.push_back(std::to_string(e.argument));
+		insert_values.push_back(std::to_string(e.strict));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -271,39 +271,39 @@ public:
 		);
 
 		if (results.Success()) {
-			spawn_events_e.id = results.LastInsertedID();
-			return spawn_events_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		spawn_events_e = NewEntity();
+		e = NewEntity();
 
-		return spawn_events_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<SpawnEvents> spawn_events_entries
+		std::vector<SpawnEvents> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spawn_events_e: spawn_events_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(spawn_events_e.id));
-			insert_values.push_back("'" + Strings::Escape(spawn_events_e.zone) + "'");
-			insert_values.push_back(std::to_string(spawn_events_e.cond_id));
-			insert_values.push_back("'" + Strings::Escape(spawn_events_e.name) + "'");
-			insert_values.push_back(std::to_string(spawn_events_e.period));
-			insert_values.push_back(std::to_string(spawn_events_e.next_minute));
-			insert_values.push_back(std::to_string(spawn_events_e.next_hour));
-			insert_values.push_back(std::to_string(spawn_events_e.next_day));
-			insert_values.push_back(std::to_string(spawn_events_e.next_month));
-			insert_values.push_back(std::to_string(spawn_events_e.next_year));
-			insert_values.push_back(std::to_string(spawn_events_e.enabled));
-			insert_values.push_back(std::to_string(spawn_events_e.action));
-			insert_values.push_back(std::to_string(spawn_events_e.argument));
-			insert_values.push_back(std::to_string(spawn_events_e.strict));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+			insert_values.push_back(std::to_string(e.cond_id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.period));
+			insert_values.push_back(std::to_string(e.next_minute));
+			insert_values.push_back(std::to_string(e.next_hour));
+			insert_values.push_back(std::to_string(e.next_day));
+			insert_values.push_back(std::to_string(e.next_month));
+			insert_values.push_back(std::to_string(e.next_year));
+			insert_values.push_back(std::to_string(e.enabled));
+			insert_values.push_back(std::to_string(e.action));
+			insert_values.push_back(std::to_string(e.argument));
+			insert_values.push_back(std::to_string(e.strict));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

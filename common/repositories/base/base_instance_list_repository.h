@@ -171,19 +171,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		InstanceList instance_list_e
+		InstanceList e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_e.zone));
-		update_values.push_back(columns[2] + " = " + std::to_string(instance_list_e.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(instance_list_e.is_global));
-		update_values.push_back(columns[4] + " = " + std::to_string(instance_list_e.start_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(instance_list_e.duration));
-		update_values.push_back(columns[6] + " = " + std::to_string(instance_list_e.never_expires));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zone));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.version));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.is_global));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.start_time));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.duration));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.never_expires));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -191,7 +191,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_e.id
+				e.id
 			)
 		);
 
@@ -200,18 +200,18 @@ public:
 
 	static InstanceList InsertOne(
 		Database& db,
-		InstanceList instance_list_e
+		InstanceList e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_e.id));
-		insert_values.push_back(std::to_string(instance_list_e.zone));
-		insert_values.push_back(std::to_string(instance_list_e.version));
-		insert_values.push_back(std::to_string(instance_list_e.is_global));
-		insert_values.push_back(std::to_string(instance_list_e.start_time));
-		insert_values.push_back(std::to_string(instance_list_e.duration));
-		insert_values.push_back(std::to_string(instance_list_e.never_expires));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.zone));
+		insert_values.push_back(std::to_string(e.version));
+		insert_values.push_back(std::to_string(e.is_global));
+		insert_values.push_back(std::to_string(e.start_time));
+		insert_values.push_back(std::to_string(e.duration));
+		insert_values.push_back(std::to_string(e.never_expires));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,32 +222,32 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_e.id = results.LastInsertedID();
-			return instance_list_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		instance_list_e = NewEntity();
+		e = NewEntity();
 
-		return instance_list_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<InstanceList> instance_list_entries
+		std::vector<InstanceList> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_e: instance_list_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_e.id));
-			insert_values.push_back(std::to_string(instance_list_e.zone));
-			insert_values.push_back(std::to_string(instance_list_e.version));
-			insert_values.push_back(std::to_string(instance_list_e.is_global));
-			insert_values.push_back(std::to_string(instance_list_e.start_time));
-			insert_values.push_back(std::to_string(instance_list_e.duration));
-			insert_values.push_back(std::to_string(instance_list_e.never_expires));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.zone));
+			insert_values.push_back(std::to_string(e.version));
+			insert_values.push_back(std::to_string(e.is_global));
+			insert_values.push_back(std::to_string(e.start_time));
+			insert_values.push_back(std::to_string(e.duration));
+			insert_values.push_back(std::to_string(e.never_expires));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

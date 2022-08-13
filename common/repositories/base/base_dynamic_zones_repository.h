@@ -251,35 +251,35 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DynamicZones dynamic_zones_e
+		DynamicZones e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zones_e.instance_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zones_e.type));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(dynamic_zones_e.uuid) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(dynamic_zones_e.name) + "'");
-		update_values.push_back(columns[5] + " = " + std::to_string(dynamic_zones_e.leader_id));
-		update_values.push_back(columns[6] + " = " + std::to_string(dynamic_zones_e.min_players));
-		update_values.push_back(columns[7] + " = " + std::to_string(dynamic_zones_e.max_players));
-		update_values.push_back(columns[8] + " = " + std::to_string(dynamic_zones_e.dz_switch_id));
-		update_values.push_back(columns[9] + " = " + std::to_string(dynamic_zones_e.compass_zone_id));
-		update_values.push_back(columns[10] + " = " + std::to_string(dynamic_zones_e.compass_x));
-		update_values.push_back(columns[11] + " = " + std::to_string(dynamic_zones_e.compass_y));
-		update_values.push_back(columns[12] + " = " + std::to_string(dynamic_zones_e.compass_z));
-		update_values.push_back(columns[13] + " = " + std::to_string(dynamic_zones_e.safe_return_zone_id));
-		update_values.push_back(columns[14] + " = " + std::to_string(dynamic_zones_e.safe_return_x));
-		update_values.push_back(columns[15] + " = " + std::to_string(dynamic_zones_e.safe_return_y));
-		update_values.push_back(columns[16] + " = " + std::to_string(dynamic_zones_e.safe_return_z));
-		update_values.push_back(columns[17] + " = " + std::to_string(dynamic_zones_e.safe_return_heading));
-		update_values.push_back(columns[18] + " = " + std::to_string(dynamic_zones_e.zone_in_x));
-		update_values.push_back(columns[19] + " = " + std::to_string(dynamic_zones_e.zone_in_y));
-		update_values.push_back(columns[20] + " = " + std::to_string(dynamic_zones_e.zone_in_z));
-		update_values.push_back(columns[21] + " = " + std::to_string(dynamic_zones_e.zone_in_heading));
-		update_values.push_back(columns[22] + " = " + std::to_string(dynamic_zones_e.has_zone_in));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.instance_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.uuid) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[5] + " = " + std::to_string(e.leader_id));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.min_players));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.max_players));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.dz_switch_id));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.compass_zone_id));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.compass_x));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.compass_y));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.compass_z));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.safe_return_zone_id));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.safe_return_x));
+		update_values.push_back(columns[15] + " = " + std::to_string(e.safe_return_y));
+		update_values.push_back(columns[16] + " = " + std::to_string(e.safe_return_z));
+		update_values.push_back(columns[17] + " = " + std::to_string(e.safe_return_heading));
+		update_values.push_back(columns[18] + " = " + std::to_string(e.zone_in_x));
+		update_values.push_back(columns[19] + " = " + std::to_string(e.zone_in_y));
+		update_values.push_back(columns[20] + " = " + std::to_string(e.zone_in_z));
+		update_values.push_back(columns[21] + " = " + std::to_string(e.zone_in_heading));
+		update_values.push_back(columns[22] + " = " + std::to_string(e.has_zone_in));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -287,7 +287,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				dynamic_zones_e.id
+				e.id
 			)
 		);
 
@@ -296,34 +296,34 @@ public:
 
 	static DynamicZones InsertOne(
 		Database& db,
-		DynamicZones dynamic_zones_e
+		DynamicZones e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(dynamic_zones_e.id));
-		insert_values.push_back(std::to_string(dynamic_zones_e.instance_id));
-		insert_values.push_back(std::to_string(dynamic_zones_e.type));
-		insert_values.push_back("'" + Strings::Escape(dynamic_zones_e.uuid) + "'");
-		insert_values.push_back("'" + Strings::Escape(dynamic_zones_e.name) + "'");
-		insert_values.push_back(std::to_string(dynamic_zones_e.leader_id));
-		insert_values.push_back(std::to_string(dynamic_zones_e.min_players));
-		insert_values.push_back(std::to_string(dynamic_zones_e.max_players));
-		insert_values.push_back(std::to_string(dynamic_zones_e.dz_switch_id));
-		insert_values.push_back(std::to_string(dynamic_zones_e.compass_zone_id));
-		insert_values.push_back(std::to_string(dynamic_zones_e.compass_x));
-		insert_values.push_back(std::to_string(dynamic_zones_e.compass_y));
-		insert_values.push_back(std::to_string(dynamic_zones_e.compass_z));
-		insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_zone_id));
-		insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_x));
-		insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_y));
-		insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_z));
-		insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_heading));
-		insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_x));
-		insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_y));
-		insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_z));
-		insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_heading));
-		insert_values.push_back(std::to_string(dynamic_zones_e.has_zone_in));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.instance_id));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back("'" + Strings::Escape(e.uuid) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.leader_id));
+		insert_values.push_back(std::to_string(e.min_players));
+		insert_values.push_back(std::to_string(e.max_players));
+		insert_values.push_back(std::to_string(e.dz_switch_id));
+		insert_values.push_back(std::to_string(e.compass_zone_id));
+		insert_values.push_back(std::to_string(e.compass_x));
+		insert_values.push_back(std::to_string(e.compass_y));
+		insert_values.push_back(std::to_string(e.compass_z));
+		insert_values.push_back(std::to_string(e.safe_return_zone_id));
+		insert_values.push_back(std::to_string(e.safe_return_x));
+		insert_values.push_back(std::to_string(e.safe_return_y));
+		insert_values.push_back(std::to_string(e.safe_return_z));
+		insert_values.push_back(std::to_string(e.safe_return_heading));
+		insert_values.push_back(std::to_string(e.zone_in_x));
+		insert_values.push_back(std::to_string(e.zone_in_y));
+		insert_values.push_back(std::to_string(e.zone_in_z));
+		insert_values.push_back(std::to_string(e.zone_in_heading));
+		insert_values.push_back(std::to_string(e.has_zone_in));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -334,48 +334,48 @@ public:
 		);
 
 		if (results.Success()) {
-			dynamic_zones_e.id = results.LastInsertedID();
-			return dynamic_zones_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		dynamic_zones_e = NewEntity();
+		e = NewEntity();
 
-		return dynamic_zones_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DynamicZones> dynamic_zones_entries
+		std::vector<DynamicZones> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &dynamic_zones_e: dynamic_zones_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(dynamic_zones_e.id));
-			insert_values.push_back(std::to_string(dynamic_zones_e.instance_id));
-			insert_values.push_back(std::to_string(dynamic_zones_e.type));
-			insert_values.push_back("'" + Strings::Escape(dynamic_zones_e.uuid) + "'");
-			insert_values.push_back("'" + Strings::Escape(dynamic_zones_e.name) + "'");
-			insert_values.push_back(std::to_string(dynamic_zones_e.leader_id));
-			insert_values.push_back(std::to_string(dynamic_zones_e.min_players));
-			insert_values.push_back(std::to_string(dynamic_zones_e.max_players));
-			insert_values.push_back(std::to_string(dynamic_zones_e.dz_switch_id));
-			insert_values.push_back(std::to_string(dynamic_zones_e.compass_zone_id));
-			insert_values.push_back(std::to_string(dynamic_zones_e.compass_x));
-			insert_values.push_back(std::to_string(dynamic_zones_e.compass_y));
-			insert_values.push_back(std::to_string(dynamic_zones_e.compass_z));
-			insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_zone_id));
-			insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_x));
-			insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_y));
-			insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_z));
-			insert_values.push_back(std::to_string(dynamic_zones_e.safe_return_heading));
-			insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_x));
-			insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_y));
-			insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_z));
-			insert_values.push_back(std::to_string(dynamic_zones_e.zone_in_heading));
-			insert_values.push_back(std::to_string(dynamic_zones_e.has_zone_in));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.instance_id));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back("'" + Strings::Escape(e.uuid) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.leader_id));
+			insert_values.push_back(std::to_string(e.min_players));
+			insert_values.push_back(std::to_string(e.max_players));
+			insert_values.push_back(std::to_string(e.dz_switch_id));
+			insert_values.push_back(std::to_string(e.compass_zone_id));
+			insert_values.push_back(std::to_string(e.compass_x));
+			insert_values.push_back(std::to_string(e.compass_y));
+			insert_values.push_back(std::to_string(e.compass_z));
+			insert_values.push_back(std::to_string(e.safe_return_zone_id));
+			insert_values.push_back(std::to_string(e.safe_return_x));
+			insert_values.push_back(std::to_string(e.safe_return_y));
+			insert_values.push_back(std::to_string(e.safe_return_z));
+			insert_values.push_back(std::to_string(e.safe_return_heading));
+			insert_values.push_back(std::to_string(e.zone_in_x));
+			insert_values.push_back(std::to_string(e.zone_in_y));
+			insert_values.push_back(std::to_string(e.zone_in_z));
+			insert_values.push_back(std::to_string(e.zone_in_heading));
+			insert_values.push_back(std::to_string(e.has_zone_in));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

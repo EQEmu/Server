@@ -176,20 +176,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcSpellsEffectsEntries npc_spells_effects_entries_e
+		NpcSpellsEffectsEntries e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(npc_spells_effects_entries_e.npc_spells_effects_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_spells_effects_entries_e.spell_effect_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_spells_effects_entries_e.minlevel));
-		update_values.push_back(columns[4] + " = " + std::to_string(npc_spells_effects_entries_e.maxlevel));
-		update_values.push_back(columns[5] + " = " + std::to_string(npc_spells_effects_entries_e.se_base));
-		update_values.push_back(columns[6] + " = " + std::to_string(npc_spells_effects_entries_e.se_limit));
-		update_values.push_back(columns[7] + " = " + std::to_string(npc_spells_effects_entries_e.se_max));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.npc_spells_effects_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.spell_effect_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.minlevel));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.maxlevel));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.se_base));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.se_limit));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.se_max));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_spells_effects_entries_e.id
+				e.id
 			)
 		);
 
@@ -206,19 +206,19 @@ public:
 
 	static NpcSpellsEffectsEntries InsertOne(
 		Database& db,
-		NpcSpellsEffectsEntries npc_spells_effects_entries_e
+		NpcSpellsEffectsEntries e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.id));
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.npc_spells_effects_id));
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.spell_effect_id));
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.minlevel));
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.maxlevel));
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.se_base));
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.se_limit));
-		insert_values.push_back(std::to_string(npc_spells_effects_entries_e.se_max));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.npc_spells_effects_id));
+		insert_values.push_back(std::to_string(e.spell_effect_id));
+		insert_values.push_back(std::to_string(e.minlevel));
+		insert_values.push_back(std::to_string(e.maxlevel));
+		insert_values.push_back(std::to_string(e.se_base));
+		insert_values.push_back(std::to_string(e.se_limit));
+		insert_values.push_back(std::to_string(e.se_max));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,33 +229,33 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_spells_effects_entries_e.id = results.LastInsertedID();
-			return npc_spells_effects_entries_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		npc_spells_effects_entries_e = NewEntity();
+		e = NewEntity();
 
-		return npc_spells_effects_entries_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcSpellsEffectsEntries> npc_spells_effects_entries_entries
+		std::vector<NpcSpellsEffectsEntries> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_spells_effects_entries_e: npc_spells_effects_entries_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.id));
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.npc_spells_effects_id));
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.spell_effect_id));
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.minlevel));
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.maxlevel));
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.se_base));
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.se_limit));
-			insert_values.push_back(std::to_string(npc_spells_effects_entries_e.se_max));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.npc_spells_effects_id));
+			insert_values.push_back(std::to_string(e.spell_effect_id));
+			insert_values.push_back(std::to_string(e.minlevel));
+			insert_values.push_back(std::to_string(e.maxlevel));
+			insert_values.push_back(std::to_string(e.se_base));
+			insert_values.push_back(std::to_string(e.se_limit));
+			insert_values.push_back(std::to_string(e.se_max));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

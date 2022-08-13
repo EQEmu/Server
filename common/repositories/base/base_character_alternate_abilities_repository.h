@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterAlternateAbilities character_alternate_abilities_e
+		CharacterAlternateAbilities e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_alternate_abilities_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_alternate_abilities_e.aa_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_alternate_abilities_e.aa_value));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_alternate_abilities_e.charges));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.aa_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.aa_value));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_alternate_abilities_e.id
+				e.id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static CharacterAlternateAbilities InsertOne(
 		Database& db,
-		CharacterAlternateAbilities character_alternate_abilities_e
+		CharacterAlternateAbilities e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_alternate_abilities_e.id));
-		insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_id));
-		insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_value));
-		insert_values.push_back(std::to_string(character_alternate_abilities_e.charges));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.aa_id));
+		insert_values.push_back(std::to_string(e.aa_value));
+		insert_values.push_back(std::to_string(e.charges));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			character_alternate_abilities_e.id = results.LastInsertedID();
-			return character_alternate_abilities_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_alternate_abilities_e = NewEntity();
+		e = NewEntity();
 
-		return character_alternate_abilities_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterAlternateAbilities> character_alternate_abilities_entries
+		std::vector<CharacterAlternateAbilities> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_alternate_abilities_e: character_alternate_abilities_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_alternate_abilities_e.id));
-			insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_id));
-			insert_values.push_back(std::to_string(character_alternate_abilities_e.aa_value));
-			insert_values.push_back(std::to_string(character_alternate_abilities_e.charges));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.aa_id));
+			insert_values.push_back(std::to_string(e.aa_value));
+			insert_values.push_back(std::to_string(e.charges));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

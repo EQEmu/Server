@@ -176,20 +176,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		TradeskillRecipeEntries tradeskill_recipe_entries_e
+		TradeskillRecipeEntries e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(tradeskill_recipe_entries_e.recipe_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(tradeskill_recipe_entries_e.item_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(tradeskill_recipe_entries_e.successcount));
-		update_values.push_back(columns[4] + " = " + std::to_string(tradeskill_recipe_entries_e.failcount));
-		update_values.push_back(columns[5] + " = " + std::to_string(tradeskill_recipe_entries_e.componentcount));
-		update_values.push_back(columns[6] + " = " + std::to_string(tradeskill_recipe_entries_e.salvagecount));
-		update_values.push_back(columns[7] + " = " + std::to_string(tradeskill_recipe_entries_e.iscontainer));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.recipe_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.item_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.successcount));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.failcount));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.componentcount));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.salvagecount));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.iscontainer));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				tradeskill_recipe_entries_e.id
+				e.id
 			)
 		);
 
@@ -206,19 +206,19 @@ public:
 
 	static TradeskillRecipeEntries InsertOne(
 		Database& db,
-		TradeskillRecipeEntries tradeskill_recipe_entries_e
+		TradeskillRecipeEntries e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.id));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.recipe_id));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.item_id));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.successcount));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.failcount));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.componentcount));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.salvagecount));
-		insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.iscontainer));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.recipe_id));
+		insert_values.push_back(std::to_string(e.item_id));
+		insert_values.push_back(std::to_string(e.successcount));
+		insert_values.push_back(std::to_string(e.failcount));
+		insert_values.push_back(std::to_string(e.componentcount));
+		insert_values.push_back(std::to_string(e.salvagecount));
+		insert_values.push_back(std::to_string(e.iscontainer));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,33 +229,33 @@ public:
 		);
 
 		if (results.Success()) {
-			tradeskill_recipe_entries_e.id = results.LastInsertedID();
-			return tradeskill_recipe_entries_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		tradeskill_recipe_entries_e = NewEntity();
+		e = NewEntity();
 
-		return tradeskill_recipe_entries_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<TradeskillRecipeEntries> tradeskill_recipe_entries_entries
+		std::vector<TradeskillRecipeEntries> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tradeskill_recipe_entries_e: tradeskill_recipe_entries_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.id));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.recipe_id));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.item_id));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.successcount));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.failcount));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.componentcount));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.salvagecount));
-			insert_values.push_back(std::to_string(tradeskill_recipe_entries_e.iscontainer));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.recipe_id));
+			insert_values.push_back(std::to_string(e.item_id));
+			insert_values.push_back(std::to_string(e.successcount));
+			insert_values.push_back(std::to_string(e.failcount));
+			insert_values.push_back(std::to_string(e.componentcount));
+			insert_values.push_back(std::to_string(e.salvagecount));
+			insert_values.push_back(std::to_string(e.iscontainer));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

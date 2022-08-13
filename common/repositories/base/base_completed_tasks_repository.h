@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CompletedTasks completed_tasks_e
+		CompletedTasks e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(completed_tasks_e.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(completed_tasks_e.completedtime));
-		update_values.push_back(columns[2] + " = " + std::to_string(completed_tasks_e.taskid));
-		update_values.push_back(columns[3] + " = " + std::to_string(completed_tasks_e.activityid));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.completedtime));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.taskid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.activityid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				completed_tasks_e.charid
+				e.charid
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static CompletedTasks InsertOne(
 		Database& db,
-		CompletedTasks completed_tasks_e
+		CompletedTasks e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(completed_tasks_e.charid));
-		insert_values.push_back(std::to_string(completed_tasks_e.completedtime));
-		insert_values.push_back(std::to_string(completed_tasks_e.taskid));
-		insert_values.push_back(std::to_string(completed_tasks_e.activityid));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.completedtime));
+		insert_values.push_back(std::to_string(e.taskid));
+		insert_values.push_back(std::to_string(e.activityid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			completed_tasks_e.charid = results.LastInsertedID();
-			return completed_tasks_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		completed_tasks_e = NewEntity();
+		e = NewEntity();
 
-		return completed_tasks_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CompletedTasks> completed_tasks_entries
+		std::vector<CompletedTasks> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &completed_tasks_e: completed_tasks_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(completed_tasks_e.charid));
-			insert_values.push_back(std::to_string(completed_tasks_e.completedtime));
-			insert_values.push_back(std::to_string(completed_tasks_e.taskid));
-			insert_values.push_back(std::to_string(completed_tasks_e.activityid));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.completedtime));
+			insert_values.push_back(std::to_string(e.taskid));
+			insert_values.push_back(std::to_string(e.activityid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

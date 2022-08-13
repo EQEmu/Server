@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DiscoveredItems discovered_items_e
+		DiscoveredItems e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(discovered_items_e.item_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(discovered_items_e.char_name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(discovered_items_e.discovered_date));
-		update_values.push_back(columns[3] + " = " + std::to_string(discovered_items_e.account_status));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.item_id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.char_name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.discovered_date));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.account_status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				discovered_items_e.item_id
+				e.item_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static DiscoveredItems InsertOne(
 		Database& db,
-		DiscoveredItems discovered_items_e
+		DiscoveredItems e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(discovered_items_e.item_id));
-		insert_values.push_back("'" + Strings::Escape(discovered_items_e.char_name) + "'");
-		insert_values.push_back(std::to_string(discovered_items_e.discovered_date));
-		insert_values.push_back(std::to_string(discovered_items_e.account_status));
+		insert_values.push_back(std::to_string(e.item_id));
+		insert_values.push_back("'" + Strings::Escape(e.char_name) + "'");
+		insert_values.push_back(std::to_string(e.discovered_date));
+		insert_values.push_back(std::to_string(e.account_status));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			discovered_items_e.item_id = results.LastInsertedID();
-			return discovered_items_e;
+			e.item_id = results.LastInsertedID();
+			return e;
 		}
 
-		discovered_items_e = NewEntity();
+		e = NewEntity();
 
-		return discovered_items_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DiscoveredItems> discovered_items_entries
+		std::vector<DiscoveredItems> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &discovered_items_e: discovered_items_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(discovered_items_e.item_id));
-			insert_values.push_back("'" + Strings::Escape(discovered_items_e.char_name) + "'");
-			insert_values.push_back(std::to_string(discovered_items_e.discovered_date));
-			insert_values.push_back(std::to_string(discovered_items_e.account_status));
+			insert_values.push_back(std::to_string(e.item_id));
+			insert_values.push_back("'" + Strings::Escape(e.char_name) + "'");
+			insert_values.push_back(std::to_string(e.discovered_date));
+			insert_values.push_back(std::to_string(e.account_status));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

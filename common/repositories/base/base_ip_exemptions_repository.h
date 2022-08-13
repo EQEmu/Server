@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		IpExemptions ip_exemptions_e
+		IpExemptions e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(ip_exemptions_e.exemption_ip) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(ip_exemptions_e.exemption_amount));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.exemption_ip) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.exemption_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				ip_exemptions_e.exemption_id
+				e.exemption_id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static IpExemptions InsertOne(
 		Database& db,
-		IpExemptions ip_exemptions_e
+		IpExemptions e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(ip_exemptions_e.exemption_id));
-		insert_values.push_back("'" + Strings::Escape(ip_exemptions_e.exemption_ip) + "'");
-		insert_values.push_back(std::to_string(ip_exemptions_e.exemption_amount));
+		insert_values.push_back(std::to_string(e.exemption_id));
+		insert_values.push_back("'" + Strings::Escape(e.exemption_ip) + "'");
+		insert_values.push_back(std::to_string(e.exemption_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,28 +194,28 @@ public:
 		);
 
 		if (results.Success()) {
-			ip_exemptions_e.exemption_id = results.LastInsertedID();
-			return ip_exemptions_e;
+			e.exemption_id = results.LastInsertedID();
+			return e;
 		}
 
-		ip_exemptions_e = NewEntity();
+		e = NewEntity();
 
-		return ip_exemptions_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<IpExemptions> ip_exemptions_entries
+		std::vector<IpExemptions> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &ip_exemptions_e: ip_exemptions_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(ip_exemptions_e.exemption_id));
-			insert_values.push_back("'" + Strings::Escape(ip_exemptions_e.exemption_ip) + "'");
-			insert_values.push_back(std::to_string(ip_exemptions_e.exemption_amount));
+			insert_values.push_back(std::to_string(e.exemption_id));
+			insert_values.push_back("'" + Strings::Escape(e.exemption_ip) + "'");
+			insert_values.push_back(std::to_string(e.exemption_amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

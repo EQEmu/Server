@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureDetails adventure_details_e
+		AdventureDetails e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(adventure_details_e.adventure_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(adventure_details_e.instance_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(adventure_details_e.count));
-		update_values.push_back(columns[4] + " = " + std::to_string(adventure_details_e.assassinate_count));
-		update_values.push_back(columns[5] + " = " + std::to_string(adventure_details_e.status));
-		update_values.push_back(columns[6] + " = " + std::to_string(adventure_details_e.time_created));
-		update_values.push_back(columns[7] + " = " + std::to_string(adventure_details_e.time_zoned));
-		update_values.push_back(columns[8] + " = " + std::to_string(adventure_details_e.time_completed));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.adventure_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.instance_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.count));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.assassinate_count));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.status));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.time_created));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.time_zoned));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.time_completed));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				adventure_details_e.id
+				e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static AdventureDetails InsertOne(
 		Database& db,
-		AdventureDetails adventure_details_e
+		AdventureDetails e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(adventure_details_e.id));
-		insert_values.push_back(std::to_string(adventure_details_e.adventure_id));
-		insert_values.push_back(std::to_string(adventure_details_e.instance_id));
-		insert_values.push_back(std::to_string(adventure_details_e.count));
-		insert_values.push_back(std::to_string(adventure_details_e.assassinate_count));
-		insert_values.push_back(std::to_string(adventure_details_e.status));
-		insert_values.push_back(std::to_string(adventure_details_e.time_created));
-		insert_values.push_back(std::to_string(adventure_details_e.time_zoned));
-		insert_values.push_back(std::to_string(adventure_details_e.time_completed));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.adventure_id));
+		insert_values.push_back(std::to_string(e.instance_id));
+		insert_values.push_back(std::to_string(e.count));
+		insert_values.push_back(std::to_string(e.assassinate_count));
+		insert_values.push_back(std::to_string(e.status));
+		insert_values.push_back(std::to_string(e.time_created));
+		insert_values.push_back(std::to_string(e.time_zoned));
+		insert_values.push_back(std::to_string(e.time_completed));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,34 +236,34 @@ public:
 		);
 
 		if (results.Success()) {
-			adventure_details_e.id = results.LastInsertedID();
-			return adventure_details_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		adventure_details_e = NewEntity();
+		e = NewEntity();
 
-		return adventure_details_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AdventureDetails> adventure_details_entries
+		std::vector<AdventureDetails> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &adventure_details_e: adventure_details_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(adventure_details_e.id));
-			insert_values.push_back(std::to_string(adventure_details_e.adventure_id));
-			insert_values.push_back(std::to_string(adventure_details_e.instance_id));
-			insert_values.push_back(std::to_string(adventure_details_e.count));
-			insert_values.push_back(std::to_string(adventure_details_e.assassinate_count));
-			insert_values.push_back(std::to_string(adventure_details_e.status));
-			insert_values.push_back(std::to_string(adventure_details_e.time_created));
-			insert_values.push_back(std::to_string(adventure_details_e.time_zoned));
-			insert_values.push_back(std::to_string(adventure_details_e.time_completed));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.adventure_id));
+			insert_values.push_back(std::to_string(e.instance_id));
+			insert_values.push_back(std::to_string(e.count));
+			insert_values.push_back(std::to_string(e.assassinate_count));
+			insert_values.push_back(std::to_string(e.status));
+			insert_values.push_back(std::to_string(e.time_created));
+			insert_values.push_back(std::to_string(e.time_zoned));
+			insert_values.push_back(std::to_string(e.time_completed));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

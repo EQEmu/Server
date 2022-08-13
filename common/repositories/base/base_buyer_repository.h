@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Buyer buyer_e
+		Buyer e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(buyer_e.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(buyer_e.buyslot));
-		update_values.push_back(columns[2] + " = " + std::to_string(buyer_e.itemid));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(buyer_e.itemname) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(buyer_e.quantity));
-		update_values.push_back(columns[5] + " = " + std::to_string(buyer_e.price));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.buyslot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.itemid));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.itemname) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(e.quantity));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.price));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				buyer_e.charid
+				e.charid
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static Buyer InsertOne(
 		Database& db,
-		Buyer buyer_e
+		Buyer e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(buyer_e.charid));
-		insert_values.push_back(std::to_string(buyer_e.buyslot));
-		insert_values.push_back(std::to_string(buyer_e.itemid));
-		insert_values.push_back("'" + Strings::Escape(buyer_e.itemname) + "'");
-		insert_values.push_back(std::to_string(buyer_e.quantity));
-		insert_values.push_back(std::to_string(buyer_e.price));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.buyslot));
+		insert_values.push_back(std::to_string(e.itemid));
+		insert_values.push_back("'" + Strings::Escape(e.itemname) + "'");
+		insert_values.push_back(std::to_string(e.quantity));
+		insert_values.push_back(std::to_string(e.price));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,31 +216,31 @@ public:
 		);
 
 		if (results.Success()) {
-			buyer_e.charid = results.LastInsertedID();
-			return buyer_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		buyer_e = NewEntity();
+		e = NewEntity();
 
-		return buyer_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Buyer> buyer_entries
+		std::vector<Buyer> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &buyer_e: buyer_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(buyer_e.charid));
-			insert_values.push_back(std::to_string(buyer_e.buyslot));
-			insert_values.push_back(std::to_string(buyer_e.itemid));
-			insert_values.push_back("'" + Strings::Escape(buyer_e.itemname) + "'");
-			insert_values.push_back(std::to_string(buyer_e.quantity));
-			insert_values.push_back(std::to_string(buyer_e.price));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.buyslot));
+			insert_values.push_back(std::to_string(e.itemid));
+			insert_values.push_back("'" + Strings::Escape(e.itemname) + "'");
+			insert_values.push_back(std::to_string(e.quantity));
+			insert_values.push_back(std::to_string(e.price));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

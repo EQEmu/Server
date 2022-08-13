@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountRewards account_rewards_e
+		AccountRewards e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_rewards_e.account_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(account_rewards_e.reward_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(account_rewards_e.amount));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.account_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.reward_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				account_rewards_e.account_id
+				e.account_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static AccountRewards InsertOne(
 		Database& db,
-		AccountRewards account_rewards_e
+		AccountRewards e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(account_rewards_e.account_id));
-		insert_values.push_back(std::to_string(account_rewards_e.reward_id));
-		insert_values.push_back(std::to_string(account_rewards_e.amount));
+		insert_values.push_back(std::to_string(e.account_id));
+		insert_values.push_back(std::to_string(e.reward_id));
+		insert_values.push_back(std::to_string(e.amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			account_rewards_e.account_id = results.LastInsertedID();
-			return account_rewards_e;
+			e.account_id = results.LastInsertedID();
+			return e;
 		}
 
-		account_rewards_e = NewEntity();
+		e = NewEntity();
 
-		return account_rewards_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AccountRewards> account_rewards_entries
+		std::vector<AccountRewards> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_rewards_e: account_rewards_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(account_rewards_e.account_id));
-			insert_values.push_back(std::to_string(account_rewards_e.reward_id));
-			insert_values.push_back(std::to_string(account_rewards_e.amount));
+			insert_values.push_back(std::to_string(e.account_id));
+			insert_values.push_back(std::to_string(e.reward_id));
+			insert_values.push_back(std::to_string(e.amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

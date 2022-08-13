@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaRankPrereqs aa_rank_prereqs_e
+		AaRankPrereqs e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_prereqs_e.rank_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_prereqs_e.aa_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_prereqs_e.points));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.rank_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.aa_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.points));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				aa_rank_prereqs_e.rank_id
+				e.rank_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static AaRankPrereqs InsertOne(
 		Database& db,
-		AaRankPrereqs aa_rank_prereqs_e
+		AaRankPrereqs e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(aa_rank_prereqs_e.rank_id));
-		insert_values.push_back(std::to_string(aa_rank_prereqs_e.aa_id));
-		insert_values.push_back(std::to_string(aa_rank_prereqs_e.points));
+		insert_values.push_back(std::to_string(e.rank_id));
+		insert_values.push_back(std::to_string(e.aa_id));
+		insert_values.push_back(std::to_string(e.points));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_rank_prereqs_e.rank_id = results.LastInsertedID();
-			return aa_rank_prereqs_e;
+			e.rank_id = results.LastInsertedID();
+			return e;
 		}
 
-		aa_rank_prereqs_e = NewEntity();
+		e = NewEntity();
 
-		return aa_rank_prereqs_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaRankPrereqs> aa_rank_prereqs_entries
+		std::vector<AaRankPrereqs> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_rank_prereqs_e: aa_rank_prereqs_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(aa_rank_prereqs_e.rank_id));
-			insert_values.push_back(std::to_string(aa_rank_prereqs_e.aa_id));
-			insert_values.push_back(std::to_string(aa_rank_prereqs_e.points));
+			insert_values.push_back(std::to_string(e.rank_id));
+			insert_values.push_back(std::to_string(e.aa_id));
+			insert_values.push_back(std::to_string(e.points));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

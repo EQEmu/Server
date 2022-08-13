@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Tributes tributes_e
+		Tributes e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(tributes_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(tributes_e.unknown));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(tributes_e.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(tributes_e.descr) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(tributes_e.isguild));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.unknown));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.descr) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(e.isguild));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				tributes_e.id
+				e.id
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static Tributes InsertOne(
 		Database& db,
-		Tributes tributes_e
+		Tributes e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(tributes_e.id));
-		insert_values.push_back(std::to_string(tributes_e.unknown));
-		insert_values.push_back("'" + Strings::Escape(tributes_e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(tributes_e.descr) + "'");
-		insert_values.push_back(std::to_string(tributes_e.isguild));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.unknown));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.descr) + "'");
+		insert_values.push_back(std::to_string(e.isguild));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,30 +209,30 @@ public:
 		);
 
 		if (results.Success()) {
-			tributes_e.id = results.LastInsertedID();
-			return tributes_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		tributes_e = NewEntity();
+		e = NewEntity();
 
-		return tributes_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Tributes> tributes_entries
+		std::vector<Tributes> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tributes_e: tributes_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(tributes_e.id));
-			insert_values.push_back(std::to_string(tributes_e.unknown));
-			insert_values.push_back("'" + Strings::Escape(tributes_e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(tributes_e.descr) + "'");
-			insert_values.push_back(std::to_string(tributes_e.isguild));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.unknown));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.descr) + "'");
+			insert_values.push_back(std::to_string(e.isguild));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

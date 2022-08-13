@@ -196,25 +196,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ObjectContents object_contents_e
+		ObjectContents e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(object_contents_e.zoneid));
-		update_values.push_back(columns[1] + " = " + std::to_string(object_contents_e.parentid));
-		update_values.push_back(columns[2] + " = " + std::to_string(object_contents_e.bagidx));
-		update_values.push_back(columns[3] + " = " + std::to_string(object_contents_e.itemid));
-		update_values.push_back(columns[4] + " = " + std::to_string(object_contents_e.charges));
-		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (object_contents_e.droptime > 0 ? std::to_string(object_contents_e.droptime) : "null") + ")");
-		update_values.push_back(columns[6] + " = " + std::to_string(object_contents_e.augslot1));
-		update_values.push_back(columns[7] + " = " + std::to_string(object_contents_e.augslot2));
-		update_values.push_back(columns[8] + " = " + std::to_string(object_contents_e.augslot3));
-		update_values.push_back(columns[9] + " = " + std::to_string(object_contents_e.augslot4));
-		update_values.push_back(columns[10] + " = " + std::to_string(object_contents_e.augslot5));
-		update_values.push_back(columns[11] + " = " + std::to_string(object_contents_e.augslot6));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.zoneid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.parentid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.bagidx));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.itemid));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.charges));
+		update_values.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
+		update_values.push_back(columns[6] + " = " + std::to_string(e.augslot1));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.augslot2));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.augslot3));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.augslot4));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.augslot5));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.augslot6));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,7 +222,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				object_contents_e.parentid
+				e.parentid
 			)
 		);
 
@@ -231,23 +231,23 @@ public:
 
 	static ObjectContents InsertOne(
 		Database& db,
-		ObjectContents object_contents_e
+		ObjectContents e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(object_contents_e.zoneid));
-		insert_values.push_back(std::to_string(object_contents_e.parentid));
-		insert_values.push_back(std::to_string(object_contents_e.bagidx));
-		insert_values.push_back(std::to_string(object_contents_e.itemid));
-		insert_values.push_back(std::to_string(object_contents_e.charges));
-		insert_values.push_back("FROM_UNIXTIME(" + (object_contents_e.droptime > 0 ? std::to_string(object_contents_e.droptime) : "null") + ")");
-		insert_values.push_back(std::to_string(object_contents_e.augslot1));
-		insert_values.push_back(std::to_string(object_contents_e.augslot2));
-		insert_values.push_back(std::to_string(object_contents_e.augslot3));
-		insert_values.push_back(std::to_string(object_contents_e.augslot4));
-		insert_values.push_back(std::to_string(object_contents_e.augslot5));
-		insert_values.push_back(std::to_string(object_contents_e.augslot6));
+		insert_values.push_back(std::to_string(e.zoneid));
+		insert_values.push_back(std::to_string(e.parentid));
+		insert_values.push_back(std::to_string(e.bagidx));
+		insert_values.push_back(std::to_string(e.itemid));
+		insert_values.push_back(std::to_string(e.charges));
+		insert_values.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
+		insert_values.push_back(std::to_string(e.augslot1));
+		insert_values.push_back(std::to_string(e.augslot2));
+		insert_values.push_back(std::to_string(e.augslot3));
+		insert_values.push_back(std::to_string(e.augslot4));
+		insert_values.push_back(std::to_string(e.augslot5));
+		insert_values.push_back(std::to_string(e.augslot6));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -258,37 +258,37 @@ public:
 		);
 
 		if (results.Success()) {
-			object_contents_e.parentid = results.LastInsertedID();
-			return object_contents_e;
+			e.parentid = results.LastInsertedID();
+			return e;
 		}
 
-		object_contents_e = NewEntity();
+		e = NewEntity();
 
-		return object_contents_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ObjectContents> object_contents_entries
+		std::vector<ObjectContents> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &object_contents_e: object_contents_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(object_contents_e.zoneid));
-			insert_values.push_back(std::to_string(object_contents_e.parentid));
-			insert_values.push_back(std::to_string(object_contents_e.bagidx));
-			insert_values.push_back(std::to_string(object_contents_e.itemid));
-			insert_values.push_back(std::to_string(object_contents_e.charges));
-			insert_values.push_back("FROM_UNIXTIME(" + (object_contents_e.droptime > 0 ? std::to_string(object_contents_e.droptime) : "null") + ")");
-			insert_values.push_back(std::to_string(object_contents_e.augslot1));
-			insert_values.push_back(std::to_string(object_contents_e.augslot2));
-			insert_values.push_back(std::to_string(object_contents_e.augslot3));
-			insert_values.push_back(std::to_string(object_contents_e.augslot4));
-			insert_values.push_back(std::to_string(object_contents_e.augslot5));
-			insert_values.push_back(std::to_string(object_contents_e.augslot6));
+			insert_values.push_back(std::to_string(e.zoneid));
+			insert_values.push_back(std::to_string(e.parentid));
+			insert_values.push_back(std::to_string(e.bagidx));
+			insert_values.push_back(std::to_string(e.itemid));
+			insert_values.push_back(std::to_string(e.charges));
+			insert_values.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
+			insert_values.push_back(std::to_string(e.augslot1));
+			insert_values.push_back(std::to_string(e.augslot2));
+			insert_values.push_back(std::to_string(e.augslot3));
+			insert_values.push_back(std::to_string(e.augslot4));
+			insert_values.push_back(std::to_string(e.augslot5));
+			insert_values.push_back(std::to_string(e.augslot6));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoottableEntries loottable_entries_e
+		LoottableEntries e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(loottable_entries_e.loottable_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(loottable_entries_e.lootdrop_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(loottable_entries_e.multiplier));
-		update_values.push_back(columns[3] + " = " + std::to_string(loottable_entries_e.droplimit));
-		update_values.push_back(columns[4] + " = " + std::to_string(loottable_entries_e.mindrop));
-		update_values.push_back(columns[5] + " = " + std::to_string(loottable_entries_e.probability));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.loottable_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.lootdrop_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.multiplier));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.droplimit));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.mindrop));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.probability));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				loottable_entries_e.loottable_id
+				e.loottable_id
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static LoottableEntries InsertOne(
 		Database& db,
-		LoottableEntries loottable_entries_e
+		LoottableEntries e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(loottable_entries_e.loottable_id));
-		insert_values.push_back(std::to_string(loottable_entries_e.lootdrop_id));
-		insert_values.push_back(std::to_string(loottable_entries_e.multiplier));
-		insert_values.push_back(std::to_string(loottable_entries_e.droplimit));
-		insert_values.push_back(std::to_string(loottable_entries_e.mindrop));
-		insert_values.push_back(std::to_string(loottable_entries_e.probability));
+		insert_values.push_back(std::to_string(e.loottable_id));
+		insert_values.push_back(std::to_string(e.lootdrop_id));
+		insert_values.push_back(std::to_string(e.multiplier));
+		insert_values.push_back(std::to_string(e.droplimit));
+		insert_values.push_back(std::to_string(e.mindrop));
+		insert_values.push_back(std::to_string(e.probability));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,31 +216,31 @@ public:
 		);
 
 		if (results.Success()) {
-			loottable_entries_e.loottable_id = results.LastInsertedID();
-			return loottable_entries_e;
+			e.loottable_id = results.LastInsertedID();
+			return e;
 		}
 
-		loottable_entries_e = NewEntity();
+		e = NewEntity();
 
-		return loottable_entries_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LoottableEntries> loottable_entries_entries
+		std::vector<LoottableEntries> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &loottable_entries_e: loottable_entries_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(loottable_entries_e.loottable_id));
-			insert_values.push_back(std::to_string(loottable_entries_e.lootdrop_id));
-			insert_values.push_back(std::to_string(loottable_entries_e.multiplier));
-			insert_values.push_back(std::to_string(loottable_entries_e.droplimit));
-			insert_values.push_back(std::to_string(loottable_entries_e.mindrop));
-			insert_values.push_back(std::to_string(loottable_entries_e.probability));
+			insert_values.push_back(std::to_string(e.loottable_id));
+			insert_values.push_back(std::to_string(e.lootdrop_id));
+			insert_values.push_back(std::to_string(e.multiplier));
+			insert_values.push_back(std::to_string(e.droplimit));
+			insert_values.push_back(std::to_string(e.mindrop));
+			insert_values.push_back(std::to_string(e.probability));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

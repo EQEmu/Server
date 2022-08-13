@@ -181,21 +181,21 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterInstanceSafereturns character_instance_safereturns_e
+		CharacterInstanceSafereturns e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_instance_safereturns_e.character_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_instance_safereturns_e.instance_zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_instance_safereturns_e.instance_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_instance_safereturns_e.safe_zone_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_instance_safereturns_e.safe_x));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_instance_safereturns_e.safe_y));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_instance_safereturns_e.safe_z));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_instance_safereturns_e.safe_heading));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.character_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.instance_zone_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.instance_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.safe_zone_id));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.safe_x));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.safe_y));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.safe_z));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.safe_heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -203,7 +203,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_instance_safereturns_e.id
+				e.id
 			)
 		);
 
@@ -212,20 +212,20 @@ public:
 
 	static CharacterInstanceSafereturns InsertOne(
 		Database& db,
-		CharacterInstanceSafereturns character_instance_safereturns_e
+		CharacterInstanceSafereturns e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.character_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_zone_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_zone_id));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_x));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_y));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_z));
-		insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_heading));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.character_id));
+		insert_values.push_back(std::to_string(e.instance_zone_id));
+		insert_values.push_back(std::to_string(e.instance_id));
+		insert_values.push_back(std::to_string(e.safe_zone_id));
+		insert_values.push_back(std::to_string(e.safe_x));
+		insert_values.push_back(std::to_string(e.safe_y));
+		insert_values.push_back(std::to_string(e.safe_z));
+		insert_values.push_back(std::to_string(e.safe_heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -236,34 +236,34 @@ public:
 		);
 
 		if (results.Success()) {
-			character_instance_safereturns_e.id = results.LastInsertedID();
-			return character_instance_safereturns_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_instance_safereturns_e = NewEntity();
+		e = NewEntity();
 
-		return character_instance_safereturns_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterInstanceSafereturns> character_instance_safereturns_entries
+		std::vector<CharacterInstanceSafereturns> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_instance_safereturns_e: character_instance_safereturns_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.character_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_zone_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.instance_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_zone_id));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_x));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_y));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_z));
-			insert_values.push_back(std::to_string(character_instance_safereturns_e.safe_heading));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.character_id));
+			insert_values.push_back(std::to_string(e.instance_zone_id));
+			insert_values.push_back(std::to_string(e.instance_id));
+			insert_values.push_back(std::to_string(e.safe_zone_id));
+			insert_values.push_back(std::to_string(e.safe_x));
+			insert_values.push_back(std::to_string(e.safe_y));
+			insert_values.push_back(std::to_string(e.safe_z));
+			insert_values.push_back(std::to_string(e.safe_heading));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

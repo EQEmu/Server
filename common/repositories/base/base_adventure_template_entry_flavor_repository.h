@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AdventureTemplateEntryFlavor adventure_template_entry_flavor_e
+		AdventureTemplateEntryFlavor e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(adventure_template_entry_flavor_e.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(adventure_template_entry_flavor_e.text) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				adventure_template_entry_flavor_e.id
+				e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static AdventureTemplateEntryFlavor InsertOne(
 		Database& db,
-		AdventureTemplateEntryFlavor adventure_template_entry_flavor_e
+		AdventureTemplateEntryFlavor e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(adventure_template_entry_flavor_e.id));
-		insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_e.text) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			adventure_template_entry_flavor_e.id = results.LastInsertedID();
-			return adventure_template_entry_flavor_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		adventure_template_entry_flavor_e = NewEntity();
+		e = NewEntity();
 
-		return adventure_template_entry_flavor_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AdventureTemplateEntryFlavor> adventure_template_entry_flavor_entries
+		std::vector<AdventureTemplateEntryFlavor> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &adventure_template_entry_flavor_e: adventure_template_entry_flavor_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(adventure_template_entry_flavor_e.id));
-			insert_values.push_back("'" + Strings::Escape(adventure_template_entry_flavor_e.text) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

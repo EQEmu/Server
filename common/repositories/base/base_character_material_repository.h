@@ -171,19 +171,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterMaterial character_material_e
+		CharacterMaterial e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_material_e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_material_e.blue));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_material_e.green));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_material_e.red));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_material_e.use_tint));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_material_e.color));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.blue));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.green));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.red));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.use_tint));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.color));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -191,7 +191,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_material_e.id
+				e.id
 			)
 		);
 
@@ -200,18 +200,18 @@ public:
 
 	static CharacterMaterial InsertOne(
 		Database& db,
-		CharacterMaterial character_material_e
+		CharacterMaterial e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_material_e.id));
-		insert_values.push_back(std::to_string(character_material_e.slot));
-		insert_values.push_back(std::to_string(character_material_e.blue));
-		insert_values.push_back(std::to_string(character_material_e.green));
-		insert_values.push_back(std::to_string(character_material_e.red));
-		insert_values.push_back(std::to_string(character_material_e.use_tint));
-		insert_values.push_back(std::to_string(character_material_e.color));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.blue));
+		insert_values.push_back(std::to_string(e.green));
+		insert_values.push_back(std::to_string(e.red));
+		insert_values.push_back(std::to_string(e.use_tint));
+		insert_values.push_back(std::to_string(e.color));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,32 +222,32 @@ public:
 		);
 
 		if (results.Success()) {
-			character_material_e.id = results.LastInsertedID();
-			return character_material_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_material_e = NewEntity();
+		e = NewEntity();
 
-		return character_material_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterMaterial> character_material_entries
+		std::vector<CharacterMaterial> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_material_e: character_material_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_material_e.id));
-			insert_values.push_back(std::to_string(character_material_e.slot));
-			insert_values.push_back(std::to_string(character_material_e.blue));
-			insert_values.push_back(std::to_string(character_material_e.green));
-			insert_values.push_back(std::to_string(character_material_e.red));
-			insert_values.push_back(std::to_string(character_material_e.use_tint));
-			insert_values.push_back(std::to_string(character_material_e.color));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.blue));
+			insert_values.push_back(std::to_string(e.green));
+			insert_values.push_back(std::to_string(e.red));
+			insert_values.push_back(std::to_string(e.use_tint));
+			insert_values.push_back(std::to_string(e.color));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

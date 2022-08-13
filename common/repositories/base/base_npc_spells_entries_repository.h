@@ -196,24 +196,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcSpellsEntries npc_spells_entries_e
+		NpcSpellsEntries e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(npc_spells_entries_e.npc_spells_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_spells_entries_e.spellid));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_spells_entries_e.type));
-		update_values.push_back(columns[4] + " = " + std::to_string(npc_spells_entries_e.minlevel));
-		update_values.push_back(columns[5] + " = " + std::to_string(npc_spells_entries_e.maxlevel));
-		update_values.push_back(columns[6] + " = " + std::to_string(npc_spells_entries_e.manacost));
-		update_values.push_back(columns[7] + " = " + std::to_string(npc_spells_entries_e.recast_delay));
-		update_values.push_back(columns[8] + " = " + std::to_string(npc_spells_entries_e.priority));
-		update_values.push_back(columns[9] + " = " + std::to_string(npc_spells_entries_e.resist_adjust));
-		update_values.push_back(columns[10] + " = " + std::to_string(npc_spells_entries_e.min_hp));
-		update_values.push_back(columns[11] + " = " + std::to_string(npc_spells_entries_e.max_hp));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.npc_spells_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.spellid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.minlevel));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.maxlevel));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.manacost));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.recast_delay));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.priority));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.resist_adjust));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.min_hp));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.max_hp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -221,7 +221,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_spells_entries_e.id
+				e.id
 			)
 		);
 
@@ -230,23 +230,23 @@ public:
 
 	static NpcSpellsEntries InsertOne(
 		Database& db,
-		NpcSpellsEntries npc_spells_entries_e
+		NpcSpellsEntries e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_spells_entries_e.id));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.npc_spells_id));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.spellid));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.type));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.minlevel));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.maxlevel));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.manacost));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.recast_delay));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.priority));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.resist_adjust));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.min_hp));
-		insert_values.push_back(std::to_string(npc_spells_entries_e.max_hp));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.npc_spells_id));
+		insert_values.push_back(std::to_string(e.spellid));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.minlevel));
+		insert_values.push_back(std::to_string(e.maxlevel));
+		insert_values.push_back(std::to_string(e.manacost));
+		insert_values.push_back(std::to_string(e.recast_delay));
+		insert_values.push_back(std::to_string(e.priority));
+		insert_values.push_back(std::to_string(e.resist_adjust));
+		insert_values.push_back(std::to_string(e.min_hp));
+		insert_values.push_back(std::to_string(e.max_hp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -257,37 +257,37 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_spells_entries_e.id = results.LastInsertedID();
-			return npc_spells_entries_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		npc_spells_entries_e = NewEntity();
+		e = NewEntity();
 
-		return npc_spells_entries_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcSpellsEntries> npc_spells_entries_entries
+		std::vector<NpcSpellsEntries> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_spells_entries_e: npc_spells_entries_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_spells_entries_e.id));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.npc_spells_id));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.spellid));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.type));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.minlevel));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.maxlevel));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.manacost));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.recast_delay));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.priority));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.resist_adjust));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.min_hp));
-			insert_values.push_back(std::to_string(npc_spells_entries_e.max_hp));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.npc_spells_id));
+			insert_values.push_back(std::to_string(e.spellid));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.minlevel));
+			insert_values.push_back(std::to_string(e.maxlevel));
+			insert_values.push_back(std::to_string(e.manacost));
+			insert_values.push_back(std::to_string(e.recast_delay));
+			insert_values.push_back(std::to_string(e.priority));
+			insert_values.push_back(std::to_string(e.resist_adjust));
+			insert_values.push_back(std::to_string(e.min_hp));
+			insert_values.push_back(std::to_string(e.max_hp));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

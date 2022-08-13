@@ -156,17 +156,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterPetInventory character_pet_inventory_e
+		CharacterPetInventory e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_inventory_e.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_inventory_e.pet));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_pet_inventory_e.slot));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_inventory_e.item_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.pet));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +174,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_pet_inventory_e.char_id
+				e.char_id
 			)
 		);
 
@@ -183,15 +183,15 @@ public:
 
 	static CharacterPetInventory InsertOne(
 		Database& db,
-		CharacterPetInventory character_pet_inventory_e
+		CharacterPetInventory e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_pet_inventory_e.char_id));
-		insert_values.push_back(std::to_string(character_pet_inventory_e.pet));
-		insert_values.push_back(std::to_string(character_pet_inventory_e.slot));
-		insert_values.push_back(std::to_string(character_pet_inventory_e.item_id));
+		insert_values.push_back(std::to_string(e.char_id));
+		insert_values.push_back(std::to_string(e.pet));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -202,29 +202,29 @@ public:
 		);
 
 		if (results.Success()) {
-			character_pet_inventory_e.char_id = results.LastInsertedID();
-			return character_pet_inventory_e;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		character_pet_inventory_e = NewEntity();
+		e = NewEntity();
 
-		return character_pet_inventory_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterPetInventory> character_pet_inventory_entries
+		std::vector<CharacterPetInventory> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_pet_inventory_e: character_pet_inventory_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_pet_inventory_e.char_id));
-			insert_values.push_back(std::to_string(character_pet_inventory_e.pet));
-			insert_values.push_back(std::to_string(character_pet_inventory_e.slot));
-			insert_values.push_back(std::to_string(character_pet_inventory_e.item_id));
+			insert_values.push_back(std::to_string(e.char_id));
+			insert_values.push_back(std::to_string(e.pet));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.item_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -176,20 +176,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterBind character_bind_e
+		CharacterBind e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_bind_e.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_bind_e.zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_bind_e.instance_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_bind_e.x));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_bind_e.y));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_bind_e.z));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_bind_e.heading));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.slot));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.zone_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.instance_id));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.x));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.y));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.z));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_bind_e.id
+				e.id
 			)
 		);
 
@@ -206,19 +206,19 @@ public:
 
 	static CharacterBind InsertOne(
 		Database& db,
-		CharacterBind character_bind_e
+		CharacterBind e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_bind_e.id));
-		insert_values.push_back(std::to_string(character_bind_e.slot));
-		insert_values.push_back(std::to_string(character_bind_e.zone_id));
-		insert_values.push_back(std::to_string(character_bind_e.instance_id));
-		insert_values.push_back(std::to_string(character_bind_e.x));
-		insert_values.push_back(std::to_string(character_bind_e.y));
-		insert_values.push_back(std::to_string(character_bind_e.z));
-		insert_values.push_back(std::to_string(character_bind_e.heading));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.slot));
+		insert_values.push_back(std::to_string(e.zone_id));
+		insert_values.push_back(std::to_string(e.instance_id));
+		insert_values.push_back(std::to_string(e.x));
+		insert_values.push_back(std::to_string(e.y));
+		insert_values.push_back(std::to_string(e.z));
+		insert_values.push_back(std::to_string(e.heading));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,33 +229,33 @@ public:
 		);
 
 		if (results.Success()) {
-			character_bind_e.id = results.LastInsertedID();
-			return character_bind_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_bind_e = NewEntity();
+		e = NewEntity();
 
-		return character_bind_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterBind> character_bind_entries
+		std::vector<CharacterBind> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_bind_e: character_bind_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_bind_e.id));
-			insert_values.push_back(std::to_string(character_bind_e.slot));
-			insert_values.push_back(std::to_string(character_bind_e.zone_id));
-			insert_values.push_back(std::to_string(character_bind_e.instance_id));
-			insert_values.push_back(std::to_string(character_bind_e.x));
-			insert_values.push_back(std::to_string(character_bind_e.y));
-			insert_values.push_back(std::to_string(character_bind_e.z));
-			insert_values.push_back(std::to_string(character_bind_e.heading));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.slot));
+			insert_values.push_back(std::to_string(e.zone_id));
+			insert_values.push_back(std::to_string(e.instance_id));
+			insert_values.push_back(std::to_string(e.x));
+			insert_values.push_back(std::to_string(e.y));
+			insert_values.push_back(std::to_string(e.z));
+			insert_values.push_back(std::to_string(e.heading));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

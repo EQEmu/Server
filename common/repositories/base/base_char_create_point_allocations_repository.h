@@ -211,28 +211,28 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharCreatePointAllocations char_create_point_allocations_e
+		CharCreatePointAllocations e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(char_create_point_allocations_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(char_create_point_allocations_e.base_str));
-		update_values.push_back(columns[2] + " = " + std::to_string(char_create_point_allocations_e.base_sta));
-		update_values.push_back(columns[3] + " = " + std::to_string(char_create_point_allocations_e.base_dex));
-		update_values.push_back(columns[4] + " = " + std::to_string(char_create_point_allocations_e.base_agi));
-		update_values.push_back(columns[5] + " = " + std::to_string(char_create_point_allocations_e.base_int));
-		update_values.push_back(columns[6] + " = " + std::to_string(char_create_point_allocations_e.base_wis));
-		update_values.push_back(columns[7] + " = " + std::to_string(char_create_point_allocations_e.base_cha));
-		update_values.push_back(columns[8] + " = " + std::to_string(char_create_point_allocations_e.alloc_str));
-		update_values.push_back(columns[9] + " = " + std::to_string(char_create_point_allocations_e.alloc_sta));
-		update_values.push_back(columns[10] + " = " + std::to_string(char_create_point_allocations_e.alloc_dex));
-		update_values.push_back(columns[11] + " = " + std::to_string(char_create_point_allocations_e.alloc_agi));
-		update_values.push_back(columns[12] + " = " + std::to_string(char_create_point_allocations_e.alloc_int));
-		update_values.push_back(columns[13] + " = " + std::to_string(char_create_point_allocations_e.alloc_wis));
-		update_values.push_back(columns[14] + " = " + std::to_string(char_create_point_allocations_e.alloc_cha));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.base_str));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.base_sta));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.base_dex));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.base_agi));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.base_int));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.base_wis));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.base_cha));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.alloc_str));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.alloc_sta));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.alloc_dex));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.alloc_agi));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.alloc_int));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.alloc_wis));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.alloc_cha));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,7 +240,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				char_create_point_allocations_e.id
+				e.id
 			)
 		);
 
@@ -249,26 +249,26 @@ public:
 
 	static CharCreatePointAllocations InsertOne(
 		Database& db,
-		CharCreatePointAllocations char_create_point_allocations_e
+		CharCreatePointAllocations e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.id));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_str));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_sta));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_dex));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_agi));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_int));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_wis));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.base_cha));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_str));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_sta));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_dex));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_agi));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_int));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_wis));
-		insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_cha));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.base_str));
+		insert_values.push_back(std::to_string(e.base_sta));
+		insert_values.push_back(std::to_string(e.base_dex));
+		insert_values.push_back(std::to_string(e.base_agi));
+		insert_values.push_back(std::to_string(e.base_int));
+		insert_values.push_back(std::to_string(e.base_wis));
+		insert_values.push_back(std::to_string(e.base_cha));
+		insert_values.push_back(std::to_string(e.alloc_str));
+		insert_values.push_back(std::to_string(e.alloc_sta));
+		insert_values.push_back(std::to_string(e.alloc_dex));
+		insert_values.push_back(std::to_string(e.alloc_agi));
+		insert_values.push_back(std::to_string(e.alloc_int));
+		insert_values.push_back(std::to_string(e.alloc_wis));
+		insert_values.push_back(std::to_string(e.alloc_cha));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -279,40 +279,40 @@ public:
 		);
 
 		if (results.Success()) {
-			char_create_point_allocations_e.id = results.LastInsertedID();
-			return char_create_point_allocations_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		char_create_point_allocations_e = NewEntity();
+		e = NewEntity();
 
-		return char_create_point_allocations_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharCreatePointAllocations> char_create_point_allocations_entries
+		std::vector<CharCreatePointAllocations> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &char_create_point_allocations_e: char_create_point_allocations_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.id));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_str));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_sta));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_dex));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_agi));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_int));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_wis));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.base_cha));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_str));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_sta));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_dex));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_agi));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_int));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_wis));
-			insert_values.push_back(std::to_string(char_create_point_allocations_e.alloc_cha));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.base_str));
+			insert_values.push_back(std::to_string(e.base_sta));
+			insert_values.push_back(std::to_string(e.base_dex));
+			insert_values.push_back(std::to_string(e.base_agi));
+			insert_values.push_back(std::to_string(e.base_int));
+			insert_values.push_back(std::to_string(e.base_wis));
+			insert_values.push_back(std::to_string(e.base_cha));
+			insert_values.push_back(std::to_string(e.alloc_str));
+			insert_values.push_back(std::to_string(e.alloc_sta));
+			insert_values.push_back(std::to_string(e.alloc_dex));
+			insert_values.push_back(std::to_string(e.alloc_agi));
+			insert_values.push_back(std::to_string(e.alloc_int));
+			insert_values.push_back(std::to_string(e.alloc_wis));
+			insert_values.push_back(std::to_string(e.alloc_cha));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

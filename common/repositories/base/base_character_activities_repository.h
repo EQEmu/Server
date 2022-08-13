@@ -161,18 +161,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterActivities character_activities_e
+		CharacterActivities e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_activities_e.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_activities_e.taskid));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_activities_e.activityid));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_activities_e.donecount));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_activities_e.completed));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.charid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.taskid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.activityid));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.donecount));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.completed));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,7 +180,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_activities_e.charid
+				e.charid
 			)
 		);
 
@@ -189,16 +189,16 @@ public:
 
 	static CharacterActivities InsertOne(
 		Database& db,
-		CharacterActivities character_activities_e
+		CharacterActivities e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_activities_e.charid));
-		insert_values.push_back(std::to_string(character_activities_e.taskid));
-		insert_values.push_back(std::to_string(character_activities_e.activityid));
-		insert_values.push_back(std::to_string(character_activities_e.donecount));
-		insert_values.push_back(std::to_string(character_activities_e.completed));
+		insert_values.push_back(std::to_string(e.charid));
+		insert_values.push_back(std::to_string(e.taskid));
+		insert_values.push_back(std::to_string(e.activityid));
+		insert_values.push_back(std::to_string(e.donecount));
+		insert_values.push_back(std::to_string(e.completed));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -209,30 +209,30 @@ public:
 		);
 
 		if (results.Success()) {
-			character_activities_e.charid = results.LastInsertedID();
-			return character_activities_e;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		character_activities_e = NewEntity();
+		e = NewEntity();
 
-		return character_activities_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterActivities> character_activities_entries
+		std::vector<CharacterActivities> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_activities_e: character_activities_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_activities_e.charid));
-			insert_values.push_back(std::to_string(character_activities_e.taskid));
-			insert_values.push_back(std::to_string(character_activities_e.activityid));
-			insert_values.push_back(std::to_string(character_activities_e.donecount));
-			insert_values.push_back(std::to_string(character_activities_e.completed));
+			insert_values.push_back(std::to_string(e.charid));
+			insert_values.push_back(std::to_string(e.taskid));
+			insert_values.push_back(std::to_string(e.activityid));
+			insert_values.push_back(std::to_string(e.donecount));
+			insert_values.push_back(std::to_string(e.completed));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -206,27 +206,27 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaAbility aa_ability_e
+		AaAbility e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_ability_e.id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(aa_ability_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_e.category));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_e.classes));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_ability_e.races));
-		update_values.push_back(columns[5] + " = " + std::to_string(aa_ability_e.drakkin_heritage));
-		update_values.push_back(columns[6] + " = " + std::to_string(aa_ability_e.deities));
-		update_values.push_back(columns[7] + " = " + std::to_string(aa_ability_e.status));
-		update_values.push_back(columns[8] + " = " + std::to_string(aa_ability_e.type));
-		update_values.push_back(columns[9] + " = " + std::to_string(aa_ability_e.charges));
-		update_values.push_back(columns[10] + " = " + std::to_string(aa_ability_e.grant_only));
-		update_values.push_back(columns[11] + " = " + std::to_string(aa_ability_e.first_rank_id));
-		update_values.push_back(columns[12] + " = " + std::to_string(aa_ability_e.enabled));
-		update_values.push_back(columns[13] + " = " + std::to_string(aa_ability_e.reset_on_death));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.category));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.classes));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.races));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.drakkin_heritage));
+		update_values.push_back(columns[6] + " = " + std::to_string(e.deities));
+		update_values.push_back(columns[7] + " = " + std::to_string(e.status));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[9] + " = " + std::to_string(e.charges));
+		update_values.push_back(columns[10] + " = " + std::to_string(e.grant_only));
+		update_values.push_back(columns[11] + " = " + std::to_string(e.first_rank_id));
+		update_values.push_back(columns[12] + " = " + std::to_string(e.enabled));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.reset_on_death));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -234,7 +234,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				aa_ability_e.id
+				e.id
 			)
 		);
 
@@ -243,25 +243,25 @@ public:
 
 	static AaAbility InsertOne(
 		Database& db,
-		AaAbility aa_ability_e
+		AaAbility e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(aa_ability_e.id));
-		insert_values.push_back("'" + Strings::Escape(aa_ability_e.name) + "'");
-		insert_values.push_back(std::to_string(aa_ability_e.category));
-		insert_values.push_back(std::to_string(aa_ability_e.classes));
-		insert_values.push_back(std::to_string(aa_ability_e.races));
-		insert_values.push_back(std::to_string(aa_ability_e.drakkin_heritage));
-		insert_values.push_back(std::to_string(aa_ability_e.deities));
-		insert_values.push_back(std::to_string(aa_ability_e.status));
-		insert_values.push_back(std::to_string(aa_ability_e.type));
-		insert_values.push_back(std::to_string(aa_ability_e.charges));
-		insert_values.push_back(std::to_string(aa_ability_e.grant_only));
-		insert_values.push_back(std::to_string(aa_ability_e.first_rank_id));
-		insert_values.push_back(std::to_string(aa_ability_e.enabled));
-		insert_values.push_back(std::to_string(aa_ability_e.reset_on_death));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.category));
+		insert_values.push_back(std::to_string(e.classes));
+		insert_values.push_back(std::to_string(e.races));
+		insert_values.push_back(std::to_string(e.drakkin_heritage));
+		insert_values.push_back(std::to_string(e.deities));
+		insert_values.push_back(std::to_string(e.status));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back(std::to_string(e.charges));
+		insert_values.push_back(std::to_string(e.grant_only));
+		insert_values.push_back(std::to_string(e.first_rank_id));
+		insert_values.push_back(std::to_string(e.enabled));
+		insert_values.push_back(std::to_string(e.reset_on_death));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -272,39 +272,39 @@ public:
 		);
 
 		if (results.Success()) {
-			aa_ability_e.id = results.LastInsertedID();
-			return aa_ability_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		aa_ability_e = NewEntity();
+		e = NewEntity();
 
-		return aa_ability_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaAbility> aa_ability_entries
+		std::vector<AaAbility> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_ability_e: aa_ability_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(aa_ability_e.id));
-			insert_values.push_back("'" + Strings::Escape(aa_ability_e.name) + "'");
-			insert_values.push_back(std::to_string(aa_ability_e.category));
-			insert_values.push_back(std::to_string(aa_ability_e.classes));
-			insert_values.push_back(std::to_string(aa_ability_e.races));
-			insert_values.push_back(std::to_string(aa_ability_e.drakkin_heritage));
-			insert_values.push_back(std::to_string(aa_ability_e.deities));
-			insert_values.push_back(std::to_string(aa_ability_e.status));
-			insert_values.push_back(std::to_string(aa_ability_e.type));
-			insert_values.push_back(std::to_string(aa_ability_e.charges));
-			insert_values.push_back(std::to_string(aa_ability_e.grant_only));
-			insert_values.push_back(std::to_string(aa_ability_e.first_rank_id));
-			insert_values.push_back(std::to_string(aa_ability_e.enabled));
-			insert_values.push_back(std::to_string(aa_ability_e.reset_on_death));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.category));
+			insert_values.push_back(std::to_string(e.classes));
+			insert_values.push_back(std::to_string(e.races));
+			insert_values.push_back(std::to_string(e.drakkin_heritage));
+			insert_values.push_back(std::to_string(e.deities));
+			insert_values.push_back(std::to_string(e.status));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back(std::to_string(e.charges));
+			insert_values.push_back(std::to_string(e.grant_only));
+			insert_values.push_back(std::to_string(e.first_rank_id));
+			insert_values.push_back(std::to_string(e.enabled));
+			insert_values.push_back(std::to_string(e.reset_on_death));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

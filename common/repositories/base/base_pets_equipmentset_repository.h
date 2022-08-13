@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		PetsEquipmentset pets_equipmentset_e
+		PetsEquipmentset e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(pets_equipmentset_e.set_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(pets_equipmentset_e.setname) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_equipmentset_e.nested_set));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.set_id));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.setname) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.nested_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				pets_equipmentset_e.set_id
+				e.set_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static PetsEquipmentset InsertOne(
 		Database& db,
-		PetsEquipmentset pets_equipmentset_e
+		PetsEquipmentset e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(pets_equipmentset_e.set_id));
-		insert_values.push_back("'" + Strings::Escape(pets_equipmentset_e.setname) + "'");
-		insert_values.push_back(std::to_string(pets_equipmentset_e.nested_set));
+		insert_values.push_back(std::to_string(e.set_id));
+		insert_values.push_back("'" + Strings::Escape(e.setname) + "'");
+		insert_values.push_back(std::to_string(e.nested_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			pets_equipmentset_e.set_id = results.LastInsertedID();
-			return pets_equipmentset_e;
+			e.set_id = results.LastInsertedID();
+			return e;
 		}
 
-		pets_equipmentset_e = NewEntity();
+		e = NewEntity();
 
-		return pets_equipmentset_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<PetsEquipmentset> pets_equipmentset_entries
+		std::vector<PetsEquipmentset> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &pets_equipmentset_e: pets_equipmentset_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(pets_equipmentset_e.set_id));
-			insert_values.push_back("'" + Strings::Escape(pets_equipmentset_e.setname) + "'");
-			insert_values.push_back(std::to_string(pets_equipmentset_e.nested_set));
+			insert_values.push_back(std::to_string(e.set_id));
+			insert_values.push_back("'" + Strings::Escape(e.setname) + "'");
+			insert_values.push_back(std::to_string(e.nested_set));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

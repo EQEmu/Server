@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterSkills character_skills_e
+		CharacterSkills e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_skills_e.skill_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_skills_e.value));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.skill_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_skills_e.id
+				e.id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static CharacterSkills InsertOne(
 		Database& db,
-		CharacterSkills character_skills_e
+		CharacterSkills e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_skills_e.id));
-		insert_values.push_back(std::to_string(character_skills_e.skill_id));
-		insert_values.push_back(std::to_string(character_skills_e.value));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.skill_id));
+		insert_values.push_back(std::to_string(e.value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,28 +194,28 @@ public:
 		);
 
 		if (results.Success()) {
-			character_skills_e.id = results.LastInsertedID();
-			return character_skills_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_skills_e = NewEntity();
+		e = NewEntity();
 
-		return character_skills_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterSkills> character_skills_entries
+		std::vector<CharacterSkills> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_skills_e: character_skills_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_skills_e.id));
-			insert_values.push_back(std::to_string(character_skills_e.skill_id));
-			insert_values.push_back(std::to_string(character_skills_e.value));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.skill_id));
+			insert_values.push_back(std::to_string(e.value));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

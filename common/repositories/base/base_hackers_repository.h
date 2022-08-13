@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Hackers hackers_e
+		Hackers e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(hackers_e.account) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(hackers_e.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(hackers_e.hacked) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(hackers_e.zone) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(hackers_e.date) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.account) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.hacked) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.zone) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(e.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				hackers_e.id
+				e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static Hackers InsertOne(
 		Database& db,
-		Hackers hackers_e
+		Hackers e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(hackers_e.id));
-		insert_values.push_back("'" + Strings::Escape(hackers_e.account) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_e.hacked) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_e.zone) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_e.date) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.account) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.hacked) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,31 +215,31 @@ public:
 		);
 
 		if (results.Success()) {
-			hackers_e.id = results.LastInsertedID();
-			return hackers_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		hackers_e = NewEntity();
+		e = NewEntity();
 
-		return hackers_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Hackers> hackers_entries
+		std::vector<Hackers> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &hackers_e: hackers_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(hackers_e.id));
-			insert_values.push_back("'" + Strings::Escape(hackers_e.account) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_e.hacked) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_e.zone) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_e.date) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.account) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.hacked) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.date) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

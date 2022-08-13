@@ -166,18 +166,18 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Lootdrop lootdrop_e
+		Lootdrop e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(lootdrop_e.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_e.min_expansion));
-		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_e.max_expansion));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(lootdrop_e.content_flags) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(lootdrop_e.content_flags_disabled) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.min_expansion));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.max_expansion));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.content_flags) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,7 +185,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				lootdrop_e.id
+				e.id
 			)
 		);
 
@@ -194,17 +194,17 @@ public:
 
 	static Lootdrop InsertOne(
 		Database& db,
-		Lootdrop lootdrop_e
+		Lootdrop e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(lootdrop_e.id));
-		insert_values.push_back("'" + Strings::Escape(lootdrop_e.name) + "'");
-		insert_values.push_back(std::to_string(lootdrop_e.min_expansion));
-		insert_values.push_back(std::to_string(lootdrop_e.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.min_expansion));
+		insert_values.push_back(std::to_string(e.max_expansion));
+		insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -215,31 +215,31 @@ public:
 		);
 
 		if (results.Success()) {
-			lootdrop_e.id = results.LastInsertedID();
-			return lootdrop_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		lootdrop_e = NewEntity();
+		e = NewEntity();
 
-		return lootdrop_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Lootdrop> lootdrop_entries
+		std::vector<Lootdrop> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &lootdrop_e: lootdrop_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(lootdrop_e.id));
-			insert_values.push_back("'" + Strings::Escape(lootdrop_e.name) + "'");
-			insert_values.push_back(std::to_string(lootdrop_e.min_expansion));
-			insert_values.push_back(std::to_string(lootdrop_e.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(lootdrop_e.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.min_expansion));
+			insert_values.push_back(std::to_string(e.max_expansion));
+			insert_values.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

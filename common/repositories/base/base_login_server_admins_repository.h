@@ -176,20 +176,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LoginServerAdmins login_server_admins_e
+		LoginServerAdmins e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(login_server_admins_e.account_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(login_server_admins_e.account_password) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(login_server_admins_e.first_name) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(login_server_admins_e.last_name) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(login_server_admins_e.email) + "'");
-		update_values.push_back(columns[6] + " = FROM_UNIXTIME(" + (login_server_admins_e.registration_date > 0 ? std::to_string(login_server_admins_e.registration_date) : "null") + ")");
-		update_values.push_back(columns[7] + " = '" + Strings::Escape(login_server_admins_e.registration_ip_address) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.account_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.account_password) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.first_name) + "'");
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.last_name) + "'");
+		update_values.push_back(columns[5] + " = '" + Strings::Escape(e.email) + "'");
+		update_values.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
+		update_values.push_back(columns[7] + " = '" + Strings::Escape(e.registration_ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,7 +197,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				login_server_admins_e.id
+				e.id
 			)
 		);
 
@@ -206,19 +206,19 @@ public:
 
 	static LoginServerAdmins InsertOne(
 		Database& db,
-		LoginServerAdmins login_server_admins_e
+		LoginServerAdmins e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(login_server_admins_e.id));
-		insert_values.push_back("'" + Strings::Escape(login_server_admins_e.account_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(login_server_admins_e.account_password) + "'");
-		insert_values.push_back("'" + Strings::Escape(login_server_admins_e.first_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(login_server_admins_e.last_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(login_server_admins_e.email) + "'");
-		insert_values.push_back("FROM_UNIXTIME(" + (login_server_admins_e.registration_date > 0 ? std::to_string(login_server_admins_e.registration_date) : "null") + ")");
-		insert_values.push_back("'" + Strings::Escape(login_server_admins_e.registration_ip_address) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.account_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.account_password) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.first_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.last_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.email) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
+		insert_values.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,33 +229,33 @@ public:
 		);
 
 		if (results.Success()) {
-			login_server_admins_e.id = results.LastInsertedID();
-			return login_server_admins_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		login_server_admins_e = NewEntity();
+		e = NewEntity();
 
-		return login_server_admins_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LoginServerAdmins> login_server_admins_entries
+		std::vector<LoginServerAdmins> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &login_server_admins_e: login_server_admins_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(login_server_admins_e.id));
-			insert_values.push_back("'" + Strings::Escape(login_server_admins_e.account_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(login_server_admins_e.account_password) + "'");
-			insert_values.push_back("'" + Strings::Escape(login_server_admins_e.first_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(login_server_admins_e.last_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(login_server_admins_e.email) + "'");
-			insert_values.push_back("FROM_UNIXTIME(" + (login_server_admins_e.registration_date > 0 ? std::to_string(login_server_admins_e.registration_date) : "null") + ")");
-			insert_values.push_back("'" + Strings::Escape(login_server_admins_e.registration_ip_address) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.account_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.account_password) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.first_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.last_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.email) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
+			insert_values.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

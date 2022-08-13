@@ -166,19 +166,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharCreateCombinations char_create_combinations_e
+		CharCreateCombinations e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(char_create_combinations_e.allocation_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(char_create_combinations_e.race));
-		update_values.push_back(columns[2] + " = " + std::to_string(char_create_combinations_e.class_));
-		update_values.push_back(columns[3] + " = " + std::to_string(char_create_combinations_e.deity));
-		update_values.push_back(columns[4] + " = " + std::to_string(char_create_combinations_e.start_zone));
-		update_values.push_back(columns[5] + " = " + std::to_string(char_create_combinations_e.expansions_req));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.allocation_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.race));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.class_));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.deity));
+		update_values.push_back(columns[4] + " = " + std::to_string(e.start_zone));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.expansions_req));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -186,7 +186,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				char_create_combinations_e.race
+				e.race
 			)
 		);
 
@@ -195,17 +195,17 @@ public:
 
 	static CharCreateCombinations InsertOne(
 		Database& db,
-		CharCreateCombinations char_create_combinations_e
+		CharCreateCombinations e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(char_create_combinations_e.allocation_id));
-		insert_values.push_back(std::to_string(char_create_combinations_e.race));
-		insert_values.push_back(std::to_string(char_create_combinations_e.class_));
-		insert_values.push_back(std::to_string(char_create_combinations_e.deity));
-		insert_values.push_back(std::to_string(char_create_combinations_e.start_zone));
-		insert_values.push_back(std::to_string(char_create_combinations_e.expansions_req));
+		insert_values.push_back(std::to_string(e.allocation_id));
+		insert_values.push_back(std::to_string(e.race));
+		insert_values.push_back(std::to_string(e.class_));
+		insert_values.push_back(std::to_string(e.deity));
+		insert_values.push_back(std::to_string(e.start_zone));
+		insert_values.push_back(std::to_string(e.expansions_req));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,31 +216,31 @@ public:
 		);
 
 		if (results.Success()) {
-			char_create_combinations_e.race = results.LastInsertedID();
-			return char_create_combinations_e;
+			e.race = results.LastInsertedID();
+			return e;
 		}
 
-		char_create_combinations_e = NewEntity();
+		e = NewEntity();
 
-		return char_create_combinations_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharCreateCombinations> char_create_combinations_entries
+		std::vector<CharCreateCombinations> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &char_create_combinations_e: char_create_combinations_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(char_create_combinations_e.allocation_id));
-			insert_values.push_back(std::to_string(char_create_combinations_e.race));
-			insert_values.push_back(std::to_string(char_create_combinations_e.class_));
-			insert_values.push_back(std::to_string(char_create_combinations_e.deity));
-			insert_values.push_back(std::to_string(char_create_combinations_e.start_zone));
-			insert_values.push_back(std::to_string(char_create_combinations_e.expansions_req));
+			insert_values.push_back(std::to_string(e.allocation_id));
+			insert_values.push_back(std::to_string(e.race));
+			insert_values.push_back(std::to_string(e.class_));
+			insert_values.push_back(std::to_string(e.deity));
+			insert_values.push_back(std::to_string(e.start_zone));
+			insert_values.push_back(std::to_string(e.expansions_req));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

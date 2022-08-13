@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		InstanceListPlayer instance_list_player_e
+		InstanceListPlayer e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(instance_list_player_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(instance_list_player_e.charid));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.charid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				instance_list_player_e.id
+				e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static InstanceListPlayer InsertOne(
 		Database& db,
-		InstanceListPlayer instance_list_player_e
+		InstanceListPlayer e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(instance_list_player_e.id));
-		insert_values.push_back(std::to_string(instance_list_player_e.charid));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.charid));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			instance_list_player_e.id = results.LastInsertedID();
-			return instance_list_player_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		instance_list_player_e = NewEntity();
+		e = NewEntity();
 
-		return instance_list_player_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<InstanceListPlayer> instance_list_player_entries
+		std::vector<InstanceListPlayer> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &instance_list_player_e: instance_list_player_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(instance_list_player_e.id));
-			insert_values.push_back(std::to_string(instance_list_player_e.charid));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.charid));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

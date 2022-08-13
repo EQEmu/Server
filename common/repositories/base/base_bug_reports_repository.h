@@ -296,44 +296,44 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		BugReports bug_reports_e
+		BugReports e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(bug_reports_e.zone) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(bug_reports_e.client_version_id));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(bug_reports_e.client_version_name) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(bug_reports_e.account_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(bug_reports_e.character_id));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(bug_reports_e.character_name) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(bug_reports_e.reporter_spoof));
-		update_values.push_back(columns[8] + " = " + std::to_string(bug_reports_e.category_id));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(bug_reports_e.category_name) + "'");
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(bug_reports_e.reporter_name) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(bug_reports_e.ui_path) + "'");
-		update_values.push_back(columns[12] + " = " + std::to_string(bug_reports_e.pos_x));
-		update_values.push_back(columns[13] + " = " + std::to_string(bug_reports_e.pos_y));
-		update_values.push_back(columns[14] + " = " + std::to_string(bug_reports_e.pos_z));
-		update_values.push_back(columns[15] + " = " + std::to_string(bug_reports_e.heading));
-		update_values.push_back(columns[16] + " = " + std::to_string(bug_reports_e.time_played));
-		update_values.push_back(columns[17] + " = " + std::to_string(bug_reports_e.target_id));
-		update_values.push_back(columns[18] + " = '" + Strings::Escape(bug_reports_e.target_name) + "'");
-		update_values.push_back(columns[19] + " = " + std::to_string(bug_reports_e.optional_info_mask));
-		update_values.push_back(columns[20] + " = " + std::to_string(bug_reports_e._can_duplicate));
-		update_values.push_back(columns[21] + " = " + std::to_string(bug_reports_e._crash_bug));
-		update_values.push_back(columns[22] + " = " + std::to_string(bug_reports_e._target_info));
-		update_values.push_back(columns[23] + " = " + std::to_string(bug_reports_e._character_flags));
-		update_values.push_back(columns[24] + " = " + std::to_string(bug_reports_e._unknown_value));
-		update_values.push_back(columns[25] + " = '" + Strings::Escape(bug_reports_e.bug_report) + "'");
-		update_values.push_back(columns[26] + " = '" + Strings::Escape(bug_reports_e.system_info) + "'");
-		update_values.push_back(columns[27] + " = FROM_UNIXTIME(" + (bug_reports_e.report_datetime > 0 ? std::to_string(bug_reports_e.report_datetime) : "null") + ")");
-		update_values.push_back(columns[28] + " = " + std::to_string(bug_reports_e.bug_status));
-		update_values.push_back(columns[29] + " = FROM_UNIXTIME(" + (bug_reports_e.last_review > 0 ? std::to_string(bug_reports_e.last_review) : "null") + ")");
-		update_values.push_back(columns[30] + " = '" + Strings::Escape(bug_reports_e.last_reviewer) + "'");
-		update_values.push_back(columns[31] + " = '" + Strings::Escape(bug_reports_e.reviewer_notes) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
+		update_values.push_back(columns[2] + " = " + std::to_string(e.client_version_id));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.client_version_name) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(e.account_id));
+		update_values.push_back(columns[5] + " = " + std::to_string(e.character_id));
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.character_name) + "'");
+		update_values.push_back(columns[7] + " = " + std::to_string(e.reporter_spoof));
+		update_values.push_back(columns[8] + " = " + std::to_string(e.category_id));
+		update_values.push_back(columns[9] + " = '" + Strings::Escape(e.category_name) + "'");
+		update_values.push_back(columns[10] + " = '" + Strings::Escape(e.reporter_name) + "'");
+		update_values.push_back(columns[11] + " = '" + Strings::Escape(e.ui_path) + "'");
+		update_values.push_back(columns[12] + " = " + std::to_string(e.pos_x));
+		update_values.push_back(columns[13] + " = " + std::to_string(e.pos_y));
+		update_values.push_back(columns[14] + " = " + std::to_string(e.pos_z));
+		update_values.push_back(columns[15] + " = " + std::to_string(e.heading));
+		update_values.push_back(columns[16] + " = " + std::to_string(e.time_played));
+		update_values.push_back(columns[17] + " = " + std::to_string(e.target_id));
+		update_values.push_back(columns[18] + " = '" + Strings::Escape(e.target_name) + "'");
+		update_values.push_back(columns[19] + " = " + std::to_string(e.optional_info_mask));
+		update_values.push_back(columns[20] + " = " + std::to_string(e._can_duplicate));
+		update_values.push_back(columns[21] + " = " + std::to_string(e._crash_bug));
+		update_values.push_back(columns[22] + " = " + std::to_string(e._target_info));
+		update_values.push_back(columns[23] + " = " + std::to_string(e._character_flags));
+		update_values.push_back(columns[24] + " = " + std::to_string(e._unknown_value));
+		update_values.push_back(columns[25] + " = '" + Strings::Escape(e.bug_report) + "'");
+		update_values.push_back(columns[26] + " = '" + Strings::Escape(e.system_info) + "'");
+		update_values.push_back(columns[27] + " = FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
+		update_values.push_back(columns[28] + " = " + std::to_string(e.bug_status));
+		update_values.push_back(columns[29] + " = FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
+		update_values.push_back(columns[30] + " = '" + Strings::Escape(e.last_reviewer) + "'");
+		update_values.push_back(columns[31] + " = '" + Strings::Escape(e.reviewer_notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -341,7 +341,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				bug_reports_e.id
+				e.id
 			)
 		);
 
@@ -350,43 +350,43 @@ public:
 
 	static BugReports InsertOne(
 		Database& db,
-		BugReports bug_reports_e
+		BugReports e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(bug_reports_e.id));
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.zone) + "'");
-		insert_values.push_back(std::to_string(bug_reports_e.client_version_id));
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.client_version_name) + "'");
-		insert_values.push_back(std::to_string(bug_reports_e.account_id));
-		insert_values.push_back(std::to_string(bug_reports_e.character_id));
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.character_name) + "'");
-		insert_values.push_back(std::to_string(bug_reports_e.reporter_spoof));
-		insert_values.push_back(std::to_string(bug_reports_e.category_id));
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.category_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.reporter_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.ui_path) + "'");
-		insert_values.push_back(std::to_string(bug_reports_e.pos_x));
-		insert_values.push_back(std::to_string(bug_reports_e.pos_y));
-		insert_values.push_back(std::to_string(bug_reports_e.pos_z));
-		insert_values.push_back(std::to_string(bug_reports_e.heading));
-		insert_values.push_back(std::to_string(bug_reports_e.time_played));
-		insert_values.push_back(std::to_string(bug_reports_e.target_id));
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.target_name) + "'");
-		insert_values.push_back(std::to_string(bug_reports_e.optional_info_mask));
-		insert_values.push_back(std::to_string(bug_reports_e._can_duplicate));
-		insert_values.push_back(std::to_string(bug_reports_e._crash_bug));
-		insert_values.push_back(std::to_string(bug_reports_e._target_info));
-		insert_values.push_back(std::to_string(bug_reports_e._character_flags));
-		insert_values.push_back(std::to_string(bug_reports_e._unknown_value));
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.bug_report) + "'");
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.system_info) + "'");
-		insert_values.push_back("FROM_UNIXTIME(" + (bug_reports_e.report_datetime > 0 ? std::to_string(bug_reports_e.report_datetime) : "null") + ")");
-		insert_values.push_back(std::to_string(bug_reports_e.bug_status));
-		insert_values.push_back("FROM_UNIXTIME(" + (bug_reports_e.last_review > 0 ? std::to_string(bug_reports_e.last_review) : "null") + ")");
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.last_reviewer) + "'");
-		insert_values.push_back("'" + Strings::Escape(bug_reports_e.reviewer_notes) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+		insert_values.push_back(std::to_string(e.client_version_id));
+		insert_values.push_back("'" + Strings::Escape(e.client_version_name) + "'");
+		insert_values.push_back(std::to_string(e.account_id));
+		insert_values.push_back(std::to_string(e.character_id));
+		insert_values.push_back("'" + Strings::Escape(e.character_name) + "'");
+		insert_values.push_back(std::to_string(e.reporter_spoof));
+		insert_values.push_back(std::to_string(e.category_id));
+		insert_values.push_back("'" + Strings::Escape(e.category_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.reporter_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.ui_path) + "'");
+		insert_values.push_back(std::to_string(e.pos_x));
+		insert_values.push_back(std::to_string(e.pos_y));
+		insert_values.push_back(std::to_string(e.pos_z));
+		insert_values.push_back(std::to_string(e.heading));
+		insert_values.push_back(std::to_string(e.time_played));
+		insert_values.push_back(std::to_string(e.target_id));
+		insert_values.push_back("'" + Strings::Escape(e.target_name) + "'");
+		insert_values.push_back(std::to_string(e.optional_info_mask));
+		insert_values.push_back(std::to_string(e._can_duplicate));
+		insert_values.push_back(std::to_string(e._crash_bug));
+		insert_values.push_back(std::to_string(e._target_info));
+		insert_values.push_back(std::to_string(e._character_flags));
+		insert_values.push_back(std::to_string(e._unknown_value));
+		insert_values.push_back("'" + Strings::Escape(e.bug_report) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.system_info) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
+		insert_values.push_back(std::to_string(e.bug_status));
+		insert_values.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
+		insert_values.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -397,57 +397,57 @@ public:
 		);
 
 		if (results.Success()) {
-			bug_reports_e.id = results.LastInsertedID();
-			return bug_reports_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		bug_reports_e = NewEntity();
+		e = NewEntity();
 
-		return bug_reports_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<BugReports> bug_reports_entries
+		std::vector<BugReports> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &bug_reports_e: bug_reports_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(bug_reports_e.id));
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.zone) + "'");
-			insert_values.push_back(std::to_string(bug_reports_e.client_version_id));
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.client_version_name) + "'");
-			insert_values.push_back(std::to_string(bug_reports_e.account_id));
-			insert_values.push_back(std::to_string(bug_reports_e.character_id));
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.character_name) + "'");
-			insert_values.push_back(std::to_string(bug_reports_e.reporter_spoof));
-			insert_values.push_back(std::to_string(bug_reports_e.category_id));
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.category_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.reporter_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.ui_path) + "'");
-			insert_values.push_back(std::to_string(bug_reports_e.pos_x));
-			insert_values.push_back(std::to_string(bug_reports_e.pos_y));
-			insert_values.push_back(std::to_string(bug_reports_e.pos_z));
-			insert_values.push_back(std::to_string(bug_reports_e.heading));
-			insert_values.push_back(std::to_string(bug_reports_e.time_played));
-			insert_values.push_back(std::to_string(bug_reports_e.target_id));
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.target_name) + "'");
-			insert_values.push_back(std::to_string(bug_reports_e.optional_info_mask));
-			insert_values.push_back(std::to_string(bug_reports_e._can_duplicate));
-			insert_values.push_back(std::to_string(bug_reports_e._crash_bug));
-			insert_values.push_back(std::to_string(bug_reports_e._target_info));
-			insert_values.push_back(std::to_string(bug_reports_e._character_flags));
-			insert_values.push_back(std::to_string(bug_reports_e._unknown_value));
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.bug_report) + "'");
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.system_info) + "'");
-			insert_values.push_back("FROM_UNIXTIME(" + (bug_reports_e.report_datetime > 0 ? std::to_string(bug_reports_e.report_datetime) : "null") + ")");
-			insert_values.push_back(std::to_string(bug_reports_e.bug_status));
-			insert_values.push_back("FROM_UNIXTIME(" + (bug_reports_e.last_review > 0 ? std::to_string(bug_reports_e.last_review) : "null") + ")");
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.last_reviewer) + "'");
-			insert_values.push_back("'" + Strings::Escape(bug_reports_e.reviewer_notes) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.zone) + "'");
+			insert_values.push_back(std::to_string(e.client_version_id));
+			insert_values.push_back("'" + Strings::Escape(e.client_version_name) + "'");
+			insert_values.push_back(std::to_string(e.account_id));
+			insert_values.push_back(std::to_string(e.character_id));
+			insert_values.push_back("'" + Strings::Escape(e.character_name) + "'");
+			insert_values.push_back(std::to_string(e.reporter_spoof));
+			insert_values.push_back(std::to_string(e.category_id));
+			insert_values.push_back("'" + Strings::Escape(e.category_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.reporter_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.ui_path) + "'");
+			insert_values.push_back(std::to_string(e.pos_x));
+			insert_values.push_back(std::to_string(e.pos_y));
+			insert_values.push_back(std::to_string(e.pos_z));
+			insert_values.push_back(std::to_string(e.heading));
+			insert_values.push_back(std::to_string(e.time_played));
+			insert_values.push_back(std::to_string(e.target_id));
+			insert_values.push_back("'" + Strings::Escape(e.target_name) + "'");
+			insert_values.push_back(std::to_string(e.optional_info_mask));
+			insert_values.push_back(std::to_string(e._can_duplicate));
+			insert_values.push_back(std::to_string(e._crash_bug));
+			insert_values.push_back(std::to_string(e._target_info));
+			insert_values.push_back(std::to_string(e._character_flags));
+			insert_values.push_back(std::to_string(e._unknown_value));
+			insert_values.push_back("'" + Strings::Escape(e.bug_report) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.system_info) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
+			insert_values.push_back(std::to_string(e.bug_status));
+			insert_values.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
+			insert_values.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -161,17 +161,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DiscordWebhooks discord_webhooks_e
+		DiscordWebhooks e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(discord_webhooks_e.webhook_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(discord_webhooks_e.webhook_url) + "'");
-		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (discord_webhooks_e.created_at > 0 ? std::to_string(discord_webhooks_e.created_at) : "null") + ")");
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (discord_webhooks_e.deleted_at > 0 ? std::to_string(discord_webhooks_e.deleted_at) : "null") + ")");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.webhook_name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.webhook_url) + "'");
+		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -179,7 +179,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				discord_webhooks_e.id
+				e.id
 			)
 		);
 
@@ -188,16 +188,16 @@ public:
 
 	static DiscordWebhooks InsertOne(
 		Database& db,
-		DiscordWebhooks discord_webhooks_e
+		DiscordWebhooks e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(discord_webhooks_e.id));
-		insert_values.push_back("'" + Strings::Escape(discord_webhooks_e.webhook_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(discord_webhooks_e.webhook_url) + "'");
-		insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_e.created_at > 0 ? std::to_string(discord_webhooks_e.created_at) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_e.deleted_at > 0 ? std::to_string(discord_webhooks_e.deleted_at) : "null") + ")");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.webhook_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.webhook_url) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -208,30 +208,30 @@ public:
 		);
 
 		if (results.Success()) {
-			discord_webhooks_e.id = results.LastInsertedID();
-			return discord_webhooks_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		discord_webhooks_e = NewEntity();
+		e = NewEntity();
 
-		return discord_webhooks_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DiscordWebhooks> discord_webhooks_entries
+		std::vector<DiscordWebhooks> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &discord_webhooks_e: discord_webhooks_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(discord_webhooks_e.id));
-			insert_values.push_back("'" + Strings::Escape(discord_webhooks_e.webhook_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(discord_webhooks_e.webhook_url) + "'");
-			insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_e.created_at > 0 ? std::to_string(discord_webhooks_e.created_at) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_e.deleted_at > 0 ? std::to_string(discord_webhooks_e.deleted_at) : "null") + ")");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.webhook_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.webhook_url) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

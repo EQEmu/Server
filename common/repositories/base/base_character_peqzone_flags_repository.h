@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterPeqzoneFlags character_peqzone_flags_e
+		CharacterPeqzoneFlags e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_peqzone_flags_e.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_peqzone_flags_e.zone_id));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_peqzone_flags_e.id
+				e.id
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static CharacterPeqzoneFlags InsertOne(
 		Database& db,
-		CharacterPeqzoneFlags character_peqzone_flags_e
+		CharacterPeqzoneFlags e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_peqzone_flags_e.id));
-		insert_values.push_back(std::to_string(character_peqzone_flags_e.zone_id));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.zone_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			character_peqzone_flags_e.id = results.LastInsertedID();
-			return character_peqzone_flags_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_peqzone_flags_e = NewEntity();
+		e = NewEntity();
 
-		return character_peqzone_flags_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterPeqzoneFlags> character_peqzone_flags_entries
+		std::vector<CharacterPeqzoneFlags> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_peqzone_flags_e: character_peqzone_flags_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_peqzone_flags_e.id));
-			insert_values.push_back(std::to_string(character_peqzone_flags_e.zone_id));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.zone_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -171,19 +171,19 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterExpeditionLockouts character_expedition_lockouts_e
+		CharacterExpeditionLockouts e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_expedition_lockouts_e.character_id));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(character_expedition_lockouts_e.expedition_name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(character_expedition_lockouts_e.event_name) + "'");
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (character_expedition_lockouts_e.expire_time > 0 ? std::to_string(character_expedition_lockouts_e.expire_time) : "null") + ")");
-		update_values.push_back(columns[5] + " = " + std::to_string(character_expedition_lockouts_e.duration));
-		update_values.push_back(columns[6] + " = '" + Strings::Escape(character_expedition_lockouts_e.from_expedition_uuid) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.character_id));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.expedition_name) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.event_name) + "'");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		update_values.push_back(columns[5] + " = " + std::to_string(e.duration));
+		update_values.push_back(columns[6] + " = '" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -191,7 +191,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				character_expedition_lockouts_e.id
+				e.id
 			)
 		);
 
@@ -200,18 +200,18 @@ public:
 
 	static CharacterExpeditionLockouts InsertOne(
 		Database& db,
-		CharacterExpeditionLockouts character_expedition_lockouts_e
+		CharacterExpeditionLockouts e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(character_expedition_lockouts_e.id));
-		insert_values.push_back(std::to_string(character_expedition_lockouts_e.character_id));
-		insert_values.push_back("'" + Strings::Escape(character_expedition_lockouts_e.expedition_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(character_expedition_lockouts_e.event_name) + "'");
-		insert_values.push_back("FROM_UNIXTIME(" + (character_expedition_lockouts_e.expire_time > 0 ? std::to_string(character_expedition_lockouts_e.expire_time) : "null") + ")");
-		insert_values.push_back(std::to_string(character_expedition_lockouts_e.duration));
-		insert_values.push_back("'" + Strings::Escape(character_expedition_lockouts_e.from_expedition_uuid) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.character_id));
+		insert_values.push_back("'" + Strings::Escape(e.expedition_name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.event_name) + "'");
+		insert_values.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		insert_values.push_back(std::to_string(e.duration));
+		insert_values.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -222,32 +222,32 @@ public:
 		);
 
 		if (results.Success()) {
-			character_expedition_lockouts_e.id = results.LastInsertedID();
-			return character_expedition_lockouts_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_expedition_lockouts_e = NewEntity();
+		e = NewEntity();
 
-		return character_expedition_lockouts_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterExpeditionLockouts> character_expedition_lockouts_entries
+		std::vector<CharacterExpeditionLockouts> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_expedition_lockouts_e: character_expedition_lockouts_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(character_expedition_lockouts_e.id));
-			insert_values.push_back(std::to_string(character_expedition_lockouts_e.character_id));
-			insert_values.push_back("'" + Strings::Escape(character_expedition_lockouts_e.expedition_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(character_expedition_lockouts_e.event_name) + "'");
-			insert_values.push_back("FROM_UNIXTIME(" + (character_expedition_lockouts_e.expire_time > 0 ? std::to_string(character_expedition_lockouts_e.expire_time) : "null") + ")");
-			insert_values.push_back(std::to_string(character_expedition_lockouts_e.duration));
-			insert_values.push_back("'" + Strings::Escape(character_expedition_lockouts_e.from_expedition_uuid) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.character_id));
+			insert_values.push_back("'" + Strings::Escape(e.expedition_name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.event_name) + "'");
+			insert_values.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			insert_values.push_back(std::to_string(e.duration));
+			insert_values.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

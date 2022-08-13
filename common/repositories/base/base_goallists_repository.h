@@ -146,15 +146,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Goallists goallists_e
+		Goallists e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(goallists_e.listid));
-		update_values.push_back(columns[1] + " = " + std::to_string(goallists_e.entry));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.listid));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -162,7 +162,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				goallists_e.listid
+				e.listid
 			)
 		);
 
@@ -171,13 +171,13 @@ public:
 
 	static Goallists InsertOne(
 		Database& db,
-		Goallists goallists_e
+		Goallists e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(goallists_e.listid));
-		insert_values.push_back(std::to_string(goallists_e.entry));
+		insert_values.push_back(std::to_string(e.listid));
+		insert_values.push_back(std::to_string(e.entry));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -188,27 +188,27 @@ public:
 		);
 
 		if (results.Success()) {
-			goallists_e.listid = results.LastInsertedID();
-			return goallists_e;
+			e.listid = results.LastInsertedID();
+			return e;
 		}
 
-		goallists_e = NewEntity();
+		e = NewEntity();
 
-		return goallists_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Goallists> goallists_entries
+		std::vector<Goallists> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &goallists_e: goallists_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(goallists_e.listid));
-			insert_values.push_back(std::to_string(goallists_e.entry));
+			insert_values.push_back(std::to_string(e.listid));
+			insert_values.push_back(std::to_string(e.entry));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

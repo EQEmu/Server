@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountFlags account_flags_e
+		AccountFlags e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_flags_e.p_accid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_flags_e.p_flag) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(account_flags_e.p_value) + "'");
+		update_values.push_back(columns[0] + " = " + std::to_string(e.p_accid));
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.p_flag) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.p_value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				account_flags_e.p_accid
+				e.p_accid
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static AccountFlags InsertOne(
 		Database& db,
-		AccountFlags account_flags_e
+		AccountFlags e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(account_flags_e.p_accid));
-		insert_values.push_back("'" + Strings::Escape(account_flags_e.p_flag) + "'");
-		insert_values.push_back("'" + Strings::Escape(account_flags_e.p_value) + "'");
+		insert_values.push_back(std::to_string(e.p_accid));
+		insert_values.push_back("'" + Strings::Escape(e.p_flag) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.p_value) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			account_flags_e.p_accid = results.LastInsertedID();
-			return account_flags_e;
+			e.p_accid = results.LastInsertedID();
+			return e;
 		}
 
-		account_flags_e = NewEntity();
+		e = NewEntity();
 
-		return account_flags_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AccountFlags> account_flags_entries
+		std::vector<AccountFlags> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_flags_e: account_flags_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(account_flags_e.p_accid));
-			insert_values.push_back("'" + Strings::Escape(account_flags_e.p_flag) + "'");
-			insert_values.push_back("'" + Strings::Escape(account_flags_e.p_value) + "'");
+			insert_values.push_back(std::to_string(e.p_accid));
+			insert_values.push_back("'" + Strings::Escape(e.p_flag) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.p_value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

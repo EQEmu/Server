@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Reports reports_e
+		Reports e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(reports_e.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(reports_e.reported) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(reports_e.reported_text) + "'");
+		update_values.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.reported) + "'");
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				reports_e.id
+				e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static Reports InsertOne(
 		Database& db,
-		Reports reports_e
+		Reports e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(reports_e.id));
-		insert_values.push_back("'" + Strings::Escape(reports_e.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(reports_e.reported) + "'");
-		insert_values.push_back("'" + Strings::Escape(reports_e.reported_text) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.reported) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.reported_text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +201,29 @@ public:
 		);
 
 		if (results.Success()) {
-			reports_e.id = results.LastInsertedID();
-			return reports_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		reports_e = NewEntity();
+		e = NewEntity();
 
-		return reports_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Reports> reports_entries
+		std::vector<Reports> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &reports_e: reports_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(reports_e.id));
-			insert_values.push_back("'" + Strings::Escape(reports_e.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(reports_e.reported) + "'");
-			insert_values.push_back("'" + Strings::Escape(reports_e.reported_text) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.reported) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.reported_text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

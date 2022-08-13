@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GmIps gm_ips_e
+		GmIps e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + Strings::Escape(gm_ips_e.name) + "'");
-		update_values.push_back(columns[1] + " = " + std::to_string(gm_ips_e.account_id));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(gm_ips_e.ip_address) + "'");
+		update_values.push_back(columns[0] + " = '" + Strings::Escape(e.name) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.account_id));
+		update_values.push_back(columns[2] + " = '" + Strings::Escape(e.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				gm_ips_e.account_id
+				e.account_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static GmIps InsertOne(
 		Database& db,
-		GmIps gm_ips_e
+		GmIps e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back("'" + Strings::Escape(gm_ips_e.name) + "'");
-		insert_values.push_back(std::to_string(gm_ips_e.account_id));
-		insert_values.push_back("'" + Strings::Escape(gm_ips_e.ip_address) + "'");
+		insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+		insert_values.push_back(std::to_string(e.account_id));
+		insert_values.push_back("'" + Strings::Escape(e.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			gm_ips_e.account_id = results.LastInsertedID();
-			return gm_ips_e;
+			e.account_id = results.LastInsertedID();
+			return e;
 		}
 
-		gm_ips_e = NewEntity();
+		e = NewEntity();
 
-		return gm_ips_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GmIps> gm_ips_entries
+		std::vector<GmIps> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &gm_ips_e: gm_ips_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back("'" + Strings::Escape(gm_ips_e.name) + "'");
-			insert_values.push_back(std::to_string(gm_ips_e.account_id));
-			insert_values.push_back("'" + Strings::Escape(gm_ips_e.ip_address) + "'");
+			insert_values.push_back("'" + Strings::Escape(e.name) + "'");
+			insert_values.push_back(std::to_string(e.account_id));
+			insert_values.push_back("'" + Strings::Escape(e.ip_address) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

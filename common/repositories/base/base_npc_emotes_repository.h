@@ -161,17 +161,17 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		NpcEmotes npc_emotes_e
+		NpcEmotes e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(npc_emotes_e.emoteid));
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_emotes_e.event_));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_emotes_e.type));
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(npc_emotes_e.text) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.emoteid));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.event_));
+		update_values.push_back(columns[3] + " = " + std::to_string(e.type));
+		update_values.push_back(columns[4] + " = '" + Strings::Escape(e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -179,7 +179,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				npc_emotes_e.id
+				e.id
 			)
 		);
 
@@ -188,16 +188,16 @@ public:
 
 	static NpcEmotes InsertOne(
 		Database& db,
-		NpcEmotes npc_emotes_e
+		NpcEmotes e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(npc_emotes_e.id));
-		insert_values.push_back(std::to_string(npc_emotes_e.emoteid));
-		insert_values.push_back(std::to_string(npc_emotes_e.event_));
-		insert_values.push_back(std::to_string(npc_emotes_e.type));
-		insert_values.push_back("'" + Strings::Escape(npc_emotes_e.text) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.emoteid));
+		insert_values.push_back(std::to_string(e.event_));
+		insert_values.push_back(std::to_string(e.type));
+		insert_values.push_back("'" + Strings::Escape(e.text) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -208,30 +208,30 @@ public:
 		);
 
 		if (results.Success()) {
-			npc_emotes_e.id = results.LastInsertedID();
-			return npc_emotes_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		npc_emotes_e = NewEntity();
+		e = NewEntity();
 
-		return npc_emotes_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<NpcEmotes> npc_emotes_entries
+		std::vector<NpcEmotes> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_emotes_e: npc_emotes_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(npc_emotes_e.id));
-			insert_values.push_back(std::to_string(npc_emotes_e.emoteid));
-			insert_values.push_back(std::to_string(npc_emotes_e.event_));
-			insert_values.push_back(std::to_string(npc_emotes_e.type));
-			insert_values.push_back("'" + Strings::Escape(npc_emotes_e.text) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.emoteid));
+			insert_values.push_back(std::to_string(e.event_));
+			insert_values.push_back(std::to_string(e.type));
+			insert_values.push_back("'" + Strings::Escape(e.text) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

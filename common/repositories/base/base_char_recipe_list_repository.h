@@ -151,16 +151,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharRecipeList char_recipe_list_e
+		CharRecipeList e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(char_recipe_list_e.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(char_recipe_list_e.recipe_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(char_recipe_list_e.madecount));
+		update_values.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.recipe_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.madecount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -168,7 +168,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				char_recipe_list_e.char_id
+				e.char_id
 			)
 		);
 
@@ -177,14 +177,14 @@ public:
 
 	static CharRecipeList InsertOne(
 		Database& db,
-		CharRecipeList char_recipe_list_e
+		CharRecipeList e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(char_recipe_list_e.char_id));
-		insert_values.push_back(std::to_string(char_recipe_list_e.recipe_id));
-		insert_values.push_back(std::to_string(char_recipe_list_e.madecount));
+		insert_values.push_back(std::to_string(e.char_id));
+		insert_values.push_back(std::to_string(e.recipe_id));
+		insert_values.push_back(std::to_string(e.madecount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -195,28 +195,28 @@ public:
 		);
 
 		if (results.Success()) {
-			char_recipe_list_e.char_id = results.LastInsertedID();
-			return char_recipe_list_e;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		char_recipe_list_e = NewEntity();
+		e = NewEntity();
 
-		return char_recipe_list_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharRecipeList> char_recipe_list_entries
+		std::vector<CharRecipeList> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &char_recipe_list_e: char_recipe_list_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(char_recipe_list_e.char_id));
-			insert_values.push_back(std::to_string(char_recipe_list_e.recipe_id));
-			insert_values.push_back(std::to_string(char_recipe_list_e.madecount));
+			insert_values.push_back(std::to_string(e.char_id));
+			insert_values.push_back(std::to_string(e.recipe_id));
+			insert_values.push_back(std::to_string(e.madecount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

@@ -156,16 +156,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionListMod faction_list_mod_e
+		FactionListMod e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(faction_list_mod_e.faction_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_mod_e.mod));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(faction_list_mod_e.mod_name) + "'");
+		update_values.push_back(columns[1] + " = " + std::to_string(e.faction_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.mod));
+		update_values.push_back(columns[3] + " = '" + Strings::Escape(e.mod_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -173,7 +173,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				faction_list_mod_e.id
+				e.id
 			)
 		);
 
@@ -182,15 +182,15 @@ public:
 
 	static FactionListMod InsertOne(
 		Database& db,
-		FactionListMod faction_list_mod_e
+		FactionListMod e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(faction_list_mod_e.id));
-		insert_values.push_back(std::to_string(faction_list_mod_e.faction_id));
-		insert_values.push_back(std::to_string(faction_list_mod_e.mod));
-		insert_values.push_back("'" + Strings::Escape(faction_list_mod_e.mod_name) + "'");
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.faction_id));
+		insert_values.push_back(std::to_string(e.mod));
+		insert_values.push_back("'" + Strings::Escape(e.mod_name) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -201,29 +201,29 @@ public:
 		);
 
 		if (results.Success()) {
-			faction_list_mod_e.id = results.LastInsertedID();
-			return faction_list_mod_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		faction_list_mod_e = NewEntity();
+		e = NewEntity();
 
-		return faction_list_mod_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<FactionListMod> faction_list_mod_entries
+		std::vector<FactionListMod> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &faction_list_mod_e: faction_list_mod_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(faction_list_mod_e.id));
-			insert_values.push_back(std::to_string(faction_list_mod_e.faction_id));
-			insert_values.push_back(std::to_string(faction_list_mod_e.mod));
-			insert_values.push_back("'" + Strings::Escape(faction_list_mod_e.mod_name) + "'");
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.faction_id));
+			insert_values.push_back(std::to_string(e.mod));
+			insert_values.push_back("'" + Strings::Escape(e.mod_name) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}

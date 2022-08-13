@@ -151,15 +151,15 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		PlayerTitlesets player_titlesets_e
+		PlayerTitlesets e
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(player_titlesets_e.char_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(player_titlesets_e.title_set));
+		update_values.push_back(columns[1] + " = " + std::to_string(e.char_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(e.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -167,7 +167,7 @@ public:
 				TableName(),
 				Strings::Implode(", ", update_values),
 				PrimaryKey(),
-				player_titlesets_e.id
+				e.id
 			)
 		);
 
@@ -176,14 +176,14 @@ public:
 
 	static PlayerTitlesets InsertOne(
 		Database& db,
-		PlayerTitlesets player_titlesets_e
+		PlayerTitlesets e
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(player_titlesets_e.id));
-		insert_values.push_back(std::to_string(player_titlesets_e.char_id));
-		insert_values.push_back(std::to_string(player_titlesets_e.title_set));
+		insert_values.push_back(std::to_string(e.id));
+		insert_values.push_back(std::to_string(e.char_id));
+		insert_values.push_back(std::to_string(e.title_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -194,28 +194,28 @@ public:
 		);
 
 		if (results.Success()) {
-			player_titlesets_e.id = results.LastInsertedID();
-			return player_titlesets_e;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		player_titlesets_e = NewEntity();
+		e = NewEntity();
 
-		return player_titlesets_e;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<PlayerTitlesets> player_titlesets_entries
+		std::vector<PlayerTitlesets> entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &player_titlesets_e: player_titlesets_entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(player_titlesets_e.id));
-			insert_values.push_back(std::to_string(player_titlesets_e.char_id));
-			insert_values.push_back(std::to_string(player_titlesets_e.title_set));
+			insert_values.push_back(std::to_string(e.id));
+			insert_values.push_back(std::to_string(e.char_id));
+			insert_values.push_back(std::to_string(e.title_set));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
 		}
