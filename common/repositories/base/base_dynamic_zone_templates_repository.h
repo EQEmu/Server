@@ -505,13 +505,13 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT MAX({}) FROM {}",
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
 				PrimaryKey(),
 				TableName()
 			)
 		);
 
-		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 	static int64 Count(Database& db, const std::string &where_filter = "")
@@ -524,7 +524,7 @@ public:
 			)
 		);
 
-		return (results.Success() ? strtoll(results.begin()[0], nullptr, 10) : 0);
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };
