@@ -28,7 +28,7 @@
  */
 void NpcScaleManager::ScaleNPC(NPC *npc)
 {
-	if (npc->IsSkipAutoScale()) {
+	if (npc->IsSkipAutoScale() || npc->GetNPCTypeID() == 0) {
 		return;
 	}
 
