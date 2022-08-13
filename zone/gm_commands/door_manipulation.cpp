@@ -34,269 +34,16 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		);
 	}
 
-	// option
-	if (arg1.empty()) {
-		DoorManipulation::CommandHeader(c);
-		c->Message(
-			Chat::White,
-			"#door create <modelname> | Creates a door from a model. (Example IT78 creates a campfire)"
-		);
-		c->Message(Chat::White, "#door setinvertstate [0|1] | Sets selected door invert state");
-		c->Message(Chat::White, "#door setincline <incline> | Sets selected door incline");
-		c->Message(Chat::White, "#door opentype <opentype> | Sets selected door opentype");
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
-				Saylink::Create("#door showmodelszone", false, "local zone"),
-				Saylink::Create("#door showmodelsglobal", false, "global")
-			).c_str()
-		);
-		c->Message(
-			Chat::White,
-			"#door showmodelsfromfile <file.eqg|file.s3d> | Shows models from s3d or eqg file. Example tssequip.eqg or wallet01.eqg"
-		);
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} | Shows available models in the current zone that you are in",
-				Saylink::Create("#door showmodelszone", false, "#door showmodelszone")
-			).c_str()
-		);
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} | Shows available models globally by first listing all global model files",
-				Saylink::Create("#door showmodelsglobal", false, "#door showmodelsglobal")
-			).c_str()
-		);
-
-		c->Message(Chat::White, "#door save | Creates database entry for selected door");
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} - Brings up editing interface for selected door",
-				Saylink::Create("#door edit", false, "#door edit")
-			).c_str()
-		);
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} - lists doors in zone",
-				Saylink::Create("#list doors", false, "#list doors")
-			).c_str()
-		);
-
-		return;
-	}
-
 	// edit menu
 	if (arg1 == "edit") {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Door Selected ID [{}] Name [{}] OpenType [{}] Invertstate [{} | {}/{}] ",
-					c->GetDoorToolEntityId(),
-					door->GetDoorName(),
-					door->GetOpenType(),
-					door->GetInvertState(),
-					Saylink::Create("#door setinvertstate 0", false, "0"),
-					Saylink::Create("#door setinvertstate 1", false, "1")
-				).c_str()
-			);
 
 			const std::string move_x_action   = "move_x";
 			const std::string move_y_action   = "move_y";
 			const std::string move_z_action   = "move_z";
 			const std::string move_h_action   = "move_h";
 			const std::string set_size_action = "set_size";
-
-			std::vector<std::string> move_options = {
-				move_x_action,
-				move_y_action,
-				move_z_action,
-				move_h_action,
-				set_size_action
-			};
-			std::vector<std::string> move_x_options_positive;
-			std::vector<std::string> move_x_options_negative;
-			std::vector<std::string> move_y_options_positive;
-			std::vector<std::string> move_y_options_negative;
-			std::vector<std::string> move_z_options_positive;
-			std::vector<std::string> move_z_options_negative;
-			std::vector<std::string> move_h_options_positive;
-			std::vector<std::string> move_h_options_negative;
-			std::vector<std::string> set_size_options_positive;
-			std::vector<std::string> set_size_options_negative;
-			for (const auto          &move_option : move_options) {
-				if (move_option == move_x_action) {
-					move_x_options_positive.emplace_back(
-						Saylink::Create(
-							fmt::format("#door edit {} .25", move_option),
-							false,
-							".25"
-						)
-					);
-
-					for (int move_index = 0; move_index <= 15; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
-						move_x_options_positive.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
-						move_x_options_negative.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					move_x_options_negative.emplace_back(
-						Saylink::Create(
-							fmt::format("#door edit {} -.25", move_option),
-							false,
-							".25"
-						)
-					);
-				}
-				else if (move_option == move_y_action) {
-					move_y_options_positive.emplace_back(
-						Saylink::Create(
-							fmt::format("#door edit {} .25", move_option),
-							false,
-							".25"
-						)
-					);
-
-					for (int move_index = 0; move_index <= 15; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
-						move_y_options_positive.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? -1 : move_index);
-						move_y_options_negative.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					move_y_options_negative.emplace_back(
-						Saylink::Create(
-							fmt::format("#door edit {} -.25", move_option),
-							false,
-							".25"
-						)
-					);
-				}
-				else if (move_option == move_z_action) {
-					move_z_options_positive.emplace_back(
-						Saylink::Create(
-							fmt::format("#door edit {} .25", move_option),
-							false,
-							".25"
-						)
-					);
-
-					for (int move_index = 0; move_index <= 15; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
-						move_z_options_positive.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? -1 : move_index);
-						move_z_options_negative.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					move_z_options_negative.emplace_back(
-						Saylink::Create(
-							fmt::format("#door edit {} -.25", move_option),
-							false,
-							".25"
-						)
-					);
-				}
-				else if (move_option == move_h_action) {
-					for (int move_index = 0; move_index <= 50; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
-						move_h_options_positive.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					for (int move_index = -50; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? -1 : move_index);
-						move_h_options_negative.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-				}
-				else if (move_option == set_size_action) {
-					for (int move_index = 0; move_index <= 100; move_index += 10) {
-						int value = (move_index == 0 ? 1 : move_index);
-						set_size_options_positive.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-
-					for (int move_index = -100; move_index <= 0; move_index += 10) {
-						int value = (move_index == 0 ? -1 : move_index);
-						set_size_options_negative.emplace_back(
-							Saylink::Create(
-								fmt::format("#door edit {} {}", move_option, value),
-								false,
-								fmt::format("{}", std::abs(value))
-							)
-						);
-					}
-				}
-			}
 
 			// we're passing a move action here
 			if (!arg3.empty() && Strings::IsNumber(arg3)) {
@@ -336,73 +83,192 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				door_position.w = door_position.w + h_move;
 				door->SetPosition(door_position);
 				door->SetSize(door->GetSize() + set_size);
-			}
 
-			// spawn and move helpers
-			uint16 helper_mob_x_negative = 0;
-			uint16 helper_mob_x_positive = 0;
-			uint16 helper_mob_y_positive = 0;
-			uint16 helper_mob_y_negative = 0;
+				// spawn and move helpers
+				uint16 helper_mob_x_negative = 0;
+				uint16 helper_mob_x_positive = 0;
+				uint16 helper_mob_y_positive = 0;
+				uint16 helper_mob_y_negative = 0;
 
-			for (auto &n: entity_list.GetNPCList()) {
-				NPC         *npc     = n.second;
-				std::string npc_name = npc->GetName();
-				if (npc_name.find("-X") != std::string::npos) {
-					helper_mob_x_negative = npc->GetID();
+				for (auto &n: entity_list.GetNPCList()) {
+					NPC         *npc     = n.second;
+					std::string npc_name = npc->GetName();
+					if (npc_name.find("-X") != std::string::npos) {
+						helper_mob_x_negative = npc->GetID();
+					}
+					if (npc_name.find("-Y") != std::string::npos) {
+						helper_mob_y_negative = npc->GetID();
+					}
+					if (npc_name.find("+X") != std::string::npos) {
+						helper_mob_x_positive = npc->GetID();
+					}
+					if (npc_name.find("+Y") != std::string::npos) {
+						helper_mob_y_positive = npc->GetID();
+					}
 				}
-				if (npc_name.find("-Y") != std::string::npos) {
-					helper_mob_y_negative = npc->GetID();
+
+				// -X
+				door_position = door->GetPosition();
+				if (helper_mob_x_negative == 0) {
+					door_position.x = door_position.x - 15;
+					helper_mob_x_negative = NPC::SpawnNodeNPC("-X", "", door_position)->GetID();
 				}
-				if (npc_name.find("+X") != std::string::npos) {
-					helper_mob_x_positive = npc->GetID();
+				else {
+					auto n = entity_list.GetNPCByID(helper_mob_x_negative);
+					n->GMMove(door->GetX() - 15, door->GetY(), door->GetZ(), n->GetHeading());
 				}
-				if (npc_name.find("+Y") != std::string::npos) {
-					helper_mob_y_positive = npc->GetID();
+
+				// +X
+				door_position = door->GetPosition();
+				if (helper_mob_x_positive == 0) {
+					door_position.x = door_position.x + 15;
+					helper_mob_x_positive = NPC::SpawnNodeNPC("+X", "", door_position)->GetID();
+				}
+				else {
+					auto n = entity_list.GetNPCByID(helper_mob_x_positive);
+					n->GMMove(door->GetX() + 15, door->GetY(), door->GetZ(), n->GetHeading());
+				}
+
+				// -Y
+				door_position = door->GetPosition();
+				if (helper_mob_y_negative == 0) {
+					door_position.y = door_position.y - 15;
+					helper_mob_y_negative = NPC::SpawnNodeNPC("-Y", "", door_position)->GetID();
+				}
+				else {
+					auto n = entity_list.GetNPCByID(helper_mob_y_negative);
+					n->GMMove(door->GetX(), door->GetY() - 15, door->GetZ(), n->GetHeading());
+				}
+
+				// +Y
+				door_position = door->GetPosition();
+				if (helper_mob_y_positive == 0) {
+					door_position.y = door_position.y + 15;
+					helper_mob_y_positive = NPC::SpawnNodeNPC("+Y", "", door_position)->GetID();
+				}
+				else {
+					auto n = entity_list.GetNPCByID(helper_mob_y_positive);
+					n->GMMove(door->GetX(), door->GetY() + 15, door->GetZ(), n->GetHeading());
+				}
+
+				return;
+			}
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Door Selected ID [{}] Name [{}] OpenType [{}] Invertstate [{} | {}/{}] ",
+					c->GetDoorToolEntityId(),
+					door->GetDoorName(),
+					door->GetOpenType(),
+					door->GetInvertState(),
+					Saylink::Create("#door setinvertstate 0", true, "0"),
+					Saylink::Create("#door setinvertstate 1", true, "1")
+				).c_str()
+			);
+
+
+			std::vector<std::string> move_options = {
+				move_x_action,
+				move_y_action,
+				move_z_action,
+				move_h_action,
+				set_size_action
+			};
+			std::vector<std::string> move_x_options_positive;
+			std::vector<std::string> move_x_options_negative;
+			std::vector<std::string> move_y_options_positive;
+			std::vector<std::string> move_y_options_negative;
+			std::vector<std::string> move_z_options_positive;
+			std::vector<std::string> move_z_options_negative;
+			std::vector<std::string> move_h_options_positive;
+			std::vector<std::string> move_h_options_negative;
+			std::vector<std::string> set_size_options_positive;
+			std::vector<std::string> set_size_options_negative;
+
+			std::vector<std::string> xyz_values = {
+				".1", "1", "5", "10", "25", "50", "100"
+			};
+
+			// build positive options x/y/z
+			for (const auto &v: xyz_values) {
+				for (const auto &o: move_options) {
+					if (o == move_x_action) {
+						move_x_options_positive.emplace_back(
+							Saylink::Create(fmt::format("#door edit {} {}", o, v), true, v)
+						);
+					}
+					else if (o == move_y_action) {
+						move_y_options_positive.emplace_back(
+							Saylink::Create(fmt::format("#door edit {} {}", o, v), true, v)
+						);
+					}
+					else if (o == move_z_action) {
+						move_z_options_positive.emplace_back(
+							Saylink::Create(fmt::format("#door edit {} {}", o, v), true, v)
+						);
+					}
 				}
 			}
 
-			// -X
-			glm::vec4 door_position = door->GetPosition();
-			if (helper_mob_x_negative == 0) {
-				door_position.x = door_position.x - 15;
-				helper_mob_x_negative = NPC::SpawnNodeNPC("-X", "", door_position)->GetID();
-			}
-			else {
-				auto n = entity_list.GetNPCByID(helper_mob_x_negative);
-				n->GMMove(door->GetX() - 15, door->GetY(), door->GetZ(), n->GetHeading());
-			}
-
-			// +X
-			door_position = door->GetPosition();
-			if (helper_mob_x_positive == 0) {
-				door_position.x = door_position.x + 15;
-				helper_mob_x_positive = NPC::SpawnNodeNPC("+X", "", door_position)->GetID();
-			}
-			else {
-				auto n = entity_list.GetNPCByID(helper_mob_x_positive);
-				n->GMMove(door->GetX() + 15, door->GetY(), door->GetZ(), n->GetHeading());
-			}
-
-			// -Y
-			door_position = door->GetPosition();
-			if (helper_mob_y_negative == 0) {
-				door_position.y = door_position.y - 15;
-				helper_mob_y_negative = NPC::SpawnNodeNPC("-Y", "", door_position)->GetID();
-			}
-			else {
-				auto n = entity_list.GetNPCByID(helper_mob_y_negative);
-				n->GMMove(door->GetX(), door->GetY() - 15, door->GetZ(), n->GetHeading());
+			// loop through vector in reverse order
+			// build negative options x/y/z
+			for (auto v = xyz_values.rbegin(); v != xyz_values.rend(); ++v) {
+				for (const auto &o: move_options) {
+					if (o == move_x_action) {
+						move_x_options_negative.emplace_back(
+							Saylink::Create(fmt::format("#door edit {} -{}", o, *v), true, *v)
+						);
+					}
+					else if (o == move_y_action) {
+						move_y_options_negative.emplace_back(
+							Saylink::Create(fmt::format("#door edit {} -{}", o, *v), true, *v)
+						);
+					}
+					else if (o == move_z_action) {
+						move_z_options_negative.emplace_back(
+							Saylink::Create(fmt::format("#door edit {} -{}", o, *v), true, *v)
+						);
+					}
+				}
 			}
 
-			// +Y
-			door_position = door->GetPosition();
-			if (helper_mob_y_positive == 0) {
-				door_position.y = door_position.y + 15;
-				helper_mob_y_positive = NPC::SpawnNodeNPC("+Y", "", door_position)->GetID();
+			std::vector<std::string> heading_values = {
+				"1", "5", "32.5", "63.75", "130",
+			};
+
+			// build positive options h
+			for (const auto &v: heading_values) {
+				move_h_options_positive.emplace_back(
+					Saylink::Create(fmt::format("#door edit {} {}", move_h_action, v), true, v)
+				);
 			}
-			else {
-				auto n = entity_list.GetNPCByID(helper_mob_y_positive);
-				n->GMMove(door->GetX(), door->GetY() + 15, door->GetZ(), n->GetHeading());
+
+			// loop through vector in reverse order
+			// build negative options h
+			for (auto v = heading_values.rbegin(); v != heading_values.rend(); ++v) {
+				move_h_options_negative.emplace_back(
+					Saylink::Create(fmt::format("#door edit {} -{}", move_h_action, *v), true, *v)
+				);
+			}
+
+			std::vector<std::string> size_values = {
+				"1", "5", "10", "25", "50", "100", "1000"
+			};
+
+			// build positive options size
+			for (const auto &v: size_values) {
+				set_size_options_positive.emplace_back(
+					Saylink::Create(fmt::format("#door edit {} {}", set_size_action, v), true, v)
+				);
+			}
+
+			// loop through vector in reverse order
+			// build negative options size
+			for (auto v = size_values.rbegin(); v != size_values.rend(); ++v) {
+				set_size_options_negative.emplace_back(
+					Saylink::Create(fmt::format("#door edit {} -{}", set_size_action, *v), true, *v)
+				);
 			}
 
 			c->Message(
@@ -412,17 +278,17 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					door->GetDoorName(),
 					Saylink::Create(
 						"#door save",
-						false,
+						true,
 						"Save"
 					),
 					Saylink::Create(
 						"#door changemodelqueue",
-						false,
+						true,
 						"Change Model"
 					),
 					Saylink::Create(
 						"#door setinclineinc",
-						false,
+						true,
 						"Incline"
 					)
 				).c_str()
@@ -505,8 +371,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
-				Saylink::Create("#door showmodelszone", false, "local zone"),
-				Saylink::Create("#door showmodelsglobal", false, "global")
+				Saylink::Create("#door showmodelszone", true, "local zone"),
+				Saylink::Create("#door showmodelsglobal", true, "global")
 			).c_str()
 		);
 	}
@@ -527,7 +393,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		}
 	}
 
-	// incline
+	// invertstate
 	if (arg1 == "setinvertstate" && !arg2.empty() && Strings::IsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
@@ -551,6 +417,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			door->SetIncline(door->GetIncline() + std::atoi(arg2.c_str()));
 		}
 	}
+
 	if (arg1 == "setinclineinc") {
 		std::map<float, std::string> incline_values = {
 			{.01,    "Upright"},
@@ -567,14 +434,14 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		std::vector<std::string> incline_normal_options;
 		std::vector<std::string> incline_positive_options;
 		std::vector<std::string> incline_negative_options;
-		for (auto                incline_value : incline_values) {
+		for (auto                incline_value: incline_values) {
 			incline_normal_options.emplace_back(
 				Saylink::Create(
 					fmt::format(
 						"#door setincline {}",
 						incline_value.first
 					),
-					false,
+					true,
 					incline_value.second
 				)
 			);
@@ -588,7 +455,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						"#door setinclineinc {}",
 						incline_value
 					),
-					false,
+					true,
 					itoa(std::abs(incline_value))
 				)
 			);
@@ -602,7 +469,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						"#door setinclineinc {}",
 						incline_value
 					),
-					false,
+					true,
 					itoa(std::abs(incline_value))
 				)
 			);
@@ -680,6 +547,64 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 		DisplayObjectResultToClient(c, game_objects);
 	}
+
+	// help menu
+	if (arg1.empty()) {
+		DoorManipulation::CommandHeader(c);
+		c->Message(
+			Chat::White,
+			"#door create <modelname> | Creates a door from a model. (Example IT78 creates a campfire)"
+		);
+		c->Message(Chat::White, "#door setinvertstate [0|1] | Sets selected door invert state");
+		c->Message(Chat::White, "#door setincline <incline> | Sets selected door incline");
+		c->Message(Chat::White, "#door opentype <opentype> | Sets selected door opentype");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
+				Saylink::Create("#door showmodelszone", true, "local zone"),
+				Saylink::Create("#door showmodelsglobal", true, "global")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			"#door showmodelsfromfile <file.eqg|file.s3d> | Shows models from s3d or eqg file. Example tssequip.eqg or wallet01.eqg"
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} | Shows available models in the current zone that you are in",
+				Saylink::Create("#door showmodelszone", true, "#door showmodelszone")
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} | Shows available models globally by first listing all global model files",
+				Saylink::Create("#door showmodelsglobal", true, "#door showmodelsglobal")
+			).c_str()
+		);
+
+		c->Message(Chat::White, "#door save | Creates database entry for selected door");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} - Brings up editing interface for selected door",
+				Saylink::Create("#door edit", true, "#door edit")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} - lists doors in zone",
+				Saylink::Create("#list doors", true, "#list doors")
+			).c_str()
+		);
+
+		return;
+	}
 }
 
 void DoorManipulation::CommandHeader(Client *c)
@@ -702,7 +627,7 @@ void DoorManipulation::DisplayObjectResultToClient(
 				"[{}] ",
 				Saylink::Create(
 					fmt::format("#door model {}", g.object_name),
-					false,
+					true,
 					g.object_name
 				)
 			)
@@ -750,7 +675,7 @@ void DoorManipulation::DisplayModelsFromFileResults(
 				"[{}] ",
 				Saylink::Create(
 					fmt::format("#door showmodelsfromfile {}", g.file_from),
-					false,
+					true,
 					g.file_from
 				)
 			)
