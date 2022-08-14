@@ -1916,6 +1916,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		zone->LoadZoneBlockedSpells();
 		break;
 	}
+	case ServerOP_ReloadCommands:
+	{
+		zone->SendReloadMessage("Commands");
+		command_init();
+		break;
+	}
 	case ServerOP_ReloadContentFlags:
 	{
 		zone->SendReloadMessage("Content Flags");

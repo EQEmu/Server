@@ -77,9 +77,8 @@ void command_reload(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Attempting to reload Blocked Spells globally.");	
 		pack = new ServerPacket(ServerOP_ReloadBlockedSpells, 0);
 	} else if (is_commands) {
-		c->Message(Chat::White, "Attempting to reload Commands.");
-		command_init();
-		return;
+		c->Message(Chat::White, "Attempting to reload Commands globally.");
+		pack = new ServerPacket(ServerOP_ReloadCommands, 0);
 	} else if (is_content_flags) {
 		c->Message(Chat::White, "Attempting to reload Content Flags globally.");
 		pack = new ServerPacket(ServerOP_ReloadContentFlags, 0);
