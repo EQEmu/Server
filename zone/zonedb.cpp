@@ -4843,7 +4843,7 @@ uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
 }
 
 double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
-	const auto& query = fmt::format(
+	const std::string query = fmt::format(
 		SQL(
 			SELECT
 			`aa_modifier`
@@ -4871,7 +4871,7 @@ double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16
 }
 
 double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
-	const auto& query = fmt::format(
+	const std::string query = fmt::format(
 		SQL(
 			SELECT
 			`exp_modifier`
