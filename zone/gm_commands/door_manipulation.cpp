@@ -560,7 +560,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | Shows available models in the current zone that you are in",
-				Saylink::Silent("#door showmodelszone", "#door showmodelszone")
+				Saylink::Silent("#door showmodelszone")
 			).c_str()
 		);
 
@@ -568,7 +568,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} | Shows available models globally by first listing all global model files",
-				Saylink::Silent("#door showmodelsglobal", "#door showmodelsglobal")
+				Saylink::Silent("#door showmodelsglobal")
 			).c_str()
 		);
 
@@ -577,14 +577,14 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"{} - Brings up editing interface for selected door",
-				Saylink::Silent("#door edit", "#door edit")
+				Saylink::Silent("#door edit")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"{} - lists doors in zone",
-				Saylink::Silent("#list doors", "#list doors")
+				Saylink::Silent("#list doors")
 			).c_str()
 		);
 

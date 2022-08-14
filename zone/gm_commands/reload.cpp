@@ -223,7 +223,7 @@ void command_reload(Client *c, const Seperator *sep)
 					"Zone Header Load {} | Zone: {}",
 					(
 						zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion()) ?
-						"Suceeded" :
+						"Succeeded" :
 						"Failed"
 					),
 					zone->GetZoneDescription()
@@ -267,7 +267,7 @@ void command_reload(Client *c, const Seperator *sep)
 				"Zone Header Load {} | Zone: {} ({}){}",
 				(
 					zone->LoadZoneCFG(zone_short_name, version) ?
-					"Suceeded" :
+					"Succeeded" :
 					"Failed"
 				),
 				zone_long_name,
