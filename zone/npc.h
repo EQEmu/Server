@@ -109,6 +109,13 @@ public:
 	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);
 
+	// loot recording / simulator
+	bool IsRecordLootStats() const;
+	void SetRecordLootStats(bool record_loot_stats);
+	void FlushLootStats();
+	const std::vector<uint32> &GetRolledItems() const;
+	int GetRolledItemCount(uint32 item_id);
+
 	NPC(const NPCType* npc_type_data, Spawn2* respawn, const glm::vec4& position, GravityBehavior iflymode, bool IsCorpse = false);
 
 	virtual ~NPC();
@@ -678,10 +685,12 @@ protected:
 
 
 private:
-	uint32 loottable_id;
-	bool   skip_global_loot;
-	bool   skip_auto_scale;
-	bool   p_depop;
+	uint32              loottable_id;
+	bool                skip_global_loot;
+	bool                skip_auto_scale;
+	bool                p_depop;
+	bool                m_record_loot_stats;
+	std::vector<uint32> m_rolled_items = {};
 };
 
 #endif

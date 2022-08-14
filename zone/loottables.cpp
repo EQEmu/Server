@@ -39,7 +39,7 @@
 #endif
 
 // Queries the loottable: adds item & coin to the npc
-void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
+void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
 	const LootTable_Struct* lts = nullptr;
 	// global loot passes nullptr for these
 	bool bGlobal = copper == nullptr && silver == nullptr && gold == nullptr && plat == nullptr;
@@ -558,6 +558,10 @@ void NPC::AddLootDrop(
 		itemlist->push_back(item);
 	}
 	else safe_delete(item);
+
+	if (IsRecordLootStats()) {
+		m_rolled_items.emplace_back(item->item_id);
+	}
 
 	if (wear_change && outapp) {
 		entity_list.QueueClients(this, outapp);
