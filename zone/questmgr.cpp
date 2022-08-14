@@ -3401,20 +3401,20 @@ std::string QuestManager::gethexcolorcode(std::string color_name) {
 	return std::string();
 }
 
-double QuestManager::GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id) const {
-	return database.GetAAEXPModifier(character_id, zone_id);
+double QuestManager::GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	return database.GetAAEXPModifier(character_id, zone_id, instance_version);
 }
 
-double QuestManager::GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const {
-	return database.GetEXPModifier(character_id, zone_id);
+double QuestManager::GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	return database.GetEXPModifier(character_id, zone_id, instance_version);
 }
 
-void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier) {
-	database.SetAAEXPModifier(character_id, zone_id, aa_modifier);
+void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version) {
+	database.SetAAEXPModifier(character_id, zone_id, aa_modifier, instance_version);
 }
 
-void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier) {
-	database.SetEXPModifier(character_id, zone_id, exp_modifier);
+void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version) {
+	database.SetEXPModifier(character_id, zone_id, exp_modifier, instance_version);
 }
 
 std::string QuestManager::getgendername(uint32 gender_id) {

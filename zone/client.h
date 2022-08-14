@@ -600,10 +600,10 @@ public:
 
 	inline uint32 GetEXP() const { return m_pp.exp; }
 
-	inline double GetAAEXPModifier(uint32 zone_id) const { return database.GetAAEXPModifier(CharacterID(), zone_id); };
-	inline double GetEXPModifier(uint32 zone_id) const { return database.GetEXPModifier(CharacterID(), zone_id); };
-	inline void SetAAEXPModifier(uint32 zone_id, double aa_modifier) { database.SetAAEXPModifier(CharacterID(), zone_id, aa_modifier); };
-	inline void SetEXPModifier(uint32 zone_id, double exp_modifier) { database.SetEXPModifier(CharacterID(), zone_id, exp_modifier); };
+	inline double GetAAEXPModifier(uint32 zone_id, int16 instance_version = -1) const { return database.GetAAEXPModifier(CharacterID(), zone_id, instance_version); };
+	inline double GetEXPModifier(uint32 zone_id, int16 instance_version = -1) const { return database.GetEXPModifier(CharacterID(), zone_id, instance_version); };
+	inline void SetAAEXPModifier(uint32 zone_id, double aa_modifier, int16 instance_version = -1) { database.SetAAEXPModifier(CharacterID(), zone_id, aa_modifier, instance_version); };
+	inline void SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version = -1) { database.SetEXPModifier(CharacterID(), zone_id, exp_modifier, instance_version); };
 
 	bool UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }

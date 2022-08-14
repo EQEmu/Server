@@ -2258,9 +2258,19 @@ double Perl__getaaexpmodifierbycharid(uint32 character_id, uint32 zone_id)
 	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id);
 }
 
+double Perl__getaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, int16 instance_version)
+{
+	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id, instance_version);
+}
+
 double Perl__getexpmodifierbycharid(uint32 character_id, uint32 zone_id)
 {
 	return quest_manager.GetEXPModifierByCharID(character_id, zone_id);
+}
+
+double Perl__getexpmodifierbycharid(uint32 character_id, uint32 zone_id, int16 instance_version)
+{
+	return quest_manager.GetEXPModifierByCharID(character_id, zone_id, instance_version);
 }
 
 void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double aa_modifier)
@@ -2268,9 +2278,19 @@ void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double 
 	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier);
 }
 
+void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version)
+{
+	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier, instance_version);
+}
+
 void Perl__setexpmodifierbycharid(uint32 character_id, uint32 zone_id, double exp_modifier)
 {
 	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier);
+}
+
+void Perl__setexpmodifierbycharid(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version)
+{
+	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier, instance_version);
 }
 
 std::string Perl__getcleannpcnamebyid(uint32 npc_id)
@@ -4011,7 +4031,8 @@ void perl_register_quest()
 	package.add("forcedoorclose", (void(*)(uint32, bool))&Perl__forcedoorclose);
 	package.add("forcedooropen", (void(*)(uint32))&Perl__forcedooropen);
 	package.add("forcedooropen", (void(*)(uint32, bool))&Perl__forcedooropen);
-	package.add("getaaexpmodifierbycharid", &Perl__getaaexpmodifierbycharid);
+	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getaaexpmodifierbycharid);
+	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getaaexpmodifierbycharid);
 	package.add("getbodytypename", &Perl__getbodytypename);
 	package.add("getcharidbyname", &Perl__getcharidbyname);
 	package.add("getclassname", (std::string(*)(uint8))&Perl__getclassname);
@@ -4020,7 +4041,8 @@ void perl_register_quest()
 	package.add("getconsiderlevelname", &Perl__getconsiderlevelname);
 	package.add("gethexcolorcode", &Perl__gethexcolorcode);
 	package.add("getcurrencyid", &Perl__getcurrencyid);
-	package.add("getexpmodifierbycharid", &Perl__getexpmodifierbycharid);
+	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getexpmodifierbycharid);
+	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getexpmodifierbycharid);
 	package.add("get_expedition", &Perl__get_expedition);
 	package.add("get_expedition_by_char_id", &Perl__get_expedition_by_char_id);
 	package.add("get_expedition_by_dz_id", &Perl__get_expedition_by_dz_id);
@@ -4150,14 +4172,16 @@ void perl_register_quest()
 	package.add("scribespells", (int(*)(int, int))&Perl__scribespells);
 	package.add("secondstotime", &Perl__secondstotime);
 	package.add("selfcast", &Perl__selfcast);
-	package.add("setaaexpmodifierbycharid", &Perl__setaaexpmodifierbycharid);
+	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setaaexpmodifierbycharid);
+	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setaaexpmodifierbycharid);
 	package.add("set_proximity", (void(*)(float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float, bool))&Perl__set_proximity);
 	package.add("set_zone_flag", &Perl__set_zone_flag);
 	package.add("setallskill", &Perl__setallskill);
 	package.add("setanim", &Perl__setanim);
-	package.add("setexpmodifierbycharid", &Perl__setexpmodifierbycharid);
+	package.add("setexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setexpmodifierbycharid);
+	package.add("setexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setexpmodifierbycharid);
 	package.add("setglobal", &Perl__setglobal);
 	package.add("setguild", &Perl__setguild);
 	package.add("sethp", &Perl__sethp);
