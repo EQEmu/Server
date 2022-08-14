@@ -606,13 +606,12 @@ void command_help(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		command_link = Saylink::Create(
+		command_link = Saylink::Silent(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
 				cur.first
 			),
-			false,
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
@@ -688,13 +687,12 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto current_commmand_link = Saylink::Create(
+	auto current_commmand_link = Saylink::Silent(
 		fmt::format(
 			"{}{}",
 			COMMAND_CHAR,
 			command_iter->first
 		),
-		false,
 		fmt::format(
 			"{}{}",
 			COMMAND_CHAR,
@@ -713,13 +711,12 @@ void command_findaliases(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		alias_link = Saylink::Create(
+		alias_link = Saylink::Silent(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
 				a.first
 			),
-			false,
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,

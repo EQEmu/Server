@@ -1698,14 +1698,13 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 		std::vector<std::string> update_saylinks;
 
 		for (auto &increment: update_increments) {
-			auto task_update_saylink = Saylink::Create(
+			auto task_update_saylink = Saylink::Silent(
 				fmt::format(
 					"#task update {} {} {}",
 					task->task_id,
 					task->activity[activity_id].activity_id,
 					increment
 				),
-				false,
 				increment
 			);
 
