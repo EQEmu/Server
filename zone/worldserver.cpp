@@ -3148,7 +3148,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			zone->SetQuestHotReloadQueued(true);
 		} else if (request_zone_short_name == "all") {
 			std::string reload_quest_saylink = Saylink::Silent("#reload quest", "Locally");
-			std::string reload_world_saylink = Saylink::Silent("#reload world",	"Globally");
+			std::string reload_world_saylink = Saylink::Silent("#reload world", "Globally");
 			worldserver.SendEmoteMessage(
 				0,
 				0,
