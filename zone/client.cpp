@@ -11301,6 +11301,16 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
+	auto commands_link = Saylink::Silent("#reload commands");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Commands globally",
+			commands_link
+		).c_str()
+	);
+
 	auto content_flags_link = Saylink::Silent("#reload content_flags");
 
 	Message(

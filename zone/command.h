@@ -5,6 +5,7 @@ class Client;
 class Seperator;
 
 #include "../common/types.h"
+#include <map>
 #include <string>
 
 #define    COMMAND_CHAR '#'
@@ -27,6 +28,7 @@ int command_add(std::string command_name, std::string description, uint8 admin, 
 int command_notavail(Client *c, std::string message);
 int command_realdispatch(Client *c, std::string message);
 void command_logcommand(Client *c, std::string message);
+uint8 GetCommandStatus(Client *c, std::string command_name);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);
