@@ -9533,6 +9533,7 @@ void Client::ShowDevToolsMenu()
 	std::string menu_reload_six;
 	std::string menu_reload_seven;
 	std::string menu_reload_eight;
+	std::string menu_reload_nine;
 	std::string menu_toggle;
 
 	/**
@@ -9558,33 +9559,35 @@ void Client::ShowDevToolsMenu()
 	menu_reload_one += Saylink::Silent("#reload aa", "AAs");
 	menu_reload_one += " | " + Saylink::Silent("#reload alternate_currencies", "Alternate Currencies");
 	menu_reload_one += " | " + Saylink::Silent("#reload blocked_spells", "Blocked Spells");
-	menu_reload_one += " | " + Saylink::Silent("#reload content_flags", "Content Flags");
 
-	menu_reload_two += Saylink::Silent("#reload doors", "Doors");
-	menu_reload_two += " | " + Saylink::Silent("#reload ground_spawns", "Ground Spawns");
+	menu_reload_two += Saylink::Silent("#reload commands", "Commands");
+	menu_reload_two += " | " + Saylink::Silent("#reload content_flags", "Content Flags");
 
-	menu_reload_three += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
-	menu_reload_three += " | " + Saylink::Silent("#reload logs", "Log Settings");
+	menu_reload_three += Saylink::Silent("#reload doors", "Doors");
+	menu_reload_three += " | " + Saylink::Silent("#reload ground_spawns", "Ground Spawns");
 
-	menu_reload_four += Saylink::Silent("#reload merchants", "Merchants");
-	menu_reload_four += " | " + Saylink::Silent("#reload npc_emotes", "NPC Emotes");
-	menu_reload_four += " | " + Saylink::Silent("#reload objects", "Objects");
+	menu_reload_four += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
+	menu_reload_four += " | " + Saylink::Silent("#reload logs", "Log Settings");
 
-	menu_reload_five += Saylink::Silent("#reload perl_export", "Perl Event Export Settings");
-	menu_reload_five += " | " + Saylink::Silent("#reload quest", "Quests");
+	menu_reload_five += Saylink::Silent("#reload merchants", "Merchants");
+	menu_reload_five += " | " + Saylink::Silent("#reload npc_emotes", "NPC Emotes");
+	menu_reload_five += " | " + Saylink::Silent("#reload objects", "Objects");
 
-	menu_reload_six += Saylink::Silent("#reload rules", "Rules");
-	menu_reload_six += " | " + Saylink::Silent("#reload static", "Static Zone Data");
-	menu_reload_six += " | " + Saylink::Silent("#reload tasks", "Tasks");
+	menu_reload_six += Saylink::Silent("#reload perl_export", "Perl Event Export Settings");
+	menu_reload_six += " | " + Saylink::Silent("#reload quest", "Quests");
 
-	menu_reload_seven += Saylink::Silent("#reload titles", "Titles");
-	menu_reload_seven += " | " + Saylink::Silent("#reload traps 1", "Traps");
-	menu_reload_seven += " | " + Saylink::Silent("#reload variables", "Variables");
-	menu_reload_seven += " | " + Saylink::Silent("#reload veteran_rewards", "Veteran Rewards");
+	menu_reload_seven += Saylink::Silent("#reload rules", "Rules");
+	menu_reload_seven += " | " + Saylink::Silent("#reload static", "Static Zone Data");
+	menu_reload_seven += " | " + Saylink::Silent("#reload tasks", "Tasks");
 
-	menu_reload_eight += Saylink::Silent("#reload world", "World");
-	menu_reload_eight += " | " + Saylink::Silent("#reload zone", "Zone");
-	menu_reload_eight += " | " + Saylink::Silent("#reload zone_points", "Zone Points");
+	menu_reload_eight += Saylink::Silent("#reload titles", "Titles");
+	menu_reload_eight += " | " + Saylink::Silent("#reload traps 1", "Traps");
+	menu_reload_eight += " | " + Saylink::Silent("#reload variables", "Variables");
+	menu_reload_eight += " | " + Saylink::Silent("#reload veteran_rewards", "Veteran Rewards");
+
+	menu_reload_nine += Saylink::Silent("#reload world", "World");
+	menu_reload_nine += " | " + Saylink::Silent("#reload zone", "Zone");
+	menu_reload_nine += " | " + Saylink::Silent("#reload zone_points", "Zone Points");
 
 	/**
 	 * Show window status
@@ -9702,6 +9705,14 @@ void Client::ShowDevToolsMenu()
 		fmt::format(
 			"Reload | {}",
 			menu_reload_eight
+		).c_str()
+	);
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Reload | {}",
+			menu_reload_nine
 		).c_str()
 	);
 
