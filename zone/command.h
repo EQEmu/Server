@@ -5,7 +5,6 @@ class Client;
 class Seperator;
 
 #include "../common/types.h"
-#include <map>
 #include <string>
 
 #define    COMMAND_CHAR '#'
