@@ -3,7 +3,7 @@
 void command_lootsim(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-	if (arguments < 3) {
+	if (arguments < 3 || !sep->IsNumber(1) || !sep->IsNumber(2) || !sep->IsNumber(3)) {
 		c->Message(Chat::White, "Usage: #lootsim [npc_type_id] [loottable_id] [iterations] [loot_log_enabled=0]");
 		return;
 	}
