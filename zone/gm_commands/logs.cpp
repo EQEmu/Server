@@ -184,11 +184,7 @@ void command_logs(Client *c, const Seperator *sep)
 				next_category_id
 			);
 
-			auto next_list_link = Saylink::Create(
-				next_list_string,
-				false,
-				next_list_string
-			);
+			auto next_list_link = Saylink::Silent(next_list_string, next_list_string);
 
 			c->Message(
 				Chat::White,

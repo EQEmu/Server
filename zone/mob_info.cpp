@@ -590,25 +590,31 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 	std::string menu_commands;
 
 	if (npc->GetGrid() > 0) {
-		menu_commands += "[" + Saylink::Create("#grid show", false, "Grid Points") + "] ";
+		menu_commands += "[" + Saylink::Silent("#grid show", "Grid Points") + "] ";
 	}
 
 	if (npc->GetEmoteID() > 0) {
-		std::string saylink = StringFormat("#emotesearch %u", npc->GetEmoteID());
-		menu_commands += "[" + Saylink::Create(saylink, false, "Emotes") + "] ";
+		menu_commands += "[" + Saylink::Silent(fmt::format("#emotesearch {}", npc->GetEmoteID()), "Emotes") + "] ";
 	}
 
 	if (npc->GetLoottableID() > 0) {
-		menu_commands += "[" + Saylink::Create("#npcloot show", false, "Loot") + "] ";
+		menu_commands += "[" + Saylink::Silent("#npcloot show", "Loot") + "] ";
 	}
 
 	if (npc->IsProximitySet()) {
-		menu_commands += "[" + Saylink::Create("#proximity show", false, "Proximity") + "] ";
+		menu_commands += "[" + Saylink::Silent("#proximity show", "Proximity") + "] ";
 	}
 
 	if (menu_commands.length() > 0) {
-		std::string dev_menu = "[" + Saylink::Create("#devtools", false, "DevTools") + "] ";;
-		client->Message(Chat::White, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
+		const auto& dev_menu = Saylink::Silent("#devtools", "DevTools");
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"| [{}] [Show Commands] {}",
+				dev_menu,
+				menu_commands
+			).c_str()
+		);
 	}
 }
 

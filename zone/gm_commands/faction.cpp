@@ -56,9 +56,8 @@ void command_faction(Client *c, const Seperator *sep)
 			auto        faction_id     = std::stoul(row[0]);
 			std::string faction_name   = row[1];
 			std::string faction_value  = row[2];
-			std::string reset_link     = Saylink::Create(
+			std::string reset_link     = Saylink::Silent(
 				fmt::format("#faction reset {}", faction_id),
-				false,
 				"Reset"
 			);
 

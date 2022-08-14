@@ -43,7 +43,7 @@ void command_zheader(Client *c, const Seperator *sep)
 			"Zone Header Load {} | Zone: {} ({}){}",
 			(
 				zone->LoadZoneCFG(zone_short_name, version) ?
-				"Suceeded" :
+				"Succeeded" :
 				"Failed"
 			),
 			zone_long_name,
