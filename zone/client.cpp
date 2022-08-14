@@ -9616,7 +9616,7 @@ void Client::ShowDevToolsMenu()
 		Chat::White,
 		fmt::format(
 			"Show Menu | {}",
-			Saylink::Silent("#dev", "#dev")
+			Saylink::Silent("#dev")
 		).c_str()
 	);
 
@@ -9716,7 +9716,7 @@ void Client::ShowDevToolsMenu()
 		).c_str()
 	);
 
-	auto help_link = Saylink::Silent("#help", "#help");
+	auto help_link = Saylink::Silent("#help");
 
 	Message(
 		Chat::White,

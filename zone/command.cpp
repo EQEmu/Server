@@ -700,11 +700,6 @@ void command_findaliases(Client *c, const Seperator *sep)
 			"{}{}",
 			COMMAND_CHAR,
 			command_iter->first
-		),
-		fmt::format(
-			"{}{}",
-			COMMAND_CHAR,
-			command_iter->first
 		)
 	);
 
@@ -720,11 +715,6 @@ void command_findaliases(Client *c, const Seperator *sep)
 		}
 
 		alias_link = Saylink::Silent(
-			fmt::format(
-				"{}{}",
-				COMMAND_CHAR,
-				a.first
-			),
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
