@@ -2535,7 +2535,7 @@ bool BotDatabase::CreateBotGroup(const std::string& group_name, const uint32 lea
 		return false;
 	}
 
-	if (!QueryBotGroupExistence(group_name)) {
+	if (QueryBotGroupExistence(group_name)) {
 		return false;
 	}
 
