@@ -628,7 +628,7 @@ void Aura::ProcessEnterTrap(Mob *owner)
 			continue;
 		}
 		// might need more checks ...
-		if (owner->IsAttackAllowed(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+		if (mob != owner && owner->IsAttackAllowed(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 			SpellFinished(spell_id, mob);
 			owner->RemoveAura(GetID(), false); // if we're a buff (ex. NEC) we don't want to strip :P
 			break;
@@ -646,7 +646,7 @@ void Aura::ProcessExitTrap(Mob *owner)
 			continue;
 		}
 		// might need more checks ...
-		if (owner->IsAttackAllowed(mob)) {
+		if (mob != owner && owner->IsAttackAllowed(mob)) {
 			bool in_range = DistanceSquared(GetPosition(), mob->GetPosition()) <= distance;
 			auto it       = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
