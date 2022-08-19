@@ -9373,7 +9373,7 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
  */
 bool Client::GotoPlayer(std::string player_name)
 {
-	std::string query = StringFormat(
+	const std::string query = fmt::format(
 		"SELECT"
 		"    character_data.zone_id,"
 		"    character_data.zone_instance,"
@@ -9385,21 +9385,23 @@ bool Client::GotoPlayer(std::string player_name)
 		"    character_data "
 		"WHERE"
 		"    TRUE"
-		"    AND character_data.name = '%s'"
-		"    AND character_data.last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1", player_name.c_str());
+		"    AND character_data.name = '{}'"
+		"    AND character_data.last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1",
+		player_name
+	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return false;
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto zone_id     = static_cast<uint32>(atoi(row[0]));
-		auto instance_id = static_cast<uint16>(atoi(row[1]));
-		auto x           = static_cast<float>(atof(row[2]));
-		auto y           = static_cast<float>(atof(row[3]));
-		auto z           = static_cast<float>(atof(row[4]));
-		auto heading     = static_cast<float>(atof(row[5]));
+		auto zone_id = std::stoul(row[0]);
+		auto instance_id = static_cast<uint16>(std::stoul(row[1]));
+		auto x = std::stof(row[2]);
+		auto y = std::stof(row[3]);
+		auto z = std::stof(row[4]);
+		auto heading = std::stof(row[5]);
 
 		if (instance_id > 0 && !database.CheckInstanceExists(instance_id)) {
 			Message(Chat::Yellow, "Instance no longer exists...");
@@ -9416,6 +9418,42 @@ bool Client::GotoPlayer(std::string player_name)
 	}
 
 	return false;
+}
+
+bool Client::GotoPlayerGroup(std::string player_name) {
+	if (!GetGroup()) {
+		return GotoPlayer(player_name);
+	} else {
+		auto client_group = GetGroup();
+		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+				auto group_member = client_group->members[member_index]->CastToClient();
+				if (!group_member->GotoPlayer(player_name)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+}
+
+bool Client::GotoPlayerRaid(std::string player_name) {
+	if (!GetRaid()) {
+		return GotoPlayer(player_name);
+	} else {
+		auto client_raid = GetRaid();
+		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
+				auto raid_member = client_raid->members[member_index].member->CastToClient();
+				if (!raid_member->GotoPlayer(player_name)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
 }
 
 glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()

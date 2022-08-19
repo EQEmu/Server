@@ -2555,6 +2555,36 @@ void Lua_Client::TaskSelector(luabind::adl::object table) {
 	self->TaskQuestSetSelector(self, task_count, tasks);
 }
 
+bool Lua_Client::TeleportToPlayerByCharID(uint32 character_id) {
+	Lua_Safe_Call_Bool();
+	return self->GotoPlayer(database.GetCharNameByID(character_id));
+}
+
+bool Lua_Client::TeleportToPlayerByName(std::string player_name) {
+	Lua_Safe_Call_Bool();
+	return self->GotoPlayer(player_name);
+}
+
+bool Lua_Client::TeleportGroupToPlayerByCharID(uint32 character_id) {
+	Lua_Safe_Call_Bool();
+	return self->GotoPlayerGroup(database.GetCharNameByID(character_id));
+}
+
+bool Lua_Client::TeleportGroupToPlayerByName(std::string player_name) {
+	Lua_Safe_Call_Bool();
+	return self->GotoPlayerGroup(player_name);
+}
+
+bool Lua_Client::TeleportRaidToPlayerByCharID(uint32 character_id) {
+	Lua_Safe_Call_Bool();
+	return self->GotoPlayerRaid(database.GetCharNameByID(character_id));
+}
+
+bool Lua_Client::TeleportRaidToPlayerByName(std::string player_name) {
+	Lua_Safe_Call_Bool();
+	return self->GotoPlayerRaid(player_name);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2951,6 +2981,12 @@ luabind::scope lua_register_client() {
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32))&Lua_Client::TakePlatinum)
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32,bool))&Lua_Client::TakePlatinum)
 	.def("TaskSelector", (void(Lua_Client::*)(luabind::adl::object))&Lua_Client::TaskSelector)
+	.def("TeleportToPlayerByCharID", (bool(Lua_Client::*)(uint32))&Lua_Client::TeleportToPlayerByCharID)
+	.def("TeleportToPlayerByName", (bool(Lua_Client::*)(std::string))&Lua_Client::TeleportToPlayerByName)
+	.def("TeleportGroupToPlayerByCharID", (bool(Lua_Client::*)(uint32))&Lua_Client::TeleportGroupToPlayerByCharID)
+	.def("TeleportGroupToPlayerByName", (bool(Lua_Client::*)(std::string))&Lua_Client::TeleportGroupToPlayerByName)
+	.def("TeleportRaidToPlayerByCharID", (bool(Lua_Client::*)(uint32))&Lua_Client::TeleportRaidToPlayerByCharID)
+	.def("TeleportRaidToPlayerByName", (bool(Lua_Client::*)(std::string))&Lua_Client::TeleportRaidToPlayerByName)
 	.def("Thirsty", (bool(Lua_Client::*)(void))&Lua_Client::Thirsty)
 	.def("TrainDisc", (void(Lua_Client::*)(int))&Lua_Client::TrainDisc)
 	.def("TrainDiscBySpellID", (void(Lua_Client::*)(int32))&Lua_Client::TrainDiscBySpellID)

@@ -243,6 +243,8 @@ public:
 	void SendChatLineBreak(uint16 color = Chat::White);
 
 	bool GotoPlayer(std::string player_name);
+	bool GotoPlayerGroup(std::string player_name);
+	bool GotoPlayerRaid(std::string player_name);
 
 	//abstract virtual function implementations required by base abstract class
 	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);

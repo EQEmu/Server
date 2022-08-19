@@ -2399,6 +2399,36 @@ void Perl_Client_TaskSelector(Client* self, perl::array task_ids)
 	self->TaskQuestSetSelector(self, task_count, tasks);
 }
 
+bool Perl_Client_TeleportToPlayerByCharacterID(Client* self, uint32 character_id)
+{
+	return self->GotoPlayer(database.GetCharNameByID(character_id));
+}
+
+bool Perl_Client_TeleportToPlayerByName(Client* self, std::string player_name)
+{
+	return self->GotoPlayer(player_name);
+}
+
+bool Perl_Client_TeleportGroupToPlayerByCharacterID(Client* self, uint32 character_id)
+{
+	return self->GotoPlayerGroup(database.GetCharNameByID(character_id));
+}
+
+bool Perl_Client_TeleportGroupToPlayerByName(Client* self, std::string player_name)
+{
+	return self->GotoPlayerGroup(player_name);
+}
+
+bool Perl_Client_TeleportRaidToPlayerByCharacterID(Client* self, uint32 character_id)
+{
+	return self->GotoPlayerRaid(database.GetCharNameByID(character_id));
+}
+
+bool Perl_Client_TeleportRaidToPlayerByName(Client* self, std::string player_name)
+{
+	return self->GotoPlayerRaid(player_name);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -2799,6 +2829,12 @@ void perl_register_client()
 	package.add("TakeMoneyFromPP", (bool(*)(Client*, uint64_t, bool))&Perl_Client_TakeMoneyFromPP);
 	package.add("TakePlatinum", (bool(*)(Client*, uint32))&Perl_Client_TakePlatinum);
 	package.add("TakePlatinum", (bool(*)(Client*, uint32, bool))&Perl_Client_TakePlatinum);
+	package.add("TeleportToPlayerByCharID", &Perl_Client_TeleportToPlayerByCharacterID);
+	package.add("TeleportToPlayerByName", &Perl_Client_TeleportToPlayerByName);
+	package.add("TeleportGroupToPlayerByCharID", &Perl_Client_TeleportGroupToPlayerByCharacterID);
+	package.add("TeleportGroupToPlayerByName", &Perl_Client_TeleportGroupToPlayerByName);
+	package.add("TeleportRaidToPlayerByCharID", &Perl_Client_TeleportRaidToPlayerByCharacterID);
+	package.add("TeleportRaidToPlayerByName", &Perl_Client_TeleportRaidToPlayerByName);
 	package.add("TaskSelector", &Perl_Client_TaskSelector);
 	package.add("Thirsty", &Perl_Client_Thirsty);
 	package.add("TrainDiscBySpellID", &Perl_Client_TrainDiscBySpellID);
