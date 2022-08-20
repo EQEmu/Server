@@ -9397,40 +9397,40 @@ bool Client::GotoPlayer(std::string player_name)
 	return false;
 }
 
-bool Client::GotoPlayerGroup(std::string player_name) {
+bool Client::GotoPlayerGroup(const std::string& player_name)
+{
 	if (!GetGroup()) {
 		return GotoPlayer(player_name);
-	} else {
-		auto client_group = GetGroup();
-		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
-			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
-				auto group_member = client_group->members[member_index]->CastToClient();
-				if (!group_member->GotoPlayer(player_name)) {
-					return false;
-				}
+	}
+
+	for (auto &m: GetGroup()->members) {
+		if (m && m->IsClient()) {
+			auto c = m->CastToClient();
+			if (!c->GotoPlayer(player_name)) {
+				return false;
 			}
 		}
-
-		return true;
 	}
+
+	return true;
 }
 
-bool Client::GotoPlayerRaid(std::string player_name) {
+bool Client::GotoPlayerRaid(const std::string& player_name)
+{
 	if (!GetRaid()) {
 		return GotoPlayer(player_name);
-	} else {
-		auto client_raid = GetRaid();
-		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
-			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
-				auto raid_member = client_raid->members[member_index].member->CastToClient();
-				if (!raid_member->GotoPlayer(player_name)) {
-					return false;
-				}
+	}
+	
+	for (auto &m: GetRaid()->members) {
+		if (m.member && m.member->IsClient()) {
+			auto c = m.member->CastToClient();
+			if (!c->GotoPlayer(player_name)) {
+				return false;
 			}
 		}
-
-		return true;
 	}
+
+	return true;
 }
 
 glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()
