@@ -11,6 +11,7 @@ void command_reload(Client *c, const Seperator *sep)
 	bool is_aa = !strcasecmp(sep->arg[1], "aa");
 	bool is_alternate_currencies = !strcasecmp(sep->arg[1], "alternate_currencies");
 	bool is_blocked_spells = !strcasecmp(sep->arg[1], "blocked_spells");
+	bool is_commands = !strcasecmp(sep->arg[1], "commands");
 	bool is_content_flags = !strcasecmp(sep->arg[1], "content_flags");
 	bool is_doors = !strcasecmp(sep->arg[1], "doors");
 	bool is_dztemplates = !strcasecmp(sep->arg[1], "dztemplates");
@@ -37,6 +38,7 @@ void command_reload(Client *c, const Seperator *sep)
 		!is_aa &&
 		!is_alternate_currencies &&
 		!is_blocked_spells &&
+		!is_commands &&
 		!is_content_flags &&
 		!is_doors &&
 		!is_dztemplates &&
@@ -74,7 +76,10 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_blocked_spells) {
 		c->Message(Chat::White, "Attempting to reload Blocked Spells globally.");	
 		pack = new ServerPacket(ServerOP_ReloadBlockedSpells, 0);
-	} else if (is_content_flags) {		
+	} else if (is_commands) {
+		c->Message(Chat::White, "Attempting to reload Commands globally.");
+		pack = new ServerPacket(ServerOP_ReloadCommands, 0);
+	} else if (is_content_flags) {
 		c->Message(Chat::White, "Attempting to reload Content Flags globally.");
 		pack = new ServerPacket(ServerOP_ReloadContentFlags, 0);
 	} else if (is_doors) {

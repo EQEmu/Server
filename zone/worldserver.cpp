@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/profanity_manager.h"
 
 #include "client.h"
+#include "command.h"
 #include "corpse.h"
 #include "entity.h"
 #include "expedition.h"
@@ -1913,6 +1914,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		zone->SendReloadMessage("Blocked Spells");
 		zone->LoadZoneBlockedSpells();
+		break;
+	}
+	case ServerOP_ReloadCommands:
+	{
+		zone->SendReloadMessage("Commands");
+		command_init();
 		break;
 	}
 	case ServerOP_ReloadContentFlags:

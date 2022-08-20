@@ -53,6 +53,7 @@ int (*command_dispatch)(Client *,std::string) = command_notavail;
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
 std::vector<CommandRecord *> command_delete_list;
+std::map<std::string, uint8> commands_map;
 
 /*
  * command_notavail
@@ -82,7 +83,9 @@ int command_notavail(Client *c, std::string message)
 
 int command_init(void)
 {
-	commandaliases.clear();
+	if (!commandaliases.empty()) {
+		command_deinit();
+	}
 
 	if (
 		command_add("acceptrules", "[acceptrules] - Accept the EQEmu Agreement", AccountStatus::Player, command_acceptrules) ||
@@ -469,8 +472,10 @@ int command_init(void)
  */
 void command_deinit(void)
 {
-	for (auto &c : command_delete_list)
+	for (auto &c : command_delete_list) {
 		delete c;
+	}
+
 	command_delete_list.clear();
 	commandlist.clear();
 	commandaliases.clear();
@@ -521,12 +526,19 @@ int command_add(std::string command_name, std::string description, uint8 admin, 
 	c->description = description;
 	c->function = function;
 
+	commands_map[command_name] = admin;
+
 	commandlist[command_name] = c;
 	commandaliases[command_name] = command_name;
 	command_delete_list.push_back(c);
 	command_count++;
 
 	return 0;
+}
+
+uint8 GetCommandStatus(Client *c, std::string command_name) {
+	auto command_status = commands_map[command_name];
+	return command_status;
 }
 
 /*
@@ -612,19 +624,15 @@ void command_help(Client *c, const Seperator *sep)
 				"{}{}",
 				COMMAND_CHAR,
 				cur.first
-			),
-			fmt::format(
-				"{}{}",
-				COMMAND_CHAR,
-				cur.first
 			)
 		);
 
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} | {}",
+				"{} | Status: {} | {}",
 				command_link,
+				cur.second->admin,
 				!cur.second->description.empty() ? cur.second->description : ""
 			).c_str()
 		);
@@ -693,11 +701,6 @@ void command_findaliases(Client *c, const Seperator *sep)
 			"{}{}",
 			COMMAND_CHAR,
 			command_iter->first
-		),
-		fmt::format(
-			"{}{}",
-			COMMAND_CHAR,
-			command_iter->first
 		)
 	);
 
@@ -713,11 +716,6 @@ void command_findaliases(Client *c, const Seperator *sep)
 		}
 
 		alias_link = Saylink::Silent(
-			fmt::format(
-				"{}{}",
-				COMMAND_CHAR,
-				a.first
-			),
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,

@@ -4265,7 +4265,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 			fmt::format(
 				"Door ({}) [{}]",
 				currentdoor->GetEntityID(),
-				Saylink::Silent("#door edit", "#door edit")
+				Saylink::Silent("#door edit")
 			).c_str()
 		);
 	}
