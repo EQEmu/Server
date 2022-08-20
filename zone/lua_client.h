@@ -122,6 +122,12 @@ public:
 	void MoveZoneInstance(uint16 instance_id);
 	void MoveZoneInstanceGroup(uint16 instance_id);
 	void MoveZoneInstanceRaid(uint16 instance_id);
+	bool TeleportToPlayerByCharID(uint32 character_id);
+	bool TeleportToPlayerByName(std::string player_name);
+	bool TeleportGroupToPlayerByCharID(uint32 character_id);
+	bool TeleportGroupToPlayerByName(std::string player_name);
+	bool TeleportRaidToPlayerByCharID(uint32 character_id);
+	bool TeleportRaidToPlayerByName(std::string player_name);
 	void ChangeLastName(std::string last_name);
 	int GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc);
 	void SetFactionLevel(uint32 char_id, uint32 npc_id, int char_class, int char_race, int char_deity);

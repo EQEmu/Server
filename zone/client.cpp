@@ -65,6 +65,7 @@ extern volatile bool RunLoops;
 
 #include "../common/repositories/character_spells_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
+#include "../common/repositories/character_data_repository.h"
 
 
 extern QueryServ* QServ;
@@ -9373,49 +9374,63 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
  */
 bool Client::GotoPlayer(std::string player_name)
 {
-	std::string query = StringFormat(
-		"SELECT"
-		"    character_data.zone_id,"
-		"    character_data.zone_instance,"
-		"    character_data.x,"
-		"    character_data.y,"
-		"    character_data.z,"
-		"    character_data.heading "
-		"FROM"
-		"    character_data "
-		"WHERE"
-		"    TRUE"
-		"    AND character_data.name = '%s'"
-		"    AND character_data.last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1", player_name.c_str());
+	auto characters = CharacterDataRepository::GetWhere(
+		database,
+		fmt::format("name = '{}' AND last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1", player_name)
+	);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto zone_id     = static_cast<uint32>(atoi(row[0]));
-		auto instance_id = static_cast<uint16>(atoi(row[1]));
-		auto x           = static_cast<float>(atof(row[2]));
-		auto y           = static_cast<float>(atof(row[3]));
-		auto z           = static_cast<float>(atof(row[4]));
-		auto heading     = static_cast<float>(atof(row[5]));
-
-		if (instance_id > 0 && !database.CheckInstanceExists(instance_id)) {
+	for (auto &c: characters) {
+		if (c.zone_instance > 0 && !database.CheckInstanceExists(c.zone_instance)) {
 			Message(Chat::Yellow, "Instance no longer exists...");
 			return false;
 		}
 
-		if (instance_id > 0) {
-			database.AddClientToInstance(instance_id, CharacterID());
+		if (c.zone_instance > 0) {
+			database.AddClientToInstance(c.zone_instance, CharacterID());
 		}
 
-		MovePC(zone_id, instance_id, x, y, z, heading);
+		MovePC(c.zone_id, c.zone_instance, c.x, c.y, c.z, c.heading);
 
 		return true;
 	}
 
 	return false;
+}
+
+bool Client::GotoPlayerGroup(const std::string& player_name)
+{
+	if (!GetGroup()) {
+		return GotoPlayer(player_name);
+	}
+
+	for (auto &m: GetGroup()->members) {
+		if (m && m->IsClient()) {
+			auto c = m->CastToClient();
+			if (!c->GotoPlayer(player_name)) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool Client::GotoPlayerRaid(const std::string& player_name)
+{
+	if (!GetRaid()) {
+		return GotoPlayer(player_name);
+	}
+	
+	for (auto &m: GetRaid()->members) {
+		if (m.member && m.member->IsClient()) {
+			auto c = m.member->CastToClient();
+			if (!c->GotoPlayer(player_name)) {
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 glm::vec4 &Client::GetLastPositionBeforeBulkUpdate()
