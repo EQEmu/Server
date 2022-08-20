@@ -347,7 +347,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		for (auto &z: zone_store.zones) {
 			if (z.short_name == target_zone_name && z.version == 0) {
 				found_zone = true;
-				if (z.expansion <= (content_service.GetCurrentExpansion() + 1)) {
+				if (z.expansion <= content_service.GetCurrentExpansion() || z.bypass_expansion_check) {
 					meets_zone_expansion_check = true;
 					break;
 				}
@@ -362,7 +362,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			auto zones = ZoneRepository::GetWhere(content_db,
 				fmt::format(
 					"expansion <= {} AND short_name = '{}' and version = 0",
-					(content_service.GetCurrentExpansion() + 1),
+					(content_service.GetCurrentExpansion()),
 					target_zone_name
 				)
 			);
@@ -373,7 +373,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		LogInfo(
 			"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
 			target_zone_name,
-			(content_service.GetCurrentExpansion() + 1),
+			(content_service.GetCurrentExpansion()),
 			content_service.GetCurrentExpansionName(),
 			meets_zone_expansion_check ? "true" : "false"
 		);
