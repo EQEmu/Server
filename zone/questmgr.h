@@ -325,10 +325,10 @@ public:
 	void ReloadZoneStaticData();
 	std::string secondstotime(int duration);
 	std::string gethexcolorcode(std::string color_name);
-	double GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
-	double GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
-	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier);
-	void SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier);
+	double GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	double GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version = -1);
+	void SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version = -1);
 	std::string getgendername(uint32 gender_id);
 	std::string getdeityname(uint32 deity_id);
 	std::string getinventoryslotname(int16 slot_id);
