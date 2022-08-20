@@ -145,7 +145,7 @@ public:
 	bool SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag);
 	
 	/* Bot bot-group functions   */
-	bool QueryBotGroupExistence(const std::string& botgroup_name, bool& extant_flag);
+	bool QueryBotGroupExistence(const std::string& botgroup_name);
 
 	bool LoadBotGroupIDByBotGroupName(const std::string& botgroup_name, uint32& botgroup_id);
 	bool LoadBotGroupIDByLeaderID(const uint32 leader_id, uint32& botgroup_id);
