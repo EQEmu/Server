@@ -4842,8 +4842,8 @@ uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
 	return results.LastInsertedID();
 }
 
-double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id) const {
-	std::string query = fmt::format(
+double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	const std::string query = fmt::format(
 		SQL(
 			SELECT
 			`aa_modifier`
@@ -4852,22 +4852,26 @@ double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id) const
 			WHERE
 			`character_id` = {}
 			AND
-			(`zone_id` = {} OR `zone_id` = 0)
-			ORDER BY `zone_id` DESC
+			(`zone_id` = {} OR `zone_id` = 0) AND
+			(`instance_version` = {} OR `instance_version` = -1)
+			ORDER BY `zone_id`, `instance_version` DESC
 			LIMIT 1
 		),
 		character_id,
-		zone_id
+		zone_id,
+		instance_version
 	);
+
 	auto results = database.QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atof(row[0]);
 	}
+
 	return 1.0f;
 }
 
-double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id) const {
-	std::string query = fmt::format(
+double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	const std::string query = fmt::format(
 		SQL(
 			SELECT
 			`exp_modifier`
@@ -4876,48 +4880,54 @@ double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id) const {
 			WHERE
 			`character_id` = {}
 			AND
-			(`zone_id` = {} OR `zone_id` = 0)
-			ORDER BY `zone_id` DESC
+			(`zone_id` = {} OR `zone_id` = 0) AND
+			(`instance_version` = {} OR `instance_version` = -1)
+			ORDER BY `zone_id`, `instance_version` DESC
 			LIMIT 1
 		),
 		character_id,
-		zone_id
+		zone_id,
+		instance_version
 	);
+
 	auto results = database.QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atof(row[0]);
 	}
+
 	return 1.0f;
 }
 
-void ZoneDatabase::SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier) {
-	float exp_modifier = GetEXPModifier(character_id, zone_id);
+void ZoneDatabase::SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version) {
+	float exp_modifier = GetEXPModifier(character_id, zone_id, instance_version);
 	std::string query = fmt::format(
 		SQL(
 			REPLACE INTO
 			`character_exp_modifiers`
 			VALUES
-			({}, {}, {}, {})
+			({}, {}, {}, {}, {})
 		),
 		character_id,
 		zone_id,
+		instance_version,
 		aa_modifier,
 		exp_modifier
 	);
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier) {
-	float aa_modifier = GetAAEXPModifier(character_id, zone_id);
+void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version) {
+	float aa_modifier = GetAAEXPModifier(character_id, zone_id, instance_version);
 	std::string query = fmt::format(
 		SQL(
 			REPLACE INTO
 			`character_exp_modifiers`
 			VALUES
-			({}, {}, {}, {})
+			({}, {}, {}, {}, {})
 		),
 		character_id,
 		zone_id,
+		instance_version,
 		aa_modifier,
 		exp_modifier
 	);

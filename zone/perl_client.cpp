@@ -2086,19 +2086,39 @@ double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id)
 	return self->GetAAEXPModifier(zone_id);
 }
 
+double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+{
+	return self->GetAAEXPModifier(zone_id, instance_version);
+}
+
 double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id)
 {
 	return self->GetEXPModifier(zone_id);
 }
 
-void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, float aa_modifier)
+double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+{
+	return self->GetEXPModifier(zone_id, instance_version);
+}
+
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier)
 {
 	self->SetAAEXPModifier(zone_id, aa_modifier);
 }
 
-void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, float exp_modifier)
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier, int16 instance_version)
+{
+	self->SetAAEXPModifier(zone_id, aa_modifier, instance_version);
+}
+
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier)
 {
 	self->SetEXPModifier(zone_id, exp_modifier);
+}
+
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier, int16 instance_version)
+{
+	self->SetEXPModifier(zone_id, exp_modifier, instance_version);
 }
 
 void Perl_Client_AddLDoNLoss(Client* self, uint32 theme_id)
@@ -2482,7 +2502,8 @@ void perl_register_client()
 	package.add("ForageItem", &Perl_Client_ForageItem);
 	package.add("Freeze", &Perl_Client_Freeze);
 	package.add("GMKill", &Perl_Client_GMKill);
-	package.add("GetAAEXPModifier", &Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
 	package.add("GetAAExp", &Perl_Client_GetAAExp);
 	package.add("GetAALevel", &Perl_Client_GetAALevel);
 	package.add("GetAAPercent", &Perl_Client_GetAAPercent);
@@ -2531,7 +2552,8 @@ void perl_register_client()
 	package.add("GetDuelTarget", &Perl_Client_GetDuelTarget);
 	package.add("GetEnvironmentDamageModifier", &Perl_Client_GetEnvironmentDamageModifier);
 	package.add("GetEXP", &Perl_Client_GetEXP);
-	package.add("GetEXPModifier", &Perl_Client_GetEXPModifier);
+	package.add("GetEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
 	package.add("GetEbonCrystals", &Perl_Client_GetEbonCrystals);
 	package.add("GetEndurance", &Perl_Client_GetEndurance);
 	package.add("GetEnduranceRatio", &Perl_Client_GetEnduranceRatio);
@@ -2719,7 +2741,8 @@ void perl_register_client()
 	package.add("SendToInstance", &Perl_Client_SendToInstance);
 	package.add("SendWebLink", &Perl_Client_SendWebLink);
 	package.add("SendZoneFlagInfo", &Perl_Client_SendZoneFlagInfo);
-	package.add("SetAAEXPModifier", &Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetAAEXPModifier);
 	package.add("SetAAPoints", &Perl_Client_SetAAPoints);
 	package.add("SetAATitle", (void(*)(Client*, std::string))&Perl_Client_SetAATitle);
 	package.add("SetAATitle", (void(*)(Client*, std::string, bool))&Perl_Client_SetAATitle);
@@ -2747,7 +2770,8 @@ void perl_register_client()
 	package.add("SetDueling", &Perl_Client_SetDueling);
 	package.add("SetEXP", (void(*)(Client*, uint32, uint32))&Perl_Client_SetEXP);
 	package.add("SetEXP", (void(*)(Client*, uint32, uint32, bool))&Perl_Client_SetEXP);
-	package.add("SetEXPModifier", &Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetEXPModifier);
 	package.add("SetEbonCrystals", &Perl_Client_SetEbonCrystals);
 	package.add("SetEndurance", &Perl_Client_SetEndurance);
 	package.add("SetEnvironmentDamageModifier", &Perl_Client_SetEnvironmentDamageModifier);
