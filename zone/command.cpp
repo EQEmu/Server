@@ -198,6 +198,7 @@ int command_init(void)
 		command_add("level", "[Level] - Set your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
 		command_add("listpetition", "List petitions", AccountStatus::Guide, command_listpetition) ||
+		command_add("lootsim", "[npc_type_id] [loottable_id] [iterations] - Runs benchmark simulations using real loot logic to report numbers and data", AccountStatus::GMImpossible, command_lootsim) ||
 		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", AccountStatus::GMImpossible, command_load_shared_memory) ||
 		command_add("loc", "Print out your or your target's current location and heading", AccountStatus::Player, command_loc) ||
 		command_add("logs",  "Manage anything to do with logs", AccountStatus::GMImpossible, command_logs) ||
@@ -1035,6 +1036,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/level.cpp"
 #include "gm_commands/list.cpp"
 #include "gm_commands/listpetition.cpp"
+#include "gm_commands/lootsim.cpp"
 #include "gm_commands/loc.cpp"
 #include "gm_commands/logcommand.cpp"
 #include "gm_commands/logs.cpp"
