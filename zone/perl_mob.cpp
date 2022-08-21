@@ -930,12 +930,12 @@ void Perl_Mob_SpellFinished(Mob* self, uint16 spell_id, Mob* target) // @categor
 	self->SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 }
 
-void Perl_Mob_SpellFinished(Mob* self, uint16 spell_id, Mob* target, uint16 mana_cost) // @categories Spells and Disciplines
+void Perl_Mob_SpellFinished(Mob* self, uint16 spell_id, Mob* target, int32 mana_cost) // @categories Spells and Disciplines
 {
 	self->SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, mana_cost, -1, spells[spell_id].resist_difficulty);
 }
 
-void Perl_Mob_SpellFinished(Mob* self, uint16 spell_id, Mob* target, uint16 mana_cost, uint16 resist_diff) // @categories Spells and Disciplines
+void Perl_Mob_SpellFinished(Mob* self, uint16 spell_id, Mob* target, int32 mana_cost, uint16 resist_diff) // @categories Spells and Disciplines
 {
 	self->SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, mana_cost, -1, resist_diff);
 }
@@ -2933,8 +2933,8 @@ void perl_register_mob()
 	package.add("SpellEffect", (void(*)(Mob*, uint32, uint32, uint32, bool, uint32, bool, perl::nullable<Client*>, uint32, uint32))&Perl_Mob_SpellEffect);
 	package.add("SpellFinished", (void(*)(Mob*, uint16))&Perl_Mob_SpellFinished);
 	package.add("SpellFinished", (void(*)(Mob*, uint16, Mob*))&Perl_Mob_SpellFinished);
-	package.add("SpellFinished", (void(*)(Mob*, uint16, Mob*, uint16))&Perl_Mob_SpellFinished);
-	package.add("SpellFinished", (void(*)(Mob*, uint16, Mob*, uint16, uint16))&Perl_Mob_SpellFinished);
+	package.add("SpellFinished", (void(*)(Mob*, uint16, Mob*, int32))&Perl_Mob_SpellFinished);
+	package.add("SpellFinished", (void(*)(Mob*, uint16, Mob*, int32, uint16))&Perl_Mob_SpellFinished);
 	package.add("Spin", &Perl_Mob_Spin);
 	package.add("StartEnrage", &Perl_Mob_StartEnrage);
 	package.add("StopNavigation", &Perl_Mob_StopNavigation);
