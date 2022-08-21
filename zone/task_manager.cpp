@@ -240,7 +240,7 @@ bool TaskManager::LoadTasks(int single_task)
 		activity_data->goal_match_list      = task_activity.goal_match_list;
 		activity_data->goal_count           = task_activity.goalcount;
 		activity_data->deliver_to_npc       = task_activity.delivertonpc;
-		activity_data->zone_version         = task_activity.zone_version;
+		activity_data->zone_version         = task_activity.zone_version >= 0 ? task_activity.zone_version : -1;
 
 		// zones
 		activity_data->zones = task_activity.zones;
