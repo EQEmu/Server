@@ -1,6 +1,34 @@
 ALTER TABLE `zone`
     ADD COLUMN `bypass_expansion_check` tinyint(3) NOT NULL DEFAULT 0 AFTER `expansion`;
 
+UPDATE `zone` SET `bypass_expansion_check` = 1 WHERE `short_name`
+IN (
+    'befallenb',
+    'commonlands',
+    'freeportacademy',
+    'freeportarena',
+    'freeportcityhall',
+    'freeporteast',
+    'freeporthall',
+    'freeportmilitia',
+    'freeportsewers',
+    'freeportwest',
+    'guildhall',
+    'guildlobby',
+    'highpasshold',
+    'highpasskeep',
+    'innothuleb',
+    'kithforest',
+    'mistythicket',
+    'moors',
+    'nektulosa',
+    'northro',
+    'oceanoftears',
+    'southro',
+    'steamfontmts',
+    'toxxulia'
+);
+
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 244; -- nedaria
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 132; -- freportn
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 131; -- freporte
