@@ -41,7 +41,6 @@ UPDATE `zone` SET `expansion` = 0 WHERE `id` = 263; -- oggok
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 56; -- crushbone
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 133; -- freportw
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 255; -- northkarana
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 246; -- nektulosnektulos_classic
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 149; -- gukbottom
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 248; -- neriaka
 UPDATE `zone` SET `expansion` = 0 WHERE `id` = 249; -- neriakb
@@ -177,7 +176,6 @@ UPDATE `zone` SET `expansion` = 3 WHERE `id` = 362; -- sseru
 UPDATE `zone` SET `expansion` = 3 WHERE `id` = 252; -- netherbian
 UPDATE `zone` SET `expansion` = 3 WHERE `id` = 103; -- echo
 UPDATE `zone` SET `expansion` = 3 WHERE `id` = 330; -- scarlet
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 5880; -- bazaarbazaar_old
 UPDATE `zone` SET `expansion` = 3 WHERE `id` = 277; -- paludal
 UPDATE `zone` SET `expansion` = 3 WHERE `id` = 332; -- shadeweaver
 UPDATE `zone` SET `expansion` = 3 WHERE `id` = 333; -- shadowhaven
@@ -609,14 +607,3 @@ UPDATE `zone` SET `expansion` = 19 WHERE `id` = 5886; -- breedinggrounds
 UPDATE `zone` SET `expansion` = 19 WHERE `id` = 5887; -- chapterhouse
 UPDATE `zone` SET `expansion` = 19 WHERE `id` = 5888; -- crystalshard
 UPDATE `zone` SET `expansion` = 19 WHERE `id` = 5889; -- eastwastesshard
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 245; -- nektropos
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 7; -- apprentice
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 10; -- arena2
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 11; -- arttest
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 111; -- erudsxing2
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 206; -- load2
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 14; -- aviak
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 205; -- load
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 413; -- tutorial
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 47; -- clz
-UPDATE `zone` SET `expansion` = 99 WHERE `id` = 251; -- neriakd
