@@ -1608,7 +1608,7 @@ protected:
 	bool delaytimer;
 	uint16 casting_spell_targetid;
 	EQ::spells::CastingSlot casting_spell_slot;
-	uint16 casting_spell_mana;
+	int32 casting_spell_mana;
 	uint32 casting_spell_inventory_slot;
 	uint32 casting_spell_timer;
 	uint32 casting_spell_timer_duration;
