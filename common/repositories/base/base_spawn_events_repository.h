@@ -19,20 +19,20 @@
 class BaseSpawnEventsRepository {
 public:
 	struct SpawnEvents {
-		int         id;
+		uint32_t    id;
 		std::string zone;
-		int         cond_id;
+		uint32_t    cond_id;
 		std::string name;
-		int         period;
-		int         next_minute;
-		int         next_hour;
-		int         next_day;
-		int         next_month;
-		int         next_year;
-		int         enabled;
-		int         action;
-		int         argument;
-		int         strict;
+		uint32_t    period;
+		uint8_t     next_minute;
+		uint8_t     next_hour;
+		uint8_t     next_day;
+		uint8_t     next_month;
+		uint32_t    next_year;
+		int8_t      enabled;
+		uint8_t     action;
+		int32_t     argument;
+		int8_t      strict;
 	};
 
 	static std::string PrimaryKey()
@@ -166,20 +166,20 @@ public:
 		if (results.RowCount() == 1) {
 			SpawnEvents e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.zone        = row[1] ? row[1] : "";
-			e.cond_id     = atoi(row[2]);
+			e.cond_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 			e.name        = row[3] ? row[3] : "";
-			e.period      = atoi(row[4]);
-			e.next_minute = atoi(row[5]);
-			e.next_hour   = atoi(row[6]);
-			e.next_day    = atoi(row[7]);
-			e.next_month  = atoi(row[8]);
-			e.next_year   = atoi(row[9]);
-			e.enabled     = atoi(row[10]);
-			e.action      = atoi(row[11]);
-			e.argument    = atoi(row[12]);
-			e.strict      = atoi(row[13]);
+			e.period      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.next_minute = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.next_hour   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.next_day    = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
+			e.next_month  = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.next_year   = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.enabled     = static_cast<int8_t>(atoi(row[10]));
+			e.action      = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.argument    = static_cast<int32_t>(atoi(row[12]));
+			e.strict      = static_cast<int8_t>(atoi(row[13]));
 
 			return e;
 		}
@@ -337,20 +337,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnEvents e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.zone        = row[1] ? row[1] : "";
-			e.cond_id     = atoi(row[2]);
+			e.cond_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 			e.name        = row[3] ? row[3] : "";
-			e.period      = atoi(row[4]);
-			e.next_minute = atoi(row[5]);
-			e.next_hour   = atoi(row[6]);
-			e.next_day    = atoi(row[7]);
-			e.next_month  = atoi(row[8]);
-			e.next_year   = atoi(row[9]);
-			e.enabled     = atoi(row[10]);
-			e.action      = atoi(row[11]);
-			e.argument    = atoi(row[12]);
-			e.strict      = atoi(row[13]);
+			e.period      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.next_minute = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.next_hour   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.next_day    = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
+			e.next_month  = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.next_year   = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.enabled     = static_cast<int8_t>(atoi(row[10]));
+			e.action      = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.argument    = static_cast<int32_t>(atoi(row[12]));
+			e.strict      = static_cast<int8_t>(atoi(row[13]));
 
 			all_entries.push_back(e);
 		}
@@ -375,20 +375,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnEvents e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.zone        = row[1] ? row[1] : "";
-			e.cond_id     = atoi(row[2]);
+			e.cond_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 			e.name        = row[3] ? row[3] : "";
-			e.period      = atoi(row[4]);
-			e.next_minute = atoi(row[5]);
-			e.next_hour   = atoi(row[6]);
-			e.next_day    = atoi(row[7]);
-			e.next_month  = atoi(row[8]);
-			e.next_year   = atoi(row[9]);
-			e.enabled     = atoi(row[10]);
-			e.action      = atoi(row[11]);
-			e.argument    = atoi(row[12]);
-			e.strict      = atoi(row[13]);
+			e.period      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.next_minute = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.next_hour   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.next_day    = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
+			e.next_month  = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.next_year   = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.enabled     = static_cast<int8_t>(atoi(row[10]));
+			e.action      = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.argument    = static_cast<int32_t>(atoi(row[12]));
+			e.strict      = static_cast<int8_t>(atoi(row[13]));
 
 			all_entries.push_back(e);
 		}

@@ -19,23 +19,23 @@
 class BaseInventorySnapshotsRepository {
 public:
 	struct InventorySnapshots {
-		int         time_index;
-		int         charid;
-		int         slotid;
-		int         itemid;
-		int         charges;
-		int         color;
-		int         augslot1;
-		int         augslot2;
-		int         augslot3;
-		int         augslot4;
-		int         augslot5;
-		int         augslot6;
-		int         instnodrop;
+		uint32_t    time_index;
+		uint32_t    charid;
+		uint32_t    slotid;
+		uint32_t    itemid;
+		uint16_t    charges;
+		uint32_t    color;
+		uint32_t    augslot1;
+		uint32_t    augslot2;
+		uint32_t    augslot3;
+		uint32_t    augslot4;
+		uint32_t    augslot5;
+		int32_t     augslot6;
+		uint8_t     instnodrop;
 		std::string custom_data;
-		int         ornamenticon;
-		int         ornamentidfile;
-		int         ornament_hero_model;
+		uint32_t    ornamenticon;
+		uint32_t    ornamentidfile;
+		int32_t     ornament_hero_model;
 	};
 
 	static std::string PrimaryKey()
@@ -178,23 +178,23 @@ public:
 		if (results.RowCount() == 1) {
 			InventorySnapshots e{};
 
-			e.time_index          = atoi(row[0]);
-			e.charid              = atoi(row[1]);
-			e.slotid              = atoi(row[2]);
-			e.itemid              = atoi(row[3]);
-			e.charges             = atoi(row[4]);
-			e.color               = atoi(row[5]);
-			e.augslot1            = atoi(row[6]);
-			e.augslot2            = atoi(row[7]);
-			e.augslot3            = atoi(row[8]);
-			e.augslot4            = atoi(row[9]);
-			e.augslot5            = atoi(row[10]);
-			e.augslot6            = atoi(row[11]);
-			e.instnodrop          = atoi(row[12]);
+			e.time_index          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.charid              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slotid              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.itemid              = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.charges             = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.color               = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.augslot1            = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.augslot2            = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.augslot3            = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.augslot4            = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.augslot5            = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.augslot6            = static_cast<int32_t>(atoi(row[11]));
+			e.instnodrop          = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 			e.custom_data         = row[13] ? row[13] : "";
-			e.ornamenticon        = atoi(row[14]);
-			e.ornamentidfile      = atoi(row[15]);
-			e.ornament_hero_model = atoi(row[16]);
+			e.ornamenticon        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.ornamentidfile      = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
+			e.ornament_hero_model = static_cast<int32_t>(atoi(row[16]));
 
 			return e;
 		}
@@ -362,23 +362,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			InventorySnapshots e{};
 
-			e.time_index          = atoi(row[0]);
-			e.charid              = atoi(row[1]);
-			e.slotid              = atoi(row[2]);
-			e.itemid              = atoi(row[3]);
-			e.charges             = atoi(row[4]);
-			e.color               = atoi(row[5]);
-			e.augslot1            = atoi(row[6]);
-			e.augslot2            = atoi(row[7]);
-			e.augslot3            = atoi(row[8]);
-			e.augslot4            = atoi(row[9]);
-			e.augslot5            = atoi(row[10]);
-			e.augslot6            = atoi(row[11]);
-			e.instnodrop          = atoi(row[12]);
+			e.time_index          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.charid              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slotid              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.itemid              = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.charges             = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.color               = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.augslot1            = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.augslot2            = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.augslot3            = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.augslot4            = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.augslot5            = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.augslot6            = static_cast<int32_t>(atoi(row[11]));
+			e.instnodrop          = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 			e.custom_data         = row[13] ? row[13] : "";
-			e.ornamenticon        = atoi(row[14]);
-			e.ornamentidfile      = atoi(row[15]);
-			e.ornament_hero_model = atoi(row[16]);
+			e.ornamenticon        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.ornamentidfile      = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
+			e.ornament_hero_model = static_cast<int32_t>(atoi(row[16]));
 
 			all_entries.push_back(e);
 		}
@@ -403,23 +403,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			InventorySnapshots e{};
 
-			e.time_index          = atoi(row[0]);
-			e.charid              = atoi(row[1]);
-			e.slotid              = atoi(row[2]);
-			e.itemid              = atoi(row[3]);
-			e.charges             = atoi(row[4]);
-			e.color               = atoi(row[5]);
-			e.augslot1            = atoi(row[6]);
-			e.augslot2            = atoi(row[7]);
-			e.augslot3            = atoi(row[8]);
-			e.augslot4            = atoi(row[9]);
-			e.augslot5            = atoi(row[10]);
-			e.augslot6            = atoi(row[11]);
-			e.instnodrop          = atoi(row[12]);
+			e.time_index          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.charid              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slotid              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.itemid              = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.charges             = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.color               = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.augslot1            = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.augslot2            = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.augslot3            = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.augslot4            = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.augslot5            = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.augslot6            = static_cast<int32_t>(atoi(row[11]));
+			e.instnodrop          = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 			e.custom_data         = row[13] ? row[13] : "";
-			e.ornamenticon        = atoi(row[14]);
-			e.ornamentidfile      = atoi(row[15]);
-			e.ornament_hero_model = atoi(row[16]);
+			e.ornamenticon        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.ornamentidfile      = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
+			e.ornament_hero_model = static_cast<int32_t>(atoi(row[16]));
 
 			all_entries.push_back(e);
 		}

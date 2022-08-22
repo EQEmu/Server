@@ -19,9 +19,9 @@
 class BaseDynamicZoneMembersRepository {
 public:
 	struct DynamicZoneMembers {
-		int id;
-		int dynamic_zone_id;
-		int character_id;
+		uint32_t id;
+		uint32_t dynamic_zone_id;
+		uint32_t character_id;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			DynamicZoneMembers e{};
 
-			e.id              = atoi(row[0]);
-			e.dynamic_zone_id = atoi(row[1]);
-			e.character_id    = atoi(row[2]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.character_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -249,9 +249,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneMembers e{};
 
-			e.id              = atoi(row[0]);
-			e.dynamic_zone_id = atoi(row[1]);
-			e.character_id    = atoi(row[2]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.character_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -276,9 +276,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneMembers e{};
 
-			e.id              = atoi(row[0]);
-			e.dynamic_zone_id = atoi(row[1]);
-			e.character_id    = atoi(row[2]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.character_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

@@ -19,9 +19,9 @@
 class BaseSharedTaskMembersRepository {
 public:
 	struct SharedTaskMembers {
-		int64 shared_task_id;
-		int64 character_id;
-		int   is_leader;
+		int64_t shared_task_id;
+		int64_t character_id;
+		int8_t  is_leader;
 	};
 
 	static std::string PrimaryKey()
@@ -124,7 +124,7 @@ public:
 
 			e.shared_task_id = strtoll(row[0], nullptr, 10);
 			e.character_id   = strtoll(row[1], nullptr, 10);
-			e.is_leader      = atoi(row[2]);
+			e.is_leader      = static_cast<int8_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -252,7 +252,7 @@ public:
 
 			e.shared_task_id = strtoll(row[0], nullptr, 10);
 			e.character_id   = strtoll(row[1], nullptr, 10);
-			e.is_leader      = atoi(row[2]);
+			e.is_leader      = static_cast<int8_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -279,7 +279,7 @@ public:
 
 			e.shared_task_id = strtoll(row[0], nullptr, 10);
 			e.character_id   = strtoll(row[1], nullptr, 10);
-			e.is_leader      = atoi(row[2]);
+			e.is_leader      = static_cast<int8_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

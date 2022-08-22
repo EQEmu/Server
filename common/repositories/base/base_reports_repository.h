@@ -19,7 +19,7 @@
 class BaseReportsRepository {
 public:
 	struct Reports {
-		int         id;
+		uint32_t    id;
 		std::string name;
 		std::string reported;
 		std::string reported_text;
@@ -126,7 +126,7 @@ public:
 		if (results.RowCount() == 1) {
 			Reports e{};
 
-			e.id            = atoi(row[0]);
+			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name          = row[1] ? row[1] : "";
 			e.reported      = row[2] ? row[2] : "";
 			e.reported_text = row[3] ? row[3] : "";
@@ -257,7 +257,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Reports e{};
 
-			e.id            = atoi(row[0]);
+			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name          = row[1] ? row[1] : "";
 			e.reported      = row[2] ? row[2] : "";
 			e.reported_text = row[3] ? row[3] : "";
@@ -285,7 +285,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Reports e{};
 
-			e.id            = atoi(row[0]);
+			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name          = row[1] ? row[1] : "";
 			e.reported      = row[2] ? row[2] : "";
 			e.reported_text = row[3] ? row[3] : "";

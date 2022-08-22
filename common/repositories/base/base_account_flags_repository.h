@@ -19,7 +19,7 @@
 class BaseAccountFlagsRepository {
 public:
 	struct AccountFlags {
-		int         p_accid;
+		uint32_t    p_accid;
 		std::string p_flag;
 		std::string p_value;
 	};
@@ -122,7 +122,7 @@ public:
 		if (results.RowCount() == 1) {
 			AccountFlags e{};
 
-			e.p_accid = atoi(row[0]);
+			e.p_accid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.p_flag  = row[1] ? row[1] : "";
 			e.p_value = row[2] ? row[2] : "";
 
@@ -250,7 +250,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AccountFlags e{};
 
-			e.p_accid = atoi(row[0]);
+			e.p_accid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.p_flag  = row[1] ? row[1] : "";
 			e.p_value = row[2] ? row[2] : "";
 
@@ -277,7 +277,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AccountFlags e{};
 
-			e.p_accid = atoi(row[0]);
+			e.p_accid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.p_flag  = row[1] ? row[1] : "";
 			e.p_value = row[2] ? row[2] : "";
 

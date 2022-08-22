@@ -19,10 +19,10 @@
 class BaseDiscoveredItemsRepository {
 public:
 	struct DiscoveredItems {
-		int         item_id;
+		uint32_t    item_id;
 		std::string char_name;
-		int         discovered_date;
-		int         account_status;
+		uint32_t    discovered_date;
+		int32_t     account_status;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			DiscoveredItems e{};
 
-			e.item_id         = atoi(row[0]);
+			e.item_id         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.char_name       = row[1] ? row[1] : "";
-			e.discovered_date = atoi(row[2]);
-			e.account_status  = atoi(row[3]);
+			e.discovered_date = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.account_status  = static_cast<int32_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DiscoveredItems e{};
 
-			e.item_id         = atoi(row[0]);
+			e.item_id         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.char_name       = row[1] ? row[1] : "";
-			e.discovered_date = atoi(row[2]);
-			e.account_status  = atoi(row[3]);
+			e.discovered_date = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.account_status  = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DiscoveredItems e{};
 
-			e.item_id         = atoi(row[0]);
+			e.item_id         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.char_name       = row[1] ? row[1] : "";
-			e.discovered_date = atoi(row[2]);
-			e.account_status  = atoi(row[3]);
+			e.discovered_date = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.account_status  = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

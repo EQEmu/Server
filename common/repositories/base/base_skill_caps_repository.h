@@ -19,11 +19,11 @@
 class BaseSkillCapsRepository {
 public:
 	struct SkillCaps {
-		int skillID;
-		int class_;
-		int level;
-		int cap;
-		int class_;
+		uint8_t  skillID;
+		uint8_t  class_;
+		uint8_t  level;
+		uint32_t cap;
+		uint8_t  class_;
 	};
 
 	static std::string PrimaryKey()
@@ -130,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			SkillCaps e{};
 
-			e.skillID = atoi(row[0]);
-			e.class_  = atoi(row[1]);
-			e.level   = atoi(row[2]);
-			e.cap     = atoi(row[3]);
-			e.class_  = atoi(row[4]);
+			e.skillID = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
+			e.class_  = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.level   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.cap     = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.class_  = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SkillCaps e{};
 
-			e.skillID = atoi(row[0]);
-			e.class_  = atoi(row[1]);
-			e.level   = atoi(row[2]);
-			e.cap     = atoi(row[3]);
-			e.class_  = atoi(row[4]);
+			e.skillID = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
+			e.class_  = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.level   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.cap     = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.class_  = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SkillCaps e{};
 
-			e.skillID = atoi(row[0]);
-			e.class_  = atoi(row[1]);
-			e.level   = atoi(row[2]);
-			e.cap     = atoi(row[3]);
-			e.class_  = atoi(row[4]);
+			e.skillID = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
+			e.class_  = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.level   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.cap     = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.class_  = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

@@ -19,10 +19,10 @@
 class BaseLootdropRepository {
 public:
 	struct Lootdrop {
-		int         id;
+		uint32_t    id;
 		std::string name;
-		int         min_expansion;
-		int         max_expansion;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -134,10 +134,10 @@ public:
 		if (results.RowCount() == 1) {
 			Lootdrop e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name                   = row[1] ? row[1] : "";
-			e.min_expansion          = atoi(row[2]);
-			e.max_expansion          = atoi(row[3]);
+			e.min_expansion          = static_cast<int8_t>(atoi(row[2]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[3]));
 			e.content_flags          = row[4] ? row[4] : "";
 			e.content_flags_disabled = row[5] ? row[5] : "";
 
@@ -273,10 +273,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lootdrop e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name                   = row[1] ? row[1] : "";
-			e.min_expansion          = atoi(row[2]);
-			e.max_expansion          = atoi(row[3]);
+			e.min_expansion          = static_cast<int8_t>(atoi(row[2]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[3]));
 			e.content_flags          = row[4] ? row[4] : "";
 			e.content_flags_disabled = row[5] ? row[5] : "";
 
@@ -303,10 +303,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lootdrop e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name                   = row[1] ? row[1] : "";
-			e.min_expansion          = atoi(row[2]);
-			e.max_expansion          = atoi(row[3]);
+			e.min_expansion          = static_cast<int8_t>(atoi(row[2]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[3]));
 			e.content_flags          = row[4] ? row[4] : "";
 			e.content_flags_disabled = row[5] ? row[5] : "";
 

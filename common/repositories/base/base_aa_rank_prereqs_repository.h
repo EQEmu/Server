@@ -19,9 +19,9 @@
 class BaseAaRankPrereqsRepository {
 public:
 	struct AaRankPrereqs {
-		int rank_id;
-		int aa_id;
-		int points;
+		uint32_t rank_id;
+		int32_t  aa_id;
+		int32_t  points;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			AaRankPrereqs e{};
 
-			e.rank_id = atoi(row[0]);
-			e.aa_id   = atoi(row[1]);
-			e.points  = atoi(row[2]);
+			e.rank_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
+			e.points  = static_cast<int32_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AaRankPrereqs e{};
 
-			e.rank_id = atoi(row[0]);
-			e.aa_id   = atoi(row[1]);
-			e.points  = atoi(row[2]);
+			e.rank_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
+			e.points  = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AaRankPrereqs e{};
 
-			e.rank_id = atoi(row[0]);
-			e.aa_id   = atoi(row[1]);
-			e.points  = atoi(row[2]);
+			e.rank_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
+			e.points  = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

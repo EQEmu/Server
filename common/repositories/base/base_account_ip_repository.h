@@ -19,9 +19,9 @@
 class BaseAccountIpRepository {
 public:
 	struct AccountIp {
-		int         accid;
+		int32_t     accid;
 		std::string ip;
-		int         count;
+		int32_t     count;
 		std::string lastused;
 	};
 
@@ -126,9 +126,9 @@ public:
 		if (results.RowCount() == 1) {
 			AccountIp e{};
 
-			e.accid    = atoi(row[0]);
+			e.accid    = static_cast<int32_t>(atoi(row[0]));
 			e.ip       = row[1] ? row[1] : "";
-			e.count    = atoi(row[2]);
+			e.count    = static_cast<int32_t>(atoi(row[2]));
 			e.lastused = row[3] ? row[3] : "";
 
 			return e;
@@ -258,9 +258,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AccountIp e{};
 
-			e.accid    = atoi(row[0]);
+			e.accid    = static_cast<int32_t>(atoi(row[0]));
 			e.ip       = row[1] ? row[1] : "";
-			e.count    = atoi(row[2]);
+			e.count    = static_cast<int32_t>(atoi(row[2]));
 			e.lastused = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);
@@ -286,9 +286,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AccountIp e{};
 
-			e.accid    = atoi(row[0]);
+			e.accid    = static_cast<int32_t>(atoi(row[0]));
 			e.ip       = row[1] ? row[1] : "";
-			e.count    = atoi(row[2]);
+			e.count    = static_cast<int32_t>(atoi(row[2]));
 			e.lastused = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);

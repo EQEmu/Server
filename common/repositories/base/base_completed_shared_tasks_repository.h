@@ -19,12 +19,12 @@
 class BaseCompletedSharedTasksRepository {
 public:
 	struct CompletedSharedTasks {
-		int64  id;
-		int    task_id;
-		time_t accepted_time;
-		time_t expire_time;
-		time_t completion_time;
-		int    is_locked;
+		int64_t id;
+		int32_t task_id;
+		time_t  accepted_time;
+		time_t  expire_time;
+		time_t  completion_time;
+		int8_t  is_locked;
 	};
 
 	static std::string PrimaryKey()
@@ -135,11 +135,11 @@ public:
 			CompletedSharedTasks e{};
 
 			e.id              = strtoll(row[0], nullptr, 10);
-			e.task_id         = atoi(row[1]);
+			e.task_id         = static_cast<int32_t>(atoi(row[1]));
 			e.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
 			e.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 			e.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			e.is_locked       = atoi(row[5]);
+			e.is_locked       = static_cast<int8_t>(atoi(row[5]));
 
 			return e;
 		}
@@ -275,11 +275,11 @@ public:
 			CompletedSharedTasks e{};
 
 			e.id              = strtoll(row[0], nullptr, 10);
-			e.task_id         = atoi(row[1]);
+			e.task_id         = static_cast<int32_t>(atoi(row[1]));
 			e.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
 			e.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 			e.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			e.is_locked       = atoi(row[5]);
+			e.is_locked       = static_cast<int8_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}
@@ -305,11 +305,11 @@ public:
 			CompletedSharedTasks e{};
 
 			e.id              = strtoll(row[0], nullptr, 10);
-			e.task_id         = atoi(row[1]);
+			e.task_id         = static_cast<int32_t>(atoi(row[1]));
 			e.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
 			e.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 			e.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			e.is_locked       = atoi(row[5]);
+			e.is_locked       = static_cast<int8_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}

@@ -19,7 +19,7 @@
 class BaseLoginServerAdminsRepository {
 public:
 	struct LoginServerAdmins {
-		int         id;
+		uint32_t    id;
 		std::string account_name;
 		std::string account_password;
 		std::string first_name;
@@ -142,7 +142,7 @@ public:
 		if (results.RowCount() == 1) {
 			LoginServerAdmins e{};
 
-			e.id                      = atoi(row[0]);
+			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.account_name            = row[1] ? row[1] : "";
 			e.account_password        = row[2] ? row[2] : "";
 			e.first_name              = row[3] ? row[3] : "";
@@ -289,7 +289,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginServerAdmins e{};
 
-			e.id                      = atoi(row[0]);
+			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.account_name            = row[1] ? row[1] : "";
 			e.account_password        = row[2] ? row[2] : "";
 			e.first_name              = row[3] ? row[3] : "";
@@ -321,7 +321,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginServerAdmins e{};
 
-			e.id                      = atoi(row[0]);
+			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.account_name            = row[1] ? row[1] : "";
 			e.account_password        = row[2] ? row[2] : "";
 			e.first_name              = row[3] ? row[3] : "";

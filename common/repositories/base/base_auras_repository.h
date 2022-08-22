@@ -19,17 +19,17 @@
 class BaseAurasRepository {
 public:
 	struct Auras {
-		int         type;
-		int         npc_type;
+		int32_t     type;
+		int32_t     npc_type;
 		std::string name;
-		int         spell_id;
-		int         distance;
-		int         aura_type;
-		int         spawn_type;
-		int         movement;
-		int         duration;
-		int         icon;
-		int         cast_time;
+		int32_t     spell_id;
+		int32_t     distance;
+		int32_t     aura_type;
+		int32_t     spawn_type;
+		int32_t     movement;
+		int32_t     duration;
+		int32_t     icon;
+		int32_t     cast_time;
 	};
 
 	static std::string PrimaryKey()
@@ -154,17 +154,17 @@ public:
 		if (results.RowCount() == 1) {
 			Auras e{};
 
-			e.type       = atoi(row[0]);
-			e.npc_type   = atoi(row[1]);
+			e.type       = static_cast<int32_t>(atoi(row[0]));
+			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = atoi(row[3]);
-			e.distance   = atoi(row[4]);
-			e.aura_type  = atoi(row[5]);
-			e.spawn_type = atoi(row[6]);
-			e.movement   = atoi(row[7]);
-			e.duration   = atoi(row[8]);
-			e.icon       = atoi(row[9]);
-			e.cast_time  = atoi(row[10]);
+			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
+			e.distance   = static_cast<int32_t>(atoi(row[4]));
+			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
+			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
+			e.movement   = static_cast<int32_t>(atoi(row[7]));
+			e.duration   = static_cast<int32_t>(atoi(row[8]));
+			e.icon       = static_cast<int32_t>(atoi(row[9]));
+			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
 
 			return e;
 		}
@@ -314,17 +314,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Auras e{};
 
-			e.type       = atoi(row[0]);
-			e.npc_type   = atoi(row[1]);
+			e.type       = static_cast<int32_t>(atoi(row[0]));
+			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = atoi(row[3]);
-			e.distance   = atoi(row[4]);
-			e.aura_type  = atoi(row[5]);
-			e.spawn_type = atoi(row[6]);
-			e.movement   = atoi(row[7]);
-			e.duration   = atoi(row[8]);
-			e.icon       = atoi(row[9]);
-			e.cast_time  = atoi(row[10]);
+			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
+			e.distance   = static_cast<int32_t>(atoi(row[4]));
+			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
+			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
+			e.movement   = static_cast<int32_t>(atoi(row[7]));
+			e.duration   = static_cast<int32_t>(atoi(row[8]));
+			e.icon       = static_cast<int32_t>(atoi(row[9]));
+			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +349,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Auras e{};
 
-			e.type       = atoi(row[0]);
-			e.npc_type   = atoi(row[1]);
+			e.type       = static_cast<int32_t>(atoi(row[0]));
+			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = atoi(row[3]);
-			e.distance   = atoi(row[4]);
-			e.aura_type  = atoi(row[5]);
-			e.spawn_type = atoi(row[6]);
-			e.movement   = atoi(row[7]);
-			e.duration   = atoi(row[8]);
-			e.icon       = atoi(row[9]);
-			e.cast_time  = atoi(row[10]);
+			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
+			e.distance   = static_cast<int32_t>(atoi(row[4]));
+			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
+			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
+			e.movement   = static_cast<int32_t>(atoi(row[7]));
+			e.duration   = static_cast<int32_t>(atoi(row[8]));
+			e.icon       = static_cast<int32_t>(atoi(row[9]));
+			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
 
 			all_entries.push_back(e);
 		}

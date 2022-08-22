@@ -19,7 +19,7 @@
 class BaseBugsRepository {
 public:
 	struct Bugs {
-		int         id;
+		uint32_t    id;
 		std::string zone;
 		std::string name;
 		std::string ui;
@@ -27,11 +27,11 @@ public:
 		float       y;
 		float       z;
 		std::string type;
-		int         flag;
+		uint8_t     flag;
 		std::string target;
 		std::string bug;
 		std::string date;
-		int         status;
+		uint8_t     status;
 	};
 
 	static std::string PrimaryKey()
@@ -162,19 +162,19 @@ public:
 		if (results.RowCount() == 1) {
 			Bugs e{};
 
-			e.id     = atoi(row[0]);
+			e.id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.zone   = row[1] ? row[1] : "";
 			e.name   = row[2] ? row[2] : "";
 			e.ui     = row[3] ? row[3] : "";
-			e.x      = static_cast<float>(atof(row[4]));
-			e.y      = static_cast<float>(atof(row[5]));
-			e.z      = static_cast<float>(atof(row[6]));
+			e.x      = strtof(row[4], nullptr);
+			e.y      = strtof(row[5], nullptr);
+			e.z      = strtof(row[6], nullptr);
 			e.type   = row[7] ? row[7] : "";
-			e.flag   = atoi(row[8]);
+			e.flag   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
 			e.date   = row[11] ? row[11] : "";
-			e.status = atoi(row[12]);
+			e.status = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 
 			return e;
 		}
@@ -329,19 +329,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Bugs e{};
 
-			e.id     = atoi(row[0]);
+			e.id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.zone   = row[1] ? row[1] : "";
 			e.name   = row[2] ? row[2] : "";
 			e.ui     = row[3] ? row[3] : "";
-			e.x      = static_cast<float>(atof(row[4]));
-			e.y      = static_cast<float>(atof(row[5]));
-			e.z      = static_cast<float>(atof(row[6]));
+			e.x      = strtof(row[4], nullptr);
+			e.y      = strtof(row[5], nullptr);
+			e.z      = strtof(row[6], nullptr);
 			e.type   = row[7] ? row[7] : "";
-			e.flag   = atoi(row[8]);
+			e.flag   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
 			e.date   = row[11] ? row[11] : "";
-			e.status = atoi(row[12]);
+			e.status = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -366,19 +366,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Bugs e{};
 
-			e.id     = atoi(row[0]);
+			e.id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.zone   = row[1] ? row[1] : "";
 			e.name   = row[2] ? row[2] : "";
 			e.ui     = row[3] ? row[3] : "";
-			e.x      = static_cast<float>(atof(row[4]));
-			e.y      = static_cast<float>(atof(row[5]));
-			e.z      = static_cast<float>(atof(row[6]));
+			e.x      = strtof(row[4], nullptr);
+			e.y      = strtof(row[5], nullptr);
+			e.z      = strtof(row[6], nullptr);
 			e.type   = row[7] ? row[7] : "";
-			e.flag   = atoi(row[8]);
+			e.flag   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
 			e.date   = row[11] ? row[11] : "";
-			e.status = atoi(row[12]);
+			e.status = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

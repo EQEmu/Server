@@ -19,17 +19,17 @@
 class BaseCharacterPetBuffsRepository {
 public:
 	struct CharacterPetBuffs {
-		int         char_id;
-		int         pet;
-		int         slot;
-		int         spell_id;
-		int         caster_level;
+		int32_t     char_id;
+		int32_t     pet;
+		int32_t     slot;
+		int32_t     spell_id;
+		int8_t      caster_level;
 		std::string castername;
-		int         ticsremaining;
-		int         counters;
-		int         numhits;
-		int         rune;
-		int         instrument_mod;
+		int32_t     ticsremaining;
+		int32_t     counters;
+		int32_t     numhits;
+		int32_t     rune;
+		uint8_t     instrument_mod;
 	};
 
 	static std::string PrimaryKey()
@@ -154,17 +154,17 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = atoi(row[0]);
-			e.pet            = atoi(row[1]);
-			e.slot           = atoi(row[2]);
-			e.spell_id       = atoi(row[3]);
-			e.caster_level   = atoi(row[4]);
+			e.char_id        = static_cast<int32_t>(atoi(row[0]));
+			e.pet            = static_cast<int32_t>(atoi(row[1]));
+			e.slot           = static_cast<int32_t>(atoi(row[2]));
+			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
+			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = atoi(row[6]);
-			e.counters       = atoi(row[7]);
-			e.numhits        = atoi(row[8]);
-			e.rune           = atoi(row[9]);
-			e.instrument_mod = atoi(row[10]);
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
+			e.counters       = static_cast<int32_t>(atoi(row[7]));
+			e.numhits        = static_cast<int32_t>(atoi(row[8]));
+			e.rune           = static_cast<int32_t>(atoi(row[9]));
+			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 
 			return e;
 		}
@@ -314,17 +314,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = atoi(row[0]);
-			e.pet            = atoi(row[1]);
-			e.slot           = atoi(row[2]);
-			e.spell_id       = atoi(row[3]);
-			e.caster_level   = atoi(row[4]);
+			e.char_id        = static_cast<int32_t>(atoi(row[0]));
+			e.pet            = static_cast<int32_t>(atoi(row[1]));
+			e.slot           = static_cast<int32_t>(atoi(row[2]));
+			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
+			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = atoi(row[6]);
-			e.counters       = atoi(row[7]);
-			e.numhits        = atoi(row[8]);
-			e.rune           = atoi(row[9]);
-			e.instrument_mod = atoi(row[10]);
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
+			e.counters       = static_cast<int32_t>(atoi(row[7]));
+			e.numhits        = static_cast<int32_t>(atoi(row[8]));
+			e.rune           = static_cast<int32_t>(atoi(row[9]));
+			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +349,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = atoi(row[0]);
-			e.pet            = atoi(row[1]);
-			e.slot           = atoi(row[2]);
-			e.spell_id       = atoi(row[3]);
-			e.caster_level   = atoi(row[4]);
+			e.char_id        = static_cast<int32_t>(atoi(row[0]));
+			e.pet            = static_cast<int32_t>(atoi(row[1]));
+			e.slot           = static_cast<int32_t>(atoi(row[2]));
+			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
+			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = atoi(row[6]);
-			e.counters       = atoi(row[7]);
-			e.numhits        = atoi(row[8]);
-			e.rune           = atoi(row[9]);
-			e.instrument_mod = atoi(row[10]);
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
+			e.counters       = static_cast<int32_t>(atoi(row[7]));
+			e.numhits        = static_cast<int32_t>(atoi(row[8]));
+			e.rune           = static_cast<int32_t>(atoi(row[9]));
+			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

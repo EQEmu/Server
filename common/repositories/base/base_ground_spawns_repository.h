@@ -19,9 +19,9 @@
 class BaseGroundSpawnsRepository {
 public:
 	struct GroundSpawns {
-		int         id;
-		int         zoneid;
-		int         version;
+		uint32_t    id;
+		uint32_t    zoneid;
+		int16_t     version;
 		float       max_x;
 		float       max_y;
 		float       max_z;
@@ -29,12 +29,12 @@ public:
 		float       min_y;
 		float       heading;
 		std::string name;
-		int         item;
-		int         max_allowed;
+		uint32_t    item;
+		uint32_t    max_allowed;
 		std::string comment;
-		int         respawn_timer;
-		int         min_expansion;
-		int         max_expansion;
+		uint32_t    respawn_timer;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -182,22 +182,22 @@ public:
 		if (results.RowCount() == 1) {
 			GroundSpawns e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.version                = atoi(row[2]);
-			e.max_x                  = static_cast<float>(atof(row[3]));
-			e.max_y                  = static_cast<float>(atof(row[4]));
-			e.max_z                  = static_cast<float>(atof(row[5]));
-			e.min_x                  = static_cast<float>(atof(row[6]));
-			e.min_y                  = static_cast<float>(atof(row[7]));
-			e.heading                = static_cast<float>(atof(row[8]));
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.zoneid                 = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.max_x                  = strtof(row[3], nullptr);
+			e.max_y                  = strtof(row[4], nullptr);
+			e.max_z                  = strtof(row[5], nullptr);
+			e.min_x                  = strtof(row[6], nullptr);
+			e.min_y                  = strtof(row[7], nullptr);
+			e.heading                = strtof(row[8], nullptr);
 			e.name                   = row[9] ? row[9] : "";
-			e.item                   = atoi(row[10]);
-			e.max_allowed            = atoi(row[11]);
+			e.item                   = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.max_allowed            = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
 			e.comment                = row[12] ? row[12] : "";
-			e.respawn_timer          = atoi(row[13]);
-			e.min_expansion          = atoi(row[14]);
-			e.max_expansion          = atoi(row[15]);
+			e.respawn_timer          = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[15]));
 			e.content_flags          = row[16] ? row[16] : "";
 			e.content_flags_disabled = row[17] ? row[17] : "";
 
@@ -369,22 +369,22 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroundSpawns e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.version                = atoi(row[2]);
-			e.max_x                  = static_cast<float>(atof(row[3]));
-			e.max_y                  = static_cast<float>(atof(row[4]));
-			e.max_z                  = static_cast<float>(atof(row[5]));
-			e.min_x                  = static_cast<float>(atof(row[6]));
-			e.min_y                  = static_cast<float>(atof(row[7]));
-			e.heading                = static_cast<float>(atof(row[8]));
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.zoneid                 = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.max_x                  = strtof(row[3], nullptr);
+			e.max_y                  = strtof(row[4], nullptr);
+			e.max_z                  = strtof(row[5], nullptr);
+			e.min_x                  = strtof(row[6], nullptr);
+			e.min_y                  = strtof(row[7], nullptr);
+			e.heading                = strtof(row[8], nullptr);
 			e.name                   = row[9] ? row[9] : "";
-			e.item                   = atoi(row[10]);
-			e.max_allowed            = atoi(row[11]);
+			e.item                   = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.max_allowed            = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
 			e.comment                = row[12] ? row[12] : "";
-			e.respawn_timer          = atoi(row[13]);
-			e.min_expansion          = atoi(row[14]);
-			e.max_expansion          = atoi(row[15]);
+			e.respawn_timer          = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[15]));
 			e.content_flags          = row[16] ? row[16] : "";
 			e.content_flags_disabled = row[17] ? row[17] : "";
 
@@ -411,22 +411,22 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroundSpawns e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.version                = atoi(row[2]);
-			e.max_x                  = static_cast<float>(atof(row[3]));
-			e.max_y                  = static_cast<float>(atof(row[4]));
-			e.max_z                  = static_cast<float>(atof(row[5]));
-			e.min_x                  = static_cast<float>(atof(row[6]));
-			e.min_y                  = static_cast<float>(atof(row[7]));
-			e.heading                = static_cast<float>(atof(row[8]));
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.zoneid                 = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.max_x                  = strtof(row[3], nullptr);
+			e.max_y                  = strtof(row[4], nullptr);
+			e.max_z                  = strtof(row[5], nullptr);
+			e.min_x                  = strtof(row[6], nullptr);
+			e.min_y                  = strtof(row[7], nullptr);
+			e.heading                = strtof(row[8], nullptr);
 			e.name                   = row[9] ? row[9] : "";
-			e.item                   = atoi(row[10]);
-			e.max_allowed            = atoi(row[11]);
+			e.item                   = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.max_allowed            = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
 			e.comment                = row[12] ? row[12] : "";
-			e.respawn_timer          = atoi(row[13]);
-			e.min_expansion          = atoi(row[14]);
-			e.max_expansion          = atoi(row[15]);
+			e.respawn_timer          = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[15]));
 			e.content_flags          = row[16] ? row[16] : "";
 			e.content_flags_disabled = row[17] ? row[17] : "";
 

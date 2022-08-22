@@ -19,20 +19,20 @@
 class BaseServerScheduledEventsRepository {
 public:
 	struct ServerScheduledEvents {
-		int         id;
+		int32_t     id;
 		std::string description;
 		std::string event_type;
 		std::string event_data;
-		int         minute_start;
-		int         hour_start;
-		int         day_start;
-		int         month_start;
-		int         year_start;
-		int         minute_end;
-		int         hour_end;
-		int         day_end;
-		int         month_end;
-		int         year_end;
+		int32_t     minute_start;
+		int32_t     hour_start;
+		int32_t     day_start;
+		int32_t     month_start;
+		int32_t     year_start;
+		int32_t     minute_end;
+		int32_t     hour_end;
+		int32_t     day_end;
+		int32_t     month_end;
+		int32_t     year_end;
 		std::string cron_expression;
 		time_t      created_at;
 		time_t      deleted_at;
@@ -178,20 +178,20 @@ public:
 		if (results.RowCount() == 1) {
 			ServerScheduledEvents e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<int32_t>(atoi(row[0]));
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = atoi(row[4]);
-			e.hour_start      = atoi(row[5]);
-			e.day_start       = atoi(row[6]);
-			e.month_start     = atoi(row[7]);
-			e.year_start      = atoi(row[8]);
-			e.minute_end      = atoi(row[9]);
-			e.hour_end        = atoi(row[10]);
-			e.day_end         = atoi(row[11]);
-			e.month_end       = atoi(row[12]);
-			e.year_end        = atoi(row[13]);
+			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
+			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
+			e.day_start       = static_cast<int32_t>(atoi(row[6]));
+			e.month_start     = static_cast<int32_t>(atoi(row[7]));
+			e.year_start      = static_cast<int32_t>(atoi(row[8]));
+			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
+			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
+			e.day_end         = static_cast<int32_t>(atoi(row[11]));
+			e.month_end       = static_cast<int32_t>(atoi(row[12]));
+			e.year_end        = static_cast<int32_t>(atoi(row[13]));
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -361,20 +361,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ServerScheduledEvents e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<int32_t>(atoi(row[0]));
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = atoi(row[4]);
-			e.hour_start      = atoi(row[5]);
-			e.day_start       = atoi(row[6]);
-			e.month_start     = atoi(row[7]);
-			e.year_start      = atoi(row[8]);
-			e.minute_end      = atoi(row[9]);
-			e.hour_end        = atoi(row[10]);
-			e.day_end         = atoi(row[11]);
-			e.month_end       = atoi(row[12]);
-			e.year_end        = atoi(row[13]);
+			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
+			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
+			e.day_start       = static_cast<int32_t>(atoi(row[6]));
+			e.month_start     = static_cast<int32_t>(atoi(row[7]));
+			e.year_start      = static_cast<int32_t>(atoi(row[8]));
+			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
+			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
+			e.day_end         = static_cast<int32_t>(atoi(row[11]));
+			e.month_end       = static_cast<int32_t>(atoi(row[12]));
+			e.year_end        = static_cast<int32_t>(atoi(row[13]));
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -402,20 +402,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ServerScheduledEvents e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<int32_t>(atoi(row[0]));
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = atoi(row[4]);
-			e.hour_start      = atoi(row[5]);
-			e.day_start       = atoi(row[6]);
-			e.month_start     = atoi(row[7]);
-			e.year_start      = atoi(row[8]);
-			e.minute_end      = atoi(row[9]);
-			e.hour_end        = atoi(row[10]);
-			e.day_end         = atoi(row[11]);
-			e.month_end       = atoi(row[12]);
-			e.year_end        = atoi(row[13]);
+			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
+			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
+			e.day_start       = static_cast<int32_t>(atoi(row[6]));
+			e.month_start     = static_cast<int32_t>(atoi(row[7]));
+			e.year_start      = static_cast<int32_t>(atoi(row[8]));
+			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
+			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
+			e.day_end         = static_cast<int32_t>(atoi(row[11]));
+			e.month_end       = static_cast<int32_t>(atoi(row[12]));
+			e.year_end        = static_cast<int32_t>(atoi(row[13]));
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);

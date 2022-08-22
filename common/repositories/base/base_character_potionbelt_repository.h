@@ -19,10 +19,10 @@
 class BaseCharacterPotionbeltRepository {
 public:
 	struct CharacterPotionbelt {
-		int id;
-		int potion_id;
-		int item_id;
-		int icon;
+		uint32_t id;
+		uint8_t  potion_id;
+		uint32_t item_id;
+		uint32_t icon;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPotionbelt e{};
 
-			e.id        = atoi(row[0]);
-			e.potion_id = atoi(row[1]);
-			e.item_id   = atoi(row[2]);
-			e.icon      = atoi(row[3]);
+			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.potion_id = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.item_id   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.icon      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPotionbelt e{};
 
-			e.id        = atoi(row[0]);
-			e.potion_id = atoi(row[1]);
-			e.item_id   = atoi(row[2]);
-			e.icon      = atoi(row[3]);
+			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.potion_id = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.item_id   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.icon      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPotionbelt e{};
 
-			e.id        = atoi(row[0]);
-			e.potion_id = atoi(row[1]);
-			e.item_id   = atoi(row[2]);
-			e.icon      = atoi(row[3]);
+			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.potion_id = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.item_id   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.icon      = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

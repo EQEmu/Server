@@ -19,15 +19,15 @@
 class BaseGridEntriesRepository {
 public:
 	struct GridEntries {
-		int   gridid;
-		int   zoneid;
-		int   number;
-		float x;
-		float y;
-		float z;
-		float heading;
-		int   pause;
-		int   centerpoint;
+		int32_t gridid;
+		int32_t zoneid;
+		int32_t number;
+		float   x;
+		float   y;
+		float   z;
+		float   heading;
+		int32_t pause;
+		int8_t  centerpoint;
 	};
 
 	static std::string PrimaryKey()
@@ -146,15 +146,15 @@ public:
 		if (results.RowCount() == 1) {
 			GridEntries e{};
 
-			e.gridid      = atoi(row[0]);
-			e.zoneid      = atoi(row[1]);
-			e.number      = atoi(row[2]);
-			e.x           = static_cast<float>(atof(row[3]));
-			e.y           = static_cast<float>(atof(row[4]));
-			e.z           = static_cast<float>(atof(row[5]));
-			e.heading     = static_cast<float>(atof(row[6]));
-			e.pause       = atoi(row[7]);
-			e.centerpoint = atoi(row[8]);
+			e.gridid      = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
+			e.number      = static_cast<int32_t>(atoi(row[2]));
+			e.x           = strtof(row[3], nullptr);
+			e.y           = strtof(row[4], nullptr);
+			e.z           = strtof(row[5], nullptr);
+			e.heading     = strtof(row[6], nullptr);
+			e.pause       = static_cast<int32_t>(atoi(row[7]));
+			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
 
 			return e;
 		}
@@ -298,15 +298,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GridEntries e{};
 
-			e.gridid      = atoi(row[0]);
-			e.zoneid      = atoi(row[1]);
-			e.number      = atoi(row[2]);
-			e.x           = static_cast<float>(atof(row[3]));
-			e.y           = static_cast<float>(atof(row[4]));
-			e.z           = static_cast<float>(atof(row[5]));
-			e.heading     = static_cast<float>(atof(row[6]));
-			e.pause       = atoi(row[7]);
-			e.centerpoint = atoi(row[8]);
+			e.gridid      = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
+			e.number      = static_cast<int32_t>(atoi(row[2]));
+			e.x           = strtof(row[3], nullptr);
+			e.y           = strtof(row[4], nullptr);
+			e.z           = strtof(row[5], nullptr);
+			e.heading     = strtof(row[6], nullptr);
+			e.pause       = static_cast<int32_t>(atoi(row[7]));
+			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +331,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GridEntries e{};
 
-			e.gridid      = atoi(row[0]);
-			e.zoneid      = atoi(row[1]);
-			e.number      = atoi(row[2]);
-			e.x           = static_cast<float>(atof(row[3]));
-			e.y           = static_cast<float>(atof(row[4]));
-			e.z           = static_cast<float>(atof(row[5]));
-			e.heading     = static_cast<float>(atof(row[6]));
-			e.pause       = atoi(row[7]);
-			e.centerpoint = atoi(row[8]);
+			e.gridid      = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
+			e.number      = static_cast<int32_t>(atoi(row[2]));
+			e.x           = strtof(row[3], nullptr);
+			e.y           = strtof(row[4], nullptr);
+			e.z           = strtof(row[5], nullptr);
+			e.heading     = strtof(row[6], nullptr);
+			e.pause       = static_cast<int32_t>(atoi(row[7]));
+			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}

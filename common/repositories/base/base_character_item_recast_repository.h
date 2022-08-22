@@ -19,9 +19,9 @@
 class BaseCharacterItemRecastRepository {
 public:
 	struct CharacterItemRecast {
-		int id;
-		int recast_type;
-		int timestamp;
+		uint32_t id;
+		uint16_t recast_type;
+		uint32_t timestamp;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterItemRecast e{};
 
-			e.id          = atoi(row[0]);
-			e.recast_type = atoi(row[1]);
-			e.timestamp   = atoi(row[2]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.recast_type = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.timestamp   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterItemRecast e{};
 
-			e.id          = atoi(row[0]);
-			e.recast_type = atoi(row[1]);
-			e.timestamp   = atoi(row[2]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.recast_type = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.timestamp   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterItemRecast e{};
 
-			e.id          = atoi(row[0]);
-			e.recast_type = atoi(row[1]);
-			e.timestamp   = atoi(row[2]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.recast_type = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.timestamp   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

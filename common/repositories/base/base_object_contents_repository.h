@@ -19,18 +19,18 @@
 class BaseObjectContentsRepository {
 public:
 	struct ObjectContents {
-		int    zoneid;
-		int    parentid;
-		int    bagidx;
-		int    itemid;
-		int    charges;
-		time_t droptime;
-		int    augslot1;
-		int    augslot2;
-		int    augslot3;
-		int    augslot4;
-		int    augslot5;
-		int    augslot6;
+		uint32_t zoneid;
+		uint32_t parentid;
+		uint32_t bagidx;
+		uint32_t itemid;
+		int16_t  charges;
+		time_t   droptime;
+		uint32_t augslot1;
+		uint32_t augslot2;
+		uint32_t augslot3;
+		uint32_t augslot4;
+		uint32_t augslot5;
+		int32_t  augslot6;
 	};
 
 	static std::string PrimaryKey()
@@ -158,18 +158,18 @@ public:
 		if (results.RowCount() == 1) {
 			ObjectContents e{};
 
-			e.zoneid   = atoi(row[0]);
-			e.parentid = atoi(row[1]);
-			e.bagidx   = atoi(row[2]);
-			e.itemid   = atoi(row[3]);
-			e.charges  = atoi(row[4]);
+			e.zoneid   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.parentid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.bagidx   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.itemid   = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.charges  = static_cast<int16_t>(atoi(row[4]));
 			e.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			e.augslot1 = atoi(row[6]);
-			e.augslot2 = atoi(row[7]);
-			e.augslot3 = atoi(row[8]);
-			e.augslot4 = atoi(row[9]);
-			e.augslot5 = atoi(row[10]);
-			e.augslot6 = atoi(row[11]);
+			e.augslot1 = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.augslot2 = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.augslot3 = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.augslot4 = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.augslot5 = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.augslot6 = static_cast<int32_t>(atoi(row[11]));
 
 			return e;
 		}
@@ -322,18 +322,18 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ObjectContents e{};
 
-			e.zoneid   = atoi(row[0]);
-			e.parentid = atoi(row[1]);
-			e.bagidx   = atoi(row[2]);
-			e.itemid   = atoi(row[3]);
-			e.charges  = atoi(row[4]);
+			e.zoneid   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.parentid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.bagidx   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.itemid   = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.charges  = static_cast<int16_t>(atoi(row[4]));
 			e.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			e.augslot1 = atoi(row[6]);
-			e.augslot2 = atoi(row[7]);
-			e.augslot3 = atoi(row[8]);
-			e.augslot4 = atoi(row[9]);
-			e.augslot5 = atoi(row[10]);
-			e.augslot6 = atoi(row[11]);
+			e.augslot1 = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.augslot2 = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.augslot3 = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.augslot4 = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.augslot5 = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.augslot6 = static_cast<int32_t>(atoi(row[11]));
 
 			all_entries.push_back(e);
 		}
@@ -358,18 +358,18 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ObjectContents e{};
 
-			e.zoneid   = atoi(row[0]);
-			e.parentid = atoi(row[1]);
-			e.bagidx   = atoi(row[2]);
-			e.itemid   = atoi(row[3]);
-			e.charges  = atoi(row[4]);
+			e.zoneid   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.parentid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.bagidx   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.itemid   = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.charges  = static_cast<int16_t>(atoi(row[4]));
 			e.droptime = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
-			e.augslot1 = atoi(row[6]);
-			e.augslot2 = atoi(row[7]);
-			e.augslot3 = atoi(row[8]);
-			e.augslot4 = atoi(row[9]);
-			e.augslot5 = atoi(row[10]);
-			e.augslot6 = atoi(row[11]);
+			e.augslot1 = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.augslot2 = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.augslot3 = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.augslot4 = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.augslot5 = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.augslot6 = static_cast<int32_t>(atoi(row[11]));
 
 			all_entries.push_back(e);
 		}

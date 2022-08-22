@@ -19,18 +19,18 @@
 class BaseNpcSpellsEntriesRepository {
 public:
 	struct NpcSpellsEntries {
-		int id;
-		int npc_spells_id;
-		int spellid;
-		int type;
-		int minlevel;
-		int maxlevel;
-		int manacost;
-		int recast_delay;
-		int priority;
-		int resist_adjust;
-		int min_hp;
-		int max_hp;
+		uint32_t id;
+		int32_t  npc_spells_id;
+		uint16_t spellid;
+		uint32_t type;
+		uint8_t  minlevel;
+		uint8_t  maxlevel;
+		int16_t  manacost;
+		int32_t  recast_delay;
+		int16_t  priority;
+		int32_t  resist_adjust;
+		int16_t  min_hp;
+		int16_t  max_hp;
 	};
 
 	static std::string PrimaryKey()
@@ -158,18 +158,18 @@ public:
 		if (results.RowCount() == 1) {
 			NpcSpellsEntries e{};
 
-			e.id            = atoi(row[0]);
-			e.npc_spells_id = atoi(row[1]);
-			e.spellid       = atoi(row[2]);
-			e.type          = atoi(row[3]);
-			e.minlevel      = atoi(row[4]);
-			e.maxlevel      = atoi(row[5]);
-			e.manacost      = atoi(row[6]);
-			e.recast_delay  = atoi(row[7]);
-			e.priority      = atoi(row[8]);
-			e.resist_adjust = atoi(row[9]);
-			e.min_hp        = atoi(row[10]);
-			e.max_hp        = atoi(row[11]);
+			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.npc_spells_id = static_cast<int32_t>(atoi(row[1]));
+			e.spellid       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.type          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.minlevel      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.maxlevel      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.manacost      = static_cast<int16_t>(atoi(row[6]));
+			e.recast_delay  = static_cast<int32_t>(atoi(row[7]));
+			e.priority      = static_cast<int16_t>(atoi(row[8]));
+			e.resist_adjust = static_cast<int32_t>(atoi(row[9]));
+			e.min_hp        = static_cast<int16_t>(atoi(row[10]));
+			e.max_hp        = static_cast<int16_t>(atoi(row[11]));
 
 			return e;
 		}
@@ -321,18 +321,18 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEntries e{};
 
-			e.id            = atoi(row[0]);
-			e.npc_spells_id = atoi(row[1]);
-			e.spellid       = atoi(row[2]);
-			e.type          = atoi(row[3]);
-			e.minlevel      = atoi(row[4]);
-			e.maxlevel      = atoi(row[5]);
-			e.manacost      = atoi(row[6]);
-			e.recast_delay  = atoi(row[7]);
-			e.priority      = atoi(row[8]);
-			e.resist_adjust = atoi(row[9]);
-			e.min_hp        = atoi(row[10]);
-			e.max_hp        = atoi(row[11]);
+			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.npc_spells_id = static_cast<int32_t>(atoi(row[1]));
+			e.spellid       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.type          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.minlevel      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.maxlevel      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.manacost      = static_cast<int16_t>(atoi(row[6]));
+			e.recast_delay  = static_cast<int32_t>(atoi(row[7]));
+			e.priority      = static_cast<int16_t>(atoi(row[8]));
+			e.resist_adjust = static_cast<int32_t>(atoi(row[9]));
+			e.min_hp        = static_cast<int16_t>(atoi(row[10]));
+			e.max_hp        = static_cast<int16_t>(atoi(row[11]));
 
 			all_entries.push_back(e);
 		}
@@ -357,18 +357,18 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEntries e{};
 
-			e.id            = atoi(row[0]);
-			e.npc_spells_id = atoi(row[1]);
-			e.spellid       = atoi(row[2]);
-			e.type          = atoi(row[3]);
-			e.minlevel      = atoi(row[4]);
-			e.maxlevel      = atoi(row[5]);
-			e.manacost      = atoi(row[6]);
-			e.recast_delay  = atoi(row[7]);
-			e.priority      = atoi(row[8]);
-			e.resist_adjust = atoi(row[9]);
-			e.min_hp        = atoi(row[10]);
-			e.max_hp        = atoi(row[11]);
+			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.npc_spells_id = static_cast<int32_t>(atoi(row[1]));
+			e.spellid       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.type          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.minlevel      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.maxlevel      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.manacost      = static_cast<int16_t>(atoi(row[6]));
+			e.recast_delay  = static_cast<int32_t>(atoi(row[7]));
+			e.priority      = static_cast<int16_t>(atoi(row[8]));
+			e.resist_adjust = static_cast<int32_t>(atoi(row[9]));
+			e.min_hp        = static_cast<int16_t>(atoi(row[10]));
+			e.max_hp        = static_cast<int16_t>(atoi(row[11]));
 
 			all_entries.push_back(e);
 		}

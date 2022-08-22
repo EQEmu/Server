@@ -19,10 +19,10 @@
 class BaseNpcEmotesRepository {
 public:
 	struct NpcEmotes {
-		int         id;
-		int         emoteid;
-		int         event_;
-		int         type;
+		int32_t     id;
+		uint32_t    emoteid;
+		int8_t      event_;
+		int8_t      type;
 		std::string text;
 	};
 
@@ -130,10 +130,10 @@ public:
 		if (results.RowCount() == 1) {
 			NpcEmotes e{};
 
-			e.id      = atoi(row[0]);
-			e.emoteid = atoi(row[1]);
-			e.event_  = atoi(row[2]);
-			e.type    = atoi(row[3]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.emoteid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.event_  = static_cast<int8_t>(atoi(row[2]));
+			e.type    = static_cast<int8_t>(atoi(row[3]));
 			e.text    = row[4] ? row[4] : "";
 
 			return e;
@@ -265,10 +265,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcEmotes e{};
 
-			e.id      = atoi(row[0]);
-			e.emoteid = atoi(row[1]);
-			e.event_  = atoi(row[2]);
-			e.type    = atoi(row[3]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.emoteid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.event_  = static_cast<int8_t>(atoi(row[2]));
+			e.type    = static_cast<int8_t>(atoi(row[3]));
 			e.text    = row[4] ? row[4] : "";
 
 			all_entries.push_back(e);
@@ -294,10 +294,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcEmotes e{};
 
-			e.id      = atoi(row[0]);
-			e.emoteid = atoi(row[1]);
-			e.event_  = atoi(row[2]);
-			e.type    = atoi(row[3]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.emoteid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.event_  = static_cast<int8_t>(atoi(row[2]));
+			e.type    = static_cast<int8_t>(atoi(row[3]));
 			e.text    = row[4] ? row[4] : "";
 
 			all_entries.push_back(e);

@@ -19,12 +19,12 @@
 class BaseCharCreateCombinationsRepository {
 public:
 	struct CharCreateCombinations {
-		int allocation_id;
-		int race;
-		int class_;
-		int deity;
-		int start_zone;
-		int expansions_req;
+		uint32_t allocation_id;
+		uint32_t race;
+		uint32_t class_;
+		uint32_t deity;
+		uint32_t start_zone;
+		uint32_t expansions_req;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			CharCreateCombinations e{};
 
-			e.allocation_id  = atoi(row[0]);
-			e.race           = atoi(row[1]);
-			e.class_         = atoi(row[2]);
-			e.deity          = atoi(row[3]);
-			e.start_zone     = atoi(row[4]);
-			e.expansions_req = atoi(row[5]);
+			e.allocation_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.class_         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.deity          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.start_zone     = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.expansions_req = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharCreateCombinations e{};
 
-			e.allocation_id  = atoi(row[0]);
-			e.race           = atoi(row[1]);
-			e.class_         = atoi(row[2]);
-			e.deity          = atoi(row[3]);
-			e.start_zone     = atoi(row[4]);
-			e.expansions_req = atoi(row[5]);
+			e.allocation_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.class_         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.deity          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.start_zone     = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.expansions_req = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharCreateCombinations e{};
 
-			e.allocation_id  = atoi(row[0]);
-			e.race           = atoi(row[1]);
-			e.class_         = atoi(row[2]);
-			e.deity          = atoi(row[3]);
-			e.start_zone     = atoi(row[4]);
-			e.expansions_req = atoi(row[5]);
+			e.allocation_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.class_         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.deity          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.start_zone     = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.expansions_req = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

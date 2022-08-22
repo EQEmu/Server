@@ -19,8 +19,8 @@
 class BaseLdonTrapEntriesRepository {
 public:
 	struct LdonTrapEntries {
-		int id;
-		int trap_id;
+		uint32_t id;
+		uint32_t trap_id;
 	};
 
 	static std::string PrimaryKey()
@@ -118,8 +118,8 @@ public:
 		if (results.RowCount() == 1) {
 			LdonTrapEntries e{};
 
-			e.id      = atoi(row[0]);
-			e.trap_id = atoi(row[1]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.trap_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
 			return e;
 		}
@@ -242,8 +242,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LdonTrapEntries e{};
 
-			e.id      = atoi(row[0]);
-			e.trap_id = atoi(row[1]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.trap_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -268,8 +268,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LdonTrapEntries e{};
 
-			e.id      = atoi(row[0]);
-			e.trap_id = atoi(row[1]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.trap_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

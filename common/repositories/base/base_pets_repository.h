@@ -19,15 +19,15 @@
 class BasePetsRepository {
 public:
 	struct Pets {
-		int         id;
+		int32_t     id;
 		std::string type;
-		int         petpower;
-		int         npcID;
-		int         temp;
-		int         petcontrol;
-		int         petnaming;
-		int         monsterflag;
-		int         equipmentset;
+		int32_t     petpower;
+		int32_t     npcID;
+		int8_t      temp;
+		int8_t      petcontrol;
+		int8_t      petnaming;
+		int8_t      monsterflag;
+		int32_t     equipmentset;
 	};
 
 	static std::string PrimaryKey()
@@ -146,15 +146,15 @@ public:
 		if (results.RowCount() == 1) {
 			Pets e{};
 
-			e.id           = atoi(row[0]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
 			e.type         = row[1] ? row[1] : "";
-			e.petpower     = atoi(row[2]);
-			e.npcID        = atoi(row[3]);
-			e.temp         = atoi(row[4]);
-			e.petcontrol   = atoi(row[5]);
-			e.petnaming    = atoi(row[6]);
-			e.monsterflag  = atoi(row[7]);
-			e.equipmentset = atoi(row[8]);
+			e.petpower     = static_cast<int32_t>(atoi(row[2]));
+			e.npcID        = static_cast<int32_t>(atoi(row[3]));
+			e.temp         = static_cast<int8_t>(atoi(row[4]));
+			e.petcontrol   = static_cast<int8_t>(atoi(row[5]));
+			e.petnaming    = static_cast<int8_t>(atoi(row[6]));
+			e.monsterflag  = static_cast<int8_t>(atoi(row[7]));
+			e.equipmentset = static_cast<int32_t>(atoi(row[8]));
 
 			return e;
 		}
@@ -297,15 +297,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Pets e{};
 
-			e.id           = atoi(row[0]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
 			e.type         = row[1] ? row[1] : "";
-			e.petpower     = atoi(row[2]);
-			e.npcID        = atoi(row[3]);
-			e.temp         = atoi(row[4]);
-			e.petcontrol   = atoi(row[5]);
-			e.petnaming    = atoi(row[6]);
-			e.monsterflag  = atoi(row[7]);
-			e.equipmentset = atoi(row[8]);
+			e.petpower     = static_cast<int32_t>(atoi(row[2]));
+			e.npcID        = static_cast<int32_t>(atoi(row[3]));
+			e.temp         = static_cast<int8_t>(atoi(row[4]));
+			e.petcontrol   = static_cast<int8_t>(atoi(row[5]));
+			e.petnaming    = static_cast<int8_t>(atoi(row[6]));
+			e.monsterflag  = static_cast<int8_t>(atoi(row[7]));
+			e.equipmentset = static_cast<int32_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}
@@ -330,15 +330,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Pets e{};
 
-			e.id           = atoi(row[0]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
 			e.type         = row[1] ? row[1] : "";
-			e.petpower     = atoi(row[2]);
-			e.npcID        = atoi(row[3]);
-			e.temp         = atoi(row[4]);
-			e.petcontrol   = atoi(row[5]);
-			e.petnaming    = atoi(row[6]);
-			e.monsterflag  = atoi(row[7]);
-			e.equipmentset = atoi(row[8]);
+			e.petpower     = static_cast<int32_t>(atoi(row[2]));
+			e.npcID        = static_cast<int32_t>(atoi(row[3]));
+			e.temp         = static_cast<int8_t>(atoi(row[4]));
+			e.petcontrol   = static_cast<int8_t>(atoi(row[5]));
+			e.petnaming    = static_cast<int8_t>(atoi(row[6]));
+			e.monsterflag  = static_cast<int8_t>(atoi(row[7]));
+			e.equipmentset = static_cast<int32_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}

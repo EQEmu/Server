@@ -19,9 +19,9 @@
 class BaseCharacterAltCurrencyRepository {
 public:
 	struct CharacterAltCurrency {
-		int char_id;
-		int currency_id;
-		int amount;
+		uint32_t char_id;
+		uint32_t currency_id;
+		uint32_t amount;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterAltCurrency e{};
 
-			e.char_id     = atoi(row[0]);
-			e.currency_id = atoi(row[1]);
-			e.amount      = atoi(row[2]);
+			e.char_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.currency_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAltCurrency e{};
 
-			e.char_id     = atoi(row[0]);
-			e.currency_id = atoi(row[1]);
-			e.amount      = atoi(row[2]);
+			e.char_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.currency_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAltCurrency e{};
 
-			e.char_id     = atoi(row[0]);
-			e.currency_id = atoi(row[1]);
-			e.amount      = atoi(row[2]);
+			e.char_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.currency_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

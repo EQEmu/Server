@@ -19,10 +19,10 @@
 class BaseCharacterExpModifiersRepository {
 public:
 	struct CharacterExpModifiers {
-		int   character_id;
-		int   zone_id;
-		float aa_modifier;
-		float exp_modifier;
+		int32_t character_id;
+		int32_t zone_id;
+		float   aa_modifier;
+		float   exp_modifier;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterExpModifiers e{};
 
-			e.character_id = atoi(row[0]);
-			e.zone_id      = atoi(row[1]);
-			e.aa_modifier  = static_cast<float>(atof(row[2]));
-			e.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id      = static_cast<int32_t>(atoi(row[1]));
+			e.aa_modifier  = strtof(row[2], nullptr);
+			e.exp_modifier = strtof(row[3], nullptr);
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterExpModifiers e{};
 
-			e.character_id = atoi(row[0]);
-			e.zone_id      = atoi(row[1]);
-			e.aa_modifier  = static_cast<float>(atof(row[2]));
-			e.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id      = static_cast<int32_t>(atoi(row[1]));
+			e.aa_modifier  = strtof(row[2], nullptr);
+			e.exp_modifier = strtof(row[3], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterExpModifiers e{};
 
-			e.character_id = atoi(row[0]);
-			e.zone_id      = atoi(row[1]);
-			e.aa_modifier  = static_cast<float>(atof(row[2]));
-			e.exp_modifier = static_cast<float>(atof(row[3]));
+			e.character_id = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id      = static_cast<int32_t>(atoi(row[1]));
+			e.aa_modifier  = strtof(row[2], nullptr);
+			e.exp_modifier = strtof(row[3], nullptr);
 
 			all_entries.push_back(e);
 		}

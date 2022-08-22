@@ -19,9 +19,9 @@
 class BaseIpExemptionsRepository {
 public:
 	struct IpExemptions {
-		int         exemption_id;
+		int32_t     exemption_id;
 		std::string exemption_ip;
-		int         exemption_amount;
+		int32_t     exemption_amount;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			IpExemptions e{};
 
-			e.exemption_id     = atoi(row[0]);
+			e.exemption_id     = static_cast<int32_t>(atoi(row[0]));
 			e.exemption_ip     = row[1] ? row[1] : "";
-			e.exemption_amount = atoi(row[2]);
+			e.exemption_amount = static_cast<int32_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -249,9 +249,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			IpExemptions e{};
 
-			e.exemption_id     = atoi(row[0]);
+			e.exemption_id     = static_cast<int32_t>(atoi(row[0]));
 			e.exemption_ip     = row[1] ? row[1] : "";
-			e.exemption_amount = atoi(row[2]);
+			e.exemption_amount = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -276,9 +276,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			IpExemptions e{};
 
-			e.exemption_id     = atoi(row[0]);
+			e.exemption_id     = static_cast<int32_t>(atoi(row[0]));
 			e.exemption_ip     = row[1] ? row[1] : "";
-			e.exemption_amount = atoi(row[2]);
+			e.exemption_amount = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

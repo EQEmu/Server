@@ -19,16 +19,16 @@
 class BaseBaseDataRepository {
 public:
 	struct BaseData {
-		int   level;
-		int   class_;
-		float hp;
-		float mana;
-		float end;
-		float unk1;
-		float unk2;
-		float hp_fac;
-		float mana_fac;
-		float end_fac;
+		uint32_t level;
+		uint32_t class_;
+		double   hp;
+		double   mana;
+		double   end;
+		double   unk1;
+		double   unk2;
+		double   hp_fac;
+		double   mana_fac;
+		double   end_fac;
 	};
 
 	static std::string PrimaryKey()
@@ -150,16 +150,16 @@ public:
 		if (results.RowCount() == 1) {
 			BaseData e{};
 
-			e.level    = atoi(row[0]);
-			e.class_   = atoi(row[1]);
-			e.hp       = static_cast<float>(atof(row[2]));
-			e.mana     = static_cast<float>(atof(row[3]));
-			e.end      = static_cast<float>(atof(row[4]));
-			e.unk1     = static_cast<float>(atof(row[5]));
-			e.unk2     = static_cast<float>(atof(row[6]));
-			e.hp_fac   = static_cast<float>(atof(row[7]));
-			e.mana_fac = static_cast<float>(atof(row[8]));
-			e.end_fac  = static_cast<float>(atof(row[9]));
+			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.hp       = strtod(row[2], nullptr);
+			e.mana     = strtod(row[3], nullptr);
+			e.end      = strtod(row[4], nullptr);
+			e.unk1     = strtod(row[5], nullptr);
+			e.unk2     = strtod(row[6], nullptr);
+			e.hp_fac   = strtod(row[7], nullptr);
+			e.mana_fac = strtod(row[8], nullptr);
+			e.end_fac  = strtod(row[9], nullptr);
 
 			return e;
 		}
@@ -306,16 +306,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BaseData e{};
 
-			e.level    = atoi(row[0]);
-			e.class_   = atoi(row[1]);
-			e.hp       = static_cast<float>(atof(row[2]));
-			e.mana     = static_cast<float>(atof(row[3]));
-			e.end      = static_cast<float>(atof(row[4]));
-			e.unk1     = static_cast<float>(atof(row[5]));
-			e.unk2     = static_cast<float>(atof(row[6]));
-			e.hp_fac   = static_cast<float>(atof(row[7]));
-			e.mana_fac = static_cast<float>(atof(row[8]));
-			e.end_fac  = static_cast<float>(atof(row[9]));
+			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.hp       = strtod(row[2], nullptr);
+			e.mana     = strtod(row[3], nullptr);
+			e.end      = strtod(row[4], nullptr);
+			e.unk1     = strtod(row[5], nullptr);
+			e.unk2     = strtod(row[6], nullptr);
+			e.hp_fac   = strtod(row[7], nullptr);
+			e.mana_fac = strtod(row[8], nullptr);
+			e.end_fac  = strtod(row[9], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -340,16 +340,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BaseData e{};
 
-			e.level    = atoi(row[0]);
-			e.class_   = atoi(row[1]);
-			e.hp       = static_cast<float>(atof(row[2]));
-			e.mana     = static_cast<float>(atof(row[3]));
-			e.end      = static_cast<float>(atof(row[4]));
-			e.unk1     = static_cast<float>(atof(row[5]));
-			e.unk2     = static_cast<float>(atof(row[6]));
-			e.hp_fac   = static_cast<float>(atof(row[7]));
-			e.mana_fac = static_cast<float>(atof(row[8]));
-			e.end_fac  = static_cast<float>(atof(row[9]));
+			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.hp       = strtod(row[2], nullptr);
+			e.mana     = strtod(row[3], nullptr);
+			e.end      = strtod(row[4], nullptr);
+			e.unk1     = strtod(row[5], nullptr);
+			e.unk2     = strtod(row[6], nullptr);
+			e.hp_fac   = strtod(row[7], nullptr);
+			e.mana_fac = strtod(row[8], nullptr);
+			e.end_fac  = strtod(row[9], nullptr);
 
 			all_entries.push_back(e);
 		}

@@ -19,12 +19,12 @@
 class BaseCharacterTaskTimersRepository {
 public:
 	struct CharacterTaskTimers {
-		int    id;
-		int    character_id;
-		int    task_id;
-		int    timer_type;
-		int    timer_group;
-		time_t expire_time;
+		uint32_t id;
+		uint32_t character_id;
+		uint32_t task_id;
+		int32_t  timer_type;
+		int32_t  timer_group;
+		time_t   expire_time;
 	};
 
 	static std::string PrimaryKey()
@@ -134,11 +134,11 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterTaskTimers e{};
 
-			e.id           = atoi(row[0]);
-			e.character_id = atoi(row[1]);
-			e.task_id      = atoi(row[2]);
-			e.timer_type   = atoi(row[3]);
-			e.timer_group  = atoi(row[4]);
+			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
+			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			return e;
@@ -273,11 +273,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTaskTimers e{};
 
-			e.id           = atoi(row[0]);
-			e.character_id = atoi(row[1]);
-			e.task_id      = atoi(row[2]);
-			e.timer_type   = atoi(row[3]);
-			e.timer_group  = atoi(row[4]);
+			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
+			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
@@ -303,11 +303,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTaskTimers e{};
 
-			e.id           = atoi(row[0]);
-			e.character_id = atoi(row[1]);
-			e.task_id      = atoi(row[2]);
-			e.timer_type   = atoi(row[3]);
-			e.timer_group  = atoi(row[4]);
+			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
+			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
