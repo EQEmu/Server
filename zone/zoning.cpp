@@ -511,6 +511,9 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	m_ZoneSummonLocation = glm::vec4();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
+
+	// this simply resets the zone shutdown timer
+	zone->ResetShutdownTimer();
 }
 
 void Client::MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {

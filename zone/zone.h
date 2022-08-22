@@ -298,6 +298,7 @@ public:
 	void SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp);
 	void SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
 	void StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
+	void ResetShutdownTimer();
 	void UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void weatherSend(Client *client = nullptr);
 	void ClearSpawnTimers();

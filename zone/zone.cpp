@@ -1502,7 +1502,7 @@ bool Zone::Process() {
 
 	if (!staticzone) {
 		if (autoshutdown_timer.Check()) {
-			StartShutdownTimer();
+			ResetShutdownTimer();
 			if (numclients == 0) {
 				return false;
 			}
@@ -1749,13 +1749,28 @@ void Zone::StartShutdownTimer(uint32 set_time)
 
 	if (set_time != autoshutdown_timer.GetDuration()) {
 		LogInfo(
-			"[StartShutdownTimer] Reset to [{}] {}",
+			"[StartShutdownTimer] Reset to [{}] {} from original remaining time [{}] duration [{}] zone [{}]",
 			Strings::SecondsToTime(set_time, true),
-			!loaded_from.empty() ? fmt::format("(Loaded from [{}])", loaded_from) : ""
+			!loaded_from.empty() ? fmt::format("(Loaded from [{}])", loaded_from) : "",
+			Strings::SecondsToTime(autoshutdown_timer.GetRemainingTime(), true),
+			Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+			zone->GetZoneDescription()
 		);
 	}
 
 	autoshutdown_timer.SetTimer(set_time);
+}
+
+void Zone::ResetShutdownTimer() {
+	LogInfo(
+		"[ResetShutdownTimer] Reset to [{}] from original remaining time [{}] duration [{}] zone [{}]",
+		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+		Strings::SecondsToTime(autoshutdown_timer.GetRemainingTime(), true),
+		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+		zone->GetZoneDescription()
+	);
+
+	autoshutdown_timer.SetTimer(autoshutdown_timer.GetDuration());
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
