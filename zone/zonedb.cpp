@@ -3142,22 +3142,9 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 
 int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 {
-	std::string query = StringFormat("SELECT shutdowndelay FROM zone "
-                                    "WHERE zoneidnumber = %i AND (version=%i OR version=0) "
-                                    "ORDER BY version DESC", zoneID, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return (RuleI(Zone, AutoShutdownDelay));
-    }
+	auto z = GetZoneVersionWithFallback(zoneID, version);
 
-    if (results.RowCount() == 0) {
-        std::cerr << "Error in getZoneShutDownDelay no result '" << query << "' " << std::endl;
-        return (RuleI(Zone, AutoShutdownDelay));
-    }
-
-    auto& row = results.begin();
-
-    return atoi(row[0]);
+    return z.id > 0 ? z.shutdowndelay : RuleI(Zone, AutoShutdownDelay)
 }
 
 uint32 ZoneDatabase::GetKarma(uint32 acct_id)

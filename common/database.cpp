@@ -51,6 +51,7 @@
 #include "http/uri.h"
 
 #include "repositories/zone_repository.h"
+#include "zone_store.h"
 
 extern Client client;
 
@@ -1047,20 +1048,10 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 }
 
 uint8 Database::GetPEQZone(uint32 zone_id, uint32 version){
-	std::string query = fmt::format(
-		"SELECT peqzone FROM zone WHERE zoneidnumber = {} AND (version = {} OR version = 0) ORDER BY version DESC LIMIT 1",
-		zone_id,
-		version
-	);
-	auto results = QueryDatabase(query);
 
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
+	auto z = GetZoneVersionWithFallback(zone_id, version);
 
-	auto row = results.begin();
-
-	return static_cast<uint8>(std::stoi(row[0]));
+	return z.id > 0 ? z.peqzone : 0;
 }
 
 bool Database::CheckNameFilter(std::string name, bool surname)
