@@ -944,14 +944,14 @@ void Zone::LoadZoneDoors()
 }
 
 Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
-:	initgrids_timer(10000),
-	autoshutdown_timer((RuleI(Zone, AutoShutdownDelay))),
-	clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
-	spawn2_timer(1000),
-	hot_reload_timer(1000),
-	qglobal_purge_timer(30000),
-	m_SafePoint(0.0f,0.0f,0.0f,0.0f),
-	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
+: initgrids_timer(10000),
+  autoshutdown_timer((RuleI(Zone, AutoShutdownDelay))),
+  clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
+  spawn2_timer(1000),
+  hot_reload_timer(1000),
+  qglobal_purge_timer(30000),
+  m_safe_points(0.0f, 0.0f, 0.0f, 0.0f),
+  m_graveyard(0.0f, 0.0f, 0.0f, 0.0f)
 {
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
@@ -979,26 +979,26 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	strlwr(short_name);
 	memset(file_name, 0, sizeof(file_name));
 	long_name = 0;
-	aggroedmobs =0;
-	pgraveyard_id = 0;
+	aggroedmobs       =0;
+	m_graveyard_id    = 0;
 	pgraveyard_zoneid = 0;
-	pMaxClients = 0;
-	pvpzone = false;
+	m_max_clients     = 0;
+	pvpzone           = false;
 
 	if (database.GetServerType() == 1) {
 		pvpzone = true;
 	}
 
-	auto z = GetZone(short_name, 0);
+	auto z = GetZone(short_name, instanceversion);
 	if (z.id > 0) {
 		long_name = strcpy(new char[strlen(z.long_name.c_str()) + 1], z.long_name.c_str());
 
-		m_SafePoint.x = z.safe_x;
-		m_SafePoint.y = z.safe_y;
-		m_SafePoint.z = z.safe_z;
-		m_SafePoint.w = z.safe_heading;
-		pgraveyard_id = z.graveyard_id;
-		pMaxClients   = z.maxclients;
+		m_safe_points.x = z.safe_x;
+		m_safe_points.y = z.safe_y;
+		m_safe_points.z = z.safe_z;
+		m_safe_points.w = z.safe_heading;
+		m_graveyard_id = z.graveyard_id;
+		m_max_clients  = z.maxclients;
 
 		if (z.file_name.empty()) {
 			strcpy(file_name, short_name);
@@ -1010,10 +1010,10 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 
 	if (graveyard_id() > 0) {
 		LogDebug("Graveyard ID is [{}]", graveyard_id());
-		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.x, &m_Graveyard.y, &m_Graveyard.z, &m_Graveyard.w);
+		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_graveyard.x, &m_graveyard.y, &m_graveyard.z, &m_graveyard.w);
 
 		if (GraveYardLoaded) {
-			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
+			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_graveyard).c_str());
 		}
 		else {
 			LogError("Unable to load the graveyard id [{}] for zone [{}]", graveyard_id(), short_name);
@@ -1397,6 +1397,14 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	max_movement_update_range = z.max_movement_update_range;
 	default_ruleset           = z.ruleset;
 	allow_mercs               = true;
+	m_graveyard_id            = z.graveyard_id;
+	m_max_clients             = z.maxclients;
+
+	// safe coordinates
+	m_safe_points.x = z.safe_x;
+	m_safe_points.y = z.safe_y;
+	m_safe_points.z = z.safe_z;
+	m_safe_points.w = z.safe_heading;
 
 	if (!z.map_file_name.empty()) {
 		strcpy(map_name, z.map_file_name.c_str());
@@ -2189,7 +2197,7 @@ bool Zone::HasGraveyard() {
 
 void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 	pgraveyard_zoneid = zoneid;
-	m_Graveyard = graveyardPosition;
+	m_graveyard       = graveyardPosition;
 }
 
 void Zone::LoadZoneBlockedSpells()

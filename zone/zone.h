@@ -166,13 +166,13 @@ public:
 	inline const char *GetShortName() { return short_name; }
 	inline const uint8 GetZoneType() const { return zone_type; }
 	inline const uint16 GetInstanceVersion() const { return instanceversion; }
-	inline const uint32 &GetMaxClients() { return pMaxClients; }
-	inline const uint32 &graveyard_id() { return pgraveyard_id; }
+	inline const uint32 &GetMaxClients() { return m_max_clients; }
+	inline const uint32 &graveyard_id() { return m_graveyard_id; }
 	inline const uint32 &graveyard_zoneid() { return pgraveyard_zoneid; }
 	inline const uint32 GetInstanceID() const { return instanceid; }
 	inline const uint32 GetZoneID() const { return zoneid; }
-	inline glm::vec4 GetSafePoint() { return m_SafePoint; }
-	inline glm::vec4 GetGraveyardPoint() { return m_Graveyard; }
+	inline glm::vec4 GetSafePoint() { return m_safe_points; }
+	inline glm::vec4 GetGraveyardPoint() { return m_graveyard; }
 	inline std::vector<int> GetGlobalLootTables(NPC *mob) const { return m_global_loot.GetGlobalLootTables(mob); }
 	inline Timer *GetInstanceTimer() { return Instance_Timer; }
 	inline void AddGlobalLootEntry(GlobalLootEntry &in) { return m_global_loot.AddEntry(in); }
@@ -408,8 +408,8 @@ private:
 	char      *map_name;
 	char      *short_name;
 	char      file_name[16];
-	glm::vec4 m_SafePoint;
-	glm::vec4 m_Graveyard;
+	glm::vec4 m_safe_points;
+	glm::vec4 m_graveyard;
 	int       default_ruleset;
 	int       zone_total_blocked_spells;
 	int       npc_position_update_distance;
@@ -418,8 +418,8 @@ private:
 	uint16    instanceversion;
 	uint32    instanceid;
 	uint32    instance_time_remaining;
-	uint32    pgraveyard_id, pgraveyard_zoneid;
-	uint32    pMaxClients;
+	uint32    m_graveyard_id, pgraveyard_zoneid;
+	uint32    m_max_clients;
 	uint32    zoneid;
 	uint32    m_last_ucss_update;
 
