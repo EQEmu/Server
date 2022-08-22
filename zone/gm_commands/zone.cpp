@@ -66,7 +66,7 @@ void command_zone(Client *c, const Seperator *sep)
 		x,
 		y,
 		z,
-		zd.id > 0 ? zd.safe_heading : 0.0f,
+		zd ? zd->safe_heading : 0.0f,
 		0,
 		zone_mode
 	);

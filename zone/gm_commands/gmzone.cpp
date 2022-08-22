@@ -111,7 +111,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 			ZoneID(zone_short_name.c_str()),
 			zone_version
 		);
-		if (z.id == 0) {
+		if (!z) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -124,10 +124,10 @@ void command_gmzone(Client *c, const Seperator *sep)
 			return;
 		}
 
-		target_x       = z.safe_x;
-		target_y       = z.safe_y;
-		target_z       = z.safe_z;
-		target_heading = z.safe_heading;
+		target_x       = z->safe_x;
+		target_y       = z->safe_y;
+		target_z       = z->safe_z;
+		target_heading = z->safe_heading;
 
 		c->Message(
 			Chat::White,

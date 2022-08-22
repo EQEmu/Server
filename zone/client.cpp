@@ -5365,11 +5365,11 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z, float headin
 
 	if (x == 0 && y == 0 && z == 0) {
 		auto zd = GetZone(m_pp.binds[4].zone_id);
-		if (zd.id > 0) {
-			m_pp.binds[4].x = zd.safe_x;
-			m_pp.binds[4].y = zd.safe_y;
-			m_pp.binds[4].z = zd.safe_z;
-			m_pp.binds[4].heading = zd.safe_heading;
+		if (zd) {
+			m_pp.binds[4].x = zd->safe_x;
+			m_pp.binds[4].y = zd->safe_y;
+			m_pp.binds[4].z = zd->safe_z;
+			m_pp.binds[4].heading = zd->safe_heading;
 		}
 	}
 	else {

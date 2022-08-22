@@ -137,30 +137,30 @@ std::string ZoneStore::GetZoneLongName(uint32 zone_id)
  * @param version
  * @return
  */
-ZoneRepository::Zone ZoneStore::GetZone(uint32 zone_id, int version)
+ZoneRepository::Zone *ZoneStore::GetZone(uint32 zone_id, int version)
 {
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
-			return z;
+			return &z;
 		}
 	}
 
-	return ZoneRepository::NewEntity();
+	return nullptr;
 }
 
 /**
  * @param in_zone_name
  * @return
  */
-ZoneRepository::Zone ZoneStore::GetZone(const char *in_zone_name)
+ZoneRepository::Zone *ZoneStore::GetZone(const char *in_zone_name)
 {
 	for (auto &z: m_zones) {
 		if (z.short_name == in_zone_name) {
-			return z;
+			return &z;
 		}
 	}
 
-	return ZoneRepository::NewEntity();
+	return nullptr;
 }
 
 const std::vector<ZoneRepository::Zone> &ZoneStore::GetZones() const
@@ -169,20 +169,20 @@ const std::vector<ZoneRepository::Zone> &ZoneStore::GetZones() const
 }
 
 // gets zone data by using explicit version and falling back to version 0 if not found
-ZoneRepository::Zone ZoneStore::GetZoneWithFallback(uint32 zone_id, int version)
+ZoneRepository::Zone *ZoneStore::GetZoneWithFallback(uint32 zone_id, int version)
 {
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
-			return z;
+			return &z;
 		}
 	}
 
 	// second pass, default to version 0 if specific doesn't exist
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == 0) {
-			return z;
+			return &z;
 		}
 	}
 
-	return ZoneRepository::NewEntity();
+	return nullptr;
 }

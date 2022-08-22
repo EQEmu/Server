@@ -6639,12 +6639,12 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 
 	// this both loads the safe points and does a sanity check on zone name
 	auto z = GetZone(target_zone, 0);
-	if (z.id == 0) {
+	if (z) {
 		target_zone[0] = 0;
-		target_x       = z.safe_x;
-		target_y       = z.safe_y;
-		target_z       = z.safe_z;
-		target_heading = z.safe_heading;
+		target_x       = z->safe_x;
+		target_y       = z->safe_y;
+		target_z       = z->safe_z;
+		target_heading = z->safe_heading;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_GMZoneRequest, sizeof(GMZoneRequest_Struct));

@@ -990,21 +990,21 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	}
 
 	auto z = GetZone(short_name, instanceversion);
-	if (z.id > 0) {
-		long_name = strcpy(new char[strlen(z.long_name.c_str()) + 1], z.long_name.c_str());
+	if (z) {
+		long_name = strcpy(new char[strlen(z->long_name.c_str()) + 1], z->long_name.c_str());
 
-		m_safe_points.x = z.safe_x;
-		m_safe_points.y = z.safe_y;
-		m_safe_points.z = z.safe_z;
-		m_safe_points.w = z.safe_heading;
-		m_graveyard_id = z.graveyard_id;
-		m_max_clients  = z.maxclients;
+		m_safe_points.x = z->safe_x;
+		m_safe_points.y = z->safe_y;
+		m_safe_points.z = z->safe_z;
+		m_safe_points.w = z->safe_heading;
+		m_graveyard_id = z->graveyard_id;
+		m_max_clients  = z->maxclients;
 
-		if (z.file_name.empty()) {
+		if (z->file_name.empty()) {
 			strcpy(file_name, short_name);
 		}
 		else {
-			strcpy(file_name, z.file_name.c_str());
+			strcpy(file_name, z->file_name.c_str());
 		}
 	}
 
@@ -1297,7 +1297,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
 	auto z = zone_store.GetZone(ZoneID(filename), instance_version);
 
-	if (z.id == 0) {
+	if (!z) {
 		LogError("[LoadZoneCFG] Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
 		return false;
 	}
@@ -1309,108 +1309,108 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 
 	strcpy(map_name, "default");
 
-	newzone_data.ztype = z.ztype;
+	newzone_data.ztype = z->ztype;
 	zone_type = newzone_data.ztype;
 
 	// fog:red
-	newzone_data.fog_red[0] = z.fog_red;
-	newzone_data.fog_red[1] = z.fog_red2;
-	newzone_data.fog_red[2] = z.fog_red3;
-	newzone_data.fog_red[3] = z.fog_red4;
+	newzone_data.fog_red[0] = z->fog_red;
+	newzone_data.fog_red[1] = z->fog_red2;
+	newzone_data.fog_red[2] = z->fog_red3;
+	newzone_data.fog_red[3] = z->fog_red4;
 
 	// fog:blue
-	newzone_data.fog_blue[0] = z.fog_blue;
-	newzone_data.fog_blue[1] = z.fog_blue2;
-	newzone_data.fog_blue[2] = z.fog_blue3;
-	newzone_data.fog_blue[3] = z.fog_blue4;
+	newzone_data.fog_blue[0] = z->fog_blue;
+	newzone_data.fog_blue[1] = z->fog_blue2;
+	newzone_data.fog_blue[2] = z->fog_blue3;
+	newzone_data.fog_blue[3] = z->fog_blue4;
 
 	// fog:green
-	newzone_data.fog_green[0] = z.fog_green;
-	newzone_data.fog_green[1] = z.fog_green2;
-	newzone_data.fog_green[2] = z.fog_green3;
-	newzone_data.fog_green[3] = z.fog_green4;
+	newzone_data.fog_green[0] = z->fog_green;
+	newzone_data.fog_green[1] = z->fog_green2;
+	newzone_data.fog_green[2] = z->fog_green3;
+	newzone_data.fog_green[3] = z->fog_green4;
 
 	// fog:minclip
-	newzone_data.fog_minclip[0] = z.fog_minclip;
-	newzone_data.fog_minclip[1] = z.fog_minclip2;
-	newzone_data.fog_minclip[2] = z.fog_minclip3;
-	newzone_data.fog_minclip[3] = z.fog_minclip4;
+	newzone_data.fog_minclip[0] = z->fog_minclip;
+	newzone_data.fog_minclip[1] = z->fog_minclip2;
+	newzone_data.fog_minclip[2] = z->fog_minclip3;
+	newzone_data.fog_minclip[3] = z->fog_minclip4;
 
 	// fog:maxclip
-	newzone_data.fog_maxclip[0] = z.fog_maxclip;
-	newzone_data.fog_maxclip[1] = z.fog_maxclip2;
-	newzone_data.fog_maxclip[2] = z.fog_maxclip3;
-	newzone_data.fog_maxclip[3] = z.fog_maxclip4;
+	newzone_data.fog_maxclip[0] = z->fog_maxclip;
+	newzone_data.fog_maxclip[1] = z->fog_maxclip2;
+	newzone_data.fog_maxclip[2] = z->fog_maxclip3;
+	newzone_data.fog_maxclip[3] = z->fog_maxclip4;
 
 	// rain_chance
-	newzone_data.rain_chance[0] = z.rain_chance1;
-	newzone_data.rain_chance[1] = z.rain_chance2;
-	newzone_data.rain_chance[2] = z.rain_chance3;
-	newzone_data.rain_chance[3] = z.rain_chance4;
+	newzone_data.rain_chance[0] = z->rain_chance1;
+	newzone_data.rain_chance[1] = z->rain_chance2;
+	newzone_data.rain_chance[2] = z->rain_chance3;
+	newzone_data.rain_chance[3] = z->rain_chance4;
 
 	// rain_duration
-	newzone_data.rain_duration[0] = z.rain_duration1;
-	newzone_data.rain_duration[1] = z.rain_duration2;
-	newzone_data.rain_duration[2] = z.rain_duration3;
-	newzone_data.rain_duration[3] = z.rain_duration4;
+	newzone_data.rain_duration[0] = z->rain_duration1;
+	newzone_data.rain_duration[1] = z->rain_duration2;
+	newzone_data.rain_duration[2] = z->rain_duration3;
+	newzone_data.rain_duration[3] = z->rain_duration4;
 
 	// snow_chance
-	newzone_data.snow_chance[0] = z.snow_chance1;
-	newzone_data.snow_chance[1] = z.snow_chance2;
-	newzone_data.snow_chance[2] = z.snow_chance3;
-	newzone_data.snow_chance[3] = z.snow_chance4;
+	newzone_data.snow_chance[0] = z->snow_chance1;
+	newzone_data.snow_chance[1] = z->snow_chance2;
+	newzone_data.snow_chance[2] = z->snow_chance3;
+	newzone_data.snow_chance[3] = z->snow_chance4;
 
 	// snow_duration
-	newzone_data.snow_duration[0] = z.snow_duration1;
-	newzone_data.snow_duration[1] = z.snow_duration2;
-	newzone_data.snow_duration[2] = z.snow_duration3;
-	newzone_data.snow_duration[3] = z.snow_duration4;
+	newzone_data.snow_duration[0] = z->snow_duration1;
+	newzone_data.snow_duration[1] = z->snow_duration2;
+	newzone_data.snow_duration[2] = z->snow_duration3;
+	newzone_data.snow_duration[3] = z->snow_duration4;
 
 	// misc
-	newzone_data.fog_density               = z.fog_density;
-	newzone_data.sky                       = z.sky;
-	newzone_data.zone_exp_multiplier       = z.zone_exp_multiplier;
-	newzone_data.safe_x                    = z.safe_x;
-	newzone_data.safe_y                    = z.safe_y;
-	newzone_data.safe_z                    = z.safe_z;
-	newzone_data.underworld                = z.underworld;
-	newzone_data.minclip                   = z.minclip;
-	newzone_data.maxclip                   = z.maxclip;
-	newzone_data.time_type                 = z.time_type;
-	newzone_data.gravity                   = z.gravity;
-	newzone_data.fast_regen_hp             = z.fast_regen_hp;
-	newzone_data.fast_regen_mana           = z.fast_regen_mana;
-	newzone_data.fast_regen_endurance      = z.fast_regen_endurance;
-	newzone_data.npc_aggro_max_dist        = z.npc_max_aggro_dist;
-	newzone_data.underworld_teleport_index = z.underworld_teleport_index;
-	newzone_data.lava_damage               = z.lava_damage;
-	newzone_data.min_lava_damage           = z.min_lava_damage;
-	newzone_data.suspend_buffs             = z.suspendbuffs;
+	newzone_data.fog_density               = z->fog_density;
+	newzone_data.sky                       = z->sky;
+	newzone_data.zone_exp_multiplier       = z->zone_exp_multiplier;
+	newzone_data.safe_x                    = z->safe_x;
+	newzone_data.safe_y                    = z->safe_y;
+	newzone_data.safe_z                    = z->safe_z;
+	newzone_data.underworld                = z->underworld;
+	newzone_data.minclip                   = z->minclip;
+	newzone_data.maxclip                   = z->maxclip;
+	newzone_data.time_type                 = z->time_type;
+	newzone_data.gravity                   = z->gravity;
+	newzone_data.fast_regen_hp             = z->fast_regen_hp;
+	newzone_data.fast_regen_mana           = z->fast_regen_mana;
+	newzone_data.fast_regen_endurance      = z->fast_regen_endurance;
+	newzone_data.npc_aggro_max_dist        = z->npc_max_aggro_dist;
+	newzone_data.underworld_teleport_index = z->underworld_teleport_index;
+	newzone_data.lava_damage               = z->lava_damage;
+	newzone_data.min_lava_damage           = z->min_lava_damage;
+	newzone_data.suspend_buffs             = z->suspendbuffs;
 
 	// local attributes
-	can_bind                  = z.canbind != 0;
-	is_city                   = z.canbind == 2;
-	can_combat                = z.cancombat != 0;
-	can_levitate              = z.canlevitate != 0;
-	can_castoutdoor           = z.castoutdoor != 0;
-	is_hotzone                = z.hotzone != 0;
-	max_movement_update_range = z.max_movement_update_range;
-	default_ruleset           = z.ruleset;
+	can_bind                  = z->canbind != 0;
+	is_city                   = z->canbind == 2;
+	can_combat                = z->cancombat != 0;
+	can_levitate              = z->canlevitate != 0;
+	can_castoutdoor           = z->castoutdoor != 0;
+	is_hotzone                = z->hotzone != 0;
+	max_movement_update_range = z->max_movement_update_range;
+	default_ruleset           = z->ruleset;
 	allow_mercs               = true;
-	m_graveyard_id            = z.graveyard_id;
-	m_max_clients             = z.maxclients;
+	m_graveyard_id            = z->graveyard_id;
+	m_max_clients             = z->maxclients;
 
 	// safe coordinates
-	m_safe_points.x = z.safe_x;
-	m_safe_points.y = z.safe_y;
-	m_safe_points.z = z.safe_z;
-	m_safe_points.w = z.safe_heading;
+	m_safe_points.x = z->safe_x;
+	m_safe_points.y = z->safe_y;
+	m_safe_points.z = z->safe_z;
+	m_safe_points.w = z->safe_heading;
 
-	if (!z.map_file_name.empty()) {
-		strcpy(map_name, z.map_file_name.c_str());
+	if (!z->map_file_name.empty()) {
+		strcpy(map_name, z->map_file_name.c_str());
 	}
 	else {
-		strcpy(map_name, z.short_name.c_str());
+		strcpy(map_name, z->short_name.c_str());
 	}
 
 	// overwrite with our internal variables

@@ -33,15 +33,15 @@ public:
 
 	void LoadZones(Database &db);
 
-	ZoneRepository::Zone GetZone(uint32 zone_id, int version = 0);
-	ZoneRepository::Zone GetZone(const char *in_zone_name);
+	ZoneRepository::Zone *GetZone(uint32 zone_id, int version = 0);
+	ZoneRepository::Zone *GetZone(const char *in_zone_name);
 	uint32 GetZoneID(const char *in_zone_name);
 	uint32 GetZoneID(std::string zone_name);
 	std::string GetZoneName(uint32 zone_id);
 	std::string GetZoneLongName(uint32 zone_id);
 	const char *GetZoneName(uint32 zone_id, bool error_unknown = false);
 	const char *GetZoneLongName(uint32 zone_id, bool error_unknown = false);
-	ZoneRepository::Zone GetZoneWithFallback(uint32 zone_id, int version = 0);
+	ZoneRepository::Zone *GetZoneWithFallback(uint32 zone_id, int version = 0);
 private:
 	std::vector<ZoneRepository::Zone> m_zones;
 };
@@ -67,9 +67,9 @@ inline const char *ZoneLongName(uint32 zone_id, bool error_unknown = false)
 		error_unknown
 	);
 }
-inline ZoneRepository::Zone GetZone(uint32 zone_id, int version = 0) { return zone_store.GetZone(zone_id, version); };
-inline ZoneRepository::Zone GetZone(const char *in_zone_name) { return zone_store.GetZone(in_zone_name); };
-inline ZoneRepository::Zone GetZone(const char *in_zone_name, int version = 0)
+inline ZoneRepository::Zone *GetZone(uint32 zone_id, int version = 0) { return zone_store.GetZone(zone_id, version); };
+inline ZoneRepository::Zone *GetZone(const char *in_zone_name) { return zone_store.GetZone(in_zone_name); };
+inline ZoneRepository::Zone *GetZone(const char *in_zone_name, int version = 0)
 {
 	return zone_store.GetZone(
 		ZoneID(
@@ -77,7 +77,7 @@ inline ZoneRepository::Zone GetZone(const char *in_zone_name, int version = 0)
 		), version
 	);
 };
-inline ZoneRepository::Zone GetZoneVersionWithFallback(uint32 zone_id, int version = 0)
+inline ZoneRepository::Zone *GetZoneVersionWithFallback(uint32 zone_id, int version = 0)
 {
 	return zone_store.GetZoneWithFallback(
 		zone_id,

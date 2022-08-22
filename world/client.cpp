@@ -1734,10 +1734,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
 		pp.zone_id = RuleI(World, TutorialZoneID);
 		auto z = GetZone(pp.zone_id);
-		if (z.id > 0) {
-			pp.x = z.safe_x;
-			pp.y = z.safe_y;
-			pp.z = z.safe_z;
+		if (z) {
+			pp.x = z->safe_x;
+			pp.y = z->safe_y;
+			pp.z = z->safe_z;
 		}
 	}
 

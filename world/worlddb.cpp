@@ -237,11 +237,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 					pp.binds[4].zone_id = (uint32) atoi(row_d[1]);
 
 					auto z = GetZone(pp.binds[4].zone_id);
-					if (z.id > 0) {
-						pp.binds[4].x       = z.safe_x;
-						pp.binds[4].y       = z.safe_y;
-						pp.binds[4].z       = z.safe_z;
-						pp.binds[4].heading = z.safe_heading;
+					if (z) {
+						pp.binds[4].x       = z->safe_x;
+						pp.binds[4].y       = z->safe_y;
+						pp.binds[4].z       = z->safe_z;
+						pp.binds[4].heading = z->safe_heading;
 					}
 				}
 					/* Otherwise, use the zone and coordinates given */
@@ -253,11 +253,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 					float heading = atof(row_d[5]);
 					if (x == 0 && y == 0 && z == 0 && heading == 0) {
 						auto zone = GetZone(pp.binds[4].zone_id);
-						if (zone.id > 0) {
-							pp.binds[4].x       = zone.safe_x;
-							pp.binds[4].y       = zone.safe_y;
-							pp.binds[4].z       = zone.safe_z;
-							pp.binds[4].heading = zone.safe_heading;
+						if (zone) {
+							pp.binds[4].x       = zone->safe_x;
+							pp.binds[4].y       = zone->safe_y;
+							pp.binds[4].z       = zone->safe_z;
+							pp.binds[4].heading = zone->safe_heading;
 						}
 					}
 				}
@@ -611,11 +611,11 @@ bool WorldDatabase::GetStartZone(
 		pp->heading == 0
 	) {
 		auto zone = GetZone(pp->zone_id);
-		if (zone.id > 0) {
-			pp->x       = zone.safe_x;
-			pp->y       = zone.safe_y;
-			pp->z       = zone.safe_z;
-			pp->heading = zone.safe_heading;
+		if (zone) {
+			pp->x       = zone->safe_x;
+			pp->y       = zone->safe_y;
+			pp->z       = zone->safe_z;
+			pp->heading = zone->safe_heading;
 		}
 	}
 
@@ -626,11 +626,11 @@ bool WorldDatabase::GetStartZone(
 		pp->binds[0].heading == 0
 	) {
 		auto zone = GetZone(pp->binds[0].zone_id);
-		if (zone.id > 0) {
-			pp->binds[0].x       = zone.safe_x;
-			pp->binds[0].y       = zone.safe_y;
-			pp->binds[0].z       = zone.safe_z;
-			pp->binds[0].heading = zone.safe_heading;
+		if (zone) {
+			pp->binds[0].x       = zone->safe_x;
+			pp->binds[0].y       = zone->safe_y;
+			pp->binds[0].z       = zone->safe_z;
+			pp->binds[0].heading = zone->safe_heading;
 		}
 	}
 

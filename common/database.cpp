@@ -1051,7 +1051,7 @@ uint8 Database::GetPEQZone(uint32 zone_id, uint32 version){
 
 	auto z = GetZoneVersionWithFallback(zone_id, version);
 
-	return z.id > 0 ? z.peqzone : 0;
+	return z ? z->peqzone : 0;
 }
 
 bool Database::CheckNameFilter(std::string name, bool surname)
