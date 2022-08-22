@@ -25,9 +25,11 @@
 #include "../../common/rulesys.h"
 #include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
+#include "../../common/zone_store.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
+ZoneStore zone_store;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);

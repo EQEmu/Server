@@ -78,7 +78,6 @@
 #else
 #include <pthread.h>
 #include "../common/unix.h"
-#include "../common/zone_store.h"
 #include "zone_event_scheduler.h"
 
 #endif

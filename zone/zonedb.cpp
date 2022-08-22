@@ -3144,7 +3144,7 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 {
 	auto z = GetZoneVersionWithFallback(zoneID, version);
 
-    return z.id > 0 ? z.shutdowndelay : RuleI(Zone, AutoShutdownDelay)
+    return z.id > 0 ? z.shutdowndelay : RuleI(Zone, AutoShutdownDelay);
 }
 
 uint32 ZoneDatabase::GetKarma(uint32 acct_id)
