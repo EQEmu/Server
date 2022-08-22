@@ -33,8 +33,8 @@
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
-#include "zone_store.h"
 #include "../common/repositories/char_recipe_list_repository.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 
 extern QueryServ* QServ;

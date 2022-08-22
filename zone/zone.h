@@ -25,7 +25,7 @@
 #include "../common/random.h"
 #include "../common/strings.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/grid_repository.h"
 #include "../common/repositories/grid_entries_repository.h"
 #include "../common/repositories/zone_points_repository.h"
@@ -155,7 +155,7 @@ public:
 	ZonePoint *
 	GetClosestZonePoint(const glm::vec3 &location, const char *to_name, Client *client, float max_distance = 40000.0f);
 
-	inline bool BuffTimersSuspended() const { return newzone_data.SuspendBuffs != 0; };
+	inline bool BuffTimersSuspended() const { return newzone_data.suspend_buffs != 0; };
 	inline bool HasMap() { return zonemap != nullptr; }
 	inline bool HasWaterMap() { return watermap != nullptr; }
 	inline bool InstantGrids() { return (!initgrids_timer.Enabled()); }

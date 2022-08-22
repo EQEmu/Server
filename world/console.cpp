@@ -30,7 +30,7 @@
 #include "../common/strings.h"
 #include "../common/md5.h"
 #include "eqemu_api_world_data_service.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include <fmt/format.h>
 
 extern ClientList      client_list;

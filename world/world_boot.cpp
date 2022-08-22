@@ -19,11 +19,12 @@
 #include "world_config.h"
 #include "world_event_scheduler.h"
 #include "world_server_command_handler.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include "worlddb.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "../common/ip_util.h"
+#include "../common/zone_store.h"
 
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
@@ -310,7 +311,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	LogInfo("Loading zones");
 
-	world_store.LoadZones();
+	zone_store.LoadZones(content_db);
 
 	LogInfo("Clearing groups");
 	database.ClearGroup();

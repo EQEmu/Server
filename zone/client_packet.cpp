@@ -6638,16 +6638,8 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 		strcpy(target_zone, zone_short_name);
 
 	// this both loads the safe points and does a sanity check on zone name
-	if (!content_db.GetSafePoints(
-		target_zone,
-		0,
-		&target_x,
-		&target_y,
-		&target_z,
-		&target_heading,
-		&min_status,
-		&min_level
-	)) {
+	auto z = GetZone(target_zone, 0);
+	if (z.id == 0) {
 		target_zone[0] = 0;
 	}
 

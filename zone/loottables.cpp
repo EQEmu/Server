@@ -26,7 +26,7 @@
 #include "mob.h"
 #include "npc.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "global_loot_manager.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/say_link.h"

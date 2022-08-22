@@ -24,7 +24,7 @@
 #include "../common/eqemu_logsys.h"
 
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "bot.h"
 #include "client.h"
 

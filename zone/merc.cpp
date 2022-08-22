@@ -1168,11 +1168,11 @@ void Merc::CalcRestState() {
 		}
 	}
 
-	RestRegenHP = 6 * (GetMaxHP() / zone->newzone_data.FastRegenHP);
+	RestRegenHP = 6 * (GetMaxHP() / zone->newzone_data.fast_regen_hp);
 
-	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.FastRegenMana);
+	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.fast_regen_mana);
 
-	RestRegenEndurance = 6 * (GetMaxEndurance() / zone->newzone_data.FastRegenEndurance);
+	RestRegenEndurance = 6 * (GetMaxEndurance() / zone->newzone_data.fast_regen_endurance);
 }
 
 bool Merc::HasSkill(EQ::skills::SkillType skill_id) const {

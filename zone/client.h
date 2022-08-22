@@ -63,7 +63,7 @@ namespace EQ
 #include "questmgr.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "task_manager.h"
 #include "task_client_state.h"
 #include "cheat_manager.h"
