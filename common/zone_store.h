@@ -41,8 +41,7 @@ public:
 	std::string GetZoneLongName(uint32 zone_id);
 	const char *GetZoneName(uint32 zone_id, bool error_unknown = false);
 	const char *GetZoneLongName(uint32 zone_id, bool error_unknown = false);
-
-	ZoneRepository::Zone GetZoneWithFallback(uint32 i, int i_1);
+	ZoneRepository::Zone GetZoneWithFallback(uint32 zone_id, int version = 0);
 private:
 	std::vector<ZoneRepository::Zone> m_zones;
 };
