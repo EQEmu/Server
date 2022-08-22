@@ -991,7 +991,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 
 	auto z = GetZone(short_name, 0);
 	if (z.id > 0) {
-		strcpy(new char[strlen(z.long_name.c_str())+1], z.long_name.c_str());
+		long_name = strcpy(new char[strlen(z.long_name.c_str()) + 1], z.long_name.c_str());
 
 		m_SafePoint.x = z.safe_x;
 		m_SafePoint.y = z.safe_y;

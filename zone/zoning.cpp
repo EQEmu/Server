@@ -669,7 +669,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	auto zd = GetZone(zoneID, zone->GetInstanceVersion());
 	if (zd.id > 0) {
-		strcpy(pZoneName, zd.long_name.c_str());
+		pZoneName = strcpy(new char[strlen(zd.long_name.c_str()) + 1], zd.long_name.c_str());
 	}
 
 	cheat_manager.SetExemptStatus(Port, true);
