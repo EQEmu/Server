@@ -8528,7 +8528,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				return;
 			}
 
-			ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str());
+			ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), true);
 
 			if (!silentsaylink) {
 				Message(Chat::LightGray, "You say, '%s'", response.c_str());
@@ -11133,7 +11133,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY.c_str())) {
 				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str());
 				if (!response.empty()) {
-					ChannelMessageReceived(8, 0, 100, response.c_str());
+					ChannelMessageReceived(8, 0, 100, response.c_str(), true);
 				}
 			}
 			break;
@@ -11142,7 +11142,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY.c_str())) {
 				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY.c_str());
 				if (!response.empty()) {
-					ChannelMessageReceived(8, 0, 100, response.c_str());
+					ChannelMessageReceived(8, 0, 100, response.c_str(), true);
 				}
 			}
 			break;

@@ -1566,7 +1566,7 @@ void Perl_Client_SilentMessage(Client* self, const char* message) // @categories
 				if (self->GetTarget()->CastToNPC()->IsMoving() &&
 					  !self->GetTarget()->CastToNPC()->IsOnHatelist(self->GetTarget()))
 					self->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-				self->ChannelMessageReceived(8, 0, 100, message);
+				self->ChannelMessageReceived(8, 0, 100, message, true);
 			}
 		}
 	}
