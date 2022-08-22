@@ -113,6 +113,7 @@ public:
 		int         lava_damage;
 		int         min_lava_damage;
 		int         expansion;
+		int         bypass_expansion_check;
 	};
 
 	static std::string PrimaryKey()
@@ -217,6 +218,7 @@ public:
 			"lava_damage",
 			"min_lava_damage",
 			"expansion",
+			"bypass_expansion_check",
 		};
 	}
 
@@ -317,6 +319,7 @@ public:
 			"lava_damage",
 			"min_lava_damage",
 			"expansion",
+			"bypass_expansion_check",
 		};
 	}
 
@@ -451,6 +454,7 @@ public:
 		e.lava_damage               = 50;
 		e.min_lava_damage           = 10;
 		e.expansion                 = 0;
+		e.bypass_expansion_check    = 0;
 
 		return e;
 	}
@@ -580,6 +584,7 @@ public:
 			e.lava_damage               = atoi(row[91]);
 			e.min_lava_damage           = atoi(row[92]);
 			e.expansion                 = atoi(row[93]);
+			e.bypass_expansion_check    = atoi(row[94]);
 
 			return e;
 		}
@@ -706,6 +711,7 @@ public:
 		v.push_back(columns[91] + " = " + std::to_string(e.lava_damage));
 		v.push_back(columns[92] + " = " + std::to_string(e.min_lava_damage));
 		v.push_back(columns[93] + " = " + std::to_string(e.expansion));
+		v.push_back(columns[94] + " = " + std::to_string(e.bypass_expansion_check));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -821,6 +827,7 @@ public:
 		v.push_back(std::to_string(e.lava_damage));
 		v.push_back(std::to_string(e.min_lava_damage));
 		v.push_back(std::to_string(e.expansion));
+		v.push_back(std::to_string(e.bypass_expansion_check));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -944,6 +951,7 @@ public:
 			v.push_back(std::to_string(e.lava_damage));
 			v.push_back(std::to_string(e.min_lava_damage));
 			v.push_back(std::to_string(e.expansion));
+			v.push_back(std::to_string(e.bypass_expansion_check));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1071,6 +1079,7 @@ public:
 			e.lava_damage               = atoi(row[91]);
 			e.min_lava_damage           = atoi(row[92]);
 			e.expansion                 = atoi(row[93]);
+			e.bypass_expansion_check    = atoi(row[94]);
 
 			all_entries.push_back(e);
 		}
@@ -1189,6 +1198,7 @@ public:
 			e.lava_damage               = atoi(row[91]);
 			e.min_lava_damage           = atoi(row[92]);
 			e.expansion                 = atoi(row[93]);
+			e.bypass_expansion_check    = atoi(row[94]);
 
 			all_entries.push_back(e);
 		}
