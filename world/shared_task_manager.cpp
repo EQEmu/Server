@@ -15,7 +15,6 @@
 #include "../common/repositories/completed_shared_task_members_repository.h"
 #include "../common/repositories/completed_shared_task_activity_state_repository.h"
 #include "../common/repositories/shared_task_dynamic_zones_repository.h"
-#include <array>
 #include <ctime>
 
 extern ClientList client_list;
@@ -130,6 +129,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		e.max_done_count = a.goalcount;
 		e.step           = a.step;
 		e.optional       = a.optional;
+		e.req_activity_id = a.req_activity_id;
+		e.activity_state = ActivityState::ActivityHidden;
 
 		shared_task_activity_state.emplace_back(e);
 	}
@@ -354,6 +355,8 @@ void SharedTaskManager::LoadSharedTaskState()
 						e.updated_time   = sta.updated_time;
 						e.step           = ad.step;
 						e.optional       = ad.optional;
+						e.req_activity_id = ad.req_activity_id;
+						e.activity_state = sta.completed_time == 0 ? ActivityHidden : ActivityCompleted;
 					}
 				}
 
@@ -524,6 +527,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 					// if the activity is done, lets mark it as such
 					if (a.done_count == a.max_done_count) {
 						a.completed_time = std::time(nullptr);
+						a.activity_state = ActivityState::ActivityCompleted;
 					}
 
 					// sync state as each update comes in (for now)
@@ -1702,43 +1706,19 @@ void SharedTaskManager::LockTask(SharedTask* s, bool lock)
 
 bool SharedTaskManager::HandleCompletedActivities(SharedTask* s)
 {
-	bool is_task_complete = true;
-	bool lock_task = false;
+	auto states = s->GetActivityState();
 
-	std::array<bool, MAXACTIVITIESPERTASK> completed_steps;
-	completed_steps.fill(true);
-
-	// multiple activity ids may share a step, sort so previous step completions can be checked
-	auto activity_states = s->GetActivityState();
-	std::sort(activity_states.begin(), activity_states.end(),
-		[](const auto& lhs, const auto& rhs) { return lhs.step < rhs.step; });
-
-	for (const auto& a : activity_states)
-	{
-		if (a.done_count != a.max_done_count && !a.optional)
-		{
-			is_task_complete = false;
-			if (a.step > 0 && a.step <= MAXACTIVITIESPERTASK)
-			{
-				completed_steps[a.step - 1] = false;
-			}
-		}
-
-		int lock_index = s->GetTaskData().lock_activity_id;
-		if (a.activity_id == lock_index && a.step > 0 && a.step <= MAXACTIVITIESPERTASK)
-		{
-			// lock if element is active (on first step or previous step completed)
-			lock_task = (a.step == 1 || completed_steps[a.step - 2]);
-		}
-	}
+	// activity state holds both source data and current state
+	auto res = Tasks::GetActiveElements(states, states, states.size());
 
 	// completion locks are silent
-	if (!is_task_complete && lock_task)
+	auto it = std::find(res.active.begin(), res.active.end(), s->GetTaskData().lock_activity_id);
+	if (!res.is_task_complete && it != res.active.end())
 	{
 		LockTask(s, true);
 	}
 
-	return is_task_complete;
+	return res.is_task_complete;
 }
 
 void SharedTaskManager::HandleCompletedTask(SharedTask* s)

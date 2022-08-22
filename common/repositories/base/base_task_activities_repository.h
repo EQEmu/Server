@@ -21,6 +21,7 @@ public:
 	struct TaskActivities {
 		int         taskid;
 		int         activityid;
+		int         req_activity_id;
 		int         step;
 		int         activitytype;
 		std::string target_name;
@@ -48,6 +49,7 @@ public:
 		return {
 			"taskid",
 			"activityid",
+			"req_activity_id",
 			"step",
 			"activitytype",
 			"target_name",
@@ -71,6 +73,7 @@ public:
 		return {
 			"taskid",
 			"activityid",
+			"req_activity_id",
 			"step",
 			"activitytype",
 			"target_name",
@@ -128,6 +131,7 @@ public:
 
 		e.taskid               = 0;
 		e.activityid           = 0;
+		e.req_activity_id      = -1;
 		e.step                 = 0;
 		e.activitytype         = 0;
 		e.target_name          = "";
@@ -180,21 +184,22 @@ public:
 
 			e.taskid               = atoi(row[0]);
 			e.activityid           = atoi(row[1]);
-			e.step                 = atoi(row[2]);
-			e.activitytype         = atoi(row[3]);
-			e.target_name          = row[4] ? row[4] : "";
-			e.item_list            = row[5] ? row[5] : "";
-			e.skill_list           = row[6] ? row[6] : "";
-			e.spell_list           = row[7] ? row[7] : "";
-			e.description_override = row[8] ? row[8] : "";
-			e.goalid               = atoi(row[9]);
-			e.goal_match_list      = row[10] ? row[10] : "";
-			e.goalmethod           = atoi(row[11]);
-			e.goalcount            = atoi(row[12]);
-			e.delivertonpc         = atoi(row[13]);
-			e.zones                = row[14] ? row[14] : "";
-			e.zone_version         = atoi(row[15]);
-			e.optional             = atoi(row[16]);
+			e.req_activity_id      = atoi(row[2]);
+			e.step                 = atoi(row[3]);
+			e.activitytype         = atoi(row[4]);
+			e.target_name          = row[5] ? row[5] : "";
+			e.item_list            = row[6] ? row[6] : "";
+			e.skill_list           = row[7] ? row[7] : "";
+			e.spell_list           = row[8] ? row[8] : "";
+			e.description_override = row[9] ? row[9] : "";
+			e.goalid               = atoi(row[10]);
+			e.goal_match_list      = row[11] ? row[11] : "";
+			e.goalmethod           = atoi(row[12]);
+			e.goalcount            = atoi(row[13]);
+			e.delivertonpc         = atoi(row[14]);
+			e.zones                = row[15] ? row[15] : "";
+			e.zone_version         = atoi(row[16]);
+			e.optional             = atoi(row[17]);
 
 			return e;
 		}
@@ -230,21 +235,22 @@ public:
 
 		v.push_back(columns[0] + " = " + std::to_string(e.taskid));
 		v.push_back(columns[1] + " = " + std::to_string(e.activityid));
-		v.push_back(columns[2] + " = " + std::to_string(e.step));
-		v.push_back(columns[3] + " = " + std::to_string(e.activitytype));
-		v.push_back(columns[4] + " = '" + Strings::Escape(e.target_name) + "'");
-		v.push_back(columns[5] + " = '" + Strings::Escape(e.item_list) + "'");
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.skill_list) + "'");
-		v.push_back(columns[7] + " = '" + Strings::Escape(e.spell_list) + "'");
-		v.push_back(columns[8] + " = '" + Strings::Escape(e.description_override) + "'");
-		v.push_back(columns[9] + " = " + std::to_string(e.goalid));
-		v.push_back(columns[10] + " = '" + Strings::Escape(e.goal_match_list) + "'");
-		v.push_back(columns[11] + " = " + std::to_string(e.goalmethod));
-		v.push_back(columns[12] + " = " + std::to_string(e.goalcount));
-		v.push_back(columns[13] + " = " + std::to_string(e.delivertonpc));
-		v.push_back(columns[14] + " = '" + Strings::Escape(e.zones) + "'");
-		v.push_back(columns[15] + " = " + std::to_string(e.zone_version));
-		v.push_back(columns[16] + " = " + std::to_string(e.optional));
+		v.push_back(columns[2] + " = " + std::to_string(e.req_activity_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.step));
+		v.push_back(columns[4] + " = " + std::to_string(e.activitytype));
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.target_name) + "'");
+		v.push_back(columns[6] + " = '" + Strings::Escape(e.item_list) + "'");
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.skill_list) + "'");
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.spell_list) + "'");
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.description_override) + "'");
+		v.push_back(columns[10] + " = " + std::to_string(e.goalid));
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.goal_match_list) + "'");
+		v.push_back(columns[12] + " = " + std::to_string(e.goalmethod));
+		v.push_back(columns[13] + " = " + std::to_string(e.goalcount));
+		v.push_back(columns[14] + " = " + std::to_string(e.delivertonpc));
+		v.push_back(columns[15] + " = '" + Strings::Escape(e.zones) + "'");
+		v.push_back(columns[16] + " = " + std::to_string(e.zone_version));
+		v.push_back(columns[17] + " = " + std::to_string(e.optional));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -268,6 +274,7 @@ public:
 
 		v.push_back(std::to_string(e.taskid));
 		v.push_back(std::to_string(e.activityid));
+		v.push_back(std::to_string(e.req_activity_id));
 		v.push_back(std::to_string(e.step));
 		v.push_back(std::to_string(e.activitytype));
 		v.push_back("'" + Strings::Escape(e.target_name) + "'");
@@ -314,6 +321,7 @@ public:
 
 			v.push_back(std::to_string(e.taskid));
 			v.push_back(std::to_string(e.activityid));
+			v.push_back(std::to_string(e.req_activity_id));
 			v.push_back(std::to_string(e.step));
 			v.push_back(std::to_string(e.activitytype));
 			v.push_back("'" + Strings::Escape(e.target_name) + "'");
@@ -364,21 +372,22 @@ public:
 
 			e.taskid               = atoi(row[0]);
 			e.activityid           = atoi(row[1]);
-			e.step                 = atoi(row[2]);
-			e.activitytype         = atoi(row[3]);
-			e.target_name          = row[4] ? row[4] : "";
-			e.item_list            = row[5] ? row[5] : "";
-			e.skill_list           = row[6] ? row[6] : "";
-			e.spell_list           = row[7] ? row[7] : "";
-			e.description_override = row[8] ? row[8] : "";
-			e.goalid               = atoi(row[9]);
-			e.goal_match_list      = row[10] ? row[10] : "";
-			e.goalmethod           = atoi(row[11]);
-			e.goalcount            = atoi(row[12]);
-			e.delivertonpc         = atoi(row[13]);
-			e.zones                = row[14] ? row[14] : "";
-			e.zone_version         = atoi(row[15]);
-			e.optional             = atoi(row[16]);
+			e.req_activity_id      = atoi(row[2]);
+			e.step                 = atoi(row[3]);
+			e.activitytype         = atoi(row[4]);
+			e.target_name          = row[5] ? row[5] : "";
+			e.item_list            = row[6] ? row[6] : "";
+			e.skill_list           = row[7] ? row[7] : "";
+			e.spell_list           = row[8] ? row[8] : "";
+			e.description_override = row[9] ? row[9] : "";
+			e.goalid               = atoi(row[10]);
+			e.goal_match_list      = row[11] ? row[11] : "";
+			e.goalmethod           = atoi(row[12]);
+			e.goalcount            = atoi(row[13]);
+			e.delivertonpc         = atoi(row[14]);
+			e.zones                = row[15] ? row[15] : "";
+			e.zone_version         = atoi(row[16]);
+			e.optional             = atoi(row[17]);
 
 			all_entries.push_back(e);
 		}
@@ -405,21 +414,22 @@ public:
 
 			e.taskid               = atoi(row[0]);
 			e.activityid           = atoi(row[1]);
-			e.step                 = atoi(row[2]);
-			e.activitytype         = atoi(row[3]);
-			e.target_name          = row[4] ? row[4] : "";
-			e.item_list            = row[5] ? row[5] : "";
-			e.skill_list           = row[6] ? row[6] : "";
-			e.spell_list           = row[7] ? row[7] : "";
-			e.description_override = row[8] ? row[8] : "";
-			e.goalid               = atoi(row[9]);
-			e.goal_match_list      = row[10] ? row[10] : "";
-			e.goalmethod           = atoi(row[11]);
-			e.goalcount            = atoi(row[12]);
-			e.delivertonpc         = atoi(row[13]);
-			e.zones                = row[14] ? row[14] : "";
-			e.zone_version         = atoi(row[15]);
-			e.optional             = atoi(row[16]);
+			e.req_activity_id      = atoi(row[2]);
+			e.step                 = atoi(row[3]);
+			e.activitytype         = atoi(row[4]);
+			e.target_name          = row[5] ? row[5] : "";
+			e.item_list            = row[6] ? row[6] : "";
+			e.skill_list           = row[7] ? row[7] : "";
+			e.spell_list           = row[8] ? row[8] : "";
+			e.description_override = row[9] ? row[9] : "";
+			e.goalid               = atoi(row[10]);
+			e.goal_match_list      = row[11] ? row[11] : "";
+			e.goalmethod           = atoi(row[12]);
+			e.goalcount            = atoi(row[13]);
+			e.delivertonpc         = atoi(row[14]);
+			e.zones                = row[15] ? row[15] : "";
+			e.zone_version         = atoi(row[16]);
+			e.optional             = atoi(row[17]);
 
 			all_entries.push_back(e);
 		}

@@ -366,218 +366,94 @@ static void DeleteCompletedTaskFromDatabase(int character_id, int task_id)
 
 bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &task_info)
 {
-	bool all_activities_complete = true;
-
 	LogTasksDetail(
-		"[UnlockActivities] Fetching task info for character_id [{}] task [{}] slot [{}] current_step [{}] accepted_time [{}] updated [{}]",
+		"[UnlockActivities] Fetching task info for character_id [{}] task [{}] slot [{}] accepted_time [{}] updated [{}]",
 		character_id,
 		task_info.task_id,
 		task_info.slot,
-		task_info.current_step,
 		task_info.accepted_time,
 		task_info.updated
 	);
 
-	TaskInformation *p_task_data = task_manager->m_task_data[task_info.task_id];
-	if (p_task_data == nullptr) {
+	const TaskInformation* task = task_manager->m_task_data[task_info.task_id];
+	if (!task)
+	{
 		return true;
 	}
 
-	for (int i = 0; i < p_task_data->activity_count; i++) {
+	for (int i = 0; i < task->activity_count; ++i)
+	{
 		if (task_info.activity[i].activity_id >= 0) {
 			LogTasksDetail(
-				"[UnlockActivities] character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}] sequence [{}]",
+				"[UnlockActivities] character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}]",
 				character_id,
 				task_info.task_id,
 				task_info.activity[i].activity_id,
 				task_info.activity[i].done_count,
 				task_info.activity[i].activity_state,
-				task_info.activity[i].updated,
-				p_task_data->sequence_mode
+				task_info.activity[i].updated
 			);
 		}
 	}
 
-	// On loading the client state, all activities that are not completed, are
-	// marked as hidden. For Sequential (non-stepped) mode, we mark the first
-	// activity_information as active if not complete.
+	auto res = Tasks::GetActiveElements(task->activity_information, task_info.activity, task->activity_count);
 
-	if (p_task_data->sequence_mode == ActivitiesSequential) {
-		if (task_info.activity[0].activity_state != ActivityCompleted) {
-			task_info.activity[0].activity_state = ActivityActive;
-		}
-
-		// Enable the next Hidden task.
-		for (int i = 0; i < p_task_data->activity_count; i++) {
-			if ((task_info.activity[i].activity_state == ActivityActive) &&
-				(!p_task_data->activity_information[i].optional)) {
-				all_activities_complete = false;
-				break;
-			}
-
-			if (task_info.activity[i].activity_state == ActivityHidden) {
-				task_info.activity[i].activity_state = ActivityActive;
-				all_activities_complete = false;
-				break;
-			}
-		}
-
-		if (all_activities_complete && RuleB(TaskSystem, RecordCompletedTasks)) {
-			if (RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
-				LogTasks("KeepOneRecord enabled");
-				auto iterator        = m_completed_tasks.begin();
-				int  erased_elements = 0;
-				while (iterator != m_completed_tasks.end()) {
-					int task_id = (*iterator).task_id;
-					if (task_id == task_info.task_id) {
-						iterator = m_completed_tasks.erase(iterator);
-						erased_elements++;
-					}
-					else {
-						++iterator;
-					}
-				}
-
-				LogTasks("Erased Element count is [{}]", erased_elements);
-
-				if (erased_elements) {
-					m_last_completed_task_loaded -= erased_elements;
-					DeleteCompletedTaskFromDatabase(character_id, task_info.task_id);
-				}
-			}
-
-			if (p_task_data->type != TaskType::Shared) {
-				CompletedTaskInformation completed_task_information{};
-				completed_task_information.task_id        = task_info.task_id;
-				completed_task_information.completed_time = time(nullptr);
-
-				for (int i = 0; i < p_task_data->activity_count; i++) {
-					completed_task_information.activity_done[i] = (task_info.activity[i].activity_state ==
-						ActivityCompleted);
-				}
-
-				m_completed_tasks.push_back(completed_task_information);
-			}
-		}
-
-		LogTasks("Returning sequential task, AllActivitiesComplete is [{}]", all_activities_complete);
-
-		return all_activities_complete;
-	}
-
-	// Stepped Mode
-	// TODO: This code is probably more complex than it needs to be
-
-	bool current_step_complete = true;
-
-	LogTasks(
-		"[UnlockActivities] Current step [{}] last_step [{}]",
-		task_info.current_step,
-		p_task_data->last_step
-	);
-
-	// If current_step is -1, this is the first call to this method since loading the
-	// client state. Unlock all activities with a step number of 0
-
-	if (task_info.current_step == -1) {
-		for (int i             = 0; i < p_task_data->activity_count; i++) {
-
-			if (p_task_data->activity_information[i].step_number == 0 &&
-				task_info.activity[i].activity_state == ActivityHidden) {
-				task_info.activity[i].activity_state = ActivityActive;
-				// task_info.activity_information[i].updated=true;
-			}
-		}
-		task_info.current_step = 0;
-	}
-
-	for (int current_step = task_info.current_step; current_step <= p_task_data->last_step; current_step++) {
-		for (int activity = 0; activity < p_task_data->activity_count; activity++) {
-			if (p_task_data->activity_information[activity].step_number == (int) task_info.current_step) {
-				if ((task_info.activity[activity].activity_state != ActivityCompleted) &&
-					(!p_task_data->activity_information[activity].optional)) {
-					current_step_complete   = false;
-					all_activities_complete = false;
-					break;
-				}
-			}
-		}
-		if (!current_step_complete) {
-			break;
-		}
-		task_info.current_step++;
-	}
-
-	if (all_activities_complete) {
-		if (RuleB(TaskSystem, RecordCompletedTasks)) {
-			// If we are only keeping one completed record per task, and the player has done
-			// the same task again, erase the previous completed entry for this task.
-			if (RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
-				LogTasksDetail("[UnlockActivities] KeepOneRecord enabled");
-				auto iterator        = m_completed_tasks.begin();
-				int  erased_elements = 0;
-
-				while (iterator != m_completed_tasks.end()) {
-					int task_id = (*iterator).task_id;
-					if (task_id == task_info.task_id) {
-						iterator = m_completed_tasks.erase(iterator);
-						erased_elements++;
-					}
-					else {
-						++iterator;
-					}
-				}
-
-				LogTasksDetail("[UnlockActivities] Erased Element count is [{}]", erased_elements);
-
-				if (erased_elements) {
-					m_last_completed_task_loaded -= erased_elements;
-					DeleteCompletedTaskFromDatabase(character_id, task_info.task_id);
-				}
-			}
-
-			if (p_task_data->type != TaskType::Shared) {
-				CompletedTaskInformation completed_task_information{};
-				completed_task_information.task_id        = task_info.task_id;
-				completed_task_information.completed_time = time(nullptr);
-
-				for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-					completed_task_information.activity_done[activity_id] =
-						(task_info.activity[activity_id].activity_state == ActivityCompleted);
-				}
-
-				m_completed_tasks.push_back(completed_task_information);
-			}
-		}
-		return true;
-	}
-
-	// Mark all non-completed tasks in the current step as active
-	for (int activity = 0; activity < p_task_data->activity_count; activity++) {
-		LogTasksDetail(
-			"[UnlockActivities] - Debug task [{}] activity [{}] step_number [{}] current_step [{}]",
-			task_info.task_id,
-			activity,
-			p_task_data->activity_information[activity].step_number,
-			(int) task_info.current_step
-
-		);
-
-		if ((p_task_data->activity_information[activity].step_number == (int) task_info.current_step) &&
-			(task_info.activity[activity].activity_state == ActivityHidden)) {
-
-			LogTasksDetail(
-				"[UnlockActivities] -- Debug task [{}] activity [{}] (ActivityActive)",
-				task_info.task_id,
-				activity
-			);
-
-			task_info.activity[activity].activity_state = ActivityActive;
-			task_info.activity[activity].updated        = true;
+	for (int activity_id : res.active)
+	{
+		ClientActivityInformation& client_activity = task_info.activity[activity_id];
+		if (client_activity.activity_state == ActivityHidden)
+		{
+			LogTasksDetail("[UnlockActivities] task [{}] activity [{}] (ActivityActive)", task_info.task_id, activity_id);
+			client_activity.activity_state = ActivityActive;
+			client_activity.updated = true;
 		}
 	}
 
-	return false;
+	if (res.is_task_complete && RuleB(TaskSystem, RecordCompletedTasks))
+	{
+		RecordCompletedTask(character_id, *task, task_info);
+	}
+
+	return res.is_task_complete;
+}
+
+void ClientTaskState::RecordCompletedTask(uint32_t character_id, const TaskInformation& task, const ClientTaskInformation& client_task)
+{
+	// If we are only keeping one completed record per task, and the player has done
+	// the same task again, erase the previous completed entry for this task.
+	if (RuleB(TasksSystem, KeepOneRecordPerCompletedTask))
+	{
+		size_t before = m_completed_tasks.size();
+
+		m_completed_tasks.erase(std::remove_if(m_completed_tasks.begin(), m_completed_tasks.end(),
+			[&](const CompletedTaskInformation& completed) { return completed.task_id == client_task.task_id; }
+		), m_completed_tasks.end());
+
+		size_t erased = m_completed_tasks.size() - before;
+
+		LogTasksDetail("[RecordCompletedTask] KeepOneRecord erased [{}] elements", erased);
+
+		if (erased > 0)
+		{
+			m_last_completed_task_loaded -= erased;
+			DeleteCompletedTaskFromDatabase(character_id, client_task.task_id);
+		}
+	}
+
+	if (task.type != TaskType::Shared)
+	{
+		CompletedTaskInformation completed{};
+		completed.task_id = client_task.task_id;
+		completed.completed_time = std::time(nullptr);
+
+		for (int i = 0; i < task.activity_count; ++i)
+		{
+			completed.activity_done[i] = (client_task.activity[i].activity_state == ActivityCompleted);
+		}
+
+		LogTasksDetail("[RecordCompletedTask] [{}] for character [{}]", client_task.task_id, character_id);
+		m_completed_tasks.push_back(completed);
+	}
 }
 
 bool ClientTaskState::UpdateTasksOnSpeakWith(Client *client, int npc_type_id)
@@ -2396,7 +2272,6 @@ void ClientTaskState::AcceptNewTask(
 	active_slot->task_id       = task_id;
 	active_slot->accepted_time = static_cast<int>(accept_time);
 	active_slot->updated       = true;
-	active_slot->current_step  = -1;
 	active_slot->was_rewarded  = false;
 
 	for (int activity_id = 0; activity_id < task_manager->m_task_data[task_id]->activity_count; activity_id++) {
