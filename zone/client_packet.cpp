@@ -8528,26 +8528,13 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				return;
 			}
 
-			if (GetTarget() && GetTarget()->IsNPC()) {
-				if (silentsaylink) {
-					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response, 0);
-				}
-				else {
-					Message(Chat::LightGray, "You say, '%s'", response.c_str());
-				}
+			ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str());
 
-				ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str());
-
-				return;
+			if (!silentsaylink) {
+				Message(Chat::LightGray, "You say, '%s'", response.c_str());
 			}
-			else {
-				ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str());
-				if (!silentsaylink) {
-					Message(Chat::LightGray, "You say, '%s'", response.c_str());
-				}
 
-				return;
-			}
+			return;
 		}
 		else {
 			Message(Chat::Red, "Error: Say Link not found or is too long.");
