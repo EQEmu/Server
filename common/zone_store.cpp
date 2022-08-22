@@ -169,7 +169,7 @@ const std::vector<ZoneRepository::Zone> &ZoneStore::GetZones() const
 }
 
 // gets zone data by using explicit version and falling back to version 0 if not found
-ZoneRepository::Zone ZoneStore::GetZoneWithFallback(uint32 zone_id, int version = 0)
+ZoneRepository::Zone ZoneStore::GetZoneWithFallback(uint32 zone_id, int version)
 {
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zone_id && z.version == version) {
