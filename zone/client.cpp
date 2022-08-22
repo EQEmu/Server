@@ -830,7 +830,7 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 	return;
 }
 
-void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname) {
+void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname, bool is_silent) {
 	char message[4096];
 	strn0cpy(message, orig_message, sizeof(message));
 
@@ -1168,7 +1168,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
-		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
+		if (!is_silent) {
+			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
+		}
+
 		parse->EventPlayer(EVENT_SAY, this, message, language);
 
 		if (sender != this)
