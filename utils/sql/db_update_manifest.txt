@@ -453,6 +453,7 @@
 9197|2022_08_01_drop_expansion_account.sql|SHOW COLUMNS FROM `account` LIKE 'expansion'|notempty|
 9198|2022_08_14_exp_modifier_instance_versions.sql|SHOW COLUMNS FROM `character_exp_modifiers` LIKE 'instance_version'|empty|
 9199|2022_08_08_task_req_activity_id.sql|SHOW COLUMNS FROM `task_activities` LIKE 'req_activity_id'|empty|
+9200|2022_08_19_zone_expansion_consistency.sql|SELECT * FROM db_version WHERE version >= 9200|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
