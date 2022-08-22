@@ -132,7 +132,6 @@ foreach my $table_to_generate (@tables) {
         "character_enabledtasks",
         # "grid",         # Manually created
         # "tradeskill_recipe",     # Manually created
-        # "character_recipe_list", # Manually created
         "guild_bank",
         "inventory_versions",
         "raid_leaders",
