@@ -526,6 +526,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				}
 			} else {
 				if (
+					scm->chan_num == ChatChannel_Guild ||
 					scm->chan_num == ChatChannel_Auction ||
 					scm->chan_num == ChatChannel_OOC ||
 					scm->chan_num == ChatChannel_Broadcast ||
