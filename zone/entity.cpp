@@ -567,7 +567,6 @@ void EntityList::MobProcess()
 				in.s_addr = mob->CastToClient()->GetIP();
 				LogInfo("Dropping client: Process=false, ip=[{}] port=[{}]", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
-				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
 					LogError("About to delete a client still in a group");

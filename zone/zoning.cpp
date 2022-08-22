@@ -488,8 +488,6 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		zc2->success = 1;
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
-
-		zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 	} else {
 		// vesuvias - zoneing to another zone so we need to the let the world server
 		//handle things with the client for a while
