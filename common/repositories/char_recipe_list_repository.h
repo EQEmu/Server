@@ -45,6 +45,20 @@ public:
 
 	// Custom extended repository methods here
 
+	static CharRecipeList GetCharRecipeListEntry(
+		const std::vector<CharRecipeList> &recipe_list,
+		uint32 recipe_id
+	)
+	{
+		for (auto &e : recipe_list) {
+			if (e.recipe_id == recipe_id) {
+				return e;
+			}
+		}
+
+		return NewEntity();
+	}
+
 };
 
 #endif //EQEMU_CHAR_RECIPE_LIST_REPOSITORY_H
