@@ -511,7 +511,7 @@ sub translate_mysql_data_type_to_c {
 
     my $struct_data_type = "std::string";
     if ($mysql_column_type =~ /unsigned/) {
-        if ($mysql_data_type =~ /bitint/) {
+        if ($mysql_data_type =~ /bigint/) {
             $struct_data_type = 'uint64_t';
         }
         elsif ($mysql_data_type =~ /tinyint/) {
