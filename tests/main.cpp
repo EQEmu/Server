@@ -29,6 +29,7 @@
 #include "string_util_test.h"
 #include "data_verification_test.h"
 #include "skills_util_test.h"
+#include "task_state_test.h"
 #include "../common/eqemu_config.h"
 
 const EQEmuConfig *Config;
@@ -49,6 +50,7 @@ int main() {
 		tests.add(new StringUtilTest());
 		tests.add(new DataVerificationTest());
 		tests.add(new SkillsUtilsTest());
+		tests.add(new TaskStateTest());
 		tests.run(*output, true);
 	} catch(...) {
 		return -1;

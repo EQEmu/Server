@@ -88,6 +88,7 @@ private:
 	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, TaskInformation& task);
 	void DispatchEventTaskComplete(Client* client, ClientTaskInformation& client_task, int activity_id);
 	void AddOffer(int task_id, uint16_t npc_entity_id) { m_last_offers.push_back({task_id, npc_entity_id}); };
+	void RecordCompletedTask(uint32_t character_id, const TaskInformation& task, const ClientTaskInformation& client_task);
 
 	void IncrementDoneCount(
 		Client *client,

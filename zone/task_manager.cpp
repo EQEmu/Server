@@ -120,8 +120,6 @@ bool TaskManager::LoadTasks(int single_task)
 		m_task_data[task_id]->request_timer_group     = task.request_timer_group;
 		m_task_data[task_id]->request_timer_seconds   = task.request_timer_seconds;
 		m_task_data[task_id]->activity_count          = 0;
-		m_task_data[task_id]->sequence_mode           = ActivitiesSequential;
-		m_task_data[task_id]->last_step               = 0;
 
 		LogTasksDetail(
 			"[LoadTasks] (Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
@@ -202,16 +200,6 @@ bool TaskManager::LoadTasks(int single_task)
 		int                 activity_index = m_task_data[task_id]->activity_count;
 		ActivityInformation *activity_data = &m_task_data[task_id]->activity_information[activity_index];
 
-		m_task_data[task_id]->activity_information[m_task_data[task_id]->activity_count].step_number = step;
-
-		if (step != 0) {
-			m_task_data[task_id]->sequence_mode = ActivitiesStepped;
-		}
-
-		if (step > m_task_data[task_id]->last_step) {
-			m_task_data[task_id]->last_step = step;
-		}
-
 		// Task Activities MUST be numbered sequentially from 0. If not, log an error
 		// and set the task to nullptr. Subsequent activities for this task will raise
 		// ERR_NOTASK errors.
@@ -227,6 +215,8 @@ bool TaskManager::LoadTasks(int single_task)
 		}
 
 		// set activity data
+		activity_data->req_activity_id      = task_activity.req_activity_id;
+		activity_data->step                 = step;
 		activity_data->activity_type        = static_cast<TaskActivityType>(task_activity.activitytype);
 		activity_data->target_name          = task_activity.target_name;
 		activity_data->item_list            = task_activity.item_list;
@@ -257,7 +247,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 		LogTasksDetail(
 			"[LoadTasks] (Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_id [{}] goal_method [{}] goal_count [{}] zones [{}]"
-			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}] sequence [{}]",
+			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
 			task_id,
 			activity_id,
 			m_task_data[task_id]->activity_count,
@@ -270,8 +260,7 @@ bool TaskManager::LoadTasks(int single_task)
 			activity_data->item_list.c_str(),
 			activity_data->skill_list.c_str(),
 			activity_data->spell_list.c_str(),
-			activity_data->description_override.c_str(),
-			(m_task_data[task_id]->sequence_mode == ActivitiesStepped ? "stepped" : "sequential")
+			activity_data->description_override.c_str()
 		);
 
 		m_task_data[task_id]->activity_count++;
@@ -852,43 +841,6 @@ int TaskManager::GetActivityCount(int task_id)
 	return 0;
 }
 
-void TaskManager::ExplainTask(Client *client, int task_id)
-{
-
-	// TODO: This method is not finished (hardly started). It was intended to
-	// explain in English, what each activity_information did, conditions for step unlocking, etc.
-	//
-	return;
-
-	if (!client) { return; }
-
-	if ((task_id <= 0) || (task_id >= MAXTASKS)) {
-		client->Message(Chat::White, "task_id out-of-range.");
-		return;
-	}
-
-	if (m_task_data[task_id] == nullptr) {
-		client->Message(Chat::White, "Task does not exist.");
-		return;
-	}
-
-	char explanation[1000], *ptr;
-	client->Message(Chat::White, "Task %4i: title: %s", task_id, m_task_data[task_id]->description.c_str());
-	client->Message(Chat::White, "%3i Activities", m_task_data[task_id]->activity_count);
-	ptr = explanation;
-	for (int i = 0; i < m_task_data[task_id]->activity_count; i++) {
-
-		sprintf(ptr, "Act: %3i: ", i);
-		ptr = ptr + strlen(ptr);
-		switch (m_task_data[task_id]->activity_information[i].activity_type) {
-			case TaskActivityType::Deliver:
-				sprintf(ptr, "Deliver");
-				break;
-		}
-
-	}
-}
-
 bool TaskManager::IsTaskRepeatable(int task_id)
 {
 	if ((task_id <= 0) || (task_id >= MAXTASKS)) {
@@ -1322,7 +1274,6 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		task_info->task_id       = task_id;
-		task_info->current_step  = -1;
 		task_info->accepted_time = character_task.acceptedtime;
 		task_info->updated       = false;
 		task_info->was_rewarded  = character_task.was_rewarded;
@@ -1568,11 +1519,10 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 		// purely debugging
 		LogTasksDetail(
-			"[LoadClientState] Fetching task info for character_id [{}] task [{}] slot [{}] current_step [{}] accepted_time [{}] updated [{}]",
+			"[LoadClientState] Fetching task info for character_id [{}] task [{}] slot [{}] accepted_time [{}] updated [{}]",
 			character_id,
 			client_task_state->m_active_task.task_id,
 			client_task_state->m_active_task.slot,
-			client_task_state->m_active_task.current_step,
 			client_task_state->m_active_task.accepted_time,
 			client_task_state->m_active_task.updated
 		);
@@ -1582,14 +1532,13 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			for (int i = 0; i < p_task_data->activity_count; i++) {
 				if (client_task_state->m_active_task.activity[i].activity_id >= 0) {
 					LogTasksDetail(
-						"[LoadClientState] -- character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}] sequence [{}]",
+						"[LoadClientState] -- character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}]",
 						character_id,
 						client_task_state->m_active_task.task_id,
 						client_task_state->m_active_task.activity[i].activity_id,
 						client_task_state->m_active_task.activity[i].done_count,
 						client_task_state->m_active_task.activity[i].activity_state,
-						client_task_state->m_active_task.activity[i].updated,
-						p_task_data->sequence_mode
+						client_task_state->m_active_task.activity[i].updated
 					);
 				}
 			}

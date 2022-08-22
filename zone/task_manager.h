@@ -61,7 +61,6 @@ public:
 		bool task_complete = false
 	);
 	void SendCompletedTasksToClient(Client *c, ClientTaskState *client_task_state);
-	void ExplainTask(Client *client, int task_id);
 	int FirstTaskInSet(int task_set);
 	int LastTaskInSet(int task_set);
 	int NextTaskInSet(int task_set, int task_id);
