@@ -164,6 +164,7 @@ public:
 		uint8 in_feettexture,
 		uint16 in_usemodel,
 		bool in_always_aggros_foes,
+		int32 in_heroic_strikethrough,
 		int64 in_hp_regen_per_second = 0
 	);
 	virtual ~Mob();
@@ -640,6 +641,7 @@ public:
 	void SetIsBoat(bool boat) { is_boat = boat; }
 	bool IsControllableBoat() const;
 	inline const bool AlwaysAggro() const { return always_aggro; }
+	inline virtual int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 
 	//Group
 	virtual bool HasRaid() = 0;
@@ -1473,7 +1475,8 @@ protected:
 	bool follow_run;
 	bool no_target_hotkey;
 	bool rare_spawn;
-
+	int32 heroic_strikethrough;
+	
 	uint32 m_PlayerState;
 	uint32 GetPlayerState() { return m_PlayerState; }
 	void AddPlayerState(uint32 new_state) { m_PlayerState |= new_state; }

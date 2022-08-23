@@ -115,7 +115,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	npc_type_data->feettexture,
 	npc_type_data->use_model,
 	npc_type_data->always_aggro,
-	npc_type_data->hp_regen_per_second
+	npc_type_data->hp_regen_per_second,
+	npc_type_data->heroic_strikethrough
 ),
 	  attacked_timer(CombatEventTimer_expire),
 	  swarm_timer(100),
@@ -203,6 +204,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	accuracy_rating  = npc_type_data->accuracy_rating;
 	avoidance_rating = npc_type_data->avoidance_rating;
 	ATK              = npc_type_data->ATK;
+	heroic_strikethrough = npc_type_data->heroic_strikethrough;
 
 	// used for when switch back to charm
 	default_ac               = npc_type_data->AC;
@@ -2646,6 +2648,10 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		AI_AddNPCSpellsEffects(atoi(val.c_str()));
 		CalcBonuses();
 		return;
+	} 
+	else if (id == "heroic_strikethrough") {
+		heroic_strikethrough = atoi(val.c_str());
+		return;
 	}
 }
 
@@ -2785,6 +2791,8 @@ float NPC::GetNPCStat(const char *identifier)
 	}
 	else if (id == "npc_spells_effects_id") {
 		return npc_spells_effects_id;
+	}else if (id == "heroic_strikethrough") {
+		return heroic_strikethrough;
 	}
 	//default values
 	else if (id == "default_ac") {

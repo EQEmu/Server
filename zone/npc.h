@@ -448,6 +448,7 @@ public:
 	const char* GetRawNPCTypeName() const { return NPCTypedata_ours ? NPCTypedata_ours->name : NPCTypedata->name; }
 
 	virtual int GetKillExpMod() const { return NPCTypedata_ours ? NPCTypedata_ours->exp_mod : NPCTypedata->exp_mod; }
+	int GetHeroicStrikethrough() const { return NPCTypedata_ours ? NPCTypedata_ours->heroic_strikethrough : NPCTypedata->heroic_strikethrough; }
 
 	void ChangeLastName(std::string last_name);
 	void ClearLastName();

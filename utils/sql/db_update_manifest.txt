@@ -454,6 +454,7 @@
 9198|2022_08_14_exp_modifier_instance_versions.sql|SHOW COLUMNS FROM `character_exp_modifiers` LIKE 'instance_version'|empty|
 9199|2022_08_08_task_req_activity_id.sql|SHOW COLUMNS FROM `task_activities` LIKE 'req_activity_id'|empty|
 9200|2022_08_19_zone_expansion_consistency.sql|SELECT * FROM db_version WHERE version >= 9200|empty|
+9201|2022_08_22_npc_types_heroic_strikethrough.sql|SHOW COLUMNS FROM `npc_types` LIKE 'heroic_strikethrough'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
