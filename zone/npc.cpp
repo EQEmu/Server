@@ -2791,7 +2791,8 @@ float NPC::GetNPCStat(const char *identifier)
 	}
 	else if (id == "npc_spells_effects_id") {
 		return npc_spells_effects_id;
-	}else if (id == "heroic_strikethrough") {
+	}
+	else if (id == "heroic_strikethrough") {
 		return heroic_strikethrough;
 	}
 	//default values
