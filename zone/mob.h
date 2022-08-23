@@ -641,7 +641,7 @@ public:
 	void SetIsBoat(bool boat) { is_boat = boat; }
 	bool IsControllableBoat() const;
 	inline const bool AlwaysAggro() const { return always_aggro; }
-	inline virtual int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
+	inline int32 GetHeroicStrikethrough() const  { return heroic_strikethrough; }
 
 	//Group
 	virtual bool HasRaid() = 0;
