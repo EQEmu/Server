@@ -70,6 +70,17 @@ namespace detail {
 						 std::declval<T &>()))>> : std::true_type { };
 }; // namespace detail
 
+namespace EQ {
+// lame -- older GCC's didn't define this, clang's libc++ however does, even though they lack FP support
+#if defined(__GNUC__) && (__GNUC__ < 11) && !defined(__clang__)
+	enum class chars_format {
+		scientific = 1, fixed = 2, hex = 4, general = fixed | scientific
+	};
+#else
+	using chars_format = std::chars_format;
+#endif
+}; // namespace EQ
+
 class Strings {
 public:
 	static bool Contains(std::vector<std::string> container, std::string element);
@@ -117,7 +128,7 @@ public:
 	// basic string_view overloads that just use std stuff since they work!
 	template <typename T>
 	std::enable_if_t<std::is_floating_point_v<T> && detail::has_from_chars_float<T>::value, std::from_chars_result>
-	static from_chars(std::string_view str, T& value, std::chars_format fmt = std::chars_format::general)
+	static from_chars(std::string_view str, T& value, EQ::chars_format fmt = EQ::chars_format::general)
 	{
 		return std::from_chars(str.data(), str.data() + str.size(), value, fmt);
 	}
@@ -134,7 +145,7 @@ public:
 	// This does have to allocate since from_chars doesn't need a null terminated string and neither does string_view
 	template <typename T>
 	std::enable_if_t<std::is_floating_point_v<T> && !detail::has_from_chars_float<T>::value && std::is_same_v<T, float>, std::from_chars_result>
-	static from_chars(std::string_view str, T& value, std::chars_format fmt = std::chars_format::general)
+	static from_chars(std::string_view str, T& value, EQ::chars_format fmt = EQ::chars_format::general)
 	{
 		std::from_chars_result res{};
 		std::string tmp_str(str.data(), str.size());
@@ -144,7 +155,7 @@ public:
 
 	template <typename T>
 	std::enable_if_t<std::is_floating_point_v<T> && !detail::has_from_chars_float<T>::value && std::is_same_v<T, double>, std::from_chars_result>
-	static from_chars(std::string_view str, T& value, std::chars_format fmt = std::chars_format::general)
+	static from_chars(std::string_view str, T& value, EQ::chars_format fmt = EQ::chars_format::general)
 	{
 		std::from_chars_result res{};
 		std::string tmp_str(str.data(), str.size());
