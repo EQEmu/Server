@@ -80,8 +80,8 @@ struct SharedTaskMember {
 
 // used in shared task requests to validate group/raid members
 struct SharedTaskRequest {
-	int  lowest_level;
-	int  highest_level;
+	uint32_t lowest_level;
+	uint32_t highest_level;
 	uint32_t leader_id;
 	SharedTaskRequestGroupType group_type;
 	std::vector<uint32_t> character_ids;
