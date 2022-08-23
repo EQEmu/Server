@@ -2449,6 +2449,16 @@ bool Perl_Client_TeleportRaidToPlayerByName(Client* self, std::string player_nam
 	return self->GotoPlayerRaid(player_name);
 }
 
+int Perl_Client_GetRecipeMadeCount(Client* self, uint32 recipe_id) // @categories Skills and Recipes
+{
+	return self->GetRecipeMadeCount(recipe_id);
+}
+
+bool Perl_Client_HasRecipeLearned(Client* self, uint32 recipe_id) // @categories Skills and Recipes
+{
+	return self->HasRecipeLearned(recipe_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -2636,6 +2646,7 @@ void perl_register_client()
 	package.add("GetRaidPoints", &Perl_Client_GetRaidPoints);
 	package.add("GetRawItemAC", &Perl_Client_GetRawItemAC);
 	package.add("GetRawSkill", &Perl_Client_GetRawSkill);
+	package.add("GetRecipeMadeCount", &Perl_Client_GetRecipeMadeCount);
 	package.add("GetScribeableSpells", (perl::array(*)(Client*))&Perl_Client_GetScribeableSpells);
 	package.add("GetScribeableSpells", (perl::array(*)(Client*, uint8))&Perl_Client_GetScribeableSpells);
 	package.add("GetScribeableSpells", (perl::array(*)(Client*, uint8, uint8))&Perl_Client_GetScribeableSpells);
@@ -2663,6 +2674,7 @@ void perl_register_client()
 	package.add("HasExpeditionLockout", &Perl_Client_HasExpeditionLockout);
 	package.add("HasItemEquippedByID", &Perl_Client_HasItemEquippedByID);
 	package.add("HasPEQZoneFlag", &Perl_Client_HasPEQZoneFlag);
+	package.add("HasRecipeLearned", &Perl_Client_HasRecipeLearned);
 	package.add("HasSkill", &Perl_Client_HasSkill);
 	package.add("HasSpellScribed", &Perl_Client_HasSpellScribed);
 	package.add("HasZoneFlag", &Perl_Client_HasZoneFlag);

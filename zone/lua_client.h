@@ -310,7 +310,9 @@ public:
 	void UpdateGroupAAs(int points, uint32 type);
 	uint32 GetGroupPoints();
 	uint32 GetRaidPoints();
-	void LearnRecipe(uint32 recipe);
+	void LearnRecipe(uint32 recipe_id);
+	int GetRecipeMadeCount(uint32 recipe_id);
+	bool HasRecipeLearned(uint32 recipe_id);
 	int GetEndurance();
 	int GetMaxEndurance();
 	int GetEndurancePercent();
