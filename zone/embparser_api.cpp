@@ -3676,6 +3676,21 @@ void Perl__tracknpc(uint32 entity_id)
 	quest_manager.TrackNPC(entity_id);
 }
 
+int Perl__getrecipemadecount(uint32 recipe_id)
+{
+	return quest_manager.GetRecipeMadeCount(recipe_id);
+}
+
+std::string Perl__getrecipename(uint32 recipe_id)
+{
+	return quest_manager.GetRecipeName(recipe_id);
+}
+
+bool Perl__hasrecipelearned(uint32 recipe_id)
+{
+	return quest_manager.HasRecipeLearned(recipe_id);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4082,6 +4097,8 @@ void perl_register_quest()
 	package.add("getplayerburiedcorpsecount", &Perl__getplayerburiedcorpsecount);
 	package.add("getplayercorpsecount", &Perl__getplayercorpsecount);
 	package.add("getplayercorpsecountbyzoneid", &Perl__getplayercorpsecountbyzoneid);
+	package.add("getrecipemadecount", &Perl__getrecipemadecount);
+	package.add("getrecipename", &Perl__getrecipename);
 	package.add("gettaskactivitydonecount", &Perl__gettaskactivitydonecount);
 	package.add("gettaskname", &Perl__gettaskname);
 	package.add("gettimerdurationMS", &Perl__gettimerdurationMS);
@@ -4096,6 +4113,7 @@ void perl_register_quest()
 	package.add("gmsay", (void(*)(const char*, int, bool, int))&Perl__gmsay);
 	package.add("gmsay", (void(*)(const char*, int, bool, int, int))&Perl__gmsay);
 	package.add("has_zone_flag", &Perl__has_zone_flag);
+	package.add("hasrecipelearned", &Perl__hasrecipelearned);
 	package.add("hastimer", &Perl__hastimer);
 	package.add("incstat", &Perl__incstat);
 	package.add("isdisctome", &Perl__isdisctome);

@@ -3414,6 +3414,18 @@ void lua_track_npc(uint32 entity_id) {
 	quest_manager.TrackNPC(entity_id);
 }
 
+int lua_get_recipe_made_count(uint32 recipe_id) {
+	return quest_manager.GetRecipeMadeCount(recipe_id);
+}
+
+std::string lua_get_recipe_name(uint32 recipe_id) {
+	return quest_manager.GetRecipeName(recipe_id);
+}
+
+bool lua_has_recipe_learned(uint32 recipe_id) {
+	return quest_manager.HasRecipeLearned(recipe_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3874,6 +3886,9 @@ luabind::scope lua_register_general() {
 		luabind::def("check_name_filter", &lua_check_name_filter),
 		luabind::def("discord_send", &lua_discord_send),
 		luabind::def("track_npc", &lua_track_npc),
+		luabind::def("get_recipe_made_count", &lua_get_recipe_made_count),
+		luabind::def("get_recipe_name", &lua_get_recipe_name),
+		luabind::def("has_recipe_learned", &lua_has_recipe_learned),
 
 		/*
 			Cross Zone

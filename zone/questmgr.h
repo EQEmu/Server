@@ -337,6 +337,9 @@ public:
 	const SPDat_Spell_Struct *getspell(uint32 spell_id);
 	std::string getenvironmentaldamagename(uint8 damage_type);
 	void TrackNPC(uint32 entity_id);
+	int GetRecipeMadeCount(uint32 recipe_id);
+	std::string GetRecipeName(uint32 recipe_id);
+	bool HasRecipeLearned(uint32 recipe_id);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

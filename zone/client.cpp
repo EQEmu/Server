@@ -63,6 +63,7 @@ extern volatile bool RunLoops;
 #include "../common/expedition_lockout_timer.h"
 #include "cheat_manager.h"
 
+#include "../common/repositories/char_recipe_list_repository.h"
 #include "../common/repositories/character_spells_repository.h"
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/character_data_repository.h"
@@ -11758,4 +11759,32 @@ void Client::SetTrackingID(uint32 entity_id)
 	TrackingID = entity_id;
 
 	MessageString(Chat::Skills, TRACKING_BEGIN, m->GetCleanName());
+}
+
+int Client::GetRecipeMadeCount(uint32 recipe_id)
+{
+	auto r = CharRecipeListRepository::GetWhere(
+		database,
+		fmt::format("char_id = {} AND recipe_id = {}", CharacterID(), recipe_id)
+	);
+
+	if (!r.empty() && r[0].recipe_id) {
+		return r[0].madecount;
+	}
+
+	return 0;
+}
+
+bool Client::HasRecipeLearned(uint32 recipe_id)
+{
+	auto r = CharRecipeListRepository::GetWhere(
+		database,
+		fmt::format("char_id = {} AND recipe_id = {}", CharacterID(), recipe_id)
+	);
+
+	if (!r.empty() && r[0].recipe_id) {
+		return true;
+	}
+
+	return false;
 }

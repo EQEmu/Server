@@ -2605,6 +2605,16 @@ bool Lua_Client::TeleportRaidToPlayerByName(std::string player_name) {
 	return self->GotoPlayerRaid(player_name);
 }
 
+int Lua_Client::GetRecipeMadeCount(uint32 recipe_id) {
+	Lua_Safe_Call_Int();
+	return self->GetRecipeMadeCount(recipe_id);
+}
+
+bool Lua_Client::HasRecipeLearned(uint32 recipe_id) {
+	Lua_Safe_Call_Bool();
+	return self->HasRecipeLearned(recipe_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2789,6 +2799,7 @@ luabind::scope lua_register_client() {
 	.def("GetRaidPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetRaidPoints)
 	.def("GetRawItemAC", (int(Lua_Client::*)(void))&Lua_Client::GetRawItemAC)
 	.def("GetRawSkill", (int(Lua_Client::*)(int))&Lua_Client::GetRawSkill)
+	.def("GetRecipeMadeCount", (int(Lua_Client::*)(uint32))&Lua_Client::GetRecipeMadeCount)
 	.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetScribeableSpells)
 	.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L,uint8))&Lua_Client::GetScribeableSpells)
 	.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L,uint8,uint8))&Lua_Client::GetScribeableSpells)
@@ -2814,6 +2825,7 @@ luabind::scope lua_register_client() {
 	.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
 	.def("HasItemEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemEquippedByID)
 	.def("HasPEQZoneFlag", (bool(Lua_Client::*)(uint32))&Lua_Client::HasPEQZoneFlag)
+	.def("HasRecipeLearned", (bool(Lua_Client::*)(uint32))&Lua_Client::HasRecipeLearned)
 	.def("HasSkill", (bool(Lua_Client::*)(int))&Lua_Client::HasSkill)
 	.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
 	.def("HasZoneFlag", (bool(Lua_Client::*)(uint32))&Lua_Client::HasZoneFlag)

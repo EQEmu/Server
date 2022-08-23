@@ -39,6 +39,8 @@
 #include "dialogue_window.h"
 #include "string_ids.h"
 
+#include "../common/repositories/tradeskill_recipe_repository.h"
+
 #include <iostream>
 #include <limits.h>
 #include <list>
@@ -3163,13 +3165,6 @@ void QuestManager::voicetell(const char *str, int macronum, int racenum, int gen
 	}
 }
 
-void QuestManager::LearnRecipe(uint32 recipe_id) {
-	QuestManagerCurrentQuestVars();
-	if(!initiator)
-		return;
-	initiator->LearnRecipe(recipe_id);
-}
-
 void QuestManager::SendMail(const char *to, const char *from, const char *subject, const char *message) {
 	if(to == nullptr || from == nullptr || subject == nullptr || message == nullptr) {
 		return;
@@ -3682,4 +3677,44 @@ void QuestManager::TrackNPC(uint32 entity_id) {
 	}
 
 	initiator->SetTrackingID(entity_id);
+}
+
+int QuestManager::GetRecipeMadeCount(uint32 recipe_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return 0;
+	}
+
+	return initiator->GetRecipeMadeCount(recipe_id);
+}
+
+std::string QuestManager::GetRecipeName(uint32 recipe_id) {
+	auto r = TradeskillRecipeRepository::GetWhere(
+		database,
+		fmt::format("id = {}", recipe_id)
+	);
+
+	if (!r.empty() && r[0].id) {
+		return r[0].name;
+	}
+
+	return std::string();
+}
+
+bool QuestManager::HasRecipeLearned(uint32 recipe_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return false;
+	}
+
+	return initiator->HasRecipeLearned(recipe_id);
+}
+
+void QuestManager::LearnRecipe(uint32 recipe_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->LearnRecipe(recipe_id);
 }
