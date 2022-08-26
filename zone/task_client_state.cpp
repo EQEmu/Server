@@ -859,6 +859,15 @@ void ClientTaskState::IncrementDoneCount(
 		parse->EventPlayer(EVENT_TASK_UPDATE, client, export_string, 0);
 	}
 
+	if (task_information->type != TaskType::Shared) {
+		// live messages for each increment of non-shared tasks
+		auto activity_type = task_information->activity_information[activity_id].activity_type;
+		int msg_count = activity_type == TaskActivityType::GiveCash ? 1 : count;
+		for (int i = 0; i < msg_count; ++i) {
+			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_information->title.c_str());
+		}
+	}
+
 	info->activity[activity_id].updated = true;
 	// Have we reached the goal count for this activity_information ?
 	if (info->activity[activity_id].done_count >= task_information->activity_information[activity_id].goal_count) {
@@ -873,12 +882,14 @@ void ClientTaskState::IncrementDoneCount(
 		// Unlock subsequent activities for this task
 		bool task_complete = UnlockActivities(client, *info);
 		LogTasks("[IncrementDoneCount] task_complete is [{}]", task_complete);
+		// shared tasks only send update messages on activity completion
+		if (task_information->type == TaskType::Shared) {
+			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_information->title.c_str());
+		}
 		// and by the 'Task Stage Completed' message
 		client->SendTaskActivityComplete(info->task_id, activity_id, task_index, task_information->type);
 		// Send the updated task/activity_information list to the client
 		task_manager->SendSingleActiveTaskToClient(client, *info, task_complete, false);
-		// Inform the client the task has been updated, both by a chat message
-		client->MessageString(Chat::DefaultText, TASK_UPDATED, task_information->title.c_str());
 
 		if (!ignore_quest_update) {
 			std::string export_string = fmt::format(
@@ -938,10 +949,6 @@ void ClientTaskState::IncrementDoneCount(
 		}
 	}
 	else {
-		if (task_information->type != TaskType::Shared) {
-			client->MessageString(Chat::DefaultText, TASK_UPDATED, task_information->title.c_str());
-		}
-
 		// Send an updated packet for this single activity_information
 		task_manager->SendTaskActivityLong(
 			client,
