@@ -59,7 +59,7 @@ public:
 	void UpdateTasksForItem(Client* client, TaskActivityType type, NPC* npc, int item_id, int count = 1);
 	void UpdateTasksOnExplore(Client* client, const glm::vec4& loc);
 	bool UpdateTasksOnSpeakWith(Client* client, NPC* npc);
-	bool UpdateTasksOnDeliver(Client* client, std::list<EQ::ItemInstance*>& items, int cash, NPC* npc);
+	bool UpdateTasksOnDeliver(Client* client, std::vector<EQ::ItemInstance*>& items, Trade& trade, NPC* npc);
 	void UpdateTasksOnTouch(Client *client, int dz_switch_id);
 	void ProcessTaskProximities(Client *client, float x, float y, float z);
 	bool TaskOutOfTime(TaskType task_type, int index);
@@ -110,9 +110,9 @@ private:
 	std::pair<int, int> FindTask(Client* client, const TaskUpdateFilter& filter) const;
 	void RecordCompletedTask(uint32_t character_id, const TaskInformation& task, const ClientTaskInformation& client_task);
 	void UpdateTasksOnKill(Client* client, Client* exp_client, NPC* npc);
-	bool UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count = 1);
+	int UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count = 1);
 
-	void IncrementDoneCount(
+	int IncrementDoneCount(
 		Client *client,
 		const TaskInformation* task_information,
 		int task_index,
