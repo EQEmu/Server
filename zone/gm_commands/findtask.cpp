@@ -35,8 +35,8 @@ void command_findtask(Client *c, const Seperator *sep)
 			std::string search_criteria = Strings::ToLower(sep->argplus[1]);
 			if (!search_criteria.empty()) {
 				int         found_count = 0;
-				for (uint32 task_id     = 1; task_id <= MAXTASKS; task_id++) {
-					auto        task_name       = task_manager->GetTaskName(task_id);
+				for (const auto& task : task_manager->GetTaskData()) {
+					auto task_name = task.second.title;
 					std::string task_name_lower = Strings::ToLower(task_name);
 					if (task_name_lower.find(search_criteria) == std::string::npos) {
 						continue;
@@ -46,7 +46,7 @@ void command_findtask(Client *c, const Seperator *sep)
 						Chat::White,
 						fmt::format(
 							"Task {}: {}",
-							task_id,
+							task.first,
 							task_name
 						).c_str()
 					);

@@ -18,8 +18,6 @@ class Mob;
 class TaskManager {
 
 public:
-	TaskManager();
-	~TaskManager();
 	int GetActivityCount(int task_id);
 	bool LoadTasks(int single_task = 0);
 	void ReloadGoalLists();
@@ -69,10 +67,17 @@ public:
 
 	void HandleUpdateTasksOnKill(Client* client, NPC* npc);
 
+	const std::unordered_map<uint32_t, TaskInformation>& GetTaskData() const { return m_task_data; }
+	TaskInformation* GetTaskData(int task_id)
+	{
+		auto it = m_task_data.find(task_id);
+		return it != m_task_data.end() ? &it->second : nullptr;
+	}
+
 private:
 	TaskGoalListManager  m_goal_list_manager;
-	TaskInformation      *m_task_data[MAXTASKS]{};
 	std::vector<int>     m_task_sets[MAXTASKSETS];
+	std::unordered_map<uint32_t, TaskInformation> m_task_data;
 	void SendActiveTaskDescription(
 		Client *client,
 		int task_id,
