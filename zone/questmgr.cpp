@@ -2780,7 +2780,7 @@ std::string QuestManager::getcleannpcnamebyid(uint32 npc_id) {
 	return res;
 }
 
-uint16 QuestManager::CreateInstance(const char *zone_short_name, int16 version, uint32 duration)
+uint16 QuestManager::CreateInstance(const char *zone_short_name, int16 instance_version, uint32 duration)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -2798,7 +2798,7 @@ uint16 QuestManager::CreateInstance(const char *zone_short_name, int16 version, 
 		return 0;
 	}
 
-	if (!database.CreateInstance(instance_id, zone_id, version, duration)) {
+	if (!database.CreateInstance(instance_id, zone_id, instance_version, duration)) {
 		if (initiator) {
 			initiator->Message(Chat::Red, "Server was unable to create a new instance.");
 		}
