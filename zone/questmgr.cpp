@@ -2780,30 +2780,33 @@ std::string QuestManager::getcleannpcnamebyid(uint32 npc_id) {
 	return res;
 }
 
-uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 duration)
+uint16 QuestManager::CreateInstance(const char *zone_short_name, int16 version, uint32 duration)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
-		uint32 zone_id = ZoneID(zone);
-		if(zone_id == 0)
-			return 0;
 
-		uint16 id = 0;
-		if(!database.GetUnusedInstanceID(id))
-		{
-			initiator->Message(Chat::Red, "Server was unable to find a free instance id.");
-			return 0;
-		}
-
-		if(!database.CreateInstance(id, zone_id, version, duration))
-		{
-			initiator->Message(Chat::Red, "Server was unable to create a new instance.");
-			return 0;
-		}
-		return id;
+	uint32 zone_id = ZoneID(zone_short_name);
+	if (!zone_id) {
+		return 0;
 	}
-	return 0;
+
+	uint16 instance_id = 0;
+	if (!database.GetUnusedInstanceID(instance_id)) {
+		if (initiator) {
+			initiator->Message(Chat::Red, "Server was unable to find a free instance id.");
+		}
+
+		return 0;
+	}
+
+	if (!database.CreateInstance(instance_id, zone_id, version, duration)) {
+		if (initiator) {
+			initiator->Message(Chat::Red, "Server was unable to create a new instance.");
+		}
+
+		return 0;
+	}
+
+	return instance_id;
 }
 
 void QuestManager::DestroyInstance(uint16 instance_id)
