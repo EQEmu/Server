@@ -33,11 +33,10 @@ void command_findrecipe(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Recipe {} | {}{}{}",
+				"Recipe {} | {}{}",
 				Strings::Commify(std::to_string(recipe_id)),
 				r[0].name,
-				can_view_recipes ? " | " : "",
-				can_view_recipes ? Saylink::Silent(fmt::format("#viewrecipe {}", r[0].id), "View") : ""
+				can_view_recipes ? fmt::format(" | {}", Saylink::Silent(fmt::format("#viewrecipe {}", r[0].id), "View")) : ""
 			).c_str()
 		);
 	} else {
@@ -66,11 +65,10 @@ void command_findrecipe(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Recipe {} | {} | {}",
+					"Recipe {} | {}{}",
 					Strings::Commify(std::to_string(r.id)),
 					r.name,
-					can_view_recipes ? " | " : "",
-					can_view_recipes ? Saylink::Silent(fmt::format("#viewrecipe {}", r.id), "View") : ""
+					can_view_recipes ? fmt::format(" | {}", Saylink::Silent(fmt::format("#viewrecipe {}", r.id), "View")) : ""
 				).c_str()
 			);
 

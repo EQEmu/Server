@@ -42,18 +42,17 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 	);
 
 	auto entry_number = 1;
-	bool can_summon_items = c->Admin() > GetCommandStatus(c, "summonitem");
+	bool can_summon_items = c->Admin() >= GetCommandStatus(c, "summonitem");
 
 	for (const auto& e : re) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Entry {}{} | {}{}{}",
+				"Entry {}{} | {}{}",
 				entry_number,
 				e.iscontainer > 0 ? " (Container)" : "",
 				e.item_id > 1000 ? database.CreateItemLink(e.item_id) : EQ::constants::GetObjectTypeName(e.item_id),
-				can_summon_items && e.item_id > 1000 ? " | " : "",
-				can_summon_items && e.item_id > 1000 ? Saylink::Silent(fmt::format("#si {}", e.item_id), "Summon") : ""
+				can_summon_items && e.item_id > 1000 ? fmt::format(" | {}", Saylink::Silent(fmt::format("#si {}", e.item_id), "Summon")) : ""
 			).c_str()
 		);
 		
