@@ -356,7 +356,7 @@ void SharedTaskManager::LoadSharedTaskState()
 						e.step           = ad.step;
 						e.optional       = ad.optional;
 						e.req_activity_id = ad.req_activity_id;
-						e.activity_state = sta.completed_time == 0 ? ActivityHidden : ActivityCompleted;
+						e.activity_state = sta.completed_time > 0 ? ActivityCompleted : ActivityHidden;
 					}
 				}
 
