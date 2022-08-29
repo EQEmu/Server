@@ -1166,27 +1166,16 @@ public:
 	{
 		if (task_state) { task_state->UpdateTasksOnTouch(this, dz_switch_id); }
 	}
-	inline void TaskSetSelector(Mob *mob, int task_set_id)
+	inline void TaskSetSelector(Mob* mob, int task_set_id, bool ignore_cooldown)
 	{
-		if (task_manager) {
-			task_manager->TaskSetSelector(
-				this,
-				task_state,
-				mob,
-				task_set_id
-			);
+		if (task_manager && task_state) {
+			task_manager->TaskSetSelector(this, mob, task_set_id, ignore_cooldown);
 		}
 	}
-	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks)
+	inline void TaskQuestSetSelector(Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown)
 	{
-		if (task_manager) {
-			task_manager->TaskQuestSetSelector(
-				this,
-				task_state,
-				mob,
-				count,
-				tasks
-			);
+		if (task_manager && task_state) {
+			task_manager->TaskQuestSetSelector(this, mob, tasks, ignore_cooldown);
 		}
 	}
 	inline void EnableTask(int task_count, int *task_list)

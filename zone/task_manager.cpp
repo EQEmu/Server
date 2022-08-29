@@ -558,11 +558,10 @@ TaskType TaskManager::GetTaskType(uint32 task_id)
 	return TaskType::Task;
 }
 
-void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_state, Mob *mob, int task_set_id)
+void TaskManager::TaskSetSelector(Client* client, Mob* mob, int task_set_id, bool ignore_cooldown)
 {
-	int task_list[MAXCHOOSERENTRIES];
-	int task_list_index = 0;
 	int player_level    = client->GetLevel();
+	ClientTaskState* client_task_state = client->GetTaskState();
 
 	LogTasks(
 		"TaskSetSelector called for task_set_id [{}] EnableTaskSize is [{}]",
@@ -579,12 +578,12 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 	{
 		const auto task_data = GetTaskData(task_id);
 		if (task_data && task_data->type == TaskType::Shared) {
-			SharedTaskSelector(client, mob, m_task_sets[task_set_id].size(), m_task_sets[task_set_id].data());
+			SharedTaskSelector(client, mob, m_task_sets[task_set_id], ignore_cooldown);
 			return;
 		}
 	}
 
-	if (client->HasTaskRequestCooldownTimer()) {
+	if (!ignore_cooldown && client->HasTaskRequestCooldownTimer()) {
 		client->SendTaskRequestCooldownTimerMessage();
 		return;
 	}
@@ -607,7 +606,8 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 		++iterator;
 	} // skip first when all enabled since it's useless data
 
-	while (iterator != m_task_sets[task_set_id].end() && task_list_index < MAXCHOOSERENTRIES) {
+	std::vector<int> task_list;
+	while (iterator != m_task_sets[task_set_id].end() && task_list.size() < MAXCHOOSERENTRIES) {
 		auto task = *iterator;
 		const auto task_data = GetTaskData(task);
 
@@ -617,14 +617,14 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 			!client_task_state->IsTaskActive(task) && client_task_state->HasSlotForTask(task_data) &&
 			// this slot checking is a bit silly, but we allow mixing of task types ...
 			(IsTaskRepeatable(task) || !client_task_state->IsTaskCompleted(task))) {
-			task_list[task_list_index++] = task;
+			task_list.push_back(task);
 		}
 
 		++iterator;
 	}
 
-	if (task_list_index > 0) {
-		SendTaskSelector(client, mob, task_list_index, task_list);
+	if (!task_list.empty()) {
+		SendTaskSelector(client, mob, task_list);
 	}
 	else {
 		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
@@ -633,42 +633,36 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 
 // unlike the non-Quest version of this function, it does not check enabled, that is assumed the responsibility of the quest to handle
 // we do however still want it to check the other stuff like level, active, room, etc
-void TaskManager::TaskQuestSetSelector(
-	Client *client,
-	ClientTaskState *client_task_state,
-	Mob *mob,
-	int count,
-	int *tasks
-)
+void TaskManager::TaskQuestSetSelector(Client* client, Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown)
 {
-	int task_list[MAXCHOOSERENTRIES];
-	int task_list_index = 0;
+	std::vector<int> task_list;
 	int player_level    = client->GetLevel();
+	ClientTaskState* client_task_state = client->GetTaskState();
 
-	LogTasks("[UPDATE] TaskQuestSetSelector called for array size [{}]", count);
+	LogTasks("[UPDATE] TaskQuestSetSelector called with size [{}]", tasks.size());
 
-	if (count <= 0) {
+	if (tasks.empty()) {
 		return;
 	}
 
 	// live prevents mixing selection types (also uses diff opcodes for solo vs shared tasks)
 	// to keep shared task validation live-like (and simple), any shared task will
 	// forward this to shared task validation and non-shared tasks will be dropped
-	for (int i = 0; i < count; ++i) {
+	for (int i = 0; i < tasks.size(); ++i) {
 		auto task = tasks[i];
 		const auto task_data = GetTaskData(task);
 		if (task_data && task_data->type == TaskType::Shared) {
-			SharedTaskSelector(client, mob, count, tasks);
+			SharedTaskSelector(client, mob, tasks, ignore_cooldown);
 			return;
 		}
 	}
 
-	if (client->HasTaskRequestCooldownTimer()) {
+	if (!ignore_cooldown && client->HasTaskRequestCooldownTimer()) {
 		client->SendTaskRequestCooldownTimerMessage();
 		return;
 	}
 
-	for (int i = 0; i < count; ++i) {
+	for (int i = 0; i < tasks.size() && task_list.size() < MAXCHOOSERENTRIES; ++i) {
 		auto task = tasks[i];
 		const auto task_data = GetTaskData(task);
 		// verify level, we're not currently on it, repeatable status, if it's a (shared) task
@@ -677,23 +671,27 @@ void TaskManager::TaskQuestSetSelector(
 			client_task_state->HasSlotForTask(task_data) &&
 			// this slot checking is a bit silly, but we allow mixing of task types ...
 			(IsTaskRepeatable(task) || !client_task_state->IsTaskCompleted(task))) {
-			task_list[task_list_index++] = task;
+			task_list.push_back(task);
 		}
 	}
 
-	if (task_list_index > 0) {
-		SendTaskSelector(client, mob, task_list_index, task_list);
+	if (!task_list.empty()) {
+		SendTaskSelector(client, mob, task_list);
 	}
 	else {
 		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
 	}
 }
 
-void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const int *tasks)
+void TaskManager::SharedTaskSelector(Client* client, Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown)
 {
-	LogTasks("[UPDATE] SharedTaskSelector called for array size [{}]", count);
+	LogTasks("[UPDATE] SharedTaskSelector called with size [{}]", tasks.size());
 
-	if (count <= 0 || client->HasTaskRequestCooldownTimer()) {
+	if (tasks.empty()) {
+		return;
+	}
+
+	if (!ignore_cooldown && client->HasTaskRequestCooldownTimer()) {
 		client->SendTaskRequestCooldownTimerMessage();
 		return;
 	}
@@ -736,10 +734,9 @@ void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const 
 
 	if (!validation_failed) {
 		// run type and level filters on task selections
-		int task_list[MAXCHOOSERENTRIES] = {0};
-		int task_list_index              = 0;
+		std::vector<int> task_list;
 
-		for (int i = 0; i < count && task_list_index < MAXCHOOSERENTRIES; ++i) {
+		for (int i = 0; i < tasks.size() && task_list.size() < MAXCHOOSERENTRIES; ++i) {
 			// todo: are there non repeatable shared tasks? (would need to check all group/raid members)
 			auto task = tasks[i];
 			const auto task_data = GetTaskData(task);
@@ -748,13 +745,13 @@ void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const 
 			    request.lowest_level >= task_data->min_level &&
 			    (task_data->max_level == 0 || request.highest_level <= task_data->max_level))
 			{
-				task_list[task_list_index++] = task;
+				task_list.push_back(task);
 			}
 		}
 
 		// check if any tasks are left to offer after filtering
-		if (task_list_index > 0) {
-			SendSharedTaskSelector(client, mob, task_list_index, task_list);
+		if (!task_list.empty()) {
+			SendSharedTaskSelector(client, mob, task_list);
 		}
 		else {
 			client->MessageString(Chat::Red, TaskStr::NOT_MEET_REQ);
@@ -763,14 +760,14 @@ void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const 
 }
 
 // sends task selector to client
-void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int *task_list)
+void TaskManager::SendTaskSelector(Client* client, Mob* mob, const std::vector<int>& task_list)
 {
-	LogTasks("TaskSelector for [{}] Tasks", task_count);
+	LogTasks("TaskSelector for [{}] Tasks", task_list.size());
 	int player_level = client->GetLevel();
 	client->GetTaskState()->ClearLastOffers();
 
 	int      valid_tasks_count = 0;
-	for (int task_index        = 0; task_index < task_count; task_index++) {
+	for (int task_index = 0; task_index < task_list.size(); task_index++) {
 		if (!ValidateLevel(task_list[task_index], player_level)) {
 			continue;
 		}
@@ -796,7 +793,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 	// this is also sent in OP_TaskDescription
 	buf.WriteUInt32(mob->GetID());    // TaskGiver
 
-	for (int i = 0; i < task_count; i++) { // max 40
+	for (int i = 0; i < task_list.size(); i++) { // max 40
 		if (!ValidateLevel(task_list[i], player_level)) {
 			continue;
 		}
@@ -816,9 +813,9 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 	client->QueuePacket(outapp.get());
 }
 
-void TaskManager::SendSharedTaskSelector(Client *client, Mob *mob, int task_count, int *task_list)
+void TaskManager::SendSharedTaskSelector(Client* client, Mob* mob, const std::vector<int>& task_list)
 {
-	LogTasks("SendSharedTaskSelector for [{}] Tasks", task_count);
+	LogTasks("SendSharedTaskSelector for [{}] Tasks", task_list.size());
 
 	// request timer is only set when shared task selection shown (not for failed validations)
 	client->StartTaskRequestCooldownTimer();
@@ -826,12 +823,12 @@ void TaskManager::SendSharedTaskSelector(Client *client, Mob *mob, int task_coun
 
 	SerializeBuffer buf;
 
-	buf.WriteUInt32(task_count); // number of tasks
+	buf.WriteUInt32(static_cast<uint32_t>(task_list.size())); // number of tasks
 	// shared task selection (live doesn't mix types) makes client send shared task specific opcode for accepts
 	buf.WriteUInt32(static_cast<uint32_t>(TaskType::Shared));
 	buf.WriteUInt32(mob->GetID()); // task giver entity id
 
-	for (int i = 0; i < task_count; ++i) {
+	for (int i = 0; i < task_list.size(); ++i) {
 		int task_id = task_list[i];
 		buf.WriteUInt32(task_id);
 		m_task_data[task_id].SerializeSelector(buf, client->ClientVersion());

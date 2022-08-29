@@ -2512,32 +2512,25 @@ int Lua_Client::GetSpellDamage() {
 }
 
 void Lua_Client::TaskSelector(luabind::adl::object table) {
+	TaskSelector(table, false);
+}
+
+void Lua_Client::TaskSelector(luabind::adl::object table, bool ignore_cooldown) {
 	Lua_Safe_Call_Void();
 
 	if(luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
 
-	int tasks[MAXCHOOSERENTRIES] = { 0 };
-	int task_count = 0;
-
+	std::vector<int> tasks;
 	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
 		auto cur = table[i];
-		int cur_value = 0;
-		if(luabind::type(cur) != LUA_TNIL) {
-			try {
-				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
-			}
-		} else {
-			task_count = i - 1;
-			break;
+		if (luabind::type(cur) == LUA_TNUMBER) {
+			tasks.push_back(luabind::object_cast<int>(cur));
 		}
-
-		tasks[i - 1] = cur_value;
 	}
 
-	self->TaskQuestSetSelector(self, task_count, tasks);
+	self->TaskQuestSetSelector(self, tasks, ignore_cooldown);
 }
 
 bool Lua_Client::TeleportToPlayerByCharID(uint32 character_id) {
@@ -2983,6 +2976,7 @@ luabind::scope lua_register_client() {
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32))&Lua_Client::TakePlatinum)
 	.def("TakePlatinum", (bool(Lua_Client::*)(uint32,bool))&Lua_Client::TakePlatinum)
 	.def("TaskSelector", (void(Lua_Client::*)(luabind::adl::object))&Lua_Client::TaskSelector)
+	.def("TaskSelector", (void(Lua_Client::*)(luabind::adl::object, bool))&Lua_Client::TaskSelector)
 	.def("TeleportToPlayerByCharID", (bool(Lua_Client::*)(uint32))&Lua_Client::TeleportToPlayerByCharID)
 	.def("TeleportToPlayerByName", (bool(Lua_Client::*)(std::string))&Lua_Client::TeleportToPlayerByName)
 	.def("TeleportGroupToPlayerByCharID", (bool(Lua_Client::*)(uint32))&Lua_Client::TeleportGroupToPlayerByCharID)
