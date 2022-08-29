@@ -450,7 +450,7 @@ const std::map<int, std::string>& EQ::constants::GetObjectTypeMap()
 		{ ObjectTypes::Bandolier, "Bandolier" },
 		{ ObjectTypes::Medicine, "Medicine" },
 		{ ObjectTypes::Tinkering, "Tinkering" },
-		{ ObjectTypes::LexiconOne, "Lexicon" },
+		{ ObjectTypes::Lexicon, "Lexicon" },
 		{ ObjectTypes::PoisonMaking, "Mortar and Pestle" },
 		{ ObjectTypes::Quest, "Quest" },
 		{ ObjectTypes::MixingBowl, "Mixing Bowl" },

@@ -260,7 +260,7 @@ namespace EQ
 			Bandolier,
 			Medicine,
 			Tinkering,
-			LexiconOne,
+			Lexicon,
 			PoisonMaking,
 			Quest,
 			MixingBowl,
