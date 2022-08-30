@@ -64,7 +64,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 				fmt::format(
 					"Component: {}",
 					e.componentcount
-				).c_str()
+				)
 			);
 
 			has_message = true;
@@ -75,7 +75,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 				fmt::format(
 					"Fail: {}",
 					e.failcount
-				).c_str()
+				)
 			);
 
 			has_message = true;
@@ -86,7 +86,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 				fmt::format(
 					"Salvage: {}",
 					e.salvagecount
-				).c_str()
+				)
 			);
 
 			has_message = true;
@@ -97,7 +97,7 @@ void command_viewrecipe(Client *c, const Seperator *sep)
 				fmt::format(
 					"Success: {}",
 					e.successcount
-				).c_str()
+				)
 			);
 
 			has_message = true;
