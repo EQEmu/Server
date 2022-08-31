@@ -488,8 +488,6 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		zc2->success = 1;
 		outapp->priority = 6;
 		FastQueuePacket(&outapp);
-
-		zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 	} else {
 		// vesuvias - zoneing to another zone so we need to the let the world server
 		//handle things with the client for a while
@@ -513,6 +511,9 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	m_ZoneSummonLocation = glm::vec4();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
+
+	// this simply resets the zone shutdown timer
+	zone->ResetShutdownTimer();
 }
 
 void Client::MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {

@@ -159,18 +159,12 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	// Dynamic zones need to Sync here.
 	// Static zones sync when they connect in worldserver.cpp.
 	// Static zones cannot sync here as request is ignored by worldserver.
-	if (!is_static)
-	{
+	if (!is_static) {
 		zone->GetTimeSync();
 	}
 
 	zone->RequestUCSServerStatus();
-
-	/**
-	 * Set Shutdown timer
-	 */
-	uint32 shutdown_timer = static_cast<uint32>(content_db.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion()));
-	zone->StartShutdownTimer(shutdown_timer);
+	zone->StartShutdownTimer();
 
 	/*
 	 * Set Logging
@@ -903,11 +897,23 @@ void Zone::Shutdown(bool quiet)
 	}
 	zone->ldon_trap_entry_list.clear();
 
-	LogInfo("Zone Shutdown: [{}] ([{}])", zone->GetShortName(), zone->GetZoneID());
+	LogInfo(
+		"[Zone Shutdown] Zone [{}] zone_id [{}] version [{}] instance_id [{}]",
+		zone->GetShortName(),
+		zone->GetZoneID(),
+		zone->GetInstanceVersion(),
+		zone->GetInstanceID()
+	);
 	petition_list.ClearPetitions();
 	zone->SetZoneHasCurrentTime(false);
 	if (!quiet) {
-		LogInfo("Zone Shutdown: Going to sleep");
+		LogInfo(
+			"[Zone Shutdown] Zone [{}] zone_id [{}] version [{}] instance_id [{}] Going to sleep",
+			zone->GetShortName(),
+			zone->GetZoneID(),
+			zone->GetInstanceVersion(),
+			zone->GetInstanceID()
+		);
 	}
 
 	is_zone_loaded = false;
@@ -921,7 +927,7 @@ void Zone::Shutdown(bool quiet)
 	LogSys.CloseFileLogs();
 
 	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
-		LogInfo("[KillProcessOnDynamicShutdown] Shutting down");
+		LogInfo("[Zone Shutdown] Shutting down");
 		EQ::EventLoop::Get().Shutdown();
 	}
 }
@@ -1002,7 +1008,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	if (long_name == 0) {
 		long_name = strcpy(new char[18], "Long zone missing");
 	}
-	autoshutdown_timer.Start(AUTHENTICATION_TIMEOUT * 1000, false);
 	Weather_Timer = new Timer(60000);
 	Weather_Timer->Start();
 	LogDebug("The next weather check for zone: [{}] will be in [{}] seconds", short_name, Weather_Timer->GetRemainingTime()/1000);
@@ -1495,9 +1500,9 @@ bool Zone::Process() {
 		}
 	}
 
-	if(!staticzone) {
+	if (!staticzone) {
 		if (autoshutdown_timer.Check()) {
-			StartShutdownTimer();
+			ResetShutdownTimer();
 			if (numclients == 0) {
 				return false;
 			}
@@ -1727,17 +1732,45 @@ bool Zone::HasWeather()
 		return true;
 }
 
-void Zone::StartShutdownTimer(uint32 set_time) {
-	if (set_time > autoshutdown_timer.GetRemainingTime()) {
-		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
-			set_time = static_cast<uint32>(content_db.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
+void Zone::StartShutdownTimer(uint32 set_time)
+{
+	// if we pass in the default value, we should pull from the zone and use it is different
+	std::string loaded_from = "rules";
+	if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
+		auto delay = content_db.getZoneShutDownDelay(
+			GetZoneID(),
+			GetInstanceVersion()
+		);
+		if (delay != RuleI(Zone, AutoShutdownDelay)) {
+			set_time = delay;
+			loaded_from = "zone table";
 		}
-
-		autoshutdown_timer.SetTimer(set_time);
-		LogDebug("Zone::StartShutdownTimer set to {}", set_time);
 	}
 
-	LogDebug("Zone::StartShutdownTimer trigger - set_time: [{}] remaining_time: [{}] diff: [{}]", set_time, autoshutdown_timer.GetRemainingTime(), (set_time - autoshutdown_timer.GetRemainingTime()));
+	if (set_time != autoshutdown_timer.GetDuration()) {
+		LogInfo(
+			"[StartShutdownTimer] Reset to [{}] {} from original remaining time [{}] duration [{}] zone [{}]",
+			Strings::SecondsToTime(set_time, true),
+			!loaded_from.empty() ? fmt::format("(Loaded from [{}])", loaded_from) : "",
+			Strings::SecondsToTime(autoshutdown_timer.GetRemainingTime(), true),
+			Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+			zone->GetZoneDescription()
+		);
+	}
+
+	autoshutdown_timer.SetTimer(set_time);
+}
+
+void Zone::ResetShutdownTimer() {
+	LogInfo(
+		"[ResetShutdownTimer] Reset to [{}] from original remaining time [{}] duration [{}] zone [{}]",
+		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+		Strings::SecondsToTime(autoshutdown_timer.GetRemainingTime(), true),
+		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+		zone->GetZoneDescription()
+	);
+
+	autoshutdown_timer.SetTimer(autoshutdown_timer.GetDuration());
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
