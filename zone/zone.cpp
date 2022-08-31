@@ -989,7 +989,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		pvpzone = true;
 	}
 
-	auto z = GetZone(short_name, instanceversion);
+	auto z = GetZoneVersionWithFallback(ZoneID(short_name), instanceversion);
 	if (z) {
 		long_name = strcpy(new char[strlen(z->long_name.c_str()) + 1], z->long_name.c_str());
 
