@@ -19,12 +19,12 @@
 class BaseGraveyardRepository {
 public:
 	struct Graveyard {
-		int   id;
-		int   zone_id;
-		float x;
-		float y;
-		float z;
-		float heading;
+		int32_t id;
+		int32_t zone_id;
+		float   x;
+		float   y;
+		float   z;
+		float   heading;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			Graveyard e{};
 
-			e.id      = atoi(row[0]);
-			e.zone_id = atoi(row[1]);
-			e.x       = static_cast<float>(atof(row[2]));
-			e.y       = static_cast<float>(atof(row[3]));
-			e.z       = static_cast<float>(atof(row[4]));
-			e.heading = static_cast<float>(atof(row[5]));
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id = static_cast<int32_t>(atoi(row[1]));
+			e.x       = strtof(row[2], nullptr);
+			e.y       = strtof(row[3], nullptr);
+			e.z       = strtof(row[4], nullptr);
+			e.heading = strtof(row[5], nullptr);
 
 			return e;
 		}
@@ -273,12 +273,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Graveyard e{};
 
-			e.id      = atoi(row[0]);
-			e.zone_id = atoi(row[1]);
-			e.x       = static_cast<float>(atof(row[2]));
-			e.y       = static_cast<float>(atof(row[3]));
-			e.z       = static_cast<float>(atof(row[4]));
-			e.heading = static_cast<float>(atof(row[5]));
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id = static_cast<int32_t>(atoi(row[1]));
+			e.x       = strtof(row[2], nullptr);
+			e.y       = strtof(row[3], nullptr);
+			e.z       = strtof(row[4], nullptr);
+			e.heading = strtof(row[5], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -303,12 +303,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Graveyard e{};
 
-			e.id      = atoi(row[0]);
-			e.zone_id = atoi(row[1]);
-			e.x       = static_cast<float>(atof(row[2]));
-			e.y       = static_cast<float>(atof(row[3]));
-			e.z       = static_cast<float>(atof(row[4]));
-			e.heading = static_cast<float>(atof(row[5]));
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id = static_cast<int32_t>(atoi(row[1]));
+			e.x       = strtof(row[2], nullptr);
+			e.y       = strtof(row[3], nullptr);
+			e.z       = strtof(row[4], nullptr);
+			e.heading = strtof(row[5], nullptr);
 
 			all_entries.push_back(e);
 		}

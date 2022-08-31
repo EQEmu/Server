@@ -19,12 +19,12 @@
 class BaseSpawnentryRepository {
 public:
 	struct Spawnentry {
-		int         spawngroupID;
-		int         npcID;
-		int         chance;
-		int         condition_value_filter;
-		int         min_expansion;
-		int         max_expansion;
+		int32_t     spawngroupID;
+		int32_t     npcID;
+		int16_t     chance;
+		int32_t     condition_value_filter;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -142,12 +142,12 @@ public:
 		if (results.RowCount() == 1) {
 			Spawnentry e{};
 
-			e.spawngroupID           = atoi(row[0]);
-			e.npcID                  = atoi(row[1]);
-			e.chance                 = atoi(row[2]);
-			e.condition_value_filter = atoi(row[3]);
-			e.min_expansion          = atoi(row[4]);
-			e.max_expansion          = atoi(row[5]);
+			e.spawngroupID           = static_cast<int32_t>(atoi(row[0]));
+			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
+			e.chance                 = static_cast<int16_t>(atoi(row[2]));
+			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[4]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[5]));
 			e.content_flags          = row[6] ? row[6] : "";
 			e.content_flags_disabled = row[7] ? row[7] : "";
 
@@ -290,12 +290,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawnentry e{};
 
-			e.spawngroupID           = atoi(row[0]);
-			e.npcID                  = atoi(row[1]);
-			e.chance                 = atoi(row[2]);
-			e.condition_value_filter = atoi(row[3]);
-			e.min_expansion          = atoi(row[4]);
-			e.max_expansion          = atoi(row[5]);
+			e.spawngroupID           = static_cast<int32_t>(atoi(row[0]));
+			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
+			e.chance                 = static_cast<int16_t>(atoi(row[2]));
+			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[4]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[5]));
 			e.content_flags          = row[6] ? row[6] : "";
 			e.content_flags_disabled = row[7] ? row[7] : "";
 
@@ -322,12 +322,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawnentry e{};
 
-			e.spawngroupID           = atoi(row[0]);
-			e.npcID                  = atoi(row[1]);
-			e.chance                 = atoi(row[2]);
-			e.condition_value_filter = atoi(row[3]);
-			e.min_expansion          = atoi(row[4]);
-			e.max_expansion          = atoi(row[5]);
+			e.spawngroupID           = static_cast<int32_t>(atoi(row[0]));
+			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
+			e.chance                 = static_cast<int16_t>(atoi(row[2]));
+			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[4]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[5]));
 			e.content_flags          = row[6] ? row[6] : "";
 			e.content_flags_disabled = row[7] ? row[7] : "";
 

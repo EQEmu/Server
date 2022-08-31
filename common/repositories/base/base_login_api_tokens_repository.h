@@ -19,10 +19,10 @@
 class BaseLoginApiTokensRepository {
 public:
 	struct LoginApiTokens {
-		int         id;
+		int32_t     id;
 		std::string token;
-		int         can_write;
-		int         can_read;
+		int32_t     can_write;
+		int32_t     can_read;
 		time_t      created_at;
 		time_t      updated_at;
 	};
@@ -134,10 +134,10 @@ public:
 		if (results.RowCount() == 1) {
 			LoginApiTokens e{};
 
-			e.id         = atoi(row[0]);
+			e.id         = static_cast<int32_t>(atoi(row[0]));
 			e.token      = row[1] ? row[1] : "";
-			e.can_write  = atoi(row[2]);
-			e.can_read   = atoi(row[3]);
+			e.can_write  = static_cast<int32_t>(atoi(row[2]));
+			e.can_read   = static_cast<int32_t>(atoi(row[3]));
 			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
@@ -273,10 +273,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginApiTokens e{};
 
-			e.id         = atoi(row[0]);
+			e.id         = static_cast<int32_t>(atoi(row[0]));
 			e.token      = row[1] ? row[1] : "";
-			e.can_write  = atoi(row[2]);
-			e.can_read   = atoi(row[3]);
+			e.can_write  = static_cast<int32_t>(atoi(row[2]));
+			e.can_read   = static_cast<int32_t>(atoi(row[3]));
 			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
@@ -303,10 +303,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginApiTokens e{};
 
-			e.id         = atoi(row[0]);
+			e.id         = static_cast<int32_t>(atoi(row[0]));
 			e.token      = row[1] ? row[1] : "";
-			e.can_write  = atoi(row[2]);
-			e.can_read   = atoi(row[3]);
+			e.can_write  = static_cast<int32_t>(atoi(row[2]));
+			e.can_read   = static_cast<int32_t>(atoi(row[3]));
 			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 

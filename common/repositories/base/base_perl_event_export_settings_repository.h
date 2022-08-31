@@ -19,13 +19,13 @@
 class BasePerlEventExportSettingsRepository {
 public:
 	struct PerlEventExportSettings {
-		int         event_id;
+		int32_t     event_id;
 		std::string event_description;
-		int         export_qglobals;
-		int         export_mob;
-		int         export_zone;
-		int         export_item;
-		int         export_event;
+		int16_t     export_qglobals;
+		int16_t     export_mob;
+		int16_t     export_zone;
+		int16_t     export_item;
+		int16_t     export_event;
 	};
 
 	static std::string PrimaryKey()
@@ -138,13 +138,13 @@ public:
 		if (results.RowCount() == 1) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = atoi(row[0]);
+			e.event_id          = static_cast<int32_t>(atoi(row[0]));
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = atoi(row[2]);
-			e.export_mob        = atoi(row[3]);
-			e.export_zone       = atoi(row[4]);
-			e.export_item       = atoi(row[5]);
-			e.export_event      = atoi(row[6]);
+			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
+			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
+			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
+			e.export_item       = static_cast<int16_t>(atoi(row[5]));
+			e.export_event      = static_cast<int16_t>(atoi(row[6]));
 
 			return e;
 		}
@@ -282,13 +282,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = atoi(row[0]);
+			e.event_id          = static_cast<int32_t>(atoi(row[0]));
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = atoi(row[2]);
-			e.export_mob        = atoi(row[3]);
-			e.export_zone       = atoi(row[4]);
-			e.export_item       = atoi(row[5]);
-			e.export_event      = atoi(row[6]);
+			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
+			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
+			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
+			e.export_item       = static_cast<int16_t>(atoi(row[5]));
+			e.export_event      = static_cast<int16_t>(atoi(row[6]));
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +313,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = atoi(row[0]);
+			e.event_id          = static_cast<int32_t>(atoi(row[0]));
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = atoi(row[2]);
-			e.export_mob        = atoi(row[3]);
-			e.export_zone       = atoi(row[4]);
-			e.export_item       = atoi(row[5]);
-			e.export_event      = atoi(row[6]);
+			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
+			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
+			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
+			e.export_item       = static_cast<int16_t>(atoi(row[5]));
+			e.export_event      = static_cast<int16_t>(atoi(row[6]));
 
 			all_entries.push_back(e);
 		}

@@ -20,9 +20,9 @@ class BaseSpawnConditionsRepository {
 public:
 	struct SpawnConditions {
 		std::string zone;
-		int         id;
-		int         value;
-		int         onchange;
+		uint32_t    id;
+		int32_t     value;
+		uint8_t     onchange;
 		std::string name;
 	};
 
@@ -131,9 +131,9 @@ public:
 			SpawnConditions e{};
 
 			e.zone     = row[0] ? row[0] : "";
-			e.id       = atoi(row[1]);
-			e.value    = atoi(row[2]);
-			e.onchange = atoi(row[3]);
+			e.id       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.value    = static_cast<int32_t>(atoi(row[2]));
+			e.onchange = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 			e.name     = row[4] ? row[4] : "";
 
 			return e;
@@ -267,9 +267,9 @@ public:
 			SpawnConditions e{};
 
 			e.zone     = row[0] ? row[0] : "";
-			e.id       = atoi(row[1]);
-			e.value    = atoi(row[2]);
-			e.onchange = atoi(row[3]);
+			e.id       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.value    = static_cast<int32_t>(atoi(row[2]));
+			e.onchange = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 			e.name     = row[4] ? row[4] : "";
 
 			all_entries.push_back(e);
@@ -296,9 +296,9 @@ public:
 			SpawnConditions e{};
 
 			e.zone     = row[0] ? row[0] : "";
-			e.id       = atoi(row[1]);
-			e.value    = atoi(row[2]);
-			e.onchange = atoi(row[3]);
+			e.id       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.value    = static_cast<int32_t>(atoi(row[2]));
+			e.onchange = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 			e.name     = row[4] ? row[4] : "";
 
 			all_entries.push_back(e);

@@ -19,22 +19,22 @@
 class BasePetitionsRepository {
 public:
 	struct Petitions {
-		int         dib;
-		int         petid;
+		uint32_t    dib;
+		uint32_t    petid;
 		std::string charname;
 		std::string accountname;
 		std::string lastgm;
 		std::string petitiontext;
 		std::string gmtext;
 		std::string zone;
-		int         urgency;
-		int         charclass;
-		int         charrace;
-		int         charlevel;
-		int         checkouts;
-		int         unavailables;
-		int         ischeckedout;
-		int64       senttime;
+		int32_t     urgency;
+		int32_t     charclass;
+		int32_t     charrace;
+		int32_t     charlevel;
+		int32_t     checkouts;
+		int32_t     unavailables;
+		int8_t      ischeckedout;
+		int64_t     senttime;
 	};
 
 	static std::string PrimaryKey()
@@ -174,21 +174,21 @@ public:
 		if (results.RowCount() == 1) {
 			Petitions e{};
 
-			e.dib          = atoi(row[0]);
-			e.petid        = atoi(row[1]);
+			e.dib          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.petid        = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.charname     = row[2] ? row[2] : "";
 			e.accountname  = row[3] ? row[3] : "";
 			e.lastgm       = row[4] ? row[4] : "";
 			e.petitiontext = row[5] ? row[5] : "";
 			e.gmtext       = row[6] ? row[6] : "";
 			e.zone         = row[7] ? row[7] : "";
-			e.urgency      = atoi(row[8]);
-			e.charclass    = atoi(row[9]);
-			e.charrace     = atoi(row[10]);
-			e.charlevel    = atoi(row[11]);
-			e.checkouts    = atoi(row[12]);
-			e.unavailables = atoi(row[13]);
-			e.ischeckedout = atoi(row[14]);
+			e.urgency      = static_cast<int32_t>(atoi(row[8]));
+			e.charclass    = static_cast<int32_t>(atoi(row[9]));
+			e.charrace     = static_cast<int32_t>(atoi(row[10]));
+			e.charlevel    = static_cast<int32_t>(atoi(row[11]));
+			e.checkouts    = static_cast<int32_t>(atoi(row[12]));
+			e.unavailables = static_cast<int32_t>(atoi(row[13]));
+			e.ischeckedout = static_cast<int8_t>(atoi(row[14]));
 			e.senttime     = strtoll(row[15], nullptr, 10);
 
 			return e;
@@ -353,21 +353,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Petitions e{};
 
-			e.dib          = atoi(row[0]);
-			e.petid        = atoi(row[1]);
+			e.dib          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.petid        = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.charname     = row[2] ? row[2] : "";
 			e.accountname  = row[3] ? row[3] : "";
 			e.lastgm       = row[4] ? row[4] : "";
 			e.petitiontext = row[5] ? row[5] : "";
 			e.gmtext       = row[6] ? row[6] : "";
 			e.zone         = row[7] ? row[7] : "";
-			e.urgency      = atoi(row[8]);
-			e.charclass    = atoi(row[9]);
-			e.charrace     = atoi(row[10]);
-			e.charlevel    = atoi(row[11]);
-			e.checkouts    = atoi(row[12]);
-			e.unavailables = atoi(row[13]);
-			e.ischeckedout = atoi(row[14]);
+			e.urgency      = static_cast<int32_t>(atoi(row[8]));
+			e.charclass    = static_cast<int32_t>(atoi(row[9]));
+			e.charrace     = static_cast<int32_t>(atoi(row[10]));
+			e.charlevel    = static_cast<int32_t>(atoi(row[11]));
+			e.checkouts    = static_cast<int32_t>(atoi(row[12]));
+			e.unavailables = static_cast<int32_t>(atoi(row[13]));
+			e.ischeckedout = static_cast<int8_t>(atoi(row[14]));
 			e.senttime     = strtoll(row[15], nullptr, 10);
 
 			all_entries.push_back(e);
@@ -393,21 +393,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Petitions e{};
 
-			e.dib          = atoi(row[0]);
-			e.petid        = atoi(row[1]);
+			e.dib          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.petid        = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.charname     = row[2] ? row[2] : "";
 			e.accountname  = row[3] ? row[3] : "";
 			e.lastgm       = row[4] ? row[4] : "";
 			e.petitiontext = row[5] ? row[5] : "";
 			e.gmtext       = row[6] ? row[6] : "";
 			e.zone         = row[7] ? row[7] : "";
-			e.urgency      = atoi(row[8]);
-			e.charclass    = atoi(row[9]);
-			e.charrace     = atoi(row[10]);
-			e.charlevel    = atoi(row[11]);
-			e.checkouts    = atoi(row[12]);
-			e.unavailables = atoi(row[13]);
-			e.ischeckedout = atoi(row[14]);
+			e.urgency      = static_cast<int32_t>(atoi(row[8]));
+			e.charclass    = static_cast<int32_t>(atoi(row[9]));
+			e.charrace     = static_cast<int32_t>(atoi(row[10]));
+			e.charlevel    = static_cast<int32_t>(atoi(row[11]));
+			e.checkouts    = static_cast<int32_t>(atoi(row[12]));
+			e.unavailables = static_cast<int32_t>(atoi(row[13]));
+			e.ischeckedout = static_cast<int8_t>(atoi(row[14]));
 			e.senttime     = strtoll(row[15], nullptr, 10);
 
 			all_entries.push_back(e);

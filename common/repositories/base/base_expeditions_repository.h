@@ -19,10 +19,10 @@
 class BaseExpeditionsRepository {
 public:
 	struct Expeditions {
-		int id;
-		int dynamic_zone_id;
-		int add_replay_on_join;
-		int is_locked;
+		uint32_t id;
+		uint32_t dynamic_zone_id;
+		uint8_t  add_replay_on_join;
+		uint8_t  is_locked;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			Expeditions e{};
 
-			e.id                 = atoi(row[0]);
-			e.dynamic_zone_id    = atoi(row[1]);
-			e.add_replay_on_join = atoi(row[2]);
-			e.is_locked          = atoi(row[3]);
+			e.id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.add_replay_on_join = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.is_locked          = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 
 			return e;
 		}
@@ -257,10 +257,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Expeditions e{};
 
-			e.id                 = atoi(row[0]);
-			e.dynamic_zone_id    = atoi(row[1]);
-			e.add_replay_on_join = atoi(row[2]);
-			e.is_locked          = atoi(row[3]);
+			e.id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.add_replay_on_join = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.is_locked          = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -285,10 +285,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Expeditions e{};
 
-			e.id                 = atoi(row[0]);
-			e.dynamic_zone_id    = atoi(row[1]);
-			e.add_replay_on_join = atoi(row[2]);
-			e.is_locked          = atoi(row[3]);
+			e.id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.add_replay_on_join = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.is_locked          = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

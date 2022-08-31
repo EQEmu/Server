@@ -19,10 +19,10 @@
 class BaseDataBucketsRepository {
 public:
 	struct DataBuckets {
-		int64       id;
+		uint64_t    id;
 		std::string key;
 		std::string value;
-		int         expires;
+		uint32_t    expires;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			DataBuckets e{};
 
-			e.id      = strtoll(row[0], nullptr, 10);
+			e.id      = strtoull(row[0], nullptr, 10);
 			e.key     = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
-			e.expires = atoi(row[3]);
+			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			return e;
 		}
@@ -257,10 +257,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DataBuckets e{};
 
-			e.id      = strtoll(row[0], nullptr, 10);
+			e.id      = strtoull(row[0], nullptr, 10);
 			e.key     = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
-			e.expires = atoi(row[3]);
+			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -285,10 +285,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DataBuckets e{};
 
-			e.id      = strtoll(row[0], nullptr, 10);
+			e.id      = strtoull(row[0], nullptr, 10);
 			e.key     = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
-			e.expires = atoi(row[3]);
+			e.expires = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

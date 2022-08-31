@@ -19,10 +19,10 @@
 class BaseCharacterPetInventoryRepository {
 public:
 	struct CharacterPetInventory {
-		int char_id;
-		int pet;
-		int slot;
-		int item_id;
+		int32_t char_id;
+		int32_t pet;
+		int32_t slot;
+		int32_t item_id;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetInventory e{};
 
-			e.char_id = atoi(row[0]);
-			e.pet     = atoi(row[1]);
-			e.slot    = atoi(row[2]);
-			e.item_id = atoi(row[3]);
+			e.char_id = static_cast<int32_t>(atoi(row[0]));
+			e.pet     = static_cast<int32_t>(atoi(row[1]));
+			e.slot    = static_cast<int32_t>(atoi(row[2]));
+			e.item_id = static_cast<int32_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInventory e{};
 
-			e.char_id = atoi(row[0]);
-			e.pet     = atoi(row[1]);
-			e.slot    = atoi(row[2]);
-			e.item_id = atoi(row[3]);
+			e.char_id = static_cast<int32_t>(atoi(row[0]));
+			e.pet     = static_cast<int32_t>(atoi(row[1]));
+			e.slot    = static_cast<int32_t>(atoi(row[2]));
+			e.item_id = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInventory e{};
 
-			e.char_id = atoi(row[0]);
-			e.pet     = atoi(row[1]);
-			e.slot    = atoi(row[2]);
-			e.item_id = atoi(row[3]);
+			e.char_id = static_cast<int32_t>(atoi(row[0]));
+			e.pet     = static_cast<int32_t>(atoi(row[1]));
+			e.slot    = static_cast<int32_t>(atoi(row[2]));
+			e.item_id = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

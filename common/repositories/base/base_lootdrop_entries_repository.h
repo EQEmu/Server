@@ -19,17 +19,17 @@
 class BaseLootdropEntriesRepository {
 public:
 	struct LootdropEntries {
-		int   lootdrop_id;
-		int   item_id;
-		int   item_charges;
-		int   equip_item;
-		float chance;
-		float disabled_chance;
-		int   trivial_min_level;
-		int   trivial_max_level;
-		int   multiplier;
-		int   npc_min_level;
-		int   npc_max_level;
+		uint32_t lootdrop_id;
+		int32_t  item_id;
+		uint16_t item_charges;
+		uint8_t  equip_item;
+		float    chance;
+		float    disabled_chance;
+		uint16_t trivial_min_level;
+		uint16_t trivial_max_level;
+		uint8_t  multiplier;
+		uint16_t npc_min_level;
+		uint16_t npc_max_level;
 	};
 
 	static std::string PrimaryKey()
@@ -154,17 +154,17 @@ public:
 		if (results.RowCount() == 1) {
 			LootdropEntries e{};
 
-			e.lootdrop_id       = atoi(row[0]);
-			e.item_id           = atoi(row[1]);
-			e.item_charges      = atoi(row[2]);
-			e.equip_item        = atoi(row[3]);
-			e.chance            = static_cast<float>(atof(row[4]));
-			e.disabled_chance   = static_cast<float>(atof(row[5]));
-			e.trivial_min_level = atoi(row[6]);
-			e.trivial_max_level = atoi(row[7]);
-			e.multiplier        = atoi(row[8]);
-			e.npc_min_level     = atoi(row[9]);
-			e.npc_max_level     = atoi(row[10]);
+			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id           = static_cast<int32_t>(atoi(row[1]));
+			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.chance            = strtof(row[4], nullptr);
+			e.disabled_chance   = strtof(row[5], nullptr);
+			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
+			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
 
 			return e;
 		}
@@ -314,17 +314,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LootdropEntries e{};
 
-			e.lootdrop_id       = atoi(row[0]);
-			e.item_id           = atoi(row[1]);
-			e.item_charges      = atoi(row[2]);
-			e.equip_item        = atoi(row[3]);
-			e.chance            = static_cast<float>(atof(row[4]));
-			e.disabled_chance   = static_cast<float>(atof(row[5]));
-			e.trivial_min_level = atoi(row[6]);
-			e.trivial_max_level = atoi(row[7]);
-			e.multiplier        = atoi(row[8]);
-			e.npc_min_level     = atoi(row[9]);
-			e.npc_max_level     = atoi(row[10]);
+			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id           = static_cast<int32_t>(atoi(row[1]));
+			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.chance            = strtof(row[4], nullptr);
+			e.disabled_chance   = strtof(row[5], nullptr);
+			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
+			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +349,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LootdropEntries e{};
 
-			e.lootdrop_id       = atoi(row[0]);
-			e.item_id           = atoi(row[1]);
-			e.item_charges      = atoi(row[2]);
-			e.equip_item        = atoi(row[3]);
-			e.chance            = static_cast<float>(atof(row[4]));
-			e.disabled_chance   = static_cast<float>(atof(row[5]));
-			e.trivial_min_level = atoi(row[6]);
-			e.trivial_max_level = atoi(row[7]);
-			e.multiplier        = atoi(row[8]);
-			e.npc_min_level     = atoi(row[9]);
-			e.npc_max_level     = atoi(row[10]);
+			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id           = static_cast<int32_t>(atoi(row[1]));
+			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.chance            = strtof(row[4], nullptr);
+			e.disabled_chance   = strtof(row[5], nullptr);
+			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
+			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

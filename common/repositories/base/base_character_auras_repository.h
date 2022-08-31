@@ -19,9 +19,9 @@
 class BaseCharacterAurasRepository {
 public:
 	struct CharacterAuras {
-		int id;
-		int slot;
-		int spell_id;
+		int32_t id;
+		int8_t  slot;
+		int32_t spell_id;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterAuras e{};
 
-			e.id       = atoi(row[0]);
-			e.slot     = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
+			e.slot     = static_cast<int8_t>(atoi(row[1]));
+			e.spell_id = static_cast<int32_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAuras e{};
 
-			e.id       = atoi(row[0]);
-			e.slot     = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
+			e.slot     = static_cast<int8_t>(atoi(row[1]));
+			e.spell_id = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAuras e{};
 
-			e.id       = atoi(row[0]);
-			e.slot     = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
+			e.slot     = static_cast<int8_t>(atoi(row[1]));
+			e.spell_id = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

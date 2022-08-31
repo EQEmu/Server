@@ -19,9 +19,9 @@
 class BaseFactionListModRepository {
 public:
 	struct FactionListMod {
-		int         id;
-		int         faction_id;
-		int         mod;
+		uint32_t    id;
+		uint32_t    faction_id;
+		int16_t     mod;
 		std::string mod_name;
 	};
 
@@ -126,9 +126,9 @@ public:
 		if (results.RowCount() == 1) {
 			FactionListMod e{};
 
-			e.id         = atoi(row[0]);
-			e.faction_id = atoi(row[1]);
-			e.mod        = atoi(row[2]);
+			e.id         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.faction_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.mod        = static_cast<int16_t>(atoi(row[2]));
 			e.mod_name   = row[3] ? row[3] : "";
 
 			return e;
@@ -257,9 +257,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionListMod e{};
 
-			e.id         = atoi(row[0]);
-			e.faction_id = atoi(row[1]);
-			e.mod        = atoi(row[2]);
+			e.id         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.faction_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.mod        = static_cast<int16_t>(atoi(row[2]));
 			e.mod_name   = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);
@@ -285,9 +285,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionListMod e{};
 
-			e.id         = atoi(row[0]);
-			e.faction_id = atoi(row[1]);
-			e.mod        = atoi(row[2]);
+			e.id         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.faction_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.mod        = static_cast<int16_t>(atoi(row[2]));
 			e.mod_name   = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);

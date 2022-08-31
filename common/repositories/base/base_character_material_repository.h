@@ -19,13 +19,13 @@
 class BaseCharacterMaterialRepository {
 public:
 	struct CharacterMaterial {
-		int id;
-		int slot;
-		int blue;
-		int green;
-		int red;
-		int use_tint;
-		int color;
+		uint32_t id;
+		uint8_t  slot;
+		uint8_t  blue;
+		uint8_t  green;
+		uint8_t  red;
+		uint8_t  use_tint;
+		uint32_t color;
 	};
 
 	static std::string PrimaryKey()
@@ -138,13 +138,13 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterMaterial e{};
 
-			e.id       = atoi(row[0]);
-			e.slot     = atoi(row[1]);
-			e.blue     = atoi(row[2]);
-			e.green    = atoi(row[3]);
-			e.red      = atoi(row[4]);
-			e.use_tint = atoi(row[5]);
-			e.color    = atoi(row[6]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			return e;
 		}
@@ -281,13 +281,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterMaterial e{};
 
-			e.id       = atoi(row[0]);
-			e.slot     = atoi(row[1]);
-			e.blue     = atoi(row[2]);
-			e.green    = atoi(row[3]);
-			e.red      = atoi(row[4]);
-			e.use_tint = atoi(row[5]);
-			e.color    = atoi(row[6]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -312,13 +312,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterMaterial e{};
 
-			e.id       = atoi(row[0]);
-			e.slot     = atoi(row[1]);
-			e.blue     = atoi(row[2]);
-			e.green    = atoi(row[3]);
-			e.red      = atoi(row[4]);
-			e.use_tint = atoi(row[5]);
-			e.color    = atoi(row[6]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

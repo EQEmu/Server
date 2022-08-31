@@ -19,9 +19,9 @@
 class BaseContentFlagsRepository {
 public:
 	struct ContentFlags {
-		int         id;
+		int32_t     id;
 		std::string flag_name;
-		int         enabled;
+		int8_t      enabled;
 		std::string notes;
 	};
 
@@ -126,9 +126,9 @@ public:
 		if (results.RowCount() == 1) {
 			ContentFlags e{};
 
-			e.id        = atoi(row[0]);
+			e.id        = static_cast<int32_t>(atoi(row[0]));
 			e.flag_name = row[1] ? row[1] : "";
-			e.enabled   = atoi(row[2]);
+			e.enabled   = static_cast<int8_t>(atoi(row[2]));
 			e.notes     = row[3] ? row[3] : "";
 
 			return e;
@@ -257,9 +257,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ContentFlags e{};
 
-			e.id        = atoi(row[0]);
+			e.id        = static_cast<int32_t>(atoi(row[0]));
 			e.flag_name = row[1] ? row[1] : "";
-			e.enabled   = atoi(row[2]);
+			e.enabled   = static_cast<int8_t>(atoi(row[2]));
 			e.notes     = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);
@@ -285,9 +285,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ContentFlags e{};
 
-			e.id        = atoi(row[0]);
+			e.id        = static_cast<int32_t>(atoi(row[0]));
 			e.flag_name = row[1] ? row[1] : "";
-			e.enabled   = atoi(row[2]);
+			e.enabled   = static_cast<int8_t>(atoi(row[2]));
 			e.notes     = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);

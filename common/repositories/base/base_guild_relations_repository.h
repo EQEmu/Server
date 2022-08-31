@@ -19,9 +19,9 @@
 class BaseGuildRelationsRepository {
 public:
 	struct GuildRelations {
-		int guild1;
-		int guild2;
-		int relation;
+		uint32_t guild1;
+		uint32_t guild2;
+		int8_t   relation;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			GuildRelations e{};
 
-			e.guild1   = atoi(row[0]);
-			e.guild2   = atoi(row[1]);
-			e.relation = atoi(row[2]);
+			e.guild1   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.guild2   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.relation = static_cast<int8_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildRelations e{};
 
-			e.guild1   = atoi(row[0]);
-			e.guild2   = atoi(row[1]);
-			e.relation = atoi(row[2]);
+			e.guild1   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.guild2   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.relation = static_cast<int8_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildRelations e{};
 
-			e.guild1   = atoi(row[0]);
-			e.guild2   = atoi(row[1]);
-			e.relation = atoi(row[2]);
+			e.guild1   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.guild2   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.relation = static_cast<int8_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

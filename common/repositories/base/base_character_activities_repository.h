@@ -19,11 +19,11 @@
 class BaseCharacterActivitiesRepository {
 public:
 	struct CharacterActivities {
-		int charid;
-		int taskid;
-		int activityid;
-		int donecount;
-		int completed;
+		uint32_t charid;
+		uint32_t taskid;
+		uint32_t activityid;
+		uint32_t donecount;
+		int8_t   completed;
 	};
 
 	static std::string PrimaryKey()
@@ -130,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterActivities e{};
 
-			e.charid     = atoi(row[0]);
-			e.taskid     = atoi(row[1]);
-			e.activityid = atoi(row[2]);
-			e.donecount  = atoi(row[3]);
-			e.completed  = atoi(row[4]);
+			e.charid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.activityid = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.donecount  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.completed  = static_cast<int8_t>(atoi(row[4]));
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterActivities e{};
 
-			e.charid     = atoi(row[0]);
-			e.taskid     = atoi(row[1]);
-			e.activityid = atoi(row[2]);
-			e.donecount  = atoi(row[3]);
-			e.completed  = atoi(row[4]);
+			e.charid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.activityid = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.donecount  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.completed  = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterActivities e{};
 
-			e.charid     = atoi(row[0]);
-			e.taskid     = atoi(row[1]);
-			e.activityid = atoi(row[2]);
-			e.donecount  = atoi(row[3]);
-			e.completed  = atoi(row[4]);
+			e.charid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.activityid = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.donecount  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.completed  = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}

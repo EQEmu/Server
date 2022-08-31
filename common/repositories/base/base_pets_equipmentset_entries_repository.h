@@ -19,9 +19,9 @@
 class BasePetsEquipmentsetEntriesRepository {
 public:
 	struct PetsEquipmentsetEntries {
-		int set_id;
-		int slot;
-		int item_id;
+		int32_t set_id;
+		int32_t slot;
+		int32_t item_id;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			PetsEquipmentsetEntries e{};
 
-			e.set_id  = atoi(row[0]);
-			e.slot    = atoi(row[1]);
-			e.item_id = atoi(row[2]);
+			e.set_id  = static_cast<int32_t>(atoi(row[0]));
+			e.slot    = static_cast<int32_t>(atoi(row[1]));
+			e.item_id = static_cast<int32_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsEquipmentsetEntries e{};
 
-			e.set_id  = atoi(row[0]);
-			e.slot    = atoi(row[1]);
-			e.item_id = atoi(row[2]);
+			e.set_id  = static_cast<int32_t>(atoi(row[0]));
+			e.slot    = static_cast<int32_t>(atoi(row[1]));
+			e.item_id = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsEquipmentsetEntries e{};
 
-			e.set_id  = atoi(row[0]);
-			e.slot    = atoi(row[1]);
-			e.item_id = atoi(row[2]);
+			e.set_id  = static_cast<int32_t>(atoi(row[0]));
+			e.slot    = static_cast<int32_t>(atoi(row[1]));
+			e.item_id = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

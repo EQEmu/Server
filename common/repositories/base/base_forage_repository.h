@@ -19,13 +19,13 @@
 class BaseForageRepository {
 public:
 	struct Forage {
-		int         id;
-		int         zoneid;
-		int         Itemid;
-		int         level;
-		int         chance;
-		int         min_expansion;
-		int         max_expansion;
+		int32_t     id;
+		int32_t     zoneid;
+		int32_t     Itemid;
+		int16_t     level;
+		int16_t     chance;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -146,13 +146,13 @@ public:
 		if (results.RowCount() == 1) {
 			Forage e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.Itemid                 = atoi(row[2]);
-			e.level                  = atoi(row[3]);
-			e.chance                 = atoi(row[4]);
-			e.min_expansion          = atoi(row[5]);
-			e.max_expansion          = atoi(row[6]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
+			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
+			e.level                  = static_cast<int16_t>(atoi(row[3]));
+			e.chance                 = static_cast<int16_t>(atoi(row[4]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[5]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[6]));
 			e.content_flags          = row[7] ? row[7] : "";
 			e.content_flags_disabled = row[8] ? row[8] : "";
 
@@ -297,13 +297,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Forage e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.Itemid                 = atoi(row[2]);
-			e.level                  = atoi(row[3]);
-			e.chance                 = atoi(row[4]);
-			e.min_expansion          = atoi(row[5]);
-			e.max_expansion          = atoi(row[6]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
+			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
+			e.level                  = static_cast<int16_t>(atoi(row[3]));
+			e.chance                 = static_cast<int16_t>(atoi(row[4]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[5]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[6]));
 			e.content_flags          = row[7] ? row[7] : "";
 			e.content_flags_disabled = row[8] ? row[8] : "";
 
@@ -330,13 +330,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Forage e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.Itemid                 = atoi(row[2]);
-			e.level                  = atoi(row[3]);
-			e.chance                 = atoi(row[4]);
-			e.min_expansion          = atoi(row[5]);
-			e.max_expansion          = atoi(row[6]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
+			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
+			e.level                  = static_cast<int16_t>(atoi(row[3]));
+			e.chance                 = static_cast<int16_t>(atoi(row[4]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[5]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[6]));
 			e.content_flags          = row[7] ? row[7] : "";
 			e.content_flags_disabled = row[8] ? row[8] : "";
 

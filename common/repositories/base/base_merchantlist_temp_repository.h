@@ -19,12 +19,12 @@
 class BaseMerchantlistTempRepository {
 public:
 	struct MerchantlistTemp {
-		int npcid;
-		int slot;
-		int zone_id;
-		int instance_id;
-		int itemid;
-		int charges;
+		uint32_t npcid;
+		uint8_t  slot;
+		int32_t  zone_id;
+		int32_t  instance_id;
+		uint32_t itemid;
+		uint32_t charges;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			MerchantlistTemp e{};
 
-			e.npcid       = atoi(row[0]);
-			e.slot        = atoi(row[1]);
-			e.zone_id     = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
-			e.itemid      = atoi(row[4]);
-			e.charges     = atoi(row[5]);
+			e.npcid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.zone_id     = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id = static_cast<int32_t>(atoi(row[3]));
+			e.itemid      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.charges     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MerchantlistTemp e{};
 
-			e.npcid       = atoi(row[0]);
-			e.slot        = atoi(row[1]);
-			e.zone_id     = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
-			e.itemid      = atoi(row[4]);
-			e.charges     = atoi(row[5]);
+			e.npcid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.zone_id     = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id = static_cast<int32_t>(atoi(row[3]));
+			e.itemid      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.charges     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MerchantlistTemp e{};
 
-			e.npcid       = atoi(row[0]);
-			e.slot        = atoi(row[1]);
-			e.zone_id     = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
-			e.itemid      = atoi(row[4]);
-			e.charges     = atoi(row[5]);
+			e.npcid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.zone_id     = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id = static_cast<int32_t>(atoi(row[3]));
+			e.itemid      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.charges     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

@@ -19,10 +19,10 @@
 class BaseCompletedTasksRepository {
 public:
 	struct CompletedTasks {
-		int charid;
-		int completedtime;
-		int taskid;
-		int activityid;
+		uint32_t charid;
+		uint32_t completedtime;
+		uint32_t taskid;
+		int32_t  activityid;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			CompletedTasks e{};
 
-			e.charid        = atoi(row[0]);
-			e.completedtime = atoi(row[1]);
-			e.taskid        = atoi(row[2]);
-			e.activityid    = atoi(row[3]);
+			e.charid        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.completedtime = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.taskid        = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.activityid    = static_cast<int32_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CompletedTasks e{};
 
-			e.charid        = atoi(row[0]);
-			e.completedtime = atoi(row[1]);
-			e.taskid        = atoi(row[2]);
-			e.activityid    = atoi(row[3]);
+			e.charid        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.completedtime = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.taskid        = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.activityid    = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CompletedTasks e{};
 
-			e.charid        = atoi(row[0]);
-			e.completedtime = atoi(row[1]);
-			e.taskid        = atoi(row[2]);
-			e.activityid    = atoi(row[3]);
+			e.charid        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.completedtime = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.taskid        = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.activityid    = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

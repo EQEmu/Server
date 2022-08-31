@@ -19,7 +19,7 @@
 class BaseLoginAccountsRepository {
 public:
 	struct LoginAccounts {
-		int         id;
+		uint32_t    id;
 		std::string account_name;
 		std::string account_password;
 		std::string account_email;
@@ -146,7 +146,7 @@ public:
 		if (results.RowCount() == 1) {
 			LoginAccounts e{};
 
-			e.id                 = atoi(row[0]);
+			e.id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.account_name       = row[1] ? row[1] : "";
 			e.account_password   = row[2] ? row[2] : "";
 			e.account_email      = row[3] ? row[3] : "";
@@ -298,7 +298,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginAccounts e{};
 
-			e.id                 = atoi(row[0]);
+			e.id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.account_name       = row[1] ? row[1] : "";
 			e.account_password   = row[2] ? row[2] : "";
 			e.account_email      = row[3] ? row[3] : "";
@@ -331,7 +331,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginAccounts e{};
 
-			e.id                 = atoi(row[0]);
+			e.id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.account_name       = row[1] ? row[1] : "";
 			e.account_password   = row[2] ? row[2] : "";
 			e.account_email      = row[3] ? row[3] : "";

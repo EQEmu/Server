@@ -19,10 +19,10 @@
 class BaseGroupIdRepository {
 public:
 	struct GroupId {
-		int         groupid;
-		int         charid;
+		int32_t     groupid;
+		int32_t     charid;
 		std::string name;
-		int         ismerc;
+		int8_t      ismerc;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			GroupId e{};
 
-			e.groupid = atoi(row[0]);
-			e.charid  = atoi(row[1]);
+			e.groupid = static_cast<int32_t>(atoi(row[0]));
+			e.charid  = static_cast<int32_t>(atoi(row[1]));
 			e.name    = row[2] ? row[2] : "";
-			e.ismerc  = atoi(row[3]);
+			e.ismerc  = static_cast<int8_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroupId e{};
 
-			e.groupid = atoi(row[0]);
-			e.charid  = atoi(row[1]);
+			e.groupid = static_cast<int32_t>(atoi(row[0]));
+			e.charid  = static_cast<int32_t>(atoi(row[1]));
 			e.name    = row[2] ? row[2] : "";
-			e.ismerc  = atoi(row[3]);
+			e.ismerc  = static_cast<int8_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroupId e{};
 
-			e.groupid = atoi(row[0]);
-			e.charid  = atoi(row[1]);
+			e.groupid = static_cast<int32_t>(atoi(row[0]));
+			e.charid  = static_cast<int32_t>(atoi(row[1]));
 			e.name    = row[2] ? row[2] : "";
-			e.ismerc  = atoi(row[3]);
+			e.ismerc  = static_cast<int8_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

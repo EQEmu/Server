@@ -19,10 +19,10 @@
 class BaseCharacterAlternateAbilitiesRepository {
 public:
 	struct CharacterAlternateAbilities {
-		int id;
-		int aa_id;
-		int aa_value;
-		int charges;
+		uint32_t id;
+		uint16_t aa_id;
+		uint16_t aa_value;
+		uint16_t charges;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterAlternateAbilities e{};
 
-			e.id       = atoi(row[0]);
-			e.aa_id    = atoi(row[1]);
-			e.aa_value = atoi(row[2]);
-			e.charges  = atoi(row[3]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id    = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.aa_value = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.charges  = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAlternateAbilities e{};
 
-			e.id       = atoi(row[0]);
-			e.aa_id    = atoi(row[1]);
-			e.aa_value = atoi(row[2]);
-			e.charges  = atoi(row[3]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id    = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.aa_value = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.charges  = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAlternateAbilities e{};
 
-			e.id       = atoi(row[0]);
-			e.aa_id    = atoi(row[1]);
-			e.aa_value = atoi(row[2]);
-			e.charges  = atoi(row[3]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.aa_id    = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.aa_value = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.charges  = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

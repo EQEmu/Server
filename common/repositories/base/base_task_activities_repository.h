@@ -19,24 +19,24 @@
 class BaseTaskActivitiesRepository {
 public:
 	struct TaskActivities {
-		int         taskid;
-		int         activityid;
-		int         req_activity_id;
-		int         step;
-		int         activitytype;
+		uint32_t    taskid;
+		uint32_t    activityid;
+		int32_t     req_activity_id;
+		int32_t     step;
+		uint8_t     activitytype;
 		std::string target_name;
 		std::string item_list;
 		std::string skill_list;
 		std::string spell_list;
 		std::string description_override;
-		int         goalid;
+		uint32_t    goalid;
 		std::string goal_match_list;
-		int         goalmethod;
-		int         goalcount;
-		int         delivertonpc;
+		uint32_t    goalmethod;
+		int32_t     goalcount;
+		uint32_t    delivertonpc;
 		std::string zones;
-		int         zone_version;
-		int         optional;
+		int32_t     zone_version;
+		int8_t      optional;
 	};
 
 	static std::string PrimaryKey()
@@ -182,24 +182,24 @@ public:
 		if (results.RowCount() == 1) {
 			TaskActivities e{};
 
-			e.taskid               = atoi(row[0]);
-			e.activityid           = atoi(row[1]);
-			e.req_activity_id      = atoi(row[2]);
-			e.step                 = atoi(row[3]);
-			e.activitytype         = atoi(row[4]);
+			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
+			e.step                 = static_cast<int32_t>(atoi(row[3]));
+			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
 			e.item_list            = row[6] ? row[6] : "";
 			e.skill_list           = row[7] ? row[7] : "";
 			e.spell_list           = row[8] ? row[8] : "";
 			e.description_override = row[9] ? row[9] : "";
-			e.goalid               = atoi(row[10]);
+			e.goalid               = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
 			e.goal_match_list      = row[11] ? row[11] : "";
-			e.goalmethod           = atoi(row[12]);
-			e.goalcount            = atoi(row[13]);
-			e.delivertonpc         = atoi(row[14]);
+			e.goalmethod           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.goalcount            = static_cast<int32_t>(atoi(row[13]));
+			e.delivertonpc         = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
 			e.zones                = row[15] ? row[15] : "";
-			e.zone_version         = atoi(row[16]);
-			e.optional             = atoi(row[17]);
+			e.zone_version         = static_cast<int32_t>(atoi(row[16]));
+			e.optional             = static_cast<int8_t>(atoi(row[17]));
 
 			return e;
 		}
@@ -370,24 +370,24 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TaskActivities e{};
 
-			e.taskid               = atoi(row[0]);
-			e.activityid           = atoi(row[1]);
-			e.req_activity_id      = atoi(row[2]);
-			e.step                 = atoi(row[3]);
-			e.activitytype         = atoi(row[4]);
+			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
+			e.step                 = static_cast<int32_t>(atoi(row[3]));
+			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
 			e.item_list            = row[6] ? row[6] : "";
 			e.skill_list           = row[7] ? row[7] : "";
 			e.spell_list           = row[8] ? row[8] : "";
 			e.description_override = row[9] ? row[9] : "";
-			e.goalid               = atoi(row[10]);
+			e.goalid               = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
 			e.goal_match_list      = row[11] ? row[11] : "";
-			e.goalmethod           = atoi(row[12]);
-			e.goalcount            = atoi(row[13]);
-			e.delivertonpc         = atoi(row[14]);
+			e.goalmethod           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.goalcount            = static_cast<int32_t>(atoi(row[13]));
+			e.delivertonpc         = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
 			e.zones                = row[15] ? row[15] : "";
-			e.zone_version         = atoi(row[16]);
-			e.optional             = atoi(row[17]);
+			e.zone_version         = static_cast<int32_t>(atoi(row[16]));
+			e.optional             = static_cast<int8_t>(atoi(row[17]));
 
 			all_entries.push_back(e);
 		}
@@ -412,24 +412,24 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TaskActivities e{};
 
-			e.taskid               = atoi(row[0]);
-			e.activityid           = atoi(row[1]);
-			e.req_activity_id      = atoi(row[2]);
-			e.step                 = atoi(row[3]);
-			e.activitytype         = atoi(row[4]);
+			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
+			e.step                 = static_cast<int32_t>(atoi(row[3]));
+			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
 			e.item_list            = row[6] ? row[6] : "";
 			e.skill_list           = row[7] ? row[7] : "";
 			e.spell_list           = row[8] ? row[8] : "";
 			e.description_override = row[9] ? row[9] : "";
-			e.goalid               = atoi(row[10]);
+			e.goalid               = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
 			e.goal_match_list      = row[11] ? row[11] : "";
-			e.goalmethod           = atoi(row[12]);
-			e.goalcount            = atoi(row[13]);
-			e.delivertonpc         = atoi(row[14]);
+			e.goalmethod           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.goalcount            = static_cast<int32_t>(atoi(row[13]));
+			e.delivertonpc         = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
 			e.zones                = row[15] ? row[15] : "";
-			e.zone_version         = atoi(row[16]);
-			e.optional             = atoi(row[17]);
+			e.zone_version         = static_cast<int32_t>(atoi(row[16]));
+			e.optional             = static_cast<int8_t>(atoi(row[17]));
 
 			all_entries.push_back(e);
 		}

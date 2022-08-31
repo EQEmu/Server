@@ -19,12 +19,12 @@
 class BaseGuildsRepository {
 public:
 	struct Guilds {
-		int         id;
+		int32_t     id;
 		std::string name;
-		int         leader;
-		int         minstatus;
+		int32_t     leader;
+		int16_t     minstatus;
 		std::string motd;
-		int         tribute;
+		uint32_t    tribute;
 		std::string motd_setter;
 		std::string channel;
 		std::string url;
@@ -146,12 +146,12 @@ public:
 		if (results.RowCount() == 1) {
 			Guilds e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<int32_t>(atoi(row[0]));
 			e.name        = row[1] ? row[1] : "";
-			e.leader      = atoi(row[2]);
-			e.minstatus   = atoi(row[3]);
+			e.leader      = static_cast<int32_t>(atoi(row[2]));
+			e.minstatus   = static_cast<int16_t>(atoi(row[3]));
 			e.motd        = row[4] ? row[4] : "";
-			e.tribute     = atoi(row[5]);
+			e.tribute     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.motd_setter = row[6] ? row[6] : "";
 			e.channel     = row[7] ? row[7] : "";
 			e.url         = row[8] ? row[8] : "";
@@ -297,12 +297,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Guilds e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<int32_t>(atoi(row[0]));
 			e.name        = row[1] ? row[1] : "";
-			e.leader      = atoi(row[2]);
-			e.minstatus   = atoi(row[3]);
+			e.leader      = static_cast<int32_t>(atoi(row[2]));
+			e.minstatus   = static_cast<int16_t>(atoi(row[3]));
 			e.motd        = row[4] ? row[4] : "";
-			e.tribute     = atoi(row[5]);
+			e.tribute     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.motd_setter = row[6] ? row[6] : "";
 			e.channel     = row[7] ? row[7] : "";
 			e.url         = row[8] ? row[8] : "";
@@ -330,12 +330,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Guilds e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<int32_t>(atoi(row[0]));
 			e.name        = row[1] ? row[1] : "";
-			e.leader      = atoi(row[2]);
-			e.minstatus   = atoi(row[3]);
+			e.leader      = static_cast<int32_t>(atoi(row[2]));
+			e.minstatus   = static_cast<int16_t>(atoi(row[3]));
 			e.motd        = row[4] ? row[4] : "";
-			e.tribute     = atoi(row[5]);
+			e.tribute     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.motd_setter = row[6] ? row[6] : "";
 			e.channel     = row[7] ? row[7] : "";
 			e.url         = row[8] ? row[8] : "";

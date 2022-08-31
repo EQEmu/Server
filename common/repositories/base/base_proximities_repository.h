@@ -19,14 +19,14 @@
 class BaseProximitiesRepository {
 public:
 	struct Proximities {
-		int   zoneid;
-		int   exploreid;
-		float minx;
-		float maxx;
-		float miny;
-		float maxy;
-		float minz;
-		float maxz;
+		uint32_t zoneid;
+		uint32_t exploreid;
+		float    minx;
+		float    maxx;
+		float    miny;
+		float    maxy;
+		float    minz;
+		float    maxz;
 	};
 
 	static std::string PrimaryKey()
@@ -142,14 +142,14 @@ public:
 		if (results.RowCount() == 1) {
 			Proximities e{};
 
-			e.zoneid    = atoi(row[0]);
-			e.exploreid = atoi(row[1]);
-			e.minx      = static_cast<float>(atof(row[2]));
-			e.maxx      = static_cast<float>(atof(row[3]));
-			e.miny      = static_cast<float>(atof(row[4]));
-			e.maxy      = static_cast<float>(atof(row[5]));
-			e.minz      = static_cast<float>(atof(row[6]));
-			e.maxz      = static_cast<float>(atof(row[7]));
+			e.zoneid    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.exploreid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.minx      = strtof(row[2], nullptr);
+			e.maxx      = strtof(row[3], nullptr);
+			e.miny      = strtof(row[4], nullptr);
+			e.maxy      = strtof(row[5], nullptr);
+			e.minz      = strtof(row[6], nullptr);
+			e.maxz      = strtof(row[7], nullptr);
 
 			return e;
 		}
@@ -290,14 +290,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Proximities e{};
 
-			e.zoneid    = atoi(row[0]);
-			e.exploreid = atoi(row[1]);
-			e.minx      = static_cast<float>(atof(row[2]));
-			e.maxx      = static_cast<float>(atof(row[3]));
-			e.miny      = static_cast<float>(atof(row[4]));
-			e.maxy      = static_cast<float>(atof(row[5]));
-			e.minz      = static_cast<float>(atof(row[6]));
-			e.maxz      = static_cast<float>(atof(row[7]));
+			e.zoneid    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.exploreid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.minx      = strtof(row[2], nullptr);
+			e.maxx      = strtof(row[3], nullptr);
+			e.miny      = strtof(row[4], nullptr);
+			e.maxy      = strtof(row[5], nullptr);
+			e.minz      = strtof(row[6], nullptr);
+			e.maxz      = strtof(row[7], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -322,14 +322,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Proximities e{};
 
-			e.zoneid    = atoi(row[0]);
-			e.exploreid = atoi(row[1]);
-			e.minx      = static_cast<float>(atof(row[2]));
-			e.maxx      = static_cast<float>(atof(row[3]));
-			e.miny      = static_cast<float>(atof(row[4]));
-			e.maxy      = static_cast<float>(atof(row[5]));
-			e.minz      = static_cast<float>(atof(row[6]));
-			e.maxz      = static_cast<float>(atof(row[7]));
+			e.zoneid    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.exploreid = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.minx      = strtof(row[2], nullptr);
+			e.maxx      = strtof(row[3], nullptr);
+			e.miny      = strtof(row[4], nullptr);
+			e.maxy      = strtof(row[5], nullptr);
+			e.minz      = strtof(row[6], nullptr);
+			e.maxz      = strtof(row[7], nullptr);
 
 			all_entries.push_back(e);
 		}

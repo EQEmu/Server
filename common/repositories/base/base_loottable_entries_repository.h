@@ -19,12 +19,12 @@
 class BaseLoottableEntriesRepository {
 public:
 	struct LoottableEntries {
-		int   loottable_id;
-		int   lootdrop_id;
-		int   multiplier;
-		int   droplimit;
-		int   mindrop;
-		float probability;
+		uint32_t loottable_id;
+		uint32_t lootdrop_id;
+		uint8_t  multiplier;
+		uint8_t  droplimit;
+		uint8_t  mindrop;
+		float    probability;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			LoottableEntries e{};
 
-			e.loottable_id = atoi(row[0]);
-			e.lootdrop_id  = atoi(row[1]);
-			e.multiplier   = atoi(row[2]);
-			e.droplimit    = atoi(row[3]);
-			e.mindrop      = atoi(row[4]);
-			e.probability  = static_cast<float>(atof(row[5]));
+			e.loottable_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.lootdrop_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.multiplier   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.droplimit    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.mindrop      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.probability  = strtof(row[5], nullptr);
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoottableEntries e{};
 
-			e.loottable_id = atoi(row[0]);
-			e.lootdrop_id  = atoi(row[1]);
-			e.multiplier   = atoi(row[2]);
-			e.droplimit    = atoi(row[3]);
-			e.mindrop      = atoi(row[4]);
-			e.probability  = static_cast<float>(atof(row[5]));
+			e.loottable_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.lootdrop_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.multiplier   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.droplimit    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.mindrop      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.probability  = strtof(row[5], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoottableEntries e{};
 
-			e.loottable_id = atoi(row[0]);
-			e.lootdrop_id  = atoi(row[1]);
-			e.multiplier   = atoi(row[2]);
-			e.droplimit    = atoi(row[3]);
-			e.mindrop      = atoi(row[4]);
-			e.probability  = static_cast<float>(atof(row[5]));
+			e.loottable_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.lootdrop_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.multiplier   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.droplimit    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.mindrop      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.probability  = strtof(row[5], nullptr);
 
 			all_entries.push_back(e);
 		}

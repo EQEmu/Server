@@ -19,7 +19,7 @@
 class BaseDiscordWebhooksRepository {
 public:
 	struct DiscordWebhooks {
-		int         id;
+		int32_t     id;
 		std::string webhook_name;
 		std::string webhook_url;
 		time_t      created_at;
@@ -130,7 +130,7 @@ public:
 		if (results.RowCount() == 1) {
 			DiscordWebhooks e{};
 
-			e.id           = atoi(row[0]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
 			e.webhook_name = row[1] ? row[1] : "";
 			e.webhook_url  = row[2] ? row[2] : "";
 			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
@@ -265,7 +265,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DiscordWebhooks e{};
 
-			e.id           = atoi(row[0]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
 			e.webhook_name = row[1] ? row[1] : "";
 			e.webhook_url  = row[2] ? row[2] : "";
 			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
@@ -294,7 +294,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DiscordWebhooks e{};
 
-			e.id           = atoi(row[0]);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
 			e.webhook_name = row[1] ? row[1] : "";
 			e.webhook_url  = row[2] ? row[2] : "";
 			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);

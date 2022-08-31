@@ -19,24 +19,24 @@
 class BaseSpawn2Repository {
 public:
 	struct Spawn2 {
-		int         id;
-		int         spawngroupID;
+		int32_t     id;
+		int32_t     spawngroupID;
 		std::string zone;
-		int         version;
+		int16_t     version;
 		float       x;
 		float       y;
 		float       z;
 		float       heading;
-		int         respawntime;
-		int         variance;
-		int         pathgrid;
-		int         path_when_zone_idle;
-		int         _condition;
-		int         cond_value;
-		int         enabled;
-		int         animation;
-		int         min_expansion;
-		int         max_expansion;
+		int32_t     respawntime;
+		int32_t     variance;
+		int32_t     pathgrid;
+		int8_t      path_when_zone_idle;
+		uint32_t    _condition;
+		int32_t     cond_value;
+		uint8_t     enabled;
+		uint8_t     animation;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -190,24 +190,24 @@ public:
 		if (results.RowCount() == 1) {
 			Spawn2 e{};
 
-			e.id                     = atoi(row[0]);
-			e.spawngroupID           = atoi(row[1]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.spawngroupID           = static_cast<int32_t>(atoi(row[1]));
 			e.zone                   = row[2] ? row[2] : "";
-			e.version                = atoi(row[3]);
-			e.x                      = static_cast<float>(atof(row[4]));
-			e.y                      = static_cast<float>(atof(row[5]));
-			e.z                      = static_cast<float>(atof(row[6]));
-			e.heading                = static_cast<float>(atof(row[7]));
-			e.respawntime            = atoi(row[8]);
-			e.variance               = atoi(row[9]);
-			e.pathgrid               = atoi(row[10]);
-			e.path_when_zone_idle    = atoi(row[11]);
-			e._condition             = atoi(row[12]);
-			e.cond_value             = atoi(row[13]);
-			e.enabled                = atoi(row[14]);
-			e.animation              = atoi(row[15]);
-			e.min_expansion          = atoi(row[16]);
-			e.max_expansion          = atoi(row[17]);
+			e.version                = static_cast<int16_t>(atoi(row[3]));
+			e.x                      = strtof(row[4], nullptr);
+			e.y                      = strtof(row[5], nullptr);
+			e.z                      = strtof(row[6], nullptr);
+			e.heading                = strtof(row[7], nullptr);
+			e.respawntime            = static_cast<int32_t>(atoi(row[8]));
+			e.variance               = static_cast<int32_t>(atoi(row[9]));
+			e.pathgrid               = static_cast<int32_t>(atoi(row[10]));
+			e.path_when_zone_idle    = static_cast<int8_t>(atoi(row[11]));
+			e._condition             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.cond_value             = static_cast<int32_t>(atoi(row[13]));
+			e.enabled                = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.animation              = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[16]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[17]));
 			e.content_flags          = row[18] ? row[18] : "";
 			e.content_flags_disabled = row[19] ? row[19] : "";
 
@@ -385,24 +385,24 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawn2 e{};
 
-			e.id                     = atoi(row[0]);
-			e.spawngroupID           = atoi(row[1]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.spawngroupID           = static_cast<int32_t>(atoi(row[1]));
 			e.zone                   = row[2] ? row[2] : "";
-			e.version                = atoi(row[3]);
-			e.x                      = static_cast<float>(atof(row[4]));
-			e.y                      = static_cast<float>(atof(row[5]));
-			e.z                      = static_cast<float>(atof(row[6]));
-			e.heading                = static_cast<float>(atof(row[7]));
-			e.respawntime            = atoi(row[8]);
-			e.variance               = atoi(row[9]);
-			e.pathgrid               = atoi(row[10]);
-			e.path_when_zone_idle    = atoi(row[11]);
-			e._condition             = atoi(row[12]);
-			e.cond_value             = atoi(row[13]);
-			e.enabled                = atoi(row[14]);
-			e.animation              = atoi(row[15]);
-			e.min_expansion          = atoi(row[16]);
-			e.max_expansion          = atoi(row[17]);
+			e.version                = static_cast<int16_t>(atoi(row[3]));
+			e.x                      = strtof(row[4], nullptr);
+			e.y                      = strtof(row[5], nullptr);
+			e.z                      = strtof(row[6], nullptr);
+			e.heading                = strtof(row[7], nullptr);
+			e.respawntime            = static_cast<int32_t>(atoi(row[8]));
+			e.variance               = static_cast<int32_t>(atoi(row[9]));
+			e.pathgrid               = static_cast<int32_t>(atoi(row[10]));
+			e.path_when_zone_idle    = static_cast<int8_t>(atoi(row[11]));
+			e._condition             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.cond_value             = static_cast<int32_t>(atoi(row[13]));
+			e.enabled                = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.animation              = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[16]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[17]));
 			e.content_flags          = row[18] ? row[18] : "";
 			e.content_flags_disabled = row[19] ? row[19] : "";
 
@@ -429,24 +429,24 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawn2 e{};
 
-			e.id                     = atoi(row[0]);
-			e.spawngroupID           = atoi(row[1]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.spawngroupID           = static_cast<int32_t>(atoi(row[1]));
 			e.zone                   = row[2] ? row[2] : "";
-			e.version                = atoi(row[3]);
-			e.x                      = static_cast<float>(atof(row[4]));
-			e.y                      = static_cast<float>(atof(row[5]));
-			e.z                      = static_cast<float>(atof(row[6]));
-			e.heading                = static_cast<float>(atof(row[7]));
-			e.respawntime            = atoi(row[8]);
-			e.variance               = atoi(row[9]);
-			e.pathgrid               = atoi(row[10]);
-			e.path_when_zone_idle    = atoi(row[11]);
-			e._condition             = atoi(row[12]);
-			e.cond_value             = atoi(row[13]);
-			e.enabled                = atoi(row[14]);
-			e.animation              = atoi(row[15]);
-			e.min_expansion          = atoi(row[16]);
-			e.max_expansion          = atoi(row[17]);
+			e.version                = static_cast<int16_t>(atoi(row[3]));
+			e.x                      = strtof(row[4], nullptr);
+			e.y                      = strtof(row[5], nullptr);
+			e.z                      = strtof(row[6], nullptr);
+			e.heading                = strtof(row[7], nullptr);
+			e.respawntime            = static_cast<int32_t>(atoi(row[8]));
+			e.variance               = static_cast<int32_t>(atoi(row[9]));
+			e.pathgrid               = static_cast<int32_t>(atoi(row[10]));
+			e.path_when_zone_idle    = static_cast<int8_t>(atoi(row[11]));
+			e._condition             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.cond_value             = static_cast<int32_t>(atoi(row[13]));
+			e.enabled                = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.animation              = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[16]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[17]));
 			e.content_flags          = row[18] ? row[18] : "";
 			e.content_flags_disabled = row[19] ? row[19] : "";
 

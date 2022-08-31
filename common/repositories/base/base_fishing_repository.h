@@ -19,15 +19,15 @@
 class BaseFishingRepository {
 public:
 	struct Fishing {
-		int         id;
-		int         zoneid;
-		int         Itemid;
-		int         skill_level;
-		int         chance;
-		int         npc_id;
-		int         npc_chance;
-		int         min_expansion;
-		int         max_expansion;
+		int32_t     id;
+		int32_t     zoneid;
+		int32_t     Itemid;
+		int16_t     skill_level;
+		int16_t     chance;
+		int32_t     npc_id;
+		int32_t     npc_chance;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -154,15 +154,15 @@ public:
 		if (results.RowCount() == 1) {
 			Fishing e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.Itemid                 = atoi(row[2]);
-			e.skill_level            = atoi(row[3]);
-			e.chance                 = atoi(row[4]);
-			e.npc_id                 = atoi(row[5]);
-			e.npc_chance             = atoi(row[6]);
-			e.min_expansion          = atoi(row[7]);
-			e.max_expansion          = atoi(row[8]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
+			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
+			e.skill_level            = static_cast<int16_t>(atoi(row[3]));
+			e.chance                 = static_cast<int16_t>(atoi(row[4]));
+			e.npc_id                 = static_cast<int32_t>(atoi(row[5]));
+			e.npc_chance             = static_cast<int32_t>(atoi(row[6]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[8]));
 			e.content_flags          = row[9] ? row[9] : "";
 			e.content_flags_disabled = row[10] ? row[10] : "";
 
@@ -313,15 +313,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Fishing e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.Itemid                 = atoi(row[2]);
-			e.skill_level            = atoi(row[3]);
-			e.chance                 = atoi(row[4]);
-			e.npc_id                 = atoi(row[5]);
-			e.npc_chance             = atoi(row[6]);
-			e.min_expansion          = atoi(row[7]);
-			e.max_expansion          = atoi(row[8]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
+			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
+			e.skill_level            = static_cast<int16_t>(atoi(row[3]));
+			e.chance                 = static_cast<int16_t>(atoi(row[4]));
+			e.npc_id                 = static_cast<int32_t>(atoi(row[5]));
+			e.npc_chance             = static_cast<int32_t>(atoi(row[6]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[8]));
 			e.content_flags          = row[9] ? row[9] : "";
 			e.content_flags_disabled = row[10] ? row[10] : "";
 
@@ -348,15 +348,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Fishing e{};
 
-			e.id                     = atoi(row[0]);
-			e.zoneid                 = atoi(row[1]);
-			e.Itemid                 = atoi(row[2]);
-			e.skill_level            = atoi(row[3]);
-			e.chance                 = atoi(row[4]);
-			e.npc_id                 = atoi(row[5]);
-			e.npc_chance             = atoi(row[6]);
-			e.min_expansion          = atoi(row[7]);
-			e.max_expansion          = atoi(row[8]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
+			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
+			e.skill_level            = static_cast<int16_t>(atoi(row[3]));
+			e.chance                 = static_cast<int16_t>(atoi(row[4]));
+			e.npc_id                 = static_cast<int32_t>(atoi(row[5]));
+			e.npc_chance             = static_cast<int32_t>(atoi(row[6]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[8]));
 			e.content_flags          = row[9] ? row[9] : "";
 			e.content_flags_disabled = row[10] ? row[10] : "";
 

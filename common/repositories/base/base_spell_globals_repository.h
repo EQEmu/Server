@@ -19,7 +19,7 @@
 class BaseSpellGlobalsRepository {
 public:
 	struct SpellGlobals {
-		int         spellid;
+		int32_t     spellid;
 		std::string spell_name;
 		std::string qglobal;
 		std::string value;
@@ -126,7 +126,7 @@ public:
 		if (results.RowCount() == 1) {
 			SpellGlobals e{};
 
-			e.spellid    = atoi(row[0]);
+			e.spellid    = static_cast<int32_t>(atoi(row[0]));
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";
@@ -258,7 +258,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellGlobals e{};
 
-			e.spellid    = atoi(row[0]);
+			e.spellid    = static_cast<int32_t>(atoi(row[0]));
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";
@@ -286,7 +286,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellGlobals e{};
 
-			e.spellid    = atoi(row[0]);
+			e.spellid    = static_cast<int32_t>(atoi(row[0]));
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";

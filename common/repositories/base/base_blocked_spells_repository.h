@@ -19,10 +19,10 @@
 class BaseBlockedSpellsRepository {
 public:
 	struct BlockedSpells {
-		int         id;
-		int         spellid;
-		int         type;
-		int         zoneid;
+		int32_t     id;
+		uint32_t    spellid;
+		int8_t      type;
+		int32_t     zoneid;
 		float       x;
 		float       y;
 		float       z;
@@ -158,16 +158,16 @@ public:
 		if (results.RowCount() == 1) {
 			BlockedSpells e{};
 
-			e.id          = atoi(row[0]);
-			e.spellid     = atoi(row[1]);
-			e.type        = atoi(row[2]);
-			e.zoneid      = atoi(row[3]);
-			e.x           = static_cast<float>(atof(row[4]));
-			e.y           = static_cast<float>(atof(row[5]));
-			e.z           = static_cast<float>(atof(row[6]));
-			e.x_diff      = static_cast<float>(atof(row[7]));
-			e.y_diff      = static_cast<float>(atof(row[8]));
-			e.z_diff      = static_cast<float>(atof(row[9]));
+			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.spellid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.type        = static_cast<int8_t>(atoi(row[2]));
+			e.zoneid      = static_cast<int32_t>(atoi(row[3]));
+			e.x           = strtof(row[4], nullptr);
+			e.y           = strtof(row[5], nullptr);
+			e.z           = strtof(row[6], nullptr);
+			e.x_diff      = strtof(row[7], nullptr);
+			e.y_diff      = strtof(row[8], nullptr);
+			e.z_diff      = strtof(row[9], nullptr);
 			e.message     = row[10] ? row[10] : "";
 			e.description = row[11] ? row[11] : "";
 
@@ -321,16 +321,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BlockedSpells e{};
 
-			e.id          = atoi(row[0]);
-			e.spellid     = atoi(row[1]);
-			e.type        = atoi(row[2]);
-			e.zoneid      = atoi(row[3]);
-			e.x           = static_cast<float>(atof(row[4]));
-			e.y           = static_cast<float>(atof(row[5]));
-			e.z           = static_cast<float>(atof(row[6]));
-			e.x_diff      = static_cast<float>(atof(row[7]));
-			e.y_diff      = static_cast<float>(atof(row[8]));
-			e.z_diff      = static_cast<float>(atof(row[9]));
+			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.spellid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.type        = static_cast<int8_t>(atoi(row[2]));
+			e.zoneid      = static_cast<int32_t>(atoi(row[3]));
+			e.x           = strtof(row[4], nullptr);
+			e.y           = strtof(row[5], nullptr);
+			e.z           = strtof(row[6], nullptr);
+			e.x_diff      = strtof(row[7], nullptr);
+			e.y_diff      = strtof(row[8], nullptr);
+			e.z_diff      = strtof(row[9], nullptr);
 			e.message     = row[10] ? row[10] : "";
 			e.description = row[11] ? row[11] : "";
 
@@ -357,16 +357,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BlockedSpells e{};
 
-			e.id          = atoi(row[0]);
-			e.spellid     = atoi(row[1]);
-			e.type        = atoi(row[2]);
-			e.zoneid      = atoi(row[3]);
-			e.x           = static_cast<float>(atof(row[4]));
-			e.y           = static_cast<float>(atof(row[5]));
-			e.z           = static_cast<float>(atof(row[6]));
-			e.x_diff      = static_cast<float>(atof(row[7]));
-			e.y_diff      = static_cast<float>(atof(row[8]));
-			e.z_diff      = static_cast<float>(atof(row[9]));
+			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.spellid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.type        = static_cast<int8_t>(atoi(row[2]));
+			e.zoneid      = static_cast<int32_t>(atoi(row[3]));
+			e.x           = strtof(row[4], nullptr);
+			e.y           = strtof(row[5], nullptr);
+			e.z           = strtof(row[6], nullptr);
+			e.x_diff      = strtof(row[7], nullptr);
+			e.y_diff      = strtof(row[8], nullptr);
+			e.z_diff      = strtof(row[9], nullptr);
 			e.message     = row[10] ? row[10] : "";
 			e.description = row[11] ? row[11] : "";
 

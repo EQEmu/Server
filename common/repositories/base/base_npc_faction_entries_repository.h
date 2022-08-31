@@ -19,11 +19,11 @@
 class BaseNpcFactionEntriesRepository {
 public:
 	struct NpcFactionEntries {
-		int npc_faction_id;
-		int faction_id;
-		int value;
-		int npc_value;
-		int temp;
+		uint32_t npc_faction_id;
+		uint32_t faction_id;
+		int32_t  value;
+		int8_t   npc_value;
+		int8_t   temp;
 	};
 
 	static std::string PrimaryKey()
@@ -130,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			NpcFactionEntries e{};
 
-			e.npc_faction_id = atoi(row[0]);
-			e.faction_id     = atoi(row[1]);
-			e.value          = atoi(row[2]);
-			e.npc_value      = atoi(row[3]);
-			e.temp           = atoi(row[4]);
+			e.npc_faction_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.faction_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.value          = static_cast<int32_t>(atoi(row[2]));
+			e.npc_value      = static_cast<int8_t>(atoi(row[3]));
+			e.temp           = static_cast<int8_t>(atoi(row[4]));
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcFactionEntries e{};
 
-			e.npc_faction_id = atoi(row[0]);
-			e.faction_id     = atoi(row[1]);
-			e.value          = atoi(row[2]);
-			e.npc_value      = atoi(row[3]);
-			e.temp           = atoi(row[4]);
+			e.npc_faction_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.faction_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.value          = static_cast<int32_t>(atoi(row[2]));
+			e.npc_value      = static_cast<int8_t>(atoi(row[3]));
+			e.temp           = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcFactionEntries e{};
 
-			e.npc_faction_id = atoi(row[0]);
-			e.faction_id     = atoi(row[1]);
-			e.value          = atoi(row[2]);
-			e.npc_value      = atoi(row[3]);
-			e.temp           = atoi(row[4]);
+			e.npc_faction_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.faction_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.value          = static_cast<int32_t>(atoi(row[2]));
+			e.npc_value      = static_cast<int8_t>(atoi(row[3]));
+			e.temp           = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}

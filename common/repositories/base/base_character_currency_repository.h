@@ -19,23 +19,23 @@
 class BaseCharacterCurrencyRepository {
 public:
 	struct CharacterCurrency {
-		int id;
-		int platinum;
-		int gold;
-		int silver;
-		int copper;
-		int platinum_bank;
-		int gold_bank;
-		int silver_bank;
-		int copper_bank;
-		int platinum_cursor;
-		int gold_cursor;
-		int silver_cursor;
-		int copper_cursor;
-		int radiant_crystals;
-		int career_radiant_crystals;
-		int ebon_crystals;
-		int career_ebon_crystals;
+		uint32_t id;
+		uint32_t platinum;
+		uint32_t gold;
+		uint32_t silver;
+		uint32_t copper;
+		uint32_t platinum_bank;
+		uint32_t gold_bank;
+		uint32_t silver_bank;
+		uint32_t copper_bank;
+		uint32_t platinum_cursor;
+		uint32_t gold_cursor;
+		uint32_t silver_cursor;
+		uint32_t copper_cursor;
+		uint32_t radiant_crystals;
+		uint32_t career_radiant_crystals;
+		uint32_t ebon_crystals;
+		uint32_t career_ebon_crystals;
 	};
 
 	static std::string PrimaryKey()
@@ -178,23 +178,23 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterCurrency e{};
 
-			e.id                      = atoi(row[0]);
-			e.platinum                = atoi(row[1]);
-			e.gold                    = atoi(row[2]);
-			e.silver                  = atoi(row[3]);
-			e.copper                  = atoi(row[4]);
-			e.platinum_bank           = atoi(row[5]);
-			e.gold_bank               = atoi(row[6]);
-			e.silver_bank             = atoi(row[7]);
-			e.copper_bank             = atoi(row[8]);
-			e.platinum_cursor         = atoi(row[9]);
-			e.gold_cursor             = atoi(row[10]);
-			e.silver_cursor           = atoi(row[11]);
-			e.copper_cursor           = atoi(row[12]);
-			e.radiant_crystals        = atoi(row[13]);
-			e.career_radiant_crystals = atoi(row[14]);
-			e.ebon_crystals           = atoi(row[15]);
-			e.career_ebon_crystals    = atoi(row[16]);
+			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.platinum                = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.gold                    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.silver                  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.copper                  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.platinum_bank           = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.gold_bank               = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.silver_bank             = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.copper_bank             = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.platinum_cursor         = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.gold_cursor             = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.silver_cursor           = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
+			e.copper_cursor           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.radiant_crystals        = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.career_radiant_crystals = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.ebon_crystals           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
+			e.career_ebon_crystals    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
 
 			return e;
 		}
@@ -362,23 +362,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCurrency e{};
 
-			e.id                      = atoi(row[0]);
-			e.platinum                = atoi(row[1]);
-			e.gold                    = atoi(row[2]);
-			e.silver                  = atoi(row[3]);
-			e.copper                  = atoi(row[4]);
-			e.platinum_bank           = atoi(row[5]);
-			e.gold_bank               = atoi(row[6]);
-			e.silver_bank             = atoi(row[7]);
-			e.copper_bank             = atoi(row[8]);
-			e.platinum_cursor         = atoi(row[9]);
-			e.gold_cursor             = atoi(row[10]);
-			e.silver_cursor           = atoi(row[11]);
-			e.copper_cursor           = atoi(row[12]);
-			e.radiant_crystals        = atoi(row[13]);
-			e.career_radiant_crystals = atoi(row[14]);
-			e.ebon_crystals           = atoi(row[15]);
-			e.career_ebon_crystals    = atoi(row[16]);
+			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.platinum                = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.gold                    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.silver                  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.copper                  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.platinum_bank           = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.gold_bank               = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.silver_bank             = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.copper_bank             = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.platinum_cursor         = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.gold_cursor             = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.silver_cursor           = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
+			e.copper_cursor           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.radiant_crystals        = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.career_radiant_crystals = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.ebon_crystals           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
+			e.career_ebon_crystals    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -403,23 +403,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCurrency e{};
 
-			e.id                      = atoi(row[0]);
-			e.platinum                = atoi(row[1]);
-			e.gold                    = atoi(row[2]);
-			e.silver                  = atoi(row[3]);
-			e.copper                  = atoi(row[4]);
-			e.platinum_bank           = atoi(row[5]);
-			e.gold_bank               = atoi(row[6]);
-			e.silver_bank             = atoi(row[7]);
-			e.copper_bank             = atoi(row[8]);
-			e.platinum_cursor         = atoi(row[9]);
-			e.gold_cursor             = atoi(row[10]);
-			e.silver_cursor           = atoi(row[11]);
-			e.copper_cursor           = atoi(row[12]);
-			e.radiant_crystals        = atoi(row[13]);
-			e.career_radiant_crystals = atoi(row[14]);
-			e.ebon_crystals           = atoi(row[15]);
-			e.career_ebon_crystals    = atoi(row[16]);
+			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.platinum                = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.gold                    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.silver                  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.copper                  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.platinum_bank           = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.gold_bank               = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.silver_bank             = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.copper_bank             = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.platinum_cursor         = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.gold_cursor             = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.silver_cursor           = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
+			e.copper_cursor           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.radiant_crystals        = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.career_radiant_crystals = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.ebon_crystals           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
+			e.career_ebon_crystals    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

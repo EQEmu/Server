@@ -19,12 +19,12 @@
 class BaseBuyerRepository {
 public:
 	struct Buyer {
-		int         charid;
-		int         buyslot;
-		int         itemid;
+		int32_t     charid;
+		int32_t     buyslot;
+		int32_t     itemid;
 		std::string itemname;
-		int         quantity;
-		int         price;
+		int32_t     quantity;
+		int32_t     price;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			Buyer e{};
 
-			e.charid   = atoi(row[0]);
-			e.buyslot  = atoi(row[1]);
-			e.itemid   = atoi(row[2]);
+			e.charid   = static_cast<int32_t>(atoi(row[0]));
+			e.buyslot  = static_cast<int32_t>(atoi(row[1]));
+			e.itemid   = static_cast<int32_t>(atoi(row[2]));
 			e.itemname = row[3] ? row[3] : "";
-			e.quantity = atoi(row[4]);
-			e.price    = atoi(row[5]);
+			e.quantity = static_cast<int32_t>(atoi(row[4]));
+			e.price    = static_cast<int32_t>(atoi(row[5]));
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Buyer e{};
 
-			e.charid   = atoi(row[0]);
-			e.buyslot  = atoi(row[1]);
-			e.itemid   = atoi(row[2]);
+			e.charid   = static_cast<int32_t>(atoi(row[0]));
+			e.buyslot  = static_cast<int32_t>(atoi(row[1]));
+			e.itemid   = static_cast<int32_t>(atoi(row[2]));
 			e.itemname = row[3] ? row[3] : "";
-			e.quantity = atoi(row[4]);
-			e.price    = atoi(row[5]);
+			e.quantity = static_cast<int32_t>(atoi(row[4]));
+			e.price    = static_cast<int32_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Buyer e{};
 
-			e.charid   = atoi(row[0]);
-			e.buyslot  = atoi(row[1]);
-			e.itemid   = atoi(row[2]);
+			e.charid   = static_cast<int32_t>(atoi(row[0]));
+			e.buyslot  = static_cast<int32_t>(atoi(row[1]));
+			e.itemid   = static_cast<int32_t>(atoi(row[2]));
 			e.itemname = row[3] ? row[3] : "";
-			e.quantity = atoi(row[4]);
-			e.price    = atoi(row[5]);
+			e.quantity = static_cast<int32_t>(atoi(row[4]));
+			e.price    = static_cast<int32_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}

@@ -19,8 +19,8 @@
 class BaseCharacterPeqzoneFlagsRepository {
 public:
 	struct CharacterPeqzoneFlags {
-		int id;
-		int zone_id;
+		int32_t id;
+		int32_t zone_id;
 	};
 
 	static std::string PrimaryKey()
@@ -118,8 +118,8 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPeqzoneFlags e{};
 
-			e.id      = atoi(row[0]);
-			e.zone_id = atoi(row[1]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id = static_cast<int32_t>(atoi(row[1]));
 
 			return e;
 		}
@@ -242,8 +242,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPeqzoneFlags e{};
 
-			e.id      = atoi(row[0]);
-			e.zone_id = atoi(row[1]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id = static_cast<int32_t>(atoi(row[1]));
 
 			all_entries.push_back(e);
 		}
@@ -268,8 +268,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPeqzoneFlags e{};
 
-			e.id      = atoi(row[0]);
-			e.zone_id = atoi(row[1]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id = static_cast<int32_t>(atoi(row[1]));
 
 			all_entries.push_back(e);
 		}

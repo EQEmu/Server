@@ -19,10 +19,10 @@
 class BaseGridRepository {
 public:
 	struct Grid {
-		int id;
-		int zoneid;
-		int type;
-		int type2;
+		int32_t id;
+		int32_t zoneid;
+		int32_t type;
+		int32_t type2;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			Grid e{};
 
-			e.id     = atoi(row[0]);
-			e.zoneid = atoi(row[1]);
-			e.type   = atoi(row[2]);
-			e.type2  = atoi(row[3]);
+			e.id     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid = static_cast<int32_t>(atoi(row[1]));
+			e.type   = static_cast<int32_t>(atoi(row[2]));
+			e.type2  = static_cast<int32_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Grid e{};
 
-			e.id     = atoi(row[0]);
-			e.zoneid = atoi(row[1]);
-			e.type   = atoi(row[2]);
-			e.type2  = atoi(row[3]);
+			e.id     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid = static_cast<int32_t>(atoi(row[1]));
+			e.type   = static_cast<int32_t>(atoi(row[2]));
+			e.type2  = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Grid e{};
 
-			e.id     = atoi(row[0]);
-			e.zoneid = atoi(row[1]);
-			e.type   = atoi(row[2]);
-			e.type2  = atoi(row[3]);
+			e.id     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid = static_cast<int32_t>(atoi(row[1]));
+			e.type   = static_cast<int32_t>(atoi(row[2]));
+			e.type2  = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

@@ -19,8 +19,8 @@
 class BaseDbStrRepository {
 public:
 	struct DbStr {
-		int         id;
-		int         type;
+		int32_t     id;
+		int32_t     type;
 		std::string value;
 	};
 
@@ -122,8 +122,8 @@ public:
 		if (results.RowCount() == 1) {
 			DbStr e{};
 
-			e.id    = atoi(row[0]);
-			e.type  = atoi(row[1]);
+			e.id    = static_cast<int32_t>(atoi(row[0]));
+			e.type  = static_cast<int32_t>(atoi(row[1]));
 			e.value = row[2] ? row[2] : "";
 
 			return e;
@@ -250,8 +250,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DbStr e{};
 
-			e.id    = atoi(row[0]);
-			e.type  = atoi(row[1]);
+			e.id    = static_cast<int32_t>(atoi(row[0]));
+			e.type  = static_cast<int32_t>(atoi(row[1]));
 			e.value = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -277,8 +277,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DbStr e{};
 
-			e.id    = atoi(row[0]);
-			e.type  = atoi(row[1]);
+			e.id    = static_cast<int32_t>(atoi(row[0]));
+			e.type  = static_cast<int32_t>(atoi(row[1]));
 			e.value = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);

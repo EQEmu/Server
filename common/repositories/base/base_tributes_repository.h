@@ -19,11 +19,11 @@
 class BaseTributesRepository {
 public:
 	struct Tributes {
-		int         id;
-		int         unknown;
+		uint32_t    id;
+		uint32_t    unknown;
 		std::string name;
 		std::string descr;
-		int         isguild;
+		int8_t      isguild;
 	};
 
 	static std::string PrimaryKey()
@@ -130,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			Tributes e{};
 
-			e.id      = atoi(row[0]);
-			e.unknown = atoi(row[1]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.unknown = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.name    = row[2] ? row[2] : "";
 			e.descr   = row[3] ? row[3] : "";
-			e.isguild = atoi(row[4]);
+			e.isguild = static_cast<int8_t>(atoi(row[4]));
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Tributes e{};
 
-			e.id      = atoi(row[0]);
-			e.unknown = atoi(row[1]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.unknown = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.name    = row[2] ? row[2] : "";
 			e.descr   = row[3] ? row[3] : "";
-			e.isguild = atoi(row[4]);
+			e.isguild = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Tributes e{};
 
-			e.id      = atoi(row[0]);
-			e.unknown = atoi(row[1]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.unknown = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.name    = row[2] ? row[2] : "";
 			e.descr   = row[3] ? row[3] : "";
-			e.isguild = atoi(row[4]);
+			e.isguild = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}

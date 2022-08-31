@@ -19,7 +19,7 @@
 class BaseAdventureTemplateEntryFlavorRepository {
 public:
 	struct AdventureTemplateEntryFlavor {
-		int         id;
+		uint32_t    id;
 		std::string text;
 	};
 
@@ -118,7 +118,7 @@ public:
 		if (results.RowCount() == 1) {
 			AdventureTemplateEntryFlavor e{};
 
-			e.id   = atoi(row[0]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.text = row[1] ? row[1] : "";
 
 			return e;
@@ -242,7 +242,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureTemplateEntryFlavor e{};
 
-			e.id   = atoi(row[0]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.text = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);
@@ -268,7 +268,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureTemplateEntryFlavor e{};
 
-			e.id   = atoi(row[0]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.text = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);

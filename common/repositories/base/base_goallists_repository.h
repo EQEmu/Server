@@ -19,8 +19,8 @@
 class BaseGoallistsRepository {
 public:
 	struct Goallists {
-		int listid;
-		int entry;
+		uint32_t listid;
+		uint32_t entry;
 	};
 
 	static std::string PrimaryKey()
@@ -118,8 +118,8 @@ public:
 		if (results.RowCount() == 1) {
 			Goallists e{};
 
-			e.listid = atoi(row[0]);
-			e.entry  = atoi(row[1]);
+			e.listid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.entry  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
 			return e;
 		}
@@ -242,8 +242,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Goallists e{};
 
-			e.listid = atoi(row[0]);
-			e.entry  = atoi(row[1]);
+			e.listid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.entry  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -268,8 +268,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Goallists e{};
 
-			e.listid = atoi(row[0]);
-			e.entry  = atoi(row[1]);
+			e.listid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.entry  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

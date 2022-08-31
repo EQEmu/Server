@@ -19,17 +19,17 @@
 class BaseStartingItemsRepository {
 public:
 	struct StartingItems {
-		int         id;
-		int         race;
-		int         class_;
-		int         deityid;
-		int         zoneid;
-		int         itemid;
-		int         item_charges;
-		int         gm;
-		int         slot;
-		int         min_expansion;
-		int         max_expansion;
+		uint32_t    id;
+		int32_t     race;
+		int32_t     class_;
+		int32_t     deityid;
+		int32_t     zoneid;
+		int32_t     itemid;
+		uint8_t     item_charges;
+		int8_t      gm;
+		int32_t     slot;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -162,17 +162,17 @@ public:
 		if (results.RowCount() == 1) {
 			StartingItems e{};
 
-			e.id                     = atoi(row[0]);
-			e.race                   = atoi(row[1]);
-			e.class_                 = atoi(row[2]);
-			e.deityid                = atoi(row[3]);
-			e.zoneid                 = atoi(row[4]);
-			e.itemid                 = atoi(row[5]);
-			e.item_charges           = atoi(row[6]);
-			e.gm                     = atoi(row[7]);
-			e.slot                   = atoi(row[8]);
-			e.min_expansion          = atoi(row[9]);
-			e.max_expansion          = atoi(row[10]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race                   = static_cast<int32_t>(atoi(row[1]));
+			e.class_                 = static_cast<int32_t>(atoi(row[2]));
+			e.deityid                = static_cast<int32_t>(atoi(row[3]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[4]));
+			e.itemid                 = static_cast<int32_t>(atoi(row[5]));
+			e.item_charges           = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.gm                     = static_cast<int8_t>(atoi(row[7]));
+			e.slot                   = static_cast<int32_t>(atoi(row[8]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
 			e.content_flags          = row[11] ? row[11] : "";
 			e.content_flags_disabled = row[12] ? row[12] : "";
 
@@ -329,17 +329,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartingItems e{};
 
-			e.id                     = atoi(row[0]);
-			e.race                   = atoi(row[1]);
-			e.class_                 = atoi(row[2]);
-			e.deityid                = atoi(row[3]);
-			e.zoneid                 = atoi(row[4]);
-			e.itemid                 = atoi(row[5]);
-			e.item_charges           = atoi(row[6]);
-			e.gm                     = atoi(row[7]);
-			e.slot                   = atoi(row[8]);
-			e.min_expansion          = atoi(row[9]);
-			e.max_expansion          = atoi(row[10]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race                   = static_cast<int32_t>(atoi(row[1]));
+			e.class_                 = static_cast<int32_t>(atoi(row[2]));
+			e.deityid                = static_cast<int32_t>(atoi(row[3]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[4]));
+			e.itemid                 = static_cast<int32_t>(atoi(row[5]));
+			e.item_charges           = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.gm                     = static_cast<int8_t>(atoi(row[7]));
+			e.slot                   = static_cast<int32_t>(atoi(row[8]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
 			e.content_flags          = row[11] ? row[11] : "";
 			e.content_flags_disabled = row[12] ? row[12] : "";
 
@@ -366,17 +366,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartingItems e{};
 
-			e.id                     = atoi(row[0]);
-			e.race                   = atoi(row[1]);
-			e.class_                 = atoi(row[2]);
-			e.deityid                = atoi(row[3]);
-			e.zoneid                 = atoi(row[4]);
-			e.itemid                 = atoi(row[5]);
-			e.item_charges           = atoi(row[6]);
-			e.gm                     = atoi(row[7]);
-			e.slot                   = atoi(row[8]);
-			e.min_expansion          = atoi(row[9]);
-			e.max_expansion          = atoi(row[10]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race                   = static_cast<int32_t>(atoi(row[1]));
+			e.class_                 = static_cast<int32_t>(atoi(row[2]));
+			e.deityid                = static_cast<int32_t>(atoi(row[3]));
+			e.zoneid                 = static_cast<int32_t>(atoi(row[4]));
+			e.itemid                 = static_cast<int32_t>(atoi(row[5]));
+			e.item_charges           = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.gm                     = static_cast<int8_t>(atoi(row[7]));
+			e.slot                   = static_cast<int32_t>(atoi(row[8]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
 			e.content_flags          = row[11] ? row[11] : "";
 			e.content_flags_disabled = row[12] ? row[12] : "";
 

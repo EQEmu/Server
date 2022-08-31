@@ -19,9 +19,9 @@
 class BaseCharRecipeListRepository {
 public:
 	struct CharRecipeList {
-		int char_id;
-		int recipe_id;
-		int madecount;
+		int32_t char_id;
+		int32_t recipe_id;
+		int32_t madecount;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharRecipeList e{};
 
-			e.char_id   = atoi(row[0]);
-			e.recipe_id = atoi(row[1]);
-			e.madecount = atoi(row[2]);
+			e.char_id   = static_cast<int32_t>(atoi(row[0]));
+			e.recipe_id = static_cast<int32_t>(atoi(row[1]));
+			e.madecount = static_cast<int32_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharRecipeList e{};
 
-			e.char_id   = atoi(row[0]);
-			e.recipe_id = atoi(row[1]);
-			e.madecount = atoi(row[2]);
+			e.char_id   = static_cast<int32_t>(atoi(row[0]));
+			e.recipe_id = static_cast<int32_t>(atoi(row[1]));
+			e.madecount = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharRecipeList e{};
 
-			e.char_id   = atoi(row[0]);
-			e.recipe_id = atoi(row[1]);
-			e.madecount = atoi(row[2]);
+			e.char_id   = static_cast<int32_t>(atoi(row[0]));
+			e.recipe_id = static_cast<int32_t>(atoi(row[1]));
+			e.madecount = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

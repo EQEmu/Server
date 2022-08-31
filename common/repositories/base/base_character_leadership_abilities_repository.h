@@ -19,9 +19,9 @@
 class BaseCharacterLeadershipAbilitiesRepository {
 public:
 	struct CharacterLeadershipAbilities {
-		int id;
-		int slot;
-		int rank;
+		uint32_t id;
+		uint16_t slot;
+		uint16_t rank;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterLeadershipAbilities e{};
 
-			e.id   = atoi(row[0]);
-			e.slot = atoi(row[1]);
-			e.rank = atoi(row[2]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterLeadershipAbilities e{};
 
-			e.id   = atoi(row[0]);
-			e.slot = atoi(row[1]);
-			e.rank = atoi(row[2]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterLeadershipAbilities e{};
 
-			e.id   = atoi(row[0]);
-			e.slot = atoi(row[1]);
-			e.rank = atoi(row[2]);
+			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

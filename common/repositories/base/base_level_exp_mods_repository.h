@@ -19,9 +19,9 @@
 class BaseLevelExpModsRepository {
 public:
 	struct LevelExpMods {
-		int   level;
-		float exp_mod;
-		float aa_exp_mod;
+		int32_t level;
+		float   exp_mod;
+		float   aa_exp_mod;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			LevelExpMods e{};
 
-			e.level      = atoi(row[0]);
-			e.exp_mod    = static_cast<float>(atof(row[1]));
-			e.aa_exp_mod = static_cast<float>(atof(row[2]));
+			e.level      = static_cast<int32_t>(atoi(row[0]));
+			e.exp_mod    = strtof(row[1], nullptr);
+			e.aa_exp_mod = strtof(row[2], nullptr);
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LevelExpMods e{};
 
-			e.level      = atoi(row[0]);
-			e.exp_mod    = static_cast<float>(atof(row[1]));
-			e.aa_exp_mod = static_cast<float>(atof(row[2]));
+			e.level      = static_cast<int32_t>(atoi(row[0]));
+			e.exp_mod    = strtof(row[1], nullptr);
+			e.aa_exp_mod = strtof(row[2], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LevelExpMods e{};
 
-			e.level      = atoi(row[0]);
-			e.exp_mod    = static_cast<float>(atof(row[1]));
-			e.aa_exp_mod = static_cast<float>(atof(row[2]));
+			e.level      = static_cast<int32_t>(atoi(row[0]));
+			e.exp_mod    = strtof(row[1], nullptr);
+			e.aa_exp_mod = strtof(row[2], nullptr);
 
 			all_entries.push_back(e);
 		}

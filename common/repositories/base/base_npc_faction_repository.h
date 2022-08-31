@@ -19,10 +19,10 @@
 class BaseNpcFactionRepository {
 public:
 	struct NpcFaction {
-		int         id;
+		int32_t     id;
 		std::string name;
-		int         primaryfaction;
-		int         ignore_primary_assist;
+		int32_t     primaryfaction;
+		int8_t      ignore_primary_assist;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			NpcFaction e{};
 
-			e.id                    = atoi(row[0]);
+			e.id                    = static_cast<int32_t>(atoi(row[0]));
 			e.name                  = row[1] ? row[1] : "";
-			e.primaryfaction        = atoi(row[2]);
-			e.ignore_primary_assist = atoi(row[3]);
+			e.primaryfaction        = static_cast<int32_t>(atoi(row[2]));
+			e.ignore_primary_assist = static_cast<int8_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -257,10 +257,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcFaction e{};
 
-			e.id                    = atoi(row[0]);
+			e.id                    = static_cast<int32_t>(atoi(row[0]));
 			e.name                  = row[1] ? row[1] : "";
-			e.primaryfaction        = atoi(row[2]);
-			e.ignore_primary_assist = atoi(row[3]);
+			e.primaryfaction        = static_cast<int32_t>(atoi(row[2]));
+			e.ignore_primary_assist = static_cast<int8_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -285,10 +285,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcFaction e{};
 
-			e.id                    = atoi(row[0]);
+			e.id                    = static_cast<int32_t>(atoi(row[0]));
 			e.name                  = row[1] ? row[1] : "";
-			e.primaryfaction        = atoi(row[2]);
-			e.ignore_primary_assist = atoi(row[3]);
+			e.primaryfaction        = static_cast<int32_t>(atoi(row[2]));
+			e.ignore_primary_assist = static_cast<int8_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

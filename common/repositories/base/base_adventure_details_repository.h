@@ -19,15 +19,15 @@
 class BaseAdventureDetailsRepository {
 public:
 	struct AdventureDetails {
-		int id;
-		int adventure_id;
-		int instance_id;
-		int count;
-		int assassinate_count;
-		int status;
-		int time_created;
-		int time_zoned;
-		int time_completed;
+		uint32_t id;
+		uint16_t adventure_id;
+		int32_t  instance_id;
+		uint16_t count;
+		uint16_t assassinate_count;
+		uint8_t  status;
+		uint32_t time_created;
+		uint32_t time_zoned;
+		uint32_t time_completed;
 	};
 
 	static std::string PrimaryKey()
@@ -146,15 +146,15 @@ public:
 		if (results.RowCount() == 1) {
 			AdventureDetails e{};
 
-			e.id                = atoi(row[0]);
-			e.adventure_id      = atoi(row[1]);
-			e.instance_id       = atoi(row[2]);
-			e.count             = atoi(row[3]);
-			e.assassinate_count = atoi(row[4]);
-			e.status            = atoi(row[5]);
-			e.time_created      = atoi(row[6]);
-			e.time_zoned        = atoi(row[7]);
-			e.time_completed    = atoi(row[8]);
+			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.adventure_id      = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.instance_id       = static_cast<int32_t>(atoi(row[2]));
+			e.count             = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.assassinate_count = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.status            = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.time_created      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.time_zoned        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.time_completed    = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
 
 			return e;
 		}
@@ -297,15 +297,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureDetails e{};
 
-			e.id                = atoi(row[0]);
-			e.adventure_id      = atoi(row[1]);
-			e.instance_id       = atoi(row[2]);
-			e.count             = atoi(row[3]);
-			e.assassinate_count = atoi(row[4]);
-			e.status            = atoi(row[5]);
-			e.time_created      = atoi(row[6]);
-			e.time_zoned        = atoi(row[7]);
-			e.time_completed    = atoi(row[8]);
+			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.adventure_id      = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.instance_id       = static_cast<int32_t>(atoi(row[2]));
+			e.count             = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.assassinate_count = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.status            = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.time_created      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.time_zoned        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.time_completed    = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -330,15 +330,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureDetails e{};
 
-			e.id                = atoi(row[0]);
-			e.adventure_id      = atoi(row[1]);
-			e.instance_id       = atoi(row[2]);
-			e.count             = atoi(row[3]);
-			e.assassinate_count = atoi(row[4]);
-			e.status            = atoi(row[5]);
-			e.time_created      = atoi(row[6]);
-			e.time_zoned        = atoi(row[7]);
-			e.time_completed    = atoi(row[8]);
+			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.adventure_id      = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.instance_id       = static_cast<int32_t>(atoi(row[2]));
+			e.count             = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.assassinate_count = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
+			e.status            = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.time_created      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.time_zoned        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.time_completed    = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

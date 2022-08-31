@@ -19,10 +19,10 @@
 class BaseZonePointsRepository {
 public:
 	struct ZonePoints {
-		int         id;
+		int32_t     id;
 		std::string zone;
-		int         version;
-		int         number;
+		int32_t     version;
+		uint16_t    number;
 		float       y;
 		float       x;
 		float       z;
@@ -31,18 +31,18 @@ public:
 		float       target_x;
 		float       target_z;
 		float       target_heading;
-		int         zoneinst;
-		int         target_zone_id;
-		int         target_instance;
+		uint16_t    zoneinst;
+		uint32_t    target_zone_id;
+		uint32_t    target_instance;
 		float       buffer;
-		int         client_version_mask;
-		int         min_expansion;
-		int         max_expansion;
+		uint32_t    client_version_mask;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
-		int         is_virtual;
-		int         height;
-		int         width;
+		int8_t      is_virtual;
+		int32_t     height;
+		int32_t     width;
 	};
 
 	static std::string PrimaryKey()
@@ -206,30 +206,30 @@ public:
 		if (results.RowCount() == 1) {
 			ZonePoints e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = atoi(row[2]);
-			e.number                 = atoi(row[3]);
-			e.y                      = static_cast<float>(atof(row[4]));
-			e.x                      = static_cast<float>(atof(row[5]));
-			e.z                      = static_cast<float>(atof(row[6]));
-			e.heading                = static_cast<float>(atof(row[7]));
-			e.target_y               = static_cast<float>(atof(row[8]));
-			e.target_x               = static_cast<float>(atof(row[9]));
-			e.target_z               = static_cast<float>(atof(row[10]));
-			e.target_heading         = static_cast<float>(atof(row[11]));
-			e.zoneinst               = atoi(row[12]);
-			e.target_zone_id         = atoi(row[13]);
-			e.target_instance        = atoi(row[14]);
-			e.buffer                 = static_cast<float>(atof(row[15]));
-			e.client_version_mask    = atoi(row[16]);
-			e.min_expansion          = atoi(row[17]);
-			e.max_expansion          = atoi(row[18]);
+			e.version                = static_cast<int32_t>(atoi(row[2]));
+			e.number                 = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.y                      = strtof(row[4], nullptr);
+			e.x                      = strtof(row[5], nullptr);
+			e.z                      = strtof(row[6], nullptr);
+			e.heading                = strtof(row[7], nullptr);
+			e.target_y               = strtof(row[8], nullptr);
+			e.target_x               = strtof(row[9], nullptr);
+			e.target_z               = strtof(row[10], nullptr);
+			e.target_heading         = strtof(row[11], nullptr);
+			e.zoneinst               = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
+			e.target_zone_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.target_instance        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.buffer                 = strtof(row[15], nullptr);
+			e.client_version_mask    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = atoi(row[21]);
-			e.height                 = atoi(row[22]);
-			e.width                  = atoi(row[23]);
+			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
+			e.height                 = static_cast<int32_t>(atoi(row[22]));
+			e.width                  = static_cast<int32_t>(atoi(row[23]));
 
 			return e;
 		}
@@ -417,30 +417,30 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = atoi(row[2]);
-			e.number                 = atoi(row[3]);
-			e.y                      = static_cast<float>(atof(row[4]));
-			e.x                      = static_cast<float>(atof(row[5]));
-			e.z                      = static_cast<float>(atof(row[6]));
-			e.heading                = static_cast<float>(atof(row[7]));
-			e.target_y               = static_cast<float>(atof(row[8]));
-			e.target_x               = static_cast<float>(atof(row[9]));
-			e.target_z               = static_cast<float>(atof(row[10]));
-			e.target_heading         = static_cast<float>(atof(row[11]));
-			e.zoneinst               = atoi(row[12]);
-			e.target_zone_id         = atoi(row[13]);
-			e.target_instance        = atoi(row[14]);
-			e.buffer                 = static_cast<float>(atof(row[15]));
-			e.client_version_mask    = atoi(row[16]);
-			e.min_expansion          = atoi(row[17]);
-			e.max_expansion          = atoi(row[18]);
+			e.version                = static_cast<int32_t>(atoi(row[2]));
+			e.number                 = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.y                      = strtof(row[4], nullptr);
+			e.x                      = strtof(row[5], nullptr);
+			e.z                      = strtof(row[6], nullptr);
+			e.heading                = strtof(row[7], nullptr);
+			e.target_y               = strtof(row[8], nullptr);
+			e.target_x               = strtof(row[9], nullptr);
+			e.target_z               = strtof(row[10], nullptr);
+			e.target_heading         = strtof(row[11], nullptr);
+			e.zoneinst               = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
+			e.target_zone_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.target_instance        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.buffer                 = strtof(row[15], nullptr);
+			e.client_version_mask    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = atoi(row[21]);
-			e.height                 = atoi(row[22]);
-			e.width                  = atoi(row[23]);
+			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
+			e.height                 = static_cast<int32_t>(atoi(row[22]));
+			e.width                  = static_cast<int32_t>(atoi(row[23]));
 
 			all_entries.push_back(e);
 		}
@@ -465,30 +465,30 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = atoi(row[2]);
-			e.number                 = atoi(row[3]);
-			e.y                      = static_cast<float>(atof(row[4]));
-			e.x                      = static_cast<float>(atof(row[5]));
-			e.z                      = static_cast<float>(atof(row[6]));
-			e.heading                = static_cast<float>(atof(row[7]));
-			e.target_y               = static_cast<float>(atof(row[8]));
-			e.target_x               = static_cast<float>(atof(row[9]));
-			e.target_z               = static_cast<float>(atof(row[10]));
-			e.target_heading         = static_cast<float>(atof(row[11]));
-			e.zoneinst               = atoi(row[12]);
-			e.target_zone_id         = atoi(row[13]);
-			e.target_instance        = atoi(row[14]);
-			e.buffer                 = static_cast<float>(atof(row[15]));
-			e.client_version_mask    = atoi(row[16]);
-			e.min_expansion          = atoi(row[17]);
-			e.max_expansion          = atoi(row[18]);
+			e.version                = static_cast<int32_t>(atoi(row[2]));
+			e.number                 = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.y                      = strtof(row[4], nullptr);
+			e.x                      = strtof(row[5], nullptr);
+			e.z                      = strtof(row[6], nullptr);
+			e.heading                = strtof(row[7], nullptr);
+			e.target_y               = strtof(row[8], nullptr);
+			e.target_x               = strtof(row[9], nullptr);
+			e.target_z               = strtof(row[10], nullptr);
+			e.target_heading         = strtof(row[11], nullptr);
+			e.zoneinst               = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
+			e.target_zone_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.target_instance        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.buffer                 = strtof(row[15], nullptr);
+			e.client_version_mask    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = atoi(row[21]);
-			e.height                 = atoi(row[22]);
-			e.width                  = atoi(row[23]);
+			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
+			e.height                 = static_cast<int32_t>(atoi(row[22]));
+			e.width                  = static_cast<int32_t>(atoi(row[23]));
 
 			all_entries.push_back(e);
 		}

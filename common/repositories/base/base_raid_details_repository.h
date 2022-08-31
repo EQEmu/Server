@@ -19,9 +19,9 @@
 class BaseRaidDetailsRepository {
 public:
 	struct RaidDetails {
-		int         raidid;
-		int         loottype;
-		int         locked;
+		int32_t     raidid;
+		int32_t     loottype;
+		int8_t      locked;
 		std::string motd;
 	};
 
@@ -126,9 +126,9 @@ public:
 		if (results.RowCount() == 1) {
 			RaidDetails e{};
 
-			e.raidid   = atoi(row[0]);
-			e.loottype = atoi(row[1]);
-			e.locked   = atoi(row[2]);
+			e.raidid   = static_cast<int32_t>(atoi(row[0]));
+			e.loottype = static_cast<int32_t>(atoi(row[1]));
+			e.locked   = static_cast<int8_t>(atoi(row[2]));
 			e.motd     = row[3] ? row[3] : "";
 
 			return e;
@@ -258,9 +258,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid   = atoi(row[0]);
-			e.loottype = atoi(row[1]);
-			e.locked   = atoi(row[2]);
+			e.raidid   = static_cast<int32_t>(atoi(row[0]));
+			e.loottype = static_cast<int32_t>(atoi(row[1]));
+			e.locked   = static_cast<int8_t>(atoi(row[2]));
 			e.motd     = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);
@@ -286,9 +286,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid   = atoi(row[0]);
-			e.loottype = atoi(row[1]);
-			e.locked   = atoi(row[2]);
+			e.raidid   = static_cast<int32_t>(atoi(row[0]));
+			e.loottype = static_cast<int32_t>(atoi(row[1]));
+			e.locked   = static_cast<int8_t>(atoi(row[2]));
 			e.motd     = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);

@@ -19,15 +19,15 @@
 class BaseRaidMembersRepository {
 public:
 	struct RaidMembers {
-		int         raidid;
-		int         charid;
-		int         groupid;
-		int         _class;
-		int         level;
+		int32_t     raidid;
+		int32_t     charid;
+		uint32_t    groupid;
+		int8_t      _class;
+		int8_t      level;
 		std::string name;
-		int         isgroupleader;
-		int         israidleader;
-		int         islooter;
+		int8_t      isgroupleader;
+		int8_t      israidleader;
+		int8_t      islooter;
 	};
 
 	static std::string PrimaryKey()
@@ -146,15 +146,15 @@ public:
 		if (results.RowCount() == 1) {
 			RaidMembers e{};
 
-			e.raidid        = atoi(row[0]);
-			e.charid        = atoi(row[1]);
-			e.groupid       = atoi(row[2]);
-			e._class        = atoi(row[3]);
-			e.level         = atoi(row[4]);
+			e.raidid        = static_cast<int32_t>(atoi(row[0]));
+			e.charid        = static_cast<int32_t>(atoi(row[1]));
+			e.groupid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e._class        = static_cast<int8_t>(atoi(row[3]));
+			e.level         = static_cast<int8_t>(atoi(row[4]));
 			e.name          = row[5] ? row[5] : "";
-			e.isgroupleader = atoi(row[6]);
-			e.israidleader  = atoi(row[7]);
-			e.islooter      = atoi(row[8]);
+			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
+			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
+			e.islooter      = static_cast<int8_t>(atoi(row[8]));
 
 			return e;
 		}
@@ -298,15 +298,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidMembers e{};
 
-			e.raidid        = atoi(row[0]);
-			e.charid        = atoi(row[1]);
-			e.groupid       = atoi(row[2]);
-			e._class        = atoi(row[3]);
-			e.level         = atoi(row[4]);
+			e.raidid        = static_cast<int32_t>(atoi(row[0]));
+			e.charid        = static_cast<int32_t>(atoi(row[1]));
+			e.groupid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e._class        = static_cast<int8_t>(atoi(row[3]));
+			e.level         = static_cast<int8_t>(atoi(row[4]));
 			e.name          = row[5] ? row[5] : "";
-			e.isgroupleader = atoi(row[6]);
-			e.israidleader  = atoi(row[7]);
-			e.islooter      = atoi(row[8]);
+			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
+			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
+			e.islooter      = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +331,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidMembers e{};
 
-			e.raidid        = atoi(row[0]);
-			e.charid        = atoi(row[1]);
-			e.groupid       = atoi(row[2]);
-			e._class        = atoi(row[3]);
-			e.level         = atoi(row[4]);
+			e.raidid        = static_cast<int32_t>(atoi(row[0]));
+			e.charid        = static_cast<int32_t>(atoi(row[1]));
+			e.groupid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e._class        = static_cast<int8_t>(atoi(row[3]));
+			e.level         = static_cast<int8_t>(atoi(row[4]));
 			e.name          = row[5] ? row[5] : "";
-			e.isgroupleader = atoi(row[6]);
-			e.israidleader  = atoi(row[7]);
-			e.islooter      = atoi(row[8]);
+			e.isgroupleader = static_cast<int8_t>(atoi(row[6]));
+			e.israidleader  = static_cast<int8_t>(atoi(row[7]));
+			e.islooter      = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}

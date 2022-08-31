@@ -19,10 +19,10 @@
 class BaseBooksRepository {
 public:
 	struct Books {
-		int         id;
+		int32_t     id;
 		std::string name;
 		std::string txtfile;
-		int         language;
+		int32_t     language;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			Books e{};
 
-			e.id       = atoi(row[0]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
 			e.name     = row[1] ? row[1] : "";
 			e.txtfile  = row[2] ? row[2] : "";
-			e.language = atoi(row[3]);
+			e.language = static_cast<int32_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -257,10 +257,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Books e{};
 
-			e.id       = atoi(row[0]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
 			e.name     = row[1] ? row[1] : "";
 			e.txtfile  = row[2] ? row[2] : "";
-			e.language = atoi(row[3]);
+			e.language = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -285,10 +285,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Books e{};
 
-			e.id       = atoi(row[0]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
 			e.name     = row[1] ? row[1] : "";
 			e.txtfile  = row[2] ? row[2] : "";
-			e.language = atoi(row[3]);
+			e.language = static_cast<int32_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

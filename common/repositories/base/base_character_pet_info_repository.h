@@ -19,15 +19,15 @@
 class BaseCharacterPetInfoRepository {
 public:
 	struct CharacterPetInfo {
-		int         char_id;
-		int         pet;
+		int32_t     char_id;
+		int32_t     pet;
 		std::string petname;
-		int         petpower;
-		int         spell_id;
-		int         hp;
-		int         mana;
+		int32_t     petpower;
+		int32_t     spell_id;
+		int32_t     hp;
+		int32_t     mana;
 		float       size;
-		int         taunting;
+		int8_t      taunting;
 	};
 
 	static std::string PrimaryKey()
@@ -146,15 +146,15 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetInfo e{};
 
-			e.char_id  = atoi(row[0]);
-			e.pet      = atoi(row[1]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.pet      = static_cast<int32_t>(atoi(row[1]));
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = atoi(row[3]);
-			e.spell_id = atoi(row[4]);
-			e.hp       = atoi(row[5]);
-			e.mana     = atoi(row[6]);
-			e.size     = static_cast<float>(atof(row[7]));
-			e.taunting = atoi(row[8]);
+			e.petpower = static_cast<int32_t>(atoi(row[3]));
+			e.spell_id = static_cast<int32_t>(atoi(row[4]));
+			e.hp       = static_cast<int32_t>(atoi(row[5]));
+			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.size     = strtof(row[7], nullptr);
+			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
 			return e;
 		}
@@ -298,15 +298,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInfo e{};
 
-			e.char_id  = atoi(row[0]);
-			e.pet      = atoi(row[1]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.pet      = static_cast<int32_t>(atoi(row[1]));
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = atoi(row[3]);
-			e.spell_id = atoi(row[4]);
-			e.hp       = atoi(row[5]);
-			e.mana     = atoi(row[6]);
-			e.size     = static_cast<float>(atof(row[7]));
-			e.taunting = atoi(row[8]);
+			e.petpower = static_cast<int32_t>(atoi(row[3]));
+			e.spell_id = static_cast<int32_t>(atoi(row[4]));
+			e.hp       = static_cast<int32_t>(atoi(row[5]));
+			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.size     = strtof(row[7], nullptr);
+			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +331,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInfo e{};
 
-			e.char_id  = atoi(row[0]);
-			e.pet      = atoi(row[1]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.pet      = static_cast<int32_t>(atoi(row[1]));
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = atoi(row[3]);
-			e.spell_id = atoi(row[4]);
-			e.hp       = atoi(row[5]);
-			e.mana     = atoi(row[6]);
-			e.size     = static_cast<float>(atof(row[7]));
-			e.taunting = atoi(row[8]);
+			e.petpower = static_cast<int32_t>(atoi(row[3]));
+			e.spell_id = static_cast<int32_t>(atoi(row[4]));
+			e.hp       = static_cast<int32_t>(atoi(row[5]));
+			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.size     = strtof(row[7], nullptr);
+			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}
