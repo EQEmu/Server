@@ -143,6 +143,7 @@ public:
 		int8_t      flymode;
 		int8_t      always_aggro;
 		int32_t     exp_mod;
+		int32_t     heroic_strikethrough;
 	};
 
 	static std::string PrimaryKey()
@@ -277,6 +278,7 @@ public:
 			"flymode",
 			"always_aggro",
 			"exp_mod",
+			"heroic_strikethrough",
 		};
 	}
 
@@ -407,6 +409,7 @@ public:
 			"flymode",
 			"always_aggro",
 			"exp_mod",
+			"heroic_strikethrough",
 		};
 	}
 
@@ -571,6 +574,7 @@ public:
 		e.flymode                = -1;
 		e.always_aggro           = 0;
 		e.exp_mod                = 100;
+		e.heroic_strikethrough   = 0;
 
 		return e;
 	}
@@ -730,6 +734,7 @@ public:
 			e.flymode                = static_cast<int8_t>(atoi(row[121]));
 			e.always_aggro           = static_cast<int8_t>(atoi(row[122]));
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
+			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
 
 			return e;
 		}
@@ -886,6 +891,7 @@ public:
 		v.push_back(columns[121] + " = " + std::to_string(e.flymode));
 		v.push_back(columns[122] + " = " + std::to_string(e.always_aggro));
 		v.push_back(columns[123] + " = " + std::to_string(e.exp_mod));
+		v.push_back(columns[124] + " = " + std::to_string(e.heroic_strikethrough));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1031,6 +1037,7 @@ public:
 		v.push_back(std::to_string(e.flymode));
 		v.push_back(std::to_string(e.always_aggro));
 		v.push_back(std::to_string(e.exp_mod));
+		v.push_back(std::to_string(e.heroic_strikethrough));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1184,6 +1191,7 @@ public:
 			v.push_back(std::to_string(e.flymode));
 			v.push_back(std::to_string(e.always_aggro));
 			v.push_back(std::to_string(e.exp_mod));
+			v.push_back(std::to_string(e.heroic_strikethrough));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1341,6 +1349,7 @@ public:
 			e.flymode                = static_cast<int8_t>(atoi(row[121]));
 			e.always_aggro           = static_cast<int8_t>(atoi(row[122]));
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
+			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
 
 			all_entries.push_back(e);
 		}
@@ -1489,6 +1498,7 @@ public:
 			e.flymode                = static_cast<int8_t>(atoi(row[121]));
 			e.always_aggro           = static_cast<int8_t>(atoi(row[122]));
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
+			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
 
 			all_entries.push_back(e);
 		}
