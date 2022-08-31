@@ -254,10 +254,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 					if (x == 0 && y == 0 && z == 0 && heading == 0) {
 						auto zone = GetZone(pp.binds[4].zone_id);
 						if (zone) {
-							pp.binds[4].x       = zone->safe_x;
-							pp.binds[4].y       = zone->safe_y;
-							pp.binds[4].z       = zone->safe_z;
-							pp.binds[4].heading = zone->safe_heading;
+							x       = zone->safe_x;
+							y       = zone->safe_y;
+							z       = zone->safe_z;
+							heading = zone->safe_heading;
 						}
 					}
 				}
