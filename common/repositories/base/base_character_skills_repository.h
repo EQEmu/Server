@@ -19,9 +19,9 @@
 class BaseCharacterSkillsRepository {
 public:
 	struct CharacterSkills {
-		int id;
-		int skill_id;
-		int value;
+		uint32_t id;
+		uint16_t skill_id;
+		uint16_t value;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterSkills e{};
 
-			e.id       = atoi(row[0]);
-			e.skill_id = atoi(row[1]);
-			e.value    = atoi(row[2]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.skill_id = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.value    = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -249,9 +249,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterSkills e{};
 
-			e.id       = atoi(row[0]);
-			e.skill_id = atoi(row[1]);
-			e.value    = atoi(row[2]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.skill_id = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.value    = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -276,9 +276,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterSkills e{};
 
-			e.id       = atoi(row[0]);
-			e.skill_id = atoi(row[1]);
-			e.value    = atoi(row[2]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.skill_id = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.value    = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

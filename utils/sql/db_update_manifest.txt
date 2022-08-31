@@ -455,6 +455,7 @@
 9199|2022_08_08_task_req_activity_id.sql|SHOW COLUMNS FROM `task_activities` LIKE 'req_activity_id'|empty|
 9200|2022_08_19_zone_expansion_consistency.sql|SELECT * FROM db_version WHERE version >= 9200|empty|
 9201|2022_08_22_npc_types_heroic_strikethrough.sql|SHOW COLUMNS FROM `npc_types` LIKE 'heroic_strikethrough'|empty|
+9202|2022_08_24_task_activities_step.sql|SHOW COLUMNS FROM `task_activities` LIKE 'step'|contains|unsigned
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

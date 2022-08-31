@@ -19,19 +19,19 @@
 class BaseMerchantlistRepository {
 public:
 	struct Merchantlist {
-		int         merchantid;
-		int         slot;
-		int         item;
-		int         faction_required;
-		int         level_required;
-		int         alt_currency_cost;
-		int         classes_required;
-		int         probability;
+		int32_t     merchantid;
+		int32_t     slot;
+		int32_t     item;
+		int16_t     faction_required;
+		uint8_t     level_required;
+		uint16_t    alt_currency_cost;
+		int32_t     classes_required;
+		int32_t     probability;
 		std::string bucket_name;
 		std::string bucket_value;
-		int         bucket_comparison;
-		int         min_expansion;
-		int         max_expansion;
+		uint8_t     bucket_comparison;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -170,19 +170,19 @@ public:
 		if (results.RowCount() == 1) {
 			Merchantlist e{};
 
-			e.merchantid             = atoi(row[0]);
-			e.slot                   = atoi(row[1]);
-			e.item                   = atoi(row[2]);
-			e.faction_required       = atoi(row[3]);
-			e.level_required         = atoi(row[4]);
-			e.alt_currency_cost      = atoi(row[5]);
-			e.classes_required       = atoi(row[6]);
-			e.probability            = atoi(row[7]);
+			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
+			e.slot                   = static_cast<int32_t>(atoi(row[1]));
+			e.item                   = static_cast<int32_t>(atoi(row[2]));
+			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
+			e.probability            = static_cast<int32_t>(atoi(row[7]));
 			e.bucket_name            = row[8] ? row[8] : "";
 			e.bucket_value           = row[9] ? row[9] : "";
-			e.bucket_comparison      = atoi(row[10]);
-			e.min_expansion          = atoi(row[11]);
-			e.max_expansion          = atoi(row[12]);
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
 			e.content_flags          = row[13] ? row[13] : "";
 			e.content_flags_disabled = row[14] ? row[14] : "";
 
@@ -346,19 +346,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Merchantlist e{};
 
-			e.merchantid             = atoi(row[0]);
-			e.slot                   = atoi(row[1]);
-			e.item                   = atoi(row[2]);
-			e.faction_required       = atoi(row[3]);
-			e.level_required         = atoi(row[4]);
-			e.alt_currency_cost      = atoi(row[5]);
-			e.classes_required       = atoi(row[6]);
-			e.probability            = atoi(row[7]);
+			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
+			e.slot                   = static_cast<int32_t>(atoi(row[1]));
+			e.item                   = static_cast<int32_t>(atoi(row[2]));
+			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
+			e.probability            = static_cast<int32_t>(atoi(row[7]));
 			e.bucket_name            = row[8] ? row[8] : "";
 			e.bucket_value           = row[9] ? row[9] : "";
-			e.bucket_comparison      = atoi(row[10]);
-			e.min_expansion          = atoi(row[11]);
-			e.max_expansion          = atoi(row[12]);
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
 			e.content_flags          = row[13] ? row[13] : "";
 			e.content_flags_disabled = row[14] ? row[14] : "";
 
@@ -385,19 +385,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Merchantlist e{};
 
-			e.merchantid             = atoi(row[0]);
-			e.slot                   = atoi(row[1]);
-			e.item                   = atoi(row[2]);
-			e.faction_required       = atoi(row[3]);
-			e.level_required         = atoi(row[4]);
-			e.alt_currency_cost      = atoi(row[5]);
-			e.classes_required       = atoi(row[6]);
-			e.probability            = atoi(row[7]);
+			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
+			e.slot                   = static_cast<int32_t>(atoi(row[1]));
+			e.item                   = static_cast<int32_t>(atoi(row[2]));
+			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
+			e.probability            = static_cast<int32_t>(atoi(row[7]));
 			e.bucket_name            = row[8] ? row[8] : "";
 			e.bucket_value           = row[9] ? row[9] : "";
-			e.bucket_comparison      = atoi(row[10]);
-			e.min_expansion          = atoi(row[11]);
-			e.max_expansion          = atoi(row[12]);
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
 			e.content_flags          = row[13] ? row[13] : "";
 			e.content_flags_disabled = row[14] ? row[14] : "";
 

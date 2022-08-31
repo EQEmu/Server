@@ -19,8 +19,8 @@
 class BaseFriendsRepository {
 public:
 	struct Friends {
-		int         charid;
-		int         type;
+		uint32_t    charid;
+		uint8_t     type;
 		std::string name;
 	};
 
@@ -122,8 +122,8 @@ public:
 		if (results.RowCount() == 1) {
 			Friends e{};
 
-			e.charid = atoi(row[0]);
-			e.type   = atoi(row[1]);
+			e.charid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type   = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 			e.name   = row[2] ? row[2] : "";
 
 			return e;
@@ -250,8 +250,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Friends e{};
 
-			e.charid = atoi(row[0]);
-			e.type   = atoi(row[1]);
+			e.charid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type   = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 			e.name   = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -277,8 +277,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Friends e{};
 
-			e.charid = atoi(row[0]);
-			e.type   = atoi(row[1]);
+			e.charid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type   = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 			e.name   = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);

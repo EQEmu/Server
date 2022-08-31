@@ -19,17 +19,17 @@
 class BaseAdventureStatsRepository {
 public:
 	struct AdventureStats {
-		int player_id;
-		int guk_wins;
-		int mir_wins;
-		int mmc_wins;
-		int ruj_wins;
-		int tak_wins;
-		int guk_losses;
-		int mir_losses;
-		int mmc_losses;
-		int ruj_losses;
-		int tak_losses;
+		uint32_t player_id;
+		uint32_t guk_wins;
+		uint32_t mir_wins;
+		uint32_t mmc_wins;
+		uint32_t ruj_wins;
+		uint32_t tak_wins;
+		uint32_t guk_losses;
+		uint32_t mir_losses;
+		uint32_t mmc_losses;
+		uint32_t ruj_losses;
+		uint32_t tak_losses;
 	};
 
 	static std::string PrimaryKey()
@@ -154,17 +154,17 @@ public:
 		if (results.RowCount() == 1) {
 			AdventureStats e{};
 
-			e.player_id  = atoi(row[0]);
-			e.guk_wins   = atoi(row[1]);
-			e.mir_wins   = atoi(row[2]);
-			e.mmc_wins   = atoi(row[3]);
-			e.ruj_wins   = atoi(row[4]);
-			e.tak_wins   = atoi(row[5]);
-			e.guk_losses = atoi(row[6]);
-			e.mir_losses = atoi(row[7]);
-			e.mmc_losses = atoi(row[8]);
-			e.ruj_losses = atoi(row[9]);
-			e.tak_losses = atoi(row[10]);
+			e.player_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.guk_wins   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.mir_wins   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.mmc_wins   = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.ruj_wins   = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.tak_wins   = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.guk_losses = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.mir_losses = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.mmc_losses = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.ruj_losses = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.tak_losses = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
 
 			return e;
 		}
@@ -314,17 +314,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureStats e{};
 
-			e.player_id  = atoi(row[0]);
-			e.guk_wins   = atoi(row[1]);
-			e.mir_wins   = atoi(row[2]);
-			e.mmc_wins   = atoi(row[3]);
-			e.ruj_wins   = atoi(row[4]);
-			e.tak_wins   = atoi(row[5]);
-			e.guk_losses = atoi(row[6]);
-			e.mir_losses = atoi(row[7]);
-			e.mmc_losses = atoi(row[8]);
-			e.ruj_losses = atoi(row[9]);
-			e.tak_losses = atoi(row[10]);
+			e.player_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.guk_wins   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.mir_wins   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.mmc_wins   = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.ruj_wins   = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.tak_wins   = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.guk_losses = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.mir_losses = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.mmc_losses = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.ruj_losses = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.tak_losses = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +349,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureStats e{};
 
-			e.player_id  = atoi(row[0]);
-			e.guk_wins   = atoi(row[1]);
-			e.mir_wins   = atoi(row[2]);
-			e.mmc_wins   = atoi(row[3]);
-			e.ruj_wins   = atoi(row[4]);
-			e.tak_wins   = atoi(row[5]);
-			e.guk_losses = atoi(row[6]);
-			e.mir_losses = atoi(row[7]);
-			e.mmc_losses = atoi(row[8]);
-			e.ruj_losses = atoi(row[9]);
-			e.tak_losses = atoi(row[10]);
+			e.player_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.guk_wins   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.mir_wins   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.mmc_wins   = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.ruj_wins   = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.tak_wins   = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.guk_losses = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.mir_losses = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.mmc_losses = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.ruj_losses = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.tak_losses = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

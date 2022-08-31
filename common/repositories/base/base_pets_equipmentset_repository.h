@@ -19,9 +19,9 @@
 class BasePetsEquipmentsetRepository {
 public:
 	struct PetsEquipmentset {
-		int         set_id;
+		int32_t     set_id;
 		std::string setname;
-		int         nested_set;
+		int32_t     nested_set;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			PetsEquipmentset e{};
 
-			e.set_id     = atoi(row[0]);
+			e.set_id     = static_cast<int32_t>(atoi(row[0]));
 			e.setname    = row[1] ? row[1] : "";
-			e.nested_set = atoi(row[2]);
+			e.nested_set = static_cast<int32_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsEquipmentset e{};
 
-			e.set_id     = atoi(row[0]);
+			e.set_id     = static_cast<int32_t>(atoi(row[0]));
 			e.setname    = row[1] ? row[1] : "";
-			e.nested_set = atoi(row[2]);
+			e.nested_set = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsEquipmentset e{};
 
-			e.set_id     = atoi(row[0]);
+			e.set_id     = static_cast<int32_t>(atoi(row[0]));
 			e.setname    = row[1] ? row[1] : "";
-			e.nested_set = atoi(row[2]);
+			e.nested_set = static_cast<int32_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

@@ -19,17 +19,17 @@
 class BaseCharacterCorpseItemsRepository {
 public:
 	struct CharacterCorpseItems {
-		int corpse_id;
-		int equip_slot;
-		int item_id;
-		int charges;
-		int aug_1;
-		int aug_2;
-		int aug_3;
-		int aug_4;
-		int aug_5;
-		int aug_6;
-		int attuned;
+		uint32_t corpse_id;
+		uint32_t equip_slot;
+		uint32_t item_id;
+		uint32_t charges;
+		uint32_t aug_1;
+		uint32_t aug_2;
+		uint32_t aug_3;
+		uint32_t aug_4;
+		uint32_t aug_5;
+		int32_t  aug_6;
+		int16_t  attuned;
 	};
 
 	static std::string PrimaryKey()
@@ -154,17 +154,17 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterCorpseItems e{};
 
-			e.corpse_id  = atoi(row[0]);
-			e.equip_slot = atoi(row[1]);
-			e.item_id    = atoi(row[2]);
-			e.charges    = atoi(row[3]);
-			e.aug_1      = atoi(row[4]);
-			e.aug_2      = atoi(row[5]);
-			e.aug_3      = atoi(row[6]);
-			e.aug_4      = atoi(row[7]);
-			e.aug_5      = atoi(row[8]);
-			e.aug_6      = atoi(row[9]);
-			e.attuned    = atoi(row[10]);
+			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
+			e.attuned    = static_cast<int16_t>(atoi(row[10]));
 
 			return e;
 		}
@@ -314,17 +314,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCorpseItems e{};
 
-			e.corpse_id  = atoi(row[0]);
-			e.equip_slot = atoi(row[1]);
-			e.item_id    = atoi(row[2]);
-			e.charges    = atoi(row[3]);
-			e.aug_1      = atoi(row[4]);
-			e.aug_2      = atoi(row[5]);
-			e.aug_3      = atoi(row[6]);
-			e.aug_4      = atoi(row[7]);
-			e.aug_5      = atoi(row[8]);
-			e.aug_6      = atoi(row[9]);
-			e.attuned    = atoi(row[10]);
+			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
+			e.attuned    = static_cast<int16_t>(atoi(row[10]));
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +349,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCorpseItems e{};
 
-			e.corpse_id  = atoi(row[0]);
-			e.equip_slot = atoi(row[1]);
-			e.item_id    = atoi(row[2]);
-			e.charges    = atoi(row[3]);
-			e.aug_1      = atoi(row[4]);
-			e.aug_2      = atoi(row[5]);
-			e.aug_3      = atoi(row[6]);
-			e.aug_4      = atoi(row[7]);
-			e.aug_5      = atoi(row[8]);
-			e.aug_6      = atoi(row[9]);
-			e.attuned    = atoi(row[10]);
+			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
+			e.attuned    = static_cast<int16_t>(atoi(row[10]));
 
 			all_entries.push_back(e);
 		}

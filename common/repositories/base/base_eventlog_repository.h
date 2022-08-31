@@ -19,16 +19,16 @@
 class BaseEventlogRepository {
 public:
 	struct Eventlog {
-		int         id;
+		uint32_t    id;
 		std::string accountname;
-		int         accountid;
-		int         status;
+		uint32_t    accountid;
+		int32_t     status;
 		std::string charname;
 		std::string target;
 		std::string time;
 		std::string descriptiontype;
 		std::string description;
-		int         event_nid;
+		int32_t     event_nid;
 	};
 
 	static std::string PrimaryKey()
@@ -150,16 +150,16 @@ public:
 		if (results.RowCount() == 1) {
 			Eventlog e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.accountname     = row[1] ? row[1] : "";
-			e.accountid       = atoi(row[2]);
-			e.status          = atoi(row[3]);
+			e.accountid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.status          = static_cast<int32_t>(atoi(row[3]));
 			e.charname        = row[4] ? row[4] : "";
 			e.target          = row[5] ? row[5] : "";
 			e.time            = row[6] ? row[6] : "";
 			e.descriptiontype = row[7] ? row[7] : "";
 			e.description     = row[8] ? row[8] : "";
-			e.event_nid       = atoi(row[9]);
+			e.event_nid       = static_cast<int32_t>(atoi(row[9]));
 
 			return e;
 		}
@@ -305,16 +305,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Eventlog e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.accountname     = row[1] ? row[1] : "";
-			e.accountid       = atoi(row[2]);
-			e.status          = atoi(row[3]);
+			e.accountid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.status          = static_cast<int32_t>(atoi(row[3]));
 			e.charname        = row[4] ? row[4] : "";
 			e.target          = row[5] ? row[5] : "";
 			e.time            = row[6] ? row[6] : "";
 			e.descriptiontype = row[7] ? row[7] : "";
 			e.description     = row[8] ? row[8] : "";
-			e.event_nid       = atoi(row[9]);
+			e.event_nid       = static_cast<int32_t>(atoi(row[9]));
 
 			all_entries.push_back(e);
 		}
@@ -339,16 +339,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Eventlog e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.accountname     = row[1] ? row[1] : "";
-			e.accountid       = atoi(row[2]);
-			e.status          = atoi(row[3]);
+			e.accountid       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.status          = static_cast<int32_t>(atoi(row[3]));
 			e.charname        = row[4] ? row[4] : "";
 			e.target          = row[5] ? row[5] : "";
 			e.time            = row[6] ? row[6] : "";
 			e.descriptiontype = row[7] ? row[7] : "";
 			e.description     = row[8] ? row[8] : "";
-			e.event_nid       = atoi(row[9]);
+			e.event_nid       = static_cast<int32_t>(atoi(row[9]));
 
 			all_entries.push_back(e);
 		}

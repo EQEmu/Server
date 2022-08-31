@@ -19,20 +19,20 @@
 class BaseTitlesRepository {
 public:
 	struct Titles {
-		int         id;
-		int         skill_id;
-		int         min_skill_value;
-		int         max_skill_value;
-		int         min_aa_points;
-		int         max_aa_points;
-		int         class_;
-		int         gender;
-		int         char_id;
-		int         status;
-		int         item_id;
+		uint32_t    id;
+		int8_t      skill_id;
+		int32_t     min_skill_value;
+		int32_t     max_skill_value;
+		int32_t     min_aa_points;
+		int32_t     max_aa_points;
+		int8_t      class_;
+		int8_t      gender;
+		int32_t     char_id;
+		int32_t     status;
+		int32_t     item_id;
 		std::string prefix;
 		std::string suffix;
-		int         title_set;
+		int32_t     title_set;
 	};
 
 	static std::string PrimaryKey()
@@ -166,20 +166,20 @@ public:
 		if (results.RowCount() == 1) {
 			Titles e{};
 
-			e.id              = atoi(row[0]);
-			e.skill_id        = atoi(row[1]);
-			e.min_skill_value = atoi(row[2]);
-			e.max_skill_value = atoi(row[3]);
-			e.min_aa_points   = atoi(row[4]);
-			e.max_aa_points   = atoi(row[5]);
-			e.class_          = atoi(row[6]);
-			e.gender          = atoi(row[7]);
-			e.char_id         = atoi(row[8]);
-			e.status          = atoi(row[9]);
-			e.item_id         = atoi(row[10]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.skill_id        = static_cast<int8_t>(atoi(row[1]));
+			e.min_skill_value = static_cast<int32_t>(atoi(row[2]));
+			e.max_skill_value = static_cast<int32_t>(atoi(row[3]));
+			e.min_aa_points   = static_cast<int32_t>(atoi(row[4]));
+			e.max_aa_points   = static_cast<int32_t>(atoi(row[5]));
+			e.class_          = static_cast<int8_t>(atoi(row[6]));
+			e.gender          = static_cast<int8_t>(atoi(row[7]));
+			e.char_id         = static_cast<int32_t>(atoi(row[8]));
+			e.status          = static_cast<int32_t>(atoi(row[9]));
+			e.item_id         = static_cast<int32_t>(atoi(row[10]));
 			e.prefix          = row[11] ? row[11] : "";
 			e.suffix          = row[12] ? row[12] : "";
-			e.title_set       = atoi(row[13]);
+			e.title_set       = static_cast<int32_t>(atoi(row[13]));
 
 			return e;
 		}
@@ -337,20 +337,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Titles e{};
 
-			e.id              = atoi(row[0]);
-			e.skill_id        = atoi(row[1]);
-			e.min_skill_value = atoi(row[2]);
-			e.max_skill_value = atoi(row[3]);
-			e.min_aa_points   = atoi(row[4]);
-			e.max_aa_points   = atoi(row[5]);
-			e.class_          = atoi(row[6]);
-			e.gender          = atoi(row[7]);
-			e.char_id         = atoi(row[8]);
-			e.status          = atoi(row[9]);
-			e.item_id         = atoi(row[10]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.skill_id        = static_cast<int8_t>(atoi(row[1]));
+			e.min_skill_value = static_cast<int32_t>(atoi(row[2]));
+			e.max_skill_value = static_cast<int32_t>(atoi(row[3]));
+			e.min_aa_points   = static_cast<int32_t>(atoi(row[4]));
+			e.max_aa_points   = static_cast<int32_t>(atoi(row[5]));
+			e.class_          = static_cast<int8_t>(atoi(row[6]));
+			e.gender          = static_cast<int8_t>(atoi(row[7]));
+			e.char_id         = static_cast<int32_t>(atoi(row[8]));
+			e.status          = static_cast<int32_t>(atoi(row[9]));
+			e.item_id         = static_cast<int32_t>(atoi(row[10]));
 			e.prefix          = row[11] ? row[11] : "";
 			e.suffix          = row[12] ? row[12] : "";
-			e.title_set       = atoi(row[13]);
+			e.title_set       = static_cast<int32_t>(atoi(row[13]));
 
 			all_entries.push_back(e);
 		}
@@ -375,20 +375,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Titles e{};
 
-			e.id              = atoi(row[0]);
-			e.skill_id        = atoi(row[1]);
-			e.min_skill_value = atoi(row[2]);
-			e.max_skill_value = atoi(row[3]);
-			e.min_aa_points   = atoi(row[4]);
-			e.max_aa_points   = atoi(row[5]);
-			e.class_          = atoi(row[6]);
-			e.gender          = atoi(row[7]);
-			e.char_id         = atoi(row[8]);
-			e.status          = atoi(row[9]);
-			e.item_id         = atoi(row[10]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.skill_id        = static_cast<int8_t>(atoi(row[1]));
+			e.min_skill_value = static_cast<int32_t>(atoi(row[2]));
+			e.max_skill_value = static_cast<int32_t>(atoi(row[3]));
+			e.min_aa_points   = static_cast<int32_t>(atoi(row[4]));
+			e.max_aa_points   = static_cast<int32_t>(atoi(row[5]));
+			e.class_          = static_cast<int8_t>(atoi(row[6]));
+			e.gender          = static_cast<int8_t>(atoi(row[7]));
+			e.char_id         = static_cast<int32_t>(atoi(row[8]));
+			e.status          = static_cast<int32_t>(atoi(row[9]));
+			e.item_id         = static_cast<int32_t>(atoi(row[10]));
 			e.prefix          = row[11] ? row[11] : "";
 			e.suffix          = row[12] ? row[12] : "";
-			e.title_set       = atoi(row[13]);
+			e.title_set       = static_cast<int32_t>(atoi(row[13]));
 
 			all_entries.push_back(e);
 		}

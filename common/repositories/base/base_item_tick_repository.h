@@ -19,12 +19,12 @@
 class BaseItemTickRepository {
 public:
 	struct ItemTick {
-		int         it_itemid;
-		int         it_chance;
-		int         it_level;
-		int         it_id;
+		int32_t     it_itemid;
+		int32_t     it_chance;
+		int32_t     it_level;
+		int32_t     it_id;
 		std::string it_qglobal;
-		int         it_bagslot;
+		int8_t      it_bagslot;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			ItemTick e{};
 
-			e.it_itemid  = atoi(row[0]);
-			e.it_chance  = atoi(row[1]);
-			e.it_level   = atoi(row[2]);
-			e.it_id      = atoi(row[3]);
+			e.it_itemid  = static_cast<int32_t>(atoi(row[0]));
+			e.it_chance  = static_cast<int32_t>(atoi(row[1]));
+			e.it_level   = static_cast<int32_t>(atoi(row[2]));
+			e.it_id      = static_cast<int32_t>(atoi(row[3]));
 			e.it_qglobal = row[4] ? row[4] : "";
-			e.it_bagslot = atoi(row[5]);
+			e.it_bagslot = static_cast<int8_t>(atoi(row[5]));
 
 			return e;
 		}
@@ -273,12 +273,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ItemTick e{};
 
-			e.it_itemid  = atoi(row[0]);
-			e.it_chance  = atoi(row[1]);
-			e.it_level   = atoi(row[2]);
-			e.it_id      = atoi(row[3]);
+			e.it_itemid  = static_cast<int32_t>(atoi(row[0]));
+			e.it_chance  = static_cast<int32_t>(atoi(row[1]));
+			e.it_level   = static_cast<int32_t>(atoi(row[2]));
+			e.it_id      = static_cast<int32_t>(atoi(row[3]));
 			e.it_qglobal = row[4] ? row[4] : "";
-			e.it_bagslot = atoi(row[5]);
+			e.it_bagslot = static_cast<int8_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}
@@ -303,12 +303,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ItemTick e{};
 
-			e.it_itemid  = atoi(row[0]);
-			e.it_chance  = atoi(row[1]);
-			e.it_level   = atoi(row[2]);
-			e.it_id      = atoi(row[3]);
+			e.it_itemid  = static_cast<int32_t>(atoi(row[0]));
+			e.it_chance  = static_cast<int32_t>(atoi(row[1]));
+			e.it_level   = static_cast<int32_t>(atoi(row[2]));
+			e.it_id      = static_cast<int32_t>(atoi(row[3]));
 			e.it_qglobal = row[4] ? row[4] : "";
-			e.it_bagslot = atoi(row[5]);
+			e.it_bagslot = static_cast<int8_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}

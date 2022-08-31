@@ -19,11 +19,11 @@
 class BaseTimersRepository {
 public:
 	struct Timers {
-		int char_id;
-		int type;
-		int start;
-		int duration;
-		int enable;
+		int32_t  char_id;
+		uint32_t type;
+		uint32_t start;
+		uint32_t duration;
+		int8_t   enable;
 	};
 
 	static std::string PrimaryKey()
@@ -130,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			Timers e{};
 
-			e.char_id  = atoi(row[0]);
-			e.type     = atoi(row[1]);
-			e.start    = atoi(row[2]);
-			e.duration = atoi(row[3]);
-			e.enable   = atoi(row[4]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.type     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.start    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.duration = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.enable   = static_cast<int8_t>(atoi(row[4]));
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Timers e{};
 
-			e.char_id  = atoi(row[0]);
-			e.type     = atoi(row[1]);
-			e.start    = atoi(row[2]);
-			e.duration = atoi(row[3]);
-			e.enable   = atoi(row[4]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.type     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.start    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.duration = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.enable   = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Timers e{};
 
-			e.char_id  = atoi(row[0]);
-			e.type     = atoi(row[1]);
-			e.start    = atoi(row[2]);
-			e.duration = atoi(row[3]);
-			e.enable   = atoi(row[4]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.type     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.start    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.duration = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.enable   = static_cast<int8_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}

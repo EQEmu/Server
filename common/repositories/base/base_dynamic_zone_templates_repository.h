@@ -19,24 +19,24 @@
 class BaseDynamicZoneTemplatesRepository {
 public:
 	struct DynamicZoneTemplates {
-		int         id;
-		int         zone_id;
-		int         zone_version;
+		uint32_t    id;
+		int32_t     zone_id;
+		int32_t     zone_version;
 		std::string name;
-		int         min_players;
-		int         max_players;
-		int         duration_seconds;
-		int         dz_switch_id;
-		int         compass_zone_id;
+		int32_t     min_players;
+		int32_t     max_players;
+		int32_t     duration_seconds;
+		int32_t     dz_switch_id;
+		int32_t     compass_zone_id;
 		float       compass_x;
 		float       compass_y;
 		float       compass_z;
-		int         return_zone_id;
+		int32_t     return_zone_id;
 		float       return_x;
 		float       return_y;
 		float       return_z;
 		float       return_h;
-		int         override_zone_in;
+		int8_t      override_zone_in;
 		float       zone_in_x;
 		float       zone_in_y;
 		float       zone_in_z;
@@ -198,28 +198,28 @@ public:
 		if (results.RowCount() == 1) {
 			DynamicZoneTemplates e{};
 
-			e.id               = atoi(row[0]);
-			e.zone_id          = atoi(row[1]);
-			e.zone_version     = atoi(row[2]);
+			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.zone_version     = static_cast<int32_t>(atoi(row[2]));
 			e.name             = row[3] ? row[3] : "";
-			e.min_players      = atoi(row[4]);
-			e.max_players      = atoi(row[5]);
-			e.duration_seconds = atoi(row[6]);
-			e.dz_switch_id     = atoi(row[7]);
-			e.compass_zone_id  = atoi(row[8]);
-			e.compass_x        = static_cast<float>(atof(row[9]));
-			e.compass_y        = static_cast<float>(atof(row[10]));
-			e.compass_z        = static_cast<float>(atof(row[11]));
-			e.return_zone_id   = atoi(row[12]);
-			e.return_x         = static_cast<float>(atof(row[13]));
-			e.return_y         = static_cast<float>(atof(row[14]));
-			e.return_z         = static_cast<float>(atof(row[15]));
-			e.return_h         = static_cast<float>(atof(row[16]));
-			e.override_zone_in = atoi(row[17]);
-			e.zone_in_x        = static_cast<float>(atof(row[18]));
-			e.zone_in_y        = static_cast<float>(atof(row[19]));
-			e.zone_in_z        = static_cast<float>(atof(row[20]));
-			e.zone_in_h        = static_cast<float>(atof(row[21]));
+			e.min_players      = static_cast<int32_t>(atoi(row[4]));
+			e.max_players      = static_cast<int32_t>(atoi(row[5]));
+			e.duration_seconds = static_cast<int32_t>(atoi(row[6]));
+			e.dz_switch_id     = static_cast<int32_t>(atoi(row[7]));
+			e.compass_zone_id  = static_cast<int32_t>(atoi(row[8]));
+			e.compass_x        = strtof(row[9], nullptr);
+			e.compass_y        = strtof(row[10], nullptr);
+			e.compass_z        = strtof(row[11], nullptr);
+			e.return_zone_id   = static_cast<int32_t>(atoi(row[12]));
+			e.return_x         = strtof(row[13], nullptr);
+			e.return_y         = strtof(row[14], nullptr);
+			e.return_z         = strtof(row[15], nullptr);
+			e.return_h         = strtof(row[16], nullptr);
+			e.override_zone_in = static_cast<int8_t>(atoi(row[17]));
+			e.zone_in_x        = strtof(row[18], nullptr);
+			e.zone_in_y        = strtof(row[19], nullptr);
+			e.zone_in_z        = strtof(row[20], nullptr);
+			e.zone_in_h        = strtof(row[21], nullptr);
 
 			return e;
 		}
@@ -401,28 +401,28 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneTemplates e{};
 
-			e.id               = atoi(row[0]);
-			e.zone_id          = atoi(row[1]);
-			e.zone_version     = atoi(row[2]);
+			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.zone_version     = static_cast<int32_t>(atoi(row[2]));
 			e.name             = row[3] ? row[3] : "";
-			e.min_players      = atoi(row[4]);
-			e.max_players      = atoi(row[5]);
-			e.duration_seconds = atoi(row[6]);
-			e.dz_switch_id     = atoi(row[7]);
-			e.compass_zone_id  = atoi(row[8]);
-			e.compass_x        = static_cast<float>(atof(row[9]));
-			e.compass_y        = static_cast<float>(atof(row[10]));
-			e.compass_z        = static_cast<float>(atof(row[11]));
-			e.return_zone_id   = atoi(row[12]);
-			e.return_x         = static_cast<float>(atof(row[13]));
-			e.return_y         = static_cast<float>(atof(row[14]));
-			e.return_z         = static_cast<float>(atof(row[15]));
-			e.return_h         = static_cast<float>(atof(row[16]));
-			e.override_zone_in = atoi(row[17]);
-			e.zone_in_x        = static_cast<float>(atof(row[18]));
-			e.zone_in_y        = static_cast<float>(atof(row[19]));
-			e.zone_in_z        = static_cast<float>(atof(row[20]));
-			e.zone_in_h        = static_cast<float>(atof(row[21]));
+			e.min_players      = static_cast<int32_t>(atoi(row[4]));
+			e.max_players      = static_cast<int32_t>(atoi(row[5]));
+			e.duration_seconds = static_cast<int32_t>(atoi(row[6]));
+			e.dz_switch_id     = static_cast<int32_t>(atoi(row[7]));
+			e.compass_zone_id  = static_cast<int32_t>(atoi(row[8]));
+			e.compass_x        = strtof(row[9], nullptr);
+			e.compass_y        = strtof(row[10], nullptr);
+			e.compass_z        = strtof(row[11], nullptr);
+			e.return_zone_id   = static_cast<int32_t>(atoi(row[12]));
+			e.return_x         = strtof(row[13], nullptr);
+			e.return_y         = strtof(row[14], nullptr);
+			e.return_z         = strtof(row[15], nullptr);
+			e.return_h         = strtof(row[16], nullptr);
+			e.override_zone_in = static_cast<int8_t>(atoi(row[17]));
+			e.zone_in_x        = strtof(row[18], nullptr);
+			e.zone_in_y        = strtof(row[19], nullptr);
+			e.zone_in_z        = strtof(row[20], nullptr);
+			e.zone_in_h        = strtof(row[21], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -447,28 +447,28 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneTemplates e{};
 
-			e.id               = atoi(row[0]);
-			e.zone_id          = atoi(row[1]);
-			e.zone_version     = atoi(row[2]);
+			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.zone_version     = static_cast<int32_t>(atoi(row[2]));
 			e.name             = row[3] ? row[3] : "";
-			e.min_players      = atoi(row[4]);
-			e.max_players      = atoi(row[5]);
-			e.duration_seconds = atoi(row[6]);
-			e.dz_switch_id     = atoi(row[7]);
-			e.compass_zone_id  = atoi(row[8]);
-			e.compass_x        = static_cast<float>(atof(row[9]));
-			e.compass_y        = static_cast<float>(atof(row[10]));
-			e.compass_z        = static_cast<float>(atof(row[11]));
-			e.return_zone_id   = atoi(row[12]);
-			e.return_x         = static_cast<float>(atof(row[13]));
-			e.return_y         = static_cast<float>(atof(row[14]));
-			e.return_z         = static_cast<float>(atof(row[15]));
-			e.return_h         = static_cast<float>(atof(row[16]));
-			e.override_zone_in = atoi(row[17]);
-			e.zone_in_x        = static_cast<float>(atof(row[18]));
-			e.zone_in_y        = static_cast<float>(atof(row[19]));
-			e.zone_in_z        = static_cast<float>(atof(row[20]));
-			e.zone_in_h        = static_cast<float>(atof(row[21]));
+			e.min_players      = static_cast<int32_t>(atoi(row[4]));
+			e.max_players      = static_cast<int32_t>(atoi(row[5]));
+			e.duration_seconds = static_cast<int32_t>(atoi(row[6]));
+			e.dz_switch_id     = static_cast<int32_t>(atoi(row[7]));
+			e.compass_zone_id  = static_cast<int32_t>(atoi(row[8]));
+			e.compass_x        = strtof(row[9], nullptr);
+			e.compass_y        = strtof(row[10], nullptr);
+			e.compass_z        = strtof(row[11], nullptr);
+			e.return_zone_id   = static_cast<int32_t>(atoi(row[12]));
+			e.return_x         = strtof(row[13], nullptr);
+			e.return_y         = strtof(row[14], nullptr);
+			e.return_z         = strtof(row[15], nullptr);
+			e.return_h         = strtof(row[16], nullptr);
+			e.override_zone_in = static_cast<int8_t>(atoi(row[17]));
+			e.zone_in_x        = strtof(row[18], nullptr);
+			e.zone_in_y        = strtof(row[19], nullptr);
+			e.zone_in_z        = strtof(row[20], nullptr);
+			e.zone_in_h        = strtof(row[21], nullptr);
 
 			all_entries.push_back(e);
 		}

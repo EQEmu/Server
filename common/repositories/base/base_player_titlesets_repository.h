@@ -19,9 +19,9 @@
 class BasePlayerTitlesetsRepository {
 public:
 	struct PlayerTitlesets {
-		int id;
-		int char_id;
-		int title_set;
+		uint32_t id;
+		uint32_t char_id;
+		uint32_t title_set;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			PlayerTitlesets e{};
 
-			e.id        = atoi(row[0]);
-			e.char_id   = atoi(row[1]);
-			e.title_set = atoi(row[2]);
+			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.char_id   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.title_set = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -249,9 +249,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerTitlesets e{};
 
-			e.id        = atoi(row[0]);
-			e.char_id   = atoi(row[1]);
-			e.title_set = atoi(row[2]);
+			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.char_id   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.title_set = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -276,9 +276,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerTitlesets e{};
 
-			e.id        = atoi(row[0]);
-			e.char_id   = atoi(row[1]);
-			e.title_set = atoi(row[2]);
+			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.char_id   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.title_set = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

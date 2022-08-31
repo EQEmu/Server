@@ -188,12 +188,13 @@ foreach my $table_to_generate (@tables) {
         my $column_name           = $row[0];
         my $column_name_formatted = format_column_name_for_cpp_var($column_name);
         my $data_type             = $row[2];
+        my $column_type           = $row[3];
 
         if ($longest_column_length < length($column_name_formatted)) {
             $longest_column_length = length($column_name_formatted);
         }
 
-        my $struct_data_type = translate_mysql_data_type_to_c($data_type);
+        my $struct_data_type = translate_mysql_data_type_to_c($data_type, $column_type);
 
         if ($longest_data_type_length < length($struct_data_type)) {
             $longest_data_type_length = length($struct_data_type);
@@ -252,7 +253,7 @@ foreach my $table_to_generate (@tables) {
             $default_value = 0;
         }
 
-        my $struct_data_type = translate_mysql_data_type_to_c($data_type);
+        my $struct_data_type = translate_mysql_data_type_to_c($data_type, $column_type);
 
         # struct
         $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name_formatted);
@@ -299,7 +300,18 @@ foreach my $table_to_generate (@tables) {
         $insert_many_entries .= sprintf("\t\t\tv.push_back(%s);\n", $value);
 
         # find one / all (select)
-        if ($data_type =~ /bigint/) {
+
+        if ($column_type =~ /unsigned/) {
+            if ($data_type =~ /bigint/) {
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoull(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoull(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+            }
+            elsif ($data_type =~ /int/) {
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(strtoul(row[%s], nullptr, 10));\n", $column_name_formatted, $struct_data_type, $index);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(strtoul(row[%s], nullptr, 10));\n", $column_name_formatted, $struct_data_type, $index);
+            }
+        }
+        elsif ($data_type =~ /bigint/) {
             $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
             $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
         }
@@ -308,12 +320,16 @@ foreach my $table_to_generate (@tables) {
             $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
         }
         elsif ($data_type =~ /int/) {
-            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(atoi(row[%s]));\n", $column_name_formatted, $struct_data_type, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(atoi(row[%s]));\n", $column_name_formatted, $struct_data_type, $index);
         }
-        elsif ($data_type =~ /float|double|decimal/) {
-            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
+        elsif ($data_type =~ /float|decimal/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtof(row[%s], nullptr);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtof(row[%s], nullptr);\n", $column_name_formatted, $index);
+        }
+        elsif ($data_type =~ /double/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtod(row[%s], nullptr);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtod(row[%s], nullptr);\n", $column_name_formatted, $index);
         }
         else {
             $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
@@ -491,22 +507,40 @@ sub trim {
 
 sub translate_mysql_data_type_to_c {
     my $mysql_data_type = $_[0];
+    my $mysql_column_type = $_[1];
 
     my $struct_data_type = "std::string";
-    if ($mysql_data_type =~ /tinyint/) {
-        $struct_data_type = 'int';
-    }
-    elsif ($mysql_data_type =~ /smallint/) {
-        $struct_data_type = 'int';
+    if ($mysql_column_type =~ /unsigned/) {
+        if ($mysql_data_type =~ /bigint/) {
+            $struct_data_type = 'uint64_t';
+        }
+        elsif ($mysql_data_type =~ /tinyint/) {
+            $struct_data_type = 'uint8_t';
+        }
+        elsif ($mysql_data_type =~ /smallint/) {
+            $struct_data_type = 'uint16_t';
+        }
+        elsif ($mysql_data_type =~ /int/) {
+            $struct_data_type = 'uint32_t';
+        }
     }
     elsif ($mysql_data_type =~ /bigint/) {
-        $struct_data_type = 'int64';
+        $struct_data_type = 'int64_t';
+    }
+    elsif ($mysql_data_type =~ /tinyint/) {
+        $struct_data_type = 'int8_t';
+    }
+    elsif ($mysql_data_type =~ /smallint/) {
+        $struct_data_type = 'int16_t';
     }
     elsif ($mysql_data_type =~ /int/) {
-        $struct_data_type = 'int';
+        $struct_data_type = 'int32_t';
     }
-    elsif ($mysql_data_type =~ /float|double|decimal/) {
+    elsif ($mysql_data_type =~ /float|decimal/) {
         $struct_data_type = 'float';
+    }
+    elsif ($mysql_data_type =~ /double/) {
+        $struct_data_type = 'double';
     }
     elsif ($mysql_data_type =~ /datetime/) {
         $struct_data_type = 'time_t';

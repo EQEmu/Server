@@ -19,10 +19,10 @@
 class BaseSpawnConditionValuesRepository {
 public:
 	struct SpawnConditionValues {
-		int         id;
-		int         value;
+		uint32_t    id;
+		uint8_t     value;
 		std::string zone;
-		int         instance_id;
+		uint32_t    instance_id;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			SpawnConditionValues e{};
 
-			e.id          = atoi(row[0]);
-			e.value       = atoi(row[1]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.value       = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 			e.zone        = row[2] ? row[2] : "";
-			e.instance_id = atoi(row[3]);
+			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnConditionValues e{};
 
-			e.id          = atoi(row[0]);
-			e.value       = atoi(row[1]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.value       = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 			e.zone        = row[2] ? row[2] : "";
-			e.instance_id = atoi(row[3]);
+			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnConditionValues e{};
 
-			e.id          = atoi(row[0]);
-			e.value       = atoi(row[1]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.value       = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 			e.zone        = row[2] ? row[2] : "";
-			e.instance_id = atoi(row[3]);
+			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

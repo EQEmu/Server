@@ -19,7 +19,7 @@
 class BaseHackersRepository {
 public:
 	struct Hackers {
-		int         id;
+		int32_t     id;
 		std::string account;
 		std::string name;
 		std::string hacked;
@@ -134,7 +134,7 @@ public:
 		if (results.RowCount() == 1) {
 			Hackers e{};
 
-			e.id      = atoi(row[0]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
 			e.account = row[1] ? row[1] : "";
 			e.name    = row[2] ? row[2] : "";
 			e.hacked  = row[3] ? row[3] : "";
@@ -273,7 +273,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Hackers e{};
 
-			e.id      = atoi(row[0]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
 			e.account = row[1] ? row[1] : "";
 			e.name    = row[2] ? row[2] : "";
 			e.hacked  = row[3] ? row[3] : "";
@@ -303,7 +303,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Hackers e{};
 
-			e.id      = atoi(row[0]);
+			e.id      = static_cast<int32_t>(atoi(row[0]));
 			e.account = row[1] ? row[1] : "";
 			e.name    = row[2] ? row[2] : "";
 			e.hacked  = row[3] ? row[3] : "";

@@ -19,12 +19,12 @@
 class BaseCharacterExpeditionLockoutsRepository {
 public:
 	struct CharacterExpeditionLockouts {
-		int         id;
-		int         character_id;
+		uint32_t    id;
+		uint32_t    character_id;
 		std::string expedition_name;
 		std::string event_name;
 		time_t      expire_time;
-		int         duration;
+		uint32_t    duration;
 		std::string from_expedition_uuid;
 	};
 
@@ -138,12 +138,12 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterExpeditionLockouts e{};
 
-			e.id                   = atoi(row[0]);
-			e.character_id         = atoi(row[1]);
+			e.id                   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id         = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.expedition_name      = row[2] ? row[2] : "";
 			e.event_name           = row[3] ? row[3] : "";
 			e.expire_time          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			e.duration             = atoi(row[5]);
+			e.duration             = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.from_expedition_uuid = row[6] ? row[6] : "";
 
 			return e;
@@ -281,12 +281,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterExpeditionLockouts e{};
 
-			e.id                   = atoi(row[0]);
-			e.character_id         = atoi(row[1]);
+			e.id                   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id         = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.expedition_name      = row[2] ? row[2] : "";
 			e.event_name           = row[3] ? row[3] : "";
 			e.expire_time          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			e.duration             = atoi(row[5]);
+			e.duration             = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.from_expedition_uuid = row[6] ? row[6] : "";
 
 			all_entries.push_back(e);
@@ -312,12 +312,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterExpeditionLockouts e{};
 
-			e.id                   = atoi(row[0]);
-			e.character_id         = atoi(row[1]);
+			e.id                   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id         = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.expedition_name      = row[2] ? row[2] : "";
 			e.event_name           = row[3] ? row[3] : "";
 			e.expire_time          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
-			e.duration             = atoi(row[5]);
+			e.duration             = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 			e.from_expedition_uuid = row[6] ? row[6] : "";
 
 			all_entries.push_back(e);

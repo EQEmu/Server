@@ -20,7 +20,7 @@ class BaseGmIpsRepository {
 public:
 	struct GmIps {
 		std::string name;
-		int         account_id;
+		int32_t     account_id;
 		std::string ip_address;
 	};
 
@@ -123,7 +123,7 @@ public:
 			GmIps e{};
 
 			e.name       = row[0] ? row[0] : "";
-			e.account_id = atoi(row[1]);
+			e.account_id = static_cast<int32_t>(atoi(row[1]));
 			e.ip_address = row[2] ? row[2] : "";
 
 			return e;
@@ -251,7 +251,7 @@ public:
 			GmIps e{};
 
 			e.name       = row[0] ? row[0] : "";
-			e.account_id = atoi(row[1]);
+			e.account_id = static_cast<int32_t>(atoi(row[1]));
 			e.ip_address = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -278,7 +278,7 @@ public:
 			GmIps e{};
 
 			e.name       = row[0] ? row[0] : "";
-			e.account_id = atoi(row[1]);
+			e.account_id = static_cast<int32_t>(atoi(row[1]));
 			e.ip_address = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);

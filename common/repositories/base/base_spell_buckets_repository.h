@@ -19,7 +19,7 @@
 class BaseSpellBucketsRepository {
 public:
 	struct SpellBuckets {
-		int64       spellid;
+		uint64_t    spellid;
 		std::string key;
 		std::string value;
 	};
@@ -122,7 +122,7 @@ public:
 		if (results.RowCount() == 1) {
 			SpellBuckets e{};
 
-			e.spellid = strtoll(row[0], nullptr, 10);
+			e.spellid = strtoull(row[0], nullptr, 10);
 			e.key     = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 
@@ -250,7 +250,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellBuckets e{};
 
-			e.spellid = strtoll(row[0], nullptr, 10);
+			e.spellid = strtoull(row[0], nullptr, 10);
 			e.key     = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 
@@ -277,7 +277,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellBuckets e{};
 
-			e.spellid = strtoll(row[0], nullptr, 10);
+			e.spellid = strtoull(row[0], nullptr, 10);
 			e.key     = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 

@@ -19,12 +19,12 @@
 class BaseTraderRepository {
 public:
 	struct Trader {
-		int char_id;
-		int item_id;
-		int serialnumber;
-		int charges;
-		int item_cost;
-		int slot_id;
+		uint32_t char_id;
+		uint32_t item_id;
+		uint32_t serialnumber;
+		int32_t  charges;
+		uint32_t item_cost;
+		uint8_t  slot_id;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			Trader e{};
 
-			e.char_id      = atoi(row[0]);
-			e.item_id      = atoi(row[1]);
-			e.serialnumber = atoi(row[2]);
-			e.charges      = atoi(row[3]);
-			e.item_cost    = atoi(row[4]);
-			e.slot_id      = atoi(row[5]);
+			e.char_id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.serialnumber = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges      = static_cast<int32_t>(atoi(row[3]));
+			e.item_cost    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.slot_id      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Trader e{};
 
-			e.char_id      = atoi(row[0]);
-			e.item_id      = atoi(row[1]);
-			e.serialnumber = atoi(row[2]);
-			e.charges      = atoi(row[3]);
-			e.item_cost    = atoi(row[4]);
-			e.slot_id      = atoi(row[5]);
+			e.char_id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.serialnumber = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges      = static_cast<int32_t>(atoi(row[3]));
+			e.item_cost    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.slot_id      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Trader e{};
 
-			e.char_id      = atoi(row[0]);
-			e.item_id      = atoi(row[1]);
-			e.serialnumber = atoi(row[2]);
-			e.charges      = atoi(row[3]);
-			e.item_cost    = atoi(row[4]);
-			e.slot_id      = atoi(row[5]);
+			e.char_id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.serialnumber = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges      = static_cast<int32_t>(atoi(row[3]));
+			e.item_cost    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.slot_id      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

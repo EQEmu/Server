@@ -19,14 +19,14 @@
 class BaseMailRepository {
 public:
 	struct Mail {
-		int         msgid;
-		int         charid;
-		int         timestamp;
+		uint32_t    msgid;
+		uint32_t    charid;
+		int32_t     timestamp;
 		std::string from;
 		std::string subject;
 		std::string body;
 		std::string to;
-		int         status;
+		int8_t      status;
 	};
 
 	static std::string PrimaryKey()
@@ -142,14 +142,14 @@ public:
 		if (results.RowCount() == 1) {
 			Mail e{};
 
-			e.msgid     = atoi(row[0]);
-			e.charid    = atoi(row[1]);
-			e.timestamp = atoi(row[2]);
+			e.msgid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.charid    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.timestamp = static_cast<int32_t>(atoi(row[2]));
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = atoi(row[7]);
+			e.status    = static_cast<int8_t>(atoi(row[7]));
 
 			return e;
 		}
@@ -289,14 +289,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Mail e{};
 
-			e.msgid     = atoi(row[0]);
-			e.charid    = atoi(row[1]);
-			e.timestamp = atoi(row[2]);
+			e.msgid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.charid    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.timestamp = static_cast<int32_t>(atoi(row[2]));
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = atoi(row[7]);
+			e.status    = static_cast<int8_t>(atoi(row[7]));
 
 			all_entries.push_back(e);
 		}
@@ -321,14 +321,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Mail e{};
 
-			e.msgid     = atoi(row[0]);
-			e.charid    = atoi(row[1]);
-			e.timestamp = atoi(row[2]);
+			e.msgid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.charid    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.timestamp = static_cast<int32_t>(atoi(row[2]));
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = atoi(row[7]);
+			e.status    = static_cast<int8_t>(atoi(row[7]));
 
 			all_entries.push_back(e);
 		}

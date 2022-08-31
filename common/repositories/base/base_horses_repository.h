@@ -19,11 +19,11 @@
 class BaseHorsesRepository {
 public:
 	struct Horses {
-		int         id;
+		int32_t     id;
 		std::string filename;
-		int         race;
-		int         gender;
-		int         texture;
+		int16_t     race;
+		int8_t      gender;
+		int8_t      texture;
 		float       mountspeed;
 		std::string notes;
 	};
@@ -138,12 +138,12 @@ public:
 		if (results.RowCount() == 1) {
 			Horses e{};
 
-			e.id         = atoi(row[0]);
+			e.id         = static_cast<int32_t>(atoi(row[0]));
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = atoi(row[2]);
-			e.gender     = atoi(row[3]);
-			e.texture    = atoi(row[4]);
-			e.mountspeed = static_cast<float>(atof(row[5]));
+			e.race       = static_cast<int16_t>(atoi(row[2]));
+			e.gender     = static_cast<int8_t>(atoi(row[3]));
+			e.texture    = static_cast<int8_t>(atoi(row[4]));
+			e.mountspeed = strtof(row[5], nullptr);
 			e.notes      = row[6] ? row[6] : "";
 
 			return e;
@@ -281,12 +281,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = atoi(row[0]);
+			e.id         = static_cast<int32_t>(atoi(row[0]));
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = atoi(row[2]);
-			e.gender     = atoi(row[3]);
-			e.texture    = atoi(row[4]);
-			e.mountspeed = static_cast<float>(atof(row[5]));
+			e.race       = static_cast<int16_t>(atoi(row[2]));
+			e.gender     = static_cast<int8_t>(atoi(row[3]));
+			e.texture    = static_cast<int8_t>(atoi(row[4]));
+			e.mountspeed = strtof(row[5], nullptr);
 			e.notes      = row[6] ? row[6] : "";
 
 			all_entries.push_back(e);
@@ -312,12 +312,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = atoi(row[0]);
+			e.id         = static_cast<int32_t>(atoi(row[0]));
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = atoi(row[2]);
-			e.gender     = atoi(row[3]);
-			e.texture    = atoi(row[4]);
-			e.mountspeed = static_cast<float>(atof(row[5]));
+			e.race       = static_cast<int16_t>(atoi(row[2]));
+			e.gender     = static_cast<int8_t>(atoi(row[3]));
+			e.texture    = static_cast<int8_t>(atoi(row[4]));
+			e.mountspeed = strtof(row[5], nullptr);
 			e.notes      = row[6] ? row[6] : "";
 
 			all_entries.push_back(e);

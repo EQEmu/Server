@@ -19,10 +19,10 @@
 class BaseFactionValuesRepository {
 public:
 	struct FactionValues {
-		int char_id;
-		int faction_id;
-		int current_value;
-		int temp;
+		int32_t char_id;
+		int32_t faction_id;
+		int16_t current_value;
+		int8_t  temp;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			FactionValues e{};
 
-			e.char_id       = atoi(row[0]);
-			e.faction_id    = atoi(row[1]);
-			e.current_value = atoi(row[2]);
-			e.temp          = atoi(row[3]);
+			e.char_id       = static_cast<int32_t>(atoi(row[0]));
+			e.faction_id    = static_cast<int32_t>(atoi(row[1]));
+			e.current_value = static_cast<int16_t>(atoi(row[2]));
+			e.temp          = static_cast<int8_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionValues e{};
 
-			e.char_id       = atoi(row[0]);
-			e.faction_id    = atoi(row[1]);
-			e.current_value = atoi(row[2]);
-			e.temp          = atoi(row[3]);
+			e.char_id       = static_cast<int32_t>(atoi(row[0]));
+			e.faction_id    = static_cast<int32_t>(atoi(row[1]));
+			e.current_value = static_cast<int16_t>(atoi(row[2]));
+			e.temp          = static_cast<int8_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionValues e{};
 
-			e.char_id       = atoi(row[0]);
-			e.faction_id    = atoi(row[1]);
-			e.current_value = atoi(row[2]);
-			e.temp          = atoi(row[3]);
+			e.char_id       = static_cast<int32_t>(atoi(row[0]));
+			e.faction_id    = static_cast<int32_t>(atoi(row[1]));
+			e.current_value = static_cast<int16_t>(atoi(row[2]));
+			e.temp          = static_cast<int8_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

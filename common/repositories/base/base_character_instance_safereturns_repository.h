@@ -19,15 +19,15 @@
 class BaseCharacterInstanceSafereturnsRepository {
 public:
 	struct CharacterInstanceSafereturns {
-		int   id;
-		int   character_id;
-		int   instance_zone_id;
-		int   instance_id;
-		int   safe_zone_id;
-		float safe_x;
-		float safe_y;
-		float safe_z;
-		float safe_heading;
+		uint32_t id;
+		uint32_t character_id;
+		int32_t  instance_zone_id;
+		int32_t  instance_id;
+		int32_t  safe_zone_id;
+		float    safe_x;
+		float    safe_y;
+		float    safe_z;
+		float    safe_heading;
 	};
 
 	static std::string PrimaryKey()
@@ -146,15 +146,15 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterInstanceSafereturns e{};
 
-			e.id               = atoi(row[0]);
-			e.character_id     = atoi(row[1]);
-			e.instance_zone_id = atoi(row[2]);
-			e.instance_id      = atoi(row[3]);
-			e.safe_zone_id     = atoi(row[4]);
-			e.safe_x           = static_cast<float>(atof(row[5]));
-			e.safe_y           = static_cast<float>(atof(row[6]));
-			e.safe_z           = static_cast<float>(atof(row[7]));
-			e.safe_heading     = static_cast<float>(atof(row[8]));
+			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
+			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
+			e.safe_x           = strtof(row[5], nullptr);
+			e.safe_y           = strtof(row[6], nullptr);
+			e.safe_z           = strtof(row[7], nullptr);
+			e.safe_heading     = strtof(row[8], nullptr);
 
 			return e;
 		}
@@ -297,15 +297,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterInstanceSafereturns e{};
 
-			e.id               = atoi(row[0]);
-			e.character_id     = atoi(row[1]);
-			e.instance_zone_id = atoi(row[2]);
-			e.instance_id      = atoi(row[3]);
-			e.safe_zone_id     = atoi(row[4]);
-			e.safe_x           = static_cast<float>(atof(row[5]));
-			e.safe_y           = static_cast<float>(atof(row[6]));
-			e.safe_z           = static_cast<float>(atof(row[7]));
-			e.safe_heading     = static_cast<float>(atof(row[8]));
+			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
+			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
+			e.safe_x           = strtof(row[5], nullptr);
+			e.safe_y           = strtof(row[6], nullptr);
+			e.safe_z           = strtof(row[7], nullptr);
+			e.safe_heading     = strtof(row[8], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -330,15 +330,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterInstanceSafereturns e{};
 
-			e.id               = atoi(row[0]);
-			e.character_id     = atoi(row[1]);
-			e.instance_zone_id = atoi(row[2]);
-			e.instance_id      = atoi(row[3]);
-			e.safe_zone_id     = atoi(row[4]);
-			e.safe_x           = static_cast<float>(atof(row[5]));
-			e.safe_y           = static_cast<float>(atof(row[6]));
-			e.safe_z           = static_cast<float>(atof(row[7]));
-			e.safe_heading     = static_cast<float>(atof(row[8]));
+			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.character_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
+			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
+			e.safe_x           = strtof(row[5], nullptr);
+			e.safe_y           = strtof(row[6], nullptr);
+			e.safe_z           = strtof(row[7], nullptr);
+			e.safe_heading     = strtof(row[8], nullptr);
 
 			all_entries.push_back(e);
 		}

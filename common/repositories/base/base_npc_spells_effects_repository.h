@@ -19,9 +19,9 @@
 class BaseNpcSpellsEffectsRepository {
 public:
 	struct NpcSpellsEffects {
-		int         id;
+		uint32_t    id;
 		std::string name;
-		int         parent_list;
+		uint32_t    parent_list;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			NpcSpellsEffects e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name        = row[1] ? row[1] : "";
-			e.parent_list = atoi(row[2]);
+			e.parent_list = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -249,9 +249,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEffects e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name        = row[1] ? row[1] : "";
-			e.parent_list = atoi(row[2]);
+			e.parent_list = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -276,9 +276,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEffects e{};
 
-			e.id          = atoi(row[0]);
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name        = row[1] ? row[1] : "";
-			e.parent_list = atoi(row[2]);
+			e.parent_list = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

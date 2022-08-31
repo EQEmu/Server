@@ -19,19 +19,19 @@
 class BaseTradeskillRecipeRepository {
 public:
 	struct TradeskillRecipe {
-		int         id;
+		int32_t     id;
 		std::string name;
-		int         tradeskill;
-		int         skillneeded;
-		int         trivial;
-		int         nofail;
-		int         replace_container;
+		int16_t     tradeskill;
+		int16_t     skillneeded;
+		int16_t     trivial;
+		int8_t      nofail;
+		int8_t      replace_container;
 		std::string notes;
-		int         must_learn;
-		int         quest;
-		int         enabled;
-		int         min_expansion;
-		int         max_expansion;
+		int8_t      must_learn;
+		int8_t      quest;
+		int8_t      enabled;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -170,19 +170,19 @@ public:
 		if (results.RowCount() == 1) {
 			TradeskillRecipe e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
 			e.name                   = row[1] ? row[1] : "";
-			e.tradeskill             = atoi(row[2]);
-			e.skillneeded            = atoi(row[3]);
-			e.trivial                = atoi(row[4]);
-			e.nofail                 = atoi(row[5]);
-			e.replace_container      = atoi(row[6]);
+			e.tradeskill             = static_cast<int16_t>(atoi(row[2]));
+			e.skillneeded            = static_cast<int16_t>(atoi(row[3]));
+			e.trivial                = static_cast<int16_t>(atoi(row[4]));
+			e.nofail                 = static_cast<int8_t>(atoi(row[5]));
+			e.replace_container      = static_cast<int8_t>(atoi(row[6]));
 			e.notes                  = row[7] ? row[7] : "";
-			e.must_learn             = atoi(row[8]);
-			e.quest                  = atoi(row[9]);
-			e.enabled                = atoi(row[10]);
-			e.min_expansion          = atoi(row[11]);
-			e.max_expansion          = atoi(row[12]);
+			e.must_learn             = static_cast<int8_t>(atoi(row[8]));
+			e.quest                  = static_cast<int8_t>(atoi(row[9]));
+			e.enabled                = static_cast<int8_t>(atoi(row[10]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
 			e.content_flags          = row[13] ? row[13] : "";
 			e.content_flags_disabled = row[14] ? row[14] : "";
 
@@ -345,19 +345,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipe e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
 			e.name                   = row[1] ? row[1] : "";
-			e.tradeskill             = atoi(row[2]);
-			e.skillneeded            = atoi(row[3]);
-			e.trivial                = atoi(row[4]);
-			e.nofail                 = atoi(row[5]);
-			e.replace_container      = atoi(row[6]);
+			e.tradeskill             = static_cast<int16_t>(atoi(row[2]));
+			e.skillneeded            = static_cast<int16_t>(atoi(row[3]));
+			e.trivial                = static_cast<int16_t>(atoi(row[4]));
+			e.nofail                 = static_cast<int8_t>(atoi(row[5]));
+			e.replace_container      = static_cast<int8_t>(atoi(row[6]));
 			e.notes                  = row[7] ? row[7] : "";
-			e.must_learn             = atoi(row[8]);
-			e.quest                  = atoi(row[9]);
-			e.enabled                = atoi(row[10]);
-			e.min_expansion          = atoi(row[11]);
-			e.max_expansion          = atoi(row[12]);
+			e.must_learn             = static_cast<int8_t>(atoi(row[8]));
+			e.quest                  = static_cast<int8_t>(atoi(row[9]));
+			e.enabled                = static_cast<int8_t>(atoi(row[10]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
 			e.content_flags          = row[13] ? row[13] : "";
 			e.content_flags_disabled = row[14] ? row[14] : "";
 
@@ -384,19 +384,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipe e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
 			e.name                   = row[1] ? row[1] : "";
-			e.tradeskill             = atoi(row[2]);
-			e.skillneeded            = atoi(row[3]);
-			e.trivial                = atoi(row[4]);
-			e.nofail                 = atoi(row[5]);
-			e.replace_container      = atoi(row[6]);
+			e.tradeskill             = static_cast<int16_t>(atoi(row[2]));
+			e.skillneeded            = static_cast<int16_t>(atoi(row[3]));
+			e.trivial                = static_cast<int16_t>(atoi(row[4]));
+			e.nofail                 = static_cast<int8_t>(atoi(row[5]));
+			e.replace_container      = static_cast<int8_t>(atoi(row[6]));
 			e.notes                  = row[7] ? row[7] : "";
-			e.must_learn             = atoi(row[8]);
-			e.quest                  = atoi(row[9]);
-			e.enabled                = atoi(row[10]);
-			e.min_expansion          = atoi(row[11]);
-			e.max_expansion          = atoi(row[12]);
+			e.must_learn             = static_cast<int8_t>(atoi(row[8]));
+			e.quest                  = static_cast<int8_t>(atoi(row[9]));
+			e.enabled                = static_cast<int8_t>(atoi(row[10]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
 			e.content_flags          = row[13] ? row[13] : "";
 			e.content_flags_disabled = row[14] ? row[14] : "";
 

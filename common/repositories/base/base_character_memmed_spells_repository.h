@@ -19,9 +19,9 @@
 class BaseCharacterMemmedSpellsRepository {
 public:
 	struct CharacterMemmedSpells {
-		int id;
-		int slot_id;
-		int spell_id;
+		uint32_t id;
+		uint16_t slot_id;
+		uint16_t spell_id;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterMemmedSpells e{};
 
-			e.id       = atoi(row[0]);
-			e.slot_id  = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id  = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterMemmedSpells e{};
 
-			e.id       = atoi(row[0]);
-			e.slot_id  = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id  = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterMemmedSpells e{};
 
-			e.id       = atoi(row[0]);
-			e.slot_id  = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id  = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

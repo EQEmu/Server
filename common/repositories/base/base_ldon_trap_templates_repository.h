@@ -19,11 +19,11 @@
 class BaseLdonTrapTemplatesRepository {
 public:
 	struct LdonTrapTemplates {
-		int id;
-		int type;
-		int spell_id;
-		int skill;
-		int locked;
+		uint32_t id;
+		uint8_t  type;
+		uint16_t spell_id;
+		uint16_t skill;
+		uint8_t  locked;
 	};
 
 	static std::string PrimaryKey()
@@ -130,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			LdonTrapTemplates e{};
 
-			e.id       = atoi(row[0]);
-			e.type     = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
-			e.skill    = atoi(row[3]);
-			e.locked   = atoi(row[4]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.skill    = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.locked   = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LdonTrapTemplates e{};
 
-			e.id       = atoi(row[0]);
-			e.type     = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
-			e.skill    = atoi(row[3]);
-			e.locked   = atoi(row[4]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.skill    = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.locked   = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LdonTrapTemplates e{};
 
-			e.id       = atoi(row[0]);
-			e.type     = atoi(row[1]);
-			e.spell_id = atoi(row[2]);
-			e.skill    = atoi(row[3]);
-			e.locked   = atoi(row[4]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.skill    = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.locked   = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

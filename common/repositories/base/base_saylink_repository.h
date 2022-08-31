@@ -19,7 +19,7 @@
 class BaseSaylinkRepository {
 public:
 	struct Saylink {
-		int         id;
+		int32_t     id;
 		std::string phrase;
 	};
 
@@ -118,7 +118,7 @@ public:
 		if (results.RowCount() == 1) {
 			Saylink e{};
 
-			e.id     = atoi(row[0]);
+			e.id     = static_cast<int32_t>(atoi(row[0]));
 			e.phrase = row[1] ? row[1] : "";
 
 			return e;
@@ -241,7 +241,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Saylink e{};
 
-			e.id     = atoi(row[0]);
+			e.id     = static_cast<int32_t>(atoi(row[0]));
 			e.phrase = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);
@@ -267,7 +267,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Saylink e{};
 
-			e.id     = atoi(row[0]);
+			e.id     = static_cast<int32_t>(atoi(row[0]));
 			e.phrase = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);

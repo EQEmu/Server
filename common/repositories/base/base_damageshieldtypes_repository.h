@@ -19,8 +19,8 @@
 class BaseDamageshieldtypesRepository {
 public:
 	struct Damageshieldtypes {
-		int spellid;
-		int type;
+		uint32_t spellid;
+		uint8_t  type;
 	};
 
 	static std::string PrimaryKey()
@@ -118,8 +118,8 @@ public:
 		if (results.RowCount() == 1) {
 			Damageshieldtypes e{};
 
-			e.spellid = atoi(row[0]);
-			e.type    = atoi(row[1]);
+			e.spellid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type    = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 
 			return e;
 		}
@@ -242,8 +242,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Damageshieldtypes e{};
 
-			e.spellid = atoi(row[0]);
-			e.type    = atoi(row[1]);
+			e.spellid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type    = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -268,8 +268,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Damageshieldtypes e{};
 
-			e.spellid = atoi(row[0]);
-			e.type    = atoi(row[1]);
+			e.spellid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type    = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

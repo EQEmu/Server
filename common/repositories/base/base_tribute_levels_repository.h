@@ -19,10 +19,10 @@
 class BaseTributeLevelsRepository {
 public:
 	struct TributeLevels {
-		int tribute_id;
-		int level;
-		int cost;
-		int item_id;
+		uint32_t tribute_id;
+		uint32_t level;
+		uint32_t cost;
+		uint32_t item_id;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			TributeLevels e{};
 
-			e.tribute_id = atoi(row[0]);
-			e.level      = atoi(row[1]);
-			e.cost       = atoi(row[2]);
-			e.item_id    = atoi(row[3]);
+			e.tribute_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.level      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.cost       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TributeLevels e{};
 
-			e.tribute_id = atoi(row[0]);
-			e.level      = atoi(row[1]);
-			e.cost       = atoi(row[2]);
-			e.item_id    = atoi(row[3]);
+			e.tribute_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.level      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.cost       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TributeLevels e{};
 
-			e.tribute_id = atoi(row[0]);
-			e.level      = atoi(row[1]);
-			e.cost       = atoi(row[2]);
-			e.item_id    = atoi(row[3]);
+			e.tribute_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.level      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.cost       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

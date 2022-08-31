@@ -19,23 +19,23 @@
 class BaseCharacterBuffsRepository {
 public:
 	struct CharacterBuffs {
-		int         character_id;
-		int         slot_id;
-		int         spell_id;
-		int         caster_level;
+		uint32_t    character_id;
+		uint8_t     slot_id;
+		uint16_t    spell_id;
+		uint8_t     caster_level;
 		std::string caster_name;
-		int         ticsremaining;
-		int         counters;
-		int         numhits;
-		int         melee_rune;
-		int         magic_rune;
-		int         persistent;
-		int         dot_rune;
-		int         caston_x;
-		int         caston_y;
-		int         caston_z;
-		int         ExtraDIChance;
-		int         instrument_mod;
+		int32_t     ticsremaining;
+		uint32_t    counters;
+		uint32_t    numhits;
+		uint32_t    melee_rune;
+		uint32_t    magic_rune;
+		uint8_t     persistent;
+		int32_t     dot_rune;
+		int32_t     caston_x;
+		int32_t     caston_y;
+		int32_t     caston_z;
+		int32_t     ExtraDIChance;
+		int32_t     instrument_mod;
 	};
 
 	static std::string PrimaryKey()
@@ -178,23 +178,23 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterBuffs e{};
 
-			e.character_id   = atoi(row[0]);
-			e.slot_id        = atoi(row[1]);
-			e.spell_id       = atoi(row[2]);
-			e.caster_level   = atoi(row[3]);
+			e.character_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.caster_level   = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 			e.caster_name    = row[4] ? row[4] : "";
-			e.ticsremaining  = atoi(row[5]);
-			e.counters       = atoi(row[6]);
-			e.numhits        = atoi(row[7]);
-			e.melee_rune     = atoi(row[8]);
-			e.magic_rune     = atoi(row[9]);
-			e.persistent     = atoi(row[10]);
-			e.dot_rune       = atoi(row[11]);
-			e.caston_x       = atoi(row[12]);
-			e.caston_y       = atoi(row[13]);
-			e.caston_z       = atoi(row[14]);
-			e.ExtraDIChance  = atoi(row[15]);
-			e.instrument_mod = atoi(row[16]);
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.counters       = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.numhits        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.melee_rune     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.magic_rune     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.persistent     = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
+			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
+			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
+			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
+			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
+			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
 
 			return e;
 		}
@@ -362,23 +362,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBuffs e{};
 
-			e.character_id   = atoi(row[0]);
-			e.slot_id        = atoi(row[1]);
-			e.spell_id       = atoi(row[2]);
-			e.caster_level   = atoi(row[3]);
+			e.character_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.caster_level   = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 			e.caster_name    = row[4] ? row[4] : "";
-			e.ticsremaining  = atoi(row[5]);
-			e.counters       = atoi(row[6]);
-			e.numhits        = atoi(row[7]);
-			e.melee_rune     = atoi(row[8]);
-			e.magic_rune     = atoi(row[9]);
-			e.persistent     = atoi(row[10]);
-			e.dot_rune       = atoi(row[11]);
-			e.caston_x       = atoi(row[12]);
-			e.caston_y       = atoi(row[13]);
-			e.caston_z       = atoi(row[14]);
-			e.ExtraDIChance  = atoi(row[15]);
-			e.instrument_mod = atoi(row[16]);
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.counters       = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.numhits        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.melee_rune     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.magic_rune     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.persistent     = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
+			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
+			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
+			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
+			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
+			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
 
 			all_entries.push_back(e);
 		}
@@ -403,23 +403,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBuffs e{};
 
-			e.character_id   = atoi(row[0]);
-			e.slot_id        = atoi(row[1]);
-			e.spell_id       = atoi(row[2]);
-			e.caster_level   = atoi(row[3]);
+			e.character_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot_id        = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.spell_id       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.caster_level   = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
 			e.caster_name    = row[4] ? row[4] : "";
-			e.ticsremaining  = atoi(row[5]);
-			e.counters       = atoi(row[6]);
-			e.numhits        = atoi(row[7]);
-			e.melee_rune     = atoi(row[8]);
-			e.magic_rune     = atoi(row[9]);
-			e.persistent     = atoi(row[10]);
-			e.dot_rune       = atoi(row[11]);
-			e.caston_x       = atoi(row[12]);
-			e.caston_y       = atoi(row[13]);
-			e.caston_z       = atoi(row[14]);
-			e.ExtraDIChance  = atoi(row[15]);
-			e.instrument_mod = atoi(row[16]);
+			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.counters       = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.numhits        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.melee_rune     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.magic_rune     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.persistent     = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
+			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
+			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
+			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
+			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
+			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
 
 			all_entries.push_back(e);
 		}

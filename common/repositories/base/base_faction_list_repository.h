@@ -19,9 +19,9 @@
 class BaseFactionListRepository {
 public:
 	struct FactionList {
-		int         id;
+		int32_t     id;
 		std::string name;
-		int         base;
+		int16_t     base;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			FactionList e{};
 
-			e.id   = atoi(row[0]);
+			e.id   = static_cast<int32_t>(atoi(row[0]));
 			e.name = row[1] ? row[1] : "";
-			e.base = atoi(row[2]);
+			e.base = static_cast<int16_t>(atoi(row[2]));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionList e{};
 
-			e.id   = atoi(row[0]);
+			e.id   = static_cast<int32_t>(atoi(row[0]));
 			e.name = row[1] ? row[1] : "";
-			e.base = atoi(row[2]);
+			e.base = static_cast<int16_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionList e{};
 
-			e.id   = atoi(row[0]);
+			e.id   = static_cast<int32_t>(atoi(row[0]));
 			e.name = row[1] ? row[1] : "";
-			e.base = atoi(row[2]);
+			e.base = static_cast<int16_t>(atoi(row[2]));
 
 			all_entries.push_back(e);
 		}

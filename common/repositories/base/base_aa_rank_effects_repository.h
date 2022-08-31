@@ -19,11 +19,11 @@
 class BaseAaRankEffectsRepository {
 public:
 	struct AaRankEffects {
-		int rank_id;
-		int slot;
-		int effect_id;
-		int base1;
-		int base2;
+		uint32_t rank_id;
+		uint32_t slot;
+		int32_t  effect_id;
+		int32_t  base1;
+		int32_t  base2;
 	};
 
 	static std::string PrimaryKey()
@@ -130,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			AaRankEffects e{};
 
-			e.rank_id   = atoi(row[0]);
-			e.slot      = atoi(row[1]);
-			e.effect_id = atoi(row[2]);
-			e.base1     = atoi(row[3]);
-			e.base2     = atoi(row[4]);
+			e.rank_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.effect_id = static_cast<int32_t>(atoi(row[2]));
+			e.base1     = static_cast<int32_t>(atoi(row[3]));
+			e.base2     = static_cast<int32_t>(atoi(row[4]));
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AaRankEffects e{};
 
-			e.rank_id   = atoi(row[0]);
-			e.slot      = atoi(row[1]);
-			e.effect_id = atoi(row[2]);
-			e.base1     = atoi(row[3]);
-			e.base2     = atoi(row[4]);
+			e.rank_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.effect_id = static_cast<int32_t>(atoi(row[2]));
+			e.base1     = static_cast<int32_t>(atoi(row[3]));
+			e.base2     = static_cast<int32_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AaRankEffects e{};
 
-			e.rank_id   = atoi(row[0]);
-			e.slot      = atoi(row[1]);
-			e.effect_id = atoi(row[2]);
-			e.base1     = atoi(row[3]);
-			e.base2     = atoi(row[4]);
+			e.rank_id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.effect_id = static_cast<int32_t>(atoi(row[2]));
+			e.base1     = static_cast<int32_t>(atoi(row[3]));
+			e.base2     = static_cast<int32_t>(atoi(row[4]));
 
 			all_entries.push_back(e);
 		}

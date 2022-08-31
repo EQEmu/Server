@@ -19,7 +19,7 @@
 class BaseCharacterInspectMessagesRepository {
 public:
 	struct CharacterInspectMessages {
-		int         id;
+		uint32_t    id;
 		std::string inspect_message;
 	};
 
@@ -118,7 +118,7 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterInspectMessages e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.inspect_message = row[1] ? row[1] : "";
 
 			return e;
@@ -242,7 +242,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterInspectMessages e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.inspect_message = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);
@@ -268,7 +268,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterInspectMessages e{};
 
-			e.id              = atoi(row[0]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.inspect_message = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);

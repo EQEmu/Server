@@ -19,10 +19,10 @@
 class BaseRespawnTimesRepository {
 public:
 	struct RespawnTimes {
-		int id;
-		int start;
-		int duration;
-		int instance_id;
+		int32_t id;
+		int32_t start;
+		int32_t duration;
+		int16_t instance_id;
 	};
 
 	static std::string PrimaryKey()
@@ -126,10 +126,10 @@ public:
 		if (results.RowCount() == 1) {
 			RespawnTimes e{};
 
-			e.id          = atoi(row[0]);
-			e.start       = atoi(row[1]);
-			e.duration    = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
+			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.start       = static_cast<int32_t>(atoi(row[1]));
+			e.duration    = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id = static_cast<int16_t>(atoi(row[3]));
 
 			return e;
 		}
@@ -258,10 +258,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RespawnTimes e{};
 
-			e.id          = atoi(row[0]);
-			e.start       = atoi(row[1]);
-			e.duration    = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
+			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.start       = static_cast<int32_t>(atoi(row[1]));
+			e.duration    = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id = static_cast<int16_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +286,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RespawnTimes e{};
 
-			e.id          = atoi(row[0]);
-			e.start       = atoi(row[1]);
-			e.duration    = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
+			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.start       = static_cast<int32_t>(atoi(row[1]));
+			e.duration    = static_cast<int32_t>(atoi(row[2]));
+			e.instance_id = static_cast<int16_t>(atoi(row[3]));
 
 			all_entries.push_back(e);
 		}

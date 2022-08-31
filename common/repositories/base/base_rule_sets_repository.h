@@ -19,7 +19,7 @@
 class BaseRuleSetsRepository {
 public:
 	struct RuleSets {
-		int         ruleset_id;
+		uint8_t     ruleset_id;
 		std::string name;
 	};
 
@@ -118,7 +118,7 @@ public:
 		if (results.RowCount() == 1) {
 			RuleSets e{};
 
-			e.ruleset_id = atoi(row[0]);
+			e.ruleset_id = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
 			e.name       = row[1] ? row[1] : "";
 
 			return e;
@@ -241,7 +241,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleSets e{};
 
-			e.ruleset_id = atoi(row[0]);
+			e.ruleset_id = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
 			e.name       = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);
@@ -267,7 +267,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RuleSets e{};
 
-			e.ruleset_id = atoi(row[0]);
+			e.ruleset_id = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
 			e.name       = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);

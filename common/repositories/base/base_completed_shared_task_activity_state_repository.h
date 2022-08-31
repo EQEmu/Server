@@ -19,11 +19,11 @@
 class BaseCompletedSharedTaskActivityStateRepository {
 public:
 	struct CompletedSharedTaskActivityState {
-		int64  shared_task_id;
-		int    activity_id;
-		int    done_count;
-		time_t updated_time;
-		time_t completed_time;
+		int64_t shared_task_id;
+		int32_t activity_id;
+		int32_t done_count;
+		time_t  updated_time;
+		time_t  completed_time;
 	};
 
 	static std::string PrimaryKey()
@@ -131,8 +131,8 @@ public:
 			CompletedSharedTaskActivityState e{};
 
 			e.shared_task_id = strtoll(row[0], nullptr, 10);
-			e.activity_id    = atoi(row[1]);
-			e.done_count     = atoi(row[2]);
+			e.activity_id    = static_cast<int32_t>(atoi(row[1]));
+			e.done_count     = static_cast<int32_t>(atoi(row[2]));
 			e.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 			e.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
@@ -267,8 +267,8 @@ public:
 			CompletedSharedTaskActivityState e{};
 
 			e.shared_task_id = strtoll(row[0], nullptr, 10);
-			e.activity_id    = atoi(row[1]);
-			e.done_count     = atoi(row[2]);
+			e.activity_id    = static_cast<int32_t>(atoi(row[1]));
+			e.done_count     = static_cast<int32_t>(atoi(row[2]));
 			e.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 			e.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
@@ -296,8 +296,8 @@ public:
 			CompletedSharedTaskActivityState e{};
 
 			e.shared_task_id = strtoll(row[0], nullptr, 10);
-			e.activity_id    = atoi(row[1]);
-			e.done_count     = atoi(row[2]);
+			e.activity_id    = static_cast<int32_t>(atoi(row[1]));
+			e.done_count     = static_cast<int32_t>(atoi(row[2]));
 			e.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 			e.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 

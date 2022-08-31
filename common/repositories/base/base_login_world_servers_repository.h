@@ -19,15 +19,15 @@
 class BaseLoginWorldServersRepository {
 public:
 	struct LoginWorldServers {
-		int         id;
+		uint32_t    id;
 		std::string long_name;
 		std::string short_name;
 		std::string tag_description;
-		int         login_server_list_type_id;
+		int32_t     login_server_list_type_id;
 		time_t      last_login_date;
 		std::string last_ip_address;
-		int         login_server_admin_id;
-		int         is_server_trusted;
+		int32_t     login_server_admin_id;
+		int32_t     is_server_trusted;
 		std::string note;
 	};
 
@@ -150,15 +150,15 @@ public:
 		if (results.RowCount() == 1) {
 			LoginWorldServers e{};
 
-			e.id                        = atoi(row[0]);
+			e.id                        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.long_name                 = row[1] ? row[1] : "";
 			e.short_name                = row[2] ? row[2] : "";
 			e.tag_description           = row[3] ? row[3] : "";
-			e.login_server_list_type_id = atoi(row[4]);
+			e.login_server_list_type_id = static_cast<int32_t>(atoi(row[4]));
 			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			e.last_ip_address           = row[6] ? row[6] : "";
-			e.login_server_admin_id     = atoi(row[7]);
-			e.is_server_trusted         = atoi(row[8]);
+			e.login_server_admin_id     = static_cast<int32_t>(atoi(row[7]));
+			e.is_server_trusted         = static_cast<int32_t>(atoi(row[8]));
 			e.note                      = row[9] ? row[9] : "";
 
 			return e;
@@ -305,15 +305,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginWorldServers e{};
 
-			e.id                        = atoi(row[0]);
+			e.id                        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.long_name                 = row[1] ? row[1] : "";
 			e.short_name                = row[2] ? row[2] : "";
 			e.tag_description           = row[3] ? row[3] : "";
-			e.login_server_list_type_id = atoi(row[4]);
+			e.login_server_list_type_id = static_cast<int32_t>(atoi(row[4]));
 			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			e.last_ip_address           = row[6] ? row[6] : "";
-			e.login_server_admin_id     = atoi(row[7]);
-			e.is_server_trusted         = atoi(row[8]);
+			e.login_server_admin_id     = static_cast<int32_t>(atoi(row[7]));
+			e.is_server_trusted         = static_cast<int32_t>(atoi(row[8]));
 			e.note                      = row[9] ? row[9] : "";
 
 			all_entries.push_back(e);
@@ -339,15 +339,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginWorldServers e{};
 
-			e.id                        = atoi(row[0]);
+			e.id                        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.long_name                 = row[1] ? row[1] : "";
 			e.short_name                = row[2] ? row[2] : "";
 			e.tag_description           = row[3] ? row[3] : "";
-			e.login_server_list_type_id = atoi(row[4]);
+			e.login_server_list_type_id = static_cast<int32_t>(atoi(row[4]));
 			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			e.last_ip_address           = row[6] ? row[6] : "";
-			e.login_server_admin_id     = atoi(row[7]);
-			e.is_server_trusted         = atoi(row[8]);
+			e.login_server_admin_id     = static_cast<int32_t>(atoi(row[7]));
+			e.is_server_trusted         = static_cast<int32_t>(atoi(row[8]));
 			e.note                      = row[9] ? row[9] : "";
 
 			all_entries.push_back(e);

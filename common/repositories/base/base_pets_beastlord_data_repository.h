@@ -19,13 +19,13 @@
 class BasePetsBeastlordDataRepository {
 public:
 	struct PetsBeastlordData {
-		int   player_race;
-		int   pet_race;
-		int   texture;
-		int   helm_texture;
-		int   gender;
-		float size_modifier;
-		int   face;
+		uint32_t    player_race;
+		uint32_t    pet_race;
+		uint8_t     texture;
+		uint8_t     helm_texture;
+		uint8_t     gender;
+		std::string size_modifier;
+		uint8_t     face;
 	};
 
 	static std::string PrimaryKey()
@@ -138,13 +138,12 @@ public:
 		if (results.RowCount() == 1) {
 			PetsBeastlordData e{};
 
-			e.player_race   = atoi(row[0]);
-			e.pet_race      = atoi(row[1]);
-			e.texture       = atoi(row[2]);
-			e.helm_texture  = atoi(row[3]);
-			e.gender        = atoi(row[4]);
-			e.size_modifier = static_cast<float>(atof(row[5]));
-			e.face          = atoi(row[6]);
+			e.player_race   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.pet_race      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.texture       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.helm_texture  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.gender        = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.face          = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			return e;
 		}
@@ -282,13 +281,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsBeastlordData e{};
 
-			e.player_race   = atoi(row[0]);
-			e.pet_race      = atoi(row[1]);
-			e.texture       = atoi(row[2]);
-			e.helm_texture  = atoi(row[3]);
-			e.gender        = atoi(row[4]);
-			e.size_modifier = static_cast<float>(atof(row[5]));
-			e.face          = atoi(row[6]);
+			e.player_race   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.pet_race      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.texture       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.helm_texture  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.gender        = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.face          = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +311,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsBeastlordData e{};
 
-			e.player_race   = atoi(row[0]);
-			e.pet_race      = atoi(row[1]);
-			e.texture       = atoi(row[2]);
-			e.helm_texture  = atoi(row[3]);
-			e.gender        = atoi(row[4]);
-			e.size_modifier = static_cast<float>(atof(row[5]));
-			e.face          = atoi(row[6]);
+			e.player_race   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.pet_race      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.texture       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.helm_texture  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.gender        = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.face          = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

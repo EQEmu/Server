@@ -19,12 +19,12 @@
 class BaseCharacterTasksRepository {
 public:
 	struct CharacterTasks {
-		int charid;
-		int taskid;
-		int slot;
-		int type;
-		int acceptedtime;
-		int was_rewarded;
+		uint32_t charid;
+		uint32_t taskid;
+		uint32_t slot;
+		int8_t   type;
+		uint32_t acceptedtime;
+		int8_t   was_rewarded;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterTasks e{};
 
-			e.charid       = atoi(row[0]);
-			e.taskid       = atoi(row[1]);
-			e.slot         = atoi(row[2]);
-			e.type         = atoi(row[3]);
-			e.acceptedtime = atoi(row[4]);
-			e.was_rewarded = atoi(row[5]);
+			e.charid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slot         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.acceptedtime = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTasks e{};
 
-			e.charid       = atoi(row[0]);
-			e.taskid       = atoi(row[1]);
-			e.slot         = atoi(row[2]);
-			e.type         = atoi(row[3]);
-			e.acceptedtime = atoi(row[4]);
-			e.was_rewarded = atoi(row[5]);
+			e.charid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slot         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.acceptedtime = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTasks e{};
 
-			e.charid       = atoi(row[0]);
-			e.taskid       = atoi(row[1]);
-			e.slot         = atoi(row[2]);
-			e.type         = atoi(row[3]);
-			e.acceptedtime = atoi(row[4]);
-			e.was_rewarded = atoi(row[5]);
+			e.charid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slot         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.acceptedtime = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}

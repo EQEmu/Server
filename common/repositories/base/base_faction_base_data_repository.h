@@ -19,12 +19,12 @@
 class BaseFactionBaseDataRepository {
 public:
 	struct FactionBaseData {
-		int client_faction_id;
-		int min;
-		int max;
-		int unk_hero1;
-		int unk_hero2;
-		int unk_hero3;
+		int16_t client_faction_id;
+		int16_t min;
+		int16_t max;
+		int16_t unk_hero1;
+		int16_t unk_hero2;
+		int16_t unk_hero3;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			FactionBaseData e{};
 
-			e.client_faction_id = atoi(row[0]);
-			e.min               = atoi(row[1]);
-			e.max               = atoi(row[2]);
-			e.unk_hero1         = atoi(row[3]);
-			e.unk_hero2         = atoi(row[4]);
-			e.unk_hero3         = atoi(row[5]);
+			e.client_faction_id = static_cast<int16_t>(atoi(row[0]));
+			e.min               = static_cast<int16_t>(atoi(row[1]));
+			e.max               = static_cast<int16_t>(atoi(row[2]));
+			e.unk_hero1         = static_cast<int16_t>(atoi(row[3]));
+			e.unk_hero2         = static_cast<int16_t>(atoi(row[4]));
+			e.unk_hero3         = static_cast<int16_t>(atoi(row[5]));
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionBaseData e{};
 
-			e.client_faction_id = atoi(row[0]);
-			e.min               = atoi(row[1]);
-			e.max               = atoi(row[2]);
-			e.unk_hero1         = atoi(row[3]);
-			e.unk_hero2         = atoi(row[4]);
-			e.unk_hero3         = atoi(row[5]);
+			e.client_faction_id = static_cast<int16_t>(atoi(row[0]));
+			e.min               = static_cast<int16_t>(atoi(row[1]));
+			e.max               = static_cast<int16_t>(atoi(row[2]));
+			e.unk_hero1         = static_cast<int16_t>(atoi(row[3]));
+			e.unk_hero2         = static_cast<int16_t>(atoi(row[4]));
+			e.unk_hero3         = static_cast<int16_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionBaseData e{};
 
-			e.client_faction_id = atoi(row[0]);
-			e.min               = atoi(row[1]);
-			e.max               = atoi(row[2]);
-			e.unk_hero1         = atoi(row[3]);
-			e.unk_hero2         = atoi(row[4]);
-			e.unk_hero3         = atoi(row[5]);
+			e.client_faction_id = static_cast<int16_t>(atoi(row[0]));
+			e.min               = static_cast<int16_t>(atoi(row[1]));
+			e.max               = static_cast<int16_t>(atoi(row[2]));
+			e.unk_hero1         = static_cast<int16_t>(atoi(row[3]));
+			e.unk_hero2         = static_cast<int16_t>(atoi(row[4]));
+			e.unk_hero3         = static_cast<int16_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}

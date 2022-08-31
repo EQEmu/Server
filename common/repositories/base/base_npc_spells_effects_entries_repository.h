@@ -19,14 +19,14 @@
 class BaseNpcSpellsEffectsEntriesRepository {
 public:
 	struct NpcSpellsEffectsEntries {
-		int id;
-		int npc_spells_effects_id;
-		int spell_effect_id;
-		int minlevel;
-		int maxlevel;
-		int se_base;
-		int se_limit;
-		int se_max;
+		uint32_t id;
+		int32_t  npc_spells_effects_id;
+		int16_t  spell_effect_id;
+		uint8_t  minlevel;
+		uint8_t  maxlevel;
+		int32_t  se_base;
+		int32_t  se_limit;
+		int32_t  se_max;
 	};
 
 	static std::string PrimaryKey()
@@ -142,14 +142,14 @@ public:
 		if (results.RowCount() == 1) {
 			NpcSpellsEffectsEntries e{};
 
-			e.id                    = atoi(row[0]);
-			e.npc_spells_effects_id = atoi(row[1]);
-			e.spell_effect_id       = atoi(row[2]);
-			e.minlevel              = atoi(row[3]);
-			e.maxlevel              = atoi(row[4]);
-			e.se_base               = atoi(row[5]);
-			e.se_limit              = atoi(row[6]);
-			e.se_max                = atoi(row[7]);
+			e.id                    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.npc_spells_effects_id = static_cast<int32_t>(atoi(row[1]));
+			e.spell_effect_id       = static_cast<int16_t>(atoi(row[2]));
+			e.minlevel              = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.maxlevel              = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.se_base               = static_cast<int32_t>(atoi(row[5]));
+			e.se_limit              = static_cast<int32_t>(atoi(row[6]));
+			e.se_max                = static_cast<int32_t>(atoi(row[7]));
 
 			return e;
 		}
@@ -289,14 +289,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEffectsEntries e{};
 
-			e.id                    = atoi(row[0]);
-			e.npc_spells_effects_id = atoi(row[1]);
-			e.spell_effect_id       = atoi(row[2]);
-			e.minlevel              = atoi(row[3]);
-			e.maxlevel              = atoi(row[4]);
-			e.se_base               = atoi(row[5]);
-			e.se_limit              = atoi(row[6]);
-			e.se_max                = atoi(row[7]);
+			e.id                    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.npc_spells_effects_id = static_cast<int32_t>(atoi(row[1]));
+			e.spell_effect_id       = static_cast<int16_t>(atoi(row[2]));
+			e.minlevel              = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.maxlevel              = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.se_base               = static_cast<int32_t>(atoi(row[5]));
+			e.se_limit              = static_cast<int32_t>(atoi(row[6]));
+			e.se_max                = static_cast<int32_t>(atoi(row[7]));
 
 			all_entries.push_back(e);
 		}
@@ -321,14 +321,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEffectsEntries e{};
 
-			e.id                    = atoi(row[0]);
-			e.npc_spells_effects_id = atoi(row[1]);
-			e.spell_effect_id       = atoi(row[2]);
-			e.minlevel              = atoi(row[3]);
-			e.maxlevel              = atoi(row[4]);
-			e.se_base               = atoi(row[5]);
-			e.se_limit              = atoi(row[6]);
-			e.se_max                = atoi(row[7]);
+			e.id                    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.npc_spells_effects_id = static_cast<int32_t>(atoi(row[1]));
+			e.spell_effect_id       = static_cast<int16_t>(atoi(row[2]));
+			e.minlevel              = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.maxlevel              = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.se_base               = static_cast<int32_t>(atoi(row[5]));
+			e.se_limit              = static_cast<int32_t>(atoi(row[6]));
+			e.se_max                = static_cast<int32_t>(atoi(row[7]));
 
 			all_entries.push_back(e);
 		}

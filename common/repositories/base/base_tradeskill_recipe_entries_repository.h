@@ -19,14 +19,14 @@
 class BaseTradeskillRecipeEntriesRepository {
 public:
 	struct TradeskillRecipeEntries {
-		int id;
-		int recipe_id;
-		int item_id;
-		int successcount;
-		int failcount;
-		int componentcount;
-		int salvagecount;
-		int iscontainer;
+		int32_t id;
+		int32_t recipe_id;
+		int32_t item_id;
+		int8_t  successcount;
+		int8_t  failcount;
+		int8_t  componentcount;
+		int8_t  salvagecount;
+		int8_t  iscontainer;
 	};
 
 	static std::string PrimaryKey()
@@ -142,14 +142,14 @@ public:
 		if (results.RowCount() == 1) {
 			TradeskillRecipeEntries e{};
 
-			e.id             = atoi(row[0]);
-			e.recipe_id      = atoi(row[1]);
-			e.item_id        = atoi(row[2]);
-			e.successcount   = atoi(row[3]);
-			e.failcount      = atoi(row[4]);
-			e.componentcount = atoi(row[5]);
-			e.salvagecount   = atoi(row[6]);
-			e.iscontainer    = atoi(row[7]);
+			e.id             = static_cast<int32_t>(atoi(row[0]));
+			e.recipe_id      = static_cast<int32_t>(atoi(row[1]));
+			e.item_id        = static_cast<int32_t>(atoi(row[2]));
+			e.successcount   = static_cast<int8_t>(atoi(row[3]));
+			e.failcount      = static_cast<int8_t>(atoi(row[4]));
+			e.componentcount = static_cast<int8_t>(atoi(row[5]));
+			e.salvagecount   = static_cast<int8_t>(atoi(row[6]));
+			e.iscontainer    = static_cast<int8_t>(atoi(row[7]));
 
 			return e;
 		}
@@ -289,14 +289,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipeEntries e{};
 
-			e.id             = atoi(row[0]);
-			e.recipe_id      = atoi(row[1]);
-			e.item_id        = atoi(row[2]);
-			e.successcount   = atoi(row[3]);
-			e.failcount      = atoi(row[4]);
-			e.componentcount = atoi(row[5]);
-			e.salvagecount   = atoi(row[6]);
-			e.iscontainer    = atoi(row[7]);
+			e.id             = static_cast<int32_t>(atoi(row[0]));
+			e.recipe_id      = static_cast<int32_t>(atoi(row[1]));
+			e.item_id        = static_cast<int32_t>(atoi(row[2]));
+			e.successcount   = static_cast<int8_t>(atoi(row[3]));
+			e.failcount      = static_cast<int8_t>(atoi(row[4]));
+			e.componentcount = static_cast<int8_t>(atoi(row[5]));
+			e.salvagecount   = static_cast<int8_t>(atoi(row[6]));
+			e.iscontainer    = static_cast<int8_t>(atoi(row[7]));
 
 			all_entries.push_back(e);
 		}
@@ -321,14 +321,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipeEntries e{};
 
-			e.id             = atoi(row[0]);
-			e.recipe_id      = atoi(row[1]);
-			e.item_id        = atoi(row[2]);
-			e.successcount   = atoi(row[3]);
-			e.failcount      = atoi(row[4]);
-			e.componentcount = atoi(row[5]);
-			e.salvagecount   = atoi(row[6]);
-			e.iscontainer    = atoi(row[7]);
+			e.id             = static_cast<int32_t>(atoi(row[0]));
+			e.recipe_id      = static_cast<int32_t>(atoi(row[1]));
+			e.item_id        = static_cast<int32_t>(atoi(row[2]));
+			e.successcount   = static_cast<int8_t>(atoi(row[3]));
+			e.failcount      = static_cast<int8_t>(atoi(row[4]));
+			e.componentcount = static_cast<int8_t>(atoi(row[5]));
+			e.salvagecount   = static_cast<int8_t>(atoi(row[6]));
+			e.iscontainer    = static_cast<int8_t>(atoi(row[7]));
 
 			all_entries.push_back(e);
 		}

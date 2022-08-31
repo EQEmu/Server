@@ -19,9 +19,9 @@
 class BaseAccountRewardsRepository {
 public:
 	struct AccountRewards {
-		int account_id;
-		int reward_id;
-		int amount;
+		uint32_t account_id;
+		uint32_t reward_id;
+		uint32_t amount;
 	};
 
 	static std::string PrimaryKey()
@@ -122,9 +122,9 @@ public:
 		if (results.RowCount() == 1) {
 			AccountRewards e{};
 
-			e.account_id = atoi(row[0]);
-			e.reward_id  = atoi(row[1]);
-			e.amount     = atoi(row[2]);
+			e.account_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.reward_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AccountRewards e{};
 
-			e.account_id = atoi(row[0]);
-			e.reward_id  = atoi(row[1]);
-			e.amount     = atoi(row[2]);
+			e.account_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.reward_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AccountRewards e{};
 
-			e.account_id = atoi(row[0]);
-			e.reward_id  = atoi(row[1]);
-			e.amount     = atoi(row[2]);
+			e.account_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.reward_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

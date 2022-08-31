@@ -19,7 +19,7 @@
 class BaseGroupLeadersRepository {
 public:
 	struct GroupLeaders {
-		int         gid;
+		int32_t     gid;
 		std::string leadername;
 		std::string marknpc;
 		std::string leadershipaa;
@@ -27,7 +27,7 @@ public:
 		std::string assist;
 		std::string puller;
 		std::string mentoree;
-		int         mentor_percent;
+		int32_t     mentor_percent;
 	};
 
 	static std::string PrimaryKey()
@@ -146,7 +146,7 @@ public:
 		if (results.RowCount() == 1) {
 			GroupLeaders e{};
 
-			e.gid            = atoi(row[0]);
+			e.gid            = static_cast<int32_t>(atoi(row[0]));
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
 			e.leadershipaa   = row[3] ? row[3] : "";
@@ -154,7 +154,7 @@ public:
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
 			e.mentoree       = row[7] ? row[7] : "";
-			e.mentor_percent = atoi(row[8]);
+			e.mentor_percent = static_cast<int32_t>(atoi(row[8]));
 
 			return e;
 		}
@@ -298,7 +298,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroupLeaders e{};
 
-			e.gid            = atoi(row[0]);
+			e.gid            = static_cast<int32_t>(atoi(row[0]));
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
 			e.leadershipaa   = row[3] ? row[3] : "";
@@ -306,7 +306,7 @@ public:
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
 			e.mentoree       = row[7] ? row[7] : "";
-			e.mentor_percent = atoi(row[8]);
+			e.mentor_percent = static_cast<int32_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}
@@ -331,7 +331,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroupLeaders e{};
 
-			e.gid            = atoi(row[0]);
+			e.gid            = static_cast<int32_t>(atoi(row[0]));
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
 			e.leadershipaa   = row[3] ? row[3] : "";
@@ -339,7 +339,7 @@ public:
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
 			e.mentoree       = row[7] ? row[7] : "";
-			e.mentor_percent = atoi(row[8]);
+			e.mentor_percent = static_cast<int32_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
 		}

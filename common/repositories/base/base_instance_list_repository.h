@@ -19,13 +19,13 @@
 class BaseInstanceListRepository {
 public:
 	struct InstanceList {
-		int id;
-		int zone;
-		int version;
-		int is_global;
-		int start_time;
-		int duration;
-		int never_expires;
+		int32_t  id;
+		uint32_t zone;
+		uint8_t  version;
+		uint8_t  is_global;
+		uint32_t start_time;
+		uint32_t duration;
+		uint8_t  never_expires;
 	};
 
 	static std::string PrimaryKey()
@@ -138,13 +138,13 @@ public:
 		if (results.RowCount() == 1) {
 			InstanceList e{};
 
-			e.id            = atoi(row[0]);
-			e.zone          = atoi(row[1]);
-			e.version       = atoi(row[2]);
-			e.is_global     = atoi(row[3]);
-			e.start_time    = atoi(row[4]);
-			e.duration      = atoi(row[5]);
-			e.never_expires = atoi(row[6]);
+			e.id            = static_cast<int32_t>(atoi(row[0]));
+			e.zone          = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.is_global     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.start_time    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.duration      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.never_expires = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			return e;
 		}
@@ -281,13 +281,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			InstanceList e{};
 
-			e.id            = atoi(row[0]);
-			e.zone          = atoi(row[1]);
-			e.version       = atoi(row[2]);
-			e.is_global     = atoi(row[3]);
-			e.start_time    = atoi(row[4]);
-			e.duration      = atoi(row[5]);
-			e.never_expires = atoi(row[6]);
+			e.id            = static_cast<int32_t>(atoi(row[0]));
+			e.zone          = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.is_global     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.start_time    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.duration      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.never_expires = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -312,13 +312,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			InstanceList e{};
 
-			e.id            = atoi(row[0]);
-			e.zone          = atoi(row[1]);
-			e.version       = atoi(row[2]);
-			e.is_global     = atoi(row[3]);
-			e.start_time    = atoi(row[4]);
-			e.duration      = atoi(row[5]);
-			e.never_expires = atoi(row[6]);
+			e.id            = static_cast<int32_t>(atoi(row[0]));
+			e.zone          = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.is_global     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.start_time    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.duration      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.never_expires = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

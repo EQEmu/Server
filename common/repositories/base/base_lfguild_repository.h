@@ -19,15 +19,15 @@
 class BaseLfguildRepository {
 public:
 	struct Lfguild {
-		int         type;
+		uint8_t     type;
 		std::string name;
 		std::string comment;
-		int         fromlevel;
-		int         tolevel;
-		int         classes;
-		int         aacount;
-		int         timezone;
-		int         timeposted;
+		uint8_t     fromlevel;
+		uint8_t     tolevel;
+		uint32_t    classes;
+		uint32_t    aacount;
+		uint32_t    timezone;
+		uint32_t    timeposted;
 	};
 
 	static std::string PrimaryKey()
@@ -146,15 +146,15 @@ public:
 		if (results.RowCount() == 1) {
 			Lfguild e{};
 
-			e.type       = atoi(row[0]);
+			e.type       = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
 			e.name       = row[1] ? row[1] : "";
 			e.comment    = row[2] ? row[2] : "";
-			e.fromlevel  = atoi(row[3]);
-			e.tolevel    = atoi(row[4]);
-			e.classes    = atoi(row[5]);
-			e.aacount    = atoi(row[6]);
-			e.timezone   = atoi(row[7]);
-			e.timeposted = atoi(row[8]);
+			e.fromlevel  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.tolevel    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.classes    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aacount    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.timezone   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.timeposted = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
 
 			return e;
 		}
@@ -298,15 +298,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lfguild e{};
 
-			e.type       = atoi(row[0]);
+			e.type       = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
 			e.name       = row[1] ? row[1] : "";
 			e.comment    = row[2] ? row[2] : "";
-			e.fromlevel  = atoi(row[3]);
-			e.tolevel    = atoi(row[4]);
-			e.classes    = atoi(row[5]);
-			e.aacount    = atoi(row[6]);
-			e.timezone   = atoi(row[7]);
-			e.timeposted = atoi(row[8]);
+			e.fromlevel  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.tolevel    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.classes    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aacount    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.timezone   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.timeposted = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +331,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lfguild e{};
 
-			e.type       = atoi(row[0]);
+			e.type       = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
 			e.name       = row[1] ? row[1] : "";
 			e.comment    = row[2] ? row[2] : "";
-			e.fromlevel  = atoi(row[3]);
-			e.tolevel    = atoi(row[4]);
-			e.classes    = atoi(row[5]);
-			e.aacount    = atoi(row[6]);
-			e.timezone   = atoi(row[7]);
-			e.timeposted = atoi(row[8]);
+			e.fromlevel  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.tolevel    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.classes    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aacount    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.timezone   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.timeposted = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
 
 			all_entries.push_back(e);
 		}

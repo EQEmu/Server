@@ -19,14 +19,14 @@
 class BaseCharacterBindRepository {
 public:
 	struct CharacterBind {
-		int   id;
-		int   slot;
-		int   zone_id;
-		int   instance_id;
-		float x;
-		float y;
-		float z;
-		float heading;
+		uint32_t id;
+		int32_t  slot;
+		uint16_t zone_id;
+		uint32_t instance_id;
+		float    x;
+		float    y;
+		float    z;
+		float    heading;
 	};
 
 	static std::string PrimaryKey()
@@ -142,14 +142,14 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterBind e{};
 
-			e.id          = atoi(row[0]);
-			e.slot        = atoi(row[1]);
-			e.zone_id     = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
-			e.x           = static_cast<float>(atof(row[4]));
-			e.y           = static_cast<float>(atof(row[5]));
-			e.z           = static_cast<float>(atof(row[6]));
-			e.heading     = static_cast<float>(atof(row[7]));
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot        = static_cast<int32_t>(atoi(row[1]));
+			e.zone_id     = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.x           = strtof(row[4], nullptr);
+			e.y           = strtof(row[5], nullptr);
+			e.z           = strtof(row[6], nullptr);
+			e.heading     = strtof(row[7], nullptr);
 
 			return e;
 		}
@@ -289,14 +289,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBind e{};
 
-			e.id          = atoi(row[0]);
-			e.slot        = atoi(row[1]);
-			e.zone_id     = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
-			e.x           = static_cast<float>(atof(row[4]));
-			e.y           = static_cast<float>(atof(row[5]));
-			e.z           = static_cast<float>(atof(row[6]));
-			e.heading     = static_cast<float>(atof(row[7]));
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot        = static_cast<int32_t>(atoi(row[1]));
+			e.zone_id     = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.x           = strtof(row[4], nullptr);
+			e.y           = strtof(row[5], nullptr);
+			e.z           = strtof(row[6], nullptr);
+			e.heading     = strtof(row[7], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -321,14 +321,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBind e{};
 
-			e.id          = atoi(row[0]);
-			e.slot        = atoi(row[1]);
-			e.zone_id     = atoi(row[2]);
-			e.instance_id = atoi(row[3]);
-			e.x           = static_cast<float>(atof(row[4]));
-			e.y           = static_cast<float>(atof(row[5]));
-			e.z           = static_cast<float>(atof(row[6]));
-			e.heading     = static_cast<float>(atof(row[7]));
+			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot        = static_cast<int32_t>(atoi(row[1]));
+			e.zone_id     = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.x           = strtof(row[4], nullptr);
+			e.y           = strtof(row[5], nullptr);
+			e.z           = strtof(row[6], nullptr);
+			e.heading     = strtof(row[7], nullptr);
 
 			all_entries.push_back(e);
 		}

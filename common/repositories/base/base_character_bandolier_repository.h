@@ -19,11 +19,11 @@
 class BaseCharacterBandolierRepository {
 public:
 	struct CharacterBandolier {
-		int         id;
-		int         bandolier_id;
-		int         bandolier_slot;
-		int         item_id;
-		int         icon;
+		uint32_t    id;
+		uint8_t     bandolier_id;
+		uint8_t     bandolier_slot;
+		uint32_t    item_id;
+		uint32_t    icon;
 		std::string bandolier_name;
 	};
 
@@ -134,11 +134,11 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterBandolier e{};
 
-			e.id             = atoi(row[0]);
-			e.bandolier_id   = atoi(row[1]);
-			e.bandolier_slot = atoi(row[2]);
-			e.item_id        = atoi(row[3]);
-			e.icon           = atoi(row[4]);
+			e.id             = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.bandolier_id   = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.bandolier_slot = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.item_id        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.icon           = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
 			e.bandolier_name = row[5] ? row[5] : "";
 
 			return e;
@@ -274,11 +274,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBandolier e{};
 
-			e.id             = atoi(row[0]);
-			e.bandolier_id   = atoi(row[1]);
-			e.bandolier_slot = atoi(row[2]);
-			e.item_id        = atoi(row[3]);
-			e.icon           = atoi(row[4]);
+			e.id             = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.bandolier_id   = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.bandolier_slot = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.item_id        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.icon           = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
 			e.bandolier_name = row[5] ? row[5] : "";
 
 			all_entries.push_back(e);
@@ -304,11 +304,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBandolier e{};
 
-			e.id             = atoi(row[0]);
-			e.bandolier_id   = atoi(row[1]);
-			e.bandolier_slot = atoi(row[2]);
-			e.item_id        = atoi(row[3]);
-			e.icon           = atoi(row[4]);
+			e.id             = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.bandolier_id   = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.bandolier_slot = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.item_id        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.icon           = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
 			e.bandolier_name = row[5] ? row[5] : "";
 
 			all_entries.push_back(e);

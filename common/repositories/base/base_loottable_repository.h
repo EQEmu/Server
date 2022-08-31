@@ -19,14 +19,14 @@
 class BaseLoottableRepository {
 public:
 	struct Loottable {
-		int         id;
+		uint32_t    id;
 		std::string name;
-		int         mincash;
-		int         maxcash;
-		int         avgcoin;
-		int         done;
-		int         min_expansion;
-		int         max_expansion;
+		uint32_t    mincash;
+		uint32_t    maxcash;
+		uint32_t    avgcoin;
+		int8_t      done;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -150,14 +150,14 @@ public:
 		if (results.RowCount() == 1) {
 			Loottable e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name                   = row[1] ? row[1] : "";
-			e.mincash                = atoi(row[2]);
-			e.maxcash                = atoi(row[3]);
-			e.avgcoin                = atoi(row[4]);
-			e.done                   = atoi(row[5]);
-			e.min_expansion          = atoi(row[6]);
-			e.max_expansion          = atoi(row[7]);
+			e.mincash                = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.maxcash                = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.avgcoin                = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.done                   = static_cast<int8_t>(atoi(row[5]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 
@@ -305,14 +305,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Loottable e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name                   = row[1] ? row[1] : "";
-			e.mincash                = atoi(row[2]);
-			e.maxcash                = atoi(row[3]);
-			e.avgcoin                = atoi(row[4]);
-			e.done                   = atoi(row[5]);
-			e.min_expansion          = atoi(row[6]);
-			e.max_expansion          = atoi(row[7]);
+			e.mincash                = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.maxcash                = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.avgcoin                = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.done                   = static_cast<int8_t>(atoi(row[5]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 
@@ -339,14 +339,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Loottable e{};
 
-			e.id                     = atoi(row[0]);
+			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.name                   = row[1] ? row[1] : "";
-			e.mincash                = atoi(row[2]);
-			e.maxcash                = atoi(row[3]);
-			e.avgcoin                = atoi(row[4]);
-			e.done                   = atoi(row[5]);
-			e.min_expansion          = atoi(row[6]);
-			e.max_expansion          = atoi(row[7]);
+			e.mincash                = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.maxcash                = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.avgcoin                = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.done                   = static_cast<int8_t>(atoi(row[5]));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 

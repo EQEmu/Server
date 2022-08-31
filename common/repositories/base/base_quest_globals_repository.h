@@ -19,12 +19,12 @@
 class BaseQuestGlobalsRepository {
 public:
 	struct QuestGlobals {
-		int         charid;
-		int         npcid;
-		int         zoneid;
+		int32_t     charid;
+		int32_t     npcid;
+		int32_t     zoneid;
 		std::string name;
 		std::string value;
-		int         expdate;
+		int32_t     expdate;
 	};
 
 	static std::string PrimaryKey()
@@ -134,12 +134,12 @@ public:
 		if (results.RowCount() == 1) {
 			QuestGlobals e{};
 
-			e.charid  = atoi(row[0]);
-			e.npcid   = atoi(row[1]);
-			e.zoneid  = atoi(row[2]);
+			e.charid  = static_cast<int32_t>(atoi(row[0]));
+			e.npcid   = static_cast<int32_t>(atoi(row[1]));
+			e.zoneid  = static_cast<int32_t>(atoi(row[2]));
 			e.name    = row[3] ? row[3] : "";
 			e.value   = row[4] ? row[4] : "";
-			e.expdate = atoi(row[5]);
+			e.expdate = static_cast<int32_t>(atoi(row[5]));
 
 			return e;
 		}
@@ -274,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			QuestGlobals e{};
 
-			e.charid  = atoi(row[0]);
-			e.npcid   = atoi(row[1]);
-			e.zoneid  = atoi(row[2]);
+			e.charid  = static_cast<int32_t>(atoi(row[0]));
+			e.npcid   = static_cast<int32_t>(atoi(row[1]));
+			e.zoneid  = static_cast<int32_t>(atoi(row[2]));
 			e.name    = row[3] ? row[3] : "";
 			e.value   = row[4] ? row[4] : "";
-			e.expdate = atoi(row[5]);
+			e.expdate = static_cast<int32_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			QuestGlobals e{};
 
-			e.charid  = atoi(row[0]);
-			e.npcid   = atoi(row[1]);
-			e.zoneid  = atoi(row[2]);
+			e.charid  = static_cast<int32_t>(atoi(row[0]));
+			e.npcid   = static_cast<int32_t>(atoi(row[1]));
+			e.zoneid  = static_cast<int32_t>(atoi(row[2]));
 			e.name    = row[3] ? row[3] : "";
 			e.value   = row[4] ? row[4] : "";
-			e.expdate = atoi(row[5]);
+			e.expdate = static_cast<int32_t>(atoi(row[5]));
 
 			all_entries.push_back(e);
 		}
