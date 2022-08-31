@@ -248,6 +248,70 @@ namespace EQ
 			Looting
 		};
 
+		enum ObjectTypes : int {
+			SmallBag,
+			LargeBag,
+			Quiver,
+			BeltPouch,
+			WristPouch,
+			Backpack,
+			SmallChest,
+			LargeChest,
+			Bandolier,
+			Medicine,
+			Tinkering,
+			Lexicon,
+			PoisonMaking,
+			Quest,
+			MixingBowl,
+			Baking,
+			Tailoring,
+			Blacksmithing,
+			Fletching,
+			Brewing,
+			JewelryMaking,
+			Pottery,
+			Kiln,
+			KeyMaker,
+			ResearchWIZ,
+			ResearchMAG,
+			ResearchNEC,
+			ResearchENC,
+			Unknown,
+			ResearchPractice,
+			Alchemy,
+			HighElfForge,
+			DarkElfForge,
+			OgreForge,
+			DwarfForge,
+			GnomeForge,
+			BarbarianForge,
+			IksarForge,
+			HumanForgeOne,
+			HumanForgeTwo,
+			HalflingTailoringOne,
+			HalflingTailoringTwo,
+			EruditeTailoring,
+			WoodElfTailoring,
+			WoodElfFletching,
+			IksarPottery,
+			Fishing,
+			TrollForge,
+			WoodElfForge,
+			HalflingForge,
+			EruditeForge,
+			Merchant,
+			FroglokForge,
+			Augmenter,
+			Churn,
+			TransformationMold,
+			DetransformationMold,
+			Unattuner,
+			TradeskillBag,
+			CollectibleBag,
+			NoDeposit
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
@@ -277,6 +341,9 @@ namespace EQ
 
 		extern const std::map<uint8, std::string>& GetSpawnAnimationMap();
 		std::string GetSpawnAnimationName(uint8 animation_id);
+
+		extern const std::map<int, std::string>& GetObjectTypeMap();
+		std::string GetObjectTypeName(int object_type);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;

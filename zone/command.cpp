@@ -146,6 +146,7 @@ int command_init(void)
 		command_add("findfaction", "[Search Criteria] - Search for a faction", AccountStatus::Guide, command_findfaction) ||
 		command_add("findnpctype", "[Search Criteria] - Search database NPC types", AccountStatus::GMAdmin, command_findnpctype) ||
 		command_add("findrace", "[Search Criteria] - Search for a race", AccountStatus::Guide, command_findrace) ||
+		command_add("findrecipe", "[Search Criteria] - Search for a recipe", AccountStatus::Guide, command_findrecipe) ||
 		command_add("findskill", "[Search Criteria] - Search for a skill", AccountStatus::Guide, command_findskill) ||
 		command_add("findspell", "[Search Criteria] - Search for a spell", AccountStatus::Guide, command_findspell) ||
 		command_add("findtask", "[Search Criteria] - Search for a task", AccountStatus::Guide, command_findtask) ||
@@ -341,6 +342,7 @@ int command_init(void)
 		command_add("viewcurrencies", "View your or your target's currencies", AccountStatus::GMAdmin, command_viewcurrencies) ||
 		command_add("viewnpctype", "[NPC ID] - Show stats for an NPC by NPC ID", AccountStatus::GMAdmin, command_viewnpctype) ||
 		command_add("viewpetition", "[petition number] - View a petition", AccountStatus::ApprenticeGuide, command_viewpetition) ||
+		command_add("viewrecipe", "[Recipe ID] - Show a recipe's entries", AccountStatus::GMAdmin, command_viewrecipe) ||
 		command_add("viewzoneloot", "[item id] - Allows you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", AccountStatus::QuestTroupe, command_viewzoneloot) ||
 		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", AccountStatus::GMMgmt, command_wc) ||
 		command_add("weather", "[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather", AccountStatus::QuestTroupe, command_weather) ||
@@ -981,6 +983,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/findfaction.cpp"
 #include "gm_commands/findnpctype.cpp"
 #include "gm_commands/findrace.cpp"
+#include "gm_commands/findrecipe.cpp"
 #include "gm_commands/findskill.cpp"
 #include "gm_commands/findspell.cpp"
 #include "gm_commands/findtask.cpp"
@@ -1174,6 +1177,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/viewcurrencies.cpp"
 #include "gm_commands/viewnpctype.cpp"
 #include "gm_commands/viewpetition.cpp"
+#include "gm_commands/viewrecipe.cpp"
 #include "gm_commands/viewzoneloot.cpp"
 #include "gm_commands/wc.cpp"
 #include "gm_commands/weather.cpp"
