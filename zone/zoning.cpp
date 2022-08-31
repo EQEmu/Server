@@ -667,7 +667,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 	pShortZoneName = ZoneName(zoneID);
 
-	auto zd = GetZone(zoneID, zone->GetInstanceVersion());
+	auto zd = GetZoneVersionWithFallback(zoneID, zone->GetInstanceVersion());
 	if (zd) {
 		pZoneName = strcpy(new char[strlen(zd->long_name.c_str()) + 1], zd->long_name.c_str());
 	}
