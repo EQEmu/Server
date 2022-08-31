@@ -260,6 +260,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 							heading = zone->safe_heading;
 						}
 					}
+					pp.binds[4].x       = x;
+					pp.binds[4].y       = y;
+					pp.binds[4].z       = z;
+					pp.binds[4].heading = heading;
 				}
 			}
 			pp.binds[0] = pp.binds[4];
