@@ -19,7 +19,7 @@
 class BaseSpellBucketsRepository {
 public:
 	struct SpellBuckets {
-		uint32_t    spellid;
+		uint64_t    spellid;
 		std::string key;
 		std::string value;
 	};

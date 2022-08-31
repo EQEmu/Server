@@ -19,7 +19,7 @@
 class BaseDataBucketsRepository {
 public:
 	struct DataBuckets {
-		uint32_t    id;
+		uint64_t    id;
 		std::string key;
 		std::string value;
 		uint32_t    expires;

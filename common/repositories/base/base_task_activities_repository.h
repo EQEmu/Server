@@ -22,7 +22,7 @@ public:
 		uint32_t    taskid;
 		uint32_t    activityid;
 		int32_t     req_activity_id;
-		int32_t     step;
+		uint32_t    step;
 		uint8_t     activitytype;
 		std::string target_name;
 		std::string item_list;
@@ -185,7 +185,7 @@ public:
 			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
-			e.step                 = static_cast<int32_t>(atoi(row[3]));
+			e.step                 = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
 			e.item_list            = row[6] ? row[6] : "";
@@ -373,7 +373,7 @@ public:
 			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
-			e.step                 = static_cast<int32_t>(atoi(row[3]));
+			e.step                 = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
 			e.item_list            = row[6] ? row[6] : "";
@@ -415,7 +415,7 @@ public:
 			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
 			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
-			e.step                 = static_cast<int32_t>(atoi(row[3]));
+			e.step                 = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
 			e.item_list            = row[6] ? row[6] : "";

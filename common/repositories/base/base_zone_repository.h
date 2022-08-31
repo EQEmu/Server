@@ -78,7 +78,7 @@ public:
 		int8_t      castoutdoor;
 		uint8_t     hotzone;
 		uint8_t     insttype;
-		uint32_t    shutdowndelay;
+		uint64_t    shutdowndelay;
 		int8_t      peqzone;
 		uint8_t     suspendbuffs;
 		int32_t     rain_chance1;
