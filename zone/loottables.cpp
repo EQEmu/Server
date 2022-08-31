@@ -164,18 +164,20 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		droplimit = mindrop;
 	}
 
-	float       roll_t           = 0.0f;
-	float       no_loot_prob     = 1.0f;
-	bool        RollTableChanceBypass = false;
-	bool        active_item_list = false;
-	for (uint32 i                = 0; i < loot_drop->NumEntries; ++i) {
+	float roll_t                   = 0.0f;
+	float no_loot_prob             = 1.0f;
+	bool  roll_table_chance_bypass = false;
+	bool  active_item_list         = false;
+
+	for (uint32 i = 0; i < loot_drop->NumEntries; ++i) {
 		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
 		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
 			roll_t += loot_drop->Entries[i].chance;
-			if(loot_drop->Entries[i].chance >= 100) {
-				RollTableChanceBypass = true;
-			} else {
-				no_loot_prob *= (100-loot_drop->Entries[i].chance)/100.0f;
+			if (loot_drop->Entries[i].chance >= 100) {
+				roll_table_chance_bypass = true;
+			}
+			else {
+				no_loot_prob *= (100 - loot_drop->Entries[i].chance) / 100.0f;
 			}
 			active_item_list = true;
 		}
@@ -191,16 +193,17 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	// looping to find the lucky item, descremening otherwise. This is ok,
 	// items with chance 60 are 6 times more likely than items chance 10.
 	int drops = 0;
+
 	for (int i = 0; i < droplimit; ++i) {
-		if(drops < mindrop || RollTableChanceBypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob)
-		{
+		if (drops < mindrop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
 			float       roll = (float) zone->random.Real(0.0, roll_t);
 			for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
 				const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
 				if (db_item) {
 					// if it doesn't meet the requirements do nothing
-					if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j]))
+					if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
 						continue;
+					}
 
 					if (roll < loot_drop->Entries[j].chance) {
 						npc->AddLootDrop(
