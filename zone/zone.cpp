@@ -1295,7 +1295,7 @@ void Zone::ReloadStaticData() {
 
 bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
-	auto z = zone_store.GetZone(ZoneID(filename), instance_version);
+	auto z = zone_store.GetZoneWithFallback(ZoneID(filename), instance_version);
 
 	if (!z) {
 		LogError("[LoadZoneCFG] Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
