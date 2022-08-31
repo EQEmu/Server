@@ -97,6 +97,7 @@ Mob::Mob(
 	uint8 in_feettexture,
 	uint16 in_usemodel,
 	bool in_always_aggro,
+	int32 in_heroic_strikethrough,
 	int64 in_hp_regen_per_second
 ) :
 	attack_timer(2000),
@@ -283,6 +284,7 @@ Mob::Mob(
 	spawned             = false;
 	rare_spawn          = false;
 	always_aggro        = in_always_aggro;
+	heroic_strikethrough = in_heroic_strikethrough;
 
 	InitializeBuffSlots();
 

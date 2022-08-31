@@ -150,6 +150,7 @@ struct NPCType
 	int8	flymode;
 	bool	always_aggro;
 	int     exp_mod;
+	int 	heroic_strikethrough;
 };
 
 namespace player_lootitem {
