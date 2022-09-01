@@ -31,11 +31,13 @@ void command_zheader(Client *c, const Seperator *sep)
 		std::stoul(sep->arg[3]) :
 		0
 	);
-	
+
 	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 	entity_list.QueueClients(c, outapp);
 	safe_delete(outapp);
+
+	zone_store.LoadZones(content_db);
 
 	c->Message(
 		Chat::White,

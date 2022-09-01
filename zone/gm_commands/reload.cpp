@@ -68,13 +68,13 @@ void command_reload(Client *c, const Seperator *sep)
 	ServerPacket* pack = nullptr;
 
 	if (is_aa) {
-		c->Message(Chat::White, "Attempting to reload Alternate Advancement Data globally.");	
+		c->Message(Chat::White, "Attempting to reload Alternate Advancement Data globally.");
 		pack = new ServerPacket(ServerOP_ReloadAAData, 0);
 	} else if (is_alternate_currencies) {
-		c->Message(Chat::White, "Attempting to reload Alternate Currencies globally.");	
+		c->Message(Chat::White, "Attempting to reload Alternate Currencies globally.");
 		pack = new ServerPacket(ServerOP_ReloadAlternateCurrencies, 0);
 	} else if (is_blocked_spells) {
-		c->Message(Chat::White, "Attempting to reload Blocked Spells globally.");	
+		c->Message(Chat::White, "Attempting to reload Blocked Spells globally.");
 		pack = new ServerPacket(ServerOP_ReloadBlockedSpells, 0);
 	} else if (is_commands) {
 		c->Message(Chat::White, "Attempting to reload Commands globally.");
@@ -83,20 +83,20 @@ void command_reload(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Attempting to reload Content Flags globally.");
 		pack = new ServerPacket(ServerOP_ReloadContentFlags, 0);
 	} else if (is_doors) {
-		c->Message(Chat::White, "Attempting to reload Doors globally.");	
+		c->Message(Chat::White, "Attempting to reload Doors globally.");
 		pack = new ServerPacket(ServerOP_ReloadDoors, 0);
 	} else if (is_dztemplates) {
 		c->Message(Chat::White, "Attempting to reload Dynamic Zone Templates globally.");
 		pack = new ServerPacket(ServerOP_ReloadDzTemplates, 0);
 	} else if (is_ground_spawns) {
-		c->Message(Chat::White, "Attempting to reload Ground Spawns globally.");	
+		c->Message(Chat::White, "Attempting to reload Ground Spawns globally.");
 		pack = new ServerPacket(ServerOP_ReloadGroundSpawns, 0);
 	} else if (is_level_mods) {
 		if (!RuleB(Zone, LevelBasedEXPMods)) {
 			c->Message(Chat::White, "Level Based Experience Modifiers are disabled.");
 			return;
 		}
-			
+
 		c->Message(Chat::White, "Attempting to reload Level Based Experience Modifiers globally.");
 		pack = new ServerPacket(ServerOP_ReloadLevelEXPMods, 0);
 	} else if (is_logs) {
@@ -137,7 +137,7 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_rules) {
 		c->Message(Chat::White, "Attempting to reload Rules globally.");
 		pack = new ServerPacket(ServerOP_ReloadRules, 0);
-	} else if (is_static) {		
+	} else if (is_static) {
 		c->Message(Chat::White, "Attempting to reload Static Zone Data globally.");
 		pack = new ServerPacket(ServerOP_ReloadStaticZoneData, 0);
 	} else if (is_tasks) {
@@ -148,11 +148,11 @@ void command_reload(Client *c, const Seperator *sep)
 		} else {
 			task_id = std::stoul(sep->arg[2]);
 		}
-		
+
 		auto rts = (ReloadTasks_Struct*) pack->pBuffer;
 		rts->reload_type = RELOADTASKS;
 		rts->task_id = task_id;
-	} else if (is_titles) {		
+	} else if (is_titles) {
 		c->Message(Chat::White, "Attempting to reload Titles globally.");
 		pack = new ServerPacket(ServerOP_ReloadTitles, 0);
 	} else if (is_traps) {
@@ -221,6 +221,8 @@ void command_reload(Client *c, const Seperator *sep)
 		auto RW  = (ReloadWorld_Struct *) pack->pBuffer;
 		RW->global_repop = global_repop;
 	} else if (is_zone) {
+		zone_store.LoadZones(content_db);
+
 		if (arguments < 2) {
 			c->Message(
 				Chat::White,
@@ -260,7 +262,7 @@ void command_reload(Client *c, const Seperator *sep)
 			std::stoul(sep->arg[3]) :
 			0
 		);
-		
+
 		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
@@ -287,11 +289,11 @@ void command_reload(Client *c, const Seperator *sep)
 				)
 			).c_str()
 		);
-	} else if (is_zone_points) {		
+	} else if (is_zone_points) {
 		c->Message(Chat::White, "Attempting to reloading Zone Points globally.");
 		pack = new ServerPacket(ServerOP_ReloadZonePoints, 0);
 	}
-	
+
 	if (pack) {
 		worldserver.SendPacket(pack);
 	}

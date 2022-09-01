@@ -59,12 +59,14 @@ void command_zone(Client *c, const Seperator *sep)
 	auto z = sep->IsNumber(4) ? std::stof(sep->arg[4]) : 0.0f;
 	auto zone_mode = sep->IsNumber(2) ? ZoneSolicited : ZoneToSafeCoords;
 
+	auto zd = GetZone(zone_id);
+
 	c->MovePC(
 		zone_id,
 		x,
 		y,
 		z,
-		0.0f,
+		zd ? zd->safe_heading : 0.0f,
 		0,
 		zone_mode
 	);

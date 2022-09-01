@@ -1075,7 +1075,7 @@ void Mob::AI_Process() {
 		// NPCs will forget people after 10 mins of not interacting with them or out of range
 		// both of these maybe zone specific, hardcoded for now
 		if (hate_list_cleanup_timer.Check()) {
-			hate_list.RemoveStaleEntries(600000, static_cast<float>(zone->newzone_data.NPCAggroMaxDist));
+			hate_list.RemoveStaleEntries(600000, static_cast<float>(zone->newzone_data.npc_aggro_max_dist));
 			if (hate_list.IsHateListEmpty()) {
 				AI_Event_NoLongerEngaged();
 				zone->DelAggroMob();

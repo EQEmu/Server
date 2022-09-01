@@ -23,7 +23,7 @@
 #include "quest_parser_collection.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
 extern WorldServer worldserver;
 

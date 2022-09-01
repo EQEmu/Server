@@ -49,7 +49,7 @@
 #include "bot_command.h"
 #endif
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "titles.h"
 #include "guild_mgr.h"
 #include "task_manager.h"
@@ -78,7 +78,6 @@
 #else
 #include <pthread.h>
 #include "../common/unix.h"
-#include "zone_store.h"
 #include "zone_event_scheduler.h"
 
 #endif
@@ -303,7 +302,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading zone names");
 
-	zone_store.LoadZones();
+	zone_store.LoadZones(content_db);
 
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name)) {

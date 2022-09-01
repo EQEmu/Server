@@ -54,7 +54,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;

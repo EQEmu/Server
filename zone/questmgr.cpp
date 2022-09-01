@@ -35,7 +35,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "dialogue_window.h"
 #include "string_ids.h"
 
@@ -3364,11 +3364,11 @@ void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 	} else if (strcasecmp(type.c_str(), "fog_density") == 0) {
 		zone->newzone_data.fog_density = atof(value.c_str());
 	} else if (strcasecmp(type.c_str(), "suspendbuffs") == 0) {
-		zone->newzone_data.SuspendBuffs = atoi(value.c_str());
+		zone->newzone_data.suspend_buffs = atoi(value.c_str());
 	} else if (strcasecmp(type.c_str(), "lavadamage") == 0) {
-		zone->newzone_data.LavaDamage = atoi(value.c_str());
+		zone->newzone_data.lava_damage = atoi(value.c_str());
 	} else if (strcasecmp(type.c_str(), "minlavadamage") == 0) {
-		zone->newzone_data.MinLavaDamage = atoi(value.c_str());
+		zone->newzone_data.min_lava_damage = atoi(value.c_str());
 	}
 
 	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));

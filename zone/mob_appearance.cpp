@@ -27,7 +27,7 @@
 #include "mob.h"
 #include "quest_parser_collection.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
 #ifdef BOTS
 #include "bot.h"

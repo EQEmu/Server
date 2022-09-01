@@ -29,7 +29,7 @@ struct CharacterSelect_Struct;
 
 class WorldDatabase : public SharedDatabase {
 public:
-	bool GetStartZone(PlayerProfile_Struct* p_player_profile_struct, CharCreate_Struct* p_char_create_struct, bool is_titanium);
+	bool GetStartZone(PlayerProfile_Struct* pp, CharCreate_Struct* p_char_create_struct, bool is_titanium);
 	void GetCharSelectInfo(uint32 account_id, EQApplicationPacket **out_app, uint32 client_version_bit);
 	int MoveCharacterToBind(int character_id, uint8 bind_number = 0);
 	int MoveCharacterToInstanceSafeReturn(int character_id, int instance_zone_id, int instance_id);

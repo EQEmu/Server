@@ -28,7 +28,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>

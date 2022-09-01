@@ -950,14 +950,14 @@ void Zone::LoadZoneDoors()
 }
 
 Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
-:	initgrids_timer(10000),
-	autoshutdown_timer((RuleI(Zone, AutoShutdownDelay))),
-	clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
-	spawn2_timer(1000),
-	hot_reload_timer(1000),
-	qglobal_purge_timer(30000),
-	m_SafePoint(0.0f,0.0f,0.0f,0.0f),
-	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
+: initgrids_timer(10000),
+  autoshutdown_timer((RuleI(Zone, AutoShutdownDelay))),
+  clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
+  spawn2_timer(1000),
+  hot_reload_timer(1000),
+  qglobal_purge_timer(30000),
+  m_safe_points(0.0f, 0.0f, 0.0f, 0.0f),
+  m_graveyard(0.0f, 0.0f, 0.0f, 0.0f)
 {
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
@@ -977,7 +977,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	tradevar = 0;
 	lootvar = 0;
 
-	if(RuleB(TaskSystem, EnableTaskSystem)) {
+	if (RuleB(TaskSystem, EnableTaskSystem)) {
 		task_manager->LoadProximities(zoneid);
 	}
 
@@ -985,21 +985,41 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	strlwr(short_name);
 	memset(file_name, 0, sizeof(file_name));
 	long_name = 0;
-	aggroedmobs =0;
-	pgraveyard_id = 0;
+	aggroedmobs       =0;
+	m_graveyard_id    = 0;
 	pgraveyard_zoneid = 0;
-	pMaxClients = 0;
-	pvpzone = false;
-	if(database.GetServerType() == 1)
+	m_max_clients     = 0;
+	pvpzone           = false;
+
+	if (database.GetServerType() == 1) {
 		pvpzone = true;
-	content_db.GetZoneLongName(short_name, &long_name, file_name, &m_SafePoint.x, &m_SafePoint.y, &m_SafePoint.z, &pgraveyard_id, &pMaxClients);
-	if(graveyard_id() > 0)
-	{
+	}
+
+	auto z = GetZoneVersionWithFallback(ZoneID(short_name), instanceversion);
+	if (z) {
+		long_name = strcpy(new char[strlen(z->long_name.c_str()) + 1], z->long_name.c_str());
+
+		m_safe_points.x = z->safe_x;
+		m_safe_points.y = z->safe_y;
+		m_safe_points.z = z->safe_z;
+		m_safe_points.w = z->safe_heading;
+		m_graveyard_id = z->graveyard_id;
+		m_max_clients  = z->maxclients;
+
+		if (z->file_name.empty()) {
+			strcpy(file_name, short_name);
+		}
+		else {
+			strcpy(file_name, z->file_name.c_str());
+		}
+	}
+
+	if (graveyard_id() > 0) {
 		LogDebug("Graveyard ID is [{}]", graveyard_id());
-		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.x, &m_Graveyard.y, &m_Graveyard.z, &m_Graveyard.w);
+		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_graveyard.x, &m_graveyard.y, &m_graveyard.z, &m_graveyard.w);
 
 		if (GraveYardLoaded) {
-			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
+			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_graveyard).c_str());
 		}
 		else {
 			LogError("Unable to load the graveyard id [{}] for zone [{}]", graveyard_id(), short_name);
@@ -1280,52 +1300,125 @@ void Zone::ReloadStaticData() {
 
 bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
+	auto z = zone_store.GetZoneWithFallback(ZoneID(filename), instance_version);
+
+	if (!z) {
+		LogError("[LoadZoneCFG] Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
+		return false;
+	}
 
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
 	map_name = nullptr;
+	map_name = new char[100];
+	newzone_data.zone_id = zoneid;
 
-	if (!content_db.GetZoneCFG(
-		ZoneID(filename),
-		instance_version,
-		&newzone_data,
-		can_bind,
-		can_combat,
-		can_levitate,
-		can_castoutdoor,
-		is_city,
-		is_hotzone,
-		allow_mercs,
-		max_movement_update_range,
-		zone_type,
-		default_ruleset,
-		&map_name
-	)) {
-		// If loading a non-zero instance failed, try loading the default
-		if (instance_version != 0) {
-			safe_delete_array(map_name);
-			if (!content_db.GetZoneCFG(
-				ZoneID(filename),
-				0,
-				&newzone_data,
-				can_bind,
-				can_combat,
-				can_levitate,
-				can_castoutdoor,
-				is_city,
-				is_hotzone,
-				allow_mercs,
-				max_movement_update_range,
-				zone_type,
-				default_ruleset,
-				&map_name
-			)) {
-				LogError("Error loading the Zone Config");
-				return false;
-			}
-		}
+	strcpy(map_name, "default");
+
+	newzone_data.ztype = z->ztype;
+	zone_type = newzone_data.ztype;
+
+	// fog:red
+	newzone_data.fog_red[0] = z->fog_red;
+	newzone_data.fog_red[1] = z->fog_red2;
+	newzone_data.fog_red[2] = z->fog_red3;
+	newzone_data.fog_red[3] = z->fog_red4;
+
+	// fog:blue
+	newzone_data.fog_blue[0] = z->fog_blue;
+	newzone_data.fog_blue[1] = z->fog_blue2;
+	newzone_data.fog_blue[2] = z->fog_blue3;
+	newzone_data.fog_blue[3] = z->fog_blue4;
+
+	// fog:green
+	newzone_data.fog_green[0] = z->fog_green;
+	newzone_data.fog_green[1] = z->fog_green2;
+	newzone_data.fog_green[2] = z->fog_green3;
+	newzone_data.fog_green[3] = z->fog_green4;
+
+	// fog:minclip
+	newzone_data.fog_minclip[0] = z->fog_minclip;
+	newzone_data.fog_minclip[1] = z->fog_minclip2;
+	newzone_data.fog_minclip[2] = z->fog_minclip3;
+	newzone_data.fog_minclip[3] = z->fog_minclip4;
+
+	// fog:maxclip
+	newzone_data.fog_maxclip[0] = z->fog_maxclip;
+	newzone_data.fog_maxclip[1] = z->fog_maxclip2;
+	newzone_data.fog_maxclip[2] = z->fog_maxclip3;
+	newzone_data.fog_maxclip[3] = z->fog_maxclip4;
+
+	// rain_chance
+	newzone_data.rain_chance[0] = z->rain_chance1;
+	newzone_data.rain_chance[1] = z->rain_chance2;
+	newzone_data.rain_chance[2] = z->rain_chance3;
+	newzone_data.rain_chance[3] = z->rain_chance4;
+
+	// rain_duration
+	newzone_data.rain_duration[0] = z->rain_duration1;
+	newzone_data.rain_duration[1] = z->rain_duration2;
+	newzone_data.rain_duration[2] = z->rain_duration3;
+	newzone_data.rain_duration[3] = z->rain_duration4;
+
+	// snow_chance
+	newzone_data.snow_chance[0] = z->snow_chance1;
+	newzone_data.snow_chance[1] = z->snow_chance2;
+	newzone_data.snow_chance[2] = z->snow_chance3;
+	newzone_data.snow_chance[3] = z->snow_chance4;
+
+	// snow_duration
+	newzone_data.snow_duration[0] = z->snow_duration1;
+	newzone_data.snow_duration[1] = z->snow_duration2;
+	newzone_data.snow_duration[2] = z->snow_duration3;
+	newzone_data.snow_duration[3] = z->snow_duration4;
+
+	// misc
+	newzone_data.fog_density               = z->fog_density;
+	newzone_data.sky                       = z->sky;
+	newzone_data.zone_exp_multiplier       = z->zone_exp_multiplier;
+	newzone_data.safe_x                    = z->safe_x;
+	newzone_data.safe_y                    = z->safe_y;
+	newzone_data.safe_z                    = z->safe_z;
+	newzone_data.underworld                = z->underworld;
+	newzone_data.minclip                   = z->minclip;
+	newzone_data.maxclip                   = z->maxclip;
+	newzone_data.time_type                 = z->time_type;
+	newzone_data.gravity                   = z->gravity;
+	newzone_data.fast_regen_hp             = z->fast_regen_hp;
+	newzone_data.fast_regen_mana           = z->fast_regen_mana;
+	newzone_data.fast_regen_endurance      = z->fast_regen_endurance;
+	newzone_data.npc_aggro_max_dist        = z->npc_max_aggro_dist;
+	newzone_data.underworld_teleport_index = z->underworld_teleport_index;
+	newzone_data.lava_damage               = z->lava_damage;
+	newzone_data.min_lava_damage           = z->min_lava_damage;
+	newzone_data.suspend_buffs             = z->suspendbuffs;
+
+	// local attributes
+	can_bind                  = z->canbind != 0;
+	is_city                   = z->canbind == 2;
+	can_combat                = z->cancombat != 0;
+	can_levitate              = z->canlevitate != 0;
+	can_castoutdoor           = z->castoutdoor != 0;
+	is_hotzone                = z->hotzone != 0;
+	max_movement_update_range = z->max_movement_update_range;
+	default_ruleset           = z->ruleset;
+	allow_mercs               = true;
+	m_graveyard_id            = z->graveyard_id;
+	m_max_clients             = z->maxclients;
+
+	// safe coordinates
+	m_safe_points.x = z->safe_x;
+	m_safe_points.y = z->safe_y;
+	m_safe_points.z = z->safe_z;
+	m_safe_points.w = z->safe_heading;
+
+	if (!z->map_file_name.empty()) {
+		strcpy(map_name, z->map_file_name.c_str());
+	}
+	else {
+		strcpy(map_name, z->short_name.c_str());
 	}
 
-	//overwrite with our internal variables
+	// overwrite with our internal variables
 	strcpy(newzone_data.zone_short_name, GetShortName());
 	strcpy(newzone_data.zone_long_name, GetLongName());
 	strcpy(newzone_data.zone_short_name2, GetShortName());
@@ -2137,7 +2230,7 @@ bool Zone::HasGraveyard() {
 
 void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 	pgraveyard_zoneid = zoneid;
-	m_Graveyard = graveyardPosition;
+	m_graveyard       = graveyardPosition;
 }
 
 void Zone::LoadZoneBlockedSpells()

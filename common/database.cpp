@@ -51,6 +51,7 @@
 #include "http/uri.h"
 
 #include "repositories/zone_repository.h"
+#include "zone_store.h"
 
 extern Client client;
 
@@ -1018,97 +1019,6 @@ void Database::SetAccountCRCField(uint32 account_id, std::string field_name, uin
 	);
 }
 
-// Get zone starting points from DB
-bool Database::GetSafePoints(const char* zone_short_name, uint32 instance_version, float* safe_x, float* safe_y, float* safe_z, float* safe_heading, int16* min_status, uint8* min_level, char *flag_needed) {
-
-	if (zone_short_name == nullptr)
-		return false;
-
-	std::string query = fmt::format(
-		SQL(
-			SELECT
-			`safe_x`, `safe_y`, `safe_z`, `safe_heading`, `min_status`, `min_level`, `flag_needed`
-			FROM
-			zone
-			WHERE
-			`short_name` = '{}'
-			AND
-			(`version` = {} OR `version` = 0)
-			ORDER BY `version` DESC
-		), zone_short_name, instance_version
-	);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-		return false;
-
-	if (results.RowCount() == 0)
-		return false;
-
-	auto row = results.begin();
-
-	if (safe_x != nullptr)
-		*safe_x = atof(row[0]);
-
-	if (safe_y != nullptr)
-		*safe_y = atof(row[1]);
-
-	if (safe_z != nullptr)
-		*safe_z = atof(row[2]);
-
-	if (safe_heading != nullptr)
-		*safe_heading = atof(row[3]);
-
-	if (min_status != nullptr)
-		*min_status = atoi(row[4]);
-
-	if (min_level != nullptr)
-		*min_level = atoi(row[5]);
-
-	if (flag_needed != nullptr)
-		strcpy(flag_needed, row[6]);
-
-	return true;
-}
-
-bool Database::GetZoneLongName(const char* short_name, char** long_name, char* file_name, float* safe_x, float* safe_y, float* safe_z, uint32* graveyard_id, uint32* maxclients) {
-
-	std::string query = StringFormat("SELECT long_name, file_name, safe_x, safe_y, safe_z, graveyard_id, maxclients FROM zone WHERE short_name='%s' AND version=0", short_name);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success()) {
-		return false;
-	}
-
-	if (results.RowCount() == 0)
-		return false;
-
-	auto row = results.begin();
-
-	if (long_name != nullptr)
-		*long_name = strcpy(new char[strlen(row[0])+1], row[0]);
-
-	if (file_name != nullptr) {
-		if (row[1] == nullptr)
-			strcpy(file_name, short_name);
-		else
-			strcpy(file_name, row[1]);
-	}
-
-	if (safe_x != nullptr)
-		*safe_x = atof(row[2]);
-	if (safe_y != nullptr)
-		*safe_y = atof(row[3]);
-	if (safe_z != nullptr)
-		*safe_z = atof(row[4]);
-	if (graveyard_id != nullptr)
-		*graveyard_id = atoi(row[5]);
-	if (maxclients != nullptr)
-		*maxclients = atoi(row[6]);
-
-	return true;
-}
-
 bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid, float* graveyard_x, float* graveyard_y, float* graveyard_z, float* graveyard_heading) {
 
 	std::string query = StringFormat("SELECT zone_id, x, y, z, heading FROM graveyard WHERE id=%i", graveyard_id);
@@ -1138,20 +1048,10 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 }
 
 uint8 Database::GetPEQZone(uint32 zone_id, uint32 version){
-	std::string query = fmt::format(
-		"SELECT peqzone FROM zone WHERE zoneidnumber = {} AND (version = {} OR version = 0) ORDER BY version DESC LIMIT 1",
-		zone_id,
-		version
-	);
-	auto results = QueryDatabase(query);
 
-	if (!results.Success() || !results.RowCount()) {
-		return 0;
-	}
+	auto z = GetZoneVersionWithFallback(zone_id, version);
 
-	auto row = results.begin();
-
-	return static_cast<uint8>(std::stoi(row[0]));
+	return z ? z->peqzone : 0;
 }
 
 bool Database::CheckNameFilter(std::string name, bool surname)

@@ -28,7 +28,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "position.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)

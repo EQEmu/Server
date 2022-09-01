@@ -32,7 +32,6 @@ SET(world_sources
 	world_server_command_handler.cpp
 	worlddb.cpp
 	world_boot.cpp
-	world_store.cpp
 	zonelist.cpp
 	zoneserver.cpp
 )
@@ -71,7 +70,6 @@ SET(world_headers
 	worlddb.h
 	world_boot.h
 	world_event_scheduler.h
-	world_store.h
 	zonelist.h
 	zoneserver.h
 )

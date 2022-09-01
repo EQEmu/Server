@@ -1341,17 +1341,17 @@ namespace SoD
 		OUT_str(zone_short_name2);
 		OUT(zone_id);
 		OUT(zone_instance);
-		OUT(SuspendBuffs);
-		OUT(FastRegenHP);
-		OUT(FastRegenMana);
-		OUT(FastRegenEndurance);
+		OUT(suspend_buffs);
+		OUT(fast_regen_hp);
+		OUT(fast_regen_mana);
+		OUT(fast_regen_endurance);
 		OUT(underworld_teleport_index);
 
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown800 = -1;
 		eq->unknown844 = 600;
-		OUT(LavaDamage);
-		OUT(MinLavaDamage);
+		OUT(lava_damage);
+		OUT(min_lava_damage);
 		eq->unknown888 = 1;
 		eq->unknown889 = 0;
 		eq->unknown890 = 1;
@@ -1361,8 +1361,8 @@ namespace SoD
 		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown895 = 0;
 		eq->unknown908 = 2;
-		eq->unknown912 = 2;
-		eq->FogDensity = emu->fog_density;
+		eq->unknown912  = 2;
+		eq->fog_density = emu->fog_density;
 
 		FINISH_ENCODE();
 	}

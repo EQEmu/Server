@@ -33,7 +33,7 @@
 #include "../common/event_sub.h"
 #include "web_interface.h"
 #include "wguild_mgr.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include <set>
 
 extern WebInterfaceList web_interface;
