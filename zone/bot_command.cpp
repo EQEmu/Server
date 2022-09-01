@@ -61,7 +61,7 @@
 
 #include "bot_command.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "doors.h"

@@ -4,7 +4,7 @@
 
 #include "embperl.h"
 #include "expedition.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "../common/global_define.h"
 
 void Perl_Expedition_AddLockout(Expedition* self, std::string event_name, uint32_t seconds)

@@ -34,9 +34,11 @@
 #include "spells.h"
 #include "base_data.h"
 #include "../common/content/world_content_service.h"
+#include "../common/zone_store.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
+ZoneStore zone_store;
 
 #ifdef _WINDOWS
 #include <direct.h>

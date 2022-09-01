@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -440,35 +440,35 @@ struct NewZone_Struct {
 /*0704*/	char	zone_short_name2[96];	//zone file name? excludes instance number which can be in previous version.
 /*0800*/	int32	unknown800;	//seen -1
 /*0804*/	char	unknown804[40]; //
-/*0844*/	int32	unknown844;	//seen 600
-/*0848*/	int32	unknown848;
-/*0852*/	uint16	zone_id;
-/*0854*/	uint16	zone_instance;
-/*0856*/	uint32	scriptNPCReceivedanItem;
-/*0860*/	uint32	bCheck;					// padded bool
-/*0864*/	uint32	scriptIDSomething;
-/*0868*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
-/*0872*/	uint32	scriptIDSomething3;
-/*0876*/	uint32	SuspendBuffs;
-/*0880*/	uint32	LavaDamage;	//seen 50
-/*0884*/	uint32	MinLavaDamage;	//seen 10
-/*0888*/	uint8	unknown888;	//seen 1
-/*0889*/	uint8	unknown889;	//seen 0 (POK) or 1 (rujj)
-/*0890*/	uint8	unknown890;	//seen 1
-/*0891*/	uint8	unknown891;	//seen 0
-/*0892*/	uint8	unknown892;	//seen 0
-/*0893*/	uint8	unknown893;	//seen 0 - 00
-/*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
-/*0895*/	uint8	unknown895;	//seen 0 - 00
-/*0896*/	uint32	FastRegenHP;	//seen 180
-/*0900*/	uint32	FastRegenMana;	//seen 180
-/*0904*/	uint32	FastRegenEndurance;	//seen 180
-/*0908*/	uint32	unknown908;	//seen 2
-/*0912*/	uint32	unknown912;	//seen 2
-/*0916*/	float	FogDensity;	//Of about 10 or so zones tested, all but one have this set to 0.33 Blightfire had 0.16
-/*0920*/	uint32	unknown920;	//seen 0
-/*0924*/	uint32	unknown924;	//seen 0
-/*0928*/	uint32	unknown928;	//seen 0
+/*0844*/	int32  unknown844;	//seen 600
+/*0848*/	int32  unknown848;
+/*0852*/	uint16 zone_id;
+/*0854*/	uint16 zone_instance;
+/*0856*/	uint32 scriptNPCReceivedanItem;
+/*0860*/	uint32 bCheck;					// padded bool
+/*0864*/	uint32 scriptIDSomething;
+/*0868*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
+/*0872*/	uint32 scriptIDSomething3;
+/*0876*/	uint32 suspend_buffs;
+/*0880*/	uint32 lava_damage;	//seen 50
+/*0884*/	uint32 min_lava_damage;	//seen 10
+/*0888*/	uint8  unknown888;	//seen 1
+/*0889*/	uint8  unknown889;	//seen 0 (POK) or 1 (rujj)
+/*0890*/	uint8  unknown890;	//seen 1
+/*0891*/	uint8  unknown891;	//seen 0
+/*0892*/	uint8  unknown892;	//seen 0
+/*0893*/	uint8  unknown893;	//seen 0 - 00
+/*0894*/	uint8  fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
+/*0895*/	uint8  unknown895;	//seen 0 - 00
+/*0896*/	uint32 fast_regen_hp;	//seen 180
+/*0900*/	uint32 fast_regen_mana;	//seen 180
+/*0904*/	uint32 fast_regen_endurance;	//seen 180
+/*0908*/	uint32 unknown908;	//seen 2
+/*0912*/	uint32 unknown912;	//seen 2
+/*0916*/	float  fog_density;	//Of about 10 or so zones tested, all but one have this set to 0.33 Blightfire had 0.16
+/*0920*/	uint32 unknown920;	//seen 0
+/*0924*/	uint32 unknown924;	//seen 0
+/*0928*/	uint32 unknown928;	//seen 0
 /*0932*/	uint8  unknown932[12];
 };
 
@@ -3997,7 +3997,7 @@ struct ItemSerializationHeaderFinish
 {
 	uint16 ornamentIcon;
 	/*060*/	uint8 unknown060; //0
-	/*061*/	uint8 unknown061; //0 - 
+	/*061*/	uint8 unknown061; //0 -
 	/*062*/	uint8 isCopied; // New to Underfoot // Copied flag on item
 	/*063*/	uint8 ItemClass; //0, 1, or 2
 };

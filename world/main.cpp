@@ -91,12 +91,12 @@ union semun {
 #include "world_server_command_handler.h"
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/character_task_timers_repository.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include "world_event_scheduler.h"
 #include "shared_task_manager.h"
 #include "world_boot.h"
 
-WorldStore          world_store;
+ZoneStore           zone_store;
 ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;

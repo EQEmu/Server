@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include "dynamic_zone.h"
 #include "dynamic_zone_manager.h"
 #include "expedition_message.h"
@@ -1324,6 +1324,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadVeteranRewards:
 		case ServerOP_ReloadWorld:
 		case ServerOP_ReloadZonePoints:
+		case ServerOP_ReloadZoneData:
 		case ServerOP_RezzPlayerAccept:
 		case ServerOP_SpawnStatusChange:
 		case ServerOP_UpdateSpawn:

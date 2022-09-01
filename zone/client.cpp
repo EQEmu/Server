@@ -46,7 +46,7 @@ extern volatile bool RunLoops;
 #include "position.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "petitions.h"
 #include "command.h"
 #include "water_map.h"
@@ -5371,14 +5371,13 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z, float headin
 	}
 
 	if (x == 0 && y == 0 && z == 0) {
-		content_db.GetSafePoints(
-			ZoneName(m_pp.binds[4].zone_id),
-			0,
-			&m_pp.binds[4].x,
-			&m_pp.binds[4].y,
-			&m_pp.binds[4].z,
-			&m_pp.binds[4].heading
-		);
+		auto zd = GetZone(m_pp.binds[4].zone_id);
+		if (zd) {
+			m_pp.binds[4].x = zd->safe_x;
+			m_pp.binds[4].y = zd->safe_y;
+			m_pp.binds[4].z = zd->safe_z;
+			m_pp.binds[4].heading = zd->safe_heading;
+		}
 	}
 	else {
 		m_pp.binds[4].x = x;
@@ -9427,7 +9426,7 @@ bool Client::GotoPlayerRaid(const std::string& player_name)
 	if (!GetRaid()) {
 		return GotoPlayer(player_name);
 	}
-	
+
 	for (auto &m: GetRaid()->members) {
 		if (m.member && m.member->IsClient()) {
 			auto c = m.member->CastToClient();

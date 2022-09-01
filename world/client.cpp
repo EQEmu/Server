@@ -46,7 +46,7 @@
 #include "clientlist.h"
 #include "wguild_mgr.h"
 #include "sof_char_create_data.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/account_repository.h"
 
 #include <iostream>
@@ -1733,7 +1733,12 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	/* Overrides if we have the tutorial flag set! */
 	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
 		pp.zone_id = RuleI(World, TutorialZoneID);
-		content_db.GetSafePoints(ZoneName(pp.zone_id), 0, &pp.x, &pp.y, &pp.z);
+		auto z = GetZone(pp.zone_id);
+		if (z) {
+			pp.x = z->safe_x;
+			pp.y = z->safe_y;
+			pp.z = z->safe_z;
+		}
 	}
 
 	/*  Will either be the same as home or tutorial if enabled. */

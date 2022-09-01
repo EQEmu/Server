@@ -2041,6 +2041,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
 		break;
 	}
+	case ServerOP_ReloadZoneData:
+	{
+		zone_store.LoadZones(content_db);
+		zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
+		zone->SendReloadMessage("Zone Data");
+		break;
+	}
 	case ServerOP_CameraShake:
 	{
 		if (zone)

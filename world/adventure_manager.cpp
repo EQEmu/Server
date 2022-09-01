@@ -10,7 +10,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include <sstream>
 #include <stdio.h>
 

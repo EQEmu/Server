@@ -23,7 +23,7 @@
 #include "mob.h"
 #include "qglobals.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "zonedump.h"
 #include "../common/loottable.h"
 

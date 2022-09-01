@@ -1019,17 +1019,17 @@ namespace SoF
 		OUT_str(zone_short_name2);
 		OUT(zone_id);
 		OUT(zone_instance);
-		OUT(SuspendBuffs);
-		OUT(FastRegenHP);
-		OUT(FastRegenMana);
-		OUT(FastRegenEndurance);
+		OUT(suspend_buffs);
+		OUT(fast_regen_hp);
+		OUT(fast_regen_mana);
+		OUT(fast_regen_endurance);
 		OUT(underworld_teleport_index);
 
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown796 = -1;
 		eq->unknown840 = 600;
-		OUT(LavaDamage);
-		OUT(MinLavaDamage);
+		OUT(lava_damage);
+		OUT(min_lava_damage);
 		eq->unknown884 = 1;
 		eq->unknown885 = 0;
 		eq->unknown886 = 1;

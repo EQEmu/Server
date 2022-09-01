@@ -26,7 +26,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
 extern EntityList entity_list;
 extern Zone* zone;

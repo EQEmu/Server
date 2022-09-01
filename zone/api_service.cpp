@@ -22,7 +22,7 @@
 #include "../common/net/websocket_server.h"
 #include "../common/eqemu_logsys.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "client.h"
 #include "entity.h"
 #include "corpse.h"
