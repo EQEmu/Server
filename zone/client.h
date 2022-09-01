@@ -348,7 +348,7 @@ public:
 	int GetIPExemption();
 	void SetIPExemption(int exemption_amount);
 	inline bool GetHideMe() const { return gm_hide_me; }
-	void SetHideMe(bool hm);
+	void SetHideMe(bool flag);
 	inline uint16 GetPort() const { return port; }
 	bool IsDead() const { return(dead); }
 	bool IsUnconscious() const { return ((current_hp <= 0) ? true : false); }
