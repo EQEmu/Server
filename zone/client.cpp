@@ -3385,9 +3385,11 @@ void Client::SetTint(int16 in_slot, EQ::textures::Tint_Struct& color) {
 
 }
 
-void Client::SetHideMe(bool gm_hide_me)
+void Client::SetHideMe(bool flag)
 {
 	EQApplicationPacket app;
+
+	gm_hide_me = flag;
 
 	if (gm_hide_me) {
 		database.SetHideMe(AccountID(), true);
