@@ -558,14 +558,14 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 	return true;
 }
 
-bool ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count)
+int ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count)
 {
 	if (!task_manager)
 	{
-		return false;
+		return 0;
 	}
 
-	bool any_updated = false;
+	int max_updated = 0;
 
 	for (const auto& client_task : m_active_tasks)
 	{
@@ -591,14 +591,14 @@ bool ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter
 				LogTasks("[UpdateTasks] client [{}] task [{}] activity [{}] increment [{}]",
 					client->GetName(), client_task.task_id, client_activity.activity_id, count);
 
-				IncrementDoneCount(client, task, client_task.slot, client_activity.activity_id, count);
-				any_updated = true;
+				int updated = IncrementDoneCount(client, task, client_task.slot, client_activity.activity_id, count);
+				max_updated = std::max(max_updated, updated);
 				break; // only one element updated per task, move to next task
 			}
 		}
 	}
 
-	return any_updated;
+	return max_updated;
 }
 
 std::pair<int, int> ClientTaskState::FindTask(Client* client, const TaskUpdateFilter& filter) const
@@ -653,7 +653,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client* client, TaskActivityType type, NP
 	filter.type = type;
 	filter.npc = npc;
 
-	return UpdateTasks(client, filter);
+	return UpdateTasks(client, filter) > 0;
 }
 
 int ClientTaskState::ActiveSpeakTask(Client* client, NPC* npc)
@@ -719,12 +719,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client* client, const glm::vec4& pos)
 	UpdateTasks(client, filter);
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(
-	Client *client,
-	std::list<EQ::ItemInstance *> &items,
-	int cash,
-	NPC* npc
-)
+bool ClientTaskState::UpdateTasksOnDeliver(Client* client, std::vector<EQ::ItemInstance*>& items, Trade& trade, NPC* npc)
 {
 	LogTasks("[UpdateTasksOnDeliver] npc [{}]", npc->GetName());
 
@@ -733,10 +728,12 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 	TaskUpdateFilter filter{};
 	filter.npc = npc;
 
+	int cash = trade.cp + (trade.sp * 10) + (trade.gp * 100) + (trade.pp * 1000);
 	if (cash != 0)
 	{
 		filter.type = TaskActivityType::GiveCash;
-		if (UpdateTasks(client, filter, cash))
+		int updated_count = UpdateTasks(client, filter, cash);
+		if (updated_count > 0)
 		{
 			// todo: remove used coin and use Deliver with explicit coin fields instead of custom type
 			is_updated = true;
@@ -744,14 +741,26 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 	}
 
 	filter.type = TaskActivityType::Deliver;
-	for (EQ::ItemInstance* item : items)
+	for (EQ::ItemInstance*& item : items)
 	{
+		// items may have gaps for unused trade slots
+		if (!item)
+		{
+			continue;
+		}
+
 		filter.item_id = item->GetID();
 
 		int count = item->IsStackable() ? item->GetCharges() : 1;
-		if (UpdateTasks(client, filter, count))
+		int updated_count = UpdateTasks(client, filter, count);
+		if (updated_count > 0)
 		{
-			// todo: remove items used in update (highest in case multiple tasks consume same item)
+			// remove items used in updates
+			item->SetCharges(count - updated_count);
+			if (count == updated_count)
+			{
+				item = nullptr; // all items in trade slot consumed
+			}
 			is_updated = true;
 		}
 	}
@@ -782,7 +791,7 @@ void ClientTaskState::UpdateTasksOnKill(Client* client, Client* exp_client, NPC*
 	UpdateTasks(client, filter);
 }
 
-void ClientTaskState::IncrementDoneCount(
+int ClientTaskState::IncrementDoneCount(
 	Client *client,
 	const TaskInformation* task_information,
 	int task_index,
@@ -793,7 +802,7 @@ void ClientTaskState::IncrementDoneCount(
 {
 	auto info = GetClientTaskInfo(task_information->type, task_index);
 	if (info == nullptr) {
-		return;
+		return 0;
 	}
 
 	LogTasks(
@@ -803,6 +812,9 @@ void ClientTaskState::IncrementDoneCount(
 		activity_id,
 		count
 	);
+
+	int remaining = task_information->activity_information[activity_id].goal_count - info->activity[activity_id].done_count;
+	count = std::min(count, remaining);
 
 	// shared task shim
 	// intercept and pass to world first before processing normally
@@ -840,14 +852,10 @@ void ClientTaskState::IncrementDoneCount(
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 
-		return;
+		return count;
 	}
 
 	info->activity[activity_id].done_count += count;
-
-	if (info->activity[activity_id].done_count > task_information->activity_information[activity_id].goal_count) {
-		info->activity[activity_id].done_count = task_information->activity_information[activity_id].goal_count;
-	}
 
 	if (!ignore_quest_update) {
 		std::string export_string = fmt::format(
@@ -952,6 +960,8 @@ void ClientTaskState::IncrementDoneCount(
 	}
 
 	task_manager->SaveClientState(client, this);
+
+	return count;
 }
 
 void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
