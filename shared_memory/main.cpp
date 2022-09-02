@@ -306,7 +306,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(load_all || load_faction_assoc) {
+	if (load_all || load_faction_assoc) {
 		LogInfo("Loading faction associations");
 		try {
 			LoadFactionAssociation(&content_db, hotfix_name);
@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if(load_all || load_bd) {
+	if (load_all || load_bd) {
 		LogInfo("Loading base data");
 		try {
 			LoadBaseData(&content_db, hotfix_name);
