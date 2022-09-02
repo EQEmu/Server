@@ -1381,7 +1381,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 		/* Update any tasks that have an activity to loot this item */
 		if (RuleB(TaskSystem, EnableTaskSystem))
-			client->UpdateTasksForItem(TaskActivityType::Loot, item->ID);
+			client->UpdateTasksForItem(TaskActivityType::Loot, IsNPCCorpse() ? CastToNPC() : nullptr, item->ID);
 
 		/* Remove it from Corpse */
 		if (item_data) {

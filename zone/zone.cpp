@@ -977,10 +977,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	tradevar = 0;
 	lootvar = 0;
 
-	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		task_manager->LoadProximities(zoneid);
-	}
-
 	short_name = strcpy(new char[strlen(in_short_name)+1], in_short_name);
 	strlwr(short_name);
 	memset(file_name, 0, sizeof(file_name));

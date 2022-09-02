@@ -48,13 +48,6 @@ void command_task(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"--- [{}] Reload proximity information",
-				Saylink::Silent("#task reload prox", "reload prox")
-			).c_str()
-		);
-		c->Message(
-			Chat::White,
-			fmt::format(
 				"--- [{}] Reload task set information",
 				Saylink::Silent("#task reload sets", "reload sets")
 			).c_str()
@@ -142,13 +135,6 @@ void command_task(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"--- [{}] Reload proximity information",
-				Saylink::Silent("#task reload prox", "reload prox")
-			).c_str()
-		);
-		c->Message(
-			Chat::White,
-			fmt::format(
 				"--- [{}] Reload task set information",
 				Saylink::Silent("#task reload sets", "reload sets")
 			).c_str()
@@ -209,11 +195,6 @@ void command_task(Client *c, const Seperator *sep)
 				c->Message(Chat::Yellow, "Attempting to reload goal lists.");
 				worldserver.SendReloadTasks(RELOADTASKGOALLISTS);
 				c->Message(Chat::Yellow, "Successfully reloaded goal lists.");
-				return;
-			} else if (!strcasecmp(sep->arg[2], "prox")) {
-				c->Message(Chat::Yellow, "Attempting to reload task proximites.");
-				worldserver.SendReloadTasks(RELOADTASKPROXIMITIES);
-				c->Message(Chat::Yellow, "Successfully reloaded task proximites.");
 				return;
 			} else if (!strcasecmp(sep->arg[2], "sets")) {
 				c->Message(Chat::Yellow, "Attempting to reload task sets.");

@@ -3,7 +3,6 @@
 
 #include "tasks.h"
 #include "task_client_state.h"
-#include "task_proximity_manager.h"
 #include "task_goal_list_manager.h"
 #include "../common/types.h"
 #include "../common/repositories/character_tasks_repository.h"
@@ -24,10 +23,6 @@ public:
 	int GetActivityCount(int task_id);
 	bool LoadTasks(int single_task = 0);
 	void ReloadGoalLists();
-	inline void LoadProximities(int zone_id)
-	{
-		m_proximity_manager.LoadProximities(zone_id);
-	}
 	bool LoadTaskSets();
 	bool LoadClientState(Client *client, ClientTaskState *client_task_state);
 	bool SaveClientState(Client *client, ClientTaskState *client_task_state);
@@ -72,11 +67,10 @@ public:
 	// shared tasks
 	void SyncClientSharedTaskState(Client *c, ClientTaskState *cts);
 
-	void HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, NPC* npc);
+	void HandleUpdateTasksOnKill(Client* client, NPC* npc);
 
 private:
 	TaskGoalListManager  m_goal_list_manager;
-	TaskProximityManager m_proximity_manager;
 	TaskInformation      *m_task_data[MAXTASKS]{};
 	std::vector<int>     m_task_sets[MAXTASKSETS];
 	void SendActiveTaskDescription(

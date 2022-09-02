@@ -142,7 +142,6 @@ SET(zone_sources
     task_client_state.cpp
     task_goal_list_manager.cpp
     task_manager.cpp
-    task_proximity_manager.cpp
     tasks.cpp
     titles.cpp
     tradeskills.cpp
@@ -268,7 +267,6 @@ SET(zone_headers
     task_client_state.h
     task_goal_list_manager.h
     task_manager.h
-    task_proximity_manager.h
     tasks.h
     titles.h
     trap.h

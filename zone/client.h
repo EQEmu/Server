@@ -1139,48 +1139,32 @@ public:
 	}
 	inline void UpdateTasksForItem(
 		TaskActivityType activity_type,
+		NPC* npc,
 		int item_id,
 		int count = 1
 	)
 	{
 		if (task_state) {
-			task_state->UpdateTasksForItem(this, activity_type, item_id, count);
+			task_state->UpdateTasksForItem(this, activity_type, npc, item_id, count);
 		}
 	}
-	inline void UpdateTasksOnExplore(int explore_id)
+	inline void UpdateTasksOnExplore(const glm::vec4& pos)
 	{
 		if (task_state) {
-			task_state->UpdateTasksOnExplore(
-				this,
-				explore_id
-			);
+			task_state->UpdateTasksOnExplore(this, pos);
 		}
 	}
-	inline bool UpdateTasksOnSpeakWith(int npc_type_id)
+	inline bool UpdateTasksOnSpeakWith(NPC* npc)
 	{
-		if (task_state) {
-			return task_state->UpdateTasksOnSpeakWith(
-				this,
-				npc_type_id
-			);
-		}
-		else { return false; }
+		return task_state && task_state->UpdateTasksOnSpeakWith(this, npc);
 	}
 	inline bool UpdateTasksOnDeliver(
 		std::list<EQ::ItemInstance *> &items,
 		int cash,
-		int npc_type_id
+		NPC* npc
 	)
 	{
-		if (task_state) {
-			return task_state->UpdateTasksOnDeliver(
-				this,
-				items,
-				cash,
-				npc_type_id
-			);
-		}
-		else { return false; }
+		return task_state && task_state->UpdateTasksOnDeliver(this, items, cash, npc);
 	}
 	void UpdateTasksOnTouchSwitch(int dz_switch_id)
 	{
@@ -1235,12 +1219,7 @@ public:
 	inline void ProcessTaskProximities(float x, float y, float z)
 	{
 		if (task_state) {
-			task_state->ProcessTaskProximities(
-				this,
-				x,
-				y,
-				z
-			);
+			task_state->ProcessTaskProximities(this, x, y, z);
 		}
 	}
 	inline void AssignTask(
@@ -1252,22 +1231,19 @@ public:
 			task_state->AcceptNewTask(this, task_id, npc_id, std::time(nullptr), enforce_level_requirement);
 		}
 	}
-	inline int ActiveSpeakTask(int npc_type_id)
+	inline int ActiveSpeakTask(NPC* npc)
 	{
 		if (task_state) {
-			return task_state->ActiveSpeakTask(npc_type_id);
+			return task_state->ActiveSpeakTask(this, npc);
 		}
 		else {
 			return 0;
 		}
 	}
-	inline int ActiveSpeakActivity(int npc_type_id, int task_id)
+	inline int ActiveSpeakActivity(NPC* npc, int task_id)
 	{
 		if (task_state) {
-			return task_state->ActiveSpeakActivity(
-				npc_type_id,
-				task_id
-			);
+			return task_state->ActiveSpeakActivity(this, npc, task_id);
 		}
 		else { return 0; }
 	}

@@ -225,12 +225,30 @@ bool TaskManager::LoadTasks(int single_task)
 		activity_data->spell_list           = task_activity.spell_list;
 		activity_data->spell_id             = Strings::IsNumber(task_activity.spell_list) ? std::stoi(task_activity.spell_list) : 0; // for older clients
 		activity_data->description_override = task_activity.description_override;
-		activity_data->goal_id              = task_activity.goalid;
+		activity_data->npc_id               = task_activity.npc_id;
+		activity_data->npc_goal_id          = task_activity.npc_goal_id;
+		activity_data->npc_match_list       = task_activity.npc_match_list;
+		activity_data->item_id              = task_activity.item_id;
+		activity_data->item_goal_id         = task_activity.item_goal_id;
+		activity_data->item_id_list         = task_activity.item_id_list;
+		activity_data->dz_switch_id         = task_activity.dz_switch_id;
 		activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;
-		activity_data->goal_match_list      = task_activity.goal_match_list;
 		activity_data->goal_count           = task_activity.goalcount;
-		activity_data->deliver_to_npc       = task_activity.delivertonpc;
+		activity_data->min_x                = task_activity.min_x;
+		activity_data->min_y                = task_activity.min_y;
+		activity_data->min_z                = task_activity.min_z;
+		activity_data->max_x                = task_activity.max_x;
+		activity_data->max_y                = task_activity.max_y;
+		activity_data->max_z                = task_activity.max_z;
 		activity_data->zone_version         = task_activity.zone_version >= 0 ? task_activity.zone_version : -1;
+		activity_data->has_area             = false;
+
+		if (std::abs(task_activity.max_x - task_activity.min_x) > 0.0f &&
+		    std::abs(task_activity.max_y - task_activity.min_y) > 0.0f &&
+		    std::abs(task_activity.max_z - task_activity.min_z) > 0.0f)
+		{
+			activity_data->has_area = true;
+		}
 
 		// zones
 		activity_data->zones = task_activity.zones;
@@ -246,13 +264,12 @@ bool TaskManager::LoadTasks(int single_task)
 		activity_data->optional = task_activity.optional;
 
 		LogTasksDetail(
-			"[LoadTasks] (Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_id [{}] goal_method [{}] goal_count [{}] zones [{}]"
+			"[LoadTasks] (Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_method [{}] goal_count [{}] zones [{}]"
 			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
 			task_id,
 			activity_id,
 			m_task_data[task_id]->activity_count,
 			static_cast<int32_t>(activity_data->activity_type),
-			activity_data->goal_id,
 			activity_data->goal_method,
 			activity_data->goal_count,
 			activity_data->zones.c_str(),
@@ -1515,7 +1532,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		client_task_state->m_active_task.slot
 	);
 	if (client_task_state->m_active_task.task_id != TASKSLOTEMPTY) {
-		client_task_state->UnlockActivities(character_id, client_task_state->m_active_task);
+		client_task_state->UnlockActivities(client, client_task_state->m_active_task);
 
 		// purely debugging
 		LogTasksDetail(
@@ -1552,13 +1569,13 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		client_task_state->m_active_shared_task.slot
 	);
 	if (client_task_state->m_active_shared_task.task_id != TASKSLOTEMPTY) {
-		client_task_state->UnlockActivities(character_id, client_task_state->m_active_shared_task);
+		client_task_state->UnlockActivities(client, client_task_state->m_active_shared_task);
 	}
 
 	// quests (max 20 or 40 depending on client)
 	for (auto &active_quest : client_task_state->m_active_quests) {
 		if (active_quest.task_id != TASKSLOTEMPTY) {
-			client_task_state->UnlockActivities(character_id, active_quest);
+			client_task_state->UnlockActivities(client, active_quest);
 		}
 	}
 
@@ -1781,7 +1798,7 @@ void TaskManager::SyncClientSharedTaskStateToLocal(
 	}
 }
 
-void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, NPC* npc)
+void TaskManager::HandleUpdateTasksOnKill(Client* client, NPC* npc)
 {
 	for (auto &c: client->GetPartyMembers()) {
 		if (!c->ClientDataLoaded() || !c->HasTaskState()) {
@@ -1790,96 +1807,7 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id, NP
 
 		LogTasksDetail("[HandleUpdateTasksOnKill] Looping through client [{}]", c->GetCleanName());
 
-		// loop over the union of tasks and quests
-		for (auto &active_task : c->GetTaskState()->m_active_tasks) {
-			auto current_task = &active_task;
-			if (current_task->task_id == TASKSLOTEMPTY) {
-				continue;
-			}
-
-			// Check if there are any active kill activities for this p_task_data
-			auto p_task_data = m_task_data[current_task->task_id];
-			if (p_task_data == nullptr) {
-				return;
-			}
-
-			for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-				ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-				ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
-
-				// We are not interested in completed or hidden activities
-				if (client_activity->activity_state != ActivityActive) {
-					continue;
-				}
-
-				// We are only interested in Kill activities
-				if (activity_info->activity_type != TaskActivityType::Kill) {
-					continue;
-				}
-
-				// Is there a zone restriction on the activity_information ?
-				if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-					LogTasks(
-						"[HandleUpdateTasksOnKill] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
-						client->GetName(),
-						current_task->task_id,
-						activity_id,
-						static_cast<int32_t>(TaskActivityType::Kill),
-						npc_type_id
-					);
-					continue;
-				}
-				// Is the activity_information to kill this type of NPC ?
-				switch (activity_info->goal_method) {
-					case METHODSINGLEID:
-						if (activity_info->goal_id != npc_type_id) {
-							LogTasksDetail("[HandleUpdateTasksOnKill] Matched single goal");
-							continue;
-						}
-						break;
-
-					case METHODLIST:
-						if (!m_goal_list_manager.IsInList(
-							activity_info->goal_id,
-							(int) npc_type_id
-						) && !TaskGoalListManager::IsInMatchList(
-							activity_info->goal_match_list,
-							std::to_string(npc_type_id)
-						) && !TaskGoalListManager::IsInMatchListPartial(
-							activity_info->goal_match_list,
-							npc->GetCleanName()
-						) && !TaskGoalListManager::IsInMatchListPartial(
-							activity_info->goal_match_list,
-							npc->GetName()
-						)) {
-							LogTasksDetail("[HandleUpdateTasksOnKill] Matched list goal");
-							continue;
-						}
-						break;
-
-					default:
-						// If METHODQUEST, don't updated the activity_information here
-						continue;
-				}
-
-				LogTasksDetail("[HandleUpdateTasksOnKill] passed checks");
-
-				// handle actual update
-				// legacy eqemu task update logic loops through group on kill of npc to update a single task
-				if (p_task_data->type != TaskType::Shared) {
-					LogTasksDetail("[HandleUpdateTasksOnKill] Non-Shared Update");
-					c->GetTaskState()->IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
-					continue;
-				}
-
-				LogTasksDetail("[HandleUpdateTasksOnKill] Shared update");
-
-				// shared tasks only require one client to receive an update to propagate
-				if (c == client) {
-					c->GetTaskState()->IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
-				}
-			}
-		}
+		c->GetTaskState()->UpdateTasksOnKill(c, client, npc);
 	}
 }
 
