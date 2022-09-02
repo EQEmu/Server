@@ -199,11 +199,12 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		strcpy(flag_needed, zone_data->flag_needed.c_str());
 	}
 
-	safe_x     = zone_data->safe_x;
-	safe_y     = zone_data->safe_y;
-	safe_z     = zone_data->safe_z;
-	min_status = zone_data->min_status;
-	min_level  = zone_data->min_level;
+	safe_x       = zone_data->safe_x;
+	safe_y       = zone_data->safe_y;
+	safe_z       = zone_data->safe_z;
+	safe_heading = zone_data->safe_heading;
+	min_status   = zone_data->min_status;
+	min_level    = zone_data->min_level;
 
 	std::string export_string = fmt::format(
 		"{} {}",
