@@ -8821,6 +8821,36 @@ void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platin
 	QueuePacket(outapp.get());
 }
 
+void Client::RewardFaction(int id, int amount)
+{
+	// first we hit the primary faction, even without any associations
+	SetFactionLevel2(CharacterID(), id, GetClass(), GetBaseRace(), GetDeity(), amount, false);
+
+	auto faction_assoc = content_db.GetFactionAssociationHit(id);
+	// We could log here, but since it's actually expected for some not to have entries, it would be noisy.
+	if (!faction_assoc) {
+		return;
+	}
+
+	// now hit them in order
+	for (int i = 0; i < MAX_FACTION_ASSOC; ++i) {
+		if (faction_assoc->hits[i].id <= 0) // we don't allow later entries
+			break;
+		if (faction_assoc->hits[i].multiplier == 0.0f) {
+			LogFaction("Bad association multiplier for ID {} entry {}", id, i + 1);
+			continue;
+		}
+
+		// value is truncated and min clamped to 1 (or -1)
+		float temp = faction_assoc->hits[i].multiplier * amount;
+		int sign = temp < 0.0f ? -1 : 1;
+		int32 new_amount = std::max(1, static_cast<int32>(std::abs(temp))) * sign;
+
+		SetFactionLevel2(CharacterID(), faction_assoc->hits[i].id, GetClass(), GetBaseRace(), GetDeity(),
+				 new_amount, false);
+	}
+}
+
 void Client::SendHPUpdateMarquee(){
 	if (!this || !IsClient() || !current_hp || !max_hp)
 		return;
