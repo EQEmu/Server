@@ -144,6 +144,7 @@ public:
 		int8_t      always_aggro;
 		int32_t     exp_mod;
 		int32_t     heroic_strikethrough;
+		int32_t     faction_amount;
 	};
 
 	static std::string PrimaryKey()
@@ -279,6 +280,7 @@ public:
 			"always_aggro",
 			"exp_mod",
 			"heroic_strikethrough",
+			"faction_amount",
 		};
 	}
 
@@ -410,6 +412,7 @@ public:
 			"always_aggro",
 			"exp_mod",
 			"heroic_strikethrough",
+			"faction_amount",
 		};
 	}
 
@@ -575,6 +578,7 @@ public:
 		e.always_aggro           = 0;
 		e.exp_mod                = 100;
 		e.heroic_strikethrough   = 0;
+		e.faction_amount         = 0;
 
 		return e;
 	}
@@ -735,6 +739,7 @@ public:
 			e.always_aggro           = static_cast<int8_t>(atoi(row[122]));
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
 			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
+			e.faction_amount         = static_cast<int32_t>(atoi(row[125]));
 
 			return e;
 		}
@@ -892,6 +897,7 @@ public:
 		v.push_back(columns[122] + " = " + std::to_string(e.always_aggro));
 		v.push_back(columns[123] + " = " + std::to_string(e.exp_mod));
 		v.push_back(columns[124] + " = " + std::to_string(e.heroic_strikethrough));
+		v.push_back(columns[125] + " = " + std::to_string(e.faction_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1038,6 +1044,7 @@ public:
 		v.push_back(std::to_string(e.always_aggro));
 		v.push_back(std::to_string(e.exp_mod));
 		v.push_back(std::to_string(e.heroic_strikethrough));
+		v.push_back(std::to_string(e.faction_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1192,6 +1199,7 @@ public:
 			v.push_back(std::to_string(e.always_aggro));
 			v.push_back(std::to_string(e.exp_mod));
 			v.push_back(std::to_string(e.heroic_strikethrough));
+			v.push_back(std::to_string(e.faction_amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1350,6 +1358,7 @@ public:
 			e.always_aggro           = static_cast<int8_t>(atoi(row[122]));
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
 			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
+			e.faction_amount         = static_cast<int32_t>(atoi(row[125]));
 
 			all_entries.push_back(e);
 		}
@@ -1499,6 +1508,7 @@ public:
 			e.always_aggro           = static_cast<int8_t>(atoi(row[122]));
 			e.exp_mod                = static_cast<int32_t>(atoi(row[123]));
 			e.heroic_strikethrough   = static_cast<int32_t>(atoi(row[124]));
+			e.faction_amount         = static_cast<int32_t>(atoi(row[125]));
 
 			all_entries.push_back(e);
 		}
