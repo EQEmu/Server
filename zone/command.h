@@ -77,6 +77,7 @@ void command_enablerecipe(Client *c, const Seperator *sep);
 void command_endurance(Client *c, const Seperator *sep);
 void command_equipitem(Client *c, const Seperator *sep);
 void command_faction(Client *c, const Seperator *sep);
+void command_faction_association(Client *c, const Seperator *sep);
 void command_feature(Client *c, const Seperator *sep);
 void command_findaliases(Client *c, const Seperator *sep);
 void command_findclass(Client *c, const Seperator *sep);
