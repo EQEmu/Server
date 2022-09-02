@@ -127,7 +127,7 @@ OPTION(EQEMU_COMMANDS_LOGGING "Enable GM Command logs" ON)
 OPTION(EQEMU_BUILD_SERVER "Build the game server." ON)
 OPTION(EQEMU_BUILD_LOGIN "Build the login server." ON)
 OPTION(EQEMU_BUILD_HC "Build the headless client." OFF)
-OPTION(EQEMU_BUILD_TESTS "Build utility tests." OFF)
+OPTION(EQEMU_BUILD_TESTS "Build zone tests." ON)
 OPTION(EQEMU_BUILD_CLIENT_FILES "Build Client Import/Export Data Programs." ON)
 OPTION(EQEMU_PREFER_LUA "Build with normal Lua even if LuaJIT is found." OFF)
 
@@ -442,6 +442,7 @@ ENDIF(EQEMU_BUILD_HC)
 
 IF(EQEMU_BUILD_TESTS)
 	ADD_SUBDIRECTORY(tests)
+	ADD_SUBDIRECTORY(test)
 ENDIF(EQEMU_BUILD_TESTS)
 
 IF(EQEMU_BUILD_CLIENT_FILES)
