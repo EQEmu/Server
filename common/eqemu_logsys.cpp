@@ -469,7 +469,7 @@ void EQEmuLogSys::Out(
 	std::string prefix;
 
 	if (RuleB(Logging, PrintFileFunctionAndLine)) {
-		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
+		prefix = fmt::format("[{0}:{1}] ", base_file_name(file), line);
 	}
 
 	va_list args;
