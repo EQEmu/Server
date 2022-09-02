@@ -965,7 +965,9 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	merchantvar = 0;
 	tradevar = 0;
 	lootvar = 0;
-
+	if (zoneid == -1) {
+		return;
+	}
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
 		task_manager->LoadProximities(zoneid);
 	}

@@ -4295,6 +4295,12 @@ void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int da
 	if (!on) {
 		return;
 	}
+	if (on->GetHP() == 0) {
+		return;
+	}
+	if (on->HasDied()) {
+		return;
+	}
 
 	if (!FromSkillProc) {
 		on->TryDefensiveProc(this, hand);

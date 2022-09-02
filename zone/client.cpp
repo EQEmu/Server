@@ -188,8 +188,10 @@ Client::Client(EQStreamInterface* ieqs)
 	berserk = false;
 	dead = false;
 	eqs = ieqs;
-	ip = eqs->GetRemoteIP();
-	port = ntohs(eqs->GetRemotePort());
+	if (eqs) {
+		ip = eqs->GetRemoteIP();
+		port = ntohs(eqs->GetRemotePort());
+	}
 	client_state = CLIENT_CONNECTING;
 	Trader=false;
 	Buyer = false;

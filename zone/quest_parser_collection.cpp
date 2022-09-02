@@ -471,6 +471,9 @@ int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounte
 }
 
 QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string &filename) {
+	if (!Config) {
+		return nullptr;
+	}
 	//first look for /quests/zone/npcid.ext (precedence)
 	filename = Config->QuestDir;
 	filename += zone->GetShortName();
@@ -699,6 +702,9 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 }
 
 QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filename) {
+	if (!Config) {
+		return nullptr;
+	}
 	// simply look for /quests/global/global_npc.ext
 	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
@@ -1003,6 +1009,7 @@ void QuestParserCollection::GetErrors(std::list<std::string> &err) {
 int QuestParserCollection::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 											 std::vector<EQ::Any> *extra_pointers) {
     int ret = 0;
+	if (_load_precedence.size() == 0) return ret;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		int i = (*iter)->DispatchEventNPC(evt, npc, init, data, extra_data, extra_pointers);

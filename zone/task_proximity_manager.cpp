@@ -22,6 +22,9 @@ TaskProximityManager::~TaskProximityManager()
 
 bool TaskProximityManager::LoadProximities(int zone_id)
 {
+	if (zone_id == -1) {
+		return false;
+	}
 	TaskProximity proximity{};
 	m_task_proximities.clear();
 

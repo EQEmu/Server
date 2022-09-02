@@ -234,6 +234,9 @@ bool NpcScaleManager::LoadScaleData()
  */
 NpcScaleManager::global_npc_scale NpcScaleManager::GetGlobalScaleDataForTypeLevel(int8 npc_type, int npc_level)
 {
+	if (npc_type < 1) {
+		return {};
+	}
 	auto iter = npc_global_base_scaling_data.find(std::make_pair(npc_type, npc_level));
 	if (iter != npc_global_base_scaling_data.end()) {
 		return iter->second;
