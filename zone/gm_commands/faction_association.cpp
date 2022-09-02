@@ -10,8 +10,9 @@ void command_faction_association(Client *c, const Seperator *sep)
 
 	// default to self unless target is also a client
 	auto target = c;
-	if (c->GetTarget() && c->GetTarget()->IsClient())
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
+	}
 
 	target->RewardFaction(atoi(sep->arg[1]), atoi(sep->arg[2]));
 }
