@@ -699,10 +699,6 @@ void lua_reset_task_activity(int task, int activity) {
 	quest_manager.resettaskactivity(task, activity);
 }
 
-void lua_task_explored_area(int explore_id) {
-	quest_manager.taskexploredarea(explore_id);
-}
-
 void lua_assign_task(int task_id) {
 	quest_manager.assigntask(task_id);
 }
@@ -3717,7 +3713,6 @@ luabind::scope lua_register_general() {
 		luabind::def("get_task_activity_done_count", &lua_get_task_activity_done_count),
 		luabind::def("update_task_activity", &lua_update_task_activity),
 		luabind::def("reset_task_activity", &lua_reset_task_activity),
-		luabind::def("task_explored_area", &lua_task_explored_area),
 		luabind::def("assign_task", &lua_assign_task),
 		luabind::def("fail_task", &lua_fail_task),
 		luabind::def("task_time_left", &lua_task_time_left),

@@ -3451,24 +3451,11 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				task_manager = new TaskManager;
 				task_manager->LoadTasks();
 
-				if (zone) {
-					task_manager->LoadProximities(zone->GetZoneID());
-				}
-
 				entity_list.ReloadAllClientsTaskState();
 			} else {
 				LogTasks("Global reload of Task ID [{}]", rts->task_id);
 				task_manager->LoadTasks(rts->task_id);
 				entity_list.ReloadAllClientsTaskState(rts->task_id);
-			}
-
-			break;
-		}
-		case RELOADTASKPROXIMITIES:
-		{
-			if (zone) {
-				LogTasks("Global reload of all Task Proximities");
-				task_manager->LoadProximities(zone->GetZoneID());
 			}
 
 			break;

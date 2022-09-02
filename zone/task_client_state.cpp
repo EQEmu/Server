@@ -364,11 +364,11 @@ static void DeleteCompletedTaskFromDatabase(int character_id, int task_id)
 	);
 }
 
-bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &task_info)
+bool ClientTaskState::UnlockActivities(Client* client, ClientTaskInformation& task_info)
 {
 	LogTasksDetail(
 		"[UnlockActivities] Fetching task info for character_id [{}] task [{}] slot [{}] accepted_time [{}] updated [{}]",
-		character_id,
+		client->CharacterID(),
 		task_info.task_id,
 		task_info.slot,
 		task_info.accepted_time,
@@ -386,7 +386,7 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 		if (task_info.activity[i].activity_id >= 0) {
 			LogTasksDetail(
 				"[UnlockActivities] character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}]",
-				character_id,
+				client->CharacterID(),
 				task_info.task_id,
 				task_info.activity[i].activity_id,
 				task_info.activity[i].done_count,
@@ -411,8 +411,11 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 
 	if (res.is_task_complete && RuleB(TaskSystem, RecordCompletedTasks))
 	{
-		RecordCompletedTask(character_id, *task, task_info);
+		RecordCompletedTask(client->CharacterID(), *task, task_info);
 	}
+
+	// check if client has an explore task in current zone to enable task explore processing
+	m_has_explore_task = HasExploreTask(client);
 
 	return res.is_task_complete;
 }
@@ -456,188 +459,237 @@ void ClientTaskState::RecordCompletedTask(uint32_t character_id, const TaskInfor
 	}
 }
 
-bool ClientTaskState::UpdateTasksOnSpeakWith(Client *client, int npc_type_id)
+const TaskInformation* ClientTaskState::GetTaskData(const ClientTaskInformation& client_task) const
 {
-	return UpdateTasksByNPC(client, TaskActivityType::SpeakWith, npc_type_id);
+	if (client_task.task_id == TASKSLOTEMPTY)
+	{
+		return nullptr;
+	}
+
+	return task_manager->m_task_data[client_task.task_id];
 }
 
-bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity_type, int npc_type_id)
+bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, int task_id,
+	const ActivityInformation& activity, const ClientActivityInformation& client_activity) const
 {
-
-	int is_updating = false;
-
-	if (!HasActiveTasks()) {
+	if (activity.goal_method == METHODQUEST && activity.goal_method != filter.method)
+	{
 		return false;
 	}
 
-	// loop over the union of tasks and quests
-	for (auto &active_task : m_active_tasks) {
-		auto current_task = &active_task;
-		if (current_task->task_id == TASKSLOTEMPTY) {
-			continue;
-		}
+	// todo: some tasks do allow hidden/unlocked elements to silently update
+	if (client_activity.activity_state != ActivityActive)
+	{
+		return false;
+	}
 
-		// Check if there are any active kill activities for this p_task_data
-		auto p_task_data = task_manager->m_task_data[current_task->task_id];
-		if (p_task_data == nullptr) {
+	if (activity.activity_type != filter.type)
+	{
+		return false;
+	}
+
+	if (activity.dz_switch_id != 0 && activity.dz_switch_id != filter.dz_switch_id)
+	{
+		return false;
+	}
+
+	// item is only checked for updates that provide an item (unlike npc which may be null for non-npcs)
+	if (activity.item_id != 0 && filter.item_id != 0 && activity.item_id != filter.item_id)
+	{
+		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item id filter", client->GetName(), task_id, client_activity.activity_id);
+		return false;
+	}
+
+	if (activity.npc_id != 0 && (!filter.npc || activity.npc_id != filter.npc->GetNPCTypeID()))
+	{
+		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc id filter", client->GetName(), task_id, client_activity.activity_id);
+		return false;
+	}
+
+	if (!activity.CheckZone(zone->GetZoneID(), zone->GetInstanceVersion()))
+	{
+		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed zone filter", client->GetName(), task_id, client_activity.activity_id);
+		return false;
+	}
+
+	if (activity.has_area && !filter.ignore_area && RuleB(TaskSystem, EnableTaskProximity))
+	{
+		const glm::vec4& pos = filter.use_pos ? filter.pos : client->GetPosition();
+		if (pos.x < activity.min_x || pos.x > activity.max_x ||
+		    pos.y < activity.min_y || pos.y > activity.max_y ||
+		    pos.z < activity.min_z || pos.z > activity.max_z)
+		{
+			LogTasksDetail("[CanUpdate] client [{}] task [{}]-[{}] failed area filter", client->GetName(), task_id, client_activity.activity_id);
 			return false;
 		}
+	}
 
-		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
+	if (activity.item_goal_id != 0 && filter.item_id != 0 &&
+	    !task_manager->m_goal_list_manager.IsInList(activity.item_goal_id, filter.item_id))
+	{
+		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item goallist filter", client->GetName(), task_id, client_activity.activity_id);
+		return false;
+	}
 
-			// We are not interested in completed or hidden activities
-			if (client_activity->activity_state != ActivityActive) {
-				continue;
-			}
-			// We are only interested in Kill activities
-			if (activity_info->activity_type != activity_type) {
-				continue;
-			}
-			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-				LogTasks(
-					"[UPDATE] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
-					client->GetName(),
-					current_task->task_id,
-					activity_id,
-					static_cast<int32_t>(activity_type),
-					npc_type_id
-				);
-				continue;
-			}
-			// Is the activity_information to kill this type of NPC ?
-			switch (activity_info->goal_method) {
-				case METHODSINGLEID:
-					if (activity_info->goal_id != npc_type_id) {
-						continue;
-					}
-					break;
+	if (!activity.item_id_list.empty() && filter.item_id != 0 &&
+	    !TaskGoalListManager::IsInMatchList(activity.item_id_list, std::to_string(filter.item_id)))
+	{
+		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item match filter", client->GetName(), task_id, client_activity.activity_id);
+		return false;
+	}
 
-				case METHODLIST:
-					if (!task_manager->m_goal_list_manager.IsInList(
-						activity_info->goal_id,
-						npc_type_id
-					) && !TaskGoalListManager::IsInMatchList(
-						activity_info->goal_match_list,
-						std::to_string(npc_type_id)
-					)) {
-						continue;
-					}
-					break;
+	if (activity.npc_goal_id != 0 && (!filter.npc ||
+	    !task_manager->m_goal_list_manager.IsInList(activity.npc_goal_id, filter.npc->GetNPCTypeID())))
+	{
+		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc goallist filter", client->GetName(), task_id, client_activity.activity_id);
+		return false;
+	}
 
-				default:
-					// If METHODQUEST, don't updated the activity_information here
-					continue;
+	// npc filter supports both npc names and ids in match lists
+	if (!activity.npc_match_list.empty() && (!filter.npc ||
+	    (!TaskGoalListManager::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetName()) &&
+	     !TaskGoalListManager::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetCleanName()) &&
+	     !TaskGoalListManager::IsInMatchList(activity.npc_match_list, std::to_string(filter.npc->GetNPCTypeID())))))
+	{
+		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc match filter", client->GetName(), task_id, client_activity.activity_id);
+		return false;
+	}
+
+	return true;
+}
+
+bool ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count)
+{
+	if (!task_manager)
+	{
+		return false;
+	}
+
+	bool any_updated = false;
+
+	for (const auto& client_task : m_active_tasks)
+	{
+		const TaskInformation* task = GetTaskData(client_task);
+		if (!task)
+		{
+			continue;
+		}
+
+		// legacy eqemu task update logic loops through group on kill of npc to update a single task
+		// shared tasks only require one client to receive an update to propagate
+		if (filter.type == TaskActivityType::Kill && task->type == TaskType::Shared && client != filter.exp_client)
+		{
+			continue;
+		}
+
+		for (const ClientActivityInformation& client_activity : client_task.activity)
+		{
+			const ActivityInformation& activity = task->activity_information[client_activity.activity_id];
+
+			if (CanUpdate(client, filter, client_task.task_id, activity, client_activity))
+			{
+				LogTasks("[UpdateTasks] client [{}] task [{}] activity [{}] increment [{}]",
+					client->GetName(), client_task.task_id, client_activity.activity_id, count);
+
+				IncrementDoneCount(client, task, client_task.slot, client_activity.activity_id, count);
+				any_updated = true;
+				break; // only one element updated per task, move to next task
 			}
-			// We found an active p_task_data to kill this type of NPC, so increment the done count
-			LogTasksDetail("Calling increment done count ByNPC");
-			IncrementDoneCount(client, p_task_data, current_task->slot, activity_id);
-			is_updating = true;
 		}
 	}
 
-	return is_updating;
+	return any_updated;
 }
 
-int ClientTaskState::ActiveSpeakTask(int npc_type_id)
+std::pair<int, int> ClientTaskState::FindTask(Client* client, const TaskUpdateFilter& filter) const
 {
+	if (!task_manager)
+	{
+		return std::make_pair(0, 0);
+	}
 
+	for (const auto& client_task : m_active_tasks)
+	{
+		const TaskInformation* task = GetTaskData(client_task);
+		if (!task || (filter.task_id != 0 && client_task.task_id != filter.task_id))
+		{
+			continue;
+		}
+
+		for (const ClientActivityInformation& client_activity : client_task.activity)
+		{
+			const ActivityInformation& activity = task->activity_information[client_activity.activity_id];
+			if (CanUpdate(client, filter, client_task.task_id, activity, client_activity))
+			{
+				return std::make_pair(client_task.task_id, client_activity.activity_id);
+			}
+		}
+	}
+
+	return std::make_pair(0, 0);
+}
+
+bool ClientTaskState::HasExploreTask(Client* client) const
+{
+	TaskUpdateFilter filter{};
+	filter.type = TaskActivityType::Explore;
+	filter.ignore_area = true; // we don't care if client is currently in the explore area
+
+	auto result = FindTask(client, filter);
+	bool has_explore = result.first != 0;
+
+	LogTasksDetail("[HasExploreTask] client [{}] has explore task in current zone [{}]", client->GetName(), has_explore);
+	return has_explore;
+}
+
+bool ClientTaskState::UpdateTasksOnSpeakWith(Client* client, NPC* npc)
+{
+	return UpdateTasksByNPC(client, TaskActivityType::SpeakWith, npc);
+}
+
+bool ClientTaskState::UpdateTasksByNPC(Client* client, TaskActivityType type, NPC* npc)
+{
+	TaskUpdateFilter filter{};
+	filter.type = type;
+	filter.npc = npc;
+
+	return UpdateTasks(client, filter);
+}
+
+int ClientTaskState::ActiveSpeakTask(Client* client, NPC* npc)
+{
 	// This method is to be used from Perl quests only and returns the task_id of the first
 	// active task found which has an active SpeakWith activity_information for this NPC.
-	if (!HasActiveTasks()) {
-		return 0;
-	}
+	TaskUpdateFilter filter{};
+	filter.type = TaskActivityType::SpeakWith;
+	filter.npc = npc;
+	filter.method = METHODQUEST;
 
-	// loop over the union of tasks and quests
-	for (auto &active_task : m_active_tasks) {
-		auto current_task = &active_task;
-		if (current_task->task_id == TASKSLOTEMPTY) {
-			continue;
-		}
-
-		TaskInformation *p_task_data = task_manager->m_task_data[current_task->task_id];
-		if (p_task_data == nullptr) {
-			continue;
-		}
-
-		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
-
-			// We are not interested in completed or hidden activities
-			if (client_activity->activity_state != ActivityActive) {
-				continue;
-			}
-			if (activity_info->activity_type != TaskActivityType::SpeakWith) {
-				continue;
-			}
-			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-				continue;
-			}
-			// Is the activity_information to speak with this type of NPC ?
-			if (activity_info->goal_method == METHODQUEST && activity_info->goal_id == npc_type_id) {
-				return current_task->task_id;
-			}
-		}
-	}
-
-	return 0;
+	auto result = FindTask(client, filter);
+	return result.first; // task id
 }
 
-int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
+int ClientTaskState::ActiveSpeakActivity(Client* client, NPC* npc, int task_id)
 {
-
 	// This method is to be used from Perl quests only and returns the activity_id of the first
 	// active activity_information found in the specified task which is to SpeakWith this NPC.
-	if (!HasActiveTasks()) {
+
+	if (task_id <= 0 || task_id >= MAXTASKS)
+	{
 		return -1;
 	}
-	if (task_id <= 0 || task_id >= MAXTASKS) {
-		return -1;
-	}
 
-	// loop over the union of tasks and quests
-	for (auto &active_task : m_active_tasks) {
-		auto current_task = &active_task;
-		if (current_task->task_id != task_id) {
-			continue;
-		}
+	TaskUpdateFilter filter{};
+	filter.type = TaskActivityType::SpeakWith;
+	filter.npc = npc;
+	filter.method = METHODQUEST;
+	filter.task_id = task_id;
 
-		TaskInformation *p_task_data = task_manager->m_task_data[current_task->task_id];
-		if (p_task_data == nullptr) {
-			continue;
-		}
-
-		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
-
-			// We are not interested in completed or hidden activities
-			if (client_activity->activity_state != ActivityActive) {
-				continue;
-			}
-			if (activity_info->activity_type != TaskActivityType::SpeakWith) {
-				continue;
-			}
-			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-				continue;
-			}
-
-			// Is the activity_information to speak with this type of NPC ?
-			if (activity_info->goal_method == METHODQUEST && activity_info->goal_id == npc_type_id) {
-				return activity_id;
-			}
-		}
-		return 0;
-	}
-	return 0;
+	auto result = FindTask(client, filter);
+	return result.first != 0 ? result.second : -1; // activity id
 }
 
-void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activity_type, int item_id, int count)
+void ClientTaskState::UpdateTasksForItem(Client* client, TaskActivityType type, NPC* npc, int item_id, int count)
 {
 
 	// This method updates the client's task activities of the specified type which relate
@@ -645,269 +697,62 @@ void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activi
 	//
 	// Type should be one of ActivityLoot, ActivityTradeSkill, ActivityFish or ActivityForage
 
-	// If the client has no tasks, there is nothing further to check.
+	LogTasks("[UpdateTasksForItem] activity_type [{}] item_id [{}]", static_cast<int>(type), item_id);
 
-	LogTasks(
-		"[UpdateTasksForItem] activity_type [{}] item_id [{}]",
-		static_cast<int32_t>(activity_type),
-		item_id
-	);
+	TaskUpdateFilter filter{};
+	filter.type = type;
+	filter.npc = npc; // looting may filter on npc id or name
+	filter.item_id = item_id;
 
-	if (!HasActiveTasks()) {
-		return;
-	}
-
-	// loop over the union of tasks and quests
-	for (auto &active_task : m_active_tasks) {
-		auto current_task = &active_task;
-		if (current_task->task_id == TASKSLOTEMPTY) {
-			continue;
-		}
-
-		// Check if there are any active loot activities for this task
-
-		TaskInformation *p_task_data = task_manager->m_task_data[current_task->task_id];
-		if (p_task_data == nullptr) {
-			return;
-		}
-
-		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
-
-			// We are not interested in completed or hidden activities
-			if (client_activity->activity_state != ActivityActive) {
-				continue;
-			}
-			// We are only interested in the ActivityType we were called with
-			if (activity_info->activity_type != activity_type) {
-				continue;
-			}
-			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-				LogTasks(
-					"[UpdateTasksForItem] Error: Character [{}] activity_information type [{}] for Item [{}] failed zone check",
-					client->GetName(),
-					static_cast<int32_t>(activity_type),
-					item_id
-				);
-				continue;
-			}
-			// Is the activity_information related to this item ?
-			//
-			switch (activity_info->goal_method) {
-
-				case METHODSINGLEID:
-					if (activity_info->goal_id != item_id) { continue; }
-					break;
-
-				case METHODLIST:
-					if (!task_manager->m_goal_list_manager.IsInList(
-						activity_info->goal_id,
-						item_id
-					) && !TaskGoalListManager::IsInMatchList(
-						activity_info->goal_match_list,
-						std::to_string(item_id)
-					)) { continue; }
-					break;
-
-				default:
-					// If METHODQUEST, don't updated the activity_information here
-					continue;
-			}
-			// We found an active task related to this item, so increment the done count
-			LogTasksDetail("[UpdateTasksForItem] Calling increment done count ForItem");
-			IncrementDoneCount(client, p_task_data, current_task->slot, activity_id, count);
-		}
-	}
+	UpdateTasks(client, filter, count);
 }
 
-void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
+void ClientTaskState::UpdateTasksOnExplore(Client* client, const glm::vec4& pos)
 {
-	LogTasks("[UpdateTasksOnExplore] explore_id [{}]", explore_id);
+	LogTasksDetail("[UpdateTasksOnExplore] client [{}]", client->GetName());
 
-	if (!HasActiveTasks()) {
-		return;
-	}
+	TaskUpdateFilter filter{};
+	filter.type = TaskActivityType::Explore;
+	filter.pos = pos;
+	filter.use_pos = true;
 
-	// loop over the union of tasks and quests
-	for (auto &active_task : m_active_tasks) {
-		auto current_task = &active_task;
-		if (current_task->task_id == TASKSLOTEMPTY) {
-			continue;
-		}
-
-		// Check if there are any active explore activities for this task
-
-		TaskInformation *task_data = task_manager->m_task_data[current_task->task_id];
-		if (task_data == nullptr) {
-			return;
-		}
-
-		for (int activity_id = 0; activity_id < task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &task_data->activity_information[activity_id];
-
-			// We are not interested in completed or hidden activities
-			if (client_activity->activity_state != ActivityActive) {
-				continue;
-			}
-			// We are only interested in explore activities
-			if (activity_info->activity_type != TaskActivityType::Explore) {
-				continue;
-			}
-			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-				LogTasks(
-					"[UpdateTasksOnExplore] character [{}] explore_id [{}] failed zone check",
-					client->GetName(),
-					explore_id
-				);
-				continue;
-			}
-			// Is the activity_information to explore this area id ?
-			switch (activity_info->goal_method) {
-
-				case METHODSINGLEID:
-					if (activity_info->goal_id != explore_id) {
-						continue;
-					}
-					break;
-
-				case METHODLIST:
-					if (!task_manager->m_goal_list_manager.IsInList(
-						activity_info->goal_id,
-						explore_id
-					) && !TaskGoalListManager::IsInMatchList(
-						activity_info->goal_match_list,
-						std::to_string(explore_id)
-					)) {
-						continue;
-					}
-					break;
-
-				default:
-					// If METHODQUEST, don't updated the activity_information here
-					continue;
-			}
-
-			// We found an active task to explore this area, so set done count to goal count
-			// (Only a goal count of 1 makes sense for explore activities?)
-			LogTasks(
-				"[UpdateTasksOnExplore] character [{}] explore_id [{}] increment on explore",
-				client->GetName(),
-				explore_id
-			);
-
-			IncrementDoneCount(
-				client,
-				task_data,
-				current_task->slot,
-				activity_id,
-				activity_info->goal_count - current_task->activity[activity_id].done_count
-			);
-		}
-	}
+	UpdateTasks(client, filter);
 }
 
 bool ClientTaskState::UpdateTasksOnDeliver(
 	Client *client,
 	std::list<EQ::ItemInstance *> &items,
 	int cash,
-	int npc_type_id
+	NPC* npc
 )
 {
+	LogTasks("[UpdateTasksOnDeliver] npc [{}]", npc->GetName());
+
 	bool is_updated = false;
 
-	LogTasks("[UpdateTasksOnDeliver] [{}]", npc_type_id);
+	TaskUpdateFilter filter{};
+	filter.npc = npc;
 
-	if (!HasActiveTasks()) {
-		return false;
+	if (cash != 0)
+	{
+		filter.type = TaskActivityType::GiveCash;
+		if (UpdateTasks(client, filter, cash))
+		{
+			// todo: remove used coin and use Deliver with explicit coin fields instead of custom type
+			is_updated = true;
+		}
 	}
 
-	// loop over the union of tasks and quests
-	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
-		auto current_task = &m_active_tasks[i];
-		if (current_task->task_id == TASKSLOTEMPTY) {
-			continue;
-		}
+	filter.type = TaskActivityType::Deliver;
+	for (EQ::ItemInstance* item : items)
+	{
+		filter.item_id = item->GetID();
 
-		// Check if there are any active deliver activities for this task
-		TaskInformation *p_task_data = task_manager->m_task_data[current_task->task_id];
-		if (p_task_data == nullptr) {
-			return false;
-		}
-
-		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
-
-			// We are not interested in completed or hidden activities
-			if (client_activity->activity_state != ActivityActive) {
-				continue;
-			}
-
-			// We are only interested in Deliver activities
-			if (activity_info->activity_type != TaskActivityType::Deliver &&
-				activity_info->activity_type != TaskActivityType::GiveCash) {
-				continue;
-			}
-			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-				Log(
-					Logs::General, Logs::Tasks,
-					"[UPDATE] Char: %s Deliver activity_information failed zone check (current zone %i, need zone "
-					"%s",
-					client->GetName(), zone->GetZoneID(), activity_info->zones.c_str());
-				continue;
-			}
-			// Is the activity_information to deliver to this NPCTypeID ?
-			if (activity_info->deliver_to_npc != npc_type_id) {
-				continue;
-			}
-			// Is the activity_information related to these items ?
-			//
-			if ((activity_info->activity_type == TaskActivityType::GiveCash) && cash) {
-				LogTasks("[UpdateTasksOnDeliver] Increment on GiveCash");
-				IncrementDoneCount(client, p_task_data, i, activity_id, cash);
-				is_updated = true;
-			}
-			else {
-				for (auto &item : items) {
-					switch (activity_info->goal_method) {
-						case METHODSINGLEID:
-							if (activity_info->goal_id != item->GetID()) {
-								continue;
-							}
-							break;
-
-						case METHODLIST:
-							if (!task_manager->m_goal_list_manager.IsInList(
-								activity_info->goal_id,
-								item->GetID()
-							) && !TaskGoalListManager::IsInMatchList(
-								activity_info->goal_match_list,
-								std::to_string(item->GetID())
-							)) {
-								continue;
-							}
-							break;
-
-						default:
-							// If METHODQUEST, don't updated the activity_information here
-							continue;
-					}
-					// We found an active task related to this item, so increment the done count
-					LogTasks("[UpdateTasksOnDeliver] Increment on GiveItem");
-					IncrementDoneCount(
-						client,
-						p_task_data,
-						current_task->slot,
-						activity_id,
-						item->GetCharges() <= 0 ? 1 : item->GetCharges()
-					);
-					is_updated = true;
-				}
-			}
+		int count = item->IsStackable() ? item->GetCharges() : 1;
+		if (UpdateTasks(client, filter, count))
+		{
+			// todo: remove items used in update (highest in case multiple tasks consume same item)
+			is_updated = true;
 		}
 	}
 
@@ -916,69 +761,30 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 
 void ClientTaskState::UpdateTasksOnTouch(Client *client, int dz_switch_id)
 {
-	// If the client has no tasks, there is nothing further to check.
+	LogTasks("[UpdateTasksOnTouch] dz switch [{}] ", dz_switch_id);
 
-	LogTasks("[UpdateTasksOnTouch] [{}] ", dz_switch_id);
+	TaskUpdateFilter filter{};
+	filter.type = TaskActivityType::Touch;
+	filter.dz_switch_id = dz_switch_id;
 
-	if (!HasActiveTasks()) {
-		return;
-	}
+	UpdateTasks(client, filter);
+}
 
-	// loop over the union of tasks and quests
-	for (auto &active_task : m_active_tasks) {
-		auto current_task = &active_task;
-		if (current_task->task_id == TASKSLOTEMPTY) {
-			continue;
-		}
+void ClientTaskState::UpdateTasksOnKill(Client* client, Client* exp_client, NPC* npc)
+{
+	TaskUpdateFilter filter{};
+	filter.type = TaskActivityType::Kill;
+	filter.npc = npc;
+	filter.pos = npc->GetPosition(); // or should areas be filtered by client position?
+	filter.use_pos = true;
+	filter.exp_client = exp_client;
 
-		// Check if there are any active explore activities for this task
-		TaskInformation *p_task_data = task_manager->m_task_data[current_task->task_id];
-		if (p_task_data == nullptr) {
-			return;
-		}
-
-		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
-
-			// We are not interested in completed or hidden activities
-			if (current_task->activity[activity_id].activity_state != ActivityActive) {
-				continue;
-			}
-			// We are only interested in touch activities
-			if (activity_info->activity_type != TaskActivityType::Touch) {
-				continue;
-			}
-			if (activity_info->goal_method != METHODSINGLEID) {
-				continue;
-			}
-			if (!activity_info->CheckZone(zone->GetZoneID(), zone->GetInstanceVersion())) {
-				LogTasks(
-					"[UpdateTasksOnTouch] character [{}] Touch activity_information failed zone check",
-					client->GetName()
-				);
-				continue;
-			}
-			if (activity_info->goal_id != dz_switch_id) {
-				continue;
-			}
-			// We found an active task to zone into this zone, so set done count to goal count
-			// (Only a goal count of 1 makes sense for touch activities?)
-			LogTasks("[UpdateTasksOnTouch] Increment on Touch");
-			IncrementDoneCount(
-				client,
-				p_task_data,
-				current_task->slot,
-				activity_id,
-				activity_info->goal_count - current_task->activity[activity_id].done_count
-			);
-		}
-	}
+	UpdateTasks(client, filter);
 }
 
 void ClientTaskState::IncrementDoneCount(
 	Client *client,
-	TaskInformation *task_information,
+	const TaskInformation* task_information,
 	int task_index,
 	int activity_id,
 	int count,
@@ -1024,7 +830,7 @@ void ClientTaskState::IncrementDoneCount(
 
 		SyncSharedTaskZoneClientDoneCountState(
 			client,
-			task_information,
+			task_information->type,
 			task_index,
 			activity_id,
 			r->done_count
@@ -1065,7 +871,7 @@ void ClientTaskState::IncrementDoneCount(
 		// Flag the activity_information as complete
 		info->activity[activity_id].activity_state = ActivityCompleted;
 		// Unlock subsequent activities for this task
-		bool task_complete = UnlockActivities(client->CharacterID(), *info);
+		bool task_complete = UnlockActivities(client, *info);
 		LogTasks("[IncrementDoneCount] task_complete is [{}]", task_complete);
 		// and by the 'Task Stage Completed' message
 		client->SendTaskActivityComplete(info->task_id, activity_id, task_index, task_information->type);
@@ -1159,7 +965,7 @@ void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInform
 	parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
 }
 
-void ClientTaskState::RewardTask(Client *client, TaskInformation *task_information, ClientTaskInformation& client_task)
+void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_information, ClientTaskInformation& client_task)
 {
 
 	if (!task_information || !client || client_task.was_rewarded) {
@@ -2000,6 +1806,7 @@ void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_t
 	// persistence
 	if (remove_from_db) {
 		RemoveTask(c, sequence_number, task_type);
+		m_has_explore_task = HasExploreTask(c);
 	}
 }
 
@@ -2281,7 +2088,7 @@ void ClientTaskState::AcceptNewTask(
 		active_slot->activity[activity_id].updated        = true;
 	}
 
-	UnlockActivities(client->CharacterID(), *active_slot);
+	UnlockActivities(client, *active_slot);
 
 	if (task->type == TaskType::Quest) {
 		m_active_task_count++;
@@ -2332,6 +2139,10 @@ void ClientTaskState::AcceptNewTask(
 
 void ClientTaskState::ProcessTaskProximities(Client *client, float x, float y, float z)
 {
+	if (!m_has_explore_task) {
+		return;
+	}
+
 	float last_x = client->ProximityX();
 	float last_y = client->ProximityY();
 	float last_z = client->ProximityZ();
@@ -2340,19 +2151,7 @@ void ClientTaskState::ProcessTaskProximities(Client *client, float x, float y, f
 		return;
 	}
 
-	LogTasksDetail("[ProcessTaskProximities] Checking proximities for Position x[{}] y[{}] z[{}]", x, y, z);
-	int explore_id = task_manager->m_proximity_manager.CheckProximities(x, y, z);
-	if (explore_id > 0) {
-		LogTasksDetail(
-			"[ProcessTaskProximities] Position x[{}] y[{}] z[{}] is within proximity explore_id [{}]",
-			x,
-			y,
-			z,
-			explore_id
-		);
-
-		UpdateTasksOnExplore(client, explore_id);
-	}
+	UpdateTasksOnExplore(client, glm::vec4(x, y, z, 0.0f));
 }
 
 void ClientTaskState::SharedTaskIncrementDoneCount(
@@ -2505,7 +2304,7 @@ void ClientTaskState::ListTaskTimers(Client* client)
 	}
 }
 
-void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, TaskInformation& task)
+void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, const TaskInformation& task)
 {
 	if (task.replay_timer_seconds > 0)
 	{
@@ -2557,7 +2356,7 @@ void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& clie
 // zone-level before sending updates to world
 void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
 	Client *p_client,
-	TaskInformation *p_information,
+	TaskType type,
 	int task_index,
 	int activity_id,
 	uint32 done_count
@@ -2566,7 +2365,7 @@ void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
 	for (auto &e : entity_list.GetClientList()) {
 		auto c = e.second;
 		if (c->GetSharedTaskId() == p_client->GetSharedTaskId()) {
-			auto t = c->GetTaskState()->GetClientTaskInfo(p_information->type, task_index);
+			auto t = c->GetTaskState()->GetClientTaskInfo(type, task_index);
 			if (t == nullptr) {
 				continue;
 			}

@@ -25,15 +25,25 @@ public:
 		int32_t     step;
 		uint8_t     activitytype;
 		std::string target_name;
-		std::string item_list;
-		std::string skill_list;
-		std::string spell_list;
-		std::string description_override;
-		uint32_t    goalid;
-		std::string goal_match_list;
 		uint32_t    goalmethod;
 		int32_t     goalcount;
-		uint32_t    delivertonpc;
+		std::string description_override;
+		uint32_t    npc_id;
+		uint32_t    npc_goal_id;
+		std::string npc_match_list;
+		uint32_t    item_id;
+		uint32_t    item_goal_id;
+		std::string item_id_list;
+		std::string item_list;
+		int32_t     dz_switch_id;
+		float       min_x;
+		float       min_y;
+		float       min_z;
+		float       max_x;
+		float       max_y;
+		float       max_z;
+		std::string skill_list;
+		std::string spell_list;
 		std::string zones;
 		int32_t     zone_version;
 		int8_t      optional;
@@ -53,15 +63,25 @@ public:
 			"step",
 			"activitytype",
 			"target_name",
-			"item_list",
-			"skill_list",
-			"spell_list",
-			"description_override",
-			"goalid",
-			"goal_match_list",
 			"goalmethod",
 			"goalcount",
-			"delivertonpc",
+			"description_override",
+			"npc_id",
+			"npc_goal_id",
+			"npc_match_list",
+			"item_id",
+			"item_goal_id",
+			"item_id_list",
+			"item_list",
+			"dz_switch_id",
+			"min_x",
+			"min_y",
+			"min_z",
+			"max_x",
+			"max_y",
+			"max_z",
+			"skill_list",
+			"spell_list",
 			"zones",
 			"zone_version",
 			"optional",
@@ -77,15 +97,25 @@ public:
 			"step",
 			"activitytype",
 			"target_name",
-			"item_list",
-			"skill_list",
-			"spell_list",
-			"description_override",
-			"goalid",
-			"goal_match_list",
 			"goalmethod",
 			"goalcount",
-			"delivertonpc",
+			"description_override",
+			"npc_id",
+			"npc_goal_id",
+			"npc_match_list",
+			"item_id",
+			"item_goal_id",
+			"item_id_list",
+			"item_list",
+			"dz_switch_id",
+			"min_x",
+			"min_y",
+			"min_z",
+			"max_x",
+			"max_y",
+			"max_z",
+			"skill_list",
+			"spell_list",
 			"zones",
 			"zone_version",
 			"optional",
@@ -135,15 +165,25 @@ public:
 		e.step                 = 0;
 		e.activitytype         = 0;
 		e.target_name          = "";
-		e.item_list            = "";
-		e.skill_list           = "-1";
-		e.spell_list           = "0";
-		e.description_override = "";
-		e.goalid               = 0;
-		e.goal_match_list      = "";
 		e.goalmethod           = 0;
 		e.goalcount            = 1;
-		e.delivertonpc         = 0;
+		e.description_override = "";
+		e.npc_id               = 0;
+		e.npc_goal_id          = 0;
+		e.npc_match_list       = "";
+		e.item_id              = 0;
+		e.item_goal_id         = 0;
+		e.item_id_list         = "";
+		e.item_list            = "";
+		e.dz_switch_id         = 0;
+		e.min_x                = 0;
+		e.min_y                = 0;
+		e.min_z                = 0;
+		e.max_x                = 0;
+		e.max_y                = 0;
+		e.max_z                = 0;
+		e.skill_list           = "-1";
+		e.spell_list           = "0";
 		e.zones                = "";
 		e.zone_version         = -1;
 		e.optional             = 0;
@@ -188,18 +228,28 @@ public:
 			e.step                 = static_cast<int32_t>(atoi(row[3]));
 			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
-			e.item_list            = row[6] ? row[6] : "";
-			e.skill_list           = row[7] ? row[7] : "";
-			e.spell_list           = row[8] ? row[8] : "";
-			e.description_override = row[9] ? row[9] : "";
-			e.goalid               = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.goal_match_list      = row[11] ? row[11] : "";
-			e.goalmethod           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.goalcount            = static_cast<int32_t>(atoi(row[13]));
-			e.delivertonpc         = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.zones                = row[15] ? row[15] : "";
-			e.zone_version         = static_cast<int32_t>(atoi(row[16]));
-			e.optional             = static_cast<int8_t>(atoi(row[17]));
+			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
+			e.description_override = row[8] ? row[8] : "";
+			e.npc_id               = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.npc_goal_id          = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.npc_match_list       = row[11] ? row[11] : "";
+			e.item_id              = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.item_goal_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.item_id_list         = row[14] ? row[14] : "";
+			e.item_list            = row[15] ? row[15] : "";
+			e.dz_switch_id         = static_cast<int32_t>(atoi(row[16]));
+			e.min_x                = strtof(row[17], nullptr);
+			e.min_y                = strtof(row[18], nullptr);
+			e.min_z                = strtof(row[19], nullptr);
+			e.max_x                = strtof(row[20], nullptr);
+			e.max_y                = strtof(row[21], nullptr);
+			e.max_z                = strtof(row[22], nullptr);
+			e.skill_list           = row[23] ? row[23] : "";
+			e.spell_list           = row[24] ? row[24] : "";
+			e.zones                = row[25] ? row[25] : "";
+			e.zone_version         = static_cast<int32_t>(atoi(row[26]));
+			e.optional             = static_cast<int8_t>(atoi(row[27]));
 
 			return e;
 		}
@@ -239,18 +289,28 @@ public:
 		v.push_back(columns[3] + " = " + std::to_string(e.step));
 		v.push_back(columns[4] + " = " + std::to_string(e.activitytype));
 		v.push_back(columns[5] + " = '" + Strings::Escape(e.target_name) + "'");
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.item_list) + "'");
-		v.push_back(columns[7] + " = '" + Strings::Escape(e.skill_list) + "'");
-		v.push_back(columns[8] + " = '" + Strings::Escape(e.spell_list) + "'");
-		v.push_back(columns[9] + " = '" + Strings::Escape(e.description_override) + "'");
-		v.push_back(columns[10] + " = " + std::to_string(e.goalid));
-		v.push_back(columns[11] + " = '" + Strings::Escape(e.goal_match_list) + "'");
-		v.push_back(columns[12] + " = " + std::to_string(e.goalmethod));
-		v.push_back(columns[13] + " = " + std::to_string(e.goalcount));
-		v.push_back(columns[14] + " = " + std::to_string(e.delivertonpc));
-		v.push_back(columns[15] + " = '" + Strings::Escape(e.zones) + "'");
-		v.push_back(columns[16] + " = " + std::to_string(e.zone_version));
-		v.push_back(columns[17] + " = " + std::to_string(e.optional));
+		v.push_back(columns[6] + " = " + std::to_string(e.goalmethod));
+		v.push_back(columns[7] + " = " + std::to_string(e.goalcount));
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.description_override) + "'");
+		v.push_back(columns[9] + " = " + std::to_string(e.npc_id));
+		v.push_back(columns[10] + " = " + std::to_string(e.npc_goal_id));
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.npc_match_list) + "'");
+		v.push_back(columns[12] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[13] + " = " + std::to_string(e.item_goal_id));
+		v.push_back(columns[14] + " = '" + Strings::Escape(e.item_id_list) + "'");
+		v.push_back(columns[15] + " = '" + Strings::Escape(e.item_list) + "'");
+		v.push_back(columns[16] + " = " + std::to_string(e.dz_switch_id));
+		v.push_back(columns[17] + " = " + std::to_string(e.min_x));
+		v.push_back(columns[18] + " = " + std::to_string(e.min_y));
+		v.push_back(columns[19] + " = " + std::to_string(e.min_z));
+		v.push_back(columns[20] + " = " + std::to_string(e.max_x));
+		v.push_back(columns[21] + " = " + std::to_string(e.max_y));
+		v.push_back(columns[22] + " = " + std::to_string(e.max_z));
+		v.push_back(columns[23] + " = '" + Strings::Escape(e.skill_list) + "'");
+		v.push_back(columns[24] + " = '" + Strings::Escape(e.spell_list) + "'");
+		v.push_back(columns[25] + " = '" + Strings::Escape(e.zones) + "'");
+		v.push_back(columns[26] + " = " + std::to_string(e.zone_version));
+		v.push_back(columns[27] + " = " + std::to_string(e.optional));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -278,15 +338,25 @@ public:
 		v.push_back(std::to_string(e.step));
 		v.push_back(std::to_string(e.activitytype));
 		v.push_back("'" + Strings::Escape(e.target_name) + "'");
-		v.push_back("'" + Strings::Escape(e.item_list) + "'");
-		v.push_back("'" + Strings::Escape(e.skill_list) + "'");
-		v.push_back("'" + Strings::Escape(e.spell_list) + "'");
-		v.push_back("'" + Strings::Escape(e.description_override) + "'");
-		v.push_back(std::to_string(e.goalid));
-		v.push_back("'" + Strings::Escape(e.goal_match_list) + "'");
 		v.push_back(std::to_string(e.goalmethod));
 		v.push_back(std::to_string(e.goalcount));
-		v.push_back(std::to_string(e.delivertonpc));
+		v.push_back("'" + Strings::Escape(e.description_override) + "'");
+		v.push_back(std::to_string(e.npc_id));
+		v.push_back(std::to_string(e.npc_goal_id));
+		v.push_back("'" + Strings::Escape(e.npc_match_list) + "'");
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.item_goal_id));
+		v.push_back("'" + Strings::Escape(e.item_id_list) + "'");
+		v.push_back("'" + Strings::Escape(e.item_list) + "'");
+		v.push_back(std::to_string(e.dz_switch_id));
+		v.push_back(std::to_string(e.min_x));
+		v.push_back(std::to_string(e.min_y));
+		v.push_back(std::to_string(e.min_z));
+		v.push_back(std::to_string(e.max_x));
+		v.push_back(std::to_string(e.max_y));
+		v.push_back(std::to_string(e.max_z));
+		v.push_back("'" + Strings::Escape(e.skill_list) + "'");
+		v.push_back("'" + Strings::Escape(e.spell_list) + "'");
 		v.push_back("'" + Strings::Escape(e.zones) + "'");
 		v.push_back(std::to_string(e.zone_version));
 		v.push_back(std::to_string(e.optional));
@@ -325,15 +395,25 @@ public:
 			v.push_back(std::to_string(e.step));
 			v.push_back(std::to_string(e.activitytype));
 			v.push_back("'" + Strings::Escape(e.target_name) + "'");
-			v.push_back("'" + Strings::Escape(e.item_list) + "'");
-			v.push_back("'" + Strings::Escape(e.skill_list) + "'");
-			v.push_back("'" + Strings::Escape(e.spell_list) + "'");
-			v.push_back("'" + Strings::Escape(e.description_override) + "'");
-			v.push_back(std::to_string(e.goalid));
-			v.push_back("'" + Strings::Escape(e.goal_match_list) + "'");
 			v.push_back(std::to_string(e.goalmethod));
 			v.push_back(std::to_string(e.goalcount));
-			v.push_back(std::to_string(e.delivertonpc));
+			v.push_back("'" + Strings::Escape(e.description_override) + "'");
+			v.push_back(std::to_string(e.npc_id));
+			v.push_back(std::to_string(e.npc_goal_id));
+			v.push_back("'" + Strings::Escape(e.npc_match_list) + "'");
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.item_goal_id));
+			v.push_back("'" + Strings::Escape(e.item_id_list) + "'");
+			v.push_back("'" + Strings::Escape(e.item_list) + "'");
+			v.push_back(std::to_string(e.dz_switch_id));
+			v.push_back(std::to_string(e.min_x));
+			v.push_back(std::to_string(e.min_y));
+			v.push_back(std::to_string(e.min_z));
+			v.push_back(std::to_string(e.max_x));
+			v.push_back(std::to_string(e.max_y));
+			v.push_back(std::to_string(e.max_z));
+			v.push_back("'" + Strings::Escape(e.skill_list) + "'");
+			v.push_back("'" + Strings::Escape(e.spell_list) + "'");
 			v.push_back("'" + Strings::Escape(e.zones) + "'");
 			v.push_back(std::to_string(e.zone_version));
 			v.push_back(std::to_string(e.optional));
@@ -376,18 +456,28 @@ public:
 			e.step                 = static_cast<int32_t>(atoi(row[3]));
 			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
-			e.item_list            = row[6] ? row[6] : "";
-			e.skill_list           = row[7] ? row[7] : "";
-			e.spell_list           = row[8] ? row[8] : "";
-			e.description_override = row[9] ? row[9] : "";
-			e.goalid               = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.goal_match_list      = row[11] ? row[11] : "";
-			e.goalmethod           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.goalcount            = static_cast<int32_t>(atoi(row[13]));
-			e.delivertonpc         = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.zones                = row[15] ? row[15] : "";
-			e.zone_version         = static_cast<int32_t>(atoi(row[16]));
-			e.optional             = static_cast<int8_t>(atoi(row[17]));
+			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
+			e.description_override = row[8] ? row[8] : "";
+			e.npc_id               = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.npc_goal_id          = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.npc_match_list       = row[11] ? row[11] : "";
+			e.item_id              = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.item_goal_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.item_id_list         = row[14] ? row[14] : "";
+			e.item_list            = row[15] ? row[15] : "";
+			e.dz_switch_id         = static_cast<int32_t>(atoi(row[16]));
+			e.min_x                = strtof(row[17], nullptr);
+			e.min_y                = strtof(row[18], nullptr);
+			e.min_z                = strtof(row[19], nullptr);
+			e.max_x                = strtof(row[20], nullptr);
+			e.max_y                = strtof(row[21], nullptr);
+			e.max_z                = strtof(row[22], nullptr);
+			e.skill_list           = row[23] ? row[23] : "";
+			e.spell_list           = row[24] ? row[24] : "";
+			e.zones                = row[25] ? row[25] : "";
+			e.zone_version         = static_cast<int32_t>(atoi(row[26]));
+			e.optional             = static_cast<int8_t>(atoi(row[27]));
 
 			all_entries.push_back(e);
 		}
@@ -418,18 +508,28 @@ public:
 			e.step                 = static_cast<int32_t>(atoi(row[3]));
 			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
 			e.target_name          = row[5] ? row[5] : "";
-			e.item_list            = row[6] ? row[6] : "";
-			e.skill_list           = row[7] ? row[7] : "";
-			e.spell_list           = row[8] ? row[8] : "";
-			e.description_override = row[9] ? row[9] : "";
-			e.goalid               = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.goal_match_list      = row[11] ? row[11] : "";
-			e.goalmethod           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.goalcount            = static_cast<int32_t>(atoi(row[13]));
-			e.delivertonpc         = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.zones                = row[15] ? row[15] : "";
-			e.zone_version         = static_cast<int32_t>(atoi(row[16]));
-			e.optional             = static_cast<int8_t>(atoi(row[17]));
+			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
+			e.description_override = row[8] ? row[8] : "";
+			e.npc_id               = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
+			e.npc_goal_id          = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
+			e.npc_match_list       = row[11] ? row[11] : "";
+			e.item_id              = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.item_goal_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
+			e.item_id_list         = row[14] ? row[14] : "";
+			e.item_list            = row[15] ? row[15] : "";
+			e.dz_switch_id         = static_cast<int32_t>(atoi(row[16]));
+			e.min_x                = strtof(row[17], nullptr);
+			e.min_y                = strtof(row[18], nullptr);
+			e.min_z                = strtof(row[19], nullptr);
+			e.max_x                = strtof(row[20], nullptr);
+			e.max_y                = strtof(row[21], nullptr);
+			e.max_z                = strtof(row[22], nullptr);
+			e.skill_list           = row[23] ? row[23] : "";
+			e.spell_list           = row[24] ? row[24] : "";
+			e.zones                = row[25] ? row[25] : "";
+			e.zone_version         = static_cast<int32_t>(atoi(row[26]));
+			e.optional             = static_cast<int8_t>(atoi(row[27]));
 
 			all_entries.push_back(e);
 		}

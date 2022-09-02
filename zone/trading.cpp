@@ -947,7 +947,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 		if(RuleB(TaskSystem, EnableTaskSystem)) {
 			int Cash = trade->cp + (trade->sp * 10) + (trade->gp * 100) + (trade->pp * 1000);
-			if(UpdateTasksOnDeliver(items, Cash, tradingWith->GetNPCTypeID())) {
+			if (UpdateTasksOnDeliver(items, Cash, tradingWith->CastToNPC())) {
 				if(!tradingWith->IsMoving())
 					tradingWith->FaceTarget(this);
 

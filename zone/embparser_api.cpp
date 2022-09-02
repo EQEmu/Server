@@ -1162,11 +1162,6 @@ void Perl__resettaskactivity(int task_id, int activity_id)
 	quest_manager.resettaskactivity(task_id, activity_id);
 }
 
-void Perl__taskexploredarea(int explore_id)
-{
-	quest_manager.taskexploredarea(explore_id);
-}
-
 void Perl__assigntask(int task_id)
 {
 	quest_manager.assigntask(task_id);
@@ -4238,7 +4233,6 @@ void perl_register_quest()
 	package.add("summonitem", (void(*)(int, int))&Perl__summonitem);
 	package.add("surname", &Perl__surname);
 	package.add("targlobal", &Perl__targlobal);
-	package.add("taskexploredarea", &Perl__taskexploredarea);
 	package.add("taskselector", &Perl__taskselector);
 	package.add("task_setselector", &Perl__task_setselector);
 	package.add("tasktimeleft", &Perl__tasktimeleft);

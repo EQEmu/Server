@@ -225,7 +225,6 @@ namespace DatabaseSchema {
 			"pets_beastlord_data",
 			"pets_equipmentset",
 			"pets_equipmentset_entries",
-			"proximities",
 			"skill_caps",
 			"spawn2",
 			"spawn_conditions",
