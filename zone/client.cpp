@@ -8760,7 +8760,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
 			qr->faction = target->CastToNPC()->GetPrimaryFaction();
-			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+			qr->faction_mod = 1; // Too lazy to get real value, not even used by client anyhow.
 		}
 	}
 
@@ -8780,7 +8780,7 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 	memcpy(qr, &reward, sizeof(QuestReward_Struct));
 
 	// not set in caller because reasons
-	qr->mob_id = target ? target->GetID() : 0;		// Entity ID for the from mob name
+	qr->mob_id = target ? target->GetID() : 0; // Entity ID for the from mob name, tasks won't set this
 
 	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0)
 		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum);
@@ -8789,6 +8789,12 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 		if (reward.item_id[i] > 0)
 			SummonItem(reward.item_id[i], 0, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
 
+	// only process if both are valid
+	// if we don't have a target here, we want to just reward, but if there is a target, need to check charm
+	if (reward.faction && reward.faction_mod && (target == nullptr || !target->IsCharmed()))
+		RewardFaction(reward.faction, reward.faction_mod);
+
+	// legacy support
 	if (faction)
 	{
 		if (target && target->IsNPC() && !target->IsCharmed())
@@ -8796,11 +8802,11 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
 			qr->faction = target->CastToNPC()->GetPrimaryFaction();
-			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+			qr->faction_mod = 1; // Too lazy to get real value, not even used by client anyhow.
 		}
 	}
 
-	if (reward.exp_reward> 0)
+	if (reward.exp_reward > 0)
 		AddEXP(reward.exp_reward);
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
