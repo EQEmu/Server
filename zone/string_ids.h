@@ -210,6 +210,7 @@
 #define EATING_MESSAGE				1091	//Chomp, chomp, chomp... %1 takes a bite from a %2.
 #define DRINKING_MESSAGE			1093	//Glug, glug, glug... %1 takes a drink from a %2.
 #define SUCCESSFUL_TAUNT			1095	//I'll teach you to interfere with me %3.
+#define TRADE_BACK                  1105    //I have no need for this %3, you can have it back.
 #define PET_SIT_STRING				1130	//Changing position, Master.
 #define PET_CALMING					1131	//Sorry, Master..calming down.
 #define PET_FOLLOWING				1132	//Following you, Master.
