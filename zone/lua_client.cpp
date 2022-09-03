@@ -1683,110 +1683,52 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	QuestReward_Struct quest_reward;
 	quest_reward.mob_id = 0;
 	quest_reward.target_id = self->GetID();
-	quest_reward.copper = 0;
-	quest_reward.silver = 0;
-	quest_reward.gold = 0;
-	quest_reward.platinum = 0;
-	quest_reward.exp_reward = 0;
+	quest_reward.copper = luabind::type(reward["copper"]) != LUA_TNIL ? luabind::object_cast<uint32>(reward["copper"]) : 0;
+	quest_reward.silver = luabind::type(reward["silver"]) != LUA_TNIL ? luabind::object_cast<uint32>(reward["silver"]) : 0;
+	quest_reward.gold = luabind::type(reward["gold"]) != LUA_TNIL ? luabind::object_cast<uint32>(reward["gold"]) : 0;
+	quest_reward.platinum = luabind::type(reward["platinum"]) != LUA_TNIL ? luabind::object_cast<uint32>(reward["platinum"]) : 0;
+	quest_reward.exp_reward = luabind::type(reward["exp"]) != LUA_TNIL ? luabind::object_cast<uint32>(reward["exp"]) : 0;
 	quest_reward.faction = 0;
 	quest_reward.faction_mod = 0;
 	bool faction = false;
 	std::fill(std::begin(quest_reward.item_id), std::end(quest_reward.item_id), -1);
 
-	auto cur = reward["copper"];
-	if (luabind::type(cur) != LUA_TNIL) {
-		try {
-			quest_reward.copper = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed &) {
-		}
-	}
-
-	cur = reward["silver"];
-	if (luabind::type(cur) != LUA_TNIL) {
-		try {
-			quest_reward.silver = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed &) {
-		}
-	}
-
-	cur = reward["gold"];
-	if (luabind::type(cur) != LUA_TNIL) {
-		try {
-			quest_reward.gold = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed &) {
-		}
-	}
-
-	cur = reward["platinum"];
-	if (luabind::type(cur) != LUA_TNIL) {
-		try {
-			quest_reward.platinum = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed &) {
-		}
-	}
-
-	cur = reward["itemid"];
-	if (luabind::type(cur) != LUA_TNIL) {
-		try {
-			quest_reward.item_id[0] = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed &) {
-		}
+	auto item_id = reward["itemid"];
+	if (luabind::type(item_id) != LUA_TNIL) {
+		quest_reward.item_id[0] = luabind::object_cast<uint32>(item_id);
 	}
 
 	// if you define both an itemid and items table, the itemid is thrown away
 	// should we error?
-	cur = reward["items"];
-	if (luabind::type(cur) == LUA_TTABLE) {
-		try {
-			// assume they defined a compatible table
-			for (int i = 1; i <= QUESTREWARD_COUNT; ++i) {
-				auto item = cur[i];
-				int cur_value = -1;
-				if (luabind::type(item) != LUA_TNIL) {
-					try {
-						cur_value = luabind::object_cast<uint32>(item);
-					} catch (luabind::cast_failed &) {
-					}
-				} else {
-					break;
-				}
-				quest_reward.item_id[i - 1] = cur_value;
+	auto items = reward["items"];
+	if (luabind::type(items) == LUA_TTABLE) {
+		// assume they defined a compatible table
+		for (int i = 1; i <= QUESTREWARD_COUNT; ++i) {
+			auto item = items[i];
+			int cur_value = -1;
+			if (luabind::type(item) != LUA_TNIL) {
+				cur_value = luabind::object_cast<uint32>(item);
+			} else {
+				break;
 			}
-		} catch (luabind::cast_failed &) {
+			quest_reward.item_id[i - 1] = cur_value;
 		}
 	}
 
-	cur = reward["exp"];
-	if (luabind::type(cur) != LUA_TNIL) {
-		try {
-			quest_reward.exp_reward = luabind::object_cast<uint32>(cur);
-		} catch (luabind::cast_failed &) {
-		}
-	}
-
-	cur = reward["faction"];
-	if (luabind::type(cur) != LUA_TNIL) {
+	auto lua_faction = reward["faction"];
+	if (luabind::type(lua_faction) != LUA_TNIL) {
 		// if it's a table it will be {faction, faction_mod}
-		if (luabind::type(cur) == LUA_TTABLE) {
-			auto item = cur[1];
+		if (luabind::type(lua_faction) == LUA_TTABLE) {
+			auto item = lua_faction[1];
 			if (luabind::type(item) != LUA_TNIL) {
-				try {
-					quest_reward.faction = luabind::object_cast<uint32>(item);
-				} catch (luabind::cast_failed &) {
-				}
+				quest_reward.faction = luabind::object_cast<uint32>(item);
 			}
-			item = cur[2];
+			item = lua_faction[2];
 			if (luabind::type(item) != LUA_TNIL) {
-				try {
-					quest_reward.faction_mod = luabind::object_cast<uint32>(item);
-				} catch (luabind::cast_failed &) {
-				}
+				quest_reward.faction_mod = luabind::object_cast<uint32>(item);
 			}
 		} else {
-			try {
-				faction = luabind::object_cast<bool>(cur);
-			} catch (luabind::cast_failed &) {
-			}
+			faction = luabind::object_cast<bool>(lua_faction);
 		}
 	}
 
