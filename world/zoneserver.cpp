@@ -819,7 +819,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					ingress_server->SendPacket(pack);	// inform target server
 				}
 			} else {
-				LogInfo("Processing ZTZ for ingress to zone for client [{}]", ztz->name);
+				LogInfo(
+					"Processing ZTZ for ingress to zone for client [{}] instance_id [{}] zone_id [{}]",
+					ztz->name,
+					ztz->current_instance_id,
+					ztz->current_zone_id
+				);
 				auto egress_server = (
 					ztz->current_instance_id ?
 					zoneserver_list.FindByInstanceID(ztz->current_instance_id) :
@@ -827,6 +832,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				);
 
 				if (egress_server) {
+					LogInfo("Found egress server, forwarding client");
 					egress_server->SendPacket(pack);
 				}
 			}
