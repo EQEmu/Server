@@ -995,6 +995,9 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 		client->Message(Chat::Yellow, task_information->completion_emote.c_str());
 	}
 
+	// TODO: this function should sometimes use QuestReward_Struct and CashReward_Struct
+	// assumption is they use QuestReward_Struct when there is more than 1 thing getting rewarded
+
 	const EQ::ItemData *item_data;
 	std::vector<int>   reward_list;
 
@@ -1029,13 +1032,18 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 	}
 
 	// just use normal NPC faction ID stuff
-	if (task_information->faction_reward) {
+	if (task_information->faction_reward && task_information->faction_amount == 0) {
 		client->SetFactionLevel(
 			client->CharacterID(),
 			task_information->faction_reward,
 			client->GetBaseClass(),
 			client->GetBaseRace(),
 			client->GetDeity()
+		);
+	} else if (task_information->faction_reward != 0 && task_information->faction_amount != 0) {
+		client->RewardFaction(
+			task_information->faction_reward,
+			task_information->faction_amount
 		);
 	}
 

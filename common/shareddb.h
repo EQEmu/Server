@@ -41,6 +41,7 @@ struct InspectMessage_Struct;
 struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
 struct NPCFactionList;
+struct FactionAssociations;
 struct LootTable_Struct;
 struct LootDrop_Struct;
 
@@ -160,6 +161,14 @@ public:
 	bool LoadNPCFactionLists(const std::string &prefix);
 
 	/**
+	 * faction associations
+	 */
+	void GetFactionAssociationInfo(uint32 &list_count, uint32 &max_lists);
+	const FactionAssociations *GetFactionAssociationHit(int id);
+	void LoadFactionAssociation(void *data, uint32 size, uint32 list_count, uint32 max_lists);
+	bool LoadFactionAssociation(const std::string &prefix);
+
+	/**
 	 * loot
 	 */
 	void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);
@@ -212,6 +221,8 @@ protected:
 	std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>>          items_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                             faction_mmf;
 	std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>>           faction_hash;
+	std::unique_ptr<EQ::MemoryMappedFile>                             faction_associations_mmf;
+	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>>      faction_associations_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                             loot_table_mmf;
 	std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootTable_Struct>> loot_table_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                             loot_drop_mmf;

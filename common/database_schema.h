@@ -190,6 +190,7 @@ namespace DatabaseSchema {
 			"damageshieldtypes",
 			"doors",
 			"dynamic_zone_templates",
+			"faction_association",
 			"faction_base_data",
 			"faction_list",
 			"faction_list_mod",

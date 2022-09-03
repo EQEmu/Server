@@ -1350,6 +1350,15 @@ void QuestManager::faction(int faction_id, int faction_value, int temp) {
 	}
 }
 
+void QuestManager::rewardfaction(int faction_id, int faction_value) {
+	QuestManagerCurrentQuestVars();
+	if (initiator && initiator->IsClient()) {
+		if (faction_id != 0 && faction_value != 0) {
+			initiator->RewardFaction(faction_id, faction_value);
+		}
+	}
+}
+
 void QuestManager::setsky(uint8 new_sky) {
 	QuestManagerCurrentQuestVars();
 	if (zone)

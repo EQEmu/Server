@@ -46,6 +46,7 @@ public:
 		uint32_t    request_timer_seconds;
 		uint32_t    dz_template_id;
 		int32_t     lock_activity_id;
+		int32_t     faction_amount;
 	};
 
 	static std::string PrimaryKey()
@@ -83,6 +84,7 @@ public:
 			"request_timer_seconds",
 			"dz_template_id",
 			"lock_activity_id",
+			"faction_amount",
 		};
 	}
 
@@ -116,6 +118,7 @@ public:
 			"request_timer_seconds",
 			"dz_template_id",
 			"lock_activity_id",
+			"faction_amount",
 		};
 	}
 
@@ -183,6 +186,7 @@ public:
 		e.request_timer_seconds = 0;
 		e.dz_template_id        = 0;
 		e.lock_activity_id      = -1;
+		e.faction_amount        = 0;
 
 		return e;
 	}
@@ -245,6 +249,7 @@ public:
 			e.request_timer_seconds = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
 			e.dz_template_id        = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
 			e.lock_activity_id      = static_cast<int32_t>(atoi(row[26]));
+			e.faction_amount        = static_cast<int32_t>(atoi(row[27]));
 
 			return e;
 		}
@@ -305,6 +310,7 @@ public:
 		v.push_back(columns[24] + " = " + std::to_string(e.request_timer_seconds));
 		v.push_back(columns[25] + " = " + std::to_string(e.dz_template_id));
 		v.push_back(columns[26] + " = " + std::to_string(e.lock_activity_id));
+		v.push_back(columns[27] + " = " + std::to_string(e.faction_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -353,6 +359,7 @@ public:
 		v.push_back(std::to_string(e.request_timer_seconds));
 		v.push_back(std::to_string(e.dz_template_id));
 		v.push_back(std::to_string(e.lock_activity_id));
+		v.push_back(std::to_string(e.faction_amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -409,6 +416,7 @@ public:
 			v.push_back(std::to_string(e.request_timer_seconds));
 			v.push_back(std::to_string(e.dz_template_id));
 			v.push_back(std::to_string(e.lock_activity_id));
+			v.push_back(std::to_string(e.faction_amount));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -469,6 +477,7 @@ public:
 			e.request_timer_seconds = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
 			e.dz_template_id        = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
 			e.lock_activity_id      = static_cast<int32_t>(atoi(row[26]));
+			e.faction_amount        = static_cast<int32_t>(atoi(row[27]));
 
 			all_entries.push_back(e);
 		}
@@ -520,6 +529,7 @@ public:
 			e.request_timer_seconds = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
 			e.dz_template_id        = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
 			e.lock_activity_id      = static_cast<int32_t>(atoi(row[26]));
+			e.faction_amount        = static_cast<int32_t>(atoi(row[27]));
 
 			all_entries.push_back(e);
 		}
