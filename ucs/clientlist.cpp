@@ -887,7 +887,8 @@ void Client::AddCharacter(int CharID, const char *CharacterName, int Level) {
 }
 
 void Client::SendKeepAlive() {
-	QueuePacket(new EQApplicationPacket(OP_SessionReady, 0));
+	EQApplicationPacket outapp(OP_SessionReady, 0);
+	QueuePacket(&outapp);
 }
 
 void Client::SendMailBoxes() {

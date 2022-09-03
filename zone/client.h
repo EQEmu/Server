@@ -1158,13 +1158,9 @@ public:
 	{
 		return task_state && task_state->UpdateTasksOnSpeakWith(this, npc);
 	}
-	inline bool UpdateTasksOnDeliver(
-		std::list<EQ::ItemInstance *> &items,
-		int cash,
-		NPC* npc
-	)
+	inline bool UpdateTasksOnDeliver(std::vector<EQ::ItemInstance*>& items, Trade& trade, NPC* npc)
 	{
-		return task_state && task_state->UpdateTasksOnDeliver(this, items, cash, npc);
+		return task_state && task_state->UpdateTasksOnDeliver(this, items, trade, npc);
 	}
 	void UpdateTasksOnTouchSwitch(int dz_switch_id)
 	{

@@ -162,7 +162,7 @@ void command_task(Client *c, const Seperator *sep)
 
 	if (is_assign) {
 		auto task_id = std::strtoul(sep->arg[2], nullptr, 10);
-		if (task_id && task_id < MAXTASKS) {
+		if (task_id) {
 			target->AssignTask(task_id, 0, false);
 			c->Message(
 				Chat::Yellow,
@@ -203,7 +203,7 @@ void command_task(Client *c, const Seperator *sep)
 				return;
 			} else if (!strcasecmp(sep->arg[2], "task") && arguments == 3) {
 				int task_id = std::strtoul(sep->arg[3], nullptr, 10);
-				if (task_id && task_id < MAXTASKS) {
+				if (task_id) {
 					c->Message(
 						Chat::Yellow,
 						fmt::format(
@@ -252,7 +252,7 @@ void command_task(Client *c, const Seperator *sep)
 	} else if (is_uncomplete) {
 		if (sep->IsNumber(2)) {
 			auto task_id = std::stoul(sep->arg[2]);
-			if (!task_id || task_id > MAXTASKS) {
+			if (!task_id) {
 				c->Message(Chat::White, "Invalid task ID specified.");
 				return;
 			}

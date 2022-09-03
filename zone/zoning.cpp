@@ -193,17 +193,15 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	float safe_x, safe_y, safe_z, safe_heading;
 	int16 min_status = AccountStatus::Player;
 	uint8 min_level  = 0;
-	char  flag_needed[128];
 
-	if (!zone_data->flag_needed.empty()) {
-		strcpy(flag_needed, zone_data->flag_needed.c_str());
-	}
+	LogInfo("[Handle_OP_ZoneChange] Loaded zone flag [{}]", zone_data->flag_needed);
 
-	safe_x     = zone_data->safe_x;
-	safe_y     = zone_data->safe_y;
-	safe_z     = zone_data->safe_z;
-	min_status = zone_data->min_status;
-	min_level  = zone_data->min_level;
+	safe_x       = zone_data->safe_x;
+	safe_y       = zone_data->safe_y;
+	safe_z       = zone_data->safe_z;
+	safe_heading = zone_data->safe_heading;
+	min_status   = zone_data->min_status;
+	min_level    = zone_data->min_level;
 
 	std::string export_string = fmt::format(
 		"{} {}",
@@ -326,10 +324,15 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		myerror = ZONE_ERROR_NOEXPERIENCE;
 	}
 
-	if(!ignore_restrictions && flag_needed[0] != '\0') {
+	if (!ignore_restrictions && !zone_data->flag_needed.empty()) {
 		//the flag needed string is not empty, meaning a flag is required.
-		if(Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(target_zone_id))
-		{
+		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(target_zone_id)) {
+			LogInfo(
+				"Client [{}] does not have the proper flag to enter [{}] ({})",
+				GetCleanName(),
+				ZoneName(target_zone_id),
+				target_zone_id
+			);
 			Message(Chat::Red, "You do not have the flag to enter %s.", target_zone_name);
 			myerror = ZONE_ERROR_NOEXPERIENCE;
 		}
@@ -341,36 +344,11 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	 * Expansion check
 	 */
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
+		bool meets_zone_expansion_check = false;
 
-		/**
-		 * Hit the zone cache first so we're not hitting the database every time someone attempts to zone
-		 */
-		bool      meets_zone_expansion_check = false;
-		bool      found_zone                 = false;
-		for (auto &z: zone_store.GetZones()) {
-			if (z.short_name == target_zone_name && z.version == 0) {
-				found_zone = true;
-				if (z.expansion <= content_service.GetCurrentExpansion() || z.bypass_expansion_check) {
-					meets_zone_expansion_check = true;
-					break;
-				}
-			}
-		}
-
-		/**
-		 * If we fail to find a cached zone lookup because someone just so happened to change some data, second attempt
-		 * In 99% of cases we would never get here and this would be fallback
-		 */
-		if (!found_zone) {
-			auto zones = ZoneRepository::GetWhere(content_db,
-				fmt::format(
-					"expansion <= {} AND short_name = '{}' and version = 0",
-					(content_service.GetCurrentExpansion()),
-					target_zone_name
-				)
-			);
-
-			meets_zone_expansion_check = !zones.empty();
+		auto z = zone_store.GetZoneWithFallback(ZoneID(target_zone_name), 0);
+		if (z->expansion <= content_service.GetCurrentExpansion() || z->bypass_expansion_check) {
+			meets_zone_expansion_check = true;
 		}
 
 		LogInfo(
@@ -465,7 +443,16 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		}
 	}
 
-	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, ZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
+	LogInfo(
+		"Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]",
+		m_pp.name,
+		ZoneName(zone_id),
+		zone_id,
+		instance_id,
+		dest_x,
+		dest_y,
+		dest_z
+	);
 
 	//set the player's coordinates in the new zone so they have them
 	//when they zone into it
@@ -672,6 +659,18 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	if (zd) {
 		pZoneName = strcpy(new char[strlen(zd->long_name.c_str()) + 1], zd->long_name.c_str());
 	}
+
+	LogInfo(
+		"[ZonePC] Client [{}] zone_id [{}] x [{}] y [{}] x [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+		GetCleanName(),
+		zoneID,
+		x,
+		y,
+		z,
+		heading,
+		ignorerestrictions,
+		zm
+	);
 
 	cheat_manager.SetExemptStatus(Port, true);
 
@@ -880,9 +879,11 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	safe_delete_array(pZoneName);
 }
 
-void Client::GoToSafeCoords(uint16 zone_id, uint16 instance_id) {
-	if(zone_id == 0)
+void Client::GoToSafeCoords(uint16 zone_id, uint16 instance_id)
+{
+	if (zone_id == 0) {
 		zone_id = zone->GetZoneID();
+	}
 
 	MovePC(zone_id, instance_id, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
 }
@@ -1239,15 +1240,12 @@ bool Client::CanBeInZone() {
 	float safe_x, safe_y, safe_z, safe_heading;
 	int16 min_status = AccountStatus::Player;
 	uint8 min_level = 0;
-	char flag_needed[128];
 
 	auto z = GetZoneVersionWithFallback(
 		ZoneID(zone->GetShortName()),
 		zone->GetInstanceVersion()
 	);
 	if (!z) {
-		//this should not happen...
-		LogDebug("[CLIENT] Unable to query zone info for ourself [{}]", zone->GetShortName());
 		return false;
 	}
 
@@ -1258,10 +1256,6 @@ bool Client::CanBeInZone() {
 	min_status   = z->min_status;
 	min_level    = z->min_level;
 
-	if (!z->flag_needed.empty()) {
-		strcpy(flag_needed, z->flag_needed.c_str());
-	}
-
 	if (GetLevel() < min_level) {
 		LogDebug("[CLIENT] Character does not meet min level requirement ([{}] < [{}])!", GetLevel(), min_level);
 		return (false);
@@ -1271,13 +1265,13 @@ bool Client::CanBeInZone() {
 		return (false);
 	}
 
-	if (flag_needed[0] != '\0') {
+	if (!z->flag_needed.empty()) {
 		//the flag needed string is not empty, meaning a flag is required.
 		if (Admin() < minStatusToIgnoreZoneFlags && !HasZoneFlag(zone->GetZoneID())) {
-			LogDebug("[CLIENT] Character does not have the flag to be in this zone ([{}])!", flag_needed);
-			return (false);
+			LogInfo("Character [{}] does not have the flag to be in this zone [{}]!", GetCleanName(), z->flag_needed);
+			return false;
 		}
 	}
 
-	return(true);
+	return true;
 }

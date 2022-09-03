@@ -59,7 +59,7 @@ public:
 	void UpdateTasksForItem(Client* client, TaskActivityType type, NPC* npc, int item_id, int count = 1);
 	void UpdateTasksOnExplore(Client* client, const glm::vec4& loc);
 	bool UpdateTasksOnSpeakWith(Client* client, NPC* npc);
-	bool UpdateTasksOnDeliver(Client* client, std::list<EQ::ItemInstance*>& items, int cash, NPC* npc);
+	bool UpdateTasksOnDeliver(Client* client, std::vector<EQ::ItemInstance*>& items, Trade& trade, NPC* npc);
 	void UpdateTasksOnTouch(Client *client, int dz_switch_id);
 	void ProcessTaskProximities(Client *client, float x, float y, float z);
 	bool TaskOutOfTime(TaskType task_type, int index);
@@ -74,7 +74,7 @@ public:
 	int ActiveSpeakActivity(Client* client, NPC* npc, int task_id);
 	int ActiveTasksInSet(int task_set_id);
 	int CompletedTasksInSet(int task_set_id);
-	bool HasSlotForTask(TaskInformation *task);
+	bool HasSlotForTask(const TaskInformation* task);
 	void CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz);
 	void ListTaskTimers(Client* client);
 	void KickPlayersSharedTask(Client* client);
@@ -110,11 +110,11 @@ private:
 	std::pair<int, int> FindTask(Client* client, const TaskUpdateFilter& filter) const;
 	void RecordCompletedTask(uint32_t character_id, const TaskInformation& task, const ClientTaskInformation& client_task);
 	void UpdateTasksOnKill(Client* client, Client* exp_client, NPC* npc);
-	bool UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count = 1);
+	int UpdateTasks(Client* client, const TaskUpdateFilter& filter, int count = 1);
 
-	void IncrementDoneCount(
+	int IncrementDoneCount(
 		Client *client,
-		const TaskInformation* task_information,
+		const TaskInformation* task_data,
 		int task_index,
 		int activity_id,
 		int count = 1,
