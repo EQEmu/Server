@@ -1088,17 +1088,32 @@ void Perl__taskselector(perl::array task_ids)
 		throw std::runtime_error(fmt::format("Exceeded max number of task offers [{}]", MAXCHOOSERENTRIES));
 	}
 
-	int tasks[MAXCHOOSERENTRIES];
+	std::vector<int> tasks;
 	for (int i = 0; i < task_ids.size(); ++i)
 	{
-		tasks[i] = task_ids[i];
+		tasks.push_back(task_ids[i]);
 	}
-	quest_manager.taskselector(static_cast<int>(task_ids.size()), tasks);
+	quest_manager.taskselector(tasks);
+}
+
+void Perl__taskselector_nocooldown(perl::array task_ids)
+{
+	std::vector<int> tasks;
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
+	{
+		tasks.push_back(task_ids[i]);
+	}
+	quest_manager.taskselector(tasks, true);
 }
 
 void Perl__task_setselector(int task_set_id)
 {
 	quest_manager.tasksetselector(task_set_id);
+}
+
+void Perl__task_setselector(int task_set_id, bool ignore_cooldown)
+{
+	quest_manager.tasksetselector(task_set_id, ignore_cooldown);
 }
 
 void Perl__enabletask(perl::array task_ids)
@@ -4240,7 +4255,9 @@ void perl_register_quest()
 	package.add("surname", &Perl__surname);
 	package.add("targlobal", &Perl__targlobal);
 	package.add("taskselector", &Perl__taskselector);
-	package.add("task_setselector", &Perl__task_setselector);
+	package.add("taskselector_nocooldown", &Perl__taskselector_nocooldown);
+	package.add("task_setselector", (void(*)(int))&Perl__task_setselector);
+	package.add("task_setselector", (void(*)(int, bool))&Perl__task_setselector);
 	package.add("tasktimeleft", &Perl__tasktimeleft);
 	package.add("toggle_spawn_event", &Perl__toggle_spawn_event);
 	package.add("toggledoorstate", &Perl__toggledoorstate);

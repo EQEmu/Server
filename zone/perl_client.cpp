@@ -2407,16 +2407,24 @@ int Perl_Client_GetSpellDamage(Client* self)
 
 void Perl_Client_TaskSelector(Client* self, perl::array task_ids)
 {
-	int tasks[MAXCHOOSERENTRIES] = { 0 };
-	int task_count = 0;
-
+	std::vector<int> tasks;
 	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
 	{
-		tasks[i] = task_ids[i];
-		++task_count;
+		tasks.push_back(task_ids[i]);
 	}
 
-	self->TaskQuestSetSelector(self, task_count, tasks);
+	self->TaskQuestSetSelector(self, tasks, false);
+}
+
+void Perl_Client_TaskSelectorNoCooldown(Client* self, perl::array task_ids)
+{
+	std::vector<int> tasks;
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
+	{
+		tasks.push_back(task_ids[i]);
+	}
+
+	self->TaskQuestSetSelector(self, tasks, true);
 }
 
 bool Perl_Client_TeleportToPlayerByCharacterID(Client* self, uint32 character_id)
@@ -2872,6 +2880,7 @@ void perl_register_client()
 	package.add("TeleportRaidToPlayerByCharID", &Perl_Client_TeleportRaidToPlayerByCharacterID);
 	package.add("TeleportRaidToPlayerByName", &Perl_Client_TeleportRaidToPlayerByName);
 	package.add("TaskSelector", &Perl_Client_TaskSelector);
+	package.add("TaskSelectorNoCooldown", &Perl_Client_TaskSelectorNoCooldown);
 	package.add("Thirsty", &Perl_Client_Thirsty);
 	package.add("TrainDiscBySpellID", &Perl_Client_TrainDiscBySpellID);
 	package.add("UnFreeze", &Perl_Client_UnFreeze);

@@ -437,6 +437,7 @@ public:
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 	void TaskSelector(luabind::adl::object table);
+	void TaskSelector(luabind::adl::object table, bool ignore_cooldown);
 
 	void SetClientMaxLevel(uint8 max_level);
 	uint8 GetClientMaxLevel();

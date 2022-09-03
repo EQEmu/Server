@@ -24,20 +24,14 @@ public:
 	bool LoadTaskSets();
 	bool LoadClientState(Client *client, ClientTaskState *client_task_state);
 	bool SaveClientState(Client *client, ClientTaskState *client_task_state);
-	void SendTaskSelector(Client *client, Mob *mob, int task_count, int *task_list);
+	void SendTaskSelector(Client* client, Mob* mob, const std::vector<int>& tasks);
 	bool ValidateLevel(int task_id, int player_level);
 	std::string GetTaskName(uint32 task_id);
 	TaskType GetTaskType(uint32 task_id);
-	void TaskSetSelector(Client *client, ClientTaskState *client_task_state, Mob *mob, int task_set_id);
+	void TaskSetSelector(Client* client, Mob* mob, int task_set_id, bool ignore_cooldown);
 	// task list provided by QuestManager (perl/lua)
-	void TaskQuestSetSelector(
-		Client *client,
-		ClientTaskState *client_task_state,
-		Mob *mob,
-		int count,
-		int *tasks
-	);
-	void SharedTaskSelector(Client* client, Mob* mob, int count, const int* tasks);
+	void TaskQuestSetSelector(Client* client, Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown);
+	void SharedTaskSelector(Client* client, Mob* mob, const std::vector<int>& tasks, bool ignore_cooldown);
 	void SendActiveTasksToClient(Client *client, bool task_complete = false);
 	void SendSingleActiveTaskToClient(
 		Client *client,
@@ -92,7 +86,7 @@ private:
 	// shared tasks
 	void SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskState *cts);
 	void SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts);
-	void SendSharedTaskSelector(Client* client, Mob* mob, int task_count, int* task_list);
+	void SendSharedTaskSelector(Client* client, Mob* mob, const std::vector<int>& tasks);
 	void SyncClientSharedTaskStateToLocal(Client *c);
 };
 
