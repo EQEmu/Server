@@ -63,8 +63,7 @@ void DiscordManager::ProcessMessageQueue()
 				webhook.webhook_url
 			);
 		}
-
-		webhook_message_queue.erase(q.first);
 	}
+	webhook_message_queue.clear();
 	webhook_queue_lock.unlock();
 }
