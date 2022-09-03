@@ -17,22 +17,6 @@
 
 extern WorldServer worldserver;
 
-TaskManager::TaskManager()
-{
-	for (auto &task : m_task_data) {
-		task = nullptr;
-	}
-}
-
-TaskManager::~TaskManager()
-{
-	for (auto &task : m_task_data) {
-		if (task != nullptr) {
-			safe_delete(task);
-		}
-	}
-}
-
 bool TaskManager::LoadTaskSets()
 {
 	// Clear all task sets in memory. Done so we can reload them on the fly if required by just calling
@@ -44,9 +28,8 @@ bool TaskManager::LoadTaskSets()
 	auto rows = TasksetsRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"`id` > 0 AND `id` < {} AND `taskid` >= 0 AND `taskid` < {} ORDER BY `id`, `taskid` ASC",
-			MAXTASKSETS,
-			MAXTASKS
+			"`id` > 0 AND `id` < {} AND `taskid` >= 0 ORDER BY `id`, `taskid` ASC",
+			MAXTASKSETS
 		)
 	);
 
@@ -78,48 +61,51 @@ bool TaskManager::LoadTasks(int single_task)
 			LogTasks("[TaskManager::LoadTasks] LoadTaskSets failed");
 		}
 
-		task_query_filter = fmt::format("id < {}", MAXTASKS);
+		task_query_filter = fmt::format("id > 0");
 	}
 
 	// load task level data
 	auto repo_tasks = TasksRepository::GetWhere(content_db, task_query_filter);
+	m_task_data.reserve(repo_tasks.size());
 
 	for (auto &task: repo_tasks) {
 		int task_id = task.id;
 
-		if ((task_id <= 0) || (task_id >= MAXTASKS)) {
+		if (task_id <= 0) {
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
 			LogError("[TASKS]Task ID [{}] out of range while loading tasks from database", task_id);
 			continue;
 		}
 
 		// load task data
-		m_task_data[task_id] = new TaskInformation();
-		m_task_data[task_id]->type                    = static_cast<TaskType>(task.type);
-		m_task_data[task_id]->duration                = task.duration;
-		m_task_data[task_id]->duration_code           = static_cast<DurationCode>(task.duration_code);
-		m_task_data[task_id]->title                   = task.title;
-		m_task_data[task_id]->description             = task.description;
-		m_task_data[task_id]->reward                  = task.reward;
-		m_task_data[task_id]->reward_id               = task.rewardid;
-		m_task_data[task_id]->cash_reward             = task.cashreward;
-		m_task_data[task_id]->experience_reward       = task.xpreward;
-		m_task_data[task_id]->reward_method           = (TaskMethodType) task.rewardmethod;
-		m_task_data[task_id]->reward_points           = task.reward_points;
-		m_task_data[task_id]->reward_point_type       = static_cast<AltCurrencyType>(task.reward_point_type);
-		m_task_data[task_id]->faction_reward          = task.faction_reward;
-		m_task_data[task_id]->min_level               = task.minlevel;
-		m_task_data[task_id]->max_level               = task.maxlevel;
-		m_task_data[task_id]->level_spread            = task.level_spread;
-		m_task_data[task_id]->min_players             = task.min_players;
-		m_task_data[task_id]->max_players             = task.max_players;
-		m_task_data[task_id]->repeatable              = task.repeatable;
-		m_task_data[task_id]->completion_emote        = task.completion_emote;
-		m_task_data[task_id]->replay_timer_group      = task.replay_timer_group;
-		m_task_data[task_id]->replay_timer_seconds    = task.replay_timer_seconds;
-		m_task_data[task_id]->request_timer_group     = task.request_timer_group;
-		m_task_data[task_id]->request_timer_seconds   = task.request_timer_seconds;
-		m_task_data[task_id]->activity_count          = 0;
+		TaskInformation task_data{};
+		task_data.type                    = static_cast<TaskType>(task.type);
+		task_data.duration                = task.duration;
+		task_data.duration_code           = static_cast<DurationCode>(task.duration_code);
+		task_data.title                   = task.title;
+		task_data.description             = task.description;
+		task_data.reward                  = task.reward;
+		task_data.reward_id               = task.rewardid;
+		task_data.cash_reward             = task.cashreward;
+		task_data.experience_reward       = task.xpreward;
+		task_data.reward_method           = (TaskMethodType) task.rewardmethod;
+		task_data.reward_points           = task.reward_points;
+		task_data.reward_point_type       = static_cast<AltCurrencyType>(task.reward_point_type);
+		task_data.faction_reward          = task.faction_reward;
+		task_data.min_level               = task.minlevel;
+		task_data.max_level               = task.maxlevel;
+		task_data.level_spread            = task.level_spread;
+		task_data.min_players             = task.min_players;
+		task_data.max_players             = task.max_players;
+		task_data.repeatable              = task.repeatable;
+		task_data.completion_emote        = task.completion_emote;
+		task_data.replay_timer_group      = task.replay_timer_group;
+		task_data.replay_timer_seconds    = task.replay_timer_seconds;
+		task_data.request_timer_group     = task.request_timer_group;
+		task_data.request_timer_seconds   = task.request_timer_seconds;
+		task_data.activity_count          = 0;
+
+		m_task_data.try_emplace(task_id, std::move(task_data));
 
 		LogTasksDetail(
 			"[LoadTasks] (Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
@@ -163,8 +149,7 @@ bool TaskManager::LoadTasks(int single_task)
 	// if loading only a single task
 	if (single_task == 0) {
 		activities_query_filter = fmt::format(
-			"taskid < {} and activityid < {} ORDER BY taskid, activityid ASC",
-			MAXTASKS,
+			"activityid < {} ORDER BY taskid, activityid ASC",
 			MAXACTIVITIESPERTASK
 		);
 	}
@@ -176,7 +161,7 @@ bool TaskManager::LoadTasks(int single_task)
 		int step        = task_activity.step;
 		int activity_id = task_activity.activityid;
 
-		if ((task_id <= 0) || (task_id >= MAXTASKS) || (activity_id < 0) || (activity_id >= MAXACTIVITIESPERTASK)) {
+		if (task_id <= 0 || activity_id < 0 || activity_id >= MAXACTIVITIESPERTASK) {
 
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
 			LogTasks(
@@ -187,7 +172,8 @@ bool TaskManager::LoadTasks(int single_task)
 			continue;
 		}
 
-		if (m_task_data[task_id] == nullptr) {
+		auto task_data = GetTaskData(task_id);
+		if (!task_data) {
 			LogTasks(
 				"[LoadTasks] Error: activity_information for non-existent task ([{}], [{}]) while loading activities from database",
 				task_id,
@@ -197,20 +183,20 @@ bool TaskManager::LoadTasks(int single_task)
 		}
 
 		// create pointer to activity data since declarations get unruly long
-		int                 activity_index = m_task_data[task_id]->activity_count;
-		ActivityInformation *activity_data = &m_task_data[task_id]->activity_information[activity_index];
+		int                 activity_index = task_data->activity_count;
+		ActivityInformation *activity_data = &task_data->activity_information[activity_index];
 
 		// Task Activities MUST be numbered sequentially from 0. If not, log an error
 		// and set the task to nullptr. Subsequent activities for this task will raise
 		// ERR_NOTASK errors.
 		// Change to (activityID != (Tasks[taskID]->activity_count + 1)) to index from 1
-		if (activity_id != m_task_data[task_id]->activity_count) {
+		if (activity_id != task_data->activity_count) {
 			LogTasks(
 				"[LoadTasks] Error: Activities for Task [{}] (activity_id [{}]) are not sequential starting at 0. Not loading task ",
 				task_id,
 				activity_id
 			);
-			m_task_data[task_id] = nullptr;
+			m_task_data.erase(task_id);
 			continue;
 		}
 
@@ -268,7 +254,7 @@ bool TaskManager::LoadTasks(int single_task)
 			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
 			task_id,
 			activity_id,
-			m_task_data[task_id]->activity_count,
+			task_data->activity_count,
 			static_cast<int32_t>(activity_data->activity_type),
 			activity_data->goal_method,
 			activity_data->goal_count,
@@ -280,7 +266,7 @@ bool TaskManager::LoadTasks(int single_task)
 			activity_data->description_override.c_str()
 		);
 
-		m_task_data[task_id]->activity_count++;
+		task_data->activity_count++;
 	}
 
 	LogTasks("Loaded [{}] Task Activities", task_activities.size());
@@ -313,6 +299,8 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 				continue;
 			}
 
+			const auto task_data = GetTaskData(task_id);
+
 			int slot = active_task.slot;
 			if (active_task.updated) {
 
@@ -329,7 +317,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 					character_id,
 					task_id,
 					slot,
-					static_cast<int>(m_task_data[task_id]->type),
+					static_cast<int>(task_data->type),
 					active_task.accepted_time,
 					active_task.was_rewarded
 				);
@@ -349,7 +337,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 
 			int updated_activity_count = 0;
 
-			for (int activity_index = 0; activity_index < m_task_data[task_id]->activity_count; ++activity_index) {
+			for (int activity_index = 0; activity_index < task_data->activity_count; ++activity_index) {
 				if (!active_task.activity[activity_index].updated) {
 					continue;
 				}
@@ -396,7 +384,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 			}
 
 			active_task.updated = false;
-			for (int activity_index = 0; activity_index < m_task_data[task_id]->activity_count; ++activity_index) {
+			for (int activity_index = 0; activity_index < task_data->activity_count; ++activity_index) {
 				active_task.activity[activity_index].updated = false;
 			}
 		}
@@ -417,12 +405,13 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 
 		int task_id = client_task_state->m_completed_tasks[task_index].task_id;
 
-		if ((task_id <= 0) || (task_id >= MAXTASKS) || (m_task_data[task_id] == nullptr)) {
+		const auto task_data = GetTaskData(task_id);
+		if (!task_data) {
 			continue;
 		}
 
 		// we don't record completed shared tasks in the task quest log
-		if (m_task_data[task_id]->type == TaskType::Shared) {
+		if (task_data->type == TaskType::Shared) {
 			break;
 		}
 
@@ -450,8 +439,8 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		// Insert one record for each completed optional task.
-		for (int activity_id = 0; activity_id < m_task_data[task_id]->activity_count; activity_id++) {
-			if (!m_task_data[task_id]->activity_information[activity_id].optional ||
+		for (int activity_id = 0; activity_id < task_data->activity_count; activity_id++) {
+			if (!task_data->activity_information[activity_id].optional ||
 				!client_task_state->m_completed_tasks[task_index].activity_done[activity_id]) {
 				continue;
 			}
@@ -529,15 +518,16 @@ int TaskManager::NextTaskInSet(int task_set, int task_id)
 
 bool TaskManager::ValidateLevel(int task_id, int player_level)
 {
-	if (m_task_data[task_id] == nullptr) {
+	const auto task_data = GetTaskData(task_id);
+	if (!task_data) {
 		return false;
 	}
 
-	if (m_task_data[task_id]->min_level && (player_level < m_task_data[task_id]->min_level)) {
+	if (task_data->min_level && (player_level < task_data->min_level)) {
 		return false;
 	}
 
-	if (m_task_data[task_id]->max_level && (player_level > m_task_data[task_id]->max_level)) {
+	if (task_data->max_level && (player_level > task_data->max_level)) {
 		return false;
 	}
 
@@ -546,9 +536,10 @@ bool TaskManager::ValidateLevel(int task_id, int player_level)
 
 std::string TaskManager::GetTaskName(uint32 task_id)
 {
-	if (task_id > 0 && task_id < MAXTASKS) {
-		if (m_task_data[task_id] != nullptr) {
-			return m_task_data[task_id]->title;
+	if (task_id > 0) {
+		const auto task_data = GetTaskData(task_id);
+		if (task_data) {
+			return task_data->title;
 		}
 	}
 
@@ -557,9 +548,10 @@ std::string TaskManager::GetTaskName(uint32 task_id)
 
 TaskType TaskManager::GetTaskType(uint32 task_id)
 {
-	if (task_id > 0 && task_id < MAXTASKS) {
-		if (m_task_data[task_id] != nullptr) {
-			return m_task_data[task_id]->type;
+	if (task_id > 0) {
+		const auto task_data = GetTaskData(task_id);
+		if (task_data) {
+			return task_data->type;
 		}
 	}
 	return TaskType::Task;
@@ -584,7 +576,8 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 	// forward to shared task selector validation if set contains a shared task
 	for (const auto& task_id : m_task_sets[task_set_id])
 	{
-		if (m_task_data[task_id] && m_task_data[task_id]->type == TaskType::Shared) {
+		const auto task_data = GetTaskData(task_id);
+		if (task_data && task_data->type == TaskType::Shared) {
 			SharedTaskSelector(client, mob, m_task_sets[task_set_id].size(), m_task_sets[task_set_id].data());
 			return;
 		}
@@ -615,10 +608,12 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 
 	while (iterator != m_task_sets[task_set_id].end() && task_list_index < MAXCHOOSERENTRIES) {
 		auto task = *iterator;
+		const auto task_data = GetTaskData(task);
+
 		// verify level, we're not currently on it, repeatable status, if it's a (shared) task
 		// we aren't currently on another, and if it's enabled if not all_enabled
 		if ((all_enabled || client_task_state->IsTaskEnabled(task)) && ValidateLevel(task, player_level) &&
-			!client_task_state->IsTaskActive(task) && client_task_state->HasSlotForTask(m_task_data[task]) &&
+			!client_task_state->IsTaskActive(task) && client_task_state->HasSlotForTask(task_data) &&
 			// this slot checking is a bit silly, but we allow mixing of task types ...
 			(IsTaskRepeatable(task) || !client_task_state->IsTaskCompleted(task))) {
 			task_list[task_list_index++] = task;
@@ -660,7 +655,8 @@ void TaskManager::TaskQuestSetSelector(
 	// forward this to shared task validation and non-shared tasks will be dropped
 	for (int i = 0; i < count; ++i) {
 		auto task = tasks[i];
-		if (m_task_data[task] && m_task_data[task]->type == TaskType::Shared) {
+		const auto task_data = GetTaskData(task);
+		if (task_data && task_data->type == TaskType::Shared) {
 			SharedTaskSelector(client, mob, count, tasks);
 			return;
 		}
@@ -673,10 +669,11 @@ void TaskManager::TaskQuestSetSelector(
 
 	for (int i = 0; i < count; ++i) {
 		auto task = tasks[i];
+		const auto task_data = GetTaskData(task);
 		// verify level, we're not currently on it, repeatable status, if it's a (shared) task
 		// we aren't currently on another, and if it's enabled if not all_enabled
 		if (ValidateLevel(task, player_level) && !client_task_state->IsTaskActive(task) &&
-			client_task_state->HasSlotForTask(m_task_data[task]) &&
+			client_task_state->HasSlotForTask(task_data) &&
 			// this slot checking is a bit silly, but we allow mixing of task types ...
 			(IsTaskRepeatable(task) || !client_task_state->IsTaskCompleted(task))) {
 			task_list[task_list_index++] = task;
@@ -744,10 +741,12 @@ void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const 
 		for (int i = 0; i < count && task_list_index < MAXCHOOSERENTRIES; ++i) {
 			// todo: are there non repeatable shared tasks? (would need to check all group/raid members)
 			auto task = tasks[i];
-			if (m_task_data[task] &&
-				m_task_data[task]->type == TaskType::Shared &&
-				request.lowest_level >= m_task_data[task]->min_level &&
-				(m_task_data[task]->max_level == 0 || request.highest_level <= m_task_data[task]->max_level)) {
+			const auto task_data = GetTaskData(task);
+			if (task_data &&
+			    task_data->type == TaskType::Shared &&
+			    request.lowest_level >= task_data->min_level &&
+			    (task_data->max_level == 0 || request.highest_level <= task_data->max_level))
+			{
 				task_list[task_list_index++] = task;
 			}
 		}
@@ -768,13 +767,6 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 	LogTasks("TaskSelector for [{}] Tasks", task_count);
 	int player_level = client->GetLevel();
 	client->GetTaskState()->ClearLastOffers();
-
-	// Check if any of the tasks exist
-	for (int i = 0; i < task_count; i++) {
-		if (m_task_data[task_list[i]] != nullptr) {
-			break;
-		}
-	}
 
 	int      valid_tasks_count = 0;
 	for (int task_index        = 0; task_index < task_count; task_index++) {
@@ -815,7 +807,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 		}
 
 		buf.WriteUInt32(task_list[i]); // task_id
-		m_task_data[task_list[i]]->SerializeSelector(buf, client->ClientVersion());
+		m_task_data[task_list[i]].SerializeSelector(buf, client->ClientVersion());
 		client->GetTaskState()->AddOffer(task_list[i], mob->GetID());
 	}
 
@@ -841,7 +833,7 @@ void TaskManager::SendSharedTaskSelector(Client *client, Mob *mob, int task_coun
 	for (int i = 0; i < task_count; ++i) {
 		int task_id = task_list[i];
 		buf.WriteUInt32(task_id);
-		m_task_data[task_id]->SerializeSelector(buf, client->ClientVersion());
+		m_task_data[task_id].SerializeSelector(buf, client->ClientVersion());
 		client->GetTaskState()->AddOffer(task_id, mob->GetID());
 	}
 
@@ -851,8 +843,11 @@ void TaskManager::SendSharedTaskSelector(Client *client, Mob *mob, int task_coun
 
 int TaskManager::GetActivityCount(int task_id)
 {
-	if ((task_id > 0) && (task_id < MAXTASKS)) {
-		if (m_task_data[task_id]) { return m_task_data[task_id]->activity_count; }
+	if (task_id > 0) {
+		const auto task_data = GetTaskData(task_id);
+		if (task_data) {
+			return task_data->activity_count;
+		}
 	}
 
 	return 0;
@@ -860,12 +855,8 @@ int TaskManager::GetActivityCount(int task_id)
 
 bool TaskManager::IsTaskRepeatable(int task_id)
 {
-	if ((task_id <= 0) || (task_id >= MAXTASKS)) {
-		return false;
-	}
-
-	TaskInformation *task_data = task_manager->m_task_data[task_id];
-	if (task_data == nullptr) {
+	const auto task_data = GetTaskData(task_id);
+	if (!task_data) {
 		return false;
 	}
 
@@ -900,9 +891,10 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *client_
 	}
 	*/
 	for (int i = first_task_to_send; i < last_task_to_send; i++) {
-		int TaskID = client_task_state->m_completed_tasks[i].task_id;
-		if (m_task_data[TaskID] == nullptr) { continue; }
-		packet_length = packet_length + 8 + m_task_data[TaskID]->title.size() + 1;
+		int task_id = client_task_state->m_completed_tasks[i].task_id;
+		const auto task_data = GetTaskData(task_id);
+		if (!task_data) { continue; }
+		packet_length = packet_length + 8 + task_data->title.size() + 1;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_CompletedTasks, packet_length);
@@ -915,11 +907,12 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *client_
 	//	int task_id = (*iterator).task_id;
 	for (int i = first_task_to_send; i < last_task_to_send; i++) {
 		int task_id = client_task_state->m_completed_tasks[i].task_id;
-		if (m_task_data[task_id] == nullptr) { continue; }
+		const auto task_data = GetTaskData(task_id);
+		if (!task_data) { continue; }
 		*(uint32 *) buf = task_id;
 		buf = buf + 4;
 
-		sprintf(buf, "%s", m_task_data[task_id]->title.c_str());
+		sprintf(buf, "%s", task_data->title.c_str());
 		buf = buf + strlen(buf) + 1;
 		//*(uint32 *)buf = (*iterator).CompletedTime;
 		*(uint32 *) buf = client_task_state->m_completed_tasks[i].completed_time;
@@ -934,14 +927,16 @@ void TaskManager::SendTaskActivityShort(Client *client, int task_id, int activit
 {
 	// This activity_information Packet is sent for activities that have not yet been unlocked and appear as ???
 	// in the client.
+	const auto task_data = GetTaskData(task_id);
+
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskActivity, 25);
 	outapp->WriteUInt32(client_task_index);
-	outapp->WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));
+	outapp->WriteUInt32(static_cast<uint32>(task_data->type));
 	outapp->WriteUInt32(task_id);
 	outapp->WriteUInt32(activity_id);
 	outapp->WriteUInt32(0);
 	outapp->WriteUInt32(0xffffffff);
-	outapp->WriteUInt8(m_task_data[task_id]->activity_information[activity_id].optional ? 1 : 0);
+	outapp->WriteUInt8(task_data->activity_information[activity_id].optional ? 1 : 0);
 	client->QueuePacket(outapp.get());
 }
 
@@ -953,16 +948,18 @@ void TaskManager::SendTaskActivityLong(
 	bool task_complete
 )
 {
+	const auto task_data = GetTaskData(task_id);
+
 	SerializeBuffer buf(100);
 
 	buf.WriteUInt32(client_task_index);    // TaskSequenceNumber
-	buf.WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));        // task type
+	buf.WriteUInt32(static_cast<uint32>(task_data->type)); // task type
 	buf.WriteUInt32(task_id);
 	buf.WriteUInt32(activity_id);
 	buf.WriteUInt32(0);        // unknown3
 
-	const auto &activity = m_task_data[task_id]->activity_information[activity_id];
-	int done_count = client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id);
+	const auto& activity = task_data->activity_information[activity_id];
+	int done_count = client->GetTaskActivityDoneCount(task_data->type, client_task_index, activity_id);
 
 	activity.SerializeObjective(buf, client->ClientVersion(), done_count);
 
@@ -982,10 +979,12 @@ void TaskManager::SendActiveTaskToClient(
 		return;
 	}
 
+	const auto task_data = GetTaskData(task->task_id);
+
 	int  start_time    = task->accepted_time;
 	int  task_id       = task->task_id;
-	auto task_type     = m_task_data[task_id]->type;
-	auto task_duration = m_task_data[task_id]->duration;
+	auto task_type     = task_data->type;
+	auto task_duration = task_data->duration;
 
 	SendActiveTaskDescription(
 		client,
@@ -1066,12 +1065,13 @@ void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 	// quests
 	for (int task_index = 0; task_index < MAXACTIVEQUESTS; task_index++) {
 		int task_id = state->m_active_quests[task_index].task_id;
-		if ((task_id == 0) || (m_task_data[task_id] == nullptr)) {
+		const auto task_data = GetTaskData(task_id);
+		if (!task_data) {
 			continue;
 		}
 
 		LogTasksDetail("--");
-		LogTasksDetail("[SendActiveTasksToClient] Task [{}]", m_task_data[task_id]->title);
+		LogTasksDetail("[SendActiveTasksToClient] Task [{}]", task_data->title);
 
 		SendActiveTaskToClient(&state->m_active_quests[task_index], client, task_index, task_complete);
 	}
@@ -1083,7 +1083,8 @@ void TaskManager::SendSingleActiveTaskToClient(
 )
 {
 	int task_id = task_info.task_id;
-	if (task_id == 0 || m_task_data[task_id] == nullptr) {
+	const auto task_data = GetTaskData(task_id);
+	if (!task_data) {
 		return;
 	}
 
@@ -1093,7 +1094,7 @@ void TaskManager::SendSingleActiveTaskToClient(
 		task_id,
 		task_info,
 		start_time,
-		m_task_data[task_id]->duration,
+		task_data->duration,
 		bring_up_task_journal
 	);
 	Log(Logs::General,
@@ -1131,25 +1132,26 @@ void TaskManager::SendActiveTaskDescription(
 	bool bring_up_task_journal
 )
 {
-	if ((task_id < 1) || (task_id >= MAXTASKS) || !m_task_data[task_id]) {
+	auto task_data = GetTaskData(task_id);
+	if (!task_data) {
 		return;
 	}
 
-	int packet_length = sizeof(TaskDescriptionHeader_Struct) + m_task_data[task_id]->title.length() + 1
-						+ sizeof(TaskDescriptionData1_Struct) + m_task_data[task_id]->description.length() + 1
+	int packet_length = sizeof(TaskDescriptionHeader_Struct) + task_data->title.length() + 1
+						+ sizeof(TaskDescriptionData1_Struct) + task_data->description.length() + 1
 						+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	// If there is an item make the reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.
 	//
-	if (m_task_data[task_id]->reward_id && m_task_data[task_id]->item_link.empty()) {
+	if (task_data->reward_id && task_data->item_link.empty()) {
 		int item_id = 0;
 		// If the reward is a list of items, and the first entry on the list is valid
-		if (m_task_data[task_id]->reward_method == METHODSINGLEID) {
-			item_id = m_task_data[task_id]->reward_id;
+		if (task_data->reward_method == METHODSINGLEID) {
+			item_id = task_data->reward_id;
 		}
-		else if (m_task_data[task_id]->reward_method == METHODLIST) {
-			item_id = m_goal_list_manager.GetFirstEntry(m_task_data[task_id]->reward_id);
+		else if (task_data->reward_method == METHODLIST) {
+			item_id = m_goal_list_manager.GetFirstEntry(task_data->reward_id);
 			if (item_id < 0) {
 				item_id = 0;
 			}
@@ -1162,11 +1164,11 @@ void TaskManager::SendActiveTaskDescription(
 			linker.SetLinkType(EQ::saylink::SayLinkItemData);
 			linker.SetItemData(reward_item);
 			linker.SetTaskUse();
-			m_task_data[task_id]->item_link = linker.GenerateLink();
+			task_data->item_link = linker.GenerateLink();
 		}
 	}
 
-	packet_length += m_task_data[task_id]->reward.length() + 1 + m_task_data[task_id]->item_link.length() + 1;
+	packet_length += task_data->reward.length() + 1 + task_data->item_link.length() + 1;
 
 	char                          *Ptr;
 	TaskDescriptionHeader_Struct  *task_description_header;
@@ -1181,26 +1183,26 @@ void TaskManager::SendActiveTaskDescription(
 	task_description_header->SequenceNumber = task_info.slot;
 	task_description_header->TaskID         = task_id;
 	task_description_header->open_window    = bring_up_task_journal;
-	task_description_header->task_type      = static_cast<uint32>(m_task_data[task_id]->type);
+	task_description_header->task_type      = static_cast<uint32>(task_data->type);
 
-	task_description_header->reward_type = static_cast<int>(m_task_data[task_id]->reward_point_type);
+	task_description_header->reward_type = static_cast<int>(task_data->reward_point_type);
 
 	Ptr = (char *) task_description_header + sizeof(TaskDescriptionHeader_Struct);
 
-	sprintf(Ptr, "%s", m_task_data[task_id]->title.c_str());
-	Ptr += m_task_data[task_id]->title.length() + 1;
+	sprintf(Ptr, "%s", task_data->title.c_str());
+	Ptr += task_data->title.length() + 1;
 
 	tdd1 = (TaskDescriptionData1_Struct *) Ptr;
 
 	tdd1->Duration = duration;
-	tdd1->dur_code = static_cast<uint32>(m_task_data[task_id]->duration_code);
+	tdd1->dur_code = static_cast<uint32>(task_data->duration_code);
 
 	tdd1->StartTime = start_time;
 
 	Ptr = (char *) tdd1 + sizeof(TaskDescriptionData1_Struct);
 
-	sprintf(Ptr, "%s", m_task_data[task_id]->description.c_str());
-	Ptr += m_task_data[task_id]->description.length() + 1;
+	sprintf(Ptr, "%s", task_data->description.c_str());
+	Ptr += task_data->description.length() + 1;
 
 	tdd2 = (TaskDescriptionData2_Struct *) Ptr;
 
@@ -1209,24 +1211,24 @@ void TaskManager::SendActiveTaskDescription(
 	// "has_reward_selection" is after this bool! Smaller packet when this is 0
 	tdd2->has_rewards = 1;
 
-	tdd2->coin_reward    = m_task_data[task_id]->cash_reward;
-	tdd2->xp_reward      = m_task_data[task_id]->experience_reward ? 1 : 0; // just booled
-	tdd2->faction_reward = m_task_data[task_id]->faction_reward ? 1 : 0; // faction booled
+	tdd2->coin_reward    = task_data->cash_reward;
+	tdd2->xp_reward      = task_data->experience_reward ? 1 : 0; // just booled
+	tdd2->faction_reward = task_data->faction_reward ? 1 : 0; // faction booled
 
 	Ptr = (char *) tdd2 + sizeof(TaskDescriptionData2_Struct);
 
 	// we actually have 2 strings here. One is max length 96 and not parsed for item links
 	// We actually skipped past that string incorrectly before, so TODO: fix item link string
-	sprintf(Ptr, "%s", m_task_data[task_id]->reward.c_str());
-	Ptr += m_task_data[task_id]->reward.length() + 1;
+	sprintf(Ptr, "%s", task_data->reward.c_str());
+	Ptr += task_data->reward.length() + 1;
 
 	// second string is parsed for item links
-	sprintf(Ptr, "%s", m_task_data[task_id]->item_link.c_str());
-	Ptr += m_task_data[task_id]->item_link.length() + 1;
+	sprintf(Ptr, "%s", task_data->item_link.c_str());
+	Ptr += task_data->item_link.length() + 1;
 
 	tdt = (TaskDescriptionTrailer_Struct *) Ptr;
 	// shared tasks show radiant/ebon crystal reward, non-shared tasks show generic points
-	tdt->Points = m_task_data[task_id]->reward_points;
+	tdt->Points = task_data->reward_points;
 
 	tdt->has_reward_selection = 0; // TODO: new rewards window
 
@@ -1265,7 +1267,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		// this should just load from the tasks table
 		auto type = task_manager->GetTaskType(character_task.taskid);
 
-		if ((task_id < 0) || (task_id >= MAXTASKS)) {
+		if (task_id < 0) {
 			LogTasks(
 				"[LoadClientState] Error: task_id [{}] out of range while loading character tasks from database",
 				task_id
@@ -1324,7 +1326,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 	for (auto &character_activity: character_activities) {
 		int task_id = character_activity.taskid;
-		if ((task_id < 0) || (task_id >= MAXTASKS)) {
+		if (task_id < 0) {
 			LogTasks(
 				"[LoadClientState] Error: task_id [{}] out of range while loading character activities from database character_id [{}]",
 				task_id,
@@ -1415,7 +1417,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 		for (auto &character_completed_task: character_completed_tasks) {
 			int task_id = character_completed_task.taskid;
-			if ((task_id <= 0) || (task_id >= MAXTASKS)) {
+			if (task_id <= 0) {
 				LogError("[TASKS]Task ID [{}] out of range while loading completed tasks from database", task_id);
 				continue;
 			}
@@ -1445,13 +1447,13 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 			// If activity_id is -1, Mark all the non-optional tasks as completed.
 			if (activity_id < 0) {
-				TaskInformation *task = m_task_data[task_id];
-				if (task == nullptr) {
+				const auto task_data = GetTaskData(task_id);
+				if (!task_data) {
 					continue;
 				}
 
-				for (int i = 0; i < task->activity_count; i++) {
-					if (!task->activity_information[i].optional) {
+				for (int i = 0; i < task_data->activity_count; i++) {
+					if (!task_data->activity_information[i].optional) {
 						completed_task_information.activity_done[i] = true;
 					}
 				}
@@ -1470,9 +1472,9 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 	std::string query = StringFormat(
 		"SELECT `taskid` FROM character_enabledtasks "
-		"WHERE `charid` = %i AND `taskid` >0 AND `taskid` < %i "
+		"WHERE `charid` = %i AND `taskid` > 0 "
 		"ORDER BY `taskid` ASC",
-		character_id, MAXTASKS
+		character_id
 	);
 
 	auto results = database.QueryDatabase(query);
@@ -1492,7 +1494,8 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		if (task_id == TASKSLOTEMPTY) {
 			continue;
 		}
-		if (!m_task_data[task_id]) {
+		const auto task_data = GetTaskData(task_id);
+		if (!task_data) {
 			client->Message(
 				Chat::Red,
 				"Active Task Slot %i, references a task (%i), that does not exist. "
@@ -1505,13 +1508,13 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			client_task_state->m_active_tasks[task_index].task_id = TASKSLOTEMPTY;
 			continue;
 		}
-		for (int activity_index = 0; activity_index < m_task_data[task_id]->activity_count; activity_index++) {
+		for (int activity_index = 0; activity_index < task_data->activity_count; activity_index++) {
 			if (client_task_state->m_active_tasks[task_index].activity[activity_index].activity_id != activity_index) {
 				client->Message(
 					Chat::Red,
 					"Active Task %i, %s. activity_information count does not match expected value."
 					"Removing from memory. Contact a GM to resolve this.",
-					task_id, m_task_data[task_id]->title.c_str()
+					task_id, task_data->title.c_str()
 				);
 
 				LogTasks(
@@ -1544,9 +1547,9 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			client_task_state->m_active_task.updated
 		);
 
-		TaskInformation *p_task_data = task_manager->m_task_data[client_task_state->m_active_task.task_id];
-		if (p_task_data != nullptr) {
-			for (int i = 0; i < p_task_data->activity_count; i++) {
+		const auto task_data = GetTaskData(client_task_state->m_active_task.task_id);
+		if (task_data) {
+			for (int i = 0; i < task_data->activity_count; i++) {
 				if (client_task_state->m_active_task.activity[i].activity_id >= 0) {
 					LogTasksDetail(
 						"[LoadClientState] -- character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}]",
@@ -1667,10 +1670,10 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 						if (!shared_task->was_rewarded && IsActiveTaskComplete(*shared_task))
 						{
 							LogTasksDetail("[LoadClientState] Syncing shared task completion for client [{}]", c->GetName());
-							auto task_info = task_manager->m_task_data[shared_task->task_id];
-							cts->AddReplayTimer(c, *shared_task, *task_info); // live updates a fresh timer
-							cts->DispatchEventTaskComplete(c, *shared_task, task_info->activity_count - 1);
-							cts->RewardTask(c, task_info, *shared_task);
+							const auto task_data = GetTaskData(shared_task->task_id);
+							cts->AddReplayTimer(c, *shared_task, *task_data); // live updates a fresh timer
+							cts->DispatchEventTaskComplete(c, *shared_task, task_data->activity_count - 1);
+							cts->RewardTask(c, task_data, *shared_task);
 						}
 
 						SaveClientState(c, cts);
@@ -1712,7 +1715,7 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 			CharacterActivitiesRepository::DeleteWhere(database, delete_where);
 
 			c->MessageString(Chat::Yellow, TaskStr::NO_LONGER_MEMBER_TITLE,
-				m_task_data[cts->m_active_shared_task.task_id]->title.c_str());
+				m_task_data[cts->m_active_shared_task.task_id].title.c_str());
 
 			// remove as active task if doesn't exist
 			cts->m_active_shared_task = {};
@@ -1813,11 +1816,16 @@ void TaskManager::HandleUpdateTasksOnKill(Client* client, NPC* npc)
 
 bool TaskManager::IsActiveTaskComplete(ClientTaskInformation& client_task)
 {
-	auto task_info = task_manager->m_task_data[client_task.task_id];
-	for (int i = 0; i < task_info->activity_count; ++i)
+	const auto task_data = GetTaskData(client_task.task_id);
+	if (!task_data)
+	{
+		return false;
+	}
+
+	for (int i = 0; i < task_data->activity_count; ++i)
 	{
 		if (client_task.activity[i].activity_state != ActivityCompleted &&
-		    !task_info->activity_information[i].optional)
+		    !task_data->activity_information[i].optional)
 		{
 			return false;
 		}
