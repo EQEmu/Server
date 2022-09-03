@@ -59,6 +59,8 @@ uint32 ZoneStore::GetZoneID(std::string zone_name)
 		}
 	}
 
+	LogInfo("[GetZoneID] Failed to get zone_name [{}]", zone_name);
+
 	return 0;
 }
 
@@ -78,6 +80,12 @@ const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
 	if (error_unknown) {
 		return "UNKNOWN";
 	}
+
+	LogInfo(
+		"[GetZoneName] Failed to get zone name by zone_id [{}] error_unknown [{}]",
+		zone_id,
+		(error_unknown ? "true" : "false")
+	);
 
 	return nullptr;
 }
@@ -99,6 +107,12 @@ const char *ZoneStore::GetZoneLongName(uint32 zone_id, bool error_unknown)
 		return "UNKNOWN";
 	}
 
+	LogInfo(
+		"[GetZoneLongName] Failed to get zone long name by zone_id [{}] error_unknown [{}]",
+		zone_id,
+		(error_unknown ? "true" : "false")
+	);
+
 	return nullptr;
 }
 
@@ -114,6 +128,8 @@ std::string ZoneStore::GetZoneName(uint32 zone_id)
 		}
 	}
 
+	LogInfo("[GetZoneName] Failed to get zone long name by zone_id [{}]", zone_id);
+
 	return {};
 }
 
@@ -128,6 +144,8 @@ std::string ZoneStore::GetZoneLongName(uint32 zone_id)
 			return z.long_name;
 		}
 	}
+
+	LogInfo("[GetZoneLongName] Failed to get zone long name by zone_id [{}]", zone_id);
 
 	return {};
 }
@@ -145,6 +163,8 @@ ZoneRepository::Zone *ZoneStore::GetZone(uint32 zone_id, int version)
 		}
 	}
 
+	LogInfo("[GetZone] Failed to get zone by zone_id [{}] version [{}]", zone_id, version);
+
 	return nullptr;
 }
 
@@ -159,6 +179,8 @@ ZoneRepository::Zone *ZoneStore::GetZone(const char *in_zone_name)
 			return &z;
 		}
 	}
+
+	LogInfo("[GetZone] Failed to get zone by zone_name [{}]", in_zone_name);
 
 	return nullptr;
 }
@@ -183,6 +205,8 @@ ZoneRepository::Zone *ZoneStore::GetZoneWithFallback(uint32 zone_id, int version
 			return &z;
 		}
 	}
+
+	LogInfo("[GetZoneWithFallback] Failed to get zone by zone_id [{}] version [{}]", zone_id, version);
 
 	return nullptr;
 }
