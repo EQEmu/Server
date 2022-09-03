@@ -780,13 +780,6 @@ void Client::CompleteConnect()
 
 	conn_state = ClientConnectFinished;
 
-	//enforce some rules..
-	if (!CanBeInZone()) {
-		LogInfo("Kicking character [{}] from zone, not allowed here", GetCleanName());
-		GoToSafeCoords(ZoneID("arena"), 0);
-		return;
-	}
-
 	if (zone)
 		zone->weatherSend(this);
 
@@ -918,6 +911,13 @@ void Client::CompleteConnect()
 	}
 
 	heroforge_wearchange_timer.Start(250);
+
+	// enforce some rules..
+	if (!CanBeInZone()) {
+		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
+		GoToSafeCoords(ZoneID("arena"), 0);
+		return;
+	}
 }
 
 // connecting opcode handlers
