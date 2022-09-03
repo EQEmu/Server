@@ -140,6 +140,7 @@ int command_init(void)
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", AccountStatus::Guide, command_equipitem) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
+		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
 		command_add("feature", "Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
 		command_add("findaliases", "[Search Criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
 		command_add("findclass", "[Search Criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
@@ -1146,6 +1147,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/spawnfix.cpp"
 #include "gm_commands/spawnstatus.cpp"
 #include "gm_commands/spellinfo.cpp"
+#include "gm_commands/faction_association.cpp"
 #include "gm_commands/stun.cpp"
 #include "gm_commands/summon.cpp"
 #include "gm_commands/summonburiedplayercorpse.cpp"

@@ -436,6 +436,11 @@ void Lua_Client::SetFactionLevel2(uint32 char_id, int faction_id, int char_class
 	self->SetFactionLevel2(char_id, faction_id, char_class, char_race, char_deity, value, temp);
 }
 
+void Lua_Client::RewardFaction(int id, int amount) {
+	Lua_Safe_Call_Void();
+	self->RewardFaction(id, amount);
+}
+
 int Lua_Client::GetRawItemAC() {
 	Lua_Safe_Call_Int();
 	return self->GetRawItemAC();
@@ -1761,9 +1766,27 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 
 	cur = reward["faction"];
 	if (luabind::type(cur) != LUA_TNIL) {
-		try {
-			faction = luabind::object_cast<bool>(cur);
-		} catch (luabind::cast_failed &) {
+		// if it's a table it will be {faction, faction_mod}
+		if (luabind::type(cur) == LUA_TTABLE) {
+			auto item = cur[1];
+			if (luabind::type(item) != LUA_TNIL) {
+				try {
+					quest_reward.faction = luabind::object_cast<uint32>(item);
+				} catch (luabind::cast_failed &) {
+				}
+			}
+			item = cur[2];
+			if (luabind::type(item) != LUA_TNIL) {
+				try {
+					quest_reward.faction_mod = luabind::object_cast<uint32>(item);
+				} catch (luabind::cast_failed &) {
+				}
+			}
+		} else {
+			try {
+				faction = luabind::object_cast<bool>(cur);
+			} catch (luabind::cast_failed &) {
+			}
 		}
 	}
 
@@ -2922,6 +2945,7 @@ luabind::scope lua_register_client() {
 	.def("ResetCastbarCooldownBySpellID", (void(Lua_Client::*)(uint32))&Lua_Client::ResetCastbarCooldownBySpellID)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
+	.def("RewardFaction", (void(Lua_Client::*)(int,int))&Lua_Client::RewardFaction)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)
 	.def("Save", (void(Lua_Client::*)(void))&Lua_Client::Save)
 	.def("SaveBackup", (void(Lua_Client::*)(void))&Lua_Client::SaveBackup)

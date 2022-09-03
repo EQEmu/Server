@@ -217,7 +217,8 @@ struct TaskInformation {
 	int                 reward_id{};
 	int                 cash_reward{};       // Expressed in copper
 	int                 experience_reward{};
-	int                 faction_reward{};   // just a npc_faction_id
+	int                 faction_reward{};   // npc_faction_id if amount == 0, otherwise primary faction ID
+	int                 faction_amount{};   // faction hit value
 	TaskMethodType      reward_method;
 	int                 reward_points;
 	AltCurrencyType     reward_point_type;

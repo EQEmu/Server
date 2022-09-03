@@ -92,6 +92,7 @@ bool TaskManager::LoadTasks(int single_task)
 		task_data.reward_points           = task.reward_points;
 		task_data.reward_point_type       = static_cast<AltCurrencyType>(task.reward_point_type);
 		task_data.faction_reward          = task.faction_reward;
+		task_data.faction_amount          = task.faction_amount;
 		task_data.min_level               = task.minlevel;
 		task_data.max_level               = task.maxlevel;
 		task_data.level_spread            = task.level_spread;

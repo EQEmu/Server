@@ -3186,6 +3186,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			LogError("Loading npcs faction lists failed!");
 		}
 
+		LogInfo("Loading faction association hits");
+		if (!content_db.LoadFactionAssociation(hotfix_name)) {
+			LogError("Loading faction association hits failed!");
+		}
+
 		LogInfo("Loading loot tables");
 		if (!content_db.LoadLoot(hotfix_name)) {
 			LogError("Loading loot failed!");

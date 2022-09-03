@@ -257,8 +257,9 @@ bool HateList::RemoveEntFromHateList(Mob *in_entity)
 	return is_found;
 }
 
-void HateList::DoFactionHits(int64 npc_faction_level_id) {
-	if (npc_faction_level_id <= 0)
+// so if faction_id and faction_value are set, we do RewardFaction, otherwise old stuff
+void HateList::DoFactionHits(int64 npc_faction_level_id, int32 faction_id, int32 faction_value) {
+	if (npc_faction_level_id <= 0 && faction_id <= 0 && faction_value == 0)
 		return;
 	auto iterator = list.begin();
 	while (iterator != list.end())
@@ -270,8 +271,13 @@ void HateList::DoFactionHits(int64 npc_faction_level_id) {
 		else
 			client = nullptr;
 
-		if (client)
-			client->SetFactionLevel(client->CharacterID(), npc_faction_level_id, client->GetBaseClass(), client->GetBaseRace(), client->GetDeity());
+		if (client) {
+			if (faction_id != 0 && faction_value != 0) {
+				client->RewardFaction(faction_id, faction_value);
+			} else {
+				client->SetFactionLevel(client->CharacterID(), npc_faction_level_id, client->GetBaseClass(), client->GetBaseRace(), client->GetDeity());
+			}
+		}
 		++iterator;
 	}
 }
