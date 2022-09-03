@@ -368,4 +368,4 @@ INSERT INTO `faction_association` VALUES (1799,1775,-1,1788,-1,1799,-1,0,0,0,0,0
 INSERT INTO `faction_association` VALUES (1801,1802,-1,1803,-0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 INSERT INTO `faction_association` VALUES (1802,1801,-1,1803,-0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 INSERT INTO `faction_association` VALUES (1803,1801,-1,1802,-0.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-INSERT INTO `faction_association` VALUES (1804,1817,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;0);
+INSERT INTO `faction_association` VALUES (1804,1817,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
