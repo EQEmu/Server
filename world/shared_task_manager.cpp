@@ -1724,6 +1724,12 @@ bool SharedTaskManager::HandleCompletedActivities(SharedTask* s)
 void SharedTaskManager::HandleCompletedTask(SharedTask* s)
 {
 	auto db_task = s->GetDbSharedTask();
+	if (db_task.completion_time > 0)
+	{
+		LogTasksDetail("[HandleCompletedTask] shared task [{}] already completed", db_task.id);
+		return;
+	}
+
 	LogTasksDetail("[HandleCompletedTask] Marking shared task [{}] completed", db_task.id);
 	db_task.completion_time = std::time(nullptr);
 	db_task.is_locked = true;
