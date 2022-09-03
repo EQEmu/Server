@@ -140,6 +140,7 @@ public:
 	void SetSimpleRoamBox(float box_size, float move_distance);
 	void SetSimpleRoamBox(float box_size, float move_distance, int move_delay);
 	void RecalculateSkills();
+	void ReloadSpells();
 	void ScaleNPC(uint8 npc_level);
 	bool IsRaidTarget();
 	bool IsRareSpawn();

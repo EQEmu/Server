@@ -665,6 +665,11 @@ bool Perl_NPC_IsRareSpawn(NPC* self)
 	return self->IsRareSpawn();
 }
 
+void Perl_NPC_ReloadSpells(NPC* self)
+{
+	self->ReloadSpells();
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -765,6 +770,7 @@ void perl_register_npc()
 	package.add("PauseWandering", &Perl_NPC_PauseWandering);
 	package.add("PickPocket", &Perl_NPC_PickPocket);
 	package.add("RecalculateSkills", &Perl_NPC_RecalculateSkills);
+	package.add("ReloadSpells", &Perl_NPC_ReloadSpells);
 	package.add("RemoveAISpell", &Perl_NPC_RemoveSpellFromNPCList);
 	package.add("RemoveAISpellEffect", &Perl_NPC_RemoveAISpellEffect);
 	package.add("RemoveCash", &Perl_NPC_RemoveCash);

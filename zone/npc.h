@@ -541,6 +541,7 @@ public:
 	void ScaleNPC(uint8 npc_level);
 
 	void RecalculateSkills();
+	void ReloadSpells();
 
 	static LootDropEntries_Struct NewLootDropEntry();
 protected:
