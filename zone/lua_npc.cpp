@@ -675,6 +675,12 @@ bool Lua_NPC::IsRareSpawn()
 	return self->IsRareSpawn();
 }
 
+void Lua_NPC::ReloadSpells()
+{
+	Lua_Safe_Call_Void();
+	self->ReloadSpells();
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -769,6 +775,7 @@ luabind::scope lua_register_npc() {
 	.def("PauseWandering", (void(Lua_NPC::*)(int))&Lua_NPC::PauseWandering)
 	.def("PickPocket", (void(Lua_NPC::*)(Lua_Client))&Lua_NPC::PickPocket)
 	.def("RecalculateSkills", (void(Lua_NPC::*)(void))&Lua_NPC::RecalculateSkills)
+	.def("ReloadSpells", (void(Lua_NPC::*)(void))&Lua_NPC::ReloadSpells)
 	.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 	.def("RemoveAISpellEffect", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpellEffect)
 	.def("RemoveCash", (void(Lua_NPC::*)(void))&Lua_NPC::RemoveCash)
