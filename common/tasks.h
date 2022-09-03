@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <array>
 
-#define MAXTASKS 10000
 #define MAXTASKSETS 1000
 #define MAXACTIVEQUESTS 19 // The Client has a hard cap of 19 active quests, 29 in SoD+
 #define MAXCHOOSERENTRIES 40 // The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
@@ -223,8 +222,8 @@ struct TaskInformation {
 	int                 reward_points;
 	AltCurrencyType     reward_point_type;
 	int                 activity_count{};
-	short               min_level{};
-	short               max_level{};
+	uint8_t             min_level{};
+	uint8_t             max_level{};
 	int                 level_spread;
 	int                 min_players;
 	int                 max_players;
