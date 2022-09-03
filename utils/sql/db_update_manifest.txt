@@ -460,6 +460,7 @@
 9204|2022_09_02_faction_association.sql|SHOW TABLES LIKE 'faction_association'|empty|
 9205|2022_09_03_fix_starting_point_heading.sql|SELECT * FROM db_version WHERE version >= 9205|empty|
 9206|2022_09_03_fix_door_destination_headings.sql|SELECT * FROM db_version WHERE version >= 9206|empty|
+9207|2022_09_03_fix_zone_point_heading_data.sql|SELECT * FROM db_version WHERE version >= 9206|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
