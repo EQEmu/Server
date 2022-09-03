@@ -74,7 +74,7 @@ public:
 	int ActiveSpeakActivity(Client* client, NPC* npc, int task_id);
 	int ActiveTasksInSet(int task_set_id);
 	int CompletedTasksInSet(int task_set_id);
-	bool HasSlotForTask(TaskInformation *task);
+	bool HasSlotForTask(const TaskInformation* task);
 	void CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz);
 	void ListTaskTimers(Client* client);
 	void KickPlayersSharedTask(Client* client);
@@ -114,7 +114,7 @@ private:
 
 	int IncrementDoneCount(
 		Client *client,
-		const TaskInformation* task_information,
+		const TaskInformation* task_data,
 		int task_index,
 		int activity_id,
 		int count = 1,

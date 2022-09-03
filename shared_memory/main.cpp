@@ -27,6 +27,7 @@
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
 #include "../common/strings.h"
+#include "faction_association.h"
 #include "items.h"
 #include "npc_faction.h"
 #include "loot.h"
@@ -181,13 +182,14 @@ int main(int argc, char **argv)
 
 	std::string hotfix_name = "";
 
-	bool load_all        = true;
-	bool load_items      = false;
-	bool load_factions   = false;
-	bool load_loot       = false;
-	bool load_skill_caps = false;
-	bool load_spells     = false;
-	bool load_bd         = false;
+	bool load_all           = true;
+	bool load_items         = false;
+	bool load_factions      = false;
+	bool load_faction_assoc = false;
+	bool load_loot          = false;
+	bool load_skill_caps    = false;
+	bool load_spells        = false;
+	bool load_bd            = false;
 
 	if (argc > 1) {
 		for (int i = 1; i < argc; ++i) {
@@ -228,6 +230,10 @@ int main(int argc, char **argv)
 					else if (strcasecmp("spells", argv[i]) == 0) {
 						load_spells = true;
 						load_all    = false;
+					}
+					else if (strcasecmp("faction_assoc", argv[i]) == 0) {
+						load_faction_assoc = true;
+						load_all = false;
 					}
 					break;
 				case '-': {
@@ -295,6 +301,16 @@ int main(int argc, char **argv)
 		try {
 			LoadSpells(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
+			LogError("{}", ex.what());
+			return 1;
+		}
+	}
+
+	if (load_all || load_faction_assoc) {
+		LogInfo("Loading faction associations");
+		try {
+			LoadFactionAssociation(&content_db, hotfix_name);
+		} catch(std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;
 		}
