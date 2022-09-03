@@ -1509,7 +1509,7 @@ bool SharedDatabase::LoadFactionAssociation(const std::string &prefix)
 		auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("factionassociation");
 		mutex.Lock();
-		std::string file_name = Config->SharedMemDir + prefix + std::string("factionassociations");
+		std::string file_name = Config->SharedMemDir + prefix + std::string("factionassociation");
 		faction_associations_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
 		faction_associations_hash = std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>>(
 		    new EQ::FixedMemoryHashSet<FactionAssociations>(reinterpret_cast<uint8 *>(faction_associations_mmf->Get()),
