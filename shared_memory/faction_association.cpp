@@ -25,7 +25,7 @@
 #include "../common/faction.h"
 
 void LoadFactionAssociation(SharedDatabase *database, const std::string &prefix) {
-	EQ::IPCMutex mutex("factionassociation");
+	EQ::IPCMutex mutex("factionassociations");
 	mutex.Lock();
 
 	uint32 lists = 0;
@@ -35,7 +35,7 @@ void LoadFactionAssociation(SharedDatabase *database, const std::string &prefix)
 	uint32 size = static_cast<uint32>(EQ::FixedMemoryHashSet<FactionAssociations>::estimated_size(lists, max_list));
 
 	auto Config = EQEmuConfig::get();
-	std::string file_name = Config->SharedMemDir + prefix + std::string("factionassociation");
+	std::string file_name = Config->SharedMemDir + prefix + std::string("factionassociations");
 	EQ::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
