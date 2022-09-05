@@ -547,15 +547,12 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	int aa_cap = RuleI(AA, UnusedAAPointCap);
 
 	if (aa_cap > 0 && aaexp > 0) {
-		char val1[20] = {0};
-		char val2[20] = {0};
-		
 		if (m_pp.aapoints == aa_cap) {
 			MessageString(Chat::Red, AA_CAP);
 			aaexp = 0;
 			m_epp.perAA = 0;
 		} else if (m_pp.aapoints > aa_cap) {
-			MessageString(Chat::Red, OVER_AA_CAP, ConvertArray(aa_cap, val1), ConvertArray(aa_cap, val2));
+			MessageString(Chat::Red, OVER_AA_CAP, fmt::format_int(aa_cap).c_str(), fmt::format_int(aa_cap).c_str());
 			m_pp.aapoints = aa_cap;
 			aaexp = 0;
 			m_epp.perAA = 0;
