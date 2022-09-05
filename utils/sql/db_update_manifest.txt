@@ -458,6 +458,7 @@
 9202|2022_08_24_task_activities_step.sql|SHOW COLUMNS FROM `task_activities` LIKE 'step'|contains|unsigned
 9203|2022_08_07_replace_task_goals.sql|SHOW COLUMNS FROM `task_activities` LIKE 'item_id'|empty|
 9204|2022_09_02_faction_association.sql|SHOW TABLES LIKE 'faction_association'|empty|
+9205|2022_09_03_fix_starting_point_heading.sql|SELECT * FROM db_version WHERE version >= 9205|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
