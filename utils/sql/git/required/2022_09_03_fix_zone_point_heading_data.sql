@@ -2990,3 +2990,5 @@ UPDATE zone_points SET target_heading = 0 WHERE id = 840; -- frozenshadow (16)
 UPDATE zone_points SET target_heading = 0 WHERE id = 841; -- frozenshadow (17)
 UPDATE zone_points SET target_heading = 0 WHERE id = 842; -- frozenshadow (18)
 UPDATE zone_points SET target_heading = 0 WHERE id = 843; -- frozenshadow (19)
+
+UPDATE zone_points SET target_heading = 999 where target_heading = 1998;
