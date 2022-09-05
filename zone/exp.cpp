@@ -544,14 +544,18 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
 	// Check for Unused AA Cap.  If at or above cap, set AAs to cap, set aaexp to 0 and set aa percentage to 0.
 	// Doing this here means potentially one kill wasted worth of experience, but easiest to put it here than to rewrite this function.
-	if (aaexp > 0) {
-		int aa_cap = RuleI(AA, UnusedAAPointCap);
+	int aa_cap = RuleI(AA, UnusedAAPointCap);
+
+	if (aa_cap > 0 && aaexp > 0) {
+		char val1[20] = {0};
+		char val2[20] = {0};
+		
 		if (m_pp.aapoints == aa_cap) {
 			MessageString(Chat::Red, AA_CAP);
 			aaexp = 0;
 			m_epp.perAA = 0;
 		} else if (m_pp.aapoints > aa_cap) {
-			MessageString(Chat::Red, OVER_AA_CAP);
+			MessageString(Chat::Red, OVER_AA_CAP, ConvertArray(aa_cap, val1), ConvertArray(aa_cap, val2));
 			m_pp.aapoints = aa_cap;
 			aaexp = 0;
 			m_epp.perAA = 0;

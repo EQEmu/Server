@@ -685,7 +685,7 @@ RULE_REAL(AA, ModernAAScalingStartPercent, 1000, "1000% or 10x AA experience at 
 RULE_INT(AA, ModernAAScalingAAMinimum, 0, "The minimum number of earned AA before AA experience scaling begins")
 RULE_INT(AA, ModernAAScalingAALimit, 4000, "The number of earned AA when AA experience scaling ends")
 RULE_BOOL(AA, SoundForAAEarned, false, "Play sound when AA point earned")
-RULE_INT(AA, UnusedAAPointCap, 30, "Cap for Unused AA Points.  Default: 30.  NOTE: DO NOT LOWER THIS WITHOUT KNOWING WHAT YOU ARE DOING. MAY RESULT IN PLAYERS LOSING AAs.")
+RULE_INT(AA, UnusedAAPointCap, -1, "Cap for Unused AA Points.  Default: -1.  NOTE: DO NOT LOWER THIS WITHOUT KNOWING WHAT YOU ARE DOING. MAY RESULT IN PLAYERS LOSING AAs.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Console)
