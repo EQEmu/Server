@@ -557,6 +557,7 @@ RULE_BOOL(TaskSystem, EnableTaskProximity, true, "Enable task proximity system")
 RULE_INT(TaskSystem, RequestCooldownTimerSeconds, 15, "Seconds between allowing characters to request tasks (live-like default: 15 seconds)")
 RULE_INT(TaskSystem, SharedTasksWorldProcessRate, 6000, "Timer interval (milliseconds) that shared tasks are processed in world")
 RULE_INT(TaskSystem, SharedTasksTerminateTimerMS, 120000, "Delay (milliseconds) until a shared task is terminated if requirements are no longer met after member removal (default: 2 minutes)")
+RULE_BOOL(TaskSystem, UpdateOneElementPerTask, true, "If true (live-like) task updates only increment the first matching activity. If false all matching elements will be incremented.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Range)

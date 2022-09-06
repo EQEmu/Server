@@ -592,7 +592,11 @@ int ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter,
 
 				int updated = IncrementDoneCount(client, task, client_task.slot, client_activity.activity_id, count);
 				max_updated = std::max(max_updated, updated);
-				break; // only one element updated per task, move to next task
+
+				if (RuleB(TaskSystem, UpdateOneElementPerTask))
+				{
+					break; // only one element updated per task, move to next task
+				}
 			}
 		}
 	}
