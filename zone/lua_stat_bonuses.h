@@ -100,7 +100,7 @@ public:
 	uint32 GetwindMod() const;
 	uint32 GetstringedMod() const;
 	uint32 GetsongModCap() const;
-	int8 Gethatemod() const;
+	int32 Gethatemod() const;
 	int64 GetEnduranceReduction() const;
 	int32 GetStrikeThrough() const;
 	int32 GetMeleeMitigation() const;

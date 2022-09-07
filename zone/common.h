@@ -413,7 +413,7 @@ struct StatBonuses {
 	uint32	windMod;
 	uint32	stringedMod;
 	uint32	songModCap;
-	int8	hatemod;
+	int32	hatemod;
 	int64	EnduranceReduction;
 
 	int32	StrikeThrough;						// PoP: Strike Through %
