@@ -273,15 +273,15 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 	auto user_to_world_response = (UsertoWorldResponse_Struct *) packet.Data();
 	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
 
-	Client *client = server.client_manager->GetClient(
+	Client *c = server.client_manager->GetClient(
 		user_to_world_response->lsaccountid,
 		user_to_world_response->login
 	);
 
-	if (client) {
+	if (c) {
 		LogDebug("Found client with user id of [{0}] and account name of {1}",
 				 user_to_world_response->lsaccountid,
-				 client->GetAccountName().c_str()
+				 c->GetAccountName().c_str()
 		);
 
 		auto *outapp = new EQApplicationPacket(
@@ -289,62 +289,62 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 			sizeof(PlayEverquestResponse_Struct)
 		);
 
-		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		per->base_header.sequence = client->GetPlaySequence();
-		per->server_number        = client->GetPlayServerID();
+		auto *r = (PlayEverquestResponse_Struct *) outapp->pBuffer;
+		r->base_header.sequence = c->GetPlaySequence();
+		r->server_number        = c->GetPlayServerID();
 
 		LogDebug(
 			"Found sequence and play of [{0}] [{1}]",
-			client->GetPlaySequence(),
-			client->GetPlayServerID()
+			c->GetPlaySequence(),
+			c->GetPlayServerID()
 		);
 
 		LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
 
 		if (user_to_world_response->response > 0) {
-			per->base_reply.success = true;
+			r->base_reply.success = true;
 			SendClientAuth(
-				client->GetConnection()->GetRemoteAddr(),
-				client->GetAccountName(),
-				client->GetKey(),
-				client->GetAccountID(),
-				client->GetLoginServerName()
+				c->GetConnection()->GetRemoteAddr(),
+				c->GetAccountName(),
+				c->GetKey(),
+				c->GetAccountID(),
+				c->GetLoginServerName()
 			);
 		}
 
 		switch (user_to_world_response->response) {
 			case UserToWorldStatusSuccess:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
 				break;
 			case UserToWorldStatusSuspended:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
 				break;
 			case UserToWorldStatusBanned:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
 				break;
 			default:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
+				r->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
 				break;
 		}
 
 		LogDebug(
 			"Sending play response with following data, allowed [{0}], sequence {1}, server number {2}, message {3}",
-			per->base_reply.success,
-			per->base_header.sequence,
-			per->server_number,
-			per->base_reply.error_str_id
+			r->base_reply.success,
+			r->base_header.sequence,
+			r->server_number,
+			r->base_reply.error_str_id
 		);
 
-		client->SendPlayResponse(outapp);
+		c->SendPlayResponse(outapp);
 		delete outapp;
 	}
 	else {

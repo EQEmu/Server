@@ -313,6 +313,20 @@ public:
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
+	struct LogEnabled {
+		bool log_to_file_enabled;
+		bool log_to_console_enabled;
+		bool log_to_gmsay_enabled;
+		bool log_to_discord_enabled;
+		bool log_enabled;
+	};
+
+	// instead of calculating this every log message, lets cache it
+	LogEnabled logs_enabled[Logs::LogCategory::MaxCategoryID]{};
+
+	LogEnabled GetLogsEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
+	bool IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
+
 	struct DiscordWebhooks {
 		int         id;
 		std::string webhook_name;
