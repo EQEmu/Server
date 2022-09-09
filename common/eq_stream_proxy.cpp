@@ -42,14 +42,6 @@ void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
 		return;
 	}
 
-	LogPacketServerClient(
-		"[{} - {:#04x}] [Size: {}] {}",
-		OpcodeManager::EmuToName(p->GetOpcode()),
-		(*m_opcodes)->EmuToEQ(p->GetOpcode()),
-		p->Size(),
-		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketServerClient) ? DumpPacketToString(p) : "")
-	);
-
 	EQApplicationPacket *newp = p->Copy();
 	FastQueuePacket(&newp, ack_req);
 }
