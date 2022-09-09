@@ -51,7 +51,7 @@ public:
 	 * @param size
 	 */
 	void Handle_Login(const char *data, unsigned int size);
-	
+
 	/**
 	* Sends the expansion data packet
 	*
@@ -110,6 +110,12 @@ public:
 	 * @return
 	 */
 	std::string GetAccountName() const { return m_account_name; }
+
+	/**
+	 * Returns a description for the client for logging
+	 * @return std::string
+	 */
+	std::string GetClientDescription();
 
 	/**
 	 * Gets the key generated at login for this client

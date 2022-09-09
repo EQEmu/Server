@@ -26,14 +26,6 @@ bool Client::Process()
 {
 	EQApplicationPacket *app = m_connection->PopPacket();
 	while (app) {
-		if (server.options.IsTraceOn()) {
-			LogDebug("Application packet received from client (size {0})", app->Size());
-		}
-
-		if (server.options.IsDumpInPacketsOn()) {
-			DumpPacket(app);
-		}
-
 		if (m_client_status == cs_failed_to_login) {
 			delete app;
 			app = m_connection->PopPacket();
@@ -42,9 +34,7 @@ bool Client::Process()
 
 		switch (app->GetOpcode()) {
 			case OP_SessionReady: {
-				if (server.options.IsTraceOn()) {
-					LogInfo("Session ready received from client");
-				}
+				LogInfo("Session ready received from client account {}", GetClientDescription());
 				Handle_SessionReady((const char *) app->pBuffer, app->Size());
 				break;
 			}
@@ -54,9 +44,7 @@ bool Client::Process()
 					break;
 				}
 
-				if (server.options.IsTraceOn()) {
-					LogInfo("Login received from client");
-				}
+				LogInfo("Login received from client {}", GetClientDescription());
 
 				Handle_Login((const char *) app->pBuffer, app->Size());
 				break;
@@ -67,9 +55,7 @@ bool Client::Process()
 					break;
 				}
 
-				if (server.options.IsTraceOn()) {
-					LogDebug("Server list request received from client");
-				}
+				LogInfo("Server list request received from client {}", GetClientDescription());
 
 				SendServerListPacket(*(uint32_t *) app->pBuffer);
 				break;
@@ -87,7 +73,7 @@ bool Client::Process()
 				if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
 					char dump[64];
 					app->build_header_dump(dump);
-					LogError("Recieved unhandled application packet from the client: [{}]", dump);
+					LogError("Received unhandled application packet from the client: [{}]", dump);
 				}
 			}
 		}
@@ -127,10 +113,6 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	buf->base_header.sequence    = 0x02;
 	buf->base_reply.success      = true;
 	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
-
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp);
-	}
 
 	m_connection->QueuePacket(outapp);
 	delete outapp;
@@ -290,14 +272,12 @@ void Client::Handle_Play(const char *data)
 	auto       server_id_in = (unsigned int) play->server_number;
 	auto       sequence_in  = (unsigned int) play->base_header.sequence;
 
-	if (server.options.IsTraceOn()) {
-		LogInfo(
-			"Play received from client [{0}] server number {1} sequence {2}",
-			GetAccountName(),
-			server_id_in,
-			sequence_in
-		);
-	}
+	LogInfo(
+		"[Handle_Play] Play received from client [{}] server number [{}] sequence [{}]",
+		GetAccountName(),
+		server_id_in,
+		sequence_in
+	);
 
 	m_play_server_id   = (unsigned int) play->server_number;
 	m_play_sequence_id = sequence_in;
@@ -310,21 +290,14 @@ void Client::Handle_Play(const char *data)
  */
 void Client::SendServerListPacket(uint32 seq)
 {
-	auto outapp = server.server_manager->CreateServerListPacket(this, seq);
+	auto app = server.server_manager->CreateServerListPacket(this, seq);
 
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp.get());
-	}
-
-	m_connection->QueuePacket(outapp.get());
+	m_connection->QueuePacket(app.get());
 }
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
-	if (server.options.IsTraceOn()) {
-		LogDebug("Sending play response for {0}", GetAccountName());
-		// server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
-	}
+	LogInfo("Sending play response for {}", GetClientDescription());
 	m_connection->QueuePacket(outapp);
 }
 
@@ -421,10 +394,6 @@ void Client::DoFailedLogin()
 	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
 	outapp.WriteData(&base_header, sizeof(base_header));
 	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
-
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(&outapp);
-	}
 
 	m_connection->QueuePacket(&outapp);
 	m_client_status = cs_failed_to_login;
@@ -576,10 +545,6 @@ void Client::DoSuccessfulLogin(
 	outapp->WriteData(&base_header, sizeof(base_header));
 	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
-	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp.get());
-	}
-
 	m_connection->QueuePacket(outapp.get());
 
 	m_client_status = cs_logged_in;
@@ -596,7 +561,7 @@ void Client::SendExpansionPacketData(PlayerLoginReply_Struct& plrs)
 
 
 	if (server.options.IsDisplayExpansions()) {
-		
+
 		int32_t expansion = server.options.GetMaxExpansions();
 		int32_t owned_expansion = (expansion << 1) | 1;
 
@@ -838,4 +803,18 @@ bool Client::ProcessHealthCheck(std::string username)
 	}
 
 	return false;
+}
+
+std::string Client::GetClientDescription()
+{
+	in_addr in{};
+	in.s_addr = GetConnection()->GetRemoteIP();
+	std::string client_ip = inet_ntoa(in);
+
+	return fmt::format(
+		"account_name [{}] account_id ({}) ip_address [{}]",
+		GetAccountName(),
+		GetAccountID(),
+		client_ip
+	);
 }

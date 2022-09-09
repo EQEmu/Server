@@ -636,6 +636,46 @@
         OutF(LogSys, Logs::Detail, Logs::DynamicZones, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogPacketServerClient(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketServerClient].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::PacketServerClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketServerClientDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketServerClient].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::PacketServerClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketServerClientWithDump(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketServerClientWithDump].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::PacketServerClientWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketServerClientWithDumpDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketServerClientWithDump].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::PacketServerClientWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketClientServer(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::PacketClientServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketClientServerDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::PacketClientServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketClientServerWithDump(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::PacketClientServerWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketClientServerWithDumpDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::PacketClientServerWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define LogScheduler(message, ...) do {\
     if (LogSys.log_settings[Logs::Scheduler].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Scheduler, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
