@@ -327,9 +327,6 @@ public:
 		bool log_enabled;
 	};
 
-	// instead of calculating this every log message, lets cache it
-	LogEnabled logs_enabled[Logs::LogCategory::MaxCategoryID]{};
-
 	LogEnabled GetLogsEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
 	bool IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
 
