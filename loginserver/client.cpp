@@ -26,6 +26,14 @@ bool Client::Process()
 {
 	EQApplicationPacket *app = m_connection->PopPacket();
 	while (app) {
+		LogPacketClientServer(
+			"[{}] [{:#06x}] Size [{}] {}",
+			OpcodeManager::EmuToName(app->GetOpcode()),
+			app->GetOpcode(),
+			app->Size(),
+			(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+		);
+
 		if (m_client_status == cs_failed_to_login) {
 			delete app;
 			app = m_connection->PopPacket();
