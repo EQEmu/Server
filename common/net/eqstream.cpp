@@ -65,6 +65,7 @@ EQ::Net::EQStream::~EQStream()
 }
 
 void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
+
 	LogPacketServerClient(
 		"[{}] [{:#04x}] Size [{}] {}",
 		OpcodeManager::EmuToName(p->GetOpcode()),

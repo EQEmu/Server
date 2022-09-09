@@ -447,8 +447,8 @@ void ClearMappedOpcode(EmuOpcode op)
 // client methods
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
-	LogPacketServerClient(
-		"[{} - {:#04x}] [Size: {}] {}",
+	LogPacketClientServer(
+		"[{}] [{:#04x}] Size [{}] {}",
 		OpcodeManager::EmuToName(app->GetOpcode()),
 		app->GetOpcode(),
 		app->Size(),
