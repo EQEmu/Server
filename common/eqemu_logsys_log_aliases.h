@@ -413,35 +413,6 @@
         OutF(LogSys, Logs::Detail, Logs::PacketServerClient, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
-#define LogPacketClientServerUnhandled(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::PacketClientServerUnhandled))\
-        OutF(LogSys, Logs::General, Logs::PacketClientServerUnhandled, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogPacketClientServerUnhandledDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServerUnhandled))\
-        OutF(LogSys, Logs::Detail, Logs::PacketClientServerUnhandled, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogPacketServerClientWithDump(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::PacketServerClientWithDump))\
-        OutF(LogSys, Logs::General, Logs::PacketServerClientWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogPacketServerClientWithDumpDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::PacketServerClientWithDump))\
-        OutF(LogSys, Logs::Detail, Logs::PacketServerClientWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogPacketClientServerWithDump(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::General, Logs::PacketClientServerWithDump))\
-        OutF(LogSys, Logs::General, Logs::PacketClientServerWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
-
-#define LogPacketClientServerWithDumpDetail(message, ...) do {\
-    if (LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServerWithDump))\
-        OutF(LogSys, Logs::Detail, Logs::PacketClientServerWithDump, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
-} while (0)
 
 #define LogLoginserver(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::General, Logs::Loginserver))\

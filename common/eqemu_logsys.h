@@ -54,7 +54,7 @@ namespace Logs {
 		AI,
 		Aggro,
 		Attack,
-		PacketClientServer,
+		DeprecatedCS,
 		Combat,
 		Commands,
 		Crash,
@@ -88,10 +88,10 @@ namespace Logs {
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
-		PacketServerClient,
-		PacketClientServerUnhandled,
-		PacketServerClientWithDump,
-		PacketClientServerWithDump,
+		DeprecatedSC,
+		DeprecatedCSU,
+		DeprecatedSCD,
+		DeprecatedCSD,
 		Loginserver,
 		ClientLogin,
 		HeadlessClient,
@@ -132,6 +132,9 @@ namespace Logs {
 		Hate,
 		Discord,
 		Faction,
+		PacketServerClient,
+		PacketClientServer,
+		PacketServerToServer,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -144,7 +147,7 @@ namespace Logs {
 		"AI",
 		"Aggro",
 		"Attack",
-		"Packet-Client->Server",
+		"Deprecated",
 		"Combat",
 		"Commands",
 		"Crash",
@@ -178,10 +181,10 @@ namespace Logs {
 		"MySQL Query",
 		"Mercenaries",
 		"Quest Debug",
-		"Packet-Server->Client",
-		"Packet-Client->Server Unhandled",
-		"Packet-Server->Client (Dump)",
-		"Packet-Client->Server (Dump)",
+		"Deprecated",
+		"Deprecated",
+		"Deprecated",
+		"Deprecated",
 		"Login Server",
 		"Client Login",
 		"Headless Client",
@@ -222,6 +225,9 @@ namespace Logs {
 		"Hate",
 		"Discord",
 		"Faction",
+		"Packet-S->C",
+		"Packet-C->S",
+		"Packet-S->S"
 	};
 }
 
