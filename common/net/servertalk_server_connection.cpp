@@ -135,7 +135,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 		auto leg_opcode = *(uint16_t*)&m_buffer[current];
 		auto leg_size = *(uint16_t*)&m_buffer[current + 2] - 4;
 
-		//this creates a small edge case where the exact size of a 
+		//this creates a small edge case where the exact size of a
 		//packet from the modern protocol can't be "43061256"
 		//so in send we pad it one byte if that's the case
 		if (leg_opcode == ServerOP_NewLSInfo && leg_size == sizeof(ServerNewLSInfo_Struct)) {
@@ -318,6 +318,16 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 			auto data = p.GetString(6, length);
 			size_t message_len = length;
 			EQ::Net::StaticPacket packet(&data[0], message_len);
+
+			const auto is_detail_enabled = LogSys.IsLogEnabled(Logs::Detail, Logs::PacketServerToServer);
+			if (opcode != ServerOP_KeepAlive || is_detail_enabled) {
+				LogPacketServerToServer(
+					"[{:#06x}] Size [{}] {}",
+					opcode,
+					packet.Length(),
+					(is_detail_enabled ? "\n" + packet.ToString() : "")
+				);
+			}
 
 			auto cb = m_message_callbacks.find(opcode);
 			if (cb != m_message_callbacks.end()) {

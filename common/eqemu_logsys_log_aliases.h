@@ -814,6 +814,16 @@
         OutF(LogSys, Logs::Detail, Logs::Faction, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogPacketServerToServer(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::PacketServerToServer))\
+        OutF(LogSys, Logs::General, Logs::PacketServerToServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogPacketServerToServerDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::PacketServerToServer))\
+        OutF(LogSys, Logs::Detail, Logs::PacketServerToServer, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 // manually created
 
 #define LogExpeditionsModerate(message, ...) do {\
