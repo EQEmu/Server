@@ -153,7 +153,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	// lava dragon is a fixed size model and should always use its default
 	// otherwise pathing issues
 	if (race == RACE_LAVA_DRAGON_49) {
-		size = 6;
+		size = 5;
 	}
 
 	taunting       = false;
