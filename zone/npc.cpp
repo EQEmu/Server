@@ -146,10 +146,14 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	swarm_timer.Disable();
 
+	if (size <= 0.0f || ) {
+		size = GetRaceGenderDefaultHeight(race, gender);
+	}
+
 	// lava dragon is a fixed size model and should always use its default
 	// otherwise pathing issues
-	if (size <= 0.0f || race == RACE_LAVA_DRAGON_49) {
-		size = GetRaceGenderDefaultHeight(race, gender);
+	if (race == RACE_LAVA_DRAGON_49) {
+		size = 6;
 	}
 
 	taunting       = false;
