@@ -150,6 +150,12 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		size = GetRaceGenderDefaultHeight(race, gender);
 	}
 
+	// lava dragon is a fixed size model and should always use its default
+	// otherwise pathing issues
+	if (race == RACE_LAVA_DRAGON_49) {
+		size = 5;
+	}
+
 	taunting       = false;
 	proximity      = nullptr;
 	copper         = 0;
@@ -2649,7 +2655,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *new_value)
 		AI_AddNPCSpellsEffects(atoi(val.c_str()));
 		CalcBonuses();
 		return;
-	} 
+	}
 	else if (id == "heroic_strikethrough") {
 		heroic_strikethrough = atoi(val.c_str());
 		return;

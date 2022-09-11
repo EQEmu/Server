@@ -878,8 +878,6 @@ float Mob::GetZOffset() const {
 			offset = 1.0f;
 			break;
 		case RACE_DRAGON_438:
-			offset = 0.776f;
-			break;
 		case RACE_DRAGON_452:
 			offset = 0.776f;
 			break;
@@ -889,9 +887,8 @@ float Mob::GetZOffset() const {
 		case RACE_SPIDER_440:
 			offset = 0.938f;
 			break;
+		case RACE_IMP_46:
 		case RACE_SNAKE_468:
-			offset = 1.0f;
-			break;
 		case RACE_CORATHUS_459:
 			offset = 1.0f;
 			break;
@@ -902,8 +899,6 @@ float Mob::GetZOffset() const {
 			offset = 1.2f;
 			break;
 		case RACE_GOO_549:
-			offset = 0.5f;
-			break;
 		case RACE_GOO_548:
 			offset = 0.5f;
 			break;
@@ -920,14 +915,13 @@ float Mob::GetZOffset() const {
 			offset = 4.0f;
 			break;
 		case RACE_ARMOR_OF_MARR_323:
-			offset = 5.0f;
-			break;
 		case RACE_AMYGDALAN_663:
 			offset = 5.0f;
 			break;
 		case RACE_SANDMAN_664:
 			offset = 4.0f;
 			break;
+		case RACE_LAVA_DRAGON_49:
 		case RACE_ALARAN_SENTRY_STONE_703:
 			offset = 9.0f;
 			break;
@@ -937,9 +931,31 @@ float Mob::GetZOffset() const {
 		case RACE_BLIND_DREAMER_669:
 			offset = 7.0f;
 			break;
-		case RACE_GORAL_687:
-			offset = 2.0f;
+		case RACE_SIREN_187:
+		case RACE_HALAS_CITIZEN_90:
+		case RACE_OTTERMAN_190:
+			offset = .5f;
 			break;
+		case RACE_COLDAIN_183:
+			offset = .6f;
+			break;
+		case RACE_WEREWOLF_14:
+			offset = 1.2f;
+			break;
+		case RACE_DWARF_8:
+			offset = .7f;
+			break;
+		case RACE_HORSE_216:
+			offset = 1.4f;
+			break;
+		case RACE_ENCHANTED_ARMOR_175:
+		case RACE_TIGER_63:
+			offset = 1.75f;
+			break;
+		case RACE_STATUE_OF_RALLOS_ZEK_66:
+			offset = 1.0f;
+			break;
+		case RACE_GORAL_687:
 		case RACE_SELYRAH_686:
 			offset = 2.0f;
 			break;
