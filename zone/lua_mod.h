@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sol/sol.hpp>
 #include <string>
 
 struct lua_State;
@@ -8,8 +9,8 @@ class LuaParser;
 class LuaMod
 {
 public:
-	LuaMod(lua_State *ls, LuaParser *lp, const std::string &package_name) {
-		L = ls; 
+	LuaMod(sol::environment *in_env, LuaParser *lp, const std::string &package_name) {
+		env = in_env;
 		parser_ = lp;
 		package_name_ = package_name;
 		Init();
@@ -28,7 +29,7 @@ public:
 	void GetExperienceForKill(Client *self, Mob *against, uint32 &returnValue, bool &ignoreDefault);
 private:
 	LuaParser *parser_;
-	lua_State *L;
+	sol::environment *env;
 	std::string package_name_;
 
 	bool m_has_melee_mitigation;

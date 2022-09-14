@@ -2,6 +2,7 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
+#include <sol/sol.hpp>
 
 #include <sstream>
 #include <list>

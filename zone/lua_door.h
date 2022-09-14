@@ -7,12 +7,6 @@
 class Doors;
 class Lua_Mob;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_door();
-
 class Lua_Door : public Lua_Entity
 {
 	typedef Doors NativeType;

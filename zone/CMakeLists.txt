@@ -52,9 +52,12 @@ SET(zone_sources
     lua_bit.cpp
     lua_corpse.cpp
     lua_client.cpp
+    lua_client_impl.cpp
     lua_door.cpp
+    lua_door_impl.cpp
     lua_encounter.cpp
     lua_entity.cpp
+    lua_entity_impl.cpp
     lua_entity_list.cpp
     lua_expedition.cpp
     lua_general.cpp
@@ -64,6 +67,7 @@ SET(zone_sources
     lua_item.cpp
     lua_iteminst.cpp
     lua_mob.cpp
+    lua_mob_impl.cpp
     lua_mod.cpp
     lua_npc.cpp
     lua_object.cpp
@@ -213,6 +217,7 @@ SET(zone_headers
     lua_entity.h
     lua_entity_list.h
     lua_expedition.h
+    lua_forward.h
     lua_general.h
     lua_group.h
     lua_hate_list.h

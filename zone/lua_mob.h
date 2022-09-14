@@ -2,6 +2,7 @@
 #define EQEMU_LUA_MOB_H
 #ifdef LUA_EQEMU
 
+#include <sol/forward.hpp>
 #include "lua_entity.h"
 
 class Mob;
@@ -14,16 +15,6 @@ class Lua_Bot;
 #endif
 class Lua_NPC;
 class Lua_Client;
-
-namespace luabind {
-	struct scope;
-	namespace adl {
-		class object;
-	}
-}
-
-luabind::scope lua_register_mob();
-luabind::scope lua_register_special_abilities();
 
 class Lua_Mob : public Lua_Entity
 {
@@ -57,7 +48,7 @@ public:
 	bool Attack(Lua_Mob other, int hand, bool from_riposte);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough);
 	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell);
-	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, luabind::adl::object opts);
+	bool Attack(Lua_Mob other, int hand, bool from_riposte, bool is_strikethrough, bool is_from_spell, sol::table opts);
 	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill);
 	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable);
 	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot);
@@ -182,7 +173,7 @@ public:
 	void Say(const char *message);
 	void Say(const char* message, int language);
 	void QuestSay(Lua_Client client, const char *message);
-	void QuestSay(Lua_Client client, const char *message, luabind::adl::object opts);
+	void QuestSay(Lua_Client client, const char *message, sol::table opts);
 	void Shout(const char *message);
 	void Shout(const char* message, int language);
 	void Emote(const char *message);
@@ -332,7 +323,7 @@ public:
 	void SetTexture(int in);
 	void SetRace(int in);
 	void SetGender(int in);
-	void SendIllusionPacket(luabind::adl::object illusion);
+	void SendIllusionPacket(sol::table illusion);
 	void ChangeRace(int in);
 	void ChangeGender(int in);
 	void ChangeTexture(int in);
@@ -442,7 +433,6 @@ public:
 	int AttackAnimation(int Hand, Lua_ItemInst weapon);
 	int GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon);
 	bool IsBerserk();
-	bool TryFinishingBlow(Lua_Mob defender, int64 &damage);
 	int GetBodyType();
 	int GetOrigBodyType();
 	void CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id);

@@ -18,12 +18,6 @@ class Lua_Corpse;
 class Lua_Object;
 class Lua_Door;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_entity();
-
 class Lua_Entity : public Lua_Ptr<Entity>
 {
 	typedef Entity NativeType;

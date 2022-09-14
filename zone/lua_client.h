@@ -2,6 +2,8 @@
 #define EQEMU_LUA_CLIENT_H
 #ifdef LUA_EQEMU
 
+#include <sol/forward.hpp>
+
 #include "lua_mob.h"
 
 class Client;
@@ -10,13 +12,6 @@ class Lua_Group;
 class Lua_Raid;
 class Lua_Inventory;
 class Lua_Packet;
-
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_client();
-luabind::scope lua_register_inventory_where();
 
 class Lua_Client : public Lua_Mob
 {
@@ -183,15 +178,15 @@ public:
 	uint16 FindMemmedSpellBySlot(int slot);
 	int FindMemmedSpellBySpellID(uint16 spell_id);
 	int MemmedCount();
-	luabind::object GetLearnableDisciplines(lua_State* L);
-	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level);
-	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level, uint8 max_level);
-	luabind::object GetLearnedDisciplines(lua_State* L);
-	luabind::object GetMemmedSpells(lua_State* L);
-	luabind::object GetScribedSpells(lua_State* L);
-	luabind::object GetScribeableSpells(lua_State* L);
-	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level);
-	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level, uint8 max_level);
+	sol::table GetLearnableDisciplines(sol::this_state s);
+	sol::table GetLearnableDisciplines(sol::this_state s, uint8 min_level);
+	sol::table GetLearnableDisciplines(sol::this_state s, uint8 min_level, uint8 max_level);
+	sol::table GetLearnedDisciplines(sol::this_state s);
+	sol::table GetMemmedSpells(sol::this_state s);
+	sol::table GetScribedSpells(sol::this_state s);
+	sol::table GetScribeableSpells(sol::this_state s);
+	sol::table GetScribeableSpells(sol::this_state s, uint8 min_level);
+	sol::table GetScribeableSpells(sol::this_state s, uint8 min_level, uint8 max_level);
 	void ScribeSpell(int spell_id, int slot);
 	void ScribeSpell(int spell_id, int slot, bool update_client);
 	uint16 ScribeSpells(uint8 min_level, uint8 max_level);
@@ -239,7 +234,7 @@ public:
 		bool attuned);
 	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
 		bool attuned, int to_slot);
-	void SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_items_table);
+	void SummonBaggedItems(uint32 bag_item_id, sol::table bag_items_table);
 	void SetStats(int type, int value);
 	void IncStats(int type, int value);
 	void DropItem(int slot_id);
@@ -395,7 +390,7 @@ public:
 	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid);
 	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp);
 	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction);
-	void QuestReward(Lua_Mob target, luabind::adl::object reward);
+	void QuestReward(Lua_Mob target, sol::table reward);
 	void CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 	bool IsDead();
 	int CalcCurrentWeight();
@@ -421,7 +416,7 @@ public:
 	void RemoveItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity);
 	void SetGMStatus(uint32 newStatus);
-	void AddItem(luabind::object item_table);
+	void AddItem(sol::table item_table);
 	int CountAugmentEquippedByID(uint32 item_id);
 	int CountItemEquippedByID(uint32 item_id);
 	bool HasAugmentEquippedByID(uint32 item_id);
@@ -436,21 +431,21 @@ public:
 
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
-	void TaskSelector(luabind::adl::object table);
-	void TaskSelector(luabind::adl::object table, bool ignore_cooldown);
+	void TaskSelector(sol::table table);
+	void TaskSelector(sol::table table, bool ignore_cooldown);
 
 	void SetClientMaxLevel(uint8 max_level);
 	uint8 GetClientMaxLevel();
 
 	void DialogueWindow(std::string markdown);
 
-	Lua_Expedition  CreateExpedition(luabind::object expedition_info);
+	Lua_Expedition  CreateExpedition(sol::table expedition_info);
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);
 	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool disable_messages);
 	Lua_Expedition  CreateExpeditionFromTemplate(uint32_t dz_template_id);
 	Lua_Expedition  GetExpedition();
-	luabind::object GetExpeditionLockouts(lua_State* L);
-	luabind::object GetExpeditionLockouts(lua_State* L, std::string expedition_name);
+	sol::table GetExpeditionLockouts(sol::this_state s);
+	sol::table GetExpeditionLockouts(sol::this_state s, std::string expedition_name);
 	std::string     GetLockoutExpeditionUUID(std::string expedition_name, std::string event_name);
 	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds);
 	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid);
@@ -466,7 +461,7 @@ public:
 	void            MovePCDynamicZone(std::string zone_name);
 	void            MovePCDynamicZone(std::string zone_name, int zone_version);
 	void            MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid);
-	void            CreateTaskDynamicZone(int task_id, luabind::object dz_table);
+	void            CreateTaskDynamicZone(int task_id, sol::table dz_table);
 	void            Fling(float value, float target_x, float target_y, float target_z);
 	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los);
 	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping);

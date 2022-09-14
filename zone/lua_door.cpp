@@ -1,218 +1,49 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
-#include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
+#include <sol/sol.hpp>
 
 #include "doors.h"
 #include "lua_mob.h"
 #include "lua_door.h"
 
-void Lua_Door::SetDoorName(const char *name) {
-	Lua_Safe_Call_Void();
-	self->SetDoorName(name);
-}
-
-const char *Lua_Door::GetDoorName() {
-	Lua_Safe_Call_String();
-	return self->GetDoorName();
-}
-
-float Lua_Door::GetX() {
-	Lua_Safe_Call_Real();
-	return self->GetPosition().x;
-}
-
-float Lua_Door::GetY() {
-	Lua_Safe_Call_Real();
-	return self->GetPosition().y;
-}
-
-float Lua_Door::GetZ() {
-	Lua_Safe_Call_Real();
-	return self->GetPosition().z;
-}
-
-float Lua_Door::GetHeading() {
-	Lua_Safe_Call_Real();
-	return self->GetPosition().w;
-}
-
-void Lua_Door::SetX(float x) {
-	Lua_Safe_Call_Void();
-	auto position = self->GetPosition();
-	position.x = x;
-	self->SetPosition(position);
-}
-
-void Lua_Door::SetY(float y) {
-	Lua_Safe_Call_Void();
-	auto position = self->GetPosition();
-	position.y = y;
-	self->SetPosition(position);
-}
-
-void Lua_Door::SetZ(float z) {
-	Lua_Safe_Call_Void();
-	auto position = self->GetPosition();
-	position.z = z;
-	self->SetPosition(position);
-}
-
-void Lua_Door::SetHeading(float h) {
-	Lua_Safe_Call_Void();
-	auto position = self->GetPosition();
-	position.w = h;
-	self->SetPosition(position);
-}
-
-void Lua_Door::SetLocation(float x, float y, float z) {
-	Lua_Safe_Call_Void();
-	self->SetLocation(x, y, z);
-}
-
-uint32 Lua_Door::GetDoorDBID() {
-	Lua_Safe_Call_Int();
-	return self->GetDoorDBID();
-}
-
-uint32 Lua_Door::GetDoorID() {
-	Lua_Safe_Call_Int();
-	return self->GetDoorID();
-}
-
-void Lua_Door::SetSize(uint32 sz) {
-	Lua_Safe_Call_Void();
-	self->SetSize(sz);
-}
-
-uint32 Lua_Door::GetSize() {
-	Lua_Safe_Call_Int();
-	return self->GetSize();
-}
-
-void Lua_Door::SetIncline(uint32 incline) {
-	Lua_Safe_Call_Void();
-	self->SetIncline(incline);
-}
-
-uint32 Lua_Door::GetIncline() {
-	Lua_Safe_Call_Int();
-	return self->GetIncline();
-}
-
-void Lua_Door::SetOpenType(uint32 type) {
-	Lua_Safe_Call_Void();
-	self->SetOpenType(type);
-}
-
-uint32 Lua_Door::GetOpenType() {
-	Lua_Safe_Call_Int();
-	return self->GetOpenType();
-}
-
-void Lua_Door::SetDisableTimer(bool flag) {
-	Lua_Safe_Call_Void();
-	self->SetDisableTimer(flag);
-}
-
-bool Lua_Door::GetDisableTimer() {
-	Lua_Safe_Call_Bool();
-	return self->GetDisableTimer();
-}
-
-void Lua_Door::SetLockPick(uint32 pick) {
-	Lua_Safe_Call_Void();
-	self->SetLockpick(pick);
-}
-
-uint32 Lua_Door::GetLockPick() {
-	Lua_Safe_Call_Int();
-	return self->GetLockpick();
-}
-
-void Lua_Door::SetKeyItem(uint32 key) {
-	Lua_Safe_Call_Void();
-	self->SetKeyItem(key);
-}
-
-uint32 Lua_Door::GetKeyItem() {
-	Lua_Safe_Call_Int();
-	return self->GetKeyItem();
-}
-
-void Lua_Door::SetNoKeyring(int type) {
-	Lua_Safe_Call_Void();
-	self->SetNoKeyring(type);
-}
-
-int Lua_Door::GetNoKeyring() {
-	Lua_Safe_Call_Int();
-	return self->GetNoKeyring();
-}
-
-void Lua_Door::CreateDatabaseEntry() {
-	Lua_Safe_Call_Void();
-	self->CreateDatabaseEntry();
-}
-
-void Lua_Door::ForceOpen(Lua_Mob sender) {
-	Lua_Safe_Call_Void();
-	self->ForceOpen(sender);
-}
-
-void Lua_Door::ForceOpen(Lua_Mob sender, bool alt_mode) {
-	Lua_Safe_Call_Void();
-	self->ForceOpen(sender, alt_mode);
-}
-
-void Lua_Door::ForceClose(Lua_Mob sender) {
-	Lua_Safe_Call_Void();
-	self->ForceClose(sender);
-}
-
-void Lua_Door::ForceClose(Lua_Mob sender, bool alt_mode) {
-	Lua_Safe_Call_Void();
-	self->ForceClose(sender, alt_mode);
-}
-
-luabind::scope lua_register_door() {
-	return luabind::class_<Lua_Door, Lua_Entity>("Door")
-	.def(luabind::constructor<>())
-	.property("null", &Lua_Door::Null)
-	.property("valid", &Lua_Door::Valid)
-	.def("CreateDatabaseEntry", (void(Lua_Door::*)(void))&Lua_Door::CreateDatabaseEntry)
-	.def("ForceClose", (void(Lua_Door::*)(Lua_Mob))&Lua_Door::ForceClose)
-	.def("ForceClose", (void(Lua_Door::*)(Lua_Mob,bool))&Lua_Door::ForceClose)
-	.def("ForceOpen", (void(Lua_Door::*)(Lua_Mob))&Lua_Door::ForceOpen)
-	.def("ForceOpen", (void(Lua_Door::*)(Lua_Mob,bool))&Lua_Door::ForceOpen)
-	.def("GetDisableTimer", (bool(Lua_Door::*)(void))&Lua_Door::GetDisableTimer)
-	.def("GetDoorDBID", (uint32(Lua_Door::*)(void))&Lua_Door::GetDoorDBID)
-	.def("GetDoorID", (uint32(Lua_Door::*)(void))&Lua_Door::GetDoorID)
-	.def("GetDoorName", (const char*(Lua_Door::*)(void))&Lua_Door::GetDoorName)
-	.def("GetHeading", (float(Lua_Door::*)(void))&Lua_Door::GetHeading)
-	.def("GetIncline", (uint32(Lua_Door::*)(void))&Lua_Door::GetIncline)
-	.def("GetKeyItem", (uint32(Lua_Door::*)(void))&Lua_Door::GetKeyItem)
-	.def("GetLockPick", (uint32(Lua_Door::*)(void))&Lua_Door::GetLockPick)
-	.def("GetNoKeyring", (int(Lua_Door::*)(void))&Lua_Door::GetNoKeyring)
-	.def("GetOpenType", (uint32(Lua_Door::*)(void))&Lua_Door::GetOpenType)
-	.def("GetSize", (uint32(Lua_Door::*)(void))&Lua_Door::GetSize)
-	.def("GetX", (float(Lua_Door::*)(void))&Lua_Door::GetX)
-	.def("GetY", (float(Lua_Door::*)(void))&Lua_Door::GetY)
-	.def("GetZ", (float(Lua_Door::*)(void))&Lua_Door::GetZ)
-	.def("SetDisableTimer", (void(Lua_Door::*)(bool))&Lua_Door::SetDisableTimer)
-	.def("SetDoorName", (void(Lua_Door::*)(const char*))&Lua_Door::SetDoorName)
-	.def("SetHeading", (void(Lua_Door::*)(float))&Lua_Door::SetHeading)
-	.def("SetIncline", (void(Lua_Door::*)(uint32))&Lua_Door::SetIncline)
-	.def("SetKeyItem", (void(Lua_Door::*)(uint32))&Lua_Door::SetKeyItem)
-	.def("SetLocation", (void(Lua_Door::*)(float,float,float))&Lua_Door::SetLocation)
-	.def("SetLockPick", (void(Lua_Door::*)(uint32))&Lua_Door::SetLockPick)
-	.def("SetNoKeyring", (void(Lua_Door::*)(int))&Lua_Door::SetNoKeyring)
-	.def("SetOpenType", (void(Lua_Door::*)(uint32))&Lua_Door::SetOpenType)
-	.def("SetSize", (void(Lua_Door::*)(uint32))&Lua_Door::SetSize)
-	.def("SetX", (void(Lua_Door::*)(float))&Lua_Door::SetX)
-	.def("SetY", (void(Lua_Door::*)(float))&Lua_Door::SetY)
-	.def("SetZ", (void(Lua_Door::*)(float))&Lua_Door::SetZ);
+void lua_register_door(sol::state_view &sv)
+{
+	auto door =
+	    sv.new_usertype<Lua_Door>("Door", sol::constructors<Lua_Door>(), sol::base_classes, sol::bases<Lua_Entity>());
+	door["null"] = &Lua_Door::Null;
+	door["valid"] = &Lua_Door::Valid;
+	door["CreateDatabaseEntry"] = &Lua_Door::CreateDatabaseEntry;
+	door["ForceClose"] = sol::overload((void(Lua_Door::*)(Lua_Mob))&Lua_Door::ForceClose,
+					   (void(Lua_Door::*)(Lua_Mob, bool)) & Lua_Door::ForceClose);
+	door["ForceOpen"] = sol::overload((void(Lua_Door::*)(Lua_Mob))&Lua_Door::ForceOpen,
+					  (void(Lua_Door::*)(Lua_Mob, bool))&Lua_Door::ForceOpen);
+	door["GetDisableTimer"] = &Lua_Door::GetDisableTimer;
+	door["GetDoorDBID"] = &Lua_Door::GetDoorDBID;
+	door["GetDoorID"] = &Lua_Door::GetDoorID;
+	door["GetDoorName"] = &Lua_Door::GetDoorName;
+	door["GetHeading"] = &Lua_Door::GetHeading;
+	door["GetIncline"] = &Lua_Door::GetIncline;
+	door["GetKeyItem"] = &Lua_Door::GetKeyItem;
+	door["GetLockPick"] = &Lua_Door::GetLockPick;
+	door["GetNoKeyring"] = &Lua_Door::GetNoKeyring;
+	door["GetOpenType"] = &Lua_Door::GetOpenType;
+	door["GetSize"] = &Lua_Door::GetSize;
+	door["GetX"] = &Lua_Door::GetX;
+	door["GetY"] = &Lua_Door::GetY;
+	door["GetZ"] = &Lua_Door::GetZ;
+	door["SetDisableTimer"] = &Lua_Door::SetDisableTimer;
+	door["SetDoorName"] = &Lua_Door::SetDoorName;
+	door["SetHeading"] = &Lua_Door::SetHeading;
+	door["SetIncline"] = &Lua_Door::SetIncline;
+	door["SetKeyItem"] = &Lua_Door::SetKeyItem;
+	door["SetLocation"] = &Lua_Door::SetLocation;
+	door["SetLockPick"] = &Lua_Door::SetLockPick;
+	door["SetNoKeyring"] = &Lua_Door::SetNoKeyring;
+	door["SetOpenType"] = &Lua_Door::SetOpenType;
+	door["SetSize"] = &Lua_Door::SetSize;
+	door["SetX"] = &Lua_Door::SetX;
+	door["SetY"] = &Lua_Door::SetY;
+	door["SetZ"] = &Lua_Door::SetZ;
 }
 
 #endif

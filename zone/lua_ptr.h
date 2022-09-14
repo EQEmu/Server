@@ -18,6 +18,8 @@
 #define Lua_Safe_Call_Class(type) NativeType *self = reinterpret_cast<NativeType*>(d_)
 #endif
 
+#include "../common/types.h"
+
 template<typename T>
 class Lua_Ptr
 {

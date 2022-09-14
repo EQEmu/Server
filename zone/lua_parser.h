@@ -5,12 +5,11 @@
 #include "quest_parser_collection.h"
 #include "quest_interface.h"
 #include <string>
-#include <list>
-#include <map>
 #include <exception>
+#include <memory>
+#include <sol/forward.hpp>
 
 #include "zone_config.h"
-#include "lua_mod.h"
 
 extern const ZoneConfig *Config;
 
@@ -26,11 +25,6 @@ namespace EQ
 #include "lua_parser_events.h"
 
 struct lua_registered_event;
-namespace luabind {
-	namespace adl {
-		class object;
-	}
-}
 
 class LuaParser : public QuestInterface {
 public:
@@ -88,7 +82,7 @@ public:
 		return &inst;
 	}
 
-	bool HasFunction(std::string function, std::string package_name);
+	bool HasFunction(const std::string &function, const std::string &package_name);
 
 	//Mod Extensions
 	void MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
@@ -107,30 +101,28 @@ private:
 	LuaParser& operator=(const LuaParser&);
 
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
-		std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<std::any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-		std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<std::any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventItem(std::string package_name, QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data,
-		uint32 extra_data, std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		uint32 extra_data, std::vector<std::any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-		std::vector<std::any> *extra_pointers, luabind::adl::object *l_func = nullptr);
+		std::vector<std::any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
 
-	void LoadScript(std::string filename, std::string package_name);
-	void MapFunctions(lua_State *L);
+	void LoadScript(const std::string &filename, const std::string &package_name);
+	void MapFunctions();
 	QuestEventID ConvertLuaEvent(QuestEventID evt);
-
-	std::map<std::string, std::string> vars_;
-	std::map<std::string, bool> loaded_;
-	std::vector<LuaMod> mods_;
-	lua_State *L;
 
 	NPCArgumentHandler NPCArgumentDispatch[_LargestEventID];
 	PlayerArgumentHandler PlayerArgumentDispatch[_LargestEventID];
 	ItemArgumentHandler ItemArgumentDispatch[_LargestEventID];
 	SpellArgumentHandler SpellArgumentDispatch[_LargestEventID];
 	EncounterArgumentHandler EncounterArgumentDispatch[_LargestEventID];
+
+	struct Implementation;
+	std::unique_ptr<Implementation> m_impl;
 
 };
 
