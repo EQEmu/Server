@@ -9,12 +9,6 @@ class Bot;
 class Lua_Bot;
 class Lua_Mob;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_bot();
-
 class Lua_Bot : public Lua_Mob
 {
 	typedef Bot NativeType;

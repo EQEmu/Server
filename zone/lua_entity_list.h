@@ -28,23 +28,6 @@ struct Lua_Object_List;
 struct Lua_Doors_List;
 struct Lua_Spawn_List;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_entity_list();
-luabind::scope lua_register_mob_list();
-luabind::scope lua_register_client_list();
-luabind::scope lua_register_npc_list();
-luabind::scope lua_register_corpse_list();
-luabind::scope lua_register_object_list();
-luabind::scope lua_register_door_list();
-luabind::scope lua_register_spawn_list();
-
-#ifdef BOTS
-luabind::scope lua_register_bot_list();
-#endif
-
 class Lua_EntityList : public Lua_Ptr<EntityList>
 {
 	typedef EntityList NativeType;

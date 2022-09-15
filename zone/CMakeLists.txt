@@ -49,6 +49,7 @@ SET(zone_sources
     inventory.cpp
     loottables.cpp
     lua_bot.cpp
+    lua_bot_impl.cpp
     lua_bit.cpp
     lua_corpse.cpp
     lua_corpse_impl.cpp
@@ -60,6 +61,7 @@ SET(zone_sources
     lua_entity.cpp
     lua_entity_impl.cpp
     lua_entity_list.cpp
+    lua_entity_list_impl.cpp
     lua_expedition.cpp
     lua_general.cpp
     lua_group.cpp

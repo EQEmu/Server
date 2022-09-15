@@ -935,7 +935,7 @@ void LuaParser::MapFunctions()
 	lua_register_npc(sv);
 	lua_register_client(sv);
 #ifdef BOTS
-//	lua_register_bot(sv);
+	lua_register_bot(sv);
 #endif
 	lua_register_inventory(sv);
 	lua_register_inventory_where(sv);
@@ -945,17 +945,17 @@ void LuaParser::MapFunctions()
 	lua_register_spawn(sv);
 	lua_register_hate_entry(sv);
 	lua_register_hate_list(sv);
-//	lua_register_entity_list(sv);
-//	lua_register_mob_list(sv);
-//	lua_register_client_list(sv);
+	lua_register_entity_list(sv);
+	lua_register_mob_list(sv);
+	lua_register_client_list(sv);
 #ifdef BOTS
-//	lua_register_bot_list(sv);
+	lua_register_bot_list(sv);
 #endif
-//	lua_register_npc_list(sv);
-//	lua_register_corpse_list(sv);
-//	lua_register_object_list(sv);
-//	lua_register_door_list(sv);
-//	lua_register_spawn_list(sv);
+	lua_register_npc_list(sv);
+	lua_register_corpse_list(sv);
+	lua_register_object_list(sv);
+	lua_register_door_list(sv);
+	lua_register_spawn_list(sv);
 	lua_register_corpse_loot_list(sv);
 	lua_register_npc_loot_list(sv);
 	lua_register_group(sv);
