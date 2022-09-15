@@ -5028,6 +5028,12 @@ void Client::HandleLDoNOpen(NPC *target)
 			return;
 		}
 
+		if (target->GetSpecialAbility(IMMUNE_OPEN))
+		{
+			LogDebug("[{}] tried to open [{}] but it was immune", GetName(), target->GetName());
+			return;
+		}
+
 		if(DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
 			LogDebug("[{}] tried to open [{}] but [{}] was out of range",
