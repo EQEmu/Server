@@ -1,5 +1,6 @@
 #ifdef LUA_EQEMU
 
+#include <sol/sol.hpp>
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/iterator_policy.hpp>
@@ -23,36 +24,44 @@
 
 struct Lua_Mob_List {
 	std::vector<Lua_Mob> entries;
+	sol::as_table_t<std::vector<Lua_Mob>> get_entries() { return sol::as_table(entries); }
 };
 
 struct Lua_NPC_List {
 	std::vector<Lua_NPC> entries;
+	sol::as_table_t<std::vector<Lua_NPC>> get_entries() { return sol::as_table(entries); }
 };
 
 struct Lua_Client_List {
 	std::vector<Lua_Client> entries;
+	sol::as_table_t<std::vector<Lua_Client>> get_entries() { return sol::as_table(entries); }
 };
 
 #ifdef BOTS
 struct Lua_Bot_List {
 	std::vector<Lua_Bot> entries;
+	sol::as_table_t<std::vector<Lua_Bot>> get_entries() { return sol::as_table(entries); }
 };
 #endif
 
 struct Lua_Corpse_List {
 	std::vector<Lua_Corpse> entries;
+	sol::as_table_t<std::vector<Lua_Corpse>> get_entries() { return sol::as_table(entries); }
 };
 
 struct Lua_Object_List {
 	std::vector<Lua_Object> entries;
+	sol::as_table_t<std::vector<Lua_Object>> get_entries() { return sol::as_table(entries); }
 };
 
 struct Lua_Doors_List {
 	std::vector<Lua_Door> entries;
+	sol::as_table_t<std::vector<Lua_Door>> get_entries() { return sol::as_table(entries); }
 };
 
 struct Lua_Spawn_List {
 	std::vector<Lua_Spawn> entries;
+	sol::as_table_t<std::vector<Lua_Spawn>> get_entries() { return sol::as_table(entries); }
 };
 
 Lua_Mob Lua_EntityList::GetMobID(int id) {

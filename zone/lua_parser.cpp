@@ -918,6 +918,7 @@ void LuaParser::MapFunctions()
 	lua_register_entity(sv);
 	lua_register_mob(sv);
 	lua_register_door(sv);
+	lua_register_group(sv);
 	/*
 	try {
 		luabind::open(L);

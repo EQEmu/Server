@@ -62,6 +62,7 @@ SET(zone_sources
     lua_expedition.cpp
     lua_general.cpp
     lua_group.cpp
+    lua_group_impl.cpp
     lua_hate_list.cpp
     lua_inventory.cpp
     lua_item.cpp
@@ -71,13 +72,18 @@ SET(zone_sources
     lua_mod.cpp
     lua_npc.cpp
     lua_object.cpp
+    lua_object_impl.cpp
     lua_packet.cpp
     lua_parser.cpp
     lua_parser_events.cpp
     lua_raid.cpp
+    lua_raid_impl.cpp
     lua_spawn.cpp
+    lua_spawn_impl.cpp
     lua_spell.cpp
+    lua_spell_impl.cpp
     lua_stat_bonuses.cpp
+    lua_stat_bonuses_impl.cpp
     embperl.cpp
     embxs.cpp
     entity.cpp

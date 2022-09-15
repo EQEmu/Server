@@ -7,12 +7,6 @@
 
 struct StatBonuses;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_stat_bonuses();
-
 class Lua_StatBonuses : public Lua_Ptr<StatBonuses>
 {
 	typedef StatBonuses NativeType;

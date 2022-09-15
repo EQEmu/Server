@@ -20,7 +20,7 @@
 
 void lua_register_client(sol::state_view &sv)
 {
-	auto client = sv.new_usertype<Lua_Client>("Client", sol::constructors<Lua_Client>(), sol::base_classes,
+	auto client = sv.new_usertype<Lua_Client>("Client", sol::constructors<Lua_Client()>(), sol::base_classes,
 						  sol::bases<Lua_Mob, Lua_Entity>());
 	client["AccountID"] = (uint32(Lua_Client::*)(void))&Lua_Client::AccountID;
 	client["AccountName"] = (const char *(Lua_Client::*)(void))&Lua_Client::AccountName;

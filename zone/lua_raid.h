@@ -8,12 +8,6 @@ class Raid;
 class Lua_Client;
 class Lua_Mob;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_raid();
-
 class Lua_Raid : public Lua_Ptr<Raid>
 {
 	typedef Raid NativeType;

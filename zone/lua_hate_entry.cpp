@@ -1,5 +1,6 @@
 #ifdef LUA_EQEMU
 
+#include <sol/sol.hpp>
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
@@ -13,6 +14,7 @@
 struct Lua_HateList
 {
 	std::vector<Lua_HateEntry> entries;
+	sol::as_table_t<std::vector<Lua_HateEntry>> get_entries() { return sol::as_table(entries); }
 };
 
 Lua_Mob Lua_HateEntry::GetEnt() {

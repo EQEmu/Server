@@ -8,12 +8,6 @@ class Group;
 class Lua_Mob;
 class Lua_Client;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_group();
-
 class Lua_Group : public Lua_Ptr<Group>
 {
 	typedef Group NativeType;

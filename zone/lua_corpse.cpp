@@ -1,5 +1,6 @@
 #ifdef LUA_EQEMU
 
+#include <sol/sol.hpp>
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/iterator_policy.hpp>
@@ -10,6 +11,7 @@
 
 struct Lua_Corpse_Loot_List {
 	std::vector<uint32> entries;
+	sol::as_table_t<std::vector<uint32>> get_entries() { return sol::as_table(entries); }
 };
 
 uint32 Lua_Corpse::GetCharID() {

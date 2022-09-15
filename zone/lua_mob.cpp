@@ -18,7 +18,7 @@
 
 void lua_register_mob(sol::state_view &sv)
 {
-	auto mob = sv.new_usertype<Lua_Mob>("Mob", sol::constructors<Lua_Mob>(), sol::base_classes, sol::bases<Lua_Entity>());
+	auto mob = sv.new_usertype<Lua_Mob>("Mob", sol::constructors<Lua_Mob()>(), sol::base_classes, sol::bases<Lua_Entity>());
 	mob["AddNimbusEffect"] = (void(Lua_Mob::*)(int))&Lua_Mob::AddNimbusEffect;
 	mob["AddToHateList"] =
 	    sol::overload((void(Lua_Mob::*)(Lua_Mob)) & Lua_Mob::AddToHateList,
