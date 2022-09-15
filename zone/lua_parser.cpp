@@ -915,82 +915,66 @@ bool LuaParser::HasFunction(const std::string &subname, const std::string &packa
 void LuaParser::MapFunctions()
 {
 	sol::state_view sv = m_impl->state->lua_state();
+//	lua_register_general(sv);
+//	lua_register_random(sv);
+//	lua_register_events(sv);
+//	lua_register_faction(sv);
+//	lua_register_slot(sv);
+//	lua_register_material(sv);
+//	lua_register_client_version(sv);
+//	lua_register_appearance(sv);
+//	lua_register_classes(sv);
+//	lua_register_skills(sv);
+//	lua_register_bodytypes(sv);
+//	lua_register_filters(sv);
+//	lua_register_message_types(sv);
 	lua_register_entity(sv);
+//	lua_register_encounter(sv);
 	lua_register_mob(sv);
-	lua_register_door(sv);
+	lua_register_special_abilities(sv);
+	lua_register_npc(sv);
+	lua_register_client(sv);
+#ifdef BOTS
+//	lua_register_bot(sv);
+#endif
+	lua_register_inventory(sv);
+	lua_register_inventory_where(sv);
+	lua_register_iteminst(sv);
+	lua_register_item(sv);
+	lua_register_spell(sv);
+	lua_register_spawn(sv);
+	lua_register_hate_entry(sv);
+	lua_register_hate_list(sv);
+//	lua_register_entity_list(sv);
+//	lua_register_mob_list(sv);
+//	lua_register_client_list(sv);
+#ifdef BOTS
+//	lua_register_bot_list(sv);
+#endif
+//	lua_register_npc_list(sv);
+//	lua_register_corpse_list(sv);
+//	lua_register_object_list(sv);
+//	lua_register_door_list(sv);
+//	lua_register_spawn_list(sv);
+	lua_register_corpse_loot_list(sv);
+	lua_register_npc_loot_list(sv);
 	lua_register_group(sv);
-	/*
-	try {
-		luabind::open(L);
+	lua_register_raid(sv);
+	lua_register_corpse(sv);
+	lua_register_door(sv);
+	lua_register_object(sv);
+//	lua_register_packet(sv);
+//	lua_register_packet_opcodes(sv);
+	lua_register_stat_bonuses(sv);
+//	lua_register_rules_const(sv);
+//	lua_register_rulei(sv);
+//	lua_register_ruler(sv);
+//	lua_register_ruleb(sv);
+//	lua_register_journal_speakmode(sv);
+//	lua_register_journal_mode(sv);
+//	lua_register_expedition(sv);
+//	lua_register_expedition_lock_messages(sv);
 
-		luabind::module(L)
-		[
-			lua_register_general(),
-			lua_register_random(),
-			lua_register_events(),
-			lua_register_faction(),
-			lua_register_slot(),
-			lua_register_material(),
-			lua_register_client_version(),
-			lua_register_appearance(),
-			lua_register_classes(),
-			lua_register_skills(),
-			lua_register_bodytypes(),
-			lua_register_filters(),
-			lua_register_message_types(),
-			lua_register_entity(),
-			lua_register_encounter(),
-			lua_register_mob(),
-			lua_register_special_abilities(),
-			lua_register_npc(),
-			lua_register_client(),
-#ifdef BOTS
-			lua_register_bot(),
-#endif
-			lua_register_inventory(),
-			lua_register_inventory_where(),
-			lua_register_iteminst(),
-			lua_register_item(),
-			lua_register_spell(),
-			lua_register_spawn(),
-			lua_register_hate_entry(),
-			lua_register_hate_list(),
-			lua_register_entity_list(),
-			lua_register_mob_list(),
-			lua_register_client_list(),
-#ifdef BOTS
-			lua_register_bot_list(),
-#endif
-			lua_register_npc_list(),
-			lua_register_corpse_list(),
-			lua_register_object_list(),
-			lua_register_door_list(),
-			lua_register_spawn_list(),
-			lua_register_corpse_loot_list(),
-			lua_register_npc_loot_list(),
-			lua_register_group(),
-			lua_register_raid(),
-			lua_register_corpse(),
-			lua_register_door(),
-			lua_register_object(),
-			lua_register_packet(),
-			lua_register_packet_opcodes(),
-			lua_register_stat_bonuses(),
-			lua_register_rules_const(),
-			lua_register_rulei(),
-			lua_register_ruler(),
-			lua_register_ruleb(),
-			lua_register_journal_speakmode(),
-			lua_register_journal_mode(),
-			lua_register_expedition(),
-			lua_register_expedition_lock_messages()
-		];
-
-	} catch(std::exception &ex) {
-		std::string error = ex.what();
-		AddError(error);
-	}
-	*/
 }
 
 int LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,

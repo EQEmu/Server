@@ -18,9 +18,8 @@
 void lua_register_entity(sol::state_view &sv)
 {
 	auto entity = sv.new_usertype<Lua_Entity>("Entity", sol::constructors<Lua_Entity()>());
-	entity["null"] = sol::property(&Lua_Entity::Null);
-	entity["valid"] = sol::property(&Lua_Entity::Valid);
-//	.property("valid", &Lua_Entity::Valid)
+	entity["null"] = sol::readonly_property(&Lua_Entity::Null);
+	entity["valid"] = sol::readonly_property(&Lua_Entity::Valid);
 #ifdef BOTS
 	entity["CastToBot"] = &Lua_Entity::CastToBot;
 #endif

@@ -2,6 +2,7 @@
 #define EQEMU_LUA_NPC_H
 #ifdef LUA_EQEMU
 
+#include <sol/forward.hpp>
 #include "lua_mob.h"
 
 class NPC;
@@ -9,13 +10,6 @@ class Lua_Mob;
 class Lua_NPC;
 class Lua_Client;
 struct Lua_NPC_Loot_List;
-
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_npc();
-luabind::scope lua_register_npc_loot_list();
 
 class Lua_NPC : public Lua_Mob
 {
@@ -152,7 +146,7 @@ public:
 	uint16 GetFirstSlotByItemID(uint32 item_id);
 	float GetHealScale();
 	float GetSpellScale();
-	Lua_NPC_Loot_List GetLootList(lua_State* L);
+	Lua_NPC_Loot_List GetLootList();
 	void AddAISpellEffect(int spell_effect_id, int base_value, int limit_value, int max_value);
 	void RemoveAISpellEffect(int spell_effect_id);
 	bool HasAISpellEffect(int spell_effect_id);

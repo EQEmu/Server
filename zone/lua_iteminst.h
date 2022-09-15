@@ -11,12 +11,6 @@ namespace EQ
 	class ItemInstance;
 }
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_iteminst();
-
 class Lua_ItemInst : public Lua_Ptr<EQ::ItemInstance>
 {
 	typedef EQ::ItemInstance NativeType;

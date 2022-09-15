@@ -51,6 +51,7 @@ SET(zone_sources
     lua_bot.cpp
     lua_bit.cpp
     lua_corpse.cpp
+    lua_corpse_impl.cpp
     lua_client.cpp
     lua_client_impl.cpp
     lua_door.cpp
@@ -64,13 +65,18 @@ SET(zone_sources
     lua_group.cpp
     lua_group_impl.cpp
     lua_hate_list.cpp
+    lua_hate_list_impl.cpp
     lua_inventory.cpp
+    lua_inventory_impl.cpp
     lua_item.cpp
+    lua_item_impl.cpp
     lua_iteminst.cpp
+    lua_iteminst_impl.cpp
     lua_mob.cpp
     lua_mob_impl.cpp
     lua_mod.cpp
     lua_npc.cpp
+    lua_npc_impl.cpp
     lua_object.cpp
     lua_object_impl.cpp
     lua_packet.cpp

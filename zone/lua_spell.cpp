@@ -8,8 +8,8 @@
 void lua_register_spell(sol::state_view &sv)
 {
 	auto spell = sv.new_usertype<Lua_Spell>("Spell", sol::constructors<Lua_Spell(), Lua_Spell(int)>());
-	spell["null"] = sol::property(&Lua_Spell::Null);
-	spell["valid"] = sol::property(&Lua_Spell::Valid);
+	spell["null"] = sol::readonly_property(&Lua_Spell::Null);
+	spell["valid"] = sol::readonly_property(&Lua_Spell::Valid);
 	spell["AEDuration"] = &Lua_Spell::GetAEDuration;
 	spell["AEMaxTargets"] = &Lua_Spell::GetAEMaxTargets;
 	spell["Activated"] = &Lua_Spell::GetActivated;

@@ -8,8 +8,8 @@
 void lua_register_object(sol::state_view &sv)
 {
 	auto object = sv.new_usertype<Lua_Object>("Object", sol::constructors<Lua_Object()>(), sol::base_classes, sol::bases<Lua_Entity>());
-	object["null"] = sol::property(&Lua_Object::Null);
-	object["valid"] = sol::property(&Lua_Object::Valid);
+	object["null"] = sol::readonly_property(&Lua_Object::Null);
+	object["valid"] = sol::readonly_property(&Lua_Object::Valid);
 	object["ClearUser"] = (void(Lua_Object::*)(void))&Lua_Object::ClearUser;
 	object["Close"] = (void(Lua_Object::*)(void))&Lua_Object::Close;
 	object["Delete"] = sol::overload((void(Lua_Object::*)(bool)) & Lua_Object::Delete,

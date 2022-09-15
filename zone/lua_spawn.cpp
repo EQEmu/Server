@@ -9,8 +9,8 @@
 void lua_register_spawn(sol::state_view &sv)
 {
 	auto spawn = sv.new_usertype<Lua_Spawn>("Spawn", sol::constructors<Lua_Spawn()>());
-	spawn["null"] = sol::property(&Lua_Spawn::Null);
-	spawn["valid"] = sol::property(&Lua_Spawn::Valid);
+	spawn["null"] = sol::readonly_property(&Lua_Spawn::Null);
+	spawn["valid"] = sol::readonly_property(&Lua_Spawn::Valid);
 	spawn["CurrentNPCID"] = (uint32(Lua_Spawn::*)(void))&Lua_Spawn::CurrentNPCID;
 	spawn["Depop"] = (void(Lua_Spawn::*)(void))&Lua_Spawn::Depop;
 	spawn["Disable"] = (void(Lua_Spawn::*)(void))&Lua_Spawn::Disable;

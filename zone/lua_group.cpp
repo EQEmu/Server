@@ -13,8 +13,8 @@
 void lua_register_group(sol::state_view &sv)
 {
 	auto group = sv.new_usertype<Lua_Group>("Group", sol::constructors<Lua_Group()>());
-	group["null"] = sol::property(&Lua_Group::Null);
-	group["valid"] = sol::property(&Lua_Group::Valid);
+	group["null"] = sol::readonly_property(&Lua_Group::Null);
+	group["valid"] = sol::readonly_property(&Lua_Group::Valid);
 	group["CastGroupSpell"] = (void(Lua_Group::*)(Lua_Mob,int))&Lua_Group::CastGroupSpell;
 	group["DisbandGroup"] = (void(Lua_Group::*)(void))&Lua_Group::DisbandGroup;
 	group["DoesAnyMemberHaveExpeditionLockout"] = sol::overload(

@@ -10,8 +10,8 @@ void lua_register_door(sol::state_view &sv)
 {
 	auto door =
 	    sv.new_usertype<Lua_Door>("Door", sol::constructors<Lua_Door()>(), sol::base_classes, sol::bases<Lua_Entity>());
-	door["null"] = sol::property(&Lua_Door::Null);
-	door["valid"] = sol::property(&Lua_Door::Valid);
+	door["null"] = sol::readonly_property(&Lua_Door::Null);
+	door["valid"] = sol::readonly_property(&Lua_Door::Valid);
 	door["CreateDatabaseEntry"] = &Lua_Door::CreateDatabaseEntry;
 	door["ForceClose"] = sol::overload((void(Lua_Door::*)(Lua_Mob))&Lua_Door::ForceClose,
 					   (void(Lua_Door::*)(Lua_Mob, bool)) & Lua_Door::ForceClose);

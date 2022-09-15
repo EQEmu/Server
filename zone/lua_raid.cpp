@@ -11,8 +11,8 @@
 
 void lua_register_raid(sol::state_view &sv) {
 	auto raid = sv.new_usertype<Lua_Raid>("Raid", sol::constructors<Lua_Raid()>());
-	raid["null"] = sol::property(&Lua_Raid::Null);
-	raid["valid"] = sol::property(&Lua_Raid::Valid);
+	raid["null"] = sol::readonly_property(&Lua_Raid::Null);
+	raid["valid"] = sol::readonly_property(&Lua_Raid::Valid);
 	raid["BalanceHP"] = (void(Lua_Raid::*)(int,uint32))&Lua_Raid::BalanceHP;
 	raid["CastGroupSpell"] = (void(Lua_Raid::*)(Lua_Mob,int,uint32))&Lua_Raid::CastGroupSpell;
 	raid["DoesAnyMemberHaveExpeditionLockout"] = sol::overload(
