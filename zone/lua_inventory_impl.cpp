@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "masterentity.h"
 #include "lua_inventory.h"
 #include "lua_iteminst.h"
@@ -178,4 +179,4 @@ bool Lua_Inventory::HasItemEquippedByID(uint32 item_id) {
 	Lua_Safe_Call_Bool();
 	return self->HasItemEquippedByID(item_id);
 }
-
+#endif

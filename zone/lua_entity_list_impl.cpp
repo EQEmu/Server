@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "masterentity.h"
 #include "lua_entity_list.h"
 #include "lua_entity.h"
@@ -343,3 +344,4 @@ Lua_Bot Lua_EntityList::GetBotByName(std::string bot_name) {
 }
 #endif
 
+#endif

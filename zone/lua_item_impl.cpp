@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "masterentity.h"
 #include "lua_item.h"
 
@@ -895,4 +896,4 @@ const char *Lua_Item::GetScrollName() {
 	Lua_Safe_Call_String();
 	return self->ScrollName;
 }
-
+#endif

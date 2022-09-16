@@ -1,13 +1,13 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
-#include <luabind/luabind.hpp>
+#include <sol/sol.hpp>
 #include "lua_encounter.h"
 #include "encounter.h"
 
 
-luabind::scope lua_register_encounter() {
-	return luabind::class_<Lua_Encounter>("Encounter");
+void lua_register_encounter(sol::state_view &sv)
+{
+	sv.new_usertype<Lua_Encounter>("Encounter");
 }
 
 #endif

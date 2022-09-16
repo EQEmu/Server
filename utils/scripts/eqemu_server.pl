@@ -478,7 +478,6 @@ sub build_linux_source
     print `ln -s -f $build_dir/bin/export_client_files .`;
     print `ln -s -f $build_dir/bin/import_client_files .`;
     print `ln -s -f $build_dir/bin/libcommon.a .`;
-    print `ln -s -f $build_dir/bin/libluabind.a .`;
     print `ln -s -f $build_dir/bin/queryserv .`;
     print `ln -s -f $build_dir/bin/shared_memory .`;
     print `ln -s -f $build_dir/bin/ucs .`;

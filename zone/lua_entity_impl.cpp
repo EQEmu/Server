@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "entity.h"
 #include "lua_entity.h"
 
@@ -124,4 +125,5 @@ Lua_Bot Lua_Entity::CastToBot() {
 	Bot *b = reinterpret_cast<Bot*>(d);
 	return Lua_Bot(b);
 }
+#endif
 #endif

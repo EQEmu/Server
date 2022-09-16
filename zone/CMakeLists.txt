@@ -63,7 +63,10 @@ SET(zone_sources
     lua_entity_list.cpp
     lua_entity_list_impl.cpp
     lua_expedition.cpp
+    lua_expedition_impl.cpp
     lua_general.cpp
+    lua_general_enums.cpp
+    lua_general_rule.cpp
     lua_group.cpp
     lua_group_impl.cpp
     lua_hate_list.cpp
@@ -82,6 +85,7 @@ SET(zone_sources
     lua_object.cpp
     lua_object_impl.cpp
     lua_packet.cpp
+    lua_packet_impl.cpp
     lua_parser.cpp
     lua_parser_events.cpp
     lua_raid.cpp

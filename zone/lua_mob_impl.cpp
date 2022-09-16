@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include <sol/sol.hpp>
 
 #include "client.h"
@@ -2239,3 +2240,4 @@ void Lua_Mob::SetBuffDuration(int spell_id, int duration) {
 	Lua_Safe_Call_Void();
 	self->SetBuffDuration(spell_id, duration);
 }
+#endif

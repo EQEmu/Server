@@ -6,15 +6,6 @@
 
 class Encounter;
 
-namespace luabind {
-	struct scope;
-	namespace adl {
-		class object;
-	}
-}
-
-luabind::scope lua_register_encounter();
-
 class Lua_Encounter : public Lua_Ptr<Encounter>
 {
 	typedef Encounter NativeType;

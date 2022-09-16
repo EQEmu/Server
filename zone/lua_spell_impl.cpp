@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "../common/spdat.h"
 #include "lua_spell.h"
 
@@ -483,4 +484,4 @@ int Lua_Spell::GetRank() {
 	Lua_Safe_Call_Int();
 	return self->rank;
 }
-
+#endif

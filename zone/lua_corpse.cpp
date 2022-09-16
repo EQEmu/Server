@@ -1,4 +1,3 @@
-#include "lua_entity.h"
 #ifdef LUA_EQEMU
 
 #include <sol/sol.hpp>
@@ -6,6 +5,7 @@
 #include "corpse.h"
 #include "lua_corpse.h"
 #include "lua_client.h"
+#include "lua_entity.h"
 
 struct Lua_Corpse_Loot_List {
 	std::vector<uint32> entries;

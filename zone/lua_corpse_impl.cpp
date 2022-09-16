@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "corpse.h"
 #include "lua_corpse.h"
 #include "lua_client.h"
@@ -176,3 +177,4 @@ void Lua_Corpse::RemoveItemByID(uint32 item_id, int quantity) {
 	Lua_Safe_Call_Void();
 	self->RemoveItemByID(item_id, quantity);	
 }
+#endif

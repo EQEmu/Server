@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "groups.h"
 #include "masterentity.h"
 #include "lua_group.h"
@@ -112,3 +113,4 @@ bool Lua_Group::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, 
 	Lua_Safe_Call_Bool();
 	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
 }
+#endif

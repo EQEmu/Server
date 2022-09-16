@@ -1,917 +1,602 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
-#include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
+#include <sol/sol.hpp>
 
 #include "masterentity.h"
 #include "lua_packet.h"
 
-struct Opcodes { };
-
-Lua_Packet::Lua_Packet(int opcode, int size) {
-	SetLuaPtrData(new EQApplicationPacket(static_cast<EmuOpcode>(opcode), size));
-	owned_ = true;
-}
-
-Lua_Packet::Lua_Packet(int opcode, int size, bool raw) {
-	if(raw) {
-		SetLuaPtrData(new EQApplicationPacket(OP_Unknown, size));
-		owned_ = true;
-
-		EQApplicationPacket *self = reinterpret_cast<EQApplicationPacket*>(d_);
-		self->SetOpcodeBypass(opcode);
-	} else {
-		SetLuaPtrData(new EQApplicationPacket(static_cast<EmuOpcode>(opcode), size));
-		owned_ = true;
-	}
-}
-
-Lua_Packet& Lua_Packet::operator=(const Lua_Packet& o) {
-	if(o.owned_) {
-		owned_ = true;
-		EQApplicationPacket *app = reinterpret_cast<EQApplicationPacket*>(o.d_);
-		if(app) {
-			d_ = new EQApplicationPacket(app->GetOpcode(), app->pBuffer, app->size);
-
-			EQApplicationPacket *self = reinterpret_cast<EQApplicationPacket*>(d_);
-			self->SetOpcodeBypass(app->GetOpcodeBypass());
-		} else {
-			d_ = nullptr;
-		}
-	} else {
-		owned_ = false;
-		d_ = o.d_;
-	}
-	return *this;
-}
-
-Lua_Packet::Lua_Packet(const Lua_Packet& o) {
-	if(o.owned_) {
-		owned_ = true;
-		EQApplicationPacket *app = reinterpret_cast<EQApplicationPacket*>(o.d_);
-		if(app) {
-			d_ = new EQApplicationPacket(app->GetOpcode(), app->pBuffer, app->size);
-
-			EQApplicationPacket *self = reinterpret_cast<EQApplicationPacket*>(d_);
-			self->SetOpcodeBypass(app->GetOpcodeBypass());
-		} else {
-			d_ = nullptr;
-		}
-	} else {
-		owned_ = false;
-		d_ = o.d_;
-	}
-}
-
-int Lua_Packet::GetSize() {
-	Lua_Safe_Call_Int();
-	return static_cast<int>(self->size);
-}
-
-int Lua_Packet::GetOpcode() {
-	Lua_Safe_Call_Int();
-	return static_cast<int>(self->GetOpcode());
-}
-
-void Lua_Packet::SetOpcode(int op) {
-	Lua_Safe_Call_Void();
-	self->SetOpcodeBypass(static_cast<uint16>(op));
-}
-
-int Lua_Packet::GetRawOpcode() {
-	Lua_Safe_Call_Int();
-	return static_cast<int>(self->GetOpcodeBypass());
-}
-
-void Lua_Packet::SetRawOpcode(int op) {
-	Lua_Safe_Call_Void();
-	self->SetOpcode(static_cast<EmuOpcode>(op));
-}
-
-int Lua_Packet::GetWritePosition() {
-	Lua_Safe_Call_Int();
-	return self->GetWritePosition();
-}
-
-void Lua_Packet::SetWritePosition(int offset) {
-	Lua_Safe_Call_Void();
-	self->SetWritePosition(offset);
-}
-
-void Lua_Packet::WriteInt8(int value) {
-	Lua_Safe_Call_Void();
-	self->WriteUInt8(static_cast<uint8_t>(value));
-}
-
-void Lua_Packet::WriteInt8(int offset, int value) {
-	Lua_Safe_Call_Void();
-
-	if(offset + sizeof(int8) <= self->size) {
-		*reinterpret_cast<int8*>(self->pBuffer + offset) = value;
-	}
-}
-
-void Lua_Packet::WriteInt16(int value) {
-	Lua_Safe_Call_Void();
-	self->WriteUInt16(static_cast<uint16_t>(value));
-}
-
-void Lua_Packet::WriteInt16(int offset, int value) {
-	Lua_Safe_Call_Void();
-
-	if(offset + sizeof(int16) <= self->size) {
-		*reinterpret_cast<int16*>(self->pBuffer + offset) = value;
-	}
-}
-
-void Lua_Packet::WriteInt32(int value) {
-	Lua_Safe_Call_Void();
-	self->WriteUInt32(static_cast<uint32_t>(value));
-}
-
-void Lua_Packet::WriteInt32(int offset, int value) {
-	Lua_Safe_Call_Void();
-
-	if(offset + sizeof(int32) <= self->size) {
-		*reinterpret_cast<int32*>(self->pBuffer + offset) = value;
-	}
-}
-
-void Lua_Packet::WriteInt64(int64 value) {
-	Lua_Safe_Call_Void();
-	self->WriteUInt64(static_cast<uint64_t>(value));
-}
-
-void Lua_Packet::WriteInt64(int offset, int64 value) {
-	Lua_Safe_Call_Void();
-
-	if(offset + sizeof(int64) <= self->size) {
-		*reinterpret_cast<int64*>(self->pBuffer + offset) = value;
-	}
-}
-
-void Lua_Packet::WriteFloat(float value) {
-	Lua_Safe_Call_Void();
-	self->WriteFloat(value);
-}
-
-void Lua_Packet::WriteFloat(int offset, float value) {
-	Lua_Safe_Call_Void();
-
-	if(offset + sizeof(float) <= self->size) {
-		*reinterpret_cast<float*>(self->pBuffer + offset) = value;
-	}
-}
-
-void Lua_Packet::WriteDouble(double value) {
-	Lua_Safe_Call_Void();
-	self->WriteDouble(value);
-}
-
-void Lua_Packet::WriteDouble(int offset, double value) {
-	Lua_Safe_Call_Void();
-
-	if(offset + sizeof(double) <= self->size) {
-		*reinterpret_cast<double*>(self->pBuffer + offset) = value;
-	}
-}
-
-void Lua_Packet::WriteString(std::string value) {
-	Lua_Safe_Call_Void();
-	self->WriteString(value.c_str());
-}
-
-void Lua_Packet::WriteString(int offset, std::string value) {
-	Lua_Safe_Call_Void();
-
-	if(offset + value.length() + 1 <= self->size) {
-		memcpy(self->pBuffer + offset, value.c_str(), value.length());
-		*reinterpret_cast<int8*>(self->pBuffer + offset + value.length()) = 0;
-	}
-}
-
-void Lua_Packet::WriteFixedLengthString(std::string value) {
-	Lua_Safe_Call_Void();
-	self->WriteLengthString(static_cast<uint32_t>(value.size()), value.c_str());
-}
-
-void Lua_Packet::WriteFixedLengthString(int offset, std::string value, int string_length) {
-	Lua_Safe_Call_Void();
-
-	if(offset + string_length <= static_cast<int>(self->size)) {
-		memset(self->pBuffer + offset, 0, string_length);
-		memcpy(self->pBuffer + offset, value.c_str(), value.length());
-	}
-}
-
-int Lua_Packet::ReadInt8(int offset) {
-	Lua_Safe_Call_Int();
-	if(offset + sizeof(int8) <= self->size) {
-		int8 v = *reinterpret_cast<int8*>(self->pBuffer + offset);
-		return v;
-	}
-
-	return 0;
-}
-
-int Lua_Packet::ReadInt16(int offset) {
-	Lua_Safe_Call_Int();
-
-	if(offset + sizeof(int16) <= self->size) {
-		int16 v = *reinterpret_cast<int16*>(self->pBuffer + offset);
-		return v;
-	}
-
-	return 0;
-}
-
-int Lua_Packet::ReadInt32(int offset) {
-	Lua_Safe_Call_Int();
-
-	if(offset + sizeof(int32) <= self->size) {
-		int32 v = *reinterpret_cast<int32*>(self->pBuffer + offset);
-		return v;
-	}
-
-	return 0;
-}
-
-int64 Lua_Packet::ReadInt64(int offset) {
-	Lua_Safe_Call_Int();
-
-	if(offset + sizeof(int64) <= self->size) {
-		int64 v = *reinterpret_cast<int64*>(self->pBuffer + offset);
-		return v;
-	}
-
-	return 0;
-}
-
-float Lua_Packet::ReadFloat(int offset) {
-	Lua_Safe_Call_Real();
-
-	if(offset + sizeof(float) <= self->size) {
-		float v = *reinterpret_cast<float*>(self->pBuffer + offset);
-		return v;
-	}
-
-	return 0;
-}
-
-double Lua_Packet::ReadDouble(int offset) {
-	Lua_Safe_Call_Real();
-
-	if(offset + sizeof(double) <= self->size) {
-		double v = *reinterpret_cast<double*>(self->pBuffer + offset);
-		return v;
-	}
-
-	return 0;
-}
-
-std::string Lua_Packet::ReadString(int offset) {
-	Lua_Safe_Call_String();
-
-	if(offset < static_cast<int>(self->size)) {
-		std::string ret;
-
-		int i = offset;
-		for(;;) {
-			if(i >= static_cast<int>(self->size)) {
-				break;
-			}
-
-			char c = *reinterpret_cast<char*>(self->pBuffer + i);
-
-			if(c == '\0') {
-				break;
-			}
-
-			ret.push_back(c);
-			++i;
-		}
-
-		return ret;
-	}
-
-	return "";
-}
-
-std::string Lua_Packet::ReadFixedLengthString(int offset, int string_length) {
-	Lua_Safe_Call_String();
-
-	if(offset + string_length <= static_cast<int>(self->size)) {
-		std::string ret;
-
-		int i = offset;
-		for(;;) {
-			if(i >= offset + string_length) {
-				break;
-			}
-
-			char c = *reinterpret_cast<char*>(self->pBuffer + i);
-			ret.push_back(c);
-			++i;
-		}
-
-		return ret;
-	}
-
-	return "";
-}
-
-luabind::scope lua_register_packet() {
-	return luabind::class_<Lua_Packet>("Packet")
-	.def(luabind::constructor<>())
-	.def(luabind::constructor<int,int>())
-	.def(luabind::constructor<int,int,bool>())
-	.property("null", &Lua_Packet::Null)
-	.property("valid", &Lua_Packet::Valid)
-	.def("GetOpcode", &Lua_Packet::GetOpcode)
-	.def("GetRawOpcode", &Lua_Packet::GetRawOpcode)
-	.def("GetSize", &Lua_Packet::GetSize)
-	.def("GetWritePosition", &Lua_Packet::GetWritePosition)
-	.def("ReadDouble", &Lua_Packet::ReadDouble)
-	.def("ReadFixedLengthString", &Lua_Packet::ReadFixedLengthString)
-	.def("ReadFloat", &Lua_Packet::ReadFloat)
-	.def("ReadInt16", &Lua_Packet::ReadInt16)
-	.def("ReadInt32", &Lua_Packet::ReadInt32)
-	.def("ReadInt64", &Lua_Packet::ReadInt64)
-	.def("ReadInt8", &Lua_Packet::ReadInt8)
-	.def("ReadString", &Lua_Packet::ReadString)
-	.def("SetOpcode", &Lua_Packet::SetOpcode)
-	.def("SetRawOpcode", &Lua_Packet::SetRawOpcode)
-	.def("SetWritePosition", &Lua_Packet::SetWritePosition)
-	.def("WriteDouble", (void(Lua_Packet::*)(double))&Lua_Packet::WriteDouble)
-	.def("WriteDouble", (void(Lua_Packet::*)(int, double))&Lua_Packet::WriteDouble)
-	.def("WriteFixedLengthString", (void(Lua_Packet::*)(int, std::string, int))&Lua_Packet::WriteFixedLengthString)
-	.def("WriteFixedLengthString", (void(Lua_Packet::*)(std::string))&Lua_Packet::WriteFixedLengthString)
-	.def("WriteFloat", (void(Lua_Packet::*)(float))&Lua_Packet::WriteFloat)
-	.def("WriteFloat", (void(Lua_Packet::*)(int, float))&Lua_Packet::WriteFloat)
-	.def("WriteInt16", (void(Lua_Packet::*)(int))&Lua_Packet::WriteInt16)
-	.def("WriteInt16", (void(Lua_Packet::*)(int, int))&Lua_Packet::WriteInt16)
-	.def("WriteInt32", (void(Lua_Packet::*)(int))&Lua_Packet::WriteInt32)
-	.def("WriteInt32", (void(Lua_Packet::*)(int, int))&Lua_Packet::WriteInt32)
-	.def("WriteInt64", (void(Lua_Packet::*)(int, int64))&Lua_Packet::WriteInt64)
-	.def("WriteInt64", (void(Lua_Packet::*)(int64))&Lua_Packet::WriteInt64)
-	.def("WriteInt8", (void(Lua_Packet::*)(int))&Lua_Packet::WriteInt8)
-	.def("WriteInt8", (void(Lua_Packet::*)(int, int))&Lua_Packet::WriteInt8)
-	.def("WriteString", (void(Lua_Packet::*)(int, std::string))&Lua_Packet::WriteString)
-	.def("WriteString", (void(Lua_Packet::*)(std::string))&Lua_Packet::WriteString);
+void lua_register_packet(sol::state_view &sv)
+{
+	auto packet = sv.new_usertype<Lua_Packet>(
+	    "Packet", sol::constructors<Lua_Packet(), Lua_Packet(int, int), Lua_Packet(int, int, bool)>());
+	packet["null"] = sol::readonly_property(&Lua_Packet::Null);
+	packet["valid"] = sol::readonly_property(&Lua_Packet::Valid);
+	packet["GetOpcode"] = &Lua_Packet::GetOpcode;
+	packet["GetRawOpcode"] = &Lua_Packet::GetRawOpcode;
+	packet["GetSize"] = &Lua_Packet::GetSize;
+	packet["GetWritePosition"] = &Lua_Packet::GetWritePosition;
+	packet["ReadDouble"] = &Lua_Packet::ReadDouble;
+	packet["ReadFixedLengthString"] = &Lua_Packet::ReadFixedLengthString;
+	packet["ReadFloat"] = &Lua_Packet::ReadFloat;
+	packet["ReadInt16"] = &Lua_Packet::ReadInt16;
+	packet["ReadInt32"] = &Lua_Packet::ReadInt32;
+	packet["ReadInt64"] = &Lua_Packet::ReadInt64;
+	packet["ReadInt8"] = &Lua_Packet::ReadInt8;
+	packet["ReadString"] = &Lua_Packet::ReadString;
+	packet["SetOpcode"] = &Lua_Packet::SetOpcode;
+	packet["SetRawOpcode"] = &Lua_Packet::SetRawOpcode;
+	packet["SetWritePosition"] = &Lua_Packet::SetWritePosition;
+	packet["WriteDouble"] = sol::overload((void(Lua_Packet::*)(double)) & Lua_Packet::WriteDouble,
+					      (void(Lua_Packet::*)(int, double)) & Lua_Packet::WriteDouble);
+	packet["WriteFixedLengthString"] =
+	    sol::overload((void(Lua_Packet::*)(int, std::string, int)) & Lua_Packet::WriteFixedLengthString,
+			  (void(Lua_Packet::*)(std::string)) & Lua_Packet::WriteFixedLengthString);
+	packet["WriteFloat"] = sol::overload((void(Lua_Packet::*)(float)) & Lua_Packet::WriteFloat,
+					     (void(Lua_Packet::*)(int, float)) & Lua_Packet::WriteFloat);
+	packet["WriteInt16"] = sol::overload((void(Lua_Packet::*)(int)) & Lua_Packet::WriteInt16,
+					     (void(Lua_Packet::*)(int, int)) & Lua_Packet::WriteInt16);
+	packet["WriteInt32"] = sol::overload((void(Lua_Packet::*)(int)) & Lua_Packet::WriteInt32,
+					     (void(Lua_Packet::*)(int, int)) & Lua_Packet::WriteInt32);
+	packet["WriteInt64"] = sol::overload((void(Lua_Packet::*)(int, int64)) & Lua_Packet::WriteInt64,
+					     (void(Lua_Packet::*)(int64)) & Lua_Packet::WriteInt64);
+	packet["WriteInt8"] = sol::overload((void(Lua_Packet::*)(int)) & Lua_Packet::WriteInt8,
+					    (void(Lua_Packet::*)(int, int)) & Lua_Packet::WriteInt8);
+	packet["WriteString"] = sol::overload((void(Lua_Packet::*)(int, std::string)) & Lua_Packet::WriteString,
+					      (void(Lua_Packet::*)(std::string)) & Lua_Packet::WriteString);
 }
 
 //TODO: Reorder these to match emu_oplist.h again
-luabind::scope lua_register_packet_opcodes() {
-	return luabind::class_<Opcodes>("Opcode")
-	.enum_("constants")
-	[
-		luabind::value("ExploreUnknown", static_cast<int>(OP_ExploreUnknown)),
-		luabind::value("Heartbeat", static_cast<int>(OP_Heartbeat)),
-		luabind::value("ReloadUI", static_cast<int>(OP_ReloadUI)),
-		luabind::value("IncreaseStats", static_cast<int>(OP_IncreaseStats)),
-		luabind::value("ApproveZone", static_cast<int>(OP_ApproveZone)),
-		luabind::value("Dye", static_cast<int>(OP_Dye)),
-		luabind::value("Stamina", static_cast<int>(OP_Stamina)),
-		luabind::value("ControlBoat", static_cast<int>(OP_ControlBoat)),
-		luabind::value("MobUpdate", static_cast<int>(OP_MobUpdate)),
-		luabind::value("ClientUpdate", static_cast<int>(OP_ClientUpdate)),
-		luabind::value("ChannelMessage", static_cast<int>(OP_ChannelMessage)),
-		luabind::value("SimpleMessage", static_cast<int>(OP_SimpleMessage)),
-		luabind::value("FormattedMessage", static_cast<int>(OP_FormattedMessage)),
-		luabind::value("TGB", static_cast<int>(OP_TGB)),
-		luabind::value("Bind_Wound", static_cast<int>(OP_Bind_Wound)),
-		luabind::value("Charm", static_cast<int>(OP_Charm)),
-		luabind::value("Begging", static_cast<int>(OP_Begging)),
-		luabind::value("MoveCoin", static_cast<int>(OP_MoveCoin)),
-		luabind::value("SpawnDoor", static_cast<int>(OP_SpawnDoor)),
-		luabind::value("Sneak", static_cast<int>(OP_Sneak)),
-		luabind::value("ExpUpdate", static_cast<int>(OP_ExpUpdate)),
-		luabind::value("DumpName", static_cast<int>(OP_DumpName)),
-		luabind::value("RespondAA", static_cast<int>(OP_RespondAA)),
-		luabind::value("UpdateAA", static_cast<int>(OP_UpdateAA)),
-		luabind::value("SendAAStats", static_cast<int>(OP_SendAAStats)),
-		luabind::value("SendAATable", static_cast<int>(OP_SendAATable)),
-		luabind::value("AAAction", static_cast<int>(OP_AAAction)),
-		luabind::value("BoardBoat", static_cast<int>(OP_BoardBoat)),
-		luabind::value("LeaveBoat", static_cast<int>(OP_LeaveBoat)),
-		luabind::value("AdventureInfoRequest", static_cast<int>(OP_AdventureInfoRequest)),
-		luabind::value("AdventureInfo", static_cast<int>(OP_AdventureInfo)),
-		luabind::value("AdventureRequest", static_cast<int>(OP_AdventureRequest)),
-		luabind::value("AdventureDetails", static_cast<int>(OP_AdventureDetails)),
-		luabind::value("LDoNButton", static_cast<int>(OP_LDoNButton)),
-		luabind::value("AdventureData", static_cast<int>(OP_AdventureData)),
-		luabind::value("AdventureFinish", static_cast<int>(OP_AdventureFinish)),
-		luabind::value("LeaveAdventure", static_cast<int>(OP_LeaveAdventure)),
-		luabind::value("AdventureUpdate", static_cast<int>(OP_AdventureUpdate)),
-		luabind::value("SendExpZonein", static_cast<int>(OP_SendExpZonein)),
-		luabind::value("RaidUpdate", static_cast<int>(OP_RaidUpdate)),
-		luabind::value("GuildLeader", static_cast<int>(OP_GuildLeader)),
-		luabind::value("GuildPeace", static_cast<int>(OP_GuildPeace)),
-		luabind::value("GuildRemove", static_cast<int>(OP_GuildRemove)),
-		luabind::value("GuildMemberList", static_cast<int>(OP_GuildMemberList)),
-		luabind::value("GuildMemberUpdate", static_cast<int>(OP_GuildMemberUpdate)),
-		luabind::value("GuildMemberLevelUpdate", static_cast<int>(OP_GuildMemberLevelUpdate)),
-		luabind::value("GuildInvite", static_cast<int>(OP_GuildInvite)),
-		luabind::value("GuildMOTD", static_cast<int>(OP_GuildMOTD)),
-		luabind::value("SetGuildMOTD", static_cast<int>(OP_SetGuildMOTD)),
-		luabind::value("GuildPublicNote", static_cast<int>(OP_GuildPublicNote)),
-		luabind::value("GetGuildsList", static_cast<int>(OP_GetGuildsList)),
-		luabind::value("GuildDemote", static_cast<int>(OP_GuildDemote)),
-		luabind::value("GuildInviteAccept", static_cast<int>(OP_GuildInviteAccept)),
-		luabind::value("GuildWar", static_cast<int>(OP_GuildWar)),
-		luabind::value("GuildDelete", static_cast<int>(OP_GuildDelete)),
-		luabind::value("GuildManageRemove", static_cast<int>(OP_GuildManageRemove)),
-		luabind::value("GuildManageAdd", static_cast<int>(OP_GuildManageAdd)),
-		luabind::value("GuildManageStatus", static_cast<int>(OP_GuildManageStatus)),
-		luabind::value("GuildManageBanker", static_cast<int>(OP_GuildManageBanker)),
-		luabind::value("GetGuildMOTD", static_cast<int>(OP_GetGuildMOTD)),
-		luabind::value("Trader", static_cast<int>(OP_Trader)),
-		luabind::value("Bazaar", static_cast<int>(OP_Bazaar)),
-		luabind::value("BecomeTrader", static_cast<int>(OP_BecomeTrader)),
-		luabind::value("TraderItemUpdate", static_cast<int>(OP_TraderItemUpdate)),
-		luabind::value("TraderShop", static_cast<int>(OP_TraderShop)),
-		luabind::value("TraderBuy", static_cast<int>(OP_TraderBuy)),
-		luabind::value("PetCommands", static_cast<int>(OP_PetCommands)),
-		luabind::value("TradeSkillCombine", static_cast<int>(OP_TradeSkillCombine)),
-		luabind::value("AugmentItem", static_cast<int>(OP_AugmentItem)),
-		luabind::value("ItemName", static_cast<int>(OP_ItemName)),
-		luabind::value("ShopItem", static_cast<int>(OP_ShopItem)),
-		luabind::value("ShopPlayerBuy", static_cast<int>(OP_ShopPlayerBuy)),
-		luabind::value("ShopPlayerSell", static_cast<int>(OP_ShopPlayerSell)),
-		luabind::value("ShopDelItem", static_cast<int>(OP_ShopDelItem)),
-		luabind::value("ShopRequest", static_cast<int>(OP_ShopRequest)),
-		luabind::value("ShopEnd", static_cast<int>(OP_ShopEnd)),
-		luabind::value("LFGCommand", static_cast<int>(OP_LFGCommand)),
-		luabind::value("LFGAppearance", static_cast<int>(OP_LFGAppearance)),
-		luabind::value("GroupUpdate", static_cast<int>(OP_GroupUpdate)),
-		luabind::value("GroupInvite", static_cast<int>(OP_GroupInvite)),
-		luabind::value("GroupDisband", static_cast<int>(OP_GroupDisband)),
-		luabind::value("GroupInvite2", static_cast<int>(OP_GroupInvite2)),
-		luabind::value("GroupFollow", static_cast<int>(OP_GroupFollow)),
-		luabind::value("GroupFollow2", static_cast<int>(OP_GroupFollow2)),
-		luabind::value("GroupCancelInvite", static_cast<int>(OP_GroupCancelInvite)),
-		luabind::value("CustomTitles", static_cast<int>(OP_CustomTitles)),
-		luabind::value("Split", static_cast<int>(OP_Split)),
-		luabind::value("Jump", static_cast<int>(OP_Jump)),
-		luabind::value("ConsiderCorpse", static_cast<int>(OP_ConsiderCorpse)),
-		luabind::value("SkillUpdate", static_cast<int>(OP_SkillUpdate)),
-		luabind::value("GMEndTrainingResponse", static_cast<int>(OP_GMEndTrainingResponse)),
-		luabind::value("GMEndTraining", static_cast<int>(OP_GMEndTraining)),
-		luabind::value("GMTrainSkill", static_cast<int>(OP_GMTrainSkill)),
-		luabind::value("GMTraining", static_cast<int>(OP_GMTraining)),
-		luabind::value("DeleteItem", static_cast<int>(OP_DeleteItem)),
-		luabind::value("CombatAbility", static_cast<int>(OP_CombatAbility)),
-		luabind::value("TrackUnknown", static_cast<int>(OP_TrackUnknown)),
-		luabind::value("TrackTarget", static_cast<int>(OP_TrackTarget)),
-		luabind::value("Track", static_cast<int>(OP_Track)),
-		luabind::value("ItemLinkClick", static_cast<int>(OP_ItemLinkClick)),
-		luabind::value("ItemLinkResponse", static_cast<int>(OP_ItemLinkResponse)),
-		luabind::value("ItemLinkText", static_cast<int>(OP_ItemLinkText)),
-		luabind::value("RezzAnswer", static_cast<int>(OP_RezzAnswer)),
-		luabind::value("RezzComplete", static_cast<int>(OP_RezzComplete)),
-		luabind::value("SendZonepoints", static_cast<int>(OP_SendZonepoints)),
-		luabind::value("SetRunMode", static_cast<int>(OP_SetRunMode)),
-		luabind::value("InspectRequest", static_cast<int>(OP_InspectRequest)),
-		luabind::value("InspectAnswer", static_cast<int>(OP_InspectAnswer)),
-		luabind::value("SenseTraps", static_cast<int>(OP_SenseTraps)),
-		luabind::value("DisarmTraps", static_cast<int>(OP_DisarmTraps)),
-		luabind::value("Assist", static_cast<int>(OP_Assist)),
-		luabind::value("AssistGroup", static_cast<int>(OP_AssistGroup)),
-		luabind::value("PickPocket", static_cast<int>(OP_PickPocket)),
-		luabind::value("LootRequest", static_cast<int>(OP_LootRequest)),
-		luabind::value("EndLootRequest", static_cast<int>(OP_EndLootRequest)),
-		luabind::value("MoneyOnCorpse", static_cast<int>(OP_MoneyOnCorpse)),
-		luabind::value("LootComplete", static_cast<int>(OP_LootComplete)),
-		luabind::value("LootItem", static_cast<int>(OP_LootItem)),
-		luabind::value("MoveItem", static_cast<int>(OP_MoveItem)),
-		luabind::value("WhoAllRequest", static_cast<int>(OP_WhoAllRequest)),
-		luabind::value("WhoAllResponse", static_cast<int>(OP_WhoAllResponse)),
-		luabind::value("Consume", static_cast<int>(OP_Consume)),
-		luabind::value("AutoAttack", static_cast<int>(OP_AutoAttack)),
-		luabind::value("AutoAttack2", static_cast<int>(OP_AutoAttack2)),
-		luabind::value("TargetMouse", static_cast<int>(OP_TargetMouse)),
-		luabind::value("TargetCommand", static_cast<int>(OP_TargetCommand)),
-		luabind::value("TargetReject", static_cast<int>(OP_TargetReject)),
-		luabind::value("TargetHoTT", static_cast<int>(OP_TargetHoTT)),
-		luabind::value("Hide", static_cast<int>(OP_Hide)),
-		luabind::value("Forage", static_cast<int>(OP_Forage)),
-		luabind::value("Fishing", static_cast<int>(OP_Fishing)),
-		luabind::value("Bug", static_cast<int>(OP_Bug)),
-		luabind::value("Emote", static_cast<int>(OP_Emote)),
-		luabind::value("Consider", static_cast<int>(OP_Consider)),
-		luabind::value("FaceChange", static_cast<int>(OP_FaceChange)),
-		luabind::value("RandomReq", static_cast<int>(OP_RandomReq)),
-		luabind::value("RandomReply", static_cast<int>(OP_RandomReply)),
-		luabind::value("Camp", static_cast<int>(OP_Camp)),
-		luabind::value("YellForHelp", static_cast<int>(OP_YellForHelp)),
-		luabind::value("SafePoint", static_cast<int>(OP_SafePoint)),
-		luabind::value("Buff", static_cast<int>(OP_Buff)),
-		luabind::value("ColoredText", static_cast<int>(OP_ColoredText)),
-		luabind::value("SpecialMesg", static_cast<int>(OP_SpecialMesg)),
-		luabind::value("Consent", static_cast<int>(OP_Consent)),
-		luabind::value("ConsentResponse", static_cast<int>(OP_ConsentResponse)),
-		luabind::value("Stun", static_cast<int>(OP_Stun)),
-		luabind::value("BeginCast", static_cast<int>(OP_BeginCast)),
-		luabind::value("CastSpell", static_cast<int>(OP_CastSpell)),
-		luabind::value("InterruptCast", static_cast<int>(OP_InterruptCast)),
-		luabind::value("Death", static_cast<int>(OP_Death)),
-		luabind::value("FeignDeath", static_cast<int>(OP_FeignDeath)),
-		luabind::value("Illusion", static_cast<int>(OP_Illusion)),
-		luabind::value("LevelUpdate", static_cast<int>(OP_LevelUpdate)),
-		luabind::value("LevelAppearance", static_cast<int>(OP_LevelAppearance)),
-		luabind::value("MemorizeSpell", static_cast<int>(OP_MemorizeSpell)),
-		luabind::value("HPUpdate", static_cast<int>(OP_HPUpdate)),
-		luabind::value("Mend", static_cast<int>(OP_Mend)),
-		luabind::value("Taunt", static_cast<int>(OP_Taunt)),
-		luabind::value("GMDelCorpse", static_cast<int>(OP_GMDelCorpse)),
-		luabind::value("GMFind", static_cast<int>(OP_GMFind)),
-		luabind::value("GMServers", static_cast<int>(OP_GMServers)),
-		luabind::value("GMGoto", static_cast<int>(OP_GMGoto)),
-		luabind::value("GMSummon", static_cast<int>(OP_GMSummon)),
-		luabind::value("GMKill", static_cast<int>(OP_GMKill)),
-		luabind::value("GMLastName", static_cast<int>(OP_GMLastName)),
-		luabind::value("GMToggle", static_cast<int>(OP_GMToggle)),
-		luabind::value("GMEmoteZone", static_cast<int>(OP_GMEmoteZone)),
-		luabind::value("GMBecomeNPC", static_cast<int>(OP_GMBecomeNPC)),
-		luabind::value("GMHideMe", static_cast<int>(OP_GMHideMe)),
-		luabind::value("GMZoneRequest", static_cast<int>(OP_GMZoneRequest)),
-		luabind::value("GMZoneRequest2", static_cast<int>(OP_GMZoneRequest2)),
-		luabind::value("Petition", static_cast<int>(OP_Petition)),
-		luabind::value("PetitionRefresh", static_cast<int>(OP_PetitionRefresh)),
-		luabind::value("PDeletePetition", static_cast<int>(OP_PDeletePetition)),
-		luabind::value("PetitionBug", static_cast<int>(OP_PetitionBug)),
-		luabind::value("PetitionUpdate", static_cast<int>(OP_PetitionUpdate)),
-		luabind::value("PetitionCheckout", static_cast<int>(OP_PetitionCheckout)),
-		luabind::value("PetitionCheckout2", static_cast<int>(OP_PetitionCheckout2)),
-		luabind::value("PetitionDelete", static_cast<int>(OP_PetitionDelete)),
-		luabind::value("PetitionResolve", static_cast<int>(OP_PetitionResolve)),
-		luabind::value("PetitionCheckIn", static_cast<int>(OP_PetitionCheckIn)),
-		luabind::value("PetitionUnCheckout", static_cast<int>(OP_PetitionUnCheckout)),
-		luabind::value("PetitionQue", static_cast<int>(OP_PetitionQue)),
-		luabind::value("SetServerFilter", static_cast<int>(OP_SetServerFilter)),
-		luabind::value("NewSpawn", static_cast<int>(OP_NewSpawn)),
-		luabind::value("Animation", static_cast<int>(OP_Animation)),
-		luabind::value("ZoneChange", static_cast<int>(OP_ZoneChange)),
-		luabind::value("DeleteSpawn", static_cast<int>(OP_DeleteSpawn)),
-		luabind::value("EnvDamage", static_cast<int>(OP_EnvDamage)),
-		luabind::value("Action", static_cast<int>(OP_Action)),
-		luabind::value("Damage", static_cast<int>(OP_Damage)),
-		luabind::value("ManaChange", static_cast<int>(OP_ManaChange)),
-		luabind::value("ClientError", static_cast<int>(OP_ClientError)),
-		luabind::value("Save", static_cast<int>(OP_Save)),
-		luabind::value("LocInfo", static_cast<int>(OP_LocInfo)),
-		luabind::value("Surname", static_cast<int>(OP_Surname)),
-		luabind::value("ClearSurname", static_cast<int>(OP_ClearSurname)),
-		luabind::value("SwapSpell", static_cast<int>(OP_SwapSpell)),
-		luabind::value("DeleteSpell", static_cast<int>(OP_DeleteSpell)),
-		luabind::value("CloseContainer", static_cast<int>(OP_CloseContainer)),
-		luabind::value("ClickObjectAction", static_cast<int>(OP_ClickObjectAction)),
-		luabind::value("GroundSpawn", static_cast<int>(OP_GroundSpawn)),
-		luabind::value("ClearObject", static_cast<int>(OP_ClearObject)),
-		luabind::value("ZoneUnavail", static_cast<int>(OP_ZoneUnavail)),
-		luabind::value("ItemPacket", static_cast<int>(OP_ItemPacket)),
-		luabind::value("TradeRequest", static_cast<int>(OP_TradeRequest)),
-		luabind::value("TradeRequestAck", static_cast<int>(OP_TradeRequestAck)),
-		luabind::value("TradeAcceptClick", static_cast<int>(OP_TradeAcceptClick)),
-		luabind::value("TradeMoneyUpdate", static_cast<int>(OP_TradeMoneyUpdate)),
-		luabind::value("TradeCoins", static_cast<int>(OP_TradeCoins)),
-		luabind::value("CancelTrade", static_cast<int>(OP_CancelTrade)),
-		luabind::value("FinishTrade", static_cast<int>(OP_FinishTrade)),
-		luabind::value("SaveOnZoneReq", static_cast<int>(OP_SaveOnZoneReq)),
-		luabind::value("Logout", static_cast<int>(OP_Logout)),
-		luabind::value("LogoutReply", static_cast<int>(OP_LogoutReply)),
-		luabind::value("PreLogoutReply", static_cast<int>(OP_PreLogoutReply)),
-		luabind::value("DuelAccept", static_cast<int>(OP_DuelAccept)),
-		luabind::value("InstillDoubt", static_cast<int>(OP_InstillDoubt)),
-		luabind::value("SafeFallSuccess", static_cast<int>(OP_SafeFallSuccess)),
-		luabind::value("DisciplineUpdate", static_cast<int>(OP_DisciplineUpdate)),
-		luabind::value("SendGuildTributes", static_cast<int>(OP_SendGuildTributes)),
-		luabind::value("SendTributes", static_cast<int>(OP_SendTributes)),
-		luabind::value("TributeUpdate", static_cast<int>(OP_TributeUpdate)),
-		luabind::value("TributeItem", static_cast<int>(OP_TributeItem)),
-		luabind::value("TributePointUpdate", static_cast<int>(OP_TributePointUpdate)),
-		luabind::value("TributeInfo", static_cast<int>(OP_TributeInfo)),
-		luabind::value("GuildTributeInfo", static_cast<int>(OP_GuildTributeInfo)),
-		luabind::value("OpenGuildTributeMaster", static_cast<int>(OP_OpenGuildTributeMaster)),
-		luabind::value("OpenTributeMaster", static_cast<int>(OP_OpenTributeMaster)),
-		luabind::value("TributeTimer", static_cast<int>(OP_TributeTimer)),
-		luabind::value("SelectTribute", static_cast<int>(OP_SelectTribute)),
-		luabind::value("TributeNPC", static_cast<int>(OP_TributeNPC)),
-		luabind::value("TributeMoney", static_cast<int>(OP_TributeMoney)),
-		luabind::value("TributeToggle", static_cast<int>(OP_TributeToggle)),
-		luabind::value("CloseTributeMaster", static_cast<int>(OP_CloseTributeMaster)),
-		luabind::value("RecipesFavorite", static_cast<int>(OP_RecipesFavorite)),
-		luabind::value("RecipesSearch", static_cast<int>(OP_RecipesSearch)),
-		luabind::value("RecipeReply", static_cast<int>(OP_RecipeReply)),
-		luabind::value("RecipeDetails", static_cast<int>(OP_RecipeDetails)),
-		luabind::value("RecipeAutoCombine", static_cast<int>(OP_RecipeAutoCombine)),
-		luabind::value("Shielding", static_cast<int>(OP_Shielding)),
-		luabind::value("FindPersonRequest", static_cast<int>(OP_FindPersonRequest)),
-		luabind::value("FindPersonReply", static_cast<int>(OP_FindPersonReply)),
-		luabind::value("ZoneEntry", static_cast<int>(OP_ZoneEntry)),
-		luabind::value("PlayerProfile", static_cast<int>(OP_PlayerProfile)),
-		luabind::value("CharInventory", static_cast<int>(OP_CharInventory)),
-		luabind::value("ZoneSpawns", static_cast<int>(OP_ZoneSpawns)),
-		luabind::value("Weather", static_cast<int>(OP_Weather)),
-		luabind::value("ReqNewZone", static_cast<int>(OP_ReqNewZone)),
-		luabind::value("NewZone", static_cast<int>(OP_NewZone)),
-		luabind::value("ReqClientSpawn", static_cast<int>(OP_ReqClientSpawn)),
-		luabind::value("SpawnAppearance", static_cast<int>(OP_SpawnAppearance)),
-		luabind::value("ClientReady", static_cast<int>(OP_ClientReady)),
-		luabind::value("ZoneComplete", static_cast<int>(OP_ZoneComplete)),
-		luabind::value("ApproveWorld", static_cast<int>(OP_ApproveWorld)),
-		luabind::value("LogServer", static_cast<int>(OP_LogServer)),
-		luabind::value("MOTD", static_cast<int>(OP_MOTD)),
-		luabind::value("SendLoginInfo", static_cast<int>(OP_SendLoginInfo)),
-		luabind::value("DeleteCharacter", static_cast<int>(OP_DeleteCharacter)),
-		luabind::value("SendCharInfo", static_cast<int>(OP_SendCharInfo)),
-		luabind::value("ExpansionInfo", static_cast<int>(OP_ExpansionInfo)),
-		luabind::value("CharacterCreate", static_cast<int>(OP_CharacterCreate)),
-		luabind::value("CharacterCreateRequest", static_cast<int>(OP_CharacterCreateRequest)),
-		luabind::value("RandomNameGenerator", static_cast<int>(OP_RandomNameGenerator)),
-		luabind::value("GuildsList", static_cast<int>(OP_GuildsList)),
-		luabind::value("ApproveName", static_cast<int>(OP_ApproveName)),
-		luabind::value("EnterWorld", static_cast<int>(OP_EnterWorld)),
-		luabind::value("PostEnterWorld	", static_cast<int>(OP_PostEnterWorld	)),
-		luabind::value("SendSystemStats", static_cast<int>(OP_SendSystemStats)),
-		luabind::value("World_Client_CRC1", static_cast<int>(OP_World_Client_CRC1)),
-		luabind::value("World_Client_CRC2", static_cast<int>(OP_World_Client_CRC2)),
-		luabind::value("SetChatServer", static_cast<int>(OP_SetChatServer)),
-		luabind::value("SetChatServer2", static_cast<int>(OP_SetChatServer2)),
-		luabind::value("ZoneServerInfo", static_cast<int>(OP_ZoneServerInfo)),
-		luabind::value("WorldClientReady", static_cast<int>(OP_WorldClientReady)),
-		luabind::value("WorldUnknown001", static_cast<int>(OP_WorldUnknown001)),
-		luabind::value("AckPacket", static_cast<int>(OP_AckPacket)),
-		luabind::value("WearChange", static_cast<int>(OP_WearChange)),
-		luabind::value("CrashDump", static_cast<int>(OP_CrashDump)),
-		luabind::value("LoginComplete", static_cast<int>(OP_LoginComplete)),
-		luabind::value("GMNameChange", static_cast<int>(OP_GMNameChange)),
-		luabind::value("ReadBook", static_cast<int>(OP_ReadBook)),
-		luabind::value("GMKick", static_cast<int>(OP_GMKick)),
-		luabind::value("RezzRequest", static_cast<int>(OP_RezzRequest)),
-		luabind::value("MultiLineMsg", static_cast<int>(OP_MultiLineMsg)),
-		luabind::value("TimeOfDay", static_cast<int>(OP_TimeOfDay)),
-		luabind::value("CompletedTasks", static_cast<int>(OP_CompletedTasks)),
-		luabind::value("MoneyUpdate", static_cast<int>(OP_MoneyUpdate)),
-		luabind::value("ClickObject", static_cast<int>(OP_ClickObject)),
-		luabind::value("MoveDoor", static_cast<int>(OP_MoveDoor)),
-		luabind::value("TraderDelItem", static_cast<int>(OP_TraderDelItem)),
-		luabind::value("AdventureMerchantPurchase", static_cast<int>(OP_AdventureMerchantPurchase)),
-		luabind::value("TestBuff", static_cast<int>(OP_TestBuff)),
-		luabind::value("DuelDecline", static_cast<int>(OP_DuelDecline)),
-		luabind::value("RequestDuel", static_cast<int>(OP_RequestDuel)),
-		luabind::value("BazaarInspect", static_cast<int>(OP_BazaarInspect)),
-		luabind::value("ClickDoor", static_cast<int>(OP_ClickDoor)),
-		luabind::value("GroupAcknowledge", static_cast<int>(OP_GroupAcknowledge)),
-		luabind::value("GroupDelete", static_cast<int>(OP_GroupDelete)),
-		luabind::value("AdventureMerchantResponse", static_cast<int>(OP_AdventureMerchantResponse)),
-		luabind::value("ShopEndConfirm", static_cast<int>(OP_ShopEndConfirm)),
-		luabind::value("AdventureMerchantRequest", static_cast<int>(OP_AdventureMerchantRequest)),
-		luabind::value("Sound", static_cast<int>(OP_Sound)),
-		luabind::value("0x0193", static_cast<int>(OP_0x0193)),
-		luabind::value("0x0347", static_cast<int>(OP_0x0347)),
-		luabind::value("WorldComplete", static_cast<int>(OP_WorldComplete)),
-		luabind::value("MobRename", static_cast<int>(OP_MobRename)),
-		luabind::value("TaskDescription", static_cast<int>(OP_TaskDescription)),
-		luabind::value("TaskActivity", static_cast<int>(OP_TaskActivity)),
-		luabind::value("SharedTaskPlayerList", static_cast<int>(OP_SharedTaskPlayerList)),
-		luabind::value("AnnoyingZoneUnknown", static_cast<int>(OP_AnnoyingZoneUnknown)),
-		luabind::value("Some3ByteHPUpdate", static_cast<int>(OP_Some3ByteHPUpdate)),
-		luabind::value("FloatListThing", static_cast<int>(OP_FloatListThing)),
-		luabind::value("AAExpUpdate", static_cast<int>(OP_AAExpUpdate)),
-		luabind::value("ForceFindPerson", static_cast<int>(OP_ForceFindPerson)),
-		luabind::value("PlayMP3", static_cast<int>(OP_PlayMP3)),
-		luabind::value("RequestClientZoneChange", static_cast<int>(OP_RequestClientZoneChange)),
-		luabind::value("SomeItemPacketMaybe", static_cast<int>(OP_SomeItemPacketMaybe)),
-		luabind::value("QueryResponseThing", static_cast<int>(OP_QueryResponseThing)),
-		luabind::value("Some6ByteHPUpdate", static_cast<int>(OP_Some6ByteHPUpdate)),
-		luabind::value("BankerChange", static_cast<int>(OP_BankerChange)),
-		luabind::value("BecomeCorpse", static_cast<int>(OP_BecomeCorpse)),
-		luabind::value("Action2", static_cast<int>(OP_Action2)),
-		luabind::value("BazaarSearch", static_cast<int>(OP_BazaarSearch)),
-		luabind::value("SetTitle", static_cast<int>(OP_SetTitle)),
-		luabind::value("SetTitleReply", static_cast<int>(OP_SetTitleReply)),
-		luabind::value("ConfirmDelete", static_cast<int>(OP_ConfirmDelete)),
-		luabind::value("ConsentDeny", static_cast<int>(OP_ConsentDeny)),
-		luabind::value("CrystalCountUpdate", static_cast<int>(OP_CrystalCountUpdate)),
-		luabind::value("DeletePetition", static_cast<int>(OP_DeletePetition)),
-		luabind::value("DenyResponse", static_cast<int>(OP_DenyResponse)),
-		luabind::value("Disarm", static_cast<int>(OP_Disarm)),
-		luabind::value("Feedback", static_cast<int>(OP_Feedback)),
-		luabind::value("FriendsWho", static_cast<int>(OP_FriendsWho)),
-		luabind::value("GMApproval", static_cast<int>(OP_GMApproval)),
-		luabind::value("GMSearchCorpse", static_cast<int>(OP_GMSearchCorpse)),
-		luabind::value("GuildBank", static_cast<int>(OP_GuildBank)),
-		luabind::value("InitialHPUpdate", static_cast<int>(OP_InitialHPUpdate)),
-		luabind::value("InitialMobHealth", static_cast<int>(OP_InitialMobHealth)),
-		luabind::value("LFGGetMatchesRequest", static_cast<int>(OP_LFGGetMatchesRequest)),
-		luabind::value("LFGGetMatchesResponse", static_cast<int>(OP_LFGGetMatchesResponse)),
-		luabind::value("LFGResponse", static_cast<int>(OP_LFGResponse)),
-		luabind::value("LFPCommand", static_cast<int>(OP_LFPCommand)),
-		luabind::value("LFPGetMatchesRequest", static_cast<int>(OP_LFPGetMatchesRequest)),
-		luabind::value("LFPGetMatchesResponse", static_cast<int>(OP_LFPGetMatchesResponse)),
-		luabind::value("LeadershipExpToggle", static_cast<int>(OP_LeadershipExpToggle)),
-		luabind::value("LeadershipExpUpdate", static_cast<int>(OP_LeadershipExpUpdate)),
-		luabind::value("LoadSpellSet", static_cast<int>(OP_LoadSpellSet)),
-		luabind::value("LockoutTimerInfo", static_cast<int>(OP_LockoutTimerInfo)),
-		luabind::value("MendHPUpdate", static_cast<int>(OP_MendHPUpdate)),
-		luabind::value("MobHealth", static_cast<int>(OP_MobHealth)),
-		luabind::value("MoveLogDisregard", static_cast<int>(OP_MoveLogDisregard)),
-		luabind::value("MoveLogRequest", static_cast<int>(OP_MoveLogRequest)),
-		luabind::value("PetitionSearch", static_cast<int>(OP_PetitionSearch)),
-		luabind::value("PetitionSearchResults", static_cast<int>(OP_PetitionSearchResults)),
-		luabind::value("PetitionSearchText", static_cast<int>(OP_PetitionSearchText)),
-		luabind::value("RaidInvite", static_cast<int>(OP_RaidInvite)),
-		luabind::value("ReclaimCrystals", static_cast<int>(OP_ReclaimCrystals)),
-		luabind::value("Report", static_cast<int>(OP_Report)),
-		luabind::value("SenseHeading", static_cast<int>(OP_SenseHeading)),
-		luabind::value("LDoNOpen", static_cast<int>(OP_LDoNOpen)),
-		luabind::value("LDoNSenseTraps", static_cast<int>(OP_LDoNSenseTraps)),
-		luabind::value("LDoNPickLock", static_cast<int>(OP_LDoNPickLock)),
-		luabind::value("LDoNDisarmTraps", static_cast<int>(OP_LDoNDisarmTraps)),
-		luabind::value("LDoNInspect", static_cast<int>(OP_LDoNInspect)),
-		luabind::value("DynamicWall", static_cast<int>(OP_DynamicWall)),
-		luabind::value("RequestTitles", static_cast<int>(OP_RequestTitles)),
-		luabind::value("PurchaseLeadershipAA", static_cast<int>(OP_PurchaseLeadershipAA)),
-		luabind::value("UpdateLeadershipAA", static_cast<int>(OP_UpdateLeadershipAA)),
-		luabind::value("AdventurePointsUpdate", static_cast<int>(OP_AdventurePointsUpdate)),
-		luabind::value("ZoneInUnknown", static_cast<int>(OP_ZoneInUnknown)),
-		luabind::value("ZoneServerReady	", static_cast<int>(OP_ZoneServerReady	)),
-		luabind::value("ZoneGuildList", static_cast<int>(OP_ZoneGuildList)),
-		luabind::value("SendTitleList", static_cast<int>(OP_SendTitleList)),
-		luabind::value("NewTitlesAvailable", static_cast<int>(OP_NewTitlesAvailable)),
-		luabind::value("Bandolier", static_cast<int>(OP_Bandolier)),
-		luabind::value("OpenDiscordMerchant", static_cast<int>(OP_OpenDiscordMerchant)),
-		luabind::value("DiscordMerchantInventory", static_cast<int>(OP_DiscordMerchantInventory)),
-		luabind::value("GiveMoney", static_cast<int>(OP_GiveMoney)),
-		luabind::value("OnLevelMessage", static_cast<int>(OP_OnLevelMessage)),
-		luabind::value("RequestKnowledgeBase", static_cast<int>(OP_RequestKnowledgeBase)),
-		luabind::value("KnowledgeBase", static_cast<int>(OP_KnowledgeBase)),
-		luabind::value("VetRewardsAvaliable", static_cast<int>(OP_VetRewardsAvaliable)),
-		luabind::value("VetClaimRequest", static_cast<int>(OP_VetClaimRequest)),
-		luabind::value("VetClaimReply", static_cast<int>(OP_VetClaimReply)),
-		luabind::value("WeaponEquip1", static_cast<int>(OP_WeaponEquip1)),
-		luabind::value("PlayerStateAdd", static_cast<int>(OP_PlayerStateAdd)),
-		luabind::value("PlayerStateRemove", static_cast<int>(OP_PlayerStateRemove)),
-		luabind::value("WorldLogout", static_cast<int>(OP_WorldLogout)),
-		luabind::value("SessionReady", static_cast<int>(OP_SessionReady)),
-		luabind::value("Login", static_cast<int>(OP_Login)),
-		luabind::value("ServerListRequest", static_cast<int>(OP_ServerListRequest)),
-		luabind::value("PlayEverquestRequest", static_cast<int>(OP_PlayEverquestRequest)),
-		luabind::value("ChatMessage", static_cast<int>(OP_ChatMessage)),
-		luabind::value("LoginAccepted", static_cast<int>(OP_LoginAccepted)),
-		luabind::value("ServerListResponse", static_cast<int>(OP_ServerListResponse)),
-		luabind::value("Poll", static_cast<int>(OP_Poll)),
-		luabind::value("PlayEverquestResponse", static_cast<int>(OP_PlayEverquestResponse)),
-		luabind::value("EnterChat", static_cast<int>(OP_EnterChat)),
-		luabind::value("PollResponse", static_cast<int>(OP_PollResponse)),
-		luabind::value("Command", static_cast<int>(OP_Command)),
-		luabind::value("ZonePlayerToBind", static_cast<int>(OP_ZonePlayerToBind)),
-		luabind::value("AutoFire", static_cast<int>(OP_AutoFire)),
-		luabind::value("Rewind", static_cast<int>(OP_Rewind)),
-		luabind::value("TaskSelectWindow", static_cast<int>(OP_TaskSelectWindow)),
-		luabind::value("TaskActivityComplete", static_cast<int>(OP_TaskActivityComplete)),
-		luabind::value("AcceptNewTask", static_cast<int>(OP_AcceptNewTask)),
-		luabind::value("CancelTask", static_cast<int>(OP_CancelTask)),
-		luabind::value("TaskHistoryRequest", static_cast<int>(OP_TaskHistoryRequest)),
-		luabind::value("TaskHistoryReply", static_cast<int>(OP_TaskHistoryReply)),
-		luabind::value("PetBuffWindow", static_cast<int>(OP_PetBuffWindow)),
-		luabind::value("RaidJoin", static_cast<int>(OP_RaidJoin)),
-		luabind::value("Translocate", static_cast<int>(OP_Translocate)),
-		luabind::value("Sacrifice", static_cast<int>(OP_Sacrifice)),
-		luabind::value("KeyRing", static_cast<int>(OP_KeyRing)),
-		luabind::value("PopupResponse", static_cast<int>(OP_PopupResponse)),
-		luabind::value("DeleteCharge", static_cast<int>(OP_DeleteCharge)),
-		luabind::value("PotionBelt", static_cast<int>(OP_PotionBelt)),
-		luabind::value("Barter", static_cast<int>(OP_Barter)),
-		luabind::value("VoiceMacroIn", static_cast<int>(OP_VoiceMacroIn)),
-		luabind::value("VoiceMacroOut", static_cast<int>(OP_VoiceMacroOut)),
-		luabind::value("WorldObjectsSent", static_cast<int>(OP_WorldObjectsSent)),
-		luabind::value("BlockedBuffs", static_cast<int>(OP_BlockedBuffs)),
-		luabind::value("RemoveBlockedBuffs", static_cast<int>(OP_RemoveBlockedBuffs)),
-		luabind::value("ClearBlockedBuffs", static_cast<int>(OP_ClearBlockedBuffs)),
-		luabind::value("GroupUpdateLeaderAA", static_cast<int>(OP_GroupUpdateLeaderAA)),
-		luabind::value("MarkNPC", static_cast<int>(OP_MarkNPC)),
-		luabind::value("ClearNPCMarks", static_cast<int>(OP_ClearNPCMarks)),
-		luabind::value("DoGroupLeadershipAbility", static_cast<int>(OP_DoGroupLeadershipAbility)),
-		luabind::value("DelegateAbility", static_cast<int>(OP_DelegateAbility)),
-		luabind::value("SetGroupTarget", static_cast<int>(OP_SetGroupTarget)),
-		luabind::value("ApplyPoison", static_cast<int>(OP_ApplyPoison)),
-		luabind::value("FinishWindow", static_cast<int>(OP_FinishWindow)),
-		luabind::value("FinishWindow2", static_cast<int>(OP_FinishWindow2)),
-		luabind::value("ItemVerifyRequest", static_cast<int>(OP_ItemVerifyRequest)),
-		luabind::value("ItemVerifyReply", static_cast<int>(OP_ItemVerifyReply)),
-		luabind::value("GMTrainSkillConfirm", static_cast<int>(OP_GMTrainSkillConfirm)),
-		luabind::value("RestState", static_cast<int>(OP_RestState)),
-		luabind::value("AugmentInfo", static_cast<int>(OP_AugmentInfo)),
-		luabind::value("PVPStats", static_cast<int>(OP_PVPStats)),
-		luabind::value("PVPLeaderBoardRequest", static_cast<int>(OP_PVPLeaderBoardRequest)),
-		luabind::value("PVPLeaderBoardReply", static_cast<int>(OP_PVPLeaderBoardReply)),
-		luabind::value("PVPLeaderBoardDetailsRequest", static_cast<int>(OP_PVPLeaderBoardDetailsRequest)),
-		luabind::value("PVPLeaderBoardDetailsReply", static_cast<int>(OP_PVPLeaderBoardDetailsReply)),
-		luabind::value("DisciplineTimer", static_cast<int>(OP_DisciplineTimer)),
-		luabind::value("RespawnWindow", static_cast<int>(OP_RespawnWindow)),
-		luabind::value("AdventureMerchantSell", static_cast<int>(OP_AdventureMerchantSell)),
-		luabind::value("AdventureStatsRequest", static_cast<int>(OP_AdventureStatsRequest)),
-		luabind::value("AdventureStatsReply", static_cast<int>(OP_AdventureStatsReply)),
-		luabind::value("AdventureLeaderboardRequest", static_cast<int>(OP_AdventureLeaderboardRequest)),
-		luabind::value("AdventureLeaderboardReply", static_cast<int>(OP_AdventureLeaderboardReply)),
-		luabind::value("SetStartCity", static_cast<int>(OP_SetStartCity)),
-		luabind::value("LoginUnknown1", static_cast<int>(OP_LoginUnknown1)),
-		luabind::value("LoginUnknown2", static_cast<int>(OP_LoginUnknown2)),
-		luabind::value("ItemViewUnknown", static_cast<int>(OP_ItemViewUnknown)),
-		luabind::value("GetGuildMOTDReply", static_cast<int>(OP_GetGuildMOTDReply)),
-		luabind::value("SetGuildRank", static_cast<int>(OP_SetGuildRank)),
-		luabind::value("SpawnPositionUpdate", static_cast<int>(OP_SpawnPositionUpdate)),
-		luabind::value("ManaUpdate", static_cast<int>(OP_ManaUpdate)),
-		luabind::value("EnduranceUpdate", static_cast<int>(OP_EnduranceUpdate)),
-		luabind::value("MobManaUpdate", static_cast<int>(OP_MobManaUpdate)),
-		luabind::value("MobEnduranceUpdate", static_cast<int>(OP_MobEnduranceUpdate)),
-		luabind::value("GroupUpdateB", static_cast<int>(OP_GroupUpdateB)),
-		luabind::value("GroupDisbandYou", static_cast<int>(OP_GroupDisbandYou)),
-		luabind::value("GroupDisbandOther", static_cast<int>(OP_GroupDisbandOther)),
-		luabind::value("GroupLeaderChange", static_cast<int>(OP_GroupLeaderChange)),
-		luabind::value("GroupLeadershipAAUpdate", static_cast<int>(OP_GroupLeadershipAAUpdate)),
-		luabind::value("GroupRoles", static_cast<int>(OP_GroupRoles)),
-		luabind::value("SendFindableNPCs", static_cast<int>(OP_SendFindableNPCs)),
-		luabind::value("HideCorpse", static_cast<int>(OP_HideCorpse)),
-		luabind::value("TargetBuffs", static_cast<int>(OP_TargetBuffs)),
-		luabind::value("TradeBusy", static_cast<int>(OP_TradeBusy)),
-		luabind::value("GuildUpdateURLAndChannel", static_cast<int>(OP_GuildUpdateURLAndChannel)),
-		luabind::value("CameraEffect", static_cast<int>(OP_CameraEffect)),
-		luabind::value("SpellEffect", static_cast<int>(OP_SpellEffect)),
-		luabind::value("DzQuit", static_cast<int>(OP_DzQuit)),
-		luabind::value("DzListTimers", static_cast<int>(OP_DzListTimers)),
-		luabind::value("DzPlayerList", static_cast<int>(OP_DzPlayerList)),
-		luabind::value("DzAddPlayer", static_cast<int>(OP_DzAddPlayer)),
-		luabind::value("DzRemovePlayer", static_cast<int>(OP_DzRemovePlayer)),
-		luabind::value("DzSwapPlayer", static_cast<int>(OP_DzSwapPlayer)),
-		luabind::value("DzMakeLeader", static_cast<int>(OP_DzMakeLeader)),
-		luabind::value("DzExpeditionInvite", static_cast<int>(OP_DzExpeditionInvite)),
-		luabind::value("DzExpeditionInviteResponse", static_cast<int>(OP_DzExpeditionInviteResponse)),
-		luabind::value("DzExpeditionInfo", static_cast<int>(OP_DzExpeditionInfo)),
-		luabind::value("DzMemberListName", static_cast<int>(OP_DzMemberListName)),
-		luabind::value("DzMemberListStatus", static_cast<int>(OP_DzMemberListStatus)),
-		luabind::value("DzSetLeaderName", static_cast<int>(OP_DzSetLeaderName)),
-		luabind::value("DzExpeditionEndsWarning", static_cast<int>(OP_DzExpeditionEndsWarning)),
-		luabind::value("DzExpeditionLockoutTimers", static_cast<int>(OP_DzExpeditionLockoutTimers)),
-		luabind::value("DzMemberList", static_cast<int>(OP_DzMemberList)),
-		luabind::value("DzCompass", static_cast<int>(OP_DzCompass)),
-		luabind::value("DzChooseZone", static_cast<int>(OP_DzChooseZone)),
-		luabind::value("DzChooseZoneReply", static_cast<int>(OP_DzChooseZoneReply)),
-		luabind::value("BuffCreate", static_cast<int>(OP_BuffCreate)),
-		luabind::value("GuildStatus", static_cast<int>(OP_GuildStatus)),
-		luabind::value("BuffRemoveRequest", static_cast<int>(OP_BuffRemoveRequest)),
-		luabind::value("CorpseDrag", static_cast<int>(OP_CorpseDrag)),
-		luabind::value("CorpseDrop", static_cast<int>(OP_CorpseDrop)),
-		luabind::value("ChangeSize", static_cast<int>(OP_ChangeSize)),
-		luabind::value("GroupMakeLeader", static_cast<int>(OP_GroupMakeLeader)),
-		luabind::value("RemoveAllDoors", static_cast<int>(OP_RemoveAllDoors)),
-		luabind::value("RemoveNimbusEffect", static_cast<int>(OP_RemoveNimbusEffect)),
-		luabind::value("GuildCreate", static_cast<int>(OP_GuildCreate)),
-		luabind::value("AltCurrency", static_cast<int>(OP_AltCurrency)),
-		luabind::value("FellowshipUpdate", static_cast<int>(OP_FellowshipUpdate)),
-		luabind::value("AltCurrencyMerchantRequest", static_cast<int>(OP_AltCurrencyMerchantRequest)),
-		luabind::value("AltCurrencyMerchantReply", static_cast<int>(OP_AltCurrencyMerchantReply)),
-		luabind::value("AltCurrencyPurchase", static_cast<int>(OP_AltCurrencyPurchase)),
-		luabind::value("AltCurrencySellSelection", static_cast<int>(OP_AltCurrencySellSelection)),
-		luabind::value("AltCurrencyReclaim", static_cast<int>(OP_AltCurrencyReclaim)),
-		luabind::value("AltCurrencySell", static_cast<int>(OP_AltCurrencySell)),
-		luabind::value("Untargetable", static_cast<int>(OP_Untargetable)),
-		luabind::value("CrystalReclaim", static_cast<int>(OP_CrystalReclaim)),
-		luabind::value("CrystalCreate", static_cast<int>(OP_CrystalCreate)),
-		luabind::value("SendMaxCharacters", static_cast<int>(OP_SendMaxCharacters)),
-		luabind::value("SendMembership", static_cast<int>(OP_SendMembership)),
-		luabind::value("SendMembershipDetails", static_cast<int>(OP_SendMembershipDetails)),
-		luabind::value("LFGuild", static_cast<int>(OP_LFGuild)),
-		luabind::value("XTargetRequest", static_cast<int>(OP_XTargetRequest)),
-		luabind::value("XTargetResponse", static_cast<int>(OP_XTargetResponse)),
-		luabind::value("XTargetAutoAddHaters", static_cast<int>(OP_XTargetAutoAddHaters)),
-		luabind::value("Weblink", static_cast<int>(OP_Weblink)),
-		luabind::value("InspectMessageUpdate", static_cast<int>(OP_InspectMessageUpdate)),
-		luabind::value("ItemPreview", static_cast<int>(OP_ItemPreview)),
-		luabind::value("MercenaryDataRequest", static_cast<int>(OP_MercenaryDataRequest)),
-		luabind::value("MercenaryDataResponse", static_cast<int>(OP_MercenaryDataResponse)),
-		luabind::value("MercenaryHire", static_cast<int>(OP_MercenaryHire)),
-		luabind::value("MercenaryUnknown1", static_cast<int>(OP_MercenaryUnknown1)),
-		luabind::value("MercenaryTimer", static_cast<int>(OP_MercenaryTimer)),
-		luabind::value("MercenaryAssign", static_cast<int>(OP_MercenaryAssign)),
-		luabind::value("MercenaryDataUpdate", static_cast<int>(OP_MercenaryDataUpdate)),
-		luabind::value("MercenaryCommand", static_cast<int>(OP_MercenaryCommand)),
-		luabind::value("MercenarySuspendRequest", static_cast<int>(OP_MercenarySuspendRequest)),
-		luabind::value("MercenarySuspendResponse", static_cast<int>(OP_MercenarySuspendResponse)),
-		luabind::value("MercenaryUnsuspendResponse", static_cast<int>(OP_MercenaryUnsuspendResponse)),
-		luabind::value("MercenaryDataUpdateRequest", static_cast<int>(OP_MercenaryDataUpdateRequest)),
-		luabind::value("MercenaryDismiss", static_cast<int>(OP_MercenaryDismiss)),
-		luabind::value("MercenaryTimerRequest", static_cast<int>(OP_MercenaryTimerRequest)),
-		luabind::value("OpenInventory", static_cast<int>(OP_OpenInventory)),
-		luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer)),
-		luabind::value("Marquee", static_cast<int>(OP_Marquee)),
-		luabind::value("ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp)),
-		luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote)),
-		luabind::value("Fling", static_cast<int>(OP_Fling))
-	];
+void lua_register_packet_opcodes(sol::state_view &sv)
+{
+	sv.new_enum<int>("Opcode",
+		{
+			{ "ExploreUnknown", static_cast<int>(OP_ExploreUnknown) },
+			{ "Heartbeat", static_cast<int>(OP_Heartbeat) },
+			{ "ReloadUI", static_cast<int>(OP_ReloadUI) },
+			{ "IncreaseStats", static_cast<int>(OP_IncreaseStats) },
+			{ "ApproveZone", static_cast<int>(OP_ApproveZone) },
+			{ "Dye", static_cast<int>(OP_Dye) },
+			{ "Stamina", static_cast<int>(OP_Stamina) },
+			{ "ControlBoat", static_cast<int>(OP_ControlBoat) },
+			{ "MobUpdate", static_cast<int>(OP_MobUpdate) },
+			{ "ClientUpdate", static_cast<int>(OP_ClientUpdate) },
+			{ "ChannelMessage", static_cast<int>(OP_ChannelMessage) },
+			{ "SimpleMessage", static_cast<int>(OP_SimpleMessage) },
+			{ "FormattedMessage", static_cast<int>(OP_FormattedMessage) },
+			{ "TGB", static_cast<int>(OP_TGB) },
+			{ "Bind_Wound", static_cast<int>(OP_Bind_Wound) },
+			{ "Charm", static_cast<int>(OP_Charm) },
+			{ "Begging", static_cast<int>(OP_Begging) },
+			{ "MoveCoin", static_cast<int>(OP_MoveCoin) },
+			{ "SpawnDoor", static_cast<int>(OP_SpawnDoor) },
+			{ "Sneak", static_cast<int>(OP_Sneak) },
+			{ "ExpUpdate", static_cast<int>(OP_ExpUpdate) },
+			{ "DumpName", static_cast<int>(OP_DumpName) },
+			{ "RespondAA", static_cast<int>(OP_RespondAA) },
+			{ "UpdateAA", static_cast<int>(OP_UpdateAA) },
+			{ "SendAAStats", static_cast<int>(OP_SendAAStats) },
+			{ "SendAATable", static_cast<int>(OP_SendAATable) },
+			{ "AAAction", static_cast<int>(OP_AAAction) },
+			{ "BoardBoat", static_cast<int>(OP_BoardBoat) },
+			{ "LeaveBoat", static_cast<int>(OP_LeaveBoat) },
+			{ "AdventureInfoRequest", static_cast<int>(OP_AdventureInfoRequest) },
+			{ "AdventureInfo", static_cast<int>(OP_AdventureInfo) },
+			{ "AdventureRequest", static_cast<int>(OP_AdventureRequest) },
+			{ "AdventureDetails", static_cast<int>(OP_AdventureDetails) },
+			{ "LDoNButton", static_cast<int>(OP_LDoNButton) },
+			{ "AdventureData", static_cast<int>(OP_AdventureData) },
+			{ "AdventureFinish", static_cast<int>(OP_AdventureFinish) },
+			{ "LeaveAdventure", static_cast<int>(OP_LeaveAdventure) },
+			{ "AdventureUpdate", static_cast<int>(OP_AdventureUpdate) },
+			{ "SendExpZonein", static_cast<int>(OP_SendExpZonein) },
+			{ "RaidUpdate", static_cast<int>(OP_RaidUpdate) },
+			{ "GuildLeader", static_cast<int>(OP_GuildLeader) },
+			{ "GuildPeace", static_cast<int>(OP_GuildPeace) },
+			{ "GuildRemove", static_cast<int>(OP_GuildRemove) },
+			{ "GuildMemberList", static_cast<int>(OP_GuildMemberList) },
+			{ "GuildMemberUpdate", static_cast<int>(OP_GuildMemberUpdate) },
+			{ "GuildMemberLevelUpdate", static_cast<int>(OP_GuildMemberLevelUpdate) },
+			{ "GuildInvite", static_cast<int>(OP_GuildInvite) },
+			{ "GuildMOTD", static_cast<int>(OP_GuildMOTD) },
+			{ "SetGuildMOTD", static_cast<int>(OP_SetGuildMOTD) },
+			{ "GuildPublicNote", static_cast<int>(OP_GuildPublicNote) },
+			{ "GetGuildsList", static_cast<int>(OP_GetGuildsList) },
+			{ "GuildDemote", static_cast<int>(OP_GuildDemote) },
+			{ "GuildInviteAccept", static_cast<int>(OP_GuildInviteAccept) },
+			{ "GuildWar", static_cast<int>(OP_GuildWar) },
+			{ "GuildDelete", static_cast<int>(OP_GuildDelete) },
+			{ "GuildManageRemove", static_cast<int>(OP_GuildManageRemove) },
+			{ "GuildManageAdd", static_cast<int>(OP_GuildManageAdd) },
+			{ "GuildManageStatus", static_cast<int>(OP_GuildManageStatus) },
+			{ "GuildManageBanker", static_cast<int>(OP_GuildManageBanker) },
+			{ "GetGuildMOTD", static_cast<int>(OP_GetGuildMOTD) },
+			{ "Trader", static_cast<int>(OP_Trader) },
+			{ "Bazaar", static_cast<int>(OP_Bazaar) },
+			{ "BecomeTrader", static_cast<int>(OP_BecomeTrader) },
+			{ "TraderItemUpdate", static_cast<int>(OP_TraderItemUpdate) },
+			{ "TraderShop", static_cast<int>(OP_TraderShop) },
+			{ "TraderBuy", static_cast<int>(OP_TraderBuy) },
+			{ "PetCommands", static_cast<int>(OP_PetCommands) },
+			{ "TradeSkillCombine", static_cast<int>(OP_TradeSkillCombine) },
+			{ "AugmentItem", static_cast<int>(OP_AugmentItem) },
+			{ "ItemName", static_cast<int>(OP_ItemName) },
+			{ "ShopItem", static_cast<int>(OP_ShopItem) },
+			{ "ShopPlayerBuy", static_cast<int>(OP_ShopPlayerBuy) },
+			{ "ShopPlayerSell", static_cast<int>(OP_ShopPlayerSell) },
+			{ "ShopDelItem", static_cast<int>(OP_ShopDelItem) },
+			{ "ShopRequest", static_cast<int>(OP_ShopRequest) },
+			{ "ShopEnd", static_cast<int>(OP_ShopEnd) },
+			{ "LFGCommand", static_cast<int>(OP_LFGCommand) },
+			{ "LFGAppearance", static_cast<int>(OP_LFGAppearance) },
+			{ "GroupUpdate", static_cast<int>(OP_GroupUpdate) },
+			{ "GroupInvite", static_cast<int>(OP_GroupInvite) },
+			{ "GroupDisband", static_cast<int>(OP_GroupDisband) },
+			{ "GroupInvite2", static_cast<int>(OP_GroupInvite2) },
+			{ "GroupFollow", static_cast<int>(OP_GroupFollow) },
+			{ "GroupFollow2", static_cast<int>(OP_GroupFollow2) },
+			{ "GroupCancelInvite", static_cast<int>(OP_GroupCancelInvite) },
+			{ "CustomTitles", static_cast<int>(OP_CustomTitles) },
+			{ "Split", static_cast<int>(OP_Split) },
+			{ "Jump", static_cast<int>(OP_Jump) },
+			{ "ConsiderCorpse", static_cast<int>(OP_ConsiderCorpse) },
+			{ "SkillUpdate", static_cast<int>(OP_SkillUpdate) },
+			{ "GMEndTrainingResponse", static_cast<int>(OP_GMEndTrainingResponse) },
+			{ "GMEndTraining", static_cast<int>(OP_GMEndTraining) },
+			{ "GMTrainSkill", static_cast<int>(OP_GMTrainSkill) },
+			{ "GMTraining", static_cast<int>(OP_GMTraining) },
+			{ "DeleteItem", static_cast<int>(OP_DeleteItem) },
+			{ "CombatAbility", static_cast<int>(OP_CombatAbility) },
+			{ "TrackUnknown", static_cast<int>(OP_TrackUnknown) },
+			{ "TrackTarget", static_cast<int>(OP_TrackTarget) },
+			{ "Track", static_cast<int>(OP_Track) },
+			{ "ItemLinkClick", static_cast<int>(OP_ItemLinkClick) },
+			{ "ItemLinkResponse", static_cast<int>(OP_ItemLinkResponse) },
+			{ "ItemLinkText", static_cast<int>(OP_ItemLinkText) },
+			{ "RezzAnswer", static_cast<int>(OP_RezzAnswer) },
+			{ "RezzComplete", static_cast<int>(OP_RezzComplete) },
+			{ "SendZonepoints", static_cast<int>(OP_SendZonepoints) },
+			{ "SetRunMode", static_cast<int>(OP_SetRunMode) },
+			{ "InspectRequest", static_cast<int>(OP_InspectRequest) },
+			{ "InspectAnswer", static_cast<int>(OP_InspectAnswer) },
+			{ "SenseTraps", static_cast<int>(OP_SenseTraps) },
+			{ "DisarmTraps", static_cast<int>(OP_DisarmTraps) },
+			{ "Assist", static_cast<int>(OP_Assist) },
+			{ "AssistGroup", static_cast<int>(OP_AssistGroup) },
+			{ "PickPocket", static_cast<int>(OP_PickPocket) },
+			{ "LootRequest", static_cast<int>(OP_LootRequest) },
+			{ "EndLootRequest", static_cast<int>(OP_EndLootRequest) },
+			{ "MoneyOnCorpse", static_cast<int>(OP_MoneyOnCorpse) },
+			{ "LootComplete", static_cast<int>(OP_LootComplete) },
+			{ "LootItem", static_cast<int>(OP_LootItem) },
+			{ "MoveItem", static_cast<int>(OP_MoveItem) },
+			{ "WhoAllRequest", static_cast<int>(OP_WhoAllRequest) },
+			{ "WhoAllResponse", static_cast<int>(OP_WhoAllResponse) },
+			{ "Consume", static_cast<int>(OP_Consume) },
+			{ "AutoAttack", static_cast<int>(OP_AutoAttack) },
+			{ "AutoAttack2", static_cast<int>(OP_AutoAttack2) },
+			{ "TargetMouse", static_cast<int>(OP_TargetMouse) },
+			{ "TargetCommand", static_cast<int>(OP_TargetCommand) },
+			{ "TargetReject", static_cast<int>(OP_TargetReject) },
+			{ "TargetHoTT", static_cast<int>(OP_TargetHoTT) },
+			{ "Hide", static_cast<int>(OP_Hide) },
+			{ "Forage", static_cast<int>(OP_Forage) },
+			{ "Fishing", static_cast<int>(OP_Fishing) },
+			{ "Bug", static_cast<int>(OP_Bug) },
+			{ "Emote", static_cast<int>(OP_Emote) },
+			{ "Consider", static_cast<int>(OP_Consider) },
+			{ "FaceChange", static_cast<int>(OP_FaceChange) },
+			{ "RandomReq", static_cast<int>(OP_RandomReq) },
+			{ "RandomReply", static_cast<int>(OP_RandomReply) },
+			{ "Camp", static_cast<int>(OP_Camp) },
+			{ "YellForHelp", static_cast<int>(OP_YellForHelp) },
+			{ "SafePoint", static_cast<int>(OP_SafePoint) },
+			{ "Buff", static_cast<int>(OP_Buff) },
+			{ "ColoredText", static_cast<int>(OP_ColoredText) },
+			{ "SpecialMesg", static_cast<int>(OP_SpecialMesg) },
+			{ "Consent", static_cast<int>(OP_Consent) },
+			{ "ConsentResponse", static_cast<int>(OP_ConsentResponse) },
+			{ "Stun", static_cast<int>(OP_Stun) },
+			{ "BeginCast", static_cast<int>(OP_BeginCast) },
+			{ "CastSpell", static_cast<int>(OP_CastSpell) },
+			{ "InterruptCast", static_cast<int>(OP_InterruptCast) },
+			{ "Death", static_cast<int>(OP_Death) },
+			{ "FeignDeath", static_cast<int>(OP_FeignDeath) },
+			{ "Illusion", static_cast<int>(OP_Illusion) },
+			{ "LevelUpdate", static_cast<int>(OP_LevelUpdate) },
+			{ "LevelAppearance", static_cast<int>(OP_LevelAppearance) },
+			{ "MemorizeSpell", static_cast<int>(OP_MemorizeSpell) },
+			{ "HPUpdate", static_cast<int>(OP_HPUpdate) },
+			{ "Mend", static_cast<int>(OP_Mend) },
+			{ "Taunt", static_cast<int>(OP_Taunt) },
+			{ "GMDelCorpse", static_cast<int>(OP_GMDelCorpse) },
+			{ "GMFind", static_cast<int>(OP_GMFind) },
+			{ "GMServers", static_cast<int>(OP_GMServers) },
+			{ "GMGoto", static_cast<int>(OP_GMGoto) },
+			{ "GMSummon", static_cast<int>(OP_GMSummon) },
+			{ "GMKill", static_cast<int>(OP_GMKill) },
+			{ "GMLastName", static_cast<int>(OP_GMLastName) },
+			{ "GMToggle", static_cast<int>(OP_GMToggle) },
+			{ "GMEmoteZone", static_cast<int>(OP_GMEmoteZone) },
+			{ "GMBecomeNPC", static_cast<int>(OP_GMBecomeNPC) },
+			{ "GMHideMe", static_cast<int>(OP_GMHideMe) },
+			{ "GMZoneRequest", static_cast<int>(OP_GMZoneRequest) },
+			{ "GMZoneRequest2", static_cast<int>(OP_GMZoneRequest2) },
+			{ "Petition", static_cast<int>(OP_Petition) },
+			{ "PetitionRefresh", static_cast<int>(OP_PetitionRefresh) },
+			{ "PDeletePetition", static_cast<int>(OP_PDeletePetition) },
+			{ "PetitionBug", static_cast<int>(OP_PetitionBug) },
+			{ "PetitionUpdate", static_cast<int>(OP_PetitionUpdate) },
+			{ "PetitionCheckout", static_cast<int>(OP_PetitionCheckout) },
+			{ "PetitionCheckout2", static_cast<int>(OP_PetitionCheckout2) },
+			{ "PetitionDelete", static_cast<int>(OP_PetitionDelete) },
+			{ "PetitionResolve", static_cast<int>(OP_PetitionResolve) },
+			{ "PetitionCheckIn", static_cast<int>(OP_PetitionCheckIn) },
+			{ "PetitionUnCheckout", static_cast<int>(OP_PetitionUnCheckout) },
+			{ "PetitionQue", static_cast<int>(OP_PetitionQue) },
+			{ "SetServerFilter", static_cast<int>(OP_SetServerFilter) },
+			{ "NewSpawn", static_cast<int>(OP_NewSpawn) },
+			{ "Animation", static_cast<int>(OP_Animation) },
+			{ "ZoneChange", static_cast<int>(OP_ZoneChange) },
+			{ "DeleteSpawn", static_cast<int>(OP_DeleteSpawn) },
+			{ "EnvDamage", static_cast<int>(OP_EnvDamage) },
+			{ "Action", static_cast<int>(OP_Action) },
+			{ "Damage", static_cast<int>(OP_Damage) },
+			{ "ManaChange", static_cast<int>(OP_ManaChange) },
+			{ "ClientError", static_cast<int>(OP_ClientError) },
+			{ "Save", static_cast<int>(OP_Save) },
+			{ "LocInfo", static_cast<int>(OP_LocInfo) },
+			{ "Surname", static_cast<int>(OP_Surname) },
+			{ "ClearSurname", static_cast<int>(OP_ClearSurname) },
+			{ "SwapSpell", static_cast<int>(OP_SwapSpell) },
+			{ "DeleteSpell", static_cast<int>(OP_DeleteSpell) },
+			{ "CloseContainer", static_cast<int>(OP_CloseContainer) },
+			{ "ClickObjectAction", static_cast<int>(OP_ClickObjectAction) },
+			{ "GroundSpawn", static_cast<int>(OP_GroundSpawn) },
+			{ "ClearObject", static_cast<int>(OP_ClearObject) },
+			{ "ZoneUnavail", static_cast<int>(OP_ZoneUnavail) },
+			{ "ItemPacket", static_cast<int>(OP_ItemPacket) },
+			{ "TradeRequest", static_cast<int>(OP_TradeRequest) },
+			{ "TradeRequestAck", static_cast<int>(OP_TradeRequestAck) },
+			{ "TradeAcceptClick", static_cast<int>(OP_TradeAcceptClick) },
+			{ "TradeMoneyUpdate", static_cast<int>(OP_TradeMoneyUpdate) },
+			{ "TradeCoins", static_cast<int>(OP_TradeCoins) },
+			{ "CancelTrade", static_cast<int>(OP_CancelTrade) },
+			{ "FinishTrade", static_cast<int>(OP_FinishTrade) },
+			{ "SaveOnZoneReq", static_cast<int>(OP_SaveOnZoneReq) },
+			{ "Logout", static_cast<int>(OP_Logout) },
+			{ "LogoutReply", static_cast<int>(OP_LogoutReply) },
+			{ "PreLogoutReply", static_cast<int>(OP_PreLogoutReply) },
+			{ "DuelAccept", static_cast<int>(OP_DuelAccept) },
+			{ "InstillDoubt", static_cast<int>(OP_InstillDoubt) },
+			{ "SafeFallSuccess", static_cast<int>(OP_SafeFallSuccess) },
+			{ "DisciplineUpdate", static_cast<int>(OP_DisciplineUpdate) },
+			{ "SendGuildTributes", static_cast<int>(OP_SendGuildTributes) },
+			{ "SendTributes", static_cast<int>(OP_SendTributes) },
+			{ "TributeUpdate", static_cast<int>(OP_TributeUpdate) },
+			{ "TributeItem", static_cast<int>(OP_TributeItem) },
+			{ "TributePointUpdate", static_cast<int>(OP_TributePointUpdate) },
+			{ "TributeInfo", static_cast<int>(OP_TributeInfo) },
+			{ "GuildTributeInfo", static_cast<int>(OP_GuildTributeInfo) },
+			{ "OpenGuildTributeMaster", static_cast<int>(OP_OpenGuildTributeMaster) },
+			{ "OpenTributeMaster", static_cast<int>(OP_OpenTributeMaster) },
+			{ "TributeTimer", static_cast<int>(OP_TributeTimer) },
+			{ "SelectTribute", static_cast<int>(OP_SelectTribute) },
+			{ "TributeNPC", static_cast<int>(OP_TributeNPC) },
+			{ "TributeMoney", static_cast<int>(OP_TributeMoney) },
+			{ "TributeToggle", static_cast<int>(OP_TributeToggle) },
+			{ "CloseTributeMaster", static_cast<int>(OP_CloseTributeMaster) },
+			{ "RecipesFavorite", static_cast<int>(OP_RecipesFavorite) },
+			{ "RecipesSearch", static_cast<int>(OP_RecipesSearch) },
+			{ "RecipeReply", static_cast<int>(OP_RecipeReply) },
+			{ "RecipeDetails", static_cast<int>(OP_RecipeDetails) },
+			{ "RecipeAutoCombine", static_cast<int>(OP_RecipeAutoCombine) },
+			{ "Shielding", static_cast<int>(OP_Shielding) },
+			{ "FindPersonRequest", static_cast<int>(OP_FindPersonRequest) },
+			{ "FindPersonReply", static_cast<int>(OP_FindPersonReply) },
+			{ "ZoneEntry", static_cast<int>(OP_ZoneEntry) },
+			{ "PlayerProfile", static_cast<int>(OP_PlayerProfile) },
+			{ "CharInventory", static_cast<int>(OP_CharInventory) },
+			{ "ZoneSpawns", static_cast<int>(OP_ZoneSpawns) },
+			{ "Weather", static_cast<int>(OP_Weather) },
+			{ "ReqNewZone", static_cast<int>(OP_ReqNewZone) },
+			{ "NewZone", static_cast<int>(OP_NewZone) },
+			{ "ReqClientSpawn", static_cast<int>(OP_ReqClientSpawn) },
+			{ "SpawnAppearance", static_cast<int>(OP_SpawnAppearance) },
+			{ "ClientReady", static_cast<int>(OP_ClientReady) },
+			{ "ZoneComplete", static_cast<int>(OP_ZoneComplete) },
+			{ "ApproveWorld", static_cast<int>(OP_ApproveWorld) },
+			{ "LogServer", static_cast<int>(OP_LogServer) },
+			{ "MOTD", static_cast<int>(OP_MOTD) },
+			{ "SendLoginInfo", static_cast<int>(OP_SendLoginInfo) },
+			{ "DeleteCharacter", static_cast<int>(OP_DeleteCharacter) },
+			{ "SendCharInfo", static_cast<int>(OP_SendCharInfo) },
+			{ "ExpansionInfo", static_cast<int>(OP_ExpansionInfo) },
+			{ "CharacterCreate", static_cast<int>(OP_CharacterCreate) },
+			{ "CharacterCreateRequest", static_cast<int>(OP_CharacterCreateRequest) },
+			{ "RandomNameGenerator", static_cast<int>(OP_RandomNameGenerator) },
+			{ "GuildsList", static_cast<int>(OP_GuildsList) },
+			{ "ApproveName", static_cast<int>(OP_ApproveName) },
+			{ "EnterWorld", static_cast<int>(OP_EnterWorld) },
+			{ "PostEnterWorld	", static_cast<int>(OP_PostEnterWorld	) },
+			{ "SendSystemStats", static_cast<int>(OP_SendSystemStats) },
+			{ "World_Client_CRC1", static_cast<int>(OP_World_Client_CRC1) },
+			{ "World_Client_CRC2", static_cast<int>(OP_World_Client_CRC2) },
+			{ "SetChatServer", static_cast<int>(OP_SetChatServer) },
+			{ "SetChatServer2", static_cast<int>(OP_SetChatServer2) },
+			{ "ZoneServerInfo", static_cast<int>(OP_ZoneServerInfo) },
+			{ "WorldClientReady", static_cast<int>(OP_WorldClientReady) },
+			{ "WorldUnknown001", static_cast<int>(OP_WorldUnknown001) },
+			{ "AckPacket", static_cast<int>(OP_AckPacket) },
+			{ "WearChange", static_cast<int>(OP_WearChange) },
+			{ "CrashDump", static_cast<int>(OP_CrashDump) },
+			{ "LoginComplete", static_cast<int>(OP_LoginComplete) },
+			{ "GMNameChange", static_cast<int>(OP_GMNameChange) },
+			{ "ReadBook", static_cast<int>(OP_ReadBook) },
+			{ "GMKick", static_cast<int>(OP_GMKick) },
+			{ "RezzRequest", static_cast<int>(OP_RezzRequest) },
+			{ "MultiLineMsg", static_cast<int>(OP_MultiLineMsg) },
+			{ "TimeOfDay", static_cast<int>(OP_TimeOfDay) },
+			{ "CompletedTasks", static_cast<int>(OP_CompletedTasks) },
+			{ "MoneyUpdate", static_cast<int>(OP_MoneyUpdate) },
+			{ "ClickObject", static_cast<int>(OP_ClickObject) },
+			{ "MoveDoor", static_cast<int>(OP_MoveDoor) },
+			{ "TraderDelItem", static_cast<int>(OP_TraderDelItem) },
+			{ "AdventureMerchantPurchase", static_cast<int>(OP_AdventureMerchantPurchase) },
+			{ "TestBuff", static_cast<int>(OP_TestBuff) },
+			{ "DuelDecline", static_cast<int>(OP_DuelDecline) },
+			{ "RequestDuel", static_cast<int>(OP_RequestDuel) },
+			{ "BazaarInspect", static_cast<int>(OP_BazaarInspect) },
+			{ "ClickDoor", static_cast<int>(OP_ClickDoor) },
+			{ "GroupAcknowledge", static_cast<int>(OP_GroupAcknowledge) },
+			{ "GroupDelete", static_cast<int>(OP_GroupDelete) },
+			{ "AdventureMerchantResponse", static_cast<int>(OP_AdventureMerchantResponse) },
+			{ "ShopEndConfirm", static_cast<int>(OP_ShopEndConfirm) },
+			{ "AdventureMerchantRequest", static_cast<int>(OP_AdventureMerchantRequest) },
+			{ "Sound", static_cast<int>(OP_Sound) },
+			{ "0x0193", static_cast<int>(OP_0x0193) },
+			{ "0x0347", static_cast<int>(OP_0x0347) },
+			{ "WorldComplete", static_cast<int>(OP_WorldComplete) },
+			{ "MobRename", static_cast<int>(OP_MobRename) },
+			{ "TaskDescription", static_cast<int>(OP_TaskDescription) },
+			{ "TaskActivity", static_cast<int>(OP_TaskActivity) },
+			{ "SharedTaskPlayerList", static_cast<int>(OP_SharedTaskPlayerList) },
+			{ "AnnoyingZoneUnknown", static_cast<int>(OP_AnnoyingZoneUnknown) },
+			{ "Some3ByteHPUpdate", static_cast<int>(OP_Some3ByteHPUpdate) },
+			{ "FloatListThing", static_cast<int>(OP_FloatListThing) },
+			{ "AAExpUpdate", static_cast<int>(OP_AAExpUpdate) },
+			{ "ForceFindPerson", static_cast<int>(OP_ForceFindPerson) },
+			{ "PlayMP3", static_cast<int>(OP_PlayMP3) },
+			{ "RequestClientZoneChange", static_cast<int>(OP_RequestClientZoneChange) },
+			{ "SomeItemPacketMaybe", static_cast<int>(OP_SomeItemPacketMaybe) },
+			{ "QueryResponseThing", static_cast<int>(OP_QueryResponseThing) },
+			{ "Some6ByteHPUpdate", static_cast<int>(OP_Some6ByteHPUpdate) },
+			{ "BankerChange", static_cast<int>(OP_BankerChange) },
+			{ "BecomeCorpse", static_cast<int>(OP_BecomeCorpse) },
+			{ "Action2", static_cast<int>(OP_Action2) },
+			{ "BazaarSearch", static_cast<int>(OP_BazaarSearch) },
+			{ "SetTitle", static_cast<int>(OP_SetTitle) },
+			{ "SetTitleReply", static_cast<int>(OP_SetTitleReply) },
+			{ "ConfirmDelete", static_cast<int>(OP_ConfirmDelete) },
+			{ "ConsentDeny", static_cast<int>(OP_ConsentDeny) },
+			{ "CrystalCountUpdate", static_cast<int>(OP_CrystalCountUpdate) },
+			{ "DeletePetition", static_cast<int>(OP_DeletePetition) },
+			{ "DenyResponse", static_cast<int>(OP_DenyResponse) },
+			{ "Disarm", static_cast<int>(OP_Disarm) },
+			{ "Feedback", static_cast<int>(OP_Feedback) },
+			{ "FriendsWho", static_cast<int>(OP_FriendsWho) },
+			{ "GMApproval", static_cast<int>(OP_GMApproval) },
+			{ "GMSearchCorpse", static_cast<int>(OP_GMSearchCorpse) },
+			{ "GuildBank", static_cast<int>(OP_GuildBank) },
+			{ "InitialHPUpdate", static_cast<int>(OP_InitialHPUpdate) },
+			{ "InitialMobHealth", static_cast<int>(OP_InitialMobHealth) },
+			{ "LFGGetMatchesRequest", static_cast<int>(OP_LFGGetMatchesRequest) },
+			{ "LFGGetMatchesResponse", static_cast<int>(OP_LFGGetMatchesResponse) },
+			{ "LFGResponse", static_cast<int>(OP_LFGResponse) },
+			{ "LFPCommand", static_cast<int>(OP_LFPCommand) },
+			{ "LFPGetMatchesRequest", static_cast<int>(OP_LFPGetMatchesRequest) },
+			{ "LFPGetMatchesResponse", static_cast<int>(OP_LFPGetMatchesResponse) },
+			{ "LeadershipExpToggle", static_cast<int>(OP_LeadershipExpToggle) },
+			{ "LeadershipExpUpdate", static_cast<int>(OP_LeadershipExpUpdate) },
+			{ "LoadSpellSet", static_cast<int>(OP_LoadSpellSet) },
+			{ "LockoutTimerInfo", static_cast<int>(OP_LockoutTimerInfo) },
+			{ "MendHPUpdate", static_cast<int>(OP_MendHPUpdate) },
+			{ "MobHealth", static_cast<int>(OP_MobHealth) },
+			{ "MoveLogDisregard", static_cast<int>(OP_MoveLogDisregard) },
+			{ "MoveLogRequest", static_cast<int>(OP_MoveLogRequest) },
+			{ "PetitionSearch", static_cast<int>(OP_PetitionSearch) },
+			{ "PetitionSearchResults", static_cast<int>(OP_PetitionSearchResults) },
+			{ "PetitionSearchText", static_cast<int>(OP_PetitionSearchText) },
+			{ "RaidInvite", static_cast<int>(OP_RaidInvite) },
+			{ "ReclaimCrystals", static_cast<int>(OP_ReclaimCrystals) },
+			{ "Report", static_cast<int>(OP_Report) },
+			{ "SenseHeading", static_cast<int>(OP_SenseHeading) },
+			{ "LDoNOpen", static_cast<int>(OP_LDoNOpen) },
+			{ "LDoNSenseTraps", static_cast<int>(OP_LDoNSenseTraps) },
+			{ "LDoNPickLock", static_cast<int>(OP_LDoNPickLock) },
+			{ "LDoNDisarmTraps", static_cast<int>(OP_LDoNDisarmTraps) },
+			{ "LDoNInspect", static_cast<int>(OP_LDoNInspect) },
+			{ "DynamicWall", static_cast<int>(OP_DynamicWall) },
+			{ "RequestTitles", static_cast<int>(OP_RequestTitles) },
+			{ "PurchaseLeadershipAA", static_cast<int>(OP_PurchaseLeadershipAA) },
+			{ "UpdateLeadershipAA", static_cast<int>(OP_UpdateLeadershipAA) },
+			{ "AdventurePointsUpdate", static_cast<int>(OP_AdventurePointsUpdate) },
+			{ "ZoneInUnknown", static_cast<int>(OP_ZoneInUnknown) },
+			{ "ZoneServerReady	", static_cast<int>(OP_ZoneServerReady	) },
+			{ "ZoneGuildList", static_cast<int>(OP_ZoneGuildList) },
+			{ "SendTitleList", static_cast<int>(OP_SendTitleList) },
+			{ "NewTitlesAvailable", static_cast<int>(OP_NewTitlesAvailable) },
+			{ "Bandolier", static_cast<int>(OP_Bandolier) },
+			{ "OpenDiscordMerchant", static_cast<int>(OP_OpenDiscordMerchant) },
+			{ "DiscordMerchantInventory", static_cast<int>(OP_DiscordMerchantInventory) },
+			{ "GiveMoney", static_cast<int>(OP_GiveMoney) },
+			{ "OnLevelMessage", static_cast<int>(OP_OnLevelMessage) },
+			{ "RequestKnowledgeBase", static_cast<int>(OP_RequestKnowledgeBase) },
+			{ "KnowledgeBase", static_cast<int>(OP_KnowledgeBase) },
+			{ "VetRewardsAvaliable", static_cast<int>(OP_VetRewardsAvaliable) },
+			{ "VetClaimRequest", static_cast<int>(OP_VetClaimRequest) },
+			{ "VetClaimReply", static_cast<int>(OP_VetClaimReply) },
+			{ "WeaponEquip1", static_cast<int>(OP_WeaponEquip1) },
+			{ "PlayerStateAdd", static_cast<int>(OP_PlayerStateAdd) },
+			{ "PlayerStateRemove", static_cast<int>(OP_PlayerStateRemove) },
+			{ "WorldLogout", static_cast<int>(OP_WorldLogout) },
+			{ "SessionReady", static_cast<int>(OP_SessionReady) },
+			{ "Login", static_cast<int>(OP_Login) },
+			{ "ServerListRequest", static_cast<int>(OP_ServerListRequest) },
+			{ "PlayEverquestRequest", static_cast<int>(OP_PlayEverquestRequest) },
+			{ "ChatMessage", static_cast<int>(OP_ChatMessage) },
+			{ "LoginAccepted", static_cast<int>(OP_LoginAccepted) },
+			{ "ServerListResponse", static_cast<int>(OP_ServerListResponse) },
+			{ "Poll", static_cast<int>(OP_Poll) },
+			{ "PlayEverquestResponse", static_cast<int>(OP_PlayEverquestResponse) },
+			{ "EnterChat", static_cast<int>(OP_EnterChat) },
+			{ "PollResponse", static_cast<int>(OP_PollResponse) },
+			{ "Command", static_cast<int>(OP_Command) },
+			{ "ZonePlayerToBind", static_cast<int>(OP_ZonePlayerToBind) },
+			{ "AutoFire", static_cast<int>(OP_AutoFire) },
+			{ "Rewind", static_cast<int>(OP_Rewind) },
+			{ "TaskSelectWindow", static_cast<int>(OP_TaskSelectWindow) },
+			{ "TaskActivityComplete", static_cast<int>(OP_TaskActivityComplete) },
+			{ "AcceptNewTask", static_cast<int>(OP_AcceptNewTask) },
+			{ "CancelTask", static_cast<int>(OP_CancelTask) },
+			{ "TaskHistoryRequest", static_cast<int>(OP_TaskHistoryRequest) },
+			{ "TaskHistoryReply", static_cast<int>(OP_TaskHistoryReply) },
+			{ "PetBuffWindow", static_cast<int>(OP_PetBuffWindow) },
+			{ "RaidJoin", static_cast<int>(OP_RaidJoin) },
+			{ "Translocate", static_cast<int>(OP_Translocate) },
+			{ "Sacrifice", static_cast<int>(OP_Sacrifice) },
+			{ "KeyRing", static_cast<int>(OP_KeyRing) },
+			{ "PopupResponse", static_cast<int>(OP_PopupResponse) },
+			{ "DeleteCharge", static_cast<int>(OP_DeleteCharge) },
+			{ "PotionBelt", static_cast<int>(OP_PotionBelt) },
+			{ "Barter", static_cast<int>(OP_Barter) },
+			{ "VoiceMacroIn", static_cast<int>(OP_VoiceMacroIn) },
+			{ "VoiceMacroOut", static_cast<int>(OP_VoiceMacroOut) },
+			{ "WorldObjectsSent", static_cast<int>(OP_WorldObjectsSent) },
+			{ "BlockedBuffs", static_cast<int>(OP_BlockedBuffs) },
+			{ "RemoveBlockedBuffs", static_cast<int>(OP_RemoveBlockedBuffs) },
+			{ "ClearBlockedBuffs", static_cast<int>(OP_ClearBlockedBuffs) },
+			{ "GroupUpdateLeaderAA", static_cast<int>(OP_GroupUpdateLeaderAA) },
+			{ "MarkNPC", static_cast<int>(OP_MarkNPC) },
+			{ "ClearNPCMarks", static_cast<int>(OP_ClearNPCMarks) },
+			{ "DoGroupLeadershipAbility", static_cast<int>(OP_DoGroupLeadershipAbility) },
+			{ "DelegateAbility", static_cast<int>(OP_DelegateAbility) },
+			{ "SetGroupTarget", static_cast<int>(OP_SetGroupTarget) },
+			{ "ApplyPoison", static_cast<int>(OP_ApplyPoison) },
+			{ "FinishWindow", static_cast<int>(OP_FinishWindow) },
+			{ "FinishWindow2", static_cast<int>(OP_FinishWindow2) },
+			{ "ItemVerifyRequest", static_cast<int>(OP_ItemVerifyRequest) },
+			{ "ItemVerifyReply", static_cast<int>(OP_ItemVerifyReply) },
+			{ "GMTrainSkillConfirm", static_cast<int>(OP_GMTrainSkillConfirm) },
+			{ "RestState", static_cast<int>(OP_RestState) },
+			{ "AugmentInfo", static_cast<int>(OP_AugmentInfo) },
+			{ "PVPStats", static_cast<int>(OP_PVPStats) },
+			{ "PVPLeaderBoardRequest", static_cast<int>(OP_PVPLeaderBoardRequest) },
+			{ "PVPLeaderBoardReply", static_cast<int>(OP_PVPLeaderBoardReply) },
+			{ "PVPLeaderBoardDetailsRequest", static_cast<int>(OP_PVPLeaderBoardDetailsRequest) },
+			{ "PVPLeaderBoardDetailsReply", static_cast<int>(OP_PVPLeaderBoardDetailsReply) },
+			{ "DisciplineTimer", static_cast<int>(OP_DisciplineTimer) },
+			{ "RespawnWindow", static_cast<int>(OP_RespawnWindow) },
+			{ "AdventureMerchantSell", static_cast<int>(OP_AdventureMerchantSell) },
+			{ "AdventureStatsRequest", static_cast<int>(OP_AdventureStatsRequest) },
+			{ "AdventureStatsReply", static_cast<int>(OP_AdventureStatsReply) },
+			{ "AdventureLeaderboardRequest", static_cast<int>(OP_AdventureLeaderboardRequest) },
+			{ "AdventureLeaderboardReply", static_cast<int>(OP_AdventureLeaderboardReply) },
+			{ "SetStartCity", static_cast<int>(OP_SetStartCity) },
+			{ "LoginUnknown1", static_cast<int>(OP_LoginUnknown1) },
+			{ "LoginUnknown2", static_cast<int>(OP_LoginUnknown2) },
+			{ "ItemViewUnknown", static_cast<int>(OP_ItemViewUnknown) },
+			{ "GetGuildMOTDReply", static_cast<int>(OP_GetGuildMOTDReply) },
+			{ "SetGuildRank", static_cast<int>(OP_SetGuildRank) },
+			{ "SpawnPositionUpdate", static_cast<int>(OP_SpawnPositionUpdate) },
+			{ "ManaUpdate", static_cast<int>(OP_ManaUpdate) },
+			{ "EnduranceUpdate", static_cast<int>(OP_EnduranceUpdate) },
+			{ "MobManaUpdate", static_cast<int>(OP_MobManaUpdate) },
+			{ "MobEnduranceUpdate", static_cast<int>(OP_MobEnduranceUpdate) },
+			{ "GroupUpdateB", static_cast<int>(OP_GroupUpdateB) },
+			{ "GroupDisbandYou", static_cast<int>(OP_GroupDisbandYou) },
+			{ "GroupDisbandOther", static_cast<int>(OP_GroupDisbandOther) },
+			{ "GroupLeaderChange", static_cast<int>(OP_GroupLeaderChange) },
+			{ "GroupLeadershipAAUpdate", static_cast<int>(OP_GroupLeadershipAAUpdate) },
+			{ "GroupRoles", static_cast<int>(OP_GroupRoles) },
+			{ "SendFindableNPCs", static_cast<int>(OP_SendFindableNPCs) },
+			{ "HideCorpse", static_cast<int>(OP_HideCorpse) },
+			{ "TargetBuffs", static_cast<int>(OP_TargetBuffs) },
+			{ "TradeBusy", static_cast<int>(OP_TradeBusy) },
+			{ "GuildUpdateURLAndChannel", static_cast<int>(OP_GuildUpdateURLAndChannel) },
+			{ "CameraEffect", static_cast<int>(OP_CameraEffect) },
+			{ "SpellEffect", static_cast<int>(OP_SpellEffect) },
+			{ "DzQuit", static_cast<int>(OP_DzQuit) },
+			{ "DzListTimers", static_cast<int>(OP_DzListTimers) },
+			{ "DzPlayerList", static_cast<int>(OP_DzPlayerList) },
+			{ "DzAddPlayer", static_cast<int>(OP_DzAddPlayer) },
+			{ "DzRemovePlayer", static_cast<int>(OP_DzRemovePlayer) },
+			{ "DzSwapPlayer", static_cast<int>(OP_DzSwapPlayer) },
+			{ "DzMakeLeader", static_cast<int>(OP_DzMakeLeader) },
+			{ "DzExpeditionInvite", static_cast<int>(OP_DzExpeditionInvite) },
+			{ "DzExpeditionInviteResponse", static_cast<int>(OP_DzExpeditionInviteResponse) },
+			{ "DzExpeditionInfo", static_cast<int>(OP_DzExpeditionInfo) },
+			{ "DzMemberListName", static_cast<int>(OP_DzMemberListName) },
+			{ "DzMemberListStatus", static_cast<int>(OP_DzMemberListStatus) },
+			{ "DzSetLeaderName", static_cast<int>(OP_DzSetLeaderName) },
+			{ "DzExpeditionEndsWarning", static_cast<int>(OP_DzExpeditionEndsWarning) },
+			{ "DzExpeditionLockoutTimers", static_cast<int>(OP_DzExpeditionLockoutTimers) },
+			{ "DzMemberList", static_cast<int>(OP_DzMemberList) },
+			{ "DzCompass", static_cast<int>(OP_DzCompass) },
+			{ "DzChooseZone", static_cast<int>(OP_DzChooseZone) },
+			{ "DzChooseZoneReply", static_cast<int>(OP_DzChooseZoneReply) },
+			{ "BuffCreate", static_cast<int>(OP_BuffCreate) },
+			{ "GuildStatus", static_cast<int>(OP_GuildStatus) },
+			{ "BuffRemoveRequest", static_cast<int>(OP_BuffRemoveRequest) },
+			{ "CorpseDrag", static_cast<int>(OP_CorpseDrag) },
+			{ "CorpseDrop", static_cast<int>(OP_CorpseDrop) },
+			{ "ChangeSize", static_cast<int>(OP_ChangeSize) },
+			{ "GroupMakeLeader", static_cast<int>(OP_GroupMakeLeader) },
+			{ "RemoveAllDoors", static_cast<int>(OP_RemoveAllDoors) },
+			{ "RemoveNimbusEffect", static_cast<int>(OP_RemoveNimbusEffect) },
+			{ "GuildCreate", static_cast<int>(OP_GuildCreate) },
+			{ "AltCurrency", static_cast<int>(OP_AltCurrency) },
+			{ "FellowshipUpdate", static_cast<int>(OP_FellowshipUpdate) },
+			{ "AltCurrencyMerchantRequest", static_cast<int>(OP_AltCurrencyMerchantRequest) },
+			{ "AltCurrencyMerchantReply", static_cast<int>(OP_AltCurrencyMerchantReply) },
+			{ "AltCurrencyPurchase", static_cast<int>(OP_AltCurrencyPurchase) },
+			{ "AltCurrencySellSelection", static_cast<int>(OP_AltCurrencySellSelection) },
+			{ "AltCurrencyReclaim", static_cast<int>(OP_AltCurrencyReclaim) },
+			{ "AltCurrencySell", static_cast<int>(OP_AltCurrencySell) },
+			{ "Untargetable", static_cast<int>(OP_Untargetable) },
+			{ "CrystalReclaim", static_cast<int>(OP_CrystalReclaim) },
+			{ "CrystalCreate", static_cast<int>(OP_CrystalCreate) },
+			{ "SendMaxCharacters", static_cast<int>(OP_SendMaxCharacters) },
+			{ "SendMembership", static_cast<int>(OP_SendMembership) },
+			{ "SendMembershipDetails", static_cast<int>(OP_SendMembershipDetails) },
+			{ "LFGuild", static_cast<int>(OP_LFGuild) },
+			{ "XTargetRequest", static_cast<int>(OP_XTargetRequest) },
+			{ "XTargetResponse", static_cast<int>(OP_XTargetResponse) },
+			{ "XTargetAutoAddHaters", static_cast<int>(OP_XTargetAutoAddHaters) },
+			{ "Weblink", static_cast<int>(OP_Weblink) },
+			{ "InspectMessageUpdate", static_cast<int>(OP_InspectMessageUpdate) },
+			{ "ItemPreview", static_cast<int>(OP_ItemPreview) },
+			{ "MercenaryDataRequest", static_cast<int>(OP_MercenaryDataRequest) },
+			{ "MercenaryDataResponse", static_cast<int>(OP_MercenaryDataResponse) },
+			{ "MercenaryHire", static_cast<int>(OP_MercenaryHire) },
+			{ "MercenaryUnknown1", static_cast<int>(OP_MercenaryUnknown1) },
+			{ "MercenaryTimer", static_cast<int>(OP_MercenaryTimer) },
+			{ "MercenaryAssign", static_cast<int>(OP_MercenaryAssign) },
+			{ "MercenaryDataUpdate", static_cast<int>(OP_MercenaryDataUpdate) },
+			{ "MercenaryCommand", static_cast<int>(OP_MercenaryCommand) },
+			{ "MercenarySuspendRequest", static_cast<int>(OP_MercenarySuspendRequest) },
+			{ "MercenarySuspendResponse", static_cast<int>(OP_MercenarySuspendResponse) },
+			{ "MercenaryUnsuspendResponse", static_cast<int>(OP_MercenaryUnsuspendResponse) },
+			{ "MercenaryDataUpdateRequest", static_cast<int>(OP_MercenaryDataUpdateRequest) },
+			{ "MercenaryDismiss", static_cast<int>(OP_MercenaryDismiss) },
+			{ "MercenaryTimerRequest", static_cast<int>(OP_MercenaryTimerRequest) },
+			{ "OpenInventory", static_cast<int>(OP_OpenInventory) },
+			{ "OpenContainer", static_cast<int>(OP_OpenContainer) },
+			{ "Marquee", static_cast<int>(OP_Marquee) },
+			{ "ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp) },
+			{ "GuildPromote", static_cast<int>(OP_GuildPromote) },
+			{ "Fling", static_cast<int>(OP_Fling) }
+		}
+	);
 }
 
 #endif

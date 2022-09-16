@@ -1,0 +1,237 @@
+#ifdef LUA_EQEMU
+
+#include <sol/sol.hpp>
+#include "lua_expedition.h"
+#include "expedition.h"
+#include "../common/zone_store.h"
+
+void Lua_Expedition::AddLockout(std::string event_name, uint32_t seconds) {
+	Lua_Safe_Call_Void();
+	self->AddLockout(event_name, seconds);
+}
+
+void Lua_Expedition::AddLockoutDuration(std::string event_name, int seconds) {
+	Lua_Safe_Call_Void();
+	self->AddLockoutDuration(event_name, seconds);
+}
+
+void Lua_Expedition::AddLockoutDuration(std::string event_name, int seconds, bool members_only) {
+	Lua_Safe_Call_Void();
+	self->AddLockoutDuration(event_name, seconds, members_only);
+}
+
+void Lua_Expedition::AddReplayLockout(uint32_t seconds) {
+	Lua_Safe_Call_Void();
+	self->AddReplayLockout(seconds);
+}
+
+void Lua_Expedition::AddReplayLockoutDuration(int seconds) {
+	Lua_Safe_Call_Void();
+	self->AddReplayLockoutDuration(seconds);
+}
+
+void Lua_Expedition::AddReplayLockoutDuration(int seconds, bool members_only) {
+	Lua_Safe_Call_Void();
+	self->AddReplayLockoutDuration(seconds, members_only);
+}
+
+uint32_t Lua_Expedition::GetDynamicZoneID() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZoneID();
+}
+
+uint32_t Lua_Expedition::GetID() {
+	Lua_Safe_Call_Int();
+	return self->GetID();
+}
+
+int Lua_Expedition::GetInstanceID() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZone()->GetInstanceID();
+}
+
+std::string Lua_Expedition::GetLeaderName() {
+	Lua_Safe_Call_String();
+	return self->GetLeaderName();
+}
+
+sol::table Lua_Expedition::GetLockouts(sol::this_state s) {
+	sol::state_view sv(s);
+	auto lua_table = sv.create_table();
+
+	if (d_)
+	{
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto lockouts = self->GetLockouts();
+		for (const auto& lockout : lockouts)
+		{
+			lua_table[lockout.first] = lockout.second.GetSecondsRemaining();
+		}
+	}
+
+	return lua_table;
+}
+
+std::string Lua_Expedition::GetLootEventByNPCTypeID(uint32_t npc_type_id) {
+	Lua_Safe_Call_String();
+	return self->GetLootEventByNPCTypeID(npc_type_id);
+}
+
+std::string Lua_Expedition::GetLootEventBySpawnID(uint32_t spawn_id) {
+	Lua_Safe_Call_String();
+	return self->GetLootEventBySpawnID(spawn_id);
+}
+
+uint32_t Lua_Expedition::GetMemberCount() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZone()->GetMemberCount();
+}
+
+sol::table Lua_Expedition::GetMembers(sol::this_state s) {
+	sol::state_view sv(s);
+	auto lua_table = sv.create_table();
+
+	if (d_)
+	{
+		auto self = reinterpret_cast<NativeType*>(d_);
+		for (const auto& member : self->GetDynamicZone()->GetMembers())
+		{
+			lua_table[member.name] = member.id;
+		}
+	}
+
+	return lua_table;
+}
+
+std::string Lua_Expedition::GetName() {
+	Lua_Safe_Call_String();
+	return self->GetName();
+}
+
+int Lua_Expedition::GetSecondsRemaining() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZone()->GetSecondsRemaining();
+}
+
+std::string Lua_Expedition::GetUUID() {
+	Lua_Safe_Call_String();
+	return self->GetDynamicZone()->GetUUID();
+}
+
+int Lua_Expedition::GetZoneID() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZone()->GetZoneID();
+}
+
+std::string Lua_Expedition::GetZoneName() {
+	Lua_Safe_Call_String();
+	return ZoneName(self->GetDynamicZone()->GetZoneID());
+}
+
+int Lua_Expedition::GetZoneVersion() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZone()->GetZoneVersion();
+}
+
+bool Lua_Expedition::HasLockout(std::string event_name) {
+	Lua_Safe_Call_Bool();
+	return self->HasLockout(event_name);
+}
+
+bool Lua_Expedition::HasReplayLockout() {
+	Lua_Safe_Call_Bool();
+	return self->HasReplayLockout();
+}
+
+bool Lua_Expedition::IsLocked() {
+	Lua_Safe_Call_Bool();
+	return self->IsLocked();
+}
+
+void Lua_Expedition::RemoveCompass() {
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetCompass(0, 0, 0, 0, true);
+}
+
+void Lua_Expedition::RemoveLockout(std::string event_name) {
+	Lua_Safe_Call_Void();
+	self->RemoveLockout(event_name);
+}
+
+void Lua_Expedition::SetCompass(uint32_t zone_id, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetCompass(zone_id, x, y, z, true);
+}
+
+void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetCompass(ZoneID(zone_name), x, y, z, true);
+}
+
+void Lua_Expedition::SetLocked(bool lock_expedition) {
+	Lua_Safe_Call_Void();
+	self->SetLocked(lock_expedition, ExpeditionLockMessage::None, true);
+}
+
+void Lua_Expedition::SetLocked(bool lock_expedition, int lock_msg) {
+	Lua_Safe_Call_Void();
+	self->SetLocked(lock_expedition, static_cast<ExpeditionLockMessage>(lock_msg), true);
+}
+
+void Lua_Expedition::SetLocked(bool lock_expedition, int lock_msg, uint32_t msg_color) {
+	Lua_Safe_Call_Void();
+	self->SetLocked(lock_expedition, static_cast<ExpeditionLockMessage>(lock_msg), true, msg_color);
+}
+
+void Lua_Expedition::SetLootEventByNPCTypeID(uint32_t npc_type_id, std::string event_name) {
+	Lua_Safe_Call_Void();
+	self->SetLootEventByNPCTypeID(npc_type_id, event_name);
+}
+
+void Lua_Expedition::SetLootEventBySpawnID(uint32_t spawn_id, std::string event_name) {
+	Lua_Safe_Call_Void();
+	self->SetLootEventBySpawnID(spawn_id, event_name);
+}
+
+void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
+	Lua_Safe_Call_Void();
+	self->SetReplayLockoutOnMemberJoin(enable, true);
+}
+
+void Lua_Expedition::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetSafeReturn(zone_id, x, y, z, heading, true);
+}
+
+void Lua_Expedition::SetSafeReturn(std::string zone_name, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
+}
+
+void Lua_Expedition::SetSecondsRemaining(uint32_t seconds_remaining)
+{
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetSecondsRemaining(seconds_remaining);
+}
+
+void Lua_Expedition::SetSwitchID(int dz_switch_id)
+{
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetSwitchID(dz_switch_id, true);
+}
+
+void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->GetDynamicZone()->SetZoneInLocation(x, y, z, heading, true);
+}
+
+void Lua_Expedition::UpdateLockoutDuration(std::string event_name, uint32_t duration) {
+	Lua_Safe_Call_Void();
+	self->UpdateLockoutDuration(event_name, duration);
+}
+
+void Lua_Expedition::UpdateLockoutDuration(std::string event_name, uint32_t duration, bool members_only) {
+	Lua_Safe_Call_Void();
+	self->UpdateLockoutDuration(event_name, duration, members_only);
+}
+#endif

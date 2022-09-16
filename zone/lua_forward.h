@@ -1,4 +1,5 @@
 #pragma once
+#ifdef LUA_EQEMU
 #include <sol/forward.hpp>
 #include <sol/sol.hpp>
 
@@ -62,3 +63,4 @@ void lua_register_journal_mode(sol::state_view &sv);
 void lua_register_expedition(sol::state_view &sv);
 void lua_register_expedition_lock_messages(sol::state_view &sv);
 
+#endif

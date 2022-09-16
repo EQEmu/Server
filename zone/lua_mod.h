@@ -1,4 +1,5 @@
 #pragma once
+#ifdef LUA_EQEMU
 
 #include <sol/sol.hpp>
 #include <string>
@@ -42,3 +43,4 @@ private:
 	bool m_has_get_exp_for_level;
 	bool m_has_get_experience_for_kill;
 };
+#endif

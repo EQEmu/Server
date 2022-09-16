@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "lua_stat_bonuses.h"
 
 int32 Lua_StatBonuses::GetAC() const {
@@ -1279,4 +1280,4 @@ int32 Lua_StatBonuses::GetReduceTradeskillFail(int idx) const {
 	Lua_Safe_Call_Int();
 	return self->ReduceTradeskillFail[idx];
 }
-
+#endif

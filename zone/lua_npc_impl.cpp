@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "npc.h"
 #include "lua_npc.h"
 #include "lua_client.h"
@@ -658,4 +659,4 @@ void Lua_NPC::ReloadSpells()
 	Lua_Safe_Call_Void();
 	self->ReloadSpells();
 }
-
+#endif

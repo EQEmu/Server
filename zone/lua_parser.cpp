@@ -915,21 +915,21 @@ bool LuaParser::HasFunction(const std::string &subname, const std::string &packa
 void LuaParser::MapFunctions()
 {
 	sol::state_view sv = m_impl->state->lua_state();
-//	lua_register_general(sv);
-//	lua_register_random(sv);
-//	lua_register_events(sv);
-//	lua_register_faction(sv);
-//	lua_register_slot(sv);
-//	lua_register_material(sv);
-//	lua_register_client_version(sv);
-//	lua_register_appearance(sv);
-//	lua_register_classes(sv);
-//	lua_register_skills(sv);
-//	lua_register_bodytypes(sv);
-//	lua_register_filters(sv);
-//	lua_register_message_types(sv);
+	lua_register_general(sv);
+	lua_register_random(sv);
+	lua_register_events(sv);
+	lua_register_faction(sv);
+	lua_register_slot(sv);
+	lua_register_material(sv);
+	lua_register_client_version(sv);
+	lua_register_appearance(sv);
+	lua_register_classes(sv);
+	lua_register_skills(sv);
+	lua_register_bodytypes(sv);
+	lua_register_filters(sv);
+	lua_register_message_types(sv);
 	lua_register_entity(sv);
-//	lua_register_encounter(sv);
+	lua_register_encounter(sv);
 	lua_register_mob(sv);
 	lua_register_special_abilities(sv);
 	lua_register_npc(sv);
@@ -963,18 +963,17 @@ void LuaParser::MapFunctions()
 	lua_register_corpse(sv);
 	lua_register_door(sv);
 	lua_register_object(sv);
-//	lua_register_packet(sv);
-//	lua_register_packet_opcodes(sv);
+	lua_register_packet(sv);
+	lua_register_packet_opcodes(sv);
 	lua_register_stat_bonuses(sv);
-//	lua_register_rules_const(sv);
-//	lua_register_rulei(sv);
-//	lua_register_ruler(sv);
-//	lua_register_ruleb(sv);
-//	lua_register_journal_speakmode(sv);
-//	lua_register_journal_mode(sv);
-//	lua_register_expedition(sv);
-//	lua_register_expedition_lock_messages(sv);
-
+	lua_register_rules_const(sv);
+	lua_register_rulei(sv);
+	lua_register_ruler(sv);
+	lua_register_ruleb(sv);
+	lua_register_journal_speakmode(sv);
+	lua_register_journal_mode(sv);
+	lua_register_expedition(sv);
+	lua_register_expedition_lock_messages(sv);
 }
 
 int LuaParser::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,

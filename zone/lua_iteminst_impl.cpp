@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include "masterentity.h"
 #include "lua_iteminst.h"
 #include "lua_item.h"
@@ -267,4 +268,4 @@ int Lua_ItemInst::CountAugmentByID(uint32 item_id) {
 	Lua_Safe_Call_Int();
 	return self->CountAugmentByID(item_id);
 }
-
+#endif

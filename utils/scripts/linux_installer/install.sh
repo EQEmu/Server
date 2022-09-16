@@ -103,7 +103,6 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install libio-stringy-perl
 	apt-get $apt_options install liblua5.1
 	apt-get $apt_options install liblua5.1-dev
-	apt-get $apt_options install libluabind-dev
 	apt-get $apt_options install libmysql++
 	apt-get $apt_options install libperl-dev
 	apt-get $apt_options install libperl5i-perl

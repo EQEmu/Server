@@ -1,4 +1,3 @@
-#include "lua_entity.h"
 #ifdef BOTS
 #ifdef LUA_EQEMU
 
@@ -8,6 +7,7 @@
 #include "lua_bot.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
+#include "lua_entity.h"
 
 void lua_register_bot(sol::state_view &sv)
 {

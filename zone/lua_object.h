@@ -6,12 +6,6 @@
 
 class Object;
 
-namespace luabind {
-	struct scope;
-}
-
-luabind::scope lua_register_object();
-
 class Lua_Object : public Lua_Entity
 {
 	typedef Object NativeType;

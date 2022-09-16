@@ -1,3 +1,4 @@
+#ifdef LUA_EQEMU
 #include <sol/sol.hpp>
 #include "lua_client.h"
 
@@ -2530,3 +2531,4 @@ bool Lua_Client::HasRecipeLearned(uint32 recipe_id) {
 	return self->HasRecipeLearned(recipe_id);
 }
 
+#endif
