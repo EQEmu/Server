@@ -1,3 +1,4 @@
+#ifdef BOTS
 #ifdef LUA_EQEMU
 #include "bot.h"
 #include "lua_bot.h"
@@ -79,4 +80,5 @@ uint32 Lua_Bot::GetBotItemIDBySlot(uint16 slot_id) {
 	return self->GetBotItemBySlot(slot_id);
 }
 
+#endif
 #endif
