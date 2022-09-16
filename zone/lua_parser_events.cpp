@@ -189,9 +189,12 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 
 	Seperator sep(data.c_str());
 	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "killer_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
-	int spell_id = std::stoi(sep.arg[1]);
+	int spell_id = std::stoi(sep.arg[2]);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
@@ -204,8 +207,16 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 		lua_setfield(L, -2, "spell");
 	}
 
-	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_pushinteger(L, std::stoi(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
+
+	if (extra_pointers && !extra_pointers->empty())
+	{
+		Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(0)));
+		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
+		l_npc_o.push(L);
+		lua_setfield(L, -2, "killed");
+	}
 }
 
 void handle_npc_cast(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -255,6 +266,14 @@ void handle_npc_loot_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *in
 	lua_setfield(L, -2, "corpse");
 }
 
+void handle_npc_spawn_zone(QuestInterface* parse, lua_State* L, NPC* npc, Mob* init, std::string data, uint32 extra_data,
+						std::vector<std::any> *extra_pointers) {
+	Lua_NPC l_npc(std::any_cast<NPC*>(init->CastToNPC()));
+	luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
+	l_npc_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
 //Player
 void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 					   std::vector<std::any> *extra_pointers) {
@@ -289,9 +308,12 @@ void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, st
 	lua_setfield(L, -2, "other");
 
 	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "killer_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
 	lua_setfield(L, -2, "damage");
 
-	int spell_id = std::stoi(sep.arg[2]);
+	int spell_id = std::stoi(sep.arg[3]);
 	if(IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
@@ -304,7 +326,7 @@ void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, st
 		lua_setfield(L, -2, "spell");
 	}
 
-	lua_pushinteger(L, std::stoi(sep.arg[3]));
+	lua_pushinteger(L, std::stoi(sep.arg[4]));
 	lua_setfield(L, -2, "skill");
 }
 

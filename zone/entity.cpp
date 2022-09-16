@@ -729,17 +729,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
 	/* Zone controller process EVENT_SPAWN_ZONE */
-	if (RuleB(Zone, UseZoneController)) {
-		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
-		if (controller && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
-			std::string export_string = fmt::format(
-				"{} {}",
-				npc->GetID(),
-				npc->GetNPCTypeID()
-			);
-			parse->EventNPC(EVENT_SPAWN_ZONE, controller, nullptr, export_string, 0);
-		}
-	}
+	npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
 
 	/**
 	 * Set whether NPC was spawned in or out of water

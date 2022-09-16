@@ -3764,3 +3764,18 @@ int NPC::GetRolledItemCount(uint32 item_id)
 
 	return rolled_count;
 }
+
+int NPC::DispatchZoneControllerEvent(QuestEventID evt, Mob* init,
+	const std::string& data, uint32 extra, std::vector<std::any>* pointers)
+{
+	int ret = 0;
+	if (RuleB(Zone, UseZoneController) && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID)
+	{
+		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
+		if (controller)
+		{
+			ret = parse->EventNPC(evt, controller, init, data, extra, pointers);
+		}
+	}
+	return ret;
+}

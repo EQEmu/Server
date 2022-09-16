@@ -192,12 +192,14 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_TIMER] = handle_npc_timer;
 	NPCArgumentDispatch[EVENT_DEATH] = handle_npc_death;
 	NPCArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_ZONE] = handle_npc_death;
 	NPCArgumentDispatch[EVENT_CAST] = handle_npc_cast;
 	NPCArgumentDispatch[EVENT_CAST_BEGIN] = handle_npc_cast;
 	NPCArgumentDispatch[EVENT_FEIGN_DEATH] = handle_npc_single_client;
 	NPCArgumentDispatch[EVENT_ENTER_AREA] = handle_npc_area;
 	NPCArgumentDispatch[EVENT_LEAVE_AREA] = handle_npc_area;
 	NPCArgumentDispatch[EVENT_LOOT_ZONE] = handle_npc_loot_zone;
+	NPCArgumentDispatch[EVENT_SPAWN_ZONE] = handle_npc_spawn_zone;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
