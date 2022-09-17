@@ -328,7 +328,8 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 	sol::protected_function f = l_func ? *l_func : script->second[sub_name];
 
 	auto table = m_impl->state->create_table();
-	table["self"] = npc;
+	auto l_npc = Lua_NPC(npc);
+	table["self"] = l_npc;
 
 	auto arg_function = NPCArgumentDispatch[evt];
 	arg_function(this, m_impl->state->lua_state(), table, npc, init, data, extra_data, extra_pointers);
@@ -400,7 +401,8 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 	sol::protected_function f = l_func ? *l_func : script->second[sub_name];
 
 	auto table = m_impl->state->create_table();
-	table["self"] = client;
+	auto l_client = Lua_Client(client);
+	table["self"] = l_client;
 
 	auto arg_function = PlayerArgumentDispatch[evt];
 	arg_function(this, m_impl->state->lua_state(), table, client, data, extra_data, extra_pointers);
@@ -454,8 +456,10 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 	sol::protected_function f = l_func ? *l_func : script->second[sub_name];
 
 	auto table = m_impl->state->create_table();
-	table["self"] = item;
-	table["owner"] = client;
+	auto l_item = Lua_ItemInst(item);
+	auto l_client = Lua_Client(client);
+	table["self"] = l_item;
+	table["owner"] = l_client;
 
 	auto arg_function = ItemArgumentDispatch[evt];
 	arg_function(this, m_impl->state->lua_state(), table, client, item, mob, data, extra_data, extra_pointers);
@@ -505,7 +509,8 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 	sol::protected_function f = l_func ? *l_func : script->second[sub_name];
 
 	auto table = m_impl->state->create_table();
-	table["self"] = IsValidSpell(spell_id) ? &spells[spell_id] : nullptr;
+	auto l_spell = Lua_Spell(IsValidSpell(spell_id) ? &spells[spell_id] : nullptr);
+	table["self"] = l_spell;
 
 	auto arg_function = SpellArgumentDispatch[evt];
 	arg_function(this, m_impl->state->lua_state(), table, npc, client, spell_id, data, extra_data, extra_pointers);
