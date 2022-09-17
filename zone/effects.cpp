@@ -514,109 +514,100 @@ bool Client::TrainDiscipline(uint32 itemid) {
 
 	//get the item info
 	const EQ::ItemData *item = database.GetItem(itemid);
-	if(item == nullptr) {
+	if (!item) {
 		Message(Chat::Red, "Unable to find the tome you turned in!");
-		LogError("Unable to find turned in tome id [{}]\n", (unsigned long)itemid);
-		return(false);
+		LogError("Unable to find turned in tome id [{}]", itemid);
+		return false;
 	}
 
 	if (!item->IsClassCommon() || item->ItemType != EQ::item::ItemTypeSpell) {
 		Message(Chat::Red, "Invalid item type, you cannot learn from this item.");
 		//summon them the item back...
 		SummonItem(itemid);
-		return(false);
+		return false;
 	}
 
 	//Need a way to determine the difference between a spell and a tome
 	//so they cant turn in a spell and get it as a discipline
 	//this is kinda a hack:
-	if(!(
-		item->Name[0] == 'T' &&
-		item->Name[1] == 'o' &&
-		item->Name[2] == 'm' &&
-		item->Name[3] == 'e' &&
-		item->Name[4] == ' '
-		) && !(
-		item->Name[0] == 'S' &&
-		item->Name[1] == 'k' &&
-		item->Name[2] == 'i' &&
-		item->Name[3] == 'l' &&
-		item->Name[4] == 'l' &&
-		item->Name[5] == ':' &&
-		item->Name[6] == ' '
-		)) {
+	const std::string item_name = item->Name;
+
+	if (
+		strcmp(item_name.substr(0, 5).c_str(), "Tome ") &&
+		strcmp(item_name.substr(0, 7).c_str(), "Skill: ")
+	) {
 		Message(Chat::Red, "This item is not a tome.");
 		//summon them the item back...
 		SummonItem(itemid);
-		return(false);
+		return false;
 	}
 
-	int myclass = GetClass();
-	if(myclass == WIZARD || myclass == ENCHANTER || myclass == MAGICIAN || myclass == NECROMANCER) {
+	const auto player_class = GetClass();
+	if (player_class == WIZARD || player_class == ENCHANTER || player_class == MAGICIAN || player_class == NECROMANCER) {
 		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//summon them the item back...
 		SummonItem(itemid);
-		return(false);
+		return false;
 	}
 
 	//make sure we can train this...
 	//can we use the item?
-	uint32 cbit = 1 << (myclass-1);
-	if(!(item->Classes & cbit)) {
+	const auto class_bit = static_cast<uint32>(1 << (player_class - 1));
+	if (!(item->Classes & class_bit)) {
 		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//summon them the item back...
 		SummonItem(itemid);
-		return(false);
+		return false;
 	}
 
-	uint32 spell_id = item->Scroll.Effect;
-	if(!IsValidSpell(spell_id)) {
+	const auto spell_id = static_cast<uint32>(item->Scroll.Effect);
+	if (!IsValidSpell(spell_id)) {
 		Message(Chat::Red, "This tome Contains invalid knowledge.");
-		return(false);
+		return false;
 	}
 
 	//can we use the spell?
-	const SPDat_Spell_Struct &spell = spells[spell_id];
-	uint8 level_to_use = spell.classes[myclass - 1];
-	if(level_to_use == 255) {
+	const auto& spell = spells[spell_id];
+	const auto level_to_use = spell.classes[player_class - 1];
+	if (level_to_use == 255) {
 		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//summon them the item back...
 		SummonItem(itemid);
-		return(false);
+		return false;
 	}
 
-	if(level_to_use > GetLevel()) {
-		Message(Chat::Red, "You must be at least level %d to learn this discipline.", level_to_use);
+	if (level_to_use > GetLevel()) {
+		Message(Chat::Red, fmt::format("You must be at least level {} to learn this discipline.", level_to_use).c_str());
 		//summon them the item back...
 		SummonItem(itemid);
-		return(false);
+		return false;
 	}
 
 	//add it to PP.
-	int r;
-	for(r = 0; r < MAX_PP_DISCIPLINES; r++) {
-		if(m_pp.disciplines.values[r] == spell_id) {
+	for (int r = 0; r < MAX_PP_DISCIPLINES; r++) {
+		if (m_pp.disciplines.values[r] == spell_id) {
 			Message(Chat::Red, "You already know this discipline.");
 			//summon them the item back...
 			SummonItem(itemid);
-			return(false);
-		} else if(m_pp.disciplines.values[r] == 0) {
+			return false;
+		} else if (m_pp.disciplines.values[r] == 0) {
 			m_pp.disciplines.values[r] = spell_id;
 			database.SaveCharacterDisc(CharacterID(), r, spell_id);
 			SendDisciplineUpdate();
-			Message(0, "You have learned a new discipline!");
-			return(true);
+			Message(Chat::White, "You have learned a new discipline!");
+			return true;
 		}
 	}
+
 	Message(Chat::Red, "You have learned too many disciplines and can learn no more.");
-	return(false);
+	return false;
 }
 
 bool Client::MemorizeSpellFromItem(uint32 item_id) {
-	const EQ::ItemData *item = database.GetItem(item_id);
-	if(item == nullptr) {
+	const auto& item = database.GetItem(item_id);
+	if (!item) {
 		Message(Chat::Red, "Unable to find the scroll!");
-		LogError("Unable to find scroll id [{}]\n", (unsigned long)item_id);
+		LogError("Unable to find scroll id [{}]", item_id);
 		return false;
 	}
 
@@ -626,43 +617,41 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 		return false;
 	}
 
-	if(!(
-		item->Name[0] == 'S' &&
-		item->Name[1] == 'p' &&
-		item->Name[2] == 'e' &&
-		item->Name[3] == 'l' &&
-		item->Name[4] == 'l' &&
-		item->Name[5] == ':' &&
-		item->Name[6] == ' '
-		)) {
+	const std::string item_name = item->Name;
+
+	if (
+		strcmp(item_name.substr(0, 7).c_str(), "Spell: ") &&
+		strcmp(item_name.substr(0, 6).c_str(), "Song: ")
+	) {
 		Message(Chat::Red, "This item is not a scroll.");
 		SummonItem(item_id);
 		return false;
 	}
-	int player_class = GetClass();
-	uint32 cbit = 1 << (player_class - 1);
-	if(!(item->Classes & cbit)) {
+
+	const auto class_bit = static_cast<uint32>(1 << (GetClass() - 1));
+
+	if (!(item->Classes & class_bit)) {
 		Message(Chat::Red, "Your class cannot learn from this scroll.");
 		SummonItem(item_id);
 		return false;
 	}
 
-	uint32 spell_id = item->Scroll.Effect;
-	if(!IsValidSpell(spell_id)) {
+	const auto spell_id = static_cast<uint32>(item->Scroll.Effect);
+	if (!IsValidSpell(spell_id)) {
 		Message(Chat::Red, "This scroll Contains invalid knowledge.");
 		return false;
 	}
 
-	const SPDat_Spell_Struct &spell = spells[spell_id];
-	uint8 level_to_use = spell.classes[player_class - 1];
-	if(level_to_use == 255) {
+	const auto& spell = spells[spell_id];
+	const auto level_to_use = spell.classes[GetClass() - 1];
+	if (level_to_use == 255) {
 		Message(Chat::Red, "Your class cannot learn from this scroll.");
 		SummonItem(item_id);
 		return false;
 	}
 
-	if(level_to_use > GetLevel()) {
-		Message(Chat::Red, "You must be at least level %d to learn this spell.", level_to_use);
+	if (level_to_use > GetLevel()) {
+		Message(Chat::Red, fmt::format("You must be at least level {} to learn this spell.", level_to_use).c_str());
 		SummonItem(item_id);
 		return false;
 	}
@@ -673,19 +662,19 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 			if (next_slot != -1) {
 				ScribeSpell(spell_id, next_slot);
 				return true;
-			}
-			else {
+			} else {
 				Message(
 					Chat::Red,
-					"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
-					((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
-					spell_id
+					fmt::format(
+						"Unable to scribe {} ({}) to spellbook, no more spell book slots available.",
+						((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
+						spell_id
+					).c_str()
 				);
 				SummonItem(item_id);
 				return false;
 			}
-		}
-		else {
+		} else {
 			Message(Chat::Red, "You already know this spell.");
 			SummonItem(item_id);
 			return false;
@@ -741,7 +730,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		if (IsAmnesiad()) {
 			MessageString(Chat::Red, MELEE_SILENCE);
 		}
-		return(false);
+		return false;
 	}
 
 	//make sure we have the spell...
@@ -751,12 +740,12 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			break;
 	}
 	if(r == MAX_PP_DISCIPLINES)
-		return(false);	//not found.
+		return false;	//not found.
 
 	//make sure we can use it..
 	if(!IsValidSpell(spell_id)) {
 		Message(Chat::Red, "This tome Contains invalid knowledge.");
-		return(false);
+		return false;
 	}
 
 	if (DivineAura() && !IgnoreCastingRestriction(spell_id)) {
@@ -769,18 +758,18 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(level_to_use == 255) {
 		Message(Chat::Red, "Your class cannot learn from this tome.");
 		//should summon them a new one...
-		return(false);
+		return false;
 	}
 
 	if(level_to_use > GetLevel()) {
 		MessageString(Chat::Red, DISC_LEVEL_USE_ERROR);
 		//should summon them a new one...
-		return(false);
+		return false;
 	}
 
 	if(GetEndurance() < spell.endurance_cost) {
 		Message(11, "You are too fatigued to use this skill right now.");
-		return(false);
+		return false;
 	}
 
 	// sneak attack discs require you to be hidden for 4 seconds before use
@@ -852,7 +841,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 		}
 	}
-	return(true);
+	return true;
 }
 
 uint32 Client::GetDisciplineTimer(uint32 timer_id) {
