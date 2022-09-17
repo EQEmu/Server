@@ -817,7 +817,7 @@ void LuaParser::ReloadQuests() {
 	path += "/script_init.lua";
 
 	auto result = sv.safe_script_file(path, sol::script_pass_on_error);
-	if (!result.valid()) {
+	if (!result.valid() && result.status() != sol::call_status::file) {
 		sol::error error = result;
 		AddError(error.what());
 	}
@@ -831,7 +831,7 @@ void LuaParser::ReloadQuests() {
 		zone_script += std::to_string(zone->GetInstanceVersion());
 		zone_script += ".lua";
 		result = sv.safe_script_file(zone_script, sol::script_pass_on_error);
-		if (!result.valid()) {
+		if (!result.valid() && result.status() != sol::call_status::file) {
 			sol::error error = result;
 			AddError(error.what());
 		} else {
@@ -840,7 +840,7 @@ void LuaParser::ReloadQuests() {
 			zone_script += zone->GetShortName();
 			zone_script += "/script_init.lua";
 			result = sv.safe_script_file(zone_script, sol::script_pass_on_error);
-			if (!result.valid()) {
+			if (!result.valid() && result.status() != sol::call_status::file) {
 				sol::error error = result;
 				AddError(error.what());
 			}
