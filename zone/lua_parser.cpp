@@ -754,6 +754,12 @@ void LuaParser::ReloadQuests() {
 			sol::lib::bit32,
 			sol::lib::io);
 
+	// port ???
+	if (luaopen_bit(sv.lua_state()) != 1) {
+		std::string error = lua_tostring(sv.lua_state(), -1);
+		AddError(error);
+	}
+
 	try {
 		auto result = sv.safe_script("math.randomseed(os.time())");
 		if (!result.valid()) {
