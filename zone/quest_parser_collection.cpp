@@ -97,6 +97,14 @@ void QuestParserCollection::RemoveEncounter(const std::string name) {
 	}
 }
 
+QuestInterface* QuestParserCollection::GetQuestInterface(uint32 id)
+{
+	auto it = _interfaces.find(id);
+	if (it != _interfaces.end())
+		return it->second;
+	return nullptr;
+}
+
 bool QuestParserCollection::HasQuestSub(uint32 npcid, QuestEventID evt) {
 	return HasQuestSubLocal(npcid, evt) || HasQuestSubGlobal(evt);
 }

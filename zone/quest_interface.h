@@ -23,6 +23,10 @@
 #include "event_codes.h"
 #include <any>
 
+// constants for quest system, these need to be unique
+#define LUA_IDENTIFIER 0xb0712acc
+#define PERL_IDENTIFIER 0xf8b05c11
+
 class Client;
 class NPC;
 

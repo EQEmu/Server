@@ -2,6 +2,7 @@
 #define _EQE_LUA_PARSER_H
 #ifdef LUA_EQEMU
 
+#include "common.h"
 #include "quest_parser_collection.h"
 #include "quest_interface.h"
 #include <string>
@@ -28,6 +29,7 @@ struct lua_registered_event;
 
 class LuaParser : public QuestInterface {
 public:
+	LuaParser();
 	~LuaParser();
 
 	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -66,7 +68,7 @@ public:
 	virtual void Init();
 	virtual void ReloadQuests();
 	virtual void RemoveEncounter(const std::string &name);
-    virtual uint32 GetIdentifier() { return 0xb0712acc; }
+    virtual uint32 GetIdentifier() { return LUA_IDENTIFIER; }
 
 	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
@@ -76,11 +78,6 @@ public:
 		std::vector<std::any> *extra_pointers);
 	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
-
-	static LuaParser* Instance() {
-		static LuaParser inst;
-		return &inst;
-	}
 
 	bool HasFunction(const std::string &function, const std::string &package_name);
 
@@ -96,10 +93,6 @@ public:
 	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 
 private:
-	LuaParser();
-	LuaParser(const LuaParser&);
-	LuaParser& operator=(const LuaParser&);
-
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers, sol::function *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,

@@ -66,6 +66,7 @@ public:
 	void Init();
 	void ReloadQuests(bool reset_timers = true);
 	void RemoveEncounter(const std::string name);
+	QuestInterface* GetQuestInterface(uint32 id);
 
 	bool HasQuestSub(uint32 npcid, QuestEventID evt);
 	bool PlayerHasQuestSub(QuestEventID evt);

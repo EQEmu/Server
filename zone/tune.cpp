@@ -1426,7 +1426,10 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	LuaParser::Instance()->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		reinterpret_cast<LuaParser*>(qi)->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return;

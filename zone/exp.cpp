@@ -25,6 +25,7 @@
 #include "data_bucket.h"
 #include "groups.h"
 #include "mob.h"
+#include "quest_interface.h"
 #include "raids.h"
 
 #include "queryserv.h"
@@ -207,7 +208,10 @@ uint32 Client::GetExperienceForKill(Mob *against)
 #ifdef LUA_EQEMU
 	uint32 lua_ret = 0;
 	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->GetExperienceForKill(this, against, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		lua_ret = reinterpret_cast<LuaParser*>(qi)->GetExperienceForKill(this, against, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return lua_ret;
@@ -895,7 +899,10 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 #ifdef LUA_EQEMU
 	uint32 lua_ret = 0;
 	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->GetEXPForLevel(this, check_level, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		lua_ret = reinterpret_cast<LuaParser*>(qi)->GetEXPForLevel(this, check_level, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return lua_ret;
@@ -1202,7 +1209,10 @@ uint32 Client::GetRequiredAAExperience() {
 #ifdef LUA_EQEMU
 	uint32 lua_ret = 0;
 	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->GetRequiredAAExperience(this, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		lua_ret = reinterpret_cast<LuaParser*>(qi)->GetRequiredAAExperience(this, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return lua_ret;

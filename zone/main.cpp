@@ -66,6 +66,7 @@
 #include <signal.h>
 #include <time.h>
 #include <chrono>
+#include <memory>
 
 #ifdef _CRTDBG_MAP_ALLOC
 #undef new
@@ -429,7 +430,8 @@ int main(int argc, char** argv) {
 
 	parse = new QuestParserCollection();
 #ifdef LUA_EQEMU
-	parse->RegisterQuestInterface(LuaParser::Instance(), "lua");
+	auto lua = std::make_unique<LuaParser>();
+	parse->RegisterQuestInterface(lua.get(), "lua");
 #endif
 
 #ifdef EMBPERL

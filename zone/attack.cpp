@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "fastmath.h"
 #include "mob.h"
 #include "npc.h"
+#include "quest_interface.h"
 
 
 #include <assert.h>
@@ -312,7 +313,10 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 #ifdef LUA_EQEMU
 	bool lua_ret = false;
 	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->CheckHitChance(this, other, hit, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		lua_ret = reinterpret_cast<LuaParser*>(qi)->CheckHitChance(this, other, hit, ignoreDefault);
+	}
 
 	if(ignoreDefault) {
 		return lua_ret;
@@ -352,7 +356,10 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 #ifdef LUA_EQEMU
 	bool lua_ret = false;
 	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->AvoidDamage(this, other, hit, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		lua_ret = reinterpret_cast<LuaParser*>(qi)->AvoidDamage(this, other, hit, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return lua_ret;
@@ -1029,7 +1036,10 @@ void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions 
 {
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	LuaParser::Instance()->MeleeMitigation(this, attacker, hit, opts, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		reinterpret_cast<LuaParser*>(qi)->MeleeMitigation(this, attacker, hit, opts, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return;
@@ -4726,7 +4736,10 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 {
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	LuaParser::Instance()->TryCriticalHit(this, defender, hit, opts, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		reinterpret_cast<LuaParser*>(qi)->TryCriticalHit(this, defender, hit, opts, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return;
@@ -5211,7 +5224,10 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 {
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	LuaParser::Instance()->ApplyDamageTable(this, hit, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		reinterpret_cast<LuaParser*>(qi)->ApplyDamageTable(this, hit, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return;
@@ -5617,7 +5633,10 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	LuaParser::Instance()->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
+	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
+	if (qi) {
+		reinterpret_cast<LuaParser*>(qi)->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
+	}
 
 	if (ignoreDefault) {
 		return;
