@@ -1008,6 +1008,106 @@ void QuestParserCollection::GetErrors(std::list<std::string> &quest_errors) {
 	}
 }
 
+void QuestParserCollection::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		(*iter)->MeleeMitigation(self, attacker, hit, opts, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+}
+
+void QuestParserCollection::ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault)
+{
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		(*iter)->ApplyDamageTable(self, hit, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+}
+
+bool QuestParserCollection::AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault)
+{
+	bool ret = false;
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		ret = (*iter)->AvoidDamage(self, other, hit, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+	return ret;
+}
+
+bool QuestParserCollection::CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault)
+{
+	bool ret = false;
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		ret = (*iter)->CheckHitChance(self, other, hit, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+	return ret;
+}
+
+void QuestParserCollection::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		(*iter)->TryCriticalHit(self, defender, hit, opts, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+}
+
+void QuestParserCollection::CommonOutgoingHitSuccess(Mob *self, Mob* other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		(*iter)->CommonOutgoingHitSuccess(self, other, hit, opts, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+}
+
+uint32 QuestParserCollection::GetRequiredAAExperience(Client *self, bool &ignoreDefault)
+{
+	uint32 ret = 0;
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		ret = (*iter)->GetRequiredAAExperience(self, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+	return ret;
+}
+
+uint32 QuestParserCollection::GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault)
+{
+	uint32 ret = 0;
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		ret = (*iter)->GetEXPForLevel(self, level, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+	return ret;
+}
+
+uint32 QuestParserCollection::GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault)
+{
+	uint32 ret = 0;
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		ret = (*iter)->GetExperienceForKill(self, against, ignoreDefault);
+		if (ignoreDefault) // hit a mod
+			break;
+	}
+	return ret;
+}
+
 int QuestParserCollection::DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 											 std::vector<std::any> *extra_pointers) {
     int ret = 0;

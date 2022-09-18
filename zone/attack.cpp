@@ -310,18 +310,13 @@ int Mob::GetTotalDefense()
 // SYNC WITH : tune.cpp, mob.h TuneCheckHitChance()
 bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 {
-#ifdef LUA_EQEMU
-	bool lua_ret = false;
+	bool mod_ret = false;
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		lua_ret = reinterpret_cast<LuaParser*>(qi)->CheckHitChance(this, other, hit, ignoreDefault);
-	}
+	mod_ret = parse->CheckHitChance(this, other, hit, ignoreDefault);
 
 	if(ignoreDefault) {
-		return lua_ret;
+		return mod_ret;
 	}
-#endif
 
 	Mob *attacker = other;
 	Mob *defender = this;
@@ -353,18 +348,13 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 
 bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 {
-#ifdef LUA_EQEMU
-	bool lua_ret = false;
+	bool mod_ret = false;
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		lua_ret = reinterpret_cast<LuaParser*>(qi)->AvoidDamage(this, other, hit, ignoreDefault);
-	}
+	mod_ret = parse->AvoidDamage(this, other, hit, ignoreDefault);
 
 	if (ignoreDefault) {
-		return lua_ret;
+		return mod_ret;
 	}
-#endif
 
 	/* called when a mob is attacked, does the checks to see if it's a hit
 	* and does other mitigation checks. 'this' is the mob being attacked.
@@ -1034,17 +1024,12 @@ double Mob::RollD20(int offense, int mitigation)
 //SYNC WITH: tune.cpp, mob.h TuneMeleeMitigation
 void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
-#ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		reinterpret_cast<LuaParser*>(qi)->MeleeMitigation(this, attacker, hit, opts, ignoreDefault);
-	}
+	parse->MeleeMitigation(this, attacker, hit, opts, ignoreDefault);
 
 	if (ignoreDefault) {
 		return;
 	}
-#endif
 
 	if (hit.damage_done < 0 || hit.base_damage == 0)
 		return;
@@ -4734,17 +4719,12 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 
 void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
-#ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		reinterpret_cast<LuaParser*>(qi)->TryCriticalHit(this, defender, hit, opts, ignoreDefault);
-	}
+	parse->TryCriticalHit(this, defender, hit, opts, ignoreDefault);
 
 	if (ignoreDefault) {
 		return;
 	}
-#endif
 
 	if (hit.damage_done < 1 || !defender)
 		return;
@@ -5222,17 +5202,12 @@ const DamageTable &Mob::GetDamageTable() const
 
 void Mob::ApplyDamageTable(DamageHitInfo &hit)
 {
-#ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		reinterpret_cast<LuaParser*>(qi)->ApplyDamageTable(this, hit, ignoreDefault);
-	}
+	parse->ApplyDamageTable(this, hit, ignoreDefault);
 
 	if (ignoreDefault) {
 		return;
 	}
-#endif
 
 	// someone may want to add this to custom servers, can remove this if that's the case
 	if (!IsClient()
@@ -5631,17 +5606,12 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	if (!defender)
 		return;
 
-#ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		reinterpret_cast<LuaParser*>(qi)->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
-	}
+	parse->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
 
 	if (ignoreDefault) {
 		return;
 	}
-#endif
 
 	// BER weren't parsing the halving
 	if (hit.skill == EQ::skills::SkillArchery ||

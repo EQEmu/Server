@@ -1424,17 +1424,12 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 	if (!defender)
 		return;
 
-#ifdef LUA_EQEMU
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		reinterpret_cast<LuaParser*>(qi)->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
-	}
+	parse->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
 
 	if (ignoreDefault) {
 		return;
 	}
-#endif
 
 	// BER weren't parsing the halving
 	if (hit.skill == EQ::skills::SkillArchery ||

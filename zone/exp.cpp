@@ -205,18 +205,13 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 
 uint32 Client::GetExperienceForKill(Mob *against)
 {
-#ifdef LUA_EQEMU
-	uint32 lua_ret = 0;
+	uint32 mod_ret = 0;
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		lua_ret = reinterpret_cast<LuaParser*>(qi)->GetExperienceForKill(this, against, ignoreDefault);
-	}
+	mod_ret = parse->GetExperienceForKill(this, against, ignoreDefault);
 
 	if (ignoreDefault) {
-		return lua_ret;
+		return mod_ret;
 	}
-#endif
 
 	if (against && against->IsNPC()) {
 		uint32 level = (uint32)against->GetLevel();
@@ -896,18 +891,13 @@ void Client::SetLevel(uint8 set_level, bool command)
 // Add: You can set the values you want now, client will be always sync :) - Merkur
 uint32 Client::GetEXPForLevel(uint16 check_level)
 {
-#ifdef LUA_EQEMU
-	uint32 lua_ret = 0;
+	uint32 mod_ret = 0;
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		lua_ret = reinterpret_cast<LuaParser*>(qi)->GetEXPForLevel(this, check_level, ignoreDefault);
-	}
+	mod_ret = parse->GetEXPForLevel(this, check_level, ignoreDefault);
 
 	if (ignoreDefault) {
-		return lua_ret;
+		return mod_ret;
 	}
-#endif
 
 	uint16 check_levelm1 = check_level-1;
 	float mod;
@@ -1206,18 +1196,13 @@ uint8 Client::GetCharMaxLevelFromBucket()
 }
 
 uint32 Client::GetRequiredAAExperience() {
-#ifdef LUA_EQEMU
-	uint32 lua_ret = 0;
+	uint32 mod_ret = 0;
 	bool ignoreDefault = false;
-	auto qi = parse->GetQuestInterface(LUA_IDENTIFIER);
-	if (qi) {
-		lua_ret = reinterpret_cast<LuaParser*>(qi)->GetRequiredAAExperience(this, ignoreDefault);
-	}
+	mod_ret = parse->GetRequiredAAExperience(this, ignoreDefault);
 
 	if (ignoreDefault) {
-		return lua_ret;
+		return mod_ret;
 	}
-#endif
 
 	return RuleI(AA, ExpPerPoint);
 }

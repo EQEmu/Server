@@ -83,8 +83,19 @@ public:
 		std::vector<std::any> *extra_pointers = nullptr);
 	int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr);
-	
+
 	void GetErrors(std::list<std::string> &quest_errors);
+
+	//Mods extensions
+	void MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	void ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault);
+	bool AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault);
+	bool CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault);
+	void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	void CommonOutgoingHitSuccess(Mob *self, Mob* other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
+	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
+	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 
 	/*
 		Internally used memory reference for all Perl Event Export Settings
@@ -125,7 +136,7 @@ private:
 	QuestInterface *GetQIBySpellQuest(uint32 spell_id, std::string &filename);
 	QuestInterface *GetQIByItemQuest(std::string item_script, std::string &filename);
 	QuestInterface *GetQIByEncounterQuest(std::string encounter_name, std::string &filename);
-	
+
 	int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers);
 	int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,

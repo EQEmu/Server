@@ -51,7 +51,7 @@ public:
 		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	
+
 	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt) { return false; }
 	virtual bool HasGlobalQuestSub(QuestEventID evt) { return false; }
 	virtual bool PlayerHasQuestSub(QuestEventID evt) { return false; }
@@ -76,14 +76,34 @@ public:
 		std::vector<std::any> *extra_pointers) { return 0; }
 	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers) { return 0; }
-	
+
 	virtual void AddVar(std::string name, std::string val) { }
 	virtual std::string GetVar(std::string name) { return std::string(); }
 	virtual void Init() { }
 	virtual void ReloadQuests() { }
 	virtual uint32 GetIdentifier() = 0;
 	virtual void RemoveEncounter(const std::string &name) { }
-	
+
+	//Mod Extensions
+	virtual void MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+	{ ignoreDefault = false; }
+	virtual void ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault)
+	{ ignoreDefault = false; }
+	virtual bool AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault)
+	{ ignoreDefault = false; return false; }
+	virtual bool CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault)
+	{ ignoreDefault = false; return false; }
+	virtual void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+	{ ignoreDefault = false; }
+	virtual void CommonOutgoingHitSuccess(Mob *self, Mob* other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+	{ ignoreDefault = false; }
+	virtual uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault)
+	{ ignoreDefault = false; return 0; }
+	virtual uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault)
+	{ ignoreDefault = false; return 0; }
+	virtual uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault)
+	{ ignoreDefault = false; return 0;}
+
 	//TODO: Set maximum quest errors instead of hard coding it
 	virtual void GetErrors(std::list<std::string> &quest_errors) {
 		quest_errors.insert(quest_errors.end(), errors_.begin(), errors_.end());
