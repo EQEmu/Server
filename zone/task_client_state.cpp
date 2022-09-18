@@ -1008,7 +1008,7 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 	switch (task_information->reward_method) {
 		case METHODSINGLEID: {
 			if (task_information->reward_id) {
-				int16_t slot = client->GetInv().FindFreeSlot(true, true);
+				int16_t slot = client->GetInv().FindFreeSlot(false, true);
 				client->SummonItem(task_information->reward_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
 				item_data = database.GetItem(task_information->reward_id);
 				if (item_data) {
@@ -1020,7 +1020,7 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 		case METHODLIST: {
 			reward_list = task_manager->m_goal_list_manager.GetListContents(task_information->reward_id);
 			for (int item_id : reward_list) {
-				int16_t slot = client->GetInv().FindFreeSlot(true, true);
+				int16_t slot = client->GetInv().FindFreeSlot(false, true);
 				client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
 				item_data = database.GetItem(item_id);
 				if (item_data) {
