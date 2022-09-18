@@ -58,6 +58,7 @@ public:
 	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
 	virtual bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt);
 	virtual bool EncounterHasQuestSub(std::string encounter_name, QuestEventID evt);
+	virtual bool HasEncounterSub(const std::string& package_name, QuestEventID evt);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
