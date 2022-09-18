@@ -1015,6 +1015,7 @@ void QuestParserCollection::MeleeMitigation(Mob *self, Mob *attacker, DamageHitI
 		(*iter)->MeleeMitigation(self, attacker, hit, opts, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 }
 
@@ -1025,6 +1026,7 @@ void QuestParserCollection::ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool
 		(*iter)->ApplyDamageTable(self, hit, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 }
 
@@ -1036,6 +1038,7 @@ bool QuestParserCollection::AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hi
 		ret = (*iter)->AvoidDamage(self, other, hit, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 	return ret;
 }
@@ -1048,6 +1051,7 @@ bool QuestParserCollection::CheckHitChance(Mob *self, Mob* other, DamageHitInfo 
 		ret = (*iter)->CheckHitChance(self, other, hit, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 	return ret;
 }
@@ -1059,6 +1063,7 @@ void QuestParserCollection::TryCriticalHit(Mob *self, Mob *defender, DamageHitIn
 		(*iter)->TryCriticalHit(self, defender, hit, opts, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 }
 
@@ -1069,6 +1074,7 @@ void QuestParserCollection::CommonOutgoingHitSuccess(Mob *self, Mob* other, Dama
 		(*iter)->CommonOutgoingHitSuccess(self, other, hit, opts, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 }
 
@@ -1080,6 +1086,7 @@ uint32 QuestParserCollection::GetRequiredAAExperience(Client *self, bool &ignore
 		ret = (*iter)->GetRequiredAAExperience(self, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 	return ret;
 }
@@ -1092,6 +1099,7 @@ uint32 QuestParserCollection::GetEXPForLevel(Client *self, uint16 level, bool &i
 		ret = (*iter)->GetEXPForLevel(self, level, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 	return ret;
 }
@@ -1104,6 +1112,7 @@ uint32 QuestParserCollection::GetExperienceForKill(Client *self, Mob *against, b
 		ret = (*iter)->GetExperienceForKill(self, against, ignoreDefault);
 		if (ignoreDefault) // hit a mod
 			break;
+		++iter;
 	}
 	return ret;
 }
