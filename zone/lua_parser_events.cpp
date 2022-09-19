@@ -59,13 +59,17 @@ void handle_npc_event_trade(QuestInterface *parse, sol::state_view sv, sol::tabl
 		}
 	}
 
-	L["platinum"] = std::stoul(parse->GetVar("platinum." + ident));
+	std::string str = parse->GetVar("platinum." + ident);
+	L["platinum"] = str.empty() ? 0u : std::stoul(str);
 
-	L["gold"] = std::stoul(parse->GetVar("gold." + ident));
+	str = parse->GetVar("gold." + ident);
+	L["gold"] = str.empty() ? 0u : std::stoul(str);
 
-	L["silver"] = std::stoul(parse->GetVar("silver." + ident));
+	str = parse->GetVar("silver." + ident);
+	L["silver"] = str.empty() ? 0u : std::stoul(str);
 
-	L["copper"] = std::stoul(parse->GetVar("copper." + ident));
+	str = parse->GetVar("copper." + ident);
+	L["copper"] = str.empty() ? 0u : std::stoul(str);
 
 	L["trade"] = trade;
 }
