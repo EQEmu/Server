@@ -27,6 +27,7 @@
 */
 
 #ifdef LUA_EQEMU
+#ifdef EQEMU_USE_LUA_BIT
 #define LUA_BITOP_VERSION	"1.0.2"
 
 #include "lua.hpp"
@@ -178,4 +179,5 @@ int luaopen_bit(lua_State *L)
   return 1;
 }
 
+#endif
 #endif

@@ -16,7 +16,9 @@
 
 
 #include "lua_parser.h"
+#ifdef EQEMU_USE_LUA_BIT
 #include "lua_bit.h"
+#endif
 #include "lua_entity.h"
 #include "lua_expedition.h"
 #include "lua_item.h"
@@ -754,11 +756,12 @@ void LuaParser::ReloadQuests() {
 			sol::lib::bit32,
 			sol::lib::io);
 
-	// port ???
+#ifdef EQEMU_USE_LUA_BIT
 	if (luaopen_bit(sv.lua_state()) != 1) {
 		std::string error = lua_tostring(sv.lua_state(), -1);
 		AddError(error);
 	}
+#endif
 
 	try {
 		auto result = sv.safe_script("math.randomseed(os.time())");
