@@ -514,6 +514,7 @@ enum SpellRestriction
 	IS_SUMMONED_OR_UNDEAD                                                     = 49326, //
 	IS_CLASS_CASTER_PRIEST                                                    = 49529, //
 	IS_END_OR_MANA_ABOVE_20_PCT                                               = 49543, // You must have at least 20% of your maximum mana and endurance to use this ability.	//pure melee class check end, other check mana
+	IS_END_OR_MANA_BELOW_10_PCT                                               = 49545, // 																			//pure melee class check end, other check mana, hybrid check both
 	IS_END_OR_MANA_BELOW_30_PCT                                               = 49573, // Your target already has 30% or more of their maximum mana or endurance.	//pure melee class check the, other check more
 	IS_CLASS_BARD2                                                            = 49574, //
 	IS_NOT_CLASS_BARD                                                         = 49575, //
