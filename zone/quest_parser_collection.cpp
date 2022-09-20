@@ -105,8 +105,13 @@ QuestInterface* QuestParserCollection::GetQuestInterface(uint32 id)
 	return nullptr;
 }
 
-bool QuestParserCollection::HasQuestSub(uint32 npcid, QuestEventID evt) {
-	return HasQuestSubLocal(npcid, evt) || HasQuestSubGlobal(evt);
+bool QuestParserCollection::HasQuestSub(uint32 npcid, QuestEventID evt, bool check_encounters) {
+	return HasQuestSubLocal(npcid, evt) || HasQuestSubGlobal(evt) || (check_encounters && NPCHasEncounterSub(npcid, evt));
+}
+
+bool QuestParserCollection::NPCHasEncounterSub(uint32 npc_id, QuestEventID evt) {
+	std::string package_name = "npc_" + std::to_string(npc_id);
+	return HasEncounterSub(evt, package_name);
 }
 
 bool QuestParserCollection::HasQuestSubLocal(uint32 npcid, QuestEventID evt) {
@@ -159,8 +164,12 @@ bool QuestParserCollection::HasQuestSubGlobal(QuestEventID evt) {
 	return false;
 }
 
-bool QuestParserCollection::PlayerHasQuestSub(QuestEventID evt) {
-	return PlayerHasQuestSubLocal(evt) || PlayerHasQuestSubGlobal(evt);
+bool QuestParserCollection::PlayerHasQuestSub(QuestEventID evt, bool check_encounters) {
+	return PlayerHasQuestSubLocal(evt) || PlayerHasQuestSubGlobal(evt) || (check_encounters && PlayerHasEncounterSub(evt));
+}
+
+bool QuestParserCollection::PlayerHasEncounterSub(QuestEventID evt) {
+	return HasEncounterSub(evt, "player");
 }
 
 bool QuestParserCollection::PlayerHasQuestSubLocal(QuestEventID evt) {
@@ -195,7 +204,16 @@ bool QuestParserCollection::PlayerHasQuestSubGlobal(QuestEventID evt) {
 	return false;
 }
 
-bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
+bool QuestParserCollection::SpellHasEncounterSub(uint32 spell_id, QuestEventID evt) {
+	std::string package_name = "spell_" + std::to_string(spell_id);
+	return HasEncounterSub(evt, package_name);
+}
+
+bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt, bool check_encounters) {
+	if (check_encounters && SpellHasEncounterSub(spell_id, evt)) {
+		return true;
+	}
+
 	auto iter = _spell_quest_status.find(spell_id);
 	if(iter != _spell_quest_status.end()) {
 		//loaded or failed to load
@@ -217,9 +235,21 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) 
 	return false;
 }
 
-bool QuestParserCollection::ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt) {
+bool QuestParserCollection::ItemHasEncounterSub(EQ::ItemInstance* item, QuestEventID evt) {
+	if (item) {
+		std::string package_name = "item_" + std::to_string(item->GetID());
+		return HasEncounterSub(evt, package_name);
+	}
+	return false;
+}
+
+bool QuestParserCollection::ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt, bool check_encounters) {
 	if (itm == nullptr)
 		return false;
+
+	if (check_encounters && ItemHasEncounterSub(itm, evt)) {
+		return true;
+	}
 
 	std::string item_script;
 	if(itm->GetItem()->ScriptFileID != 0) {
@@ -248,6 +278,18 @@ bool QuestParserCollection::ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID 
 			return qi->ItemHasQuestSub(itm, evt);
 		} else {
 			_item_quest_status[item_id] = QuestFailedToLoad;
+		}
+	}
+	return false;
+}
+
+bool QuestParserCollection::HasEncounterSub(QuestEventID evt, const std::string& package_name) {
+	for (auto it = _encounter_quest_status.begin(); it != _encounter_quest_status.end(); ++it) {
+		if (it->second != QuestFailedToLoad) {
+			auto qit = _interfaces.find(it->second);
+			if (qit != _interfaces.end() && qit->second->HasEncounterSub(package_name, evt)) {
+				return true;
+			}
 		}
 	}
 	return false;

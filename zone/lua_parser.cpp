@@ -923,6 +923,19 @@ bool LuaParser::HasFunction(const std::string &subname, const std::string &packa
 	return false;
 }
 
+bool LuaParser::HasEncounterSub(const std::string& package_name, QuestEventID evt)
+{
+	auto it = lua_encounter_events_registered.find(package_name);
+	if (it != lua_encounter_events_registered.end()) {
+		for (auto riter = it->second.begin(); riter != it->second.end(); ++riter) {
+			if (riter->event_id == evt) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void LuaParser::MapFunctions()
 {
 	sol::state_view sv = m_impl->state->lua_state();

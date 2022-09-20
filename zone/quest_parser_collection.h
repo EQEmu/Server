@@ -68,10 +68,10 @@ public:
 	void RemoveEncounter(const std::string name);
 	QuestInterface* GetQuestInterface(uint32 id);
 
-	bool HasQuestSub(uint32 npcid, QuestEventID evt);
-	bool PlayerHasQuestSub(QuestEventID evt);
-	bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
-	bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt);
+	bool HasQuestSub(uint32 npcid, QuestEventID evt, bool check_encounters = false);
+	bool PlayerHasQuestSub(QuestEventID evt, bool check_encounters = false);
+	bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt, bool check_encounters = false);
+	bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt, bool check_encounters = false);
 
 	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<std::any> *extra_pointers = nullptr);
@@ -121,8 +121,13 @@ public:
 private:
 	bool HasQuestSubLocal(uint32 npcid, QuestEventID evt);
 	bool HasQuestSubGlobal(QuestEventID evt);
+	bool NPCHasEncounterSub(uint32 npc_id, QuestEventID evt);
 	bool PlayerHasQuestSubLocal(QuestEventID evt);
 	bool PlayerHasQuestSubGlobal(QuestEventID evt);
+	bool PlayerHasEncounterSub(QuestEventID evt);
+	bool SpellHasEncounterSub(uint32 spell_id, QuestEventID evt);
+	bool ItemHasEncounterSub(EQ::ItemInstance* item, QuestEventID evt);
+	bool HasEncounterSub(QuestEventID evt, const std::string& package_name);
 
 	int EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers);
 	int EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers);
