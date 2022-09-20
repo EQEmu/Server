@@ -8066,7 +8066,18 @@ bool Mob::PassCastRestriction(int value)
 			}
 			break;
 		}
-
+		case IS_END_OR_MANA_BELOW_10_PCT: {
+			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
+				return true;
+			}
+			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 10) {
+				return true;
+			} 
+			else if (IsHybridClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
+				return true;
+			}
+			break;
+		}
 		case IS_END_OR_MANA_BELOW_30_PCT:
 		case IS_END_OR_MANA_BELOW_30_PCT2: {
 			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 30) {
