@@ -795,7 +795,7 @@ void LuaParser::ReloadQuests() {
 #error Incompatible lua version
 #endif
 
-#ifdef WINDOWS
+#ifdef _WINDOWS
 	const char libext[] = ".dll";
 #else
 	// lua doesn't care OSX doesn't use sonames
