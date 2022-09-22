@@ -41,7 +41,7 @@ int main()
 	LogSys.LoadLogSettingsDefaults();
 	path.LoadPaths();
 
-	auto ConfigLoadResult = EQEmuConfig::LoadConfig(".");
+	auto ConfigLoadResult = EQEmuConfig::LoadConfig();
 	Config = EQEmuConfig::get();
 	try {
 		std::ofstream                 outfile("test_output.txt");
