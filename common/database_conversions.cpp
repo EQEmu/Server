@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define strcasecmp	_stricmp
 #else
 #include "unix.h"
+#include "path_manager.h"
 #include <netinet/in.h>
 #include <sys/time.h>
 #endif
@@ -476,7 +477,9 @@ bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertCorpseDeblob();
 
 	/* Run EQEmu Server script (Checks for database updates) */
-	system("perl eqemu_server.pl ran_from_world");
+
+	const std::string file = fmt::format("{}/eqemu_server.pl", path.GetServerPath());
+	system(fmt::format("perl {} ran_from_world", file).c_str());
 
 	return true;
 }
