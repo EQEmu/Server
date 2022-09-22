@@ -132,9 +132,10 @@ bool IsStringField(int i) {
 
 void ImportSpells(SharedDatabase *db) {
 	LogInfo("Importing Spells");
-	FILE *f = fopen("import/spells_us.txt", "r");
+	std::string file = fmt::format("{}/import/spells_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/spells_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -221,9 +222,10 @@ void ImportSpells(SharedDatabase *db) {
 void ImportSkillCaps(SharedDatabase *db) {
 	LogInfo("Importing Skill Caps");
 
-	FILE *f = fopen("import/SkillCaps.txt", "r");
+	std::string file = fmt::format("{}/import/SkillCaps.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/SkillCaps.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -256,9 +258,10 @@ void ImportSkillCaps(SharedDatabase *db) {
 void ImportBaseData(SharedDatabase *db) {
 	LogInfo("Importing Base Data");
 
-	FILE *f = fopen("import/BaseData.txt", "r");
+	std::string file = fmt::format("{}/import/BaseData.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/BaseData.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -301,9 +304,10 @@ void ImportBaseData(SharedDatabase *db) {
 void ImportDBStrings(SharedDatabase *db) {
 	LogInfo("Importing DB Strings");
 
-	FILE *f = fopen("import/dbstr_us.txt", "r");
+	std::string file = fmt::format("{}/import/dbstr_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/dbstr_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
