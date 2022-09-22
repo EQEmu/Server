@@ -20,7 +20,7 @@ void PathManager::LoadPaths()
 		LogError("[PathManager] Failed to load eqemu config");
 		return;
 	}
-	LogInfo("[PathManager] server path [{}]", m_server_path);
+	LogInfo("[PathManager] server [{}]", m_server_path);
 
 	const auto c = EQEmuConfig::get();
 
@@ -34,7 +34,7 @@ void PathManager::LoadPaths()
 	else if (File::Exists(fmt::format("{}/Maps", m_server_path))) {
 		m_maps_path = fmt::format("{}/Maps", m_server_path);
 	}
-	LogInfo("[PathManager] maps path [{}]", m_maps_path);
+	LogInfo("[PathManager] maps [{}]", m_maps_path);
 
 	// quests
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->QuestDir))) {
@@ -43,7 +43,7 @@ void PathManager::LoadPaths()
 	else if (File::Exists(fmt::format("{}/quests", m_server_path))) {
 		m_quests_path = fmt::format("{}/quests", m_server_path);
 	}
-	LogInfo("[PathManager] quests path [{}]", m_quests_path);
+	LogInfo("[PathManager] quests [{}]", m_quests_path);
 
 	// plugins
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->PluginDir))) {
@@ -52,7 +52,7 @@ void PathManager::LoadPaths()
 	else if (File::Exists(fmt::format("{}/plugins", m_server_path))) {
 		m_plugins_path = fmt::format("{}/plugins", m_server_path);
 	}
-	LogInfo("[PathManager] plugins path [{}]", m_plugins_path);
+	LogInfo("[PathManager] plugins [{}]", m_plugins_path);
 
 	// lua_modules
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->LuaModuleDir))) {
@@ -61,11 +61,11 @@ void PathManager::LoadPaths()
 	else if (File::Exists(fmt::format("{}/lua_modules", m_server_path))) {
 		m_lua_modules_path = fmt::format("{}/lua_modules", m_server_path);
 	}
-	LogInfo("[PathManager] lua_modules path [{}]", m_lua_modules_path);
+	LogInfo("[PathManager] lua_modules [{}]", m_lua_modules_path);
 
 	// lua mods
 	m_lua_mods_path = fmt::format("{}/mods", m_server_path);
-	LogInfo("[PathManager] lua mods path [{}]", m_lua_mods_path);
+	LogInfo("[PathManager] lua mods [{}]", m_lua_mods_path);
 
 	// patches
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->PatchDir))) {
@@ -74,7 +74,7 @@ void PathManager::LoadPaths()
 	else if (File::Exists(fmt::format("{}/patches", m_server_path))) {
 		m_patch_path = fmt::format("{}/patches", m_server_path);
 	}
-	LogInfo("[PathManager] patches path [{}]", m_patch_path);
+	LogInfo("[PathManager] patches [{}]", m_patch_path);
 
 	// shared_memory_path
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->SharedMemDir))) {
@@ -83,7 +83,7 @@ void PathManager::LoadPaths()
 	else if (File::Exists(fmt::format("{}/shared_memory", m_server_path))) {
 		m_shared_memory_path = fmt::format("{}/shared_memory", m_server_path);
 	}
-	LogInfo("[PathManager] shared_memory path [{}]", m_shared_memory_path);
+	LogInfo("[PathManager] shared_memory [{}]", m_shared_memory_path);
 
 	// logging path
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->LogDir))) {
@@ -93,7 +93,7 @@ void PathManager::LoadPaths()
 		m_log_path = fmt::format("{}/logs", m_server_path);
 	}
 
-	LogInfo("[PathManager] logs path [{}]", m_log_path);
+	LogInfo("[PathManager] logs [{}]", m_log_path);
 }
 
 const std::string &PathManager::GetServerPath() const
