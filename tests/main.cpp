@@ -33,8 +33,11 @@
 #include "../common/eqemu_config.h"
 
 const EQEmuConfig *Config;
+PathManager path;
 
 int main() {
+	path.LoadPaths();
+
 	auto ConfigLoadResult = EQEmuConfig::LoadConfig();
         Config = EQEmuConfig::get();
 	try {

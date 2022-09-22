@@ -171,11 +171,11 @@ class EQEmuConfig
 				return LoadConfig(file_path);
 			}
 
-std::string file = fmt::format(
-	"{}/{}",
-	(file_path.empty() ? path.GetServerPath() : file_path),
-	EQEmuConfig::ConfigFile
-);
+			std::string file = fmt::format(
+				"{}/{}",
+				(file_path.empty() ? path.GetServerPath() : file_path),
+				EQEmuConfig::ConfigFile
+			);
 
 			std::ifstream fconfig(file, std::ifstream::binary);
 
