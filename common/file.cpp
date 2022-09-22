@@ -68,7 +68,7 @@ void File::Makedir(const std::string &directory_name)
 #endif
 }
 
-std::string normalizepath(const std::string& path) {
+std::string pop_parent_path(const std::string& path) {
 	std::string new_path = Strings::Replace(path, "\\", "/");
 	std::vector<std::string> paths = Strings::Split(new_path, "/");
 
@@ -89,10 +89,14 @@ std::string File::FindEqemuConfigPath()
 	if (File::Exists(path)) {
 		return fmt::format("{}", File::GetCwd());
 	}
-
-	path = fmt::format("{}/../eqemu_config.json",File::GetCwd());
-	if (File::Exists(path)) {
-		return fmt::format("{}", normalizepath(File::GetCwd()));
+	else if (File::Exists(fmt::format("{}/../eqemu_config.json", File::GetCwd()))) {
+		return fmt::format("{}", pop_parent_path(File::GetCwd()));
+	}
+	else if (File::Exists(fmt::format("{}/login.json", File::GetCwd()))) {
+		return fmt::format("{}", File::GetCwd());
+	}
+	else if (File::Exists(fmt::format("{}/../login.json", File::GetCwd()))) {
+		return fmt::format("{}", pop_parent_path(File::GetCwd()));
 	}
 
 	return {};

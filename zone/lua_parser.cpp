@@ -928,11 +928,11 @@ void LuaParser::ReloadQuests() {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
 	std::string module_path = lua_tostring(L,-1);
-	module_path += ";" + path.GetLuaModulesPath() + "?.lua;" + path.GetLuaModulesPath() + "?/init.lua";
+	module_path += ";" + path.GetLuaModulesPath() + "/?.lua;" + path.GetLuaModulesPath() + "/?/init.lua";
 	// luarock paths using lua_modules as tree
 	// to path it adds foo/share/lua/5.1/?.lua and foo/share/lua/5.1/?/init.lua
-	module_path += ";" + path.GetLuaModulesPath() + "share/lua/" + lua_version + "/?.lua";
-	module_path += ";" + path.GetLuaModulesPath() + "share/lua/" + lua_version + "/?/init.lua";
+	module_path += ";" + path.GetLuaModulesPath() + "/share/lua/" + lua_version + "/?.lua";
+	module_path += ";" + path.GetLuaModulesPath() + "/share/lua/" + lua_version + "/?/init.lua";
 	lua_pop(L, 1);
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "path");
@@ -941,10 +941,10 @@ void LuaParser::ReloadQuests() {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "cpath");
 	module_path = lua_tostring(L, -1);
-	module_path += ";" + path.GetLuaModulesPath() + "?" + libext;
+	module_path += ";" + path.GetLuaModulesPath() + "/?" + libext;
 	// luarock paths using lua_modules as tree
 	// luarocks adds foo/lib/lua/5.1/?.so for cpath
-	module_path += ";" + path.GetLuaModulesPath() + "lib/lua/" + lua_version + "/?" + libext;
+	module_path += ";" + path.GetLuaModulesPath() + "/lib/lua/" + lua_version + "/?" + libext;
 	lua_pop(L, 1);
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "cpath");

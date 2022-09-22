@@ -478,8 +478,11 @@ Clientlist::Clientlist(int ChatPort) {
 
 	const ucsconfig *Config = ucsconfig::get();
 
-	LogInfo("Loading [{}]", Config->MailOpCodesFile.c_str());
-	if (!ChatOpMgr->LoadOpcodes(Config->MailOpCodesFile.c_str()))
+
+	std::string opcodes_file = fmt::format("{}/{}", path.GetServerPath(), Config->MailOpCodesFile);
+
+	LogInfo("Loading [{}]", opcodes_file);
+	if (!ChatOpMgr->LoadOpcodes(opcodes_file.c_str()))
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {

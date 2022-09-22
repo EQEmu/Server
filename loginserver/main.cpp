@@ -44,7 +44,9 @@ void LoadDatabaseConnection()
 
 void LoadServerConfig()
 {
-	server.config = EQ::JsonConfigFile::Load("login.json");
+	server.config = EQ::JsonConfigFile::Load(
+		fmt::format("{}/login.json", path.GetServerPath())
+	);
 	LogInfo("Config System Init");
 
 	/**
@@ -173,6 +175,8 @@ int main(int argc, char **argv)
 	if (argc == 1) {
 		LogSys.LoadLogSettingsDefaults();
 	}
+
+	path.LoadPaths();
 
 	/**
 	 * Command handler

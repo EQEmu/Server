@@ -38,7 +38,7 @@ void PathManager::LoadPaths()
 
 	// quests
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->QuestDir))) {
-		m_quests_path = fmt::format("{}{}", m_server_path, striptrailingslash(c->QuestDir));
+		m_quests_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->QuestDir));
 	}
 	else if (File::Exists(fmt::format("{}/quests", m_server_path))) {
 		m_quests_path = fmt::format("{}/quests", m_server_path);
