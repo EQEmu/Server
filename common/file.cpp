@@ -19,7 +19,7 @@
 */
 
 #include <fstream>
-#include "file_util.h"
+#include "file.h"
 
 #ifdef _WINDOWS
 #include <direct.h>
@@ -32,6 +32,7 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
+#include <fmt/format.h>
 
 #endif
 
@@ -39,7 +40,7 @@
  * @param name
  * @return
  */
-bool FileUtil::exists(const std::string &name)
+bool File::Exists(const std::string &name)
 {
 	std::ifstream f(name.c_str());
 
@@ -49,9 +50,8 @@ bool FileUtil::exists(const std::string &name)
 /**
  * @param directory_name
  */
-void FileUtil::mkdir(const std::string& directory_name)
+void File::Makedir(const std::string &directory_name)
 {
-
 #ifdef _WINDOWS
 	struct _stat st;
 	if (_stat(directory_name.c_str(), &st) == 0) // exists
@@ -66,7 +66,29 @@ void FileUtil::mkdir(const std::string& directory_name)
 #endif
 }
 
-bool file_exists(const std::string& name) {
-	std::ifstream f(name.c_str());
-	return f.good();
+std::string File::FindEqemuConfigPath()
+{
+	std::string path = fmt::format("{}/eqemu_config.json", File::GetCwd());
+	if (File::Exists(path)) {
+		return fmt::format("{}/", File::GetCwd());
+	}
+
+	path = fmt::format("{}/../eqemu_config.json",File::GetCwd());
+	if (File::Exists(path)) {
+		return fmt::format("{}/../", File::GetCwd());
+	}
+
+	return {};
+}
+
+std::string File::GetCwd()
+{
+	char        buffer[100];
+	char        *answer = getcwd(buffer, sizeof(buffer));
+	std::string s_cwd;
+	if (answer) {
+		s_cwd = answer;
+	}
+
+	return s_cwd;
 }

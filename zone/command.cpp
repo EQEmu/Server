@@ -19,7 +19,7 @@
 #include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/net/eqstream.h"
-#include "../common/file_util.h"
+#include "../common/file.h"
 #include "../common/repositories/dynamic_zones_repository.h"
 
 #include "data_bucket.h"
@@ -811,7 +811,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 
 #ifdef WIN32
 			shared_memory_path = "shared_memory";
-			if (file_exists("bin/shared_memory.exe")) {
+			if (File::Exists("bin/shared_memory.exe")) {
 				shared_memory_path = "bin\\shared_memory.exe";
 			}
 
@@ -827,7 +827,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 			if (system(hotfix_command.c_str())) {}
 #else
 			shared_memory_path = "./shared_memory";
-			if (file_exists("./bin/shared_memory")) {
+			if (File::Exists("./bin/shared_memory")) {
 				shared_memory_path = "./bin/shared_memory";
 			}
 

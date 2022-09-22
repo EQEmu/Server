@@ -79,6 +79,7 @@
 #include <pthread.h>
 #include "../common/unix.h"
 #include "zone_event_scheduler.h"
+#include "../common/file.h"
 
 #endif
 
@@ -120,6 +121,11 @@ int main(int argc, char** argv) {
 	LogSys.LoadLogSettingsDefaults();
 
 	set_exception_handler();
+
+	std::string eqemu_server_path = File::FindEqemuConfigPath();
+
+	LogInfo("EQEmu Server path is [{}]", eqemu_server_path);
+	std::exit(0);
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {

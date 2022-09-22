@@ -37,7 +37,7 @@ SET(common_sources
     extprofile.cpp
     discord_manager.cpp
     faction.cpp
-    file_util.cpp
+    file.cpp
     guild_base.cpp
     guilds.cpp
     inventory_profile.cpp
@@ -529,7 +529,7 @@ SET(common_headers
     expedition_lockout_timer.h
     extprofile.h
     faction.h
-    file_util.h
+    file.h
     features.h
     fixed_memory_hash_set.h
     fixed_memory_variable_hash_set.h
