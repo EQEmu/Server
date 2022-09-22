@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
+#include "../common/path_manager.h"
 
 #include <list>
 #include <vector>

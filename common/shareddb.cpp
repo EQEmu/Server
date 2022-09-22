@@ -41,6 +41,7 @@
 #include "repositories/criteria/content_filter_criteria.h"
 #include "repositories/account_repository.h"
 #include "repositories/faction_association_repository.h"
+#include "path_manager.h"
 
 namespace ItemField
 {

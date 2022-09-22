@@ -32,6 +32,7 @@
 #include "../inventory_profile.h"
 #include "rof_structs.h"
 #include "../rulesys.h"
+#include "../path_manager.h"
 
 #include <iostream>
 #include <sstream>

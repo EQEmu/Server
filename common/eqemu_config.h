@@ -20,7 +20,6 @@
 
 #include "json/json.h"
 #include "linked_list.h"
-#include "path_manager.h"
 #include <fstream>
 #include <fmt/format.h>
 
@@ -165,7 +164,7 @@ class EQEmuConfig
 		}
 
 		// Load config file and parse data
-		static bool parseFile(const std::string& file_path = "")
+		static bool parseFile(const std::string& file_path = ".")
 		{
 			if (_config == nullptr) {
 				return LoadConfig(file_path);
@@ -173,7 +172,7 @@ class EQEmuConfig
 
 			std::string file = fmt::format(
 				"{}/{}",
-				(file_path.empty() ? path.GetServerPath() : file_path),
+				file_path,
 				EQEmuConfig::ConfigFile
 			);
 

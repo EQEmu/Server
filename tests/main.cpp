@@ -30,15 +30,12 @@
 #include "data_verification_test.h"
 #include "skills_util_test.h"
 #include "task_state_test.h"
-#include "../common/eqemu_config.h"
 
 const EQEmuConfig *Config;
-PathManager path;
 
 int main() {
-	path.LoadPaths();
 
-	auto ConfigLoadResult = EQEmuConfig::LoadConfig();
+	auto ConfigLoadResult = EQEmuConfig::LoadConfig(".");
         Config = EQEmuConfig::get();
 	try {
 		std::ofstream outfile("test_output.txt");

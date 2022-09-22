@@ -32,6 +32,7 @@
 #include "../item_instance.h"
 #include "uf_structs.h"
 #include "../rulesys.h"
+#include "../path_manager.h"
 
 #include <iostream>
 #include <sstream>

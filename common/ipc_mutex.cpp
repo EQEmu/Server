@@ -30,6 +30,7 @@
 #include "types.h"
 #include "eqemu_exception.h"
 #include "eqemu_config.h"
+#include "path_manager.h"
 
 namespace EQ {
 	struct IPCMutex::Implementation {
@@ -44,8 +45,7 @@ namespace EQ {
 		imp_ = new Implementation;
 #ifdef _WINDOWS
 		auto Config = EQEmuConfig::get();
-		std::string final_name = Config->SharedMemDir + "EQEmuMutex_";
-		final_name += name;
+		std::string final_name = fmt::format("{}/EQEmuMutex_{}.lock", path.GetSharedMemoryPath(), name);
 
 		imp_->mut_ = CreateMutex(nullptr,
 			FALSE,

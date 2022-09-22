@@ -32,6 +32,7 @@
 #include "../strings.h"
 #include "../item_instance.h"
 #include "titanium_structs.h"
+#include "../path_manager.h"
 
 #include <sstream>
 
