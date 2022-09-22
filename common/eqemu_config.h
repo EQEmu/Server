@@ -20,6 +20,7 @@
 
 #include "json/json.h"
 #include "linked_list.h"
+#include "path_manager.h"
 #include <fstream>
 #include <fmt/format.h>
 
@@ -172,7 +173,7 @@ class EQEmuConfig
 
 			std::string file = fmt::format(
 				"{}/{}",
-				file_path,
+				(file_path.empty() ? path.GetServerPath() : file_path),
 				EQEmuConfig::ConfigFile
 			);
 
