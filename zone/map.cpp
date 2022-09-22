@@ -6,6 +6,7 @@
 #include "raycast_mesh.h"
 #include "zone.h"
 #include "../common/file.h"
+#include "../common/path_manager.h"
 
 #include <algorithm>
 #include <map>
@@ -202,22 +203,8 @@ bool Map::DoCollisionCheck(glm::vec3 myloc, glm::vec3 oloc, glm::vec3 &outnorm, 
 }
 
 Map *Map::LoadMapFile(std::string file) {
-
-	std::string filename;
-	if (File::Exists("maps")) {
-		filename = "maps";
-	}
-	else if (File::Exists("Maps")) {
-		filename = "Maps";
-	}
-	else {
-		filename = Config->MapDir;
-	}
-
 	std::transform(file.begin(), file.end(), file.begin(), ::tolower);
-	filename += "/base/";
-	filename += file;
-	filename += ".map";
+	std::string filename = fmt::format("{}/base/{}.map", path_manager.GetMapsPath(), file);
 
 	LogInfo("Attempting to load Map File [{}]", filename.c_str());
 

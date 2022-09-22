@@ -21,6 +21,7 @@
 #include "json/json.h"
 #include "linked_list.h"
 #include <fstream>
+#include <fmt/format.h>
 
 struct LoginConfig {
 	std::string LoginHost;
@@ -152,23 +153,24 @@ class EQEmuConfig
 		}
 
 		// Load the config
-		static bool LoadConfig()
+		static bool LoadConfig(const std::string& path = "")
 		{
 			if (_config != nullptr) {
 				return true;
 			}
 			_config = new EQEmuConfig;
 
-			return parseFile();
+			return parseFile(path);
 		}
 
 		// Load config file and parse data
-		static bool parseFile() {
+		static bool parseFile(const std::string& path = "")
+		{
 			if (_config == nullptr) {
-				return LoadConfig();
+				return LoadConfig(path);
 			}
 
-			std::ifstream fconfig(EQEmuConfig::ConfigFile, std::ifstream::binary);
+			std::ifstream fconfig(fmt::format("{}{}", path, EQEmuConfig::ConfigFile), std::ifstream::binary);
 			try {
 				fconfig >> _config->_root;
 				_config->parse_config();

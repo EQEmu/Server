@@ -17,10 +17,11 @@ void PathManager::LoadPaths()
 {
 	m_server_path = File::FindEqemuConfigPath();
 
-	if (!EQEmuConfig::LoadConfig()) {
+	if (!EQEmuConfig::LoadConfig(m_server_path)) {
 		LogError("[PathManager] Failed to load eqemu config");
 		return;
 	}
+	LogInfo("[PathManager] EQEmu server path [{}]", m_server_path);
 
 	const auto c = EQEmuConfig::get();
 
@@ -35,11 +36,7 @@ void PathManager::LoadPaths()
 	else if (File::Exists(fmt::format("{}Maps", m_server_path))) {
 		m_maps_path = fmt::format("{}Maps", m_server_path);
 	}
-
-	LogInfo("[PathManager] EQEmu Server path [{}]", m_server_path);
 	LogInfo("[PathManager] EQEmu maps path [{}]", m_maps_path);
-
-	std::exit(0);
 }
 
 const std::string &PathManager::GetMapsPath() const

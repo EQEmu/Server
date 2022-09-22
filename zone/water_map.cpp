@@ -5,6 +5,7 @@
 #include "water_map_v2.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/file.h"
+#include "../common/path_manager.h"
 
 #include <algorithm>
 #include <cctype>
@@ -18,18 +19,7 @@
 WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 	std::transform(zone_name.begin(), zone_name.end(), zone_name.begin(), ::tolower);
 
-	std::string filename;
-	if (File::Exists("maps")) {
-		filename = "maps";
-	}
-	else if (File::Exists("Maps")) {
-		filename = "Maps";
-	}
-	else {
-		filename = Config->MapDir;
-	}
-
-	std::string file_path = filename + "/water/" + zone_name + std::string(".wtr");
+	std::string file_path = fmt::format("{}/water/{}.wtr", path_manager.GetMapsPath(), zone_name);
 	LogDebug("Attempting to load water map with path [{}]", file_path.c_str());
 	FILE *f = fopen(file_path.c_str(), "rb");
 	if(f) {
