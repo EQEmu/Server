@@ -25,6 +25,7 @@
 #include "zoneserver.h"
 #include "../common/ip_util.h"
 #include "../common/zone_store.h"
+#include "../common/path_manager.h"
 
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
@@ -291,6 +292,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	// logging system init
 	auto logging = LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings();
 
 	if (RuleB(Logging, WorldGMSayLogging)) {

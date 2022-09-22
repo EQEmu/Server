@@ -28,10 +28,12 @@
 #include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
 #include "../../common/zone_store.h"
+#include "../../common/path_manager.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
 ZoneStore zone_store;
+PathManager path;
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
@@ -43,6 +45,8 @@ int main(int argc, char **argv)
 	RegisterExecutablePlatform(ExePlatformClientExport);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	LogInfo("Client Files Export Utility");
 	if (!EQEmuConfig::LoadConfig()) {
@@ -86,6 +90,7 @@ int main(int argc, char **argv)
 	}
 
 	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

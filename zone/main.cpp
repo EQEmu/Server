@@ -108,7 +108,7 @@ QuestParserCollection *parse        = 0;
 EQEmuLogSys           LogSys;
 ZoneEventScheduler    event_scheduler;
 WorldContentService   content_service;
-PathManager           path_manager;
+PathManager           path;
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 
 	set_exception_handler();
 
-	path_manager.LoadPaths();
+	path.LoadPaths();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
@@ -263,6 +263,7 @@ int main(int argc, char** argv) {
 
 	/* Register Log System and Settings */
 	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();

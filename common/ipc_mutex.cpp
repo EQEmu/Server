@@ -40,7 +40,7 @@ namespace EQ {
 #endif
 	};
 
-	IPCMutex::IPCMutex(std::string name) : locked_(false) {
+	IPCMutex::IPCMutex(const std::string& name) : locked_(false) {
 		imp_ = new Implementation;
 #ifdef _WINDOWS
 		auto Config = EQEmuConfig::get();
@@ -55,9 +55,7 @@ namespace EQ {
 			EQ_EXCEPT("IPC Mutex", "Could not create mutex.");
 		}
 #else
-		auto Config = EQEmuConfig::get();
-		std::string final_name = Config->SharedMemDir + name;
-		final_name += ".lock";
+		std::string final_name = fmt::format("{}/{}.lock", path.GetSharedMemoryPath(), name);
 
 #ifdef __DARWIN
 #if __DARWIN_C_LEVEL < 200809L

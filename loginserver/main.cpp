@@ -11,6 +11,7 @@
 #include "loginserver_webserver.h"
 #include "loginserver_command_handler.h"
 #include "../common/strings.h"
+#include "../common/path_manager.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
@@ -20,6 +21,7 @@
 LoginServer server;
 EQEmuLogSys LogSys;
 bool        run_server = true;
+PathManager path;
 
 void ResolveAddresses();
 void CatchSignal(int sig_num)
@@ -28,7 +30,7 @@ void CatchSignal(int sig_num)
 
 void LoadDatabaseConnection()
 {
-	LogInfo("MySQL Database LoadPaths");
+	LogInfo("MySQL Database Init");
 
 	server.db = new Database(
 		server.config.GetVariableString("database", "user", "root"),
@@ -43,7 +45,7 @@ void LoadDatabaseConnection()
 void LoadServerConfig()
 {
 	server.config = EQ::JsonConfigFile::Load("login.json");
-	LogInfo("Config System LoadPaths");
+	LogInfo("Config System Init");
 
 	/**
 	 * Worldservers
@@ -166,7 +168,7 @@ int main(int argc, char **argv)
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
 
-	LogInfo("Logging System LoadPaths");
+	LogInfo("Logging System Init");
 
 	if (argc == 1) {
 		LogSys.LoadLogSettingsDefaults();
@@ -197,6 +199,7 @@ int main(int argc, char **argv)
 
 	if (argc == 1) {
 		LogSys.SetDatabase(server.db)
+			->SetLogPath("logs")
 			->LoadLogDatabaseSettings()
 			->StartFileLogs();
 	}
@@ -213,7 +216,7 @@ int main(int argc, char **argv)
 	/**
 	 * create server manager
 	 */
-	LogInfo("Server Manager LoadPaths");
+	LogInfo("Server Manager Init");
 	server.server_manager = new ServerManager();
 	if (!server.server_manager) {
 		LogError("Server Manager Failed to Start");
@@ -225,7 +228,7 @@ int main(int argc, char **argv)
 	/**
 	 * create client manager
 	 */
-	LogInfo("Client Manager LoadPaths");
+	LogInfo("Client Manager Init");
 	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
 		LogError("Client Manager Failed to Start");

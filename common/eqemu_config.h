@@ -20,6 +20,7 @@
 
 #include "json/json.h"
 #include "linked_list.h"
+#include "path_manager.h"
 #include <fstream>
 #include <fmt/format.h>
 
@@ -164,13 +165,18 @@ class EQEmuConfig
 		}
 
 		// Load config file and parse data
-		static bool parseFile(const std::string& path = "")
+		static bool parseFile(const std::string& file_path = "")
 		{
 			if (_config == nullptr) {
-				return LoadConfig(path);
+				return LoadConfig(file_path);
 			}
 
-			std::ifstream fconfig(fmt::format("{}{}", path, EQEmuConfig::ConfigFile), std::ifstream::binary);
+			std::string file = fmt::format("{}/{}", (file_path.empty() ? path.GetServerPath() : file_path), EQEmuConfig::ConfigFile);
+
+//			printf("Reading config file %s\n", file.c_str());
+
+			std::ifstream fconfig(file, std::ifstream::binary);
+
 			try {
 				fconfig >> _config->_root;
 				_config->parse_config();

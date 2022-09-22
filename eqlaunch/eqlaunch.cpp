@@ -21,6 +21,7 @@
 #include "../common/proc_launcher.h"
 #include "../common/eqemu_config.h"
 #include "../common/servertalk.h"
+#include "../common/path_manager.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/unix.h"
@@ -33,6 +34,7 @@
 #include <time.h>
 
 EQEmuLogSys LogSys;
+PathManager path;
 
 bool RunLoops = false;
 

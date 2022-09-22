@@ -36,6 +36,7 @@
 #endif
 
 #include <fmt/format.h>
+#include "strings.h"
 
 /**
  * @param name
@@ -67,16 +68,31 @@ void File::Makedir(const std::string &directory_name)
 #endif
 }
 
+std::string normalizepath(const std::string& path) {
+	std::string new_path = Strings::Replace(path, "\\", "/");
+	std::vector<std::string> paths = Strings::Split(new_path, "/");
+
+	paths.pop_back();
+
+	new_path = Strings::Join(paths, "/");
+
+#ifdef _WINDOWS
+	new_path = Strings::Replace(path, "/", "\\");
+#endif
+
+	return new_path;
+}
+
 std::string File::FindEqemuConfigPath()
 {
 	std::string path = fmt::format("{}/eqemu_config.json", File::GetCwd());
 	if (File::Exists(path)) {
-		return fmt::format("{}/", File::GetCwd());
+		return fmt::format("{}", File::GetCwd());
 	}
 
 	path = fmt::format("{}/../eqemu_config.json",File::GetCwd());
 	if (File::Exists(path)) {
-		return fmt::format("{}/../", File::GetCwd());
+		return fmt::format("{}", normalizepath(File::GetCwd()));
 	}
 
 	return {};
