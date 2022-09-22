@@ -73,6 +73,7 @@ class Corpse : public Mob {
 	uint32			SetCharID(uint32 iCharID)	{ if (IsPlayerCorpse()) { return (char_id = iCharID); } return 0xFFFFFFFF; };
 	uint32			GetDecayTime()				{ if (!corpse_decay_timer.Enabled()) return 0xFFFFFFFF; else return corpse_decay_timer.GetRemainingTime(); }
 	uint32			GetRezTime()				{ if (!corpse_rez_timer.Enabled()) return 0; else return corpse_rez_timer.GetRemainingTime(); }
+	void            ResetDecayTimer();
 	void			SetDecayTimer(uint32 decay_time);
 	void			SetConsentGroupID(uint32 group_id) { if (IsPlayerCorpse()) { consented_group_id = group_id; } }
 	void			SetConsentRaidID(uint32 raid_id)   { if (IsPlayerCorpse()) { consented_raid_id = raid_id; } }

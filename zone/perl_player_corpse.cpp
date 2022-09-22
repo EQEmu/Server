@@ -46,6 +46,11 @@ std::string Perl_Corpse_GetOwnerName(Corpse* self) // @categories Account and Ch
 	return self->GetOwnerName();
 }
 
+void Perl_Corpse_ResetDecayTimer(Corpse* self) // @categories Corpse
+{
+	self->ResetDecayTimer();
+}
+
 void Perl_Corpse_SetDecayTimer(Corpse* self, uint32_t decay_time) // @categories Corpse
 {
 	self->SetDecayTimer(decay_time);
@@ -231,6 +236,7 @@ void perl_register_corpse()
 	package.add("RemoveItem", &Perl_Corpse_RemoveItem);
 	package.add("RemoveItemByID", (void(*)(Corpse*, uint32_t))&Perl_Corpse_RemoveItemByID);
 	package.add("RemoveItemByID", (void(*)(Corpse*, uint32_t, int))&Perl_Corpse_RemoveItemByID);
+	package.add("ResetDecayTimer", &Perl_Corpse_ResetDecayTimer);
 	package.add("ResetLooter", &Perl_Corpse_ResetLooter);
 	package.add("SetCash", &Perl_Corpse_SetCash);
 	package.add("SetDecayTimer", &Perl_Corpse_SetDecayTimer);
