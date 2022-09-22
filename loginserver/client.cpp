@@ -29,7 +29,7 @@ bool Client::Process()
 		LogPacketClientServer(
 			"[{}] [{:#06x}] Size [{}] {}",
 			OpcodeManager::EmuToName(app->GetOpcode()),
-			app->GetOpcode(),
+			m_connection->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
 			app->Size(),
 			(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 		);
