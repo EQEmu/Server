@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include "../common/platform.h"
 #include "../common/path_manager.h"
 #include "memory_mapped_file_test.h"
 #include "ipc_mutex_test.h"
@@ -38,6 +39,7 @@ PathManager       path;
 
 int main()
 {
+	RegisterExecutablePlatform(ExePlatformClientImport);
 	LogSys.LoadLogSettingsDefaults();
 	path.LoadPaths();
 
