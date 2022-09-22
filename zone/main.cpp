@@ -78,9 +78,6 @@
 #else
 #include <pthread.h>
 #include "../common/unix.h"
-#include "zone_event_scheduler.h"
-#include "../common/file.h"
-#include "../common/path_manager.h"
 
 #endif
 
@@ -90,6 +87,10 @@ volatile bool RunLoops = true;
 #endif
 
 extern volatile bool is_zone_loaded;
+
+#include "zone_event_scheduler.h"
+#include "../common/file.h"
+#include "../common/path_manager.h"
 
 EntityList  entity_list;
 WorldServer worldserver;
