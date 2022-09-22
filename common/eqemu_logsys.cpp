@@ -437,7 +437,7 @@ void EQEmuLogSys::Out(
 
 	va_list args;
 	va_start(args, message);
-	std::string output_message = vStringFormat(message, args);
+	std::string output_message = strlen(message) > 0 ? vStringFormat(message, args) : message;
 	va_end(args);
 
 	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, prefix + output_message);
