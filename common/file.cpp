@@ -32,9 +32,10 @@
 
 #include <unistd.h>
 #include <sys/stat.h>
-#include <fmt/format.h>
 
 #endif
+
+#include <fmt/format.h>
 
 /**
  * @param name

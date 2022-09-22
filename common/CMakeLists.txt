@@ -61,6 +61,7 @@ SET(common_sources
     packet_dump.cpp
     packet_dump_file.cpp
     packet_functions.cpp
+    path_manager.cpp
     perl_eqdb.cpp
     perl_eqdb_res.cpp
     proc_launcher.cpp
@@ -565,6 +566,7 @@ SET(common_headers
     packet_dump.h
     packet_dump_file.h
     packet_functions.h
+    path_manager.cpp
     platform.h
     proc_launcher.h
     profanity_manager.h

@@ -80,6 +80,7 @@
 #include "../common/unix.h"
 #include "zone_event_scheduler.h"
 #include "../common/file.h"
+#include "../common/path_manager.h"
 
 #endif
 
@@ -90,21 +91,24 @@ volatile bool RunLoops = true;
 
 extern volatile bool is_zone_loaded;
 
-EntityList entity_list;
+EntityList  entity_list;
 WorldServer worldserver;
-ZoneStore zone_store;
-uint32 numclients = 0;
-char errorname[32];
-extern Zone* zone;
-npcDecayTimes_Struct npcCorpseDecayTimes[100];
-TitleManager title_manager;
-QueryServ *QServ          = 0;
-TaskManager *task_manager = 0;
-NpcScaleManager *npc_scale_manager;
-QuestParserCollection *parse = 0;
-EQEmuLogSys          LogSys;
-ZoneEventScheduler event_scheduler;
-WorldContentService  content_service;
+ZoneStore   zone_store;
+uint32      numclients = 0;
+char        errorname[32];
+extern Zone *zone;
+
+npcDecayTimes_Struct  npcCorpseDecayTimes[100];
+TitleManager          title_manager;
+QueryServ             *QServ        = 0;
+TaskManager           *task_manager = 0;
+NpcScaleManager       *npc_scale_manager;
+QuestParserCollection *parse        = 0;
+EQEmuLogSys           LogSys;
+ZoneEventScheduler    event_scheduler;
+WorldContentService   content_service;
+PathManager           path_manager;
+
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
@@ -122,10 +126,7 @@ int main(int argc, char** argv) {
 
 	set_exception_handler();
 
-	std::string eqemu_server_path = File::FindEqemuConfigPath();
-
-	LogInfo("EQEmu Server path is [{}]", eqemu_server_path);
-	std::exit(0);
+	path_manager.LoadPaths();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {

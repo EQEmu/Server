@@ -28,7 +28,7 @@ void CatchSignal(int sig_num)
 
 void LoadDatabaseConnection()
 {
-	LogInfo("MySQL Database Init");
+	LogInfo("MySQL Database LoadPaths");
 
 	server.db = new Database(
 		server.config.GetVariableString("database", "user", "root"),
@@ -43,7 +43,7 @@ void LoadDatabaseConnection()
 void LoadServerConfig()
 {
 	server.config = EQ::JsonConfigFile::Load("login.json");
-	LogInfo("Config System Init");
+	LogInfo("Config System LoadPaths");
 
 	/**
 	 * Worldservers
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
 
-	LogInfo("Logging System Init");
+	LogInfo("Logging System LoadPaths");
 
 	if (argc == 1) {
 		LogSys.LoadLogSettingsDefaults();
@@ -213,7 +213,7 @@ int main(int argc, char **argv)
 	/**
 	 * create server manager
 	 */
-	LogInfo("Server Manager Init");
+	LogInfo("Server Manager LoadPaths");
 	server.server_manager = new ServerManager();
 	if (!server.server_manager) {
 		LogError("Server Manager Failed to Start");
@@ -225,7 +225,7 @@ int main(int argc, char **argv)
 	/**
 	 * create client manager
 	 */
-	LogInfo("Client Manager Init");
+	LogInfo("Client Manager LoadPaths");
 	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
 		LogError("Client Manager Failed to Start");
