@@ -108,3 +108,8 @@ bool EQStreamProxy::CheckState(EQStreamState state) {
 	return false;
 }
 
+OpcodeManager *EQStreamProxy::GetOpcodeManager() const
+{
+	return (*m_opcodes);
+}
+

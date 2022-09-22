@@ -1013,7 +1013,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	LogPacketClientServer(
 		"[{}] [{:#06x}] Size [{}] {}",
 		OpcodeManager::EmuToName(app->GetOpcode()),
-		app->GetOpcode(),
+		eqs->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
 		app->Size(),
 		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 	);

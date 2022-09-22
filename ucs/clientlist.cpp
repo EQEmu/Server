@@ -618,7 +618,7 @@ void Clientlist::Process()
 			LogPacketClientServer(
 				"[{}] [{:#06x}] Size [{}] {}",
 				OpcodeManager::EmuToName(app->GetOpcode()),
-				app->GetOpcode(),
+				(*it)->ClientStream->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
 				app->Size(),
 				(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
 			);
