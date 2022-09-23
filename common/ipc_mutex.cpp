@@ -45,7 +45,7 @@ namespace EQ {
 		imp_ = new Implementation;
 #ifdef _WINDOWS
 		auto Config = EQEmuConfig::get();
-		std::string final_name = fmt::format("{}/EQEmuMutex_{}.lock", path.GetSharedMemoryPath(), name);
+		std::string final_name = fmt::format("{}/EQEmuMutex_{}", Config->SharedMemDir, name);
 
 		imp_->mut_ = CreateMutex(nullptr,
 			FALSE,
