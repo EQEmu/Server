@@ -33,6 +33,9 @@
 #include <sys/stat.h>
 #endif
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 namespace EQ {
 
 	struct MemoryMappedFile::Implementation {
@@ -130,7 +133,7 @@ namespace EQ {
 			EQ_EXCEPT("Shared Memory", "Could not open a file for this shared memory segment.");
 		}
 
-		imp_->mapped_object_ = CreateFileMapping(file,
+		imp_->mapped_object_ = CreateFileMapping(fs::path( filename ).filename().string().c_str(),
 			nullptr,
 			PAGE_READWRITE,
 			0,

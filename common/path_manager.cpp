@@ -5,7 +5,6 @@
 #include "strings.h"
 
 #include <filesystem>
-
 namespace fs = std::filesystem;
 
 inline std::string striptrailingslash(const std::string &file_path)
