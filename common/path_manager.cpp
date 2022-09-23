@@ -20,6 +20,8 @@ void PathManager::LoadPaths()
 {
 	m_server_path = File::FindEqemuConfigPath();
 
+	std::filesystem::current_path(m_server_path);
+
 	LogInfo("[PathManager] server [{}]", m_server_path);
 
 	if (!EQEmuConfig::LoadConfig()) {

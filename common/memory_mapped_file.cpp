@@ -133,7 +133,7 @@ namespace EQ {
 			EQ_EXCEPT("Shared Memory", "Could not open a file for this shared memory segment.");
 		}
 
-		imp_->mapped_object_ = CreateFileMapping(fs::path( filename ).filename().string().c_str(),
+		imp_->mapped_object_ = CreateFileMapping(file,
 			nullptr,
 			PAGE_READWRITE,
 			0,
