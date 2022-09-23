@@ -71,7 +71,7 @@ void PathManager::LoadPaths()
 	}
 
 	// logging path
-	if (File::Exists(fmt::format("{}/{}", m_server_path, c->LogDir))) {
+	if (File::Exists(fs::path{m_server_path + "/" + c->LogDir})) {
 		m_log_path = fs::canonical(fs::path{m_server_path + "/" + c->LogDir});
 	}
 
