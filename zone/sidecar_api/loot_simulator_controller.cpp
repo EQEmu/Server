@@ -1,7 +1,7 @@
 void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::Response &res)
 {
 	int  loottable_id = req.has_param("loottable_id") ? std::stoi(req.get_param_value("loottable_id")) : 4027;
-	int  npc_id       = 32040; // lord nagafen
+	int  npc_id       = req.has_param("npc_id") ? std::stoi(req.get_param_value("npc_id")) : 32040; // lord nagafen
 	auto iterations   = 100;
 	auto log_enabled  = false;
 

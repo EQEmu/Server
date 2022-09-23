@@ -86,6 +86,7 @@
 #include "../common/path_manager.h"
 #include "../common/events/player_event_logs.h"
 
+#include <thread>
 
 ZoneStore           zone_store;
 ClientList          client_list;
@@ -165,6 +166,7 @@ int main(int argc, char **argv)
 	}
 #endif
 
+	std::thread(WorldBoot::BootZoneSidecar).detach();
 	WorldBoot::RegisterLoginservers();
 	WorldBoot::LoadDatabaseConnections();
 	if (!WorldBoot::DatabaseLoadRoutines(argc, argv)) {

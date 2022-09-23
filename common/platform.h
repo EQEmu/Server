@@ -37,7 +37,8 @@ enum EQEmuExePlatform
 	ExePlatformClientImport,
 	ExePlatformClientExport,
 	ExePlatformHC,
-	ExePlatformTests
+	ExePlatformTests,
+	ExePlatformZoneSidecar
 };
 
 void RegisterExecutablePlatform(EQEmuExePlatform p);

@@ -18,6 +18,7 @@ void CatchSidecarSignal(int sig_num)
 
 #include "log_handler.cpp"
 #include "test_controller.cpp"
+#include "map_best_z_controller.cpp"
 #include "loot_simulator_controller.cpp"
 #include "../../common/file_util.h"
 

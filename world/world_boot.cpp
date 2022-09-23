@@ -26,6 +26,7 @@
 #include "../common/ip_util.h"
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
+#include "../common/process.h"
 
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
@@ -665,6 +666,33 @@ void WorldBoot::SendDiscordMessage(int webhook_id, const std::string &message)
 		UCSLink.SendPacket(pack);
 
 		safe_delete(pack);
+
+	}
+}
+bool killed = false;
+
+void CatchSidecarSignal(int sig_num)
+{
+	LogInfo("[SidecarAPI] Caught signal [{}] killing sub-process", sig_num);
+#ifdef _WINDOWS
+	std::system("TASKKILL /F /FI \"WINDOWTITLE eq sidecar:serve-http*\"");
+#else
+	std::system("pkill -f sidecar:serve-http");
+#endif
+
+	killed = true;
+}
+
+void WorldBoot::BootZoneSidecar()
+{
+	LogInfo("Booting zone sidecar");
+
+	std::signal(SIGINT, CatchSidecarSignal);
+	std::signal(SIGTERM, CatchSidecarSignal);
+	std::signal(SIGKILL, CatchSidecarSignal);
+
+	while (!killed) {
+		std::cout << std::system("./bin/zone sidecar:serve-http") << "\n";
 	}
 }
 

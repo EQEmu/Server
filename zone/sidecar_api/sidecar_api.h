@@ -9,6 +9,7 @@ public:
 	static void LogHandler(const httplib::Request &req, const httplib::Response &res);
 	static void TestController(const httplib::Request &req, httplib::Response &res);
 	static void LootSimulatorController(const httplib::Request &req, httplib::Response &res);
+	static void MapBestZController(const httplib::Request &req, httplib::Response &res);
 };
 
 
