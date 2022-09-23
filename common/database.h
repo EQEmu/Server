@@ -113,9 +113,9 @@ public:
 	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const std::string &hacked, const char *zone);
 	bool UpdateName(const char *oldname, const char *newname);
 	bool CopyCharacter(
-		std::string source_character_name,
-		std::string destination_character_name,
-		std::string destination_account_name
+		const std::string& source_character_name,
+		const std::string& destination_character_name,
+		const std::string& destination_account_name
 	);
 
 	/* General Information Queries */
