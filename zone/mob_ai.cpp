@@ -2113,25 +2113,25 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 {
 	// this is wrong, flurry is extra attacks on the current target
 	Mob *target = GetTarget();
-    if (target) {
-        if (IsPet() || IsTempPet() || IsCharmed() || IsAnimation()) {
-            entity_list.MessageCloseString(
-                this,
-                true,
-                200,
-                Chat::PetFlurry,
-                NPC_FLURRY,
-                GetCleanName(),
-                target->GetCleanName());
-        } else {
-            entity_list.MessageCloseString(
-                this,
-                true,
-                200,
-                Chat::NPCFlurry,
-                NPC_FLURRY,
-                GetCleanName(),
-                target->GetCleanName());
+	if (target) {
+		if (IsPet() || IsTempPet() || IsCharmed() || IsAnimation()) {
+			entity_list.MessageCloseString(
+				this,
+				true,
+				200,
+				Chat::PetFlurry,
+				NPC_FLURRY,
+				GetCleanName(),
+				target->GetCleanName());
+		} else {
+			entity_list.MessageCloseString(
+				this,
+				true,
+				200,
+				Chat::NPCFlurry,
+				NPC_FLURRY,
+				GetCleanName(),
+				target->GetCleanName());
 		}
 		
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
