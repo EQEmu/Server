@@ -57,17 +57,18 @@ void PathManager::LoadPaths()
 	}
 
 	// lua mods
-	m_lua_mods_path = fs::path{m_server_path + "/mods"}.string();
+	if (File::Exists(fs::path{ m_server_path + "/mods" }.string())) {
+		m_lua_mods_path = fs::canonical(fs::path{ m_server_path + "/mods" }).string();
+	}
 
 	// patches
-
 	if (File::Exists(fs::path{m_server_path + "/" + c->PatchDir}.string())) {
 		m_patch_path = fs::canonical(fs::path{m_server_path + "/" + c->PatchDir}).string();
 	}
 
 	// shared_memory_path
 	if (File::Exists(fs::path{m_server_path + "/" + c->SharedMemDir}.string())) {
-		m_shared_memory_path = fs::canonical(fs::path{m_server_path + "/" + c->SharedMemDir}).string();
+		m_shared_memory_path = fs::relative(fs::path{ m_server_path + "/" + c->SharedMemDir }).string();
 	}
 
 	// logging path
