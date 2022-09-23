@@ -4,6 +4,10 @@
 #include "eqemu_config.h"
 #include "strings.h"
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 inline std::string striptrailingslash(const std::string &file_path)
 {
 	if (file_path.back() == '/' || file_path.back() == '\\') {
@@ -17,6 +21,8 @@ void PathManager::LoadPaths()
 {
 	m_server_path = File::FindEqemuConfigPath();
 
+	LogInfo("[PathManager] server [{}]", m_server_path);
+
 	if (!EQEmuConfig::LoadConfig()) {
 		LogError("[PathManager] Failed to load eqemu config");
 		return;
@@ -25,68 +31,50 @@ void PathManager::LoadPaths()
 	const auto c = EQEmuConfig::get();
 
 	// maps
-	if (File::Exists(fmt::format("{}/{}", m_server_path, c->MapDir))) {
-		m_maps_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->MapDir));
+	if (File::Exists(fs::path{m_server_path + "/" + c->MapDir})) {
+		m_maps_path = fs::canonical(fs::path{m_server_path + "/" + c->MapDir});
 	}
-	else if (File::Exists(fmt::format("{}/maps", m_server_path))) {
-		m_maps_path = fmt::format("{}/maps", m_server_path);
+	else if (File::Exists(fs::path{m_server_path + "/maps"})) {
+		m_maps_path = fs::canonical(fs::path{m_server_path + "/maps"});
 	}
-	else if (File::Exists(fmt::format("{}/Maps", m_server_path))) {
-		m_maps_path = fmt::format("{}/Maps", m_server_path);
+	else if (File::Exists(fs::path{m_server_path + "/Maps"})) {
+		m_maps_path = fs::canonical(fs::path{m_server_path + "/Maps"});
 	}
 
 	// quests
-	if (File::Exists(fmt::format("{}/{}", m_server_path, c->QuestDir))) {
-		m_quests_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->QuestDir));
-	}
-	else if (File::Exists(fmt::format("{}/quests", m_server_path))) {
-		m_quests_path = fmt::format("{}/quests", m_server_path);
+	if (File::Exists(fs::path{m_server_path + "/" + c->QuestDir})) {
+		m_quests_path = fs::canonical(fs::path{m_server_path + "/" + c->QuestDir});
 	}
 
 	// plugins
-	if (File::Exists(fmt::format("{}/{}", m_server_path, c->PluginDir))) {
-		m_plugins_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->PluginDir));
-	}
-	else if (File::Exists(fmt::format("{}/plugins", m_server_path))) {
-		m_plugins_path = fmt::format("{}/plugins", m_server_path);
+	if (File::Exists(fs::path{m_server_path + "/" + c->PluginDir})) {
+		m_plugins_path = fs::canonical(fs::path{m_server_path + "/" + c->PluginDir});
 	}
 
 	// lua_modules
-	if (File::Exists(fmt::format("{}/{}", m_server_path, c->LuaModuleDir))) {
-		m_lua_modules_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->LuaModuleDir));
-	}
-	else if (File::Exists(fmt::format("{}/lua_modules", m_server_path))) {
-		m_lua_modules_path = fmt::format("{}/lua_modules", m_server_path);
+	if (File::Exists(fs::path{m_server_path + "/" + c->LuaModuleDir})) {
+		m_lua_modules_path = fs::canonical(fs::path{m_server_path + "/" + c->LuaModuleDir});
 	}
 
 	// lua mods
-	m_lua_mods_path = fmt::format("{}/mods", m_server_path);
+	m_lua_mods_path = fs::path{m_server_path + "/mods"};
 
 	// patches
-	if (File::Exists(fmt::format("{}/{}", m_server_path, c->PatchDir))) {
-		m_patch_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->PatchDir));
-	}
-	else if (File::Exists(fmt::format("{}/patches", m_server_path))) {
-		m_patch_path = fmt::format("{}/patches", m_server_path);
+
+	if (File::Exists(fs::path{m_server_path + "/" + c->PatchDir})) {
+		m_patch_path = fs::canonical(fs::path{m_server_path + "/" + c->PatchDir});
 	}
 
 	// shared_memory_path
-	if (File::Exists(fmt::format("{}/{}", m_server_path, c->SharedMemDir))) {
-		m_shared_memory_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->SharedMemDir));
-	}
-	else if (File::Exists(fmt::format("{}/shared_memory", m_server_path))) {
-		m_shared_memory_path = fmt::format("{}/shared_memory", m_server_path);
+	if (File::Exists(fs::path{m_server_path + "/" + c->SharedMemDir})) {
+		m_shared_memory_path = fs::canonical(fs::path{m_server_path + "/" + c->SharedMemDir});
 	}
 
 	// logging path
 	if (File::Exists(fmt::format("{}/{}", m_server_path, c->LogDir))) {
-		m_log_path = fmt::format("{}/{}", m_server_path, striptrailingslash(c->LogDir));
-	}
-	else if (File::Exists(fmt::format("{}/logs", m_server_path))) {
-		m_log_path = fmt::format("{}/logs", m_server_path);
+		m_log_path = fs::canonical(fs::path{m_server_path + "/" + c->LogDir});
 	}
 
-	LogInfo("[PathManager] server [{}]", m_server_path);
 	LogInfo("[PathManager] logs [{}]", m_log_path);
 	LogInfo("[PathManager] lua mods [{}]", m_lua_mods_path);
 	LogInfo("[PathManager] lua_modules [{}]", m_lua_modules_path);

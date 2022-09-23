@@ -21,6 +21,9 @@
 #ifndef EQEMU_FILE_H
 #define EQEMU_FILE_H
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 class File {
 public:

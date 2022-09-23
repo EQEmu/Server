@@ -28,7 +28,6 @@
 #include <dos.h>
 #include <windows.h>
 #include <process.h>
-#include <filesystem>
 #else
 
 #include <unistd.h>
@@ -37,7 +36,9 @@
 #endif
 
 #include <fmt/format.h>
-#include "strings.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 /**
  * @param name
@@ -45,14 +46,7 @@
  */
 bool File::Exists(const std::string &name)
 {
-#ifdef _WIN32
-	std::filesystem::path path(name);
-	return std::filesystem::exists(name);
-#else
-	std::ifstream f(name.c_str());
-
-	return f.good();
-#endif
+	return fs::exists(fs::path{name});
 }
 
 /**
@@ -60,49 +54,23 @@ bool File::Exists(const std::string &name)
  */
 void File::Makedir(const std::string &directory_name)
 {
-#ifdef _WINDOWS
-	struct _stat st;
-	if (_stat(directory_name.c_str(), &st) == 0) // exists
-		return;
-	_mkdir(directory_name.c_str());
-#else
-	struct stat st{};
-	if (stat(directory_name.c_str(), &st) == 0) { // exists
-		return;
-	}
-	::mkdir(directory_name.c_str(), 0755);
-#endif
-}
-
-std::string pop_parent_path(const std::string& path) {
-	std::string new_path = Strings::Replace(path, "\\", "/");
-	std::vector<std::string> paths = Strings::Split(new_path, "/");
-
-	paths.pop_back();
-
-	new_path = Strings::Join(paths, "/");
-
-#ifdef _WINDOWS
-	new_path = Strings::Replace(path, "/", "\\");
-#endif
-
-	return new_path;
+	fs::create_directory(directory_name);
+	fs::permissions(directory_name, fs::perms::owner_all);
 }
 
 std::string File::FindEqemuConfigPath()
 {
-	std::string path = fmt::format("{}/eqemu_config.json", File::GetCwd());
-	if (File::Exists(path)) {
-		return fmt::format("{}", File::GetCwd());
+	if (File::Exists(fs::path{File::GetCwd() + "/eqemu_config.json"})) {
+		return File::GetCwd();
 	}
-	else if (File::Exists(fmt::format("{}/../eqemu_config.json", File::GetCwd()))) {
-		return fmt::format("{}", pop_parent_path(File::GetCwd()));
+	else if (File::Exists(fs::path{File::GetCwd() + "/../eqemu_config.json"})) {
+		return canonical(fs::path{File::GetCwd() + "/../"});
 	}
-	else if (File::Exists(fmt::format("{}/login.json", File::GetCwd()))) {
-		return fmt::format("{}", File::GetCwd());
+	else if (File::Exists(fs::path{File::GetCwd() + "/login.json"})) {
+		return File::GetCwd();
 	}
-	else if (File::Exists(fmt::format("{}/../login.json", File::GetCwd()))) {
-		return fmt::format("{}", pop_parent_path(File::GetCwd()));
+	else if (File::Exists(fs::path{File::GetCwd() + "/../login.json"})) {
+		return canonical(fs::path{File::GetCwd() + "/../"});
 	}
 
 	return {};
@@ -110,12 +78,5 @@ std::string File::FindEqemuConfigPath()
 
 std::string File::GetCwd()
 {
-	char        buffer[100];
-	char        *answer = getcwd(buffer, sizeof(buffer));
-	std::string s_cwd;
-	if (answer) {
-		s_cwd = answer;
-	}
-
-	return s_cwd;
+	return fs::current_path();
 }
