@@ -35,7 +35,7 @@ void PathManager::LoadPaths()
 		m_maps_path = fs::canonical(fs::path{m_server_path + "/" + c->MapDir}).string();
 	}
 	else if (File::Exists(fs::path{m_server_path + "/maps"}.string())) {
-		m_maps_path = fs::canonical(fs::path{m_server_path + "/maps"}.string());
+		m_maps_path = fs::canonical(fs::path{m_server_path + "/maps"}).string();
 	}
 	else if (File::Exists(fs::path{m_server_path + "/Maps"}.string())) {
 		m_maps_path = fs::canonical(fs::path{m_server_path + "/Maps"}).string();
