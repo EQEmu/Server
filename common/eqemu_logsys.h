@@ -378,7 +378,6 @@ private:
 	int                                                                           m_log_platform      = 0;
 	std::string                                                                   m_platform_file_name;
 
-	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message);
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 

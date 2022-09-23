@@ -213,21 +213,6 @@ bool EQEmuLogSys::IsRfc5424LogCategory(uint16 log_category)
 }
 
 /**
- * @param log_category
- * @param in_message
- * @return
- */
-std::string EQEmuLogSys::FormatOutMessageString(
-	uint16 log_category,
-	const std::string &in_message
-)
-{
-	std::string return_string = "[" + GetPlatformName() + "] ";
-
-	return return_string + "[" + Logs::LogCategoryName[log_category] + "] " + in_message;
-}
-
-/**
  * @param debug_level
  * @param log_category
  * @param message
@@ -435,21 +420,34 @@ void EQEmuLogSys::Out(
 		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
 	}
 
+	// remove this when we remove all legacy logs
+	bool ignore_log_legacy_format = (
+		log_category == Logs::Netcode ||
+		log_category == Logs::PacketServerClient ||
+		log_category == Logs::PacketClientServer ||
+		log_category == Logs::PacketServerToServer
+	);
+
+	// remove this when we remove all legacy logs
 	va_list args;
 	va_start(args, message);
-	std::string output_message = strlen(message) > 0 ? vStringFormat(message, args) : message;
+	std::string output_message = !ignore_log_legacy_format ? vStringFormat(message, args) : message;
 	va_end(args);
 
-	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, prefix + output_message);
-
 	if (l.log_to_console_enabled) {
-		EQEmuLogSys::ProcessConsoleMessage(log_category, output_debug_message);
+		EQEmuLogSys::ProcessConsoleMessage(
+			log_category,
+			fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
+		);
 	}
 	if (l.log_to_gmsay_enabled) {
 		m_on_log_gmsay_hook(log_category, output_message);
 	}
 	if (l.log_to_file_enabled) {
-		EQEmuLogSys::ProcessLogWrite(log_category, output_debug_message);
+		EQEmuLogSys::ProcessLogWrite(
+			log_category,
+			fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
+		);
 	}
 	if (l.log_to_discord_enabled && m_on_log_discord_hook) {
 		m_on_log_discord_hook(log_category, log_settings[log_category].discord_webhook_id, output_message);
