@@ -64,13 +64,13 @@ std::string File::FindEqemuConfigPath()
 		return File::GetCwd();
 	}
 	else if (File::Exists(fs::path{File::GetCwd() + "/../eqemu_config.json"})) {
-		return canonical(fs::path{File::GetCwd() + "/../"});
+		return canonical(fs::path{File::GetCwd() + "/../"}).string();
 	}
 	else if (File::Exists(fs::path{File::GetCwd() + "/login.json"})) {
 		return File::GetCwd();
 	}
 	else if (File::Exists(fs::path{File::GetCwd() + "/../login.json"})) {
-		return canonical(fs::path{File::GetCwd() + "/../"});
+		return canonical(fs::path{File::GetCwd() + "/../"}).string();
 	}
 
 	return {};
@@ -78,5 +78,5 @@ std::string File::FindEqemuConfigPath()
 
 std::string File::GetCwd()
 {
-	return fs::current_path();
+	return fs::current_path().string();
 }

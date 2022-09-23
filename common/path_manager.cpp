@@ -32,47 +32,47 @@ void PathManager::LoadPaths()
 
 	// maps
 	if (File::Exists(fs::path{m_server_path + "/" + c->MapDir})) {
-		m_maps_path = fs::canonical(fs::path{m_server_path + "/" + c->MapDir});
+		m_maps_path = fs::canonical(fs::path{m_server_path + "/" + c->MapDir}).string();
 	}
 	else if (File::Exists(fs::path{m_server_path + "/maps"})) {
-		m_maps_path = fs::canonical(fs::path{m_server_path + "/maps"});
+		m_maps_path = fs::canonical(fs::path{m_server_path + "/maps"}.string());
 	}
 	else if (File::Exists(fs::path{m_server_path + "/Maps"})) {
-		m_maps_path = fs::canonical(fs::path{m_server_path + "/Maps"});
+		m_maps_path = fs::canonical(fs::path{m_server_path + "/Maps"}).string();
 	}
 
 	// quests
 	if (File::Exists(fs::path{m_server_path + "/" + c->QuestDir})) {
-		m_quests_path = fs::canonical(fs::path{m_server_path + "/" + c->QuestDir});
+		m_quests_path = fs::canonical(fs::path{m_server_path + "/" + c->QuestDir}).string();
 	}
 
 	// plugins
 	if (File::Exists(fs::path{m_server_path + "/" + c->PluginDir})) {
-		m_plugins_path = fs::canonical(fs::path{m_server_path + "/" + c->PluginDir});
+		m_plugins_path = fs::canonical(fs::path{m_server_path + "/" + c->PluginDir}).string();
 	}
 
 	// lua_modules
 	if (File::Exists(fs::path{m_server_path + "/" + c->LuaModuleDir})) {
-		m_lua_modules_path = fs::canonical(fs::path{m_server_path + "/" + c->LuaModuleDir});
+		m_lua_modules_path = fs::canonical(fs::path{m_server_path + "/" + c->LuaModuleDir}).string();
 	}
 
 	// lua mods
-	m_lua_mods_path = fs::path{m_server_path + "/mods"};
+	m_lua_mods_path = fs::path{m_server_path + "/mods"}.string();
 
 	// patches
 
 	if (File::Exists(fs::path{m_server_path + "/" + c->PatchDir})) {
-		m_patch_path = fs::canonical(fs::path{m_server_path + "/" + c->PatchDir});
+		m_patch_path = fs::canonical(fs::path{m_server_path + "/" + c->PatchDir}).string();
 	}
 
 	// shared_memory_path
 	if (File::Exists(fs::path{m_server_path + "/" + c->SharedMemDir})) {
-		m_shared_memory_path = fs::canonical(fs::path{m_server_path + "/" + c->SharedMemDir});
+		m_shared_memory_path = fs::canonical(fs::path{m_server_path + "/" + c->SharedMemDir}).string();
 	}
 
 	// logging path
 	if (File::Exists(fs::path{m_server_path + "/" + c->LogDir})) {
-		m_log_path = fs::canonical(fs::path{m_server_path + "/" + c->LogDir});
+		m_log_path = fs::canonical(fs::path{m_server_path + "/" + c->LogDir}).string();
 	}
 
 	LogInfo("[PathManager] logs [{}]", m_log_path);
