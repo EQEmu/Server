@@ -60,16 +60,16 @@ void File::Makedir(const std::string &directory_name)
 
 std::string File::FindEqemuConfigPath()
 {
-	if (File::Exists(fs::path{File::GetCwd() + "/eqemu_config.json"})) {
+	if (File::Exists(fs::path{File::GetCwd() + "/eqemu_config.json"}.string())) {
 		return File::GetCwd();
 	}
-	else if (File::Exists(fs::path{File::GetCwd() + "/../eqemu_config.json"})) {
+	else if (File::Exists(fs::path{File::GetCwd() + "/../eqemu_config.json"}.string())) {
 		return canonical(fs::path{File::GetCwd() + "/../"}).string();
 	}
-	else if (File::Exists(fs::path{File::GetCwd() + "/login.json"})) {
+	else if (File::Exists(fs::path{File::GetCwd() + "/login.json"}.string())) {
 		return File::GetCwd();
 	}
-	else if (File::Exists(fs::path{File::GetCwd() + "/../login.json"})) {
+	else if (File::Exists(fs::path{File::GetCwd() + "/../login.json"}.string())) {
 		return canonical(fs::path{File::GetCwd() + "/../"}).string();
 	}
 
