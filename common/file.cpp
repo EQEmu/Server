@@ -28,6 +28,7 @@
 #include <dos.h>
 #include <windows.h>
 #include <process.h>
+#include <filesystem>
 #else
 
 #include <unistd.h>
@@ -44,9 +45,14 @@
  */
 bool File::Exists(const std::string &name)
 {
+#ifdef _WIN32
+	std::filesystem::path path(name);
+	return std::filesystem::exists(name);
+#else
 	std::ifstream f(name.c_str());
 
 	return f.good();
+#endif
 }
 
 /**
