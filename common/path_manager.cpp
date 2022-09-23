@@ -33,38 +33,38 @@ void PathManager::LoadPaths()
 
 	// maps
 	if (File::Exists(fs::path{m_server_path + "/" + c->MapDir}.string())) {
-		m_maps_path = fs::canonical(fs::path{m_server_path + "/" + c->MapDir}).string();
+		m_maps_path = fs::relative(fs::path{m_server_path + "/" + c->MapDir}).string();
 	}
 	else if (File::Exists(fs::path{m_server_path + "/maps"}.string())) {
-		m_maps_path = fs::canonical(fs::path{m_server_path + "/maps"}).string();
+		m_maps_path = fs::relative(fs::path{m_server_path + "/maps"}).string();
 	}
 	else if (File::Exists(fs::path{m_server_path + "/Maps"}.string())) {
-		m_maps_path = fs::canonical(fs::path{m_server_path + "/Maps"}).string();
+		m_maps_path = fs::relative(fs::path{m_server_path + "/Maps"}).string();
 	}
 
 	// quests
 	if (File::Exists(fs::path{m_server_path + "/" + c->QuestDir}.string())) {
-		m_quests_path = fs::canonical(fs::path{m_server_path + "/" + c->QuestDir}).string();
+		m_quests_path = fs::relative(fs::path{m_server_path + "/" + c->QuestDir}).string();
 	}
 
 	// plugins
 	if (File::Exists(fs::path{m_server_path + "/" + c->PluginDir}.string())) {
-		m_plugins_path = fs::canonical(fs::path{m_server_path + "/" + c->PluginDir}).string();
+		m_plugins_path = fs::relative(fs::path{m_server_path + "/" + c->PluginDir}).string();
 	}
 
 	// lua_modules
 	if (File::Exists(fs::path{m_server_path + "/" + c->LuaModuleDir}.string())) {
-		m_lua_modules_path = fs::canonical(fs::path{m_server_path + "/" + c->LuaModuleDir}).string();
+		m_lua_modules_path = fs::relative(fs::path{m_server_path + "/" + c->LuaModuleDir}).string();
 	}
 
 	// lua mods
 	if (File::Exists(fs::path{ m_server_path + "/mods" }.string())) {
-		m_lua_mods_path = fs::canonical(fs::path{ m_server_path + "/mods" }).string();
+		m_lua_mods_path = fs::relative(fs::path{ m_server_path + "/mods" }).string();
 	}
 
 	// patches
 	if (File::Exists(fs::path{m_server_path + "/" + c->PatchDir}.string())) {
-		m_patch_path = fs::canonical(fs::path{m_server_path + "/" + c->PatchDir}).string();
+		m_patch_path = fs::relative(fs::path{m_server_path + "/" + c->PatchDir}).string();
 	}
 
 	// shared_memory_path
@@ -74,7 +74,7 @@ void PathManager::LoadPaths()
 
 	// logging path
 	if (File::Exists(fs::path{m_server_path + "/" + c->LogDir}.string())) {
-		m_log_path = fs::canonical(fs::path{m_server_path + "/" + c->LogDir}).string();
+		m_log_path = fs::relative(fs::path{m_server_path + "/" + c->LogDir}).string();
 	}
 
 	LogInfo("[PathManager] logs [{}]", m_log_path);
