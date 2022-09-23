@@ -429,10 +429,13 @@ void EQEmuLogSys::Out(
 	);
 
 	// remove this when we remove all legacy logs
-	va_list args;
-	va_start(args, message);
-	std::string output_message = !ignore_log_legacy_format ? vStringFormat(message, args) : message;
-	va_end(args);
+	std::string output_message = message;
+	if (!ignore_log_legacy_format) {
+		va_list args;
+		va_start(args, message);
+		output_message = vStringFormat(message, args);
+		va_end(args);
+	}
 
 	if (l.log_to_console_enabled) {
 		EQEmuLogSys::ProcessConsoleMessage(
