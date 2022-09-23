@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include "database.h"
 #include "extprofile.h"
+#include "path_manager.h"
 
 #include <iomanip>
 #include <iostream>
@@ -35,7 +36,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define strcasecmp	_stricmp
 #else
 #include "unix.h"
-#include "path_manager.h"
 #include <netinet/in.h>
 #include <sys/time.h>
 #endif
