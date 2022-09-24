@@ -1138,15 +1138,16 @@ public:
 			);
 		}
 	}
-	inline void UpdateTasksForItem(
-		TaskActivityType activity_type,
-		NPC* npc,
-		int item_id,
-		int count = 1
-	)
+	inline void UpdateTasksForItem(TaskActivityType type, int item_id, int count = 1)
 	{
 		if (task_state) {
-			task_state->UpdateTasksForItem(this, activity_type, npc, item_id, count);
+			task_state->UpdateTasksForItem(this, type, item_id, count);
+		}
+	}
+	inline void UpdateTasksOnLoot(Corpse* corpse, int item_id, int count = 1)
+	{
+		if (task_state) {
+			task_state->UpdateTasksOnLoot(this, corpse, item_id, count);
 		}
 	}
 	inline void UpdateTasksOnExplore(const glm::vec4& pos)

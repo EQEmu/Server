@@ -367,7 +367,7 @@ void Client::GoFish()
 					PushItemOnCursor(*inst);
 					SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 					if (RuleB(TaskSystem, EnableTaskSystem))
-						UpdateTasksForItem(TaskActivityType::Fish, nullptr, food_id);
+						UpdateTasksForItem(TaskActivityType::Fish, food_id);
 
 					safe_delete(inst);
 					inst = m_inv.GetItem(EQ::invslot::slotCursor);
@@ -486,7 +486,7 @@ void Client::ForageItem(bool guarantee) {
 				PushItemOnCursor(*inst);
 				SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 				if(RuleB(TaskSystem, EnableTaskSystem)) {
-					UpdateTasksForItem(TaskActivityType::Forage, nullptr, foragedfood);
+					UpdateTasksForItem(TaskActivityType::Forage, foragedfood);
 				}
 
 				safe_delete(inst);
