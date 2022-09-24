@@ -2605,7 +2605,7 @@ luabind::scope lua_register_client() {
 	.def("AddPlatinum", (void(Lua_Client::*)(uint32,bool))&Lua_Client::AddPlatinum)
 	.def("AddPVPPoints", (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints)
 	.def("AddSkill", (void(Lua_Client::*)(int,int))&Lua_Client::AddSkill)
-	.def("Admin", (int(Lua_Client::*)(void))&Lua_Client::Admin)
+	.def("Admin", (int16(Lua_Client::*)(void))&Lua_Client::Admin)
 	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)
