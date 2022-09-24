@@ -409,7 +409,7 @@ std::string Perl_Client_AccountName(Client* self) // @categories Account and Cha
 	return self->AccountName();
 }
 
-int Perl_Client_Admin(Client* self) // @categories Account and Character
+int16 Perl_Client_Admin(Client* self) // @categories Account and Character
 {
 	return self->Admin();
 }
