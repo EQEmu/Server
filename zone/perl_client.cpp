@@ -1227,10 +1227,15 @@ void Perl_Client_ReadBook(Client* self, const char* book_text, uint8 type) // @c
 	self->QuestReadBook(book_text, type);
 }
 
-void Perl_Client_SetGMStatus(Client* self, int new_status) // @categories Script Utility
+void Perl_Client_SetGMStatus(Client* self, int16 new_status) // @categories Script Utility
 {
 	self->SetGMStatus(new_status);
 	self->UpdateAdmin(true);
+}
+
+int16 Perl_Client_GetGMStatus(Client* self) // @categories Account and Character
+{
+	return self->Admin();
 }
 
 void Perl_Client_UpdateGroupAAs(Client* self, int points, uint32 type) // @categories Alternative Advancement, Group
@@ -2616,6 +2621,7 @@ void perl_register_client()
 	package.add("GetFreeSpellBookSlot", (int(*)(Client*))&Perl_Client_GetFreeSpellBookSlot);
 	package.add("GetFreeSpellBookSlot", (int(*)(Client*, uint32))&Perl_Client_GetFreeSpellBookSlot);
 	package.add("GetGM", &Perl_Client_GetGM);
+	package.add("GetGMStatus", &Perl_Client_GetGMStatus);
 	package.add("GetGroup", &Perl_Client_GetGroup);
 	package.add("GetGroupPoints", &Perl_Client_GetGroupPoints);
 	package.add("GetHorseId", &Perl_Client_GetHorseId);

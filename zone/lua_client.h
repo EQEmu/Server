@@ -136,7 +136,7 @@ public:
 	int GetRawItemAC();
 	uint32 AccountID();
 	const char *AccountName();
-	int Admin();
+	int16 Admin();
 	uint32 CharacterID();
 	int GuildRank();
 	uint32 GuildID();
@@ -420,7 +420,8 @@ public:
 	int CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity);
-	void SetGMStatus(uint32 newStatus);
+	void SetGMStatus(int16 new_status);
+	int16 GetGMStatus();
 	void AddItem(luabind::object item_table);
 	int CountAugmentEquippedByID(uint32 item_id);
 	int CountItemEquippedByID(uint32 item_id);
