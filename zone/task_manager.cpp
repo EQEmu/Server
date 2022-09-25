@@ -212,11 +212,7 @@ bool TaskManager::LoadTasks(int single_task)
 		activity_data->spell_list           = task_activity.spell_list;
 		activity_data->spell_id             = Strings::IsNumber(task_activity.spell_list) ? std::stoi(task_activity.spell_list) : 0; // for older clients
 		activity_data->description_override = task_activity.description_override;
-		activity_data->npc_id               = task_activity.npc_id;
-		activity_data->npc_goal_id          = task_activity.npc_goal_id;
 		activity_data->npc_match_list       = task_activity.npc_match_list;
-		activity_data->item_id              = task_activity.item_id;
-		activity_data->item_goal_id         = task_activity.item_goal_id;
 		activity_data->item_id_list         = task_activity.item_id_list;
 		activity_data->dz_switch_id         = task_activity.dz_switch_id;
 		activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;

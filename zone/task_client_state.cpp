@@ -492,19 +492,6 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 		return false;
 	}
 
-	// item is only checked for updates that provide an item (unlike npc which may be null for non-npcs)
-	if (activity.item_id != 0 && filter.item_id != 0 && activity.item_id != filter.item_id)
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item id filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
-	if (activity.npc_id != 0 && (!filter.npc || activity.npc_id != filter.npc->GetNPCTypeID()))
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc id filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
 	if (!activity.CheckZone(zone->GetZoneID(), zone->GetInstanceVersion()))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed zone filter", client->GetName(), task_id, client_activity.activity_id);
@@ -523,24 +510,11 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 		}
 	}
 
-	if (activity.item_goal_id != 0 && filter.item_id != 0 &&
-	    !task_manager->m_goal_list_manager.IsInList(activity.item_goal_id, filter.item_id))
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item goallist filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
+	// item is only checked for updates that provide an item to check (unlike npc which may be null for non-npcs)
 	if (!activity.item_id_list.empty() && filter.item_id != 0 &&
 	    !TaskGoalListManager::IsInMatchList(activity.item_id_list, std::to_string(filter.item_id)))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item match filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
-	if (activity.npc_goal_id != 0 && (!filter.npc ||
-	    !task_manager->m_goal_list_manager.IsInList(activity.npc_goal_id, filter.npc->GetNPCTypeID())))
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc goallist filter", client->GetName(), task_id, client_activity.activity_id);
 		return false;
 	}
 

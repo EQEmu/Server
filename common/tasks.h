@@ -77,11 +77,7 @@ struct ActivityInformation {
 	int              spell_id; // older clients, first id from above
 	TaskMethodType   goal_method;
 	int              goal_count;
-	uint32_t         npc_id;
-	uint32_t         npc_goal_id;
 	std::string      npc_match_list; // delimited by '|' for partial name matches but also supports ids
-	uint32_t         item_id;
-	uint32_t         item_goal_id;
 	std::string      item_id_list; // delimited by '|' to support multiple item ids
 	int              dz_switch_id;
 	float            min_x;
