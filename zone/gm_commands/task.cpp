@@ -191,12 +191,7 @@ void command_task(Client *c, const Seperator *sep)
 		return;
 	} else if (is_reload) {
 		if (arguments >= 2) {
-			if (!strcasecmp(sep->arg[2], "lists")) {
-				c->Message(Chat::Yellow, "Attempting to reload goal lists.");
-				worldserver.SendReloadTasks(RELOADTASKGOALLISTS);
-				c->Message(Chat::Yellow, "Successfully reloaded goal lists.");
-				return;
-			} else if (!strcasecmp(sep->arg[2], "sets")) {
+			if (!strcasecmp(sep->arg[2], "sets")) {
 				c->Message(Chat::Yellow, "Attempting to reload task sets.");
 				worldserver.SendReloadTasks(RELOADTASKSETS);
 				c->Message(Chat::Yellow, "Successfully reloaded task sets.");

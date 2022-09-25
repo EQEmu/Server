@@ -207,7 +207,6 @@ SET(repositories
     repositories/base/base_friends_repository.h
     repositories/base/base_global_loot_repository.h
     repositories/base/base_gm_ips_repository.h
-    repositories/base/base_goallists_repository.h
     repositories/base/base_graveyard_repository.h
     repositories/base/base_ground_spawns_repository.h
     repositories/base/base_group_id_repository.h
@@ -384,7 +383,6 @@ SET(repositories
     repositories/friends_repository.h
     repositories/global_loot_repository.h
     repositories/gm_ips_repository.h
-    repositories/goallists_repository.h
     repositories/graveyard_repository.h
     repositories/ground_spawns_repository.h
     repositories/group_id_repository.h

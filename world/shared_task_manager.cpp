@@ -1287,13 +1287,13 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 	}
 
 	// check if any party member's minimum level is too low (pre-2014 this was average level)
-	if (task.minlevel > 0 && request.lowest_level < task.minlevel) {
+	if (task.min_level > 0 && request.lowest_level < task.min_level) {
 		client_list.SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_LOW));
 		return false;
 	}
 
 	// check if any party member's maximum level is too high (pre-2014 this was average level)
-	if (task.maxlevel > 0 && request.highest_level > task.maxlevel) {
+	if (task.max_level > 0 && request.highest_level > task.max_level) {
 		client_list.SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_HIGH));
 		return false;
 	}
@@ -1472,13 +1472,13 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 	}
 
 	// check if player is below minimum level of task (pre-2014 this was average level)
-	if (s->GetTaskData().minlevel > 0 && cle->level() < s->GetTaskData().minlevel) {
+	if (s->GetTaskData().min_level > 0 && cle->level() < s->GetTaskData().min_level) {
 		SendLeaderMessage(s, Chat::Red, TaskStr::Get(TaskStr::CANT_ADD_MIN_LEVEL));
 		allow_invite = false;
 	}
 
 	// check if player is above maximum level of task (pre-2014 this was average level)
-	if (s->GetTaskData().maxlevel > 0 && cle->level() > s->GetTaskData().maxlevel) {
+	if (s->GetTaskData().max_level > 0 && cle->level() > s->GetTaskData().max_level) {
 		SendLeaderMessage(s, Chat::Red, TaskStr::Get(TaskStr::CANT_ADD_MAX_LEVEL));
 		allow_invite = false;
 	}

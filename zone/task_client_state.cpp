@@ -512,7 +512,7 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 
 	// item is only checked for updates that provide an item to check (unlike npc which may be null for non-npcs)
 	if (!activity.item_id_list.empty() && filter.item_id != 0 &&
-	    !TaskGoalListManager::IsInMatchList(activity.item_id_list, std::to_string(filter.item_id)))
+	    !Tasks::IsInMatchList(activity.item_id_list, std::to_string(filter.item_id)))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item match filter", client->GetName(), task_id, client_activity.activity_id);
 		return false;
@@ -520,9 +520,9 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 
 	// npc filter supports both npc names and ids in match lists
 	if (!activity.npc_match_list.empty() && (!filter.npc ||
-	    (!TaskGoalListManager::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetName()) &&
-	     !TaskGoalListManager::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetCleanName()) &&
-	     !TaskGoalListManager::IsInMatchList(activity.npc_match_list, std::to_string(filter.npc->GetNPCTypeID())))))
+	    (!Tasks::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetName()) &&
+	     !Tasks::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetCleanName()) &&
+	     !Tasks::IsInMatchList(activity.npc_match_list, std::to_string(filter.npc->GetNPCTypeID())))))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc match filter", client->GetName(), task_id, client_activity.activity_id);
 		return false;
@@ -979,33 +979,13 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 	const EQ::ItemData *item_data;
 	std::vector<int>   reward_list;
 
-	switch (task_information->reward_method) {
-		case METHODSINGLEID: {
-			if (task_information->reward_id) {
-				int16_t slot = client->GetInv().FindFreeSlot(false, true);
-				client->SummonItem(task_information->reward_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
-				item_data = database.GetItem(task_information->reward_id);
-				if (item_data) {
-					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
-				}
-			}
-			break;
-		}
-		case METHODLIST: {
-			reward_list = task_manager->m_goal_list_manager.GetListContents(task_information->reward_id);
-			for (int item_id : reward_list) {
-				int16_t slot = client->GetInv().FindFreeSlot(false, true);
-				client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
-				item_data = database.GetItem(item_id);
-				if (item_data) {
-					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
-				}
-			}
-			break;
-		}
-		default: {
-			// Nothing special done for METHODQUEST
-			break;
+	for (auto &i: Strings::Split("|", task_information->reward_id_list)) {
+		auto    item_id = std::stoi(i);
+		int16_t slot    = client->GetInv().FindFreeSlot(false, true);
+		client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
+		item_data = database.GetItem(item_id);
+		if (item_data) {
+			client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
 		}
 	}
 

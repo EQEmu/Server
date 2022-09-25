@@ -3,7 +3,6 @@
 
 #include "tasks.h"
 #include "task_client_state.h"
-#include "task_goal_list_manager.h"
 #include "../common/types.h"
 #include "../common/repositories/character_tasks_repository.h"
 #include <list>
@@ -20,10 +19,9 @@ class TaskManager {
 public:
 	int GetActivityCount(int task_id);
 	bool LoadTasks(int single_task = 0);
-	void ReloadGoalLists();
 	bool LoadTaskSets();
-	bool LoadClientState(Client *client, ClientTaskState *client_task_state);
-	bool SaveClientState(Client *client, ClientTaskState *client_task_state);
+	bool LoadClientState(Client *client, ClientTaskState *cts);
+	bool SaveClientState(Client *client, ClientTaskState *cts);
 	void SendTaskSelector(Client* client, Mob* mob, const std::vector<int>& tasks);
 	bool ValidateLevel(int task_id, int player_level);
 	std::string GetTaskName(uint32 task_id);
@@ -47,7 +45,7 @@ public:
 		int client_task_index,
 		bool task_complete = false
 	);
-	void SendCompletedTasksToClient(Client *c, ClientTaskState *client_task_state);
+	void SendCompletedTasksToClient(Client *c, ClientTaskState *cts);
 	int FirstTaskInSet(int task_set);
 	int LastTaskInSet(int task_set);
 	int NextTaskInSet(int task_set, int task_id);
@@ -69,8 +67,7 @@ public:
 	}
 
 private:
-	TaskGoalListManager  m_goal_list_manager;
-	std::vector<int>     m_task_sets[MAXTASKSETS];
+	std::vector<int>                              m_task_sets[MAXTASKSETS];
 	std::unordered_map<uint32_t, TaskInformation> m_task_data;
 	void SendActiveTaskDescription(
 		Client *client,
