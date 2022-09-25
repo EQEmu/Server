@@ -3207,6 +3207,8 @@ void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
 		return;
 	if (GetFilter(FilterDamageShields) == FilterHide && type == Chat::DamageShield)
 		return;
+	if (GetFilter(FilterFocusEffects) == FilterHide && type == Chat::FocusEffect)
+		return;
 
 	if (type == Chat::Emote)
 		type = 4;
