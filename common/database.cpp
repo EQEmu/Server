@@ -2199,9 +2199,9 @@ int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
  * @return
  */
 bool Database::CopyCharacter(
-	std::string source_character_name,
-	std::string destination_character_name,
-	std::string destination_account_name
+	const std::string& source_character_name,
+	const std::string& destination_character_name,
+	const std::string& destination_account_name
 )
 {
 	auto results = QueryDatabase(
@@ -2213,6 +2213,7 @@ bool Database::CopyCharacter(
 
 	if (results.RowCount() == 0) {
 		LogError("No character found with name [{}]", source_character_name);
+		return false;
 	}
 
 	auto        row                 = results.begin();
@@ -2227,6 +2228,7 @@ bool Database::CopyCharacter(
 
 	if (results.RowCount() == 0) {
 		LogError("No account found with name [{}]", destination_account_name);
+		return false;
 	}
 
 	row = results.begin();
