@@ -1127,9 +1127,9 @@ void TaskManager::SendActiveTaskDescription(
 	// is specified). I have been unable to get multiple item links to work.
 	//
 	if (!t->reward_id_list.empty() && t->item_link.empty()) {
-		auto items   = Strings::Split("|", t->reward_id_list);
+		auto items   = Strings::Split(t->reward_id_list, "|");
 		auto item    = items.front();
-		int  item_id = std::stoi(items.front());
+		int  item_id = Strings::IsNumber(items.front()) ? std::stoi(items.front()) : 0;
 
 		if (item_id) {
 			const EQ::ItemData *reward_item = database.GetItem(item_id);
