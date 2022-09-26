@@ -978,9 +978,7 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 
 	const EQ::ItemData *item_data;
 	std::vector<int>   reward_list;
-
-
-
+	
 	for (auto &i: Strings::Split(task_information->reward_id_list, "|")) {
 		auto item_id = Strings::IsNumber(i) ? std::stoi(i) : 0;
 		if (item_id > 0) {
