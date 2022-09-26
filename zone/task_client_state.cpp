@@ -979,14 +979,19 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 	const EQ::ItemData *item_data;
 	std::vector<int>   reward_list;
 
+
+
 	for (auto &i: Strings::Split(task_information->reward_id_list, "|")) {
-		auto    item_id = Strings::IsNumber(i) ? std::stoi(i) : 0;
+		auto item_id = Strings::IsNumber(i) ? std::stoi(i) : 0;
 		if (item_id > 0) {
-			int16_t slot    = client->GetInv().FindFreeSlot(false, true);
-			client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
-			item_data = database.GetItem(item_id);
-			if (item_data) {
-				client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
+			EQ::ItemInstance *inst   = database.CreateItem(item_id);
+			bool             stacked = client->TryStacking(inst);
+			if (!stacked) {
+				int16_t slot = client->GetInv().FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size);
+				client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
+				if (item_data) {
+					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
+				}
 			}
 		}
 	}
