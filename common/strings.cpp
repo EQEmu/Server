@@ -64,7 +64,7 @@ std::vector<std::string> Strings::Split(const std::string &str, const char delim
 }
 
 // this one takes delimiter length into consideration
-std::vector<std::string> Strings::Split(std::string s, std::string delimiter)
+std::vector<std::string> Strings::Split(const std::string& s, const std::string& delimiter)
 {
 	size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
 	std::string              token;
@@ -673,4 +673,8 @@ std::string Strings::ConvertToDigit(int n, std::string suffix)
 	else {
 		return NUM_TO_ENGLISH_X[n] + suffix;
 	}
+}
+bool Strings::Contains(const std::string& subject, const std::string& search)
+{
+	return subject.find(search) != std::string::npos;
 }

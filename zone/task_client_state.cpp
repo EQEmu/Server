@@ -959,61 +959,70 @@ void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInform
 	parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
 }
 
-void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_information, ClientTaskInformation& client_task)
+void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTaskInformation& client_task)
 {
-
-	if (!task_information || !client || client_task.was_rewarded) {
+	if (!ti || !c || client_task.was_rewarded) {
 		return;
 	}
 
 	client_task.was_rewarded = true;
 	client_task.updated = true;
 
-	if (!task_information->completion_emote.empty()) {
-		client->Message(Chat::Yellow, task_information->completion_emote.c_str());
+	if (!ti->completion_emote.empty()) {
+		c->Message(Chat::Yellow, ti->completion_emote.c_str());
 	}
 
 	// TODO: this function should sometimes use QuestReward_Struct and CashReward_Struct
 	// assumption is they use QuestReward_Struct when there is more than 1 thing getting rewarded
-
 	const EQ::ItemData *item_data;
-	std::vector<int>   reward_list;
-	
-	for (auto &i: Strings::Split(task_information->reward_id_list, "|")) {
-		auto item_id = Strings::IsNumber(i) ? std::stoi(i) : 0;
-		if (item_id > 0) {
-			EQ::ItemInstance *inst   = database.CreateItem(item_id);
-			bool             stacked = client->TryStacking(inst);
-			if (!stacked) {
-				int16_t slot = client->GetInv().FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size);
-				client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
-				if (item_data) {
-					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
+	std::vector<int> reward_list;
+	if (ti->reward_method != METHODQUEST) {
+		for (const auto &i: Strings::Split(ti->reward_id_list, "|")) {
+			// handle charges
+			int16  charges = -1;
+			uint32 item_id = Strings::IsNumber(i) ? std::stoi(i) : 0;
+			if (Strings::Contains(i, ",")) {
+				auto s = Strings::Split(i, ",");
+				if (!s.empty() && s.size() == 2) {
+					item_id = Strings::IsNumber(s[0]) ? std::stoi(s[0]) : 0;
+					charges = Strings::IsNumber(s[1]) ? std::stoi(s[1]) : 0;
+				}
+			}
+
+			if (item_id > 0) {
+				EQ::ItemInstance *inst   = database.CreateItem(item_id, charges);
+				bool             stacked = c->TryStacking(inst);
+				if (!stacked) {
+					int16_t slot = c->GetInv().FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size);
+					c->SummonItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, slot);
+					if (item_data) {
+						c->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
+					}
 				}
 			}
 		}
 	}
 
 	// just use normal NPC faction ID stuff
-	if (task_information->faction_reward && task_information->faction_amount == 0) {
-		client->SetFactionLevel(
-			client->CharacterID(),
-			task_information->faction_reward,
-			client->GetBaseClass(),
-			client->GetBaseRace(),
-			client->GetDeity()
+	if (ti->faction_reward && ti->faction_amount == 0) {
+		c->SetFactionLevel(
+			c->CharacterID(),
+			ti->faction_reward,
+			c->GetBaseClass(),
+			c->GetBaseRace(),
+			c->GetDeity()
 		);
-	} else if (task_information->faction_reward != 0 && task_information->faction_amount != 0) {
-		client->RewardFaction(
-			task_information->faction_reward,
-			task_information->faction_amount
+	} else if (ti->faction_reward != 0 && ti->faction_amount != 0) {
+		c->RewardFaction(
+			ti->faction_reward,
+			ti->faction_amount
 		);
 	}
 
-	if (task_information->cash_reward) {
+	if (ti->cash_reward) {
 		int platinum, gold, silver, copper;
 
-		copper = task_information->cash_reward;
+		copper = ti->cash_reward;
 
 		platinum = copper / 1000;
 		copper   = copper - (platinum * 1000);
@@ -1022,11 +1031,11 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 		silver   = copper / 10;
 		copper   = copper - (silver * 10);
 
-		client->CashReward(copper, silver, gold, platinum);
+		c->CashReward(copper, silver, gold, platinum);
 	}
-	int32 experience_reward = task_information->experience_reward;
+	int32 experience_reward = ti->experience_reward;
 	if (experience_reward > 0) {
-		client->AddEXP(experience_reward);
+		c->AddEXP(experience_reward);
 	}
 	if (experience_reward < 0) {
 		uint32 pos_reward = experience_reward * -1;
@@ -1034,19 +1043,19 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 		if (pos_reward > 100 && pos_reward < 25700) {
 			uint8 max_level   = pos_reward / 100;
 			uint8 exp_percent = pos_reward - (max_level * 100);
-			client->AddLevelBasedExp(exp_percent, max_level);
+			c->AddLevelBasedExp(exp_percent, max_level);
 		}
 	}
 
-	if (task_information->reward_points > 0)
+	if (ti->reward_points > 0)
 	{
-		if (task_information->reward_point_type == AltCurrencyType::RadiantCrystal)
+		if (ti->reward_point_type == AltCurrencyType::RadiantCrystal)
 		{
-			client->AddCrystals(task_information->reward_points, 0);
+			c->AddCrystals(ti->reward_points, 0);
 		}
-		else if (task_information->reward_point_type == AltCurrencyType::EbonCrystal)
+		else if (ti->reward_point_type == AltCurrencyType::EbonCrystal)
 		{
-			client->AddCrystals(0, task_information->reward_points);
+			c->AddCrystals(0, ti->reward_points);
 		}
 	}
 }
