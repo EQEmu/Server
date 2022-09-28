@@ -1360,6 +1360,11 @@ bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ig
 	return self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
 }
 
+void Lua_Client::ResetAlternateAdvancementRank(int aa_id) {
+	Lua_Safe_Call_Void();
+	self->ResetAlternateAdvancementRank(aa_id);
+}
+
 void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z) {
 	Lua_Safe_Call_Void();
 	self->MarkSingleCompassLoc(in_x, in_y, in_z);
@@ -2882,6 +2887,7 @@ luabind::scope lua_register_client() {
 	.def("ResetAA", (void(Lua_Client::*)(void))&Lua_Client::ResetAA)
 	.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
 	.def("ResetAllCastbarCooldowns", (void(Lua_Client::*)(void))&Lua_Client::ResetAllCastbarCooldowns)
+	.def("ResetAlternateAdvancementRank", &Lua_Client::ResetAlternateAdvancementRank)
 	.def("ResetCastbarCooldownBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownBySlot)
 	.def("ResetCastbarCooldownBySpellID", (void(Lua_Client::*)(uint32))&Lua_Client::ResetCastbarCooldownBySpellID)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)

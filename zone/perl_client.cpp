@@ -1328,6 +1328,11 @@ bool Perl_Client_GrantAlternateAdvancementAbility(Client* self, int aa_id, int p
 	return self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
 }
 
+void Perl_Client_ResetAlternateAdvancementRank(Client* self, int aa_id) // @categories Alternative Advancement
+{
+	return self->ResetAlternateAdvancementRank(aa_id);
+}
+
 uint32_t Perl_Client_GetAALevel(Client* self, uint32 aa_skill_id) // @categories Alternative Advancement, Experience and Level
 {
 	return self->GetAA(aa_skill_id);
@@ -2777,6 +2782,7 @@ void perl_register_client()
 	package.add("ResetAA", &Perl_Client_ResetAA);
 	package.add("ResetAllDisciplineTimers", &Perl_Client_ResetAllDisciplineTimers);
 	package.add("ResetAllCastbarCooldowns", &Perl_Client_ResetAllCastbarCooldowns);
+	package.add("ResetAlternateAdvancementRank", &Perl_Client_ResetAlternateAdvancementRank);
 	package.add("ResetCastbarCooldownBySlot", &Perl_Client_ResetCastbarCooldownBySlot);
 	package.add("ResetCastbarCooldownBySpellID", &Perl_Client_ResetCastbarCooldownBySpellID);
 	package.add("ResetDisciplineTimer", &Perl_Client_ResetDisciplineTimer);
