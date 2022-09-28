@@ -88,10 +88,14 @@ const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
 		(error_unknown ? "true" : "false")
 	);
 
-	backward::StackTrace st;
-	st.load_here(32);
-	backward::Printer p;
-	p.print(st);
+
+	// print stack when invalid input
+	if (zone_id == 0) {
+		backward::StackTrace st;
+		st.load_here(32);
+		backward::Printer p;
+		p.print(st);
+	}
 
 	return nullptr;
 }
