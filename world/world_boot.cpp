@@ -18,7 +18,7 @@
 #include "world_boot.h"
 #include "world_config.h"
 #include "world_event_scheduler.h"
-#include "world_server_command_handler.h"
+#include "world_server_cli.h"
 #include "../common/zone_store.h"
 #include "worlddb.h"
 #include "zonelist.h"
@@ -87,7 +87,7 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
 		LogSys.EnableConsoleLogging();
-		WorldserverCommandHandler::CommandHandler(argc, argv);
+		WorldserverCLI::CommandHandler(argc, argv);
 	}
 
 	return false;

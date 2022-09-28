@@ -88,7 +88,7 @@ union semun {
 #include "dynamic_zone_manager.h"
 #include "expedition_database.h"
 
-#include "world_server_command_handler.h"
+#include "world_server_cli.h"
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/character_task_timers_repository.h"
 #include "../common/zone_store.h"
