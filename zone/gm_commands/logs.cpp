@@ -71,6 +71,11 @@ void command_logs(Client *c, const Seperator *sep)
 				break;
 			}
 
+			bool is_deprecated_category = Strings::Contains(fmt::format("{}", Logs::LogCategoryName[index]), "Deprecated");
+			if (is_deprecated_category) {
+				continue;
+			}
+
 			std::vector<std::string> gmsay;
 			for (int i = 0; i <= 3; i++) {
 				if (i == 2) {

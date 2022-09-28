@@ -629,10 +629,19 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 
 	// Auto inject categories that don't exist in the database...
 	for (int i = Logs::AA; i != Logs::MaxCategoryID; i++) {
-		if (std::find(db_categories.begin(), db_categories.end(), i) == db_categories.end()) {
+
+		bool is_missing_in_database = std::find(db_categories.begin(), db_categories.end(), i) == db_categories.end();
+		bool is_deprecated_category = Strings::Contains(fmt::format("{}", Logs::LogCategoryName[i]), "Deprecated");
+		if (!is_missing_in_database && is_deprecated_category) {
+			LogInfo("Logging category [{}] ({}) is now deprecated, deleting from database", Logs::LogCategoryName[i], i);
+			LogsysCategoriesRepository::DeleteOne(*m_database, i);
+		}
+
+		if (is_missing_in_database && !is_deprecated_category) {
 			LogInfo(
-				"Automatically adding new log category [{0}]",
-				Logs::LogCategoryName[i]
+				"Automatically adding new log category [{}] ({})",
+				Logs::LogCategoryName[i],
+				i
 			);
 
 			auto new_category = LogsysCategoriesRepository::NewEntity();
