@@ -94,7 +94,7 @@ ZoneServer::~ZoneServer() {
 	}
 }
 
-bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_static_zone) {
+bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool in_is_static_zone) {
 	is_booting_up = false;
 
 	std::string zone_short_name = ZoneName(in_zone_id, true);
@@ -114,7 +114,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_stati
 				) :
 				""
 			),
-			is_static_zone ? " (Static)" : ""
+			in_is_static_zone ? " (Static)" : ""
 		);
 	}
 
@@ -130,7 +130,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_stati
 		LSSleepUpdate(GetPrevZoneID());
 	}
 
-	is_static_zone = is_static_zone;
+	is_static_zone = in_is_static_zone;
 
 	strn0cpy(zone_name, zone_short_name.c_str(), sizeof(zone_name));
 	strn0cpy(long_name, zone_long_name.c_str(), sizeof(long_name));
