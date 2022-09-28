@@ -37,7 +37,7 @@ SET(common_sources
     extprofile.cpp
     discord_manager.cpp
     faction.cpp
-    file_util.cpp
+    file.cpp
     guild_base.cpp
     guilds.cpp
     inventory_profile.cpp
@@ -61,6 +61,7 @@ SET(common_sources
     packet_dump.cpp
     packet_dump_file.cpp
     packet_functions.cpp
+    path_manager.cpp
     perl_eqdb.cpp
     perl_eqdb_res.cpp
     proc_launcher.cpp
@@ -207,7 +208,6 @@ SET(repositories
     repositories/base/base_friends_repository.h
     repositories/base/base_global_loot_repository.h
     repositories/base/base_gm_ips_repository.h
-    repositories/base/base_goallists_repository.h
     repositories/base/base_graveyard_repository.h
     repositories/base/base_ground_spawns_repository.h
     repositories/base/base_group_id_repository.h
@@ -384,7 +384,6 @@ SET(repositories
     repositories/friends_repository.h
     repositories/global_loot_repository.h
     repositories/gm_ips_repository.h
-    repositories/goallists_repository.h
     repositories/graveyard_repository.h
     repositories/ground_spawns_repository.h
     repositories/group_id_repository.h
@@ -531,7 +530,7 @@ SET(common_headers
     expedition_lockout_timer.h
     extprofile.h
     faction.h
-    file_util.h
+    file.h
     features.h
     fixed_memory_hash_set.h
     fixed_memory_variable_hash_set.h
@@ -567,6 +566,7 @@ SET(common_headers
     packet_dump.h
     packet_dump_file.h
     packet_functions.h
+    path_manager.cpp
     platform.h
     proc_launcher.h
     profanity_manager.h

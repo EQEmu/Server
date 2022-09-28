@@ -213,21 +213,6 @@ bool EQEmuLogSys::IsRfc5424LogCategory(uint16 log_category)
 }
 
 /**
- * @param log_category
- * @param in_message
- * @return
- */
-std::string EQEmuLogSys::FormatOutMessageString(
-	uint16 log_category,
-	const std::string &in_message
-)
-{
-	std::string return_string = "[" + GetPlatformName() + "] ";
-
-	return return_string + "[" + Logs::LogCategoryName[log_category] + "] " + in_message;
-}
-
-/**
  * @param debug_level
  * @param log_category
  * @param message
@@ -423,24 +408,10 @@ void EQEmuLogSys::Out(
 	...
 )
 {
-	bool log_to_console = log_settings[log_category].log_to_console > 0 &&
-						  log_settings[log_category].log_to_console >= debug_level;
-	bool log_to_file    = log_settings[log_category].log_to_file > 0 &&
-						  log_settings[log_category].log_to_file >= debug_level;
-	bool log_to_gmsay   = log_settings[log_category].log_to_gmsay > 0 &&
-						  log_settings[log_category].log_to_gmsay >= debug_level &&
-						  log_category != Logs::LogCategory::Netcode &&
-						  (EQEmuLogSys::m_log_platform == EQEmuExePlatform::ExePlatformZone ||
-						   EQEmuLogSys::m_log_platform == EQEmuExePlatform::ExePlatformWorld);
-	bool log_to_discord = EQEmuLogSys::m_log_platform == EQEmuExePlatform::ExePlatformZone &&
-						  log_settings[log_category].log_to_discord > 0 &&
-						  log_settings[log_category].log_to_discord >= debug_level &&
-						  log_settings[log_category].discord_webhook_id > 0 &&
-						  log_settings[log_category].discord_webhook_id < MAX_DISCORD_WEBHOOK_ID;
+	auto l = GetLogsEnabled(debug_level, log_category);
 
 	// bail out if nothing to log
-	const bool nothing_to_log = !log_to_console && !log_to_file && !log_to_gmsay && !log_to_discord;
-	if (nothing_to_log) {
+	if (!l.log_enabled) {
 		return;
 	}
 
@@ -449,23 +420,39 @@ void EQEmuLogSys::Out(
 		prefix = fmt::format("[{0}::{1}:{2}] ", base_file_name(file), func, line);
 	}
 
-	va_list args;
-	va_start(args, message);
-	std::string output_message = vStringFormat(message, args);
-	va_end(args);
+	// remove this when we remove all legacy logs
+	bool ignore_log_legacy_format = (
+		log_category == Logs::Netcode ||
+		log_category == Logs::PacketServerClient ||
+		log_category == Logs::PacketClientServer ||
+		log_category == Logs::PacketServerToServer
+	);
 
-	std::string output_debug_message = EQEmuLogSys::FormatOutMessageString(log_category, prefix + output_message);
-
-	if (log_to_console) {
-		EQEmuLogSys::ProcessConsoleMessage(log_category, output_debug_message);
+	// remove this when we remove all legacy logs
+	std::string output_message = message;
+	if (!ignore_log_legacy_format) {
+		va_list args;
+		va_start(args, message);
+		output_message = vStringFormat(message, args);
+		va_end(args);
 	}
-	if (log_to_gmsay) {
+
+	if (l.log_to_console_enabled) {
+		EQEmuLogSys::ProcessConsoleMessage(
+			log_category,
+			fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
+		);
+	}
+	if (l.log_to_gmsay_enabled) {
 		m_on_log_gmsay_hook(log_category, output_message);
 	}
-	if (log_to_file) {
-		EQEmuLogSys::ProcessLogWrite(log_category, output_debug_message);
+	if (l.log_to_file_enabled) {
+		EQEmuLogSys::ProcessLogWrite(
+			log_category,
+			fmt::format("[{}] [{}] {}", GetPlatformName(), Logs::LogCategoryName[log_category], prefix + output_message)
+		);
 	}
-	if (log_to_discord && m_on_log_discord_hook) {
+	if (l.log_to_discord_enabled && m_on_log_discord_hook) {
 		m_on_log_discord_hook(log_category, log_settings[log_category].discord_webhook_id, output_message);
 	}
 }
@@ -479,7 +466,7 @@ void EQEmuLogSys::SetCurrentTimeStamp(char *time_stamp)
 	struct tm *time_info;
 	time(&raw_time);
 	time_info = localtime(&raw_time);
-	strftime(time_stamp, 80, "[%m-%d-%Y :: %H:%M:%S]", time_info);
+	strftime(time_stamp, 80, "[%m-%d-%Y %H:%M:%S]", time_info);
 }
 
 /**
@@ -534,37 +521,29 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		LogInfo("Starting File Log [logs/{}_{}.log]", m_platform_file_name.c_str(), getpid());
+		LogInfo("Starting File Log [{}/zone/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
 
-		/**
-		 * Make directory if not exists
-		 */
-		EQEmuLogSys::MakeDirectory("logs/zone");
+		// Make directory if not exists
+		EQEmuLogSys::MakeDirectory(fmt::format("{}/zone", GetLogPath()));
 
-		/**
-		 * Open file pointer
-		 */
+		// Open file pointer
 		process_log.open(
-			StringFormat("logs/zone/%s_%i.log", m_platform_file_name.c_str(), getpid()),
+			fmt::format("{}/zone/{}_{}.log", GetLogPath(), m_platform_file_name, getpid()),
 			std::ios_base::app | std::ios_base::out
 		);
 	}
 	else {
 
-		/**
-		 * All other processes
-		 */
+		// All other processes
 		if (m_platform_file_name.empty()) {
 			return;
 		}
 
-		LogInfo("Starting File Log [logs/{}_{}.log]", m_platform_file_name.c_str(), getpid());
+		LogInfo("Starting File Log [{}/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
 
-		/**
-		 * Open file pointer
-		 */
+		// Open file pointer
 		process_log.open(
-			StringFormat("logs/%s_%i.log", m_platform_file_name.c_str(), getpid()),
+			fmt::format("{}/{}_{}.log", GetLogPath(), m_platform_file_name.c_str(), getpid()),
 			std::ios_base::app | std::ios_base::out
 		);
 	}
@@ -642,10 +621,19 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 
 	// Auto inject categories that don't exist in the database...
 	for (int i = Logs::AA; i != Logs::MaxCategoryID; i++) {
-		if (std::find(db_categories.begin(), db_categories.end(), i) == db_categories.end()) {
+
+		bool is_missing_in_database = std::find(db_categories.begin(), db_categories.end(), i) == db_categories.end();
+		bool is_deprecated_category = Strings::Contains(fmt::format("{}", Logs::LogCategoryName[i]), "Deprecated");
+		if (!is_missing_in_database && is_deprecated_category) {
+			LogInfo("Logging category [{}] ({}) is now deprecated, deleting from database", Logs::LogCategoryName[i], i);
+			LogsysCategoriesRepository::DeleteOne(*m_database, i);
+		}
+
+		if (is_missing_in_database && !is_deprecated_category) {
 			LogInfo(
-				"Automatically adding new log category [{0}]",
-				Logs::LogCategoryName[i]
+				"Automatically adding new log category [{}] ({})",
+				Logs::LogCategoryName[i],
+				i
 			);
 
 			auto new_category = LogsysCategoriesRepository::NewEntity();
@@ -696,13 +684,13 @@ void EQEmuLogSys::InjectTablesIfNotExist()
 				CREATE TABLE discord_webhooks
 				(
 					id INT auto_increment primary key NULL,
-					webhook_name varchar(100) NULL,
-					webhook_url varchar(255) NULL,
-					created_at DATETIME NULL,
-					deleted_at DATETIME NULL
-				) ENGINE=InnoDB
-					DEFAULT CHARSET=utf8mb4
-					COLLATE=utf8mb4_general_ci;
+				webhook_name varchar(100) NULL,
+				webhook_url varchar(255) NULL,
+				created_at DATETIME NULL,
+				deleted_at DATETIME NULL
+			) ENGINE=InnoDB
+				DEFAULT CHARSET=utf8mb4
+				COLLATE=utf8mb4_general_ci;
 			)
 		);
 	}
@@ -713,15 +701,15 @@ void EQEmuLogSys::InjectTablesIfNotExist()
 		m_database->QueryDatabase(
 			SQL(
 				CREATE TABLE `logsys_categories` (
-					`log_category_id` int(11) NOT NULL,
-					`log_category_description` varchar(150) DEFAULT NULL,
-					`log_to_console` smallint(11) DEFAULT 0,
-					`log_to_file` smallint(11) DEFAULT 0,
-					`log_to_gmsay` smallint(11) DEFAULT 0,
-					`log_to_discord` smallint(11) DEFAULT 0,
-					`discord_webhook_id` int(11) DEFAULT 0,
-					PRIMARY KEY (`log_category_id`)
-				) ENGINE=InnoDB DEFAULT CHARSET=latin1
+				`log_category_id` int(11) NOT NULL,
+				`log_category_description` varchar(150) DEFAULT NULL,
+				`log_to_console` smallint(11) DEFAULT 0,
+				`log_to_file` smallint(11) DEFAULT 0,
+				`log_to_gmsay` smallint(11) DEFAULT 0,
+				`log_to_discord` smallint(11) DEFAULT 0,
+				`discord_webhook_id` int(11) DEFAULT 0,
+				PRIMARY KEY (`log_category_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1
 			)
 		);
 	}
@@ -730,5 +718,46 @@ void EQEmuLogSys::InjectTablesIfNotExist()
 const EQEmuLogSys::DiscordWebhooks *EQEmuLogSys::GetDiscordWebhooks() const
 {
 	return m_discord_webhooks;
+}
+
+EQEmuLogSys::LogEnabled EQEmuLogSys::GetLogsEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category)
+{
+	auto e = LogEnabled{};
+
+	e.log_to_console_enabled = log_settings[log_category].log_to_console > 0 &&
+							   log_settings[log_category].log_to_console >= debug_level;
+	e.log_to_file_enabled    = log_settings[log_category].log_to_file > 0 &&
+							   log_settings[log_category].log_to_file >= debug_level;
+	e.log_to_gmsay_enabled   = log_settings[log_category].log_to_gmsay > 0 &&
+							   log_settings[log_category].log_to_gmsay >= debug_level &&
+							   log_category != Logs::LogCategory::Netcode &&
+							   (EQEmuLogSys::m_log_platform == EQEmuExePlatform::ExePlatformZone ||
+								EQEmuLogSys::m_log_platform == EQEmuExePlatform::ExePlatformWorld);
+	e.log_to_discord_enabled = EQEmuLogSys::m_log_platform == EQEmuExePlatform::ExePlatformZone &&
+							   log_settings[log_category].log_to_discord > 0 &&
+							   log_settings[log_category].log_to_discord >= debug_level &&
+							   log_settings[log_category].discord_webhook_id > 0 &&
+							   log_settings[log_category].discord_webhook_id < MAX_DISCORD_WEBHOOK_ID;
+	e.log_enabled =
+		e.log_to_console_enabled || e.log_to_file_enabled || e.log_to_gmsay_enabled || e.log_to_discord_enabled;
+
+	return e;
+}
+
+bool EQEmuLogSys::IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category)
+{
+	return GetLogsEnabled(debug_level, log_category).log_enabled;
+}
+
+const std::string &EQEmuLogSys::GetLogPath() const
+{
+	return m_log_path;
+}
+
+EQEmuLogSys * EQEmuLogSys::SetLogPath(const std::string &log_path)
+{
+	EQEmuLogSys::m_log_path = log_path;
+
+	return this;
 }
 

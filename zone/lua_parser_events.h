@@ -118,6 +118,10 @@ void handle_player_skill_up(QuestInterface* parse, sol::state_view sv, sol::tabl
 	std::vector<std::any>* extra_pointers);
 void handle_player_language_skill_up(QuestInterface* parse, sol::state_view sv, sol::table& L, Client* client, std::string data, uint32 extra_data,
 	std::vector<std::any>* extra_pointers);
+void handle_player_alt_currency_merchant(QuestInterface* parse, sol::state_view sv, sol::table& L, Client* client, std::string data, uint32 extra_data,
+	std::vector<std::any>* extra_pointers);
+void handle_player_merchant(QuestInterface* parse, sol::state_view sv, sol::table& L, Client* client, std::string data, uint32 extra_data,
+	std::vector<std::any>* extra_pointers);
 
 //Item
 void handle_item_click(QuestInterface *parse, sol::state_view sv, sol::table& L, Client* client, EQ::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,

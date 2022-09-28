@@ -1,6 +1,7 @@
 #ifndef EQEMU_TASKS_H
 #define EQEMU_TASKS_H
 
+#include "../common/strings.h"
 #include "serialize_buffer.h"
 #include <algorithm>
 #include <array>
@@ -16,12 +17,10 @@
 
 // Command Codes for worldserver ServerOP_ReloadTasks
 #define RELOADTASKS 0
-#define RELOADTASKGOALLISTS 1
 #define RELOADTASKSETS 2
 
 typedef enum {
 	METHODSINGLEID = 0,
-	METHODLIST     = 1,
 	METHODQUEST    = 2
 } TaskMethodType;
 
@@ -77,11 +76,7 @@ struct ActivityInformation {
 	int              spell_id; // older clients, first id from above
 	TaskMethodType   goal_method;
 	int              goal_count;
-	uint32_t         npc_id;
-	uint32_t         npc_goal_id;
 	std::string      npc_match_list; // delimited by '|' for partial name matches but also supports ids
-	uint32_t         item_id;
-	uint32_t         item_goal_id;
 	std::string      item_id_list; // delimited by '|' to support multiple item ids
 	int              dz_switch_id;
 	float            min_x;
@@ -207,15 +202,15 @@ enum class DurationCode {
 
 struct TaskInformation {
 	TaskType            type;
-	int                 duration{};
+	uint32_t            duration{};
 	DurationCode        duration_code;         // description for time investment for when duration == 0
 	std::string         title{};            // max length 64
 	std::string         description{};      // max length 4000, 2048 on Tit
 	std::string         reward{};
 	std::string         item_link{};        // max length 128 older clients, item link gets own string
 	std::string         completion_emote{}; // emote after completing task, yellow. Maybe should make more generic ... but yellow for now!
-	int                 reward_id{};
-	int                 cash_reward{};       // Expressed in copper
+	std::string         reward_id_list{};
+	uint32_t            cash_reward{};       // Expressed in copper
 	int                 experience_reward{};
 	int                 faction_reward{};   // npc_faction_id if amount == 0, otherwise primary faction ID
 	int                 faction_amount{};   // faction hit value
@@ -225,14 +220,14 @@ struct TaskInformation {
 	int                 activity_count{};
 	uint8_t             min_level{};
 	uint8_t             max_level{};
-	int                 level_spread;
-	int                 min_players;
-	int                 max_players;
+	uint32_t            level_spread;
+	uint32_t            min_players;
+	uint32_t            max_players;
 	bool                repeatable{};
-	int                 replay_timer_group;
-	int                 replay_timer_seconds;
-	int                 request_timer_group;
-	int                 request_timer_seconds;
+	uint32_t            replay_timer_group;
+	uint32_t            replay_timer_seconds;
+	uint32_t            request_timer_group;
+	uint32_t            request_timer_seconds;
 	ActivityInformation activity_information[MAXACTIVITIESPERTASK];
 
 	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const
@@ -420,6 +415,31 @@ namespace Tasks {
 
 		return result;
 	}
+
+	static bool IsInMatchList(const std::string& match_list, const std::string& entry)
+	{
+		for (auto &s: Strings::Split(match_list, '|')) {
+			if (s == entry) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static bool IsInMatchListPartial(const std::string &match_list, const std::string &entry)
+	{
+		std::string entry_match = Strings::ToLower(entry);
+		for (auto &s: Strings::Split(match_list, '|')) {
+			if (entry_match.find(Strings::ToLower(s)) != std::string::npos) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
 }
 
 namespace TaskStr {

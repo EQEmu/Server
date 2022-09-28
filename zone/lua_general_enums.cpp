@@ -97,7 +97,11 @@ void lua_register_events(sol::state_view &sv)
 		"equip_item_client", static_cast<int>(EVENT_EQUIP_ITEM_CLIENT),
 		"unequip_item_client", static_cast<int>(EVENT_UNEQUIP_ITEM_CLIENT),
 		"skill_up", static_cast<int>(EVENT_SKILL_UP),
-		"language_skill_up", static_cast<int>(EVENT_LANGUAGE_SKILL_UP)
+		"language_skill_up", static_cast<int>(EVENT_LANGUAGE_SKILL_UP),
+		"alt_currency_merchant_buy", static_cast<int>(EVENT_ALT_CURRENCY_MERCHANT_BUY),
+		"alt_currency_merchant_sell", static_cast<int>(EVENT_ALT_CURRENCY_MERCHANT_SELL),
+		"merchant_buy", static_cast<int>(EVENT_MERCHANT_BUY),
+		"merchant_sell", static_cast<int>(EVENT_MERCHANT_SELL)
 	);
 }
 

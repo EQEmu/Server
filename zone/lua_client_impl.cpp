@@ -458,8 +458,8 @@ int Lua_Client::GetAccountAge() {
 	return time(nullptr) - self->GetAccountCreation();
 }
 
-int Lua_Client::Admin() {
-	Lua_Safe_Call_Bool();
+int16 Lua_Client::Admin() {
+	Lua_Safe_Call_Int();
 	return self->Admin();
 }
 
@@ -2221,9 +2221,14 @@ void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
 	self->RemoveItem(item_id, quantity);
 }
 
-void Lua_Client::SetGMStatus(uint32 newStatus) {
+void Lua_Client::SetGMStatus(int16 new_status) {
 	Lua_Safe_Call_Void();
-	self->SetGMStatus(newStatus);
+	self->SetGMStatus(new_status);
+}
+
+int16 Lua_Client::GetGMStatus() {
+	Lua_Safe_Call_Int();
+	return self->Admin();
 }
 
 void Lua_Client::UntrainDiscBySpellID(uint16 spell_id) {

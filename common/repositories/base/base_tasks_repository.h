@@ -25,15 +25,15 @@ public:
 		int8_t      duration_code;
 		std::string title;
 		std::string description;
-		std::string reward;
-		uint32_t    rewardid;
-		uint32_t    cashreward;
-		int32_t     xpreward;
-		uint8_t     rewardmethod;
+		std::string reward_text;
+		std::string reward_id_list;
+		uint32_t    cash_reward;
+		int32_t     exp_reward;
+		uint8_t     reward_method;
 		int32_t     reward_points;
 		int32_t     reward_point_type;
-		uint8_t     minlevel;
-		uint8_t     maxlevel;
+		uint8_t     min_level;
+		uint8_t     max_level;
 		uint32_t    level_spread;
 		uint32_t    min_players;
 		uint32_t    max_players;
@@ -63,15 +63,15 @@ public:
 			"duration_code",
 			"title",
 			"description",
-			"reward",
-			"rewardid",
-			"cashreward",
-			"xpreward",
-			"rewardmethod",
+			"reward_text",
+			"reward_id_list",
+			"cash_reward",
+			"exp_reward",
+			"reward_method",
 			"reward_points",
 			"reward_point_type",
-			"minlevel",
-			"maxlevel",
+			"min_level",
+			"max_level",
 			"level_spread",
 			"min_players",
 			"max_players",
@@ -97,15 +97,15 @@ public:
 			"duration_code",
 			"title",
 			"description",
-			"reward",
-			"rewardid",
-			"cashreward",
-			"xpreward",
-			"rewardmethod",
+			"reward_text",
+			"reward_id_list",
+			"cash_reward",
+			"exp_reward",
+			"reward_method",
 			"reward_points",
 			"reward_point_type",
-			"minlevel",
-			"maxlevel",
+			"min_level",
+			"max_level",
 			"level_spread",
 			"min_players",
 			"max_players",
@@ -165,15 +165,15 @@ public:
 		e.duration_code         = 0;
 		e.title                 = "";
 		e.description           = "";
-		e.reward                = "";
-		e.rewardid              = 0;
-		e.cashreward            = 0;
-		e.xpreward              = 0;
-		e.rewardmethod          = 2;
+		e.reward_text           = "";
+		e.reward_id_list        = "";
+		e.cash_reward           = 0;
+		e.exp_reward            = 0;
+		e.reward_method         = 0;
 		e.reward_points         = 0;
 		e.reward_point_type     = 0;
-		e.minlevel              = 0;
-		e.maxlevel              = 0;
+		e.min_level             = 0;
+		e.max_level             = 0;
 		e.level_spread          = 0;
 		e.min_players           = 0;
 		e.max_players           = 0;
@@ -228,15 +228,15 @@ public:
 			e.duration_code         = static_cast<int8_t>(atoi(row[3]));
 			e.title                 = row[4] ? row[4] : "";
 			e.description           = row[5] ? row[5] : "";
-			e.reward                = row[6] ? row[6] : "";
-			e.rewardid              = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.cashreward            = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.xpreward              = static_cast<int32_t>(atoi(row[9]));
-			e.rewardmethod          = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.reward_text           = row[6] ? row[6] : "";
+			e.reward_id_list        = row[7] ? row[7] : "";
+			e.cash_reward           = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.exp_reward            = static_cast<int32_t>(atoi(row[9]));
+			e.reward_method         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 			e.reward_points         = static_cast<int32_t>(atoi(row[11]));
 			e.reward_point_type     = static_cast<int32_t>(atoi(row[12]));
-			e.minlevel              = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.maxlevel              = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.min_level             = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
+			e.max_level             = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
 			e.level_spread          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
 			e.min_players           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
 			e.max_players           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
@@ -289,15 +289,15 @@ public:
 		v.push_back(columns[3] + " = " + std::to_string(e.duration_code));
 		v.push_back(columns[4] + " = '" + Strings::Escape(e.title) + "'");
 		v.push_back(columns[5] + " = '" + Strings::Escape(e.description) + "'");
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.reward) + "'");
-		v.push_back(columns[7] + " = " + std::to_string(e.rewardid));
-		v.push_back(columns[8] + " = " + std::to_string(e.cashreward));
-		v.push_back(columns[9] + " = " + std::to_string(e.xpreward));
-		v.push_back(columns[10] + " = " + std::to_string(e.rewardmethod));
+		v.push_back(columns[6] + " = '" + Strings::Escape(e.reward_text) + "'");
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.reward_id_list) + "'");
+		v.push_back(columns[8] + " = " + std::to_string(e.cash_reward));
+		v.push_back(columns[9] + " = " + std::to_string(e.exp_reward));
+		v.push_back(columns[10] + " = " + std::to_string(e.reward_method));
 		v.push_back(columns[11] + " = " + std::to_string(e.reward_points));
 		v.push_back(columns[12] + " = " + std::to_string(e.reward_point_type));
-		v.push_back(columns[13] + " = " + std::to_string(e.minlevel));
-		v.push_back(columns[14] + " = " + std::to_string(e.maxlevel));
+		v.push_back(columns[13] + " = " + std::to_string(e.min_level));
+		v.push_back(columns[14] + " = " + std::to_string(e.max_level));
 		v.push_back(columns[15] + " = " + std::to_string(e.level_spread));
 		v.push_back(columns[16] + " = " + std::to_string(e.min_players));
 		v.push_back(columns[17] + " = " + std::to_string(e.max_players));
@@ -338,15 +338,15 @@ public:
 		v.push_back(std::to_string(e.duration_code));
 		v.push_back("'" + Strings::Escape(e.title) + "'");
 		v.push_back("'" + Strings::Escape(e.description) + "'");
-		v.push_back("'" + Strings::Escape(e.reward) + "'");
-		v.push_back(std::to_string(e.rewardid));
-		v.push_back(std::to_string(e.cashreward));
-		v.push_back(std::to_string(e.xpreward));
-		v.push_back(std::to_string(e.rewardmethod));
+		v.push_back("'" + Strings::Escape(e.reward_text) + "'");
+		v.push_back("'" + Strings::Escape(e.reward_id_list) + "'");
+		v.push_back(std::to_string(e.cash_reward));
+		v.push_back(std::to_string(e.exp_reward));
+		v.push_back(std::to_string(e.reward_method));
 		v.push_back(std::to_string(e.reward_points));
 		v.push_back(std::to_string(e.reward_point_type));
-		v.push_back(std::to_string(e.minlevel));
-		v.push_back(std::to_string(e.maxlevel));
+		v.push_back(std::to_string(e.min_level));
+		v.push_back(std::to_string(e.max_level));
 		v.push_back(std::to_string(e.level_spread));
 		v.push_back(std::to_string(e.min_players));
 		v.push_back(std::to_string(e.max_players));
@@ -395,15 +395,15 @@ public:
 			v.push_back(std::to_string(e.duration_code));
 			v.push_back("'" + Strings::Escape(e.title) + "'");
 			v.push_back("'" + Strings::Escape(e.description) + "'");
-			v.push_back("'" + Strings::Escape(e.reward) + "'");
-			v.push_back(std::to_string(e.rewardid));
-			v.push_back(std::to_string(e.cashreward));
-			v.push_back(std::to_string(e.xpreward));
-			v.push_back(std::to_string(e.rewardmethod));
+			v.push_back("'" + Strings::Escape(e.reward_text) + "'");
+			v.push_back("'" + Strings::Escape(e.reward_id_list) + "'");
+			v.push_back(std::to_string(e.cash_reward));
+			v.push_back(std::to_string(e.exp_reward));
+			v.push_back(std::to_string(e.reward_method));
 			v.push_back(std::to_string(e.reward_points));
 			v.push_back(std::to_string(e.reward_point_type));
-			v.push_back(std::to_string(e.minlevel));
-			v.push_back(std::to_string(e.maxlevel));
+			v.push_back(std::to_string(e.min_level));
+			v.push_back(std::to_string(e.max_level));
 			v.push_back(std::to_string(e.level_spread));
 			v.push_back(std::to_string(e.min_players));
 			v.push_back(std::to_string(e.max_players));
@@ -456,15 +456,15 @@ public:
 			e.duration_code         = static_cast<int8_t>(atoi(row[3]));
 			e.title                 = row[4] ? row[4] : "";
 			e.description           = row[5] ? row[5] : "";
-			e.reward                = row[6] ? row[6] : "";
-			e.rewardid              = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.cashreward            = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.xpreward              = static_cast<int32_t>(atoi(row[9]));
-			e.rewardmethod          = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.reward_text           = row[6] ? row[6] : "";
+			e.reward_id_list        = row[7] ? row[7] : "";
+			e.cash_reward           = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.exp_reward            = static_cast<int32_t>(atoi(row[9]));
+			e.reward_method         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 			e.reward_points         = static_cast<int32_t>(atoi(row[11]));
 			e.reward_point_type     = static_cast<int32_t>(atoi(row[12]));
-			e.minlevel              = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.maxlevel              = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.min_level             = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
+			e.max_level             = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
 			e.level_spread          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
 			e.min_players           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
 			e.max_players           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
@@ -508,15 +508,15 @@ public:
 			e.duration_code         = static_cast<int8_t>(atoi(row[3]));
 			e.title                 = row[4] ? row[4] : "";
 			e.description           = row[5] ? row[5] : "";
-			e.reward                = row[6] ? row[6] : "";
-			e.rewardid              = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.cashreward            = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.xpreward              = static_cast<int32_t>(atoi(row[9]));
-			e.rewardmethod          = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.reward_text           = row[6] ? row[6] : "";
+			e.reward_id_list        = row[7] ? row[7] : "";
+			e.cash_reward           = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.exp_reward            = static_cast<int32_t>(atoi(row[9]));
+			e.reward_method         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
 			e.reward_points         = static_cast<int32_t>(atoi(row[11]));
 			e.reward_point_type     = static_cast<int32_t>(atoi(row[12]));
-			e.minlevel              = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.maxlevel              = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
+			e.min_level             = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
+			e.max_level             = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
 			e.level_spread          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
 			e.min_players           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
 			e.max_players           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));

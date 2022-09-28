@@ -154,7 +154,11 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_EQUIP_ITEM_CLIENT",
 	"EVENT_UNEQUIP_ITEM_CLIENT",
 	"EVENT_SKILL_UP",
-	"EVENT_LANGUAGE_SKILL_UP"
+	"EVENT_LANGUAGE_SKILL_UP",
+	"EVENT_ALT_CURRENCY_MERCHANT_BUY",
+	"EVENT_ALT_CURRENCY_MERCHANT_SELL",
+	"EVENT_MERCHANT_BUY",
+	"EVENT_MERCHANT_SELL"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
@@ -1705,6 +1709,28 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "skill_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "skill_value", sep.arg[1]);
 			ExportVar(package_name.c_str(), "skill_max", sep.arg[2]);
+			break;
+		}
+
+		case EVENT_ALT_CURRENCY_MERCHANT_BUY:
+		case EVENT_ALT_CURRENCY_MERCHANT_SELL: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "currency_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "npc_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "merchant_id", sep.arg[2]);
+			ExportVar(package_name.c_str(), "item_id", sep.arg[3]);
+			ExportVar(package_name.c_str(), "item_cost", sep.arg[4]);
+			break;
+		}
+
+		case EVENT_MERCHANT_BUY:
+		case EVENT_MERCHANT_SELL: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "npc_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "merchant_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "item_id", sep.arg[2]);
+			ExportVar(package_name.c_str(), "item_quantity", sep.arg[3]);
+			ExportVar(package_name.c_str(), "item_cost", sep.arg[4]);
 			break;
 		}
 

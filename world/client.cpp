@@ -35,6 +35,7 @@
 #include "../common/emu_versions.h"
 #include "../common/random.h"
 #include "../common/shareddb.h"
+#include "../common/opcodemgr.h"
 
 #include "client.h"
 #include "worlddb.h"
@@ -1009,7 +1010,13 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	EmuOpcode opcode = app->GetOpcode();
 
-	LogNetcode("Received EQApplicationPacket [{:#04x}]", opcode);
+	LogPacketClientServer(
+		"[{}] [{:#06x}] Size [{}] {}",
+		OpcodeManager::EmuToName(app->GetOpcode()),
+		eqs->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+		app->Size(),
+		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+	);
 
 	if (!eqs->CheckState(ESTABLISHED)) {
 		LogInfo("Client disconnected (net inactive on send)");

@@ -50,6 +50,11 @@ if ($Config{osname} =~ /Win|MS/i) {
     $OS = "Windows";
 }
 
+if (-e "../eqemu_config.json") {
+    print "[Info] Config is up one level, let's set current directory up one level...\n";
+    chdir("../");
+}
+
 #############################################
 # internet check
 #############################################
@@ -82,6 +87,8 @@ if (-e "eqemu_server_skip_maps_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_MA
 if (-d "bin") {
     $bin_dir = "bin/";
 }
+
+my $world_path = get_world_path();
 
 #############################################
 # run routines
@@ -539,14 +546,6 @@ sub do_installer_routines
         print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "FLUSH PRIVILEGES"`;
     }
 
-    my $world_path = "world";
-    if (-e "bin/world") {
-        $world_path = "bin/world";
-    }
-    elsif (-e "bin/world.exe") {
-        $world_path = "bin/world.exe";
-    }
-
     #::: Get Binary DB version
     if ($OS eq "Windows") {
         @db_version = split(': ', `"$world_path" db_version`);
@@ -591,15 +590,6 @@ sub check_for_input
 
 sub check_for_world_bootup_database_update
 {
-
-    my $world_path = "world";
-    if (-e "bin/world") {
-        $world_path = "bin/world";
-    }
-    elsif (-e "bin/world.exe") {
-        $world_path = "bin/world.exe";
-    }
-
     $binary_database_version = 0;
     $local_database_version  = 0;
 

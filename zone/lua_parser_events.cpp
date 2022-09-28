@@ -684,4 +684,34 @@ void handle_player_language_skill_up(QuestInterface* parse, sol::state_view sv, 
 	L["skill_max"] = std::stoi(sep.arg[2]);
 }
 
+void handle_player_alt_currency_merchant(QuestInterface* parse, sol::state_view sv, sol::table& L, Client* client, std::string data, uint32 extra_data, std::vector<std::any>* extra_pointers)
+{
+	Seperator sep(data.c_str());
+
+	L["currency_id"] = std::stoi(sep.arg[0]);
+
+	L["npc_id"] = std::stoi(sep.arg[1]);
+
+	L["merchant_id"] = std::stoi(sep.arg[2]);
+
+	L["item_id"] = std::stoi(sep.arg[3]);
+
+	L["item_cost"] = std::stoi(sep.arg[4]);
+}
+
+void handle_player_merchant(QuestInterface* parse, sol::state_view sv, sol::table& L, Client* client, std::string data, uint32 extra_data, std::vector<std::any>* extra_pointers)
+{
+	Seperator sep(data.c_str());
+
+	L["npc_id"] = std::stoi(sep.arg[0]);
+
+	L["merchant_id"] = std::stoi(sep.arg[1]);
+
+	L["item_id"] = std::stoi(sep.arg[2]);
+
+	L["item_quantity"] = std::stoi(sep.arg[3]);
+
+	L["item_cost"] = std::stoi(sep.arg[4]);
+}
+
 #endif

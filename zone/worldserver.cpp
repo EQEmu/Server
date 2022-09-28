@@ -3465,12 +3465,6 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 
 			break;
 		}
-		case RELOADTASKGOALLISTS:
-		{
-			LogTasks("Global reload of all Task Goal Lists");
-			task_manager->ReloadGoalLists();
-			break;
-		}
 		case RELOADTASKSETS:
 		{
 			LogTasks("Global reload of all Task Sets");

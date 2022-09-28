@@ -50,7 +50,7 @@ void lua_register_client(sol::state_view &sv)
 					      (void(Lua_Client::*)(uint32, bool))&Lua_Client::AddPlatinum);
 	client["AddPVPPoints"] = (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints;
 	client["AddSkill"] = (void(Lua_Client::*)(int,int))&Lua_Client::AddSkill;
-	client["Admin"] = (int(Lua_Client::*)(void))&Lua_Client::Admin;
+	client["Admin"] = (int16(Lua_Client::*)(void))&Lua_Client::Admin;
 	client["AssignTask"] = sol::overload((void(Lua_Client::*)(int))&Lua_Client::AssignTask,
 					     (void(Lua_Client::*)(int, int))&Lua_Client::AssignTask,
 					     (void(Lua_Client::*)(int, int, bool))&Lua_Client::AssignTask);
@@ -177,6 +177,7 @@ void lua_register_client(sol::state_view &sv)
 	client["GetFactionLevel"] = (int(Lua_Client::*)(uint32,uint32,uint32,uint32,uint32,uint32,Lua_NPC))&Lua_Client::GetFactionLevel;
 	client["GetFeigned"] = (bool(Lua_Client::*)(void))&Lua_Client::GetFeigned;
 	client["GetGM"] = (bool(Lua_Client::*)(void))&Lua_Client::GetGM;
+	client["GetGMStatus"] = (int16(Lua_Client::*)(void))&Lua_Client::GetGMStatus;
 	client["GetGroup"] = (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup;
 	client["GetGroupPoints"] = (uint32(Lua_Client::*)(void))&Lua_Client::GetGroupPoints;
 	client["GetHorseId"] = (int(Lua_Client::*)(void))&Lua_Client::GetHorseId;
@@ -410,7 +411,7 @@ void lua_register_client(sol::state_view &sv)
 	client["SetFactionLevel2"] = (void(Lua_Client::*)(uint32,int,int,int,int,int,int))&Lua_Client::SetFactionLevel2;
 	client["SetFeigned"] = (void(Lua_Client::*)(bool))&Lua_Client::SetFeigned;
 	client["SetGM"] = (void(Lua_Client::*)(bool))&Lua_Client::SetGM;
-	client["SetGMStatus"] = (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus;
+	client["SetGMStatus"] = (void(Lua_Client::*)(int16))&Lua_Client::SetGMStatus;
 	client["SetHideMe"] = (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe;
 	client["SetHorseId"] = (void(Lua_Client::*)(int))&Lua_Client::SetHorseId;
 	client["SetHunger"] = (void(Lua_Client::*)(int))&Lua_Client::SetHunger;

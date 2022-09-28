@@ -88,13 +88,15 @@ union semun {
 #include "dynamic_zone_manager.h"
 #include "expedition_database.h"
 
-#include "world_server_command_handler.h"
+#include "world_server_cli.h"
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/character_task_timers_repository.h"
 #include "../common/zone_store.h"
 #include "world_event_scheduler.h"
 #include "shared_task_manager.h"
 #include "world_boot.h"
+#include "../common/path_manager.h"
+
 
 ZoneStore           zone_store;
 ClientList          client_list;
@@ -115,6 +117,7 @@ const WorldConfig   *Config;
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
+PathManager         path;
 
 void CatchSignal(int sig_num);
 
@@ -137,6 +140,8 @@ int main(int argc, char **argv)
 	RegisterExecutablePlatform(ExePlatformWorld);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	if (WorldBoot::HandleCommandInput(argc, argv)) {
 		return 0;

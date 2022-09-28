@@ -492,19 +492,6 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 		return false;
 	}
 
-	// item is only checked for updates that provide an item (unlike npc which may be null for non-npcs)
-	if (activity.item_id != 0 && filter.item_id != 0 && activity.item_id != filter.item_id)
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item id filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
-	if (activity.npc_id != 0 && (!filter.npc || activity.npc_id != filter.npc->GetNPCTypeID()))
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc id filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
 	if (!activity.CheckZone(zone->GetZoneID(), zone->GetInstanceVersion()))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed zone filter", client->GetName(), task_id, client_activity.activity_id);
@@ -523,32 +510,19 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 		}
 	}
 
-	if (activity.item_goal_id != 0 && filter.item_id != 0 &&
-	    !task_manager->m_goal_list_manager.IsInList(activity.item_goal_id, filter.item_id))
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item goallist filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
+	// item is only checked for updates that provide an item to check (unlike npc which may be null for non-npcs)
 	if (!activity.item_id_list.empty() && filter.item_id != 0 &&
-	    !TaskGoalListManager::IsInMatchList(activity.item_id_list, std::to_string(filter.item_id)))
+	    !Tasks::IsInMatchList(activity.item_id_list, std::to_string(filter.item_id)))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed item match filter", client->GetName(), task_id, client_activity.activity_id);
 		return false;
 	}
 
-	if (activity.npc_goal_id != 0 && (!filter.npc ||
-	    !task_manager->m_goal_list_manager.IsInList(activity.npc_goal_id, filter.npc->GetNPCTypeID())))
-	{
-		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc goallist filter", client->GetName(), task_id, client_activity.activity_id);
-		return false;
-	}
-
 	// npc filter supports both npc names and ids in match lists
 	if (!activity.npc_match_list.empty() && (!filter.npc ||
-	    (!TaskGoalListManager::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetName()) &&
-	     !TaskGoalListManager::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetCleanName()) &&
-	     !TaskGoalListManager::IsInMatchList(activity.npc_match_list, std::to_string(filter.npc->GetNPCTypeID())))))
+	    (!Tasks::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetName()) &&
+	     !Tasks::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetCleanName()) &&
+	     !Tasks::IsInMatchList(activity.npc_match_list, std::to_string(filter.npc->GetNPCTypeID())))))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc match filter", client->GetName(), task_id, client_activity.activity_id);
 		return false;
@@ -985,76 +959,68 @@ void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInform
 	parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
 }
 
-void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_information, ClientTaskInformation& client_task)
+void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTaskInformation& client_task)
 {
-
-	if (!task_information || !client || client_task.was_rewarded) {
+	if (!ti || !c || client_task.was_rewarded) {
 		return;
 	}
 
 	client_task.was_rewarded = true;
 	client_task.updated = true;
 
-	if (!task_information->completion_emote.empty()) {
-		client->Message(Chat::Yellow, task_information->completion_emote.c_str());
+	if (!ti->completion_emote.empty()) {
+		c->Message(Chat::Yellow, ti->completion_emote.c_str());
 	}
 
 	// TODO: this function should sometimes use QuestReward_Struct and CashReward_Struct
 	// assumption is they use QuestReward_Struct when there is more than 1 thing getting rewarded
-
-	const EQ::ItemData *item_data;
-	std::vector<int>   reward_list;
-
-	switch (task_information->reward_method) {
-		case METHODSINGLEID: {
-			if (task_information->reward_id) {
-				int16_t slot = client->GetInv().FindFreeSlot(false, true);
-				client->SummonItem(task_information->reward_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
-				item_data = database.GetItem(task_information->reward_id);
-				if (item_data) {
-					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
+	if (ti->reward_method != METHODQUEST) {
+		for (const auto &i: Strings::Split(ti->reward_id_list, "|")) {
+			// handle charges
+			int16  charges = -1;
+			uint32 item_id = Strings::IsNumber(i) ? std::stoi(i) : 0;
+			if (Strings::Contains(i, ",")) {
+				auto s = Strings::Split(i, ",");
+				if (!s.empty() && s.size() == 2) {
+					item_id = Strings::IsNumber(s[0]) ? std::stoi(s[0]) : 0;
+					charges = Strings::IsNumber(s[1]) ? std::stoi(s[1]) : 0;
 				}
 			}
-			break;
-		}
-		case METHODLIST: {
-			reward_list = task_manager->m_goal_list_manager.GetListContents(task_information->reward_id);
-			for (int item_id : reward_list) {
-				int16_t slot = client->GetInv().FindFreeSlot(false, true);
-				client->SummonItem(item_id, -1, 0, 0, 0, 0, 0, 0, false, slot);
-				item_data = database.GetItem(item_id);
-				if (item_data) {
-					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
+
+			if (item_id > 0) {
+				std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item_id, charges));
+				if (inst && inst->GetItem()) {
+					bool stacked = c->TryStacking(inst.get());
+					if (!stacked) {
+						int16_t slot = c->GetInv().FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size);
+						c->SummonItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, slot);
+					}
+					c->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
 				}
 			}
-			break;
-		}
-		default: {
-			// Nothing special done for METHODQUEST
-			break;
 		}
 	}
 
 	// just use normal NPC faction ID stuff
-	if (task_information->faction_reward && task_information->faction_amount == 0) {
-		client->SetFactionLevel(
-			client->CharacterID(),
-			task_information->faction_reward,
-			client->GetBaseClass(),
-			client->GetBaseRace(),
-			client->GetDeity()
+	if (ti->faction_reward && ti->faction_amount == 0) {
+		c->SetFactionLevel(
+			c->CharacterID(),
+			ti->faction_reward,
+			c->GetBaseClass(),
+			c->GetBaseRace(),
+			c->GetDeity()
 		);
-	} else if (task_information->faction_reward != 0 && task_information->faction_amount != 0) {
-		client->RewardFaction(
-			task_information->faction_reward,
-			task_information->faction_amount
+	} else if (ti->faction_reward != 0 && ti->faction_amount != 0) {
+		c->RewardFaction(
+			ti->faction_reward,
+			ti->faction_amount
 		);
 	}
 
-	if (task_information->cash_reward) {
+	if (ti->cash_reward) {
 		int platinum, gold, silver, copper;
 
-		copper = task_information->cash_reward;
+		copper = ti->cash_reward;
 
 		platinum = copper / 1000;
 		copper   = copper - (platinum * 1000);
@@ -1063,11 +1029,11 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 		silver   = copper / 10;
 		copper   = copper - (silver * 10);
 
-		client->CashReward(copper, silver, gold, platinum);
+		c->CashReward(copper, silver, gold, platinum);
 	}
-	int32 experience_reward = task_information->experience_reward;
+	int32 experience_reward = ti->experience_reward;
 	if (experience_reward > 0) {
-		client->AddEXP(experience_reward);
+		c->AddEXP(experience_reward);
 	}
 	if (experience_reward < 0) {
 		uint32 pos_reward = experience_reward * -1;
@@ -1075,19 +1041,19 @@ void ClientTaskState::RewardTask(Client *client, const TaskInformation *task_inf
 		if (pos_reward > 100 && pos_reward < 25700) {
 			uint8 max_level   = pos_reward / 100;
 			uint8 exp_percent = pos_reward - (max_level * 100);
-			client->AddLevelBasedExp(exp_percent, max_level);
+			c->AddLevelBasedExp(exp_percent, max_level);
 		}
 	}
 
-	if (task_information->reward_points > 0)
+	if (ti->reward_points > 0)
 	{
-		if (task_information->reward_point_type == AltCurrencyType::RadiantCrystal)
+		if (ti->reward_point_type == AltCurrencyType::RadiantCrystal)
 		{
-			client->AddCrystals(task_information->reward_points, 0);
+			c->AddCrystals(ti->reward_points, 0);
 		}
-		else if (task_information->reward_point_type == AltCurrencyType::EbonCrystal)
+		else if (ti->reward_point_type == AltCurrencyType::EbonCrystal)
 		{
-			client->AddCrystals(0, task_information->reward_points);
+			c->AddCrystals(0, ti->reward_points);
 		}
 	}
 }

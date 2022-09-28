@@ -26,7 +26,7 @@
 #include "../strings.h"
 #include "../eqemu_config.h"
 #include "../database_schema.h"
-#include "../file_util.h"
+#include "../file.h"
 
 #include <ctime>
 
@@ -383,8 +383,8 @@ void DatabaseDumpService::Dump()
 		pipe_file
 	);
 
-	if (!FileUtil::exists(GetSetDumpPath()) && !IsDumpOutputToConsole()) {
-		FileUtil::mkdir(GetSetDumpPath());
+	if (!File::Exists(GetSetDumpPath()) && !IsDumpOutputToConsole()) {
+		File::Makedir(GetSetDumpPath());
 	}
 
 	if (IsDumpDropTableSyntaxOnly()) {

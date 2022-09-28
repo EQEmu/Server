@@ -197,7 +197,6 @@ namespace DatabaseSchema {
 			"fishing",
 			"forage",
 			"global_loot",
-			"goallists",
 			"graveyard",
 			"grid",
 			"grid_entries",
