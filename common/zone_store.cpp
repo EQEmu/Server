@@ -20,6 +20,7 @@
 
 #include "zone_store.h"
 #include "../common/content/world_content_service.h"
+#include "stacktrace/backward.hpp"
 
 ZoneStore::ZoneStore() = default;
 ZoneStore::~ZoneStore() = default;
@@ -82,10 +83,15 @@ const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
 	}
 
 	LogInfo(
-		"[GetZoneName] Failed to get zone name by zone_id [{}] error_unknown [{}]",
+		"[GetZoneName] Failed to get zone name by zone_id [{}] error_unknown [{}] printing stack",
 		zone_id,
 		(error_unknown ? "true" : "false")
 	);
+
+	backward::StackTrace st;
+	st.load_here(32);
+	backward::Printer p;
+	p.print(st);
 
 	return nullptr;
 }
