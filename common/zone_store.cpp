@@ -92,6 +92,7 @@ const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
 	// print stack when invalid input
 	if (zone_id == 0) {
 		backward::StackTrace st;
+		backward::TraceResolver e = {};
 		st.load_here(32);
 		backward::Printer p;
 		p.print(st);
