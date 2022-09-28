@@ -11,6 +11,7 @@
 #include "loginserver_webserver.h"
 #include "loginserver_command_handler.h"
 #include "../common/strings.h"
+#include "../common/path_manager.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
@@ -20,6 +21,7 @@
 LoginServer server;
 EQEmuLogSys LogSys;
 bool        run_server = true;
+PathManager path;
 
 void ResolveAddresses();
 void CatchSignal(int sig_num)
@@ -42,7 +44,9 @@ void LoadDatabaseConnection()
 
 void LoadServerConfig()
 {
-	server.config = EQ::JsonConfigFile::Load("login.json");
+	server.config = EQ::JsonConfigFile::Load(
+		fmt::format("{}/login.json", path.GetServerPath())
+	);
 	LogInfo("Config System Init");
 
 	/**
@@ -172,6 +176,8 @@ int main(int argc, char **argv)
 		LogSys.LoadLogSettingsDefaults();
 	}
 
+	path.LoadPaths();
+
 	/**
 	 * Command handler
 	 */
@@ -197,6 +203,7 @@ int main(int argc, char **argv)
 
 	if (argc == 1) {
 		LogSys.SetDatabase(server.db)
+			->SetLogPath("logs")
 			->LoadLogDatabaseSettings()
 			->StartFileLogs();
 	}

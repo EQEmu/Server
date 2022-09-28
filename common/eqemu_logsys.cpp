@@ -521,37 +521,29 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 			return;
 		}
 
-		LogInfo("Starting File Log [logs/{}_{}.log]", m_platform_file_name.c_str(), getpid());
+		LogInfo("Starting File Log [{}/zone/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
 
-		/**
-		 * Make directory if not exists
-		 */
-		EQEmuLogSys::MakeDirectory("logs/zone");
+		// Make directory if not exists
+		EQEmuLogSys::MakeDirectory(fmt::format("{}/zone", GetLogPath()));
 
-		/**
-		 * Open file pointer
-		 */
+		// Open file pointer
 		process_log.open(
-			StringFormat("logs/zone/%s_%i.log", m_platform_file_name.c_str(), getpid()),
+			fmt::format("{}/zone/{}_{}.log", GetLogPath(), m_platform_file_name, getpid()),
 			std::ios_base::app | std::ios_base::out
 		);
 	}
 	else {
 
-		/**
-		 * All other processes
-		 */
+		// All other processes
 		if (m_platform_file_name.empty()) {
 			return;
 		}
 
-		LogInfo("Starting File Log [logs/{}_{}.log]", m_platform_file_name.c_str(), getpid());
+		LogInfo("Starting File Log [{}/{}_{}.log]", GetLogPath(), m_platform_file_name.c_str(), getpid());
 
-		/**
-		 * Open file pointer
-		 */
+		// Open file pointer
 		process_log.open(
-			StringFormat("logs/%s_%i.log", m_platform_file_name.c_str(), getpid()),
+			fmt::format("{}/{}_{}.log", GetLogPath(), m_platform_file_name.c_str(), getpid()),
 			std::ios_base::app | std::ios_base::out
 		);
 	}
@@ -756,3 +748,16 @@ bool EQEmuLogSys::IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16
 {
 	return GetLogsEnabled(debug_level, log_category).log_enabled;
 }
+
+const std::string &EQEmuLogSys::GetLogPath() const
+{
+	return m_log_path;
+}
+
+EQEmuLogSys * EQEmuLogSys::SetLogPath(const std::string &log_path)
+{
+	EQEmuLogSys::m_log_path = log_path;
+
+	return this;
+}
+

@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
+#include "../common/path_manager.h"
 
 #include <list>
 #include <vector>
@@ -478,8 +479,11 @@ Clientlist::Clientlist(int ChatPort) {
 
 	const ucsconfig *Config = ucsconfig::get();
 
-	LogInfo("Loading [{}]", Config->MailOpCodesFile.c_str());
-	if (!ChatOpMgr->LoadOpcodes(Config->MailOpCodesFile.c_str()))
+
+	std::string opcodes_file = fmt::format("{}/{}", path.GetServerPath(), Config->MailOpCodesFile);
+
+	LogInfo("Loading [{}]", opcodes_file);
+	if (!ChatOpMgr->LoadOpcodes(opcodes_file.c_str()))
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {

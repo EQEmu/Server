@@ -490,7 +490,7 @@ bool LoginServer::Connect()
 			[this](EQ::Net::ServertalkClient *client) {
 				if (client) {
 					LogInfo(
-						"Connected to Loginserver: [{0}:{1}]",
+						"Connected to Loginserver [{0}:{1}]",
 						m_loginserver_address,
 						m_loginserver_port
 					);
@@ -499,7 +499,6 @@ bool LoginServer::Connect()
 					zoneserver_list.SendLSZones();
 
 					m_statusupdate_timer = std::make_unique<EQ::Timer>(
-
 						LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
 							SendStatus();
 						}

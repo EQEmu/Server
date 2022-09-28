@@ -366,6 +366,9 @@ public:
 	// database
 	EQEmuLogSys *SetDatabase(Database *db);
 
+	[[nodiscard]] const std::string &GetLogPath() const;
+	EQEmuLogSys * SetLogPath(const std::string &log_path);
+
 private:
 
 	// reference to database
@@ -377,6 +380,7 @@ private:
 	bool                                                                          m_file_logs_enabled = false;
 	int                                                                           m_log_platform      = 0;
 	std::string                                                                   m_platform_file_name;
+	std::string                                                                   m_log_path;
 
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);

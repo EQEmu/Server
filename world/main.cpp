@@ -95,6 +95,8 @@ union semun {
 #include "world_event_scheduler.h"
 #include "shared_task_manager.h"
 #include "world_boot.h"
+#include "../common/path_manager.h"
+
 
 ZoneStore           zone_store;
 ClientList          client_list;
@@ -115,6 +117,7 @@ const WorldConfig   *Config;
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
+PathManager         path;
 
 void CatchSignal(int sig_num);
 
@@ -137,6 +140,8 @@ int main(int argc, char **argv)
 	RegisterExecutablePlatform(ExePlatformWorld);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	if (WorldBoot::HandleCommandInput(argc, argv)) {
 		return 0;
