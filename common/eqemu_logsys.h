@@ -54,7 +54,7 @@ namespace Logs {
 		AI,
 		Aggro,
 		Attack,
-		PacketClientServer,
+		DeprecatedCS,
 		Combat,
 		Commands,
 		Crash,
@@ -88,10 +88,10 @@ namespace Logs {
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
-		PacketServerClient,
-		PacketClientServerUnhandled,
-		PacketServerClientWithDump,
-		PacketClientServerWithDump,
+		DeprecatedSC,
+		DeprecatedCSU,
+		DeprecatedSCD,
+		DeprecatedCSD,
 		Loginserver,
 		ClientLogin,
 		HeadlessClient,
@@ -132,6 +132,9 @@ namespace Logs {
 		Hate,
 		Discord,
 		Faction,
+		PacketServerClient,
+		PacketClientServer,
+		PacketServerToServer,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -144,7 +147,7 @@ namespace Logs {
 		"AI",
 		"Aggro",
 		"Attack",
-		"Packet :: Client -> Server",
+		"Deprecated",
 		"Combat",
 		"Commands",
 		"Crash",
@@ -178,10 +181,10 @@ namespace Logs {
 		"MySQL Query",
 		"Mercenaries",
 		"Quest Debug",
-		"Packet :: Server -> Client",
-		"Packet :: Client -> Server Unhandled",
-		"Packet :: Server -> Client (Dump)",
-		"Packet :: Client -> Server (Dump)",
+		"Deprecated",
+		"Deprecated",
+		"Deprecated",
+		"Deprecated",
 		"Login Server",
 		"Client Login",
 		"Headless Client",
@@ -222,6 +225,9 @@ namespace Logs {
 		"Hate",
 		"Discord",
 		"Faction",
+		"Packet-S->C",
+		"Packet-C->S",
+		"Packet-S->S"
 	};
 }
 
@@ -313,6 +319,17 @@ public:
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
+	struct LogEnabled {
+		bool log_to_file_enabled;
+		bool log_to_console_enabled;
+		bool log_to_gmsay_enabled;
+		bool log_to_discord_enabled;
+		bool log_enabled;
+	};
+
+	LogEnabled GetLogsEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
+	bool IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
+
 	struct DiscordWebhooks {
 		int         id;
 		std::string webhook_name;
@@ -361,7 +378,6 @@ private:
 	int                                                                           m_log_platform      = 0;
 	std::string                                                                   m_platform_file_name;
 
-	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message);
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 

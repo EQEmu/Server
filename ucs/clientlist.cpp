@@ -615,6 +615,14 @@ void Clientlist::Process()
 		while (KeyValid && !(*it)->GetForceDisconnect() && (app = (*it)->ClientStream->PopPacket())) {
 			EmuOpcode opcode = app->GetOpcode();
 
+			LogPacketClientServer(
+				"[{}] [{:#06x}] Size [{}] {}",
+				OpcodeManager::EmuToName(app->GetOpcode()),
+				(*it)->ClientStream->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+				app->Size(),
+				(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+			);
+
 			switch (opcode) {
 			case OP_MailLogin: {
 				char *PacketBuffer = (char *)app->pBuffer + 1;

@@ -447,17 +447,13 @@ void ClearMappedOpcode(EmuOpcode op)
 // client methods
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
-	if (LogSys.log_settings[Logs::LogCategory::Netcode].is_category_enabled == 1) {
-		char buffer[64];
-		app->build_header_dump(buffer);
-		Log(Logs::Detail, Logs::PacketClientServer, "Dispatch opcode: %s", buffer);
-	}
-
-	if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)
-		Log(Logs::General, Logs::PacketClientServer, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
-
-	if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)
-		Log(Logs::General, Logs::PacketClientServerWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+	LogPacketClientServer(
+		"[{}] [{:#06x}] Size [{}] {}",
+		OpcodeManager::EmuToName(app->GetOpcode()),
+		eqs->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+		app->Size(),
+		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+	);
 
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {
@@ -500,11 +496,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
-				char buffer[64];
-				app->build_header_dump(buffer);
-				Log(Logs::General, Logs::PacketClientServerUnhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
-			}
 			break;
 		}
 

@@ -31,6 +31,11 @@ extern WorldConfig Config;
 
 void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, std::string message)
 {
+	// we don't want to loop up with chat messages
+	if (message.find("OP_SpecialMesg") != std::string::npos) {
+		return;
+	}
+
 	// Cut messages down to 4000 max to prevent client crash
 	if (!message.empty()) {
 		message = message.substr(0, 4000);

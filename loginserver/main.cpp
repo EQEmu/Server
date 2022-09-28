@@ -45,15 +45,6 @@ void LoadServerConfig()
 	server.config = EQ::JsonConfigFile::Load("login.json");
 	LogInfo("Config System Init");
 
-
-	/**
-	 * Logging
-	 */
-	server.options.Trace(server.config.GetVariableBool("logging", "trace", false));
-	server.options.WorldTrace(server.config.GetVariableBool("logging", "world_trace", false));
-	server.options.DumpInPackets(server.config.GetVariableBool("logging", "dump_packets_in", false));
-	server.options.DumpOutPackets(server.config.GetVariableBool("logging", "dump_packets_out", false));
-
 	/**
 	 * Worldservers
 	 */
@@ -63,7 +54,7 @@ void LoadServerConfig()
 			"reject_duplicate_servers",
 			false
 		)
-		);
+	);
 	server.options.SetShowPlayerCount(server.config.GetVariableBool("worldservers", "show_player_count", false));
 	server.options.AllowUnregistered(
 		server.config.GetVariableBool(
@@ -90,8 +81,18 @@ void LoadServerConfig()
 	/**
 	 * Expansion Display Settings
 	 */
-	server.options.DisplayExpansions(server.config.GetVariableBool("client_configuration", "display_expansions", false)); //disable by default
-	server.options.MaxExpansions(server.config.GetVariableInt("client_configuration", "max_expansions_mask", 67108863)); //enable display of all expansions
+	server.options.DisplayExpansions(
+		server.config.GetVariableBool(
+			"client_configuration",
+			"display_expansions",
+			false
+		)); //disable by default
+	server.options.MaxExpansions(
+		server.config.GetVariableInt(
+			"client_configuration",
+			"max_expansions_mask",
+			67108863
+		)); //enable display of all expansions
 
 	/**
 	 * Account
@@ -181,7 +182,7 @@ int main(int argc, char **argv)
 		LoadDatabaseConnection();
 
 		LogSys.LoadLogSettingsDefaults();
-		LogSys.log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);
+		LogSys.log_settings[Logs::Debug].log_to_console = static_cast<uint8>(Logs::General);
 		LogSys.log_settings[Logs::Debug].is_category_enabled = 1;
 
 		LoginserverCommandHandler::CommandHandler(argc, argv);
@@ -258,10 +259,6 @@ int main(int argc, char **argv)
 		web_api_thread.detach();
 	}
 
-	LogInfo("[Config] [Logging] IsTraceOn [{0}]", server.options.IsTraceOn());
-	LogInfo("[Config] [Logging] IsWorldTraceOn [{0}]", server.options.IsWorldTraceOn());
-	LogInfo("[Config] [Logging] IsDumpInPacketsOn [{0}]", server.options.IsDumpInPacketsOn());
-	LogInfo("[Config] [Logging] IsDumpOutPacketsOn [{0}]", server.options.IsDumpOutPacketsOn());
 	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
 	LogInfo("[Config] [Client_Configuration] DisplayExpansions [{0}]", server.options.IsDisplayExpansions());
 	LogInfo("[Config] [Client_Configuration] MaxExpansions [{0}]", server.options.GetMaxExpansions());
