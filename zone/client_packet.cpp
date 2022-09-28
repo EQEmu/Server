@@ -2575,6 +2575,16 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
 		}
 
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {}",
+			alt_cur_id,
+			tar->GetNPCTypeID(),
+			tar->MerchantType,
+			item->ID,
+			cost
+		);
+		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_BUY, this, export_string, 0);
+
 		AddAlternateCurrencyValue(alt_cur_id, -((int32)cost));
 		int16 charges = 1;
 		if (item->MaxCharges != 0)
@@ -2729,6 +2739,16 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 			std::string event_desc = StringFormat("Sold to Merchant :: itemid:%u npcid:%u alt_currency_id:%u cost:%u in zoneid:%u instid:%i", item->ID, npc_id, alt_cur_id, cost, GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
 		}
+
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {}",
+			alt_cur_id,
+			tar->GetNPCTypeID(),
+			tar->MerchantType,
+			item->ID,
+			cost
+		);
+		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_SELL, this, export_string, 0);
 
 		FastQueuePacket(&outapp);
 		AddAlternateCurrencyValue(alt_cur_id, cost);
@@ -13222,6 +13242,16 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (RuleB(EventLog, RecordBuyFromMerchant))
 		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
 
+	const auto& export_string = fmt::format(
+		"{} {} {} {} {}",
+		tmp->GetNPCTypeID(),
+		tmp->CastToNPC()->MerchantType,
+		item_id,
+		mpo->quantity,
+		mpo->price
+	);
+	parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
+
 	if ((RuleB(Character, EnableDiscoveredItems)))
 	{
 		if (!GetGM() && !IsDiscovered(item_id))
@@ -13378,6 +13408,17 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		safe_delete(qspack);
 	}
 	// end QS code
+
+	const auto& export_string = fmt::format(
+		"{} {} {} {} {}",
+		vendor->GetNPCTypeID(),
+		vendor->CastToNPC()->MerchantType,
+		itemid,
+		mp->quantity,
+		price
+	);
+	parse->EventPlayer(EVENT_MERCHANT_SELL, this, export_string, 0);
+
 
 	// Now remove the item from the player, this happens regardless of outcome
 	DeleteItemInInventory(
