@@ -1,4 +1,5 @@
 SET SESSION group_concat_max_len = 1048576;
+SET collation_connection = latin1_swedish_ci;
 
 -- backup original(s)
 CREATE TABLE `goallists_backup_9_25_2022` LIKE `goallists`;
