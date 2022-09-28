@@ -28,11 +28,7 @@ public:
 		uint32_t    goalmethod;
 		int32_t     goalcount;
 		std::string description_override;
-		uint32_t    npc_id;
-		uint32_t    npc_goal_id;
 		std::string npc_match_list;
-		uint32_t    item_id;
-		uint32_t    item_goal_id;
 		std::string item_id_list;
 		std::string item_list;
 		int32_t     dz_switch_id;
@@ -66,11 +62,7 @@ public:
 			"goalmethod",
 			"goalcount",
 			"description_override",
-			"npc_id",
-			"npc_goal_id",
 			"npc_match_list",
-			"item_id",
-			"item_goal_id",
 			"item_id_list",
 			"item_list",
 			"dz_switch_id",
@@ -100,11 +92,7 @@ public:
 			"goalmethod",
 			"goalcount",
 			"description_override",
-			"npc_id",
-			"npc_goal_id",
 			"npc_match_list",
-			"item_id",
-			"item_goal_id",
 			"item_id_list",
 			"item_list",
 			"dz_switch_id",
@@ -168,11 +156,7 @@ public:
 		e.goalmethod           = 0;
 		e.goalcount            = 1;
 		e.description_override = "";
-		e.npc_id               = 0;
-		e.npc_goal_id          = 0;
 		e.npc_match_list       = "";
-		e.item_id              = 0;
-		e.item_goal_id         = 0;
 		e.item_id_list         = "";
 		e.item_list            = "";
 		e.dz_switch_id         = 0;
@@ -231,25 +215,21 @@ public:
 			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
 			e.description_override = row[8] ? row[8] : "";
-			e.npc_id               = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.npc_goal_id          = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.npc_match_list       = row[11] ? row[11] : "";
-			e.item_id              = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.item_goal_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.item_id_list         = row[14] ? row[14] : "";
-			e.item_list            = row[15] ? row[15] : "";
-			e.dz_switch_id         = static_cast<int32_t>(atoi(row[16]));
-			e.min_x                = strtof(row[17], nullptr);
-			e.min_y                = strtof(row[18], nullptr);
-			e.min_z                = strtof(row[19], nullptr);
-			e.max_x                = strtof(row[20], nullptr);
-			e.max_y                = strtof(row[21], nullptr);
-			e.max_z                = strtof(row[22], nullptr);
-			e.skill_list           = row[23] ? row[23] : "";
-			e.spell_list           = row[24] ? row[24] : "";
-			e.zones                = row[25] ? row[25] : "";
-			e.zone_version         = static_cast<int32_t>(atoi(row[26]));
-			e.optional             = static_cast<int8_t>(atoi(row[27]));
+			e.npc_match_list       = row[9] ? row[9] : "";
+			e.item_id_list         = row[10] ? row[10] : "";
+			e.item_list            = row[11] ? row[11] : "";
+			e.dz_switch_id         = static_cast<int32_t>(atoi(row[12]));
+			e.min_x                = strtof(row[13], nullptr);
+			e.min_y                = strtof(row[14], nullptr);
+			e.min_z                = strtof(row[15], nullptr);
+			e.max_x                = strtof(row[16], nullptr);
+			e.max_y                = strtof(row[17], nullptr);
+			e.max_z                = strtof(row[18], nullptr);
+			e.skill_list           = row[19] ? row[19] : "";
+			e.spell_list           = row[20] ? row[20] : "";
+			e.zones                = row[21] ? row[21] : "";
+			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
+			e.optional             = static_cast<int8_t>(atoi(row[23]));
 
 			return e;
 		}
@@ -292,25 +272,21 @@ public:
 		v.push_back(columns[6] + " = " + std::to_string(e.goalmethod));
 		v.push_back(columns[7] + " = " + std::to_string(e.goalcount));
 		v.push_back(columns[8] + " = '" + Strings::Escape(e.description_override) + "'");
-		v.push_back(columns[9] + " = " + std::to_string(e.npc_id));
-		v.push_back(columns[10] + " = " + std::to_string(e.npc_goal_id));
-		v.push_back(columns[11] + " = '" + Strings::Escape(e.npc_match_list) + "'");
-		v.push_back(columns[12] + " = " + std::to_string(e.item_id));
-		v.push_back(columns[13] + " = " + std::to_string(e.item_goal_id));
-		v.push_back(columns[14] + " = '" + Strings::Escape(e.item_id_list) + "'");
-		v.push_back(columns[15] + " = '" + Strings::Escape(e.item_list) + "'");
-		v.push_back(columns[16] + " = " + std::to_string(e.dz_switch_id));
-		v.push_back(columns[17] + " = " + std::to_string(e.min_x));
-		v.push_back(columns[18] + " = " + std::to_string(e.min_y));
-		v.push_back(columns[19] + " = " + std::to_string(e.min_z));
-		v.push_back(columns[20] + " = " + std::to_string(e.max_x));
-		v.push_back(columns[21] + " = " + std::to_string(e.max_y));
-		v.push_back(columns[22] + " = " + std::to_string(e.max_z));
-		v.push_back(columns[23] + " = '" + Strings::Escape(e.skill_list) + "'");
-		v.push_back(columns[24] + " = '" + Strings::Escape(e.spell_list) + "'");
-		v.push_back(columns[25] + " = '" + Strings::Escape(e.zones) + "'");
-		v.push_back(columns[26] + " = " + std::to_string(e.zone_version));
-		v.push_back(columns[27] + " = " + std::to_string(e.optional));
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.npc_match_list) + "'");
+		v.push_back(columns[10] + " = '" + Strings::Escape(e.item_id_list) + "'");
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.item_list) + "'");
+		v.push_back(columns[12] + " = " + std::to_string(e.dz_switch_id));
+		v.push_back(columns[13] + " = " + std::to_string(e.min_x));
+		v.push_back(columns[14] + " = " + std::to_string(e.min_y));
+		v.push_back(columns[15] + " = " + std::to_string(e.min_z));
+		v.push_back(columns[16] + " = " + std::to_string(e.max_x));
+		v.push_back(columns[17] + " = " + std::to_string(e.max_y));
+		v.push_back(columns[18] + " = " + std::to_string(e.max_z));
+		v.push_back(columns[19] + " = '" + Strings::Escape(e.skill_list) + "'");
+		v.push_back(columns[20] + " = '" + Strings::Escape(e.spell_list) + "'");
+		v.push_back(columns[21] + " = '" + Strings::Escape(e.zones) + "'");
+		v.push_back(columns[22] + " = " + std::to_string(e.zone_version));
+		v.push_back(columns[23] + " = " + std::to_string(e.optional));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -341,11 +317,7 @@ public:
 		v.push_back(std::to_string(e.goalmethod));
 		v.push_back(std::to_string(e.goalcount));
 		v.push_back("'" + Strings::Escape(e.description_override) + "'");
-		v.push_back(std::to_string(e.npc_id));
-		v.push_back(std::to_string(e.npc_goal_id));
 		v.push_back("'" + Strings::Escape(e.npc_match_list) + "'");
-		v.push_back(std::to_string(e.item_id));
-		v.push_back(std::to_string(e.item_goal_id));
 		v.push_back("'" + Strings::Escape(e.item_id_list) + "'");
 		v.push_back("'" + Strings::Escape(e.item_list) + "'");
 		v.push_back(std::to_string(e.dz_switch_id));
@@ -398,11 +370,7 @@ public:
 			v.push_back(std::to_string(e.goalmethod));
 			v.push_back(std::to_string(e.goalcount));
 			v.push_back("'" + Strings::Escape(e.description_override) + "'");
-			v.push_back(std::to_string(e.npc_id));
-			v.push_back(std::to_string(e.npc_goal_id));
 			v.push_back("'" + Strings::Escape(e.npc_match_list) + "'");
-			v.push_back(std::to_string(e.item_id));
-			v.push_back(std::to_string(e.item_goal_id));
 			v.push_back("'" + Strings::Escape(e.item_id_list) + "'");
 			v.push_back("'" + Strings::Escape(e.item_list) + "'");
 			v.push_back(std::to_string(e.dz_switch_id));
@@ -459,25 +427,21 @@ public:
 			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
 			e.description_override = row[8] ? row[8] : "";
-			e.npc_id               = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.npc_goal_id          = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.npc_match_list       = row[11] ? row[11] : "";
-			e.item_id              = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.item_goal_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.item_id_list         = row[14] ? row[14] : "";
-			e.item_list            = row[15] ? row[15] : "";
-			e.dz_switch_id         = static_cast<int32_t>(atoi(row[16]));
-			e.min_x                = strtof(row[17], nullptr);
-			e.min_y                = strtof(row[18], nullptr);
-			e.min_z                = strtof(row[19], nullptr);
-			e.max_x                = strtof(row[20], nullptr);
-			e.max_y                = strtof(row[21], nullptr);
-			e.max_z                = strtof(row[22], nullptr);
-			e.skill_list           = row[23] ? row[23] : "";
-			e.spell_list           = row[24] ? row[24] : "";
-			e.zones                = row[25] ? row[25] : "";
-			e.zone_version         = static_cast<int32_t>(atoi(row[26]));
-			e.optional             = static_cast<int8_t>(atoi(row[27]));
+			e.npc_match_list       = row[9] ? row[9] : "";
+			e.item_id_list         = row[10] ? row[10] : "";
+			e.item_list            = row[11] ? row[11] : "";
+			e.dz_switch_id         = static_cast<int32_t>(atoi(row[12]));
+			e.min_x                = strtof(row[13], nullptr);
+			e.min_y                = strtof(row[14], nullptr);
+			e.min_z                = strtof(row[15], nullptr);
+			e.max_x                = strtof(row[16], nullptr);
+			e.max_y                = strtof(row[17], nullptr);
+			e.max_z                = strtof(row[18], nullptr);
+			e.skill_list           = row[19] ? row[19] : "";
+			e.spell_list           = row[20] ? row[20] : "";
+			e.zones                = row[21] ? row[21] : "";
+			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
+			e.optional             = static_cast<int8_t>(atoi(row[23]));
 
 			all_entries.push_back(e);
 		}
@@ -511,25 +475,21 @@ public:
 			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
 			e.description_override = row[8] ? row[8] : "";
-			e.npc_id               = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.npc_goal_id          = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.npc_match_list       = row[11] ? row[11] : "";
-			e.item_id              = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.item_goal_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.item_id_list         = row[14] ? row[14] : "";
-			e.item_list            = row[15] ? row[15] : "";
-			e.dz_switch_id         = static_cast<int32_t>(atoi(row[16]));
-			e.min_x                = strtof(row[17], nullptr);
-			e.min_y                = strtof(row[18], nullptr);
-			e.min_z                = strtof(row[19], nullptr);
-			e.max_x                = strtof(row[20], nullptr);
-			e.max_y                = strtof(row[21], nullptr);
-			e.max_z                = strtof(row[22], nullptr);
-			e.skill_list           = row[23] ? row[23] : "";
-			e.spell_list           = row[24] ? row[24] : "";
-			e.zones                = row[25] ? row[25] : "";
-			e.zone_version         = static_cast<int32_t>(atoi(row[26]));
-			e.optional             = static_cast<int8_t>(atoi(row[27]));
+			e.npc_match_list       = row[9] ? row[9] : "";
+			e.item_id_list         = row[10] ? row[10] : "";
+			e.item_list            = row[11] ? row[11] : "";
+			e.dz_switch_id         = static_cast<int32_t>(atoi(row[12]));
+			e.min_x                = strtof(row[13], nullptr);
+			e.min_y                = strtof(row[14], nullptr);
+			e.min_z                = strtof(row[15], nullptr);
+			e.max_x                = strtof(row[16], nullptr);
+			e.max_y                = strtof(row[17], nullptr);
+			e.max_z                = strtof(row[18], nullptr);
+			e.skill_list           = row[19] ? row[19] : "";
+			e.spell_list           = row[20] ? row[20] : "";
+			e.zones                = row[21] ? row[21] : "";
+			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
+			e.optional             = static_cast<int8_t>(atoi(row[23]));
 
 			all_entries.push_back(e);
 		}
