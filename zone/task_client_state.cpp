@@ -974,8 +974,6 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 
 	// TODO: this function should sometimes use QuestReward_Struct and CashReward_Struct
 	// assumption is they use QuestReward_Struct when there is more than 1 thing getting rewarded
-	const EQ::ItemData *item_data;
-	std::vector<int> reward_list;
 	if (ti->reward_method != METHODQUEST) {
 		for (const auto &i: Strings::Split(ti->reward_id_list, "|")) {
 			// handle charges
@@ -996,10 +994,8 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 					if (!stacked) {
 						int16_t slot = c->GetInv().FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size);
 						c->SummonItem(item_id, charges, 0, 0, 0, 0, 0, 0, false, slot);
-						if (item_data) {
-							c->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
-						}
 					}
+					c->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, inst->GetItem()->Name);
 				}
 			}
 		}
