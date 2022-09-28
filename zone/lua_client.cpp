@@ -461,8 +461,8 @@ int Lua_Client::GetAccountAge() {
 	return time(nullptr) - self->GetAccountCreation();
 }
 
-int Lua_Client::Admin() {
-	Lua_Safe_Call_Bool();
+int16 Lua_Client::Admin() {
+	Lua_Safe_Call_Int();
 	return self->Admin();
 }
 
@@ -2253,9 +2253,14 @@ void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
 	self->RemoveItem(item_id, quantity);
 }
 
-void Lua_Client::SetGMStatus(uint32 newStatus) {
+void Lua_Client::SetGMStatus(int16 new_status) {
 	Lua_Safe_Call_Void();
-	self->SetGMStatus(newStatus);
+	self->SetGMStatus(new_status);
+}
+
+int16 Lua_Client::GetGMStatus() {
+	Lua_Safe_Call_Int();
+	return self->Admin();
 }
 
 void Lua_Client::UntrainDiscBySpellID(uint16 spell_id) {
@@ -2600,7 +2605,7 @@ luabind::scope lua_register_client() {
 	.def("AddPlatinum", (void(Lua_Client::*)(uint32,bool))&Lua_Client::AddPlatinum)
 	.def("AddPVPPoints", (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints)
 	.def("AddSkill", (void(Lua_Client::*)(int,int))&Lua_Client::AddSkill)
-	.def("Admin", (int(Lua_Client::*)(void))&Lua_Client::Admin)
+	.def("Admin", (int16(Lua_Client::*)(void))&Lua_Client::Admin)
 	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)
@@ -2718,6 +2723,7 @@ luabind::scope lua_register_client() {
 	.def("GetFactionLevel", (int(Lua_Client::*)(uint32,uint32,uint32,uint32,uint32,uint32,Lua_NPC))&Lua_Client::GetFactionLevel)
 	.def("GetFeigned", (bool(Lua_Client::*)(void))&Lua_Client::GetFeigned)
 	.def("GetGM", (bool(Lua_Client::*)(void))&Lua_Client::GetGM)
+	.def("GetGMStatus", (int16(Lua_Client::*)(void))&Lua_Client::GetGMStatus)
 	.def("GetGroup", (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup)
 	.def("GetGroupPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetGroupPoints)
 	.def("GetHorseId", (int(Lua_Client::*)(void))&Lua_Client::GetHorseId)
@@ -2933,7 +2939,7 @@ luabind::scope lua_register_client() {
 	.def("SetFactionLevel2", (void(Lua_Client::*)(uint32,int,int,int,int,int,int))&Lua_Client::SetFactionLevel2)
 	.def("SetFeigned", (void(Lua_Client::*)(bool))&Lua_Client::SetFeigned)
 	.def("SetGM", (void(Lua_Client::*)(bool))&Lua_Client::SetGM)
-	.def("SetGMStatus", (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus)
+	.def("SetGMStatus", (void(Lua_Client::*)(int16))&Lua_Client::SetGMStatus)
 	.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe)
 	.def("SetHorseId", (void(Lua_Client::*)(int))&Lua_Client::SetHorseId)
 	.def("SetHunger", (void(Lua_Client::*)(int))&Lua_Client::SetHunger)
