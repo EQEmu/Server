@@ -4283,7 +4283,11 @@ luabind::scope lua_register_events() {
 			luabind::value("equip_item_client", static_cast<int>(EVENT_EQUIP_ITEM_CLIENT)),
 			luabind::value("unequip_item_client", static_cast<int>(EVENT_UNEQUIP_ITEM_CLIENT)),
 			luabind::value("skill_up", static_cast<int>(EVENT_SKILL_UP)),
-			luabind::value("language_skill_up", static_cast<int>(EVENT_LANGUAGE_SKILL_UP))
+			luabind::value("language_skill_up", static_cast<int>(EVENT_LANGUAGE_SKILL_UP)),
+			luabind::value("alt_currency_merchant_buy", static_cast<int>(EVENT_ALT_CURRENCY_MERCHANT_BUY)),
+			luabind::value("alt_currency_merchant_sell", static_cast<int>(EVENT_ALT_CURRENCY_MERCHANT_SELL)),
+			luabind::value("merchant_buy", static_cast<int>(EVENT_MERCHANT_BUY)),
+			luabind::value("merchant_sell", static_cast<int>(EVENT_MERCHANT_SELL))
 		];
 }
 
