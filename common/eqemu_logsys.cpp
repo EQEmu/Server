@@ -466,7 +466,7 @@ void EQEmuLogSys::SetCurrentTimeStamp(char *time_stamp)
 	struct tm *time_info;
 	time(&raw_time);
 	time_info = localtime(&raw_time);
-	strftime(time_stamp, 80, "[%m-%d-%Y :: %H:%M:%S]", time_info);
+	strftime(time_stamp, 80, "[%m-%d-%Y %H:%M:%S]", time_info);
 }
 
 /**
