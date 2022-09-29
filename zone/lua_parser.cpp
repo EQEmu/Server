@@ -1010,7 +1010,7 @@ void LuaParser::ReloadQuests() {
 				}
 			}
 
-			LoadScript(fmt::format("{}{}", path.GetLuaModsPath(), std::string(file_name)), file_name);
+			LoadScript(fmt::format("{}/{}", path.GetLuaModsPath(), std::string(file_name)), file_name);
 			mods_.emplace_back(L, this, file_name);
 		}
 
