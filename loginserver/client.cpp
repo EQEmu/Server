@@ -77,11 +77,6 @@ bool Client::Process()
 				Handle_Play((const char *) app->pBuffer);
 				break;
 			}
-			default: {
-				char dump[64];
-				app->build_header_dump(dump);
-				LogError("Received unhandled application packet from the client: [{}]", dump);
-			}
 		}
 
 		delete app;

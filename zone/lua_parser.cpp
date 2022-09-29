@@ -871,7 +871,7 @@ void LuaParser::ReloadQuests() {
 				}
 			}
 
-			LoadScript(fmt::format("{}{}", path.GetLuaModsPath(), file_name), file_name);
+			LoadScript(fmt::format("{}/{}", path.GetLuaModsPath(), file_name), file_name);
 			// error checking
 			m_impl->mods.emplace_back(LuaMod(&m_impl->loaded[file_name], this, file_name));
 		}
