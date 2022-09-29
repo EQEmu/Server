@@ -3699,7 +3699,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
-				entity_list.MessageClose(this, false, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
+				entity_list.FilteredMessageClose(this, false, RuleI(Range, SpellMessages), Chat::Emote, FilterSocials, "%s beams a smile at %s", attacker->GetCleanName(), GetCleanName());
 			}
 
 			// If a client pet is damaged while sitting, stand, fix sit button,
