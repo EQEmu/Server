@@ -79,7 +79,7 @@ bool TaskManager::LoadTasks(int single_task)
 		ti.experience_reward     = task.exp_reward;
 		ti.reward_method         = (TaskMethodType) task.reward_method;
 		ti.reward_points         = task.reward_points;
-		ti.reward_point_type     = static_cast<AltCurrencyType>(task.reward_point_type);
+		ti.reward_point_type     = task.reward_point_type;
 		ti.faction_reward        = task.faction_reward;
 		ti.faction_amount        = task.faction_amount;
 		ti.min_level             = task.min_level;
@@ -1159,7 +1159,7 @@ void TaskManager::SendActiveTaskDescription(
 	task_description_header->open_window    = bring_up_task_journal;
 	task_description_header->task_type      = static_cast<uint32>(t->type);
 
-	task_description_header->reward_type = static_cast<int>(t->reward_point_type);
+	task_description_header->reward_type = t->reward_point_type;
 
 	Ptr = (char *) task_description_header + sizeof(TaskDescriptionHeader_Struct);
 

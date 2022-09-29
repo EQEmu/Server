@@ -15,6 +15,9 @@
 #include "dynamic_zone.h"
 #include "string_ids.h"
 
+#define EBON_CRYSTAL 40902
+#define RADIANT_CRYSTAL 40903
+
 extern WorldServer worldserver;
 extern QueryServ   *QServ;
 
@@ -1031,11 +1034,11 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 
 		c->CashReward(copper, silver, gold, platinum);
 	}
-	int32 experience_reward = ti->experience_reward;
+	
+	auto experience_reward = ti->experience_reward;
 	if (experience_reward > 0) {
 		c->AddEXP(experience_reward);
-	}
-	if (experience_reward < 0) {
+	} else if (experience_reward < 0) {
 		uint32 pos_reward = experience_reward * -1;
 		// Minimal Level Based Exp reward Setting is 101 (1% exp at level 1)
 		if (pos_reward > 100 && pos_reward < 25700) {
@@ -1045,14 +1048,10 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 		}
 	}
 
-	if (ti->reward_points > 0)
-	{
-		if (ti->reward_point_type == AltCurrencyType::RadiantCrystal)
-		{
+	if (ti->reward_points > 0) {
+		if (ti->reward_point_type == static_cast<int32_t>(zone->GetCurrencyID(RADIANT_CRYSTAL))) {
 			c->AddCrystals(ti->reward_points, 0);
-		}
-		else if (ti->reward_point_type == AltCurrencyType::EbonCrystal)
-		{
+		} else if (ti->reward_point_type == static_cast<int32_t>(zone->GetCurrencyID(EBON_CRYSTAL))) {
 			c->AddCrystals(0, ti->reward_points);
 		}
 	}
