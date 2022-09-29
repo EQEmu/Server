@@ -210,8 +210,6 @@ bool Spawn2::Process() {
 			return true;
 		}
 
-		LogInfo("NPC spawn2 name [{}]", tmp->name);
-
 		if (tmp->unique_spawn_by_name) {
 			if (!entity_list.LimitCheckName(tmp->name)) {
 				LogSpawns("Spawn2 [{}]: Spawn group [{}] yeilded NPC type [{}], which is unique and one already exists", spawn2_id, spawngroup_id_, npcid);
