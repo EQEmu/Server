@@ -533,8 +533,8 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	const std::string item_name = item->Name;
 
 	if (
-		strcmp(item_name.substr(0, 5).c_str(), "Tome ") &&
-		strcmp(item_name.substr(0, 7).c_str(), "Skill: ")
+		item_name.substr(0, 5) != std::string("Tome ") &&
+		item_name.substr(0, 7) != std::string("Skill: ")
 	) {
 		Message(Chat::Red, "This item is not a tome.");
 		//summon them the item back...
@@ -620,8 +620,8 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 	const std::string item_name = item->Name;
 
 	if (
-		strcmp(item_name.substr(0, 7).c_str(), "Spell: ") &&
-		strcmp(item_name.substr(0, 6).c_str(), "Song: ")
+		item_name.substr(0, 7) != std::string("Spell: ") &&
+		item_name.substr(0, 6) != std::string("Song: ")
 	) {
 		Message(Chat::Red, "This item is not a scroll.");
 		SummonItem(item_id);
