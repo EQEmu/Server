@@ -45,6 +45,8 @@ int main(int argc, char *argv[]) {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
+	path.LoadPaths();
+
 	std::string launcher_name;
 	if(argc == 2) {
 		launcher_name = argv[1];
