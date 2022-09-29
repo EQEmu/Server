@@ -4259,7 +4259,7 @@ bool EntityList::LimitCheckName(const char *npc_name)
 	while (it != npc_list.end()) {
 		NPC *npc = it->second;
 		if (npc) {
-			if (strcasecmp(npc_name, npc->GetName()) == 0) {
+			if (strcasecmp(npc_name, npc->GetRawNPCTypeName()) == 0) {
 				return false;
 			}
 		}
