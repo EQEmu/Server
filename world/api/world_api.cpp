@@ -77,30 +77,6 @@ void WorldApi::BootWebserver(int port, const std::string &sidecar_key)
 		);
 	}
 
-//	api.Get("/hi", [](const httplib::Request& req, httplib::Response& res) {
-//		httplib::Client client("localhost:9080");
-//		client.set_connection_timeout(1, 0);
-//		client.set_read_timeout(1, 0);
-//		client.set_write_timeout(1, 0);
-//		client.set_bearer_token_auth(authorization_key);
-//		httplib::Headers headers = {
-//			{"Content-Type", "application/json"}
-//		};
-//
-//		LogInfo("Sending test controller request with key [{}]", authorization_key);
-//
-//		auto r = client.Get("/api/v1/test-controller");
-//		res.status = r->status;
-//		res.set_content(r->body, "application/json");
-//
-//		LogInfo("body content is [{}]", r->body);
-//
-////		res.set_content("Hello World!", "text/json");
-//	});
-
-//	api.Get("/api/v1/test-controller", SidecarApi::TestController);
-//	api.Get("/api/v1/loot-simulate", SidecarApi::LootSimulatorController);
-
 	LogInfo("Webserver API now listening on port [{0}]", web_api_port);
 	api.listen("0.0.0.0", web_api_port);
 }
