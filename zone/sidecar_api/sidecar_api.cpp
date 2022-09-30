@@ -75,12 +75,23 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 			for (const auto &header: req.headers) {
 				auto header_key   = header.first;
 				auto header_value = header.second;
+
+				LogHTTPDetail("[API] header_key [{}] header_value [{}]", header_key, header_value);
+
 				if (header_key == "Authorization") {
 					std::string auth_key = header_value;
 					Strings::FindReplace(auth_key, "Bearer ", "");
 
+					LogHTTPDetail(
+						"Request Authorization key is [{}] set key is [{}] match [{}]",
+						auth_key,
+						authorization_key,
+						auth_key == authorization_key ? "true" : "false"
+					);
+
 					// authorization key matches, pass the request on to the route handler
 					if (auth_key == authorization_key) {
+						LogHTTPDetail("[Sidecar] Returning as unhandled, authorization passed");
 						return httplib::Server::HandlerResponse::Unhandled;
 					}
 					else {
@@ -101,5 +112,7 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 	api.Get("/api/v1/loot-simulate", SidecarApi::LootSimulatorController);
 
 	LogInfo("Webserver API now listening on port [{0}]", web_api_port);
-	api.listen("0.0.0.0", web_api_port);
+
+	// this is not supposed to bind to the outside world
+	api.listen("localhost", web_api_port);
 }

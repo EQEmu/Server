@@ -27,6 +27,7 @@
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
 #include "../common/process.h"
+#include "api/world_api.h"
 
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
@@ -690,6 +691,8 @@ void WorldBoot::KillZoneSidecar(bool from_signal)
 	}
 }
 
+std::string sidecar_key = Strings::Random(25);
+
 void WorldBoot::BootZoneSidecar()
 {
 	LogInfo("Booting zone sidecar");
@@ -697,13 +700,18 @@ void WorldBoot::BootZoneSidecar()
 	// kill any existing and running instance first
 	WorldBoot::KillZoneSidecar();
 
-	std::string key = Strings::Random(25);
-
 	while (!killed) {
 		// TODO: Windows
-		std::cout << std::system(fmt::format("./bin/zone sidecar:serve-http --key={}", key).c_str()) << "\n";
+		std::cout << std::system(fmt::format("./bin/zone sidecar:serve-http --key={}", sidecar_key).c_str()) << "\n";
 
 		sleep(1);
 	}
+}
+
+void WorldBoot::BootWebApi()
+{
+	LogInfo("Booting web API");
+
+	WorldApi::BootWebserver(0, sidecar_key);
 }
 
