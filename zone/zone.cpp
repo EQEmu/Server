@@ -2872,7 +2872,8 @@ std::string Zone::GetZoneDescription()
 	}
 
 	return fmt::format(
-		"{} ({}){}{}",
+		"PID ({}) {} ({}){}{}",
+		EQ::GetPID(),
 		GetLongName(),
 		GetZoneID(),
 		(
