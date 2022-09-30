@@ -45,7 +45,11 @@ void WorldApi::BootWebserver(int port, const std::string &sidecar_key)
 						{"Authorization", "Bearer test"}
 					};
 
-					auto r = client.Get(req.path);
+					auto r = client.Get(
+						req.path, req.params, req.headers, [](uint64_t len, uint64_t total) {
+							return true; // return 'false' if you want to cancel the request.
+						}
+					);
 					res.status = r->status;
 					res.set_content(r->body, "application/json");
 
