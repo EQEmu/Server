@@ -20,7 +20,7 @@ void CatchSidecarSignal(int sig_num)
 #include "test_controller.cpp"
 #include "map_best_z_controller.cpp"
 #include "loot_simulator_controller.cpp"
-#include "../../common/file_util.h"
+#include "../../common/file.h"
 
 void SidecarApi::BootWebserver(int port)
 {
@@ -34,7 +34,7 @@ void SidecarApi::BootWebserver(int port)
 	std::string hotfix_name  = "zonesidecar_api_";
 
 	// bake shared memory if it doesn't exist
-	if (!file_exists("shared/zonesidecar_api_loot_drop")) {
+	if (!File::Exists("shared/zonesidecar_api_loot_drop")) {
 		LogInfo("Creating shared memory for prefix [{}]", hotfix_name);
 
 		std::string output = Process::execute(
