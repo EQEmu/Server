@@ -54,6 +54,7 @@ class EQEmuConfig
 		std::string WorldIP;
 		uint16 TelnetTCPPort;
 		std::string TelnetIP;
+		bool ApiEnabled;
 		bool TelnetEnabled;
 		int32 MaxClients;
 		bool WorldHTTPEnabled;

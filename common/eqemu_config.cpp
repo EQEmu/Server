@@ -99,6 +99,9 @@ void EQEmuConfig::parse_config()
 	TelnetEnabled = false;
 	if (_root["server"]["world"]["telnet"].get("enabled", "false").asString() == "true") { TelnetEnabled = true; }
 
+	ApiEnabled = false;
+	if (_root["server"]["world"]["api"].get("enabled", "false").asString() == "true") { ApiEnabled = true; }
+
 	WorldHTTPMimeFile = _root["server"]["world"]["http"].get("mimefile", "mime.types").asString();
 	WorldHTTPPort     = Strings::ToUnsignedInt(_root["server"]["world"]["http"].get("port", "9080").asString());
 	WorldHTTPEnabled  = false;
@@ -359,6 +362,7 @@ void EQEmuConfig::Dump() const
 	std::cout << "TelnetTCPPort = " << TelnetTCPPort << std::endl;
 	std::cout << "TelnetIP = " << TelnetIP << std::endl;
 	std::cout << "TelnetEnabled = " << TelnetEnabled << std::endl;
+	std::cout << "WebApiEnabled = " << ApiEnabled << std::endl;
 	std::cout << "WorldHTTPPort = " << WorldHTTPPort << std::endl;
 	std::cout << "WorldHTTPMimeFile = " << WorldHTTPMimeFile << std::endl;
 	std::cout << "WorldHTTPEnabled = " << WorldHTTPEnabled << std::endl;

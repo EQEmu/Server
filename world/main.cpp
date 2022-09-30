@@ -162,7 +162,10 @@ int main(int argc, char **argv)
 	}
 #endif
 
-	std::thread(WorldBoot::BootZoneSidecar).detach();
+	if (Config->ApiEnabled) {
+		LogInfo("API enabled");
+		std::thread(WorldBoot::BootZoneSidecar).detach();
+	}
 
 	WorldBoot::RegisterLoginservers();
 	WorldBoot::LoadDatabaseConnections();
