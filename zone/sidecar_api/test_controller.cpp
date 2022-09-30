@@ -1,4 +1,3 @@
-
 #include "sidecar_api.h"
 
 void SidecarApi::TestController(const httplib::Request &req, httplib::Response &res)

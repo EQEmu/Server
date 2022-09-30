@@ -186,6 +186,7 @@ public:
 		return res;
 	}
 
+	static std::string Random(size_t length);
 };
 
 const std::string StringFormat(const char *format, ...);

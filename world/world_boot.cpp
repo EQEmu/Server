@@ -209,7 +209,7 @@ void WorldBoot::CheckForServerScript(bool force_download)
 			if (res->status == 200) {
 				// write file
 
-				std::string script = fmt::format("{}/eqemu_server.pl", path.GetServerPath());
+				std::string   script = fmt::format("{}/eqemu_server.pl", path.GetServerPath());
 				std::ofstream out(script);
 				out << res->body;
 				out.close();
@@ -671,28 +671,39 @@ void WorldBoot::SendDiscordMessage(int webhook_id, const std::string &message)
 }
 bool killed = false;
 
-void CatchSidecarSignal(int sig_num)
+void WorldBoot::KillZoneSidecar(bool from_signal)
 {
-	LogInfo("[SidecarAPI] Caught signal [{}] killing sub-process", sig_num);
+	// TODO: Windows
+	// Possibly rebrand executable to make it easier to kill
+
+	LogInfo("Kill zone sidecar [{}]", from_signal ? "true" : "false");
+
 #ifdef _WINDOWS
 	std::system("TASKKILL /F /FI \"WINDOWTITLE eq sidecar:serve-http*\"");
 #else
 	std::system("pkill -f sidecar:serve-http");
 #endif
 
-	killed = true;
+	if (from_signal) {
+		LogInfo("[SidecarAPI] Caught signal killing sub-process");
+		killed = true;
+	}
 }
 
 void WorldBoot::BootZoneSidecar()
 {
 	LogInfo("Booting zone sidecar");
 
-	std::signal(SIGINT, CatchSidecarSignal);
-	std::signal(SIGTERM, CatchSidecarSignal);
-	std::signal(SIGKILL, CatchSidecarSignal);
+	// kill any existing and running instance first
+	WorldBoot::KillZoneSidecar();
+
+	std::string key = Strings::Random(25);
 
 	while (!killed) {
-		std::cout << std::system("./bin/zone sidecar:serve-http") << "\n";
+		// TODO: Windows
+		std::cout << std::system(fmt::format("./bin/zone sidecar:serve-http --key={}", key).c_str()) << "\n";
+
+		sleep(1);
 	}
 }
 

@@ -8,9 +8,13 @@ void ZoneCLI::SidecarServeHttp(int argc, char **argv, argh::parser &cmd, std::st
 	RegisterExecutablePlatform(EQEmuExePlatform::ExePlatformZoneSidecar);
 
 	int port = 0;
+	std::string key;
 	if (!cmd("--port").str().empty()) {
 		port = strtoll(cmd("--port").str().c_str(), nullptr, 10);
 	}
+	if (!cmd("--key").str().empty()) {
+		key = cmd("--key").str();
+	}
 
-	SidecarApi::BootWebserver(port);
+	SidecarApi::BootWebserver(port, key);
 }

@@ -42,9 +42,32 @@
 #include <stdio.h>
 #include <iostream>
 
+#include <random>
+#include <string>
+
 //Const char based
 #include "strings_legacy.cpp" // legacy c functions
 #include "strings_misc.cpp" // anything non "Strings" scoped
+
+std::string Strings::Random(size_t length)
+{
+	static auto &chrs = "0123456789"
+						"abcdefghijklmnopqrstuvwxyz"
+						"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	thread_local static std::mt19937                                          rg{std::random_device{}()};
+	thread_local static std::uniform_int_distribution<std::string::size_type> pick(0, sizeof(chrs) - 2);
+
+	std::string s;
+
+	s.reserve(length);
+
+	while (length--) {
+		s += chrs[pick(rg)];
+	}
+
+	return s;
+}
 
 std::vector<std::string> Strings::Split(const std::string &str, const char delim)
 {
@@ -64,7 +87,7 @@ std::vector<std::string> Strings::Split(const std::string &str, const char delim
 }
 
 // this one takes delimiter length into consideration
-std::vector<std::string> Strings::Split(const std::string& s, const std::string& delimiter)
+std::vector<std::string> Strings::Split(const std::string &s, const std::string &delimiter)
 {
 	size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
 	std::string              token;

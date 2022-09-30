@@ -87,6 +87,8 @@
 #include "../common/events/player_event_logs.h"
 
 #include <thread>
+#include <csignal>
+
 
 ZoneStore           zone_store;
 ClientList          client_list;
@@ -149,15 +151,9 @@ int main(int argc, char **argv)
 
 	LogInfo("CURRENT_VERSION [{}]", CURRENT_VERSION);
 
-	if (signal(SIGINT, CatchSignal) == SIG_ERR) {
-		LogError("Could not set signal handler");
-		return 1;
-	}
-
-	if (signal(SIGTERM, CatchSignal) == SIG_ERR) {
-		LogError("Could not set signal handler");
-		return 1;
-	}
+	std::signal(SIGINT, CatchSignal);
+	std::signal(SIGTERM, CatchSignal);
+	std::signal(SIGKILL, CatchSignal);
 
 #ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
@@ -167,6 +163,7 @@ int main(int argc, char **argv)
 #endif
 
 	std::thread(WorldBoot::BootZoneSidecar).detach();
+
 	WorldBoot::RegisterLoginservers();
 	WorldBoot::LoadDatabaseConnections();
 	if (!WorldBoot::DatabaseLoadRoutines(argc, argv)) {
@@ -464,7 +461,7 @@ int main(int argc, char **argv)
 	LogInfo("Shutting down zone connections (if any)");
 	zoneserver_list.KillAll();
 	LogInfo("Zone (TCP) listener stopped");
-	LogInfo("Signaling HTTP service to stop");
+	WorldBoot::KillZoneSidecar(true);
 	LogSys.CloseFileLogs();
 
 	WorldBoot::Shutdown();
@@ -475,5 +472,6 @@ int main(int argc, char **argv)
 void CatchSignal(int sig_num)
 {
 	LogInfo("Caught signal [{}]", sig_num);
+
 	RunLoops = false;
 }
