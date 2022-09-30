@@ -35,7 +35,7 @@ void WorldApi::BootWebserver(int port, const std::string &sidecar_key)
 		[](const httplib::Request &req, httplib::Response &res) {
 			for (const std::string &route: zone_sidecar_get_routes) {
 				if (route == req.path) {
-					httplib::Client client("localhost:9080");
+					httplib::Client client("localhost:9099");
 					client.set_connection_timeout(1, 0);
 					client.set_read_timeout(1, 0);
 					client.set_write_timeout(1, 0);

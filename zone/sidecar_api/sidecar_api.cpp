@@ -41,7 +41,7 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 		LogInfo("Booting with authorization key [{}]", authorization_key);
 	}
 
-	int         web_api_port = port > 0 ? port : 9080;
+	int         web_api_port = port > 0 ? port : 9099;
 	std::string hotfix_name  = "zonesidecar_api_";
 
 	// bake shared memory if it doesn't exist
