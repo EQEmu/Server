@@ -829,7 +829,7 @@ Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection,
 
 Json::Value ApiGetLogsysCategories(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
 {
-	if (zone->GetZoneID() == 0) {
+	if (!zone || (zone && zone->GetZoneID() == 0)) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 
