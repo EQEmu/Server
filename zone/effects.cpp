@@ -123,9 +123,9 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 			else if (IsNPC() && CastToNPC()->GetSpellScale())
 				value = int64(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
-			entity_list.MessageCloseString(
-				this, true, 100, Chat::SpellCrit,
-				OTHER_CRIT_BLAST, GetName(), itoa(-value));
+			entity_list.FilteredMessageCloseString(
+				this, true, 100, Chat::SpellCrit, FilterSpellCrits,
+				OTHER_CRIT_BLAST, 0, GetName(), itoa(-value));
 
 			if (IsClient())
 				MessageString(Chat::SpellCrit, YOU_CRIT_BLAST, itoa(-value));

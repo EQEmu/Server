@@ -3273,14 +3273,12 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 	else if (mode == FilterHide)
 		return false;
 
-	if (!sender && mode == FilterHide) {
+	if (sender != this && (mode == FilterHide || mode == FilterShowSelfOnly)) {
 		return false;
 	} else if (sender) {
 		if (this == sender) {
 			if (mode == FilterHide) // don't need to check others
 				return false;
-		} else if (mode == FilterShowSelfOnly) { // we know sender isn't us
-			return false;
 		} else if (mode == FilterShowGroupOnly) {
 			Group *g = GetGroup();
 			Raid *r = GetRaid();
