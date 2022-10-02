@@ -1310,7 +1310,6 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 					break;
 			}
 		}
-	
 	}
 
 	if (IsBardSong(spell_id) && AggroAmount > 40 && spells[spell_id].hate_added == 0)
