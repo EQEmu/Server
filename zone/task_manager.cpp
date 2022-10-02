@@ -8,9 +8,11 @@
 #include "../common/repositories/tasks_repository.h"
 #include "../common/repositories/tasksets_repository.h"
 #include "client.h"
+#include "dynamic_zone.h"
 #include "string_ids.h"
 #include "task_manager.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
+#include "../common/repositories/shared_task_dynamic_zones_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
 #include "../common/shared_tasks.h"
 #include "worldserver.h"
@@ -1832,4 +1834,49 @@ bool TaskManager::IsActiveTaskComplete(ClientTaskInformation& client_task)
 		}
 	}
 	return true;
+}
+
+int TaskManager::GetCurrentDzTaskID()
+{
+	auto dz = zone->GetDynamicZone();
+	if (dz)
+	{
+		// currently only supports shared tasks
+		auto res = SharedTasksRepository::GetWhere(database, fmt::format(
+			"id = (SELECT shared_task_id FROM shared_task_dynamic_zones WHERE dynamic_zone_id = {})", dz->GetID()));
+
+		if (!res.empty())
+		{
+			return res.front().task_id;
+		}
+	}
+	return 0;
+}
+
+void TaskManager::EndCurrentDzTask(bool send_fail)
+{
+	auto dz = zone->GetDynamicZone();
+	if (dz)
+	{
+		EndSharedTask(dz->GetID(), send_fail);
+	}
+}
+
+void TaskManager::EndSharedTask(uint32_t dz_id, bool send_fail)
+{
+	ServerPacket pack(ServerOP_SharedTaskEndByDz, sizeof(ServerSharedTaskEnd_Struct));
+	auto buf = reinterpret_cast<ServerSharedTaskEnd_Struct*>(pack.pBuffer);
+	buf->dz_id = dz_id;
+	buf->send_fail = send_fail;
+	worldserver.SendPacket(&pack);
+}
+
+void TaskManager::EndSharedTask(Client& client, int task_id, bool send_fail)
+{
+	ServerPacket pack(ServerOP_SharedTaskEnd, sizeof(ServerSharedTaskEnd_Struct));
+	auto buf = reinterpret_cast<ServerSharedTaskEnd_Struct*>(pack.pBuffer);
+	buf->character_id = client.CharacterID();
+	buf->task_id = task_id;
+	buf->send_fail = send_fail;
+	worldserver.SendPacket(&pack);
 }

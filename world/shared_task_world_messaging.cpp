@@ -338,6 +338,24 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			}
 			break;
 		}
+		case ServerOP_SharedTaskEndByDz: {
+			auto buf = reinterpret_cast<ServerSharedTaskEnd_Struct*>(pack->pBuffer);
+			auto shared_task = shared_task_manager.FindSharedTaskByDzId(buf->dz_id);
+			if (shared_task)
+			{
+				shared_task_manager.Terminate(*shared_task, buf->send_fail, true);
+			}
+			break;
+		}
+		case ServerOP_SharedTaskEnd: {
+			auto buf = reinterpret_cast<ServerSharedTaskEnd_Struct*>(pack->pBuffer);
+			auto shared_task = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->character_id);
+			if (shared_task)
+			{
+				shared_task_manager.Terminate(*shared_task, buf->send_fail, true);
+			}
+			break;
+		}
 		default:
 			break;
 	}

@@ -2480,6 +2480,24 @@ std::string QuestManager::gettaskname(uint32 task_id) {
 	return std::string();
 }
 
+int QuestManager::GetCurrentDzTaskID() {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem) && zone && task_manager) {
+		return task_manager->GetCurrentDzTaskID();
+	}
+
+	return 0;
+}
+
+void QuestManager::EndCurrentDzTask(bool send_fail) {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem) && zone && task_manager) {
+		task_manager->EndCurrentDzTask(send_fail);
+	}
+}
+
 void QuestManager::clearspawntimers() {
 	if (!zone) {
         return;

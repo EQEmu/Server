@@ -1423,6 +1423,16 @@ void Perl_Client_LockSharedTask(Client* self, bool lock)
 	return self->LockSharedTask(lock);
 }
 
+void Perl_Client_EndSharedTask(Client* self)
+{
+	return self->EndSharedTask();
+}
+
+void Perl_Client_EndSharedTask(Client* self, bool send_fail)
+{
+	return self->EndSharedTask(send_fail);
+}
+
 uint32_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
 {
 	return self->GetCorpseCount();
@@ -2548,6 +2558,8 @@ void perl_register_client()
 	package.add("Duck", &Perl_Client_Duck);
 	package.add("DyeArmorBySlot", (void(*)(Client*, uint8, uint8, uint8, uint8))&Perl_Client_DyeArmorBySlot);
 	package.add("DyeArmorBySlot", (void(*)(Client*, uint8, uint8, uint8, uint8, uint8))&Perl_Client_DyeArmorBySlot);
+	package.add("EndSharedTask", (void(*)(Client*))&Perl_Client_EndSharedTask);
+	package.add("EndSharedTask", (void(*)(Client*, bool))&Perl_Client_EndSharedTask);
 	package.add("Escape", &Perl_Client_Escape);
 	package.add("ExpeditionMessage", &Perl_Client_ExpeditionMessage);
 	package.add("FailTask", &Perl_Client_FailTask);

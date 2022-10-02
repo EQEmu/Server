@@ -1445,6 +1445,16 @@ void Lua_Client::LockSharedTask(bool lock) {
 	return self->LockSharedTask(lock);
 }
 
+void Lua_Client::EndSharedTask() {
+	Lua_Safe_Call_Void();
+	self->EndSharedTask();
+}
+
+void Lua_Client::EndSharedTask(bool send_fail) {
+	Lua_Safe_Call_Void();
+	self->EndSharedTask(send_fail);
+}
+
 int Lua_Client::GetCorpseCount() {
 	Lua_Safe_Call_Int();
 	return self->GetCorpseCount();
@@ -2657,6 +2667,8 @@ luabind::scope lua_register_client() {
 	.def("EnableAreaHPRegen", &Lua_Client::EnableAreaHPRegen)
 	.def("EnableAreaManaRegen", &Lua_Client::EnableAreaManaRegen)
 	.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
+	.def("EndSharedTask", (void(Lua_Client::*)(void))&Lua_Client::EndSharedTask)
+	.def("EndSharedTask", (void(Lua_Client::*)(bool))&Lua_Client::EndSharedTask)
 	.def("Escape", (void(Lua_Client::*)(void))&Lua_Client::Escape)
 	.def("FailTask", (void(Lua_Client::*)(int))&Lua_Client::FailTask)
 	.def("FilteredMessage", &Lua_Client::FilteredMessage)
