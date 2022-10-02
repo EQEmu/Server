@@ -3152,10 +3152,9 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	if (ClientVersionBit() & EQ::versions::maskSoDAndLater) {
 		if (filter->filters[FilterHealOverTime] == 0)
 			ClientFilters[FilterHealOverTime] = FilterShow;
-		// This is called 'Show Mine Only' in the clients, but functions the same as show
-		// so instead of apply special logic, just set to show
+		// This is called 'Show Mine Only' in the clients
 		else if (filter->filters[FilterHealOverTime] == 1)
-			ClientFilters[FilterHealOverTime] = FilterShow;
+			ClientFilters[FilterHealOverTime] = FilterShowSelfOnly;
 		else
 			ClientFilters[FilterHealOverTime] = FilterHide;
 	} else {
