@@ -412,23 +412,40 @@ bool Database::DeleteCharacter(char *character_name) {
 
 		QueryDatabase(query);
 
-		return true;
+	} else {
+
+		for (const auto& iter : DatabaseSchema::GetCharacterTables()) {
+			std::string table_name               = iter.first;
+			std::string character_id_column_name = iter.second;
+
+			QueryDatabase(fmt::format("DELETE FROM {} WHERE {} = {}", table_name, character_id_column_name, character_id));
+		}
+		LogInfo("DeleteCharacter | Character [{}] ({}) is being [{}]", character_name, character_id, delete_type);
 	}
 
 	LogInfo("DeleteCharacter | Character [{}] ({}) is being [{}]", character_name, character_id, delete_type);
 
-	for (const auto& iter : DatabaseSchema::GetCharacterTables()) {
-		std::string table_name               = iter.first;
-		std::string character_id_column_name = iter.second;
-
-		QueryDatabase(fmt::format("DELETE FROM {} WHERE {} = {}", table_name, character_id_column_name, character_id));
-	}
-
 #ifdef BOTS
 	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", character_id); // note: only use of GetMobTypeById()
 	QueryDatabase(query);
-#endif
 
+	if (RuleB(Character, SoftDeletes)) {
+		std::string query = fmt::format(
+			SQL(
+				UPDATE
+				bot_data
+				SET
+				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64)
+				WHERE
+				owner_id = '{}'
+			),
+			character_id
+		);
+		QueryDatabase(query);
+		LogInfo("DeleteCharacterBOTS | CharacterBOTS [{}] ({}) is being [{}]", character_name, character_id, delete_type);
+	}
+
+#endif
 
 	return true;
 }
