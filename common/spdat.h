@@ -563,28 +563,28 @@ enum ProcType
 
 enum SpellTypes : uint32
 {
-	SpellType_Nuke = (1 << 0),
-	SpellType_Heal = (1 << 1),
-	SpellType_Root = (1 << 2),
-	SpellType_Buff = (1 << 3),
-	SpellType_Escape = (1 << 4),
-	SpellType_Pet = (1 << 5),
-	SpellType_Lifetap = (1 << 6),
-	SpellType_Snare = (1 << 7),
-	SpellType_DOT = (1 << 8),
-	SpellType_Dispel = (1 << 9),
-	SpellType_InCombatBuff = (1 << 10),
-	SpellType_Mez = (1 << 11),
-	SpellType_Charm = (1 << 12),
-	SpellType_Slow = (1 << 13),
-	SpellType_Debuff = (1 << 14),
-	SpellType_Cure = (1 << 15),
-	SpellType_Resurrect = (1 << 16),
-	SpellType_HateRedux = (1 << 17),
-	SpellType_InCombatBuffSong = (1 << 18), // bard in-combat group/ae buffs
-	SpellType_OutOfCombatBuffSong = (1 << 19), // bard out-of-combat group/ae buffs
-	SpellType_PreCombatBuff = (1 << 20),
-	SpellType_PreCombatBuffSong = (1 << 21)
+	SpellType_Nuke = 1,
+	SpellType_Heal = 2,
+	SpellType_Root = 4,
+	SpellType_Buff = 8, 
+	SpellType_Escape = 16,
+	SpellType_Pet = 32,
+	SpellType_Lifetap = 64,
+	SpellType_Snare = 128,
+	SpellType_DOT = 256,
+	SpellType_Dispel = 512,
+	SpellType_InCombatBuff = 1024,
+	SpellType_Mez = 2048,
+	SpellType_Charm = 4096,
+	SpellType_Slow = 8196,
+	SpellType_Debuff = 16384,
+	SpellType_Cure = 32768,
+	SpellType_Resurrect = 65536,
+	SpellType_HateRedux = 131072,
+	SpellType_InCombatBuffSong = 262144, // bard in-combat group/ae buffs
+	SpellType_OutOfCombatBuffSong = 524288, // bard out-of-combat group/ae buffs
+	SpellType_PreCombatBuff = 1048576,
+	SpellType_PreCombatBuffSong = 2097152
 };
 
 const uint32 SPELL_TYPE_MIN = (SpellType_Nuke << 1) - 1;
