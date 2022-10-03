@@ -1333,43 +1333,49 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 	int32 AggroAmount = 0;
 	auto target_level = target ? target->GetLevel() : 1;
 	bool ignore_default_buff = false; // rune/hot don't use the default 9, HP buffs that heal (virtue) do use the default
+		
+	if (spells[spell_id].hate_added != 0){ // overrides the hate (ex. Healing Splash ), can be negative (but function will return 0). 
+		AggroAmount = spells[spell_id].hate_added;
+	}
+	else
+	{
+		for (int o = 0; o < EFFECT_COUNT; o++) {
+			switch (spells[spell_id].effect_id[o]) {
+				case SE_CurrentHP:
+				case SE_PercentalHeal:
+				{
+				if (heal_possible == 0) {
+					AggroAmount += 1;
+					break;
+				}
+				// hate based on base healing power of the spell
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o],
+								spells[spell_id].base_value[o], spells[spell_id].max_value[o], GetLevel(), spell_id);
+				if (val > 0) {
+					if (heal_possible < val)
+						val = heal_possible; // capped to amount healed
+					val = 2 * val / 3; // 3:2 ratio
 
-	for (int o = 0; o < EFFECT_COUNT; o++) {
-		switch (spells[spell_id].effect_id[o]) {
-			case SE_CurrentHP:
-			case SE_PercentalHeal:
-			{
-			if (heal_possible == 0) {
-				AggroAmount += 1;
+					if (target_level > 50 && val > 1500)
+						val = 1500; // target 51+ seems ~1500
+					else if (target_level <= 50 && val > 800)
+						val = 800; // per live patch notes, capped to 800
+				}
+				AggroAmount += std::max(val, (int64)1);
 				break;
 			}
-			// hate based on base healing power of the spell
-			int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o],
-							 spells[spell_id].base_value[o], spells[spell_id].max_value[o], GetLevel(), spell_id);
-			if (val > 0) {
-				if (heal_possible < val)
-					val = heal_possible; // capped to amount healed
-				val = 2 * val / 3; // 3:2 ratio
-
-				if (target_level > 50 && val > 1500)
-					val = 1500; // target 51+ seems ~1500
-				else if (target_level <= 50 && val > 800)
-					val = 800; // per live patch notes, capped to 800
+			case SE_Rune:
+				AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o],
+								spells[spell_id].base_value[o], spells[spell_id].max_value[o], GetLevel(), spell_id) * 2;
+				ignore_default_buff = true;
+				break;
+			case SE_HealOverTime:
+				AggroAmount += 10;
+				ignore_default_buff = true;
+				break;
+			default:
+				break;
 			}
-			AggroAmount += std::max(val, (int64)1);
-			break;
-		}
-		case SE_Rune:
-			AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o],
-							 spells[spell_id].base_value[o], spells[spell_id].max_value[o], GetLevel(), spell_id) * 2;
-			ignore_default_buff = true;
-			break;
-		case SE_HealOverTime:
-			AggroAmount += 10;
-			ignore_default_buff = true;
-			break;
-		default:
-			break;
 		}
 	}
 	if (GetOwner() && IsPet())
@@ -1385,7 +1391,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
 
-	return std::max(0, AggroAmount);
+	return std::max(0, AggroAmount + spells[spell_id].bonus_hate); //Bonus Hate from spells like Aurora of Morrow
 }
 
 void Mob::AddFeignMemory(Mob* attacker) {
