@@ -104,15 +104,24 @@ int main()
 	/* Load Looking For Guild Manager */
 	lfguildmanager.LoadDatabase();
 
-	while (RunLoops) {
+	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
+
+		if (!RunLoops) {
+			EQ::EventLoop::Get().Shutdown();
+			return;
+		}
+
 		if (LFGuildExpireTimer.Check()) {
 			lfguildmanager.ExpireEntries();
 		}
+	};
 
-		EQ::EventLoop::Get().Process();
-		Sleep(5);
-	}
+	EQ::Timer process_timer(loop_fn);
+	process_timer.Start(32, true);
+
+	EQ::EventLoop::Get().Run();
+
 	LogSys.CloseFileLogs();
 }
 

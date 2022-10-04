@@ -294,6 +294,7 @@ int main(int argc, char **argv)
 
 		if (!run_server) {
 			EQ::EventLoop::Get().Shutdown();
+			return;
 		}
 
 		server.client_manager->Process();
