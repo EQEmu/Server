@@ -8788,7 +8788,7 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 
 	for (int i = 0; i < QUESTREWARD_COUNT; ++i)
 		if (reward.item_id[i] > 0)
-			SummonItem(reward.item_id[i], 0, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
+			SummonItem(reward.item_id[i], -1, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
 
 	// only process if both are valid
 	// if we don't have a target here, we want to just reward, but if there is a target, need to check charm
