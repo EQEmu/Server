@@ -208,6 +208,7 @@ const std::string DIAWIND_RESPONSE_TWO_KEY       = "diawind_npc_response_two";
 const uint32      POPUPID_DIAWIND_ONE            = 99999;
 const uint32      POPUPID_DIAWIND_TWO            = 100000;
 const uint32      POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
+const uint32      POPUPID_REPLACE_SPELLWINDOW    = 1000001;
 
 struct ClientReward
 {
