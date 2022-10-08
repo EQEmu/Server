@@ -8930,11 +8930,30 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else if (item->ItemType == EQ::item::ItemTypeSpell)
 			{
-				if (RuleB(Spells, AllowSpellMemorizeFromItem)) {
-					SendPopupToClient("","Testing",1000001,1,0);
-				} else {
+				spell_id = item->Scroll.Effect;
+				if (RuleB(Spells, AllowSpellMemorizeFromItem)) 
+				{
+					int highest_spell_id = GetHighestScribedSpellinSpellGroup(spells[spell_id].spell_group);
+					if (spells[spell_id].spell_group > 0 && highest_spell_id > 0) 
+					{
+						if (spells[spell_id].rank > spells[highest_spell_id].rank)
+						{
+							std::string message = fmt::format("{} will replace {} in your spellbook", GetSpellName(spell_id), GetSpellName(highest_spell_id));
+							this->SetEntityVariable("slot_id",itoa(slot_id));
+							this->SetEntityVariable("spell_id",itoa(item->ID));
+							this->SendPopupToClient("", message.c_str(), 1000001, 1, 10);
+							return;
+						} 
+						else if (spells[spell_id].rank < spells[highest_spell_id].rank)
+						{
+							MessageString(Chat::Red, 11004, spells[spell_id].name, spells[highest_spell_id].name);
+							return;
+						} 
+					}
+					DeleteItemInInventory(slot_id, 1, true);
+					MemorizeSpellFromItem(item->ID);
 					return;
-				}
+				} 
 			}
 			else if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 			{
@@ -11143,8 +11162,10 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	std::string response;
 	switch (popup_response->popupid) {
 		case POPUPID_REPLACE_SPELLWINDOW:
-				LogDebug("Are we even receiving the reponse, with item? [{}]",popup_response->popupid);
-				//MemorizeSpellFromItem(item->ID);
+				LogDebug("Are we even receiving the reponse, with item? slot [{}] spellID [{}]",std::stoi(this->GetEntityVariable("slot_id")),std::stoi(this->GetEntityVariable("spell_id")));
+				DeleteItemInInventory(std::stoi(this->GetEntityVariable("slot_id")), 1, true);
+				MemorizeSpellFromItem(std::stoi(this->GetEntityVariable("spell_id")));
+			return;
 			break;
 
 		case POPUPID_UPDATE_SHOWSTATSWINDOW:
