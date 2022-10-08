@@ -8931,7 +8931,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			else if (item->ItemType == EQ::item::ItemTypeSpell)
 			{
 				if (RuleB(Spells, AllowSpellMemorizeFromItem)) {
-					SendPopupToClient("Test","Testing",1,1,0);
+					SendPopupToClient("","Testing",1000001,1,0);
 				} else {
 					return;
 				}
@@ -11135,13 +11135,16 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 
 	PopupResponse_Struct *popup_response = (PopupResponse_Struct *) app->pBuffer;
 
+	//Get Item Details if POPUPID_REPLACE_SPELLWINDOW was used
+
 	/**
 	 * Handle any EQEmu defined popup Ids first
 	 */
 	std::string response;
 	switch (popup_response->popupid) {
 		case POPUPID_REPLACE_SPELLWINDOW:
-				MemorizeSpellFromItem();
+				LogDebug("Are we even receiving the reponse, with item? [{}]",popup_response->popupid);
+				//MemorizeSpellFromItem(item->ID);
 			break;
 
 		case POPUPID_UPDATE_SHOWSTATSWINDOW:
