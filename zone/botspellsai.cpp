@@ -1594,12 +1594,33 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
+		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
+			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+				auto full_name = fmt::format(
+					"{}-{}",
+					botCaster->GetOwner()->CastToClient()->GetBucketKey(),
+					bucket_name
+				);
+
+				auto player_value = client_data_buckets[full_name];
+
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->GetOwner()->CastToClient()->CheckBotSpellDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
@@ -1621,12 +1642,33 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
+		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
+			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+				auto full_name = fmt::format(
+					"{}-{}",
+					botCaster->GetOwner()->CastToClient()->GetBucketKey(),
+					bucket_name
+				);
+
+				auto player_value = client_data_buckets[full_name];
+
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->GetOwner()->CastToClient()->CheckBotSpellDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
@@ -1650,7 +1692,6 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
 		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
 			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
@@ -1697,14 +1738,35 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType) {
 	std::list<BotSpell_wPriority> result;
 
-	if (botCaster && botCaster->AI_HasSpells()) {
+	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
+		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
+			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+				auto full_name = fmt::format(
+					"{}-{}",
+					botCaster->GetOwner()->CastToClient()->GetBucketKey(),
+					bucket_name
+				);
+
+				auto player_value = client_data_buckets[full_name];
+
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->GetOwner()->CastToClient()->CheckBotSpellDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if (botSpellList[i].type & spellType) {
@@ -1734,12 +1796,33 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType) {
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
+		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
+			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+				auto full_name = fmt::format(
+					"{}-{}",
+					botCaster->GetOwner()->CastToClient()->GetBucketKey(),
+					bucket_name
+				);
+
+				auto player_value = client_data_buckets[full_name];
+
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->GetOwner()->CastToClient()->CheckBotSpellDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if((botSpellList[i].type & spellType) && CheckSpellRecastTimers(botCaster, i)) {
@@ -1826,12 +1909,33 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot *botCaster) {
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
+		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
+			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+				auto full_name = fmt::format(
+					"{}-{}",
+					botCaster->GetOwner()->CastToClient()->GetBucketKey(),
+					bucket_name
+				);
+
+				auto player_value = client_data_buckets[full_name];
+
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->GetOwner()->CastToClient()->CheckBotSpellDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if(IsCompleteHealSpell(botSpellList[i].spellid) && CheckSpellRecastTimers(botCaster, i)) {
@@ -2343,12 +2447,33 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
+		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
+			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+				auto full_name = fmt::format(
+					"{}-{}",
+					botCaster->GetOwner()->CastToClient()->GetBucketKey(),
+					bucket_name
+				);
+
+				auto player_value = client_data_buckets[full_name];
+
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->GetOwner()->CastToClient()->CheckBotSpellDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if(((botSpellList[i].type & SpellType_Debuff) || IsDebuffSpell(botSpellList[i].spellid))
@@ -2390,12 +2515,33 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
-
+		auto client_data_buckets =  botCaster->GetOwner()->CastToClient()->GetBotSpellDataBuckets();
+			
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+				auto full_name = fmt::format(
+					"{}-{}",
+					botCaster->GetOwner()->CastToClient()->GetBucketKey(),
+					bucket_name
+				);
+
+				auto player_value = client_data_buckets[full_name];
+
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->GetOwner()->CastToClient()->CheckBotSpellDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if(((botSpellList[i].type & SpellType_Debuff) || IsResistDebuffSpell(botSpellList[i].spellid))
