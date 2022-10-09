@@ -1632,6 +1632,9 @@ public:
 	std::map<std::string,std::string> GetMerchantDataBuckets();
 	bool CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value);
 
+	std::map<std::string,std::string> GetBotSpellDataBuckets();
+	bool CheckBotSpellDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value);
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
