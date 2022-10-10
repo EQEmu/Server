@@ -3708,12 +3708,20 @@ bool Perl__hasrecipelearned(uint32 recipe_id)
 
 bool Perl__IsRaining()
 {
-	return quest_manager.IsRaining();
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsRaining();
 }
 
 bool Perl__IsSnowing()
 {
-	return quest_manager.IsSnowing();
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsSnowing();
 }
 
 void perl_register_quest()
