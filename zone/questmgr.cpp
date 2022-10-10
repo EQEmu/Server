@@ -3723,3 +3723,19 @@ void QuestManager::LearnRecipe(uint32 recipe_id) {
 
 	initiator->LearnRecipe(recipe_id);
 }
+
+bool QuestManager::IsRaining() {
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsRaining();
+}
+
+bool QuestManager::IsSnowing() {
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsSnowing();
+}

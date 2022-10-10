@@ -340,6 +340,8 @@ public:
 	int GetRecipeMadeCount(uint32 recipe_id);
 	std::string GetRecipeName(uint32 recipe_id);
 	bool HasRecipeLearned(uint32 recipe_id);
+	bool IsRaining();
+	bool IsSnowing();
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
