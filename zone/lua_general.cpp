@@ -4306,7 +4306,8 @@ luabind::scope lua_register_events() {
 			luabind::value("alt_currency_merchant_buy", static_cast<int>(EVENT_ALT_CURRENCY_MERCHANT_BUY)),
 			luabind::value("alt_currency_merchant_sell", static_cast<int>(EVENT_ALT_CURRENCY_MERCHANT_SELL)),
 			luabind::value("merchant_buy", static_cast<int>(EVENT_MERCHANT_BUY)),
-			luabind::value("merchant_sell", static_cast<int>(EVENT_MERCHANT_SELL))
+			luabind::value("merchant_sell", static_cast<int>(EVENT_MERCHANT_SELL)),
+			luabind::value("inspect", static_cast<int>(EVENT_INSPECT))
 		];
 }
 
