@@ -661,7 +661,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	}
 
 	LogInfo(
-		"[ZonePC] Client [{}] zone_id [{}] x [{}] y [{}] x [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+		"[ZonePC] Client [{}] zone_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
 		GetCleanName(),
 		zoneID,
 		x,
