@@ -371,8 +371,14 @@ int main(int argc, char **argv)
 		}
 	);
 
-	while (RunLoops) {
+	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
+
+		if (!RunLoops) {
+			EQ::EventLoop::Get().Shutdown();
+			return;
+		}
+
 		eqs = nullptr;
 
 		//give the stream identifier a chance to do its work....
@@ -381,7 +387,7 @@ int main(int argc, char **argv)
 		//check the stream identifier for any now-identified streams
 		while ((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
-			struct in_addr in{};
+			struct in_addr in {};
 			in.s_addr = eqsi->GetRemoteIP();
 			if (RuleB(World, UseBannedIPsTable)) { //Lieka: Check to see if we have the responsibility for blocking IPs.
 				LogInfo("Checking inbound connection [{}] against BannedIPs table", inet_ntoa(in));
@@ -447,10 +453,13 @@ int main(int argc, char **argv)
 			);
 			UpdateWindowTitle(window_title);
 		}
+	};
 
-		EQ::EventLoop::Get().Process();
-		Sleep(5);
-	}
+	EQ::Timer process_timer(loop_fn);
+	process_timer.Start(32, true);
+
+	EQ::EventLoop::Get().Run();
+
 	LogInfo("World main loop completed");
 	LogInfo("Shutting down zone connections (if any)");
 	zoneserver_list.KillAll();

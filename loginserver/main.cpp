@@ -289,13 +289,21 @@ int main(int argc, char **argv)
 	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
 	LogInfo("[Config] [Security] IsUpdatingInsecurePasswords [{0}]", server.options.IsUpdatingInsecurePasswords());
 
-	while (run_server) {
+	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
-		server.client_manager->Process();
-		EQ::EventLoop::Get().Process();
 
-		Sleep(5);
-	}
+		if (!run_server) {
+			EQ::EventLoop::Get().Shutdown();
+			return;
+		}
+
+		server.client_manager->Process();
+	};
+
+	EQ::Timer process_timer(loop_fn);
+	process_timer.Start(32, true);
+
+	EQ::EventLoop::Get().Run();
 
 	LogInfo("Server Shutdown");
 
