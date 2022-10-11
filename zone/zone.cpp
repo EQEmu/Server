@@ -1859,7 +1859,7 @@ void Zone::ResetShutdownTimer() {
 		zone->GetZoneDescription()
 	);
 
-	autoshutdown_timer.Start(autoshutdown_timer.GetDuration(), true);
+	autoshutdown_timer.SetTimer(autoshutdown_timer.GetDuration());
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
