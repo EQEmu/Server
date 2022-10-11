@@ -1801,6 +1801,8 @@ private:
 	int32 max_end;
 	int32 current_endurance;
 
+	bool lock_save_position = false;
+
 	PlayerProfile_Struct m_pp;
 	ExtendedProfile_Struct m_epp;
 	EQ::InventoryProfile m_inv;

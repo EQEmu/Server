@@ -634,11 +634,14 @@ bool Client::Save(uint8 iCommitNow) {
 		return false;
 
 	/* Wrote current basics to PP for saves */
-	m_pp.x = m_Position.x;
-	m_pp.y = m_Position.y;
-	m_pp.z = m_Position.z;
+	if (!lock_save_position) {
+		m_pp.x       = m_Position.x;
+		m_pp.y       = m_Position.y;
+		m_pp.z       = m_Position.z;
+		m_pp.heading = m_Position.w;
+	}
+
 	m_pp.guildrank = guildrank;
-	m_pp.heading = m_Position.w;
 
 	/* Mana and HP */
 	if (GetHP() <= 0) {

@@ -467,6 +467,8 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	//Force a save so its waiting for them when they zone
 	Save(2);
 
+	lock_save_position = true;
+
 	if (zone_id == zone->GetZoneID() && instance_id == zone->GetInstanceID()) {
 		// No need to ask worldserver if we're zoning to ourselves (most
 		// likely to a bind point), also fixes a bug since the default response was failure
