@@ -909,6 +909,10 @@ void Client::CompleteConnect()
 		GoToSafeCoords(ZoneID("arena"), 0);
 		return;
 	}
+
+	// force resending of position when finally complete
+	// in hopes to alleviating race condition under-world issues
+	MovePC(zone->GetZoneID(), zone->GetInstanceID(), GetX(), GetY(), GetZ(), GetHeading());
 }
 
 // connecting opcode handlers
