@@ -1495,6 +1495,8 @@ bool Zone::Process() {
 
 	if (spawn2_timer.Check()) {
 
+		LogInfo("Processing spawn2");
+
 		LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 		EQ::InventoryProfile::CleanDirty();

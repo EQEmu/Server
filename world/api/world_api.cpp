@@ -17,6 +17,8 @@ std::vector<std::string> zone_sidecar_get_routes = {
 	"/api/v1/loot-simulate"
 };
 
+httplib::Client client("localhost:9099");
+
 void WorldApi::BootWebserver(int port, const std::string &sidecar_key)
 {
 	LogInfo("Booting zone sidecar API");
@@ -30,16 +32,16 @@ void WorldApi::BootWebserver(int port, const std::string &sidecar_key)
 
 	httplib::Server api;
 
+	client.set_connection_timeout(1, 0);
+	client.set_read_timeout(1, 0);
+	client.set_write_timeout(1, 0);
+	client.set_bearer_token_auth(authorization_key);
+
 	api.set_logger(WorldApi::LogHandler);
 	api.set_pre_routing_handler(
 		[](const httplib::Request &req, httplib::Response &res) {
 			for (const std::string &route: zone_sidecar_get_routes) {
 				if (route == req.path) {
-					httplib::Client client("localhost:9099");
-					client.set_connection_timeout(1, 0);
-					client.set_read_timeout(1, 0);
-					client.set_write_timeout(1, 0);
-					client.set_bearer_token_auth(authorization_key);
 					httplib::Headers headers = {
 						{"Content-Type",  "application/json"},
 						{"Authorization", "Bearer test"}
@@ -47,7 +49,7 @@ void WorldApi::BootWebserver(int port, const std::string &sidecar_key)
 
 					auto r = client.Get(
 						req.path, req.params, req.headers, [](uint64_t len, uint64_t total) {
-							return true; // return 'false' if you want to cancel the request.
+							return true;
 						}
 					);
 					res.status = r->status;

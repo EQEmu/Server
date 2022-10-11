@@ -21,6 +21,16 @@ void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::R
 
 			BenchTimer benchmark;
 
+			// depop the previous one
+			for (auto &n: entity_list.GetNPCList()) {
+				if (n.second->GetNPCTypeID() == npc_id) {
+					LogInfo("found npc id [{}]", npc_id);
+					n.second->Depop();
+					zone->spawn2_timer.Trigger();
+					zone->Process();
+				}
+			}
+
 			npc->SetRecordLootStats(true);
 			for (int i = 0; i < iterations; i++) {
 				npc->AddLootTable(loottable_id);
