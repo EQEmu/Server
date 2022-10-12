@@ -505,7 +505,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	uint32 exp = 0;
 	uint32 aaexp = 0;
 
-	if (m_epp.perAA<0 || m_epp.perAA>100) {
+	if (m_epp.perAA < 0 || m_epp.perAA > 100) {
 		m_epp.perAA = 0;    // stop exploit with sanity check
 	}
 
@@ -546,7 +546,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	// Doing this here means potentially one kill wasted worth of experience, but easiest to put it here than to rewrite this function.
 	int aa_cap = RuleI(AA, UnusedAAPointCap);
 
-	if (aa_cap > 0 && aaexp > 0) {
+	if (aa_cap >= 0 && aaexp > 0) {
 		if (m_pp.aapoints == aa_cap) {
 			MessageString(Chat::Red, AA_CAP);
 			aaexp = 0;
