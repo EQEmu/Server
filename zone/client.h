@@ -1801,6 +1801,13 @@ private:
 	int32 max_end;
 	int32 current_endurance;
 
+	// https://github.com/EQEmu/Server/pull/2479
+	bool m_lock_save_position = false;
+public:
+	bool IsLockSavePosition() const;
+	void SetLockSavePosition(bool lock_save_position);
+private:
+
 	PlayerProfile_Struct m_pp;
 	ExtendedProfile_Struct m_epp;
 	EQ::InventoryProfile m_inv;
