@@ -8939,7 +8939,9 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					DeleteItemInInventory(slot_id, 1, true);
 					MemorizeSpellFromItem(item->ID);
 					return;
-				} 
+				} else {
+					return;
+				}
 			}
 			else if ((item->Click.Type == EQ::item::ItemEffectClick) || (item->Click.Type == EQ::item::ItemEffectExpendable) || (item->Click.Type == EQ::item::ItemEffectEquipClick) || (item->Click.Type == EQ::item::ItemEffectClick2))
 			{
