@@ -2579,11 +2579,11 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 			if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
 				if (!IsSpellInList(spell_list, e.spellid))
 				{
-					AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
+						AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
 				}
 			}
 		}
-	}
+	}	
 	if (spell_list->attack_proc >= 0) {
 		attack_proc_spell = spell_list->attack_proc;
 		proc_chance = spell_list->proc_chance;
@@ -2619,9 +2619,24 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	}
 
 	for (auto &e : spell_list->entries) {
+
+#ifdef Bots		
+		if (iDBSpellsID >= 3001 && iDBSpellsID <= 3016) {
+			if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
+				AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
+			}
+		}
+		else
+		{
+			if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
+				AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
+			}
+		}
+#else
 		if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
 			AddSpellToNPCList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
 		}
+#endif
 	}
 
 	std::sort(AIspells.begin(), AIspells.end(), [](const AISpells_Struct& a, const AISpells_Struct& b) {
@@ -2827,6 +2842,38 @@ void NPC::AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType,
 		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 }
 
+void NPC::AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType,
+							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp, std::string bucket_name, std::string bucket_value, uint8 bucket_comparison)
+{
+
+	if(!IsValidSpell(iSpellID))
+		return;
+
+	HasAISpell = true;
+	AISpells_Struct t;
+
+	t.priority = iPriority;
+	t.spellid = iSpellID;
+	t.type = iType;
+	t.manacost = iManaCost;
+	t.recast_delay = iRecastDelay;
+	t.time_cancast = 0;
+	t.resist_adjust = iResistAdjust;
+	t.min_hp = min_hp;
+	t.max_hp = max_hp;
+	t.bucket_name = bucket_name;
+	t.bucket_value = bucket_value;
+	t.bucket_comparison = bucket_comparison;
+
+	AIspells.push_back(t);
+
+	// If we're going from an empty list, we need to start the timer
+	if (AIspells.size() == 1)
+		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
+}
+
+
+
 void NPC::RemoveSpellFromNPCList(uint16 spell_id)
 {
 	auto iter = AIspells.begin();
@@ -2985,19 +3032,67 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		spell_set.idle_beneficial_chance = atoi(row[19]);
 
 		// pulling fixed values from an auto-increment field is dangerous...
+
+#ifdef BOTS
+
+		if (iDBSpellsID >= 3001 && iDBSpellsID <= 3016)
+		{
+			query = StringFormat(
+		  	  "SELECT spellid, type, minlevel, maxlevel, "
+		 	   "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust, bucket_name, bucket_value, bucket_comparison "
+
+			    "FROM bot_spells_entries "
+			    "WHERE npc_spells_id=%d ORDER BY minlevel", iDBSpellsID);
+
+			results = QueryDatabase(query);
+
+
+			if (!results.Success()) {
+				return nullptr;
+			}
+
+			int entryIndex = 0;
+			for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
+				DBnpcspells_entries_Struct entry;
+				int spell_id = atoi(row[0]);
+				entry.spellid = spell_id;
+				entry.type = atoul(row[1]);
+				entry.minlevel = atoi(row[2]);
+				entry.maxlevel = atoi(row[3]);
+				entry.manacost = atoi(row[4]);
+				entry.recast_delay = atoi(row[5]);
+				entry.priority = atoi(row[6]);
+				entry.min_hp = atoi(row[7]);
+				entry.max_hp = atoi(row[8]);
+				entry.bucket_name = row[9] ? row[9] : "";
+				entry.bucket_value = row[10] ? row[10] : "";
+				entry.bucket_comparison = atoi(row[11]);
+
+				// some spell types don't make much since to be priority 0, so fix that
+				if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
+					entry.priority = 1;
+
+				if (row[9])
+					entry.resist_adjust = atoi(row[9]);
+				else if (IsValidSpell(spell_id))
+					entry.resist_adjust = spells[spell_id].resist_difficulty;
+
+				spell_set.entries.push_back(entry);
+			}
+
+			npc_spells_cache.insert(std::make_pair(iDBSpellsID, spell_set));
+			return &npc_spells_cache[iDBSpellsID];
+	    } 
+	
+#endif
+
 		query = StringFormat(
 		    "SELECT spellid, type, minlevel, maxlevel, "
 		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
-#ifdef BOTS
-		    "FROM %s "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    (iDBSpellsID >= 3001 && iDBSpellsID <= 3016 ? "bot_spells_entries" : "npc_spells_entries"),
-		    iDBSpellsID);
-#else
 		    "FROM npc_spells_entries "
 		    "WHERE npc_spells_id=%d ORDER BY minlevel",
 		    iDBSpellsID);
-#endif
+
 		results = QueryDatabase(query);
 
 		if (!results.Success()) {

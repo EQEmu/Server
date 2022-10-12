@@ -464,6 +464,7 @@ public:
 
 	uint32 GetAdventureTemplate() const { return adventure_template_id; }
 	void AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
+	void NPC::AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp, std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
 	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value, bool apply_bonus = false);
 	void RemoveSpellFromNPCList(uint16 spell_id);
 	void RemoveSpellEffectFromNPCList(uint16 iSpellEffectID, bool apply_bonus = false);
