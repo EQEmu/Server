@@ -113,8 +113,8 @@ public:
 	void changedeity(int deity_id);
 	void exp(int amt);
 	void level(int newlevel);
-	void traindisc(int discipline_tome_item_id);
-	bool isdisctome(int item_id);
+	void traindisc(uint32 discipline_tome_item_id);
+	bool isdisctome(uint32 item_id);
 	std::string getracename(uint16 race_id);
 	std::string getspellname(uint32 spell_id);
 	std::string getskillname(int skill_id);
