@@ -11148,8 +11148,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	std::string response;
 	switch (popup_response->popupid) {
 		case POPUPID_REPLACE_SPELLWINDOW:
-			DeleteItemInInventory(std::stoi(this->GetEntityVariable("slot_id")), 1, true);
-			MemorizeSpellFromItem(std::stoi(this->GetEntityVariable("spell_id")));
+			DeleteItemInInventory(std::stoi(GetEntityVariable("slot_id")), 1, true);
+			MemorizeSpellFromItem(std::stoi(GetEntityVariable("spell_id")));
 			return;
 			break;
 
