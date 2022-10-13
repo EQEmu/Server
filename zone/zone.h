@@ -249,8 +249,8 @@ public:
 	uint32 GetCurrencyID(uint32 item_id);
 	uint32 GetCurrencyItemID(uint32 currency_id);
 
-	inline bool IsRaining() { return zone_weather == EQ::constants::WeatherTypes::Raining; }
-	inline bool IsSnowing() { return zone_weather == EQ::constants::WeatherTypes::Snowing; }
+	inline bool IsRaining() { return zone_weather == 1; }
+	inline bool IsSnowing() { return zone_weather == 2; }
 
 	std::string GetZoneDescription();
 	void SendReloadMessage(std::string reload_type);
