@@ -1378,6 +1378,10 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 	if (!ignore_default_buff && IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id))
 		AggroAmount = IsBardSong(spell_id) ? 2 : 9;
 
+	if (spells[spell_id].hate_added != 0) // overrides the hate (ex. Healing Splash ), can be negative (but function will return 0). 
+		AggroAmount = spells[spell_id].hate_added;
+	
+
 	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
@@ -1385,7 +1389,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
 
-	return std::max(0, AggroAmount);
+	return std::max(0, AggroAmount + spells[spell_id].bonus_hate); //Bonus Hate from spells like Aurora of Morrow
 }
 
 void Mob::AddFeignMemory(Mob* attacker) {
