@@ -454,6 +454,7 @@
 #define NO_CAST_OUT_OF_COMBAT		9191	//You can not cast this spell while out of combat.
 #define NO_ABILITY_IN_COMBAT		9192	//You can not use this ability while in combat.
 #define NO_ABILITY_OUT_OF_COMBAT	9194	//You can not use this ability while out of combat.
+#define LESSER_SPELL_VERSION        11004   //%1 is a lesser version of %2 and cannot be scribed
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
 #define FACE_ACCEPTED				12028	//Facial features accepted.
 #define TRACKING_BEGIN				12040   //You begin tracking %1.
