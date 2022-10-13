@@ -4050,12 +4050,14 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							attacker->MessageString(Chat::DamageShield, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
 					}
 					else {
-						entity_list.MessageCloseString(
-							this, /* Sender */
-							true, /* Skip Sender */
+						entity_list.FilteredMessageCloseString(
+							attacker, /* Sender */
+							false, /* Sender is attacker, so do not skip */
 							RuleI(Range, SpellMessages),
 							Chat::NonMelee, /* 283 */
+							FilterSpellDamage, /* FilterType: 13 */
 							HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+							0,
 							attacker->GetCleanName(), /* Message1 */
 							GetCleanName(), /* Message2 */
 							ConvertArray(damage, val1) /* Message3 */
@@ -4215,7 +4217,7 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 				// message to target
 				if (IsClient() && caster != this) {
 					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
-						FilteredMessageString(this, Chat::NonMelee, FilterHealOverTime,
+						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							HOT_HEALED_OTHER, caster->GetCleanName(),
 							itoa(acthealed), spells[spell_id].name);
 					else
@@ -4231,7 +4233,7 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
 		}
-		else {
+		else if (CastToClient()->GetFilter(FilterHealOverTime) != (FilterShowSelfOnly || FilterHide)) {
 			Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}
