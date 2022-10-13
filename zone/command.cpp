@@ -286,7 +286,7 @@ int command_init(void)
 		command_add("setendurance", "[Endurance] - Set your or your target's Endurance", AccountStatus::GMAdmin, command_setendurance) ||
 		command_add("setfaction", "[Faction ID] - Sets targeted NPC's faction in the database", AccountStatus::GMAreas, command_setfaction) ||
 		command_add("sethp", "[Health] - Set your or your target's Health", AccountStatus::GMAdmin, command_sethp) ||
-		command_add("setlanguage", "[language ID] [value] - Set your target's language skillnum to value", AccountStatus::Guide, command_setlanguage) ||
+		command_add("setlanguage", "[Language ID] [Value] - Set your or your target's Language by ID to Value", AccountStatus::Guide, command_setlanguage) ||
 		command_add("setlsinfo", "[Email] [Password] - Set loginserver email address and password (if supported by loginserver)", AccountStatus::Steward, command_setlsinfo) ||
 		command_add("setmana", "[Mana] - Set your or your target's Mana", AccountStatus::GMAdmin, command_setmana) ||
 		command_add("setpass", "[Account Name] [Password] - Set local password by account name", AccountStatus::GMLeadAdmin, command_setpass) ||
