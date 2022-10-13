@@ -1203,8 +1203,9 @@ luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instanc
 }
 
 int lua_get_zone_weather() {
-	if(!zone)
-		return 0;
+	if (!zone) {
+		return EQ::constants::WeatherTypes::None;
+	}
 
 	return zone->zone_weather;
 }

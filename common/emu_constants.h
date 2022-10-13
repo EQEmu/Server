@@ -312,6 +312,12 @@ namespace EQ
 			NoDeposit
 		};
 
+		enum WeatherTypes : uint8 {
+			None,
+			Raining,
+			Snowing	
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
@@ -344,6 +350,9 @@ namespace EQ
 
 		extern const std::map<int, std::string>& GetObjectTypeMap();
 		std::string GetObjectTypeName(int object_type);
+
+		extern const std::map<uint8, std::string>& GetWeatherTypeMap();
+		std::string GetWeatherTypeName(uint8 weather_type);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
