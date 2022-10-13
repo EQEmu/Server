@@ -505,8 +505,9 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	uint32 exp = 0;
 	uint32 aaexp = 0;
 
-	if (m_epp.perAA<0 || m_epp.perAA>100)
-		m_epp.perAA=0;	// stop exploit with sanity check
+	if (m_epp.perAA < 0 || m_epp.perAA > 100) {
+		m_epp.perAA = 0;    // stop exploit with sanity check
+	}
 
 	// Calculate regular XP
 	CalculateExp(in_add_exp, exp, aaexp, conlevel, resexp);
@@ -539,6 +540,23 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	if (aaexp < had_aaexp)
 	{
 		aaexp = had_aaexp;	//watch for wrap
+	}
+
+	// Check for Unused AA Cap.  If at or above cap, set AAs to cap, set aaexp to 0 and set aa percentage to 0.
+	// Doing this here means potentially one kill wasted worth of experience, but easiest to put it here than to rewrite this function.
+	int aa_cap = RuleI(AA, UnusedAAPointCap);
+
+	if (aa_cap >= 0 && aaexp > 0) {
+		if (m_pp.aapoints == aa_cap) {
+			MessageString(Chat::Red, AA_CAP);
+			aaexp = 0;
+			m_epp.perAA = 0;
+		} else if (m_pp.aapoints > aa_cap) {
+			MessageString(Chat::Red, OVER_AA_CAP, fmt::format_int(aa_cap).c_str(), fmt::format_int(aa_cap).c_str());
+			m_pp.aapoints = aa_cap;
+			aaexp = 0;
+			m_epp.perAA = 0;
+		}
 	}
 
 	// AA Sanity Checking for players who set aa exp and deleveled below allowed aa level.
