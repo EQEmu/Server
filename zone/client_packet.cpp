@@ -1746,11 +1746,14 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	outapp = new EQApplicationPacket(OP_Weather, 12);
 	Weather_Struct *ws = (Weather_Struct *)outapp->pBuffer;
 	ws->val1 = 0x000000FF;
-	if (zone->zone_weather == 1) { ws->type = 0x31; } // Rain
-	if (zone->zone_weather == 2) {
+
+	if (zone->zone_weather == EQ::constants::WeatherTypes::Raining) {
+		ws->type = 0x31;
+	} else if (zone->zone_weather == EQ::constants::WeatherTypes::Snowing) {
 		outapp->pBuffer[8] = 0x01;
-		ws->type = 0x02;
+		ws->type = EQ::constants::WeatherTypes::Snowing;
 	}
+
 	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);

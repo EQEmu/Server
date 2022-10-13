@@ -2110,7 +2110,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Stop Rain");
 #endif
-				zone->zone_weather = 0;
+				zone->zone_weather = EQ::constants::WeatherTypes::None;
 				zone->weather_intensity = 0;
 				zone->weatherSend();
 				break;
