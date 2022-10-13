@@ -1716,7 +1716,7 @@ void Zone::ChangeWeather()
 	bool changed = false;
 
 	if (temporary_old_weather == EQ::constants::WeatherTypes::None) {
-		if (rain_chance > 0 || snow_chance > 0) {
+		if (rain_chance || snow_chance) {
 			auto intensity = static_cast<uint8>(zone->random.Int(1, 10));
 			if (rain_chance > snow_chance || rain_chance == snow_chance) { // Rain
 				if (rain_chance >= temporary_weather) {
@@ -1775,7 +1775,7 @@ void Zone::ChangeWeather()
 	}
 
 	if (!changed) {
-		if (weather_timer == 0) {
+		if (!weather_timer) {
 			uint32 weather_timer_rule = RuleI(Zone, WeatherTimer);
 			weather_timer = weather_timer_rule * 1000;
 			Weather_Timer->Start(weather_timer);
@@ -1784,7 +1784,7 @@ void Zone::ChangeWeather()
 	} else {
 		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), temporary_old_weather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rain_chance,rain_duration,snow_chance,snow_duration);
 		weatherSend();
-		if (zone->weather_intensity == 0) {
+		if (!zone->weather_intensity) {
 			zone->zone_weather = EQ::constants::WeatherTypes::None;
 		}
 	}
