@@ -1203,8 +1203,9 @@ luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instanc
 }
 
 int lua_get_zone_weather() {
-	if(!zone)
-		return 0;
+	if (!zone) {
+		return EQ::constants::WeatherTypes::None;
+	}
 
 	return zone->zone_weather;
 }
@@ -3427,6 +3428,22 @@ bool lua_has_recipe_learned(uint32 recipe_id) {
 	return quest_manager.HasRecipeLearned(recipe_id);
 }
 
+bool lua_is_raining() {
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsRaining();
+}
+
+bool lua_is_snowing() {
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsSnowing();
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3891,6 +3908,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_recipe_made_count", &lua_get_recipe_made_count),
 		luabind::def("get_recipe_name", &lua_get_recipe_name),
 		luabind::def("has_recipe_learned", &lua_has_recipe_learned),
+		luabind::def("is_raining", &lua_is_raining),
+		luabind::def("is_snowing", &lua_is_snowing),
 
 		/*
 			Cross Zone

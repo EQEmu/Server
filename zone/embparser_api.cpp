@@ -3706,6 +3706,24 @@ bool Perl__hasrecipelearned(uint32 recipe_id)
 	return quest_manager.HasRecipeLearned(recipe_id);
 }
 
+bool Perl__IsRaining()
+{
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsRaining();
+}
+
+bool Perl__IsSnowing()
+{
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsSnowing();
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3752,6 +3770,8 @@ void perl_register_quest()
 	package.add("delete_data", &Perl__delete_data);
 	package.add("IsBeneficialSpell", &Perl__IsBeneficialSpell);
 	package.add("IsEffectInSpell", &Perl__IsEffectInSpell);
+	package.add("IsRaining", &Perl__IsRaining);
+	package.add("IsSnowing", &Perl__IsSnowing);
 	package.add("IsRunning", &Perl__IsRunning);
 	package.add("LearnRecipe", &Perl__LearnRecipe);
 	package.add("MerchantCountItem", &Perl__MerchantCountItem);
