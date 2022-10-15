@@ -10,15 +10,12 @@ void command_zone(Client *c, const Seperator *sep)
 
 	// input: (first arg)
 	// zone identifier can be a string of a zone name or its ID
-	std::string zone_identifier = sep->arg[1];
+	std::string zone_input = sep->arg[1];
+	uint32      zone_id    = 0;
 
-	// zone can be name or id, based on input
-	std::string zone_name;
-	uint32      zone_id = 0;
-	
 	// if input is id
-	if (Strings::IsNumber(zone_identifier)) {
-		zone_id = std::stoi(zone_identifier);
+	if (Strings::IsNumber(zone_input)) {
+		zone_id = std::stoi(zone_input);
 
 		// validate
 		if (!GetZone(zone_id)) {
@@ -27,24 +24,22 @@ void command_zone(Client *c, const Seperator *sep)
 		}
 	}
 	else {
-		zone_name = fmt::format("{}", zone_identifier);
-
 		// validate
-		if (!zone_store.GetZone(zone_name)) {
-			c->Message(Chat::White, fmt::format("Could not find zone by short_name [{}]", zone_name).c_str());
+		if (!zone_store.GetZone(zone_input)) {
+			c->Message(Chat::White, fmt::format("Could not find zone by short_name [{}]", zone_input).c_str());
 			return;
 		}
 
 		// validate we got id
-		zone_id = ZoneID(zone_name);
+		zone_id = ZoneID(zone_input);
 		if (zone_id == 0) {
-			c->Message(Chat::White, fmt::format("Could not find zone id by short_name [{}]", zone_name).c_str());
+			c->Message(Chat::White, fmt::format("Could not find zone id by short_name [{}]", zone_input).c_str());
 			return;
 		}
 	}
 
 	// if zone identifier is a number and the id is 0, send to safe coordinates of the local zone
-	if (Strings::IsNumber(zone_identifier) && zone_id == 0) {
+	if (Strings::IsNumber(zone_input) && zone_id == 0) {
 		c->Message(Chat::White, "Sending you to the safe coordinates of this zone.");
 
 		c->MovePC(
