@@ -1354,6 +1354,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_ReloadLogs: {
 			zoneserver_list.SendPacket(pack);
+			UCSLink.SendPacket(pack);
 			LogSys.LoadLogDatabaseSettings();
 			break;
 		}
