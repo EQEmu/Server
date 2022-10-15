@@ -182,8 +182,6 @@ ZoneRepository::Zone *ZoneStore::GetZone(std::string in_zone_name)
 		}
 	}
 
-	LogInfo("[GetZone] Failed to get zone by zone_name (std::string) [{}]", in_zone_name);
-
 	return nullptr;
 }
 
