@@ -914,6 +914,9 @@ void EntityList::AETaunt(Client *taunter, float range, int32 bonus_hate)
 
 	for (auto &it : entity_list.GetCloseMobList(taunter, range)) {
 		Mob *them = it.second;
+		if (!them) {
+			continue;
+		}
 
 		if (!them->IsNPC()) {
 			continue;
@@ -999,7 +1002,6 @@ void EntityList::AESpell(
 
 	for (auto &it : entity_list.GetCloseMobList(caster_mob, distance)) {
 		current_mob = it.second;
-
 		if (!current_mob) {
 			continue;
 		}
@@ -1150,6 +1152,9 @@ void EntityList::MassGroupBuff(
 
 	for (auto &it : entity_list.GetCloseMobList(caster, distance)) {
 		current_mob = it.second;
+		if (!current_mob) {
+			continue;
+		}
 
 		/**
 		 * Skip center
@@ -1216,6 +1221,9 @@ void EntityList::AEAttack(
 
 	for (auto &it : entity_list.GetCloseMobList(attacker, distance)) {
 		current_mob = it.second;
+		if (!current_mob) {
+			continue;
+		}
 
 		if (current_mob->IsNPC()
 			&& current_mob != attacker //this is not needed unless NPCs can use this

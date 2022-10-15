@@ -2284,6 +2284,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			auto& mob_list = entity_list.GetCloseMobList(spell_target);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
+				if (!mob) {
+					continue;
+				}
 				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
 					float distance = Distance(spell_target->GetPosition(), mob->GetPosition());
 					if ((mob->CheckLosFN(spell_target) || mob->CheckLosFN(this)) && distance <= 70) {

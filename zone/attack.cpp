@@ -443,9 +443,9 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	* Formula (all int math)
 	* (posted for parry, dodge appears to be the same as confirmed per Dev, assuming Riposte/Block are the same)
 	* Chance = (((SKILL + 100) + [((SKILL+100) * SPA(175).Base1) / 100]) / 45) + [(hDex / 25) - min([hStrikethrough, hDex / 25])].
-	If an NPC's Heroic Strikethrough is higher than your character's Heroic Agility bonus, you are disqualified from the "bonus" you would have gotten at the end. 
+	If an NPC's Heroic Strikethrough is higher than your character's Heroic Agility bonus, you are disqualified from the "bonus" you would have gotten at the end.
 	*/
-	
+
 	int hstrikethrough = attacker->GetHeroicStrikethrough();
 
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
@@ -1621,6 +1621,10 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			auto& mob_list = entity_list.GetCloseMobList(other);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
+				if (!mob) {
+					continue;
+				}
+
 				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
 					float distance = Distance(other->CastToClient()->m_Position, mob->GetPosition());
 					if ((mob->CheckLosFN(other) || mob->CheckLosFN(this)) && distance <= 70) {
@@ -2135,6 +2139,9 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			auto& mob_list = entity_list.GetCloseMobList(other);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
+				if (!mob) {
+					continue;
+				}
 				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
 					float distance = Distance(other->GetPosition(), mob->GetPosition());
 					if ((mob->CheckLosFN(other) || mob->CheckLosFN(this)) && distance <= 70) {
