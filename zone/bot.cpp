@@ -7733,7 +7733,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
 			uint16 thespell = spell_id;
-			for(int i = 0; i < AIspells.size(); i++) {
+			for(int i = 0; i < AIBotSpells.size(); i++) {
 				int j = BotGetSpells(i);
 				int spelltype = BotGetSpellType(i);
 				bool spellequal = (j == thespell);
@@ -9194,7 +9194,7 @@ void Bot::CalcBotStats(bool showtext) {
 
 	CalcBonuses();
 
-	AI_AddNPCSpells(GetBotSpellID());
+	AI_AddBotSpells(GetBotSpellID());
 
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());

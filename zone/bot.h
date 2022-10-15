@@ -136,6 +136,18 @@ public:
 		spellTypeIndexPreCombatBuffSong
 	};
 
+	struct AIBotSpells_Struct {
+		uint32	type;			// 0 = never, must be one (and only one) of the defined values
+		uint16	spellid;		// <= 0 = no spell
+		int16	manacost;		// -1 = use spdat, -2 = no cast time
+		uint32	time_cancast;	// when we can cast this spell next
+		int32	recast_delay;
+		int16	priority;
+		int16	resist_adjust;
+		int8	min_hp; // >0 won't cast if HP is below
+		int8	max_hp; // >0 won't cast if HP is above
+	};
+
 	static const uint32 SPELL_TYPE_FIRST = spellTypeIndexNuke;
 	static const uint32 SPELL_TYPE_LAST = spellTypeIndexPreCombatBuffSong;
 	static const uint32 SPELL_TYPE_COUNT = SPELL_TYPE_LAST + 1;
@@ -174,9 +186,9 @@ public:
 	virtual bool Save();
 	virtual void Depop();
 	void CalcBotStats(bool showtext = true);
-	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
-	uint32 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
-	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
+	uint16 BotGetSpells(int spellslot) { return AIBotSpells[spellslot].spellid; }
+	uint32 BotGetSpellType(int spellslot) { return AIBotSpells[spellslot].type; }
+	uint16 BotGetSpellPriority(int spellslot) { return AIBotSpells[spellslot].priority; }
 	virtual float GetProcChances(float ProcBonus, uint16 hand);
 	virtual int GetHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, int64 &damage);
@@ -220,7 +232,7 @@ public:
 	virtual void AddToHateList(Mob* other, int64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
 	virtual void SetTarget(Mob* mob);
 	virtual void Zone();
-	std::vector<AISpells_Struct> GetBotSpells() { return AIspells; }
+	std::vector<AIBotSpells_Struct> GetBotSpells() { return AIBotSpells; }
 	bool IsArcheryRange(Mob* target);
 	void ChangeBotArcherWeapons(bool isArcher);
 	void Sit();
@@ -349,6 +361,12 @@ public:
 	bool CheckLoreConflict(const EQ::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
 	const EQ::InventoryProfile& GetBotInv() const { return m_inv; }
+
+	// Bot Spell Loading Methods
+	void AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
+    bool AI_AddBotSpells(uint32 iDBSpellsID);
+	bool IsSpellInBotList(DBBotSpells_Struct* spell_list, uint16 iSpellID);
+	std::vector<AIBotSpells_Struct> AIBotSpells;
 
 	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
