@@ -77,6 +77,9 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
 		if (mob->IsClient() || mob->IsPetOwnerClient() || mob->IsMerc()) {
 			auto it = casted_on.find(mob->GetID());
 
@@ -187,6 +190,9 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 
 		for (auto &e : mob_list) {
 			auto mob = e.second;
+			if (!mob) {
+				continue;
+			}
 			// step 1: check if we're already managing this NPC's buff
 			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
@@ -414,6 +420,9 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 
 		for (auto &e : mob_list) {
 			auto mob = e.second;
+			if (!mob) {
+				continue;
+			}
 			// step 1: check if we're already managing this NPC's buff
 			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
@@ -572,6 +581,10 @@ void Aura::ProcessTotem(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
 		if (mob == this) {
 			continue;
 		}
@@ -624,6 +637,10 @@ void Aura::ProcessEnterTrap(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
 		if (mob == this) {
 			continue;
 		}
@@ -642,6 +659,10 @@ void Aura::ProcessExitTrap(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
 		if (mob == this) {
 			continue;
 		}
@@ -669,6 +690,10 @@ void Aura::ProcessSpawns()
 {
 	const auto &clients = entity_list.GetCloseMobList(this, distance);
 	for (auto  &e : clients) {
+		if (!e.second) {
+			continue;
+		}
+
 		if (!e.second->IsClient()) {
 			continue;
 		}
