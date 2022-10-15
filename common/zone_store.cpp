@@ -82,22 +82,6 @@ const char *ZoneStore::GetZoneName(uint32 zone_id, bool error_unknown)
 		return "UNKNOWN";
 	}
 
-	LogInfo(
-		"[GetZoneName] Failed to get zone name by zone_id [{}] error_unknown [{}] printing stack",
-		zone_id,
-		(error_unknown ? "true" : "false")
-	);
-
-
-	// print stack when invalid input
-	if (zone_id == 0) {
-		backward::StackTrace st;
-		backward::TraceResolver e = {};
-		st.load_here(32);
-		backward::Printer p;
-		p.print(st);
-	}
-
 	return nullptr;
 }
 
@@ -117,12 +101,6 @@ const char *ZoneStore::GetZoneLongName(uint32 zone_id, bool error_unknown)
 	if (error_unknown) {
 		return "UNKNOWN";
 	}
-
-	LogInfo(
-		"[GetZoneLongName] Failed to get zone long name by zone_id [{}] error_unknown [{}]",
-		zone_id,
-		(error_unknown ? "true" : "false")
-	);
 
 	return nullptr;
 }
@@ -192,6 +170,17 @@ ZoneRepository::Zone *ZoneStore::GetZone(const char *in_zone_name)
 	}
 
 	LogInfo("[GetZone] Failed to get zone by zone_name [{}]", in_zone_name);
+
+	return nullptr;
+}
+
+ZoneRepository::Zone *ZoneStore::GetZone(std::string in_zone_name)
+{
+	for (auto &z: m_zones) {
+		if (z.short_name == in_zone_name) {
+			return &z;
+		}
+	}
 
 	return nullptr;
 }

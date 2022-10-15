@@ -686,8 +686,8 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	int idx=-1;
 	while(iterator.MoreElements()) {
 		cle = iterator.GetData();
-
 		const char* tmpZone = ZoneName(cle->zone());
+
 		if (
 	(cle->Online() >= CLE_Status::Zoning) &&
 	(!cle->GetGM() || cle->Anon() != 1 || admin >= cle->Admin()) &&
