@@ -607,6 +607,12 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	countclients.Reset();
 	while(countclients.MoreElements()){
 		countcle = countclients.GetData();
+
+		// if zone is not valid, advance
+		if (countcle->zone() == 0) {
+			countclients.Advance();
+		}
+
 		const char* tmpZone = ZoneName(countcle->zone());
 		if (
 	(countcle->Online() >= CLE_Status::Zoning) &&
