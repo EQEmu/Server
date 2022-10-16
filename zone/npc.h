@@ -35,16 +35,6 @@
 	#define M_PI	3.141592
 #endif
 
-#define LEAVECOMBAT 0
-#define ENTERCOMBAT 1
-#define	ONDEATH		2
-#define	AFTERDEATH	3
-#define HAILED		4
-#define	KILLEDPC	5
-#define	KILLEDNPC	6
-#define	ONSPAWN		7
-#define	ONDESPAWN	8
-
 typedef struct {
 	float min_x;
 	float max_x;

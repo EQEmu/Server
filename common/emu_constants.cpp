@@ -533,3 +533,49 @@ std::string EQ::constants::GetWeatherTypeName(uint8 weather_type)
 
 	return std::string();
 }
+
+const std::map<uint8, std::string> &EQ::constants::GetEmoteEventTypeMap()
+{
+	static const std::map<uint8, std::string> emote_event_type_map = {
+		{ EmoteEventTypes::LeaveCombat, "Leave Combat" },
+		{ EmoteEventTypes::EnterCombat, "Enter Combat" },
+		{ EmoteEventTypes::OnDeath, "On Death" },
+		{ EmoteEventTypes::AfterDeath, "After Death" },
+		{ EmoteEventTypes::Hailed, "Hailed" },
+		{ EmoteEventTypes::KilledPC, "Killed PC" },
+		{ EmoteEventTypes::KilledNPC, "Killed NPC" },
+		{ EmoteEventTypes::OnSpawn, "On Spawn" },
+		{ EmoteEventTypes::OnDespawn, "On Despawn" }
+	};
+
+	return emote_event_type_map;
+}
+
+std::string EQ::constants::GetEmoteEventTypeName(uint8 emote_event_type)
+{
+	if (EQ::ValueWithin(emote_event_type, EmoteEventTypes::LeaveCombat, EmoteEventTypes::OnDespawn)) {
+		return EQ::constants::GetEmoteEventTypeMap().find(emote_event_type)->second;
+	}
+
+	return std::string();
+}
+
+const std::map<uint8, std::string> &EQ::constants::GetEmoteTypeMap()
+{
+	static const std::map<uint8, std::string> emote_type_map = {
+		{ EmoteTypes::Emote, "Emote" },
+		{ EmoteTypes::Shout, "Shout" },
+		{ EmoteTypes::Proximity, "Proximity" }
+	};
+
+	return emote_type_map;
+}
+
+std::string EQ::constants::GetEmoteTypeName(uint8 emote_type)
+{
+	if (EQ::ValueWithin(emote_type, EmoteTypes::Emote, EmoteTypes::Proximity)) {
+		return EQ::constants::GetEmoteTypeMap().find(emote_type)->second;
+	}
+
+	return std::string();
+}

@@ -1099,7 +1099,7 @@ void NPC::UpdateEquipmentLight()
 void NPC::Depop(bool StartSpawnTimer) {
 	uint32 emoteid = GetEmoteID();
 	if(emoteid != 0)
-		DoNPCEmote(ONDESPAWN,emoteid);
+		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn,emoteid);
 	p_depop = true;
 	if (respawn2)
 	{

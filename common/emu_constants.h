@@ -318,6 +318,24 @@ namespace EQ
 			Snowing	
 		};
 
+		enum EmoteEventTypes : uint8 {
+			LeaveCombat,
+			EnterCombat,
+			OnDeath,
+			AfterDeath,
+			Hailed,
+			KilledPC,
+			KilledNPC,
+			OnSpawn,
+			OnDespawn
+		};
+
+		enum EmoteTypes : uint8 {
+			Emote,
+			Shout,
+			Proximity
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
@@ -353,6 +371,12 @@ namespace EQ
 
 		extern const std::map<uint8, std::string>& GetWeatherTypeMap();
 		std::string GetWeatherTypeName(uint8 weather_type);
+
+		extern const std::map<uint8, std::string>& GetEmoteEventTypeMap();
+		std::string GetEmoteEventTypeName(uint8 emote_event_type);
+
+		extern const std::map<uint8, std::string>& GetEmoteTypeMap();
+		std::string GetEmoteTypeName(uint8 emote_type);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
