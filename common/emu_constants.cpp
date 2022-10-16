@@ -513,3 +513,23 @@ std::string EQ::constants::GetObjectTypeName(int object_type)
 
 	return std::string();
 }
+
+const std::map<uint8, std::string> &EQ::constants::GetWeatherTypeMap()
+{
+	static const std::map<uint8, std::string> weather_type_map = {
+		{WeatherTypes::None,    "None"},
+		{WeatherTypes::Raining, "Raining"},
+		{WeatherTypes::Snowing, "Snowing"}
+	};
+
+	return weather_type_map;
+}
+
+std::string EQ::constants::GetWeatherTypeName(uint8 weather_type)
+{
+	if (EQ::ValueWithin(weather_type, WeatherTypes::None, WeatherTypes::Snowing)) {
+		return EQ::constants::GetWeatherTypeMap().find(weather_type)->second;
+	}
+
+	return std::string();
+}

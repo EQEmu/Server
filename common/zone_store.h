@@ -35,6 +35,7 @@ public:
 
 	ZoneRepository::Zone *GetZone(uint32 zone_id, int version = 0);
 	ZoneRepository::Zone *GetZone(const char *in_zone_name);
+	ZoneRepository::Zone *GetZone(std::string in_zone_name);
 	uint32 GetZoneID(const char *in_zone_name);
 	uint32 GetZoneID(std::string zone_name);
 	std::string GetZoneName(uint32 zone_id);

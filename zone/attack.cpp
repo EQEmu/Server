@@ -440,9 +440,9 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	* Formula (all int math)
 	* (posted for parry, dodge appears to be the same as confirmed per Dev, assuming Riposte/Block are the same)
 	* Chance = (((SKILL + 100) + [((SKILL+100) * SPA(175).Base1) / 100]) / 45) + [(hDex / 25) - min([hStrikethrough, hDex / 25])].
-	If an NPC's Heroic Strikethrough is higher than your character's Heroic Agility bonus, you are disqualified from the "bonus" you would have gotten at the end. 
+	If an NPC's Heroic Strikethrough is higher than your character's Heroic Agility bonus, you are disqualified from the "bonus" you would have gotten at the end.
 	*/
-	
+
 	int hstrikethrough = attacker->GetHeroicStrikethrough();
 
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
@@ -1616,6 +1616,10 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			auto& mob_list = entity_list.GetCloseMobList(other);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
+				if (!mob) {
+					continue;
+				}
+
 				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
 					float distance = Distance(other->CastToClient()->m_Position, mob->GetPosition());
 					if ((mob->CheckLosFN(other) || mob->CheckLosFN(this)) && distance <= 70) {
@@ -2130,6 +2134,9 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			auto& mob_list = entity_list.GetCloseMobList(other);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
+				if (!mob) {
+					continue;
+				}
 				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
 					float distance = Distance(other->GetPosition(), mob->GetPosition());
 					if ((mob->CheckLosFN(other) || mob->CheckLosFN(this)) && distance <= 70) {
@@ -4045,12 +4052,14 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 							attacker->MessageString(Chat::DamageShield, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
 					}
 					else {
-						entity_list.MessageCloseString(
-							this, /* Sender */
-							true, /* Skip Sender */
+						entity_list.FilteredMessageCloseString(
+							attacker, /* Sender */
+							false, /* Sender is attacker, so do not skip */
 							RuleI(Range, SpellMessages),
 							Chat::NonMelee, /* 283 */
+							FilterSpellDamage, /* FilterType: 13 */
 							HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+							0,
 							attacker->GetCleanName(), /* Message1 */
 							GetCleanName(), /* Message2 */
 							ConvertArray(damage, val1) /* Message3 */
@@ -4210,7 +4219,7 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 				// message to target
 				if (IsClient() && caster != this) {
 					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
-						FilteredMessageString(this, Chat::NonMelee, FilterHealOverTime,
+						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							HOT_HEALED_OTHER, caster->GetCleanName(),
 							itoa(acthealed), spells[spell_id].name);
 					else
@@ -4226,7 +4235,7 @@ void Mob::HealDamage(uint64 amount, Mob *caster, uint16 spell_id)
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
 		}
-		else {
+		else if (CastToClient()->GetFilter(FilterHealOverTime) != (FilterShowSelfOnly || FilterHide)) {
 			Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}

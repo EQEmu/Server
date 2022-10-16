@@ -394,6 +394,8 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 	zone_mode = ZoneUnsolicited;
 	// reset since we're not zoning anymore
 	bZoning = false;
+	// remove save position lock
+	m_lock_save_position = false;
 }
 
 void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
@@ -413,6 +415,8 @@ void Client::SendZoneError(ZoneChange_Struct *zc, int8 err)
 	zone_mode = ZoneUnsolicited;
 	// reset since we're not zoning anymore
 	bZoning = false;
+	// remove save position lock
+	m_lock_save_position = false;
 }
 
 void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instance_id, float dest_x, float dest_y, float dest_z, float dest_h, int8 ignore_r) {
@@ -466,6 +470,8 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	//Force a save so its waiting for them when they zone
 	Save(2);
+
+	m_lock_save_position = true;
 
 	if (zone_id == zone->GetZoneID() && instance_id == zone->GetInstanceID()) {
 		// No need to ask worldserver if we're zoning to ourselves (most
@@ -661,7 +667,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	}
 
 	LogInfo(
-		"[ZonePC] Client [{}] zone_id [{}] x [{}] y [{}] x [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+		"[ZonePC] Client [{}] zone_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
 		GetCleanName(),
 		zoneID,
 		x,

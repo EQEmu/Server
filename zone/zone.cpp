@@ -1027,7 +1027,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	Weather_Timer = new Timer(60000);
 	Weather_Timer->Start();
 	LogDebug("The next weather check for zone: [{}] will be in [{}] seconds", short_name, Weather_Timer->GetRemainingTime()/1000);
-	zone_weather              = 0;
+	zone_weather              = EQ::constants::WeatherTypes::None;
 	weather_intensity         = 0;
 	blocked_spells            = nullptr;
 	zone_total_blocked_spells = 0;
@@ -1705,120 +1705,117 @@ void Zone::ChangeWeather()
 	}
 
 	int chance = zone->random.Int(0, 3);
-	uint8 rainchance = zone->newzone_data.rain_chance[chance];
-	uint8 rainduration = zone->newzone_data.rain_duration[chance];
-	uint8 snowchance = zone->newzone_data.snow_chance[chance];
-	uint8 snowduration = zone->newzone_data.snow_duration[chance];
-	uint32 weathertimer = 0;
-	uint16 tmpweather = zone->random.Int(0, 100);
+	auto rain_chance = zone->newzone_data.rain_chance[chance];
+	auto rain_duration = zone->newzone_data.rain_duration[chance];
+	auto snow_chance = zone->newzone_data.snow_chance[chance];
+	auto snow_duration = zone->newzone_data.snow_duration[chance];
+	uint32 weather_timer = 0;
+	auto temporary_weather = static_cast<uint8>(zone->random.Int(0, 100));
 	uint8 duration = 0;
-	uint8 tmpOldWeather = zone->zone_weather;
+	auto temporary_old_weather = zone->zone_weather;
 	bool changed = false;
 
-	if(tmpOldWeather == 0)
-	{
-		if(rainchance > 0 || snowchance > 0)
-		{
-			uint8 intensity = zone->random.Int(1, 10);
-			if((rainchance > snowchance) || (rainchance == snowchance))
-			{
-				//It's gunna rain!
-				if(rainchance >= tmpweather)
-				{
-					if(rainduration == 0)
+	if (temporary_old_weather == EQ::constants::WeatherTypes::None) {
+		if (rain_chance || snow_chance) {
+			auto intensity = static_cast<uint8>(zone->random.Int(1, 10));
+			if (rain_chance > snow_chance || rain_chance == snow_chance) { // Rain
+				if (rain_chance >= temporary_weather) {
+					if (!rain_duration) {
 						duration = 1;
-					else
-						duration = rainduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
+					} else {
+						duration = rain_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+					}
 
-					weathertimer = (duration*60)*1000;
-					Weather_Timer->Start(weathertimer);
-					zone->zone_weather = 1;
+					weather_timer = (duration * 60) * 1000;
+					Weather_Timer->Start(weather_timer);
+					zone->zone_weather = EQ::constants::WeatherTypes::Raining;
 					zone->weather_intensity = intensity;
 					changed = true;
 				}
-			}
-			else
-			{
-				//It's gunna snow!
-				if(snowchance >= tmpweather)
-				{
-					if(snowduration == 0)
+			} else { // Snow
+				if (snow_chance >= temporary_weather) {
+					if (!snow_duration) {
 						duration = 1;
-					else
-						duration = snowduration*3;
-					weathertimer = (duration*60)*1000;
-					Weather_Timer->Start(weathertimer);
-					zone->zone_weather = 2;
+					} else {
+						duration = snow_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+					}
+
+					weather_timer = (duration * 60) * 1000;
+					Weather_Timer->Start(weather_timer);
+					zone->zone_weather = EQ::constants::WeatherTypes::Snowing;
 					zone->weather_intensity = intensity;
 					changed = true;
 				}
 			}
 		}
-	}
-	else
-	{
+	} else {
 		changed = true;
 		//We've had weather, now taking a break
-		if(tmpOldWeather == 1)
-		{
-			if(rainduration == 0)
+		if (temporary_old_weather == EQ::constants::WeatherTypes::Raining) {
+			if (!rain_duration) {
 				duration = 1;
-			else
-				duration = rainduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
+			} else {
+				duration = rain_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+			}
 
-			weathertimer = (duration*60)*1000;
-			Weather_Timer->Start(weathertimer);
+			weather_timer = (duration * 60) * 1000;
+			Weather_Timer->Start(weather_timer);
 			zone->weather_intensity = 0;
-		}
-		else if(tmpOldWeather == 2)
-		{
-			if(snowduration == 0)
+		} else if (temporary_old_weather == EQ::constants::WeatherTypes::Snowing) {
+			if (!snow_duration) {
 				duration = 1;
-			else
-				duration = snowduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
+			} else {
+				duration = snow_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+			}
 
-			weathertimer = (duration*60)*1000;
-			Weather_Timer->Start(weathertimer);
+			weather_timer = (duration * 60) * 1000;
+			Weather_Timer->Start(weather_timer);
 			zone->weather_intensity = 0;
 		}
 	}
 
-	if(changed == false)
-	{
-		if(weathertimer == 0)
-		{
-			uint32 weatherTimerRule = RuleI(Zone, WeatherTimer);
-			weathertimer = weatherTimerRule*1000;
-			Weather_Timer->Start(weathertimer);
+	if (!changed) {
+		if (!weather_timer) {
+			uint32 weather_timer_rule = RuleI(Zone, WeatherTimer);
+			weather_timer = weather_timer_rule * 1000;
+			Weather_Timer->Start(weather_timer);
 		}
 		LogDebug("The next weather check for zone: [{}] will be in [{}] seconds", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000);
-	}
-	else
-	{
-		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
+	} else {
+		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), temporary_old_weather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rain_chance,rain_duration,snow_chance,snow_duration);
 		weatherSend();
-		if (zone->weather_intensity == 0)
-		{
-			zone->zone_weather = 0;
+		if (!zone->weather_intensity) {
+			zone->zone_weather = EQ::constants::WeatherTypes::None;
 		}
 	}
 }
 
 bool Zone::HasWeather()
 {
-	uint8 rain1 = zone->newzone_data.rain_chance[0];
-	uint8 rain2 = zone->newzone_data.rain_chance[1];
-	uint8 rain3 = zone->newzone_data.rain_chance[2];
-	uint8 rain4 = zone->newzone_data.rain_chance[3];
-	uint8 snow1 = zone->newzone_data.snow_chance[0];
-	uint8 snow2 = zone->newzone_data.snow_chance[1];
-	uint8 snow3 = zone->newzone_data.snow_chance[2];
-	uint8 snow4 = zone->newzone_data.snow_chance[3];
+	auto rain_chance_one = zone->newzone_data.rain_chance[0];
+	auto rain_chance_two = zone->newzone_data.rain_chance[1];
+	auto rain_chance_three = zone->newzone_data.rain_chance[2];
+	auto rain_chance_four = zone->newzone_data.rain_chance[3];
 
-	if(rain1 == 0 && rain2 == 0 && rain3 == 0 && rain4 == 0 && snow1 == 0 && snow2 == 0 && snow3 == 0 && snow4 == 0)
+	auto snow_chance_one = zone->newzone_data.snow_chance[0];
+	auto snow_chance_two = zone->newzone_data.snow_chance[1];
+	auto snow_chance_three = zone->newzone_data.snow_chance[2];
+	auto snow_chance_four = zone->newzone_data.snow_chance[3];
+
+	if (
+		!rain_chance_one &&
+		!rain_chance_two &&
+		!rain_chance_three &&
+		!rain_chance_four &&
+		!snow_chance_one &&
+		!snow_chance_two &&
+		!snow_chance_three &&
+		!snow_chance_four
+	) {
 		return false;
-	else
+	} else {
 		return true;
+	}
 }
 
 void Zone::StartShutdownTimer(uint32 set_time)
@@ -1859,7 +1856,7 @@ void Zone::ResetShutdownTimer() {
 		zone->GetZoneDescription()
 	);
 
-	autoshutdown_timer.SetTimer(autoshutdown_timer.GetDuration());
+	autoshutdown_timer.Start(autoshutdown_timer.GetDuration(), true);
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
@@ -2200,18 +2197,20 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 void Zone::weatherSend(Client *client)
 {
 	auto outapp = new EQApplicationPacket(OP_Weather, 8);
-	if (zone_weather > 0) {
+	if (zone_weather > EQ::constants::WeatherTypes::None) {
 		outapp->pBuffer[0] = zone_weather - 1;
 	}
-	if (zone_weather > 0) {
+
+	if (zone_weather > EQ::constants::WeatherTypes::None) {
 		outapp->pBuffer[4] = zone->weather_intensity;
 	}
+
 	if (client) {
 		client->QueuePacket(outapp);
-	}
-	else {
+	} else {
 		entity_list.QueueClients(0, outapp);
 	}
+
 	safe_delete(outapp);
 }
 

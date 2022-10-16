@@ -376,9 +376,10 @@ bool Database::ReserveName(uint32 account_id, char* name) {
  * @param character_name
  * @return
  */
-bool Database::DeleteCharacter(char *character_name) {
+bool Database::DeleteCharacter(char *character_name)
+{
 	uint32 character_id = 0;
-	if(!character_name || !strlen(character_name)) {
+	if (!character_name || !strlen(character_name)) {
 		LogInfo("DeleteCharacter: request to delete without a name (empty char slot)");
 		return false;
 	}
@@ -390,38 +391,8 @@ bool Database::DeleteCharacter(char *character_name) {
 	}
 
 	if (character_id <= 0) {
-		LogError("DeleteCharacter | Invalid Character ID [{}]", character_name);
+		LogError("[DeleteCharacter] Invalid Character ID [{}]", character_name);
 		return false;
-	}
-
-	std::string delete_type = "hard-deleted";
-	if (RuleB(Character, SoftDeletes)) {
-		delete_type       = "soft-deleted";
-		std::string query = fmt::format(
-			SQL(
-				UPDATE
-				character_data
-				SET
-				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64),
-				deleted_at = NOW()
-				WHERE
-				id = '{}'
-			),
-			character_id
-		);
-
-		QueryDatabase(query);
-
-		return true;
-	}
-
-	LogInfo("DeleteCharacter | Character [{}] ({}) is being [{}]", character_name, character_id, delete_type);
-
-	for (const auto& iter : DatabaseSchema::GetCharacterTables()) {
-		std::string table_name               = iter.first;
-		std::string character_id_column_name = iter.second;
-
-		QueryDatabase(fmt::format("DELETE FROM {} WHERE {} = {}", table_name, character_id_column_name, character_id));
 	}
 
 #ifdef BOTS
@@ -429,6 +400,51 @@ bool Database::DeleteCharacter(char *character_name) {
 	QueryDatabase(query);
 #endif
 
+	std::string delete_type = "hard-deleted";
+	if (RuleB(Character, SoftDeletes)) {
+		delete_type = "soft-deleted";
+		query       = fmt::format(
+			SQL(
+				UPDATE
+					character_data
+				SET
+				name       = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64),
+				deleted_at = NOW()
+					WHERE
+					id     = '{}'
+			),
+			character_id
+		);
+
+		QueryDatabase(query);
+
+#ifdef BOTS
+		query = fmt::format(
+			SQL(
+				UPDATE
+				bot_data
+				SET
+				name = SUBSTRING(CONCAT(name, '-deleted-', UNIX_TIMESTAMP()), 1, 64)
+				WHERE
+				owner_id = '{}'
+			),
+			character_id
+		);
+		QueryDatabase(query);
+		LogInfo("[DeleteCharacter] character_name [{}] ({}) bots are being [{}]", character_name, character_id, delete_type);
+#endif
+
+		return true;
+	}
+
+	for (const auto &iter: DatabaseSchema::GetCharacterTables()) {
+		std::string table_name               = iter.first;
+		std::string character_id_column_name = iter.second;
+
+		QueryDatabase(fmt::format("DELETE FROM {} WHERE {} = {}", table_name, character_id_column_name, character_id));
+	}
+
+	LogInfo("[DeleteCharacter] character_name [{}] ({}) is being [{}]", character_name, character_id, delete_type);
 
 	return true;
 }

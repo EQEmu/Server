@@ -463,6 +463,9 @@
 9207|2022_09_03_fix_zone_point_heading_data.sql|SELECT * FROM db_version WHERE version >= 9207|empty|
 9208|2022_09_25_task_concat_matchlists.sql|SHOW COLUMNS FROM `task_activities` LIKE 'npc_id'|not_empty|
 9209|2022_09_28_discord_webhooks.sql|SHOW COLUMNS FROM `logsys_categories` LIKE 'log_to_discord'|empty|
+9210|2022_10_11_fix_misty_pok_stone.sql|select * from doors where id = 2040 and `name` = 'POKRVPORT500' and client_version_mask = 4294967232|empty|
+9211|2022_10_14_fix_neriak_pok_stone.sql|select * from doors where id = 2057 and `name` = 'POKNRKPORT500' and client_version_mask = 4294967232|empty|
+9212|2022_10_14_fix_misty_pok_stone.sql|select * from doors where id = 2040 and `name` = 'POKRVPORT500' and dest_zone = 'misty'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

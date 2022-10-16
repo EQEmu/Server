@@ -365,6 +365,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				zc2->success = ZONE_ERROR_NOTREADY;
 				entity->CastToMob()->SetZone(ztz->current_zone_id, ztz->current_instance_id);
 				entity->CastToClient()->SetZoning(false);
+				entity->CastToClient()->SetLockSavePosition(false);
 			}
 			else {
 				entity->CastToClient()->UpdateWho(1);
