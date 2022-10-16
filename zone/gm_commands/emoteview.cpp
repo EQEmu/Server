@@ -22,15 +22,6 @@ void command_emoteview(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Emote {} | ID: {}",
-					emote_number,
-					e->emoteid
-				).c_str()
-			);
-
-			c->Message(
-				Chat::White,
-				fmt::format(
 					"Emote {} | Event: {} ({}) Type: {} ({})",
 					emote_number,
 					EQ::constants::GetEmoteEventTypeName(e->event_),
@@ -60,8 +51,9 @@ void command_emoteview(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} has no emotes.",
-				c->GetTargetDescription(target)
+				"{} has no emotes on Emote ID {}.",
+				c->GetTargetDescription(target),
+				emote_id
 			).c_str()
 		);
 		return;
@@ -70,10 +62,11 @@ void command_emoteview(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"{} has {} emote{}.",
+			"{} has {} emote{} on Emote ID {}.",
 			c->GetTargetDescription(target),
 			emote_count,
-			emote_count != 1 ? "s" : ""
+			emote_count != 1 ? "s" : "",
+			emote_id
 		).c_str()
 	);
 }
