@@ -31,6 +31,7 @@
 #include "../common/linked_list.h"
 #include "../common/servertalk.h"
 #include "../common/say_link.h"
+#include "../common/data_verification.h"
 
 #include "client.h"
 #include "entity.h"
@@ -41,6 +42,10 @@
 #include "quest_parser_collection.h"
 #include "water_map.h"
 #include "npc_scale_manager.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
 
 #include <cctype>
 #include <stdio.h>
@@ -309,8 +314,16 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	AISpellVar.idle_no_sp_recast_max           = static_cast<uint32>(RuleI(Spells, AI_IdleNoSpellMaxRecast));
 	AISpellVar.idle_beneficial_chance          = static_cast<uint8> (RuleI(Spells, AI_IdleBeneficialChance));
 
-	AI_Init();
-	AI_Start();
+	// It's possible for IsBot() to not be set yet during Bot loading, so have to use an alternative to catch Bots
+	if (!EQ::ValueWithin(npc_type_data->npc_spells_id, 3001, 3016)) {
+		AI_Init();
+		AI_Start();
+#ifdef BOTS
+	} else {
+		CastToBot()->AI_Bot_Init();
+		CastToBot()->AI_Bot_Start();
+#endif
+	}
 
 	d_melee_texture1 = npc_type_data->d_melee_texture1;
 	d_melee_texture2 = npc_type_data->d_melee_texture2;

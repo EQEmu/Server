@@ -2173,6 +2173,46 @@ bool Bot::Process()
 	return true;
 }
 
+void Bot::AI_Bot_Start(uint32 iMoveDelay) {
+	Mob::AI_Start(iMoveDelay);
+	if (!pAIControlled)
+		return;
+
+	if (AIspells.empty()) {
+		AIautocastspell_timer = std::make_unique<Timer>(1000);
+		AIautocastspell_timer->Disable();
+	} else {
+		AIautocastspell_timer = std::make_unique<Timer>(500);
+		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
+	}
+
+	if (NPCTypedata) {
+		AI_AddBotSpells(NPCTypedata->npc_spells_id);
+		ProcessSpecialAbilities(NPCTypedata->special_abilities);
+		AI_AddNPCSpellsEffects(NPCTypedata->npc_spells_effects_id);
+	}
+
+	SendTo(GetX(), GetY(), GetZ());
+	SaveGuardSpot(GetPosition());
+}
+
+void Bot::AI_Bot_Init()
+{
+	AIautocastspell_timer.reset(nullptr);
+	casting_spell_AIindex = static_cast<uint8>(AIspells.size());
+
+	roambox_max_x = 0;
+	roambox_max_y = 0;
+	roambox_min_x = 0;
+	roambox_min_y = 0;
+	roambox_distance = 0;
+	roambox_destination_x = 0;
+	roambox_destination_y = 0;
+	roambox_destination_z = 0;
+	roambox_min_delay = 2500;
+	roambox_delay = 2500;
+}
+
 void Bot::SpellProcess() {
 	if(spellend_timer.Check(false))	{
 		NPC::SpellProcess();
@@ -7436,7 +7476,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot s
 					MessageString(Chat::White, MELEE_SILENCE);
 
 				if(casting_spell_id)
-					AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+					AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 
 				return false;
 			}
@@ -7445,7 +7485,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot s
 		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
 			MessageString(Chat::White, SPELL_WOULDNT_HOLD);
 			if(casting_spell_id)
-				AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+				AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 
 			return false;
 		}

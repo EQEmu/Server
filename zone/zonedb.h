@@ -491,6 +491,9 @@ public:
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
+	/*Bots	*/
+	DBnpcspells_Struct*				GetBotSpells(uint32 iDBSpellsID);
+
 	/* Mercs   */
 	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
 	void	LoadMercEquipment(Merc *merc);

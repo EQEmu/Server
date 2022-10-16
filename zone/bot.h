@@ -220,7 +220,7 @@ public:
 	virtual void AddToHateList(Mob* other, int64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
 	virtual void SetTarget(Mob* mob);
 	virtual void Zone();
-	std::vector<AISpells_Struct> GetBotSpells() { return AIspells; }
+	std::vector<AISpells_Struct> GetAIBotSpells() { return AIspells; }
 	bool IsArcheryRange(Mob* target);
 	void ChangeBotArcherWeapons(bool isArcher);
 	void Sit();
@@ -308,6 +308,9 @@ public:
 	void DoEnduranceRegen();	//This Regenerates endurance
 	void DoEnduranceUpkeep();	//does the endurance upkeep
 
+	bool AI_AddBotSpells(uint32 iDBSpellsID);
+	void AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
+	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 	// AI Methods
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
 	virtual bool AI_EngagedCastCheck();
@@ -320,6 +323,10 @@ public:
 	void SetStopMeleeLevel(uint8 level);
 	void SetGuardMode();
 	void SetHoldMode();
+
+	// Bot AI Methods
+	void AI_Bot_Init();
+	void AI_Bot_Start(uint32 iMoveDelay = 0);
 
 	// Mob AI Virtual Override Methods
 	virtual void AI_Process();
