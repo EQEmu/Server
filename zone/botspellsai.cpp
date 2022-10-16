@@ -1063,7 +1063,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	int32 manaCost = mana_cost;
 
 	if (manaCost == -1)
-		manaCost = spells[AIspells[i].spellid].mana;
+		manaCost = spells[AIBot_spells[i].spellid].mana;
 	else if (manaCost == -2)
 		manaCost = 0;
 
@@ -1074,7 +1074,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	if(RuleB(Bots, FinishBuffing)) {
 		if(manaCost > hasMana) {
 			// Let's have the bots complete the buff time process
-			if(AIspells[i].type & SpellType_Buff) {
+			if(AIBot_spells[i].type & SpellType_Buff) {
 				extraMana = manaCost - hasMana;
 				SetMana(manaCost);
 			}
@@ -1083,17 +1083,17 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 
 	float dist2 = 0;
 
-	if (AIspells[i].type & SpellType_Escape) {
+	if (AIBot_spells[i].type & SpellType_Escape) {
 		dist2 = 0;
 	} else
 		dist2 = DistanceSquared(m_Position, tar->GetPosition());
 
-	if (((((spells[AIspells[i].spellid].target_type==ST_GroupTeleport && AIspells[i].type==2)
-				|| spells[AIspells[i].spellid].target_type==ST_AECaster
-				|| spells[AIspells[i].spellid].target_type==ST_Group
-				|| spells[AIspells[i].spellid].target_type==ST_AEBard)
-				&& dist2 <= spells[AIspells[i].spellid].aoe_range*spells[AIspells[i].spellid].aoe_range)
-				|| dist2 <= GetActSpellRange(AIspells[i].spellid, spells[AIspells[i].spellid].range)*GetActSpellRange(AIspells[i].spellid, spells[AIspells[i].spellid].range)) && (mana_cost <= GetMana() || GetMana() == GetMaxMana()))
+	if (((((spells[AIBot_spells[i].spellid].target_type==ST_GroupTeleport && AIBot_spells[i].type==2)
+				|| spells[AIBot_spells[i].spellid].target_type==ST_AECaster
+				|| spells[AIBot_spells[i].spellid].target_type==ST_Group
+				|| spells[AIBot_spells[i].spellid].target_type==ST_AEBard)
+				&& dist2 <= spells[AIBot_spells[i].spellid].aoe_range*spells[AIBot_spells[i].spellid].aoe_range)
+				|| dist2 <= GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)*GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)) && (mana_cost <= GetMana() || GetMana() == GetMaxMana()))
 	{
 		result = NPC::AIDoSpellCast(i, tar, mana_cost, oDontDoAgainBefore);
 
@@ -1107,20 +1107,20 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 		extraMana = false;
 	}
 	else { //handle spell recast and recast timers
-		//if(GetClass() == BARD && IsGroupSpell(AIspells[i].spellid)) {
+		//if(GetClass() == BARD && IsGroupSpell(AIBot_spells[i].spellid)) {
 		//	// Bard buff songs have been moved to their own npc spell type..
 		//	// Buff stacking is now checked as opposed to manipulating the timer to avoid rapid casting
 
-		//	//AIspells[i].time_cancast = (spells[AIspells[i].spellid].recast_time > (spells[AIspells[i].spellid].buffduration * 6000)) ? Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time : Timer::GetCurrentTime() + spells[AIspells[i].spellid].buffduration * 6000;
-		//	//spellend_timer.Start(spells[AIspells[i].spellid].cast_time);
+		//	//AIBot_spells[i].time_cancast = (spells[AIBot_spells[i].spellid].recast_time > (spells[AIBot_spells[i].spellid].buffduration * 6000)) ? Timer::GetCurrentTime() + spells[AIBot_spells[i].spellid].recast_time : Timer::GetCurrentTime() + spells[AIBot_spells[i].spellid].buffduration * 6000;
+		//	//spellend_timer.Start(spells[AIBot_spells[i].spellid].cast_time);
 		//}
 		//else
-		//	AIspells[i].time_cancast = Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time;
+		//	AIBot_spells[i].time_cancast = Timer::GetCurrentTime() + spells[AIBot_spells[i].spellid].recast_time;
 
-		AIspells[i].time_cancast = Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time;
+		AIBot_spells[i].time_cancast = Timer::GetCurrentTime() + spells[AIBot_spells[i].spellid].recast_time;
 
-		if(spells[AIspells[i].spellid].timer_id > 0) {
-			SetSpellRecastTimer(spells[AIspells[i].spellid].timer_id, spells[AIspells[i].spellid].recast_time);
+		if(spells[AIBot_spells[i].spellid].timer_id > 0) {
+			SetSpellRecastTimer(spells[AIBot_spells[i].spellid].timer_id, spells[AIBot_spells[i].spellid].recast_time);
 		}
 	}
 
@@ -1593,7 +1593,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 	std::list<BotSpell> result;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -1620,7 +1620,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 	std::list<BotSpell> result;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -1649,7 +1649,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 	std::list<BotSpell> result;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -1676,7 +1676,7 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 	std::list<BotSpell_wPriority> result;
 
 	if (botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -1711,7 +1711,7 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType) {
 	result.ManaCost = 0;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -1767,7 +1767,7 @@ BotSpell Bot::GetBestBotSpellForHealOverTime(Bot* botCaster) {
 
 	if(botCaster) {
 		std::list<BotSpell> botHoTSpellList = GetBotSpellsForSpellEffect(botCaster, SE_HealOverTime);
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
@@ -1803,7 +1803,7 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot *botCaster) {
 	result.ManaCost = 0;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -1909,7 +1909,7 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster) {
 
 	if(botCaster) {
 		std::list<BotSpell> botHoTSpellList = GetBotSpellsForSpellEffect(botCaster, SE_HealOverTime);
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
@@ -2320,7 +2320,7 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 		return result;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -2367,7 +2367,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 	bool needsDiseaseResistDebuff = (tar->GetDR() + level_mod) > 100 ? true: false;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::vector<AISpells_Struct> botSpellList = botCaster->GetAIBotSpells();
+		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
 			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
@@ -2526,8 +2526,8 @@ int32 Bot::GetSpellRecastTimer(Bot *caster, int timer_index) {
 
 bool Bot::CheckSpellRecastTimers(Bot *caster, int SpellIndex) {
 	if(caster) {
-		if(caster->AIspells[SpellIndex].time_cancast < Timer::GetCurrentTime()) { //checks spell recast
-			if(GetSpellRecastTimer(caster, spells[caster->AIspells[SpellIndex].spellid].timer_id) < Timer::GetCurrentTime()) { //checks for spells on the same timer
+		if(caster->AIBot_spells[SpellIndex].time_cancast < Timer::GetCurrentTime()) { //checks spell recast
+			if(GetSpellRecastTimer(caster, spells[caster->AIBot_spells[SpellIndex].spellid].timer_id) < Timer::GetCurrentTime()) { //checks for spells on the same timer
 				return true; //can cast spell
 			}
 		}
@@ -2679,7 +2679,7 @@ bool IsSpellInBotList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
 bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
 	npc_spells_id = iDBSpellsID;
-	AIspells.clear();
+	AIBot_spells.clear();
 	if (iDBSpellsID == 0) {
 		AIautocastspell_timer->Disable();
 		return false;
@@ -2809,7 +2809,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 		}
 	}
 
-	std::sort(AIspells.begin(), AIspells.end(), [](const AISpells_Struct& a, const AISpells_Struct& b) {
+	std::sort(AIBot_spells.begin(), AIBot_spells.end(), [](const BotSpells_Struct& a, const BotSpells_Struct& b) {
 		return a.priority > b.priority;
 	});
 
@@ -2841,7 +2841,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	AISpellVar.idle_no_sp_recast_max = (_idle_no_sp_recast_max) ? _idle_no_sp_recast_max : RuleI(Spells, AI_IdleNoSpellMaxRecast);
 	AISpellVar.idle_beneficial_chance = (_idle_beneficial_chance) ? _idle_beneficial_chance : RuleI(Spells, AI_IdleBeneficialChance);
 
-	if (AIspells.empty())
+	if (AIBot_spells.empty())
 		AIautocastspell_timer->Disable();
 	else
 		AIautocastspell_timer->Trigger();
@@ -2963,7 +2963,7 @@ void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
 		return;
 
 	HasAISpell = true;
-	AISpells_Struct t;
+	BotSpells_Struct t;
 
 	t.priority = iPriority;
 	t.spellid = iSpellID;
@@ -2975,10 +2975,10 @@ void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
 	t.min_hp = min_hp;
 	t.max_hp = max_hp;
 
-	AIspells.push_back(t);
+	AIBot_spells.push_back(t);
 
 	// If we're going from an empty list, we need to start the timer
-	if (AIspells.size() == 1)
+	if (AIBot_spells.empty())
 		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 }
 
@@ -2987,15 +2987,15 @@ void Bot::AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 	if (slot == 1) {
 		uint32 recovery_time = 0;
 		if (iCastSucceeded) {
-			if (casting_spell_AIindex < AIspells.size()) {
-					recovery_time += spells[AIspells[casting_spell_AIindex].spellid].recovery_time;
-					if (AIspells[casting_spell_AIindex].recast_delay >= 0)
+			if (casting_spell_AIindex < AIBot_spells.size()) {
+					recovery_time += spells[AIBot_spells[casting_spell_AIindex].spellid].recovery_time;
+					if (AIBot_spells[casting_spell_AIindex].recast_delay >= 0)
 					{
-						if (AIspells[casting_spell_AIindex].recast_delay < 10000)
-							AIspells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + (AIspells[casting_spell_AIindex].recast_delay*1000);
+						if (AIBot_spells[casting_spell_AIindex].recast_delay < 10000)
+							AIBot_spells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + (AIBot_spells[casting_spell_AIindex].recast_delay*1000);
 					}
 					else
-						AIspells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + spells[AIspells[casting_spell_AIindex].spellid].recast_time;
+						AIBot_spells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + spells[AIBot_spells[casting_spell_AIindex].spellid].recast_time;
 			}
 			if (recovery_time < AIautocastspell_timer->GetSetAtTrigger())
 				recovery_time = AIautocastspell_timer->GetSetAtTrigger();
@@ -3003,7 +3003,7 @@ void Bot::AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 		}
 		else
 			AIautocastspell_timer->Start(AISpellVar.fail_recast, false);
-		casting_spell_AIindex = AIspells.size();
+		casting_spell_AIindex = AIBot_spells.size();
 	}
 }
 

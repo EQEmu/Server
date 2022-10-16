@@ -174,9 +174,9 @@ public:
 	virtual bool Save();
 	virtual void Depop();
 	void CalcBotStats(bool showtext = true);
-	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
-	uint32 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
-	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
+	uint16 BotGetSpells(int spellslot) { return AIBot_spells[spellslot].spellid; }
+	uint32 BotGetSpellType(int spellslot) { return AIBot_spells[spellslot].type; }
+	uint16 BotGetSpellPriority(int spellslot) { return AIBot_spells[spellslot].priority; }
 	virtual float GetProcChances(float ProcBonus, uint16 hand);
 	virtual int GetHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, int64 &damage);
@@ -220,7 +220,6 @@ public:
 	virtual void AddToHateList(Mob* other, int64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
 	virtual void SetTarget(Mob* mob);
 	virtual void Zone();
-	std::vector<AISpells_Struct> GetAIBotSpells() { return AIspells; }
 	bool IsArcheryRange(Mob* target);
 	void ChangeBotArcherWeapons(bool isArcher);
 	void Sit();
@@ -644,7 +643,6 @@ private:
 	// Class Members
 	uint32 _botID;
 	uint32 _botOwnerCharacterID;
-	//uint32 _botSpellID;
 	bool _spawnStatus;
 	Mob* _botOwner;
 	bool _botOrderAttack;

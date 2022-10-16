@@ -2178,7 +2178,7 @@ void Bot::AI_Bot_Start(uint32 iMoveDelay) {
 	if (!pAIControlled)
 		return;
 
-	if (AIspells.empty()) {
+	if (AIBot_spells.empty()) {
 		AIautocastspell_timer = std::make_unique<Timer>(1000);
 		AIautocastspell_timer->Disable();
 	} else {
@@ -2199,7 +2199,7 @@ void Bot::AI_Bot_Start(uint32 iMoveDelay) {
 void Bot::AI_Bot_Init()
 {
 	AIautocastspell_timer.reset(nullptr);
-	casting_spell_AIindex = static_cast<uint8>(AIspells.size());
+	casting_spell_AIindex = static_cast<uint8>(AIBot_spells.size());
 
 	roambox_max_x = 0;
 	roambox_max_y = 0;
@@ -7773,7 +7773,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
 			uint16 thespell = spell_id;
-			for(int i = 0; i < AIspells.size(); i++) {
+			for(int i = 0; i < AIBot_spells.size(); i++) {
 				int j = BotGetSpells(i);
 				int spelltype = BotGetSpellType(i);
 				bool spellequal = (j == thespell);
