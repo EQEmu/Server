@@ -217,6 +217,25 @@ namespace EQ
 			stanceBurnAE
 		};
 
+		enum BotSpellIDs : int {
+			Warrior = 3001,
+			Cleric,
+			Paladin,
+			Ranger,
+			Shadowknight,
+			Druid,
+			Monk,
+			Bard,
+			Rogue,
+			Shaman,
+			Necromancer,
+			Wizard,
+			Magician,
+			Enchanter,
+			Beastlord,
+			Berserker
+		};
+
 		enum GravityBehavior : int8 {
 			Ground,
 			Flying,

@@ -315,7 +315,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	AISpellVar.idle_beneficial_chance          = static_cast<uint8> (RuleI(Spells, AI_IdleBeneficialChance));
 
 	// It's possible for IsBot() to not be set yet during Bot loading, so have to use an alternative to catch Bots
-	if (!EQ::ValueWithin(npc_type_data->npc_spells_id, 3001, 3016)) {
+	if (!EQ::ValueWithin(npc_type_data->npc_spells_id, EQ::constants::BotSpellIDs::Warrior, EQ::constants::BotSpellIDs::Berserker)) {
 		AI_Init();
 		AI_Start();
 #ifdef BOTS
