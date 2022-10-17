@@ -39,7 +39,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 		return false;
 
 	if (iChance < 100) {
-		if (zone->random.Int(0, 100) > iChance){
+		if (zone->random.Int(0, 100) > iChance) {
 			return false;
 		}
 	}
@@ -87,13 +87,14 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 				Mob* addMob = GetFirstIncomingMobToMez(this, botSpell);
 
-				if(!addMob){
+				if(!addMob) {
 					//Say("!addMob.");
-					break;}
-
-				if(!(!addMob->IsImmuneToSpell(botSpell.SpellId, this) && addMob->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0))
 					break;
+				}
 
+				if(!(!addMob->IsImmuneToSpell(botSpell.SpellId, this) && addMob->CanBuffStack(botSpell.SpellId, botLevel, true) >= 0)) {
+					break;
+				}
 				castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
 
 				if(castedSpell)
@@ -135,27 +136,30 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						if(hpr < 35) {
 							botSpell = GetBestBotSpellForFastHeal(this);
 						}
-						else if(hpr >= 35 && hpr < 70){
-							if(GetNumberNeedingHealedInGroup(60, false) >= 3)
+						else if(hpr >= 35 && hpr < 70) {
+							if(GetNumberNeedingHealedInGroup(60, false) >= 3) {
 								botSpell = GetBestBotSpellForGroupHeal(this);
-
-							if(botSpell.SpellId == 0)
+							}
+							if(botSpell.SpellId == 0) {
 								botSpell = GetBestBotSpellForPercentageHeal(this);
+							}
 						}
-						else if(hpr >= 70 && hpr < 95){
-							if(GetNumberNeedingHealedInGroup(80, false) >= 3)
+						else if(hpr >= 70 && hpr < 95) {
+							if(GetNumberNeedingHealedInGroup(80, false) >= 3) {
 								botSpell = GetBestBotSpellForGroupHealOverTime(this);
-
-							if(hasAggro)
+							}
+							if(hasAggro) {
 								botSpell = GetBestBotSpellForPercentageHeal(this);
+							}
 						}
 						else {
-							if(!tar->FindType(SE_HealOverTime))
+							if(!tar->FindType(SE_HealOverTime)) {
 								botSpell = GetBestBotSpellForHealOverTime(this);
+							}
 						}
 					}
 					else if ((botClass == CLERIC) || (botClass == DRUID) || (botClass == SHAMAN) || (botClass == PALADIN)) {
-						if(GetNumberNeedingHealedInGroup(40, true) >= 2){
+						if(GetNumberNeedingHealedInGroup(40, true) >= 2) {
 							botSpell = GetBestBotSpellForGroupCompleteHeal(this);
 
 							if(botSpell.SpellId == 0)
@@ -169,7 +173,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 									botSpell = GetBestBotSpellForPercentageHeal(this);
 							}
 						}
-						else if(GetNumberNeedingHealedInGroup(60, true) >= 2){
+						else if(GetNumberNeedingHealedInGroup(60, true) >= 2) {
 							botSpell = GetBestBotSpellForGroupHeal(this);
 
 							if(botSpell.SpellId == 0)
@@ -223,7 +227,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					if(botSpell.SpellId == 0)
 						botSpell = GetFirstBotSpellForSingleTargetHeal(this);
 
-					if(botSpell.SpellId == 0 && botClass == BARD){
+					if(botSpell.SpellId == 0 && botClass == BARD) {
 						botSpell = GetFirstBotSpellBySpellType(this, SpellType_Heal);
 					}
 
@@ -257,7 +261,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 							}
 						}*/
 						if(botClass != BARD) {
-							if(IsGroupSpell(botSpell.SpellId)){
+							if(IsGroupSpell(botSpell.SpellId)) {
 								if(HasGroup()) {
 									Group *g = GetGroup();
 
@@ -347,7 +351,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					// Put the zone levitate and movement check here since bots are able to bypass the client casting check
 					if((IsEffectInSpell(selectedBotSpell.SpellId, SE_Levitate) && !zone->CanLevitate())
 						|| (IsEffectInSpell(selectedBotSpell.SpellId, SE_MovementSpeed) && !zone->CanCastOutdoor())) {
-							if(botClass != BARD || !IsSpellUsableThisZoneType(selectedBotSpell.SpellId, zone->GetZoneType())){
+							if(botClass != BARD || !IsSpellUsableThisZoneType(selectedBotSpell.SpellId, zone->GetZoneType())) {
 								continue;
 							}
 					}
@@ -926,7 +930,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 				if(castedSpell) {
 					if(botClass != BARD) {
-						if(IsGroupSpell(botSpell.SpellId)){
+						if(IsGroupSpell(botSpell.SpellId)) {
 							Group *g;
 
 							if(HasGroup()) {
@@ -1557,7 +1561,7 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 		if(botSpell.SpellId == 0)
 			botSpell = GetFirstBotSpellForSingleTargetHeal(this);
 
-		if(botSpell.SpellId == 0){
+		if(botSpell.SpellId == 0) {
 			botSpell = GetFirstBotSpellBySpellType(this, SpellType_Heal);
 		}
 	}
@@ -2674,8 +2678,6 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 	return database.botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
 }
 
-bool IsSpellInBotList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
-
 bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
 	npc_spells_id = iDBSpellsID;
@@ -2690,7 +2692,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 		return false;
 	}
 	DBnpcspells_Struct* parentlist = content_db.GetBotSpells(spell_list->parent_list);
-#if MobAI_DEBUG_Spells >= 10
+
 	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u, level=%u", GetName(), iDBSpellsID, GetLevel());
 	if (spell_list) {
 		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_list->entries.size(), spell_list->parent_list));
@@ -2704,24 +2706,22 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	else {
 		debug_msg.append(" (not found)");
 	}
-	LogAI("[{}]", debug_msg.c_str());
+	LogAIDetail("[{}]", debug_msg.c_str());
 
-#ifdef MobAI_DEBUG_Spells >= 25
+
 	if (parentlist) {
 		for (const auto &iter : parentlist->entries) {
 			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
-	LogAI("fin (parent list)");
+	LogAIModerate("fin (parent list)");
 	if (spell_list) {
 		for (const auto &iter : spell_list->entries) {
-			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
+			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
-	LogAI("fin (spell list)");
-#endif
+	LogAIModerate("fin (spell list)");
 
-#endif
 	uint16 attack_proc_spell = -1;
 	int8 proc_chance = 3;
 	uint16 range_proc_spell = -1;
@@ -2816,15 +2816,18 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	if (IsValidSpell(attack_proc_spell)) {
 		AddProcToWeapon(attack_proc_spell, true, proc_chance);
 
-		if(RuleB(Spells, NPCInnateProcOverride))
+		if(RuleB(Spells, NPCInnateProcOverride)) { 
 			innate_proc_spell_id = attack_proc_spell;
+		}
 	}
 
-	if (IsValidSpell(range_proc_spell))
+	if (IsValidSpell(range_proc_spell)) {
 		AddRangedProc(range_proc_spell, (rproc_chance + 100));
+	}
 
-	if (IsValidSpell(defensive_proc_spell))
+	if (IsValidSpell(defensive_proc_spell)) {
 		AddDefensiveProc(defensive_proc_spell, (dproc_chance + 100));
+	}
 
 	//Set AI casting variables
 
@@ -2841,10 +2844,11 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	AISpellVar.idle_no_sp_recast_max = (_idle_no_sp_recast_max) ? _idle_no_sp_recast_max : RuleI(Spells, AI_IdleNoSpellMaxRecast);
 	AISpellVar.idle_beneficial_chance = (_idle_beneficial_chance) ? _idle_beneficial_chance : RuleI(Spells, AI_IdleBeneficialChance);
 
-	if (AIBot_spells.empty())
+	if (AIBot_spells.empty()) {
 		AIautocastspell_timer->Disable();
-	else
+	} else {
 		AIautocastspell_timer->Trigger();
+	}
 	return true;
 }
 
@@ -2856,8 +2860,9 @@ bool IsSpellInBotList(DBnpcspells_Struct* spell_list, uint16 iSpellID) {
 
 DBnpcspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 {
-	if (iDBSpellsID == 0)
+	if (iDBSpellsID == 0) {
 		return nullptr;
+	}
 
 	auto it = npc_spells_cache.find(iDBSpellsID);
 
@@ -2881,8 +2886,9 @@ DBnpcspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 			return nullptr;
 		}
 
-		if (results.RowCount() != 1)
+		if (results.RowCount() != 1) {
 			return nullptr;
+		}
 
 		auto row = results.begin();
 		DBnpcspells_Struct spell_set;
@@ -2938,11 +2944,12 @@ DBnpcspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
 				entry.priority = 1;
 
-			if (row[9])
+			if (row[9]) {
 				entry.resist_adjust = atoi(row[9]);
-			else if (IsValidSpell(spell_id))
+			}
+			else if (IsValidSpell(spell_id)) {
 				entry.resist_adjust = spells[spell_id].resist_difficulty;
-
+			}
 			spell_set.entries.push_back(entry);
 		}
 
@@ -2959,8 +2966,9 @@ void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
 							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp)
 {
 
-	if(!IsValidSpell(iSpellID))
+	if(!IsValidSpell(iSpellID)) {
 		return;
+	}
 
 	HasAISpell = true;
 	BotSpells_Struct t;
@@ -2978,8 +2986,9 @@ void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
 	AIBot_spells.push_back(t);
 
 	// If we're going from an empty list, we need to start the timer
-	if (AIBot_spells.empty())
+	if (AIBot_spells.empty()) {
 		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
+	}
 }
 
 //this gets called from InterruptSpell() for failure or SpellFinished() for success
@@ -2988,21 +2997,24 @@ void Bot::AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 		uint32 recovery_time = 0;
 		if (iCastSucceeded) {
 			if (casting_spell_AIindex < AIBot_spells.size()) {
-					recovery_time += spells[AIBot_spells[casting_spell_AIindex].spellid].recovery_time;
-					if (AIBot_spells[casting_spell_AIindex].recast_delay >= 0)
-					{
-						if (AIBot_spells[casting_spell_AIindex].recast_delay < 10000)
-							AIBot_spells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + (AIBot_spells[casting_spell_AIindex].recast_delay*1000);
+				recovery_time += spells[AIBot_spells[casting_spell_AIindex].spellid].recovery_time;
+				if (AIBot_spells[casting_spell_AIindex].recast_delay >= 0) {
+					if (AIBot_spells[casting_spell_AIindex].recast_delay < 10000) {
+						AIBot_spells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + (AIBot_spells[casting_spell_AIindex].recast_delay*1000);
 					}
-					else
-						AIBot_spells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + spells[AIBot_spells[casting_spell_AIindex].spellid].recast_time;
+				}
+				else {
+					AIBot_spells[casting_spell_AIindex].time_cancast = Timer::GetCurrentTime() + spells[AIBot_spells[casting_spell_AIindex].spellid].recast_time;
+				}
 			}
-			if (recovery_time < AIautocastspell_timer->GetSetAtTrigger())
+			if (recovery_time < AIautocastspell_timer->GetSetAtTrigger()) {
 				recovery_time = AIautocastspell_timer->GetSetAtTrigger();
+			}
 			AIautocastspell_timer->Start(recovery_time, false);
 		}
-		else
+		else {
 			AIautocastspell_timer->Start(AISpellVar.fail_recast, false);
+		}
 		casting_spell_AIindex = AIBot_spells.size();
 	}
 }

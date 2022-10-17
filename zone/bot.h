@@ -749,6 +749,8 @@ private:
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
 };
 
+bool IsSpellInBotList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
+
 #endif // BOTS
 
 #endif // BOT_H

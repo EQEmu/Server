@@ -2175,8 +2175,9 @@ bool Bot::Process()
 
 void Bot::AI_Bot_Start(uint32 iMoveDelay) {
 	Mob::AI_Start(iMoveDelay);
-	if (!pAIControlled)
+	if (!pAIControlled) {
 		return;
+	}
 
 	if (AIBot_spells.empty()) {
 		AIautocastspell_timer = std::make_unique<Timer>(1000);
@@ -2299,7 +2300,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	if (spellbonuses.NegateIfCombat)
 		BuffFadeByEffect(SE_NegateIfCombat);
 
-	if(hidden || improved_hidden){
+	if(hidden || improved_hidden) {
 		hidden = false;
 		improved_hidden = false;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -5201,7 +5202,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 #endif
 		//Live AA - Sinister Strikes *Adds weapon damage bonus to offhand weapon.
 		if (Hand == EQ::invslot::slotSecondary) {
-			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
+			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc) {
 				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQ::ItemData*) nullptr);
 				my_hit.min_damage = ucDamageBonus;
 				hate += ucDamageBonus;
@@ -6470,9 +6471,9 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		return;
 	}
 
-	if(ka_time){
+	if(ka_time) {
 
-		switch(GetClass()){
+		switch(GetClass()) {
 			case SHADOWKNIGHT: {
 				CastSpell(SPELL_NPC_HARM_TOUCH, target->GetID());
 				knightattack_timer.Start(HarmTouchReuseTime * 1000);
@@ -6572,7 +6573,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	bool did_attack = false;
 	switch(GetClass()) {
 		case WARRIOR:
-			if(level >= RuleI(Combat, NPCBashKickLevel)){
+			if(level >= RuleI(Combat, NPCBashKickLevel)) {
 				bool canBash = false;
 				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
 					canBash = true;
@@ -6592,7 +6593,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		case CLERIC:
 		case SHADOWKNIGHT:
 		case PALADIN:
-			if(level >= RuleI(Combat, NPCBashKickLevel)){
+			if(level >= RuleI(Combat, NPCBashKickLevel)) {
 				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
 					skill_to_use = EQ::skills::SkillBash;
 			}
@@ -7046,7 +7047,7 @@ int64 Bot::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		}
 
 		else if (GetClass() == WIZARD || (IsMerc() && GetClass() == CASTERDPS)) {
-			if ((GetLevel() >= RuleI(Spells, WizCritLevel)) && zone->random.Roll(RuleI(Spells, WizCritChance))){
+			if ((GetLevel() >= RuleI(Spells, WizCritLevel)) && zone->random.Roll(RuleI(Spells, WizCritChance))) {
 				//Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)
 				ratio += zone->random.Int(20,70);
 				Critical = true;
@@ -7482,7 +7483,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot s
 			}
 		}
 
-		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()){
+		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
 			MessageString(Chat::White, SPELL_WOULDNT_HOLD);
 			if(casting_spell_id)
 				AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
@@ -7873,7 +7874,7 @@ void Bot::CalcBonuses() {
 	end_regen = CalcEnduranceRegen();
 }
 
-int64 Bot::CalcHPRegenCap(){
+int64 Bot::CalcHPRegenCap() {
 	int level = GetLevel();
 	int64 hpregen_cap = 0;
 	hpregen_cap = (RuleI(Character, ItemHealthRegenCap) + itembonuses.HeroicSTA / 25);
@@ -7881,7 +7882,7 @@ int64 Bot::CalcHPRegenCap(){
 	return (hpregen_cap * RuleI(Character, HPRegenMultiplier) / 100);
 }
 
-int64 Bot::CalcManaRegenCap(){
+int64 Bot::CalcManaRegenCap() {
 	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
 	switch(GetCasterClass()) {
 		case 'I':
@@ -9141,7 +9142,7 @@ void Bot::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool
 		}
 	}
 
-	if (item->SkillModValue != 0 && item->SkillModType <= EQ::skills::HIGHEST_SKILL){
+	if (item->SkillModValue != 0 && item->SkillModType <= EQ::skills::HIGHEST_SKILL) {
 		if ((item->SkillModValue > 0 && newbon->skillmod[item->SkillModType] < item->SkillModValue) ||
 			(item->SkillModValue < 0 && newbon->skillmod[item->SkillModType] > item->SkillModValue))
 		{
