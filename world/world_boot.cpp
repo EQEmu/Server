@@ -90,6 +90,7 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 	// command handler
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
+		path.LoadPaths();
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
 		LogSys.EnableConsoleLogging();

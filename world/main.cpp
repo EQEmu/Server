@@ -141,11 +141,11 @@ int main(int argc, char **argv)
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	path.LoadPaths();
-
 	if (WorldBoot::HandleCommandInput(argc, argv)) {
 		return 0;
 	}
+
+	path.LoadPaths();
 
 	if (!WorldBoot::LoadServerConfig()) {
 		return 0;
