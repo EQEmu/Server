@@ -2955,7 +2955,7 @@ DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 		}
 
 		Bot_Spells_Cache.insert(std::make_pair(iDBSpellsID, spell_set));
-		
+
 		return &Bot_Spells_Cache[iDBSpellsID];
     }
 
