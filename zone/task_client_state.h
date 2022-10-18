@@ -106,7 +106,7 @@ private:
 	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, const TaskInformation& task);
 	bool CanUpdate(Client* client, const TaskUpdateFilter& filter, int task_id,
 		const ActivityInformation& activity, const ClientActivityInformation& client_activity) const;
-	void DispatchEventTaskComplete(Client* client, ClientTaskInformation& client_task, int activity_id);
+	int DispatchEventTaskComplete(Client* client, ClientTaskInformation& client_task, int activity_id);
 	std::pair<int, int> FindTask(Client* client, const TaskUpdateFilter& filter) const;
 	void RecordCompletedTask(uint32_t character_id, const TaskInformation& task, const ClientTaskInformation& client_task);
 	void UpdateTasksOnKill(Client* client, Client* exp_client, NPC* npc);
