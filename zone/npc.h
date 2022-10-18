@@ -75,7 +75,7 @@ struct BotSpells_Struct {
 	uint32 time_cancast;	// when we can cast this spell next
 	int32  recast_delay;
 	int16  priority;
-	int32  resist_adjust;
+	int16  resist_adjust;
 	int16  min_hp;			// >0 won't cast if HP is below
 	int16  max_hp;			// >0 won't cast if HP is above
 };

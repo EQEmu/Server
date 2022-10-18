@@ -9235,7 +9235,7 @@ void Bot::CalcBotStats(bool showtext) {
 
 	CalcBonuses();
 
-	AI_AddNPCSpells(GetBotSpellID());
+	AI_AddBotSpells(GetBotSpellID());
 
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());

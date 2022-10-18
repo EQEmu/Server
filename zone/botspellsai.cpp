@@ -1099,8 +1099,10 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 				&& dist2 <= spells[AIBot_spells[i].spellid].aoe_range*spells[AIBot_spells[i].spellid].aoe_range)
 				|| dist2 <= GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)*GetActSpellRange(AIBot_spells[i].spellid, spells[AIBot_spells[i].spellid].range)) && (mana_cost <= GetMana() || GetMana() == GetMaxMana()))
 	{
-		result = NPC::AIDoSpellCast(i, tar, mana_cost, oDontDoAgainBefore);
-
+		casting_spell_AIindex = i;
+		LogAIDetail("Bot::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
+		result = Mob::CastSpell(AIBot_spells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, spells[AIBot_spells[i].spellid].cast_time, AIBot_spells[i].manacost == -2 ? 0 : mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIBot_spells[i].resist_adjust));
+	
 		if(IsCasting() && IsSitting())
 			Stand();
 	}
@@ -2686,12 +2688,12 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 		AIautocastspell_timer->Disable();
 		return false;
 	}
-	DBnpcspells_Struct* spell_list = content_db.GetBotSpells(iDBSpellsID);
+	DBbotspells_Struct* spell_list = content_db.GetBotSpells(iDBSpellsID);
 	if (!spell_list) {
 		AIautocastspell_timer->Disable();
 		return false;
 	}
-	DBnpcspells_Struct* parentlist = content_db.GetBotSpells(spell_list->parent_list);
+	DBbotspells_Struct* parentlist = content_db.GetBotSpells(spell_list->parent_list);
 
 	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u, level=%u", GetName(), iDBSpellsID, GetLevel());
 	if (spell_list) {
@@ -2707,7 +2709,6 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 		debug_msg.append(" (not found)");
 	}
 	LogAIDetail("[{}]", debug_msg.c_str());
-
 
 	if (parentlist) {
 		for (const auto &iter : parentlist->entries) {
@@ -2852,26 +2853,26 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	return true;
 }
 
-bool IsSpellInBotList(DBnpcspells_Struct* spell_list, uint16 iSpellID) {
+bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID) {
 	auto it = std::find_if(spell_list->entries.begin(), spell_list->entries.end(),
-			       [iSpellID](const DBnpcspells_entries_Struct &a) { return a.spellid == iSpellID; });
+		[iSpellID](const DBbotspells_entries_Struct &a) { return a.spellid == iSpellID; });
 	return it != spell_list->entries.end();
 }
 
-DBnpcspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
+DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 {
 	if (iDBSpellsID == 0) {
 		return nullptr;
 	}
 
-	auto it = npc_spells_cache.find(iDBSpellsID);
+	auto it = Bot_Spells_Cache.find(iDBSpellsID);
 
-	if (it != npc_spells_cache.end()) { // it's in the cache, easy =)
+	if (it != Bot_Spells_Cache.end()) { // it's in the cache, easy =)
 		return &it->second;
 	}
 
-	if (!npc_spells_loadtried.count(iDBSpellsID)) { // no reason to ask the DB again if we have failed once already
-		npc_spells_loadtried.insert(iDBSpellsID);
+	if (!Bot_Spells_LoadTried.count(iDBSpellsID)) { // no reason to ask the DB again if we have failed once already
+		Bot_Spells_LoadTried.insert(iDBSpellsID);
 
 		std::string query = StringFormat("SELECT id, parent_list, attack_proc, proc_chance, "
 						 "range_proc, rproc_chance, defensive_proc, dproc_chance, "
@@ -2891,7 +2892,7 @@ DBnpcspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 		}
 
 		auto row = results.begin();
-		DBnpcspells_Struct spell_set;
+		DBbotspells_Struct spell_set;
 
 		spell_set.parent_list = atoi(row[1]);
 		spell_set.attack_proc = atoi(row[2]);
@@ -2928,7 +2929,7 @@ DBnpcspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 
 		int entryIndex = 0;
 		for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
-			DBnpcspells_entries_Struct entry;
+			DBbotspells_entries_Struct entry;
 			int spell_id = atoi(row[0]);
 			entry.spellid = spell_id;
 			entry.type = atoul(row[1]);
@@ -2953,9 +2954,9 @@ DBnpcspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 			spell_set.entries.push_back(entry);
 		}
 
-		npc_spells_cache.insert(std::make_pair(iDBSpellsID, spell_set));
-
-		return &npc_spells_cache[iDBSpellsID];
+		Bot_Spells_Cache.insert(std::make_pair(iDBSpellsID, spell_set));
+		
+		return &Bot_Spells_Cache[iDBSpellsID];
     }
 
 	return nullptr;
