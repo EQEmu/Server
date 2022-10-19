@@ -843,7 +843,7 @@ void Bot::GenerateBaseStats()
 	int32 CorruptionResist = _baseCorrup;
 
 	// pulling fixed values from an auto-increment field is dangerous...
-	switch(GetClass()) {
+	switch (GetClass()) {
 		case WARRIOR:
 			BotSpellID = 3001;
 			Strength += 10;
@@ -2300,7 +2300,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	if (spellbonuses.NegateIfCombat)
 		BuffFadeByEffect(SE_NegateIfCombat);
 
-	if(hidden || improved_hidden) {
+	if (hidden || improved_hidden) {
 		hidden = false;
 		improved_hidden = false;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -6471,9 +6471,9 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		return;
 	}
 
-	if(ka_time) {
+	if (ka_time) {
 
-		switch(GetClass()) {
+		switch (GetClass()) {
 			case SHADOWKNIGHT: {
 				CastSpell(SPELL_NPC_HARM_TOUCH, target->GetID());
 				knightattack_timer.Start(HarmTouchReuseTime * 1000);
@@ -6571,9 +6571,9 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	int level = GetLevel();
 	int reuse = (TauntReuseTime * 1000);
 	bool did_attack = false;
-	switch(GetClass()) {
+	switch (GetClass()) {
 		case WARRIOR:
-			if(level >= RuleI(Combat, NPCBashKickLevel)) {
+			if (level >= RuleI(Combat, NPCBashKickLevel)) {
 				bool canBash = false;
 				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
 					canBash = true;
@@ -6593,7 +6593,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		case CLERIC:
 		case SHADOWKNIGHT:
 		case PALADIN:
-			if(level >= RuleI(Combat, NPCBashKickLevel)) {
+			if (level >= RuleI(Combat, NPCBashKickLevel)) {
 				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
 					skill_to_use = EQ::skills::SkillBash;
 			}
@@ -7483,7 +7483,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot s
 			}
 		}
 
-		if(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
+		if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
 			MessageString(Chat::White, SPELL_WOULDNT_HOLD);
 			if(casting_spell_id)
 				AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
@@ -7774,7 +7774,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
 			uint16 thespell = spell_id;
-			for(int i = 0; i < AIBot_spells.size(); i++) {
+			for (int i = 0; i < AIBot_spells.size(); i++) {
 				int j = BotGetSpells(i);
 				int spelltype = BotGetSpellType(i);
 				bool spellequal = (j == thespell);
@@ -8319,7 +8319,7 @@ int64 Bot::CalcManaRegen() {
 
 uint64 Bot::GetClassHPFactor() {
 	uint32 factor;
-	switch(GetClass()) {
+	switch (GetClass()) {
 		case BEASTLORD:
 		case BERSERKER:
 		case MONK:

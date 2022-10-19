@@ -2138,11 +2138,11 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 									}
 									else {
 										//check for heal over time. if not present, try it first
-										if(!tar->FindType(SE_HealOverTime)) {
+										if (!tar->FindType(SE_HealOverTime)) {
 											selectedMercSpell = GetBestMercSpellForHealOverTime(this);
 
 											//get regular heal
-											if(selectedMercSpell.spellid == 0) {
+											if (selectedMercSpell.spellid == 0) {
 												selectedMercSpell = GetBestMercSpellForRegularSingleTargetHeal(this);
 											}
 										}
