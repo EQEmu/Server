@@ -491,6 +491,7 @@ RULE_INT(Combat, FrontalStunImmunityRaces, 512, "Bitmask for Races than have fro
 RULE_BOOL(Combat, NPCsUseFrontalStunImmunityRaces, true, "Enable or disable NPCs using frontal stun immunity Races from Combat:FrontalStunImmunityRaces, true by default.")
 RULE_BOOL(Combat, AssassinateOnlyHumanoids, true, "Enable or disable Assassinate only being allowed on Humanoids, true by default.")
 RULE_BOOL(Combat, HeadshotOnlyHumanoids, true, "Enable or disable Headshot only being allowed on Humanoids, true by default.")
+RULE_BOOL(Combat, EnableWarriorShielding, true, "Enable or disable Warrior Shielding Ability (/shield), true by default.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
