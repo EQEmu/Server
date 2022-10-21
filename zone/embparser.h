@@ -88,6 +88,7 @@ private:
 	void ExportVar(const char *pkgprefix, const char *varname, int32 value);
 	void ExportVar(const char *pkgprefix, const char *varname, uint32 value);
 	void ExportVar(const char *pkgprefix, const char *varname, float value);
+	void ExportVar(const char* pkgprefix, const char* varname, const char* classname, void* value);
 	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value);
 
 	int EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, EQ::ItemInstance* item_inst, const SPDat_Spell_Struct* spell, Mob* mob, 

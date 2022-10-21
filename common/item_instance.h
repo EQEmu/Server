@@ -229,6 +229,13 @@ namespace EQ
 		void StopTimer(std::string name);
 		void ClearTimers();
 
+		int GetTaskDeliveredCount() const { return m_task_delivered_count; }
+		void SetTaskDeliveredCount(int count) { m_task_delivered_count = count; }
+		// This function should only be used by trade return apis
+		// Removes delivered task items from stack count and returns remaining count
+		// Return value should be used to determine if an item still exists (for stackable and non-stackable)
+		int RemoveTaskDeliveredItems();
+
 		// Get a total of a stat, including augs
 		// These functions should be used in place of other code manually totaling
 		// to centralize where it is done to make future changes easier (ex. whenever powersources come around)
@@ -313,6 +320,7 @@ namespace EQ
 		uint32				m_new_id_file;
 		uint32				m_ornament_hero_model;
 		uint32				m_recast_timestamp;
+		int                 m_task_delivered_count = 0;
 
 		//
 		// Items inside of this item (augs or contents);

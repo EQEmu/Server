@@ -274,6 +274,16 @@ int Lua_ItemInst::CountAugmentByID(uint32 item_id) {
 	return self->CountAugmentByID(item_id);
 }
 
+int Lua_ItemInst::GetTaskDeliveredCount() {
+	Lua_Safe_Call_Int();
+	return self->GetTaskDeliveredCount();
+}
+
+int Lua_ItemInst::RemoveTaskDeliveredItems() {
+	Lua_Safe_Call_Int();
+	return self->RemoveTaskDeliveredItems();
+}
+
 luabind::scope lua_register_iteminst() {
 	return luabind::class_<Lua_ItemInst>("ItemInst")
 	.def(luabind::constructor<>())
@@ -303,6 +313,7 @@ luabind::scope lua_register_iteminst() {
 	.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
 	.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)
 	.def("GetPrice", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetPrice)
+	.def("GetTaskDeliveredCount", &Lua_ItemInst::GetTaskDeliveredCount)
 	.def("GetTotalItemCount", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetTotalItemCount)
 	.def("GetUnscaledItem", (Lua_ItemInst(Lua_ItemInst::*)(int))&Lua_ItemInst::GetUnscaledItem)
 	.def("IsAmmo", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsAmmo)
@@ -315,6 +326,7 @@ luabind::scope lua_register_iteminst() {
 	.def("IsStackable", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsStackable)
 	.def("IsType", (bool(Lua_ItemInst::*)(int))&Lua_ItemInst::IsType)
 	.def("IsWeapon", (bool(Lua_ItemInst::*)(void))&Lua_ItemInst::IsWeapon)
+	.def("RemoveTaskDeliveredItems", &Lua_ItemInst::RemoveTaskDeliveredItems)
 	.def("SetCharges", (void(Lua_ItemInst::*)(int))&Lua_ItemInst::SetCharges)
 	.def("SetColor", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::SetColor)
 	.def("SetCustomData", (void(Lua_ItemInst::*)(std::string,bool))&Lua_ItemInst::SetCustomData)
