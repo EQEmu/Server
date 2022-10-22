@@ -12978,10 +12978,14 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		return;
 	}
 
-	pTimerType timer = pTimerShieldAbility;
+	if (!RuleB(Combat, EnableWarriorShielding)) {
+		Message(Chat::White, "/shield is disabled.");
+		return;
+	}
 
+	pTimerType timer = pTimerShieldAbility;
 	if (!p_timers.Expired(&database, timer, false)) {
-		uint32 remaining_time = p_timers.GetRemainingTime(timer);
+		auto remaining_time = p_timers.GetRemainingTime(timer);
 		Message(
 			Chat::White,
 			fmt::format(
@@ -12992,8 +12996,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		return;
 	}
 
-	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
-
+	auto shield = (Shielding_Struct*) app->pBuffer;
 	if (ShieldAbility(shield->target_id, 15, 12000, 50, 25, true, false)) {
 		p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
 	}
