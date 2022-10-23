@@ -19,6 +19,18 @@ void command_modifynpcstat(Client *c, const Seperator *sep)
 	std::string stat = sep->arg[1];
 	std::string value = sep->arg[2] ? sep->arg[2] : "";
 
+	auto stat_description = GetModifyNPCStatDescription(stat);
+	if (!stat_description.length()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Stat '{}' does not exist.",
+				stat
+			).c_str()
+		);
+		return;
+	}
+
 	target->ModifyNPCStat(stat, value);
 
 	c->Message(
@@ -92,12 +104,10 @@ std::map<std::string, std::string> GetModifyNPCStatMap()
 	return identifiers_map;
 }
 
-std::string GetModifyNPCStatDescription(std::string identifier)
+std::string GetModifyNPCStatDescription(std::string stat)
 {
-	for (const auto& s : GetModifyNPCStatMap()) {
-		if (s.first == identifier) {
-			return s.second;
-		}
+	if (GetModifyNPCStatMap().find(stat) != GetModifyNPCStatMap().end()) {
+		return GetModifyNPCStatMap().find(stat)->second;
 	}
 
 	return std::string();
