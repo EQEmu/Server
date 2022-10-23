@@ -3,7 +3,7 @@
 void command_modifynpcstat(Client *c, const Seperator *sep)
 {
 	auto arguments = sep->argnum;
-	if (arguments <= 1) {
+	if (!arguments) {
 		c->Message(Chat::White, "Usage: #modifynpcstat [Stat] [Value]");
 		ListModifyNPCStatMap(c);
 		return;
@@ -17,7 +17,7 @@ void command_modifynpcstat(Client *c, const Seperator *sep)
 	auto target = c->GetTarget()->CastToNPC();
 
 	std::string stat = sep->arg[1];
-	std::string value = sep->arg[2];
+	std::string value = sep->arg[2] ? sep->arg[2] : "";
 
 	target->ModifyNPCStat(stat, value);
 
