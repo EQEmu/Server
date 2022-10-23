@@ -250,7 +250,7 @@ public:
    	void removetitle(int titlecheck);
 	uint16 CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
 	uint16 CreateGroundObjectFromModel(const char* model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
-	void ModifyNPCStat(const char *identifier, const char *newValue);
+	void ModifyNPCStat(std::string identifier, std::string value);
 	void UpdateSpawnTimer(uint32 id, uint32 newTime);
 	void MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity = 0);
 	uint32 MerchantCountItem(uint32 NPCid, uint32 itemid);

@@ -2579,14 +2579,11 @@ uint16 QuestManager::CreateGroundObjectFromModel(const char *model, const glm::v
 	return entid;
 }
 
-void QuestManager::ModifyNPCStat(const char *identifier, const char *newValue)
+void QuestManager::ModifyNPCStat(std::string stat, std::string value)
 {
 	QuestManagerCurrentQuestVars();
-	if(owner){
-		if(owner->IsNPC())
-		{
-			owner->CastToNPC()->ModifyNPCStat(identifier, newValue);
-		}
+	if (owner && owner->IsNPC()) {
+		owner->CastToNPC()->ModifyNPCStat(stat, value);
 	}
 }
 
