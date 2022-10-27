@@ -10547,6 +10547,16 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			scribeable = false;
 		}
 
+		if(spells[spell_id].spell_group) { 
+			int highest_spell_id = GetHighestSpellinSpellGroup(spells[spell_id].spell_group);
+			if(spells[highest_spell_id].classes[m_pp.class_ - 1] <= max_level) {
+				if (spells[highest_spell_id].classes[m_pp.class_ - 1] >= min_level) {
+					if(spell_id != highest_spell_id) {
+						continue;
+					}
+				}
+			}
+		}
 		if (scribeable) {
 			scribeable_spells.push_back(spell_id);
 		}

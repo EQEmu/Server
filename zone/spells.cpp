@@ -5520,6 +5520,26 @@ uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
 	return highest_spell_id;
 }
 
+uint32 Client::GetHighestSpellinSpellGroup(uint32 spell_group)
+{
+	//Typical live spells follow 1/5/10 rank value for actual ranks 1/2/3, but this can technically be set as anything.
+
+	int highest_rank = 0; //highest ranked found in spellgroup
+	uint32 highest_spell_id = 0;  //spell_id of the highest ranked spell
+
+	for (int i = 0; i < EQ::spells::SPELL_ID_MAX; i++) {
+		if (IsValidSpell(i)) {
+			if (spells[i].spell_group == spell_group) {
+				if (highest_rank < spells[i].rank) {
+					highest_rank = spells[i].rank;
+					highest_spell_id = i;
+				}
+			}
+		}
+	}
+	return highest_spell_id;
+}
+
 bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 	std::string query = fmt::format(
 		"SELECT qglobal, value FROM spell_globals WHERE spellid = {}",
