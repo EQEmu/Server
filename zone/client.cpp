@@ -10557,6 +10557,7 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 				}
 			}
 		}
+		
 		if (scribeable) {
 			scribeable_spells.push_back(spell_id);
 		}
