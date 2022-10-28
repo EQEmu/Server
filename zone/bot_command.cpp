@@ -3591,7 +3591,6 @@ void bot_command_invisibility(Client *c, const Seperator *sep)
 void bot_command_item_use(Client* c, const Seperator* sep)
 {
 	if (helper_is_help_or_usage(sep->arg[1])) {
-
 		c->Message(Chat::White, "usage: %s ([empty])", sep->arg[0]);
 		return;
 	}
@@ -3604,20 +3603,17 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 
 	const auto item_instance = c->GetInv().GetItem(EQ::invslot::slotCursor);
 	if (!item_instance) {
-
 		c->Message(Chat::White, "No item found on cursor!");
 		return;
 	}
 
 	auto item_data = item_instance->GetItem();
 	if (!item_data) {
-
 		c->Message(Chat::White, "No data found for cursor item!");
 		return;
 	}
 
 	if (item_data->ItemClass != EQ::item::ItemClassCommon || item_data->Slots == 0) {
-
 		c->Message(Chat::White, "'%s' is not an equipable item!", item_data->Name);
 		return;
 	}
@@ -3638,8 +3634,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
-	for (auto bot_iter : sbl) {
-
+	for (const auto& bot_iter : sbl) {
 		if (!bot_iter) {
 			continue;
 		}
@@ -3652,7 +3647,6 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		text_link = bot_iter->CreateSayLink(c, msg.c_str(), bot_iter->GetCleanName());
 
 		for (auto slot_iter : equipable_slot_list) {
-
 			// needs more failure criteria - this should cover the bulk for now
 			if (slot_iter == EQ::invslot::slotSecondary && item_data->Damage && !bot_iter->CanThisClassDualWield()) {
 				continue;
@@ -3661,26 +3655,45 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 			auto equipped_item = bot_iter->GetBotInv()[slot_iter];
 
 			if (equipped_item && !empty_only) {
-
 				linker.SetItemInst(equipped_item);
 
 				c->Message(
 					Chat::Say,
-					"[%s] says, 'I can use that for my %s! (replaces: [%s])'",
-					text_link.c_str(),
-					EQ::invslot::GetInvPossessionsSlotName(slot_iter),
-					linker.GenerateLink().c_str()
+					fmt::format(
+						"{} says, 'I can use that for my {} instead of my {}! Would you like to {} my {}?'",
+						text_link,
+						EQ::invslot::GetInvPossessionsSlotName(slot_iter),
+						linker.GenerateLink(),
+						Saylink::Silent(
+							fmt::format(
+								"^inventoryremove {} byname {}",
+								slot_iter,
+								bot_iter->GetCleanName()
+							),
+							"remove"
+						),
+						linker.GenerateLink()
+					).c_str()
 				);
-				bot_iter->DoAnim(29);
-			}
-			else if (!equipped_item) {
 
+				bot_iter->DoAnim(29);
+			} else if (!equipped_item) {
 				c->Message(
 					Chat::Say,
-					"[%s] says, 'I can use that for my %s!'",
-					text_link.c_str(),
-					EQ::invslot::GetInvPossessionsSlotName(slot_iter)
+					fmt::format(
+						"{} says, 'I can use that for my {}! Would you like to {} it to me?'",
+						text_link,
+						EQ::invslot::GetInvPossessionsSlotName(slot_iter),
+						Saylink::Silent(
+							fmt::format(
+								"^inventorygive byname {}",
+								bot_iter->GetCleanName()
+							),
+							"give"
+						)
+					).c_str()
 				);
+
 				bot_iter->DoAnim(29);
 			}
 		}
