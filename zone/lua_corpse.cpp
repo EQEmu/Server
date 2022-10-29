@@ -82,6 +82,16 @@ uint32 Lua_Corpse::CountItems() {
 	return self->CountItems();
 }
 
+void Lua_Corpse::AddItem(uint32 itemnum, uint16 charges) {
+	Lua_Safe_Call_Void();
+	self->AddItem(itemnum, charges);
+}
+
+void Lua_Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot) {
+	Lua_Safe_Call_Void();
+	self->AddItem(itemnum, charges, slot);
+}
+
 void Lua_Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) {
 	Lua_Safe_Call_Void();
 	self->AddItem(itemnum, charges, slot, aug1, aug2, aug3, aug4, aug5);
@@ -204,6 +214,8 @@ luabind::scope lua_register_corpse() {
 	.def(luabind::constructor<>())
 	.property("null", &Lua_Corpse::Null)
 	.property("valid", &Lua_Corpse::Valid)
+	.def("AddItem", (void(Lua_Corpse::*)(uint32, uint16))&Lua_Corpse::AddItem)
+	.def("AddItem", (void(Lua_Corpse::*)(uint32, uint16, int16))&Lua_Corpse::AddItem)
 	.def("AddItem", (void(Lua_Corpse::*)(uint32, uint16, int16, uint32, uint32, uint32, uint32, uint32))&Lua_Corpse::AddItem)
 	.def("AddLooter", (void(Lua_Corpse::*)(Lua_Mob))&Lua_Corpse::AddLooter)
 	.def("AllowMobLoot", (void(Lua_Corpse::*)(Lua_Mob, uint8))&Lua_Corpse::AllowMobLoot)
