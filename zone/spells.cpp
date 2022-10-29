@@ -5520,25 +5520,22 @@ uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
 	return highest_spell_id;
 }
 
-uint32 Client::GetHighestSpellinSpellGroup(uint32 spell_group)
-{
+std::vector<int> Client::BuildSpellGroupCache(uint8 max_level) {
 	//Typical live spells follow 1/5/10 rank value for actual ranks 1/2/3, but this can technically be set as anything.
+	std::vector<int> spell_group_cache;
 
-	int highest_rank = 0; //highest ranked found in spellgroup
-	uint32 highest_spell_id = 0;  //spell_id of the highest ranked spell
+	std::string query = fmt::format(
+		"SELECT MAX(id) FROM spells_new WHERE classes{} <= {} group by spellgroup",
+		 m_pp.class_, max_level
+	);
 
-	for (int i = 0; i < SPDAT_RECORDS; i++) {
-		if (
-			IsValidSpell(i) &&
-			spells[i].spell_group == spell_group &&
-			highest_rank < spells[i].rank
-		) {
-			highest_rank = spells[i].rank;
-			highest_spell_id = i;
-		}
+	auto results = database.QueryDatabase(query);
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		spell_group_cache.push_back(atoi(row[0]));
 	}
 
-	return highest_spell_id;
+	return spell_group_cache;
 }
 
 bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
