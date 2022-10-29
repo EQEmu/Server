@@ -5524,12 +5524,12 @@ std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint
     std::unordered_map<uint32, std::vector<uint16>> spell_group_cache;
 
     const auto query = fmt::format(
-        "SELECT a.spellgroup, a.id, a.rank "
+		"SELECT a.spellgroup, a.id, a.rank "
 		"FROM spells_new a "
 		"INNER JOIN ("
-   		"SELECT spellgroup, MAX(rank) rank "
-    	"FROM spells_new "
-    	"GROUP BY spellgroup) "
+		"SELECT spellgroup, MAX(rank) rank "
+		"FROM spells_new "
+		"GROUP BY spellgroup) "
 		"b ON a.spellgroup = b.spellgroup AND a.rank = b.rank "
 		"WHERE a.spellgroup IN (SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0 and classes{} BETWEEN {} AND {}) ORDER BY rank DESC",
 		m_pp.class_, min_level, max_level
