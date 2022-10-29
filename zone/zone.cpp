@@ -2949,3 +2949,26 @@ void Zone::LoadDynamicZoneTemplates()
 		dz_template_cache[dz_template.id] = dz_template;
 	}
 }
+
+std::string Zone::GetAAName(int aa_id)
+{
+	if (!aa_id) {
+		return std::string();
+	}
+
+	int current_aa_id = 0;
+
+	for (const auto& r : aa_ranks) {
+		if (r.second.get()->id == aa_id) {
+			current_aa_id = r.second.get()->base_ability->id;
+		}
+	}
+
+	if (current_aa_id) {
+		if (aa_abilities.find(current_aa_id) != aa_abilities.end()) {
+			return aa_abilities.find(current_aa_id)->second.get()->name;
+		}
+	}
+
+	return std::string();
+}
