@@ -79,6 +79,7 @@ void command_equipitem(Client *c, const Seperator *sep);
 void command_faction(Client *c, const Seperator *sep);
 void command_faction_association(Client *c, const Seperator *sep);
 void command_feature(Client *c, const Seperator *sep);
+void command_findaa(Client *c, const Seperator *sep);
 void command_findaliases(Client *c, const Seperator *sep);
 void command_findclass(Client *c, const Seperator *sep);
 void command_findfaction(Client *c, const Seperator *sep);
