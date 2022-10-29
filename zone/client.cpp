@@ -10507,7 +10507,7 @@ std::vector<int> Client::GetMemmedSpells() {
 
 std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 	std::vector<int> scribeable_spells;
-	std::vector<int> spell_group_cache = BuildSpellGroupCache(max_level);
+	std::unordered_map<uint32, std::vector<uint16>> spell_group_cache = LoadSpellGroupCache(min_level, max_level);
 
 	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
 		bool scribeable = true;
@@ -10549,15 +10549,17 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			scribeable = false;
 		}
 
-		if (spells[spell_id].spell_group) { 
-			for (auto it = spell_group_cache.begin(); it != spell_group_cache.end(); it++) {
-				if (
-					spells[*it].classes[m_pp.class_ - 1] >= min_level &&
-					spells[*it].classes[m_pp.class_ - 1] <= max_level &&
-					spell_id == *it
-				) {
-					if (scribeable) {
-						scribeable_spells.push_back(spell_id);
+		if (spells[spell_id].spell_group) {
+			if (spell_group_cache.find(spells[spell_id].spell_group) != spell_group_cache.end()) {
+				for (const auto& s : spell_group_cache.find(spells[spell_id].spell_group)->second) {
+					if (
+						spells[s].classes[m_pp.class_ - 1] >= min_level &&
+						spells[s].classes[m_pp.class_ - 1] <= max_level &&
+						s == spell_id
+					) {
+						if (scribeable) {
+							scribeable_spells.push_back(spell_id);
+						}
 					}
 					continue;
 				}

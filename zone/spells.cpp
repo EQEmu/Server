@@ -5520,19 +5520,39 @@ uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
 	return highest_spell_id;
 }
 
-std::vector<int> Client::BuildSpellGroupCache(uint8 max_level) {
-	//Typical live spells follow 1/5/10 rank value for actual ranks 1/2/3, but this can technically be set as anything.
-	std::vector<int> spell_group_cache;
+std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint8 min_level, uint8 max_level) {
+    std::unordered_map<uint32, std::vector<uint16>> spell_group_cache;
 
-	std::string query = fmt::format(
-		"SELECT MAX(id) FROM spells_new WHERE classes{} <= {} group by spellgroup",
-		 m_pp.class_, max_level
-	);
+    auto results = database.QueryDatabase("SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0");
+    if (!results.Success() || !results.RowCount()) {
+        return spell_group_cache;
+    }
 
-	auto results = database.QueryDatabase(query);
+    std::vector<uint32> spell_groups;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		spell_group_cache.push_back(atoi(row[0]));
+    for (auto row : results) {
+        spell_groups.push_back(std::stoul(row[0]));
+    }
+
+    const auto query = fmt::format(
+        "SELECT a.spellgroup, a.id, a.rank "
+		"FROM spells_new a "
+		"INNER JOIN ("
+   		"SELECT spellgroup, MAX(rank) rank "
+    	"FROM spells_new "
+    	"GROUP BY spellgroup) "
+		"b ON a.spellgroup = b.spellgroup AND a.rank = b.rank "
+		"WHERE a.spellgroup IN ({}) and classes{} >= {} and classes{} <= {} ORDER BY rank DESC",
+        fmt::join(spell_groups, ", "), m_pp.class_, min_level, m_pp.class_, max_level
+    );
+
+	results = database.QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return spell_group_cache;
+	}
+
+	for (auto row : results) {
+		spell_group_cache[std::stoul(row[0])].push_back(static_cast<uint16>(std::stoul(row[1])));
 	}
 
 	return spell_group_cache;
