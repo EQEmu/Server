@@ -2961,6 +2961,7 @@ std::string Zone::GetAAName(int aa_id)
 	for (const auto& r : aa_ranks) {
 		if (r.second.get()->id == aa_id) {
 			current_aa_id = r.second.get()->base_ability->id;
+			break;
 		}
 	}
 
