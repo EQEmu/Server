@@ -11,8 +11,8 @@
 #include <algorithm>
 
 class Client;
-
 class Mob;
+class SharedTaskRequest;
 
 class TaskManager {
 
@@ -81,6 +81,7 @@ private:
 	void SendActiveTaskToClient(ClientTaskInformation *task, Client *client, int task_index, bool task_complete);
 
 	// shared tasks
+	bool CanOfferSharedTask(int task_id, const SharedTaskRequest& request);
 	void SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskState *cts);
 	void SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts);
 	void SendSharedTaskSelector(Client* client, Mob* mob, const std::vector<int>& tasks);
