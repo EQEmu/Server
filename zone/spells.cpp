@@ -5532,7 +5532,7 @@ std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint
     	"GROUP BY spellgroup) "
 		"b ON a.spellgroup = b.spellgroup AND a.rank = b.rank "
 		"WHERE a.spellgroup IN (SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0 and classes{} BETWEEN {} AND {}) ORDER BY rank DESC",
-    	m_pp.class_, min_level, max_level
+		m_pp.class_, min_level, max_level
     );
 
 	auto results = database.QueryDatabase(query);
