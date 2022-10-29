@@ -5527,16 +5527,17 @@ uint32 Client::GetHighestSpellinSpellGroup(uint32 spell_group)
 	int highest_rank = 0; //highest ranked found in spellgroup
 	uint32 highest_spell_id = 0;  //spell_id of the highest ranked spell
 
-	for (int i = 0; i < EQ::spells::SPELL_ID_MAX; i++) {
-		if (IsValidSpell(i)) {
-			if (spells[i].spell_group == spell_group) {
-				if (highest_rank < spells[i].rank) {
-					highest_rank = spells[i].rank;
-					highest_spell_id = i;
-				}
-			}
+	for (int i = 0; i < SPDAT_RECORDS; i++) {
+		if (
+			IsValidSpell(i) &&
+			spells[i].spell_group == spell_group &&
+			highest_rank < spells[i].rank
+		) {
+			highest_rank = spells[i].rank;
+			highest_spell_id = i;
 		}
 	}
+
 	return highest_spell_id;
 }
 
