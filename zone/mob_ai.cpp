@@ -2988,16 +2988,9 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		query = StringFormat(
 		    "SELECT spellid, type, minlevel, maxlevel, "
 		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
-#ifdef BOTS
-		    "FROM %s "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    (iDBSpellsID >= 3001 && iDBSpellsID <= 3016 ? "bot_spells_entries" : "npc_spells_entries"),
-		    iDBSpellsID);
-#else
 		    "FROM npc_spells_entries "
 		    "WHERE npc_spells_id=%d ORDER BY minlevel",
 		    iDBSpellsID);
-#endif
 		results = QueryDatabase(query);
 
 		if (!results.Success()) {
