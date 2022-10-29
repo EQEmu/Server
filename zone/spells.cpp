@@ -5523,17 +5523,6 @@ uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
 std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint8 min_level, uint8 max_level) {
     std::unordered_map<uint32, std::vector<uint16>> spell_group_cache;
 
-    auto results = database.QueryDatabase("SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0");
-    if (!results.Success() || !results.RowCount()) {
-        return spell_group_cache;
-    }
-
-    std::vector<uint32> spell_groups;
-
-    for (auto row : results) {
-        spell_groups.push_back(std::stoul(row[0]));
-    }
-
     const auto query = fmt::format(
         "SELECT a.spellgroup, a.id, a.rank "
 		"FROM spells_new a "
@@ -5542,11 +5531,11 @@ std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint
     	"FROM spells_new "
     	"GROUP BY spellgroup) "
 		"b ON a.spellgroup = b.spellgroup AND a.rank = b.rank "
-		"WHERE a.spellgroup IN ({}) and classes{} >= {} and classes{} <= {} ORDER BY rank DESC",
-        fmt::join(spell_groups, ", "), m_pp.class_, min_level, m_pp.class_, max_level
+		"WHERE a.spellgroup IN (SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0 and classes{} BETWEEN {} AND {}) ORDER BY rank DESC",
+    	m_pp.class_, min_level, max_level
     );
 
-	results = database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	if (!results.Success() || !results.RowCount()) {
 		return spell_group_cache;
 	}
