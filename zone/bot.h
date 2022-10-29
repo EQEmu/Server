@@ -308,7 +308,7 @@ public:
 	void DoEnduranceUpkeep();	//does the endurance upkeep
 
 	bool AI_AddBotSpells(uint32 iDBSpellsID);
-	void AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
+	void AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp, std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 	// AI Methods
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
@@ -348,6 +348,9 @@ public:
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQ::spells::CastingSlot slot);
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
+
+	bool GetBotDataBuckets();
+	bool CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value);
 
 	// Bot Equipment & Inventory Class Methods
 	void BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database = true);
@@ -692,7 +695,8 @@ private:
 	eStandingPetOrder m_previous_pet_order;
 
 	BotCastingRoles m_CastingRoles;
-
+	std::map<std::string,std::string> bot_data_buckets;
+	
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 
 	std::map<uint32, BotAA> botAAs;

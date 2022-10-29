@@ -78,6 +78,9 @@ struct BotSpells_Struct {
 	int16  resist_adjust;
 	int16  min_hp;			// >0 won't cast if HP is below
 	int16  max_hp;			// >0 won't cast if HP is above
+	std::string bucket_name;
+	std::string bucket_value;
+	uint8_t     bucket_comparison;
 };
 
 struct AISpellsEffects_Struct {

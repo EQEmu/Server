@@ -6867,6 +6867,10 @@ std::string Mob::GetBucketKey() {
 		return fmt::format("character-{}", CastToClient()->CharacterID());
 	} else if (IsNPC()) {
 		return fmt::format("npc-{}", GetNPCTypeID());
+#ifdef BOTS
+	} else if (IsBot()) {
+		return fmt::format("character-{}", CastToBot()->GetBotOwnerCharacterID());
+#endif
 	}
 	return std::string();
 }

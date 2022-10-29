@@ -9236,6 +9236,7 @@ void Bot::CalcBotStats(bool showtext) {
 	CalcBonuses();
 
 	AI_AddBotSpells(GetBotSpellID());
+	GetBotDataBuckets();
 
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());
@@ -10320,6 +10321,168 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 			botgroup_name
 		).c_str()
 	);
+}
+
+bool Bot::GetBotDataBuckets()
+{
+	auto query = fmt::format(
+		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
+		Strings::Escape(GetOwner()->CastToClient()->GetBucketKey())
+	);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success() || !results.RowCount()) {
+		return false;
+	}
+
+	for (auto row : results) {
+		bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+	}
+
+	return true;
+}
+
+bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value)
+{
+	std::vector<std::string> bucket_checks;
+	bool found = false;
+	bool passes = false;
+
+	switch (bucket_comparison) {
+		case static_cast<uint8>(BotBucketComparison::BucketEqualTo):
+		{
+			if (player_value != bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketNotEqualTo):
+		{
+			if (player_value == bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketGreaterThanOrEqualTo):
+		{
+			if (player_value < bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketLesserThanOrEqualTo):
+		{
+			if (player_value > bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketGreaterThan):
+		{
+			if (player_value <= bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketLesserThan):
+		{
+			if (player_value >= bucket_value) {
+				break;
+			}
+
+			passes = true;
+
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketIsAny):
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			for (const auto &bucket : bucket_checks) {
+				if (player_value == bucket) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketIsNotAny):
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			for (const auto &bucket : bucket_checks) {
+				if (player_value == bucket) {
+					found = true;
+					break;
+				}
+			}
+
+			if (found) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketIsBetween):
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (
+				std::stoll(player_value) < std::stoll(bucket_checks[0]) ||
+				std::stoll(player_value) > std::stoll(bucket_checks[1])
+			) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case static_cast<uint8>(BotBucketComparison::BucketIsNotBetween):
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (
+				std::stoll(player_value) >= std::stoll(bucket_checks[0]) &&
+				std::stoll(player_value) <= std::stoll(bucket_checks[1])
+			) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+	}
+
+	return passes;
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

@@ -1614,6 +1614,24 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 				continue;
 			}
 
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+			auto full_name = fmt::format(
+				"{}-{}",
+				botCaster->CastToClient()->GetBucketKey(),
+				bucket_name
+			);
+				auto player_value = botCaster->bot_data_buckets[full_name];
+				if (player_value.empty()) {
+				continue;
+				}
+
+				if (!botCaster->CheckBotDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
+			}
+
 			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
@@ -1641,6 +1659,24 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 				continue;
 			}
 
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+			auto full_name = fmt::format(
+				"{}-{}",
+				botCaster->CastToClient()->GetBucketKey(),
+				bucket_name
+			);
+				auto player_value = botCaster->bot_data_buckets[full_name];
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->CheckBotDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
+			}
+			
 			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
 				if(spells[botSpellList[i].spellid].target_type == targetType) {
 					BotSpell botSpell;
@@ -1668,6 +1704,24 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
+			}
+
+			auto bucket_name = botSpellList[i].bucket_name;
+			auto bucket_value = botSpellList[i].bucket_value;
+			if (!bucket_name.empty() && !bucket_value.empty()) {
+			auto full_name = fmt::format(
+				"{}-{}",
+				botCaster->CastToClient()->GetBucketKey(),
+				bucket_name
+			);
+				auto player_value = botCaster->bot_data_buckets[full_name];
+				if (player_value.empty()) {
+					continue;
+				}
+
+				if (!botCaster->CheckBotDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+					continue;
+				}
 			}
 
 			if(botSpellList[i].type & spellType) {
@@ -2771,7 +2825,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 			if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
 				if (!IsSpellInBotList(spell_list, e.spellid))
 				{
-					AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
+					AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
 				}
 			}
 		}
@@ -2812,7 +2866,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 
 	for (auto &e : spell_list->entries) {
 		if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
-			AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
+			AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
 		}
 	}
 
@@ -2923,7 +2977,8 @@ DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 		// pulling fixed values from an auto-increment field is dangerous...
 		query = StringFormat(
 		    "SELECT spellid, type, minlevel, maxlevel, "
-		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
+		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust, "
+			"bucket_name, bucket_value, bucket_comparison "
 		    "FROM bot_spells_entries "
 		    "WHERE npc_spells_id=%d ORDER BY minlevel",
 		    iDBSpellsID);
@@ -2946,6 +3001,10 @@ DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 			entry.priority = atoi(row[6]);
 			entry.min_hp = atoi(row[7]);
 			entry.max_hp = atoi(row[8]);
+			entry.resist_adjust = atoi(row[9]);
+			entry.bucket_name = row[10];
+			entry.bucket_value = row[11];
+			entry.bucket_comparison = atoi(row[12]);
 
 			// some spell types don't make much since to be priority 0, so fix that
 			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
@@ -2970,7 +3029,8 @@ DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
 void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
-							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp)
+							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp,
+							std::string bucket_name, std::string bucket_value, uint8 bucket_comparison)
 {
 
 	if(!IsValidSpell(iSpellID)) {
@@ -2989,6 +3049,9 @@ void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
 	t.resist_adjust = iResistAdjust;
 	t.min_hp = min_hp;
 	t.max_hp = max_hp;
+	t.bucket_name = bucket_name;
+	t.bucket_value = bucket_value;
+	t.bucket_comparison = bucket_comparison;
 
 	AIBot_spells.push_back(t);
 

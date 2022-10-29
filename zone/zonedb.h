@@ -119,6 +119,9 @@ struct DBbotspells_entries_Struct {
 	int16	resist_adjust;
 	int8	min_hp;
 	int8	max_hp;
+	std::string bucket_name;
+	std::string bucket_value;
+	uint8_t     bucket_comparison;
 };
 #pragma pack()
 

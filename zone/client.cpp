@@ -11608,7 +11608,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 	bool passes = false;
 
 	switch (bucket_comparison) {
-		case MerchantBucketComparison::BucketEqualTo:
+		case static_cast<uint8>(MerchantBucketComparison::BucketEqualTo):
 		{
 			if (player_value != bucket_value) {
 				break;
@@ -11617,7 +11617,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketNotEqualTo:
+		case static_cast<uint8>(MerchantBucketComparison::BucketNotEqualTo):
 		{
 			if (player_value == bucket_value) {
 				break;
@@ -11626,7 +11626,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketGreaterThanOrEqualTo:
+		case static_cast<uint8>(MerchantBucketComparison::BucketGreaterThanOrEqualTo):
 		{
 			if (player_value < bucket_value) {
 				break;
@@ -11635,7 +11635,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketLesserThanOrEqualTo:
+		case static_cast<uint8>(MerchantBucketComparison::BucketLesserThanOrEqualTo):
 		{
 			if (player_value > bucket_value) {
 				break;
@@ -11644,7 +11644,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketGreaterThan:
+		case static_cast<uint8>(MerchantBucketComparison::BucketGreaterThan):
 		{
 			if (player_value <= bucket_value) {
 				break;
@@ -11653,7 +11653,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketLesserThan:
+		case static_cast<uint8>(MerchantBucketComparison::BucketLesserThan):
 		{
 			if (player_value >= bucket_value) {
 				break;
@@ -11663,7 +11663,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 
 			break;
 		}
-		case MerchantBucketComparison::BucketIsAny:
+		case static_cast<uint8>(MerchantBucketComparison::BucketIsAny):
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
@@ -11684,7 +11684,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketIsNotAny:
+		case static_cast<uint8>(MerchantBucketComparison::BucketIsNotAny):
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
@@ -11705,7 +11705,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketIsBetween:
+		case static_cast<uint8>(MerchantBucketComparison::BucketIsBetween):
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
@@ -11722,7 +11722,7 @@ bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket
 			passes = true;
 			break;
 		}
-		case MerchantBucketComparison::BucketIsNotBetween:
+		case static_cast<uint8>(MerchantBucketComparison::BucketIsNotBetween):
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
