@@ -1169,7 +1169,6 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost
 	}
 
 	auto cost = !ignore_cost ? rank->cost : 0;
-	auto real_cost = rank->cost;
 
 	m_pp.aapoints -= static_cast<uint32>(cost);
 	SaveAA();
