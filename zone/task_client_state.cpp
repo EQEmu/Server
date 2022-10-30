@@ -908,7 +908,7 @@ int ClientTaskState::IncrementDoneCount(
 				AddReplayTimer(client, *info, *task_data);
 			}
 
-			DispatchEventTaskComplete(client, *info, activity_id);
+			int event_res = DispatchEventTaskComplete(client, *info, activity_id);
 
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
@@ -925,7 +925,11 @@ int ClientTaskState::IncrementDoneCount(
 			client->SendTaskActivityComplete(info->task_id, 0, task_index, task_data->type, 0);
 
 			// If Experience and/or cash rewards are set, reward them from the task even if reward_method is METHODQUEST
-			RewardTask(client, task_data, *info);
+			// do not reward client if EVENT_TASK_COMPLETE returns non-zero
+			if (event_res == 0)
+			{
+				RewardTask(client, task_data, *info);
+			}
 			//RemoveTask(c, TaskIndex);
 
 			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
@@ -951,7 +955,7 @@ int ClientTaskState::IncrementDoneCount(
 	return count;
 }
 
-void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
+int ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
 {
 	std::string export_string = fmt::format(
 		"{} {} {}",
@@ -959,7 +963,7 @@ void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInform
 		info.activity[activity_id].activity_id,
 		info.task_id
 	);
-	parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+	return parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
 }
 
 void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTaskInformation& client_task)
