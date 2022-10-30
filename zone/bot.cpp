@@ -10327,7 +10327,7 @@ bool Bot::GetBotDataBuckets()
 {
 	auto query = fmt::format(
 		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
-		Strings::Escape(GetOwner()->CastToClient()->GetBucketKey())
+		Strings::Escape(GetBucketKey())
 	);
 	auto results = database.QueryDatabase(query);
 
