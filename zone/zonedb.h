@@ -109,19 +109,19 @@ struct DBnpcspellseffects_Struct {
 
 #pragma pack(1)
 struct DBbotspells_entries_Struct {
-	uint16	spellid;
-	uint8	minlevel;
-	uint8	maxlevel;
-	uint32	type;
-	int16	manacost;
-	int16	priority;
-	int32	recast_delay;
-	int16	resist_adjust;
-	int8	min_hp;
-	int8	max_hp;
+	uint16		spellid;
+	uint8		minlevel;
+	uint8		maxlevel;
+	uint32		type;
+	int16		manacost;
+	int16		priority;
+	int32		recast_delay;
+	int16		resist_adjust;
+	int8		min_hp;
+	int8		max_hp;
 	std::string bucket_name;
 	std::string bucket_value;
-	uint8_t     bucket_comparison;
+	uint8		bucket_comparison;
 };
 #pragma pack()
 

@@ -10349,7 +10349,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 	bool passes = false;
 
 	switch (bucket_comparison) {
-		case static_cast<uint8>(BotBucketComparison::BucketEqualTo):
+		case BucketComparison::BucketEqualTo:
 		{
 			if (player_value != bucket_value) {
 				break;
@@ -10358,7 +10358,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketNotEqualTo):
+		case BucketComparison::BucketNotEqualTo:
 		{
 			if (player_value == bucket_value) {
 				break;
@@ -10367,7 +10367,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketGreaterThanOrEqualTo):
+		case BucketComparison::BucketGreaterThanOrEqualTo:
 		{
 			if (player_value < bucket_value) {
 				break;
@@ -10376,7 +10376,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketLesserThanOrEqualTo):
+		case BucketComparison::BucketLesserThanOrEqualTo:
 		{
 			if (player_value > bucket_value) {
 				break;
@@ -10385,7 +10385,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketGreaterThan):
+		case BucketComparison::BucketGreaterThan:
 		{
 			if (player_value <= bucket_value) {
 				break;
@@ -10394,7 +10394,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketLesserThan):
+		case BucketComparison::BucketLesserThan:
 		{
 			if (player_value >= bucket_value) {
 				break;
@@ -10404,7 +10404,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketIsAny):
+		case BucketComparison::BucketIsAny:
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
@@ -10425,7 +10425,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketIsNotAny):
+		case BucketComparison::BucketIsNotAny:
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
@@ -10446,7 +10446,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketIsBetween):
+		case BucketComparison::BucketIsBetween:
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {
@@ -10463,7 +10463,7 @@ bool Bot::CheckBotDataBucket(uint8 bucket_comparison, std::string bucket_value, 
 			passes = true;
 			break;
 		}
-		case static_cast<uint8>(BotBucketComparison::BucketIsNotBetween):
+		case BucketComparison::BucketIsNotBetween:
 		{
 			bucket_checks = Strings::Split(bucket_value, "|");
 			if (bucket_checks.empty()) {

@@ -543,20 +543,7 @@ enum ReloadWorld : uint8 {
 	ForceRepop
 };
 
-enum class MerchantBucketComparison : uint8 {
-	BucketEqualTo = 0,
-	BucketNotEqualTo,
-	BucketGreaterThanOrEqualTo,
-	BucketLesserThanOrEqualTo,
-	BucketGreaterThan,
-	BucketLesserThan,
-	BucketIsAny,
-	BucketIsNotAny,
-	BucketIsBetween,
-	BucketIsNotBetween
-};
-
-enum class BotBucketComparison : uint8 {
+enum BucketComparison : uint8 {
 	BucketEqualTo = 0,
 	BucketNotEqualTo,
 	BucketGreaterThanOrEqualTo,

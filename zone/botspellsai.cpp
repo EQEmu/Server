@@ -1619,7 +1619,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 			if (!bucket_name.empty() && !bucket_value.empty()) {
 			auto full_name = fmt::format(
 				"{}-{}",
-				botCaster->CastToClient()->GetBucketKey(),
+				botCaster->GetBucketKey(),
 				bucket_name
 			);
 				auto player_value = botCaster->bot_data_buckets[full_name];
@@ -1664,7 +1664,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 			if (!bucket_name.empty() && !bucket_value.empty()) {
 			auto full_name = fmt::format(
 				"{}-{}",
-				botCaster->CastToClient()->GetBucketKey(),
+				botCaster->GetBucketKey(),
 				bucket_name
 			);
 				auto player_value = botCaster->bot_data_buckets[full_name];
@@ -1711,7 +1711,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 			if (!bucket_name.empty() && !bucket_value.empty()) {
 			auto full_name = fmt::format(
 				"{}-{}",
-				botCaster->CastToClient()->GetBucketKey(),
+				botCaster->GetBucketKey(),
 				bucket_name
 			);
 				auto player_value = botCaster->bot_data_buckets[full_name];
