@@ -1627,7 +1627,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 				continue;
 				}
 
-				if (!botCaster->CheckBotDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+				if (!zone->CheckDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
 					continue;
 				}
 			}
@@ -1672,7 +1672,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 					continue;
 				}
 
-				if (!botCaster->CheckBotDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+				if (!zone->CheckDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
 					continue;
 				}
 			}
@@ -1719,7 +1719,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 					continue;
 				}
 
-				if (!botCaster->CheckBotDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
+				if (!zone->CheckDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
 					continue;
 				}
 			}
