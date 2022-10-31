@@ -2614,7 +2614,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		CZSignal_Struct* CZS = (CZSignal_Struct*) pack->pBuffer;
 		uint8 update_type = CZS->update_type;
 		int update_identifier = CZS->update_identifier;
-		uint32 signal = CZS->signal;
+		int signal = CZS->signal;
 		const char* client_name = CZS->client_name;
 		if (update_type == CZUpdateType_Character) {
 			auto client = entity_list.GetClientByCharID(update_identifier);

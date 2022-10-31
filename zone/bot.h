@@ -238,10 +238,10 @@ public:
 	bool GetHoldFlag() { return m_hold_flag; }
 	void SetHoldFlag(bool flag = true) { m_hold_flag = flag; }
 	bool GetAttackFlag() { return m_attack_flag; }
-	void SetAttackFlag(bool flag = true) { m_attack_flag = flag; }
+	void SetAttackFlag(bool flag = true);
 	bool GetAttackingFlag() { return m_attacking_flag; }
 	bool GetPullFlag() { return m_pull_flag; }
-	void SetPullFlag(bool flag = true) { m_pull_flag = flag; }
+	void SetPullFlag(bool flag = true);
 	bool GetPullingFlag() { return m_pulling_flag; }
 	bool GetReturningFlag() { return m_returning_flag; }
 	bool UseDiscipline(uint32 spell_id, uint32 target);
@@ -619,6 +619,9 @@ public:
 	int32 GetBaseDR() { return _baseDR; }
 	int32 GetBaseCorrup() { return _baseCorrup; }
 
+	void SignalBot(int signal_id);
+	void OwnerMessage(std::string message);
+
 protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
@@ -638,6 +641,7 @@ protected:
 	//void SetRaidSlower(bool flag = true) { m_CastingRoles.RaidSlower = flag; }
 	//void SetRaidNuker(bool flag = true) { m_CastingRoles.RaidNuker = flag; }
 	//void SetRaidDoter(bool flag = true) { m_CastingRoles.RaidDoter = flag; }
+	std::deque<int> bot_signal_q;
 
 private:
 	// Class Members

@@ -29,7 +29,7 @@ public:
 		return reinterpret_cast<NPC*>(GetLuaPtrData());
 	}
 
-	void Signal(int id);
+	void Signal(int signal_id);
 	int CheckNPCFactionAlly(int faction);
 	void AddItem(int item_id, int charges);
 	void AddItem(int item_id, int charges, bool equip);

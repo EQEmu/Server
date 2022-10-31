@@ -94,10 +94,15 @@ void QuestManager::Process() {
 					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
 				} else if (cur->mob->IsEncounter()) {
 					parse->EventEncounter(EVENT_TIMER, cur->mob->CastToEncounter()->GetEncounterName(), cur->name, 0, nullptr);
-				} else {
+				} else if (cur->mob->IsClient()) {
 					//this is inheriently unsafe if we ever make it so more than npc/client start timers
 					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
 				}
+#ifdef BOTS
+				else if (cur->mob->IsBot()) {
+					parse->EventBot(EVENT_TIMER, cur->mob->CastToBot(), nullptr, cur->name, 0);
+				}
+#endif
 
 				//we MUST reset our iterator since the quest could have removed/added any
 				//number of timers... worst case we have to check a bunch of timers twice
@@ -3244,6 +3249,17 @@ NPC *QuestManager::GetNPC() const {
 
 	return nullptr;
 }
+
+#ifdef BOTS
+Bot *QuestManager::GetBot() const {
+	if (!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return (e.owner && e.owner->IsBot()) ? e.owner->CastToBot() : nullptr;
+	}
+
+	return nullptr;
+}
+#endif
 
 Mob *QuestManager::GetOwner() const {
 	if(!quests_running_.empty()) {

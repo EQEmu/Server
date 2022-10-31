@@ -32,6 +32,10 @@
 #include "fastmath.h"
 #include "../common/data_verification.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <iostream>
@@ -1954,8 +1958,8 @@ void Mob::AI_Event_NoLongerEngaged() {
 		SetPrimaryAggro(false);
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
-			if (entity_list.GetNPCByID(this->GetID())) {
-				uint32 emoteid = CastToNPC()->GetEmoteID();
+			if (entity_list.GetNPCByID(GetID())) {
+				auto emoteid = CastToNPC()->GetEmoteID();
 				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
 				if (emoteid != 0) {
 					CastToNPC()->DoNPCEmote(LEAVECOMBAT, emoteid);

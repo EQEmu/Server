@@ -177,8 +177,8 @@ public:
 	int GetWaypointID();
 	void SetCurrentWP(int wp);
 	double GetSize();
-	void Message(int type, const char *message);
-	void MessageString(int type, int string_id, uint32 distance);
+	void Message(uint32 type, const char *message);
+	void MessageString(uint32 type, int string_id, uint32 distance);
 	void Say(const char *message);
 	void Say(const char* message, int language);
 	void QuestSay(Lua_Client client, const char *message);
@@ -292,7 +292,7 @@ public:
 	const char* GetEntityVariable(const char *name);
 	void SetEntityVariable(const char *name, const char *value);
 	bool EntityVariableExists(const char *name);
-	void Signal(uint32 id);
+	void Signal(int signal_id);
 	bool CombatRange(Lua_Mob other);
 	void DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage);
 	void DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage);

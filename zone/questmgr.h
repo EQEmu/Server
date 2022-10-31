@@ -341,6 +341,10 @@ public:
 	std::string GetRecipeName(uint32 recipe_id);
 	bool HasRecipeLearned(uint32 recipe_id);
 
+#ifdef BOTS
+	Bot *GetBot() const;
+#endif
+
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;

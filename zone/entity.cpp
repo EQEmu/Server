@@ -5047,14 +5047,12 @@ void EntityList::GateAllClients()
 	}
 }
 
-void EntityList::SignalAllClients(uint32 data)
+void EntityList::SignalAllClients(int signal_id)
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *ent = it->second;
-		if (ent)
-			ent->Signal(data);
-		++it;
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->Signal(signal_id);
+		}
 	}
 }
 
@@ -5106,8 +5104,9 @@ void EntityList::GetClientList(std::list<Client *> &c_list)
 void EntityList::GetBotList(std::list<Bot *> &b_list)
 {
 	b_list.clear();
-	for (auto bot : bot_list) {
-		b_list.push_back(bot);
+
+	for (const auto& b : bot_list) {
+		b_list.push_back(b);
 	}
 }
 
@@ -5119,9 +5118,12 @@ std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id)
 		return client_bot_list;
 	}
 
-	for (auto bot : bot_list) {
-		if (bot->GetOwner() && bot->GetBotOwnerCharacterID() == character_id) {
-			client_bot_list.push_back(bot);
+	for (const auto& b : bot_list) {
+		if (
+			b->GetOwner() &&
+			b->GetBotOwnerCharacterID() == character_id
+		) {
+			client_bot_list.push_back(b);
 		}
 	}
 
@@ -5136,13 +5138,44 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name)
 		return client_bot_list;
 	}
 
-	for (auto bot : bot_list) {
-		if (bot->GetOwner() && Strings::ToLower(bot->GetOwner()->GetCleanName()) == Strings::ToLower(client_name)) {
-			client_bot_list.push_back(bot);
+	for (const auto& b : bot_list) {
+		if (
+			b->GetOwner() &&
+			Strings::ToLower(b->GetOwner()->GetCleanName()) == Strings::ToLower(client_name)
+		) {
+			client_bot_list.push_back(b);
 		}
 	}
 
 	return client_bot_list;
+}
+
+void EntityList::SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id)
+{
+	auto client_bot_list = GetBotListByCharacterID(character_id);
+	if (client_bot_list.empty()) {
+		return;
+	}
+
+	for (const auto& b : client_bot_list) {
+		b->SignalBot(signal_id);
+	}
+}
+
+void EntityList::SignalBotByBotID(uint32 bot_id, int signal_id)
+{
+	auto b = GetBotByBotID(bot_id);
+	if (b) {
+		b->SignalBot(signal_id);
+	}
+}
+
+void EntityList::SignalBotByBotName(std::string bot_name, int signal_id)
+{
+	auto b = GetBotByBotName(bot_name);
+	if (b) {
+		b->SignalBot(signal_id);
+	}
 }
 #endif
 

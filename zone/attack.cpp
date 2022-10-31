@@ -1454,6 +1454,17 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			LogCombat("Attack missed. Damage set to 0");
 			hit.damage_done = 0;
 		}
+
+#ifdef BOTS
+		if (IsBot()) {
+			const auto export_string = fmt::format(
+				"{} {}",
+				hit.skill,
+				GetSkill(hit.skill)
+			);
+			parse->EventBot(EVENT_USE_SKILL, CastToBot(), nullptr, export_string, 0);
+		}
+#endif
 	}
 }
 
@@ -2318,21 +2329,32 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
 		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);
 
-	Mob *oos = nullptr;
+	Mob *oos = killer_mob ? killer_mob->GetOwnerOrSelf() : nullptr;
 	if (killer_mob) {
-		oos = killer_mob->GetOwnerOrSelf();
-		std::string export_string = fmt::format(
+		const auto export_string = fmt::format(
 			"{} {} {} {}",
 			killer_mob->GetID(),
 			damage,
 			spell,
 			static_cast<int>(attack_skill)
 		);
-		if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
-			if (GetHP() < 0) {
-				SetHP(0);
+
+		if (IsNPC()) {
+			if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
+				if (GetHP() < 0) {
+					SetHP(0);
+				}
+
+				return false;
 			}
-			return false;
+		} else if (IsBot()) {
+			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
+				if (GetHP() < 0) {
+					SetHP(0);
+				}
+
+				return false;
+			}
 		}
 
 		if ((killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
@@ -2351,18 +2373,30 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 	else {
-		std::string export_string = fmt::format(
+		const auto export_string = fmt::format(
 			"{} {} {} {}",
 			0,
 			damage,
 			spell,
 			static_cast<int>(attack_skill)
 		);
-		if (parse->EventNPC(EVENT_DEATH, this, nullptr, export_string, 0) != 0) {
-			if (GetHP() < 0) {
-				SetHP(0);
+		
+		if (IsNPC()) {
+			if (parse->EventNPC(EVENT_DEATH, this, nullptr, export_string, 0) != 0) {
+				if (GetHP() < 0) {
+					SetHP(0);
+				}
+
+				return false;
 			}
-			return false;
+		} else if (IsBot()) {
+			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
+				if (GetHP() < 0) {
+					SetHP(0);
+				}
+
+				return false;
+			}
 		}
 	}
 
@@ -2741,6 +2775,10 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			if (emoteid != 0)
 				oos->CastToNPC()->DoNPCEmote(KILLEDNPC, emoteid);
 			killer_mob->TrySpellOnKill(killed_level, spell);
+#ifdef BOTS
+		} else if (oos->IsBot()) {
+			parse->EventBot(EVENT_NPC_SLAY, oos->CastToBot(), this, "", 0);
+#endif
 		}
 	}
 

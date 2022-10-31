@@ -245,17 +245,21 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		GetID(),
 		GetCasterLevel(spell_id)
 	);
-	if(IsClient()) {
+	if (IsClient()) {
 		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), export_string, 0) != 0) {
 			if (IsDiscipline(spell_id)) {
 				CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, 0);
 			} else {
 				CastToClient()->SendSpellBarEnable(spell_id);
 			}
-			return(false);
+			return false;
 		}
-	} else if(IsNPC()) {
+	} else if (IsNPC()) {
 		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0);
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0);
+#endif
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
@@ -1666,10 +1670,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		GetID(),
 		GetCasterLevel(spell_id)
 	);
-	if(IsClient()) {
+	if (IsClient()) {
 		parse->EventPlayer(EVENT_CAST, CastToClient(), export_string, 0);
-	} else if(IsNPC()) {
+	} else if (IsNPC()) {
 		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, export_string, 0);
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_CAST, CastToBot(), nullptr, export_string, 0);
+#endif
 	}
 
 	if(bard_song_mode)
@@ -3628,7 +3636,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0);
 	} else if (spelltar->IsClient()) {
 		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0);
+#ifdef BOTS
+	} else if (spelltar->IsBot()) {
+		parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0);
+#endif
 	}
+
 
 	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);
 

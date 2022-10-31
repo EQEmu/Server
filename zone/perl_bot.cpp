@@ -81,6 +81,16 @@ uint32 Perl_Bot_GetBotItemIDBySlot(Bot* self, uint16 slot_id)
 	return self->GetBotItemBySlot(slot_id);
 }
 
+void Perl_Bot_SignalBot(Bot* self, int signal_id)
+{
+	self->SignalBot(signal_id);
+}
+
+void Perl_Bot_OwnerMessage(Bot* self, std::string message)
+{
+	self->OwnerMessage(message);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -101,7 +111,9 @@ void perl_register_bot()
 	package.add("GetBotItemIDBySlot", &Perl_Bot_GetBotItemIDBySlot);
 	package.add("GetOwner", &Perl_Bot_GetOwner);
 	package.add("HasBotItem", &Perl_Bot_HasBotItem);
+	package.add("OwnerMessage", &Perl_Bot_OwnerMessage);
 	package.add("RemoveBotItem", &Perl_Bot_RemoveBotItem);
+	package.add("SignalBot", &Perl_Bot_SignalBot);
 }
 
 #endif //EMBPERL_XS_CLASSES

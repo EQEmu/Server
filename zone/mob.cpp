@@ -4306,6 +4306,8 @@ void Mob::SetTarget(Mob *mob)
 
 #ifdef BOTS
 		CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0);
 #endif
 	}
 
