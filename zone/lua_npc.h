@@ -118,7 +118,7 @@ public:
 	int GetSwarmOwner();
 	int GetSwarmTarget();
 	void SetSwarmTarget(int target);
-	void ModifyNPCStat(const char *stat, const char *value);
+	void ModifyNPCStat(std::string stat, std::string value);
 	void AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust);
 	void AddAISpell(int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust, int min_hp, int max_hp);
 	void RemoveAISpell(int spell_id);
@@ -156,7 +156,7 @@ public:
 	void AddAISpellEffect(int spell_effect_id, int base_value, int limit_value, int max_value);
 	void RemoveAISpellEffect(int spell_effect_id);
 	bool HasAISpellEffect(int spell_effect_id);
-	float GetNPCStat(const char* identifier);
+	float GetNPCStat(std::string stat);
 };
 
 #endif

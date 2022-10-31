@@ -1929,7 +1929,7 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
 					uint32 emoteid = GetEmoteID();
 					if (emoteid != 0) {
-						CastToNPC()->DoNPCEmote(ENTERCOMBAT, emoteid);
+						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid);
 					}
 					std::string mob_name = GetCleanName();
 					combat_record.Start(mob_name);
@@ -1962,7 +1962,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 				auto emoteid = CastToNPC()->GetEmoteID();
 				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
 				if (emoteid != 0) {
-					CastToNPC()->DoNPCEmote(LEAVECOMBAT, emoteid);
+					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
 				}
 				combat_record.Stop();
 				CastToNPC()->SetCombatEvent(false);

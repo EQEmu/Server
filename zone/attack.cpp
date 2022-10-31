@@ -1813,7 +1813,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 			uint32 emoteid = killerMob->GetEmoteID();
 			if (emoteid != 0)
-				killerMob->CastToNPC()->DoNPCEmote(KILLEDPC, emoteid);
+				killerMob->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledPC, emoteid);
 			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 
@@ -2655,7 +2655,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		ApplyIllusionToCorpse(illusion_spell_id, corpse);
 
 		if (killer != 0 && emoteid != 0)
-			corpse->CastToNPC()->DoNPCEmote(AFTERDEATH, emoteid);
+			corpse->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::AfterDeath, emoteid);
 		if (killer != 0 && killer->IsClient()) {
 			corpse->AllowPlayerLoot(killer, 0);
 			if (killer->IsGrouped()) {
@@ -2739,12 +2739,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		uint32 emoteid = GetEmoteID();
 		if (emoteid != 0)
-			DoNPCEmote(ONDEATH, emoteid);
+			DoNPCEmote(EQ::constants::EmoteEventTypes::OnDeath, emoteid);
 		if (oos->IsNPC()) {
 			parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
 			uint32 emoteid = oos->GetEmoteID();
 			if (emoteid != 0)
-				oos->CastToNPC()->DoNPCEmote(KILLEDNPC, emoteid);
+				oos->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledNPC, emoteid);
 			killer_mob->TrySpellOnKill(killed_level, spell);
 #ifdef BOTS
 		} else if (oos->IsBot()) {

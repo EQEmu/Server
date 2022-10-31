@@ -700,7 +700,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 	uint32 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)
-		npc->DoNPCEmote(ONSPAWN, emoteid);
+		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emoteid);
 	npc->SetSpawned();
 	if (SendSpawnPacket) {
 		if (dontqueue) { // aka, SEND IT NOW BITCH!
