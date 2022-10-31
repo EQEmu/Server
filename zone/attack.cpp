@@ -2330,74 +2330,45 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);
 
 	Mob *oos = killer_mob ? killer_mob->GetOwnerOrSelf() : nullptr;
-	if (killer_mob) {
-		const auto export_string = fmt::format(
-			"{} {} {} {}",
-			killer_mob->GetID(),
-			damage,
-			spell,
-			static_cast<int>(attack_skill)
-		);
+	auto export_string = fmt::format(
+		"{} {} {} {}",
+		killer_mob ? killer_mob->GetID() : 0,
+		damage,
+		spell,
+		static_cast<int>(attack_skill)
+	);
 
-		if (IsNPC()) {
-			if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
-
-				return false;
+	if (IsNPC()) {
+		if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
+			if (GetHP() < 0) {
+				SetHP(0);
 			}
-		} else if (IsBot()) {
-			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
 
-				return false;
-			}
+			return false;
 		}
+	} else if (IsBot()) {
+		if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
+			if (GetHP() < 0) {
+				SetHP(0);
+			}
 
-		if ((killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
-			char val1[20] = { 0 };
-
-			entity_list.MessageCloseString(
-				this, /* Sender */
-				false, /* Skip Sender */
-				RuleI(Range, DamageMessages),
-				Chat::NonMelee, /* 283 */
-				HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
-				killer_mob->GetCleanName(), /* Message1 */
-				GetCleanName(), /* Message2 */
-				ConvertArray(damage, val1) /* Message3 */
-			);
+			return false;
 		}
 	}
-	else {
-		const auto export_string = fmt::format(
-			"{} {} {} {}",
-			0,
-			damage,
-			spell,
-			static_cast<int>(attack_skill)
+
+	if (killer_mob && (killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
+		char val1[20] = { 0 };
+
+		entity_list.MessageCloseString(
+			this, /* Sender */
+			false, /* Skip Sender */
+			RuleI(Range, DamageMessages),
+			Chat::NonMelee, /* 283 */
+			HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+			killer_mob->GetCleanName(), /* Message1 */
+			GetCleanName(), /* Message2 */
+			ConvertArray(damage, val1) /* Message3 */
 		);
-		
-		if (IsNPC()) {
-			if (parse->EventNPC(EVENT_DEATH, this, nullptr, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
-
-				return false;
-			}
-		} else if (IsBot()) {
-			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
-				if (GetHP() < 0) {
-					SetHP(0);
-				}
-
-				return false;
-			}
-		}
 	}
 
 	if (IsEngaged()) {
@@ -2790,7 +2761,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	entity_list.UpdateFindableNPCState(this, true);
 
-	std::string export_string = fmt::format(
+	export_string = fmt::format(
 		"{} {} {} {}",
 		killer_mob ? killer_mob->GetID() : 0,
 		damage,

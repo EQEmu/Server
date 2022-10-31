@@ -278,6 +278,7 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_COMBAT] = handle_bot_combat;
 	BotArgumentDispatch[EVENT_DEATH] = handle_bot_death;
 	BotArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_bot_death;
+	BotArgumentDispatch[EVENT_POPUP_RESPONSE] = handle_bot_popup_response;
 	BotArgumentDispatch[EVENT_SAY] = handle_bot_say;
 	BotArgumentDispatch[EVENT_SIGNAL] = handle_bot_signal;
 	BotArgumentDispatch[EVENT_SLAY] = handle_bot_slay;

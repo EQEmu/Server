@@ -208,6 +208,16 @@ void handle_bot_death(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_bot_popup_response(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 void handle_bot_say(
 	QuestInterface *parse,
 	lua_State* L,

@@ -989,6 +989,24 @@ void handle_bot_death(
 	lua_setfield(L, -2, "skill");
 }
 
+void handle_bot_popup_response(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Mob l_mob(init);
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
+
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "popup_id");
+}
+
 void handle_bot_say(
 	QuestInterface *parse,
 	lua_State* L,

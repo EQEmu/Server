@@ -9685,15 +9685,17 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			if (local_entry->single != single_flag) {
 				continue;
 			}
+			
+			msg = fmt::format(
+				"{}circle {}{}",
+				std::to_string(BOT_COMMAND_CHAR),
+				spells[local_entry->spell_id].teleport_zone,
+				single_flag ? " single" : ""
+			);
 
 			text_link = druid_bot->CreateSayLink(
 				bot_owner,
-				fmt::format(
-					"{}circle {}{}",
-					BOT_COMMAND_CHAR,
-					spells[local_entry->spell_id].teleport_zone,
-					single_flag ? " single" : ""
-				).c_str(),
+				msg.c_str(),
 				"Goto"
 			);
 
@@ -9719,15 +9721,17 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			if (local_entry->single != single_flag) {
 				continue;
 			}
+			
+			msg = fmt::format(
+				"{}portal {}{}",
+				std::to_string(BOT_COMMAND_CHAR),
+				spells[local_entry->spell_id].teleport_zone,
+				single_flag ? " single" : ""
+			);
 
 			text_link = wizard_bot->CreateSayLink(
 				bot_owner,
-				fmt::format(
-					"{}portal {}{}",
-					BOT_COMMAND_CHAR,
-					spells[local_entry->spell_id].teleport_zone,
-					single_flag ? " single" : ""
-				).c_str(),
+				msg.c_str(),
 				"Goto"
 			);
 
