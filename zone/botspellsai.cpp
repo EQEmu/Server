@@ -1604,6 +1604,11 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect) {
 	std::list<BotSpell> result;
 
+	auto bot_owner = botCaster->GetBotOwner();
+    if (!bot_owner) {
+        return result;
+    }
+
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
@@ -1624,14 +1629,20 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 			);
 				auto player_value = botCaster->bot_data_buckets[full_name];
 				if (player_value.empty()) {
-				continue;
+				full_name = fmt::format(
+					"{}-{}",
+					bot_owner->GetBucketKey(),
+					bucket_name
+				);
+					player_value = botCaster->bot_data_buckets[full_name];
+					if (player_value.empty()) {
+						continue;
+					}
 				}
-
 				if (!zone->CheckDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
 					continue;
 				}
 			}
-
 			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
@@ -1649,6 +1660,11 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType) {
 	std::list<BotSpell> result;
 
+	auto bot_owner = botCaster->GetBotOwner();
+    if (!bot_owner) {
+        return result;
+    }
+
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
@@ -1669,14 +1685,20 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 			);
 				auto player_value = botCaster->bot_data_buckets[full_name];
 				if (player_value.empty()) {
-					continue;
+				full_name = fmt::format(
+					"{}-{}",
+					bot_owner->GetBucketKey(),
+					bucket_name
+				);
+					player_value = botCaster->bot_data_buckets[full_name];
+					if (player_value.empty()) {
+						continue;
+					}
 				}
-
 				if (!zone->CheckDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
 					continue;
 				}
 			}
-			
 			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
 				if(spells[botSpellList[i].spellid].target_type == targetType) {
 					BotSpell botSpell;
@@ -1696,6 +1718,11 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType) {
 	std::list<BotSpell> result;
 
+	auto bot_owner = botCaster->GetBotOwner();
+    if (!bot_owner) {
+        return result;
+    }
+
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
@@ -1716,14 +1743,20 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 			);
 				auto player_value = botCaster->bot_data_buckets[full_name];
 				if (player_value.empty()) {
-					continue;
+				full_name = fmt::format(
+					"{}-{}",
+					bot_owner->GetBucketKey(),
+					bucket_name
+				);
+					player_value = botCaster->bot_data_buckets[full_name];
+					if (player_value.empty()) {
+						continue;
+					}
 				}
-
 				if (!zone->CheckDataBucket(botSpellList[i].bucket_comparison, bucket_value, player_value)) {
 					continue;
 				}
 			}
-
 			if(botSpellList[i].type & spellType) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;

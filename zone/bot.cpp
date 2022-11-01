@@ -9236,6 +9236,7 @@ void Bot::CalcBotStats(bool showtext) {
 	CalcBonuses();
 
 	AI_AddBotSpells(GetBotSpellID());
+	GetBotOwnerDataBuckets();
 	GetBotDataBuckets();
 
 	if(showtext) {
@@ -10321,6 +10322,30 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 			botgroup_name
 		).c_str()
 	);
+}
+
+bool Bot::GetBotOwnerDataBuckets()
+{
+	auto bot_owner = GetBotOwner();
+    if (!bot_owner) {
+        return false;
+    }
+
+	auto query = fmt::format(
+		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
+		Strings::Escape(bot_owner->GetBucketKey())
+	);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success() || !results.RowCount()) {
+		return false;
+	}
+
+	for (auto row : results) {
+		bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+	}
+
+	return true;
 }
 
 bool Bot::GetBotDataBuckets()
