@@ -1605,9 +1605,9 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 	std::list<BotSpell> result;
 
 	auto bot_owner = botCaster->GetBotOwner();
-    if (!bot_owner) {
-        return result;
-    }
+	if (!bot_owner) {
+		return result;
+	}
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
@@ -1622,18 +1622,20 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 			auto bucket_name = botSpellList[i].bucket_name;
 			auto bucket_value = botSpellList[i].bucket_value;
 			if (!bucket_name.empty() && !bucket_value.empty()) {
-			auto full_name = fmt::format(
+				auto full_name = fmt::format(
 				"{}-{}",
 				botCaster->GetBucketKey(),
 				bucket_name
-			);
+				);
+
 				auto player_value = botCaster->bot_data_buckets[full_name];
 				if (player_value.empty()) {
-				full_name = fmt::format(
+					full_name = fmt::format(
 					"{}-{}",
 					bot_owner->GetBucketKey(),
 					bucket_name
-				);
+					);
+
 					player_value = botCaster->bot_data_buckets[full_name];
 					if (player_value.empty()) {
 						continue;
@@ -1661,9 +1663,9 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 	std::list<BotSpell> result;
 
 	auto bot_owner = botCaster->GetBotOwner();
-    if (!bot_owner) {
-        return result;
-    }
+	if (!bot_owner) {
+		return result;
+	}
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
@@ -1678,18 +1680,20 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 			auto bucket_name = botSpellList[i].bucket_name;
 			auto bucket_value = botSpellList[i].bucket_value;
 			if (!bucket_name.empty() && !bucket_value.empty()) {
-			auto full_name = fmt::format(
+				auto full_name = fmt::format(
 				"{}-{}",
 				botCaster->GetBucketKey(),
 				bucket_name
-			);
+				);
+				
 				auto player_value = botCaster->bot_data_buckets[full_name];
 				if (player_value.empty()) {
-				full_name = fmt::format(
+					full_name = fmt::format(
 					"{}-{}",
 					bot_owner->GetBucketKey(),
 					bucket_name
-				);
+					);
+
 					player_value = botCaster->bot_data_buckets[full_name];
 					if (player_value.empty()) {
 						continue;
@@ -1719,9 +1723,9 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 	std::list<BotSpell> result;
 
 	auto bot_owner = botCaster->GetBotOwner();
-    if (!bot_owner) {
-        return result;
-    }
+	if (!bot_owner) {
+		return result;
+	}
 
 	if(botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
@@ -1736,18 +1740,20 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellTyp
 			auto bucket_name = botSpellList[i].bucket_name;
 			auto bucket_value = botSpellList[i].bucket_value;
 			if (!bucket_name.empty() && !bucket_value.empty()) {
-			auto full_name = fmt::format(
+				auto full_name = fmt::format(
 				"{}-{}",
 				botCaster->GetBucketKey(),
 				bucket_name
-			);
+				);
+
 				auto player_value = botCaster->bot_data_buckets[full_name];
 				if (player_value.empty()) {
-				full_name = fmt::format(
+					full_name = fmt::format(
 					"{}-{}",
 					bot_owner->GetBucketKey(),
 					bucket_name
-				);
+					);
+
 					player_value = botCaster->bot_data_buckets[full_name];
 					if (player_value.empty()) {
 						continue;
@@ -3009,12 +3015,12 @@ DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 
 		// pulling fixed values from an auto-increment field is dangerous...
 		query = StringFormat(
-		    "SELECT spellid, type, minlevel, maxlevel, "
-		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust, "
+			"SELECT spellid, type, minlevel, maxlevel, "
+			"manacost, recast_delay, priority, min_hp, max_hp, resist_adjust, "
 			"bucket_name, bucket_value, bucket_comparison "
-		    "FROM bot_spells_entries "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    iDBSpellsID);
+			"FROM bot_spells_entries "
+			"WHERE npc_spells_id=%d ORDER BY minlevel",
+			iDBSpellsID);
 		results = QueryDatabase(query);
 
 		if (!results.Success()) {
@@ -3055,7 +3061,7 @@ DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 		Bot_Spells_Cache.insert(std::make_pair(iDBSpellsID, spell_set));
 
 		return &Bot_Spells_Cache[iDBSpellsID];
-    }
+	}
 
 	return nullptr;
 }

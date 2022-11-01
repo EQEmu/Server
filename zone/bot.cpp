@@ -3345,8 +3345,8 @@ void Bot::AI_Process()
 
 					TEST_COMBATANTS();
 					auto ExtraAttackChanceBonus =
-					    (spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
-					     aabonuses.ExtraAttackChance[0]);
+						(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
+						aabonuses.ExtraAttackChance[0]);
 					if (ExtraAttackChanceBonus) {
 
 						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
@@ -3951,14 +3951,14 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 void Bot::RemoveBotItemBySlot(uint16 slot_id, std::string *error_message)
 {
 	if (!GetBotID()) {
-        return;
+		return;
 	}
 
-    if (!database.botdb.DeleteItemBySlot(GetBotID(), slot_id)) {
-        *error_message = BotDatabase::fail::DeleteItemBySlot();
+	if (!database.botdb.DeleteItemBySlot(GetBotID(), slot_id)) {
+		*error_message = BotDatabase::fail::DeleteItemBySlot();
 	}
 
-    m_inv.DeleteItem(slot_id);
+	m_inv.DeleteItem(slot_id);
 	UpdateEquipmentLight();
 }
 
@@ -3982,7 +3982,7 @@ uint32 Bot::GetBotItemBySlot(uint16 slot_id)
 {
 	uint32 item_id = 0;
 	if (!GetBotID()) {
-        return item_id;
+		return item_id;
 	}
 
 	if (!database.botdb.LoadItemBySlot(GetBotID(), slot_id, item_id)) {
@@ -7031,11 +7031,11 @@ int64 Bot::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	//Crtical Hit Calculation pathway
 	if (chance > 0 || (GetClass() == WIZARD && GetLevel() >= RuleI(Spells, WizCritLevel))) {
 
-		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
+		int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
 		if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
-			 chance = 100;
+			chance = 100;
 
 		if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
 			chance = spells[spell_id].override_crit_chance;
@@ -7226,7 +7226,7 @@ int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	uint8 botlevel = GetLevel();
 	uint8 botclass = GetClass();
 	if (botlevel >= 51 && casttime >= 3000 && !spells[spell_id].good_effect &&
-	    (botclass == SHADOWKNIGHT || botclass == RANGER || botclass == PALADIN || botclass == BEASTLORD)) {
+		(botclass == SHADOWKNIGHT || botclass == RANGER || botclass == PALADIN || botclass == BEASTLORD)) {
 		int level_mod = std::min(15, botlevel - 50);
 		cast_reducer += level_mod * 3;
 	}
@@ -10327,9 +10327,9 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 bool Bot::GetBotOwnerDataBuckets()
 {
 	auto bot_owner = GetBotOwner();
-    if (!bot_owner) {
-        return false;
-    }
+	if (!bot_owner) {
+		return false;
+	}
 
 	auto query = fmt::format(
 		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
