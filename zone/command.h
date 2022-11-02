@@ -28,6 +28,9 @@ int command_notavail(Client *c, std::string message);
 int command_realdispatch(Client *c, std::string message);
 void command_logcommand(Client *c, std::string message);
 uint8 GetCommandStatus(Client *c, std::string command_name);
+void ListModifyNPCStatMap(Client *c);
+std::map<std::string, std::string> GetModifyNPCStatMap();
+std::string GetModifyNPCStatDescription(std::string stat);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);

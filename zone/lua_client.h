@@ -329,6 +329,7 @@ public:
 	void IncrementAA(int aa);
 	bool GrantAlternateAdvancementAbility(int aa_id, int points);
 	bool GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost);
+	void ResetAlternateAdvancementRank(int aa_id);
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z);
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, int count);
 	void ClearCompassMark();

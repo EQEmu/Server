@@ -9155,7 +9155,13 @@ void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
 	if (target && target->GetClass() == LDON_TREASURE && !target->IsAura())
-		Message(Chat::Yellow, "%s", target->GetCleanName());
+	{
+		std::vector<std::any> args = { target };
+		if (parse->EventPlayer(EVENT_INSPECT, this, "", target->GetID(), &args) == 0)
+		{
+			Message(Chat::Yellow, "%s", target->GetCleanName());
+		}
+	}
 }
 
 void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
