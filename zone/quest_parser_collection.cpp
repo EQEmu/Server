@@ -476,12 +476,12 @@ int QuestParserCollection::EventSpell(
 	if (iter != _spell_quest_status.end()) {
 		//loaded or failed to load
 		if (iter->second != QuestFailedToLoad) {
-			auto qiter = _interfaces.find(iter->second);
+			auto qi = _interfaces.find(iter->second);
 			int ret = DispatchEventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
-			int i = qiter->second->EventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
-            if (i != 0) {
-                ret = i;
-            }
+			int i = qi->second->EventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
+			if (i != 0) {
+				ret = i;
+			}
 
 			return ret;
 		}
@@ -1041,18 +1041,25 @@ int QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, E
     return ret;
 }
 
-int QuestParserCollection::DispatchEventSpell(QuestEventID evt, Mob* mob, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-											   std::vector<std::any> *extra_pointers) {
-    int ret = 0;
+int QuestParserCollection::DispatchEventSpell(
+	QuestEventID evt,
+	Mob* mob,
+	Client *client,
+	uint32 spell_id,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	int ret = 0;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		int i = (*iter)->DispatchEventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
-        if(i != 0) {
-            ret = i;
-        }
+		if(i != 0) {
+			ret = i;
+		}
 		++iter;
 	}
-    return ret;
+	return ret;
 }
 
 void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings* perl_event_export_settings) {
@@ -1107,14 +1114,14 @@ int QuestParserCollection::DispatchEventBot(
 	auto iter = _load_precedence.begin();
 	while (iter != _load_precedence.end()) {
 		int i = (*iter)->DispatchEventBot(evt, bot, init, data, extra_data, extra_pointers);
-        if (i != 0) {
-            ret = i;
-        }
+		if (i != 0) {
+			ret = i;
+		}
 
 		++iter;
 	}
 
-    return ret;
+	return ret;
 }
 
 int QuestParserCollection::EventBot(
@@ -1135,8 +1142,8 @@ int QuestParserCollection::EventBot(
 	} else if (rg != 0) {
 		return rg;
 	} else if (rd != 0) {
-        return rd;
-    }
+		return rd;
+	}
 
 	return 0;
 }
@@ -1236,7 +1243,7 @@ QuestInterface *QuestParserCollection::GetQIByBotQuest(std::string &filename) {
 	filename = fmt::format("{}/{}/bot_v{}", path.GetQuestsPath(), zone->GetShortName(), zone->GetInstanceVersion());
 	std::string tmp;
 	FILE *f = nullptr;
-	
+
 	auto iter = _load_precedence.begin();
 	while (iter != _load_precedence.end()) {
 		auto ext = _extensions.find((*iter)->GetIdentifier());

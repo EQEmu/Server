@@ -1609,21 +1609,21 @@ int LuaParser::DispatchEventBot(
 		return 0;
 	}
 
-    int ret = 0;
+	int ret = 0;
 	auto riter = iter->second.begin();
 	while (riter != iter->second.end()) {
 		if (riter->event_id == evt) {
-			std::string package_name = "encounter_" + riter->encounter_name;
+			package_name = fmt::format("encounter_{}", riter->encounter_name);
 			int i = _EventBot(package_name, evt, bot, init, data, extra_data, extra_pointers, &riter->lua_reference);
-            if (i != 0) {
-                ret = i;
+			if (i != 0) {
+				ret = i;
 			}
 		}
 
 		++riter;
 	}
 
-    return ret;
+	return ret;
 }
 
 bool LuaParser::BotHasQuestSub(QuestEventID evt) {

@@ -238,10 +238,10 @@ public:
 	bool GetHoldFlag() { return m_hold_flag; }
 	void SetHoldFlag(bool flag = true) { m_hold_flag = flag; }
 	bool GetAttackFlag() { return m_attack_flag; }
-	void SetAttackFlag(bool flag = true);
+	void SetAttackFlag(bool flag = true) { m_attack_flag = flag; }
 	bool GetAttackingFlag() { return m_attacking_flag; }
 	bool GetPullFlag() { return m_pull_flag; }
-	void SetPullFlag(bool flag = true);
+	void SetPullFlag(bool flag = true) { m_pull_flag = flag; }
 	bool GetPullingFlag() { return m_pulling_flag; }
 	bool GetReturningFlag() { return m_returning_flag; }
 	bool UseDiscipline(uint32 spell_id, uint32 target);

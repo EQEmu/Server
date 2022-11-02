@@ -1927,10 +1927,11 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			if (attacker->GetHP() > 0) {
 				if (!CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
-					uint32 emoteid = GetEmoteID();
-					if (emoteid != 0) {
+					auto emote_id = GetEmoteID();
+					if (emote_id) {
 						CastToNPC()->DoNPCEmote(ENTERCOMBAT, emoteid);
 					}
+
 					std::string mob_name = GetCleanName();
 					combat_record.Start(mob_name);
 					CastToNPC()->SetCombatEvent(true);
@@ -1938,18 +1939,28 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			}
 		}
 	}
+
+#ifdef BOTS
+	if (IsBot()) {
+		parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+	}
+#endif
 }
 
 // Note: Hate list may not be actually clear until after this function call completes
 void Mob::AI_Event_NoLongerEngaged() {
-	if (!IsAIControlled())
+	if (!IsAIControlled()) {
 		return;
+	}
+
 	AI_walking_timer->Start(RandomTimer(3000,20000));
 	time_until_can_move = Timer::GetCurrentTime();
-	if (minLastFightingDelayMoving == maxLastFightingDelayMoving)
+
+	if (minLastFightingDelayMoving == maxLastFightingDelayMoving) {
 		time_until_can_move += minLastFightingDelayMoving;
-	else
+	} else {
 		time_until_can_move += zone->random.Int(minLastFightingDelayMoving, maxLastFightingDelayMoving);
+	}
 
 	StopNavigation();
 	ClearRampage();
@@ -1959,15 +1970,20 @@ void Mob::AI_Event_NoLongerEngaged() {
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 			if (entity_list.GetNPCByID(GetID())) {
-				auto emoteid = CastToNPC()->GetEmoteID();
+				auto emote_id = CastToNPC()->GetEmoteID();
 				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
-				if (emoteid != 0) {
+				if (emote_id) {
 					CastToNPC()->DoNPCEmote(LEAVECOMBAT, emoteid);
 				}
+
 				combat_record.Stop();
 				CastToNPC()->SetCombatEvent(false);
 			}
 		}
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+#endif
 	}
 }
 
@@ -2137,7 +2153,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 				GetCleanName(),
 				target->GetCleanName());
 		}
-		
+
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
@@ -2175,7 +2191,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, NPC_RAMPAGE, GetCleanName());
 	} else {
 		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
-	}	
+	}
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
 	if (rampage_targets == 0) // if set to 0 or not set in the DB
 		rampage_targets = RuleI(Combat, DefaultRampageTargets);

@@ -3519,7 +3519,7 @@ void QuestManager::CrossZoneSetEntityVariable(uint8 update_type, int update_iden
 	safe_delete(pack);
 }
 
-void QuestManager::CrossZoneSignal(uint8 update_type, int update_identifier, uint32 signal, const char* client_name) {
+void QuestManager::CrossZoneSignal(uint8 update_type, int update_identifier, int signal, const char* client_name) {
 	auto pack = new ServerPacket(ServerOP_CZSignal, sizeof(CZSignal_Struct));
 	CZSignal_Struct* CZS = (CZSignal_Struct*)pack->pBuffer;
 	CZS->update_type = update_type;
@@ -3629,7 +3629,7 @@ void QuestManager::WorldWideSetEntityVariable(uint8 update_type, const char* var
 	safe_delete(pack);
 }
 
-void QuestManager::WorldWideSignal(uint8 update_type, uint32 signal, uint8 min_status, uint8 max_status) {
+void QuestManager::WorldWideSignal(uint8 update_type, int signal, uint8 min_status, uint8 max_status) {
 	auto pack = new ServerPacket(ServerOP_WWSignal, sizeof(WWSignal_Struct));
 	WWSignal_Struct* WWS = (WWSignal_Struct*)pack->pBuffer;
 	WWS->update_type = update_type;

@@ -10389,18 +10389,6 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 	);
 }
 
-void Bot::SetAttackFlag(bool flag) {
-	m_attack_flag = flag;
-
-	parse->EventBot(EVENT_COMBAT, this, GetTarget(), flag ? "1" : "0", 0);
-}
-
-void Bot::SetPullFlag(bool flag) {
-	m_pull_flag = flag;
-
-	parse->EventBot(EVENT_COMBAT, this, GetTarget(), flag ? "1" : "0", 0);
-}
-
 void Bot::SignalBot(int signal_id)
 {
 	const auto export_string = fmt::format("{}", signal_id);
