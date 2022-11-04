@@ -2473,6 +2473,11 @@ void Lua_Mob::SetBuffDuration(int spell_id, int duration) {
 	self->SetBuffDuration(spell_id, duration);
 }
 
+Lua_Mob Lua_Mob::GetUltimateOwner() {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return Lua_Mob(self->GetUltimateOwner());
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -2729,6 +2734,7 @@ luabind::scope lua_register_mob() {
 	.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
 	.def("GetTarget", &Lua_Mob::GetTarget)
 	.def("GetTexture", &Lua_Mob::GetTexture)
+	.def("GetUltimateOwner", &Lua_Mob::GetUltimateOwner)
 	.def("GetWIS", &Lua_Mob::GetWIS)
 	.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
 	.def("GetWaypointH", &Lua_Mob::GetWaypointH)
