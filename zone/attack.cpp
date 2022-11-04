@@ -1872,7 +1872,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	if (RuleB(Character, UseDeathExpLossMult)) {
 		float exp_losses[] = { 0.005f, 0.015f, 0.025f, 0.035f, 0.045f, 0.055f, 0.065f, 0.075f, 0.085f, 0.095f, 0.110f };
 		int exp_loss = RuleI(Character, DeathExpLossMultiplier);
-		if (!EQ::ValueWithin(exp_loss, 3, 10)) {
+		if (!EQ::ValueWithin(exp_loss, 0, 10)) {
 			exp_loss = 3;
 		}
 
