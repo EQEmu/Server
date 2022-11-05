@@ -148,6 +148,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_merchant_sell",
 	"event_inspect",
 	"event_task_before_update",
+	"event_aa_buy",
+	"event_aa_gain"
 };
 
 extern Zone *zone;
@@ -249,6 +251,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_MERCHANT_BUY] = handle_player_merchant;
 	PlayerArgumentDispatch[EVENT_MERCHANT_SELL] = handle_player_merchant;
 	PlayerArgumentDispatch[EVENT_INSPECT] = handle_player_inspect;
+	PlayerArgumentDispatch[EVENT_AA_BUY] = handle_player_aa_buy;
+	PlayerArgumentDispatch[EVENT_AA_GAIN] = handle_player_aa_gain;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

@@ -898,4 +898,24 @@ void handle_player_merchant(QuestInterface* parse, lua_State* L, Client* client,
 	lua_setfield(L, -2, "item_cost");
 }
 
+void handle_player_aa_buy(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<std::any>* extra_pointers) {
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "aa_cost");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "aa_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "aa_previous_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[3]));
+	lua_setfield(L, -2, "aa_next_id");
+}
+
+void handle_player_aa_gain(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<std::any>* extra_pointers) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "aa_gained");
+}
+
 #endif

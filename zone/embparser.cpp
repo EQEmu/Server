@@ -161,6 +161,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_MERCHANT_SELL",
 	"EVENT_INSPECT",
 	"EVENT_TASK_BEFORE_UPDATE",
+	"EVENT_AA_BUY",
+	"EVENT_AA_GAIN"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
@@ -1734,6 +1736,20 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "item_id", sep.arg[2]);
 			ExportVar(package_name.c_str(), "item_quantity", sep.arg[3]);
 			ExportVar(package_name.c_str(), "item_cost", sep.arg[4]);
+			break;
+		}
+
+		case EVENT_AA_BUY: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "aa_cost", sep.arg[0]);
+			ExportVar(package_name.c_str(), "aa_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "aa_previous_id", sep.arg[2]);
+			ExportVar(package_name.c_str(), "aa_next_id", sep.arg[3]);
+			break;
+		}
+
+		case EVENT_AA_GAIN: {
+			ExportVar(package_name.c_str(), "aa_gained", data);
 			break;
 		}
 

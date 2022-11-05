@@ -3724,6 +3724,15 @@ bool Perl__IsSnowing()
 	return zone->IsSnowing();
 }
 
+std::string Perl__getaaname(int aa_id)
+{
+	if (!zone) {
+		return std::string();
+	}
+
+	return zone->GetAAName(aa_id);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4083,6 +4092,7 @@ void perl_register_quest()
 	package.add("forcedooropen", (void(*)(uint32, bool))&Perl__forcedooropen);
 	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getaaexpmodifierbycharid);
 	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getaaexpmodifierbycharid);
+	package.add("getaaname", (std::string(*)(int))&Perl__getaaname);
 	package.add("getbodytypename", &Perl__getbodytypename);
 	package.add("getcharidbyname", &Perl__getcharidbyname);
 	package.add("getclassname", (std::string(*)(uint8))&Perl__getclassname);
