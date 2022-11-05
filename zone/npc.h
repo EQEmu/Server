@@ -46,14 +46,14 @@
 #define	ONDESPAWN	8
 
 typedef struct {
-	float min_x;
-	float max_x;
-	float min_y;
-	float max_y;
-	float min_z;
-	float max_z;
-	bool say;
-	bool proximity_set;
+	float	min_x;
+	float	max_x;
+	float	min_y;
+	float	max_y;
+	float	min_z;
+	float	max_z;
+	bool	say;
+	bool	proximity_set;
 } NPCProximity;
 
 struct AISpells_Struct {
@@ -69,18 +69,18 @@ struct AISpells_Struct {
 };
 
 struct BotSpells_Struct {
-	uint32 		type;			// 0 = never, must be one (and only one) of the defined values
-	int16  		spellid;			// <= 0 = no spell
-	int16  		manacost;		// -1 = use spdat, -2 = no cast time
-	uint32 		time_cancast;	// when we can cast this spell next
-	int32  		recast_delay;
-	int16  		priority;
-	int16  		resist_adjust;
-	int16 		min_hp;			// >0 won't cast if HP is below
-	int16 		max_hp;			// >0 won't cast if HP is above
-	std::string bucket_name;
-	std::string bucket_value;
-	uint8	    bucket_comparison;
+	uint32		type;			// 0 = never, must be one (and only one) of the defined values
+	int16		spellid;			// <= 0 = no spell
+	int16		manacost;		// -1 = use spdat, -2 = no cast time
+	uint32		time_cancast;	// when we can cast this spell next
+	int32		recast_delay;
+	int16		priority;
+	int16		resist_adjust;
+	int16		min_hp;			// >0 won't cast if HP is below
+	int16		max_hp;			// >0 won't cast if HP is above
+	std::string	bucket_name;
+	std::string	bucket_value;
+	uint8		bucket_comparison;
 };
 
 struct AISpellsEffects_Struct {
@@ -91,17 +91,17 @@ struct AISpellsEffects_Struct {
 };
 
 struct AISpellsVar_Struct {
-	uint32  fail_recast;
+	uint32	fail_recast;
 	uint32	engaged_no_sp_recast_min;
 	uint32	engaged_no_sp_recast_max;
 	uint8	engaged_beneficial_self_chance;
 	uint8	engaged_beneficial_other_chance;
 	uint8	engaged_detrimental_chance;
-	uint32  pursue_no_sp_recast_min;
-	uint32  pursue_no_sp_recast_max;
-	uint8   pursue_detrimental_chance;
-	uint32  idle_no_sp_recast_min;
-	uint32  idle_no_sp_recast_max;
+	uint32	pursue_no_sp_recast_min;
+	uint32	pursue_no_sp_recast_max;
+	uint8	pursue_detrimental_chance;
+	uint32	idle_no_sp_recast_min;
+	uint32	idle_no_sp_recast_max;
 	uint8	idle_beneficial_chance;
 };
 
