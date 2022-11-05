@@ -123,6 +123,8 @@ void handle_player_alt_currency_merchant(QuestInterface* parse, lua_State* L, Cl
 	std::vector<std::any>* extra_pointers);
 void handle_player_merchant(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 	std::vector<std::any>* extra_pointers);
+void handle_player_inspect(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<std::any> *extra_pointers);
 void handle_player_aa_buy(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 	std::vector<std::any>* extra_pointers);
 void handle_player_aa_gain(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,

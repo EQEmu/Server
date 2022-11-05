@@ -812,8 +812,8 @@ void lua_create_door(const char *model, float x, float y, float z, float h, int 
 	quest_manager.CreateDoor(model, x, y, z, h, open_type, size);
 }
 
-void lua_modify_npc_stat(const char *id, const char *value) {
-	quest_manager.ModifyNPCStat(id, value);
+void lua_modify_npc_stat(std::string stat, std::string value) {
+	quest_manager.ModifyNPCStat(stat, value);
 }
 
 int lua_collect_items(uint32 item_id, bool remove) {
@@ -4316,6 +4316,8 @@ luabind::scope lua_register_events() {
 			luabind::value("alt_currency_merchant_sell", static_cast<int>(EVENT_ALT_CURRENCY_MERCHANT_SELL)),
 			luabind::value("merchant_buy", static_cast<int>(EVENT_MERCHANT_BUY)),
 			luabind::value("merchant_sell", static_cast<int>(EVENT_MERCHANT_SELL)),
+			luabind::value("inspect", static_cast<int>(EVENT_INSPECT)),
+			luabind::value("task_before_update", static_cast<int>(EVENT_TASK_BEFORE_UPDATE)),
 			luabind::value("aa_buy", static_cast<int>(EVENT_AA_BUY)),
 			luabind::value("aa_gain", static_cast<int>(EVENT_AA_GAIN))
 		];

@@ -121,6 +121,11 @@ bool Perl_Group_DoesAnyMemberHaveExpeditionLockout(Group* self, std::string expe
 	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
 }
 
+uint32_t Perl_Group_GetLowestLevel(Group* self) // @categories Script Utility, Group
+{
+	return self->GetLowestLevel();
+}
+
 void perl_register_group()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -134,6 +139,7 @@ void perl_register_group()
 	package.add("GetID", &Perl_Group_GetID);
 	package.add("GetLeader", &Perl_Group_GetLeader);
 	package.add("GetLeaderName", &Perl_Group_GetLeaderName);
+	package.add("GetLowestLevel", &Perl_Group_GetLowestLevel);
 	package.add("GetMember", &Perl_Group_GetMember);
 	package.add("GetTotalGroupDamage", &Perl_Group_GetTotalGroupDamage);
 	package.add("GroupCount", &Perl_Group_GroupCount);

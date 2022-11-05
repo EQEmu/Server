@@ -619,6 +619,13 @@ void handle_player_consider_corpse(QuestInterface* parse, lua_State* L, Client* 
 	lua_setfield(L, -2, "corpse_entity_id");
 }
 
+void handle_player_inspect(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<std::any>* extra_pointers) {
+	Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
+	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+	l_mob_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQ::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
 					   std::vector<std::any> *extra_pointers) {

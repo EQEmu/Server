@@ -210,7 +210,8 @@ enum {
 	IMMUNE_AGGRO_NPC = 50,
 	MODIFY_AVOID_DAMAGE = 51,                    //Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
 	IMMUNE_FADING_MEMORIES = 52,
-	MAX_SPECIAL_ATTACK = 53
+	IMMUNE_OPEN = 53,
+	MAX_SPECIAL_ATTACK
 };
 
 typedef enum {	//fear states

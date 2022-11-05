@@ -174,9 +174,9 @@ public:
 	virtual bool Save();
 	virtual void Depop();
 	void CalcBotStats(bool showtext = true);
-	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
-	uint32 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
-	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
+	uint16 BotGetSpells(int spellslot) { return AIBot_spells[spellslot].spellid; }
+	uint32 BotGetSpellType(int spellslot) { return AIBot_spells[spellslot].type; }
+	uint16 BotGetSpellPriority(int spellslot) { return AIBot_spells[spellslot].priority; }
 	virtual float GetProcChances(float ProcBonus, uint16 hand);
 	virtual int GetHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, int64 &damage);
@@ -220,7 +220,6 @@ public:
 	virtual void AddToHateList(Mob* other, int64 hate = 0, int64 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
 	virtual void SetTarget(Mob* mob);
 	virtual void Zone();
-	std::vector<AISpells_Struct> GetBotSpells() { return AIspells; }
 	bool IsArcheryRange(Mob* target);
 	void ChangeBotArcherWeapons(bool isArcher);
 	void Sit();
@@ -308,6 +307,9 @@ public:
 	void DoEnduranceRegen();	//This Regenerates endurance
 	void DoEnduranceUpkeep();	//does the endurance upkeep
 
+	bool AI_AddBotSpells(uint32 iDBSpellsID);
+	void AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
+	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 	// AI Methods
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
 	virtual bool AI_EngagedCastCheck();
@@ -320,6 +322,10 @@ public:
 	void SetStopMeleeLevel(uint8 level);
 	void SetGuardMode();
 	void SetHoldMode();
+
+	// Bot AI Methods
+	void AI_Bot_Init();
+	void AI_Bot_Start(uint32 iMoveDelay = 0);
 
 	// Mob AI Virtual Override Methods
 	virtual void AI_Process();
@@ -637,7 +643,6 @@ private:
 	// Class Members
 	uint32 _botID;
 	uint32 _botOwnerCharacterID;
-	//uint32 _botSpellID;
 	bool _spawnStatus;
 	Mob* _botOwner;
 	bool _botOrderAttack;
@@ -743,6 +748,8 @@ private:
 	public:
 	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
 };
+
+bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID);
 
 #endif // BOTS
 

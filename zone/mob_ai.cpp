@@ -1925,7 +1925,7 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
 					uint32 emoteid = GetEmoteID();
 					if (emoteid != 0) {
-						CastToNPC()->DoNPCEmote(ENTERCOMBAT, emoteid);
+						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid);
 					}
 					std::string mob_name = GetCleanName();
 					combat_record.Start(mob_name);
@@ -1958,7 +1958,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 				uint32 emoteid = CastToNPC()->GetEmoteID();
 				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
 				if (emoteid != 0) {
-					CastToNPC()->DoNPCEmote(LEAVECOMBAT, emoteid);
+					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
 				}
 				combat_record.Stop();
 				CastToNPC()->SetCombatEvent(false);
@@ -2988,16 +2988,9 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		query = StringFormat(
 		    "SELECT spellid, type, minlevel, maxlevel, "
 		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
-#ifdef BOTS
-		    "FROM %s "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    (iDBSpellsID >= 3001 && iDBSpellsID <= 3016 ? "bot_spells_entries" : "npc_spells_entries"),
-		    iDBSpellsID);
-#else
 		    "FROM npc_spells_entries "
 		    "WHERE npc_spells_id=%d ORDER BY minlevel",
 		    iDBSpellsID);
-#endif
 		results = QueryDatabase(query);
 
 		if (!results.Success()) {

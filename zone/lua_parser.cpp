@@ -146,6 +146,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_alt_currency_merchant_sell",
 	"event_merchant_buy",
 	"event_merchant_sell",
+	"event_inspect",
+	"event_task_before_update",
 	"event_aa_buy",
 	"event_aa_gain"
 };
@@ -223,6 +225,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE] = handle_player_task_stage_complete;
 	PlayerArgumentDispatch[EVENT_TASK_COMPLETE] = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_TASK_UPDATE] = handle_player_task_update;
+	PlayerArgumentDispatch[EVENT_TASK_BEFORE_UPDATE] = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_COMMAND] = handle_player_command;
 	PlayerArgumentDispatch[EVENT_COMBINE_SUCCESS] = handle_player_combine;
 	PlayerArgumentDispatch[EVENT_COMBINE_FAILURE] = handle_player_combine;
@@ -247,6 +250,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_SELL] = handle_player_alt_currency_merchant;
 	PlayerArgumentDispatch[EVENT_MERCHANT_BUY] = handle_player_merchant;
 	PlayerArgumentDispatch[EVENT_MERCHANT_SELL] = handle_player_merchant;
+	PlayerArgumentDispatch[EVENT_INSPECT] = handle_player_inspect;
 	PlayerArgumentDispatch[EVENT_AA_BUY] = handle_player_aa_buy;
 	PlayerArgumentDispatch[EVENT_AA_GAIN] = handle_player_aa_gain;
 

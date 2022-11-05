@@ -35,16 +35,6 @@
 	#define M_PI	3.141592
 #endif
 
-#define LEAVECOMBAT 0
-#define ENTERCOMBAT 1
-#define	ONDEATH		2
-#define	AFTERDEATH	3
-#define HAILED		4
-#define	KILLEDPC	5
-#define	KILLEDNPC	6
-#define	ONSPAWN		7
-#define	ONDESPAWN	8
-
 typedef struct {
 	float min_x;
 	float max_x;
@@ -66,6 +56,18 @@ struct AISpells_Struct {
 	int16	resist_adjust;
 	int8	min_hp; // >0 won't cast if HP is below
 	int8	max_hp; // >0 won't cast if HP is above
+};
+
+struct BotSpells_Struct {
+	uint32 type;			// 0 = never, must be one (and only one) of the defined values
+	int16  spellid;			// <= 0 = no spell
+	int16  manacost;		// -1 = use spdat, -2 = no cast time
+	uint32 time_cancast;	// when we can cast this spell next
+	int32  recast_delay;
+	int16  priority;
+	int16  resist_adjust;
+	int16  min_hp;			// >0 won't cast if HP is below
+	int16  max_hp;			// >0 won't cast if HP is above
 };
 
 struct AISpellsEffects_Struct {
@@ -419,8 +421,8 @@ public:
 	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
-	float	GetNPCStat(const char *identifier);
-	void	ModifyNPCStat(const char *identifier, const char *new_value);
+	float	GetNPCStat(std::string stat);
+	void	ModifyNPCStat(std::string stat, std::string value);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
 	bool IsLDoNTrapped() const { return (ldon_trapped); }
@@ -585,6 +587,7 @@ protected:
 
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
+	std::vector<BotSpells_Struct> AIBot_spells; //Will eventually be moved to Bot Class once Bots are no longer reliant on NPC constructor
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);

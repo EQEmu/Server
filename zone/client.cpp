@@ -5028,6 +5028,12 @@ void Client::HandleLDoNOpen(NPC *target)
 			return;
 		}
 
+		if (target->GetSpecialAbility(IMMUNE_OPEN))
+		{
+			LogDebug("[{}] tried to open [{}] but it was immune", GetName(), target->GetName());
+			return;
+		}
+
 		if(DistanceSquaredNoZ(m_Position, target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 		{
 			LogDebug("[{}] tried to open [{}] but [{}] was out of range",
@@ -6243,7 +6249,7 @@ void Client::CheckEmoteHail(Mob *target, const char* message)
 	}
 	uint32 emoteid = target->GetEmoteID();
 	if(emoteid != 0)
-		target->CastToNPC()->DoNPCEmote(HAILED,emoteid);
+		target->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::Hailed, emoteid);
 }
 
 void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count)
@@ -11837,4 +11843,24 @@ bool Client::IsLockSavePosition() const
 void Client::SetLockSavePosition(bool lock_save_position)
 {
 	Client::m_lock_save_position = lock_save_position;
+}
+
+void Client::AddAAPoints(uint32 points)
+{
+	m_pp.aapoints += points;
+
+	if (points == 1 && m_pp.aapoints == 1)
+	{
+		MessageString(Chat::Yellow, GAIN_SINGLE_AA_SINGLE_AA, fmt::format_int(m_pp.aapoints).c_str());
+	}
+	else if (points == 1 && m_pp.aapoints > 1)
+	{
+		MessageString(Chat::Yellow, GAIN_SINGLE_AA_MULTI_AA, fmt::format_int(m_pp.aapoints).c_str());
+	}
+	else
+	{
+		MessageString(Chat::Yellow, GAIN_MULTI_AA_MULTI_AA, fmt::format_int(points).c_str(), fmt::format_int(m_pp.aapoints).c_str());
+	}
+
+	SendAlternateAdvancementStats();
 }

@@ -2473,6 +2473,11 @@ void Lua_Mob::SetBuffDuration(int spell_id, int duration) {
 	self->SetBuffDuration(spell_id, duration);
 }
 
+Lua_Mob Lua_Mob::GetUltimateOwner() {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return Lua_Mob(self->GetUltimateOwner());
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -2729,6 +2734,7 @@ luabind::scope lua_register_mob() {
 	.def("GetSpellHPBonuses", &Lua_Mob::GetSpellHPBonuses)
 	.def("GetTarget", &Lua_Mob::GetTarget)
 	.def("GetTexture", &Lua_Mob::GetTexture)
+	.def("GetUltimateOwner", &Lua_Mob::GetUltimateOwner)
 	.def("GetWIS", &Lua_Mob::GetWIS)
 	.def("GetWalkspeed", &Lua_Mob::GetWalkspeed)
 	.def("GetWaypointH", &Lua_Mob::GetWaypointH)
@@ -2952,7 +2958,8 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("immune_damage_npc", static_cast<int>(IMMUNE_DAMAGE_NPC)),
 				luabind::value("immune_aggro_client", static_cast<int>(IMMUNE_AGGRO_CLIENT)),
 				luabind::value("immune_aggro_npc", static_cast<int>(IMMUNE_AGGRO_NPC)),
-				luabind::value("modify_avoid_damage", static_cast<int>(MODIFY_AVOID_DAMAGE))
+				luabind::value("modify_avoid_damage", static_cast<int>(MODIFY_AVOID_DAMAGE)),
+				luabind::value("immune_open", static_cast<int>(IMMUNE_OPEN))
 		];
 }
 

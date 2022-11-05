@@ -38,6 +38,11 @@
         OutF(LogSys, Logs::General, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogAIModerate(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::AI))\
+        OutF(LogSys, Logs::Moderate, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define LogAIDetail(message, ...) do {\
     if (LogSys.IsLogEnabled(Logs::Detail, Logs::AI))\
         OutF(LogSys, Logs::Detail, Logs::AI, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
