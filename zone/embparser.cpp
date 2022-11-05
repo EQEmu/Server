@@ -1435,7 +1435,11 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_ZONE: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "from_zone_id", sep.arg[0]);
-			ExportVar(package_name.c_str(), "target_zone_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "from_instance_id", sep.arg[1]);
+			ExportVar(package_name.c_str(), "from_instance_version", sep.arg[2]);
+			ExportVar(package_name.c_str(), "target_zone_id", sep.arg[3]);
+			ExportVar(package_name.c_str(), "target_instance_id", sep.arg[4]);
+			ExportVar(package_name.c_str(), "target_instance_version", sep.arg[5]);
 			break;
 		}
 

@@ -56,80 +56,73 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	LogDebug("Zone request from [{}]", GetName());
 	DumpPacket(app);
 #endif
-	ZoneChange_Struct* zc=(ZoneChange_Struct*)app->pBuffer;
+	auto* zc = (ZoneChange_Struct*)app->pBuffer;
 
 	uint16 target_zone_id = 0;
-	uint16 target_instance_id = zc->instanceID;
+	auto target_instance_id = zc->instanceID;
 	ZonePoint* zone_point = nullptr;
 
 	//figure out where they are going.
-	if(zc->zoneID == 0) {
+	if (zc->zoneID == 0) {
 		//client dosent know where they are going...
 		//try to figure it out for them.
 
 		switch(zone_mode) {
-		case EvacToSafeCoords:
-		case ZoneToSafeCoords:
-			//going to safe coords, but client dosent know where?
-			//assume it is this zone for now.
-			target_zone_id = zone->GetZoneID();
-			break;
-		case GMSummon:
-			target_zone_id = zonesummon_id;
-			break;
-		case GateToBindPoint:
-			target_zone_id = m_pp.binds[0].zone_id;
-			target_instance_id = m_pp.binds[0].instance_id;
-			break;
-		case ZoneToBindPoint:
-			target_zone_id = m_pp.binds[0].zone_id;
-			target_instance_id = m_pp.binds[0].instance_id;
-			break;
-		case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
-			target_zone_id = zonesummon_id;
-			break;
-		case ZoneUnsolicited: //client came up with this on its own.
-			zone_point = zone->GetClosestZonePointWithoutZone(GetX(), GetY(), GetZ(), this, ZONEPOINT_NOZONE_RANGE);
-			if(zone_point) {
-				//we found a zone point, which is a reasonable distance away
-				//assume that is the one were going with.
-				target_zone_id = zone_point->target_zone_id;
-				target_instance_id = zone_point->target_zone_instance;
-			} else {
-				//unable to find a zone point... is there anything else
-				//that can be a valid un-zolicited zone request?
+			case EvacToSafeCoords:
+			case ZoneToSafeCoords:
+				//going to safe coords, but client dosent know where?
+				//assume it is this zone for now.
+				target_zone_id = zone->GetZoneID();
+				break;
+			case GMSummon:
+				target_zone_id = zonesummon_id;
+				break;
+			case GateToBindPoint:
+				target_zone_id = m_pp.binds[0].zone_id;
+				target_instance_id = m_pp.binds[0].instance_id;
+				break;
+			case ZoneToBindPoint:
+				target_zone_id = m_pp.binds[0].zone_id;
+				target_instance_id = m_pp.binds[0].instance_id;
+				break;
+			case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
+				target_zone_id = zonesummon_id;
+				break;
+			case ZoneUnsolicited: //client came up with this on its own.
+				zone_point = zone->GetClosestZonePointWithoutZone(GetX(), GetY(), GetZ(), this, ZONEPOINT_NOZONE_RANGE);
+				if (zone_point) {
+					//we found a zone point, which is a reasonable distance away
+					//assume that is the one were going with.
+					target_zone_id = zone_point->target_zone_id;
+					target_instance_id = zone_point->target_zone_instance;
+				} else {
+					//unable to find a zone point... is there anything else
+					//that can be a valid un-zolicited zone request?
 
-				Message(Chat::Red, "Invalid unsolicited zone request.");
-				LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]", GetName(), target_zone_id);
-				if (GetBindZoneID() == target_zone_id) {
-					cheat_manager.CheatDetected(MQGate, glm::vec3(zc->x, zc->y, zc->z));
+					Message(Chat::Red, "Invalid unsolicited zone request.");
+					LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]", GetName(), target_zone_id);
+					cheat_manager.CheatDetected(GetBindZoneID() == target_zone_id ? MQGate : MQZone, glm::vec3(zc->x, zc->y, zc->z));
+					SendZoneCancel(zc);
+					return;
 				}
-				else {
-					cheat_manager.CheatDetected(MQZone, glm::vec3(zc->x, zc->y, zc->z));
-				}
-				SendZoneCancel(zc);
-				return;
-			}
-			break;
-		default:
-			break;
+				break;
+			default:
+				break;
 		};
-	}
-	else {
+	} else {
 		// This is to allow both 6.2 and Titanium clients to perform a proper zoning of the client when evac/succor
 		// WildcardX 27 January 2008
-		if(zone_mode == EvacToSafeCoords && zonesummon_id > 0)
+		if (zone_mode == EvacToSafeCoords && zonesummon_id) {
 			target_zone_id = zonesummon_id;
-		else
+		} else {
 			target_zone_id = zc->zoneID;
+		}
 
 		//if we are zoning to a specific zone unsolicied,
 		//then until otherwise determined, they must be zoning
 		//on a zone line.
-		if(zone_mode == ZoneUnsolicited)
-		{
-			if(target_zone_id == zone->GetZoneID())
-			{
+		if (zone_mode == ZoneUnsolicited) {
+			if (target_zone_id == zone->GetZoneID()) {
 				SendZoneCancel(zc);
 				return;
 			}
@@ -137,41 +130,46 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			zone_point = zone->GetClosestZonePoint(glm::vec3(GetPosition()), target_zone_id, this, ZONEPOINT_ZONE_RANGE);
 			//if we didnt get a zone point, or its to a different zone,
 			//then we assume this is invalid.
-			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
+			if (!zone_point || zone_point->target_zone_id != target_zone_id) {
 				LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]", GetName(), target_zone_id);
-				if (GetBindZoneID() == target_zone_id) {
-					cheat_manager.CheatDetected(MQGate, glm::vec3(zc->x, zc->y, zc->z));
-				}
-				else {
-					cheat_manager.CheatDetected(MQZone, glm::vec3(zc->x, zc->y, zc->z));
-				}
+				cheat_manager.CheatDetected(GetBindZoneID() == target_zone_id ? MQGate : MQZone, glm::vec3(zc->x, zc->y, zc->z));
 				SendZoneCancel(zc);
 				return;
 			}
 		}
 	}
 
-	if(target_instance_id > 0)
-	{
+	if (target_instance_id) {
 		//make sure we are in it and it's unexpired.
-		if(!database.VerifyInstanceAlive(target_instance_id, CharacterID()))
-		{
-			Message(Chat::Red, "Instance ID was expired or you were not in it.");
+		if (!database.VerifyInstanceAlive(target_instance_id, CharacterID())) {
+			Message(
+				Chat::Red,
+				fmt::format(
+					"Instance ID {} was expired or you were not a member of it.",
+					target_instance_id
+				).c_str()
+			);
 			SendZoneCancel(zc);
 			return;
 		}
 
-		if(!database.VerifyZoneInstance(target_zone_id, target_instance_id))
-		{
-			Message(Chat::Red, "Instance ID was %u does not go with zone id %u", target_instance_id, target_zone_id);
+		if (!database.VerifyZoneInstance(target_zone_id, target_instance_id)) {
+			Message(
+				Chat::Red,
+				fmt::format(
+					"Instance ID was {}, this does not match Zone ID {}.",
+					target_instance_id,
+					target_zone_id
+				).c_str()
+			);
 			SendZoneCancel(zc);
 			return;
 		}
 	}
 
 	/* Check for Valid Zone */
-	const char *target_zone_name = ZoneName(target_zone_id);
-	if(target_zone_name == nullptr) {
+	auto* target_zone_name = ZoneName(target_zone_id);
+	if (!target_zone_name) {
 		//invalid zone...
 		Message(Chat::Red, "Invalid target zone ID.");
 		LogError("Zoning [{}]: Unable to get zone name for zone id [{}]", GetName(), target_zone_id);
@@ -179,9 +177,10 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		return;
 	}
 
+	auto target_instance_version = database.GetInstanceVersion(target_instance_id);
 	auto zone_data = GetZoneVersionWithFallback(
 		ZoneID(target_zone_name),
-		database.GetInstanceVersion(target_instance_id)
+		target_instance_version
 	);
 	if (!zone_data) {
 		Message(Chat::Red, "Invalid target zone while getting safe points.");
@@ -203,11 +202,16 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	min_status   = zone_data->min_status;
 	min_level    = zone_data->min_level;
 
-	std::string export_string = fmt::format(
-		"{} {}",
+	const auto& export_string = fmt::format(
+		"{} {} {} {} {} {}",
 		zone->GetZoneID(),
-		target_zone_id
+		zone->GetInstanceID(),
+		zone->GetInstanceVersion(),
+		target_zone_id,
+		target_instance_id,
+		target_instance_version
 	);
+
 	if (parse->EventPlayer(EVENT_ZONE, this, export_string, 0) != 0) {
 		SendZoneCancel(zc);
 		return;
@@ -218,97 +222,77 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	uint8 ignore_restrictions = zonesummon_ignorerestrictions;
 	zonesummon_ignorerestrictions = 0;
 
-	float target_x = 0, target_y = 0, target_z = 0, target_heading = 0;
-	switch(zone_mode) {
-	case EvacToSafeCoords:
-	case ZoneToSafeCoords:
-		LogDebug(
-			"Zoning [{}] to safe coords ([{}], [{}], [{}], [{}]) in [{}] ([{}])",
-			GetName(),
-			safe_x,
-			safe_y,
-			safe_z,
-			safe_heading,
-			target_zone_name,
-			target_zone_id
-		);
-		target_x = safe_x;
-		target_y = safe_y;
-		target_z = safe_z;
-		target_heading = safe_heading;
-		break;
-	case GMSummon:
-		target_x = m_ZoneSummonLocation.x;
-		target_y = m_ZoneSummonLocation.y;
-		target_z = m_ZoneSummonLocation.z;
-		target_heading = m_ZoneSummonLocation.w;
-		ignore_restrictions = 1;
-		break;
-	case GateToBindPoint:
-		target_x = m_pp.binds[0].x;
-		target_y = m_pp.binds[0].y;
-		target_z = m_pp.binds[0].z;
-		target_heading = m_pp.binds[0].heading;
-		break;
-	case ZoneToBindPoint:
-		target_x = m_pp.binds[0].x;
-		target_y = m_pp.binds[0].y;
-		target_z = m_pp.binds[0].z;
-		target_heading = m_pp.binds[0].heading;
-		ignore_restrictions = 1;	//can always get to our bind point? seems exploitable
-		break;
-	case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
-		//recycle zonesummon variables
-		target_x = m_ZoneSummonLocation.x;
-		target_y = m_ZoneSummonLocation.y;
-		target_z = m_ZoneSummonLocation.z;
-		target_heading = m_ZoneSummonLocation.w;
-		break;
-	case ZoneUnsolicited: //client came up with this on its own.
-		//client requested a zoning... what are the cases when this could happen?
-
-		//Handle zone point case:
-		if(zone_point != nullptr) {
-			//they are zoning using a valid zone point, figure out coords
-
-			//999999 is a placeholder for 'same as where they were from'
-			if(zone_point->target_x == 999999)
-				target_x = GetX();
-			else
-				target_x = zone_point->target_x;
-
-			if(zone_point->target_y == 999999)
-				target_y = GetY();
-			else
-				target_y = zone_point->target_y;
-
-			if(zone_point->target_z == 999999)
-				target_z = GetZ();
-			else
-				target_z = zone_point->target_z;
-
-			if(zone_point->target_heading == 999)
-				target_heading = GetHeading();
-			else
-				target_heading = zone_point->target_heading;
-
+	auto target_x = 0.0f, target_y = 0.0f, target_z = 0.0f, target_heading = 0.0f;
+	switch (zone_mode) {
+		case EvacToSafeCoords:
+		case ZoneToSafeCoords:
+			LogDebug(
+				"Zoning [{}] to safe coords ([{}], [{}], [{}], [{}]) in [{}] ([{}])",
+				GetName(),
+				safe_x,
+				safe_y,
+				safe_z,
+				safe_heading,
+				target_zone_name,
+				target_zone_id
+			);
+			target_x = safe_x;
+			target_y = safe_y;
+			target_z = safe_z;
+			target_heading = safe_heading;
 			break;
-		}
+		case GMSummon:
+			target_x = m_ZoneSummonLocation.x;
+			target_y = m_ZoneSummonLocation.y;
+			target_z = m_ZoneSummonLocation.z;
+			target_heading = m_ZoneSummonLocation.w;
+			ignore_restrictions = 1;
+			break;
+		case GateToBindPoint:
+			target_x = m_pp.binds[0].x;
+			target_y = m_pp.binds[0].y;
+			target_z = m_pp.binds[0].z;
+			target_heading = m_pp.binds[0].heading;
+			break;
+		case ZoneToBindPoint:
+			target_x = m_pp.binds[0].x;
+			target_y = m_pp.binds[0].y;
+			target_z = m_pp.binds[0].z;
+			target_heading = m_pp.binds[0].heading;
+			ignore_restrictions = 1;	//can always get to our bind point? seems exploitable
+			break;
+		case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
+			//recycle zonesummon variables
+			target_x = m_ZoneSummonLocation.x;
+			target_y = m_ZoneSummonLocation.y;
+			target_z = m_ZoneSummonLocation.z;
+			target_heading = m_ZoneSummonLocation.w;
+			break;
+		case ZoneUnsolicited: //client came up with this on its own.
+			//client requested a zoning... what are the cases when this could happen?
 
-		//for now, there are no other cases...
+			//Handle zone point case:
+			if (zone_point) {
+				//they are zoning using a valid zone point, figure out coords
 
-		//could not find a valid reason for them to be zoning, stop it.
-		if (GetBindZoneID() == target_zone_id) {
-			cheat_manager.CheatDetected(MQGate, glm::vec3(zc->x, zc->y, zc->z));
-		}
-		else {
-			cheat_manager.CheatDetected(MQZone, glm::vec3(zc->x, zc->y, zc->z));
-		}
-		LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]. Not near a zone point", GetName(), target_zone_name);
-		SendZoneCancel(zc);
-		return;
-	default:
-		break;
+				//999999 is a placeholder for 'same as where they were from'
+				target_x = zone_point->target_x == 999999 ? GetX() : zone_point->target_x;
+				target_y = zone_point->target_y == 999999 ? GetY() : zone_point->target_y;
+				target_z = zone_point->target_z == 999999 ? GetZ() : zone_point->target_z;
+				target_heading = zone_point->target_heading == 999 ? GetHeading() : zone_point->target_heading;
+				break;
+			}
+
+			//for now, there are no other cases...
+
+			//could not find a valid reason for them to be zoning, stop it.
+			cheat_manager.CheatDetected(GetBindZoneID() == target_zone_id ? MQGate : MQZone, glm::vec3(zc->x, zc->y, zc->z));
+
+			LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]. Not near a zone point", GetName(), target_zone_name);
+			SendZoneCancel(zc);
+			return;
+		default:
+			break;
 	};
 
 	//OK, now we should know where were going...
@@ -319,8 +303,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	//not sure when we would use ZONE_ERROR_NOTREADY
 
 	//enforce min status and level
-	if (!ignore_restrictions && (Admin() < min_status || GetLevel() < zone_data->min_level))
-	{
+	if (!ignore_restrictions && (Admin() < min_status || GetLevel() < zone_data->min_level)) {
 		myerror = ZONE_ERROR_NOEXPERIENCE;
 	}
 
@@ -368,7 +351,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		LogInfo("[{}] Bypassing Expansion zone checks because GM status is set", GetCleanName());
 	}
 
-	if(myerror == 1) {
+	if (myerror == 1) {
 		//we have successfully zoned
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, target_x, target_y, target_z, target_heading, ignore_restrictions);
 	} else {

@@ -434,7 +434,19 @@ void handle_player_zone(QuestInterface *parse, lua_State* L, Client* client, std
 	lua_setfield(L, -2, "from_zone_id");
 
 	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "from_instance_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
+	lua_setfield(L, -2, "from_instance_version");
+
+	lua_pushinteger(L, std::stoi(sep.arg[3]));
 	lua_setfield(L, -2, "zone_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[4]));
+	lua_setfield(L, -2, "instance_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[5]));
+	lua_setfield(L, -2, "instance_version");
 }
 
 void handle_player_duel_win(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
