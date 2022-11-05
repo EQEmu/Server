@@ -24,7 +24,7 @@ struct TaskUpdateFilter
 	glm::vec4 pos;
 	bool use_pos          = false; // if true uses pos instead of client position for area filters
 	bool ignore_area      = false; // if true, area check is disabled
-	NPC* npc              = nullptr;
+	Mob* mob              = nullptr;
 	Client* exp_client    = nullptr; // used by Kill tasks to filter shared task updates
 	TaskActivityType type = TaskActivityType::None;
 	TaskMethodType method = TaskMethodType::METHODSINGLEID;
@@ -56,7 +56,8 @@ public:
 	void RemoveTask(Client *client, int sequence_number, TaskType task_type);
 	void RemoveTaskByTaskID(Client *client, uint32 task_id);
 	bool UpdateTasksByNPC(Client* client, TaskActivityType type, NPC* npc);
-	void UpdateTasksForItem(Client* client, TaskActivityType type, NPC* npc, int item_id, int count = 1);
+	void UpdateTasksForItem(Client* client, TaskActivityType type, int item_id, int count = 1);
+	void UpdateTasksOnLoot(Client* client, Corpse* corpse, int item_id, int count = 1);
 	void UpdateTasksOnExplore(Client* client, const glm::vec4& loc);
 	bool UpdateTasksOnSpeakWith(Client* client, NPC* npc);
 	bool UpdateTasksOnDeliver(Client* client, std::vector<EQ::ItemInstance*>& items, Trade& trade, NPC* npc);
