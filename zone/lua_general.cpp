@@ -3444,6 +3444,14 @@ bool lua_is_snowing() {
 	return zone->IsSnowing();
 }
 
+std::string lua_get_aa_name(int aa_id) {
+	if (!zone) {
+		return std::string();
+	}
+
+	return zone->GetAAName(aa_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3910,6 +3918,7 @@ luabind::scope lua_register_general() {
 		luabind::def("has_recipe_learned", &lua_has_recipe_learned),
 		luabind::def("is_raining", &lua_is_raining),
 		luabind::def("is_snowing", &lua_is_snowing),
+		luabind::def("get_aa_name", &lua_get_aa_name),
 
 		/*
 			Cross Zone
@@ -4308,7 +4317,9 @@ luabind::scope lua_register_events() {
 			luabind::value("merchant_buy", static_cast<int>(EVENT_MERCHANT_BUY)),
 			luabind::value("merchant_sell", static_cast<int>(EVENT_MERCHANT_SELL)),
 			luabind::value("inspect", static_cast<int>(EVENT_INSPECT)),
-			luabind::value("task_before_update", static_cast<int>(EVENT_TASK_BEFORE_UPDATE))
+			luabind::value("task_before_update", static_cast<int>(EVENT_TASK_BEFORE_UPDATE)),
+			luabind::value("aa_buy", static_cast<int>(EVENT_AA_BUY)),
+			luabind::value("aa_gain", static_cast<int>(EVENT_AA_GAIN))
 		];
 }
 

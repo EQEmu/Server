@@ -715,6 +715,13 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 			SendSound();
 		}
 
+		const auto export_string = fmt::format(
+			"{}",
+			gained
+		);
+
+		parse->EventPlayer(EVENT_AA_GAIN, this, export_string, 0);
+
 		/* QS: PlayerLogAARate */
 		if (RuleB(QueryServ, PlayerLogAARate)){
 			int add_points = (m_pp.aapoints - last_unspentAA);

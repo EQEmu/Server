@@ -206,6 +206,7 @@ public:
 	void SpellEffect(Lua_Mob caster, int spell_id, double partial);
 	Lua_Mob GetPet();
 	Lua_Mob GetOwner();
+	Lua_Mob GetUltimateOwner();
 	Lua_HateList GetHateList();
 	Lua_HateList GetShuffledHateList();
 	Lua_HateList GetHateListByDistance();

@@ -1370,6 +1370,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
+		// get count for task update before it's mutated by AutoPutLootInInventory
+		int count = inst->IsStackable() ? inst->GetCharges() : 1;
+
 		/* First add it to the looter - this will do the bag contents too */
 		if (lootitem->auto_loot > 0) {
 			if (!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
@@ -1380,8 +1383,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		/* Update any tasks that have an activity to loot this item */
-		if (RuleB(TaskSystem, EnableTaskSystem))
-			client->UpdateTasksForItem(TaskActivityType::Loot, IsNPCCorpse() ? CastToNPC() : nullptr, item->ID);
+		if (RuleB(TaskSystem, EnableTaskSystem) && IsNPCCorpse()) {
+			client->UpdateTasksOnLoot(this, item->ID, count);
+		}
 
 		/* Remove it from Corpse */
 		if (item_data) {

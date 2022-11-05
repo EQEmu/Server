@@ -2791,35 +2791,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	entity_list.UpdateFindableNPCState(this, true);
 
-	export_string = fmt::format(
-		"{} {} {} {}",
-		killer_mob ? killer_mob->GetID() : 0,
-		damage,
-		spell,
-		static_cast<int>(attack_skill)
-	);
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0);
 	combat_record.Stop();
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
-	if (RuleB(Zone, UseZoneController)) {
-		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
-		if (controller && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID) {
-			export_string = fmt::format(
-				"{} {} {} {} {} {:.2f} {:.2f} {:.2f} {:.2f}",
-				killer_mob ? killer_mob->GetID() : 0,
-				damage,
-				spell,
-				static_cast<int>(attack_skill),
-				GetNPCTypeID(),
-				GetX(),
-				GetY(),
-				GetZ(),
-				GetHeading()
-			);
-			parse->EventNPC(EVENT_DEATH_ZONE, controller, nullptr, export_string, 0);
-		}
-	}
+	std::vector<std::any> args = { this };
+	DispatchZoneControllerEvent(EVENT_DEATH_ZONE, oos, export_string, 0, &args);
 
 	return true;
 }
