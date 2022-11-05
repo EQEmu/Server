@@ -1599,6 +1599,7 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_DEATH_ZONE:
 		case EVENT_DEATH:
 		case EVENT_DEATH_COMPLETE: {
 			Seperator sep(data);
@@ -1606,6 +1607,18 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
+			if (extra_pointers && !extra_pointers->empty())
+			{
+				NPC* killed = std::any_cast<NPC*>(extra_pointers->at(0));
+				if (killed)
+				{
+					ExportVar(package_name.c_str(), "killed_npc_id", killed->GetNPCTypeID());
+					ExportVar(package_name.c_str(), "killed_x", killed->GetX());
+					ExportVar(package_name.c_str(), "killed_y", killed->GetY());
+					ExportVar(package_name.c_str(), "killed_z", killed->GetZ());
+					ExportVar(package_name.c_str(), "killed_h", killed->GetHeading());
+				}
+			}
 			break;
 		}
 		case EVENT_DROP_ITEM: {
@@ -1617,22 +1630,8 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 		case EVENT_SPAWN_ZONE: {
-			Seperator sep(data);
-			ExportVar(package_name.c_str(), "spawned_entity_id", sep.arg[0]);
-			ExportVar(package_name.c_str(), "spawned_npc_id", sep.arg[1]);
-			break;
-		}
-		case EVENT_DEATH_ZONE: {
-			Seperator sep(data);
-			ExportVar(package_name.c_str(), "killer_id", sep.arg[0]);
-			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
-			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
-			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
-			ExportVar(package_name.c_str(), "killed_npc_id", sep.arg[4]);
-			ExportVar(package_name.c_str(), "killed_x", sep.arg[5]);
-			ExportVar(package_name.c_str(), "killed_y", sep.arg[6]);
-			ExportVar(package_name.c_str(), "killed_z", sep.arg[7]);
-			ExportVar(package_name.c_str(), "killed_h", sep.arg[8]);
+			ExportVar(package_name.c_str(), "spawned_entity_id", mob->GetID());
+			ExportVar(package_name.c_str(), "spawned_npc_id", mob->GetNPCTypeID());
 			break;
 		}
 		case EVENT_USE_SKILL: {

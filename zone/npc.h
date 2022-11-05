@@ -27,6 +27,7 @@
 #include "zonedump.h"
 #include "../common/loottable.h"
 
+#include <any>
 #include <deque>
 #include <list>
 
@@ -549,6 +550,9 @@ public:
 	void ReloadSpells();
 
 	static LootDropEntries_Struct NewLootDropEntry();
+
+	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
+
 protected:
 
 	const NPCType*	NPCTypedata;
