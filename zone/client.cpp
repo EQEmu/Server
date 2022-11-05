@@ -10543,23 +10543,28 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		}
 
-		if (RuleB(Spells, EnableSpellGlobals) && !SpellGlobalCheck(spell_id, CharacterID())) {
+		if (
+			RuleB(Spells, EnableSpellGlobals) &&
+			!SpellGlobalCheck(spell_id, CharacterID())
+		) {
 			scribeable = false;
-		} else if (RuleB(Spells, EnableSpellBuckets) && !SpellBucketCheck(spell_id, CharacterID())) {
+		} else if (
+			RuleB(Spells, EnableSpellBuckets) &&
+			!SpellBucketCheck(spell_id, CharacterID())
+		) {
 			scribeable = false;
 		}
 
 		if (spells[spell_id].spell_group) {
-			if (spell_group_cache.find(spells[spell_id].spell_group) != spell_group_cache.end()) {
-				for (const auto& s : spell_group_cache.find(spells[spell_id].spell_group)->second) {
+			const auto& g = spell_group_cache.find(spells[spell_id].spell_group);
+			if (g != spell_group_cache.end()) {
+				for (const auto& s : g->second) {
 					if (
-						spells[s].classes[m_pp.class_ - 1] >= min_level &&
-						spells[s].classes[m_pp.class_ - 1] <= max_level &&
-						s == spell_id
+						EQ::ValueWithin(min_level, max_level, spells[s].classes[m_pp.class_ - 1]) &&
+						s == spell_id &&
+						scribeable
 					) {
-						if (scribeable) {
-							scribeable_spells.push_back(spell_id);
-						}
+						scribeable_spells.push_back(spell_id);
 					}
 					continue;
 				}
