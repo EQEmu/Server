@@ -1875,7 +1875,7 @@ bool Zone::Depop(bool StartSpawnTimer) {
 	// clear spell cache
 	database.ClearNPCSpells();
 	database.ClearBotSpells();
-	
+
 	zone->spawn_group_list.ReloadSpawnGroups();
 
 	return true;
@@ -2978,7 +2978,11 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 		}
 		case BucketComparison::BucketGreaterThanOrEqualTo:
 		{
-			if (player_value < bucket_value) {
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) < std::stoll(bucket_value)) {
 				break;
 			}
 
@@ -2987,7 +2991,11 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 		}
 		case BucketComparison::BucketLesserThanOrEqualTo:
 		{
-			if (player_value > bucket_value) {
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) > std::stoll(bucket_value)) {
 				break;
 			}
 
@@ -2996,7 +3004,11 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 		}
 		case BucketComparison::BucketGreaterThan:
 		{
-			if (player_value <= bucket_value) {
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) <= std::stoll(bucket_value)) {
 				break;
 			}
 
@@ -3005,7 +3017,11 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 		}
 		case BucketComparison::BucketLesserThan:
 		{
-			if (player_value >= bucket_value) {
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) >= std::stoll(bucket_value)) {
 				break;
 			}
 
@@ -3020,11 +3036,8 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 				break;
 			}
 
-			for (const auto &bucket : bucket_checks) {
-				if (player_value == bucket) {
-					found = true;
-					break;
-				}
+			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
+				found = true;
 			}
 
 			if (!found) {
@@ -3041,11 +3054,8 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 				break;
 			}
 
-			for (const auto &bucket : bucket_checks) {
-				if (player_value == bucket) {
-					found = true;
-					break;
-				}
+			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
+				found = true;
 			}
 
 			if (found) {
@@ -3063,8 +3073,19 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 			}
 
 			if (
-				std::stoll(player_value) < std::stoll(bucket_checks[0]) ||
-				std::stoll(player_value) > std::stoll(bucket_checks[1])
+				!Strings::IsNumber(player_value) ||
+				!Strings::IsNumber(bucket_checks[0]) ||
+				!Strings::IsNumber(bucket_checks[1])
+			) {
+				break;
+			}
+
+			if (
+				!EQ::ValueWithin(
+					std::stoll(player_value),
+					std::stoll(bucket_checks[0]),
+					std::stoll(bucket_checks[1])
+				)
 			) {
 				break;
 			}
@@ -3080,8 +3101,19 @@ bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, st
 			}
 
 			if (
-				std::stoll(player_value) >= std::stoll(bucket_checks[0]) &&
-				std::stoll(player_value) <= std::stoll(bucket_checks[1])
+				!Strings::IsNumber(player_value) ||
+				!Strings::IsNumber(bucket_checks[0]) ||
+				!Strings::IsNumber(bucket_checks[1])
+			) {
+				break;
+			}
+
+			if (
+				EQ::ValueWithin(
+					std::stoll(player_value),
+					std::stoll(bucket_checks[0]),
+					std::stoll(bucket_checks[1])
+				)
 			) {
 				break;
 			}

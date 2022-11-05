@@ -804,8 +804,9 @@ bool BotDatabase::SaveBuffs(Bot* bot_inst)
 		return false;
 
 	for (int buff_index = 0; buff_index < BUFF_COUNT; ++buff_index) {
-		if (bot_buffs[buff_index].spellid <= 0 || bot_buffs[buff_index].spellid == SPELL_UNKNOWN)
+		if (!IsValidSpell(bot_buffs[buff_index].spellid)) {
 			continue;
+		}
 
 		query = StringFormat(
 			"INSERT INTO `bot_buffs` ("

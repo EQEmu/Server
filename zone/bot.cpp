@@ -10367,6 +10367,37 @@ bool Bot::GetBotDataBuckets()
 	return true;
 }
 
+bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison)
+{
+	if (!bucket_name.empty() && !bucket_value.empty()) {
+		auto full_name = fmt::format(
+			"{}-{}",
+			GetBucketKey(),
+			bucket_name
+		);
+
+		auto player_value = bot_data_buckets[full_name];
+		if (!player_value.empty() && GetBotOwner()) {
+			full_name = fmt::format(
+				"{}-{}",
+				GetBotOwner()->GetBucketKey(),
+				bucket_name
+			);
+
+			player_value = bot_data_buckets[full_name];
+			if (player_value.empty()) {
+				return false;
+			}
+		}
+
+		if (zone->CheckDataBucket(bucket_comparison, bucket_value, player_value)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif

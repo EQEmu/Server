@@ -308,7 +308,19 @@ public:
 	void DoEnduranceUpkeep();	//does the endurance upkeep
 
 	bool AI_AddBotSpells(uint32 iDBSpellsID);
-	void AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp, std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
+	void AddSpellToBotList(
+		int16 iPriority,
+		uint16 iSpellID,
+		uint32 iType,
+		int16 iManaCost,
+		int32 iRecastDelay,
+		int16 iResistAdjust,
+		int8 min_hp,
+		int8 max_hp,
+		std::string bucket_name,
+		std::string bucket_value,
+		uint8 bucket_comparison
+	);
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 	// AI Methods
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
@@ -351,6 +363,7 @@ public:
 
 	bool GetBotOwnerDataBuckets();
 	bool GetBotDataBuckets();
+	bool CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
 
 	// Bot Equipment & Inventory Class Methods
 	void BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database = true);
@@ -696,7 +709,7 @@ private:
 
 	BotCastingRoles m_CastingRoles;
 	std::map<std::string,std::string> bot_data_buckets;
-	
+
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 
 	std::map<uint32, BotAA> botAAs;
