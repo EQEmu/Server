@@ -2951,6 +2951,32 @@ void Zone::LoadDynamicZoneTemplates()
 	}
 }
 
+std::string Zone::GetAAName(int aa_id)
+{
+	if (!aa_id) {
+		return std::string();
+	}
+
+	int current_aa_id = 0;
+
+	const auto& r = aa_ranks.find(aa_id);
+	if (
+		r != aa_ranks.end() &&
+		r->second.get()->base_ability
+	) {
+		current_aa_id = r->second.get()->base_ability->id;
+	}
+
+	if (current_aa_id) {
+		const auto& a = aa_abilities.find(current_aa_id);
+		if (a != aa_abilities.end()) {
+			return a->second.get()->name;
+		}
+	}
+
+	return std::string();
+}
+
 bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value)
 {
 	std::vector<std::string> bucket_checks;

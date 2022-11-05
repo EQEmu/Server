@@ -2452,6 +2452,11 @@ int Perl_Mob_GetSkillDmgAmt(Mob* self, uint16 skill_id)
 	return self->GetSkillDmgAmt(skill_id);
 }
 
+Mob* Perl_Mob_GetUltimateOwner(Mob* self) // @categories Script Utility, Pet
+{
+	return self->GetUltimateOwner();
+}
+
 #ifdef BOTS
 Bot* Perl_Mob_CastToBot(Mob* self)
 {
@@ -2711,6 +2716,7 @@ void perl_register_mob()
 	package.add("GetSpellStat", (int(*)(Mob*, uint32, const char*, uint8))&Perl_Mob_GetSpellStat);
 	package.add("GetTarget", &Perl_Mob_GetTarget);
 	package.add("GetTexture", &Perl_Mob_GetTexture);
+	package.add("GetUltimateOwner", &Perl_Mob_GetUltimateOwner);
 	package.add("GetWIS", &Perl_Mob_GetWIS);
 	package.add("GetWalkspeed", &Perl_Mob_GetWalkspeed);
 	package.add("GetWaypointH", &Perl_Mob_GetWaypointH);

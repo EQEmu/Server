@@ -28,6 +28,9 @@ int command_notavail(Client *c, std::string message);
 int command_realdispatch(Client *c, std::string message);
 void command_logcommand(Client *c, std::string message);
 uint8 GetCommandStatus(Client *c, std::string command_name);
+void ListModifyNPCStatMap(Client *c);
+std::map<std::string, std::string> GetModifyNPCStatMap();
+std::string GetModifyNPCStatDescription(std::string stat);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);
@@ -79,6 +82,7 @@ void command_equipitem(Client *c, const Seperator *sep);
 void command_faction(Client *c, const Seperator *sep);
 void command_faction_association(Client *c, const Seperator *sep);
 void command_feature(Client *c, const Seperator *sep);
+void command_findaa(Client *c, const Seperator *sep);
 void command_findaliases(Client *c, const Seperator *sep);
 void command_findclass(Client *c, const Seperator *sep);
 void command_findfaction(Client *c, const Seperator *sep);

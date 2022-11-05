@@ -117,7 +117,7 @@ int command_init(void)
 		command_add("damage", "[Amount] - Damage yourself or your target", AccountStatus::GMAdmin, command_damage) ||
 		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", AccountStatus::QuestTroupe, command_databuckets) ||
 		command_add("date", "[Year] [Month] [Day] [Hour] [Minute] - Set EQ time (Hour and Minute are optional)", AccountStatus::EQSupport, command_date) ||
-		command_add("dbspawn2", "[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table", AccountStatus::GMAdmin, command_dbspawn2) ||
+		command_add("dbspawn2", "[Spawngroup ID] [Respawn] [Variance] [Condition ID] [Condition Minimum] - Spawn an NPC from a predefined row in the spawn2 table, Respawn and Variance are in Seconds (condition is optional)", AccountStatus::GMAdmin, command_dbspawn2) ||
 		command_add("delacct", "[accountname] - Delete an account", AccountStatus::GMLeadAdmin, command_delacct) ||
 		command_add("delpetition", "[petition number] - Delete a petition", AccountStatus::ApprenticeGuide, command_delpetition) ||
 		command_add("depop", "Depop your NPC target", AccountStatus::Guide, command_depop) ||
@@ -133,7 +133,7 @@ int command_init(void)
 		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", AccountStatus::Player, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", AccountStatus::GMAdmin, command_editmassrespawn) ||
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", AccountStatus::QuestTroupe, command_emote) ||
-		command_add("emotesearch", "Searches NPC Emotes", AccountStatus::QuestTroupe, command_emotesearch) ||
+		command_add("emotesearch", "[Search Criteria] - Search for NPC Emotes", AccountStatus::QuestTroupe, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", AccountStatus::QuestTroupe, command_emoteview) ||
 		command_add("emptyinventory", "Clears your or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", AccountStatus::GMImpossible, command_emptyinventory) ||
 		command_add("enablerecipe",  "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
@@ -142,6 +142,7 @@ int command_init(void)
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
 		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
 		command_add("feature", "Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
+		command_add("findaa", "[Search Criteria] - Search for an AA", AccountStatus::Guide, command_findaa) ||
 		command_add("findaliases", "[Search Criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
 		command_add("findclass", "[Search Criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
 		command_add("findfaction", "[Search Criteria] - Search for a faction", AccountStatus::Guide, command_findfaction) ||
@@ -213,7 +214,7 @@ int command_init(void)
 		command_add("memspell", "[Spell ID] [Spell Gem] - Memorize a Spell by ID to the specified Spell Gem for you or your target", AccountStatus::Guide, command_memspell) ||
 		command_add("merchant_close_shop",  "Closes a merchant shop", AccountStatus::GMAdmin, command_merchantcloseshop) ||
 		command_add("merchant_open_shop",  "Opens a merchants shop", AccountStatus::GMAdmin, command_merchantopenshop) ||
-		command_add("modifynpcstat", "Modifies an NPC's stats", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
+		command_add("modifynpcstat", "[Stat] [Value] - Modifies an NPC's stats temporarily.", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
 		command_add("motd", "[Message of the Day] - Set Message of the Day (leave empty to have no Message of the Day)", AccountStatus::GMLeadAdmin, command_motd) ||
 		command_add("movechar", "[Character ID|Character Name] [Zone ID|Zone Short Name] - Move an offline character to the specified zone", AccountStatus::Guide, command_movechar) ||
 		command_add("movement", "Various movement commands", AccountStatus::GMMgmt, command_movement) ||
@@ -980,6 +981,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/equipitem.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
+#include "gm_commands/findaa.cpp"
 #include "gm_commands/findclass.cpp"
 #include "gm_commands/findfaction.cpp"
 #include "gm_commands/findnpctype.cpp"

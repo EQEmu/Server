@@ -145,7 +145,11 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_alt_currency_merchant_buy",
 	"event_alt_currency_merchant_sell",
 	"event_merchant_buy",
-	"event_merchant_sell"
+	"event_merchant_sell",
+	"event_inspect",
+	"event_task_before_update",
+	"event_aa_buy",
+	"event_aa_gain"
 };
 
 extern Zone *zone;
@@ -190,12 +194,14 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_TIMER] = handle_npc_timer;
 	NPCArgumentDispatch[EVENT_DEATH] = handle_npc_death;
 	NPCArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_ZONE] = handle_npc_death;
 	NPCArgumentDispatch[EVENT_CAST] = handle_npc_cast;
 	NPCArgumentDispatch[EVENT_CAST_BEGIN] = handle_npc_cast;
 	NPCArgumentDispatch[EVENT_FEIGN_DEATH] = handle_npc_single_client;
 	NPCArgumentDispatch[EVENT_ENTER_AREA] = handle_npc_area;
 	NPCArgumentDispatch[EVENT_LEAVE_AREA] = handle_npc_area;
 	NPCArgumentDispatch[EVENT_LOOT_ZONE] = handle_npc_loot_zone;
+	NPCArgumentDispatch[EVENT_SPAWN_ZONE] = handle_npc_spawn_zone;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
@@ -221,6 +227,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_TASK_STAGE_COMPLETE] = handle_player_task_stage_complete;
 	PlayerArgumentDispatch[EVENT_TASK_COMPLETE] = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_TASK_UPDATE] = handle_player_task_update;
+	PlayerArgumentDispatch[EVENT_TASK_BEFORE_UPDATE] = handle_player_task_update;
 	PlayerArgumentDispatch[EVENT_COMMAND] = handle_player_command;
 	PlayerArgumentDispatch[EVENT_COMBINE_SUCCESS] = handle_player_combine;
 	PlayerArgumentDispatch[EVENT_COMBINE_FAILURE] = handle_player_combine;
@@ -245,6 +252,9 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_SELL] = handle_player_alt_currency_merchant;
 	PlayerArgumentDispatch[EVENT_MERCHANT_BUY] = handle_player_merchant;
 	PlayerArgumentDispatch[EVENT_MERCHANT_SELL] = handle_player_merchant;
+	PlayerArgumentDispatch[EVENT_INSPECT] = handle_player_inspect;
+	PlayerArgumentDispatch[EVENT_AA_BUY] = handle_player_aa_buy;
+	PlayerArgumentDispatch[EVENT_AA_GAIN] = handle_player_aa_gain;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

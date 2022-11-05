@@ -43,6 +43,8 @@ void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 						  std::vector<std::any> *extra_pointers);
 void handle_npc_loot_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<std::any> *extra_pointers);
+void handle_npc_spawn_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						  std::vector<std::any> *extra_pointers);
 
 //Player
 void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
@@ -122,6 +124,12 @@ void handle_player_language_skill_up(QuestInterface* parse, lua_State* L, Client
 void handle_player_alt_currency_merchant(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 	std::vector<std::any>* extra_pointers);
 void handle_player_merchant(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<std::any>* extra_pointers);
+void handle_player_inspect(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<std::any> *extra_pointers);
+void handle_player_aa_buy(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+	std::vector<std::any>* extra_pointers);
+void handle_player_aa_gain(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 	std::vector<std::any>* extra_pointers);
 
 //Item

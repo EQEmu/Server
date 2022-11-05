@@ -522,10 +522,10 @@ bool ClientTaskState::CanUpdate(Client* client, const TaskUpdateFilter& filter, 
 	}
 
 	// npc filter supports both npc names and ids in match lists
-	if (!activity.npc_match_list.empty() && (!filter.npc ||
-	    (!Tasks::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetName()) &&
-	     !Tasks::IsInMatchListPartial(activity.npc_match_list, filter.npc->GetCleanName()) &&
-	     !Tasks::IsInMatchList(activity.npc_match_list, std::to_string(filter.npc->GetNPCTypeID())))))
+	if (!activity.npc_match_list.empty() && (!filter.mob ||
+	    (!Tasks::IsInMatchListPartial(activity.npc_match_list, filter.mob->GetName()) &&
+	     !Tasks::IsInMatchListPartial(activity.npc_match_list, filter.mob->GetCleanName()) &&
+	     !Tasks::IsInMatchList(activity.npc_match_list, std::to_string(filter.mob->GetNPCTypeID())))))
 	{
 		LogTasks("[CanUpdate] client [{}] task [{}]-[{}] failed npc match filter", client->GetName(), task_id, client_activity.activity_id);
 		return false;
@@ -564,6 +564,15 @@ int ClientTaskState::UpdateTasks(Client* client, const TaskUpdateFilter& filter,
 
 			if (CanUpdate(client, filter, client_task.task_id, activity, client_activity))
 			{
+				auto args = fmt::format("{} {} {}", count, client_activity.activity_id, client_task.task_id);
+				if (parse->EventPlayer(EVENT_TASK_BEFORE_UPDATE, client, args, 0) != 0)
+				{
+					LogTasks("[UpdateTasks] client [{}] task [{}]-[{}] update prevented by quest",
+						client->GetName(), client_task.task_id, client_activity.activity_id);
+
+					continue;
+				}
+
 				LogTasks("[UpdateTasks] client [{}] task [{}] activity [{}] increment [{}]",
 					client->GetName(), client_task.task_id, client_activity.activity_id, count);
 
@@ -631,7 +640,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client* client, TaskActivityType type, NP
 {
 	TaskUpdateFilter filter{};
 	filter.type = type;
-	filter.npc = npc;
+	filter.mob = npc;
 
 	return UpdateTasks(client, filter) > 0;
 }
@@ -642,7 +651,7 @@ int ClientTaskState::ActiveSpeakTask(Client* client, NPC* npc)
 	// active task found which has an active SpeakWith activity_information for this NPC.
 	TaskUpdateFilter filter{};
 	filter.type = TaskActivityType::SpeakWith;
-	filter.npc = npc;
+	filter.mob = npc;
 	filter.method = METHODQUEST;
 
 	auto result = FindTask(client, filter);
@@ -661,7 +670,7 @@ int ClientTaskState::ActiveSpeakActivity(Client* client, NPC* npc, int task_id)
 
 	TaskUpdateFilter filter{};
 	filter.type = TaskActivityType::SpeakWith;
-	filter.npc = npc;
+	filter.mob = npc;
 	filter.method = METHODQUEST;
 	filter.task_id = task_id;
 
@@ -669,19 +678,30 @@ int ClientTaskState::ActiveSpeakActivity(Client* client, NPC* npc, int task_id)
 	return result.first != 0 ? result.second : -1; // activity id
 }
 
-void ClientTaskState::UpdateTasksForItem(Client* client, TaskActivityType type, NPC* npc, int item_id, int count)
+void ClientTaskState::UpdateTasksForItem(Client* client, TaskActivityType type, int item_id, int count)
 {
 
 	// This method updates the client's task activities of the specified type which relate
 	// to the specified item.
 	//
-	// Type should be one of ActivityLoot, ActivityTradeSkill, ActivityFish or ActivityForage
+	// Type should be one of ActivityTradeSkill, ActivityFish or ActivityForage
 
-	LogTasks("[UpdateTasksForItem] activity_type [{}] item_id [{}]", static_cast<int>(type), item_id);
+	LogTasks("[UpdateTasksForItem] activity_type [{}] item_id [{}] count [{}]", static_cast<int>(type), item_id, count);
 
 	TaskUpdateFilter filter{};
 	filter.type = type;
-	filter.npc = npc; // looting may filter on npc id or name
+	filter.item_id = item_id;
+
+	UpdateTasks(client, filter, count);
+}
+
+void ClientTaskState::UpdateTasksOnLoot(Client* client, Corpse* corpse, int item_id, int count)
+{
+	LogTasks("[UpdateTasksOnLoot] corpse [{}] item_id [{}] count [{}]", corpse->GetName(), item_id, count);
+
+	TaskUpdateFilter filter{};
+	filter.type = TaskActivityType::Loot;
+	filter.mob = corpse;
 	filter.item_id = item_id;
 
 	UpdateTasks(client, filter, count);
@@ -706,7 +726,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client* client, std::vector<EQ::ItemI
 	bool is_updated = false;
 
 	TaskUpdateFilter filter{};
-	filter.npc = npc;
+	filter.mob = npc;
 
 	int cash = trade.cp + (trade.sp * 10) + (trade.gp * 100) + (trade.pp * 1000);
 	if (cash != 0)
@@ -763,7 +783,7 @@ void ClientTaskState::UpdateTasksOnKill(Client* client, Client* exp_client, NPC*
 {
 	TaskUpdateFilter filter{};
 	filter.type = TaskActivityType::Kill;
-	filter.npc = npc;
+	filter.mob = npc;
 	filter.pos = npc->GetPosition(); // or should areas be filtered by client position?
 	filter.use_pos = true;
 	filter.exp_client = exp_client;
@@ -908,7 +928,7 @@ int ClientTaskState::IncrementDoneCount(
 				AddReplayTimer(client, *info, *task_data);
 			}
 
-			DispatchEventTaskComplete(client, *info, activity_id);
+			int event_res = DispatchEventTaskComplete(client, *info, activity_id);
 
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
@@ -925,7 +945,11 @@ int ClientTaskState::IncrementDoneCount(
 			client->SendTaskActivityComplete(info->task_id, 0, task_index, task_data->type, 0);
 
 			// If Experience and/or cash rewards are set, reward them from the task even if reward_method is METHODQUEST
-			RewardTask(client, task_data, *info);
+			// do not reward client if EVENT_TASK_COMPLETE returns non-zero
+			if (event_res == 0)
+			{
+				RewardTask(client, task_data, *info);
+			}
 			//RemoveTask(c, TaskIndex);
 
 			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
@@ -951,7 +975,7 @@ int ClientTaskState::IncrementDoneCount(
 	return count;
 }
 
-void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
+int ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInformation& info, int activity_id)
 {
 	std::string export_string = fmt::format(
 		"{} {} {}",
@@ -959,7 +983,7 @@ void ClientTaskState::DispatchEventTaskComplete(Client* client, ClientTaskInform
 		info.activity[activity_id].activity_id,
 		info.task_id
 	);
-	parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
+	return parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
 }
 
 void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTaskInformation& client_task)

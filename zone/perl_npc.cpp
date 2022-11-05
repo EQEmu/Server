@@ -449,14 +449,14 @@ void Perl_NPC_SetSwarmTarget(NPC* self, int target_id) // @categories Pet
 	self->SetSwarmTarget(target_id);
 }
 
-void Perl_NPC_ModifyNPCStat(NPC* self, const char* stat, const char* value) // @categories Stats and Attributes
+void Perl_NPC_ModifyNPCStat(NPC* self, std::string stat, std::string value) // @categories Stats and Attributes
 {
 	self->ModifyNPCStat(stat, value);
 }
 
-float Perl_NPC_GetNPCStat(NPC* self, const char* identifier) // @categories Stats and Attributes
+float Perl_NPC_GetNPCStat(NPC* self, std::string stat) // @categories Stats and Attributes
 {
-	return self->GetNPCStat(identifier);
+	return self->GetNPCStat(stat);
 }
 
 void Perl_NPC_AddSpellToNPCList(NPC* self, int16 priority, uint16_t spell_id, uint32 type, int mana_cost, int recast_delay, int16 resist_adjust) // @categories Spells and Disciplines, Script Utility
