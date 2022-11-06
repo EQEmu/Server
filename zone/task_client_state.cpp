@@ -755,12 +755,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client* client, std::vector<EQ::ItemI
 		int updated_count = UpdateTasks(client, filter, count);
 		if (updated_count > 0)
 		{
-			// remove items used in updates
-			item->SetCharges(count - updated_count);
-			if (count == updated_count)
-			{
-				item = nullptr; // all items in trade slot consumed
-			}
+			item->SetTaskDeliveredCount(updated_count);
 			is_updated = true;
 		}
 	}
