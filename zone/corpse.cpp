@@ -908,6 +908,33 @@ bool Corpse::Process() {
 	return true;
 }
 
+void Corpse::ResetDecayTimer()
+{
+	int decay_ms = level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS) : RuleI(NPC, MinorNPCCorpseDecayTimeMS);
+
+	if (IsPlayerCorpse())
+	{
+		decay_ms = RuleI(Character, CorpseDecayTimeMS);
+	}
+	else if (IsEmpty())
+	{
+		decay_ms = RuleI(NPC, EmptyNPCCorpseDecayTimeMS) + 1000;
+	}
+	else
+	{
+		for (const npcDecayTimes_Struct& decay_time : npcCorpseDecayTimes)
+		{
+			if (level >= decay_time.minlvl && level <= decay_time.maxlvl)
+			{
+				decay_ms = decay_time.seconds * 1000;
+				break;
+			}
+		}
+	}
+
+	corpse_decay_timer.SetTimer(decay_ms);
+}
+
 void Corpse::SetDecayTimer(uint32 decaytime) {
 	if (decaytime == 0)
 		corpse_decay_timer.Trigger();
