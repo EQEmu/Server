@@ -2188,7 +2188,6 @@ void Bot::AI_Bot_Start(uint32 iMoveDelay) {
 	}
 
 	if (NPCTypedata) {
-		AI_AddBotSpells(NPCTypedata->npc_spells_id);
 		ProcessSpecialAbilities(NPCTypedata->special_abilities);
 		AI_AddNPCSpellsEffects(NPCTypedata->npc_spells_effects_id);
 	}
@@ -9235,9 +9234,9 @@ void Bot::CalcBotStats(bool showtext) {
 
 	CalcBonuses();
 
-	AI_AddBotSpells(GetBotSpellID());
 	GetBotOwnerDataBuckets();
 	GetBotDataBuckets();
+	AI_AddBotSpells(GetBotSpellID());
 
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());
@@ -10377,7 +10376,7 @@ bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uin
 		);
 
 		auto player_value = bot_data_buckets[full_name];
-		if (!player_value.empty() && GetBotOwner()) {
+		if (player_value.empty() && GetBotOwner()) {
 			full_name = fmt::format(
 				"{}-{}",
 				GetBotOwner()->GetBucketKey(),

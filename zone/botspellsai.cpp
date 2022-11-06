@@ -2840,14 +2840,15 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 		_idle_beneficial_chance = parentlist->idle_beneficial_chance;
 		for (auto &e : parentlist->entries) {
 			if (
-				EQ::ValueWithin(e.minlevel, e.maxlevel, GetLevel()) &&
+				EQ::ValueWithin(GetLevel(), e.minlevel, e.maxlevel) &&
 				e.spellid &&
 				!IsSpellInBotList(spell_list, e.spellid)
 			) {
-				if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
-					continue;
+				if(!e.bucket_name.empty() && !e.bucket_value.empty()) {
+					if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
+						continue;
+					}
 				}
-
 				AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
 			}
 		}
@@ -2898,15 +2899,12 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	}
 
 	for (auto &e : spell_list->entries) {
-		if (
-			EQ::ValueWithin(e.minlevel, e.maxlevel, GetLevel()) &&
-			e.spellid &&
-			!IsSpellInBotList(spell_list, e.spellid)
-		) {
-			if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
-				continue;
+		if (EQ::ValueWithin(GetLevel(), e.minlevel, e.maxlevel) && e.spellid) {
+			if(!e.bucket_name.empty() && !e.bucket_value.empty()) {
+				if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
+					continue;
+				}
 			}
-
 			AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
 		}
 	}
