@@ -150,3 +150,8 @@ SharedTaskMember SharedTask::GetLeader() const
 	}
 	return {};
 }
+
+bool SharedTask::IsExpired() const
+{
+	return m_db_shared_task.expire_time > 0 && m_db_shared_task.expire_time < std::time(nullptr);
+}

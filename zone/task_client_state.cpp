@@ -1122,15 +1122,11 @@ void ClientTaskState::FailTask(Client *client, int task_id)
 		return;
 	}
 
-	// type: Shared Task
+	// type: Shared Task (failed via world for all members)
 	if (m_active_shared_task.task_id == task_id) {
-		client->SendTaskFailed(task_id, TASKSLOTSHAREDTASK, TaskType::Shared);
-		// Remove the task from the client
-		client->CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
+		task_manager->EndSharedTask(*client, task_id, true);
 		return;
 	}
-
-	// TODO: shared tasks
 
 	if (m_active_task_count == 0) {
 		return;
@@ -1146,7 +1142,6 @@ void ClientTaskState::FailTask(Client *client, int task_id)
 	}
 }
 
-// TODO: Shared tasks
 bool ClientTaskState::IsTaskActivityActive(int task_id, int activity_id)
 {
 	LogTasks("[IsTaskActivityActive] task_id [{}] activity_id [{}]", task_id, activity_id);
@@ -1566,6 +1561,7 @@ bool ClientTaskState::TaskOutOfTime(TaskType task_type, int index)
 
 void ClientTaskState::TaskPeriodicChecks(Client *client)
 {
+	// shared task expiration is handled by world
 
 	// type "task"
 	if (m_active_task.task_id != TASKSLOTEMPTY) {
@@ -1574,20 +1570,6 @@ void ClientTaskState::TaskPeriodicChecks(Client *client)
 			client->SendTaskFailed(m_active_task.task_id, TASKSLOTTASK, TaskType::Task);
 			// Remove the task from the client
 			client->CancelTask(TASKSLOTTASK, TaskType::Task);
-			// It is a conscious decision to only fail one task per call to this method,
-			// otherwise the player will not see all the failed messages where multiple
-			// tasks fail at the same time.
-			return;
-		}
-	}
-
-	// type "shared"
-	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
-		if (TaskOutOfTime(TaskType::Shared, TASKSLOTSHAREDTASK)) {
-			// Send Red Task Failed Message
-			client->SendTaskFailed(m_active_shared_task.task_id, TASKSLOTSHAREDTASK, TaskType::Shared);
-			// Remove the task from the client
-			client->CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
 			// It is a conscious decision to only fail one task per call to this method,
 			// otherwise the player will not see all the failed messages where multiple
 			// tasks fail at the same time.
@@ -2434,6 +2416,13 @@ void ClientTaskState::LockSharedTask(Client* client, bool lock)
 	}
 }
 
+void ClientTaskState::EndSharedTask(Client* client, bool send_fail)
+{
+	if (task_manager && m_active_shared_task.task_id != TASKSLOTEMPTY)
+	{
+		task_manager->EndSharedTask(*client, m_active_shared_task.task_id, send_fail);
+	}
+}
 bool ClientTaskState::CanAcceptNewTask(Client* client, int task_id, int npc_entity_id) const
 {
 	auto it = std::find_if(m_last_offers.begin(), m_last_offers.end(),

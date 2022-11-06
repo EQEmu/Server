@@ -2904,7 +2904,7 @@ std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, uint32 spellTy
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2941,7 +2941,7 @@ MercSpell Merc::GetFirstMercSpellBySpellType(Merc* caster, uint32 spellType) {
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2979,7 +2979,7 @@ MercSpell Merc::GetMercSpellBySpellID(Merc* caster, uint16 spellid) {
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -3009,7 +3009,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffect(Merc* caster, int spellEf
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -3039,7 +3039,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffectAndTargetType(Merc* caster
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
