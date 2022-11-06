@@ -855,7 +855,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				continue;
 			}
 
-			if (!CheckMerchantDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
+			if (!zone->CheckDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
 				continue;
 			}
 		}

@@ -1633,7 +1633,6 @@ public:
 	Timer m_list_task_timers_rate_limit = {};
 
 	std::map<std::string,std::string> GetMerchantDataBuckets();
-	bool CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value);
 
 protected:
 	friend class Mob;

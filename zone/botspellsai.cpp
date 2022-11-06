@@ -19,6 +19,7 @@
 #ifdef BOTS
 
 #include "bot.h"
+#include "../common/data_verification.h"
 #include "../common/strings.h"
 
 #if EQDEBUG >= 12
@@ -1108,7 +1109,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 		casting_spell_AIindex = i;
 		LogAIDetail("Bot::AIDoSpellCast: spellid = [{}], tar = [{}], mana = [{}], Name: [{}]", AIBot_spells[i].spellid, tar->GetName(), mana_cost, spells[AIBot_spells[i].spellid].name);
 		result = Mob::CastSpell(AIBot_spells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, spells[AIBot_spells[i].spellid].cast_time, AIBot_spells[i].manacost == -2 ? 0 : mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIBot_spells[i].resist_adjust));
-	
+
 		if(IsCasting() && IsSitting())
 			Stand();
 	}
@@ -1604,17 +1605,22 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect) {
 	std::list<BotSpell> result;
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	auto bot_owner = botCaster->GetBotOwner();
+	if (!bot_owner) {
+		return result;
+	}
+
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
 			}
 
-			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
+			if (IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
 				botSpell.SpellIndex = i;
@@ -1631,18 +1637,23 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffect(Bot* botCaster, int spellEff
 std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType) {
 	std::list<BotSpell> result;
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	auto bot_owner = botCaster->GetBotOwner();
+	if (!bot_owner) {
+		return result;
+	}
+
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
 			}
 
-			if(IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
-				if(spells[botSpellList[i].spellid].target_type == targetType) {
+			if (IsEffectInSpell(botSpellList[i].spellid, spellEffect)) {
+				if (spells[botSpellList[i].spellid].target_type == targetType) {
 					BotSpell botSpell;
 					botSpell.SpellId = botSpellList[i].spellid;
 					botSpell.SpellIndex = i;
@@ -1660,17 +1671,22 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType) {
 	std::list<BotSpell> result;
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	auto bot_owner = botCaster->GetBotOwner();
+	if (!bot_owner) {
+		return result;
+	}
+
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
 			}
 
-			if(botSpellList[i].type & spellType) {
+			if (botSpellList[i].type & spellType) {
 				BotSpell botSpell;
 				botSpell.SpellId = botSpellList[i].spellid;
 				botSpell.SpellIndex = i;
@@ -1691,7 +1707,7 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -1708,8 +1724,13 @@ std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCa
 			}
 		}
 
-		if (result.size() > 1)
-			result.sort([](BotSpell_wPriority& l, BotSpell_wPriority& r) { return l.Priority < r.Priority; });
+		if (result.size() > 1) {
+			result.sort(
+				[](BotSpell_wPriority& l, BotSpell_wPriority& r) {
+					return l.Priority < r.Priority;
+				}
+			);
+		}
 	}
 
 	return result;
@@ -1722,17 +1743,17 @@ BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
 			}
 
-			if((botSpellList[i].type & spellType) && CheckSpellRecastTimers(botCaster, i)) {
+			if ((botSpellList[i].type & spellType) && CheckSpellRecastTimers(botCaster, i)) {
 				result.SpellId = botSpellList[i].spellid;
 				result.SpellIndex = i;
 				result.ManaCost = botSpellList[i].manacost;
@@ -1752,12 +1773,12 @@ BotSpell Bot::GetBestBotSpellForFastHeal(Bot *botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsFastHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (IsFastHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
@@ -1777,22 +1798,25 @@ BotSpell Bot::GetBestBotSpellForHealOverTime(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botHoTSpellList = GetBotSpellsForSpellEffect(botCaster, SE_HealOverTime);
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsHealOverTimeSpell(botSpellListItr->SpellId)) {
-
+			if (IsHealOverTimeSpell(botSpellListItr->SpellId)) {
 				for (int i = botSpellList.size() - 1; i >= 0; i--) {
-					if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+					if (!IsValidSpell(botSpellList[i].spellid)) {
 						// this is both to quit early to save cpu and to avoid casting bad spells
 						// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 						continue;
 					}
 
-					if(botSpellList[i].spellid == botSpellListItr->SpellId && (botSpellList[i].type & SpellType_Heal) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+					if (
+						botSpellList[i].spellid == botSpellListItr->SpellId &&
+						(botSpellList[i].type & SpellType_Heal) &&
+						CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+					) {
 						result.SpellId = botSpellListItr->SpellId;
 						result.SpellIndex = botSpellListItr->SpellIndex;
 						result.ManaCost = botSpellListItr->ManaCost;
@@ -1814,21 +1838,20 @@ BotSpell Bot::GetBestBotSpellForPercentageHeal(Bot *botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
 			}
 
-			if(IsCompleteHealSpell(botSpellList[i].spellid) && CheckSpellRecastTimers(botCaster, i)) {
+			if (IsCompleteHealSpell(botSpellList[i].spellid) && CheckSpellRecastTimers(botCaster, i)) {
 				result.SpellId = botSpellList[i].spellid;
 				result.SpellIndex = i;
 				result.ManaCost = botSpellList[i].manacost;
-
 				break;
 			}
 		}
@@ -1844,16 +1867,15 @@ BotSpell Bot::GetBestBotSpellForRegularSingleTargetHeal(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
-
 				break;
 			}
 		}
@@ -1869,16 +1891,21 @@ BotSpell Bot::GetFirstBotSpellForSingleTargetHeal(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if((IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) || IsFastHealSpell(botSpellListItr->SpellId)) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (
+				(
+					IsRegularSingleTargetHealSpell(botSpellListItr->SpellId) ||
+					IsFastHealSpell(botSpellListItr->SpellId)
+				) &&
+				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
-
 				break;
 			}
 		}
@@ -1894,16 +1921,18 @@ BotSpell Bot::GetBestBotSpellForGroupHeal(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CurrentHP);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsRegularGroupHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (
+				IsRegularGroupHealSpell(botSpellListItr->SpellId) &&
+				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
-
 				break;
 			}
 		}
@@ -1919,22 +1948,26 @@ BotSpell Bot::GetBestBotSpellForGroupHealOverTime(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botHoTSpellList = GetBotSpellsForSpellEffect(botCaster, SE_HealOverTime);
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botHoTSpellList.begin(); botSpellListItr != botHoTSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsGroupHealOverTimeSpell(botSpellListItr->SpellId)) {
+			if (IsGroupHealOverTimeSpell(botSpellListItr->SpellId)) {
 
 				for (int i = botSpellList.size() - 1; i >= 0; i--) {
-					if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+					if (!IsValidSpell(botSpellList[i].spellid)) {
 						// this is both to quit early to save cpu and to avoid casting bad spells
 						// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 						continue;
 					}
 
-					if(botSpellList[i].spellid == botSpellListItr->SpellId && (botSpellList[i].type & SpellType_Heal) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+					if (
+						botSpellList[i].spellid == botSpellListItr->SpellId &&
+						(botSpellList[i].type & SpellType_Heal) &&
+						CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+					) {
 						result.SpellId = botSpellListItr->SpellId;
 						result.SpellIndex = botSpellListItr->SpellIndex;
 						result.ManaCost = botSpellListItr->ManaCost;
@@ -1956,16 +1989,18 @@ BotSpell Bot::GetBestBotSpellForGroupCompleteHeal(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_CompleteHeal);
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsGroupCompleteHealSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if(
+				IsGroupCompleteHealSpell(botSpellListItr->SpellId) &&
+				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
-
 				break;
 			}
 		}
@@ -1981,12 +2016,15 @@ BotSpell Bot::GetBestBotSpellForMez(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_Mez);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsMezSpell(botSpellListItr->SpellId) && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (
+				IsMezSpell(botSpellListItr->SpellId) &&
+				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
@@ -2006,16 +2044,19 @@ BotSpell Bot::GetBestBotSpellForMagicBasedSlow(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_AttackSpeed);
 
 		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if (IsSlowSpell(botSpellListItr->SpellId) && spells[botSpellListItr->SpellId].resist_type == RESIST_MAGIC && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (
+				IsSlowSpell(botSpellListItr->SpellId) &&
+				spells[botSpellListItr->SpellId].resist_type == RESIST_MAGIC &&
+				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
-
 				break;
 			}
 		}
@@ -2031,12 +2072,16 @@ BotSpell Bot::GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_AttackSpeed);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsSlowSpell(botSpellListItr->SpellId) && spells[botSpellListItr->SpellId].resist_type == RESIST_DISEASE && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (
+				IsSlowSpell(botSpellListItr->SpellId) &&
+				spells[botSpellListItr->SpellId].resist_type == RESIST_DISEASE &&
+				CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)
+			) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
@@ -2052,7 +2097,7 @@ BotSpell Bot::GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster) {
 Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell) {
 	Mob* result = 0;
 
-	if(botCaster && IsMezSpell(botSpell.SpellId)) {
+	if (botCaster && IsMezSpell(botSpell.SpellId)) {
 
 		std::list<NPC*> npc_list;
 		entity_list.GetNPCList(npc_list);
@@ -2060,14 +2105,16 @@ Mob* Bot::GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell) {
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
 
-			if(DistanceSquaredNoZ(npc->GetPosition(), botCaster->GetPosition()) <= botCaster->GetActSpellRange(botSpell.SpellId, spells[botSpell.SpellId].range)) {
-				if(!npc->IsMezzed()) {
-					if(botCaster->HasGroup()) {
+			if (DistanceSquaredNoZ(npc->GetPosition(), botCaster->GetPosition()) <= botCaster->GetActSpellRange(botSpell.SpellId, spells[botSpell.SpellId].range)) {
+				if (!npc->IsMezzed()) {
+					if (botCaster->HasGroup()) {
 						Group* g = botCaster->GetGroup();
 
-						if(g) {
-							for(int counter = 0; counter < g->GroupCount(); counter++) {
-								if(npc->IsOnHatelist(g->members[counter]) && g->members[counter]->GetTarget() != npc && g->members[counter]->IsEngaged()) {
+						if (g) {
+							for (int counter = 0; counter < g->GroupCount(); counter++) {
+								if (
+									npc->IsOnHatelist(g->members[counter]) &&
+									g->members[counter]->GetTarget() != npc && g->members[counter]->IsEngaged()) {
 									result = npc;
 									break;
 								}
@@ -2092,7 +2139,7 @@ BotSpell Bot::GetBestBotMagicianPetSpell(Bot *botCaster) {
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_SummonPet);
 
 		std::string petType = GetBotMagicianPetType(botCaster);
@@ -2117,7 +2164,7 @@ BotSpell Bot::GetBestBotMagicianPetSpell(Bot *botCaster) {
 std::string Bot::GetBotMagicianPetType(Bot* botCaster) {
 	std::string result;
 
-	if(botCaster) {
+	if (botCaster) {
 		if(botCaster->IsPetChooser()) {
 			switch(botCaster->GetPetChooserID()) {
 				case 0:
@@ -2203,7 +2250,7 @@ BotSpell Bot::GetBestBotSpellForNukeByTargetType(Bot* botCaster, SpellTargetType
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster) {
+	if (botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffectAndTargetType(botCaster, SE_CurrentHP, targetType);
 
 		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
@@ -2229,7 +2276,7 @@ BotSpell Bot::GetBestBotSpellForStunByTargetType(Bot* botCaster, SpellTargetType
 	result.SpellIndex = 0;
 	result.ManaCost = 0;
 
-	if(botCaster)
+	if (botCaster)
 	{
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffectAndTargetType(botCaster, SE_Stun, targetType);
 
@@ -2331,11 +2378,11 @@ BotSpell Bot::GetDebuffBotSpell(Bot* botCaster, Mob *tar) {
 	if(!tar || !botCaster)
 		return result;
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2378,11 +2425,11 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 	bool needsPoisonResistDebuff = (tar->GetPR() + level_mod) > 100 ? true: false;
 	bool needsDiseaseResistDebuff = (tar->GetDR() + level_mod) > 100 ? true: false;
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::vector<BotSpells_Struct> botSpellList = botCaster->AIBot_spells;
 
 		for (int i = botSpellList.size() - 1; i >= 0; i--) {
-			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(botSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2426,7 +2473,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 	bool isCursed = tar->FindType(SE_CurseCounter);
 	bool isCorrupted = tar->FindType(SE_CorruptionCounter);
 
-	if(botCaster && botCaster->AI_HasSpells()) {
+	if (botCaster && botCaster->AI_HasSpells()) {
 		std::list<BotSpell_wPriority> cureList = GetPrioritizedBotSpellsBySpellType(botCaster, SpellType_Cure);
 
 		if(tar->HasGroup()) {
@@ -2690,43 +2737,67 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
 	npc_spells_id = iDBSpellsID;
 	AIBot_spells.clear();
-	if (iDBSpellsID == 0) {
+	if (!iDBSpellsID) {
 		AIautocastspell_timer->Disable();
 		return false;
 	}
-	DBbotspells_Struct* spell_list = content_db.GetBotSpells(iDBSpellsID);
+
+	auto* spell_list = content_db.GetBotSpells(iDBSpellsID);
 	if (!spell_list) {
 		AIautocastspell_timer->Disable();
 		return false;
 	}
-	DBbotspells_Struct* parentlist = content_db.GetBotSpells(spell_list->parent_list);
 
-	std::string debug_msg = StringFormat("Loading NPCSpells onto %s: dbspellsid=%u, level=%u", GetName(), iDBSpellsID, GetLevel());
+	auto* parentlist = content_db.GetBotSpells(spell_list->parent_list);
+
+	auto debug_msg = fmt::format(
+		"Loading NPCSpells onto {}: dbspellsid={}, level={}",
+		GetName(),
+		iDBSpellsID,
+		GetLevel()
+	);
+
 	if (spell_list) {
-		debug_msg.append(StringFormat(" (found, %u), parentlist=%u", spell_list->entries.size(), spell_list->parent_list));
+		debug_msg.append(
+			fmt::format(
+				" (found, {}), parentlist={}",
+				spell_list->entries.size(),
+				spell_list->parent_list
+			)
+		);
+
 		if (spell_list->parent_list) {
-			if (parentlist)
-				debug_msg.append(StringFormat(" (found, %u)", parentlist->entries.size()));
-			else
+			if (parentlist) {
+				debug_msg.append(
+					fmt::format(
+						" (found, {})",
+						parentlist->entries.size()
+					)
+				);
+			} else {
 				debug_msg.append(" (not found)");
+			}
 		}
-	}
-	else {
+	} else {
 		debug_msg.append(" (not found)");
 	}
-	LogAIDetail("[{}]", debug_msg.c_str());
+
+	LogAIDetail("[{}]", debug_msg);
 
 	if (parentlist) {
 		for (const auto &iter : parentlist->entries) {
 			LogAI("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
+
 	LogAIModerate("fin (parent list)");
+
 	if (spell_list) {
 		for (const auto &iter : spell_list->entries) {
 			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
 		}
 	}
+
 	LogAIModerate("fin (spell list)");
 
 	uint16 attack_proc_spell = -1;
@@ -2768,14 +2839,21 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 		_idle_no_sp_recast_max = parentlist->idle_no_sp_recast_max;
 		_idle_beneficial_chance = parentlist->idle_beneficial_chance;
 		for (auto &e : parentlist->entries) {
-			if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
-				if (!IsSpellInBotList(spell_list, e.spellid))
-				{
-					AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
+			if (
+				EQ::ValueWithin(GetLevel(), e.minlevel, e.maxlevel) &&
+				e.spellid &&
+				!IsSpellInBotList(spell_list, e.spellid)
+			) {
+				if (!e.bucket_name.empty() && !e.bucket_value.empty()) {
+					if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
+						continue;
+					}
 				}
+				AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
 			}
 		}
 	}
+
 	if (spell_list->attack_proc >= 0) {
 		attack_proc_spell = spell_list->attack_proc;
 		proc_chance = spell_list->proc_chance;
@@ -2792,10 +2870,20 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	}
 
 	//If any casting variables are defined in the current list, ignore those in the parent list.
-	if (spell_list->fail_recast || spell_list->engaged_no_sp_recast_min || spell_list->engaged_no_sp_recast_max
-		|| spell_list->engaged_beneficial_self_chance || spell_list->engaged_beneficial_other_chance || spell_list->engaged_detrimental_chance
-		|| spell_list->pursue_no_sp_recast_min || spell_list->pursue_no_sp_recast_max || spell_list->pursue_detrimental_chance
-		|| spell_list->idle_no_sp_recast_min || spell_list->idle_no_sp_recast_max || spell_list->idle_beneficial_chance) {
+	if (
+		spell_list->fail_recast ||
+		spell_list->engaged_no_sp_recast_min ||
+		spell_list->engaged_no_sp_recast_max ||
+		spell_list->engaged_beneficial_self_chance ||
+		spell_list->engaged_beneficial_other_chance ||
+		spell_list->engaged_detrimental_chance ||
+		spell_list->pursue_no_sp_recast_min ||
+		spell_list->pursue_no_sp_recast_max ||
+		spell_list->pursue_detrimental_chance ||
+		spell_list->idle_no_sp_recast_min ||
+		spell_list->idle_no_sp_recast_max ||
+		spell_list->idle_beneficial_chance
+	) {
 		_fail_recast = spell_list->fail_recast;
 		_engaged_no_sp_recast_min = spell_list->engaged_no_sp_recast_min;
 		_engaged_no_sp_recast_max = spell_list->engaged_no_sp_recast_max;
@@ -2811,8 +2899,13 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	}
 
 	for (auto &e : spell_list->entries) {
-		if (GetLevel() >= e.minlevel && GetLevel() <= e.maxlevel && e.spellid > 0) {
-			AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp);
+		if (EQ::ValueWithin(GetLevel(), e.minlevel, e.maxlevel) && e.spellid) {
+			if (!e.bucket_name.empty() && !e.bucket_value.empty()) {
+				if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
+					continue;
+				}
+			}
+			AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
 		}
 	}
 
@@ -2823,7 +2916,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	if (IsValidSpell(attack_proc_spell)) {
 		AddProcToWeapon(attack_proc_spell, true, proc_chance);
 
-		if (RuleB(Spells, NPCInnateProcOverride)) { 
+		if (RuleB(Spells, NPCInnateProcOverride)) {
 			innate_proc_spell_id = attack_proc_spell;
 		}
 	}
@@ -2860,14 +2953,20 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 }
 
 bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID) {
-	auto it = std::find_if(spell_list->entries.begin(), spell_list->entries.end(),
-		[iSpellID](const DBbotspells_entries_Struct &a) { return a.spellid == iSpellID; });
+	auto it = std::find_if(
+		spell_list->entries.begin(),
+		spell_list->entries.end(),
+		[iSpellID](const DBbotspells_entries_Struct &a) {
+			return a.spellid == iSpellID;
+		}
+	);
+
 	return it != spell_list->entries.end();
 }
 
 DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 {
-	if (iDBSpellsID == 0) {
+	if (!iDBSpellsID) {
 		return nullptr;
 	}
 
@@ -2880,99 +2979,112 @@ DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
 	if (!Bot_Spells_LoadTried.count(iDBSpellsID)) { // no reason to ask the DB again if we have failed once already
 		Bot_Spells_LoadTried.insert(iDBSpellsID);
 
-		std::string query = StringFormat("SELECT id, parent_list, attack_proc, proc_chance, "
-						 "range_proc, rproc_chance, defensive_proc, dproc_chance, "
-						 "fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, "
-						 "engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, "
-						 "pursue_no_sp_recast_min, pursue_no_sp_recast_max, "
-						 "pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, "
-						 "idle_b_chance FROM npc_spells WHERE id=%d",
-						 iDBSpellsID);
-		auto results = QueryDatabase(query);
-		if (!results.Success()) {
-			return nullptr;
-		}
+		auto query = fmt::format(
+			"SELECT id, parent_list, attack_proc, proc_chance, "
+			"range_proc, rproc_chance, defensive_proc, dproc_chance, "
+			"fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, "
+			"engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, "
+			"pursue_no_sp_recast_min, pursue_no_sp_recast_max, "
+			"pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, "
+			"idle_b_chance FROM npc_spells WHERE id = {}",
+			iDBSpellsID
+		);
 
-		if (results.RowCount() != 1) {
+		auto results = QueryDatabase(query);
+		if (!results.Success() || !results.RowCount()) {
 			return nullptr;
 		}
 
 		auto row = results.begin();
 		DBbotspells_Struct spell_set;
 
-		spell_set.parent_list = atoi(row[1]);
-		spell_set.attack_proc = atoi(row[2]);
-		spell_set.proc_chance = atoi(row[3]);
-		spell_set.range_proc = atoi(row[4]);
-		spell_set.rproc_chance = atoi(row[5]);
-		spell_set.defensive_proc = atoi(row[6]);
-		spell_set.dproc_chance = atoi(row[7]);
-		spell_set.fail_recast = atoi(row[8]);
-		spell_set.engaged_no_sp_recast_min = atoi(row[9]);
-		spell_set.engaged_no_sp_recast_max = atoi(row[10]);
-		spell_set.engaged_beneficial_self_chance = atoi(row[11]);
-		spell_set.engaged_beneficial_other_chance = atoi(row[12]);
-		spell_set.engaged_detrimental_chance = atoi(row[13]);
-		spell_set.pursue_no_sp_recast_min = atoi(row[14]);
-		spell_set.pursue_no_sp_recast_max = atoi(row[15]);
-		spell_set.pursue_detrimental_chance = atoi(row[16]);
-		spell_set.idle_no_sp_recast_min = atoi(row[17]);
-		spell_set.idle_no_sp_recast_max = atoi(row[18]);
-		spell_set.idle_beneficial_chance = atoi(row[19]);
+		spell_set.parent_list = std::stoul(row[1]);
+		spell_set.attack_proc = static_cast<uint16>(std::stoul(row[2]));
+		spell_set.proc_chance = static_cast<uint8>(std::stoul(row[3]));
+		spell_set.range_proc = static_cast<uint16>(std::stoul(row[4]));
+		spell_set.rproc_chance = static_cast<int16>(std::stoi(row[5]));
+		spell_set.defensive_proc = static_cast<uint16>(std::stoul(row[6]));
+		spell_set.dproc_chance = static_cast<int16>(std::stoi(row[7]));
+		spell_set.fail_recast = std::stoul(row[8]);
+		spell_set.engaged_no_sp_recast_min = std::stoul(row[9]);
+		spell_set.engaged_no_sp_recast_max = std::stoul(row[10]);
+		spell_set.engaged_beneficial_self_chance = static_cast<uint8>(std::stoul(row[11]));
+		spell_set.engaged_beneficial_other_chance = static_cast<uint8>(std::stoul(row[12]));
+		spell_set.engaged_detrimental_chance = static_cast<uint8>(std::stoul(row[13]));
+		spell_set.pursue_no_sp_recast_min = std::stoul(row[14]);
+		spell_set.pursue_no_sp_recast_max = std::stoul(row[15]);
+		spell_set.pursue_detrimental_chance = static_cast<uint8>(std::stoul(row[16]));
+		spell_set.idle_no_sp_recast_min = std::stoul(row[17]);
+		spell_set.idle_no_sp_recast_max = std::stoul(row[18]);
+		spell_set.idle_beneficial_chance = static_cast<uint8>(std::stoul(row[19]));
 
 		// pulling fixed values from an auto-increment field is dangerous...
-		query = StringFormat(
-		    "SELECT spellid, type, minlevel, maxlevel, "
-		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
-		    "FROM bot_spells_entries "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    iDBSpellsID);
+		query = fmt::format(
+			"SELECT spellid, type, minlevel, maxlevel, "
+			"manacost, recast_delay, priority, min_hp, max_hp, resist_adjust, "
+			"bucket_name, bucket_value, bucket_comparison "
+			"FROM bot_spells_entries "
+			"WHERE npc_spells_id = {} ORDER BY minlevel",
+			iDBSpellsID
+		);
 		results = QueryDatabase(query);
-
-		if (!results.Success()) {
+		if (!results.Success() || !results.RowCount()) {
 			return nullptr;
 		}
 
-		int entryIndex = 0;
-		for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
+		for (auto row : results) {
 			DBbotspells_entries_Struct entry;
-			int spell_id = atoi(row[0]);
+			auto spell_id = std::stoi(row[0]);
 			entry.spellid = spell_id;
-			entry.type = atoul(row[1]);
-			entry.minlevel = atoi(row[2]);
-			entry.maxlevel = atoi(row[3]);
-			entry.manacost = atoi(row[4]);
-			entry.recast_delay = atoi(row[5]);
-			entry.priority = atoi(row[6]);
-			entry.min_hp = atoi(row[7]);
-			entry.max_hp = atoi(row[8]);
+			entry.type = std::stoul(row[1]);
+			entry.minlevel = static_cast<uint8>(std::stoul(row[2]));
+			entry.maxlevel = static_cast<uint8>(std::stoul(row[3]));
+			entry.manacost = static_cast<int16>(std::stoi(row[4]));
+			entry.recast_delay = std::stoi(row[5]);
+			entry.priority = static_cast<int16>(std::stoi(row[6]));
+			entry.min_hp = static_cast<int8>(std::stoi(row[7]));
+			entry.max_hp = static_cast<int8>(std::stoi(row[8]));
+			entry.resist_adjust = static_cast<int16>(std::stoi(row[9]));
+			entry.bucket_name = row[10];
+			entry.bucket_value = row[11];
+			entry.bucket_comparison = static_cast<uint8>(std::stoul(row[12]));
 
 			// some spell types don't make much since to be priority 0, so fix that
-			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
+			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0) {
 				entry.priority = 1;
+			}
 
 			if (row[9]) {
-				entry.resist_adjust = atoi(row[9]);
-			}
-			else if (IsValidSpell(spell_id)) {
+				entry.resist_adjust = static_cast<int16>(std::stoi(row[9]));
+			} else if (IsValidSpell(spell_id)) {
 				entry.resist_adjust = spells[spell_id].resist_difficulty;
 			}
+
 			spell_set.entries.push_back(entry);
 		}
 
 		Bot_Spells_Cache.insert(std::make_pair(iDBSpellsID, spell_set));
 
 		return &Bot_Spells_Cache[iDBSpellsID];
-    }
+	}
 
 	return nullptr;
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
-							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp)
-{
-
+void Bot::AddSpellToBotList(
+	int16 iPriority,
+	uint16 iSpellID,
+	uint32 iType,
+	int16 iManaCost,
+	int32 iRecastDelay,
+	int16 iResistAdjust,
+	int8 min_hp,
+	int8 max_hp,
+	std::string bucket_name,
+	std::string bucket_value,
+	uint8 bucket_comparison
+) {
 	if(!IsValidSpell(iSpellID)) {
 		return;
 	}
@@ -2989,6 +3101,9 @@ void Bot::AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType,
 	t.resist_adjust = iResistAdjust;
 	t.min_hp = min_hp;
 	t.max_hp = max_hp;
+	t.bucket_name = bucket_name;
+	t.bucket_value = bucket_value;
+	t.bucket_comparison = bucket_comparison;
 
 	AIBot_spells.push_back(t);
 
