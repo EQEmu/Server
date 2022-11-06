@@ -234,6 +234,8 @@ public:
 	int completedtasksinset(int taskset);
 	bool istaskappropriate(int task);
 	std::string gettaskname(uint32 task_id);
+	int GetCurrentDzTaskID();
+	void EndCurrentDzTask(bool send_fail = false);
     void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);

@@ -169,6 +169,15 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskFailed: {
+			auto buf = reinterpret_cast<ServerSharedTaskCharacterTask_Struct*>(pack->pBuffer);
+			Client* client = entity_list.GetClientByCharID(buf->character_id);
+			if (client)
+			{
+				client->SendTaskFailed(buf->task_id, TASKSLOTSHAREDTASK, TaskType::Shared);
+			}
+			break;
+		}
 		default:
 			break;
 	}

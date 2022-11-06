@@ -1274,6 +1274,7 @@ public:
 	}
 	void PurgeTaskTimers();
 	void LockSharedTask(bool lock) { if (task_state) { task_state->LockSharedTask(this, lock); } }
+	void EndSharedTask(bool fail = false) { if (task_state) { task_state->EndSharedTask(this, fail); } }
 
 	// shared task shims / middleware
 	// these variables are used as a shim to intercept normal localized task functionality
