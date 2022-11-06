@@ -2844,7 +2844,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 				e.spellid &&
 				!IsSpellInBotList(spell_list, e.spellid)
 			) {
-				if(!e.bucket_name.empty() && !e.bucket_value.empty()) {
+				if (!e.bucket_name.empty() && !e.bucket_value.empty()) {
 					if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
 						continue;
 					}
@@ -2900,7 +2900,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 
 	for (auto &e : spell_list->entries) {
 		if (EQ::ValueWithin(GetLevel(), e.minlevel, e.maxlevel) && e.spellid) {
-			if(!e.bucket_name.empty() && !e.bucket_value.empty()) {
+			if (!e.bucket_name.empty() && !e.bucket_value.empty()) {
 				if (!CheckDataBucket(e.bucket_name, e.bucket_value, e.bucket_comparison)) {
 					continue;
 				}
