@@ -129,6 +129,7 @@ public:
 	Lua_Bot GetBotByName(std::string bot_name);
 	Lua_Bot_List GetBotList();
 	Lua_Bot_List GetBotListByCharacterID(uint32 character_id);
+	Lua_Bot_List GetBotListByCharacterID(uint32 character_id, uint8 class_id);
 	Lua_Bot_List GetBotListByClientName(std::string client_name);
 #endif
 };

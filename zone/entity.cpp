@@ -5101,7 +5101,7 @@ void EntityList::GetBotList(std::list<Bot *> &b_list)
 	}
 }
 
-std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id)
+std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id, uint8 class_id)
 {
 	std::vector<Bot *> client_bot_list;
 
@@ -5110,7 +5110,14 @@ std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id)
 	}
 
 	for (auto bot : bot_list) {
-		if (bot->GetOwner() && bot->GetBotOwnerCharacterID() == character_id) {
+		if (
+			bot->GetOwner() &&
+			bot->GetBotOwnerCharacterID() == character_id &&
+			(
+				!class_id ||
+				bot->GetClass() == class_id
+			)
+		) {
 			client_bot_list.push_back(bot);
 		}
 	}
