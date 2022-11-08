@@ -47,6 +47,11 @@ void Perl_Raid_SplitMoney(Raid* self, uint32 gid, uint32 copper, uint32 silver, 
 	self->SplitMoney(gid, copper, silver, gold, platinum);
 }
 
+void Perl_Raid_SplitMoney(Raid* self, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client* splitter) // @categories Currency and Points, Raid
+{
+	self->SplitMoney(gid, copper, silver, gold, platinum, splitter);
+}
+
 void Perl_Raid_BalanceHP(Raid* self, int32_t penalty, uint32_t group_id) // @categories Raid
 {
 	self->BalanceHP(penalty, group_id);
@@ -133,7 +138,8 @@ void perl_register_raid()
 	package.add("IsRaidMember", &Perl_Raid_IsRaidMember);
 	package.add("RaidCount", &Perl_Raid_RaidCount);
 	package.add("SplitExp", &Perl_Raid_SplitExp);
-	package.add("SplitMoney", &Perl_Raid_SplitMoney);
+	package.add("SplitMoney", (void(*)(Raid*, uint32, uint32, uint32, uint32, uint32))&Perl_Raid_SplitMoney);
+	package.add("SplitMoney", (void(*)(Raid*, uint32, uint32, uint32, uint32, uint32, Client*))&Perl_Raid_SplitMoney);
 	package.add("TeleportGroup", &Perl_Raid_TeleportGroup);
 	package.add("TeleportRaid", &Perl_Raid_TeleportRaid);
 }

@@ -51,6 +51,11 @@ void Perl_Group_SplitMoney(Group* self, uint32 copper, uint32 silver, uint32 gol
 	self->SplitMoney(copper, silver, gold, platinum);
 }
 
+void Perl_Group_SplitMoney(Group* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client* splitter) // @categories Currency and Points, Script Utility, Group
+{
+	self->SplitMoney(copper, silver, gold, platinum, splitter);
+}
+
 void Perl_Group_SetLeader(Group* self, Mob* new_leader) // @categories Account and Character, Script Utility, Group
 {
 	self->SetLeader(new_leader);
@@ -151,7 +156,8 @@ void perl_register_group()
 	package.add("SendHPPacketsTo", &Perl_Group_SendHPPacketsTo);
 	package.add("SetLeader", &Perl_Group_SetLeader);
 	package.add("SplitExp", &Perl_Group_SplitExp);
-	package.add("SplitMoney", &Perl_Group_SplitMoney);
+	package.add("SplitMoney", (void(*)(Group*, uint32, uint32, uint32, uint32))&Perl_Group_SplitMoney);
+	package.add("SplitMoney", (void(*)(Group*, uint32, uint32, uint32, uint32, Client*))&Perl_Group_SplitMoney);
 	package.add("TeleportGroup", &Perl_Group_TeleportGroup);
 }
 
