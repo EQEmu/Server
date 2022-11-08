@@ -591,7 +591,7 @@ public:
 	bool DyeArmor(int16 slot_id, uint32 rgb, bool all_flag = false, bool save_flag = true);
 
 	int GetExpansionBitmask();
-	void SetExpansionBitmask(int expansion_bitmask);
+	void SetExpansionBitmask(int expansion_bitmask, bool save = true);
 
 	static void SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id);
 

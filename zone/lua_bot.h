@@ -44,6 +44,7 @@ public:
 	bool HasBotItem(uint32 item_id);
 	void RemoveBotItem(uint32 item_id);
 	void SetExpansionBitmask(int expansion_bitmask);
+	void SetExpansionBitmask(int expansion_bitmask, bool save);
 };
 
 #endif

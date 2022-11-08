@@ -463,7 +463,7 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		loaded_bot->SetStopMeleeLevel(sml);
 
 		auto eb = std::stoi(row[28]);
-		loaded_bot->SetExpansionBitmask(eb);
+		loaded_bot->SetExpansionBitmask(eb, false);
 	}
 
 	return true;

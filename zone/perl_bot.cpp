@@ -91,6 +91,11 @@ void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask)
 	self->SetExpansionBitmask(expansion_bitmask);
 }
 
+void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask, bool save)
+{
+	self->SetExpansionBitmask(expansion_bitmask, save);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -113,7 +118,8 @@ void perl_register_bot()
 	package.add("GetOwner", &Perl_Bot_GetOwner);
 	package.add("HasBotItem", &Perl_Bot_HasBotItem);
 	package.add("RemoveBotItem", &Perl_Bot_RemoveBotItem);
-	package.add("SetExpansionBitmask", &Perl_Bot_SetExpansionBitmask);
+	package.add("SetExpansionBitmask", (void(*)(Bot*, int))&Perl_Bot_SetExpansionBitmask);
+	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);
 }
 
 #endif //EMBPERL_XS_CLASSES

@@ -10437,22 +10437,21 @@ int Bot::GetExpansionBitmask()
 	return RuleI(Bots, BotExpansionSettings);
 }
 
-void Bot::SetExpansionBitmask(int expansion_bitmask)
+void Bot::SetExpansionBitmask(int expansion_bitmask, bool save)
 {
 	m_expansion_bitmask = expansion_bitmask;
 
-	if (!database.botdb.SaveExpansionBitmask(GetBotID(), expansion_bitmask)) {
-		if (GetBotOwner() && GetBotOwner()->IsClient()) {
-			GetBotOwner()->CastToClient()->Message(
-				Chat::White,
-				fmt::format(
-					"Failed to save expansion bitmask for {}.",
-					GetCleanName()
-				).c_str()
-			);
+	if (save) {
+		if (!database.botdb.SaveExpansionBitmask(GetBotID(), expansion_bitmask)) {
+			if (GetBotOwner() && GetBotOwner()->IsClient()) {
+				GetBotOwner()->CastToClient()->Message(
+					Chat::White,
+					fmt::format(
+						"Failed to save expansion bitmask for {}.",
+						GetCleanName()
+					).c_str()
+				);
 		}
-
-		return;
 	}
 
 	LoadAAs();
