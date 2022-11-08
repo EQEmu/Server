@@ -10451,6 +10451,7 @@ void Bot::SetExpansionBitmask(int expansion_bitmask, bool save)
 						GetCleanName()
 					).c_str()
 				);
+			}
 		}
 	}
 
