@@ -1,5 +1,7 @@
 #ifdef LUA_EQEMU
 
+#include "../common/data_verification.h"
+
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
@@ -32,7 +34,12 @@ void Lua_Group::SplitExp(uint32 exp, Lua_Mob other) {
 	self->SplitExp(exp, other);
 }
 
-void Lua_Group::GroupMessage(Lua_Mob sender, int language, const char *message) {
+void Lua_Group::GroupMessage(Lua_Mob sender, const char* message) {
+	Lua_Safe_Call_Void();
+	self->GroupMessage(sender, 0, 100, message);
+}
+
+void Lua_Group::GroupMessage(Lua_Mob sender, int language, const char* message) {
 	Lua_Safe_Call_Void();
 	self->GroupMessage(sender, language, 100, message);
 }
@@ -97,14 +104,14 @@ int Lua_Group::GetID() {
 	return self->GetID();
 }
 
-Lua_Mob Lua_Group::GetMember(int index) {
+Lua_Mob Lua_Group::GetMember(int member_index) {
 	Lua_Safe_Call_Class(Lua_Mob);
 
-	if(index >= 6 || index < 0) {
+	if (!EQ::ValueWithin(member_index, 0, 5)) {
 		return Lua_Mob();
 	}
 
-	return self->members[index];
+	return self->members[member_index];
 }
 
 bool Lua_Group::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name)
@@ -136,7 +143,8 @@ luabind::scope lua_register_group() {
 	.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember)
 	.def("GetTotalGroupDamage", (uint32(Lua_Group::*)(Lua_Mob))&Lua_Group::GetTotalGroupDamage)
 	.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
-	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,int,const char* message))&Lua_Group::GroupMessage)
+	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,const char*))&Lua_Group::GroupMessage)
+	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,int,const char*))&Lua_Group::GroupMessage)
 	.def("IsGroupMember", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsGroupMember)
 	.def("IsLeader", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsLeader)
 	.def("SetLeader", (void(Lua_Group::*)(Lua_Mob))&Lua_Group::SetLeader)
