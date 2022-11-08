@@ -446,6 +446,9 @@ public:
 	void SetClientMaxLevel(uint8 max_level);
 	uint8 GetClientMaxLevel();
 
+	bool SendGMCommand(std::string message);
+	bool SendGMCommand(std::string message, bool ignore_status);
+
 	void DialogueWindow(std::string markdown);
 
 	Lua_Expedition  CreateExpedition(luabind::object expedition_info);

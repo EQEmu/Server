@@ -48,7 +48,7 @@ int command_count; // how many commands we have
 
 // this is the pointer to the dispatch function, updated once
 // init has been performed to point at the real function
-int (*command_dispatch)(Client *,std::string) = command_notavail;
+int (*command_dispatch)(Client *,std::string,bool) = command_notavail;
 
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
@@ -63,7 +63,7 @@ std::map<std::string, uint8> commands_map;
  *	not used
  *
  */
-int command_notavail(Client *c, std::string message)
+int command_notavail(Client *c, std::string message, bool ignore_status)
 {
 	c->Message(Chat::White, "Commands not available.");
 	return -1;
@@ -557,7 +557,7 @@ uint8 GetCommandStatus(Client *c, std::string command_name) {
  *	message		- what the client typed
  *
  */
-int command_realdispatch(Client *c, std::string message)
+int command_realdispatch(Client *c, std::string message, bool ignore_status)
 {
 	Seperator sep(message.c_str(), ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
@@ -570,7 +570,7 @@ int command_realdispatch(Client *c, std::string message)
 	}
 
 	auto cur = commandlist[cstr];
-	if (c->Admin() < cur->admin) {
+	if (!ignore_status && c->Admin() < cur->admin) {
 		c->Message(Chat::White, "Your status is not high enough to use this command.");
 		return -1;
 	}
