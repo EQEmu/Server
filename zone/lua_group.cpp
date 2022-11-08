@@ -77,12 +77,12 @@ int Lua_Group::GroupCount() {
 	return self->GroupCount();
 }
 
-int Lua_Group::GetHighestLevel() {
+uint32 Lua_Group::GetHighestLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetHighestLevel();
 }
 
-int Lua_Group::GetLowestLevel() {
+uint32 Lua_Group::GetLowestLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetLowestLevel();
 }
@@ -119,6 +119,11 @@ bool Lua_Group::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, 
 	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
 }
 
+uint32 Lua_Group::GetAverageLevel() {
+	Lua_Safe_Call_Int();
+	return self->GetAvgLevel();
+}
+
 luabind::scope lua_register_group() {
 	return luabind::class_<Lua_Group>("Group")
 	.def(luabind::constructor<>())
@@ -128,11 +133,12 @@ luabind::scope lua_register_group() {
 	.def("DisbandGroup", (void(Lua_Group::*)(void))&Lua_Group::DisbandGroup)
 	.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string))&Lua_Group::DoesAnyMemberHaveExpeditionLockout)
 	.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string, int))&Lua_Group::DoesAnyMemberHaveExpeditionLockout)
-	.def("GetHighestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetHighestLevel)
+	.def("GetAverageLevel", (uint32(Lua_Group::*)(void))&Lua_Group::GetAverageLevel)
+	.def("GetHighestLevel", (uint32(Lua_Group::*)(void))&Lua_Group::GetHighestLevel)
 	.def("GetID", (int(Lua_Group::*)(void))&Lua_Group::GetID)
 	.def("GetLeader", (Lua_Mob(Lua_Group::*)(void))&Lua_Group::GetLeader)
 	.def("GetLeaderName", (const char*(Lua_Group::*)(void))&Lua_Group::GetLeaderName)
-	.def("GetLowestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetLowestLevel)
+	.def("GetLowestLevel", (uint32(Lua_Group::*)(void))&Lua_Group::GetLowestLevel)
 	.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember)
 	.def("GetTotalGroupDamage", (uint32(Lua_Group::*)(Lua_Mob))&Lua_Group::GetTotalGroupDamage)
 	.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
