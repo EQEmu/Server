@@ -11745,5 +11745,5 @@ void Client::AddAAPoints(uint32 points)
 }
 
 bool Client::SendGMCommand(std::string message, bool ignore_status) {
-	return command_dispatch(this, message, ignore_status) > 0 ? true : false;
+	return command_dispatch(this, message, ignore_status) >= 0 ? true : false;
 }
