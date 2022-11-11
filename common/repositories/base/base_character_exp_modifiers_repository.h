@@ -21,6 +21,7 @@ public:
 	struct CharacterExpModifiers {
 		int32_t character_id;
 		int32_t zone_id;
+		int32_t instance_version;
 		float   aa_modifier;
 		float   exp_modifier;
 	};
@@ -35,6 +36,7 @@ public:
 		return {
 			"character_id",
 			"zone_id",
+			"instance_version",
 			"aa_modifier",
 			"exp_modifier",
 		};
@@ -45,6 +47,7 @@ public:
 		return {
 			"character_id",
 			"zone_id",
+			"instance_version",
 			"aa_modifier",
 			"exp_modifier",
 		};
@@ -87,10 +90,11 @@ public:
 	{
 		CharacterExpModifiers e{};
 
-		e.character_id = 0;
-		e.zone_id      = 0;
-		e.aa_modifier  = 0;
-		e.exp_modifier = 0;
+		e.character_id     = 0;
+		e.zone_id          = 0;
+		e.instance_version = -1;
+		e.aa_modifier      = 0;
+		e.exp_modifier     = 0;
 
 		return e;
 	}
@@ -126,10 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterExpModifiers e{};
 
-			e.character_id = static_cast<int32_t>(atoi(row[0]));
-			e.zone_id      = static_cast<int32_t>(atoi(row[1]));
-			e.aa_modifier  = strtof(row[2], nullptr);
-			e.exp_modifier = strtof(row[3], nullptr);
+			e.character_id     = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.instance_version = static_cast<int32_t>(atoi(row[2]));
+			e.aa_modifier      = strtof(row[3], nullptr);
+			e.exp_modifier     = strtof(row[4], nullptr);
 
 			return e;
 		}
@@ -165,8 +170,9 @@ public:
 
 		v.push_back(columns[0] + " = " + std::to_string(e.character_id));
 		v.push_back(columns[1] + " = " + std::to_string(e.zone_id));
-		v.push_back(columns[2] + " = " + std::to_string(e.aa_modifier));
-		v.push_back(columns[3] + " = " + std::to_string(e.exp_modifier));
+		v.push_back(columns[2] + " = " + std::to_string(e.instance_version));
+		v.push_back(columns[3] + " = " + std::to_string(e.aa_modifier));
+		v.push_back(columns[4] + " = " + std::to_string(e.exp_modifier));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -190,6 +196,7 @@ public:
 
 		v.push_back(std::to_string(e.character_id));
 		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.instance_version));
 		v.push_back(std::to_string(e.aa_modifier));
 		v.push_back(std::to_string(e.exp_modifier));
 
@@ -223,6 +230,7 @@ public:
 
 			v.push_back(std::to_string(e.character_id));
 			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.instance_version));
 			v.push_back(std::to_string(e.aa_modifier));
 			v.push_back(std::to_string(e.exp_modifier));
 
@@ -258,10 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterExpModifiers e{};
 
-			e.character_id = static_cast<int32_t>(atoi(row[0]));
-			e.zone_id      = static_cast<int32_t>(atoi(row[1]));
-			e.aa_modifier  = strtof(row[2], nullptr);
-			e.exp_modifier = strtof(row[3], nullptr);
+			e.character_id     = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.instance_version = static_cast<int32_t>(atoi(row[2]));
+			e.aa_modifier      = strtof(row[3], nullptr);
+			e.exp_modifier     = strtof(row[4], nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -286,10 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterExpModifiers e{};
 
-			e.character_id = static_cast<int32_t>(atoi(row[0]));
-			e.zone_id      = static_cast<int32_t>(atoi(row[1]));
-			e.aa_modifier  = strtof(row[2], nullptr);
-			e.exp_modifier = strtof(row[3], nullptr);
+			e.character_id     = static_cast<int32_t>(atoi(row[0]));
+			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
+			e.instance_version = static_cast<int32_t>(atoi(row[2]));
+			e.aa_modifier      = strtof(row[3], nullptr);
+			e.exp_modifier     = strtof(row[4], nullptr);
 
 			all_entries.push_back(e);
 		}
