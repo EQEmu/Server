@@ -119,6 +119,7 @@ foreach my $table_to_generate (@tables) {
     my $table_found_in_schema = 0;
 
     my @categories = (
+        "bot_tables",
         "content_tables",
         "version_tables",
         "state_tables",
