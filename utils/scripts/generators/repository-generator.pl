@@ -130,7 +130,6 @@ foreach my $table_to_generate (@tables) {
 
     # These tables don't have a typical schema
     my @table_ignore_list = (
-        "bot_create_combinations",
         "character_enabledtasks",
         # "grid",         # Manually created
         # "tradeskill_recipe",     # Manually created
