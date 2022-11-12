@@ -3496,6 +3496,10 @@ std::string lua_popup_indent() {
 	return quest_manager.popupindent();
 }
 
+std::string lua_popup_indent(uint32 indent_count) {
+	return quest_manager.popupindent(indent_count);
+}
+
 std::string lua_popup_link(std::string link) {
 	return quest_manager.popuplink(link);
 }
@@ -3997,7 +4001,8 @@ luabind::scope lua_register_general() {
 		luabind::def("popup_break", (std::string(*)(uint32))&lua_popup_break),
 		luabind::def("popup_center_message", &lua_popup_center_message),
 		luabind::def("popup_color_message", &lua_popup_color_message),
-		luabind::def("popup_indent", &lua_popup_indent),
+		luabind::def("popup_indent", (std::string(*)(void))&lua_popup_indent),
+		luabind::def("popup_indent", (std::string(*)(uint32))&lua_popup_indent),
 		luabind::def("popup_link", (std::string(*)(std::string))&lua_popup_link),
 		luabind::def("popup_link", (std::string(*)(std::string,std::string))&lua_popup_link),
 		luabind::def("popup_table", &lua_popup_table),

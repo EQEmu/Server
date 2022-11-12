@@ -3768,6 +3768,10 @@ std::string Perl__popupindent() {
 	return quest_manager.popupindent();
 }
 
+std::string Perl__popupindent(uint32 indent_count) {
+	return quest_manager.popupindent(indent_count);
+}
+
 std::string Perl__popuplink(std::string link) {
 	return quest_manager.popuplink(link);
 }
@@ -4264,11 +4268,12 @@ void perl_register_quest()
 	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
-	package.add("popupbreak", (std::string(*)(void))&Perl__popupbreak);
+	package.add("popupbreak", (std::string(*)())&Perl__popupbreak);
 	package.add("popupbreak", (std::string(*)(uint32))&Perl__popupbreak);
 	package.add("popupcentermessage", &Perl__popupcentermessage);
 	package.add("popupcolormessage", &Perl__popupcolormessage);
-	package.add("popupindent", &Perl__popupindent);
+	package.add("popupindent", (std::string(*)())&Perl__popupindent);
+	package.add("popupindent", (std::string(*)(uint32))&Perl__popupindent);
 	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
 	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
 	package.add("popuptable", &Perl__popuptable);

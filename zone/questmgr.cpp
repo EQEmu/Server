@@ -3789,9 +3789,21 @@ std::string QuestManager::popupcolormessage(std::string color, std::string messa
 	return message;
 }
 
-std::string QuestManager::popupindent()
+std::string QuestManager::popupindent(uint32 indent_count)
 {
-	return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	if (!indent_count) {
+		return std::string();
+	}
+
+	std::string indent_message;
+	auto count = indent_count;
+
+	while (count) {
+		indent_message.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+		count--;
+	}
+
+	return indent_message;
 }
 
 std::string QuestManager::popuplink(std::string link, std::string message)
