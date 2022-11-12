@@ -44,6 +44,7 @@
 #include <iostream>
 #include <limits.h>
 #include <list>
+#include <regex>
 
 #ifdef BOTS
 #include "bot.h"
@@ -3723,4 +3724,72 @@ void QuestManager::LearnRecipe(uint32 recipe_id) {
 	}
 
 	initiator->LearnRecipe(recipe_id);
+}
+
+std::string QuestManager::popupcentermessage(std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	auto cleaned_message = message;
+
+	std::regex tags("<[^>]*>");
+
+	if (std::regex_search(cleaned_message, tags)) {
+		std::regex_replace(cleaned_message, tags, cleaned_message);
+	}
+
+	auto message_len = cleaned_message.length();
+	auto initial_index = (53 - (message_len * .80));
+	auto index = 0;
+	std::string buffer;
+	while (index < initial_index) {
+		buffer.append("&nbsp;");
+		index++;
+	}
+
+	return fmt::format("{} {}", buffer, message);
+}
+
+std::string QuestManager::popupcolormessage(std::string color, std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	if (!color.empty()) {
+		const auto &c = html_colors.find(color);
+		if (c != html_colors.end()) {
+			return fmt::format(
+				"<c \"{}\">{}</c>",
+				c->second,
+				message
+			);
+		}
+	}
+
+	return message;
+}
+
+std::string QuestManager::popupindent()
+{
+	return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+}
+
+std::string QuestManager::popuplink(std::string link, std::string message)
+{
+	if (link.empty()) {
+		return std::string();
+	}
+
+	if (!link.empty()) {
+		return fmt::format(
+			"<a href=\"{}\">{}</a>",
+			link,
+			!message.empty() ? message : link
+		);
+	}
+
+	return message;
 }

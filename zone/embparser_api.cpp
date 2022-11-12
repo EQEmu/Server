@@ -3748,6 +3748,26 @@ std::string Perl__getaaname(int aa_id)
 	return zone->GetAAName(aa_id);
 }
 
+std::string Perl__popupcentermessage(std::string message) {
+	return quest_manager.popupcentermessage(message);
+}
+
+std::string Perl__popupcolormessage(std::string color, std::string message) {
+	return quest_manager.popupcolormessage(color, message);
+}
+
+std::string Perl__popupindent() {
+	return quest_manager.popupindent();
+}
+
+std::string Perl__popuplink(std::string link) {
+	return quest_manager.popuplink(link);
+}
+
+std::string Perl__popuplink(std::string link, std::string message) {
+	return quest_manager.popuplink(link, message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4220,6 +4240,11 @@ void perl_register_quest()
 	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
+	package.add("popupcentermessage", &Perl__popupcentermessage);
+	package.add("popupcolormessage", &Perl__popupcolormessage);
+	package.add("popupindent", &Perl__popupindent);
+	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
+	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
 	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
 	package.add("pvp", &Perl__pvp);
 	package.add("qs_player_event", &Perl__qs_player_event);

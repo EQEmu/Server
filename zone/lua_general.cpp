@@ -772,6 +772,18 @@ void lua_end_dz_task(bool send_fail) {
 	quest_manager.EndCurrentDzTask(send_fail);
 }
 
+void lua_popup(const char *title, const char *text) {
+	quest_manager.popup(title, text, 0, 0, 0);
+}
+
+void lua_popup(const char *title, const char *text, uint32 id) {
+	quest_manager.popup(title, text, id, 0, 0);
+}
+
+void lua_popup(const char *title, const char *text, uint32 id, uint32 buttons) {
+	quest_manager.popup(title, text, id, buttons, 0);
+}
+
 void lua_popup(const char *title, const char *text, uint32 id, uint32 buttons, uint32 duration) {
 	quest_manager.popup(title, text, id, buttons, duration);
 }
@@ -3464,6 +3476,26 @@ std::string lua_get_aa_name(int aa_id) {
 	return zone->GetAAName(aa_id);
 }
 
+std::string lua_popup_center_message(std::string message) {
+	return quest_manager.popupcentermessage(message);
+}
+
+std::string lua_popup_color_message(std::string color, std::string message) {
+	return quest_manager.popupcolormessage(color, message);
+}
+
+std::string lua_popup_indent() {
+	return quest_manager.popupindent();
+}
+
+std::string lua_popup_link(std::string link) {
+	return quest_manager.popuplink(link);
+}
+
+std::string lua_popup_link(std::string link, std::string message) {
+	return quest_manager.popuplink(link, message);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3774,7 +3806,6 @@ luabind::scope lua_register_general() {
 		luabind::def("get_dz_task_id", &lua_get_dz_task_id),
 		luabind::def("end_dz_task", (void(*)())&lua_end_dz_task),
 		luabind::def("end_dz_task", (void(*)(bool))&lua_end_dz_task),
-		luabind::def("popup", &lua_popup),
 		luabind::def("clear_spawn_timers", &lua_clear_spawn_timers),
 		luabind::def("zone_emote", &lua_zone_emote),
 		luabind::def("world_emote", &lua_world_emote),
@@ -3934,6 +3965,15 @@ luabind::scope lua_register_general() {
 		luabind::def("is_raining", &lua_is_raining),
 		luabind::def("is_snowing", &lua_is_snowing),
 		luabind::def("get_aa_name", &lua_get_aa_name),
+		luabind::def("popup", (void(*)(const char*,const char*))&lua_popup),
+		luabind::def("popup", (void(*)(const char*,const char*,uint32))&lua_popup),
+		luabind::def("popup", (void(*)(const char*,const char*,uint32,uint32))&lua_popup),
+		luabind::def("popup", (void(*)(const char*,const char*,uint32,uint32,uint32))&lua_popup),
+		luabind::def("popup_center_message", &lua_popup_center_message),
+		luabind::def("popup_color_message", &lua_popup_color_message),
+		luabind::def("popup_indent", &lua_popup_indent),
+		luabind::def("popup_link", (std::string(*)(std::string))&lua_popup_link),
+		luabind::def("popup_link", (std::string(*)(std::string,std::string))&lua_popup_link),
 
 		/*
 			Cross Zone
