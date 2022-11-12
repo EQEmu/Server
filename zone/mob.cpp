@@ -6954,8 +6954,8 @@ void Mob::CloneAppearance(Mob* other, bool clone_name)
 	);
 
 	for (
-		uint8 slot = EQ::textures::TextureSlot::armorHead;
-		slot <= EQ::textures::TextureSlot::armorFeet;
+		uint8 slot = EQ::textures::armorHead;
+		slot <= EQ::textures::armorFeet;
 		slot++
 	) {
 		auto color = 0;
@@ -6972,28 +6972,28 @@ void Mob::CloneAppearance(Mob* other, bool clone_name)
 	}
 
 	WearChange(
-		EQ::textures::TextureSlot::weaponPrimary,
-		other->GetEquipmentMaterial(EQ::textures::TextureSlot::weaponPrimary),
-		other->GetEquipmentColor(EQ::textures::TextureSlot::weaponPrimary)
+		EQ::textures::weaponPrimary,
+		other->GetEquipmentMaterial(EQ::textures::weaponPrimary),
+		other->GetEquipmentColor(EQ::textures::weaponPrimary)
 	);
 
 	WearChange(
-		EQ::textures::TextureSlot::weaponSecondary,
-		other->GetEquipmentMaterial(EQ::textures::TextureSlot::weaponSecondary),
-		other->GetEquipmentColor(EQ::textures::TextureSlot::weaponSecondary)
+		EQ::textures::weaponSecondary,
+		other->GetEquipmentMaterial(EQ::textures::weaponSecondary),
+		other->GetEquipmentColor(EQ::textures::weaponSecondary)
 	);
 
 	if (IsNPC()) {
 		auto primary_skill = (
 			other->IsNPC() ?
 			other->CastToNPC()->GetPrimSkill() :
-			ConvertItemTypeToSkillID(other->GetEquipmentType(EQ::textures::TextureSlot::weaponSecondary))
+			ConvertItemTypeToSkillID(other->GetEquipmentType(EQ::textures::weaponSecondary))
 		);
 
 		auto secondary_skill = (
 			other->IsNPC() ?
 			other->CastToNPC()->GetSecSkill()  :
-			ConvertItemTypeToSkillID(other->GetEquipmentType(EQ::textures::TextureSlot::weaponSecondary))
+			ConvertItemTypeToSkillID(other->GetEquipmentType(EQ::textures::weaponSecondary))
 		);
 
 		CastToNPC()->SetPrimSkill(primary_skill);
