@@ -27,6 +27,7 @@
 #include "lua_encounter.h"
 #include "data_bucket.h"
 #include "expedition.h"
+#include "dialogue_window.h"
 
 struct Events { };
 struct Factions { };
@@ -3477,51 +3478,51 @@ std::string lua_get_aa_name(int aa_id) {
 }
 
 std::string lua_popup_break() {
-	return quest_manager.popupbreak();
+	return DialogueWindow::Break();
 }
 
 std::string lua_popup_break(uint32 break_count) {
-	return quest_manager.popupbreak(break_count);
+	return DialogueWindow::Break(break_count);
 }
 
 std::string lua_popup_center_message(std::string message) {
-	return quest_manager.popupcentermessage(message);
+	return DialogueWindow::CenterMessage(message);
 }
 
 std::string lua_popup_color_message(std::string color, std::string message) {
-	return quest_manager.popupcolormessage(color, message);
+	return DialogueWindow::ColorMessage(color, message);
 }
 
 std::string lua_popup_indent() {
-	return quest_manager.popupindent();
+	return DialogueWindow::Indent();
 }
 
 std::string lua_popup_indent(uint32 indent_count) {
-	return quest_manager.popupindent(indent_count);
+	return DialogueWindow::Indent(indent_count);
 }
 
 std::string lua_popup_link(std::string link) {
-	return quest_manager.popuplink(link);
+	return DialogueWindow::Link(link);
 }
 
 std::string lua_popup_link(std::string link, std::string message) {
-	return quest_manager.popuplink(link, message);
+	return DialogueWindow::Link(link, message);
 }
 
 std::string lua_popup_table(std::string message) {
-	return quest_manager.popuptable(message);
+	return DialogueWindow::Table(message);
 }
 
 std::string lua_popup_table_cell() {
-	return quest_manager.popuptablecell();
+	return DialogueWindow::TableCell();
 }
 
 std::string lua_popup_table_cell(std::string message) {
-	return quest_manager.popuptablecell(message);
+	return DialogueWindow::TableCell(message);
 }
 
 std::string lua_popup_table_row(std::string message) {
-	return quest_manager.popuptablerow(message);
+	return DialogueWindow::TableRow(message);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \

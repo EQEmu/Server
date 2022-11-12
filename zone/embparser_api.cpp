@@ -26,6 +26,7 @@
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
+#include "dialogue_window.h"
 #include "embperl.h"
 #include "embxs.h"
 #include "entity.h"
@@ -3749,51 +3750,51 @@ std::string Perl__getaaname(int aa_id)
 }
 
 std::string Perl__popupbreak() {
-	return quest_manager.popupbreak();
+	return DialogueWindow::Break();
 }
 
 std::string Perl__popupbreak(uint32 break_count) {
-	return quest_manager.popupbreak(break_count);
+	return DialogueWindow::Break(break_count);
 }
 
 std::string Perl__popupcentermessage(std::string message) {
-	return quest_manager.popupcentermessage(message);
+	return DialogueWindow::CenterMessage(message);
 }
 
 std::string Perl__popupcolormessage(std::string color, std::string message) {
-	return quest_manager.popupcolormessage(color, message);
+	return DialogueWindow::ColorMessage(color, message);
 }
 
 std::string Perl__popupindent() {
-	return quest_manager.popupindent();
+	return DialogueWindow::Indent();
 }
 
 std::string Perl__popupindent(uint32 indent_count) {
-	return quest_manager.popupindent(indent_count);
+	return DialogueWindow::Indent(indent_count);
 }
 
 std::string Perl__popuplink(std::string link) {
-	return quest_manager.popuplink(link);
+	return DialogueWindow::Link(link);
 }
 
 std::string Perl__popuplink(std::string link, std::string message) {
-	return quest_manager.popuplink(link, message);
+	return DialogueWindow::Link(link, message);
 }
 
 std::string Perl__popuptable(std::string message) {
-	return quest_manager.popuptable(message);
+	return DialogueWindow::Table(message);
 }
 
 std::string Perl__popuptablecell() {
-	return quest_manager.popuptablecell();
+	return DialogueWindow::TableCell();
 }
 
 std::string Perl__popuptablecell(std::string message) {
-	return quest_manager.popuptablecell(message);
+	return DialogueWindow::TableCell(message);
 }
 
 std::string Perl__popuptablerow(std::string message) {
-	return quest_manager.popuptablerow(message);
+	return DialogueWindow::TableRow(message);
 }
 
 void perl_register_quest()

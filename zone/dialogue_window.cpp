@@ -1,3 +1,5 @@
+#include <regex>
+
 #include "dialogue_window.h"
 
 void DialogueWindow::Render(Client *c, std::string markdown)
@@ -502,4 +504,128 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		c->Message(Chat::White, " --- Select Response from Options --- ");
 		c->Message(Chat::White, Strings::Implode(" ", bracket_responses).c_str());
 	}
+}
+
+std::string DialogueWindow::Break(uint32 break_count)
+{
+	if (!break_count) {
+		return std::string();
+	}
+
+	std::string break_message;
+	auto count = break_count;
+
+	while (count) {
+		break_message.append("<br>");
+		count--;
+	}
+
+	return break_message;
+}
+
+std::string DialogueWindow::CenterMessage(std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	auto cleaned_message = message;
+
+	std::regex tags("<[^>]*>");
+
+	if (std::regex_search(cleaned_message, tags)) {
+		std::regex_replace(cleaned_message, tags, cleaned_message);
+	}
+
+	auto message_len = cleaned_message.length();
+	auto initial_index = (53 - (message_len * .80));
+	auto index = 0;
+	std::string buffer;
+	while (index < initial_index) {
+		buffer.append("&nbsp;");
+		index++;
+	}
+
+	return fmt::format("{} {}", buffer, message);
+}
+
+std::string DialogueWindow::ColorMessage(std::string color, std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	if (!color.empty()) {
+		const auto &c = html_colors.find(color);
+		if (c != html_colors.end()) {
+			return fmt::format(
+				"<c \"{}\">{}</c>",
+				c->second,
+				message
+			);
+		}
+	}
+
+	return message;
+}
+
+std::string DialogueWindow::Indent(uint32 indent_count)
+{
+	if (!indent_count) {
+		return std::string();
+	}
+
+	std::string indent_message;
+	auto count = indent_count;
+
+	while (count) {
+		indent_message.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+		count--;
+	}
+
+	return indent_message;
+}
+
+std::string DialogueWindow::Link(std::string link, std::string message)
+{
+	if (link.empty()) {
+		return std::string();
+	}
+
+	if (!link.empty()) {
+		return fmt::format(
+			"<a href=\"{}\">{}</a>",
+			link,
+			!message.empty() ? message : link
+		);
+	}
+
+	return message;
+}
+
+std::string DialogueWindow::Table(std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	return fmt::format("<table>{}</table>", message);
+}
+
+std::string DialogueWindow::TableCell(std::string message)
+{
+	if (message.empty()) {
+		return "<td></td>";
+	}
+
+	return fmt::format("<td>{}</td>", message);
+}
+
+std::string DialogueWindow::TableRow(std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	return fmt::format("<tr>{}</tr>", message);
 }

@@ -388,6 +388,14 @@ const std::map<std::string, int> animations = {
 class DialogueWindow {
 public:
 	static void Render(Client *c, std::string markdown);
+	static std::string Break(uint32 break_count = 1);
+	static std::string CenterMessage(std::string message);
+	static std::string ColorMessage(std::string color, std::string message);
+	static std::string Indent(uint32 indent_count = 1);
+	static std::string Link(std::string link, std::string message = std::string());
+	static std::string Table(std::string message);
+	static std::string TableCell(std::string message = std::string());
+	static std::string TableRow(std::string message);
 };
 
 
