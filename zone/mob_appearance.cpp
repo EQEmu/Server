@@ -278,7 +278,7 @@ uint8 Mob::GetEquipmentType(uint8 material_slot) const
 
 				const auto* inst = CastToClient()->m_inv[inventory_slot];
 				if (inst) {
-						item_type = inst->GetItemType();
+					item_type = inst->GetItemType();
 				}
 			}
 		}
