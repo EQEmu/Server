@@ -342,10 +342,14 @@ public:
 	int GetRecipeMadeCount(uint32 recipe_id);
 	std::string GetRecipeName(uint32 recipe_id);
 	bool HasRecipeLearned(uint32 recipe_id);
+	std::string popupbreak(uint32 break_count = 1);
 	std::string popupcentermessage(std::string message);
 	std::string popupcolormessage(std::string color, std::string message);
 	std::string popupindent();
 	std::string popuplink(std::string link, std::string message = std::string());
+	std::string popuptable(std::string message);
+	std::string popuptablecell(std::string message = std::string());
+	std::string popuptablerow(std::string message);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

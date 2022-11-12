@@ -3726,6 +3726,23 @@ void QuestManager::LearnRecipe(uint32 recipe_id) {
 	initiator->LearnRecipe(recipe_id);
 }
 
+std::string QuestManager::popupbreak(uint32 break_count)
+{
+	if (!break_count) {
+		return std::string();
+	}
+
+	std::string break_message;
+	auto count = break_count;
+
+	while (count) {
+		break_message.append("<br>");
+		count--;
+	}
+
+	return break_message;
+}
+
 std::string QuestManager::popupcentermessage(std::string message)
 {
 	if (message.empty()) {
@@ -3792,4 +3809,31 @@ std::string QuestManager::popuplink(std::string link, std::string message)
 	}
 
 	return message;
+}
+
+std::string QuestManager::popuptable(std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	return fmt::format("<table>{}</table>", message);
+}
+
+std::string QuestManager::popuptablecell(std::string message)
+{
+	if (message.empty()) {
+		return "<td></td>";
+	}
+
+	return fmt::format("<td>{}</td>", message);
+}
+
+std::string QuestManager::popuptablerow(std::string message)
+{
+	if (message.empty()) {
+		return std::string();
+	}
+
+	return fmt::format("<tr>{}</tr>", message);
 }

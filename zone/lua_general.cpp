@@ -3476,6 +3476,14 @@ std::string lua_get_aa_name(int aa_id) {
 	return zone->GetAAName(aa_id);
 }
 
+std::string lua_popup_break() {
+	return quest_manager.popupbreak();
+}
+
+std::string lua_popup_break(uint32 break_count) {
+	return quest_manager.popupbreak(break_count);
+}
+
 std::string lua_popup_center_message(std::string message) {
 	return quest_manager.popupcentermessage(message);
 }
@@ -3494,6 +3502,22 @@ std::string lua_popup_link(std::string link) {
 
 std::string lua_popup_link(std::string link, std::string message) {
 	return quest_manager.popuplink(link, message);
+}
+
+std::string lua_popup_table(std::string message) {
+	return quest_manager.popuptable(message);
+}
+
+std::string lua_popup_table_cell() {
+	return quest_manager.popuptablecell();
+}
+
+std::string lua_popup_table_cell(std::string message) {
+	return quest_manager.popuptablecell(message);
+}
+
+std::string lua_popup_table_row(std::string message) {
+	return quest_manager.popuptablerow(message);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
@@ -3969,11 +3993,17 @@ luabind::scope lua_register_general() {
 		luabind::def("popup", (void(*)(const char*,const char*,uint32))&lua_popup),
 		luabind::def("popup", (void(*)(const char*,const char*,uint32,uint32))&lua_popup),
 		luabind::def("popup", (void(*)(const char*,const char*,uint32,uint32,uint32))&lua_popup),
+		luabind::def("popup_break", (std::string(*)(void))&lua_popup_break),
+		luabind::def("popup_break", (std::string(*)(uint32))&lua_popup_break),
 		luabind::def("popup_center_message", &lua_popup_center_message),
 		luabind::def("popup_color_message", &lua_popup_color_message),
 		luabind::def("popup_indent", &lua_popup_indent),
 		luabind::def("popup_link", (std::string(*)(std::string))&lua_popup_link),
 		luabind::def("popup_link", (std::string(*)(std::string,std::string))&lua_popup_link),
+		luabind::def("popup_table", &lua_popup_table),
+		luabind::def("popup_table_cell", (std::string(*)(void))&lua_popup_table_cell),
+		luabind::def("popup_table_cell", (std::string(*)(std::string))&lua_popup_table_cell),
+		luabind::def("popup_table_row", &lua_popup_table_row),
 
 		/*
 			Cross Zone

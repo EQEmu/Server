@@ -3748,6 +3748,14 @@ std::string Perl__getaaname(int aa_id)
 	return zone->GetAAName(aa_id);
 }
 
+std::string Perl__popupbreak() {
+	return quest_manager.popupbreak();
+}
+
+std::string Perl__popupbreak(uint32 break_count) {
+	return quest_manager.popupbreak(break_count);
+}
+
 std::string Perl__popupcentermessage(std::string message) {
 	return quest_manager.popupcentermessage(message);
 }
@@ -3766,6 +3774,22 @@ std::string Perl__popuplink(std::string link) {
 
 std::string Perl__popuplink(std::string link, std::string message) {
 	return quest_manager.popuplink(link, message);
+}
+
+std::string Perl__popuptable(std::string message) {
+	return quest_manager.popuptable(message);
+}
+
+std::string Perl__popuptablecell() {
+	return quest_manager.popuptablecell();
+}
+
+std::string Perl__popuptablecell(std::string message) {
+	return quest_manager.popuptablecell(message);
+}
+
+std::string Perl__popuptablerow(std::string message) {
+	return quest_manager.popuptablerow(message);
 }
 
 void perl_register_quest()
@@ -4240,11 +4264,17 @@ void perl_register_quest()
 	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
+	package.add("popupbreak", (std::string(*)(void))&Perl__popupbreak);
+	package.add("popupbreak", (std::string(*)(uint32))&Perl__popupbreak);
 	package.add("popupcentermessage", &Perl__popupcentermessage);
 	package.add("popupcolormessage", &Perl__popupcolormessage);
 	package.add("popupindent", &Perl__popupindent);
 	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
 	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
+	package.add("popuptable", &Perl__popuptable);
+	package.add("popuptablecell", (std::string(*)())&Perl__popuptablecell);
+	package.add("popuptablecell", (std::string(*)(std::string))&Perl__popuptablecell);
+	package.add("popuptablerow", &Perl__popuptablerow);
 	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
 	package.add("pvp", &Perl__pvp);
 	package.add("qs_player_event", &Perl__qs_player_event);
