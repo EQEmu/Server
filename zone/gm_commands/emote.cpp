@@ -7,7 +7,7 @@ void command_emote(Client *c, const Seperator *sep)
 {
 	auto arguments = sep->argnum;
 	if (arguments < 3 || !sep->IsNumber(2)) {
-		c->Message(Chat::White, "Usage: #emote name [Type] [Message]");
+		c->Message(Chat::White, "Usage: #emote [Name] [Type] [Message]");
 		c->Message(Chat::White, "Usage: #emote world [Type] [Message]");
 		c->Message(Chat::White, "Usage: #emote zone [Type] [Message]");
 		return;
