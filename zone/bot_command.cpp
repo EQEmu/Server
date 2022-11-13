@@ -6120,10 +6120,6 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		}
 
 		auto* bot = entity_list.GetBotByBotName(bots_iter.Name);
-		auto bot_spawn_saylink = Saylink::Silent(
-			fmt::format("^spawn {}", bots_iter.Name),
-			bots_iter.Name
-		);
 
 		c->Message(
 			Chat::White,
@@ -6132,7 +6128,10 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 				bot_number,
 				(
 					(c->CharacterID() == bots_iter.Owner_ID && !bot) ?
-					bot_spawn_saylink :
+					Saylink::Silent(
+						fmt::format("^spawn {}", bots_iter.Name),
+						bots_iter.Name
+					) :
 					bots_iter.Name
 				),
 				bots_iter.Level,
@@ -6169,14 +6168,34 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 
 		c->Message(Chat::White, "Note: You can spawn any owned bots by clicking their name if they are not already spawned.");
 
+		c->Message(Chat::White, "Your bot creation limits are as follows:");
+
+		const auto overall_bot_creation_limit = c->GetBotCreationLimit();
+
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Your bot creation limit is {} bot{}.",
-				RuleI(Bots, CreationLimit),
-				RuleI(Bots, CreationLimit) != 1 ? "s" : ""
+				"Overall | {} Bot{}",
+				overall_bot_creation_limit,
+				overall_bot_creation_limit != 1 ? "s" : ""
 			).c_str()
 		);
+
+		for (uint8 class_id = WARRIOR; class_id <= BERSERKER; class_id++) {
+			auto class_creation_limit = c->GetBotCreationLimit(class_id);
+
+			if (class_creation_limit != overall_bot_creation_limit) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{} | {} Bot{}",
+						GetClassIDName(class_id),
+						class_creation_limit,
+						class_creation_limit != 1 ? "s" : ""
+					).c_str()
+				);
+			}
+		}
 	}
 }
 
