@@ -447,7 +447,7 @@ const std::map<int, std::string> animation_names_map = {
 	{ 67, "Salute" },
 	{ 68, "Shiver" },
 	{ 69, "Tap Foot" },
-	{ 70, "Bow To" },
+	{ 70, "Bow To" }
 };
 
 class DialogueWindow {
