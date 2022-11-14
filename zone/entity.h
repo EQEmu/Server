@@ -189,9 +189,9 @@ public:
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClientByLSID(uint32 iLSID);
 	Client *GetClient(uint32 ip, uint16 port);
-	Client* GetRandomClient(const glm::vec3& location, float distance, Client* exclude_client = nullptr);
-	NPC* GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc = nullptr);
-	Mob* GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob = nullptr);
+	Client* GetRandomClient(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Client* exclude_client = nullptr);
+	NPC* GetRandomNPC(const glm::vec3& location = glm::vec3(0.f), float distance = 0, NPC* exclude_npc = nullptr);
+	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
 	Group *GetGroupByMob(Mob* mob);
 	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);
