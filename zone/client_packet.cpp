@@ -1725,8 +1725,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	 * DevTools Load Settings
 	 */
 	if (Admin() >= EQ::DevTools::GM_ACCOUNT_STATUS_LEVEL) {
-		std::string dev_tools_window_key = StringFormat("%i-dev-tools-disabled", AccountID());
-		if (DataBucket::GetData(dev_tools_window_key) == "true") {
+		const auto dev_tools_key = fmt::format("{}-dev-tools-disabled", AccountID());
+		if (DataBucket::GetData(dev_tools_key) == "true") {
 			dev_tools_enabled = false;
 		}
 	}
