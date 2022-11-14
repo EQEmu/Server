@@ -2487,6 +2487,16 @@ bool Perl_Client_HasRecipeLearned(Client* self, uint32 recipe_id) // @categories
 	return self->HasRecipeLearned(recipe_id);
 }
 
+bool Perl_Client_SendGMCommand(Client* self, std::string message) // @categories Script Utility
+{
+	return self->SendGMCommand(message);
+}
+
+bool Perl_Client_SendGMCommand(Client* self, std::string message, bool ignore_status) // @categories Script Utility
+{
+	return self->SendGMCommand(message, ignore_status);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -2805,6 +2815,8 @@ void perl_register_client()
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpells", &Perl_Client_ScribeSpells);
 	package.add("SendColoredText", &Perl_Client_SendColoredText);
+	package.add("SendGMCommand", (bool(*)(Client*, std::string))&Perl_Client_SendGMCommand);
+	package.add("SendGMCommand", (bool(*)(Client*, std::string, bool))&Perl_Client_SendGMCommand);
 	package.add("SendMarqueeMessage", &Perl_Client_SendMarqueeMessage);
 	package.add("SendOPTranslocateConfirm", &Perl_Client_SendOPTranslocateConfirm);
 	package.add("SendPEQZoneFlagInfo", &Perl_Client_SendPEQZoneFlagInfo);

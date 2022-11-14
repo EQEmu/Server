@@ -908,6 +908,8 @@ public:
 	int GetSpentAA() { return m_pp.aapoints_spent; }
 	uint32 GetRequiredAAExperience();
 
+	bool SendGMCommand(std::string message, bool ignore_status = false);
+
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();
