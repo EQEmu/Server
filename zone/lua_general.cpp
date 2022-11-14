@@ -3525,6 +3525,10 @@ std::string lua_popup_table_row(std::string message) {
 	return DialogueWindow::TableRow(message);
 }
 
+void lua_zone_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4010,6 +4014,7 @@ luabind::scope lua_register_general() {
 		luabind::def("popup_table_cell", (std::string(*)(void))&lua_popup_table_cell),
 		luabind::def("popup_table_cell", (std::string(*)(std::string))&lua_popup_table_cell),
 		luabind::def("popup_table_row", &lua_popup_table_row),
+		luabind::def("zone_marquee", &lua_zone_marquee),
 
 		/*
 			Cross Zone

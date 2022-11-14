@@ -5761,3 +5761,18 @@ void EntityList::DespawnGridNodes(int32 grid_id) {
 		}
 	}
 }
+
+void EntityList::Marquee(
+	uint32 type,
+	uint32 priority,
+	uint32 fade_in,
+	uint32 fade_out,
+	uint32 duration,
+	std::string message
+) {
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+		}
+	}
+}

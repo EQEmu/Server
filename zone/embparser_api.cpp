@@ -3797,6 +3797,15 @@ std::string Perl__popuptablerow(std::string message) {
 	return DialogueWindow::TableRow(message);
 }
 
+void Perl__zonemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4393,6 +4402,7 @@ void perl_register_quest()
 	package.add("write", &Perl__write);
 	package.add("ze", &Perl__ze);
 	package.add("zone", &Perl__zone);
+	package.add("zonemarquee", &Perl__zonemarquee);
 	package.add("zonegroup", &Perl__zonegroup);
 	package.add("zoneraid", &Perl__zoneraid);
 
