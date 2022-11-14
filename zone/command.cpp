@@ -120,7 +120,7 @@ int command_init(void)
 		command_add("dbspawn2", "[Spawngroup ID] [Respawn] [Variance] [Condition ID] [Condition Minimum] - Spawn an NPC from a predefined row in the spawn2 table, Respawn and Variance are in Seconds (condition is optional)", AccountStatus::GMAdmin, command_dbspawn2) ||
 		command_add("delacct", "[accountname] - Delete an account", AccountStatus::GMLeadAdmin, command_delacct) ||
 		command_add("delpetition", "[petition number] - Delete a petition", AccountStatus::ApprenticeGuide, command_delpetition) ||
-		command_add("depop", "Depop your NPC target", AccountStatus::Guide, command_depop) ||
+		command_add("depop", "[Start Spawn Timer] Depop your NPC target and optionally start their spawn timer (false by default)", AccountStatus::Guide, command_depop) ||
 		command_add("depopzone", "Depop the zone", AccountStatus::GMAdmin, command_depopzone) ||
 		command_add("devtools", "Manages devtools", AccountStatus::GMMgmt, command_devtools) ||
 		command_add("disablerecipe",  "[Recipe ID] - Disables a Recipe", AccountStatus::QuestTroupe, command_disablerecipe) ||
