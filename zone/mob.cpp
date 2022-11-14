@@ -2320,24 +2320,18 @@ void Mob::ShowStats(Client* client)
 	}
 }
 
-void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter)
+void Mob::DoAnim(const int animation_id, int animation_speed, bool ackreq, eqFilterType filter)
 {
 	if (!attack_anim_timer.Check()) {
 		return;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-	auto *anim  = (Animation_Struct *) outapp->pBuffer;
-	anim->spawnid = GetID();
+	auto *a  = (Animation_Struct *) outapp->pBuffer;
 
-	if (type == 0) {
-		anim->action = animnum;
-		anim->speed  = 10;
-	}
-	else {
-		anim->action = animnum;
-		anim->speed  = type;
-	}
+	a->spawnid = GetID();
+	a->action  = animation_id;
+	a->speed   = animation_speed ? animation_speed : 10;
 
 	entity_list.QueueCloseClients(
 		this, /* Sender */
