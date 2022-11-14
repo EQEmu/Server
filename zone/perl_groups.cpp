@@ -126,6 +126,11 @@ uint32_t Perl_Group_GetLowestLevel(Group* self) // @categories Script Utility, G
 	return self->GetLowestLevel();
 }
 
+uint32_t Perl_Group_GetAverageLevel(Group* self) // @categories Script Utility, Group
+{
+	return self->GetAvgLevel();
+}
+
 void perl_register_group()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -135,6 +140,7 @@ void perl_register_group()
 	package.add("DisbandGroup", &Perl_Group_DisbandGroup);
 	package.add("DoesAnyMemberHaveExpeditionLockout", (bool(*)(Group*, std::string, std::string))&Perl_Group_DoesAnyMemberHaveExpeditionLockout);
 	package.add("DoesAnyMemberHaveExpeditionLockout", (bool(*)(Group*, std::string, std::string, int))&Perl_Group_DoesAnyMemberHaveExpeditionLockout);
+	package.add("GetAverageLevel", &Perl_Group_GetAverageLevel);
 	package.add("GetHighestLevel", &Perl_Group_GetHighestLevel);
 	package.add("GetID", &Perl_Group_GetID);
 	package.add("GetLeader", &Perl_Group_GetLeader);
