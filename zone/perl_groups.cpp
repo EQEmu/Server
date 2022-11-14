@@ -2,6 +2,7 @@
 
 #ifdef EMBPERL_XS_CLASSES
 
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "embperl.h"
 #include "groups.h"
@@ -34,10 +35,10 @@ void Perl_Group_GroupMessage(Group* self, Mob* sender, const char* message) // @
 
 void Perl_Group_GroupMessage(Group* self, Mob* sender, uint8_t language, const char* message) // @categories Script Utility, Group
 {
-	if ((language >= MAX_PP_LANGUAGE) || (language < 0))
-	{
+	if (!EQ::ValueWithin(language, 0, (MAX_PP_LANGUAGE - 1))) {
 		language = 0;
 	}
+
 	self->GroupMessage(sender, language, 100, message);
 }
 
@@ -101,13 +102,13 @@ uint32_t Perl_Group_GetID(Group* self) // @categories Script Utility, Group
 	return self->GetID();
 }
 
-Client* Perl_Group_GetMember(Group* self, int group_index) // @categories Account and Character, Script Utility, Group
+Client* Perl_Group_GetMember(Group* self, int member_index) // @categories Account and Character, Script Utility, Group
 {
 	Mob* member = nullptr;
-	if (group_index >= 0 && group_index < 6)
-	{
-		member = self->members[group_index];
+	if (EQ::ValueWithin(member_index, 0, 5)) {
+		member = self->members[member_index];
 	}
+
 	return member ? member->CastToClient() : nullptr;
 }
 
