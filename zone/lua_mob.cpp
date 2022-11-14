@@ -2488,6 +2488,11 @@ void Lua_Mob::CloneAppearance(Lua_Mob other, bool clone_name) {
 	self->CloneAppearance(other, clone_name);
 }
 
+uint16 Lua_Mob::GetOwnerID() {
+	Lua_Safe_Call_Int();
+	return self->GetOwnerID();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -2723,6 +2728,7 @@ luabind::scope lua_register_mob() {
 	.def("GetNimbusEffect3", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetNimbusEffect3)
 	.def("GetOrigBodyType", &Lua_Mob::GetOrigBodyType)
 	.def("GetOwner", &Lua_Mob::GetOwner)
+	.def("GetOwner", &Lua_Mob::GetOwnerID)
 	.def("GetPR", &Lua_Mob::GetPR)
 	.def("GetPet", &Lua_Mob::GetPet)
 	.def("GetPetOrder", (int(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
