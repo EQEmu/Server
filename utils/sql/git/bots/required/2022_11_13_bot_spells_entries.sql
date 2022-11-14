@@ -1,7 +1,7 @@
 UPDATE bot_spells_entries SET bucket_comparison = 0 WHERE bucket_comparison IS NULL;
-UPDATE bot_spells_entries SEt min_hp = 0 WHERE min_hp IS NULL;
-UPDATE bot_spells_entries SEt max_hp = 0 WHERE max_hp IS NULL;
-UPDATE bot_spells_entries SEt resist_adjust = 0 WHERE resist_adjust IS NULL;
+UPDATE bot_spells_entries SET min_hp = 0 WHERE min_hp IS NULL;
+UPDATE bot_spells_entries SET max_hp = 0 WHERE max_hp IS NULL;
+UPDATE bot_spells_entries SET resist_adjust = 0 WHERE resist_adjust IS NULL;
 
 ALTER TABLE `bot_spells_entries`
 MODIFY COLUMN `resist_adjust` int(11) NOT NULL DEFAULT 0 AFTER `priority`,
