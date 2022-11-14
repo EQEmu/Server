@@ -121,7 +121,7 @@ int command_init(void)
 		command_add("delacct", "[accountname] - Delete an account", AccountStatus::GMLeadAdmin, command_delacct) ||
 		command_add("delpetition", "[petition number] - Delete a petition", AccountStatus::ApprenticeGuide, command_delpetition) ||
 		command_add("depop", "Depop your NPC target", AccountStatus::Guide, command_depop) ||
-		command_add("depopzone", "Depop the zone", AccountStatus::GMAdmin, command_depopzone) ||
+		command_add("depopzone", "[Start Spawn Timers] - Depop the zone and optionally start spawn timers (false by default)", AccountStatus::GMAdmin, command_depopzone) ||
 		command_add("devtools", "Manages devtools", AccountStatus::GMMgmt, command_devtools) ||
 		command_add("disablerecipe",  "[Recipe ID] - Disables a Recipe", AccountStatus::QuestTroupe, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", AccountStatus::QuestTroupe, command_disarmtrap) ||
