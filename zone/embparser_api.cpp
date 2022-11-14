@@ -26,6 +26,7 @@
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
+#include "dialogue_window.h"
 #include "embperl.h"
 #include "embxs.h"
 #include "entity.h"
@@ -3748,6 +3749,54 @@ std::string Perl__getaaname(int aa_id)
 	return zone->GetAAName(aa_id);
 }
 
+std::string Perl__popupbreak() {
+	return DialogueWindow::Break();
+}
+
+std::string Perl__popupbreak(uint32 break_count) {
+	return DialogueWindow::Break(break_count);
+}
+
+std::string Perl__popupcentermessage(std::string message) {
+	return DialogueWindow::CenterMessage(message);
+}
+
+std::string Perl__popupcolormessage(std::string color, std::string message) {
+	return DialogueWindow::ColorMessage(color, message);
+}
+
+std::string Perl__popupindent() {
+	return DialogueWindow::Indent();
+}
+
+std::string Perl__popupindent(uint32 indent_count) {
+	return DialogueWindow::Indent(indent_count);
+}
+
+std::string Perl__popuplink(std::string link) {
+	return DialogueWindow::Link(link);
+}
+
+std::string Perl__popuplink(std::string link, std::string message) {
+	return DialogueWindow::Link(link, message);
+}
+
+std::string Perl__popuptable(std::string message) {
+	return DialogueWindow::Table(message);
+}
+
+std::string Perl__popuptablecell() {
+	return DialogueWindow::TableCell();
+}
+
+std::string Perl__popuptablecell(std::string message) {
+	return DialogueWindow::TableCell(message);
+}
+
+std::string Perl__popuptablerow(std::string message) {
+	return DialogueWindow::TableRow(message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4220,6 +4269,18 @@ void perl_register_quest()
 	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
+	package.add("popupbreak", (std::string(*)())&Perl__popupbreak);
+	package.add("popupbreak", (std::string(*)(uint32))&Perl__popupbreak);
+	package.add("popupcentermessage", &Perl__popupcentermessage);
+	package.add("popupcolormessage", &Perl__popupcolormessage);
+	package.add("popupindent", (std::string(*)())&Perl__popupindent);
+	package.add("popupindent", (std::string(*)(uint32))&Perl__popupindent);
+	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
+	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
+	package.add("popuptable", &Perl__popuptable);
+	package.add("popuptablecell", (std::string(*)())&Perl__popuptablecell);
+	package.add("popuptablecell", (std::string(*)(std::string))&Perl__popuptablecell);
+	package.add("popuptablerow", &Perl__popuptablerow);
 	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
 	package.add("pvp", &Perl__pvp);
 	package.add("qs_player_event", &Perl__qs_player_event);
