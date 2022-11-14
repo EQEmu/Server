@@ -272,11 +272,6 @@ void Lua_Mob::ChangeSize(double in_size, bool no_restriction) {
 	self->ChangeSize(static_cast<float>(in_size), no_restriction);
 }
 
-void Lua_Mob::RandomizeFeatures(bool send_illusion, bool save_variables) {
-       Lua_Safe_Call_Void();
-       self->RandomizeFeatures(send_illusion, save_variables);
-}
-
 void Lua_Mob::GMMove(double x, double y, double z) {
 	Lua_Safe_Call_Void();
 	self->GMMove(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
@@ -2478,6 +2473,21 @@ Lua_Mob Lua_Mob::GetUltimateOwner() {
 	return Lua_Mob(self->GetUltimateOwner());
 }
 
+bool Lua_Mob::RandomizeFeatures() {
+	Lua_Safe_Call_Bool();
+	return self->RandomizeFeatures();
+}
+
+bool Lua_Mob::RandomizeFeatures(bool send_illusion) {
+	Lua_Safe_Call_Bool();
+	return self->RandomizeFeatures(send_illusion);
+}
+
+bool Lua_Mob::RandomizeFeatures(bool send_illusion, bool save_variables) {
+	Lua_Safe_Call_Bool();
+	return self->RandomizeFeatures(send_illusion, save_variables);
+}
+
 void Lua_Mob::CloneAppearance(Lua_Mob other) {
 	Lua_Safe_Call_Void();
 	self->CloneAppearance(other);
@@ -2821,7 +2831,9 @@ luabind::scope lua_register_mob() {
 	.def("ProjectileAnimation", (void(Lua_Mob::*)(Lua_Mob,int,bool,double,double,double,double))&Lua_Mob::ProjectileAnimation)
 	.def("QuestSay", (void(Lua_Mob::*)(Lua_Client,const char *))&Lua_Mob::QuestSay)
 	.def("QuestSay", (void(Lua_Mob::*)(Lua_Client,const char *,luabind::adl::object))&Lua_Mob::QuestSay)
-	.def("RandomizeFeatures", (void(Lua_Mob::*)(bool,bool))&Lua_Mob::RandomizeFeatures)
+	.def("RandomizeFeatures", (bool(Lua_Mob::*)(void))&Lua_Mob::RandomizeFeatures)
+	.def("RandomizeFeatures", (bool(Lua_Mob::*)(bool))&Lua_Mob::RandomizeFeatures)
+	.def("RandomizeFeatures", (bool(Lua_Mob::*)(bool,bool))&Lua_Mob::RandomizeFeatures)
 	.def("RangedAttack", &Lua_Mob::RangedAttack)
 	.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects)
 	.def("RemoveNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::RemoveNimbusEffect)

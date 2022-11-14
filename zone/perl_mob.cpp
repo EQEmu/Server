@@ -277,11 +277,6 @@ void Perl_Mob_ChangeSize(Mob* self, float in_size, bool no_restriction) // @cate
 	self->ChangeSize(in_size, no_restriction);
 }
 
-void Perl_Mob_RandomizeFeatures(Mob* self, bool send_illusion, bool save_variables) // @categories Script Utility
-{
-	self->RandomizeFeatures(send_illusion, save_variables);
-}
-
 void Perl_Mob_GMMove(Mob* self, float x, float y, float z) // @categories Script Utility
 {
 	self->GMMove(x, y, z);
@@ -2457,6 +2452,21 @@ Mob* Perl_Mob_GetUltimateOwner(Mob* self) // @categories Script Utility, Pet
 	return self->GetUltimateOwner();
 }
 
+bool Perl_Mob_RandomizeFeatures(Mob* self) // @categories Script Utility
+{
+	return self->RandomizeFeatures();
+}
+
+bool Perl_Mob_RandomizeFeatures(Mob* self, bool send_illusion) // @categories Script Utility
+{
+	return self->RandomizeFeatures(send_illusion);
+}
+
+bool Perl_Mob_RandomizeFeatures(Mob* self, bool send_illusion, bool save_variables) // @categories Script Utility
+{
+	return self->RandomizeFeatures(send_illusion, save_variables);
+}
+
 void Perl_Mob_CloneAppearance(Mob* self, Mob* other) // @categories Script Utility
 {
 	self->CloneAppearance(other);
@@ -2818,7 +2828,9 @@ void perl_register_mob()
 	package.add("ProjectileAnim", (void(*)(Mob*, Mob*, int, bool, float, float, float))&Perl_Mob_ProjectileAnim);
 	package.add("ProjectileAnim", (void(*)(Mob*, Mob*, int, bool, float, float, float, float))&Perl_Mob_ProjectileAnim);
 	package.add("ProjectileAnim", (void(*)(Mob*, Mob*, int, bool, float, float, float, float, const char*))&Perl_Mob_ProjectileAnim);
-	package.add("RandomizeFeatures", &Perl_Mob_RandomizeFeatures);
+	package.add("RandomizeFeatures", (bool(*)(Mob*))&Perl_Mob_RandomizeFeatures);
+	package.add("RandomizeFeatures", (bool(*)(Mob*, bool))&Perl_Mob_RandomizeFeatures);
+	package.add("RandomizeFeatures", (bool(*)(Mob*, bool, bool))&Perl_Mob_RandomizeFeatures);
 	package.add("RangedAttack", &Perl_Mob_RangedAttack);
 	package.add("RemoveAllAppearanceEffects", &Perl_Mob_RemoveAllAppearanceEffects);
 	package.add("RemoveAllNimbusEffects", &Perl_Mob_RemoveAllNimbusEffects);
