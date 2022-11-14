@@ -1030,7 +1030,7 @@ void Perl_Mob_SetOwnerID(Mob* self, uint16 new_owner_id) // @categories Pet
 	self->SetOwnerID(new_owner_id);
 }
 
-int Perl_Mob_GetOwnerID(Mob* self) // @categories Script Utility, Pet
+uint16 Perl_Mob_GetOwnerID(Mob* self) // @categories Script Utility, Pet
 {
 	return self->GetOwnerID();
 }
@@ -2477,6 +2477,11 @@ void Perl_Mob_CloneAppearance(Mob* self, Mob* other, bool clone_name) // @catego
 	self->CloneAppearance(other, clone_name);
 }
 
+Mob* Perl_Mob_GetOwner(Mob* self) // @categories Script Utility, Pet
+{
+	return self->GetOwner();
+}
+
 #ifdef BOTS
 Bot* Perl_Mob_CastToBot(Mob* self)
 {
@@ -2711,6 +2716,7 @@ void perl_register_mob()
 	package.add("GetNimbusEffect1", &Perl_Mob_GetNimbusEffect1);
 	package.add("GetNimbusEffect2", &Perl_Mob_GetNimbusEffect2);
 	package.add("GetNimbusEffect3", &Perl_Mob_GetNimbusEffect3);
+	package.add("GetOwner", &Perl_Mob_GetOwner);
 	package.add("GetOwnerID", &Perl_Mob_GetOwnerID);
 	package.add("GetPR", &Perl_Mob_GetPR);
 	package.add("GetPetID", &Perl_Mob_GetPetID);
