@@ -17,7 +17,7 @@ typedef struct {
 	CmdFuncPtr function; // null means perl function
 } CommandRecord;
 
-extern int (*command_dispatch)(Client *,std::string,bool);
+extern int (*command_dispatch)(Client *, std::string, bool);
 extern int command_count; // Commands Loaded Count
 
 // Command Utilities

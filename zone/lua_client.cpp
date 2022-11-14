@@ -2925,7 +2925,7 @@ luabind::scope lua_register_client() {
 	.def("SendItemScale", (void(Lua_Client::*)(Lua_ItemInst))&Lua_Client::SendItemScale)
 	.def("SendGMCommand", (bool(Lua_Client::*)(std::string))&Lua_Client::SendGMCommand)
 	.def("SendGMCommand", (bool(Lua_Client::*)(std::string,bool))&Lua_Client::SendGMCommand)
-	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32,uint32,uint32,uint32,uint32,std::string))&Lua_Client::SendMarqueeMessage)
+	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("SendOPTranslocateConfirm", (void(Lua_Client::*)(Lua_Mob,int))&Lua_Client::SendOPTranslocateConfirm)
 	.def("SendPEQZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendPEQZoneFlagInfo)
 	.def("SendSound", (void(Lua_Client::*)(void))&Lua_Client::SendSound)

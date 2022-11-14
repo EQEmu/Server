@@ -48,7 +48,7 @@ int command_count; // how many commands we have
 
 // this is the pointer to the dispatch function, updated once
 // init has been performed to point at the real function
-int (*command_dispatch)(Client *,std::string,bool) = command_notavail;
+int (*command_dispatch)(Client *, std::string, bool) = command_notavail;
 
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
