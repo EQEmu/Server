@@ -1865,12 +1865,20 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 
 Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, Client *exclude_client)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
 	std::vector<Client*> clients_in_range;
 
 	for (const auto& client : client_list) {
 		if (
 			client.second != exclude_client &&
-			DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance
+			)
 		) {
 			clients_in_range.push_back(client.second);
 		}
@@ -1885,12 +1893,20 @@ Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, C
 
 NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
 	std::vector<NPC*> npcs_in_range;
 
 	for (const auto& npc : npc_list) {
 		if (
 			npc.second != exclude_npc &&
-			DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance
+			)
 		) {
 			npcs_in_range.push_back(npc.second);
 		}
@@ -1905,12 +1921,20 @@ NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* ex
 
 Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
 	std::vector<Mob*> mobs_in_range;
 
 	for (const auto& mob : mob_list) {
 		if (
 			mob.second != exclude_mob &&
-			DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance
+			)
 		) {
 			mobs_in_range.push_back(mob.second);
 		}

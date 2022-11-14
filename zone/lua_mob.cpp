@@ -2488,6 +2488,16 @@ bool Lua_Mob::RandomizeFeatures(bool send_illusion, bool save_variables) {
 	return self->RandomizeFeatures(send_illusion, save_variables);
 }
 
+void Lua_Mob::CloneAppearance(Lua_Mob other) {
+	Lua_Safe_Call_Void();
+	self->CloneAppearance(other);
+}
+
+void Lua_Mob::CloneAppearance(Lua_Mob other, bool clone_name) {
+	Lua_Safe_Call_Void();
+	self->CloneAppearance(other, clone_name);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -2567,6 +2577,8 @@ luabind::scope lua_register_mob() {
 	.def("CheckLoSToLoc", (bool(Lua_Mob::*)(double,double,double,double))&Lua_Mob::CheckLoSToLoc)
 	.def("CheckNumHitsRemaining", &Lua_Mob::CheckNumHitsRemaining)
 	.def("ClearSpecialAbilities", (void(Lua_Mob::*)(void))&Lua_Mob::ClearSpecialAbilities)
+	.def("CloneAppearance", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CloneAppearance)
+	.def("CloneAppearance", (void(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::CloneAppearance)
 	.def("CombatRange", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::CombatRange)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int))&Lua_Mob::Damage)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool))&Lua_Mob::Damage)

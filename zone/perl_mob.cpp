@@ -2467,6 +2467,16 @@ bool Perl_Mob_RandomizeFeatures(Mob* self, bool send_illusion, bool save_variabl
 	return self->RandomizeFeatures(send_illusion, save_variables);
 }
 
+void Perl_Mob_CloneAppearance(Mob* self, Mob* other) // @categories Script Utility
+{
+	self->CloneAppearance(other);
+}
+
+void Perl_Mob_CloneAppearance(Mob* self, Mob* other, bool clone_name) // @categories Script Utility
+{
+	self->CloneAppearance(other, clone_name);
+}
+
 #ifdef BOTS
 Bot* Perl_Mob_CastToBot(Mob* self)
 {
@@ -2547,6 +2557,8 @@ void perl_register_mob()
 	package.add("CheckLoSToLoc", (bool(*)(Mob*, float, float, float, float))&Perl_Mob_CheckLoSToLoc);
 	package.add("ClearFeignMemory", &Perl_Mob_ClearFeignMemory);
 	package.add("ClearSpecialAbilities", &Perl_Mob_ClearSpecialAbilities);
+	package.add("CloneAppearance", (void(*)(Mob*, Mob*))&Perl_Mob_CloneAppearance);
+	package.add("CloneAppearance", (void(*)(Mob*, Mob*, bool))&Perl_Mob_CloneAppearance);
 	package.add("CombatRange", &Perl_Mob_CombatRange);
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int))&Perl_Mob_Damage);
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int, bool))&Perl_Mob_Damage);

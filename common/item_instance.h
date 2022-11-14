@@ -148,6 +148,8 @@ namespace EQ
 		const ItemData* GetItem() const;
 		const ItemData* GetUnscaledItem() const;
 
+		const uint8 GetItemType() const { return m_item ? m_item->ItemType : 255; } // Return 255 so you know there's no valid item
+
 		int16 GetCharges() const				{ return m_charges; }
 		void SetCharges(int16 charges)			{ m_charges = charges; }
 
