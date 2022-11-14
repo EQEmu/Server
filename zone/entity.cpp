@@ -1871,6 +1871,7 @@ Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* ex
 		is_whole_zone = true;
 	}
 
+	auto distance_squared = (distance * distance);
 	std::vector<Bot*> bots_in_range;
 
 	for (const auto& b : bot_list) {
@@ -1878,7 +1879,7 @@ Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* ex
 			b != exclude_bot &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(b->GetPosition()), location) <= distance
+				DistanceSquared(static_cast<glm::vec3>(b->GetPosition()), location) <= distance_squared
 			)
 		) {
 			bots_in_range.push_back(b);
