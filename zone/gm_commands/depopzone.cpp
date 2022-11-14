@@ -9,6 +9,7 @@ void command_depopzone(Client *c, const Seperator *sep)
 	}
 
 	zone->Depop(start_spawn_timers);
+
 	c->Message(
 		Chat::White,
 		fmt::format(
