@@ -463,6 +463,8 @@ public:
 	int GetBuffStatValueBySpell(int spell_id, const char* identifier);
 	void SetBuffDuration(int spell_id);
 	void SetBuffDuration(int spell_id, int duration);
+	void CloneAppearance(Lua_Mob other);
+	void CloneAppearance(Lua_Mob other, bool clone_name);
 };
 
 #endif

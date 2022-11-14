@@ -489,9 +489,11 @@ public:
 	inline void SetDuelWeaponsEquiped(bool val) { has_duelweaponsequiped = val; }
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
+	virtual uint8 ConvertItemTypeToSkillID(uint8 item_type);
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { return 0; }
 	virtual uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const { return(0); }
 	virtual int32 GetEquipmentMaterial(uint8 material_slot) const;
+	virtual uint8 GetEquipmentType(uint8 material_slot) const;
 	virtual int32 GetHerosForgeModel(uint8 material_slot) const;
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
@@ -840,11 +842,26 @@ public:
 
 	int64 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false, uint16 casterid = 0, Mob *caster = nullptr);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
-	void SendIllusionPacket(uint16 in_race, uint8 in_gender = 0xFF, uint8 in_texture = 0xFF, uint8 in_helmtexture = 0xFF,
-		uint8 in_haircolor = 0xFF, uint8 in_beardcolor = 0xFF, uint8 in_eyecolor1 = 0xFF, uint8 in_eyecolor2 = 0xFF,
-		uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF,
-		uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF,
-		uint32 in_drakkin_details = 0xFFFFFFFF, float in_size = -1.0f, bool send_appearance_effects = true);
+	void SendIllusionPacket(
+		uint16 in_race,
+		uint8 in_gender = 0xFF,
+		uint8 in_texture = 0xFF,
+		uint8 in_helmtexture = 0xFF,
+		uint8 in_haircolor = 0xFF,
+		uint8 in_beardcolor = 0xFF,
+		uint8 in_eyecolor1 = 0xFF,
+		uint8 in_eyecolor2 = 0xFF,
+		uint8 in_hairstyle = 0xFF,
+		uint8 in_luclinface = 0xFF,
+		uint8 in_beard = 0xFF,
+		uint8 in_aa_title = 0xFF,
+		uint32 in_drakkin_heritage = 0xFFFFFFFF,
+		uint32 in_drakkin_tattoo = 0xFFFFFFFF,
+		uint32 in_drakkin_details = 0xFFFFFFFF,
+		float in_size = -1.0f,
+		bool send_appearance_effects = true
+	);
+	void CloneAppearance(Mob* other, bool clone_name = false);
 	void SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender = false);
 	bool RandomizeFeatures(bool send_illusion = true, bool set_variables = true);
 	virtual void Stun(int duration);
@@ -1476,7 +1493,7 @@ protected:
 	bool no_target_hotkey;
 	bool rare_spawn;
 	int32 heroic_strikethrough;
-	
+
 	uint32 m_PlayerState;
 	uint32 GetPlayerState() { return m_PlayerState; }
 	void AddPlayerState(uint32 new_state) { m_PlayerState |= new_state; }
