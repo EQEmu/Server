@@ -611,7 +611,7 @@ luabind::scope lua_register_entity_list() {
 	.def("GetRaidByID", (Lua_Raid(Lua_EntityList::*)(int))&Lua_EntityList::GetRaidByID)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(void))&Lua_EntityList::GetRandomClient)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomClient)
-	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float,float,float,float, Lua_Client))&Lua_EntityList::GetRandomClient)
+	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float,float,float,float,Lua_Client))&Lua_EntityList::GetRandomClient)
 	.def("GetRandomMob", (Lua_Mob(Lua_EntityList::*)(void))&Lua_EntityList::GetRandomMob)
 	.def("GetRandomMob", (Lua_Mob(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomMob)
 	.def("GetRandomMob", (Lua_Mob(Lua_EntityList::*)(float,float,float,float,Lua_Mob))&Lua_EntityList::GetRandomMob)
