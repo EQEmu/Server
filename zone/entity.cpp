@@ -1872,6 +1872,7 @@ Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* ex
 	}
 
 	auto distance_squared = (distance * distance);
+
 	std::vector<Bot*> bots_in_range;
 
 	for (const auto& b : bot_list) {
@@ -1902,6 +1903,8 @@ Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, C
 		is_whole_zone = true;
 	}
 
+	auto distance_squared = (distance * distance);
+
 	std::vector<Client*> clients_in_range;
 
 	for (const auto& client : client_list) {
@@ -1909,7 +1912,7 @@ Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, C
 			client.second != exclude_client &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance
+				DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance_squared
 			)
 		) {
 			clients_in_range.push_back(client.second);
@@ -1930,6 +1933,8 @@ NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* ex
 		is_whole_zone = true;
 	}
 
+	auto distance_squared = (distance * distance);
+
 	std::vector<NPC*> npcs_in_range;
 
 	for (const auto& npc : npc_list) {
@@ -1937,7 +1942,7 @@ NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* ex
 			npc.second != exclude_npc &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance
+				DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance_squared
 			)
 		) {
 			npcs_in_range.push_back(npc.second);
@@ -1958,6 +1963,8 @@ Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* ex
 		is_whole_zone = true;
 	}
 
+	auto distance_squared = (distance * distance);
+
 	std::vector<Mob*> mobs_in_range;
 
 	for (const auto& mob : mob_list) {
@@ -1965,7 +1972,7 @@ Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* ex
 			mob.second != exclude_mob &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance
+				DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance_squared
 			)
 		) {
 			mobs_in_range.push_back(mob.second);
