@@ -2,7 +2,20 @@
 
 void command_depopzone(Client *c, const Seperator *sep)
 {
-	zone->Depop();
-	c->Message(Chat::White, "Zone depoped.");
+	auto start_spawn_timers = false;
+
+	if (sep->IsNumber(1)) {
+		start_spawn_timers = std::stoi(sep->arg[1]) ? true : false;
+	}
+
+	zone->Depop(start_spawn_timers);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Zone depopped{}.",
+			start_spawn_timers ? " and spawn timers started" : ""
+		).c_str()
+	);
 }
 
