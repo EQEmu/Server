@@ -3,12 +3,25 @@
 
 void command_depop(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget() == 0 || !(c->GetTarget()->IsNPC() || c->GetTarget()->IsNPCCorpse())) {
-		c->Message(Chat::White, "You must have a NPC target for this command. (maybe you meant #depopzone?)");
+	if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+		c->Message(Chat::White, "You must target an NPC to use this command.");
+		return;
 	}
-	else {
-		c->Message(Chat::White, "Depoping '%s'.", c->GetTarget()->GetName());
-		c->GetTarget()->Depop();
-	}
-}
 
+	auto start_spawn_timer = false;
+
+	if (sep->IsNumber(1)) {
+		start_spawn_timer = std::stoi(sep->arg[1]) ? true : false;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Depopping {}{}.",
+			c->GetTargetDescription(c->GetTarget()),
+			start_spawn_timer ? " and starting their spawn timer" : ""
+		).c_str()
+	);
+
+	c->GetTarget()->Depop(start_spawn_timer);
+}

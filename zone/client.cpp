@@ -9368,6 +9368,14 @@ bool Client::IsDevToolsEnabled() const
 
 void Client::SetDevToolsEnabled(bool in_dev_tools_enabled)
 {
+	const auto dev_tools_key = fmt::format("{}-dev-tools-disabled", AccountID());
+
+	if (in_dev_tools_enabled) {
+		DataBucket::DeleteData(dev_tools_key);
+	} else {
+		DataBucket::SetData(dev_tools_key, "true");
+	}
+
 	Client::dev_tools_enabled = in_dev_tools_enabled;
 }
 
