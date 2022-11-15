@@ -531,6 +531,21 @@ NPC* Perl_EntityList_GetRandomNPC(EntityList* self, float x, float y, float z, f
 	return entity_list.GetRandomNPC(glm::vec3(x, y, z), (distance * distance), exclude_npc);
 }
 
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, std::string message)
+{
+	self->Marquee(type, message);
+}
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, std::string message, uint32 duration)
+{
+	self->Marquee(type, message, duration);
+}
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	self->Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 void perl_register_entitylist()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -596,6 +611,9 @@ void perl_register_entitylist()
 	package.add("HalveAggro", &Perl_EntityList_HalveAggro);
 	package.add("IsMobSpawnedByNpcTypeID", &Perl_EntityList_IsMobSpawnedByNpcTypeID);
 	package.add("MakeNameUnique", &Perl_EntityList_MakeNameUnique);
+	package.add("Marquee", (void(*)(EntityList*, uint32, std::string))&Perl_EntityList_Marquee);
+	package.add("Marquee", (void(*)(EntityList*, uint32, std::string, uint32))&Perl_EntityList_Marquee);
+	package.add("Marquee", (void(*)(EntityList*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_EntityList_Marquee);
 	package.add("Message", &Perl_EntityList_Message);
 	package.add("MessageClose", &Perl_EntityList_MessageClose);
 	package.add("MessageGroup", &Perl_EntityList_MessageGroup);
