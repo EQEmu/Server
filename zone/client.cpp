@@ -8639,14 +8639,10 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 void Client::SendMarqueeMessage(uint32 type, std::string message, uint32 duration)
 {
 	if (!duration || !message.length()) {
-		Message(Chat::White, "SMM1 No duration or message length somehow.");
 		return;
 	}
 
-	Message(Chat::White, fmt::format("SMM1 {} {} {}.", type, message, duration).c_str());
-
 	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + message.length());
-
 	ClientMarqueeMessage_Struct* cms = (ClientMarqueeMessage_Struct*) outapp.pBuffer;
 
 	cms->type = type;
@@ -8664,11 +8660,8 @@ void Client::SendMarqueeMessage(uint32 type, std::string message, uint32 duratio
 void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
 {
 	if (!duration || !message.length()) {
-		Message(Chat::White, "SMM2 No duration or message length somehow.");
 		return;
 	}
-
-	Message(Chat::White, fmt::format("SMM2 {} {} {} {} {} {}.", type, priority, fade_in, fade_out, duration, message).c_str());
 
 	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + message.length());
 	ClientMarqueeMessage_Struct* cms = (ClientMarqueeMessage_Struct*) outapp.pBuffer;
