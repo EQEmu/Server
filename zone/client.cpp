@@ -7489,7 +7489,7 @@ void Client::ShowXTargets(Client *c)
 
 	auto xtarget_count = 0;
 
-	for(int i = 0; i < GetMaxXTargets(); ++i) {
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		c->Message(
 			Chat::White,
 			fmt::format(
