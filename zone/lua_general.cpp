@@ -3526,6 +3526,10 @@ std::string lua_popup_table_row(std::string message) {
 }
 
 void lua_zone_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	if (!zone) {
+		return;
+	}
+
 	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
 }
 
