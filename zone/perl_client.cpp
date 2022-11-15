@@ -2759,6 +2759,9 @@ void perl_register_client()
 	package.add("LoadZoneFlags", &Perl_Client_LoadZoneFlags);
 	package.add("LockSharedTask", &Perl_Client_LockSharedTask);
 	package.add("MarkCompassLoc", &Perl_Client_MarkCompassLoc);
+	package.add("Marquee", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("Marquee", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
+	package.add("Marquee", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
 	package.add("MaxSkill", (int(*)(Client*, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16, uint16))&Perl_Client_MaxSkill);
