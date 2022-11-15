@@ -1603,11 +1603,6 @@ void Perl_Client_ExpeditionMessage(Client* self, int expedition_id, const char* 
 	self->ExpeditionSay(message, expedition_id);
 }
 
-void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg) // @categories Script Utility
-{
-	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, std::move(msg));
-}
-
 void Perl_Client_SendColoredText(Client* self, uint32 color, std::string msg) // @categories Script Utility
 {
 	self->SendColoredText(color, std::move(msg));
@@ -2497,6 +2492,21 @@ bool Perl_Client_SendGMCommand(Client* self, std::string message, bool ignore_st
 	return self->SendGMCommand(message, ignore_status);
 }
 
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, std::string message) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, message);
+}
+
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, std::string message, uint32 duration) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, message, duration);
+}
+
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -2817,7 +2827,9 @@ void perl_register_client()
 	package.add("SendColoredText", &Perl_Client_SendColoredText);
 	package.add("SendGMCommand", (bool(*)(Client*, std::string))&Perl_Client_SendGMCommand);
 	package.add("SendGMCommand", (bool(*)(Client*, std::string, bool))&Perl_Client_SendGMCommand);
-	package.add("SendMarqueeMessage", &Perl_Client_SendMarqueeMessage);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
 	package.add("SendOPTranslocateConfirm", &Perl_Client_SendOPTranslocateConfirm);
 	package.add("SendPEQZoneFlagInfo", &Perl_Client_SendPEQZoneFlagInfo);
 	package.add("SendSound", &Perl_Client_SendSound);

@@ -1531,7 +1531,8 @@ public:
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
 	void SendWebLink(const char* website);
-	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
+	void SendMarqueeMessage(uint32 type, std::string message, uint32 duration = 3000);
+	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void SendSpellAnim(uint16 targetid, uint16 spell_id);
 
 	void DuplicateLoreMessage(uint32 ItemID);

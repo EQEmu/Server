@@ -1632,11 +1632,6 @@ void Lua_Client::SetConsumption(int in_hunger, int in_thirst) {
 	self->SetConsumption(in_hunger, in_thirst);
 }
 
-void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg) {
-	Lua_Safe_Call_Void();
-	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
-}
-
 void Lua_Client::SendColoredText(uint32 type, std::string msg) {
 	Lua_Safe_Call_Void();
 	self->SendColoredText(type, msg);
@@ -2603,6 +2598,21 @@ bool Lua_Client::SendGMCommand(std::string message, bool ignore_status) {
 	return self->SendGMCommand(message, ignore_status);
 }
 
+void Lua_Client::SendMarqueeMessage(uint32 type, std::string message) {
+	Lua_Safe_Call_Void();
+	self->SendMarqueeMessage(type, message);
+}
+
+void Lua_Client::SendMarqueeMessage(uint32 type, std::string message, uint32 duration) {
+	Lua_Safe_Call_Void();
+	self->SendMarqueeMessage(type, message, duration);
+}
+
+void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	Lua_Safe_Call_Void();
+	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2925,6 +2935,8 @@ luabind::scope lua_register_client() {
 	.def("SendItemScale", (void(Lua_Client::*)(Lua_ItemInst))&Lua_Client::SendItemScale)
 	.def("SendGMCommand", (bool(Lua_Client::*)(std::string))&Lua_Client::SendGMCommand)
 	.def("SendGMCommand", (bool(Lua_Client::*)(std::string,bool))&Lua_Client::SendGMCommand)
+	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, std::string))&Lua_Client::SendMarqueeMessage)
+	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, std::string, uint32))&Lua_Client::SendMarqueeMessage)
 	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("SendOPTranslocateConfirm", (void(Lua_Client::*)(Lua_Mob,int))&Lua_Client::SendOPTranslocateConfirm)
 	.def("SendPEQZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendPEQZoneFlagInfo)

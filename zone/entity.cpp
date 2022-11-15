@@ -5762,6 +5762,14 @@ void EntityList::DespawnGridNodes(int32 grid_id) {
 	}
 }
 
+void EntityList::Marquee(uint32 type, std::string message, uint32 duration) {
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->SendMarqueeMessage(type, message, duration);
+		}
+	}
+}
+
 void EntityList::Marquee(
 	uint32 type,
 	uint32 priority,
