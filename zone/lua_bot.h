@@ -39,9 +39,12 @@ public:
 	uint32 CountBotItem(uint32 item_id);
 	Lua_ItemInst GetBotItem(uint16 slot_id);
 	uint32 GetBotItemIDBySlot(uint16 slot_id);
+	int GetExpansionBitmask();
 	Lua_Mob GetOwner();
 	bool HasBotItem(uint32 item_id);
 	void RemoveBotItem(uint32 item_id);
+	void SetExpansionBitmask(int expansion_bitmask);
+	void SetExpansionBitmask(int expansion_bitmask, bool save);
 };
 
 #endif

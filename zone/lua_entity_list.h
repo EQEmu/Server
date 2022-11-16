@@ -88,6 +88,9 @@ public:
 	Lua_Spawn GetSpawnByID(uint32 id);
 	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Lua_Mob p);
+	void Marquee(uint32 type, std::string message);
+	void Marquee(uint32 type, std::string message, uint32 duration);
+	void Marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void Message(uint32 guild_dbid, uint32 type, const char *message);
 	void MessageStatus(uint32 guild_dbid, int min_status, uint32 type, const char *message);
 	void MessageClose(Lua_Mob sender, bool skip_sender, float dist, uint32 type, const char *message);

@@ -727,7 +727,8 @@ public:
 	bool IsOnFeignMemory(Mob *attacker) const;
 	void PrintHateListToClient(Client *who) { hate_list.PrintHateListToClient(who); }
 	std::list<struct_HateList*>& GetHateList() { return hate_list.GetHateList(); }
-	std::list<struct_HateList*> GetHateListByDistance(int distance = 0) { return hate_list.GetHateListByDistance(distance); }
+	std::list<struct_HateList*> GetFilteredHateList(uint8 filter_type = HateListFilterTypes::All, uint32 distance = 0) { return hate_list.GetFilteredHateList(filter_type, distance); }
+	void DamageHateList(uint32 damage, uint8 damage_target_type = HateListFilterTypes::All, uint32 distance = 0, bool is_percentage = false) { hate_list.DamageHateList(damage, damage_target_type, distance, is_percentage); }
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	static bool CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarget, float sizeTarget);

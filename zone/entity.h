@@ -339,6 +339,8 @@ public:
 
 	void DescribeAggro(Client *to_who, NPC *from_who, float dist, bool verbose);
 
+	void	Marquee(uint32 type, std::string message, uint32 duration = 3000);
+	void	Marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
 	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);

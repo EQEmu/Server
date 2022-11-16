@@ -3797,6 +3797,48 @@ std::string Perl__popuptablerow(std::string message) {
 	return DialogueWindow::TableRow(message);
 }
 
+void Perl__marquee(uint32 type, std::string message)
+{
+	quest_manager.marquee(type, message);
+}
+
+void Perl__marquee(uint32 type, std::string message, uint32 duration)
+{
+	quest_manager.marquee(type, message, duration);
+}
+
+void Perl__marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	quest_manager.marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message, uint32 duration)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message, duration);
+}
+
+void Perl__zonemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4241,6 +4283,9 @@ void perl_register_quest()
 	package.add("level", &Perl__level);
 	package.add("log", &Perl__log);
 	package.add("log_combat", &Perl__log_combat);
+	package.add("marquee", (void(*)(uint32, std::string))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, std::string, uint32))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__marquee);
 	package.add("me", &Perl__me);
 	package.add("message", &Perl__message);
 	package.add("modifynpcstat", &Perl__ModifyNPCStat);
@@ -4393,6 +4438,9 @@ void perl_register_quest()
 	package.add("write", &Perl__write);
 	package.add("ze", &Perl__ze);
 	package.add("zone", &Perl__zone);
+	package.add("zonemarquee", (void(*)(uint32, std::string))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, std::string, uint32))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__zonemarquee);
 	package.add("zonegroup", &Perl__zonegroup);
 	package.add("zoneraid", &Perl__zoneraid);
 

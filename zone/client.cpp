@@ -8636,14 +8636,35 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 	}
 }
 
-void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
+void Client::SendMarqueeMessage(uint32 type, std::string message, uint32 duration)
 {
-	if(duration == 0 || msg.length() == 0) {
+	if (!duration || !message.length()) {
 		return;
 	}
 
-	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + msg.length());
-	ClientMarqueeMessage_Struct *cms = (ClientMarqueeMessage_Struct*)outapp.pBuffer;
+	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + message.length());
+	ClientMarqueeMessage_Struct* cms = (ClientMarqueeMessage_Struct*) outapp.pBuffer;
+
+	cms->type = type;
+	cms->unk04 = 10;
+	cms->priority = 510;
+	cms->fade_in_time = 0;
+	cms->fade_out_time = 3000;
+	cms->duration = duration;
+
+	strcpy(cms->msg, message.c_str());
+
+	QueuePacket(&outapp);
+}
+
+void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!duration || !message.length()) {
+		return;
+	}
+
+	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + message.length());
+	ClientMarqueeMessage_Struct* cms = (ClientMarqueeMessage_Struct*) outapp.pBuffer;
 
 	cms->type = type;
 	cms->unk04 = 10;
@@ -8651,7 +8672,8 @@ void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, ui
 	cms->fade_in_time = fade_in;
 	cms->fade_out_time = fade_out;
 	cms->duration = duration;
-	strcpy(cms->msg, msg.c_str());
+
+	strcpy(cms->msg, message.c_str());
 
 	QueuePacket(&outapp);
 }
