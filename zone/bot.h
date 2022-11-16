@@ -425,7 +425,14 @@ public:
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
 
-	static NPCType *CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender);
+	static NPCType *CreateDefaultNPCTypeStructForBot(
+		std::string botName,
+		std::string botLastName,
+		uint8 botLevel,
+		uint16 botRace,
+		uint8 botClass,
+		uint8 gender
+	);
 
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
@@ -583,6 +590,9 @@ public:
 	void SetDrakkinTattoo(uint32 value) { drakkin_tattoo = value; }
 	bool DyeArmor(int16 slot_id, uint32 rgb, bool all_flag = false, bool save_flag = true);
 
+	int GetExpansionBitmask();
+	void SetExpansionBitmask(int expansion_bitmask, bool save = true);
+
 	static void SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id);
 
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
@@ -594,7 +604,43 @@ public:
 	virtual void BotRangedAttack(Mob* other);
 
 	// Publicized private functions
-	static NPCType *FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
+	static NPCType *FillNPCTypeStruct(
+		uint32 botSpellsID,
+		std::string botName,
+		std::string botLastName,
+		uint8 botLevel,
+		uint16 botRace,
+		uint8 botClass,
+		uint8 gender,
+		float size,
+		uint32 face,
+		uint32 hairStyle,
+		uint32 hairColor,
+		uint32 eyeColor,
+		uint32 eyeColor2,
+		uint32 beard,
+		uint32 beardColor,
+		uint32 drakkinHeritage,
+		uint32 drakkinTattoo,
+		uint32 drakkinDetails,
+		int32 hp,
+		int32 mana,
+		int32 mr,
+		int32 cr,
+		int32 dr,
+		int32 fr,
+		int32 pr,
+		int32 corrup,
+		int32 ac,
+		uint32 str,
+		uint32 sta,
+		uint32 dex,
+		uint32 agi,
+		uint32 _int,
+		uint32 wis,
+		uint32 cha,
+		uint32 attack
+	);
 	void BotRemoveEquipItem(uint16 slot_id);
 	void RemoveBotItemBySlot(uint16 slot_id, std::string* error_message);
 	void AddBotItem(
@@ -718,6 +764,7 @@ private:
 	bool _showhelm;
 	bool _pauseAI;
 	uint8 _stopMeleeLevel;
+	int m_expansion_bitmask;
 
 	// Private "base stats" Members
 	int32 _baseMR;

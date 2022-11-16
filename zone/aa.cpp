@@ -36,6 +36,10 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "zonedb.h"
 #include "../common/zone_store.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 extern QueryServ* QServ;
 
 void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
@@ -1594,7 +1598,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	}
 #ifdef BOTS
 	else if (IsBot()) {
-		if (rank->expansion && !(RuleI(Bots, BotExpansionSettings) & (1 << (rank->expansion - 1)))) {
+		if (rank->expansion && !(CastToBot()->GetExpansionBitmask() & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	}
