@@ -7493,7 +7493,7 @@ void Client::ShowXTargets(Client *c)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"XTarget Slot {} | Type: {} ID: {} Name: {}",
+				"xtarget slot [{}] type [{}] ID [{}] name [{}]",
 				i,
 				XTargets[i].Type,
 				XTargets[i].ID,
@@ -7509,9 +7509,11 @@ void Client::ShowXTargets(Client *c)
 	 // so lets use the address as an "ID"
 	c->Message(
 		Chat::White,
-		"XTargetAutoMgr ID %p size %d",
-		GetXTargetAutoMgr(),
-		list.size()
+		fmt::format(
+			"XTargetAutoMgr ID [{}] size [{}]",
+			fmt::ptr(GetXTargetAutoMgr()),
+			list.size()
+		).c_str()
 	);
 
 	int count = 0;
