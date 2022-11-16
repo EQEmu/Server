@@ -3525,6 +3525,42 @@ std::string lua_popup_table_row(std::string message) {
 	return DialogueWindow::TableRow(message);
 }
 
+void lua_marquee(uint32 type, std::string message) {
+	quest_manager.marquee(type, message);
+}
+
+void lua_marquee(uint32 type, std::string message, uint32 duration) {
+	quest_manager.marquee(type, message, duration);
+}
+
+void lua_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	quest_manager.marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_zone_marquee(uint32 type, std::string message) {
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message);
+}
+
+void lua_zone_marquee(uint32 type, std::string message, uint32 duration) {
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message, duration);
+}
+
+void lua_zone_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4010,6 +4046,12 @@ luabind::scope lua_register_general() {
 		luabind::def("popup_table_cell", (std::string(*)(void))&lua_popup_table_cell),
 		luabind::def("popup_table_cell", (std::string(*)(std::string))&lua_popup_table_cell),
 		luabind::def("popup_table_row", &lua_popup_table_row),
+		luabind::def("marquee", (void(*)(uint32,std::string))&lua_marquee),
+		luabind::def("marquee", (void(*)(uint32,std::string,uint32))&lua_marquee),
+		luabind::def("marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_marquee),
+		luabind::def("zone_marquee", (void(*)(uint32,std::string))&lua_zone_marquee),
+		luabind::def("zone_marquee", (void(*)(uint32,std::string,uint32))&lua_zone_marquee),
+		luabind::def("zone_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_zone_marquee),
 
 		/*
 			Cross Zone

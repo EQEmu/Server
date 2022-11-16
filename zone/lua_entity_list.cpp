@@ -555,6 +555,21 @@ Lua_NPC Lua_EntityList::GetRandomNPC(float x, float y, float z, float distance, 
 	return self->GetRandomNPC(glm::vec3(x, y, z), distance, exclude_npc);
 }
 
+void Lua_EntityList::Marquee(uint32 type, std::string message) {
+	Lua_Safe_Call_Void();
+	self->Marquee(type, message);
+}
+
+void Lua_EntityList::Marquee(uint32 type, std::string message, uint32 duration) {
+	Lua_Safe_Call_Void();
+	self->Marquee(type, message, duration);
+}
+
+void Lua_EntityList::Marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	Lua_Safe_Call_Void();
+	self->Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 luabind::scope lua_register_entity_list() {
 	return luabind::class_<Lua_EntityList>("EntityList")
 	.def(luabind::constructor<>())
@@ -624,6 +639,9 @@ luabind::scope lua_register_entity_list() {
 	.def("HalveAggro", (void(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::HalveAggro)
 	.def("IsMobSpawnedByNpcTypeID", (bool(Lua_EntityList::*)(int))&Lua_EntityList::IsMobSpawnedByNpcTypeID)
 	.def("MakeNameUnique", (std::string(Lua_EntityList::*)(const char*))&Lua_EntityList::MakeNameUnique)
+	.def("Marquee", (void(Lua_EntityList::*)(uint32, std::string))&Lua_EntityList::Marquee)
+	.def("Marquee", (void(Lua_EntityList::*)(uint32, std::string, uint32))&Lua_EntityList::Marquee)
+	.def("Marquee", (void(Lua_EntityList::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_EntityList::Marquee)
 	.def("Message", (void(Lua_EntityList::*)(uint32, uint32, const char*))&Lua_EntityList::Message)
 	.def("MessageClose", (void(Lua_EntityList::*)(Lua_Mob, bool, float, uint32, const char*))&Lua_EntityList::MessageClose)
 	.def("MessageGroup", (void(Lua_EntityList::*)(Lua_Mob, bool, uint32, const char*))&Lua_EntityList::MessageGroup)

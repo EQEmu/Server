@@ -179,8 +179,8 @@ public:
 	int GetWaypointID();
 	void SetCurrentWP(int wp);
 	double GetSize();
-	void Message(int type, const char *message);
-	void MessageString(int type, int string_id, uint32 distance);
+	void Message(uint32 type, const char *message);
+	void MessageString(uint32 type, uint32 string_id, uint32 distance);
 	void Say(const char *message);
 	void Say(const char* message, int language);
 	void QuestSay(Lua_Client client, const char *message);

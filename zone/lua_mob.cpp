@@ -748,7 +748,7 @@ double Lua_Mob::GetSize() {
 	return self->GetSize();
 }
 
-void Lua_Mob::Message(int type, const char *message) {
+void Lua_Mob::Message(uint32 type, const char *message) {
 	Lua_Safe_Call_Void();
 
 	// auto inject saylinks
@@ -765,7 +765,7 @@ void Lua_Mob::Message(int type, const char *message) {
 	}
 }
 
-void Lua_Mob::MessageString(int type, int string_id, uint32 distance) {
+void Lua_Mob::MessageString(uint32 type, uint32 string_id, uint32 distance) {
 	Lua_Safe_Call_Void();
 	self->MessageString(type, string_id, distance);
 }
