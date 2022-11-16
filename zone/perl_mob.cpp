@@ -2333,22 +2333,24 @@ bool Perl_Mob_IsHorse(Mob* self) // @categories Script Utility
 perl::array Perl_Mob_GetHateListByDistance(Mob* self) // @categories Hate and Aggro
 {
 	perl::array result;
-	auto list = self->GetHateListByDistance();
-	for (auto hate_entry : list)
-	{
-		result.push_back(hate_entry);
+
+	auto h_list = self->GetFilteredHateList();
+	for (auto h : h_list) {
+		result.push_back(h);
 	}
+
 	return result;
 }
 
-perl::array Perl_Mob_GetHateListByDistance(Mob* self, int distance) // @categories Hate and Aggro
+perl::array Perl_Mob_GetHateListByDistance(Mob* self, uint32 distance) // @categories Hate and Aggro
 {
 	perl::array result;
-	auto list = self->GetHateListByDistance(distance);
-	for (auto hate_entry : list)
-	{
-		result.push_back(hate_entry);
+
+	auto h_list = self->GetFilteredHateList(HateListFilterTypes::All, distance);
+	for (auto h : h_list) {
+		result.push_back(h);
 	}
+
 	return result;
 }
 
@@ -2482,7 +2484,160 @@ Mob* Perl_Mob_GetOwner(Mob* self) // @categories Script Utility, Pet
 	return self->GetOwner();
 }
 
+void Perl_Mob_DamageHateList(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage);
+}
+
+void Perl_Mob_DamageHateList(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance);
+}
+
+void Perl_Mob_DamageHateListPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, 0, HateListFilterTypes::All, true);
+}
+
+void Perl_Mob_DamageHateListPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance, HateListFilterTypes::All, true);
+}
+
+void Perl_Mob_DamageHateListClients(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, 0, HateListFilterTypes::Clients);
+}
+
+void Perl_Mob_DamageHateListClients(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance, HateListFilterTypes::Clients);
+}
+
+void Perl_Mob_DamageHateListClientsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, 0, HateListFilterTypes::Clients, true);
+}
+
+void Perl_Mob_DamageHateListClientsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance, HateListFilterTypes::Clients, true);
+}
+
+void Perl_Mob_DamageHateListNPCs(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, 0, HateListFilterTypes::NPCs);
+}
+
+void Perl_Mob_DamageHateListNPCs(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance, HateListFilterTypes::NPCs);
+}
+
+void Perl_Mob_DamageHateListNPCsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, 0, HateListFilterTypes::NPCs, true);
+}
+
+void Perl_Mob_DamageHateListNPCsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance, HateListFilterTypes::NPCs, true);
+}
+
+perl::array Perl_Mob_GetHateListClients(Mob* self)
+{
+	perl::array result;
+
+	auto h_list = self->GetFilteredHateList(0, HateListFilterTypes::Clients);
+	for (auto h : h_list) {
+		result.push_back(h);
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetHateListClients(Mob* self, uint32 distance)
+{
+	perl::array result;
+
+	auto h_list = self->GetFilteredHateList(distance, HateListFilterTypes::Clients);
+	for (auto h : h_list) {
+		result.push_back(h);
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetHateListNPCs(Mob* self)
+{
+	perl::array result;
+
+	auto h_list = self->GetFilteredHateList(0, HateListFilterTypes::NPCs);
+	for (auto h : h_list) {
+		result.push_back(h);
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetHateListNPCs(Mob* self, uint32 distance)
+{
+	perl::array result;
+
+	auto h_list = self->GetFilteredHateList(distance, HateListFilterTypes::NPCs);
+	for (auto h : h_list) {
+		result.push_back(h);
+	}
+
+	return result;
+}
+
 #ifdef BOTS
+void Perl_Mob_DamageHateListBots(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, 0, HateListFilterTypes::Bots);
+}
+
+void Perl_Mob_DamageHateListBots(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance, HateListFilterTypes::Bots);
+}
+
+void Perl_Mob_DamageHateListBotsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, 0, HateListFilterTypes::Bots, true);
+}
+
+void Perl_Mob_DamageHateListBotsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
+{
+	self->DamageHateList(damage, distance, HateListFilterTypes::Bots, true);
+}
+
+perl::array Perl_Mob_GetHateListBots(Mob* self)
+{
+	perl::array result;
+
+	auto h_list = self->GetFilteredHateList(0, HateListFilterTypes::Bots);
+	for (auto h : h_list) {
+		result.push_back(h);
+	}
+
+	return result;
+}
+
+perl::array Perl_Mob_GetHateListBots(Mob* self, uint32 distance)
+{
+	perl::array result;
+
+	auto h_list = self->GetFilteredHateList(distance, HateListFilterTypes::Bots);
+	for (auto h : h_list)
+	{
+		result.push_back(h);
+	}
+
+	return result;
+}
+
 Bot* Perl_Mob_CastToBot(Mob* self)
 {
 	return self->CastToBot();
@@ -2569,6 +2724,24 @@ void perl_register_mob()
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int, bool))&Perl_Mob_Damage);
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int, bool, int8_t))&Perl_Mob_Damage);
 	package.add("Damage", (void(*)(Mob*, Mob*, int64, uint16_t, int, bool, int8_t, bool))&Perl_Mob_Damage);
+	package.add("DamageHateList", (void(*)(Mob*, int64))&Perl_Mob_DamageHateList);
+	package.add("DamageHateList", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateList);
+#ifdef BOTS
+	package.add("DamageHateListBots", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListBots);
+	package.add("DamageHateListBots", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListBots);
+	package.add("DamageHateListBotsPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListBotsPercentage);
+	package.add("DamageHateListBotsPercentage", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListBotsPercentage);
+#endif
+	package.add("DamageHateListClients", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListClients);
+	package.add("DamageHateListClients", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListClients);
+	package.add("DamageHateListClientsPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListClientsPercentage);
+	package.add("DamageHateListClientsPercentage", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListClientsPercentage);
+	package.add("DamageHateListNPCs", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListNPCs);
+	package.add("DamageHateListNPCs", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListNPCs);
+	package.add("DamageHateListNPCsPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListNPCsPercentage);
+	package.add("DamageHateListNPCsPercentage", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListNPCsPercentage);
+	package.add("DamageHateListPercentage", (void(*)(Mob*, int64))&Perl_Mob_DamageHateListPercentage);
+	package.add("DamageHateListPercentage", (void(*)(Mob*, int64, uint32))&Perl_Mob_DamageHateListPercentage);
 	package.add("DelGlobal", &Perl_Mob_DelGlobal);
 	package.add("DeleteBucket", &Perl_Mob_DeleteBucket);
 	package.add("Depop", (void(*)(Mob*))&Perl_Mob_Depop);
@@ -2672,8 +2845,16 @@ void perl_register_mob()
 	package.add("GetHateClosest", &Perl_Mob_GetHateClosest);
 	package.add("GetHateDamageTop", &Perl_Mob_GetHateDamageTop);
 	package.add("GetHateList", &Perl_Mob_GetHateList);
+#ifdef BOTS
+	package.add("GetHateListBots", (perl::array(*)(Mob*))&Perl_Mob_GetHateListBots);
+	package.add("GetHateListBots", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListBots);
+#endif
+	package.add("GetHateListClients", (perl::array(*)(Mob*))&Perl_Mob_GetHateListClients);
+	package.add("GetHateListClients", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListClients);
+	package.add("GetHateListNPCs", (perl::array(*)(Mob*))&Perl_Mob_GetHateListNPCs);
+	package.add("GetHateListNPCs", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListNPCs);
 	package.add("GetHateListByDistance", (perl::array(*)(Mob*))&Perl_Mob_GetHateListByDistance);
-	package.add("GetHateListByDistance", (perl::array(*)(Mob*, int))&Perl_Mob_GetHateListByDistance);
+	package.add("GetHateListByDistance", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListByDistance);
 	package.add("GetHateRandom", &Perl_Mob_GetHateRandom);
 #ifdef BOTS
 	package.add("GetHateRandomBot", &Perl_Mob_GetHateRandomBot);
