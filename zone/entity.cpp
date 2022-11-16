@@ -1863,12 +1863,47 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 	return nullptr;
 }
 
+#ifdef BOTS
+Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* exclude_bot)
+{
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
+	std::vector<Bot*> bots_in_range;
+
+	for (const auto& b : bot_list) {
+		if (
+			b != exclude_bot &&
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(b->GetPosition()), location) <= distance_squared
+			)
+		) {
+			bots_in_range.push_back(b);
+		}
+	}
+
+	if (bots_in_range.empty()) {
+		return nullptr;
+	}
+
+	return bots_in_range[zone->random.Int(0, bots_in_range.size() - 1)];
+
+}
+#endif
+
 Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, Client *exclude_client)
 {
 	auto is_whole_zone = false;
 	if (location.x == 0.0f && location.y == 0.0f) {
 		is_whole_zone = true;
 	}
+
+	auto distance_squared = (distance * distance);
 
 	std::vector<Client*> clients_in_range;
 
@@ -1877,7 +1912,7 @@ Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, C
 			client.second != exclude_client &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance
+				DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance_squared
 			)
 		) {
 			clients_in_range.push_back(client.second);
@@ -1898,6 +1933,8 @@ NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* ex
 		is_whole_zone = true;
 	}
 
+	auto distance_squared = (distance * distance);
+
 	std::vector<NPC*> npcs_in_range;
 
 	for (const auto& npc : npc_list) {
@@ -1905,7 +1942,7 @@ NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* ex
 			npc.second != exclude_npc &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance
+				DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance_squared
 			)
 		) {
 			npcs_in_range.push_back(npc.second);
@@ -1926,6 +1963,8 @@ Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* ex
 		is_whole_zone = true;
 	}
 
+	auto distance_squared = (distance * distance);
+
 	std::vector<Mob*> mobs_in_range;
 
 	for (const auto& mob : mob_list) {
@@ -1933,7 +1972,7 @@ Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* ex
 			mob.second != exclude_mob &&
 			(
 				is_whole_zone ||
-				DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance
+				DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance_squared
 			)
 		) {
 			mobs_in_range.push_back(mob.second);

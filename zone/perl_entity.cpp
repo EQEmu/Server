@@ -354,17 +354,17 @@ void Perl_EntityList_MessageGroup(EntityList* self, Mob* sender, bool skip_close
 
 Client* Perl_EntityList_GetRandomClient(EntityList* self) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomClient();
+	return self->GetRandomClient();
 }
 
 Client* Perl_EntityList_GetRandomClient(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomClient(glm::vec3(x, y, z), (distance * distance));
+	return self->GetRandomClient(glm::vec3(x, y, z), distance);
 }
 
 Client* Perl_EntityList_GetRandomClient(EntityList* self, float x, float y, float z, float distance, Client* exclude_client) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomClient(glm::vec3(x, y, z), (distance * distance), exclude_client);
+	return self->GetRandomClient(glm::vec3(x, y, z), distance, exclude_client);
 }
 
 perl::array Perl_EntityList_GetMobList(EntityList* self) // @categories Script Utility
@@ -503,32 +503,32 @@ void Perl_EntityList_SignalAllClients(EntityList* self, uint32_t data) // @categ
 
 Mob* Perl_EntityList_GetRandomMob(EntityList* self) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomMob();
+	return self->GetRandomMob();
 }
 
 Mob* Perl_EntityList_GetRandomMob(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomMob(glm::vec3(x, y, z), (distance * distance));
+	return self->GetRandomMob(glm::vec3(x, y, z), distance);
 }
 
 Mob* Perl_EntityList_GetRandomMob(EntityList* self, float x, float y, float z, float distance, Mob* exclude_mob) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomMob(glm::vec3(x, y, z), (distance * distance), exclude_mob);
+	return self->GetRandomMob(glm::vec3(x, y, z), distance, exclude_mob);
 }
 
 NPC* Perl_EntityList_GetRandomNPC(EntityList* self) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomNPC();
+	return self->GetRandomNPC();
 }
 
 NPC* Perl_EntityList_GetRandomNPC(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomNPC(glm::vec3(x, y, z), (distance * distance));
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance);
 }
 
 NPC* Perl_EntityList_GetRandomNPC(EntityList* self, float x, float y, float z, float distance, NPC* exclude_npc) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomNPC(glm::vec3(x, y, z), (distance * distance), exclude_npc);
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance, exclude_npc);
 }
 
 void Perl_EntityList_Marquee(EntityList* self, uint32 type, std::string message)
@@ -545,6 +545,23 @@ void Perl_EntityList_Marquee(EntityList* self, uint32 type, uint32 priority, uin
 {
 	self->Marquee(type, priority, fade_in, fade_out, duration, message);
 }
+
+#ifdef BOTS
+Bot* Perl_EntityList_GetRandomBot(EntityList* self) // @categories Bots, Script Utility
+{
+	return self->GetRandomBot();
+}
+
+Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, float distance) // @categories Bot, Script Utility
+{
+	return self->GetRandomBot(glm::vec3(x, y, z), distance);
+}
+
+Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, float distance, Bot* exclude_bot) // @categories Bot, Script Utility
+{
+	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
+}
+#endif
 
 void perl_register_entitylist()
 {
@@ -599,6 +616,11 @@ void perl_register_entitylist()
 	package.add("GetObjectList", &Perl_EntityList_GetObjectList);
 	package.add("GetRaidByClient", &Perl_EntityList_GetRaidByClient);
 	package.add("GetRaidByID", &Perl_EntityList_GetRaidByID);
+#ifdef BOTS
+	package.add("GetRandomBot", (Bot*(*)(EntityList*))&Perl_EntityList_GetRandomBot);
+	package.add("GetRandomBot", (Bot*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomBot);
+	package.add("GetRandomBot", (Bot*(*)(EntityList*, float, float, float, float, Bot*))&Perl_EntityList_GetRandomBot);
+#endif
 	package.add("GetRandomClient", (Client*(*)(EntityList*))&Perl_EntityList_GetRandomClient);
 	package.add("GetRandomClient", (Client*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomClient);
 	package.add("GetRandomClient", (Client*(*)(EntityList*, float, float, float, float, Client*))&Perl_EntityList_GetRandomClient);

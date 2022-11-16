@@ -136,6 +136,9 @@ public:
 	Lua_Bot_List GetBotList();
 	Lua_Bot_List GetBotListByCharacterID(uint32 character_id);
 	Lua_Bot_List GetBotListByClientName(std::string client_name);
+	Lua_Bot GetRandomBot();
+	Lua_Bot GetRandomBot(float x, float y, float z, float distance);
+	Lua_Bot GetRandomBot(float x, float y, float z, float distance, Lua_Bot exclude_bot);
 #endif
 };
 

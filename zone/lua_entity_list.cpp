@@ -570,6 +570,23 @@ void Lua_EntityList::Marquee(uint32 type, uint32 priority, uint32 fade_in, uint3
 	self->Marquee(type, priority, fade_in, fade_out, duration, message);
 }
 
+#ifdef BOTS
+Lua_Bot Lua_EntityList::GetRandomBot() {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return self->GetRandomBot();
+}
+
+Lua_Bot Lua_EntityList::GetRandomBot(float x, float y, float z, float distance) {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return self->GetRandomBot(glm::vec3(x, y, z), distance);
+}
+
+Lua_Bot Lua_EntityList::GetRandomBot(float x, float y, float z, float distance, Lua_Bot exclude_bot) {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
+}
+#endif
+
 luabind::scope lua_register_entity_list() {
 	return luabind::class_<Lua_EntityList>("EntityList")
 	.def(luabind::constructor<>())
@@ -624,6 +641,11 @@ luabind::scope lua_register_entity_list() {
 	.def("GetObjectList", (Lua_Object_List(Lua_EntityList::*)(void))&Lua_EntityList::GetObjectList)
 	.def("GetRaidByClient", (Lua_Raid(Lua_EntityList::*)(Lua_Client))&Lua_EntityList::GetRaidByClient)
 	.def("GetRaidByID", (Lua_Raid(Lua_EntityList::*)(int))&Lua_EntityList::GetRaidByID)
+#ifdef BOTS
+	.def("GetRandomBot", (Lua_Bot(Lua_EntityList::*)(void))&Lua_EntityList::GetRandomBot)
+	.def("GetRandomBot", (Lua_Bot(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomBot)
+	.def("GetRandomBot", (Lua_Bot(Lua_EntityList::*)(float,float,float,float,Lua_Bot))&Lua_EntityList::GetRandomBot)
+#endif
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(void))&Lua_EntityList::GetRandomClient)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float,float,float,float))&Lua_EntityList::GetRandomClient)
 	.def("GetRandomClient", (Lua_Client(Lua_EntityList::*)(float,float,float,float,Lua_Client))&Lua_EntityList::GetRandomClient)
