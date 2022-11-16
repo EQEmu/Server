@@ -1891,7 +1891,7 @@ Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* ex
 		return nullptr;
 	}
 
-	return bots_in_range[zone->random.Int(0, bots_in_range		.size() - 1)];
+	return bots_in_range[zone->random.Int(0, bots_in_range.size() - 1)];
 
 }
 #endif
