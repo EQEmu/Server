@@ -1005,31 +1005,9 @@ void HateList::DamageHateList(int64 damage, uint32 distance, uint8 filter_type, 
 		return;
 	}
 
-	std::list<struct_HateList*> damage_list;
-	const auto squared_distance = (distance * distance);
-	for (auto h : list) {
+	const auto& h_list = GetFilteredHateList(distance, filter_type);
+	for (const auto& h : h_list) {
 		auto hate_entry = h->entity_on_hatelist;
-		if (
-			(
-				!distance ||
-				DistanceSquaredNoZ(
-					hate_owner->GetPosition(),
-					hate_entry->GetPosition()
-				) <= squared_distance
-			) &&
-			(
-				filter_type == HateListFilterTypes::All ||
-				(filter_type == HateListFilterTypes::Bots && hate_entry->IsBot()) ||
-				(filter_type == HateListFilterTypes::Clients && hate_entry->IsClient()) ||
-				(filter_type == HateListFilterTypes::NPCs && hate_entry->IsNPC())
-			)
-		) {
-			damage_list.push_back(h);
-		}
-	}
-
-	for (const auto& d : damage_list) {
-		auto hate_entry = d->entity_on_hatelist;
 		if (is_percentage) {
 			const auto damage_percentage = EQ::Clamp(damage, static_cast<int64>(1), static_cast<int64>(100));
 			const auto total_damage = hate_entry->GetMaxHP() / damage_percentage * 100;
