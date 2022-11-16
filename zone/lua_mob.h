@@ -211,9 +211,17 @@ public:
 	uint16 GetOwnerID();
 	Lua_Mob GetUltimateOwner();
 	Lua_HateList GetHateList();
+#ifdef BOTS
+	Lua_HateList GetHateListBots();
+	Lua_HateList GetHateListBots(uint32 distance);
+#endif
+	Lua_HateList GetHateListClients();
+	Lua_HateList GetHateListClients(uint32 distance);
+	Lua_HateList GetHateListNPCs();
+	Lua_HateList GetHateListNPCs(uint32 distance);
 	Lua_HateList GetShuffledHateList();
 	Lua_HateList GetHateListByDistance();
-	Lua_HateList GetHateListByDistance(int distance);
+	Lua_HateList GetHateListByDistance(uint32 distance);
 	Lua_Mob GetHateTop();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();
@@ -468,6 +476,24 @@ public:
 	void SetBuffDuration(int spell_id, int duration);
 	void CloneAppearance(Lua_Mob other);
 	void CloneAppearance(Lua_Mob other, bool clone_name);
+	void DamageHateList(int64 damage);
+	void DamageHateList(int64 damage, uint32 distance);
+	void DamageHateListPercentage(int64 damage);
+	void DamageHateListPercentage(int64 damage, uint32 distance);
+#ifdef BOTS
+	void DamageHateListBots(int64 damage);
+	void DamageHateListBots(int64 damage, uint32 distance);
+	void DamageHateListBotsPercentage(int64 damage);
+	void DamageHateListBotsPercentage(int64 damage, uint32 distance);
+#endif
+	void DamageHateListClients(int64 damage);
+	void DamageHateListClients(int64 damage, uint32 distance);
+	void DamageHateListClientsPercentage(int64 damage);
+	void DamageHateListClientsPercentage(int64 damage, uint32 distance);
+	void DamageHateListNPCs(int64 damage);
+	void DamageHateListNPCs(int64 damage, uint32 distance);
+	void DamageHateListNPCsPercentage(int64 damage);
+	void DamageHateListNPCsPercentage(int64 damage, uint32 distance);
 };
 
 #endif

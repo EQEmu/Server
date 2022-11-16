@@ -34,6 +34,13 @@ struct struct_HateList {
 	uint32 last_modified; // we need to remove this if it gets higher than 10 mins
 };
 
+enum HateListFilterTypes : uint8 {
+	All,
+	Bots,
+	Clients,
+	NPCs
+};
+
 class HateList {
 public:
 	HateList();
@@ -64,7 +71,17 @@ public:
 	int64 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
 	std::list<struct_HateList *> &GetHateList() { return list; }
-	std::list<struct_HateList *> GetHateListByDistance(int distance = 0);
+	std::list<struct_HateList *> GetFilteredHateList(
+		uint32 distance = 0,
+		uint8 filter_type = HateListFilterTypes::All
+	);
+
+	void DamageHateList(
+		int64 damage,
+		uint32 distance = 0,
+		uint8 filter_type = HateListFilterTypes::All,
+		bool is_percentage = false
+	);
 
 	void AddEntToHateList(
 		Mob *ent,
