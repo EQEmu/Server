@@ -7483,21 +7483,53 @@ void Client::RemoveAutoXTargets()
 
 void Client::ShowXTargets(Client *c)
 {
-	if(!c)
+	if (!c) {
 		return;
+	}
 
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-		c->Message(Chat::White, "Xtarget Slot: %i, Type: %2i, ID: %4i, Name: %s", i, XTargets[i].Type, XTargets[i].ID, XTargets[i].Name);
+	auto xtarget_count = 0;
+
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"xtarget slot [{}] type [{}] ID [{}] name [{}]",
+				i,
+				XTargets[i].Type,
+				XTargets[i].ID,
+				strlen(XTargets[i].Name) ? XTargets[i].Name : "No Name"
+			).c_str()
+		);
+
+		xtarget_count++;
+	}
+
 	auto &list = GetXTargetAutoMgr()->get_list();
 	 // yeah, I kept having to do something for debugging to tell if managers were the same object or not :P
 	 // so lets use the address as an "ID"
-	c->Message(Chat::White, "XTargetAutoMgr ID %p size %d", GetXTargetAutoMgr(), list.size());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"XTargetAutoMgr ID [{}] size [{}]",
+			fmt::ptr(GetXTargetAutoMgr()),
+			list.size()
+		).c_str()
+	);
+
 	int count = 0;
 	for (auto &e : list) {
-		c->Message(Chat::White, "spawn id %d count %d", e.spawn_id, e.count);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn ID: {} Count: {}",
+				e.spawn_id,
+				e.count
+			).c_str()
+		);
+
 		count++;
-		if (count == 20) { // lets not spam too many ...
-			c->Message(Chat::White, " ... ");
+
+		if (count == 20) {
 			break;
 		}
 	}
