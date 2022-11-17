@@ -449,6 +449,21 @@ perl::array Perl_EntityList_GetBotListByClientName(EntityList* self, std::string
 	}
 	return result;
 }
+
+void Perl_EntityList_SignalAllBotsByOwnerCharacterID(EntityList* self, uint32_t character_id, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalAllBotsByOwnerCharacterID(character_id, signal_id);
+}
+
+void Perl_EntityList_SignalBotByBotID(EntityList* self, uint32_t bot_id, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalBotByBotID(bot_id, signal_id);
+}
+
+void Perl_EntityList_SignalBotByBotName(EntityList* self, std::string bot_name, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalBotByBotName(bot_name, signal_id);
+}
 #endif
 
 perl::array Perl_EntityList_GetNPCList(EntityList* self) // @categories Script Utility
@@ -675,7 +690,14 @@ void perl_register_entitylist()
 	package.add("RemoveObject", &Perl_EntityList_RemoveObject);
 	package.add("RemoveTrap", &Perl_EntityList_RemoveTrap);
 	package.add("ReplaceWithTarget", &Perl_EntityList_ReplaceWithTarget);
+#ifdef BOTS
+	package.add("SignalAllBotsByOwnerCharacterID", &Perl_EntityList_SignalAllBotsByOwnerCharacterID);
+#endif
 	package.add("SignalAllClients", &Perl_EntityList_SignalAllClients);
+#ifdef BOTS
+	package.add("SignalBotByBotID", &Perl_EntityList_SignalBotByBotID);
+	package.add("SignalBotByBotName", &Perl_EntityList_SignalBotByBotName);
+#endif
 	package.add("SignalMobsByNPCID", &Perl_EntityList_SignalMobsByNPCID);
 }
 

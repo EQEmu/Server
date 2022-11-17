@@ -508,7 +508,7 @@ public:
 	void	UnMarkNPC(uint16 ID);
 
 	void	GateAllClients();
-	void	SignalAllClients(uint32 data);
+	void	SignalAllClients(int signal_id);
 	void	UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void	DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);
 	void	SendFindableNPCList(Client *c);
@@ -537,6 +537,9 @@ public:
 	inline const std::list<Bot *> &GetBotList() { return bot_list; }
 	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = 0);
 	std::vector<Bot *> GetBotListByClientName(std::string client_name);
+	void SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id);
+	void SignalBotByBotID(uint32 bot_id, int signal_id);
+	void SignalBotByBotName(std::string bot_name, int signal_id);
 #endif
 	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
@@ -605,7 +608,7 @@ private:
 	// Please Do Not Declare Any EntityList Class Members After This Comment
 #ifdef BOTS
 	public:
-		void AddBot(Bot* newBot, bool SendSpawnPacket = true, bool dontqueue = false);
+		void AddBot(Bot* new_bot, bool send_spawn_packet = true, bool dont_queue = false);
 		bool RemoveBot(uint16 entityID);
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);

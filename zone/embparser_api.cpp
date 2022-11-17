@@ -3134,38 +3134,38 @@ void Perl__crosszonesetentityvariablebynpctypeid(int npc_id, const char* variabl
 	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_NPC, npc_id, variable_name, variable_value);
 }
 
-void Perl__crosszonesignalclientbycharid(int character_id, uint32 signal)
+void Perl__crosszonesignalclientbycharid(int character_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Character, character_id, signal);
 }
 
-void Perl__crosszonesignalclientbygroupid(int group_id, uint32 signal)
+void Perl__crosszonesignalclientbygroupid(int group_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Group, group_id, signal);
 }
 
-void Perl__crosszonesignalclientbyraidid(int raid_id, uint32 signal)
+void Perl__crosszonesignalclientbyraidid(int raid_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Raid, raid_id, signal);
 }
 
-void Perl__crosszonesignalclientbyguildid(int guild_id, uint32 signal)
+void Perl__crosszonesignalclientbyguildid(int guild_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Guild, guild_id, signal);
 }
 
-void Perl__crosszonesignalclientbyexpeditionid(uint32 expedition_id, uint32 signal)
+void Perl__crosszonesignalclientbyexpeditionid(uint32 expedition_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, expedition_id, signal);
 }
 
-void Perl__crosszonesignalclientbyname(const char* client_name, uint32 signal)
+void Perl__crosszonesignalclientbyname(const char* client_name, int signal)
 {
 	int update_identifier = 0;
 	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, update_identifier, signal, client_name);
 }
 
-void Perl__crosszonesignalnpcbynpctypeid(uint32 npc_id, uint32 signal)
+void Perl__crosszonesignalnpcbynpctypeid(uint32 npc_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_NPC, npc_id, signal);
 }
@@ -3599,22 +3599,22 @@ void Perl__worldwidesetentityvariablenpc(const char* variable_name, const char* 
 	quest_manager.WorldWideSetEntityVariable(WWSetEntityVariableUpdateType_NPC, variable_name, variable_value);
 }
 
-void Perl__worldwidesignalnpc(uint32 signal)
+void Perl__worldwidesignalnpc(int signal)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_NPC, signal);
 }
 
-void Perl__worldwidesignalclient(uint32 signal)
+void Perl__worldwidesignalclient(int signal)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal);
 }
 
-void Perl__worldwidesignalclient(uint32 signal, uint8 min_status)
+void Perl__worldwidesignalclient(int signal, uint8 min_status)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal, min_status);
 }
 
-void Perl__worldwidesignalclient(uint32 signal, uint8 min_status, uint8 max_status)
+void Perl__worldwidesignalclient(int signal, uint8 min_status, uint8 max_status)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal, min_status, max_status);
 }
@@ -4163,9 +4163,9 @@ void perl_register_quest()
 	package.add("worldwidesetentityvariableclient", (void(*)(const char*, const char*, uint8))&Perl__worldwidesetentityvariableclient);
 	package.add("worldwidesetentityvariableclient", (void(*)(const char*, const char*, uint8, uint8))&Perl__worldwidesetentityvariableclient);
 	package.add("worldwidesetentityvariablenpc", &Perl__worldwidesetentityvariablenpc);
-	package.add("worldwidesignalclient", (void(*)(uint32))&Perl__worldwidesignalclient);
-	package.add("worldwidesignalclient", (void(*)(uint32, uint8))&Perl__worldwidesignalclient);
-	package.add("worldwidesignalclient", (void(*)(uint32, uint8, uint8))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int, uint8))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int, uint8, uint8))&Perl__worldwidesignalclient);
 	package.add("worldwidesignalnpc", &Perl__worldwidesignalnpc);
 	package.add("worldwideupdateactivity", (void(*)(uint32, int))&Perl__worldwideupdateactivity);
 	package.add("worldwideupdateactivity", (void(*)(uint32, int, int))&Perl__worldwideupdateactivity);

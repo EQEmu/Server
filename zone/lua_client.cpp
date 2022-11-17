@@ -1515,9 +1515,9 @@ void Lua_Client::NotifyNewTitlesAvailable() {
 	self->NotifyNewTitlesAvailable();
 }
 
-void Lua_Client::Signal(uint32 id) {
+void Lua_Client::Signal(int signal_id) {
 	Lua_Safe_Call_Void();
-	self->Signal(id);
+	self->Signal(signal_id);
 }
 
 void Lua_Client::AddAlternateCurrencyValue(uint32 currency, int amount) {
@@ -3108,7 +3108,7 @@ luabind::scope lua_register_client() {
 	.def("SetTint", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetTint)
 	.def("SetTitleSuffix", (void(Lua_Client::*)(const char *))&Lua_Client::SetTitleSuffix)
 	.def("SetZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetZoneFlag)
-	.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
+	.def("Signal", (void(Lua_Client::*)(int))&Lua_Client::Signal)
 	.def("Sit", (void(Lua_Client::*)(void))&Lua_Client::Sit)
 	.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)
 	.def("SummonBaggedItems", (void(Lua_Client::*)(uint32,luabind::adl::object))&Lua_Client::SummonBaggedItems)

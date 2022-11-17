@@ -304,7 +304,7 @@ public:
 	const char* GetEntityVariable(const char *name);
 	void SetEntityVariable(const char *name, const char *value);
 	bool EntityVariableExists(const char *name);
-	void Signal(uint32 id);
+	void Signal(int signal_id);
 	bool CombatRange(Lua_Mob other);
 	void DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage);
 	void DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage);

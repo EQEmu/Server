@@ -1170,8 +1170,9 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 
 		Mob* sender = this;
-		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft))
+		if (GetPet() && GetTarget() == GetPet() && GetPet()->FindType(SE_VoiceGraft)) {
 			sender = GetPet();
+		}
 
 		if (!is_silent) {
 			entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
@@ -1179,36 +1180,51 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 
 		parse->EventPlayer(EVENT_SAY, this, message, language);
 
-		if (sender != this)
+		if (sender != this) {
 			break;
+		}
 
-		if(quest_manager.ProximitySayInUse())
+		if (quest_manager.ProximitySayInUse()) {
 			entity_list.ProcessProximitySay(message, this, language);
+		}
 
-		if (GetTarget() != 0 && GetTarget()->IsNPC() &&
-			!IsInvisible(GetTarget())) {
-			if(!GetTarget()->CastToNPC()->IsEngaged()) {
-				CheckLDoNHail(GetTarget());
-				CheckEmoteHail(GetTarget(), message);
+		if (
+			GetTarget() &&
+			GetTarget()->IsNPC() &&
+			!IsInvisible(GetTarget())
+		) {
+			auto* t = GetTarget()->CastToNPC();
+			if (!t->IsEngaged()) {
+				CheckLDoNHail(t);
+				CheckEmoteHail(t, message);
 
-				if(DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-					NPC *tar = GetTarget()->CastToNPC();
-					parse->EventNPC(EVENT_SAY, tar->CastToNPC(), this, message, language);
+				if (DistanceNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
+					
+					parse->EventNPC(EVENT_SAY, t, this, message, language);
 
-					if(RuleB(TaskSystem, EnableTaskSystem)) {
-						if (UpdateTasksOnSpeakWith(tar)) {
-							tar->DoQuestPause(this);
+					if (RuleB(TaskSystem, EnableTaskSystem)) {
+						if (UpdateTasksOnSpeakWith(t)) {
+							t->DoQuestPause(this);
 						}
 					}
 				}
-			}
-			else {
-				if (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-					parse->EventNPC(EVENT_AGGRO_SAY, GetTarget()->CastToNPC(), this, message, language);
+			} else {
+				if (DistanceSquaredNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
+					parse->EventNPC(EVENT_AGGRO_SAY, t, this, message, language);
 				}
 			}
 
 		}
+
+#ifdef BOTS
+	else if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
+		if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
+			parse->EventBot(GetTarget()->IsEngaged() ? EVENT_AGGRO_SAY : EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+		}
+	}
+#endif
+
+
 		break;
 	}
 	case ChatChannel_UCSRelay:
@@ -5470,9 +5486,9 @@ void Client::ShowSkillsWindow()
 	);
 }
 
-void Client::Signal(uint32 data)
+void Client::Signal(int signal_id)
 {
-	std::string export_string = fmt::format("{}", data);
+	const auto export_string = fmt::format("{}", signal_id);
 	parse->EventPlayer(EVENT_SIGNAL, this, export_string, 0);
 }
 

@@ -36,6 +36,11 @@ QuestParserCollection::QuestParserCollection() {
 	_player_quest_status = QuestUnloaded;
 	_global_player_quest_status = QuestUnloaded;
 	_global_npc_quest_status = QuestUnloaded;
+
+#ifdef BOTS
+	_bot_quest_status = QuestUnloaded;
+	_global_bot_quest_status = QuestUnloaded;
+#endif
 }
 
 QuestParserCollection::~QuestParserCollection() {
@@ -70,7 +75,7 @@ void QuestParserCollection::Init() {
 }
 
 void QuestParserCollection::ReloadQuests(bool reset_timers) {
-	if(reset_timers) {
+	if (reset_timers) {
 		quest_manager.ClearAllTimers();
 	}
 
@@ -79,11 +84,17 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 	_player_quest_status = QuestUnloaded;
 	_global_player_quest_status = QuestUnloaded;
 	_global_npc_quest_status = QuestUnloaded;
+
+#ifdef BOTS
+	_bot_quest_status = QuestUnloaded;
+	_global_bot_quest_status = QuestUnloaded;
+#endif
+
 	_spell_quest_status.clear();
 	_item_quest_status.clear();
 	_encounter_quest_status.clear();
 	auto iter = _load_precedence.begin();
-	while(iter != _load_precedence.end()) {
+	while (iter != _load_precedence.end()) {
 		(*iter)->ReloadQuests();
 		++iter;
 	}
@@ -452,38 +463,46 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, EQ::ItemI
 	return 0;
 }
 
-int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-									  std::vector<std::any> *extra_pointers) {
+int QuestParserCollection::EventSpell(
+	QuestEventID evt,
+	Mob* mob,
+	Client *client,
+	uint32 spell_id,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
 	auto iter = _spell_quest_status.find(spell_id);
-	if(iter != _spell_quest_status.end()) {
+	if (iter != _spell_quest_status.end()) {
 		//loaded or failed to load
-		if(iter->second != QuestFailedToLoad) {
-			auto qiter = _interfaces.find(iter->second);
-			int ret = DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
-			int i = qiter->second->EventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
-            if(i != 0) {
-                ret = i;
-            }
+		if (iter->second != QuestFailedToLoad) {
+			auto qi = _interfaces.find(iter->second);
+			int ret = DispatchEventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
+			int i = qi->second->EventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
+			if (i != 0) {
+				ret = i;
+			}
+
 			return ret;
 		}
-		return DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
-	}
-	else if (_spell_quest_status[spell_id] != QuestFailedToLoad) {
+
+		return DispatchEventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
+	} else if (_spell_quest_status[spell_id] != QuestFailedToLoad) {
 		std::string filename;
 		QuestInterface *qi = GetQIBySpellQuest(spell_id, filename);
 		if (qi) {
 			_spell_quest_status[spell_id] = qi->GetIdentifier();
 			qi->LoadSpellScript(filename, spell_id);
-			int ret = DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
-			int i = qi->EventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
+			int ret = DispatchEventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
+			int i = qi->EventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
 			if (i != 0) {
 				ret = i;
 			}
+
 			return ret;
-		}
-		else {
+		} else {
 			_spell_quest_status[spell_id] = QuestFailedToLoad;
-			return DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
+			return DispatchEventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
 		}
 	}
 	return 0;
@@ -1022,18 +1041,25 @@ int QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, E
     return ret;
 }
 
-int QuestParserCollection::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
-											   std::vector<std::any> *extra_pointers) {
-    int ret = 0;
+int QuestParserCollection::DispatchEventSpell(
+	QuestEventID evt,
+	Mob* mob,
+	Client *client,
+	uint32 spell_id,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	int ret = 0;
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
-		int i = (*iter)->DispatchEventSpell(evt, npc, client, spell_id, data, extra_data, extra_pointers);
-        if(i != 0) {
-            ret = i;
-        }
+		int i = (*iter)->DispatchEventSpell(evt, mob, client, spell_id, data, extra_data, extra_pointers);
+		if(i != 0) {
+			ret = i;
+		}
 		++iter;
 	}
-    return ret;
+	return ret;
 }
 
 void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings* perl_event_export_settings) {
@@ -1074,3 +1100,228 @@ void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings*
 	}
 
 }
+
+#ifdef BOTS
+int QuestParserCollection::DispatchEventBot(
+	QuestEventID evt,
+	Bot *bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+    int ret = 0;
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		int i = (*iter)->DispatchEventBot(evt, bot, init, data, extra_data, extra_pointers);
+		if (i != 0) {
+			ret = i;
+		}
+
+		++iter;
+	}
+
+	return ret;
+}
+
+int QuestParserCollection::EventBot(
+	QuestEventID evt,
+	Bot *bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	auto rd = DispatchEventBot(evt, bot, init, data, extra_data, extra_pointers);
+	auto rl = EventBotLocal(evt, bot, init, data, extra_data, extra_pointers);
+	auto rg = EventBotGlobal(evt, bot, init, data, extra_data, extra_pointers);
+
+	//Local quests returning non-default values have priority over global quests
+	if (rl != 0) {
+		return rl;
+	} else if (rg != 0) {
+		return rg;
+	} else if (rd != 0) {
+		return rd;
+	}
+
+	return 0;
+}
+
+int QuestParserCollection::EventBotLocal(
+	QuestEventID evt,
+	Bot *bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	if (_bot_quest_status == QuestUnloaded) {
+		std::string filename;
+		QuestInterface *qi = GetQIByBotQuest(filename);
+		if (qi) {
+			_bot_quest_status = qi->GetIdentifier();
+			qi->LoadBotScript(filename);
+			return qi->EventBot(evt, bot, init, data, extra_data, extra_pointers);
+		}
+	} else {
+		if (_bot_quest_status != QuestFailedToLoad) {
+			auto iter = _interfaces.find(_bot_quest_status);
+			return iter->second->EventBot(evt, bot, init, data, extra_data, extra_pointers);
+		}
+	}
+
+	return 0;
+}
+
+int QuestParserCollection::EventBotGlobal(
+	QuestEventID evt,
+	Bot *bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	if (_global_bot_quest_status == QuestUnloaded) {
+		std::string filename;
+		QuestInterface *qi = GetQIByGlobalBotQuest(filename);
+		if (qi) {
+			_global_bot_quest_status = qi->GetIdentifier();
+			qi->LoadGlobalBotScript(filename);
+			return qi->EventGlobalBot(evt, bot, init, data, extra_data, extra_pointers);
+		}
+	} else {
+		if (_global_bot_quest_status != QuestFailedToLoad) {
+			auto iter = _interfaces.find(_global_bot_quest_status);
+			return iter->second->EventGlobalBot(evt, bot, init, data, extra_data, extra_pointers);
+		}
+	}
+
+	return 0;
+}
+
+bool QuestParserCollection::BotHasQuestSubLocal(QuestEventID evt) {
+	if (_bot_quest_status == QuestUnloaded) {
+		std::string filename;
+		QuestInterface *qi = GetQIByBotQuest(filename);
+		if (qi) {
+			_bot_quest_status = qi->GetIdentifier();
+			qi->LoadBotScript(filename);
+			return qi->BotHasQuestSub(evt);
+		}
+	} else if (_bot_quest_status != QuestFailedToLoad) {
+		auto iter = _interfaces.find(_bot_quest_status);
+		return iter->second->BotHasQuestSub(evt);
+	}
+
+	return false;
+}
+
+bool QuestParserCollection::BotHasQuestSubGlobal(QuestEventID evt) {
+	if (_global_bot_quest_status == QuestUnloaded) {
+		std::string filename;
+		QuestInterface *qi = GetQIByGlobalBotQuest(filename);
+		if (qi) {
+			_global_bot_quest_status = qi->GetIdentifier();
+			qi->LoadGlobalBotScript(filename);
+			return qi->GlobalBotHasQuestSub(evt);
+		}
+	} else if (_global_bot_quest_status != QuestFailedToLoad) {
+		auto iter = _interfaces.find(_global_bot_quest_status);
+		return iter->second->GlobalBotHasQuestSub(evt);
+	}
+
+	return false;
+}
+
+QuestInterface *QuestParserCollection::GetQIByBotQuest(std::string &filename) {
+	if (!zone || !zone->IsLoaded()) {
+		return nullptr;
+	}
+
+	// first look for /quests/zone/bot_v[instance_version].ext (precedence)
+	filename = fmt::format("{}/{}/bot_v{}", path.GetQuestsPath(), zone->GetShortName(), zone->GetInstanceVersion());
+	std::string tmp;
+	FILE *f = nullptr;
+
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		auto ext = _extensions.find((*iter)->GetIdentifier());
+
+		tmp = fmt::format("{}.{}", filename, ext->second);
+
+		f = fopen(tmp.c_str(), "r");
+		if (f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		++iter;
+	}
+
+	// second look for /quests/zone/bot.ext (precedence)
+	filename = fmt::format("{}/{}/bot", path.GetQuestsPath(), zone->GetShortName());
+
+	iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		auto ext = _extensions.find((*iter)->GetIdentifier());
+
+		tmp = fmt::format("{}.{}", filename, ext->second);
+
+		f = fopen(tmp.c_str(), "r");
+		if (f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		++iter;
+	}
+
+	// third look for /quests/global/bot.ext (precedence)
+	filename = fmt::format("{}/{}/bot", path.GetQuestsPath(), QUEST_GLOBAL_DIRECTORY);
+	iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		auto ext = _extensions.find((*iter)->GetIdentifier());
+
+		tmp = fmt::format("{}.{}", filename, ext->second);
+
+		f = fopen(tmp.c_str(), "r");
+		if (f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		++iter;
+	}
+
+	return nullptr;
+}
+
+QuestInterface *QuestParserCollection::GetQIByGlobalBotQuest(std::string &filename) {
+	// first look for /quests/global/global_bot.ext (precedence)
+	filename = fmt::format("{}/{}/global_bot", path.GetQuestsPath(), QUEST_GLOBAL_DIRECTORY);
+	std::string tmp;
+	FILE *f = nullptr;
+
+	auto iter = _load_precedence.begin();
+	while (iter != _load_precedence.end()) {
+		auto ext = _extensions.find((*iter)->GetIdentifier());
+
+		tmp = fmt::format("{}.{}", filename, ext->second);
+
+		f = fopen(tmp.c_str(), "r");
+		if (f) {
+			fclose(f);
+			filename = tmp;
+			return (*iter);
+		}
+
+		++iter;
+	}
+
+	return nullptr;
+}
+#endif

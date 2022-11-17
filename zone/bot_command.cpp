@@ -2585,8 +2585,16 @@ void bot_command_aggressive(Client *c, const Seperator *sep)
 			}
 
 			my_bot->InterruptSpell();
-			if (candidate_count == 1)
-				Bot::BotGroupSay(my_bot, "Using '%s'", spells[local_entry->spell_id].name);
+			if (candidate_count == 1) {
+				Bot::BotGroupSay(
+					my_bot,
+					fmt::format(
+						"Using {}.",
+						spells[local_entry->spell_id].name
+					).c_str()
+				);
+			}
+
 			my_bot->UseDiscipline(local_entry->spell_id, my_bot->GetID());
 			++success_count;
 
@@ -2803,10 +2811,22 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	}
 
 	if (attacker_count == 1 && first_attacker) {
-		Bot::BotGroupSay(first_attacker, "Attacking %s!", target_mob->GetCleanName());
-	}
-	else {
-		c->Message(Chat::White, "%i of your bots are attacking %s!", sbl.size(), target_mob->GetCleanName());
+		Bot::BotGroupSay(
+			first_attacker,
+			fmt::format(
+				"Attacking {}.",
+				target_mob->GetCleanName()
+			).c_str()
+		);
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} of your bots are attacking {}.",
+				sbl.size(),
+				target_mob->GetCleanName()
+			).c_str()
+		);
 	}
 }
 
@@ -3065,8 +3085,16 @@ void bot_command_defensive(Client *c, const Seperator *sep)
 			}
 
 			my_bot->InterruptSpell();
-			if (candidate_count == 1)
-				Bot::BotGroupSay(my_bot, "Using '%s'", spells[local_entry->spell_id].name);
+			if (candidate_count == 1) {
+				Bot::BotGroupSay(
+					my_bot,
+					fmt::format(
+						"Using {}.",
+						spells[local_entry->spell_id].name
+					).c_str()
+				);
+			}
+
 			my_bot->UseDiscipline(local_entry->spell_id, my_bot->GetID());
 			++success_count;
 
@@ -3285,15 +3313,35 @@ void bot_command_follow(Client *c, const Seperator *sep)
 		bot_iter->GetPet()->WipeHateList();
 		bot_iter->GetPet()->SetFollowID(bot_iter->GetID());
 	}
+
 	if (sbl.size() == 1) {
 		Mob* follow_mob = entity_list.GetMob(sbl.front()->GetFollowID());
-		Bot::BotGroupSay(sbl.front(), "Following %s", ((follow_mob) ? (follow_mob->GetCleanName()) : ("'nullptr'")));
-	}
-	else {
-		if (reset)
-			c->Message(Chat::White, "%i of your bots are following their default assignments", sbl.size());
-		else
-			c->Message(Chat::White, "%i of your bots are following %s", sbl.size(), target_mob->GetCleanName());
+		Bot::BotGroupSay(
+			sbl.front(),
+			fmt::format(
+				"Following {}.",
+				follow_mob ? follow_mob->GetCleanName() : "no one"
+			).c_str()
+		);
+	} else {
+		if (reset) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} of your bots are following their default assignments.",
+					sbl.size()
+				).c_str()
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} of your bots are following {}.",
+					sbl.size(),
+					target_mob->GetCleanName()
+				).c_str()
+			);
+		}
 	}
 }
 
@@ -3338,9 +3386,14 @@ void bot_command_guard(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() == 1) {
-		Bot::BotGroupSay(sbl.front(), "%suarding this position.", (clear ? "No longer g" : "G"));
-	}
-	else {
+		Bot::BotGroupSay(
+			sbl.front(),
+			fmt::format(
+				"{}uarding this position.",
+				clear ? "No longer g" : "G"
+			).c_str()
+		);
+	} else {
 		c->Message(Chat::White, "%i of your bots are %sguarding their positions.", sbl.size(), (clear ? "no longer " : ""));
 	}
 }
@@ -3469,10 +3522,22 @@ void bot_command_hold(Client *c, const Seperator *sep)
 	}
 
 	if (sbl.size() == 1) {
-		Bot::BotGroupSay(sbl.front(), "%solding my attacks.", (clear ? "No longer h" : "H"));
-	}
-	else {
-		c->Message(Chat::White, "%i of your bots are %sholding their attacks.", sbl.size(), (clear ? "no longer " : ""));
+		Bot::BotGroupSay(
+			sbl.front(),
+			fmt::format(
+				"{}olding my attacks.",
+				clear ? "No longer h" : "H"
+			).c_str()
+		);
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} of your bots are {}holding their attacks.",
+				sbl.size(),
+				clear ? "no longer " : ""
+			).c_str()
+		);
 	}
 }
 
@@ -4224,7 +4289,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 	Bot* my_bot = sbl.front();
 
 	my_bot->InterruptSpell();
-	Bot::BotGroupSay(my_bot, "Attempting to pick the lock..");
+	Bot::BotGroupSay(my_bot, "Attempting to pick the lock.");
 
 	std::list<Doors*> door_list;
 	entity_list.GetDoorsList(door_list);
@@ -4251,7 +4316,7 @@ void bot_command_pick_lock(Client *c, const Seperator *sep)
 			++open_count;
 		}
 		else {
-			Bot::BotGroupSay(my_bot, "I am not skilled enough for this lock...");
+			Bot::BotGroupSay(my_bot, "I am not skilled enough for this lock.");
 		}
 	}
 	c->Message(Chat::White, "%i door%s attempted - %i door%s successful", door_count, ((door_count != 1) ? ("s") : ("")), open_count, ((open_count != 1) ? ("s") : ("")));
@@ -4791,38 +4856,78 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 
 	int taunting_count = 0;
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->GetSkill(EQ::skills::SkillTaunt))
+		if (!bot_iter->GetSkill(EQ::skills::SkillTaunt)) {
 			continue;
+		}
 
-		if (toggle_taunt)
+		if (toggle_taunt) {
 			bot_iter->SetTaunting(!bot_iter->IsTaunting());
-		else
+		} else {
 			bot_iter->SetTaunting(taunt_state);
+		}
 
-		if (sbl.size() == 1)
-			Bot::BotGroupSay(bot_iter, "I am %s taunting", bot_iter->IsTaunting() ? "now" : "no longer");
+		if (sbl.size() == 1) {
+			Bot::BotGroupSay(
+				bot_iter,
+				fmt::format(
+					"I am {} taunting.",
+					bot_iter->IsTaunting() ? "now" : "no longer"
+				).c_str()
+			);
+		}
 
 		++taunting_count;
 	}
+
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->HasPet())
+		if (!bot_iter->HasPet()) {
 			continue;
-		if (!bot_iter->GetPet()->GetSkill(EQ::skills::SkillTaunt))
+		}
+
+		if (!bot_iter->GetPet()->GetSkill(EQ::skills::SkillTaunt)) {
 			continue;
-		if (toggle_taunt)
+		}
+
+		if (toggle_taunt) {
 			bot_iter->GetPet()->CastToNPC()->SetTaunting(!bot_iter->GetPet()->CastToNPC()->IsTaunting());
-		else
+		} else {
 			bot_iter->GetPet()->CastToNPC()->SetTaunting(taunt_state);
-		if (sbl.size() == 1)
-			Bot::BotGroupSay(bot_iter, "My Pet is %s taunting", bot_iter->GetPet()->CastToNPC()->IsTaunting() ? "now" : "no longer");
+		}
+
+		if (sbl.size() == 1) {
+			Bot::BotGroupSay(
+				bot_iter,
+				fmt::format(
+					"My Pet is {} taunting.",
+					bot_iter->GetPet()->CastToNPC()->IsTaunting() ? "now" : "no longer"
+				).c_str()
+			);
+		}
+
 		++taunting_count;
 	}
 
 	if (taunting_count) {
-		if (toggle_taunt)
-			c->Message(Chat::White, "%i of your bots and their pets %s toggled their taunting state", taunting_count, ((taunting_count != 1) ? ("have") : ("has")));
-		else
-			c->Message(Chat::White, "%i of your bots and their pets %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
+		if (toggle_taunt) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} of your bots and their pets {} toggled their taunting state",
+					taunting_count,
+					taunting_count != 1 ? "have" : "has"
+				).c_str()
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} of your bots and their pets {} {} taunting.",
+					taunting_count,
+					taunting_count != 1 ? "have" : "has",
+					taunt_state ? "started" : "stopped"
+				).c_str()
+			);
+		}
 	}
 	else {
 		c->Message(Chat::White, "None of your bots are capable of taunting");
@@ -6600,14 +6705,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	if (c->GetBotOption(Client::booSpawnMessageSay)) {
 		Bot::BotGroupSay(my_bot, bot_spawn_message[message_index].c_str());
 	} else if (c->GetBotOption(Client::booSpawnMessageTell)) {
-		c->Message(
-			Chat::Tell,
-			fmt::format(
-				"{} tells you, \"{}\"",
-				my_bot->GetCleanName(),
-				bot_spawn_message[message_index]
-			).c_str()
-		);
+		my_bot->OwnerMessage(bot_spawn_message[message_index]);
 	}
 }
 
@@ -6663,9 +6761,11 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 
 		Bot::BotGroupSay(
 			bot_iter,
-			"My current stance is '%s' (%i)",
-			EQ::constants::GetStanceName(bot_iter->GetBotStance()),
-			bot_iter->GetBotStance()
+			fmt::format(
+				"My current stance is {} ({}).",
+				EQ::constants::GetStanceName(bot_iter->GetBotStance()),
+				bot_iter->GetBotStance()
+			).c_str()
 		);
 	}
 }
@@ -6719,41 +6819,63 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 
 void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_subcommand_bot_summon", sep->arg[0], "botsummon"))
+	if (helper_command_alias_fail(c, "bot_subcommand_bot_summon", sep->arg[0], "botsummon")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))",
+				sep->arg[0]
+			).c_str()
+		);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
+	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None) {
 		return;
+	}
 
 	for (auto bot_iter : sbl) {
-		if (!bot_iter)
+		if (!bot_iter) {
 			continue;
-
-		//Bot::BotGroupSay(bot_iter, "Whee!");
+		}
 
 		bot_iter->WipeHateList();
 		bot_iter->SetTarget(nullptr);
 		bot_iter->Teleport(c->GetPosition());
 		bot_iter->DoAnim(0);
 
-		if (!bot_iter->HasPet())
+		if (!bot_iter->HasPet()) {
 			continue;
+		}
 
 		bot_iter->GetPet()->WipeHateList();
 		bot_iter->GetPet()->SetTarget(nullptr);
 		bot_iter->GetPet()->Teleport(c->GetPosition());
 	}
 
-	if (sbl.size() == 1)
-		c->Message(Chat::White, "Summoned %s to you", ((sbl.front()) ? (sbl.front()->GetCleanName()) : ("'nullptr'")));
-	else
-		c->Message(Chat::White, "Summoned %i bots to you", sbl.size());
+	if (sbl.size() == 1) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Summoned {} to you.",
+				sbl.front() ? sbl.front()->GetCleanName() : "no one"
+			).c_str()
+		);
+	} else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Summoned {} bots to you.",
+				sbl.size()
+			).c_str()
+		);
+	}
 }
 
 void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep)
@@ -9182,15 +9304,13 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 				break;
 		}
 
-		c->Message(
-			Chat::Tell,
+		my_bot->OwnerMessage(
 			fmt::format(
-				"{} tells you, 'My {} (Slot {}) {} already unequipped.'",
-				my_bot->GetCleanName(),
+				"My {} (Slot {}) {} already unequipped.",
 				EQ::invslot::GetInvPossessionsSlotName(slot_id),
 				slot_id,
 				slot_message
-			).c_str()
+			)
 		);
 		return;
 	}
@@ -9247,15 +9367,13 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		my_bot->BotRemoveEquipItem(slot_id);
 		my_bot->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 
-		c->Message(
-			Chat::Tell,
+		my_bot->OwnerMessage(
 			fmt::format(
-				"{} tells you, 'I have unequipped {} from my {} (Slot {}).'",
-				my_bot->GetCleanName(),
+				"I have unequipped {} from my {} (Slot {}).",
 				linker.GenerateLink(),
 				EQ::invslot::GetInvPossessionsSlotName(slot_id),
 				slot_id
-			).c_str()
+			)
 		);
 	}
 }
@@ -9890,8 +10008,16 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 		return false;
 
 	casting_bot->InterruptSpell();
-	if (annouce_cast)
-		Bot::BotGroupSay(casting_bot, "Attempting to cast '%s' on %s", spells[spell_id].name, target_mob->GetCleanName());
+	if (annouce_cast) {
+		Bot::BotGroupSay(
+			casting_bot,
+			fmt::format(
+				"Attempting to cast {} on {}.",
+				spells[spell_id].name,
+				target_mob->GetCleanName()
+			).c_str()
+		);
+	}
 
 	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQ::spells::CastingSlot::Gem2, -1, -1, dont_root_before);
 }
@@ -9919,54 +10045,115 @@ bool helper_command_alias_fail(Client *bot_owner, const char* command_handler, c
 
 void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_bot, bcst_list* local_list, bool single_flag)
 {
-	if (!bot_owner)
+	if (!bot_owner) {
 		return;
+	}
 
-	if (!MyBots::IsMyBot(bot_owner, druid_bot))
+	if (!MyBots::IsMyBot(bot_owner, druid_bot)) {
 		druid_bot = nullptr;
-	if (!MyBots::IsMyBot(bot_owner, wizard_bot))
+	}
+
+	if (!MyBots::IsMyBot(bot_owner, wizard_bot)) {
 		wizard_bot = nullptr;
+	}
+
 	if (!druid_bot && !wizard_bot) {
 		bot_owner->Message(Chat::White, "No bots are capable of performing this action");
 		return;
 	}
 
-	bot_owner->Message(Chat::White, "The following destinations are available:");
 	if (!local_list) {
-		bot_owner->Message(Chat::White, "None");
+		bot_owner->Message(Chat::White, "There are no destinations you can be taken to.");
 		return;
 	}
 
 	std::string msg;
 	std::string text_link;
 
-	int destinations = 0;
+	auto destination_count = 0;
+	auto destination_number = 1;
 	for (auto list_iter : *local_list) {
 		auto local_entry = list_iter->SafeCastToDepart();
-		if (!local_entry)
-			continue;
-
-		if (druid_bot && druid_bot->GetClass() == local_entry->caster_class && druid_bot->GetLevel() >= local_entry->spell_level) {
-			if (local_entry->single != single_flag)
-				continue;
-			msg = StringFormat("%ccircle %s%s", BOT_COMMAND_CHAR, spells[local_entry->spell_id].teleport_zone, ((single_flag) ? (" single") : ("")));
-			text_link = druid_bot->CreateSayLink(bot_owner, msg.c_str(), local_entry->long_name.c_str());
-			Bot::BotGroupSay(druid_bot, "dest: '%s' click: %s", spells[local_entry->spell_id].teleport_zone, text_link.c_str());
-			++destinations;
+		if (!local_entry) {
 			continue;
 		}
-		if (wizard_bot && wizard_bot->GetClass() == local_entry->caster_class && wizard_bot->GetLevel() >= local_entry->spell_level) {
-			if (local_entry->single != single_flag)
+
+		if (
+			druid_bot &&
+			druid_bot->GetClass() == local_entry->caster_class &&
+			druid_bot->GetLevel() >= local_entry->spell_level
+		) {
+			if (local_entry->single != single_flag) {
 				continue;
-			msg = StringFormat("%cportal %s%s", BOT_COMMAND_CHAR, spells[local_entry->spell_id].teleport_zone, ((single_flag) ? (" single") : ("")));
-			text_link = wizard_bot->CreateSayLink(bot_owner, msg.c_str(), local_entry->long_name.c_str());
-			Bot::BotGroupSay(wizard_bot, "dest: '%s' click: %s", spells[local_entry->spell_id].teleport_zone, text_link.c_str());
-			++destinations;
+			}
+			
+			msg = fmt::format(
+				"{}circle {}{}",
+				std::to_string(BOT_COMMAND_CHAR),
+				spells[local_entry->spell_id].teleport_zone,
+				single_flag ? " single" : ""
+			);
+
+			text_link = druid_bot->CreateSayLink(
+				bot_owner,
+				msg.c_str(),
+				"Goto"
+			);
+
+			druid_bot->OwnerMessage(
+				fmt::format(
+					"Destination {} | {} | {}",
+					destination_number,
+					local_entry->long_name,
+					text_link
+				).c_str()
+			);
+
+			destination_count++;
+			destination_number++;
+			continue;
+		}
+
+		if (
+			wizard_bot &&
+			wizard_bot->GetClass() == local_entry->caster_class &&
+			wizard_bot->GetLevel() >= local_entry->spell_level
+		) {
+			if (local_entry->single != single_flag) {
+				continue;
+			}
+			
+			msg = fmt::format(
+				"{}portal {}{}",
+				std::to_string(BOT_COMMAND_CHAR),
+				spells[local_entry->spell_id].teleport_zone,
+				single_flag ? " single" : ""
+			);
+
+			text_link = wizard_bot->CreateSayLink(
+				bot_owner,
+				msg.c_str(),
+				"Goto"
+			);
+
+			wizard_bot->OwnerMessage(
+				fmt::format(
+					"Destination {} | {} | {}",
+					destination_number,
+					local_entry->long_name,
+					text_link
+				).c_str()
+			);
+
+			destination_count++;
+			destination_number++;
 			continue;
 		}
 	}
-	if (!destinations)
-		bot_owner->Message(Chat::White, "None");
+
+	if (!destination_count) {
+		bot_owner->Message(Chat::White, "There are no destinations you can be taken to.");
+	}
 }
 
 bool helper_is_help_or_usage(const char* arg)

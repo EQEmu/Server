@@ -6,6 +6,7 @@
 #include "client.h"
 #include "npc.h"
 #ifdef BOTS
+#include "bot.h"
 #include "lua_bot.h"
 #endif
 #include "lua_item.h"
@@ -1371,13 +1372,17 @@ bool Lua_Mob::EntityVariableExists(const char *name) {
 	return self->EntityVariableExists(name);
 }
 
-void Lua_Mob::Signal(uint32 id) {
+void Lua_Mob::Signal(int signal_id) {
 	Lua_Safe_Call_Void();
 
-	if(self->IsClient()) {
-		self->CastToClient()->Signal(id);
-	} else if(self->IsNPC()) {
-		self->CastToNPC()->SignalNPC(id);
+	if (self->IsClient()) {
+		self->CastToClient()->Signal(signal_id);
+	} else if (self->IsNPC()) {
+		self->CastToNPC()->SignalNPC(signal_id);
+#ifdef BOTS
+	} else if (self->IsBot()) {
+		self->CastToBot()->SignalBot(signal_id);
+#endif	
 	}
 }
 
@@ -3100,7 +3105,7 @@ luabind::scope lua_register_mob() {
 	.def("SetTexture", (void(Lua_Mob::*)(int))&Lua_Mob::SetTexture)
 	.def("Shout", (void(Lua_Mob::*)(const char*))& Lua_Mob::Shout)
 	.def("Shout", (void(Lua_Mob::*)(const char*, int))& Lua_Mob::Shout)
-	.def("Signal", (void(Lua_Mob::*)(uint32))&Lua_Mob::Signal)
+	.def("Signal", (void(Lua_Mob::*)(int))&Lua_Mob::Signal)
 	.def("SpellEffect", &Lua_Mob::SpellEffect)
 	.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob))&Lua_Mob::SpellFinished)
 	.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int))&Lua_Mob::SpellFinished)

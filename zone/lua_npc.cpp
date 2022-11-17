@@ -12,9 +12,9 @@ struct Lua_NPC_Loot_List {
 	std::vector<uint32> entries;
 };
 
-void Lua_NPC::Signal(int id) {
+void Lua_NPC::Signal(int signal_id) {
 	Lua_Safe_Call_Void();
-	self->SignalNPC(id);
+	self->SignalNPC(signal_id);
 }
 
 int Lua_NPC::CheckNPCFactionAlly(int faction) {

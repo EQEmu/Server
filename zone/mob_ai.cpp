@@ -32,6 +32,10 @@
 #include "fastmath.h"
 #include "../common/data_verification.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <iostream>
@@ -1923,10 +1927,11 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			if (attacker->GetHP() > 0) {
 				if (!CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
-					uint32 emoteid = GetEmoteID();
-					if (emoteid != 0) {
+					auto emote_id = GetEmoteID();
+					if (emote_id) {
 						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid);
 					}
+
 					std::string mob_name = GetCleanName();
 					combat_record.Start(mob_name);
 					CastToNPC()->SetCombatEvent(true);
@@ -1934,18 +1939,28 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			}
 		}
 	}
+
+#ifdef BOTS
+	if (IsBot()) {
+		parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+	}
+#endif
 }
 
 // Note: Hate list may not be actually clear until after this function call completes
 void Mob::AI_Event_NoLongerEngaged() {
-	if (!IsAIControlled())
+	if (!IsAIControlled()) {
 		return;
+	}
+
 	AI_walking_timer->Start(RandomTimer(3000,20000));
 	time_until_can_move = Timer::GetCurrentTime();
-	if (minLastFightingDelayMoving == maxLastFightingDelayMoving)
+
+	if (minLastFightingDelayMoving == maxLastFightingDelayMoving) {
 		time_until_can_move += minLastFightingDelayMoving;
-	else
+	} else {
 		time_until_can_move += zone->random.Int(minLastFightingDelayMoving, maxLastFightingDelayMoving);
+	}
 
 	StopNavigation();
 	ClearRampage();
@@ -1954,16 +1969,21 @@ void Mob::AI_Event_NoLongerEngaged() {
 		SetPrimaryAggro(false);
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
-			if (entity_list.GetNPCByID(this->GetID())) {
-				uint32 emoteid = CastToNPC()->GetEmoteID();
+			if (entity_list.GetNPCByID(GetID())) {
+				auto emote_id = CastToNPC()->GetEmoteID();
 				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
-				if (emoteid != 0) {
+				if (emote_id) {
 					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
 				}
+
 				combat_record.Stop();
 				CastToNPC()->SetCombatEvent(false);
 			}
 		}
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+#endif
 	}
 }
 

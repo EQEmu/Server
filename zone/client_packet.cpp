@@ -11200,13 +11200,19 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 	}
 
-	std::string export_string = fmt::format("{}", popup_response->popupid);
+	const auto export_string = fmt::format("{}", popup_response->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, export_string, 0);
 
-	Mob *Target = GetTarget();
-	if (Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, export_string, 0);
+	auto t = GetTarget();
+	if (t) {
+		if (t->IsNPC()) {
+			parse->EventNPC(EVENT_POPUP_RESPONSE, t->CastToNPC(), this, export_string, 0);
+#ifdef BOTS
+		} else if (t->IsBot()) {
+			parse->EventBot(EVENT_POPUP_RESPONSE, t->CastToBot(), this, export_string, 0);
+#endif
+		}
 	}
 }
 

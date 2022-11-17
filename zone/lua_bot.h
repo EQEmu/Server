@@ -42,9 +42,11 @@ public:
 	int GetExpansionBitmask();
 	Lua_Mob GetOwner();
 	bool HasBotItem(uint32 item_id);
+	void OwnerMessage(std::string message);
 	void RemoveBotItem(uint32 item_id);
 	void SetExpansionBitmask(int expansion_bitmask);
 	void SetExpansionBitmask(int expansion_bitmask, bool save);
+	void SignalBot(int signal_id);
 };
 
 #endif

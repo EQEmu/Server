@@ -1454,6 +1454,17 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 			LogCombat("Attack missed. Damage set to 0");
 			hit.damage_done = 0;
 		}
+
+#ifdef BOTS
+		if (IsBot()) {
+			const auto export_string = fmt::format(
+				"{} {}",
+				hit.skill,
+				GetSkill(hit.skill)
+			);
+			parse->EventBot(EVENT_USE_SKILL, CastToBot(), nullptr, export_string, 0);
+		}
+#endif
 	}
 }
 
@@ -1707,22 +1718,26 @@ void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::Skill
 
 bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
 {
-	if (!ClientFinishedLoading())
+	if (!ClientFinishedLoading()) {
 		return false;
+	}
 
-	if (dead)
+	if (dead) {
 		return false;	//cant die more than once...
+	}
 
-	if (!spell)
+	if (!spell) {
 		spell = SPELL_UNKNOWN;
+	}
 
-	std::string export_string = fmt::format(
+	auto export_string = fmt::format(
 		"{} {} {} {}",
 		killerMob ? killerMob->GetID() : 0,
 		damage,
 		spell,
 		static_cast<int>(attack_skill)
 	);
+
 	if (parse->EventPlayer(EVENT_DEATH, this, export_string, 0) != 0) {
 		if (GetHP() < 0) {
 			SetHP(0);
@@ -1793,24 +1808,36 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		GetMerc()->Suspend();
 	}
 
-	if (killerMob != nullptr)
-	{
+	if (killerMob) {
 		if (killerMob->IsNPC()) {
 			parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
 
 			mod_client_death_npc(killerMob);
 
-			uint32 emoteid = killerMob->GetEmoteID();
-			if (emoteid != 0)
+			auto emote_id = killerMob->GetEmoteID();
+			if (emote_id) {
 				killerMob->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledPC, emoteid);
+			}
+
 			killerMob->TrySpellOnKill(killed_level, spell);
+#ifdef BOTS
+		} else if (killerMob->IsBot()) {
+			parse->EventBot(EVENT_SLAY, killerMob->CastToBot(), this, "", 0);
+			killerMob->TrySpellOnKill(killed_level, spell);
+#endif
 		}
 
-		if (killerMob->IsClient() && (IsDueling() || killerMob->CastToClient()->IsDueling())) {
+		if (
+			killerMob->IsClient() &&
+			(IsDueling() || killerMob->CastToClient()->IsDueling())
+		) {
 			SetDueling(false);
 			SetDuelTarget(0);
-			if (killerMob->IsClient() && killerMob->CastToClient()->IsDueling() && killerMob->CastToClient()->GetDuelTarget() == GetID())
-			{
+			if (
+				killerMob->IsClient() &&
+				killerMob->CastToClient()->IsDueling() &&
+				killerMob->CastToClient()->GetDuelTarget() == GetID()
+			) {
 				//if duel opponent killed us...
 				killerMob->CastToClient()->SetDueling(false);
 				killerMob->CastToClient()->SetDuelTarget(0);
@@ -1843,16 +1870,19 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 	// figure out if they should lose exp
 	if (RuleB(Character, UseDeathExpLossMult)) {
-		float GetNum[] = { 0.005f,0.015f,0.025f,0.035f,0.045f,0.055f,0.065f,0.075f,0.085f,0.095f,0.110f };
-		int Num = RuleI(Character, DeathExpLossMultiplier);
-		if ((Num < 0) || (Num > 10))
-			Num = 3;
-		float loss = GetNum[Num];
-		exploss = (int)((float)GetEXP() * (loss)); //loose % of total XP pending rule (choose 0-10)
+		float exp_losses[] = { 0.005f, 0.015f, 0.025f, 0.035f, 0.045f, 0.055f, 0.065f, 0.075f, 0.085f, 0.095f, 0.110f };
+		int exp_loss = RuleI(Character, DeathExpLossMultiplier);
+		if (!EQ::ValueWithin(exp_loss, 0, 10)) {
+			exp_loss = 3;
+		}
+
+		auto current_exp_loss = exp_losses[exp_loss];
+
+		exploss = static_cast<int>(static_cast<float>(GetEXP()) * current_exp_loss); //loose % of total XP pending rule (choose 0-10)
 	}
 
 	if (!RuleB(Character, UseDeathExpLossMult)) {
-		exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
+		exploss = static_cast<int>(GetLevel() * (GetLevel() / 18.0) * 12000);
 	}
 
 	if (RuleB(Zone, LevelBasedEXPMods)) {
@@ -1873,56 +1903,49 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		}
 	}
 
-	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC())
-	{
+	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC()) {
 		exploss = 0;
-	}
-	else if (killerMob)
-	{
-		if (killerMob->IsClient())
-		{
+	} else if (killerMob) {
+		if (killerMob->IsClient()) {
 			exploss = 0;
-		}
-		else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient())
-		{
+		} else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient()) {
 			exploss = 0;
+#ifdef BOTS
+		} else if (killerMob->IsBot()) {
+			exploss = 0;
+#endif
 		}
 	}
 
-	if (spell != SPELL_UNKNOWN)
-	{
+	if (spell != SPELL_UNKNOWN) {
 		uint32 buff_count = GetMaxTotalSlots();
-		for (uint16 buffIt = 0; buffIt < buff_count; buffIt++)
-		{
-			if (buffs[buffIt].spellid == spell && buffs[buffIt].client)
-			{
+		for (uint16 buffIt = 0; buffIt < buff_count; buffIt++) {
+			if (buffs[buffIt].spellid == spell && buffs[buffIt].client) {
 				exploss = 0;	// no exp loss for pvp dot
 				break;
 			}
 		}
 	}
 
-	bool LeftCorpse = false;
+	bool leave_corpse = false;
 	Corpse* new_corpse = nullptr;
 
 	// now we apply the exp loss, unmem their spells, and make a corpse
 	// unless they're a GM (or less than lvl 10
-	if (!GetGM())
-	{
+	if (!GetGM()) {
 		if (exploss > 0) {
 			int32 newexp = GetEXP();
 			if (exploss > newexp) {
 				//lost more than we have... wtf..
 				newexp = 1;
-			}
-			else {
+			} else {
 				newexp -= exploss;
 			}
 			SetEXP(newexp, GetAAXP());
 			//m_epp.perAA = 0;	//reset to no AA exp on death.
 		}
 
-		int32 illusion_spell_id = spellbonuses.Illusion;
+		auto illusion_spell_id = spellbonuses.Illusion;
 
 		//this generates a lot of 'updates' to the client that the client does not need
 		if (RuleB(Spells, BuffsFadeOnDeath)) {
@@ -1930,58 +1953,61 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		}
 
 		if (RuleB(Character, UnmemSpellsOnDeath)) {
-			if ((ClientVersionBit() & EQ::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover))
+			if ((ClientVersionBit() & EQ::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover)) {
 				UnmemSpellAll(true);
-			else
+			} else {
 				UnmemSpellAll(false);
+			}
 		}
 
-		if ((RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) || RuleB(Character, LeaveNakedCorpses))
-		{
+		if (
+			(RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) ||
+			RuleB(Character, LeaveNakedCorpses)
+		) {
 			// creating the corpse takes the cash/items off the player too
 			new_corpse = new Corpse(this, exploss);
 
 			std::string tmp;
 			database.GetVariable("ServerType", tmp);
-			if (tmp[0] == '1' && tmp[1] == '\0' && killerMob != nullptr && killerMob->IsClient()) {
+			if (tmp[0] == '1' && tmp[1] == '\0' && killerMob && killerMob->IsClient()) {
 				database.GetVariable("PvPreward", tmp);
-				int reward = atoi(tmp.c_str());
+				auto reward = atoi(tmp.c_str());
 				if (reward == 3) {
 					database.GetVariable("PvPitem", tmp);
-					int pvpitem = atoi(tmp.c_str());
-					if (pvpitem>0 && pvpitem<200000)
-						new_corpse->SetPlayerKillItemID(pvpitem);
-				}
-				else if (reward == 2)
+					auto pvp_item_id = atoi(tmp.c_str());
+					const auto* item = database.GetItem(pvp_item_id);
+					if (item) {
+						new_corpse->SetPlayerKillItemID(pvp_item_id);
+					}
+				} else if (reward == 2) {
 					new_corpse->SetPlayerKillItemID(-1);
-				else if (reward == 1)
+				} else if (reward == 1) {
 					new_corpse->SetPlayerKillItemID(1);
-				else
+				} else {
 					new_corpse->SetPlayerKillItemID(0);
+				}
+
 				if (killerMob->CastToClient()->isgrouped) {
-					Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
-					if (group != 0)
-					{
-						for (int i = 0; i<6; i++)
-						{
-							if (group->members[i] != nullptr)
-							{
+					auto* group = entity_list.GetGroupByClient(killerMob->CastToClient());
+					if (group) {
+						for (int i = 0; i < 6; i++) {
+							if (group->members[i]) {
 								new_corpse->AllowPlayerLoot(group->members[i], i);
 							}
 						}
 					}
 				}
 			}
+
 			entity_list.AddCorpse(new_corpse, GetID());
 			SetID(0);
 
 			//send the become corpse packet to everybody else in the zone.
 			entity_list.QueueClients(this, &app2, true);
 			ApplyIllusionToCorpse(illusion_spell_id, new_corpse);
-			LeftCorpse = true;
+			leave_corpse = true;
 		}
-	}
-	else {
+	} else {
 		BuffFadeDetrimental();
 	}
 
@@ -1993,8 +2019,9 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	/*
 	Reset reuse timer for classic skill based Lay on Hands (For tit I guess)
 	*/
-	if (GetClass() == PALADIN) // we could check if it's not expired I guess, but should be fine not to
+	if (GetClass() == PALADIN) { // we could check if it's not expired I guess, but should be fine not to
 		p_timers.Clear(&database, pTimerLayHands);
+	}
 
 	/*
 	Finally, send em home
@@ -2003,25 +2030,23 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	from these and overwrite what we set in pp anyway
 	*/
 
-	if (LeftCorpse && (ClientVersionBit() & EQ::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover))
-	{
+	if (leave_corpse && (ClientVersionBit() & EQ::versions::maskSoFAndLater) && RuleB(Character, RespawnFromHover)) {
 		ClearDraggedCorpses();
 		RespawnFromHoverTimer.Start(RuleI(Character, RespawnFromHoverTimer) * 1000);
 		SendRespawnBinds();
-	}
-	else
-	{
-		if (isgrouped)
-		{
-			Group *g = GetGroup();
-			if (g)
+	} else {
+		if (isgrouped) {
+			auto* g = GetGroup();
+			if (g) {
 				g->MemberZoned(this);
+			}
 		}
 
-		Raid* r = entity_list.GetRaidByClient(this);
+		auto* r = entity_list.GetRaidByClient(this);
 
-		if (r)
+		if (r) {
 			r->MemberZoned(this);
+		}
 
 		dead_timer.Start(5000, true);
 		m_pp.zone_id = m_pp.binds[0].zone_id;
@@ -2320,9 +2345,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
 		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);
 
-	Mob* oos = killer_mob ? killer_mob->GetOwnerOrSelf() : nullptr;
-
-	std::string export_string = fmt::format(
+	Mob *oos = killer_mob ? killer_mob->GetOwnerOrSelf() : nullptr;
+	auto export_string = fmt::format(
 		"{} {} {} {}",
 		killer_mob ? killer_mob->GetID() : 0,
 		damage,
@@ -2330,12 +2354,24 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		static_cast<int>(attack_skill)
 	);
 
-	// todo: multiple attacks causes this to fire multiple times (DoAttackRounds, DoMain/OffHandAttackRounds, DoRiposte, spells?)
-	if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
-		if (GetHP() < 0) {
-			SetHP(0);
+	if (IsNPC()) {
+		if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
+			if (GetHP() < 0) {
+				SetHP(0);
+			}
+
+			return false;
 		}
-		return false;
+#ifdef BOTS
+	} else if (IsBot()) {
+		if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
+			if (GetHP() < 0) {
+				SetHP(0);
+			}
+
+			return false;
+		}
+#endif
 	}
 
 	if (killer_mob && (killer_mob->IsClient() || killer_mob->IsBot()) && (spell != SPELL_UNKNOWN) && damage > 0) {
@@ -2364,23 +2400,25 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	SetPet(0);
 
 	if (GetSwarmOwner()) {
-		Mob* owner = entity_list.GetMobID(GetSwarmOwner());
-		if (owner)
+		auto* owner = entity_list.GetMobID(GetSwarmOwner());
+		if (owner) {
 			owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+		}
 	}
 
-	Mob* killer = GetHateDamageTop(this);
+	auto* killer = GetHateDamageTop(this);
 
 	entity_list.RemoveFromTargets(this, p_depop);
 
-	if (p_depop == true)
+	if (p_depop) {
 		return false;
+	}
 
-	int32 illusion_spell_id = spellbonuses.Illusion;
+	const auto illusion_spell_id = spellbonuses.Illusion;
 
 	HasAISpellEffects = false;
 	BuffFadeAll();
-	uint8 killed_level = GetLevel();
+	const auto killed_level = GetLevel();
 
 	if (GetClass() == LDON_TREASURE) { // open chest
 		auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
@@ -2393,7 +2431,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 
 	auto app = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
-	Death_Struct* d = (Death_Struct*)app->pBuffer;
+	auto* d = (Death_Struct*) app->pBuffer;
 	d->spawn_id = GetID();
 	d->killer_id = killer_mob ? killer_mob->GetID() : 0;
 	d->bindzoneid = 0;
@@ -2409,16 +2447,17 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		respawn2->DeathReset(1);
 	}
 
-	if (killer_mob && GetClass() != LDON_TREASURE)
+	if (killer_mob && GetClass() != LDON_TREASURE) {
 		hate_list.AddEntToHateList(killer_mob, damage);
+	}
 
 	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 
-	if (give_exp == nullptr)
+	if (give_exp) {
 		give_exp = killer;
+	}
 
 	if (give_exp && give_exp->HasOwner()) {
-
 		bool ownerInGroup = false;
 		if ((give_exp->HasGroup() && give_exp->GetGroup()->IsGroupMember(give_exp->GetUltimateOwner()))
 			|| (give_exp->IsPet() && (give_exp->GetOwner()->IsClient()
@@ -2721,17 +2760,32 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	if (oos) {
 		mod_npc_killed(oos);
 
-		uint32 emoteid = GetEmoteID();
-		if (emoteid != 0)
-			DoNPCEmote(EQ::constants::EmoteEventTypes::OnDeath, emoteid);
+		if (IsNPC()) {
+			auto emote_id = GetEmoteID();
+			if (emote_id) {
+				DoNPCEmote(EQ::constants::EmoteEventTypes::OnDeath, emoteid);
+			}
+		}
+
 		if (oos->IsNPC()) {
 			parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
-			uint32 emoteid = oos->GetEmoteID();
-			if (emoteid != 0)
-				oos->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledNPC, emoteid);
+			auto emote_id = oos->GetEmoteID();
+			if (emote_id) {
+				oos->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledNPC, emote_id);
+			}
+
 			killer_mob->TrySpellOnKill(killed_level, spell);
 		}
 	}
+
+#ifdef BOTS
+	if (killer_mob->IsBot()) {
+		parse->EventBot(EVENT_NPC_SLAY, killer_mob->CastToBot(), this, "", 0);
+		killer_mob->TrySpellOnKill(killed_level, spell);
+	}
+#endif
+
+	LogInfo("[Attack] Should have attempted to do OOS check");
 
 	WipeHateList();
 	p_depop = true;

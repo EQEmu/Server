@@ -1528,7 +1528,7 @@ struct CZSetEntityVariable_Struct {
 struct CZSignal_Struct {
 	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name, 6 - NPC
 	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, Expedition ID, or NPC ID based on update type, 0 for Character Name
-	uint32 signal;
+	int signal;
 	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
@@ -1601,7 +1601,7 @@ struct WWSetEntityVariable_Struct {
 
 struct WWSignal_Struct {
 	uint8 update_type; // 0 - Character, 1 - NPC
-	uint32 signal;
+	int signal;
 	uint8 min_status;
 	uint8 max_status;
 };

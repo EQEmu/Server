@@ -440,6 +440,21 @@ Lua_Bot_List Lua_EntityList::GetBotListByClientName(std::string client_name) {
 
 	return ret;
 }
+
+void Lua_EntityList::SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id) {
+	Lua_Safe_Call_Void();
+	self->SignalAllBotsByOwnerCharacterID(character_id, signal_id);
+}
+
+void Lua_EntityList::SignalBotByBotID(uint32 bot_id, int signal_id) {
+	Lua_Safe_Call_Void();
+	self->SignalBotByBotID(bot_id, signal_id);
+}
+
+void Lua_EntityList::SignalBotByBotName(std::string bot_name, int signal_id) {
+	Lua_Safe_Call_Void();
+	self->SignalBotByBotName(bot_name, signal_id);
+}
 #endif
 
 Lua_Client_List Lua_EntityList::GetShuffledClientList() {
@@ -690,7 +705,14 @@ luabind::scope lua_register_entity_list() {
 	.def("RemoveFromTargets", (void(Lua_EntityList::*)(Lua_Mob, bool))&Lua_EntityList::RemoveFromTargets)
 	.def("RemoveNumbers", (std::string(Lua_EntityList::*)(const char*))&Lua_EntityList::RemoveNumbers)
 	.def("ReplaceWithTarget", (void(Lua_EntityList::*)(Lua_Mob, Lua_Mob))&Lua_EntityList::ReplaceWithTarget)
+#ifdef BOTS
+	.def("SignalAllBotsByOwnerCharacterID", (void(Lua_EntityList::*)(uint32, int))&Lua_EntityList::SignalAllBotsByOwnerCharacterID)
+#endif
 	.def("SignalAllClients", (void(Lua_EntityList::*)(int))&Lua_EntityList::SignalAllClients)
+#ifdef BOTS
+	.def("SignalBotByBotID", (void(Lua_EntityList::*)(uint32, int))&Lua_EntityList::SignalBotByBotID)
+	.def("SignalBotByBotName", (void(Lua_EntityList::*)(std::string, int))&Lua_EntityList::SignalBotByBotName)
+#endif
 	.def("SignalMobsByNPCID", (void(Lua_EntityList::*)(uint32, int))&Lua_EntityList::SignalMobsByNPCID);
 }
 

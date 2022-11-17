@@ -681,6 +681,9 @@ public:
 	int32 GetBaseDR() { return _baseDR; }
 	int32 GetBaseCorrup() { return _baseCorrup; }
 
+	void SignalBot(int signal_id);
+	void OwnerMessage(std::string message);
+
 protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
@@ -700,6 +703,7 @@ protected:
 	//void SetRaidSlower(bool flag = true) { m_CastingRoles.RaidSlower = flag; }
 	//void SetRaidNuker(bool flag = true) { m_CastingRoles.RaidNuker = flag; }
 	//void SetRaidDoter(bool flag = true) { m_CastingRoles.RaidDoter = flag; }
+	std::deque<int> bot_signal_q;
 
 private:
 	// Class Members

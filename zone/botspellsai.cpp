@@ -98,8 +98,16 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				}
 				castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
 
-				if(castedSpell)
-					BotGroupSay(this, "Attempting to mez %s.", addMob->GetCleanName());
+				if (castedSpell) {
+					BotGroupSay(
+						this,
+						fmt::format(
+							"Attempting to mesmerize {} with {}.",
+							addMob->GetCleanName(),
+							spells[botSpell.SpellId].name
+						).c_str()
+					);
+				}
 			}
 			break;
 		}
@@ -272,7 +280,13 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 									Group *g = GetGroup();
 
 									if(g) {
-										BotGroupSay(this, "Casting %s.", spells[botSpell.SpellId].name);
+										BotGroupSay(
+											this,
+											fmt::format(
+												"Casting {}.",
+												spells[botSpell.SpellId].name
+											).c_str()
+										);
 
 										for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
 											if(g->members[i] && !g->members[i]->qglobal) {
@@ -281,10 +295,17 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 										}
 									}
 								}
-							}
-							else {
-								if(tar != this)		//we don't need spam of bots healing themselves
-									BotGroupSay(this, "Casting %s on %s", spells[botSpell.SpellId].name, tar->GetCleanName());
+							} else {
+								if (tar != this) { //we don't need spam of bots healing themselves
+									BotGroupSay(
+										this,
+										fmt::format(
+											"Casting {} on {}.",
+											spells[botSpell.SpellId].name,
+											tar->GetCleanName()
+										).c_str()
+									);
+								}
 
 								tar->SetDontHealMeBefore(Timer::GetCurrentTime() + 2000);
 							}
@@ -892,8 +913,16 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 
-				if(castedSpell && GetClass() != BARD)
-					BotGroupSay(this, "Attempting to slow %s.", tar->GetCleanName());
+				if (castedSpell && GetClass() != BARD) {
+					BotGroupSay(
+						this,
+						fmt::format(
+							"Attempting to slow {} with {}.",
+							tar->GetCleanName(),
+							spells[botSpell.SpellId].name
+						).c_str()
+					);
+				}
 			}
 			break;
 		}
@@ -982,7 +1011,14 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 					castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
 					if (castedSpell) {
-						BotGroupSay(this, "Attempting to reduce hate on %s.", tar->GetCleanName());
+						BotGroupSay(
+							this,
+							fmt::format(
+								"Attempting to reduce hate on {} with {}.",
+								tar->GetCleanName(),
+								spells[iter.SpellId].name
+							).c_str()
+						);
 						break;
 					}
 				}
@@ -1596,8 +1632,16 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 
 	castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
 
-	if(castedSpell)
-		Say("Casting %s on %s, please stay in range!", spells[botSpell.SpellId].name, tar->GetCleanName());
+	if (castedSpell) {
+		BotGroupSay(
+			this,
+			fmt::format(
+				"Casting {} on {}, please stay in range!",
+				spells[botSpell.SpellId].name,
+				tar->GetCleanName()
+			).c_str()
+		);
+	}
 
 	return castedSpell;
 }

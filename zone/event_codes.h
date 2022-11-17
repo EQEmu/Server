@@ -106,6 +106,10 @@ typedef enum {
 	EVENT_TASK_BEFORE_UPDATE,
 	EVENT_AA_BUY,
 	EVENT_AA_GAIN,
+#ifdef BOTS
+	EVENT_SPELL_EFFECT_BOT,
+	EVENT_SPELL_EFFECT_BUFF_TIC_BOT,
+#endif
 	_LargestEventID
 } QuestEventID;
 

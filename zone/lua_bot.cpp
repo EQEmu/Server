@@ -84,6 +84,16 @@ uint32 Lua_Bot::GetBotItemIDBySlot(uint16 slot_id) {
 	return self->GetBotItemBySlot(slot_id);
 }
 
+void Lua_Bot::SignalBot(int signal_id) {
+	Lua_Safe_Call_Void();
+	self->SignalBot(signal_id);
+}
+
+void Lua_Bot::OwnerMessage(std::string message) {
+	Lua_Safe_Call_Void();
+	self->OwnerMessage(message);
+}
+
 int Lua_Bot::GetExpansionBitmask() {
 	Lua_Safe_Call_Int();
 	return self->GetExpansionBitmask();
@@ -117,9 +127,11 @@ luabind::scope lua_register_bot() {
 	.def("GetExpansionBitmask", (int(Lua_Bot::*)(void))&Lua_Bot::GetExpansionBitmask)
 	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void))&Lua_Bot::GetOwner)
 	.def("HasBotItem", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasBotItem)
+	.def("OwnerMessage", (void(Lua_Bot::*)(std::string))&Lua_Bot::OwnerMessage)
 	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32))&Lua_Bot::RemoveBotItem)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int))&Lua_Bot::SetExpansionBitmask)
-	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int,bool))&Lua_Bot::SetExpansionBitmask);
+	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int,bool))&Lua_Bot::SetExpansionBitmask)
+	.def("SignalBot", (void(Lua_Bot::*)(int))&Lua_Bot::SignalBot);
 }
 
 #endif

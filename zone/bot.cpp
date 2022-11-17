@@ -2663,7 +2663,13 @@ void Bot::AI_Process()
 			auto pull_target = bot_owner->GetTarget();
 			if (pull_target) {
 
-				Bot::BotGroupSay(this, "Pulling %s to the group..", pull_target->GetCleanName());
+				BotGroupSay(
+					this,
+					fmt::format(
+						"Pulling {}.",
+						pull_target->GetCleanName()
+					).c_str()
+				);
 				InterruptSpell();
 				WipeHateList();
 				AddToHateList(pull_target, 1);
@@ -2822,14 +2828,20 @@ void Bot::AI_Process()
 			bool find_target = true;
 
 			if (assist_mob) {
-
 				if (assist_mob->GetTarget()) {
-
 					if (assist_mob != this) {
+						if (GetTarget() != assist_mob->GetTarget()) {
+							SetTarget(assist_mob->GetTarget());
+						}
 
-						SetTarget(assist_mob->GetTarget());
-						if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
-
+						if (
+							HasPet() &&
+							(
+								GetClass() != ENCHANTER ||
+								GetPet()->GetPetType() != petAnimation ||
+								GetAA(aaAnimationEmpathy) >= 2
+							)
+						) {
 							// This artificially inflates pet's target aggro..but, less expensive than checking hate each AI process
 							GetPet()->AddToHateList(assist_mob->GetTarget(), 1);
 							GetPet()->SetTarget(assist_mob->GetTarget());
@@ -2837,12 +2849,19 @@ void Bot::AI_Process()
 					}
 
 					find_target = false;
-				}
-				else if (assist_mob != this) {
+				} else if (assist_mob != this) {
+					if (GetTarget()) {
+						SetTarget(nullptr);
+					}
 
-					SetTarget(nullptr);
-					if (HasPet() && (GetClass() != ENCHANTER || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
-
+					if (
+						HasPet() &&
+						(
+							GetClass() != ENCHANTER ||
+							GetPet()->GetPetType() != petAnimation ||
+							GetAA(aaAnimationEmpathy) >= 1
+						)
+					) {
 						GetPet()->WipeHateList();
 						GetPet()->SetTarget(nullptr);
 					}
@@ -2852,16 +2871,23 @@ void Bot::AI_Process()
 			}
 
 			if (find_target) {
-
 				if (IsRooted()) {
-					SetTarget(hate_list.GetClosestEntOnHateList(this, true));
-				}
-				else {
-
+					auto closest = hate_list.GetClosestEntOnHateList(this, true);
+					if (closest) {
+						SetTarget(closest);
+					}
+				} else {
 					// This will keep bots on target for now..but, future updates will allow for rooting/stunning
-					SetTarget(hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance));
+					auto escaping = hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance);
+					if (escaping) {
+						SetTarget(escaping);
+					}
+
 					if (!GetTarget()) {
-						SetTarget(hate_list.GetEntWithMostHateOnList(this, nullptr, true));
+						auto most_hate = hate_list.GetEntWithMostHateOnList(this, nullptr, true);
+						if (most_hate) {
+							SetTarget(most_hate);
+						}
 					}
 				}
 			}
@@ -2884,8 +2910,10 @@ void Bot::AI_Process()
 
 		Mob* tar = GetTarget(); // We should have a target..if not, we're awaiting new orders
 		if (!tar || PASSIVE) {
+			if (GetTarget()) {
+				SetTarget(nullptr);
+			}
 
-			SetTarget(nullptr);
 			WipeHateList();
 			SetAttackFlag(false);
 			SetAttackingFlag(false);
@@ -4929,12 +4957,10 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			//}
 
 			if (!database.botdb.DeleteItemBySlot(GetBotID(), return_iterator.from_bot_slot)) {
-				client->Message(
-					Chat::White,
+				OwnerMessage(
 					fmt::format(
-						"Failed to delete item by slot from slot {} for {}.",
-						return_iterator.from_bot_slot,
-						GetCleanName()
+						"Failed to delete item by slot from slot {}.",
+						return_iterator.from_bot_slot
 					).c_str()
 				);
 			}
@@ -4947,13 +4973,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				linker.SetItemInst(return_instance);
 				auto item_link = linker.GenerateLink();
 
-				client->Message(
-					Chat::Tell,
+				OwnerMessage(
 					fmt::format(
-						"{} tells you, 'I have returned {}.'",
-						GetCleanName(),
+						"I have returned {}.",
 						item_link
-					).c_str()
+					)
 				);
 
 				client->PutItemInInventory(return_iterator.to_client_slot, *return_instance, true);
@@ -4969,12 +4993,10 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		// TODO: code for stackables
 
 		if (!database.botdb.SaveItemBySlot(this, trade_iterator.to_bot_slot, trade_iterator.trade_item_instance)) {
-			client->Message(
-				Chat::White,
+			OwnerMessage(
 				fmt::format(
-					"Failed to save item by slot to slot {} for {}.",
-					trade_iterator.to_bot_slot,
-					GetCleanName()
+					"Failed to save item by slot to slot {}.",
+					trade_iterator.to_bot_slot
 				).c_str()
 			);
 		}
@@ -4984,13 +5006,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		linker.SetItemInst(trade_iterator.trade_item_instance);
 		auto item_link = linker.GenerateLink();
 
-		client->Message(
-			Chat::Tell,
+		OwnerMessage(
 			fmt::format(
-				"{} tells you, 'I have accepted {}.'",
-				GetCleanName(),
+				"I have accepted {}.",
 				item_link
-			).c_str()
+			)
 		);
 
 		m_inv.PutItem(trade_iterator.to_bot_slot, *trade_iterator.trade_item_instance);
@@ -5101,6 +5121,16 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 		my_owner->CastToClient()->SetBotPulling(false);
 	}
 
+	const auto export_string = fmt::format(
+		"{} {} {} {}",
+		killerMob ? killerMob->GetID() : 0,
+		damage,
+		spell_id,
+		static_cast<int>(attack_skill)
+	);
+
+	parse->EventBot(EVENT_DEATH_COMPLETE, this, killerMob, export_string, 0);
+
 	entity_list.RemoveBot(GetID());
 	return true;
 }
@@ -5112,7 +5142,7 @@ void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if(attacked_timer.Check()) {
 		LogCombat("Triggering EVENT_ATTACK due to attack by [{}]", from->GetName());
-		parse->EventNPC(EVENT_ATTACK, this, from, "", 0);
+		parse->EventBot(EVENT_ATTACK, this, from, "", 0);
 	}
 
 	attacked_timer.Start(CombatEventTimer_expire);
@@ -6554,7 +6584,13 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 	if(taunting && target && target->IsNPC() && taunt_time) {
 		if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this) {
-			BotGroupSay(this, "Taunting %s", target->GetCleanName());
+			BotGroupSay(
+				this,
+				fmt::format(
+					"Taunting {}.",
+					target->GetCleanName()
+				).c_str()
+			);
 			Taunt(target->CastToNPC(), false);
 			taunt_timer.Start(TauntReuseTime * 1000);
 		}
@@ -7512,27 +7548,49 @@ void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
 	Mob::DoBuffTic(buff, slot, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, int32 cast_time, int32 mana_cost,
-					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
+bool Bot::CastSpell(
+	uint16 spell_id,
+	uint16 target_id,
+	EQ::spells::CastingSlot slot,
+	int32 cast_time,
+	int32 mana_cost,
+	uint32* oSpellWillFinish,
+	uint32 item_slot,
+	int16 *resist_adjust,
+	uint32 aa_id
+) {
 	bool Result = false;
-	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
+	if (zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
 		// LogSpells("CastSpell called for spell [{}] ([{}]) on entity [{}], slot [{}], time [{}], mana [{}], from item slot [{}]", spells[spell_id].name, spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
-		if(casting_spell_id == spell_id)
+		if (casting_spell_id == spell_id) {
 			ZeroCastingVars();
+		}
 
-		if(GetClass() != BARD) {
-			if(!IsValidSpell(spell_id) || casting_spell_id || delaytimer || spellend_timer.Enabled() || IsStunned() || IsFeared() || IsMezzed() || (IsSilenced() && !IsDiscipline(spell_id)) || (IsAmnesiad() && IsDiscipline(spell_id))) {
+		if (GetClass() != BARD) {
+			if (
+				!IsValidSpell(spell_id) ||
+				casting_spell_id ||
+				delaytimer ||
+				spellend_timer.Enabled() ||
+				IsStunned() ||
+				IsFeared() ||
+				IsMezzed() ||
+				(IsSilenced() && !IsDiscipline(spell_id)) ||
+				(IsAmnesiad() && IsDiscipline(spell_id))
+			) {
 				LogSpells("Spell casting canceled: not able to cast now. Valid? [{}], casting [{}], waiting? [{}], spellend? [{}], stunned? [{}], feared? [{}], mezed? [{}], silenced? [{}]", IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled(), IsStunned(), IsFeared(), IsMezzed(), IsSilenced() );
-				if(IsSilenced() && !IsDiscipline(spell_id))
+				if (IsSilenced() && !IsDiscipline(spell_id)) {
 					MessageString(Chat::White, SILENCED_STRING);
+				}
 
-				if(IsAmnesiad() && IsDiscipline(spell_id))
-
+				if (IsAmnesiad() && IsDiscipline(spell_id)) {
 					MessageString(Chat::White, MELEE_SILENCE);
+				}
 
-				if(casting_spell_id)
+				if (casting_spell_id) {
 					AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+				}
 
 				return false;
 			}
@@ -7540,19 +7598,20 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot s
 
 		if (IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) {
 			MessageString(Chat::White, SPELL_WOULDNT_HOLD);
-			if(casting_spell_id)
+			if (casting_spell_id) {
 				AI_Bot_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+			}
 
 			return false;
 		}
 
-		if(DivineAura()) {
+		if (DivineAura()) {
 			LogSpells("Spell casting canceled: cannot cast while Divine Aura is in effect");
 			InterruptSpell(173, 0x121, false);
 			return false;
 		}
 
-		if(slot < EQ::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
+		if (slot < EQ::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
 			int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
@@ -7878,7 +7937,13 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spe
 bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
 	if(isMainGroupMGB && (GetClass() != BARD)) {
-		BotGroupSay(this, "MGB %s", spells[spell_id].name);
+		BotGroupSay(
+			this,
+			fmt::format(
+				"Casting {} as a Mass Group Buff.",
+				spells[spell_id].name
+			).c_str()
+		);
 		SpellOnTarget(spell_id, this);
 		entity_list.AESpell(this, this, spell_id, true);
 	} else {
@@ -9564,28 +9629,30 @@ Client* EntityList::GetBotOwnerByBotEntityID(uint16 entityID) {
 	return Result;
 }
 
-void EntityList::AddBot(Bot *newBot, bool SendSpawnPacket, bool dontqueue) {
-	if(newBot) {
-		newBot->SetID(GetFreeID());
-		newBot->SetSpawned();
-		if(SendSpawnPacket) {
-			if(dontqueue) {
+void EntityList::AddBot(Bot *new_bot, bool send_spawn_packet, bool dont_queue) {
+	if (new_bot) {
+		new_bot->SetID(GetFreeID());
+		new_bot->SetSpawned();
+		if (send_spawn_packet) {
+			if (dont_queue) {
 				EQApplicationPacket* outapp = new EQApplicationPacket();
-				newBot->CreateSpawnPacket(outapp);
+				new_bot->CreateSpawnPacket(outapp);
 				outapp->priority = 6;
-				QueueClients(newBot, outapp, true);
+				QueueClients(new_bot, outapp, true);
 				safe_delete(outapp);
 			} else {
 				NewSpawn_Struct* ns = new NewSpawn_Struct;
 				memset(ns, 0, sizeof(NewSpawn_Struct));
-				newBot->FillSpawnStruct(ns, newBot);
-				AddToSpawnQueue(newBot->GetID(), &ns);
+				new_bot->FillSpawnStruct(ns, new_bot);
+				AddToSpawnQueue(new_bot->GetID(), &ns);
 				safe_delete(ns);
 			}
-			parse->EventNPC(EVENT_SPAWN, newBot, nullptr, "", 0);
+
+			parse->EventBot(EVENT_SPAWN, new_bot, nullptr, "", 0);
 		}
-		bot_list.push_back(newBot);
-		mob_list.insert(std::pair<uint16, Mob*>(newBot->GetID(), newBot));
+
+		bot_list.push_back(new_bot);
+		mob_list.insert(std::pair<uint16, Mob*>(new_bot->GetID(), new_bot));
 	}
 }
 
@@ -10375,6 +10442,28 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 		fmt::format(
 			"Successfully loaded bot-group {}.",
 			botgroup_name
+		).c_str()
+	);
+}
+
+void Bot::SignalBot(int signal_id)
+{
+	const auto export_string = fmt::format("{}", signal_id);
+	parse->EventBot(EVENT_SIGNAL, this, nullptr, export_string, 0);
+}
+
+void Bot::OwnerMessage(std::string message)
+{
+	if (!GetBotOwner() || !GetBotOwner()->IsClient()) {
+		return;
+	}
+
+	GetBotOwner()->Message(
+		Chat::Tell,
+		fmt::format(
+			"{} tells you, '{}'",
+			GetCleanName(),
+			message
 		).c_str()
 	);
 }

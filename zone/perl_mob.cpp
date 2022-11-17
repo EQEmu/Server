@@ -1492,9 +1492,9 @@ perl::array Perl_Mob_GetHateList(Mob* self)
 	return result;
 }
 
-void Perl_Mob_SignalClient(Mob* self, Client* client, uint32 data) // @categories Script Utility
+void Perl_Mob_SignalClient(Mob* self, Client* client, int signal_id) // @categories Script Utility
 {
-	client->Signal(data);
+	client->Signal(signal_id);
 }
 
 bool Perl_Mob_CombatRange(Mob* self, Mob* target) // @categories Script Utility

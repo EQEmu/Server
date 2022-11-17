@@ -175,11 +175,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			return true;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, export_string, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, this, nullptr, spell_id, export_string, 0) != 0) {
 			CalcBonuses();
 			return true;
 		}
-	}
+#ifdef BOTS
+	} else if (IsBot()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BOT, this, nullptr, spell_id, export_string, 0) != 0) {
+			CalcBonuses();
+			return true;
+		}
+#endif
+	}	
 
 	if(IsVirusSpell(spell_id)) {
 
@@ -3782,9 +3789,15 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			return;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, buff.spellid, export_string, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, this, nullptr, buff.spellid, export_string, 0) != 0) {
 			return;
 		}
+#ifdef BOTS
+	} else if (IsBot()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_BOT, this, nullptr, buff.spellid, export_string, 0) != 0) {
+			return;
+		}
+#endif
 	}
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
@@ -4129,9 +4142,15 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			return;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, CastToNPC(), nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
 			return;
 		}
+#ifdef BOTS
+	} else if (IsBot()) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+			return;
+		}
+#endif
 	}
 
 	for (int i=0; i < EFFECT_COUNT; i++)
