@@ -908,6 +908,8 @@ public:
 	int GetSpentAA() { return m_pp.aapoints_spent; }
 	uint32 GetRequiredAAExperience();
 
+	bool SendGMCommand(std::string message, bool ignore_status = false);
+
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();
@@ -1062,6 +1064,7 @@ public:
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return FindSpellBookSlotBySpellID(spellid) != -1; }
 	uint32 GetHighestScribedSpellinSpellGroup(uint32 spell_group);
+	std::unordered_map<uint32, std::vector<uint16>> LoadSpellGroupCache(uint8 min_level, uint8 max_level);
 	uint16 GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill);
 	void SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
 	void SendFullPopup(const char *Title, const char *Text, uint32 PopupID = 0, uint32 NegativeID = 0, uint32 Buttons = 0, uint32 Duration = 0, const char *ButtonName0 = 0, const char *ButtonName1 = 0, uint32 SoundControls = 0);
@@ -1274,6 +1277,7 @@ public:
 	}
 	void PurgeTaskTimers();
 	void LockSharedTask(bool lock) { if (task_state) { task_state->LockSharedTask(this, lock); } }
+	void EndSharedTask(bool fail = false) { if (task_state) { task_state->EndSharedTask(this, fail); } }
 
 	// shared task shims / middleware
 	// these variables are used as a shim to intercept normal localized task functionality
@@ -1527,7 +1531,8 @@ public:
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
 	void SendWebLink(const char* website);
-	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
+	void SendMarqueeMessage(uint32 type, std::string message, uint32 duration = 3000);
+	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void SendSpellAnim(uint16 targetid, uint16 spell_id);
 
 	void DuplicateLoreMessage(uint32 ItemID);
@@ -1632,7 +1637,6 @@ public:
 	Timer m_list_task_timers_rate_limit = {};
 
 	std::map<std::string,std::string> GetMerchantDataBuckets();
-	bool CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value);
 
 protected:
 	friend class Mob;

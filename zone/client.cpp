@@ -1118,7 +1118,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 	case ChatChannel_Say: { /* Say */
 		if (message[0] == COMMAND_CHAR) {
-			if (command_dispatch(this, message) == -2) {
+			if (command_dispatch(this, message, false) == -2) {
 				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
 					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
 					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
@@ -7483,21 +7483,53 @@ void Client::RemoveAutoXTargets()
 
 void Client::ShowXTargets(Client *c)
 {
-	if(!c)
+	if (!c) {
 		return;
+	}
 
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-		c->Message(Chat::White, "Xtarget Slot: %i, Type: %2i, ID: %4i, Name: %s", i, XTargets[i].Type, XTargets[i].ID, XTargets[i].Name);
+	auto xtarget_count = 0;
+
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"xtarget slot [{}] type [{}] ID [{}] name [{}]",
+				i,
+				XTargets[i].Type,
+				XTargets[i].ID,
+				strlen(XTargets[i].Name) ? XTargets[i].Name : "No Name"
+			).c_str()
+		);
+
+		xtarget_count++;
+	}
+
 	auto &list = GetXTargetAutoMgr()->get_list();
 	 // yeah, I kept having to do something for debugging to tell if managers were the same object or not :P
 	 // so lets use the address as an "ID"
-	c->Message(Chat::White, "XTargetAutoMgr ID %p size %d", GetXTargetAutoMgr(), list.size());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"XTargetAutoMgr ID [{}] size [{}]",
+			fmt::ptr(GetXTargetAutoMgr()),
+			list.size()
+		).c_str()
+	);
+
 	int count = 0;
 	for (auto &e : list) {
-		c->Message(Chat::White, "spawn id %d count %d", e.spawn_id, e.count);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn ID: {} Count: {}",
+				e.spawn_id,
+				e.count
+			).c_str()
+		);
+
 		count++;
-		if (count == 20) { // lets not spam too many ...
-			c->Message(Chat::White, " ... ");
+
+		if (count == 20) {
 			break;
 		}
 	}
@@ -8636,14 +8668,35 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 	}
 }
 
-void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
+void Client::SendMarqueeMessage(uint32 type, std::string message, uint32 duration)
 {
-	if(duration == 0 || msg.length() == 0) {
+	if (!duration || !message.length()) {
 		return;
 	}
 
-	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + msg.length());
-	ClientMarqueeMessage_Struct *cms = (ClientMarqueeMessage_Struct*)outapp.pBuffer;
+	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + message.length());
+	ClientMarqueeMessage_Struct* cms = (ClientMarqueeMessage_Struct*) outapp.pBuffer;
+
+	cms->type = type;
+	cms->unk04 = 10;
+	cms->priority = 510;
+	cms->fade_in_time = 0;
+	cms->fade_out_time = 3000;
+	cms->duration = duration;
+
+	strcpy(cms->msg, message.c_str());
+
+	QueuePacket(&outapp);
+}
+
+void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!duration || !message.length()) {
+		return;
+	}
+
+	EQApplicationPacket outapp(OP_Marquee, sizeof(ClientMarqueeMessage_Struct) + message.length());
+	ClientMarqueeMessage_Struct* cms = (ClientMarqueeMessage_Struct*) outapp.pBuffer;
 
 	cms->type = type;
 	cms->unk04 = 10;
@@ -8651,7 +8704,8 @@ void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, ui
 	cms->fade_in_time = fade_in;
 	cms->fade_out_time = fade_out;
 	cms->duration = duration;
-	strcpy(cms->msg, msg.c_str());
+
+	strcpy(cms->msg, message.c_str());
 
 	QueuePacket(&outapp);
 }
@@ -9368,6 +9422,14 @@ bool Client::IsDevToolsEnabled() const
 
 void Client::SetDevToolsEnabled(bool in_dev_tools_enabled)
 {
+	const auto dev_tools_key = fmt::format("{}-dev-tools-disabled", AccountID());
+
+	if (in_dev_tools_enabled) {
+		DataBucket::DeleteData(dev_tools_key);
+	} else {
+		DataBucket::SetData(dev_tools_key, "true");
+	}
+
 	Client::dev_tools_enabled = in_dev_tools_enabled;
 }
 
@@ -10493,6 +10555,8 @@ std::vector<int> Client::GetMemmedSpells() {
 
 std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 	std::vector<int> scribeable_spells;
+	std::unordered_map<uint32, std::vector<uint16>> spell_group_cache = LoadSpellGroupCache(min_level, max_level);
+
 	for (uint16 spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
 		bool scribeable = true;
 		if (!IsValidSpell(spell_id)) {
@@ -10527,13 +10591,33 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		}
 
-		if (RuleB(Spells, EnableSpellGlobals) && !SpellGlobalCheck(spell_id, CharacterID())) {
+		if (
+			RuleB(Spells, EnableSpellGlobals) &&
+			!SpellGlobalCheck(spell_id, CharacterID())
+		) {
 			scribeable = false;
-		} else if (RuleB(Spells, EnableSpellBuckets) && !SpellBucketCheck(spell_id, CharacterID())) {
+		} else if (
+			RuleB(Spells, EnableSpellBuckets) &&
+			!SpellBucketCheck(spell_id, CharacterID())
+		) {
 			scribeable = false;
 		}
 
-		if (scribeable) {
+		if (spells[spell_id].spell_group) {
+			const auto& g = spell_group_cache.find(spells[spell_id].spell_group);
+			if (g != spell_group_cache.end()) {
+				for (const auto& s : g->second) {
+					if (
+						EQ::ValueWithin(spells[s].classes[m_pp.class_ - 1], min_level, max_level) &&
+						s == spell_id &&
+						scribeable
+					) {
+						scribeable_spells.push_back(spell_id);
+					}
+					continue;
+				}
+			}
+		} else if (scribeable) {
 			scribeable_spells.push_back(spell_id);
 		}
 	}
@@ -10542,7 +10626,7 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 
 std::vector<int> Client::GetScribedSpells() {
 	std::vector<int> scribed_spells;
-	for(int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
+	for (int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
 		if (IsValidSpell(m_pp.spell_book[index])) {
 			scribed_spells.push_back(m_pp.spell_book[index]);
 		}
@@ -11587,149 +11671,6 @@ void Client::SendReloadCommandMessages() {
 	SendChatLineBreak();
 }
 
-bool Client::CheckMerchantDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value)
-{
-	std::vector<std::string> bucket_checks;
-	bool found = false;
-	bool passes = false;
-
-	switch (bucket_comparison) {
-		case MerchantBucketComparison::BucketEqualTo:
-		{
-			if (player_value != bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketNotEqualTo:
-		{
-			if (player_value == bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketGreaterThanOrEqualTo:
-		{
-			if (player_value < bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketLesserThanOrEqualTo:
-		{
-			if (player_value > bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketGreaterThan:
-		{
-			if (player_value <= bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketLesserThan:
-		{
-			if (player_value >= bucket_value) {
-				break;
-			}
-
-			passes = true;
-
-			break;
-		}
-		case MerchantBucketComparison::BucketIsAny:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			for (const auto &bucket : bucket_checks) {
-				if (player_value == bucket) {
-					found = true;
-					break;
-				}
-			}
-
-			if (!found) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketIsNotAny:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			for (const auto &bucket : bucket_checks) {
-				if (player_value == bucket) {
-					found = true;
-					break;
-				}
-			}
-
-			if (found) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketIsBetween:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (
-				std::stoll(player_value) < std::stoll(bucket_checks[0]) ||
-				std::stoll(player_value) > std::stoll(bucket_checks[1])
-			) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case MerchantBucketComparison::BucketIsNotBetween:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (
-				std::stoll(player_value) >= std::stoll(bucket_checks[0]) &&
-				std::stoll(player_value) <= std::stoll(bucket_checks[1])
-			) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-	}
-
-	return passes;
-}
-
 std::map<std::string,std::string> Client::GetMerchantDataBuckets()
 {
 	std::map<std::string,std::string> merchant_data_buckets;
@@ -11843,4 +11784,8 @@ void Client::AddAAPoints(uint32 points)
 	}
 
 	SendAlternateAdvancementStats();
+}
+
+bool Client::SendGMCommand(std::string message, bool ignore_status) {
+	return command_dispatch(this, message, ignore_status) >= 0 ? true : false;
 }

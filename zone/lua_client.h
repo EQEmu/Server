@@ -348,6 +348,8 @@ public:
 	bool IsTaskActive(int task);
 	bool IsTaskActivityActive(int task, int activity);
 	void LockSharedTask(bool lock);
+	void EndSharedTask();
+	void EndSharedTask(bool send_fail);
 	int GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);
@@ -385,7 +387,9 @@ public:
 	void SetHunger(int in_hunger);
 	void SetThirst(int in_thirst);
 	void SetConsumption(int in_hunger, int in_thirst);
-	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
+	void SendMarqueeMessage(uint32 type, std::string message);
+	void SendMarqueeMessage(uint32 type, std::string message, uint32 duration);
+	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void SendColoredText(uint32 type, std::string msg);
 	void PlayMP3(std::string file);
 	void QuestReward(Lua_Mob target);
@@ -443,6 +447,9 @@ public:
 
 	void SetClientMaxLevel(uint8 max_level);
 	uint8 GetClientMaxLevel();
+
+	bool SendGMCommand(std::string message);
+	bool SendGMCommand(std::string message, bool ignore_status);
 
 #ifdef BOTS
 

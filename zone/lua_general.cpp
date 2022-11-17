@@ -27,6 +27,7 @@
 #include "lua_encounter.h"
 #include "data_bucket.h"
 #include "expedition.h"
+#include "dialogue_window.h"
 
 struct Events { };
 struct Factions { };
@@ -758,6 +759,30 @@ bool lua_is_task_appropriate(int task) {
 
 std::string lua_get_task_name(uint32 task_id) {
 	return quest_manager.gettaskname(task_id);
+}
+
+int lua_get_dz_task_id() {
+	return quest_manager.GetCurrentDzTaskID();
+}
+
+void lua_end_dz_task() {
+	quest_manager.EndCurrentDzTask();
+}
+
+void lua_end_dz_task(bool send_fail) {
+	quest_manager.EndCurrentDzTask(send_fail);
+}
+
+void lua_popup(const char *title, const char *text) {
+	quest_manager.popup(title, text, 0, 0, 0);
+}
+
+void lua_popup(const char *title, const char *text, uint32 id) {
+	quest_manager.popup(title, text, id, 0, 0);
+}
+
+void lua_popup(const char *title, const char *text, uint32 id, uint32 buttons) {
+	quest_manager.popup(title, text, id, buttons, 0);
 }
 
 void lua_popup(const char *title, const char *text, uint32 id, uint32 buttons, uint32 duration) {
@@ -3452,6 +3477,90 @@ std::string lua_get_aa_name(int aa_id) {
 	return zone->GetAAName(aa_id);
 }
 
+std::string lua_popup_break() {
+	return DialogueWindow::Break();
+}
+
+std::string lua_popup_break(uint32 break_count) {
+	return DialogueWindow::Break(break_count);
+}
+
+std::string lua_popup_center_message(std::string message) {
+	return DialogueWindow::CenterMessage(message);
+}
+
+std::string lua_popup_color_message(std::string color, std::string message) {
+	return DialogueWindow::ColorMessage(color, message);
+}
+
+std::string lua_popup_indent() {
+	return DialogueWindow::Indent();
+}
+
+std::string lua_popup_indent(uint32 indent_count) {
+	return DialogueWindow::Indent(indent_count);
+}
+
+std::string lua_popup_link(std::string link) {
+	return DialogueWindow::Link(link);
+}
+
+std::string lua_popup_link(std::string link, std::string message) {
+	return DialogueWindow::Link(link, message);
+}
+
+std::string lua_popup_table(std::string message) {
+	return DialogueWindow::Table(message);
+}
+
+std::string lua_popup_table_cell() {
+	return DialogueWindow::TableCell();
+}
+
+std::string lua_popup_table_cell(std::string message) {
+	return DialogueWindow::TableCell(message);
+}
+
+std::string lua_popup_table_row(std::string message) {
+	return DialogueWindow::TableRow(message);
+}
+
+void lua_marquee(uint32 type, std::string message) {
+	quest_manager.marquee(type, message);
+}
+
+void lua_marquee(uint32 type, std::string message, uint32 duration) {
+	quest_manager.marquee(type, message, duration);
+}
+
+void lua_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	quest_manager.marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_zone_marquee(uint32 type, std::string message) {
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message);
+}
+
+void lua_zone_marquee(uint32 type, std::string message, uint32 duration) {
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message, duration);
+}
+
+void lua_zone_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3759,7 +3868,9 @@ luabind::scope lua_register_general() {
 		luabind::def("completed_tasks_in_set", &lua_completed_tasks_in_set),
 		luabind::def("is_task_appropriate", &lua_is_task_appropriate),
 		luabind::def("get_task_name", (std::string(*)(uint32))&lua_get_task_name),
-		luabind::def("popup", &lua_popup),
+		luabind::def("get_dz_task_id", &lua_get_dz_task_id),
+		luabind::def("end_dz_task", (void(*)())&lua_end_dz_task),
+		luabind::def("end_dz_task", (void(*)(bool))&lua_end_dz_task),
 		luabind::def("clear_spawn_timers", &lua_clear_spawn_timers),
 		luabind::def("zone_emote", &lua_zone_emote),
 		luabind::def("world_emote", &lua_world_emote),
@@ -3919,6 +4030,28 @@ luabind::scope lua_register_general() {
 		luabind::def("is_raining", &lua_is_raining),
 		luabind::def("is_snowing", &lua_is_snowing),
 		luabind::def("get_aa_name", &lua_get_aa_name),
+		luabind::def("popup", (void(*)(const char*,const char*))&lua_popup),
+		luabind::def("popup", (void(*)(const char*,const char*,uint32))&lua_popup),
+		luabind::def("popup", (void(*)(const char*,const char*,uint32,uint32))&lua_popup),
+		luabind::def("popup", (void(*)(const char*,const char*,uint32,uint32,uint32))&lua_popup),
+		luabind::def("popup_break", (std::string(*)(void))&lua_popup_break),
+		luabind::def("popup_break", (std::string(*)(uint32))&lua_popup_break),
+		luabind::def("popup_center_message", &lua_popup_center_message),
+		luabind::def("popup_color_message", &lua_popup_color_message),
+		luabind::def("popup_indent", (std::string(*)(void))&lua_popup_indent),
+		luabind::def("popup_indent", (std::string(*)(uint32))&lua_popup_indent),
+		luabind::def("popup_link", (std::string(*)(std::string))&lua_popup_link),
+		luabind::def("popup_link", (std::string(*)(std::string,std::string))&lua_popup_link),
+		luabind::def("popup_table", &lua_popup_table),
+		luabind::def("popup_table_cell", (std::string(*)(void))&lua_popup_table_cell),
+		luabind::def("popup_table_cell", (std::string(*)(std::string))&lua_popup_table_cell),
+		luabind::def("popup_table_row", &lua_popup_table_row),
+		luabind::def("marquee", (void(*)(uint32,std::string))&lua_marquee),
+		luabind::def("marquee", (void(*)(uint32,std::string,uint32))&lua_marquee),
+		luabind::def("marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_marquee),
+		luabind::def("zone_marquee", (void(*)(uint32,std::string))&lua_zone_marquee),
+		luabind::def("zone_marquee", (void(*)(uint32,std::string,uint32))&lua_zone_marquee),
+		luabind::def("zone_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_zone_marquee),
 
 		/*
 			Cross Zone

@@ -210,9 +210,17 @@ void handle_npc_death(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, 
 	lua_pushinteger(L, std::stoi(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
 
-	if (extra_pointers && !extra_pointers->empty())
+	if (extra_pointers && extra_pointers->size() >= 1)
 	{
-		Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(0)));
+		Lua_Corpse l_corpse(std::any_cast<Corpse*>(extra_pointers->at(0)));
+		luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
+		l_corpse_o.push(L);
+		lua_setfield(L, -2, "corpse");
+	}
+
+	if (extra_pointers && extra_pointers->size() >= 2)
+	{
+		Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(1)));
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
 		l_npc_o.push(L);
 		lua_setfield(L, -2, "killed");

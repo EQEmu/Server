@@ -122,6 +122,11 @@ bool Lua_Corpse::IsEmpty() {
 	return self->IsEmpty();
 }
 
+void Lua_Corpse::ResetDecayTimer() {
+	Lua_Safe_Call_Void();
+	self->ResetDecayTimer();
+}
+
 void Lua_Corpse::SetDecayTimer(uint32 decaytime) {
 	Lua_Safe_Call_Void();
 	self->SetDecayTimer(decaytime);
@@ -246,6 +251,7 @@ luabind::scope lua_register_corpse() {
 	.def("RemoveItem", (void(Lua_Corpse::*)(uint16))&Lua_Corpse::RemoveItem)
 	.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32))&Lua_Corpse::RemoveItemByID)
 	.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32,int))&Lua_Corpse::RemoveItemByID)
+	.def("ResetDecayTimer", &Lua_Corpse::ResetDecayTimer)
 	.def("ResetLooter", (void(Lua_Corpse::*)(void))&Lua_Corpse::ResetLooter)
 	.def("Save", (bool(Lua_Corpse::*)(void))&Lua_Corpse::Save)
 	.def("SetCash", (void(Lua_Corpse::*)(uint32, uint32, uint32, uint32))&Lua_Corpse::SetCash)

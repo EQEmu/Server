@@ -26,6 +26,7 @@
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
+#include "dialogue_window.h"
 #include "embperl.h"
 #include "embxs.h"
 #include "entity.h"
@@ -1265,6 +1266,21 @@ bool Perl__istaskappropriate(int task_id)
 std::string Perl__gettaskname(uint32 task_id)
 {
 	return quest_manager.gettaskname(task_id);
+}
+
+int Perl__get_dz_task_id()
+{
+	return quest_manager.GetCurrentDzTaskID();
+}
+
+void Perl__end_dz_task()
+{
+	quest_manager.EndCurrentDzTask();
+}
+
+void Perl__end_dz_task(bool send_fail)
+{
+	quest_manager.EndCurrentDzTask(send_fail);
 }
 
 void Perl__popup(const char* window_title, const char* message)
@@ -3743,6 +3759,96 @@ std::string Perl__getaaname(int aa_id)
 	return zone->GetAAName(aa_id);
 }
 
+std::string Perl__popupbreak() {
+	return DialogueWindow::Break();
+}
+
+std::string Perl__popupbreak(uint32 break_count) {
+	return DialogueWindow::Break(break_count);
+}
+
+std::string Perl__popupcentermessage(std::string message) {
+	return DialogueWindow::CenterMessage(message);
+}
+
+std::string Perl__popupcolormessage(std::string color, std::string message) {
+	return DialogueWindow::ColorMessage(color, message);
+}
+
+std::string Perl__popupindent() {
+	return DialogueWindow::Indent();
+}
+
+std::string Perl__popupindent(uint32 indent_count) {
+	return DialogueWindow::Indent(indent_count);
+}
+
+std::string Perl__popuplink(std::string link) {
+	return DialogueWindow::Link(link);
+}
+
+std::string Perl__popuplink(std::string link, std::string message) {
+	return DialogueWindow::Link(link, message);
+}
+
+std::string Perl__popuptable(std::string message) {
+	return DialogueWindow::Table(message);
+}
+
+std::string Perl__popuptablecell() {
+	return DialogueWindow::TableCell();
+}
+
+std::string Perl__popuptablecell(std::string message) {
+	return DialogueWindow::TableCell(message);
+}
+
+std::string Perl__popuptablerow(std::string message) {
+	return DialogueWindow::TableRow(message);
+}
+
+void Perl__marquee(uint32 type, std::string message)
+{
+	quest_manager.marquee(type, message);
+}
+
+void Perl__marquee(uint32 type, std::string message, uint32 duration)
+{
+	quest_manager.marquee(type, message, duration);
+}
+
+void Perl__marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	quest_manager.marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message, uint32 duration)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message, duration);
+}
+
+void Perl__zonemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4090,6 +4196,8 @@ void perl_register_quest()
 	package.add("enablerecipe", &Perl__enablerecipe);
 	package.add("enabletask", &Perl__enabletask);
 	package.add("enabletitle", &Perl__enabletitle);
+	package.add("end_dz_task", (void(*)())&Perl__end_dz_task);
+	package.add("end_dz_task", (void(*)(bool))&Perl__end_dz_task);
 	package.add("exp", &Perl__exp);
 	package.add("faction", (void(*)(int, int))&Perl__faction);
 	package.add("faction", (void(*)(int, int, int))&Perl__faction);
@@ -4113,6 +4221,7 @@ void perl_register_quest()
 	package.add("getconsiderlevelname", &Perl__getconsiderlevelname);
 	package.add("gethexcolorcode", &Perl__gethexcolorcode);
 	package.add("getcurrencyid", &Perl__getcurrencyid);
+	package.add("get_dz_task_id", &Perl__get_dz_task_id);
 	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getexpmodifierbycharid);
 	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getexpmodifierbycharid);
 	package.add("get_expedition", &Perl__get_expedition);
@@ -4186,6 +4295,9 @@ void perl_register_quest()
 	package.add("level", &Perl__level);
 	package.add("log", &Perl__log);
 	package.add("log_combat", &Perl__log_combat);
+	package.add("marquee", (void(*)(uint32, std::string))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, std::string, uint32))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__marquee);
 	package.add("me", &Perl__me);
 	package.add("message", &Perl__message);
 	package.add("modifynpcstat", &Perl__ModifyNPCStat);
@@ -4214,6 +4326,18 @@ void perl_register_quest()
 	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
+	package.add("popupbreak", (std::string(*)())&Perl__popupbreak);
+	package.add("popupbreak", (std::string(*)(uint32))&Perl__popupbreak);
+	package.add("popupcentermessage", &Perl__popupcentermessage);
+	package.add("popupcolormessage", &Perl__popupcolormessage);
+	package.add("popupindent", (std::string(*)())&Perl__popupindent);
+	package.add("popupindent", (std::string(*)(uint32))&Perl__popupindent);
+	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
+	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
+	package.add("popuptable", &Perl__popuptable);
+	package.add("popuptablecell", (std::string(*)())&Perl__popuptablecell);
+	package.add("popuptablecell", (std::string(*)(std::string))&Perl__popuptablecell);
+	package.add("popuptablerow", &Perl__popuptablerow);
 	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
 	package.add("pvp", &Perl__pvp);
 	package.add("qs_player_event", &Perl__qs_player_event);
@@ -4326,6 +4450,9 @@ void perl_register_quest()
 	package.add("write", &Perl__write);
 	package.add("ze", &Perl__ze);
 	package.add("zone", &Perl__zone);
+	package.add("zonemarquee", (void(*)(uint32, std::string))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, std::string, uint32))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__zonemarquee);
 	package.add("zonegroup", &Perl__zonegroup);
 	package.add("zoneraid", &Perl__zoneraid);
 

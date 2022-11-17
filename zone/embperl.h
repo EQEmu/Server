@@ -129,6 +129,11 @@ public:
 		SV *t = get_sv(varname, true);
 		sv_setpv(t, val);
 	}
+	// put a pointer into a blessed perl variable
+	void setptr(const char* varname, const char* classname, void* val) const {
+		SV* t = get_sv(varname, GV_ADD);
+		sv_setref_pv(t, classname, val);
+	}
 
 	// put key-value pairs in hash
 	void sethash(const char *varname, std::map<std::string,std::string> &vals)

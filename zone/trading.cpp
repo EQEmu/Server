@@ -903,9 +903,18 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// todo: rule or npc field to auto return normal items also
 		if (!quest_npc)
 		{
-			for (const EQ::ItemInstance* inst : items) {
+			for (EQ::ItemInstance* inst : items) {
 				if (!inst || !inst->GetItem()) {
 					continue;
+				}
+
+				// remove delivered task items
+				if (RuleB(TaskSystem, EnableTaskSystem) && inst->GetTaskDeliveredCount() > 0) {
+					int remaining = inst->RemoveTaskDeliveredItems();
+					if (remaining <= 0) {
+						inst = nullptr;
+						continue; // all items in trade slot consumed by task update
+					}
 				}
 
 				const EQ::ItemData* item = inst->GetItem();
@@ -981,7 +990,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			tradingWith->FaceTarget(this);
 		}
 
-		// quest items are filtered by task deliver updates
 		std::vector<std::any> item_list(items.begin(), items.end());
 		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
 

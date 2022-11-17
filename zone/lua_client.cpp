@@ -1445,6 +1445,16 @@ void Lua_Client::LockSharedTask(bool lock) {
 	return self->LockSharedTask(lock);
 }
 
+void Lua_Client::EndSharedTask() {
+	Lua_Safe_Call_Void();
+	self->EndSharedTask();
+}
+
+void Lua_Client::EndSharedTask(bool send_fail) {
+	Lua_Safe_Call_Void();
+	self->EndSharedTask(send_fail);
+}
+
 int Lua_Client::GetCorpseCount() {
 	Lua_Safe_Call_Int();
 	return self->GetCorpseCount();
@@ -1620,11 +1630,6 @@ void Lua_Client::SetThirst(int in_thirst) {
 void Lua_Client::SetConsumption(int in_hunger, int in_thirst) {
 	Lua_Safe_Call_Void();
 	self->SetConsumption(in_hunger, in_thirst);
-}
-
-void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg) {
-	Lua_Safe_Call_Void();
-	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
 }
 
 void Lua_Client::SendColoredText(uint32 type, std::string msg) {
@@ -2583,6 +2588,31 @@ bool Lua_Client::HasRecipeLearned(uint32 recipe_id) {
 	return self->HasRecipeLearned(recipe_id);
 }
 
+bool Lua_Client::SendGMCommand(std::string message) {
+	Lua_Safe_Call_Bool();
+	return self->SendGMCommand(message);
+}
+
+bool Lua_Client::SendGMCommand(std::string message, bool ignore_status) {
+	Lua_Safe_Call_Bool();
+	return self->SendGMCommand(message, ignore_status);
+}
+
+void Lua_Client::SendMarqueeMessage(uint32 type, std::string message) {
+	Lua_Safe_Call_Void();
+	self->SendMarqueeMessage(type, message);
+}
+
+void Lua_Client::SendMarqueeMessage(uint32 type, std::string message, uint32 duration) {
+	Lua_Safe_Call_Void();
+	self->SendMarqueeMessage(type, message, duration);
+}
+
+void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) {
+	Lua_Safe_Call_Void();
+	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -2733,6 +2763,8 @@ luabind::scope lua_register_client() {
 	.def("EnableAreaHPRegen", &Lua_Client::EnableAreaHPRegen)
 	.def("EnableAreaManaRegen", &Lua_Client::EnableAreaManaRegen)
 	.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
+	.def("EndSharedTask", (void(Lua_Client::*)(void))&Lua_Client::EndSharedTask)
+	.def("EndSharedTask", (void(Lua_Client::*)(bool))&Lua_Client::EndSharedTask)
 	.def("Escape", (void(Lua_Client::*)(void))&Lua_Client::Escape)
 	.def("FailTask", (void(Lua_Client::*)(int))&Lua_Client::FailTask)
 	.def("FilteredMessage", &Lua_Client::FilteredMessage)
@@ -2917,6 +2949,9 @@ luabind::scope lua_register_client() {
 	.def("LockSharedTask", &Lua_Client::LockSharedTask)
 	.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float))&Lua_Client::MarkSingleCompassLoc)
 	.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float,int))&Lua_Client::MarkSingleCompassLoc)
+	.def("Marquee", (void(Lua_Client::*)(uint32, std::string))&Lua_Client::SendMarqueeMessage)
+	.def("Marquee", (void(Lua_Client::*)(uint32, std::string, uint32))&Lua_Client::SendMarqueeMessage)
+	.def("Marquee", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("MaxSkill", (int(Lua_Client::*)(int))&Lua_Client::MaxSkill)
 	.def("MemSpell", (void(Lua_Client::*)(int,int))&Lua_Client::MemSpell)
 	.def("MemSpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::MemSpell)
@@ -2989,6 +3024,10 @@ luabind::scope lua_register_client() {
 	.def("ScribeSpells", (uint16(Lua_Client::*)(uint8,uint8))&Lua_Client::ScribeSpells)
 	.def("SendColoredText", (void(Lua_Client::*)(uint32, std::string))&Lua_Client::SendColoredText)
 	.def("SendItemScale", (void(Lua_Client::*)(Lua_ItemInst))&Lua_Client::SendItemScale)
+	.def("SendGMCommand", (bool(Lua_Client::*)(std::string))&Lua_Client::SendGMCommand)
+	.def("SendGMCommand", (bool(Lua_Client::*)(std::string,bool))&Lua_Client::SendGMCommand)
+	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, std::string))&Lua_Client::SendMarqueeMessage)
+	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, std::string, uint32))&Lua_Client::SendMarqueeMessage)
 	.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 	.def("SendOPTranslocateConfirm", (void(Lua_Client::*)(Lua_Mob,int))&Lua_Client::SendOPTranslocateConfirm)
 	.def("SendPEQZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendPEQZoneFlagInfo)

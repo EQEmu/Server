@@ -308,7 +308,19 @@ public:
 	void DoEnduranceUpkeep();	//does the endurance upkeep
 
 	bool AI_AddBotSpells(uint32 iDBSpellsID);
-	void AddSpellToBotList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
+	void AddSpellToBotList(
+		int16 iPriority,
+		uint16 iSpellID,
+		uint32 iType,
+		int16 iManaCost,
+		int32 iRecastDelay,
+		int16 iResistAdjust,
+		int8 min_hp,
+		int8 max_hp,
+		std::string bucket_name,
+		std::string bucket_value,
+		uint8 bucket_comparison
+	);
 	void AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot);
 	// AI Methods
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
@@ -348,6 +360,10 @@ public:
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQ::spells::CastingSlot slot);
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
+
+	bool GetBotOwnerDataBuckets();
+	bool GetBotDataBuckets();
+	bool CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison);
 
 	// Bot Equipment & Inventory Class Methods
 	void BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database = true);
@@ -409,7 +425,14 @@ public:
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
 
-	static NPCType *CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender);
+	static NPCType *CreateDefaultNPCTypeStructForBot(
+		std::string botName,
+		std::string botLastName,
+		uint8 botLevel,
+		uint16 botRace,
+		uint8 botClass,
+		uint8 gender
+	);
 
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
@@ -567,6 +590,9 @@ public:
 	void SetDrakkinTattoo(uint32 value) { drakkin_tattoo = value; }
 	bool DyeArmor(int16 slot_id, uint32 rgb, bool all_flag = false, bool save_flag = true);
 
+	int GetExpansionBitmask();
+	void SetExpansionBitmask(int expansion_bitmask, bool save = true);
+
 	static void SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leader_id);
 
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
@@ -578,7 +604,43 @@ public:
 	virtual void BotRangedAttack(Mob* other);
 
 	// Publicized private functions
-	static NPCType *FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
+	static NPCType *FillNPCTypeStruct(
+		uint32 botSpellsID,
+		std::string botName,
+		std::string botLastName,
+		uint8 botLevel,
+		uint16 botRace,
+		uint8 botClass,
+		uint8 gender,
+		float size,
+		uint32 face,
+		uint32 hairStyle,
+		uint32 hairColor,
+		uint32 eyeColor,
+		uint32 eyeColor2,
+		uint32 beard,
+		uint32 beardColor,
+		uint32 drakkinHeritage,
+		uint32 drakkinTattoo,
+		uint32 drakkinDetails,
+		int32 hp,
+		int32 mana,
+		int32 mr,
+		int32 cr,
+		int32 dr,
+		int32 fr,
+		int32 pr,
+		int32 corrup,
+		int32 ac,
+		uint32 str,
+		uint32 sta,
+		uint32 dex,
+		uint32 agi,
+		uint32 _int,
+		uint32 wis,
+		uint32 cha,
+		uint32 attack
+	);
 	void BotRemoveEquipItem(uint16 slot_id);
 	void RemoveBotItemBySlot(uint16 slot_id, std::string* error_message);
 	void AddBotItem(
@@ -692,6 +754,7 @@ private:
 	eStandingPetOrder m_previous_pet_order;
 
 	BotCastingRoles m_CastingRoles;
+	std::map<std::string,std::string> bot_data_buckets;
 
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 
@@ -701,6 +764,7 @@ private:
 	bool _showhelm;
 	bool _pauseAI;
 	uint8 _stopMeleeLevel;
+	int m_expansion_bitmask;
 
 	// Private "base stats" Members
 	int32 _baseMR;

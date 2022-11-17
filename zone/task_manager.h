@@ -51,6 +51,10 @@ public:
 	int NextTaskInSet(int task_set, int task_id);
 	bool IsTaskRepeatable(int task_id);
 	bool IsActiveTaskComplete(ClientTaskInformation& client_task);
+	int GetCurrentDzTaskID();
+	void EndCurrentDzTask(bool send_fail);
+	void EndSharedTask(Client& client, int task_id, bool send_fail);
+	void EndSharedTask(uint32_t dz_id, bool send_fail);
 
 	friend class ClientTaskState;
 

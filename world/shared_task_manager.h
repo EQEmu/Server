@@ -50,6 +50,7 @@ public:
 
 	SharedTask *FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id);
 	SharedTask *FindSharedTaskById(int64 shared_task_id);
+	SharedTask* FindSharedTaskByDzId(uint32_t dz_id);
 
 	void DeleteSharedTask(int64 shared_task_id);
 	void SaveSharedTaskActivityState(int64 shared_task_id, std::vector<SharedTaskActivityStateEntry> activity_state);
@@ -58,6 +59,7 @@ public:
 	void LockTask(SharedTask* s, bool lock);
 	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id, int accept_time);
 	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
+	void SendSharedTaskFailed(uint32_t character_id, uint32_t task_id);
 	void SendSharedTaskMemberList(uint32 character_id, const std::vector<SharedTaskMember> &members);
 	void SendSharedTaskMemberList(uint32 character_id, const EQ::Net::DynamicPacket &serialized_members);
 	void SendSharedTaskMemberChange(
@@ -71,6 +73,9 @@ public:
 	void Process();
 	void RemoveMember(SharedTask* s, const SharedTaskMember& member, bool remove_from_db);
 	void RemoveEveryoneFromSharedTask(SharedTask *s, uint32 requested_character_id);
+
+	// caller is responsible for removing from db/cache if erase is false
+	void Terminate(SharedTask& s, bool send_fail, bool erase);
 
 	void MakeLeaderByPlayerName(SharedTask *s, const std::string &character_name);
 	void AddPlayerByCharacterIdAndName(SharedTask *s, int64 character_id, const std::string &character_name);

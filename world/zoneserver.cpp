@@ -1411,6 +1411,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_SharedTaskPurgeAllCommand:
 		case ServerOP_SharedTaskPlayerList:
 		case ServerOP_SharedTaskLock:
+		case ServerOP_SharedTaskEndByDz:
+		case ServerOP_SharedTaskEnd:
 		case ServerOP_SharedTaskKickPlayers: {
 			SharedTaskWorldMessaging::HandleZoneMessage(pack);
 			break;

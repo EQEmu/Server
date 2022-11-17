@@ -809,6 +809,22 @@ void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, const 
 	}
 }
 
+
+void PerlembParser::ExportVar(const char* pkgprefix, const char* varname, const char* classname, void* value)
+{
+	if (!perl) {
+		return;
+	}
+
+	// todo: try/catch shouldn't be necessary here (called perl apis don't throw)
+	try {
+		perl->setptr(std::string(pkgprefix).append("::").append(varname).c_str(), classname, value);
+	}
+	catch (std::string e) {
+		AddError(fmt::format("Error exporting Perl variable [{}]", e));
+	}
+}
+
 int PerlembParser::SendCommands(
 	const char *pkgprefix,
 	const char *event,
@@ -1350,6 +1366,10 @@ void PerlembParser::ExportEventVariables(
 						temp_var_name = var_name;
 						temp_var_name += "_attuned";
 						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->IsAttuned());
+
+						temp_var_name = var_name;
+						temp_var_name += "_inst";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), "QuestItem", inst);
 					}
 					else {
 						ExportVar(package_name.c_str(), var_name.c_str(), 0);
@@ -1360,6 +1380,10 @@ void PerlembParser::ExportEventVariables(
 
 						temp_var_name = var_name;
 						temp_var_name += "_attuned";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
+
+						temp_var_name = var_name;
+						temp_var_name += "_inst";
 						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
 					}
 				}
@@ -1611,9 +1635,17 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
-			if (extra_pointers && !extra_pointers->empty())
+			if (extra_pointers && extra_pointers->size() >= 1)
 			{
-				NPC* killed = std::any_cast<NPC*>(extra_pointers->at(0));
+				Corpse* corpse = std::any_cast<Corpse*>(extra_pointers->at(0));
+				if (corpse)
+				{
+					ExportVar(package_name.c_str(), "killed_corpse_id", corpse->GetID());
+				}
+			}
+			if (extra_pointers && extra_pointers->size() >= 2)
+			{
+				NPC* killed = std::any_cast<NPC*>(extra_pointers->at(1));
 				if (killed)
 				{
 					ExportVar(package_name.c_str(), "killed_npc_id", killed->GetNPCTypeID());

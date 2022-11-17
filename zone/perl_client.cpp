@@ -1423,6 +1423,16 @@ void Perl_Client_LockSharedTask(Client* self, bool lock)
 	return self->LockSharedTask(lock);
 }
 
+void Perl_Client_EndSharedTask(Client* self)
+{
+	return self->EndSharedTask();
+}
+
+void Perl_Client_EndSharedTask(Client* self, bool send_fail)
+{
+	return self->EndSharedTask(send_fail);
+}
+
 uint32_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
 {
 	return self->GetCorpseCount();
@@ -1591,11 +1601,6 @@ void Perl_Client_PlayMP3(Client* self, const char* file) // @categories Script U
 void Perl_Client_ExpeditionMessage(Client* self, int expedition_id, const char* message) // @categories Adventures and Expeditions
 {
 	self->ExpeditionSay(message, expedition_id);
-}
-
-void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg) // @categories Script Utility
-{
-	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, std::move(msg));
 }
 
 void Perl_Client_SendColoredText(Client* self, uint32 color, std::string msg) // @categories Script Utility
@@ -2477,6 +2482,31 @@ bool Perl_Client_HasRecipeLearned(Client* self, uint32 recipe_id) // @categories
 	return self->HasRecipeLearned(recipe_id);
 }
 
+bool Perl_Client_SendGMCommand(Client* self, std::string message) // @categories Script Utility
+{
+	return self->SendGMCommand(message);
+}
+
+bool Perl_Client_SendGMCommand(Client* self, std::string message, bool ignore_status) // @categories Script Utility
+{
+	return self->SendGMCommand(message, ignore_status);
+}
+
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, std::string message) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, message);
+}
+
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, std::string message, uint32 duration) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, message, duration);
+}
+
+void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message) // @categories Script Utility
+{
+	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+}
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -2612,6 +2642,8 @@ void perl_register_client()
 	package.add("Duck", &Perl_Client_Duck);
 	package.add("DyeArmorBySlot", (void(*)(Client*, uint8, uint8, uint8, uint8))&Perl_Client_DyeArmorBySlot);
 	package.add("DyeArmorBySlot", (void(*)(Client*, uint8, uint8, uint8, uint8, uint8))&Perl_Client_DyeArmorBySlot);
+	package.add("EndSharedTask", (void(*)(Client*))&Perl_Client_EndSharedTask);
+	package.add("EndSharedTask", (void(*)(Client*, bool))&Perl_Client_EndSharedTask);
 	package.add("Escape", &Perl_Client_Escape);
 	package.add("ExpeditionMessage", &Perl_Client_ExpeditionMessage);
 	package.add("FailTask", &Perl_Client_FailTask);
@@ -2803,6 +2835,9 @@ void perl_register_client()
 	package.add("LoadZoneFlags", &Perl_Client_LoadZoneFlags);
 	package.add("LockSharedTask", &Perl_Client_LockSharedTask);
 	package.add("MarkCompassLoc", &Perl_Client_MarkCompassLoc);
+	package.add("Marquee", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("Marquee", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
+	package.add("Marquee", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
 	package.add("MaxSkill", (int(*)(Client*, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16))&Perl_Client_MaxSkill);
 	package.add("MaxSkill", (int(*)(Client*, uint16, uint16, uint16))&Perl_Client_MaxSkill);
@@ -2869,7 +2904,11 @@ void perl_register_client()
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int, bool))&Perl_Client_ScribeSpell);
 	package.add("ScribeSpells", &Perl_Client_ScribeSpells);
 	package.add("SendColoredText", &Perl_Client_SendColoredText);
-	package.add("SendMarqueeMessage", &Perl_Client_SendMarqueeMessage);
+	package.add("SendGMCommand", (bool(*)(Client*, std::string))&Perl_Client_SendGMCommand);
+	package.add("SendGMCommand", (bool(*)(Client*, std::string, bool))&Perl_Client_SendGMCommand);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, std::string))&Perl_Client_SendMarqueeMessage);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, std::string, uint32))&Perl_Client_SendMarqueeMessage);
+	package.add("SendMarqueeMessage", (void(*)(Client*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_Client_SendMarqueeMessage);
 	package.add("SendOPTranslocateConfirm", &Perl_Client_SendOPTranslocateConfirm);
 	package.add("SendPEQZoneFlagInfo", &Perl_Client_SendPEQZoneFlagInfo);
 	package.add("SendSound", &Perl_Client_SendSound);

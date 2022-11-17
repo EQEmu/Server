@@ -2608,6 +2608,24 @@ std::string QuestManager::gettaskname(uint32 task_id) {
 	return std::string();
 }
 
+int QuestManager::GetCurrentDzTaskID() {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem) && zone && task_manager) {
+		return task_manager->GetCurrentDzTaskID();
+	}
+
+	return 0;
+}
+
+void QuestManager::EndCurrentDzTask(bool send_fail) {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem) && zone && task_manager) {
+		task_manager->EndCurrentDzTask(send_fail);
+	}
+}
+
 void QuestManager::clearspawntimers() {
 	if (!zone) {
         return;
@@ -2629,22 +2647,29 @@ void QuestManager::we(int type, const char *str) {
 	);
 }
 
-void QuestManager::message(int color, const char *message) {
+void QuestManager::message(uint32 type, const char *message) {
 	QuestManagerCurrentQuestVars();
-	if (!initiator)
+	if (!initiator) {
 		return;
+	}
 
-	initiator->Message(color, message);
+	initiator->Message(type, message);
 }
 
 void QuestManager::whisper(const char *message) {
 	QuestManagerCurrentQuestVars();
-	if (!initiator || !owner)
+	if (!initiator || !owner) {
 		return;
+	}
 
-	std::string mob_name = owner->GetCleanName();
-	std::string new_message = fmt::format("{} whispers, '{}'", mob_name, message);
-	initiator->Message(Chat::EchoChat1, new_message.c_str());
+	initiator->Message(
+		Chat::EchoChat1,
+		fmt::format(
+			"{} whispers, '{}'",
+			owner->GetCleanName(),
+			message
+		).c_str()
+	);
 }
 
 int QuestManager::getlevel(uint8 type)
@@ -3833,4 +3858,24 @@ void QuestManager::LearnRecipe(uint32 recipe_id) {
 	}
 
 	initiator->LearnRecipe(recipe_id);
+}
+
+void QuestManager::marquee(uint32 type, std::string message, uint32 duration)
+{
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendMarqueeMessage(type, message, duration);
+}
+
+void QuestManager::marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }

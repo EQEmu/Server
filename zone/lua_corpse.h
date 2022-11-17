@@ -51,6 +51,7 @@ public:
 	void SetCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
 	void RemoveCash();
 	bool IsEmpty();
+	void ResetDecayTimer();
 	void SetDecayTimer(uint32 decaytime);
 	bool CanMobLoot(int charid);
 	void AllowMobLoot(Lua_Mob them, uint8 slot);

@@ -97,6 +97,8 @@ public:
 	bool LoadEquipmentColor(const uint32 bot_id, const uint8 material_slot_id, uint32& rgb);
 	bool SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, const uint32 rgb);
 
+	bool SaveExpansionBitmask(const uint32 bot_id, const int expansion_bitmask);
+
 
 	/* Bot pet functions   */
 	bool LoadPetIndex(const uint32 bot_id, uint32& pet_index);

@@ -242,6 +242,27 @@ void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 reque
 	PrintSharedTaskState();
 }
 
+void SharedTaskManager::Terminate(SharedTask& s, bool send_fail, bool erase)
+{
+	LogTasksDetail("[Terminate] shared task [{}]", s.GetDbSharedTask().id);
+	for (const auto& member : s.GetMembers())
+	{
+		if (send_fail)
+		{
+			SendSharedTaskFailed(member.character_id, s.GetTaskData().id);
+		}
+		SendRemovePlayerFromSharedTaskPacket(member.character_id, s.GetTaskData().id, true);
+		client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {s.GetTaskData().title});
+	}
+
+	RemoveAllMembersFromDynamicZones(&s);
+
+	if (erase)
+	{
+		DeleteSharedTask(s.GetDbSharedTask().id);
+	}
+}
+
 void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
 {
 	LogTasksDetail(
@@ -689,6 +710,20 @@ void SharedTaskManager::SendRemovePlayerFromSharedTaskPacket(
 	}
 }
 
+void SharedTaskManager::SendSharedTaskFailed(uint32_t character_id, uint32_t task_id)
+{
+	ServerPacket pack(ServerOP_SharedTaskFailed, sizeof(ServerSharedTaskCharacterTask_Struct));
+	auto buf = reinterpret_cast<ServerSharedTaskCharacterTask_Struct*>(pack.pBuffer);
+	buf->character_id = character_id;
+	buf->task_id = task_id;
+
+	ClientListEntry* cle = client_list.FindCLEByCharacterID(character_id);
+	if (cle && cle->Server())
+	{
+		cle->Server()->SendPacket(&pack);
+	}
+}
+
 void SharedTaskManager::SendSharedTaskMemberList(uint32 character_id, const std::vector<SharedTaskMember> &members)
 {
 	EQ::Net::DynamicPacket dyn_pack;
@@ -1035,6 +1070,18 @@ SharedTask *SharedTaskManager::FindSharedTaskById(int64 shared_task_id)
 {
 	for (auto &s: m_shared_tasks) {
 		if (s.GetDbSharedTask().id == shared_task_id) {
+			return &s;
+		}
+	}
+
+	return nullptr;
+}
+
+SharedTask* SharedTaskManager::FindSharedTaskByDzId(uint32_t dz_id)
+{
+	for (auto& s: m_shared_tasks) {
+		auto it = std::find(s.dynamic_zone_ids.begin(), s.dynamic_zone_ids.end(), dz_id);
+		if (it != s.dynamic_zone_ids.end()) {
 			return &s;
 		}
 	}
@@ -1757,16 +1804,9 @@ void SharedTaskManager::Process()
 	std::vector<int64_t> delete_tasks;
 	for (auto& shared_task : m_shared_tasks)
 	{
-		if (shared_task.GetMembers().empty() || shared_task.terminate_timer.Check())
+		if (shared_task.GetMembers().empty() || shared_task.terminate_timer.Check() || shared_task.IsExpired())
 		{
-			LogTasksDetail("[Process] Terminating shared task [{}]", shared_task.GetDbSharedTask().id);
-			for (const auto& member : shared_task.GetMembers())
-			{
-				SendRemovePlayerFromSharedTaskPacket(member.character_id, shared_task.GetTaskData().id, true);
-				client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {shared_task.GetTaskData().title});
-			}
-
-			RemoveAllMembersFromDynamicZones(&shared_task);
+			Terminate(shared_task, false, false);
 
 			// avoid erasing from m_shared_tasks while iterating it
 			delete_tasks.push_back(shared_task.GetDbSharedTask().id);

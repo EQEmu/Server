@@ -21,8 +21,6 @@
 #ifndef SHAREDDB_H_
 #define SHAREDDB_H_
 
-#define MAX_ITEM_ID                200000
-
 #include "database.h"
 #include "skills.h"
 #include "spdat.h"

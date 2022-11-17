@@ -588,253 +588,284 @@ bool Bot::IsStanding() {
 	return result;
 }
 
-NPCType *Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack) {
-	auto bot_npc_type = new NPCType{ 0 };
-	int copy_length = 0;
+NPCType *Bot::FillNPCTypeStruct(
+	uint32 botSpellsID,
+	std::string botName,
+	std::string botLastName,
+	uint8 botLevel,
+	uint16 botRace,
+	uint8 botClass,
+	uint8 gender,
+	float size,
+	uint32 face,
+	uint32 hairStyle,
+	uint32 hairColor,
+	uint32 eyeColor,
+	uint32 eyeColor2,
+	uint32 beard,
+	uint32 beardColor,
+	uint32 drakkinHeritage,
+	uint32 drakkinTattoo,
+	uint32 drakkinDetails,
+	int32 hp,
+	int32 mana,
+	int32 mr,
+	int32 cr,
+	int32 dr,
+	int32 fr,
+	int32 pr,
+	int32 corrup,
+	int32 ac,
+	uint32 str,
+	uint32 sta,
+	uint32 dex,
+	uint32 agi,
+	uint32 _int,
+	uint32 wis,
+	uint32 cha,
+	uint32 attack
+) {
+	auto n = new NPCType{ 0 };
 
-	copy_length = botName.copy(bot_npc_type->name, 63);
-	bot_npc_type->name[copy_length] = '\0';
-	copy_length = 0;
+	strn0cpy(n->name, botName.c_str(), sizeof(n->name));
+	strn0cpy(n->lastname, botLastName.c_str(), sizeof(n->lastname));
 
-	copy_length = botLastName.copy(bot_npc_type->lastname, 69);
-	bot_npc_type->lastname[copy_length] = '\0';
-	copy_length = 0;
+	n->current_hp = hp;
+	n->max_hp = hp;
+	n->size = size;
+	n->runspeed = 0.7f;
+	n->gender = gender;
+	n->race = botRace;
+	n->class_ = botClass;
+	n->bodytype = 1;
+	n->deity = EQ::deity::DeityAgnostic;
+	n->level = botLevel;
+	//n->npc_id = 0;
+	//n->texture = 0;
+	//n->helmtexture = 0;
+	//n->herosforgemodel = 0;
+	//n->loottable_id = 0;
+	n->npc_spells_id = botSpellsID;
+	//n->npc_spells_effects_id = 0;
+	//n->npc_faction_id = 0;
+	//n->merchanttype = 0;
+	//n->alt_currency_type = 0;
+	//n->adventure_template = 0;
+	//n->trap_template = 0;
+	//n->light = 0;
+	n->AC = ac;
+	n->Mana = mana;
+	n->ATK = attack;
+	n->STR = str;
+	n->STA = sta;
+	n->DEX = dex;
+	n->AGI = agi;
+	n->INT = _int;
+	n->WIS = wis;
+	n->CHA = cha;
+	n->MR = mr;
+	n->FR = fr;
+	n->CR = cr;
+	n->PR = pr;
+	n->DR = dr;
+	n->Corrup = corrup;
+	//n->PhR = 0;
+	n->haircolor = hairColor;
+	n->beardcolor = beardColor;
+	n->eyecolor1 = eyeColor;
+	n->eyecolor2 = eyeColor2;
+	n->hairstyle = hairStyle;
+	n->luclinface = face;
+	n->beard = beard;
+	n->drakkin_heritage = drakkinHeritage;
+	n->drakkin_tattoo = drakkinTattoo;
+	n->drakkin_details = drakkinDetails;
+	//n->armor_tint = { 0 };
+	//n->min_dmg = 0;
+	//n->max_dmg = 0;
+	//n->charm_ac = 0;
+	//n->charm_min_dmg = 0;
+	//n->charm_max_dmg = 0;
+	//n->charm_attack_delay = 0;
+	//n->charm_accuracy_rating = 0;
+	//n->charm_avoidance_rating = 0;
+	//n->charm_atk = 0;
+	//n->attack_count = 0;
+	//*n->special_abilities = { 0 };
+	//n->d_melee_texture1 = 0;
+	//n->d_melee_texture2 = 0;
+	//*n->ammo_idfile = { 0 };
+	//n->prim_melee_type = 0;
+	//n->sec_melee_type = 0;
+	//n->ranged_type = 0;
+	n->hp_regen = 1;
+	n->mana_regen = 1;
+	//n->aggroradius = 0;
+	//n->assistradius = 0;
+	//n->see_invis = 0;
+	//n->see_invis_undead = false;
+	//n->see_hide = false;
+	//n->see_improved_hide = false;
+	//n->qglobal = false;
+	//n->npc_aggro = false;
+	//n->spawn_limit = 0;
+	//n->mount_color = 0;
+	//n->attack_speed = 0.0f;
+	//n->attack_delay = 0;
+	//n->accuracy_rating = 0;
+	//n->avoidance_rating = 0;
+	//n->findable = false;
+	n->trackable = true;
+	//n->slow_mitigation = 0;
+	n->maxlevel = botLevel;
+	//n->scalerate = 0;
+	//n->private_corpse = false;
+	//n->unique_spawn_by_name = false;
+	//n->underwater = false;
+	//n->emoteid = 0;
+	//n->spellscale = 0.0f;
+	//n->healscale = 0.0f;
+	//n->no_target_hotkey = false;
+	//n->raid_target = false;
+	//n->armtexture = 0;
+	//n->bracertexture = 0;
+	//n->handtexture = 0;
+	//n->legtexture = 0;
+	//n->feettexture = 0;
+	//n->ignore_despawn = false;
+	n->show_name = true;
+	//n->untargetable = false;
+	n->skip_global_loot = true;
+	//n->rare_spawn = false;
+	n->stuck_behavior = Ground;
+	n->skip_auto_scale = true;
 
-	bot_npc_type->current_hp = hp;
-	bot_npc_type->max_hp = hp;
-	bot_npc_type->size = size;
-	bot_npc_type->runspeed = 0.7f;
-	bot_npc_type->gender = gender;
-	bot_npc_type->race = botRace;
-	bot_npc_type->class_ = botClass;
-	bot_npc_type->bodytype = 1;
-	bot_npc_type->deity = EQ::deity::DeityAgnostic;
-	bot_npc_type->level = botLevel;
-	//bot_npc_type->npc_id = 0;
-	//bot_npc_type->texture = 0;
-	//bot_npc_type->helmtexture = 0;
-	//bot_npc_type->herosforgemodel = 0;
-	//bot_npc_type->loottable_id = 0;
-	bot_npc_type->npc_spells_id = botSpellsID;
-	//bot_npc_type->npc_spells_effects_id = 0;
-	//bot_npc_type->npc_faction_id = 0;
-	//bot_npc_type->merchanttype = 0;
-	//bot_npc_type->alt_currency_type = 0;
-	//bot_npc_type->adventure_template = 0;
-	//bot_npc_type->trap_template = 0;
-	//bot_npc_type->light = 0;
-	bot_npc_type->AC = ac;
-	bot_npc_type->Mana = mana;
-	bot_npc_type->ATK = attack;
-	bot_npc_type->STR = str;
-	bot_npc_type->STA = sta;
-	bot_npc_type->DEX = dex;
-	bot_npc_type->AGI = agi;
-	bot_npc_type->INT = _int;
-	bot_npc_type->WIS = wis;
-	bot_npc_type->CHA = cha;
-	bot_npc_type->MR = mr;
-	bot_npc_type->FR = fr;
-	bot_npc_type->CR = cr;
-	bot_npc_type->PR = pr;
-	bot_npc_type->DR = dr;
-	bot_npc_type->Corrup = corrup;
-	//bot_npc_type->PhR = 0;
-	bot_npc_type->haircolor = hairColor;
-	bot_npc_type->beardcolor = beardColor;
-	bot_npc_type->eyecolor1 = eyeColor;
-	bot_npc_type->eyecolor2 = eyeColor2;
-	bot_npc_type->hairstyle = hairStyle;
-	bot_npc_type->luclinface = face;
-	bot_npc_type->beard = beard;
-	bot_npc_type->drakkin_heritage = drakkinHeritage;
-	bot_npc_type->drakkin_tattoo = drakkinTattoo;
-	bot_npc_type->drakkin_details = drakkinDetails;
-	//bot_npc_type->armor_tint = { 0 };
-	//bot_npc_type->min_dmg = 0;
-	//bot_npc_type->max_dmg = 0;
-	//bot_npc_type->charm_ac = 0;
-	//bot_npc_type->charm_min_dmg = 0;
-	//bot_npc_type->charm_max_dmg = 0;
-	//bot_npc_type->charm_attack_delay = 0;
-	//bot_npc_type->charm_accuracy_rating = 0;
-	//bot_npc_type->charm_avoidance_rating = 0;
-	//bot_npc_type->charm_atk = 0;
-	//bot_npc_type->attack_count = 0;
-	//*bot_npc_type->special_abilities = { 0 };
-	//bot_npc_type->d_melee_texture1 = 0;
-	//bot_npc_type->d_melee_texture2 = 0;
-	//*bot_npc_type->ammo_idfile = { 0 };
-	//bot_npc_type->prim_melee_type = 0;
-	//bot_npc_type->sec_melee_type = 0;
-	//bot_npc_type->ranged_type = 0;
-	bot_npc_type->hp_regen = 1;
-	bot_npc_type->mana_regen = 1;
-	//bot_npc_type->aggroradius = 0;
-	//bot_npc_type->assistradius = 0;
-	//bot_npc_type->see_invis = 0;
-	//bot_npc_type->see_invis_undead = false;
-	//bot_npc_type->see_hide = false;
-	//bot_npc_type->see_improved_hide = false;
-	//bot_npc_type->qglobal = false;
-	//bot_npc_type->npc_aggro = false;
-	//bot_npc_type->spawn_limit = 0;
-	//bot_npc_type->mount_color = 0;
-	//bot_npc_type->attack_speed = 0.0f;
-	//bot_npc_type->attack_delay = 0;
-	//bot_npc_type->accuracy_rating = 0;
-	//bot_npc_type->avoidance_rating = 0;
-	//bot_npc_type->findable = false;
-	bot_npc_type->trackable = true;
-	//bot_npc_type->slow_mitigation = 0;
-	bot_npc_type->maxlevel = botLevel;
-	//bot_npc_type->scalerate = 0;
-	//bot_npc_type->private_corpse = false;
-	//bot_npc_type->unique_spawn_by_name = false;
-	//bot_npc_type->underwater = false;
-	//bot_npc_type->emoteid = 0;
-	//bot_npc_type->spellscale = 0.0f;
-	//bot_npc_type->healscale = 0.0f;
-	//bot_npc_type->no_target_hotkey = false;
-	//bot_npc_type->raid_target = false;
-	//bot_npc_type->armtexture = 0;
-	//bot_npc_type->bracertexture = 0;
-	//bot_npc_type->handtexture = 0;
-	//bot_npc_type->legtexture = 0;
-	//bot_npc_type->feettexture = 0;
-	//bot_npc_type->ignore_despawn = false;
-	bot_npc_type->show_name = true;
-	//bot_npc_type->untargetable = false;
-	bot_npc_type->skip_global_loot = true;
-	//bot_npc_type->rare_spawn = false;
-	bot_npc_type->stuck_behavior = Ground;
-	bot_npc_type->skip_auto_scale = true;
-
-	return bot_npc_type;
+	return n;
 }
 
-NPCType *Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender) {
-	auto bot_npc_type = new NPCType{ 0 };
-	int copy_length = 0;
+NPCType *Bot::CreateDefaultNPCTypeStructForBot(
+	std::string botName,
+	std::string botLastName,
+	uint8 botLevel,
+	uint16 botRace,
+	uint8 botClass,
+	uint8 gender
+) {
+	auto n = new NPCType{ 0 };
 
-	copy_length = botName.copy(bot_npc_type->name, 63);
-	bot_npc_type->name[copy_length] = '\0';
-	copy_length = 0;
+	strn0cpy(n->name, botName.c_str(), sizeof(n->name));
+	strn0cpy(n->lastname, botLastName.c_str(), sizeof(n->lastname));
 
-	copy_length = botLastName.copy(bot_npc_type->lastname, 69);
-	bot_npc_type->lastname[copy_length] = '\0';
-	copy_length = 0;
+	//n->current_hp = 0;
+	//n->max_hp = 0;
+	n->size = 6.0f;
+	n->runspeed = 0.7f;
+	n->gender = gender;
+	n->race = botRace;
+	n->class_ = botClass;
+	n->bodytype = 1;
+	n->deity = EQ::deity::DeityAgnostic;
+	n->level = botLevel;
+	//n->npc_id = 0;
+	//n->texture = 0;
+	//n->helmtexture = 0;
+	//n->herosforgemodel = 0;
+	//n->loottable_id = 0;
+	//n->npc_spells_id = 0;
+	//n->npc_spells_effects_id = 0;
+	//n->npc_faction_id = 0;
+	//n->merchanttype = 0;
+	//n->alt_currency_type = 0;
+	//n->adventure_template = 0;
+	//n->trap_template = 0;
+	//n->light = 0;
+	n->AC = 12;
+	//n->Mana = 0;
+	n->ATK = 75;
+	n->STR = 75;
+	n->STA = 75;
+	n->DEX = 75;
+	n->AGI = 75;
+	n->INT = 75;
+	n->WIS = 75;
+	n->CHA = 75;
+	n->MR = 25;
+	n->FR = 25;
+	n->CR = 25;
+	n->PR = 15;
+	n->DR = 15;
+	n->Corrup = 15;
+	//n->PhR = 0;
+	//n->haircolor = 0;
+	//n->beardcolor = 0;
+	//n->eyecolor1 = 0;
+	//n->eyecolor2 = 0;
+	//n->hairstyle = 0;
+	//n->luclinface = 0;
+	//n->beard = 0;
+	//n->drakkin_heritage = 0;
+	//n->drakkin_tattoo = 0;
+	//n->drakkin_details = 0;
+	//n->armor_tint = { 0 };
+	//n->min_dmg = 0;
+	//n->max_dmg = 0;
+	//n->charm_ac = 0;
+	//n->charm_min_dmg = 0;
+	//n->charm_max_dmg = 0;
+	//n->charm_attack_delay = 0;
+	//n->charm_accuracy_rating = 0;
+	//n->charm_avoidance_rating = 0;
+	//n->charm_atk = 0;
+	//n->attack_count = 0;
+	//*n->special_abilities = { 0 };
+	//n->d_melee_texture1 = 0;
+	//n->d_melee_texture2 = 0;
+	//*n->ammo_idfile = { 0 };
+	//n->prim_melee_type = 0;
+	//n->sec_melee_type = 0;
+	//n->ranged_type = 0;
+	n->hp_regen = 1;
+	n->mana_regen = 1;
+	//n->aggroradius = 0;
+	//n->assistradius = 0;
+	//n->see_invis = 0;
+	//n->see_invis_undead = false;
+	//n->see_hide = false;
+	//n->see_improved_hide = false;
+	//n->qglobal = false;
+	//n->npc_aggro = false;
+	//n->spawn_limit = 0;
+	//n->mount_color = 0;
+	//n->attack_speed = 0.0f;
+	//n->attack_delay = 0;
+	//n->accuracy_rating = 0;
+	//n->avoidance_rating = 0;
+	//n->findable = false;
+	n->trackable = true;
+	//n->slow_mitigation = 0;
+	n->maxlevel = botLevel;
+	//n->scalerate = 0;
+	//n->private_corpse = false;
+	//n->unique_spawn_by_name = false;
+	//n->underwater = false;
+	//n->emoteid = 0;
+	//n->spellscale = 0.0f;
+	//n->healscale = 0.0f;
+	//n->no_target_hotkey = false;
+	//n->raid_target = false;
+	//n->armtexture = 0;
+	//n->bracertexture = 0;
+	//n->handtexture = 0;
+	//n->legtexture = 0;
+	//n->feettexture = 0;
+	//n->ignore_despawn = false;
+	n->show_name = true;
+	//n->untargetable = false;
+	n->skip_global_loot = true;
+	//n->rare_spawn = false;
+	n->stuck_behavior = Ground;
 
-	//bot_npc_type->current_hp = 0;
-	//bot_npc_type->max_hp = 0;
-	bot_npc_type->size = 6.0f;
-	bot_npc_type->runspeed = 0.7f;
-	bot_npc_type->gender = gender;
-	bot_npc_type->race = botRace;
-	bot_npc_type->class_ = botClass;
-	bot_npc_type->bodytype = 1;
-	bot_npc_type->deity = EQ::deity::DeityAgnostic;
-	bot_npc_type->level = botLevel;
-	//bot_npc_type->npc_id = 0;
-	//bot_npc_type->texture = 0;
-	//bot_npc_type->helmtexture = 0;
-	//bot_npc_type->herosforgemodel = 0;
-	//bot_npc_type->loottable_id = 0;
-	//bot_npc_type->npc_spells_id = 0;
-	//bot_npc_type->npc_spells_effects_id = 0;
-	//bot_npc_type->npc_faction_id = 0;
-	//bot_npc_type->merchanttype = 0;
-	//bot_npc_type->alt_currency_type = 0;
-	//bot_npc_type->adventure_template = 0;
-	//bot_npc_type->trap_template = 0;
-	//bot_npc_type->light = 0;
-	bot_npc_type->AC = 12;
-	//bot_npc_type->Mana = 0;
-	bot_npc_type->ATK = 75;
-	bot_npc_type->STR = 75;
-	bot_npc_type->STA = 75;
-	bot_npc_type->DEX = 75;
-	bot_npc_type->AGI = 75;
-	bot_npc_type->INT = 75;
-	bot_npc_type->WIS = 75;
-	bot_npc_type->CHA = 75;
-	bot_npc_type->MR = 25;
-	bot_npc_type->FR = 25;
-	bot_npc_type->CR = 25;
-	bot_npc_type->PR = 15;
-	bot_npc_type->DR = 15;
-	bot_npc_type->Corrup = 15;
-	//bot_npc_type->PhR = 0;
-	//bot_npc_type->haircolor = 0;
-	//bot_npc_type->beardcolor = 0;
-	//bot_npc_type->eyecolor1 = 0;
-	//bot_npc_type->eyecolor2 = 0;
-	//bot_npc_type->hairstyle = 0;
-	//bot_npc_type->luclinface = 0;
-	//bot_npc_type->beard = 0;
-	//bot_npc_type->drakkin_heritage = 0;
-	//bot_npc_type->drakkin_tattoo = 0;
-	//bot_npc_type->drakkin_details = 0;
-	//bot_npc_type->armor_tint = { 0 };
-	//bot_npc_type->min_dmg = 0;
-	//bot_npc_type->max_dmg = 0;
-	//bot_npc_type->charm_ac = 0;
-	//bot_npc_type->charm_min_dmg = 0;
-	//bot_npc_type->charm_max_dmg = 0;
-	//bot_npc_type->charm_attack_delay = 0;
-	//bot_npc_type->charm_accuracy_rating = 0;
-	//bot_npc_type->charm_avoidance_rating = 0;
-	//bot_npc_type->charm_atk = 0;
-	//bot_npc_type->attack_count = 0;
-	//*bot_npc_type->special_abilities = { 0 };
-	//bot_npc_type->d_melee_texture1 = 0;
-	//bot_npc_type->d_melee_texture2 = 0;
-	//*bot_npc_type->ammo_idfile = { 0 };
-	//bot_npc_type->prim_melee_type = 0;
-	//bot_npc_type->sec_melee_type = 0;
-	//bot_npc_type->ranged_type = 0;
-	bot_npc_type->hp_regen = 1;
-	bot_npc_type->mana_regen = 1;
-	//bot_npc_type->aggroradius = 0;
-	//bot_npc_type->assistradius = 0;
-	//bot_npc_type->see_invis = 0;
-	//bot_npc_type->see_invis_undead = false;
-	//bot_npc_type->see_hide = false;
-	//bot_npc_type->see_improved_hide = false;
-	//bot_npc_type->qglobal = false;
-	//bot_npc_type->npc_aggro = false;
-	//bot_npc_type->spawn_limit = 0;
-	//bot_npc_type->mount_color = 0;
-	//bot_npc_type->attack_speed = 0.0f;
-	//bot_npc_type->attack_delay = 0;
-	//bot_npc_type->accuracy_rating = 0;
-	//bot_npc_type->avoidance_rating = 0;
-	//bot_npc_type->findable = false;
-	bot_npc_type->trackable = true;
-	//bot_npc_type->slow_mitigation = 0;
-	bot_npc_type->maxlevel = botLevel;
-	//bot_npc_type->scalerate = 0;
-	//bot_npc_type->private_corpse = false;
-	//bot_npc_type->unique_spawn_by_name = false;
-	//bot_npc_type->underwater = false;
-	//bot_npc_type->emoteid = 0;
-	//bot_npc_type->spellscale = 0.0f;
-	//bot_npc_type->healscale = 0.0f;
-	//bot_npc_type->no_target_hotkey = false;
-	//bot_npc_type->raid_target = false;
-	//bot_npc_type->armtexture = 0;
-	//bot_npc_type->bracertexture = 0;
-	//bot_npc_type->handtexture = 0;
-	//bot_npc_type->legtexture = 0;
-	//bot_npc_type->feettexture = 0;
-	//bot_npc_type->ignore_despawn = false;
-	bot_npc_type->show_name = true;
-	//bot_npc_type->untargetable = false;
-	bot_npc_type->skip_global_loot = true;
-	//bot_npc_type->rare_spawn = false;
-	bot_npc_type->stuck_behavior = Ground;
-
-	return bot_npc_type;
+	return n;
 }
 
 void Bot::GenerateBaseStats()
@@ -2211,7 +2242,6 @@ void Bot::AI_Bot_Start(uint32 iMoveDelay) {
 	}
 
 	if (NPCTypedata) {
-		AI_AddBotSpells(NPCTypedata->npc_spells_id);
 		ProcessSpecialAbilities(NPCTypedata->special_abilities);
 		AI_AddNPCSpellsEffects(NPCTypedata->npc_spells_effects_id);
 	}
@@ -3368,8 +3398,8 @@ void Bot::AI_Process()
 
 					TEST_COMBATANTS();
 					auto ExtraAttackChanceBonus =
-					    (spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
-					     aabonuses.ExtraAttackChance[0]);
+						(spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
+						aabonuses.ExtraAttackChance[0]);
 					if (ExtraAttackChanceBonus) {
 
 						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
@@ -3974,14 +4004,14 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 void Bot::RemoveBotItemBySlot(uint16 slot_id, std::string *error_message)
 {
 	if (!GetBotID()) {
-        return;
+		return;
 	}
 
-    if (!database.botdb.DeleteItemBySlot(GetBotID(), slot_id)) {
-        *error_message = BotDatabase::fail::DeleteItemBySlot();
+	if (!database.botdb.DeleteItemBySlot(GetBotID(), slot_id)) {
+		*error_message = BotDatabase::fail::DeleteItemBySlot();
 	}
 
-    m_inv.DeleteItem(slot_id);
+	m_inv.DeleteItem(slot_id);
 	UpdateEquipmentLight();
 }
 
@@ -4005,7 +4035,7 @@ uint32 Bot::GetBotItemBySlot(uint16 slot_id)
 {
 	uint32 item_id = 0;
 	if (!GetBotID()) {
-        return item_id;
+		return item_id;
 	}
 
 	if (!database.botdb.LoadItemBySlot(GetBotID(), slot_id, item_id)) {
@@ -7056,11 +7086,11 @@ int64 Bot::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	//Crtical Hit Calculation pathway
 	if (chance > 0 || (GetClass() == WIZARD && GetLevel() >= RuleI(Spells, WizCritLevel))) {
 
-		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
+		int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
 		if (spell_id == SPELL_IMP_HARM_TOUCH && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
-			 chance = 100;
+			chance = 100;
 
 		if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
 			chance = spells[spell_id].override_crit_chance;
@@ -7251,7 +7281,7 @@ int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	uint8 botlevel = GetLevel();
 	uint8 botclass = GetClass();
 	if (botlevel >= 51 && casttime >= 3000 && !spells[spell_id].good_effect &&
-	    (botclass == SHADOWKNIGHT || botclass == RANGER || botclass == PALADIN || botclass == BEASTLORD)) {
+		(botclass == SHADOWKNIGHT || botclass == RANGER || botclass == PALADIN || botclass == BEASTLORD)) {
 		int level_mod = std::min(15, botlevel - 50);
 		cast_reducer += level_mod * 3;
 	}
@@ -9260,6 +9290,8 @@ void Bot::CalcBotStats(bool showtext) {
 
 	CalcBonuses();
 
+	GetBotOwnerDataBuckets();
+	GetBotDataBuckets();
 	AI_AddBotSpells(GetBotSpellID());
 
 	if(showtext) {
@@ -10345,6 +10377,110 @@ void Bot::SpawnBotGroupByName(Client* c, std::string botgroup_name, uint32 leade
 			botgroup_name
 		).c_str()
 	);
+}
+
+bool Bot::GetBotOwnerDataBuckets()
+{
+	auto bot_owner = GetBotOwner();
+	if (!bot_owner) {
+		return false;
+	}
+
+	auto query = fmt::format(
+		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
+		Strings::Escape(bot_owner->GetBucketKey())
+	);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success() || !results.RowCount()) {
+		return false;
+	}
+
+	for (auto row : results) {
+		bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+	}
+
+	return true;
+}
+
+bool Bot::GetBotDataBuckets()
+{
+	auto query = fmt::format(
+		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
+		Strings::Escape(GetBucketKey())
+	);
+	auto results = database.QueryDatabase(query);
+
+	if (!results.Success() || !results.RowCount()) {
+		return false;
+	}
+
+	for (auto row : results) {
+		bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+	}
+
+	return true;
+}
+
+bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uint8 bucket_comparison)
+{
+	if (!bucket_name.empty() && !bucket_value.empty()) {
+		auto full_name = fmt::format(
+			"{}-{}",
+			GetBucketKey(),
+			bucket_name
+		);
+
+		auto player_value = bot_data_buckets[full_name];
+		if (player_value.empty() && GetBotOwner()) {
+			full_name = fmt::format(
+				"{}-{}",
+				GetBotOwner()->GetBucketKey(),
+				bucket_name
+			);
+
+			player_value = bot_data_buckets[full_name];
+			if (player_value.empty()) {
+				return false;
+			}
+		}
+
+		if (zone->CheckDataBucket(bucket_comparison, bucket_value, player_value)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int Bot::GetExpansionBitmask()
+{
+	if (m_expansion_bitmask >= 0) {
+		return m_expansion_bitmask;
+	}
+
+	return RuleI(Bots, BotExpansionSettings);
+}
+
+void Bot::SetExpansionBitmask(int expansion_bitmask, bool save)
+{
+	m_expansion_bitmask = expansion_bitmask;
+
+	if (save) {
+		if (!database.botdb.SaveExpansionBitmask(GetBotID(), expansion_bitmask)) {
+			if (GetBotOwner() && GetBotOwner()->IsClient()) {
+				GetBotOwner()->CastToClient()->Message(
+					Chat::White,
+					fmt::format(
+						"Failed to save expansion bitmask for {}.",
+						GetCleanName()
+					).c_str()
+				);
+			}
+		}
+	}
+
+	LoadAAs();
 }
 
 uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

@@ -189,9 +189,14 @@ public:
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClientByLSID(uint32 iLSID);
 	Client *GetClient(uint32 ip, uint16 port);
-	Client* GetRandomClient(const glm::vec3& location, float distance, Client* exclude_client = nullptr);
-	NPC* GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc = nullptr);
-	Mob* GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob = nullptr);
+
+#ifdef BOTS
+	Bot* GetRandomBot(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Bot* exclude_bot = nullptr);
+#endif
+
+	Client* GetRandomClient(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Client* exclude_client = nullptr);
+	NPC* GetRandomNPC(const glm::vec3& location = glm::vec3(0.f), float distance = 0, NPC* exclude_npc = nullptr);
+	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
 	Group *GetGroupByMob(Mob* mob);
 	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);
@@ -334,6 +339,8 @@ public:
 
 	void DescribeAggro(Client *to_who, NPC *from_who, float dist, bool verbose);
 
+	void	Marquee(uint32 type, std::string message, uint32 duration = 3000);
+	void	Marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
 	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);

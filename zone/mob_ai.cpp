@@ -84,7 +84,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 
 	float manaR = GetManaRatio();
 	for (int i = static_cast<int>(AIspells.size()) - 1; i >= 0; i--) {
-		if (AIspells[i].spellid <= 0 || AIspells[i].spellid >= SPDAT_RECORDS) {
+		if (!IsValidSpell(AIspells[i].spellid)) {
 			// this is both to quit early to save cpu and to avoid casting bad spells
 			// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 			//return false;
@@ -2133,7 +2133,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 				GetCleanName(),
 				target->GetCleanName());
 		}
-		
+
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
@@ -2171,7 +2171,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, NPC_RAMPAGE, GetCleanName());
 	} else {
 		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
-	}	
+	}
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
 	if (rampage_targets == 0) // if set to 0 or not set in the DB
 		rampage_targets = RuleI(Combat, DefaultRampageTargets);
