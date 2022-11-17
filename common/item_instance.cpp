@@ -1721,6 +1721,18 @@ int EQ::ItemInstance::GetItemHaste(bool augments) const
 	return total;
 }
 
+int EQ::ItemInstance::RemoveTaskDeliveredItems()
+{
+	int count = IsStackable() ? GetCharges() : 1;
+	count -= GetTaskDeliveredCount();
+	if (IsStackable())
+	{
+		SetCharges(count);
+	}
+	SetTaskDeliveredCount(0);
+	return count;
+}
+
 //
 // class EvolveInfo
 //

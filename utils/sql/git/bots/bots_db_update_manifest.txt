@@ -29,6 +29,8 @@
 9028|2021_06_04_bot_create_combinations.sql|SHOW TABLES LIKE 'bot_create_combinations'|empty|
 9029|2022_06_21_bot_groups_auto_spawn.sql|SHOW COLUMNS from `bot_groups` LIKE 'auto_spawm'|empty|
 9030|2022_10_27_bot_data_buckets.sql|SHOW COLUMNS FROM `bot_spells_entries` LIKE 'bucket_name'|empty|
+9031|2022_11_13_bot_spells_entries.sql|SELECT * FROM db_version WHERE bots_version >= 9031|empty|
+9032|2022_11_07_bot_expansion_bitmask.sql|SHOW COLUMNS FROM `bot_data` LIKE 'expansion_bitmask'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

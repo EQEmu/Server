@@ -26,6 +26,7 @@
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
+#include "dialogue_window.h"
 #include "embperl.h"
 #include "embxs.h"
 #include "entity.h"
@@ -1064,9 +1065,19 @@ int Perl__createbotcount()
 	return quest_manager.createbotcount();
 }
 
+int Perl__createbotcount(uint8 class_id)
+{
+	return quest_manager.createbotcount(class_id);
+}
+
 int Perl__spawnbotcount()
 {
 	return quest_manager.spawnbotcount();
+}
+
+int Perl__spawnbotcount(uint8 class_id)
+{
+	return quest_manager.spawnbotcount(class_id);
 }
 
 bool Perl__botquest()
@@ -3748,6 +3759,96 @@ std::string Perl__getaaname(int aa_id)
 	return zone->GetAAName(aa_id);
 }
 
+std::string Perl__popupbreak() {
+	return DialogueWindow::Break();
+}
+
+std::string Perl__popupbreak(uint32 break_count) {
+	return DialogueWindow::Break(break_count);
+}
+
+std::string Perl__popupcentermessage(std::string message) {
+	return DialogueWindow::CenterMessage(message);
+}
+
+std::string Perl__popupcolormessage(std::string color, std::string message) {
+	return DialogueWindow::ColorMessage(color, message);
+}
+
+std::string Perl__popupindent() {
+	return DialogueWindow::Indent();
+}
+
+std::string Perl__popupindent(uint32 indent_count) {
+	return DialogueWindow::Indent(indent_count);
+}
+
+std::string Perl__popuplink(std::string link) {
+	return DialogueWindow::Link(link);
+}
+
+std::string Perl__popuplink(std::string link, std::string message) {
+	return DialogueWindow::Link(link, message);
+}
+
+std::string Perl__popuptable(std::string message) {
+	return DialogueWindow::Table(message);
+}
+
+std::string Perl__popuptablecell() {
+	return DialogueWindow::TableCell();
+}
+
+std::string Perl__popuptablecell(std::string message) {
+	return DialogueWindow::TableCell(message);
+}
+
+std::string Perl__popuptablerow(std::string message) {
+	return DialogueWindow::TableRow(message);
+}
+
+void Perl__marquee(uint32 type, std::string message)
+{
+	quest_manager.marquee(type, message);
+}
+
+void Perl__marquee(uint32 type, std::string message, uint32 duration)
+{
+	quest_manager.marquee(type, message, duration);
+}
+
+void Perl__marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	quest_manager.marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message, uint32 duration)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message, duration);
+}
+
+void Perl__zonemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3756,8 +3857,10 @@ void perl_register_quest()
 
 #ifdef BOTS
 	package.add("botquest", &Perl__botquest);
-	package.add("spawnbotcount", &Perl__spawnbotcount);
-	package.add("createbotcount", &Perl__createbotcount);
+	package.add("spawnbotcount", (int(*)())&Perl__spawnbotcount);
+	package.add("spawnbotcount", (int(*)(uint8))&Perl__spawnbotcount);
+	package.add("createbotcount", (int(*)())&Perl__createbotcount);
+	package.add("createbotcount", (int(*)(uint8))&Perl__createbotcount);
 	package.add("createBot", &Perl__createBot);
 #endif //BOTS
 
@@ -4192,6 +4295,9 @@ void perl_register_quest()
 	package.add("level", &Perl__level);
 	package.add("log", &Perl__log);
 	package.add("log_combat", &Perl__log_combat);
+	package.add("marquee", (void(*)(uint32, std::string))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, std::string, uint32))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__marquee);
 	package.add("me", &Perl__me);
 	package.add("message", &Perl__message);
 	package.add("modifynpcstat", &Perl__ModifyNPCStat);
@@ -4220,6 +4326,18 @@ void perl_register_quest()
 	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
+	package.add("popupbreak", (std::string(*)())&Perl__popupbreak);
+	package.add("popupbreak", (std::string(*)(uint32))&Perl__popupbreak);
+	package.add("popupcentermessage", &Perl__popupcentermessage);
+	package.add("popupcolormessage", &Perl__popupcolormessage);
+	package.add("popupindent", (std::string(*)())&Perl__popupindent);
+	package.add("popupindent", (std::string(*)(uint32))&Perl__popupindent);
+	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
+	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
+	package.add("popuptable", &Perl__popuptable);
+	package.add("popuptablecell", (std::string(*)())&Perl__popuptablecell);
+	package.add("popuptablecell", (std::string(*)(std::string))&Perl__popuptablecell);
+	package.add("popuptablerow", &Perl__popuptablerow);
 	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
 	package.add("pvp", &Perl__pvp);
 	package.add("qs_player_event", &Perl__qs_player_event);
@@ -4332,6 +4450,9 @@ void perl_register_quest()
 	package.add("write", &Perl__write);
 	package.add("ze", &Perl__ze);
 	package.add("zone", &Perl__zone);
+	package.add("zonemarquee", (void(*)(uint32, std::string))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, std::string, uint32))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__zonemarquee);
 	package.add("zonegroup", &Perl__zonegroup);
 	package.add("zoneraid", &Perl__zoneraid);
 

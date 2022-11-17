@@ -18,6 +18,7 @@
 
 #ifdef BOTS
 
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/strings.h"
@@ -188,38 +189,46 @@ bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& availa
 	return true;
 }
 
-bool BotDatabase::QueryBotCount(const uint32 owner_id, uint32& bot_count)
+bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot_count, uint32& bot_class_count)
 {
-	if (!owner_id)
+	if (!owner_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = '%i'", owner_id);
+	query = fmt::format(
+		"SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = {}",
+		owner_id
+	);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	bot_count = atoi(row[0]);
+	bot_count = std::stoul(row[0]);
 
-	return true;
-}
+	if (EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
+		query = fmt::format(
+			"SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = {} AND `class` = {}",
+			owner_id,
+			class_id
+		);
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			return false;
+		}
 
-bool BotDatabase::LoadQuestableSpawnCount(const uint32 owner_id, int& spawn_count)
-{
-	if (!owner_id)
-		return false;
+		if (!results.RowCount()) {
+			return true;
+		}
 
-	query = StringFormat("SELECT `value` FROM `quest_globals` WHERE `name` = 'bot_spawn_limit' AND `charid` = '%i' LIMIT 1", owner_id);
-	auto results = database.QueryDatabase(query); // use 'database' for non-bot table calls
-	if (!results.Success())
-		return false;
-	if (!results.RowCount())
-		return true;
-
-	auto row = results.begin();
-	spawn_count = atoi(row[0]);
+		auto row = results.begin();
+		bot_class_count = std::stoul(row[0]);
+	}
 
 	return true;
 }
@@ -309,148 +318,194 @@ bool BotDatabase::LoadOwnerID(const uint32 bot_id, uint32& owner_id)
 
 bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id)
 {
-	if (!owner_id || bot_name.empty())
+	if (!owner_id || bot_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat(
-		"SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u' AND `name` = '%s' LIMIT 1",
-		owner_id, bot_name.c_str()
+	query = fmt::format(
+		"SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = {} AND `name` = '{}' LIMIT 1",
+		owner_id,
+		bot_name
 	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	bot_id = atoi(row[0]);
+	bot_id = std::stoul(row[0]);
+
+	return true;
+}
+
+bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id)
+{
+	if (!owner_id || bot_name.empty()) {
+		return false;
+	}
+
+	query = fmt::format(
+		"SELECT `bot_id`, `class` FROM `bot_data` WHERE `owner_id` = {} AND `name` = '{}' LIMIT 1",
+		owner_id,
+		bot_name
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	auto row = results.begin();
+	bot_id = std::stoul(row[0]);
+	bot_class_id = static_cast<uint8>(std::stoul(row[1]));
 
 	return true;
 }
 
 bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 {
-	if (!bot_id || loaded_bot)
+	if (!bot_id || loaded_bot) {
 		return false;
+	}
 
-	query = StringFormat(
+	query = fmt::format(
 		"SELECT"
-		" `owner_id`,"
-		" `spells_id`,"
-		" `name`,"
-		" `last_name`,"
-		" `title`,"
-		" `suffix`,"
-		" `zone_id`,"
-		" `gender`,"
-		" `race`,"
-		" `class`,"
-		" `level`,"
-		" `deity`,"				/* planned use[11] */
-		" `creation_day`,"		/* not in-use[12] */
-		" `last_spawn`,"		/* not in-use[13] */
-		" `time_spawned`,"
-		" `size`,"
-		" `face`,"
-		" `hair_color`,"
-		" `hair_style`,"
-		" `beard`,"
-		" `beard_color`,"
-		" `eye_color_1`,"
-		" `eye_color_2`,"
-		" `drakkin_heritage`,"
-		" `drakkin_tattoo`,"
-		" `drakkin_details`,"
-		" `ac`,"				/* not in-use[26] */
-		" `atk`,"				/* not in-use[27] */
-		" `hp`,"
-		" `mana`,"
-		" `str`,"				/* not in-use[30] */
-		" `sta`,"				/* not in-use[31] */
-		" `cha`,"				/* not in-use[32] */
-		" `dex`,"				/* not in-use[33] */
-		" `int`,"				/* not in-use[34] */
-		" `agi`,"				/* not in-use[35] */
-		" `wis`,"				/* not in-use[36] */
-		" `fire`,"				/* not in-use[37] */
-		" `cold`,"				/* not in-use[38] */
-		" `magic`,"				/* not in-use[39] */
-		" `poison`,"			/* not in-use[40] */
-		" `disease`,"			/* not in-use[41] */
-		" `corruption`,"		/* not in-use[42] */
-		" `show_helm`," // 43
-		" `follow_distance`," // 44
-		" `stop_melee_level`" // 45
+		" `owner_id`," // 0
+		" `spells_id`," // 1
+		" `name`," // 2
+		" `last_name`," // 3
+		" `title`," // 4
+		" `suffix`," // 5
+		" `level`," // 6
+		" `race`," // 7
+		" `class`," // 8
+		" `gender`," // 9
+		" `size`," // 10
+		" `face`," // 11
+		" `hair_style`," // 12
+		" `hair_color`," // 13
+		" `eye_color_1`," // 14
+		" `eye_color_2`," // 15
+		" `beard`," // 16
+		" `beard_color`," // 17
+		" `drakkin_heritage`," // 18
+		" `drakkin_tattoo`," // 19
+		" `drakkin_details`," // 20
+		" `hp`," // 21
+		" `mana`," // 22
+		" `time_spawned`," // 23
+		" `zone_id`," // 24
+		" `show_helm`," // 25
+		" `follow_distance`," // 26
+		" `stop_melee_level`," // 27
+		" `expansion_bitmask`" // 28
 		" FROM `bot_data`"
-		" WHERE `bot_id` = '%u'"
+		" WHERE `bot_id` = {}"
 		" LIMIT 1",
 		bot_id
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
-		return true;
+	}
 
-	// TODO: Consider removing resists and basic attributes from the load query above since we're using defaultNPCType values instead
+	if (!results.RowCount()) {
+		return true;
+	}
+
 	auto row = results.begin();
-	auto defaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[10]), atoi(row[8]), atoi(row[9]), atoi(row[7]));
-	auto tempNPCStruct = Bot::FillNPCTypeStruct(
-		atoi(row[1]),
-		std::string(row[2]),
-		std::string(row[3]),
-		atoi(row[10]),
-		atoi(row[8]),
-		atoi(row[9]),
-		atoi(row[7]),
-		atof(row[15]),
-		atoi(row[16]),
-		atoi(row[18]),
-		atoi(row[17]),
-		atoi(row[21]),
-		atoi(row[22]),
-		atoi(row[20]),
-		atoi(row[19]),
-		atoi(row[23]),
-		atoi(row[24]),
-		atoi(row[25]),
-		atoi(row[28]),
-		atoi(row[29]),
-		defaultNPCTypeStruct->MR,
-		defaultNPCTypeStruct->CR,
-		defaultNPCTypeStruct->DR,
-		defaultNPCTypeStruct->FR,
-		defaultNPCTypeStruct->PR,
-		defaultNPCTypeStruct->Corrup,
-		defaultNPCTypeStruct->AC,
-		defaultNPCTypeStruct->STR,
-		defaultNPCTypeStruct->STA,
-		defaultNPCTypeStruct->DEX,
-		defaultNPCTypeStruct->AGI,
-		defaultNPCTypeStruct->INT,
-		defaultNPCTypeStruct->WIS,
-		defaultNPCTypeStruct->CHA,
-		defaultNPCTypeStruct->ATK
+
+	auto d = Bot::CreateDefaultNPCTypeStructForBot(
+		std::string(row[2]), // Name
+		std::string(row[3]), // Last Name
+		static_cast<uint8>(EQ::Clamp(std::stoi(row[6]), 1, 255)), // Level
+		static_cast<uint16>(std::stoul(row[8])), // Race
+		static_cast<uint8>(EQ::Clamp(std::stoi(row[9]), WARRIOR, BERSERKER)), // Class
+		static_cast<uint8>(EQ::Clamp(std::stoi(row[7]), MALE, FEMALE)) // Gender
 	);
 
-	safe_delete(defaultNPCTypeStruct);
+	auto t = Bot::FillNPCTypeStruct(
+		std::stoul(row[1]), // Spells ID
+		std::string(row[2]), // Name
+		std::string(row[3]), // Last Name
+		static_cast<uint8>(EQ::Clamp(std::stoi(row[6]), 1, 255)), // Level
+		static_cast<uint16>(std::stoul(row[7])), // Race
+		static_cast<uint8>(EQ::Clamp(std::stoi(row[8]), WARRIOR, BERSERKER)), // Class
+		static_cast<uint8>(EQ::Clamp(std::stoi(row[9]), MALE, FEMALE)), // Gender
+		std::stof(row[10]), // Size
+		std::stoul(row[11]), // Face
+		std::stoul(row[12]), // Hair Style
+		std::stoul(row[13]), // Hair Color
+		std::stoul(row[14]), // Eye Color 1
+		std::stoul(row[15]), // Eye Color 2
+		std::stoul(row[16]), // Beard
+		std::stoul(row[17]), // Beard Color
+		std::stoul(row[18]), // Drakkin Heritage
+		std::stoul(row[19]), // Drakkin Tattoo
+		std::stoul(row[19]), // Drakkin Details
+		std::stoi(row[20]), // Health
+		std::stoi(row[21]), // Mana
+		d->MR,
+		d->CR,
+		d->DR,
+		d->FR,
+		d->PR,
+		d->Corrup,
+		d->AC,
+		d->STR,
+		d->STA,
+		d->DEX,
+		d->AGI,
+		d->INT,
+		d->WIS,
+		d->CHA,
+		d->ATK
+	);
 
-	loaded_bot = new Bot(bot_id, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);
+	safe_delete(d);
+
+	loaded_bot = new Bot(
+		bot_id,
+		std::stoul(row[0]), // Owner ID
+		std::stoul(row[1]), // Spells ID
+		std::stof(row[23]), // Total Play Time
+		std::stoul(row[24]), // Last Zone ID
+		t
+	);
+
 	if (loaded_bot) {
-		loaded_bot->SetShowHelm((atoi(row[43]) > 0 ? true : false));
-		loaded_bot->SetSurname(row[3]);//maintaining outside mob::lastname to cater to spaces
+		loaded_bot->SetSurname(row[3]);
 		loaded_bot->SetTitle(row[4]);
 		loaded_bot->SetSuffix(row[5]);
-		uint32 bfd = atoi(row[44]);
-		if (bfd < 1)
+
+		loaded_bot->SetShowHelm((std::stoi(row[25]) > 0 ? true : false));
+
+		auto bfd = std::stoul(row[26]);
+		if (bfd < 1) {
 			bfd = 1;
-		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
+		}
+
+		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX) {
 			bfd = BOT_FOLLOW_DISTANCE_DEFAULT_MAX;
+		}
+
 		loaded_bot->SetFollowDistance(bfd);
 
-		uint8 sml = atoi(row[45]);
+		auto sml = static_cast<uint8>(EQ::Clamp(std::stoi(row[27]), 1, 255));
 		loaded_bot->SetStopMeleeLevel(sml);
+
+		auto eb = std::stoi(row[28]);
+		loaded_bot->SetExpansionBitmask(eb, false);
 	}
 
 	return true;
@@ -3175,9 +3230,29 @@ uint16 BotDatabase::GetRaceClassBitmask(uint16 bot_race)
 	return classes;
 }
 
+bool BotDatabase::SaveExpansionBitmask(const uint32 bot_id, const int expansion_bitmask)
+{
+	if (!bot_id) {
+		return false;
+	}
+
+	query = fmt::format(
+		"UPDATE `bot_data` "
+		"SET `expansion_bitmask` = {} "
+		"WHERE `bot_id` = {}",
+		expansion_bitmask,
+		bot_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+
 /* fail::Bot functions   */
-const char* BotDatabase::fail::QueryNameAvailablity() { return "Failed to query name availability"; }
-const char* BotDatabase::fail::QueryBotCount() { return "Failed to query bot count"; }
 const char* BotDatabase::fail::LoadBotsList() { return "Failed to bots list"; }
 const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner ID"; }
 const char* BotDatabase::fail::LoadBotID() { return "Failed to load bot ID"; }
@@ -3188,8 +3263,6 @@ const char* BotDatabase::fail::DeleteBot() { return "Failed to delete bot"; }
 const char* BotDatabase::fail::LoadBuffs() { return "Failed to load buffs"; }
 const char* BotDatabase::fail::SaveBuffs() { return "Failed to save buffs"; }
 const char* BotDatabase::fail::DeleteBuffs() { return "Failed to delete buffs"; }
-const char* BotDatabase::fail::LoadStance() { return "Failed to load stance"; }
-const char* BotDatabase::fail::SaveStance() { return "Failed to save stance"; }
 const char* BotDatabase::fail::DeleteStance() { return "Failed to delete stance"; }
 const char* BotDatabase::fail::LoadTimers() { return "Failed to load timers"; }
 const char* BotDatabase::fail::SaveTimers() { return "Failed to save timers"; }
@@ -3236,8 +3309,6 @@ const char* BotDatabase::fail::ToggleHelmAppearance() { return "Failed to save t
 const char* BotDatabase::fail::ToggleAllHelmAppearances() { return "Failed to save toggle all helm appearance"; }
 const char* BotDatabase::fail::SaveFollowDistance() { return "Failed to save follow distance"; }
 const char* BotDatabase::fail::SaveAllFollowDistances() { return "Failed to save all follow distances"; }
-const char* BotDatabase::fail::CreateCloneBot() { return "Failed to create clone bot"; }
-const char* BotDatabase::fail::CreateCloneBotInventory() { return "Failed to create clone bot inventory"; }
 const char* BotDatabase::fail::SaveStopMeleeLevel() { return "Failed to save stop melee level"; }
 
 /* fail::Bot heal rotation functions   */

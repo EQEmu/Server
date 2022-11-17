@@ -39,10 +39,13 @@ public:
 	uint32 CountBotItem(uint32 item_id);
 	Lua_ItemInst GetBotItem(uint16 slot_id);
 	uint32 GetBotItemIDBySlot(uint16 slot_id);
+	int GetExpansionBitmask();
 	Lua_Mob GetOwner();
 	bool HasBotItem(uint32 item_id);
 	void OwnerMessage(std::string message);
 	void RemoveBotItem(uint32 item_id);
+	void SetExpansionBitmask(int expansion_bitmask);
+	void SetExpansionBitmask(int expansion_bitmask, bool save);
 	void SignalBot(int signal_id);
 };
 

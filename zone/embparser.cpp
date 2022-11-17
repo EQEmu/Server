@@ -864,6 +864,22 @@ void PerlembParser::ExportVar(const char *pkgprefix, const char *varname, const 
 	}
 }
 
+
+void PerlembParser::ExportVar(const char* pkgprefix, const char* varname, const char* classname, void* value)
+{
+	if (!perl) {
+		return;
+	}
+
+	// todo: try/catch shouldn't be necessary here (called perl apis don't throw)
+	try {
+		perl->setptr(std::string(pkgprefix).append("::").append(varname).c_str(), classname, value);
+	}
+	catch (std::string e) {
+		AddError(fmt::format("Error exporting Perl variable [{}]", e));
+	}
+}
+
 int PerlembParser::SendCommands(
 	const char *pkgprefix,
 	const char *event,
@@ -1526,6 +1542,10 @@ void PerlembParser::ExportEventVariables(
 						temp_var_name = var_name;
 						temp_var_name += "_attuned";
 						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->IsAttuned());
+
+						temp_var_name = var_name;
+						temp_var_name += "_inst";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), "QuestItem", inst);
 					}
 					else {
 						ExportVar(package_name.c_str(), var_name.c_str(), 0);
@@ -1536,6 +1556,10 @@ void PerlembParser::ExportEventVariables(
 
 						temp_var_name = var_name;
 						temp_var_name += "_attuned";
+						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
+
+						temp_var_name = var_name;
+						temp_var_name += "_inst";
 						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
 					}
 				}

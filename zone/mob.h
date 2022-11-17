@@ -299,7 +299,7 @@ public:
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model = 0);
 
 	void ChangeSize(float in_size, bool bNoRestriction = false);
-	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
+	void DoAnim(const int animation_id, int animation_speed = 0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0, float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr, EQ::skills::SkillType skillInUse = EQ::skills::SkillArchery);
 	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target=nullptr, uint32 value1slot = 1, uint32 value1ground = 1, uint32 value2slot = 1, uint32 value2ground = 1,
 		uint32 value3slot = 1, uint32 value3ground = 1, uint32 value4slot = 1, uint32 value4ground = 1, uint32 value5slot = 1, uint32 value5ground = 1);
@@ -489,9 +489,11 @@ public:
 	inline void SetDuelWeaponsEquiped(bool val) { has_duelweaponsequiped = val; }
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
+	virtual uint8 ConvertItemTypeToSkillID(uint8 item_type);
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { return 0; }
 	virtual uint32 GetEquippedItemFromTextureSlot(uint8 material_slot) const { return(0); }
 	virtual int32 GetEquipmentMaterial(uint8 material_slot) const;
+	virtual uint8 GetEquipmentType(uint8 material_slot) const;
 	virtual int32 GetHerosForgeModel(uint8 material_slot) const;
 	virtual uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
@@ -725,7 +727,8 @@ public:
 	bool IsOnFeignMemory(Mob *attacker) const;
 	void PrintHateListToClient(Client *who) { hate_list.PrintHateListToClient(who); }
 	std::list<struct_HateList*>& GetHateList() { return hate_list.GetHateList(); }
-	std::list<struct_HateList*> GetHateListByDistance(int distance = 0) { return hate_list.GetHateListByDistance(distance); }
+	std::list<struct_HateList*> GetFilteredHateList(uint8 filter_type = HateListFilterTypes::All, uint32 distance = 0) { return hate_list.GetFilteredHateList(filter_type, distance); }
+	void DamageHateList(uint32 damage, uint8 damage_target_type = HateListFilterTypes::All, uint32 distance = 0, bool is_percentage = false) { hate_list.DamageHateList(damage, damage_target_type, distance, is_percentage); }
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	static bool CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarget, float sizeTarget);
@@ -840,11 +843,26 @@ public:
 
 	int64 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false, uint16 casterid = 0, Mob *caster = nullptr);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
-	void SendIllusionPacket(uint16 in_race, uint8 in_gender = 0xFF, uint8 in_texture = 0xFF, uint8 in_helmtexture = 0xFF,
-		uint8 in_haircolor = 0xFF, uint8 in_beardcolor = 0xFF, uint8 in_eyecolor1 = 0xFF, uint8 in_eyecolor2 = 0xFF,
-		uint8 in_hairstyle = 0xFF, uint8 in_luclinface = 0xFF, uint8 in_beard = 0xFF, uint8 in_aa_title = 0xFF,
-		uint32 in_drakkin_heritage = 0xFFFFFFFF, uint32 in_drakkin_tattoo = 0xFFFFFFFF,
-		uint32 in_drakkin_details = 0xFFFFFFFF, float in_size = -1.0f, bool send_appearance_effects = true);
+	void SendIllusionPacket(
+		uint16 in_race,
+		uint8 in_gender = 0xFF,
+		uint8 in_texture = 0xFF,
+		uint8 in_helmtexture = 0xFF,
+		uint8 in_haircolor = 0xFF,
+		uint8 in_beardcolor = 0xFF,
+		uint8 in_eyecolor1 = 0xFF,
+		uint8 in_eyecolor2 = 0xFF,
+		uint8 in_hairstyle = 0xFF,
+		uint8 in_luclinface = 0xFF,
+		uint8 in_beard = 0xFF,
+		uint8 in_aa_title = 0xFF,
+		uint32 in_drakkin_heritage = 0xFFFFFFFF,
+		uint32 in_drakkin_tattoo = 0xFFFFFFFF,
+		uint32 in_drakkin_details = 0xFFFFFFFF,
+		float in_size = -1.0f,
+		bool send_appearance_effects = true
+	);
+	void CloneAppearance(Mob* other, bool clone_name = false);
 	void SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender = false);
 	bool RandomizeFeatures(bool send_illusion = true, bool set_variables = true);
 	virtual void Stun(int duration);
@@ -1476,7 +1494,7 @@ protected:
 	bool no_target_hotkey;
 	bool rare_spawn;
 	int32 heroic_strikethrough;
-	
+
 	uint32 m_PlayerState;
 	uint32 GetPlayerState() { return m_PlayerState; }
 	void AddPlayerState(uint32 new_state) { m_PlayerState |= new_state; }
