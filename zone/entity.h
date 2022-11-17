@@ -26,6 +26,7 @@
 #include "../common/servertalk.h"
 #include "../common/bodytypes.h"
 #include "../common/eq_constants.h"
+#include "../common/emu_constants.h"
 
 #include "position.h"
 #include "zonedump.h"
@@ -338,6 +339,9 @@ public:
 	void	StopMobAI();
 
 	void DescribeAggro(Client *to_who, NPC *from_who, float dist, bool verbose);
+
+	std::vector<Mob*> GetFilteredEntityList(Mob* sender, uint32 distance = 0, uint8 filter_type = EntityFilterTypes::All);
+	void DamageArea(Mob* sender, int64 damage, uint32 distance = 0, uint8 filter_type = EntityFilterTypes::All, bool is_percentage = false);
 
 	void	Marquee(uint32 type, std::string message, uint32 duration = 3000);
 	void	Marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);

@@ -15,6 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -5853,6 +5854,70 @@ void EntityList::Marquee(
 	for (const auto& c : client_list) {
 		if (c.second) {
 			c.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+		}
+	}
+}
+
+std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance, uint8 filter_type)
+{
+	std::vector<Mob *> l;
+	if (!sender) {
+		return l;
+	}
+
+	const auto squared_distance = (distance * distance);
+	const auto position = sender->GetPosition();
+	for (auto &m: mob_list) {
+		if (!m.second) {
+			continue;
+		}
+
+		if (m.second == sender) {
+			continue;
+		}
+
+		if (
+			distance &&
+			DistanceSquaredNoZ(
+				position,
+				m.second->GetPosition()
+			) > squared_distance
+		) {
+			continue;
+		}
+
+		if (
+			(filter_type == EntityFilterTypes::Bots && !m.second->IsBot()) ||
+			(filter_type == EntityFilterTypes::Clients && !m.second->IsClient()) ||
+			(filter_type == EntityFilterTypes::NPCs && !m.second->IsNPC())
+		) {
+			continue;
+		}
+
+		l.push_back(m.second);
+	}
+
+	return l;
+}
+
+void EntityList::DamageArea(Mob* sender, int64 damage, uint32 distance, uint8 filter_type, bool is_percentage)
+{
+	if (!sender) {
+		return;
+	}
+
+	if (damage <= 0) {
+		return;
+	}
+
+	const auto& l = GetFilteredEntityList(sender, distance, filter_type);
+	for (const auto& e : l) {
+		if (is_percentage) {
+			const auto damage_percentage = EQ::Clamp(damage, static_cast<int64>(1), static_cast<int64>(100));
+			const auto total_damage = (e->GetMaxHP() / 100) * damage_percentage;
+			e->Damage(sender, total_damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+		} else {
+			e->Damage(sender, damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
 		}
 	}
 }
