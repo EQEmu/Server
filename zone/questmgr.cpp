@@ -2212,11 +2212,21 @@ void QuestManager::popup(const char *title, const char *text, uint32 popupid, ui
 
 #ifdef BOTS
 
-int QuestManager::createbotcount() {
+int QuestManager::createbotcount(uint8 class_id) {
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		return initiator->GetBotCreationLimit(class_id);
+	}
+
 	return RuleI(Bots, CreationLimit);
 }
 
-int QuestManager::spawnbotcount() {
+int QuestManager::spawnbotcount(uint8 class_id) {
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		return initiator->GetBotSpawnLimit(class_id);
+	}
+
 	return RuleI(Bots, SpawnLimit);
 }
 
@@ -2228,49 +2238,167 @@ bool QuestManager::botquest()
 bool QuestManager::createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender)
 {
 	QuestManagerCurrentQuestVars();
-	uint32 MaxBotCreate = RuleI(Bots, CreationLimit);
 
-	if (initiator)
-	{
-		if(Bot::SpawnedBotCount(initiator->CharacterID()) >= MaxBotCreate)
-		{
-			initiator->Message(Chat::Yellow,"You have the maximum number of bots allowed.");
+	if (initiator) {
+		auto bot_creation_limit = initiator->GetBotCreationLimit();
+		auto bot_creation_limit_class = initiator->GetBotCreationLimit(botclass);
+		auto bot_spawn_limit = initiator->GetBotSpawnLimit();
+		auto bot_spawn_limit_class = initiator->GetBotSpawnLimit(botclass);
+
+		uint32 bot_count = 0;
+		uint32 bot_class_count = 0;
+		if (!database.botdb.QueryBotCount(initiator->CharacterID(), botclass, bot_count, bot_class_count)) {
+			initiator->Message(Chat::White, "Failed to query bot count.");
+			return false;
+		}
+
+		if (bot_creation_limit >= 0 && bot_count >= bot_creation_limit) {
+			std::string message;
+
+			if (bot_creation_limit) {
+				message = fmt::format(
+					"You cannot create anymore than {} bot{}.",
+					bot_creation_limit,
+					bot_creation_limit != 1 ? "s" : ""
+				);
+			} else {
+				message = "You cannot create any bots.";
+			}
+
+			initiator->Message(Chat::White, message.c_str());
+			return false;
+		}
+
+		if (bot_creation_limit_class >= 0 && bot_class_count >= bot_creation_limit_class) {
+			std::string message;
+
+			if (bot_creation_limit_class) {
+				message = fmt::format(
+					"You cannot create anymore than {} {} bot{}.",
+					bot_creation_limit_class,
+					GetClassIDName(botclass),
+					bot_creation_limit_class != 1 ? "s" : ""
+				);
+			} else {
+				message = fmt::format(
+					"You cannot create any {} bots.",
+					GetClassIDName(botclass)
+				);
+			}
+
+			initiator->Message(Chat::White, message.c_str());
+			return false;
+		}
+
+		auto spawned_bot_count = Bot::SpawnedBotCount(initiator->CharacterID());
+
+		if (
+			bot_spawn_limit >= 0 &&
+			spawned_bot_count >= bot_spawn_limit &&
+			!initiator->GetGM()
+		) {
+			std::string message;
+			if (bot_spawn_limit) {
+				message = fmt::format(
+					"You cannot have more than {} spawned bot{}.",
+					bot_spawn_limit,
+					bot_spawn_limit != 1 ? "s" : ""
+				);
+			} else {
+				message = "You are not currently allowed to spawn any bots.";
+			}
+
+			initiator->Message(Chat::White, message.c_str());
+			return false;
+		}
+
+		auto spawned_bot_count_class = Bot::SpawnedBotCount(initiator->CharacterID(), botclass);
+
+		if (
+			bot_spawn_limit_class >= 0 &&
+			spawned_bot_count_class >= bot_spawn_limit_class &&
+			!initiator->GetGM()
+		) {
+			std::string message;
+			if (bot_spawn_limit_class) {
+				message = fmt::format(
+					"You cannot have more than {} spawned {} bot{}.",
+					bot_spawn_limit_class,
+					GetClassIDName(botclass),
+					bot_spawn_limit_class != 1 ? "s" : ""
+				);
+			} else {
+				message = fmt::format(
+					"You are not currently allowed to spawn any {} bots.",
+					GetClassIDName(botclass)
+				);
+			}
+
+			initiator->Message(Chat::White, message.c_str());
 			return false;
 		}
 
 		std::string test_name = name;
 		bool available_flag = false;
-		if(!database.botdb.QueryNameAvailablity(test_name, available_flag)) {
-			initiator->Message(Chat::White, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
+		if (!database.botdb.QueryNameAvailablity(test_name, available_flag)) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to query name availability for '{}'.",
+					test_name
+				).c_str()
+			);
 			return false;
 		}
+
 		if (!available_flag) {
-			initiator->Message(Chat::White, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"The name {} is already being used or is invalid. Please choose a different name.",
+					test_name
+				).c_str()
+			);
 			return false;
 		}
 
-		Bot* NewBot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender), initiator);
+		Bot* new_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender), initiator);
 
-		if(NewBot)
-		{
-			if(!NewBot->IsValidRaceClassCombo()) {
+		if (new_bot) {
+			if (!new_bot->IsValidRaceClassCombo()) {
 				initiator->Message(Chat::White, "That Race/Class combination cannot be created.");
 				return false;
 			}
 
-			if(!NewBot->IsValidName()) {
-				initiator->Message(Chat::White, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
+			if (!new_bot->IsValidName()) {
+				initiator->Message(
+					Chat::White,
+					fmt::format(
+						"{} has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.",
+						new_bot->GetCleanName()
+					).c_str()
+				);
 				return false;
 			}
 
 			// Now that all validation is complete, we can save our newly created bot
-			if(!NewBot->Save())
-			{
-				initiator->Message(Chat::White, "Unable to save %s as a bot.", NewBot->GetCleanName());
-			}
-			else
-			{
-				initiator->Message(Chat::White, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
+			if (!new_bot->Save()) {
+				initiator->Message(
+					Chat::White,
+					fmt::format(
+						"Unable to save {} as a bot.",
+						new_bot->GetCleanName()
+					).c_str()
+				);
+			} else {
+				initiator->Message(
+					Chat::White,
+					fmt::format(
+						"{} saved as bot ID {}.",
+						new_bot->GetCleanName(),
+						new_bot->GetBotID()
+					).c_str()
+				);
 				return true;
 			}
 		}

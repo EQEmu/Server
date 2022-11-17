@@ -375,7 +375,7 @@ public:
 	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
 	static Bot* LoadBot(uint32 botID);
-	static uint32 SpawnedBotCount(uint32 botOwnerCharacterID);
+	static uint32 SpawnedBotCount(const uint32 owner_id, uint8 class_id = 0);
 	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
 	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* error_message);
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);

@@ -2507,6 +2507,70 @@ void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, uint32 priority, 
 	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
+#ifdef BOTS
+
+int Perl_Client_GetBotRequiredLevel(Client* self)
+{
+	return self->GetBotRequiredLevel();
+}
+
+int Perl_Client_GetBotRequiredLevel(Client* self, uint8 class_id)
+{
+	return self->GetBotRequiredLevel(class_id);
+}
+
+uint32 Perl_Client_GetBotCreationLimit(Client* self)
+{
+	return self->GetBotCreationLimit();
+}
+
+uint32 Perl_Client_GetBotCreationLimit(Client* self, uint8 class_id)
+{
+	return self->GetBotCreationLimit(class_id);
+}
+
+int Perl_Client_GetBotSpawnLimit(Client* self)
+{
+	return self->GetBotSpawnLimit();
+}
+
+int Perl_Client_GetBotSpawnLimit(Client* self, uint8 class_id)
+{
+	return self->GetBotSpawnLimit(class_id);
+}
+
+void Perl_Client_SetBotRequiredLevel(Client* self, int new_required_level)
+{
+	self->SetBotRequiredLevel(new_required_level);
+}
+
+void Perl_Client_SetBotRequiredLevel(Client* self, int new_required_level, uint8 class_id)
+{
+	self->SetBotRequiredLevel(new_required_level, class_id);
+}
+
+void Perl_Client_SetBotCreationLimit(Client* self, uint32 new_creation_limit)
+{
+	self->SetBotCreationLimit(new_creation_limit);
+}
+
+void Perl_Client_SetBotCreationLimit(Client* self, uint32 new_creation_limit, uint8 class_id)
+{
+	self->SetBotCreationLimit(new_creation_limit, class_id);
+}
+
+void Perl_Client_SetBotSpawnLimit(Client* self, int new_spawn_limit)
+{
+	self->SetBotSpawnLimit(new_spawn_limit);
+}
+
+void Perl_Client_SetBotSpawnLimit(Client* self, int new_spawn_limit, uint8 class_id)
+{
+	self->SetBotSpawnLimit(new_spawn_limit, class_id);
+}
+
+#endif
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -2626,6 +2690,18 @@ void perl_register_client()
 	package.add("GetBindZ", (float(*)(Client*, int))&Perl_Client_GetBindZ);
 	package.add("GetBindZoneID", (uint32_t(*)(Client*))&Perl_Client_GetBindZoneID);
 	package.add("GetBindZoneID", (uint32_t(*)(Client*, int))&Perl_Client_GetBindZoneID);
+
+#ifdef BOTS
+
+	package.add("GetBotCreationLimit", (uint32(*)(Client*))&Perl_Client_GetBotCreationLimit);
+	package.add("GetBotCreationLimit", (uint32(*)(Client*, uint8))&Perl_Client_GetBotCreationLimit);
+	package.add("GetBotRequiredLevel", (int(*)(Client*))&Perl_Client_GetBotRequiredLevel);
+	package.add("GetBotRequiredLevel", (int(*)(Client*, uint8))&Perl_Client_GetBotRequiredLevel);
+	package.add("GetBotSpawnLimit", (int(*)(Client*))&Perl_Client_GetBotSpawnLimit);
+	package.add("GetBotSpawnLimit", (int(*)(Client*, uint8))&Perl_Client_GetBotSpawnLimit);
+
+#endif
+
 	package.add("GetCarriedMoney", &Perl_Client_GetCarriedMoney);
 	package.add("GetCarriedPlatinum", &Perl_Client_GetCarriedPlatinum);
 	package.add("GetCharacterFactionLevel", &Perl_Client_GetCharacterFactionLevel);
@@ -2863,6 +2939,18 @@ void perl_register_client()
 	package.add("SetBindPoint", (void(*)(Client*, int, int, float, float))&Perl_Client_SetBindPoint);
 	package.add("SetBindPoint", (void(*)(Client*, int, int, float, float, float))&Perl_Client_SetBindPoint);
 	package.add("SetBindPoint", (void(*)(Client*, int, int, float, float, float, float))&Perl_Client_SetBindPoint);
+
+#ifdef BOTS
+
+	package.add("SetBotCreationLimit", (void(*)(Client*, uint32))&Perl_Client_SetBotCreationLimit);
+	package.add("SetBotCreationLimit", (void(*)(Client*, uint32, uint8))&Perl_Client_SetBotCreationLimit);
+	package.add("SetBotRequiredLevel", (void(*)(Client*, int))&Perl_Client_SetBotRequiredLevel);
+	package.add("SetBotRequiredLevel", (void(*)(Client*, int, uint8))&Perl_Client_SetBotRequiredLevel);
+	package.add("SetBotSpawnLimit", (void(*)(Client*, int))&Perl_Client_SetBotSpawnLimit);
+	package.add("SetBotSpawnLimit", (void(*)(Client*, int, uint8))&Perl_Client_SetBotSpawnLimit);
+
+#endif
+
 	package.add("SetClientMaxLevel", &Perl_Client_SetClientMaxLevel);
 	package.add("SetConsumption", &Perl_Client_SetConsumption);
 	package.add("SetCustomItemData", &Perl_Client_SetCustomItemData);

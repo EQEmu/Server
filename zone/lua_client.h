@@ -451,6 +451,23 @@ public:
 	bool SendGMCommand(std::string message);
 	bool SendGMCommand(std::string message, bool ignore_status);
 
+#ifdef BOTS
+
+	int GetBotRequiredLevel();
+	int GetBotRequiredLevel(uint8 class_id);
+	uint32 GetBotCreationLimit();
+	uint32 GetBotCreationLimit(uint8 class_id);
+	int GetBotSpawnLimit();
+	int GetBotSpawnLimit(uint8 class_id);
+	void SetBotRequiredLevel(int new_required_level);
+	void SetBotRequiredLevel(int new_required_level, uint8 class_id);
+	void SetBotCreationLimit(uint32 new_creation_limit);
+	void SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id);
+	void SetBotSpawnLimit(int new_spawn_limit);
+	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id);
+
+#endif
+
 	void DialogueWindow(std::string markdown);
 
 	Lua_Expedition  CreateExpedition(luabind::object expedition_info);

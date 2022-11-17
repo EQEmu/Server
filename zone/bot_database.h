@@ -50,13 +50,13 @@ public:
 
 	/* Bot functions   */
 	bool QueryNameAvailablity(const std::string& bot_name, bool& available_flag);
-	bool QueryBotCount(const uint32 owner_id, uint32& bot_count);
-	bool LoadQuestableSpawnCount(const uint32 owner_id, int& spawn_count);
+	bool QueryBotCount(const uint32 owner_id, int class_id, uint32& bot_count, uint32& bot_class_count);
 	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool ByAccount = false);
 
 	bool LoadOwnerID(const std::string& bot_name, uint32& owner_id);
 	bool LoadOwnerID(const uint32 bot_id, uint32& owner_id);
 	bool LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id);
+	bool LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id);
 
 	bool LoadBot(const uint32 bot_id, Bot*& loaded_bot);
 	bool SaveNewBot(Bot* bot_inst, uint32& bot_id);
@@ -196,9 +196,6 @@ public:
 	class fail {
 	public:
 		/* fail::Bot functions   */
-		static const char* QueryNameAvailablity();
-		static const char* QueryBotCount();
-		static const char* LoadQuestableSpawnCount();
 		static const char* LoadBotsList();
 		static const char* LoadOwnerID();
 		static const char* LoadBotID();
@@ -209,8 +206,6 @@ public:
 		static const char* LoadBuffs();
 		static const char* SaveBuffs();
 		static const char* DeleteBuffs();
-		static const char* LoadStance();
-		static const char* SaveStance();
 		static const char* DeleteStance();
 		static const char* LoadTimers();
 		static const char* SaveTimers();
@@ -257,8 +252,6 @@ public:
 		static const char* ToggleAllHelmAppearances();
 		static const char* SaveFollowDistance();
 		static const char* SaveAllFollowDistances();
-		static const char* CreateCloneBot();
-		static const char* CreateCloneBotInventory();
 		static const char* SaveStopMeleeLevel();
 
 		/* fail::Bot bot-group functions   */

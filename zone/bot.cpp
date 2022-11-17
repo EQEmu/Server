@@ -172,10 +172,25 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetRangerAutoWeaponSelect(false);
 
 	bool stance_flag = false;
-	if (!database.botdb.LoadStance(this, stance_flag) && bot_owner)
-		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadStance(), GetCleanName());
-	if (!stance_flag && bot_owner)
-		bot_owner->Message(Chat::White, "Could not locate stance for '%s'", GetCleanName());
+	if (!database.botdb.LoadStance(this, stance_flag) && bot_owner) {
+		bot_owner->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load stance for '{}'.",
+				GetCleanName()
+			).c_str()
+		);
+	}
+
+	if (!stance_flag && bot_owner) {
+		bot_owner->Message(
+			Chat::White,
+			fmt::format(
+				"Could not locate stance for '{}'.",
+				GetCleanName()
+			).c_str()
+		);
+	}
 
 	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == EQ::constants::stanceAggressive));
 	SetPauseAI(false);
@@ -1812,8 +1827,16 @@ bool Bot::Save()
 		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveBuffs(), GetCleanName());
 	if (!database.botdb.SaveTimers(this))
 		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveTimers(), GetCleanName());
-	if (!database.botdb.SaveStance(this))
-		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveStance(), GetCleanName());
+
+	if (!database.botdb.SaveStance(this)) {
+		bot_owner->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to save stance for '{}'.",
+				GetCleanName()
+			).c_str()
+		);
+	}
 
 	if (!SavePet())
 		bot_owner->Message(Chat::White, "Failed to save pet for '%s'", GetCleanName());
@@ -4200,13 +4223,15 @@ bool Bot::GroupHasBot(Group* group) {
 	return Result;
 }
 
-uint32 Bot::SpawnedBotCount(uint32 botOwnerCharacterID) {
-	uint32 Result = 0;
-	if(botOwnerCharacterID > 0) {
-		std::list<Bot*> SpawnedBots = entity_list.GetBotsByBotOwnerCharacterID(botOwnerCharacterID);
-		Result = SpawnedBots.size();
+uint32 Bot::SpawnedBotCount(const uint32 owner_id, uint8 class_id) {
+	uint32 spawned_bot_count = 0;
+
+	if (owner_id) {
+		const auto& sbl = entity_list.GetBotListByCharacterID(owner_id, class_id);
+		spawned_bot_count = sbl.size();
 	}
-	return Result;
+
+	return spawned_bot_count;
 }
 
 void Bot::LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp) {

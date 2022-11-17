@@ -189,38 +189,46 @@ bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& availa
 	return true;
 }
 
-bool BotDatabase::QueryBotCount(const uint32 owner_id, uint32& bot_count)
+bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot_count, uint32& bot_class_count)
 {
-	if (!owner_id)
+	if (!owner_id) {
 		return false;
+	}
 
-	query = StringFormat("SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = '%i'", owner_id);
+	query = fmt::format(
+		"SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = {}",
+		owner_id
+	);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	bot_count = atoi(row[0]);
+	bot_count = std::stoul(row[0]);
 
-	return true;
-}
+	if (EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
+		query = fmt::format(
+			"SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = {} AND `class` = {}",
+			owner_id,
+			class_id
+		);
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			return false;
+		}
 
-bool BotDatabase::LoadQuestableSpawnCount(const uint32 owner_id, int& spawn_count)
-{
-	if (!owner_id)
-		return false;
+		if (!results.RowCount()) {
+			return true;
+		}
 
-	query = StringFormat("SELECT `value` FROM `quest_globals` WHERE `name` = 'bot_spawn_limit' AND `charid` = '%i' LIMIT 1", owner_id);
-	auto results = database.QueryDatabase(query); // use 'database' for non-bot table calls
-	if (!results.Success())
-		return false;
-	if (!results.RowCount())
-		return true;
-
-	auto row = results.begin();
-	spawn_count = atoi(row[0]);
+		auto row = results.begin();
+		bot_class_count = std::stoul(row[0]);
+	}
 
 	return true;
 }
@@ -310,21 +318,55 @@ bool BotDatabase::LoadOwnerID(const uint32 bot_id, uint32& owner_id)
 
 bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id)
 {
-	if (!owner_id || bot_name.empty())
+	if (!owner_id || bot_name.empty()) {
 		return false;
+	}
 
-	query = StringFormat(
-		"SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u' AND `name` = '%s' LIMIT 1",
-		owner_id, bot_name.c_str()
+	query = fmt::format(
+		"SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = {} AND `name` = '{}' LIMIT 1",
+		owner_id,
+		bot_name
 	);
+
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
-	if (!results.RowCount())
+	}
+
+	if (!results.RowCount()) {
 		return true;
+	}
 
 	auto row = results.begin();
-	bot_id = atoi(row[0]);
+	bot_id = std::stoul(row[0]);
+
+	return true;
+}
+
+bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id)
+{
+	if (!owner_id || bot_name.empty()) {
+		return false;
+	}
+
+	query = fmt::format(
+		"SELECT `bot_id`, `class` FROM `bot_data` WHERE `owner_id` = {} AND `name` = '{}' LIMIT 1",
+		owner_id,
+		bot_name
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	if (!results.RowCount()) {
+		return true;
+	}
+
+	auto row = results.begin();
+	bot_id = std::stoul(row[0]);
+	bot_class_id = static_cast<uint8>(std::stoul(row[1]));
 
 	return true;
 }
@@ -3211,8 +3253,6 @@ bool BotDatabase::SaveExpansionBitmask(const uint32 bot_id, const int expansion_
 }
 
 /* fail::Bot functions   */
-const char* BotDatabase::fail::QueryNameAvailablity() { return "Failed to query name availability"; }
-const char* BotDatabase::fail::QueryBotCount() { return "Failed to query bot count"; }
 const char* BotDatabase::fail::LoadBotsList() { return "Failed to bots list"; }
 const char* BotDatabase::fail::LoadOwnerID() { return "Failed to load owner ID"; }
 const char* BotDatabase::fail::LoadBotID() { return "Failed to load bot ID"; }
@@ -3223,8 +3263,6 @@ const char* BotDatabase::fail::DeleteBot() { return "Failed to delete bot"; }
 const char* BotDatabase::fail::LoadBuffs() { return "Failed to load buffs"; }
 const char* BotDatabase::fail::SaveBuffs() { return "Failed to save buffs"; }
 const char* BotDatabase::fail::DeleteBuffs() { return "Failed to delete buffs"; }
-const char* BotDatabase::fail::LoadStance() { return "Failed to load stance"; }
-const char* BotDatabase::fail::SaveStance() { return "Failed to save stance"; }
 const char* BotDatabase::fail::DeleteStance() { return "Failed to delete stance"; }
 const char* BotDatabase::fail::LoadTimers() { return "Failed to load timers"; }
 const char* BotDatabase::fail::SaveTimers() { return "Failed to save timers"; }
@@ -3271,8 +3309,6 @@ const char* BotDatabase::fail::ToggleHelmAppearance() { return "Failed to save t
 const char* BotDatabase::fail::ToggleAllHelmAppearances() { return "Failed to save toggle all helm appearance"; }
 const char* BotDatabase::fail::SaveFollowDistance() { return "Failed to save follow distance"; }
 const char* BotDatabase::fail::SaveAllFollowDistances() { return "Failed to save all follow distances"; }
-const char* BotDatabase::fail::CreateCloneBot() { return "Failed to create clone bot"; }
-const char* BotDatabase::fail::CreateCloneBotInventory() { return "Failed to create clone bot inventory"; }
 const char* BotDatabase::fail::SaveStopMeleeLevel() { return "Failed to save stop melee level"; }
 
 /* fail::Bot heal rotation functions   */

@@ -9558,26 +9558,6 @@ void Client::SetLastPositionBeforeBulkUpdate(glm::vec4 in_last_position_before_b
 	Client::last_position_before_bulk_update = in_last_position_before_bulk_update;
 }
 
-#ifdef BOTS
-
-bool Client::GetBotOption(BotOwnerOption boo) const {
-
-	if (boo < _booCount) {
-		return bot_owner_options[boo];
-	}
-
-	return false;
-}
-
-void Client::SetBotOption(BotOwnerOption boo, bool flag) {
-
-	if (boo < _booCount) {
-		bot_owner_options[boo] = flag;
-	}
-}
-
-#endif
-
 void Client::SendToGuildHall()
 {
 	std::string zone_short_name = "guildhall";

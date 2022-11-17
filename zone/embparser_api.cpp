@@ -1065,9 +1065,19 @@ int Perl__createbotcount()
 	return quest_manager.createbotcount();
 }
 
+int Perl__createbotcount(uint8 class_id)
+{
+	return quest_manager.createbotcount(class_id);
+}
+
 int Perl__spawnbotcount()
 {
 	return quest_manager.spawnbotcount();
+}
+
+int Perl__spawnbotcount(uint8 class_id)
+{
+	return quest_manager.spawnbotcount(class_id);
 }
 
 bool Perl__botquest()
@@ -3847,8 +3857,10 @@ void perl_register_quest()
 
 #ifdef BOTS
 	package.add("botquest", &Perl__botquest);
-	package.add("spawnbotcount", &Perl__spawnbotcount);
-	package.add("createbotcount", &Perl__createbotcount);
+	package.add("spawnbotcount", (int(*)())&Perl__spawnbotcount);
+	package.add("spawnbotcount", (int(*)(uint8))&Perl__spawnbotcount);
+	package.add("createbotcount", (int(*)())&Perl__createbotcount);
+	package.add("createbotcount", (int(*)(uint8))&Perl__createbotcount);
 	package.add("createBot", &Perl__createBot);
 #endif //BOTS
 

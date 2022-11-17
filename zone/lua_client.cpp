@@ -2613,6 +2613,82 @@ void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in
 	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
+#ifdef BOTS
+
+int Lua_Client::GetBotRequiredLevel()
+{
+	Lua_Safe_Call_Int();
+	return self->GetBotRequiredLevel();
+}
+
+int Lua_Client::GetBotRequiredLevel(uint8 class_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetBotRequiredLevel(class_id);
+}
+
+uint32 Lua_Client::GetBotCreationLimit()
+{
+	Lua_Safe_Call_Int();
+	return self->GetBotCreationLimit();
+}
+
+uint32 Lua_Client::GetBotCreationLimit(uint8 class_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetBotCreationLimit(class_id);
+}
+
+int Lua_Client::GetBotSpawnLimit()
+{
+	Lua_Safe_Call_Int();
+	return self->GetBotSpawnLimit();
+}
+
+int Lua_Client::GetBotSpawnLimit(uint8 class_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetBotSpawnLimit(class_id);
+}
+
+void Lua_Client::SetBotRequiredLevel(int new_required_level)
+{
+	Lua_Safe_Call_Void();
+	self->SetBotRequiredLevel(new_required_level);
+}
+
+void Lua_Client::SetBotRequiredLevel(int new_required_level, uint8 class_id)
+{
+	Lua_Safe_Call_Void();
+	self->SetBotRequiredLevel(new_required_level, class_id);
+}
+
+void Lua_Client::SetBotCreationLimit(uint32 new_creation_limit)
+{
+	Lua_Safe_Call_Void();
+	self->SetBotCreationLimit(new_creation_limit);
+}
+
+void Lua_Client::SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id)
+{
+	Lua_Safe_Call_Void();
+	self->SetBotCreationLimit(new_creation_limit, class_id);
+}
+
+void Lua_Client::SetBotSpawnLimit(int new_spawn_limit)
+{
+	Lua_Safe_Call_Void();
+	self->SetBotSpawnLimit(new_spawn_limit);
+}
+
+void Lua_Client::SetBotSpawnLimit(int new_spawn_limit, uint8 class_id)
+{
+	Lua_Safe_Call_Void();
+	self->SetBotSpawnLimit(new_spawn_limit, class_id);
+}
+
+#endif
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -2733,6 +2809,18 @@ luabind::scope lua_register_client() {
 	.def("GetBindZ", (float(Lua_Client::*)(void))&Lua_Client::GetBindZ)
 	.def("GetBindZoneID", (uint32(Lua_Client::*)(int))&Lua_Client::GetBindZoneID)
 	.def("GetBindZoneID", (uint32(Lua_Client::*)(void))&Lua_Client::GetBindZoneID)
+
+#ifdef BOTS
+
+	.def("GetBotCreationLimit", (uint32(Lua_Client::*)(void))&Lua_Client::GetBotCreationLimit)
+	.def("GetBotCreationLimit", (uint32(Lua_Client::*)(uint8))&Lua_Client::GetBotCreationLimit)
+	.def("GetBotRequiredLevel", (int(Lua_Client::*)(void))&Lua_Client::GetBotRequiredLevel)
+	.def("GetBotRequiredLevel", (int(Lua_Client::*)(uint8))&Lua_Client::GetBotRequiredLevel)
+	.def("GetBotSpawnLimit", (int(Lua_Client::*)(void))&Lua_Client::GetBotSpawnLimit)
+	.def("GetBotSpawnLimit", (int(Lua_Client::*)(uint8))&Lua_Client::GetBotSpawnLimit)
+
+#endif
+
 	.def("GetCarriedMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetCarriedMoney)
 	.def("GetCarriedPlatinum", (uint32(Lua_Client::*)(void))&Lua_Client::GetCarriedPlatinum)
 	.def("GetCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetCharacterFactionLevel)
@@ -2968,6 +3056,18 @@ luabind::scope lua_register_client() {
 	.def("SetBindPoint", (void(Lua_Client::*)(int,int,float,float,float))&Lua_Client::SetBindPoint)
 	.def("SetBindPoint", (void(Lua_Client::*)(int,int,float,float,float,float))&Lua_Client::SetBindPoint)
 	.def("SetBindPoint", (void(Lua_Client::*)(void))&Lua_Client::SetBindPoint)
+
+#ifdef BOTS
+
+	.def("SetBotCreationLimit", (void(Lua_Client::*)(uint32))&Lua_Client::SetBotCreationLimit)
+	.def("SetBotCreationLimit", (void(Lua_Client::*)(uint32,uint8))&Lua_Client::SetBotCreationLimit)
+	.def("SetBotRequiredLevel", (void(Lua_Client::*)(int))&Lua_Client::SetBotRequiredLevel)
+	.def("SetBotRequiredLevel", (void(Lua_Client::*)(int,uint8))&Lua_Client::SetBotRequiredLevel)
+	.def("SetBotSpawnLimit", (void(Lua_Client::*)(int))&Lua_Client::SetBotSpawnLimit)
+	.def("SetBotSpawnLimit", (void(Lua_Client::*)(int,uint8))&Lua_Client::SetBotSpawnLimit)
+
+#endif
+
 	.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
 	.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption)
 	.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
