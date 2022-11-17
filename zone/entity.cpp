@@ -5832,9 +5832,9 @@ std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance
 		return l;
 	}
 
-	const auto         squared_distance = (distance * distance);
+	const auto squared_distance = (distance * distance);
 	const auto position = sender->GetPosition();
-	for (auto          &m: mob_list) {
+	for (auto &m: mob_list) {
 		if (!m.second) {
 			continue;
 		}
