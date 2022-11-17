@@ -6703,7 +6703,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	}
 
 	if (c->GetBotOption(Client::booSpawnMessageSay)) {
-		Bot::BotGroupSay(my_bot, bot_spawn_message[message_index]);
+		Bot::BotGroupSay(my_bot, bot_spawn_message[message_index].c_str());
 	} else if (c->GetBotOption(Client::booSpawnMessageTell)) {
 		my_bot->OwnerMessage(bot_spawn_message[message_index]);
 	}
