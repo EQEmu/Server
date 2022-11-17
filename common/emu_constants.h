@@ -334,7 +334,7 @@ namespace EQ
 		enum WeatherTypes : uint8 {
 			None,
 			Raining,
-			Snowing	
+			Snowing
 		};
 
 		enum EmoteEventTypes : uint8 {
@@ -578,6 +578,13 @@ enum BucketComparison : uint8 {
 	BucketIsNotAny,
 	BucketIsBetween,
 	BucketIsNotBetween
+};
+
+enum EntityFilterTypes : uint8 {
+	All,
+	Bots,
+	Clients,
+	NPCs
 };
 
 #endif /*COMMON_EMU_CONSTANTS_H*/

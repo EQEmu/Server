@@ -19,6 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #ifndef HATELIST_H
 #define HATELIST_H
 
+#include "../common/emu_constants.h"
+
 class Client;
 class Group;
 class Mob;
@@ -32,13 +34,6 @@ struct struct_HateList {
 	bool   is_entity_frenzy;
 	int8   oor_count; // count on how long we've been out of range
 	uint32 last_modified; // we need to remove this if it gets higher than 10 mins
-};
-
-enum HateListFilterTypes : uint8 {
-	All,
-	Bots,
-	Clients,
-	NPCs
 };
 
 class HateList {
@@ -73,13 +68,13 @@ public:
 	std::list<struct_HateList *> &GetHateList() { return list; }
 	std::list<struct_HateList *> GetFilteredHateList(
 		uint32 distance = 0,
-		uint8 filter_type = HateListFilterTypes::All
+		uint8 filter_type = EntityFilterTypes::All
 	);
 
 	void DamageHateList(
 		int64 damage,
 		uint32 distance = 0,
-		uint8 filter_type = HateListFilterTypes::All,
+		uint8 filter_type = EntityFilterTypes::All,
 		bool is_percentage = false
 	);
 

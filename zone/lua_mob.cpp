@@ -2519,59 +2519,59 @@ void Lua_Mob::DamageHateList(int64 damage, uint32 distance) {
 
 void Lua_Mob::DamageHateListClients(int64 damage) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, 0, HateListFilterTypes::Clients);
+	self->DamageHateList(damage, 0, EntityFilterTypes::Clients);
 }
 
 void Lua_Mob::DamageHateListClients(int64 damage, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, distance, HateListFilterTypes::Clients);
+	self->DamageHateList(damage, distance, EntityFilterTypes::Clients);
 }
 
 void Lua_Mob::DamageHateListNPCs(int64 damage) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, 0, HateListFilterTypes::NPCs);
+	self->DamageHateList(damage, 0, EntityFilterTypes::NPCs);
 }
 
 void Lua_Mob::DamageHateListNPCs(int64 damage, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, distance, HateListFilterTypes::NPCs);
+	self->DamageHateList(damage, distance, EntityFilterTypes::NPCs);
 }
 
 void Lua_Mob::DamageHateListPercentage(int64 damage) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, 0, HateListFilterTypes::All, true);
+	self->DamageHateList(damage, 0, EntityFilterTypes::All, true);
 }
 
 void Lua_Mob::DamageHateListPercentage(int64 damage, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, distance, HateListFilterTypes::All, true);
+	self->DamageHateList(damage, distance, EntityFilterTypes::All, true);
 }
 
 void Lua_Mob::DamageHateListClientsPercentage(int64 damage) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, 0, HateListFilterTypes::Clients, true);
+	self->DamageHateList(damage, 0, EntityFilterTypes::Clients, true);
 }
 
 void Lua_Mob::DamageHateListClientsPercentage(int64 damage, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, distance, HateListFilterTypes::Clients, true);
+	self->DamageHateList(damage, distance, EntityFilterTypes::Clients, true);
 }
 
 void Lua_Mob::DamageHateListNPCsPercentage(int64 damage) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, 0, HateListFilterTypes::NPCs, true);
+	self->DamageHateList(damage, 0, EntityFilterTypes::NPCs, true);
 }
 
 void Lua_Mob::DamageHateListNPCsPercentage(int64 damage, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, distance, HateListFilterTypes::NPCs, true);
+	self->DamageHateList(damage, distance, EntityFilterTypes::NPCs, true);
 }
 
 Lua_HateList Lua_Mob::GetHateListClients() {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
 
-	auto h_list = self->GetFilteredHateList(0, HateListFilterTypes::Clients);
+	auto h_list = self->GetFilteredHateList(EntityFilterTypes::Clients);
 	for (auto h : h_list) {
 		Lua_HateEntry e(h);
 		ret.entries.push_back(e);
@@ -2584,7 +2584,7 @@ Lua_HateList Lua_Mob::GetHateListClients(uint32 distance) {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
 
-	auto h_list = self->GetFilteredHateList(distance, HateListFilterTypes::Clients);
+	auto h_list = self->GetFilteredHateList(EntityFilterTypes::Clients, distance);
 	for (auto h : h_list) {
 		Lua_HateEntry e(h);
 		ret.entries.push_back(e);
@@ -2597,7 +2597,7 @@ Lua_HateList Lua_Mob::GetHateListNPCs() {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
 
-	auto h_list = self->GetFilteredHateList(0, HateListFilterTypes::NPCs);
+	auto h_list = self->GetFilteredHateList(EntityFilterTypes::NPCs);
 	for (auto h : h_list) {
 		Lua_HateEntry e(h);
 		ret.entries.push_back(e);
@@ -2610,7 +2610,7 @@ Lua_HateList Lua_Mob::GetHateListNPCs(uint32 distance) {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
 
-	auto h_list = self->GetFilteredHateList(distance, HateListFilterTypes::NPCs);
+	auto h_list = self->GetFilteredHateList(EntityFilterTypes::NPCs, distance);
 	for (auto h : h_list) {
 		Lua_HateEntry e(h);
 		ret.entries.push_back(e);
@@ -2619,32 +2619,112 @@ Lua_HateList Lua_Mob::GetHateListNPCs(uint32 distance) {
 	return ret;
 }
 
+void Lua_Mob::DamageArea(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage);
+}
+
+void Lua_Mob::DamageArea(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance);
+}
+
+void Lua_Mob::DamageAreaPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterTypes::All, true);
+}
+
+void Lua_Mob::DamageAreaPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterTypes::All, true);
+}
+
+void Lua_Mob::DamageAreaClients(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterTypes::Clients);
+}
+
+void Lua_Mob::DamageAreaClients(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterTypes::Clients);
+}
+
+void Lua_Mob::DamageAreaClientsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterTypes::Clients, true);
+}
+
+void Lua_Mob::DamageAreaClientsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterTypes::Clients, true);
+}
+
+void Lua_Mob::DamageAreaNPCs(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterTypes::NPCs);
+}
+
+void Lua_Mob::DamageAreaNPCs(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterTypes::NPCs);
+}
+
+void Lua_Mob::DamageAreaNPCsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterTypes::NPCs, true);
+}
+
+void Lua_Mob::DamageAreaNPCsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterTypes::NPCs, true);
+}
+
 #ifdef BOTS
+void Lua_Mob::DamageAreaBots(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterTypes::Bots);
+}
+
+void Lua_Mob::DamageAreaBots(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterTypes::Bots);
+}
+
+void Lua_Mob::DamageAreaBotsPercentage(int64 damage) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, 0, EntityFilterTypes::Bots, true);
+}
+
+void Lua_Mob::DamageAreaBotsPercentage(int64 damage, uint32 distance) {
+	Lua_Safe_Call_Void();
+	self->DamageArea(damage, distance, EntityFilterTypes::Bots, true);
+}
+
 void Lua_Mob::DamageHateListBots(int64 damage) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, 0, HateListFilterTypes::Bots);
+	self->DamageHateList(damage, 0, EntityFilterTypes::Bots);
 }
 
 void Lua_Mob::DamageHateListBots(int64 damage, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, distance, HateListFilterTypes::Bots);
+	self->DamageHateList(damage, distance, EntityFilterTypes::Bots);
 }
 
 void Lua_Mob::DamageHateListBotsPercentage(int64 damage) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, 0, HateListFilterTypes::Bots, true);
+	self->DamageHateList(damage, 0, EntityFilterTypes::Bots, true);
 }
 
 void Lua_Mob::DamageHateListBotsPercentage(int64 damage, uint32 distance) {
 	Lua_Safe_Call_Void();
-	self->DamageHateList(damage, distance, HateListFilterTypes::Bots, true);
+	self->DamageHateList(damage, distance, EntityFilterTypes::Bots, true);
 }
 
 Lua_HateList Lua_Mob::GetHateListBots() {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
 
-	auto h_list = self->GetFilteredHateList(0, HateListFilterTypes::Bots);
+	auto h_list = self->GetFilteredHateList(EntityFilterTypes::Bots);
 	for (auto h : h_list) {
 		Lua_HateEntry e(h);
 		ret.entries.push_back(e);
@@ -2657,7 +2737,7 @@ Lua_HateList Lua_Mob::GetHateListBots(uint32 distance) {
 	Lua_Safe_Call_Class(Lua_HateList);
 	Lua_HateList ret;
 
-	auto h_list = self->GetFilteredHateList(distance, HateListFilterTypes::Bots);
+	auto h_list = self->GetFilteredHateList(EntityFilterTypes::Bots, distance);
 	for (auto h : h_list) {
 		Lua_HateEntry e(h);
 		ret.entries.push_back(e);
@@ -2753,6 +2833,24 @@ luabind::scope lua_register_mob() {
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool))&Lua_Mob::Damage)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool,int))&Lua_Mob::Damage)
 	.def("Damage", (void(Lua_Mob::*)(Lua_Mob,int64,int,int,bool,int,bool))&Lua_Mob::Damage)
+	.def("DamageArea", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageArea)
+	.def("DamageArea", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageArea)
+	.def("DamageAreaPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaPercentage)
+	.def("DamageAreaPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaPercentage)
+#ifdef BOTS
+	.def("DamageAreaBots", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaBots)
+	.def("DamageAreaBots", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaBots)
+	.def("DamageAreaBotsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaBotsPercentage)
+	.def("DamageAreaBotsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaBotsPercentage)
+#endif
+	.def("DamageAreaClients", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaClients)
+	.def("DamageAreaClients", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaClients)
+	.def("DamageAreaClientsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaClientsPercentage)
+	.def("DamageAreaClientsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaClientsPercentage)
+	.def("DamageAreaNPCs", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaNPCs)
+	.def("DamageAreaNPCs", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaNPCs)
+	.def("DamageAreaNPCsPercentage", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageAreaNPCsPercentage)
+	.def("DamageAreaNPCsPercentage", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageAreaNPCsPercentage)
 	.def("DamageHateList", (void(Lua_Mob::*)(int64))&Lua_Mob::DamageHateList)
 	.def("DamageHateList", (void(Lua_Mob::*)(int64,uint32))&Lua_Mob::DamageHateList)
 #ifdef BOTS

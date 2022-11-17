@@ -86,7 +86,7 @@ public:
 	bool HasProcs();
 	bool IsInvisible();
 	bool IsInvisible(Lua_Mob other);
-    void SetInvisible(int state);
+	void SetInvisible(int state);
 	uint8 GetInvisibleLevel();
 	uint8 GetInvisibleUndeadLevel();
 	void SetSeeInvisibleLevel(uint8 invisible_level);
@@ -94,7 +94,7 @@ public:
 	bool FindBuff(int spell_id);
 	uint16 FindBuffBySlot(int slot);
 	uint32 BuffCount();
-    bool FindType(int type);
+	bool FindType(int type);
 	bool FindType(int type, bool offensive);
 	bool FindType(int type, bool offensive, int threshold);
 	int GetBuffSlotFromType(int slot);
@@ -476,6 +476,24 @@ public:
 	void SetBuffDuration(int spell_id, int duration);
 	void CloneAppearance(Lua_Mob other);
 	void CloneAppearance(Lua_Mob other, bool clone_name);
+	void DamageArea(int64 damage);
+	void DamageArea(int64 damage, uint32 distance);
+	void DamageAreaPercentage(int64 damage);
+	void DamageAreaPercentage(int64 damage, uint32 distance);
+#ifdef BOTS
+	void DamageAreaBots(int64 damage);
+	void DamageAreaBots(int64 damage, uint32 distance);
+	void DamageAreaBotsPercentage(int64 damage);
+	void DamageAreaBotsPercentage(int64 damage, uint32 distance);
+#endif
+	void DamageAreaClients(int64 damage);
+	void DamageAreaClients(int64 damage, uint32 distance);
+	void DamageAreaClientsPercentage(int64 damage);
+	void DamageAreaClientsPercentage(int64 damage, uint32 distance);
+	void DamageAreaNPCs(int64 damage);
+	void DamageAreaNPCs(int64 damage, uint32 distance);
+	void DamageAreaNPCsPercentage(int64 damage);
+	void DamageAreaNPCsPercentage(int64 damage, uint32 distance);
 	void DamageHateList(int64 damage);
 	void DamageHateList(int64 damage, uint32 distance);
 	void DamageHateListPercentage(int64 damage);
