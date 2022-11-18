@@ -386,36 +386,6 @@ void Lua_Client::MovePCInstance(int zone, int instance, float x, float y, float 
 	self->MovePC(zone, instance, x, y, z, heading);
 }
 
-void Lua_Client::MoveZone(const char *zone_short_name) {
-	Lua_Safe_Call_Void();
-	self->MoveZone(zone_short_name);
-}
-
-void Lua_Client::MoveZoneGroup(const char *zone_short_name) {
-	Lua_Safe_Call_Void();
-	self->MoveZoneGroup(zone_short_name);
-}
-
-void Lua_Client::MoveZoneRaid(const char *zone_short_name) {
-	Lua_Safe_Call_Void();
-	self->MoveZoneRaid(zone_short_name);
-}
-
-void Lua_Client::MoveZoneInstance(uint16 instance_id) {
-	Lua_Safe_Call_Void();
-	self->MoveZoneInstance(instance_id);
-}
-
-void Lua_Client::MoveZoneInstanceGroup(uint16 instance_id) {
-	Lua_Safe_Call_Void();
-	self->MoveZoneInstanceGroup(instance_id);
-}
-
-void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id) {
-	Lua_Safe_Call_Void();
-	self->MoveZoneInstanceRaid(instance_id);
-}
-
 void Lua_Client::ChangeLastName(std::string last_name) {
 	Lua_Safe_Call_Void();
 	self->ChangeLastName(last_name);
@@ -2613,6 +2583,96 @@ void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in
 	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
+void Lua_Client::MoveZone(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZone(zone_short_name);
+}
+
+void Lua_Client::MoveZone(const char *zone_short_name, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->MoveZone(zone_short_name, glm::vec4(x, y, z, 0.0f));
+}
+
+void Lua_Client::MoveZone(const char *zone_short_name, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->MoveZone(zone_short_name, glm::vec4(x, y, z, heading));
+}
+
+void Lua_Client::MoveZoneGroup(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneGroup(zone_short_name);
+}
+
+void Lua_Client::MoveZoneGroup(const char *zone_short_name, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneGroup(zone_short_name, glm::vec4(x, y, z, 0.0f));
+}
+
+void Lua_Client::MoveZoneGroup(const char *zone_short_name, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneGroup(zone_short_name, glm::vec4(x, y, z, heading));
+}
+
+void Lua_Client::MoveZoneRaid(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneRaid(zone_short_name);
+}
+
+void Lua_Client::MoveZoneRaid(const char *zone_short_name, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneRaid(zone_short_name, glm::vec4(x, y, z, 0.0f));
+}
+
+void Lua_Client::MoveZoneRaid(const char *zone_short_name, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneRaid(zone_short_name, glm::vec4(x, y, z, heading));
+}
+
+void Lua_Client::MoveZoneInstance(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstance(instance_id);
+}
+
+void Lua_Client::MoveZoneInstance(uint16 instance_id, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstance(instance_id, glm::vec4(x, y, z, 0.0f));
+}
+
+void Lua_Client::MoveZoneInstance(uint16 instance_id, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstance(instance_id, glm::vec4(x, y, z, heading));
+}
+
+void Lua_Client::MoveZoneInstanceGroup(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceGroup(instance_id);
+}
+
+void Lua_Client::MoveZoneInstanceGroup(uint16 instance_id, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceGroup(instance_id, glm::vec4(x, y, z, 0.0f));
+}
+
+void Lua_Client::MoveZoneInstanceGroup(uint16 instance_id, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceGroup(instance_id, glm::vec4(x, y, z, heading));
+}
+
+void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceRaid(instance_id);
+}
+
+void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id, float x, float y, float z) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceRaid(instance_id, glm::vec4(x, y, z, 0.0f));
+}
+
+void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id, float x, float y, float z, float heading) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceRaid(instance_id, glm::vec4(x, y, z, heading));
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -2965,11 +3025,23 @@ luabind::scope lua_register_client() {
 	.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32, int, bool))&Lua_Client::MovePCDynamicZone)
 	.def("MovePCInstance", (void(Lua_Client::*)(int,int,float,float,float,float))&Lua_Client::MovePCInstance)
 	.def("MoveZone", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZone)
+	.def("MoveZone", (void(Lua_Client::*)(const char*,float,float,float))&Lua_Client::MoveZone)
+	.def("MoveZone", (void(Lua_Client::*)(const char*,float,float,float,float))&Lua_Client::MoveZone)
 	.def("MoveZoneGroup", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneGroup)
+	.def("MoveZoneGroup", (void(Lua_Client::*)(const char*,float,float,float))&Lua_Client::MoveZoneGroup)
+	.def("MoveZoneGroup", (void(Lua_Client::*)(const char*,float,float,float,float))&Lua_Client::MoveZoneGroup)
 	.def("MoveZoneInstance", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstance)
+	.def("MoveZoneInstance", (void(Lua_Client::*)(uint16,float,float,float))&Lua_Client::MoveZoneInstance)
+	.def("MoveZoneInstance", (void(Lua_Client::*)(uint16,float,float,float,float))&Lua_Client::MoveZoneInstance)
 	.def("MoveZoneInstanceGroup", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstanceGroup)
+	.def("MoveZoneInstanceGroup", (void(Lua_Client::*)(uint16,float,float,float))&Lua_Client::MoveZoneInstanceGroup)
+	.def("MoveZoneInstanceGroup", (void(Lua_Client::*)(uint16,float,float,float,float))&Lua_Client::MoveZoneInstanceGroup)
 	.def("MoveZoneInstanceRaid", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstanceRaid)
+	.def("MoveZoneInstanceRaid", (void(Lua_Client::*)(uint16,float,float,float))&Lua_Client::MoveZoneInstanceRaid)
+	.def("MoveZoneInstanceRaid", (void(Lua_Client::*)(uint16,float,float,float,float))&Lua_Client::MoveZoneInstanceRaid)
 	.def("MoveZoneRaid", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneRaid)
+	.def("MoveZoneRaid", (void(Lua_Client::*)(const char*,float,float,float))&Lua_Client::MoveZoneRaid)
+	.def("MoveZoneRaid", (void(Lua_Client::*)(const char*,float,float,float,float))&Lua_Client::MoveZoneRaid)
 	.def("NotifyNewTitlesAvailable", (void(Lua_Client::*)(void))&Lua_Client::NotifyNewTitlesAvailable)
 	.def("NukeItem", (void(Lua_Client::*)(uint32))&Lua_Client::NukeItem)
 	.def("NukeItem", (void(Lua_Client::*)(uint32,int))&Lua_Client::NukeItem)
