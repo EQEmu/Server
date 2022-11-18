@@ -2628,15 +2628,10 @@ void Lua_Client::ApplySpell(int spell_id, int duration, bool allow_pets) {
 	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets);
 }
 
-void Lua_Client::ApplySpell(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
-	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only);
-}
-
 #ifdef BOTS
-void Lua_Client::ApplySpell(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+void Lua_Client::ApplySpell(int spell_id, int duration, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only, allow_bots);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
 }
 #endif
 
@@ -2655,15 +2650,10 @@ void Lua_Client::ApplySpellGroup(int spell_id, int duration, bool allow_pets) {
 	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets);
 }
 
-void Lua_Client::ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
-	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only);
-}
-
 #ifdef BOTS
-void Lua_Client::ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+void Lua_Client::ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only, allow_bots);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
 }
 #endif
 
@@ -2709,15 +2699,10 @@ void Lua_Client::SetSpellDuration(int spell_id, int duration, bool allow_pets) {
 	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets);
 }
 
-void Lua_Client::SetSpellDuration(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
-	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only);
-}
-
 #ifdef BOTS
-void Lua_Client::SetSpellDuration(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+void Lua_Client::SetSpellDuration(int spell_id, int duration, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only, allow_bots);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
 }
 #endif
 
@@ -2736,15 +2721,10 @@ void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, bool allow_pe
 	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets);
 }
 
-void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
-	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only);
-}
-
 #ifdef BOTS
-void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool allow_bots) {
 	Lua_Safe_Call_Void();
-	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only, allow_bots);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
 }
 #endif
 
@@ -2882,16 +2862,14 @@ luabind::scope lua_register_client() {
 	.def("ApplySpell", (void(Lua_Client::*)(int))&Lua_Client::ApplySpell)
 	.def("ApplySpell", (void(Lua_Client::*)(int,int))&Lua_Client::ApplySpell)
 	.def("ApplySpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ApplySpell)
-	.def("ApplySpell", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::ApplySpell)
 #ifdef BOTS
-	.def("ApplySpell", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::ApplySpell)
+	.def("ApplySpell", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::ApplySpell)
 #endif
 	.def("ApplySpellGroup", (void(Lua_Client::*)(int))&Lua_Client::ApplySpellGroup)
 	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int))&Lua_Client::ApplySpellGroup)
 	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ApplySpellGroup)
-	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::ApplySpellGroup)
 #ifdef BOTS
-	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::ApplySpellGroup)
+	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::ApplySpellGroup)
 #endif
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int))&Lua_Client::ApplySpellRaid)
 	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int))&Lua_Client::ApplySpellRaid)
@@ -3285,16 +3263,14 @@ luabind::scope lua_register_client() {
 	.def("SetSpellDuration", (void(Lua_Client::*)(int))&Lua_Client::SetSpellDuration)
 	.def("SetSpellDuration", (void(Lua_Client::*)(int,int))&Lua_Client::SetSpellDuration)
 	.def("SetSpellDuration", (void(Lua_Client::*)(int,int,bool))&Lua_Client::SetSpellDuration)
-	.def("SetSpellDuration", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::SetSpellDuration)
 #ifdef BOTS
-	.def("SetSpellDuration", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::SetSpellDuration)
+	.def("SetSpellDuration", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::SetSpellDuration)
 #endif
 	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int))&Lua_Client::SetSpellDurationGroup)
 	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int))&Lua_Client::SetSpellDurationGroup)
 	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int,bool))&Lua_Client::SetSpellDurationGroup)
-	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::SetSpellDurationGroup)
 #ifdef BOTS
-	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::SetSpellDurationGroup)
+	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::SetSpellDurationGroup)
 #endif
 	.def("SetSpellDurationRaid", (void(Lua_Client::*)(int))&Lua_Client::SetSpellDurationRaid)
 	.def("SetSpellDurationRaid", (void(Lua_Client::*)(int,int))&Lua_Client::SetSpellDurationRaid)

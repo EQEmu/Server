@@ -438,17 +438,15 @@ public:
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
 	void ApplySpell(int spell_id, int duration, bool allow_pets);
-	void ApplySpell(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
 #ifdef BOTS
-	void ApplySpell(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void ApplySpell(int spell_id, int duration, bool allow_pets, bool allow_bots);
 #endif
 
 	void ApplySpellGroup(int spell_id);
 	void ApplySpellGroup(int spell_id, int duration);
 	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
-	void ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
 #ifdef BOTS
-	void ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
 #endif
 
 	void ApplySpellRaid(int spell_id);
@@ -462,17 +460,15 @@ public:
 	void SetSpellDuration(int spell_id);
 	void SetSpellDuration(int spell_id, int duration);
 	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
-	void SetSpellDuration(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
 #ifdef BOTS
-	void SetSpellDuration(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void SetSpellDuration(int spell_id, int duration, bool allow_pets, bool allow_bots);
 #endif
 
 	void SetSpellDurationGroup(int spell_id);
 	void SetSpellDurationGroup(int spell_id, int duration);
 	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets);
-	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
 #ifdef BOTS
-	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
 #endif
 
 	void SetSpellDurationRaid(int spell_id);
