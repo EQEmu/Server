@@ -352,8 +352,8 @@ public:
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1, uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, bool from_casted_spell = false, uint32 aa_id = 0);
 	void SendBeginCast(uint16 spell_id, uint32 casttime);
 	virtual bool SpellOnTarget(
-		uint16 spell_id,Mo
-		b* spelltar,
+		uint16 spell_id,
+		Mob* spelltar,
 		int reflect_effectiveness = 0,
 		bool use_resist_adjust = false,
 		int16 resist_adjust = 0,
@@ -749,6 +749,7 @@ public:
 	) {
 		return hate_list.GetFilteredHateList(filter_type, distance);
 	}
+
 	void DamageHateList(
 		int64 damage,
 		uint32 distance = 0,
@@ -757,6 +758,7 @@ public:
 	) {
 		hate_list.DamageHateList(damage, distance, filter_type, is_percentage);
 	}
+
 	void DamageArea(
 		int64 damage,
 		uint32 distance = 0,
