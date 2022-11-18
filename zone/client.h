@@ -910,6 +910,31 @@ public:
 
 	bool SendGMCommand(std::string message, bool ignore_status = false);
 
+	std::vector<Mob*> GetApplySpellList(
+		ApplySpellType apply_type,
+		bool allow_pets,
+		bool is_raid_group_only,
+		bool allow_bots
+	);
+
+	void ApplySpell(
+		int spell_id,
+		int duration = 0,
+		ApplySpellType apply_type = ApplySpellType::Solo,
+		bool allow_pets = false,
+		bool is_raid_group_only = true,
+		bool allow_bots = false
+	);
+
+	void SetSpellDuration(
+		int spell_id,
+		int duration = 0,
+		ApplySpellType apply_type = ApplySpellType::Solo,
+		bool allow_pets = false,
+		bool is_raid_group_only = true,
+		bool allow_bots = false
+	);
+
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();

@@ -2613,6 +2613,168 @@ void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in
 	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
+void Lua_Client::ApplySpell(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id);
+}
+
+void Lua_Client::ApplySpell(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration);
+}
+
+void Lua_Client::ApplySpell(int spell_id, int duration, bool allow_pets) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets);
+}
+
+void Lua_Client::ApplySpell(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Lua_Client::ApplySpell(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
+void Lua_Client::ApplySpellGroup(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, 0, ApplySpellType::Group);
+}
+
+void Lua_Client::ApplySpellGroup(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group);
+}
+
+void Lua_Client::ApplySpellGroup(int spell_id, int duration, bool allow_pets) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets);
+}
+
+void Lua_Client::ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Lua_Client::ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
+void Lua_Client::ApplySpellRaid(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, 0, ApplySpellType::Raid);
+}
+
+void Lua_Client::ApplySpellRaid(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid);
+}
+
+void Lua_Client::ApplySpellRaid(int spell_id, int duration, bool allow_pets) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets);
+}
+
+void Lua_Client::ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Lua_Client::ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+	Lua_Safe_Call_Void();
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
+void Lua_Client::SetSpellDuration(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id);
+}
+
+void Lua_Client::SetSpellDuration(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration);
+}
+
+void Lua_Client::SetSpellDuration(int spell_id, int duration, bool allow_pets) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets);
+}
+
+void Lua_Client::SetSpellDuration(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Lua_Client::SetSpellDuration(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
+void Lua_Client::SetSpellDurationGroup(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, 0, ApplySpellType::Group);
+}
+
+void Lua_Client::SetSpellDurationGroup(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group);
+}
+
+void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, bool allow_pets) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets);
+}
+
+void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Lua_Client::SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
+void Lua_Client::SetSpellDurationRaid(int spell_id) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, 0, ApplySpellType::Raid);
+}
+
+void Lua_Client::SetSpellDurationRaid(int spell_id, int duration) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid);
+}
+
+void Lua_Client::SetSpellDurationRaid(int spell_id, int duration, bool allow_pets) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets);
+}
+
+void Lua_Client::SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Lua_Client::SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots) {
+	Lua_Safe_Call_Void();
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -2717,6 +2879,27 @@ luabind::scope lua_register_client() {
 	.def("AddPVPPoints", (void(Lua_Client::*)(uint32))&Lua_Client::AddPVPPoints)
 	.def("AddSkill", (void(Lua_Client::*)(int,int))&Lua_Client::AddSkill)
 	.def("Admin", (int16(Lua_Client::*)(void))&Lua_Client::Admin)
+	.def("ApplySpell", (void(Lua_Client::*)(int))&Lua_Client::ApplySpell)
+	.def("ApplySpell", (void(Lua_Client::*)(int,int))&Lua_Client::ApplySpell)
+	.def("ApplySpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ApplySpell)
+	.def("ApplySpell", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::ApplySpell)
+#ifdef BOTS
+	.def("ApplySpell", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::ApplySpell)
+#endif
+	.def("ApplySpellGroup", (void(Lua_Client::*)(int))&Lua_Client::ApplySpellGroup)
+	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int))&Lua_Client::ApplySpellGroup)
+	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ApplySpellGroup)
+	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::ApplySpellGroup)
+#ifdef BOTS
+	.def("ApplySpellGroup", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::ApplySpellGroup)
+#endif
+	.def("ApplySpellRaid", (void(Lua_Client::*)(int))&Lua_Client::ApplySpellRaid)
+	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int))&Lua_Client::ApplySpellRaid)
+	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ApplySpellRaid)
+	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::ApplySpellRaid)
+#ifdef BOTS
+	.def("ApplySpellRaid", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::ApplySpellRaid)
+#endif
 	.def("AssignTask", (void(Lua_Client::*)(int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
 	.def("AssignTask", (void(Lua_Client::*)(int,int,bool))&Lua_Client::AssignTask)
@@ -3099,6 +3282,27 @@ luabind::scope lua_register_client() {
 	.def("SetSecondaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetSecondaryWeaponOrnamentation)
 	.def("SetSkill", (void(Lua_Client::*)(int,int))&Lua_Client::SetSkill)
 	.def("SetSkillPoints", (void(Lua_Client::*)(int))&Lua_Client::SetSkillPoints)
+	.def("SetSpellDuration", (void(Lua_Client::*)(int))&Lua_Client::SetSpellDuration)
+	.def("SetSpellDuration", (void(Lua_Client::*)(int,int))&Lua_Client::SetSpellDuration)
+	.def("SetSpellDuration", (void(Lua_Client::*)(int,int,bool))&Lua_Client::SetSpellDuration)
+	.def("SetSpellDuration", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::SetSpellDuration)
+#ifdef BOTS
+	.def("SetSpellDuration", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::SetSpellDuration)
+#endif
+	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int))&Lua_Client::SetSpellDurationGroup)
+	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int))&Lua_Client::SetSpellDurationGroup)
+	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int,bool))&Lua_Client::SetSpellDurationGroup)
+	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::SetSpellDurationGroup)
+#ifdef BOTS
+	.def("SetSpellDurationGroup", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::SetSpellDurationGroup)
+#endif
+	.def("SetSpellDurationRaid", (void(Lua_Client::*)(int))&Lua_Client::SetSpellDurationRaid)
+	.def("SetSpellDurationRaid", (void(Lua_Client::*)(int,int))&Lua_Client::SetSpellDurationRaid)
+	.def("SetSpellDurationRaid", (void(Lua_Client::*)(int,int,bool))&Lua_Client::SetSpellDurationRaid)
+	.def("SetSpellDurationRaid", (void(Lua_Client::*)(int,int,bool,bool))&Lua_Client::SetSpellDurationRaid)
+#ifdef BOTS
+	.def("SetSpellDurationRaid", (void(Lua_Client::*)(int,int,bool,bool,bool))&Lua_Client::SetSpellDurationRaid)
+#endif
 	.def("SetStartZone", (void(Lua_Client::*)(int))&Lua_Client::SetStartZone)
 	.def("SetStartZone", (void(Lua_Client::*)(int,float))&Lua_Client::SetStartZone)
 	.def("SetStartZone", (void(Lua_Client::*)(int,float,float))&Lua_Client::SetStartZone)
@@ -3108,7 +3312,7 @@ luabind::scope lua_register_client() {
 	.def("SetTint", (void(Lua_Client::*)(int,uint32))&Lua_Client::SetTint)
 	.def("SetTitleSuffix", (void(Lua_Client::*)(const char *))&Lua_Client::SetTitleSuffix)
 	.def("SetZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::SetZoneFlag)
-	.def("Signal", (void(Lua_Client::*)(int))&Lua_Client::Signal)
+	.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 	.def("Sit", (void(Lua_Client::*)(void))&Lua_Client::Sit)
 	.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)
 	.def("SummonBaggedItems", (void(Lua_Client::*)(uint32,luabind::adl::object))&Lua_Client::SummonBaggedItems)

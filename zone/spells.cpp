@@ -3274,7 +3274,7 @@ bool Mob::HasDiscBuff()
 // stacking problems, and -2 if this is not a buff
 // if caster is null, the buff will be added with the caster level being
 // the level of the mob
-int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_override, bool disable_buff_overrwrite)
+int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_override, bool disable_buff_overwrite)
 {
 	int buffslot, ret, caster_level, emptyslot = -1;
 	bool will_overwrite = false;
@@ -3370,7 +3370,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	// at this point we know that this buff will stick, but we have
 	// to remove some other buffs already worn if will_overwrite is true
-	if (will_overwrite && !disable_buff_overrwrite) {
+	if (will_overwrite && !disable_buff_overwrite) {
 		std::vector<int>::iterator cur, end;
 		cur = overwrite_slots.begin();
 		end = overwrite_slots.end();
@@ -3515,14 +3515,21 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 // and if you don't want effects just return false. interrupting here will
 // break stuff
 //
-bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectiveness, bool use_resist_adjust, int16 resist_adjust,
-			bool isproc, int level_override, int32 duration_override, bool disable_buff_overrwrite)
-{
+bool Mob::SpellOnTarget(
+	uint16 spell_id,
+	Mob *spelltar,
+	int reflect_effectiveness,
+	bool use_resist_adjust,
+	int16 resist_adjust,
+	bool isproc,
+	int level_override,
+	int duration_override,
+	bool disable_buff_overwrite
+) {
 	auto spellOwner = GetOwnerOrSelf();
 
 	// well we can't cast a spell on target without a target
-	if(!spelltar)
-	{
+	if (!spelltar) {
 		LogSpells("Unable to apply spell [{}] without a target", spell_id);
 		Message(Chat::Red, "SOT: You must have a target for this spell.");
 		return false;
@@ -3532,11 +3539,17 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		return false;
 	}
 
-	if (!IsValidSpell(spell_id))
+	if (!IsValidSpell(spell_id)) {
 		return false;
+	}
 
-	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id) && !IsEffectInSpell(spell_id, SE_BindSight)) {
-		if(!IsClient() || !CastToClient()->GetGM()) {
+	if (
+		IsDetrimentalSpell(spell_id) &&
+		!IsAttackAllowed(spelltar, true) &&
+		!IsResurrectionEffects(spell_id) &&
+		!IsEffectInSpell(spell_id, SE_BindSight)
+	) {
+		if (!IsClient() || !CastToClient()->GetGM()) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
 			return false;
 		}
@@ -3548,12 +3561,28 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	// these target types skip pcnpc only check (according to dev quotes)
 	// other AE spells this is redundant, oh well
 	// 1 = PCs, 2 = NPCs
-	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList &&
-		spells[spell_id].target_type != ST_HateList) {
-		if (spells[spell_id].pcnpc_only_flag == 1 && !spelltar->IsClient() && !spelltar->IsMerc() && !spelltar->IsBot())
+	if (
+		spells[spell_id].pcnpc_only_flag &&
+		spells[spell_id].target_type != ST_AETargetHateList &&
+		spells[spell_id].target_type != ST_HateList
+	) {
+		if (
+			spells[spell_id].pcnpc_only_flag == 1 &&
+			!spelltar->IsClient() &&
+			!spelltar->IsMerc() &&
+			!spelltar->IsBot()
+		) {
 			return false;
-		else if (spells[spell_id].pcnpc_only_flag == 2 && (spelltar->IsClient() || spelltar->IsMerc() || spelltar->IsBot()))
+		} else if (
+			spells[spell_id].pcnpc_only_flag == 2 &&
+			(
+				spelltar->IsClient() ||
+				spelltar->IsMerc() ||
+				spelltar->IsBot()
+			)
+		) {
 			return false;
+		}
 	}
 
 	uint16 caster_level = level_override > 0 ? level_override : GetCasterLevel(spell_id);
@@ -3570,12 +3599,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	Action_Struct* action = (Action_Struct*) action_packet->pBuffer;
 
 	// select source
-	if(IsClient() && CastToClient()->GMHideMe())
-	{
+	if (IsClient() && CastToClient()->GMHideMe()) {
 		action->source = spelltar->GetID();
-	}
-	else
-	{
+	} else {
 		action->source = GetID();
 		// this is a hack that makes detrimental buffs work client to client
 		// TODO figure out how to do this right
@@ -3591,12 +3617,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	}
 
 	// select target
-	if (IsEffectInSpell(spell_id, SE_BindSight))
-	{
+	if (IsEffectInSpell(spell_id, SE_BindSight)) {
 		action->target = GetID();
-	}
-	else
-	{
+	} else {
 		action->target = spelltar->GetID();
 	}
 
@@ -3609,10 +3632,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	action->instrument_mod = GetInstrumentMod(spell_id);
 	action->effect_flag = 0;
 
-	if(spelltar != this && spelltar->IsClient())	// send to target
+	if (spelltar != this && spelltar->IsClient()) {    // send to target
 		spelltar->CastToClient()->QueuePacket(action_packet);
-	if(IsClient())	// send to caster
+	}
+
+	if (IsClient()) { // send to caster
 		CastToClient()->QueuePacket(action_packet);
+	}
 
 	// send to people in the area, ignoring caster and target
 	entity_list.QueueCloseClients(
@@ -3626,7 +3652,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	);
 
 	/* Send the EVENT_CAST_ON event */
-	std::string export_string = fmt::format(
+	const auto export_string = fmt::format(
 		"{} {} {}",
 		spell_id,
 		GetID(),
@@ -4074,7 +4100,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	}
 
 	// cause the effects to the target
-	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override, reflect_effectiveness, duration_override, disable_buff_overrwrite))
+	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override, reflect_effectiveness, duration_override, disable_buff_overwrite))
 	{
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.

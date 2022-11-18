@@ -1199,7 +1199,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				CheckEmoteHail(t, message);
 
 				if (DistanceNoZ(m_Position, t->GetPosition()) <= RuleI(Range, Say)) {
-					
+
 					parse->EventNPC(EVENT_SAY, t, this, message, language);
 
 					if (RuleB(TaskSystem, EnableTaskSystem)) {
@@ -11804,4 +11804,109 @@ void Client::AddAAPoints(uint32 points)
 
 bool Client::SendGMCommand(std::string message, bool ignore_status) {
 	return command_dispatch(this, message, ignore_status) >= 0 ? true : false;
+}
+
+std::vector<Mob*> Client::GetApplySpellList(
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only,
+	bool allow_bots
+) {
+	std::vector<Mob*> l;
+
+	if (apply_type == ApplySpellType::Raid && IsRaidGrouped()) {
+		auto* r = GetRaid();
+		auto group_id = r->GetGroup(this);
+		if (r && EQ::ValueWithin(group_id, 0, (MAX_RAID_GROUPS - 1))) {
+			for (auto i = 0; i < MAX_RAID_MEMBERS; i++) {
+				auto* m = r->members[i].member;
+				if (m && m->IsClient() && (!is_raid_group_only || r->GetGroup(m) == group_id)) {
+					l.push_back(m);
+
+					if (allow_pets && m->HasPet()) {
+						l.push_back(m->GetPet());
+					}
+
+#ifdef BOTS
+					if (allow_bots) {
+						const auto& sbl = entity_list.GetBotListByCharacterID(m->CharacterID());
+						for (const auto& b : sbl) {
+							l.push_back(b);
+						}
+					}
+#endif
+				}
+			}
+		}
+	} else if (apply_type == ApplySpellType::Group && IsGrouped()) {
+		auto* g = GetGroup();
+		if (g) {
+			for (auto i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				auto* m = g->members[i];
+				if (m && m->IsClient()) {
+					l.push_back(m->CastToClient());
+
+					if (allow_pets && m->HasPet()) {
+						l.push_back(m->GetPet());
+					}
+
+#ifdef BOTS
+					if (allow_bots) {
+						const auto& sbl = entity_list.GetBotListByCharacterID(m->CastToClient()->CharacterID());
+						for (const auto& b : sbl) {
+							l.push_back(b);
+						}
+					}
+#endif
+				}
+			}
+		}
+	} else {
+		l.push_back(this);
+
+		if (allow_pets && HasPet()) {
+			l.push_back(GetPet());
+		}
+
+#ifdef BOTS
+		if (allow_bots) {
+			const auto& sbl = entity_list.GetBotListByCharacterID(CharacterID());
+			for (const auto& b : sbl) {
+				l.push_back(b);
+			}
+		}
+#endif
+	}
+
+	return l;
+}
+
+void Client::ApplySpell(
+	int spell_id,
+	int duration,
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only,
+	bool allow_bots
+) {
+	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only, allow_bots);
+
+	for (const auto& m : l) {
+		m->ApplySpellBuff(spell_id, duration);
+	}
+}
+
+void Client::SetSpellDuration(
+	int spell_id,
+	int duration,
+	ApplySpellType apply_type,
+	bool allow_pets,
+	bool is_raid_group_only,
+	bool allow_bots
+) {
+	const auto& l = GetApplySpellList(apply_type, allow_pets, is_raid_group_only, allow_bots);
+
+	for (const auto& m : l) {
+		m->SetBuffDuration(spell_id, duration);
+	}
 }
