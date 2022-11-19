@@ -19,12 +19,12 @@
 class BaseCharacterTasksRepository {
 public:
 	struct CharacterTasks {
-		int charid;
-		int taskid;
-		int slot;
-		int type;
-		int acceptedtime;
-		int was_rewarded;
+		uint32_t charid;
+		uint32_t taskid;
+		uint32_t slot;
+		int8_t   type;
+		uint32_t acceptedtime;
+		int8_t   was_rewarded;
 	};
 
 	static std::string PrimaryKey()
@@ -91,19 +91,19 @@ public:
 
 	static CharacterTasks NewEntity()
 	{
-		CharacterTasks entry{};
+		CharacterTasks e{};
 
-		entry.charid       = 0;
-		entry.taskid       = 0;
-		entry.slot         = 0;
-		entry.type         = 0;
-		entry.acceptedtime = 0;
-		entry.was_rewarded = 0;
+		e.charid       = 0;
+		e.taskid       = 0;
+		e.slot         = 0;
+		e.type         = 0;
+		e.acceptedtime = 0;
+		e.was_rewarded = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterTasks GetCharacterTasksEntry(
+	static CharacterTasks GetCharacterTasks(
 		const std::vector<CharacterTasks> &character_taskss,
 		int character_tasks_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
-			entry.was_rewarded = atoi(row[5]);
+			e.charid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slot         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.acceptedtime = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,27 +166,27 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterTasks character_tasks_entry
+		const CharacterTasks &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_tasks_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_tasks_entry.taskid));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_entry.slot));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_entry.type));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_entry.acceptedtime));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_tasks_entry.was_rewarded));
+		v.push_back(columns[0] + " = " + std::to_string(e.charid));
+		v.push_back(columns[1] + " = " + std::to_string(e.taskid));
+		v.push_back(columns[2] + " = " + std::to_string(e.slot));
+		v.push_back(columns[3] + " = " + std::to_string(e.type));
+		v.push_back(columns[4] + " = " + std::to_string(e.acceptedtime));
+		v.push_back(columns[5] + " = " + std::to_string(e.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_tasks_entry.charid
+				e.charid
 			)
 		);
 
@@ -195,57 +195,57 @@ public:
 
 	static CharacterTasks InsertOne(
 		Database& db,
-		CharacterTasks character_tasks_entry
+		CharacterTasks e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_tasks_entry.charid));
-		insert_values.push_back(std::to_string(character_tasks_entry.taskid));
-		insert_values.push_back(std::to_string(character_tasks_entry.slot));
-		insert_values.push_back(std::to_string(character_tasks_entry.type));
-		insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
-		insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.taskid));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.acceptedtime));
+		v.push_back(std::to_string(e.was_rewarded));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_tasks_entry.charid = results.LastInsertedID();
-			return character_tasks_entry;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		character_tasks_entry = NewEntity();
+		e = NewEntity();
 
-		return character_tasks_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterTasks> character_tasks_entries
+		const std::vector<CharacterTasks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_tasks_entry: character_tasks_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_tasks_entry.charid));
-			insert_values.push_back(std::to_string(character_tasks_entry.taskid));
-			insert_values.push_back(std::to_string(character_tasks_entry.slot));
-			insert_values.push_back(std::to_string(character_tasks_entry.type));
-			insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
-			insert_values.push_back(std::to_string(character_tasks_entry.was_rewarded));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.taskid));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.acceptedtime));
+			v.push_back(std::to_string(e.was_rewarded));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -272,22 +272,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
-			entry.was_rewarded = atoi(row[5]);
+			e.charid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slot         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.acceptedtime = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterTasks> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterTasks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterTasks> all_entries;
 
@@ -302,22 +302,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
-			entry.was_rewarded = atoi(row[5]);
+			e.charid       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.taskid       = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.slot         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.acceptedtime = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -340,6 +340,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

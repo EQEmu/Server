@@ -8,7 +8,7 @@
 #include "zone.h"
 #include "spawngroup.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "npc.h"
 #include "mob.h"
 #include "client.h"

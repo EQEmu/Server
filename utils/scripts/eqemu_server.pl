@@ -50,6 +50,11 @@ if ($Config{osname} =~ /Win|MS/i) {
     $OS = "Windows";
 }
 
+if (-e "../eqemu_config.json") {
+    print "[Info] Config is up one level, let's set current directory up one level...\n";
+    chdir("../");
+}
+
 #############################################
 # internet check
 #############################################
@@ -82,6 +87,8 @@ if (-e "eqemu_server_skip_maps_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_MA
 if (-d "bin") {
     $bin_dir = "bin/";
 }
+
+my $world_path = get_world_path();
 
 #############################################
 # run routines
@@ -540,14 +547,6 @@ sub do_installer_routines
         print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "FLUSH PRIVILEGES"`;
     }
 
-    my $world_path = "world";
-    if (-e "bin/world") {
-        $world_path = "bin/world";
-    }
-    elsif (-e "bin/world.exe") {
-        $world_path = "bin/world.exe";
-    }
-
     #::: Get Binary DB version
     if ($OS eq "Windows") {
         @db_version = split(': ', `"$world_path" db_version`);
@@ -592,15 +591,6 @@ sub check_for_input
 
 sub check_for_world_bootup_database_update
 {
-
-    my $world_path = "world";
-    if (-e "bin/world") {
-        $world_path = "bin/world";
-    }
-    elsif (-e "bin/world.exe") {
-        $world_path = "bin/world.exe";
-    }
-
     $binary_database_version = 0;
     $local_database_version  = 0;
 
@@ -1099,7 +1089,7 @@ sub show_menu_prompt
             $dc = 1;
         }
         elsif ($input eq "windows_server_download") {
-            fetch_latest_windows_binaries();
+            fetch_latest_windows_appveyor();
             $dc = 1;
         }
         elsif ($input eq "windows_server_latest") {
@@ -1596,33 +1586,6 @@ sub fetch_latest_windows_appveyor
     print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
     print "[Update] Extracting... --- \n";
     unzip('updates_staged/build_x64.zip', 'updates_staged/binaries/');
-    my @files;
-    my $start_dir = "updates_staged/binaries";
-    find(
-        sub { push @files, $File::Find::name unless -d; },
-        $start_dir
-    );
-    for my $file (@files) {
-        my $destination_file = $file;
-        $destination_file =~ s/updates_staged\/binaries\///g;
-        print "[Update] Installing [" . $bin_dir . $destination_file . "]\n";
-        copy_file($file, $bin_dir . $destination_file);
-    }
-    print "[Update] Done\n";
-
-    rmtree('updates_staged');
-}
-
-sub fetch_latest_windows_binaries
-{
-    print "[Update] Fetching Latest Windows Binaries... \n";
-    get_remote_file($install_repository_request_url . "master_windows_build.zip",
-        "updates_staged/master_windows_build.zip",
-        1
-    );
-    print "[Update] Fetched Latest Windows Binaries... \n";
-    print "[Update] Extracting... --- \n";
-    unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(

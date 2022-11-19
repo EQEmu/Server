@@ -19,7 +19,7 @@
 class BaseHackersRepository {
 public:
 	struct Hackers {
-		int         id;
+		int32_t     id;
 		std::string account;
 		std::string name;
 		std::string hacked;
@@ -91,19 +91,19 @@ public:
 
 	static Hackers NewEntity()
 	{
-		Hackers entry{};
+		Hackers e{};
 
-		entry.id      = 0;
-		entry.account = "";
-		entry.name    = "";
-		entry.hacked  = "";
-		entry.zone    = "";
-		entry.date    = std::time(nullptr);
+		e.id      = 0;
+		e.account = "";
+		e.name    = "";
+		e.hacked  = "";
+		e.zone    = "";
+		e.date    = std::time(nullptr);
 
-		return entry;
+		return e;
 	}
 
-	static Hackers GetHackersEntry(
+	static Hackers GetHackers(
 		const std::vector<Hackers> &hackerss,
 		int hackers_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Hackers entry{};
+			Hackers e{};
 
-			entry.id      = atoi(row[0]);
-			entry.account = row[1] ? row[1] : "";
-			entry.name    = row[2] ? row[2] : "";
-			entry.hacked  = row[3] ? row[3] : "";
-			entry.zone    = row[4] ? row[4] : "";
-			entry.date    = row[5] ? row[5] : "";
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.account = row[1] ? row[1] : "";
+			e.name    = row[2] ? row[2] : "";
+			e.hacked  = row[3] ? row[3] : "";
+			e.zone    = row[4] ? row[4] : "";
+			e.date    = row[5] ? row[5] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,26 +166,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Hackers hackers_entry
+		const Hackers &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(hackers_entry.account) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(hackers_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(hackers_entry.hacked) + "'");
-		update_values.push_back(columns[4] + " = '" + Strings::Escape(hackers_entry.zone) + "'");
-		update_values.push_back(columns[5] + " = '" + Strings::Escape(hackers_entry.date) + "'");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.account) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.hacked) + "'");
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.zone) + "'");
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				hackers_entry.id
+				e.id
 			)
 		);
 
@@ -194,57 +194,57 @@ public:
 
 	static Hackers InsertOne(
 		Database& db,
-		Hackers hackers_entry
+		Hackers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(hackers_entry.id));
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.account) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.hacked) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.zone) + "'");
-		insert_values.push_back("'" + Strings::Escape(hackers_entry.date) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.account) + "'");
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.hacked) + "'");
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back("'" + Strings::Escape(e.date) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			hackers_entry.id = results.LastInsertedID();
-			return hackers_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		hackers_entry = NewEntity();
+		e = NewEntity();
 
-		return hackers_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Hackers> hackers_entries
+		const std::vector<Hackers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &hackers_entry: hackers_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(hackers_entry.id));
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.account) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.hacked) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.zone) + "'");
-			insert_values.push_back("'" + Strings::Escape(hackers_entry.date) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.account) + "'");
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.hacked) + "'");
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back("'" + Strings::Escape(e.date) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -271,22 +271,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Hackers entry{};
+			Hackers e{};
 
-			entry.id      = atoi(row[0]);
-			entry.account = row[1] ? row[1] : "";
-			entry.name    = row[2] ? row[2] : "";
-			entry.hacked  = row[3] ? row[3] : "";
-			entry.zone    = row[4] ? row[4] : "";
-			entry.date    = row[5] ? row[5] : "";
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.account = row[1] ? row[1] : "";
+			e.name    = row[2] ? row[2] : "";
+			e.hacked  = row[3] ? row[3] : "";
+			e.zone    = row[4] ? row[4] : "";
+			e.date    = row[5] ? row[5] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Hackers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Hackers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Hackers> all_entries;
 
@@ -301,22 +301,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Hackers entry{};
+			Hackers e{};
 
-			entry.id      = atoi(row[0]);
-			entry.account = row[1] ? row[1] : "";
-			entry.name    = row[2] ? row[2] : "";
-			entry.hacked  = row[3] ? row[3] : "";
-			entry.zone    = row[4] ? row[4] : "";
-			entry.date    = row[5] ? row[5] : "";
+			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.account = row[1] ? row[1] : "";
+			e.name    = row[2] ? row[2] : "";
+			e.hacked  = row[3] ? row[3] : "";
+			e.zone    = row[4] ? row[4] : "";
+			e.date    = row[5] ? row[5] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -339,6 +339,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

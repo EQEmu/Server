@@ -15,7 +15,6 @@
 #include "../common/repositories/completed_shared_task_members_repository.h"
 #include "../common/repositories/completed_shared_task_activity_state_repository.h"
 #include "../common/repositories/shared_task_dynamic_zones_repository.h"
-#include <array>
 #include <ctime>
 
 extern ClientList client_list;
@@ -130,6 +129,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		e.max_done_count = a.goalcount;
 		e.step           = a.step;
 		e.optional       = a.optional;
+		e.req_activity_id = a.req_activity_id;
+		e.activity_state = ActivityState::ActivityHidden;
 
 		shared_task_activity_state.emplace_back(e);
 	}
@@ -239,6 +240,27 @@ void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 reque
 	DeleteSharedTask(t->GetDbSharedTask().id);
 
 	PrintSharedTaskState();
+}
+
+void SharedTaskManager::Terminate(SharedTask& s, bool send_fail, bool erase)
+{
+	LogTasksDetail("[Terminate] shared task [{}]", s.GetDbSharedTask().id);
+	for (const auto& member : s.GetMembers())
+	{
+		if (send_fail)
+		{
+			SendSharedTaskFailed(member.character_id, s.GetTaskData().id);
+		}
+		SendRemovePlayerFromSharedTaskPacket(member.character_id, s.GetTaskData().id, true);
+		client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {s.GetTaskData().title});
+	}
+
+	RemoveAllMembersFromDynamicZones(&s);
+
+	if (erase)
+	{
+		DeleteSharedTask(s.GetDbSharedTask().id);
+	}
 }
 
 void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
@@ -354,6 +376,8 @@ void SharedTaskManager::LoadSharedTaskState()
 						e.updated_time   = sta.updated_time;
 						e.step           = ad.step;
 						e.optional       = ad.optional;
+						e.req_activity_id = ad.req_activity_id;
+						e.activity_state = sta.completed_time > 0 ? ActivityCompleted : ActivityHidden;
 					}
 				}
 
@@ -524,6 +548,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 					// if the activity is done, lets mark it as such
 					if (a.done_count == a.max_done_count) {
 						a.completed_time = std::time(nullptr);
+						a.activity_state = ActivityState::ActivityCompleted;
 					}
 
 					// sync state as each update comes in (for now)
@@ -682,6 +707,20 @@ void SharedTaskManager::SendRemovePlayerFromSharedTaskPacket(
 	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
 	if (cle && cle->Server()) {
 		cle->Server()->SendPacket(p.get());
+	}
+}
+
+void SharedTaskManager::SendSharedTaskFailed(uint32_t character_id, uint32_t task_id)
+{
+	ServerPacket pack(ServerOP_SharedTaskFailed, sizeof(ServerSharedTaskCharacterTask_Struct));
+	auto buf = reinterpret_cast<ServerSharedTaskCharacterTask_Struct*>(pack.pBuffer);
+	buf->character_id = character_id;
+	buf->task_id = task_id;
+
+	ClientListEntry* cle = client_list.FindCLEByCharacterID(character_id);
+	if (cle && cle->Server())
+	{
+		cle->Server()->SendPacket(&pack);
 	}
 }
 
@@ -1038,6 +1077,18 @@ SharedTask *SharedTaskManager::FindSharedTaskById(int64 shared_task_id)
 	return nullptr;
 }
 
+SharedTask* SharedTaskManager::FindSharedTaskByDzId(uint32_t dz_id)
+{
+	for (auto& s: m_shared_tasks) {
+		auto it = std::find(s.dynamic_zone_ids.begin(), s.dynamic_zone_ids.end(), dz_id);
+		if (it != s.dynamic_zone_ids.end()) {
+			return &s;
+		}
+	}
+
+	return nullptr;
+}
+
 void SharedTaskManager::QueueActiveInvitation(int64 shared_task_id, int64 character_id)
 {
 	LogTasksDetail(
@@ -1283,13 +1334,13 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 	}
 
 	// check if any party member's minimum level is too low (pre-2014 this was average level)
-	if (task.minlevel > 0 && request.lowest_level < task.minlevel) {
+	if (task.min_level > 0 && request.lowest_level < task.min_level) {
 		client_list.SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_LOW));
 		return false;
 	}
 
 	// check if any party member's maximum level is too high (pre-2014 this was average level)
-	if (task.maxlevel > 0 && request.highest_level > task.maxlevel) {
+	if (task.max_level > 0 && request.highest_level > task.max_level) {
 		client_list.SendCharacterMessage(request.leader_id, Chat::Red, TaskStr::Get(TaskStr::LVL_TOO_HIGH));
 		return false;
 	}
@@ -1452,8 +1503,8 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 			)
 		);
 
-		int lowest_level  = cle->level();
-		int highest_level = cle->level();
+		auto lowest_level  = static_cast<uint32_t>(cle->level());
+		auto highest_level = lowest_level;
 
 		for (const auto &character : characters) {
 			lowest_level  = std::min(lowest_level, character.level);
@@ -1468,13 +1519,13 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 	}
 
 	// check if player is below minimum level of task (pre-2014 this was average level)
-	if (s->GetTaskData().minlevel > 0 && cle->level() < s->GetTaskData().minlevel) {
+	if (s->GetTaskData().min_level > 0 && cle->level() < s->GetTaskData().min_level) {
 		SendLeaderMessage(s, Chat::Red, TaskStr::Get(TaskStr::CANT_ADD_MIN_LEVEL));
 		allow_invite = false;
 	}
 
 	// check if player is above maximum level of task (pre-2014 this was average level)
-	if (s->GetTaskData().maxlevel > 0 && cle->level() > s->GetTaskData().maxlevel) {
+	if (s->GetTaskData().max_level > 0 && cle->level() > s->GetTaskData().max_level) {
 		SendLeaderMessage(s, Chat::Red, TaskStr::Get(TaskStr::CANT_ADD_MAX_LEVEL));
 		allow_invite = false;
 	}
@@ -1702,48 +1753,30 @@ void SharedTaskManager::LockTask(SharedTask* s, bool lock)
 
 bool SharedTaskManager::HandleCompletedActivities(SharedTask* s)
 {
-	bool is_task_complete = true;
-	bool lock_task = false;
+	auto states = s->GetActivityState();
 
-	std::array<bool, MAXACTIVITIESPERTASK> completed_steps;
-	completed_steps.fill(true);
-
-	// multiple activity ids may share a step, sort so previous step completions can be checked
-	auto activity_states = s->GetActivityState();
-	std::sort(activity_states.begin(), activity_states.end(),
-		[](const auto& lhs, const auto& rhs) { return lhs.step < rhs.step; });
-
-	for (const auto& a : activity_states)
-	{
-		if (a.done_count != a.max_done_count && !a.optional)
-		{
-			is_task_complete = false;
-			if (a.step > 0 && a.step <= MAXACTIVITIESPERTASK)
-			{
-				completed_steps[a.step - 1] = false;
-			}
-		}
-
-		int lock_index = s->GetTaskData().lock_activity_id;
-		if (a.activity_id == lock_index && a.step > 0 && a.step <= MAXACTIVITIESPERTASK)
-		{
-			// lock if element is active (on first step or previous step completed)
-			lock_task = (a.step == 1 || completed_steps[a.step - 2]);
-		}
-	}
+	// activity state holds both source data and current state
+	auto res = Tasks::GetActiveElements(states, states, states.size());
 
 	// completion locks are silent
-	if (!is_task_complete && lock_task)
+	auto it = std::find(res.active.begin(), res.active.end(), s->GetTaskData().lock_activity_id);
+	if (!res.is_task_complete && it != res.active.end())
 	{
 		LockTask(s, true);
 	}
 
-	return is_task_complete;
+	return res.is_task_complete;
 }
 
 void SharedTaskManager::HandleCompletedTask(SharedTask* s)
 {
 	auto db_task = s->GetDbSharedTask();
+	if (db_task.completion_time > 0)
+	{
+		LogTasksDetail("[HandleCompletedTask] shared task [{}] already completed", db_task.id);
+		return;
+	}
+
 	LogTasksDetail("[HandleCompletedTask] Marking shared task [{}] completed", db_task.id);
 	db_task.completion_time = std::time(nullptr);
 	db_task.is_locked = true;
@@ -1771,16 +1804,9 @@ void SharedTaskManager::Process()
 	std::vector<int64_t> delete_tasks;
 	for (auto& shared_task : m_shared_tasks)
 	{
-		if (shared_task.GetMembers().empty() || shared_task.terminate_timer.Check())
+		if (shared_task.GetMembers().empty() || shared_task.terminate_timer.Check() || shared_task.IsExpired())
 		{
-			LogTasksDetail("[Process] Terminating shared task [{}]", shared_task.GetDbSharedTask().id);
-			for (const auto& member : shared_task.GetMembers())
-			{
-				SendRemovePlayerFromSharedTaskPacket(member.character_id, shared_task.GetTaskData().id, true);
-				client_list.SendCharacterMessageID(member.character_id, Chat::Yellow, TaskStr::HAS_ENDED, {shared_task.GetTaskData().title});
-			}
-
-			RemoveAllMembersFromDynamicZones(&shared_task);
+			Terminate(shared_task, false, false);
 
 			// avoid erasing from m_shared_tasks while iterating it
 			delete_tasks.push_back(shared_task.GetDbSharedTask().id);

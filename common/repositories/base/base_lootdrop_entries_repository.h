@@ -19,17 +19,17 @@
 class BaseLootdropEntriesRepository {
 public:
 	struct LootdropEntries {
-		int   lootdrop_id;
-		int   item_id;
-		int   item_charges;
-		int   equip_item;
-		float chance;
-		float disabled_chance;
-		int   trivial_min_level;
-		int   trivial_max_level;
-		int   multiplier;
-		int   npc_min_level;
-		int   npc_max_level;
+		uint32_t lootdrop_id;
+		int32_t  item_id;
+		uint16_t item_charges;
+		uint8_t  equip_item;
+		float    chance;
+		float    disabled_chance;
+		uint16_t trivial_min_level;
+		uint16_t trivial_max_level;
+		uint8_t  multiplier;
+		uint16_t npc_min_level;
+		uint16_t npc_max_level;
 	};
 
 	static std::string PrimaryKey()
@@ -106,24 +106,24 @@ public:
 
 	static LootdropEntries NewEntity()
 	{
-		LootdropEntries entry{};
+		LootdropEntries e{};
 
-		entry.lootdrop_id       = 0;
-		entry.item_id           = 0;
-		entry.item_charges      = 1;
-		entry.equip_item        = 0;
-		entry.chance            = 1;
-		entry.disabled_chance   = 0;
-		entry.trivial_min_level = 0;
-		entry.trivial_max_level = 0;
-		entry.multiplier        = 1;
-		entry.npc_min_level     = 0;
-		entry.npc_max_level     = 0;
+		e.lootdrop_id       = 0;
+		e.item_id           = 0;
+		e.item_charges      = 1;
+		e.equip_item        = 0;
+		e.chance            = 1;
+		e.disabled_chance   = 0;
+		e.trivial_min_level = 0;
+		e.trivial_max_level = 0;
+		e.multiplier        = 1;
+		e.npc_min_level     = 0;
+		e.npc_max_level     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static LootdropEntries GetLootdropEntriesEntry(
+	static LootdropEntries GetLootdropEntries(
 		const std::vector<LootdropEntries> &lootdrop_entriess,
 		int lootdrop_entries_id
 	)
@@ -152,21 +152,21 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LootdropEntries entry{};
+			LootdropEntries e{};
 
-			entry.lootdrop_id       = atoi(row[0]);
-			entry.item_id           = atoi(row[1]);
-			entry.item_charges      = atoi(row[2]);
-			entry.equip_item        = atoi(row[3]);
-			entry.chance            = static_cast<float>(atof(row[4]));
-			entry.disabled_chance   = static_cast<float>(atof(row[5]));
-			entry.trivial_min_level = atoi(row[6]);
-			entry.trivial_max_level = atoi(row[7]);
-			entry.multiplier        = atoi(row[8]);
-			entry.npc_min_level     = atoi(row[9]);
-			entry.npc_max_level     = atoi(row[10]);
+			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id           = static_cast<int32_t>(atoi(row[1]));
+			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.chance            = strtof(row[4], nullptr);
+			e.disabled_chance   = strtof(row[5], nullptr);
+			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
+			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -191,32 +191,32 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		LootdropEntries lootdrop_entries_entry
+		const LootdropEntries &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(lootdrop_entries_entry.lootdrop_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(lootdrop_entries_entry.item_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_entries_entry.item_charges));
-		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entries_entry.equip_item));
-		update_values.push_back(columns[4] + " = " + std::to_string(lootdrop_entries_entry.chance));
-		update_values.push_back(columns[5] + " = " + std::to_string(lootdrop_entries_entry.disabled_chance));
-		update_values.push_back(columns[6] + " = " + std::to_string(lootdrop_entries_entry.trivial_min_level));
-		update_values.push_back(columns[7] + " = " + std::to_string(lootdrop_entries_entry.trivial_max_level));
-		update_values.push_back(columns[8] + " = " + std::to_string(lootdrop_entries_entry.multiplier));
-		update_values.push_back(columns[9] + " = " + std::to_string(lootdrop_entries_entry.npc_min_level));
-		update_values.push_back(columns[10] + " = " + std::to_string(lootdrop_entries_entry.npc_max_level));
+		v.push_back(columns[0] + " = " + std::to_string(e.lootdrop_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.item_charges));
+		v.push_back(columns[3] + " = " + std::to_string(e.equip_item));
+		v.push_back(columns[4] + " = " + std::to_string(e.chance));
+		v.push_back(columns[5] + " = " + std::to_string(e.disabled_chance));
+		v.push_back(columns[6] + " = " + std::to_string(e.trivial_min_level));
+		v.push_back(columns[7] + " = " + std::to_string(e.trivial_max_level));
+		v.push_back(columns[8] + " = " + std::to_string(e.multiplier));
+		v.push_back(columns[9] + " = " + std::to_string(e.npc_min_level));
+		v.push_back(columns[10] + " = " + std::to_string(e.npc_max_level));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				lootdrop_entries_entry.lootdrop_id
+				e.lootdrop_id
 			)
 		);
 
@@ -225,67 +225,67 @@ public:
 
 	static LootdropEntries InsertOne(
 		Database& db,
-		LootdropEntries lootdrop_entries_entry
+		LootdropEntries e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.lootdrop_id));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.item_id));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.item_charges));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.disabled_chance));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_min_level));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_max_level));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.multiplier));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_min_level));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_max_level));
+		v.push_back(std::to_string(e.lootdrop_id));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.equip_item));
+		v.push_back(std::to_string(e.chance));
+		v.push_back(std::to_string(e.disabled_chance));
+		v.push_back(std::to_string(e.trivial_min_level));
+		v.push_back(std::to_string(e.trivial_max_level));
+		v.push_back(std::to_string(e.multiplier));
+		v.push_back(std::to_string(e.npc_min_level));
+		v.push_back(std::to_string(e.npc_max_level));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			lootdrop_entries_entry.lootdrop_id = results.LastInsertedID();
-			return lootdrop_entries_entry;
+			e.lootdrop_id = results.LastInsertedID();
+			return e;
 		}
 
-		lootdrop_entries_entry = NewEntity();
+		e = NewEntity();
 
-		return lootdrop_entries_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<LootdropEntries> lootdrop_entries_entries
+		const std::vector<LootdropEntries> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &lootdrop_entries_entry: lootdrop_entries_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.lootdrop_id));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.item_id));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.item_charges));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.disabled_chance));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_min_level));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_max_level));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.multiplier));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_min_level));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_max_level));
+			v.push_back(std::to_string(e.lootdrop_id));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.equip_item));
+			v.push_back(std::to_string(e.chance));
+			v.push_back(std::to_string(e.disabled_chance));
+			v.push_back(std::to_string(e.trivial_min_level));
+			v.push_back(std::to_string(e.trivial_max_level));
+			v.push_back(std::to_string(e.multiplier));
+			v.push_back(std::to_string(e.npc_min_level));
+			v.push_back(std::to_string(e.npc_max_level));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -312,27 +312,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LootdropEntries entry{};
+			LootdropEntries e{};
 
-			entry.lootdrop_id       = atoi(row[0]);
-			entry.item_id           = atoi(row[1]);
-			entry.item_charges      = atoi(row[2]);
-			entry.equip_item        = atoi(row[3]);
-			entry.chance            = static_cast<float>(atof(row[4]));
-			entry.disabled_chance   = static_cast<float>(atof(row[5]));
-			entry.trivial_min_level = atoi(row[6]);
-			entry.trivial_max_level = atoi(row[7]);
-			entry.multiplier        = atoi(row[8]);
-			entry.npc_min_level     = atoi(row[9]);
-			entry.npc_max_level     = atoi(row[10]);
+			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id           = static_cast<int32_t>(atoi(row[1]));
+			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.chance            = strtof(row[4], nullptr);
+			e.disabled_chance   = strtof(row[5], nullptr);
+			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
+			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<LootdropEntries> GetWhere(Database& db, std::string where_filter)
+	static std::vector<LootdropEntries> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<LootdropEntries> all_entries;
 
@@ -347,27 +347,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LootdropEntries entry{};
+			LootdropEntries e{};
 
-			entry.lootdrop_id       = atoi(row[0]);
-			entry.item_id           = atoi(row[1]);
-			entry.item_charges      = atoi(row[2]);
-			entry.equip_item        = atoi(row[3]);
-			entry.chance            = static_cast<float>(atof(row[4]));
-			entry.disabled_chance   = static_cast<float>(atof(row[5]));
-			entry.trivial_min_level = atoi(row[6]);
-			entry.trivial_max_level = atoi(row[7]);
-			entry.multiplier        = atoi(row[8]);
-			entry.npc_min_level     = atoi(row[9]);
-			entry.npc_max_level     = atoi(row[10]);
+			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.item_id           = static_cast<int32_t>(atoi(row[1]));
+			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.chance            = strtof(row[4], nullptr);
+			e.disabled_chance   = strtof(row[5], nullptr);
+			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
+			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
+			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
+			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -390,6 +390,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

@@ -292,7 +292,7 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_hp = GetMaxHP();
-		int fast_regen = 6 * (max_hp / zone->newzone_data.FastRegenHP);
+		int fast_regen = 6 * (max_hp / zone->newzone_data.fast_regen_hp);
 		if (base < fast_regen) // weird, but what the client is doing
 			base = fast_regen;
 	}
@@ -771,7 +771,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_mana = GetMaxMana();
-		int fast_regen = 6 * (max_mana / zone->newzone_data.FastRegenMana);
+		int fast_regen = 6 * (max_mana / zone->newzone_data.fast_regen_mana);
 		if (regen < fast_regen) // weird, but what the client is doing
 			regen = fast_regen;
 	}
@@ -1801,7 +1801,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 	int64 regen = base;
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_end = GetMaxEndurance();
-		int fast_regen = 6 * (max_end / zone->newzone_data.FastRegenEndurance);
+		int fast_regen = 6 * (max_end / zone->newzone_data.fast_regen_endurance);
 		if (aa_regen < fast_regen) // weird, but what the client is doing
 			aa_regen = fast_regen;
 	}

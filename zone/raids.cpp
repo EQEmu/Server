@@ -1768,7 +1768,7 @@ void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_re
 		uint32 group_id = GetGroup(sender->CastToClient());
 
 		/* If this is a group only packet and we're not in a group -- return */
-		if (!group_id == 0xFFFFFFFF && group_only)
+		if (group_id == 0xFFFFFFFF && group_only)
 			return;
 
 		for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++) {

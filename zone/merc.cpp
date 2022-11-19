@@ -1168,11 +1168,11 @@ void Merc::CalcRestState() {
 		}
 	}
 
-	RestRegenHP = 6 * (GetMaxHP() / zone->newzone_data.FastRegenHP);
+	RestRegenHP = 6 * (GetMaxHP() / zone->newzone_data.fast_regen_hp);
 
-	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.FastRegenMana);
+	RestRegenMana = 6 * (GetMaxMana() / zone->newzone_data.fast_regen_mana);
 
-	RestRegenEndurance = 6 * (GetMaxEndurance() / zone->newzone_data.FastRegenEndurance);
+	RestRegenEndurance = 6 * (GetMaxEndurance() / zone->newzone_data.fast_regen_endurance);
 }
 
 bool Merc::HasSkill(EQ::skills::SkillType skill_id) const {
@@ -2138,11 +2138,11 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 									}
 									else {
 										//check for heal over time. if not present, try it first
-										if(!tar->FindType(SE_HealOverTime)) {
+										if (!tar->FindType(SE_HealOverTime)) {
 											selectedMercSpell = GetBestMercSpellForHealOverTime(this);
 
 											//get regular heal
-											if(selectedMercSpell.spellid == 0) {
+											if (selectedMercSpell.spellid == 0) {
 												selectedMercSpell = GetBestMercSpellForRegularSingleTargetHeal(this);
 											}
 										}
@@ -2713,7 +2713,7 @@ int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
 	if(itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
 	{
-		int16 mana_back = itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
+		int mana_back = itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
 		// Doesnt generate mana, so best case is a free spell
 		if(mana_back > cost)
 			mana_back = cost;
@@ -2904,7 +2904,7 @@ std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, uint32 spellTy
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2941,7 +2941,7 @@ MercSpell Merc::GetFirstMercSpellBySpellType(Merc* caster, uint32 spellType) {
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -2979,7 +2979,7 @@ MercSpell Merc::GetMercSpellBySpellID(Merc* caster, uint16 spellid) {
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -3009,7 +3009,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffect(Merc* caster, int spellEf
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;
@@ -3039,7 +3039,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffectAndTargetType(Merc* caster
 		std::vector<MercSpell> mercSpellList = caster->GetMercSpells();
 
 		for (int i = mercSpellList.size() - 1; i >= 0; i--) {
-			if (mercSpellList[i].spellid <= 0 || mercSpellList[i].spellid >= SPDAT_RECORDS) {
+			if (!IsValidSpell(mercSpellList[i].spellid)) {
 				// this is both to quit early to save cpu and to avoid casting bad spells
 				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 				continue;

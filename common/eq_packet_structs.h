@@ -374,18 +374,18 @@ struct NewZone_Struct {
 /*0684*/	uint16	zone_id;
 /*0686*/	uint16	zone_instance;
 /*0688*/	uint32	unknown688;
-/*0692*/	uint8	unknown692[8];
+/*0692*/	uint8  unknown692[8];
 // Titanium doesn't have a translator, but we can still safely add stuff under here without issues since client memcpy's only what it knows
 // Just wastes some bandwidth sending to tit clients /shrug
-/*0700*/	float	fog_density;
-/*0704*/	uint32	SuspendBuffs;
-/*0708*/	uint32	FastRegenHP;
-/*0712*/	uint32	FastRegenMana;
-/*0716*/	uint32	FastRegenEndurance;
-/*0720*/	uint32	NPCAggroMaxDist;
-/*0724*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, if this value is 0, it prevents you from running off edges that would end up underworld
-/*0728*/	uint32	LavaDamage; // Seen 50
-/*0732*/	uint32	MinLavaDamage; // Seen 10
+/*0700*/	float  fog_density;
+/*0704*/	uint32 suspend_buffs;
+/*0708*/	uint32 fast_regen_hp;
+/*0712*/	uint32 fast_regen_mana;
+/*0716*/	uint32 fast_regen_endurance;
+/*0720*/	uint32 npc_aggro_max_dist;
+/*0724*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, if this value is 0, it prevents you from running off edges that would end up underworld
+/*0728*/	uint32 lava_damage; // Seen 50
+/*0732*/	uint32 min_lava_damage; // Seen 10
 /*0736*/
 };
 
@@ -3642,7 +3642,7 @@ struct MerchantList {
 	uint8 probability;
 	std::string bucket_name;
 	std::string bucket_value;
-	uint8 bucket_comparison; 
+	uint8 bucket_comparison;
 };
 
 struct TempMerchantList {

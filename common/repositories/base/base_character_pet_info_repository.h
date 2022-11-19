@@ -19,15 +19,15 @@
 class BaseCharacterPetInfoRepository {
 public:
 	struct CharacterPetInfo {
-		int         char_id;
-		int         pet;
+		int32_t     char_id;
+		int32_t     pet;
 		std::string petname;
-		int         petpower;
-		int         spell_id;
-		int         hp;
-		int         mana;
+		int32_t     petpower;
+		int32_t     spell_id;
+		int32_t     hp;
+		int32_t     mana;
 		float       size;
-		int         taunting;
+		int8_t      taunting;
 	};
 
 	static std::string PrimaryKey()
@@ -100,22 +100,22 @@ public:
 
 	static CharacterPetInfo NewEntity()
 	{
-		CharacterPetInfo entry{};
+		CharacterPetInfo e{};
 
-		entry.char_id  = 0;
-		entry.pet      = 0;
-		entry.petname  = "";
-		entry.petpower = 0;
-		entry.spell_id = 0;
-		entry.hp       = 0;
-		entry.mana     = 0;
-		entry.size     = 0;
-		entry.taunting = 1;
+		e.char_id  = 0;
+		e.pet      = 0;
+		e.petname  = "";
+		e.petpower = 0;
+		e.spell_id = 0;
+		e.hp       = 0;
+		e.mana     = 0;
+		e.size     = 0;
+		e.taunting = 1;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterPetInfo GetCharacterPetInfoEntry(
+	static CharacterPetInfo GetCharacterPetInfo(
 		const std::vector<CharacterPetInfo> &character_pet_infos,
 		int character_pet_info_id
 	)
@@ -144,19 +144,19 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterPetInfo entry{};
+			CharacterPetInfo e{};
 
-			entry.char_id  = atoi(row[0]);
-			entry.pet      = atoi(row[1]);
-			entry.petname  = row[2] ? row[2] : "";
-			entry.petpower = atoi(row[3]);
-			entry.spell_id = atoi(row[4]);
-			entry.hp       = atoi(row[5]);
-			entry.mana     = atoi(row[6]);
-			entry.size     = static_cast<float>(atof(row[7]));
-			entry.taunting = atoi(row[8]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.petname  = row[2] ? row[2] : "";
+			e.petpower = static_cast<int32_t>(atoi(row[3]));
+			e.spell_id = static_cast<int32_t>(atoi(row[4]));
+			e.hp       = static_cast<int32_t>(atoi(row[5]));
+			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.size     = strtof(row[7], nullptr);
+			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -181,30 +181,30 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterPetInfo character_pet_info_entry
+		const CharacterPetInfo &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_pet_info_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_pet_info_entry.pet));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(character_pet_info_entry.petname) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(character_pet_info_entry.petpower));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_pet_info_entry.spell_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_pet_info_entry.hp));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_pet_info_entry.mana));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_pet_info_entry.size));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_pet_info_entry.taunting));
+		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.pet));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.petname) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.petpower));
+		v.push_back(columns[4] + " = " + std::to_string(e.spell_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.hp));
+		v.push_back(columns[6] + " = " + std::to_string(e.mana));
+		v.push_back(columns[7] + " = " + std::to_string(e.size));
+		v.push_back(columns[8] + " = " + std::to_string(e.taunting));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_pet_info_entry.char_id
+				e.char_id
 			)
 		);
 
@@ -213,63 +213,63 @@ public:
 
 	static CharacterPetInfo InsertOne(
 		Database& db,
-		CharacterPetInfo character_pet_info_entry
+		CharacterPetInfo e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_pet_info_entry.char_id));
-		insert_values.push_back(std::to_string(character_pet_info_entry.pet));
-		insert_values.push_back("'" + Strings::Escape(character_pet_info_entry.petname) + "'");
-		insert_values.push_back(std::to_string(character_pet_info_entry.petpower));
-		insert_values.push_back(std::to_string(character_pet_info_entry.spell_id));
-		insert_values.push_back(std::to_string(character_pet_info_entry.hp));
-		insert_values.push_back(std::to_string(character_pet_info_entry.mana));
-		insert_values.push_back(std::to_string(character_pet_info_entry.size));
-		insert_values.push_back(std::to_string(character_pet_info_entry.taunting));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.pet));
+		v.push_back("'" + Strings::Escape(e.petname) + "'");
+		v.push_back(std::to_string(e.petpower));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.taunting));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_pet_info_entry.char_id = results.LastInsertedID();
-			return character_pet_info_entry;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		character_pet_info_entry = NewEntity();
+		e = NewEntity();
 
-		return character_pet_info_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterPetInfo> character_pet_info_entries
+		const std::vector<CharacterPetInfo> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_pet_info_entry: character_pet_info_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_pet_info_entry.char_id));
-			insert_values.push_back(std::to_string(character_pet_info_entry.pet));
-			insert_values.push_back("'" + Strings::Escape(character_pet_info_entry.petname) + "'");
-			insert_values.push_back(std::to_string(character_pet_info_entry.petpower));
-			insert_values.push_back(std::to_string(character_pet_info_entry.spell_id));
-			insert_values.push_back(std::to_string(character_pet_info_entry.hp));
-			insert_values.push_back(std::to_string(character_pet_info_entry.mana));
-			insert_values.push_back(std::to_string(character_pet_info_entry.size));
-			insert_values.push_back(std::to_string(character_pet_info_entry.taunting));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.pet));
+			v.push_back("'" + Strings::Escape(e.petname) + "'");
+			v.push_back(std::to_string(e.petpower));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.taunting));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -296,25 +296,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetInfo entry{};
+			CharacterPetInfo e{};
 
-			entry.char_id  = atoi(row[0]);
-			entry.pet      = atoi(row[1]);
-			entry.petname  = row[2] ? row[2] : "";
-			entry.petpower = atoi(row[3]);
-			entry.spell_id = atoi(row[4]);
-			entry.hp       = atoi(row[5]);
-			entry.mana     = atoi(row[6]);
-			entry.size     = static_cast<float>(atof(row[7]));
-			entry.taunting = atoi(row[8]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.petname  = row[2] ? row[2] : "";
+			e.petpower = static_cast<int32_t>(atoi(row[3]));
+			e.spell_id = static_cast<int32_t>(atoi(row[4]));
+			e.hp       = static_cast<int32_t>(atoi(row[5]));
+			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.size     = strtof(row[7], nullptr);
+			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterPetInfo> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterPetInfo> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterPetInfo> all_entries;
 
@@ -329,25 +329,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterPetInfo entry{};
+			CharacterPetInfo e{};
 
-			entry.char_id  = atoi(row[0]);
-			entry.pet      = atoi(row[1]);
-			entry.petname  = row[2] ? row[2] : "";
-			entry.petpower = atoi(row[3]);
-			entry.spell_id = atoi(row[4]);
-			entry.hp       = atoi(row[5]);
-			entry.mana     = atoi(row[6]);
-			entry.size     = static_cast<float>(atof(row[7]));
-			entry.taunting = atoi(row[8]);
+			e.char_id  = static_cast<int32_t>(atoi(row[0]));
+			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.petname  = row[2] ? row[2] : "";
+			e.petpower = static_cast<int32_t>(atoi(row[3]));
+			e.spell_id = static_cast<int32_t>(atoi(row[4]));
+			e.hp       = static_cast<int32_t>(atoi(row[5]));
+			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.size     = strtof(row[7], nullptr);
+			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -370,6 +370,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

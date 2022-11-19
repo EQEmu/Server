@@ -67,6 +67,8 @@ std::string GetPlatformName()
 			return "Launch";
 		case EQEmuExePlatform::ExePlatformHC:
 			return "HC";
+		case EQEmuExePlatform::ExePlatformTests:
+			return "Tests";
 		default:
 			return "";
 	}

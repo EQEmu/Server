@@ -38,6 +38,7 @@
 #include "../common/net/tcp_server.h"
 #include "../common/net/servertalk_client_connection.h"
 #include "../common/discord_manager.h"
+#include "../common/path_manager.h"
 
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
@@ -45,6 +46,7 @@ EQEmuLogSys LogSys;
 Database database;
 WorldServer *worldserver = nullptr;
 DiscordManager discord_manager;
+PathManager path;
 
 const ucsconfig *Config;
 
@@ -101,6 +103,8 @@ int main() {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
+	path.LoadPaths();
+
 	// Check every minute for unused channels we can delete
 	//
 	Timer ChannelListProcessTimer(60000);
@@ -132,6 +136,7 @@ int main() {
 	}
 
 	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 

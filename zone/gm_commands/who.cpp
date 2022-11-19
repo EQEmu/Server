@@ -98,12 +98,11 @@ void command_who(Client *c, const Seperator *sep)
 
 		std::string displayed_guild_name;
 		if (guild_name.length()) {
-			displayed_guild_name = Saylink::Create(
+			displayed_guild_name = Saylink::Silent(
 				fmt::format(
 					"#who \"{}\"",
 					guild_name
 				),
-				false,
 				fmt::format(
 					"<{}>",
 					guild_name
@@ -111,21 +110,19 @@ void command_who(Client *c, const Seperator *sep)
 			);
 		}
 
-		auto goto_saylink = Saylink::Create(
+		auto goto_saylink = Saylink::Silent(
 			fmt::format(
 				"#goto {}",
 				player_name
 			),
-			false,
 			"Goto"
 		);
 
-		auto summon_saylink = Saylink::Create(
+		auto summon_saylink = Saylink::Silent(
 			fmt::format(
 				"#summon {}",
 				player_name
 			),
-			false,
 			"Summon"
 		);
 
@@ -134,48 +131,43 @@ void command_who(Client *c, const Seperator *sep)
 			static_cast<uint8>(player_level)
 		);
 
-		auto class_saylink = Saylink::Create(
+		auto class_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				base_class_name
 			),
-			false,
 			display_class_name
 		);
 
-		auto race_saylink = Saylink::Create(
+		auto race_saylink = Saylink::Silent(
 			fmt::format(
 				"#who %s",
 				displayed_race_name
 			),
-			false,
 			displayed_race_name
 		);
 
-		auto zone_saylink = Saylink::Create(
+		auto zone_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				zone_short_name
 			),
-			false,
 			zone_long_name
 		);
 
-		auto account_saylink = Saylink::Create(
+		auto account_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				account_name
 			),
-			false,
 			account_name
 		);
 
-		auto account_ip_saylink = Saylink::Create(
+		auto account_ip_saylink = Saylink::Silent(
 			fmt::format(
 				"#who {}",
 				account_ip
 			),
-			false,
 			account_ip
 		);
 

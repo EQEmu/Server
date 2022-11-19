@@ -60,10 +60,13 @@ void command_findzone(Client *c, const Seperator *sep)
 			break;
 		}
 
-		std::string command_zone   = Saylink::Create("#zone " + short_name, false, "zone");
-		std::string command_gmzone = Saylink::Create(
-			fmt::format("#gmzone {} {}", short_name, version),
-			false,
+		std::string command_zone   = Saylink::Silent("#zone " + short_name, "zone");
+		std::string command_gmzone = Saylink::Silent(
+			fmt::format(
+				"#gmzone {} {}",
+				short_name,
+				version
+			),
 			"gmzone"
 		);
 

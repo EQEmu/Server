@@ -19,13 +19,13 @@
 class BaseCharacterMaterialRepository {
 public:
 	struct CharacterMaterial {
-		int id;
-		int slot;
-		int blue;
-		int green;
-		int red;
-		int use_tint;
-		int color;
+		uint32_t id;
+		uint8_t  slot;
+		uint8_t  blue;
+		uint8_t  green;
+		uint8_t  red;
+		uint8_t  use_tint;
+		uint32_t color;
 	};
 
 	static std::string PrimaryKey()
@@ -94,20 +94,20 @@ public:
 
 	static CharacterMaterial NewEntity()
 	{
-		CharacterMaterial entry{};
+		CharacterMaterial e{};
 
-		entry.id       = 0;
-		entry.slot     = 0;
-		entry.blue     = 0;
-		entry.green    = 0;
-		entry.red      = 0;
-		entry.use_tint = 0;
-		entry.color    = 0;
+		e.id       = 0;
+		e.slot     = 0;
+		e.blue     = 0;
+		e.green    = 0;
+		e.red      = 0;
+		e.use_tint = 0;
+		e.color    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterMaterial GetCharacterMaterialEntry(
+	static CharacterMaterial GetCharacterMaterial(
 		const std::vector<CharacterMaterial> &character_materials,
 		int character_material_id
 	)
@@ -136,17 +136,17 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterMaterial entry{};
+			CharacterMaterial e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot     = atoi(row[1]);
-			entry.blue     = atoi(row[2]);
-			entry.green    = atoi(row[3]);
-			entry.red      = atoi(row[4]);
-			entry.use_tint = atoi(row[5]);
-			entry.color    = atoi(row[6]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -171,27 +171,27 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterMaterial character_material_entry
+		const CharacterMaterial &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(character_material_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_material_entry.blue));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_material_entry.green));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_material_entry.red));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_material_entry.use_tint));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_material_entry.color));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.blue));
+		v.push_back(columns[3] + " = " + std::to_string(e.green));
+		v.push_back(columns[4] + " = " + std::to_string(e.red));
+		v.push_back(columns[5] + " = " + std::to_string(e.use_tint));
+		v.push_back(columns[6] + " = " + std::to_string(e.color));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_material_entry.id
+				e.id
 			)
 		);
 
@@ -200,59 +200,59 @@ public:
 
 	static CharacterMaterial InsertOne(
 		Database& db,
-		CharacterMaterial character_material_entry
+		CharacterMaterial e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_material_entry.id));
-		insert_values.push_back(std::to_string(character_material_entry.slot));
-		insert_values.push_back(std::to_string(character_material_entry.blue));
-		insert_values.push_back(std::to_string(character_material_entry.green));
-		insert_values.push_back(std::to_string(character_material_entry.red));
-		insert_values.push_back(std::to_string(character_material_entry.use_tint));
-		insert_values.push_back(std::to_string(character_material_entry.color));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.blue));
+		v.push_back(std::to_string(e.green));
+		v.push_back(std::to_string(e.red));
+		v.push_back(std::to_string(e.use_tint));
+		v.push_back(std::to_string(e.color));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_material_entry.id = results.LastInsertedID();
-			return character_material_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_material_entry = NewEntity();
+		e = NewEntity();
 
-		return character_material_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterMaterial> character_material_entries
+		const std::vector<CharacterMaterial> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_material_entry: character_material_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_material_entry.id));
-			insert_values.push_back(std::to_string(character_material_entry.slot));
-			insert_values.push_back(std::to_string(character_material_entry.blue));
-			insert_values.push_back(std::to_string(character_material_entry.green));
-			insert_values.push_back(std::to_string(character_material_entry.red));
-			insert_values.push_back(std::to_string(character_material_entry.use_tint));
-			insert_values.push_back(std::to_string(character_material_entry.color));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.blue));
+			v.push_back(std::to_string(e.green));
+			v.push_back(std::to_string(e.red));
+			v.push_back(std::to_string(e.use_tint));
+			v.push_back(std::to_string(e.color));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -279,23 +279,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterMaterial entry{};
+			CharacterMaterial e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot     = atoi(row[1]);
-			entry.blue     = atoi(row[2]);
-			entry.green    = atoi(row[3]);
-			entry.red      = atoi(row[4]);
-			entry.use_tint = atoi(row[5]);
-			entry.color    = atoi(row[6]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterMaterial> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterMaterial> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterMaterial> all_entries;
 
@@ -310,23 +310,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterMaterial entry{};
+			CharacterMaterial e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot     = atoi(row[1]);
-			entry.blue     = atoi(row[2]);
-			entry.green    = atoi(row[3]);
-			entry.red      = atoi(row[4]);
-			entry.use_tint = atoi(row[5]);
-			entry.color    = atoi(row[6]);
+			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
+			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
+			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -349,6 +349,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

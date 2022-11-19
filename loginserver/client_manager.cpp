@@ -6,6 +6,7 @@ extern bool        run_server;
 
 #include "../common/eqemu_logsys.h"
 #include "../common/misc.h"
+#include "../common/path_manager.h"
 
 ClientManager::ClientManager()
 {
@@ -15,13 +16,18 @@ ClientManager::ClientManager()
 
 	titanium_stream = new EQ::Net::EQStreamManager(titanium_opts);
 	titanium_ops    = new RegularOpcodeManager;
-	if (!titanium_ops->LoadOpcodes(
+
+	std::string opcodes_path = fmt::format(
+		"{}/{}",
+		path.GetServerPath(),
 		server.config.GetVariableString(
 			"client_configuration",
 			"titanium_opcodes",
 			"login_opcodes.conf"
-		).c_str())) {
+		)
+	);
 
+	if (!titanium_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
 			"ClientManager fatal error: couldn't load opcodes for Titanium file [{0}]",
 			server.config.GetVariableString("client_configuration", "titanium_opcodes", "login_opcodes.conf")
@@ -49,14 +55,18 @@ ClientManager::ClientManager()
 	EQStreamManagerInterfaceOptions sod_opts(sod_port, false, false);
 	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops    = new RegularOpcodeManager;
-	if (
-		!sod_ops->LoadOpcodes(
-			server.config.GetVariableString(
-				"client_configuration",
-				"sod_opcodes",
-				"login_opcodes.conf"
-			).c_str()
-		)) {
+
+	opcodes_path = fmt::format(
+		"{}/{}",
+		path.GetServerPath(),
+		server.config.GetVariableString(
+			"client_configuration",
+			"sod_opcodes",
+			"login_opcodes.conf"
+		)
+	);
+
+	if (!sod_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
 			"ClientManager fatal error: couldn't load opcodes for SoD file {0}",
 			server.config.GetVariableString("client_configuration", "sod_opcodes", "login_opcodes.conf").c_str()

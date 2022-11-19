@@ -19,9 +19,9 @@
 class BaseAccountIpRepository {
 public:
 	struct AccountIp {
-		int         accid;
+		int32_t     accid;
 		std::string ip;
-		int         count;
+		int32_t     count;
 		std::string lastused;
 	};
 
@@ -85,17 +85,17 @@ public:
 
 	static AccountIp NewEntity()
 	{
-		AccountIp entry{};
+		AccountIp e{};
 
-		entry.accid    = 0;
-		entry.ip       = "";
-		entry.count    = 1;
-		entry.lastused = std::time(nullptr);
+		e.accid    = 0;
+		e.ip       = "";
+		e.count    = 1;
+		e.lastused = std::time(nullptr);
 
-		return entry;
+		return e;
 	}
 
-	static AccountIp GetAccountIpEntry(
+	static AccountIp GetAccountIp(
 		const std::vector<AccountIp> &account_ips,
 		int account_ip_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AccountIp entry{};
+			AccountIp e{};
 
-			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1] ? row[1] : "";
-			entry.count    = atoi(row[2]);
-			entry.lastused = row[3] ? row[3] : "";
+			e.accid    = static_cast<int32_t>(atoi(row[0]));
+			e.ip       = row[1] ? row[1] : "";
+			e.count    = static_cast<int32_t>(atoi(row[2]));
+			e.lastused = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,25 +156,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountIp account_ip_entry
+		const AccountIp &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_ip_entry.accid));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(account_ip_entry.ip) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(account_ip_entry.count));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(account_ip_entry.lastused) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.accid));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.ip) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.count));
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				account_ip_entry.accid
+				e.accid
 			)
 		);
 
@@ -183,53 +183,53 @@ public:
 
 	static AccountIp InsertOne(
 		Database& db,
-		AccountIp account_ip_entry
+		AccountIp e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(account_ip_entry.accid));
-		insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
-		insert_values.push_back(std::to_string(account_ip_entry.count));
-		insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
+		v.push_back(std::to_string(e.accid));
+		v.push_back("'" + Strings::Escape(e.ip) + "'");
+		v.push_back(std::to_string(e.count));
+		v.push_back("'" + Strings::Escape(e.lastused) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			account_ip_entry.accid = results.LastInsertedID();
-			return account_ip_entry;
+			e.accid = results.LastInsertedID();
+			return e;
 		}
 
-		account_ip_entry = NewEntity();
+		e = NewEntity();
 
-		return account_ip_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AccountIp> account_ip_entries
+		const std::vector<AccountIp> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_ip_entry: account_ip_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(account_ip_entry.accid));
-			insert_values.push_back("'" + Strings::Escape(account_ip_entry.ip) + "'");
-			insert_values.push_back(std::to_string(account_ip_entry.count));
-			insert_values.push_back("'" + Strings::Escape(account_ip_entry.lastused) + "'");
+			v.push_back(std::to_string(e.accid));
+			v.push_back("'" + Strings::Escape(e.ip) + "'");
+			v.push_back(std::to_string(e.count));
+			v.push_back("'" + Strings::Escape(e.lastused) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -256,20 +256,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountIp entry{};
+			AccountIp e{};
 
-			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1] ? row[1] : "";
-			entry.count    = atoi(row[2]);
-			entry.lastused = row[3] ? row[3] : "";
+			e.accid    = static_cast<int32_t>(atoi(row[0]));
+			e.ip       = row[1] ? row[1] : "";
+			e.count    = static_cast<int32_t>(atoi(row[2]));
+			e.lastused = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<AccountIp> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AccountIp> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AccountIp> all_entries;
 
@@ -284,20 +284,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountIp entry{};
+			AccountIp e{};
 
-			entry.accid    = atoi(row[0]);
-			entry.ip       = row[1] ? row[1] : "";
-			entry.count    = atoi(row[2]);
-			entry.lastused = row[3] ? row[3] : "";
+			e.accid    = static_cast<int32_t>(atoi(row[0]));
+			e.ip       = row[1] ? row[1] : "";
+			e.count    = static_cast<int32_t>(atoi(row[2]));
+			e.lastused = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -320,6 +320,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

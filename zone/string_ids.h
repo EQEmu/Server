@@ -181,6 +181,7 @@
 #define PET_SPELLHOLD_SET_ON		702		//The pet spellhold mode has been set to on.
 #define PET_SPELLHOLD_SET_OFF		703		//The pet spellhold mode has been set to off.
 #define GUILD_NAME_IN_USE			711		//You cannot create a guild with that name, that guild already exists on this server.
+#define AA_CAP						1000	//You have reached the AA point cap, and cannot gain any further experience until some of your stored AA point pool is used.
 #define GM_GAINXP					1002	//[GM] You have gained %1 AXP and %2 EXP (%3).
 #define MALE_SLAYUNDEAD				1007	//%1's holy blade cleanses his target!(%2)
 #define FEMALE_SLAYUNDEAD			1008	//%1's holy blade cleanses her target!(%2)
@@ -210,6 +211,7 @@
 #define EATING_MESSAGE				1091	//Chomp, chomp, chomp... %1 takes a bite from a %2.
 #define DRINKING_MESSAGE			1093	//Glug, glug, glug... %1 takes a drink from a %2.
 #define SUCCESSFUL_TAUNT			1095	//I'll teach you to interfere with me %3.
+#define TRADE_BACK                  1105    //I have no need for this %3, you can have it back.
 #define PET_SIT_STRING				1130	//Changing position, Master.
 #define PET_CALMING					1131	//Sorry, Master..calming down.
 #define PET_FOLLOWING				1132	//Following you, Master.
@@ -294,6 +296,7 @@
 #define ALREADY_SHIELDING			3280	//Either you or your target is already shielding another.
 #define START_SHIELDING				3281	//%1 begins to use %2 as a living shield!
 #define END_SHIELDING				3282	//%1 ceases protecting %2.
+#define OVER_AA_CAP					3374	//Warning: You are currently over the earned Advancement point limit of %1. Please spend some of your stored AA points. The NEXT time you zone all of your AA points over %2 will be deleted. You MUST spend the extra points now.
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
@@ -453,6 +456,7 @@
 #define NO_CAST_OUT_OF_COMBAT		9191	//You can not cast this spell while out of combat.
 #define NO_ABILITY_IN_COMBAT		9192	//You can not use this ability while in combat.
 #define NO_ABILITY_OUT_OF_COMBAT	9194	//You can not use this ability while out of combat.
+#define LESSER_SPELL_VERSION        11004   //%1 is a lesser version of %2 and cannot be scribed
 #define AE_RAMPAGE					11015	//%1 goes on a WILD RAMPAGE!
 #define FACE_ACCEPTED				12028	//Facial features accepted.
 #define TRACKING_BEGIN				12040   //You begin tracking %1.

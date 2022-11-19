@@ -257,8 +257,9 @@ bool HateList::RemoveEntFromHateList(Mob *in_entity)
 	return is_found;
 }
 
-void HateList::DoFactionHits(int64 npc_faction_level_id) {
-	if (npc_faction_level_id <= 0)
+// so if faction_id and faction_value are set, we do RewardFaction, otherwise old stuff
+void HateList::DoFactionHits(int64 npc_faction_level_id, int32 faction_id, int32 faction_value) {
+	if (npc_faction_level_id <= 0 && faction_id <= 0 && faction_value == 0)
 		return;
 	auto iterator = list.begin();
 	while (iterator != list.end())
@@ -270,8 +271,13 @@ void HateList::DoFactionHits(int64 npc_faction_level_id) {
 		else
 			client = nullptr;
 
-		if (client)
-			client->SetFactionLevel(client->CharacterID(), npc_faction_level_id, client->GetBaseClass(), client->GetBaseRace(), client->GetDeity());
+		if (client) {
+			if (faction_id != 0 && faction_value != 0) {
+				client->RewardFaction(faction_id, faction_value);
+			} else {
+				client->SetFactionLevel(client->CharacterID(), npc_faction_level_id, client->GetBaseClass(), client->GetBaseRace(), client->GetDeity());
+			}
+		}
 		++iterator;
 	}
 }
@@ -844,19 +850,6 @@ void HateList::RemoveStaleEntries(int time_ms, float dist)
 	}
 }
 
-std::list<struct_HateList*> HateList::GetHateListByDistance(int distance)
-{
-	std::list<struct_HateList*> hate_list;
-	int squared_distance = (distance * distance);
-	for (auto hate_iterator : list) {
-		auto hate_entry = hate_iterator->entity_on_hatelist;
-		if (distance == 0 || (distance > 0 && DistanceSquaredNoZ(hate_owner->GetPosition(), hate_entry->GetPosition()) <= squared_distance)) {
-			hate_list.push_back(hate_iterator);
-		}
-	}
-	return hate_list;
-}
-
 #ifdef BOTS
 Bot* HateList::GetRandomBotOnHateList(bool skip_mezzed)
 {
@@ -1004,4 +997,57 @@ NPC* HateList::GetRandomNPCOnHateList(bool skip_mezzed)
 	}
 
 	return nullptr;
+}
+
+void HateList::DamageHateList(int64 damage, uint32 distance, uint8 filter_type, bool is_percentage)
+{
+	if (damage <= 0) {
+		return;
+	}
+
+	const auto& l = GetFilteredHateList(distance, filter_type);
+	for (const auto& h : l) {
+		auto e = h->entity_on_hatelist;
+		if (is_percentage) {
+			const auto damage_percentage = EQ::Clamp(damage, static_cast<int64>(1), static_cast<int64>(100));
+			const auto total_damage = (e->GetMaxHP() / 100) * damage_percentage;
+			e->Damage(hate_owner, total_damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+		} else {
+			e->Damage(hate_owner, damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+		}
+	}
+}
+
+std::list<struct_HateList*> HateList::GetFilteredHateList(uint32 distance, uint8 filter_type)
+{
+	std::list<struct_HateList*> l;
+	const auto squared_distance = (distance * distance);
+	for (auto h : list) {
+		auto e = h->entity_on_hatelist;
+		if (!e) {
+			continue;
+		}
+
+		if (
+			distance &&
+			DistanceSquaredNoZ(
+				hate_owner->GetPosition(),
+				e->GetPosition()
+			) > squared_distance
+		) {
+			continue;
+		}
+
+		if (
+			(filter_type == EntityFilterTypes::Bots && !e->IsBot()) ||
+			(filter_type == EntityFilterTypes::Clients && !e->IsClient()) ||
+			(filter_type == EntityFilterTypes::NPCs && !e->IsNPC())
+		) {
+			continue;
+		}
+
+		l.push_back(h);
+	}
+
+	return l;
 }

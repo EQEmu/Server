@@ -352,14 +352,19 @@ void Perl_EntityList_MessageGroup(EntityList* self, Mob* sender, bool skip_close
 	self->MessageGroup(sender, skip_close, emote_color_type, message);
 }
 
+Client* Perl_EntityList_GetRandomClient(EntityList* self) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomClient();
+}
+
 Client* Perl_EntityList_GetRandomClient(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomClient(glm::vec3(x, y, z), (distance * distance));
+	return self->GetRandomClient(glm::vec3(x, y, z), distance);
 }
 
 Client* Perl_EntityList_GetRandomClient(EntityList* self, float x, float y, float z, float distance, Client* exclude_client) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomClient(glm::vec3(x, y, z), (distance * distance), exclude_client);
+	return self->GetRandomClient(glm::vec3(x, y, z), distance, exclude_client);
 }
 
 perl::array Perl_EntityList_GetMobList(EntityList* self) // @categories Script Utility
@@ -423,6 +428,17 @@ perl::array Perl_EntityList_GetBotListByCharacterID(EntityList* self, uint32_t c
 	return result;
 }
 
+perl::array Perl_EntityList_GetBotListByCharacterID(EntityList* self, uint32_t character_id, uint8_t class_id) // @categories Script Utility, Bot
+{
+	perl::array result;
+	auto current_bot_list = self->GetBotListByCharacterID(character_id, class_id);
+	for (int i = 0; i < current_bot_list.size(); ++i)
+	{
+		result.push_back(current_bot_list[i]);
+	}
+	return result;
+}
+
 perl::array Perl_EntityList_GetBotListByClientName(EntityList* self, std::string client_name) // @categories Script Utility, Bot
 {
 	perl::array result;
@@ -432,6 +448,21 @@ perl::array Perl_EntityList_GetBotListByClientName(EntityList* self, std::string
 		result.push_back(current_bot_list[i]);
 	}
 	return result;
+}
+
+void Perl_EntityList_SignalAllBotsByOwnerCharacterID(EntityList* self, uint32_t character_id, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalAllBotsByOwnerCharacterID(character_id, signal_id);
+}
+
+void Perl_EntityList_SignalBotByBotID(EntityList* self, uint32_t bot_id, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalBotByBotID(bot_id, signal_id);
+}
+
+void Perl_EntityList_SignalBotByBotName(EntityList* self, std::string bot_name, int signal_id) // @categories Script Utility
+{
+	entity_list.SignalBotByBotName(bot_name, signal_id);
 }
 #endif
 
@@ -496,25 +527,67 @@ void Perl_EntityList_SignalAllClients(EntityList* self, uint32_t data) // @categ
 	entity_list.SignalAllClients(data);
 }
 
+Mob* Perl_EntityList_GetRandomMob(EntityList* self) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomMob();
+}
+
 Mob* Perl_EntityList_GetRandomMob(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomMob(glm::vec3(x, y, z), (distance * distance));
+	return self->GetRandomMob(glm::vec3(x, y, z), distance);
 }
 
 Mob* Perl_EntityList_GetRandomMob(EntityList* self, float x, float y, float z, float distance, Mob* exclude_mob) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomMob(glm::vec3(x, y, z), (distance * distance), exclude_mob);
+	return self->GetRandomMob(glm::vec3(x, y, z), distance, exclude_mob);
+}
+
+NPC* Perl_EntityList_GetRandomNPC(EntityList* self) // @categories Account and Character, Script Utility
+{
+	return self->GetRandomNPC();
 }
 
 NPC* Perl_EntityList_GetRandomNPC(EntityList* self, float x, float y, float z, float distance) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomNPC(glm::vec3(x, y, z), (distance * distance));
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance);
 }
 
 NPC* Perl_EntityList_GetRandomNPC(EntityList* self, float x, float y, float z, float distance, NPC* exclude_npc) // @categories Account and Character, Script Utility
 {
-	return entity_list.GetRandomNPC(glm::vec3(x, y, z), (distance * distance), exclude_npc);
+	return self->GetRandomNPC(glm::vec3(x, y, z), distance, exclude_npc);
 }
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, std::string message)
+{
+	self->Marquee(type, message);
+}
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, std::string message, uint32 duration)
+{
+	self->Marquee(type, message, duration);
+}
+
+void Perl_EntityList_Marquee(EntityList* self, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	self->Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+#ifdef BOTS
+Bot* Perl_EntityList_GetRandomBot(EntityList* self) // @categories Bots, Script Utility
+{
+	return self->GetRandomBot();
+}
+
+Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, float distance) // @categories Bot, Script Utility
+{
+	return self->GetRandomBot(glm::vec3(x, y, z), distance);
+}
+
+Bot* Perl_EntityList_GetRandomBot(EntityList* self, float x, float y, float z, float distance, Bot* exclude_bot) // @categories Bot, Script Utility
+{
+	return self->GetRandomBot(glm::vec3(x, y, z), distance, exclude_bot);
+}
+#endif
 
 void perl_register_entitylist()
 {
@@ -534,7 +607,8 @@ void perl_register_entitylist()
 	package.add("GetBotByID", &Perl_EntityList_GetBotByID);
 	package.add("GetBotByName", &Perl_EntityList_GetBotByName);
 	package.add("GetBotList", &Perl_EntityList_GetBotList);
-	package.add("GetBotListByCharacterID", &Perl_EntityList_GetBotListByCharacterID);
+	package.add("GetBotListByCharacterID", (perl::array(*)(EntityList*, uint32))&Perl_EntityList_GetBotListByCharacterID);
+	package.add("GetBotListByCharacterID", (perl::array(*)(EntityList*, uint32, uint8))&Perl_EntityList_GetBotListByCharacterID);
 	package.add("GetBotListByClientName", &Perl_EntityList_GetBotListByClientName);
 #endif
 	package.add("GetClientByAccID", &Perl_EntityList_GetClientByAccID);
@@ -569,15 +643,26 @@ void perl_register_entitylist()
 	package.add("GetObjectList", &Perl_EntityList_GetObjectList);
 	package.add("GetRaidByClient", &Perl_EntityList_GetRaidByClient);
 	package.add("GetRaidByID", &Perl_EntityList_GetRaidByID);
+#ifdef BOTS
+	package.add("GetRandomBot", (Bot*(*)(EntityList*))&Perl_EntityList_GetRandomBot);
+	package.add("GetRandomBot", (Bot*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomBot);
+	package.add("GetRandomBot", (Bot*(*)(EntityList*, float, float, float, float, Bot*))&Perl_EntityList_GetRandomBot);
+#endif
+	package.add("GetRandomClient", (Client*(*)(EntityList*))&Perl_EntityList_GetRandomClient);
 	package.add("GetRandomClient", (Client*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomClient);
 	package.add("GetRandomClient", (Client*(*)(EntityList*, float, float, float, float, Client*))&Perl_EntityList_GetRandomClient);
+	package.add("GetRandomMob", (Mob*(*)(EntityList*))&Perl_EntityList_GetRandomMob);
 	package.add("GetRandomMob", (Mob*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomMob);
 	package.add("GetRandomMob", (Mob*(*)(EntityList*, float, float, float, float, Mob*))&Perl_EntityList_GetRandomMob);
+	package.add("GetRandomNPC", (NPC*(*)(EntityList*))&Perl_EntityList_GetRandomNPC);
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float))&Perl_EntityList_GetRandomNPC);
 	package.add("GetRandomNPC", (NPC*(*)(EntityList*, float, float, float, float, NPC*))&Perl_EntityList_GetRandomNPC);
 	package.add("HalveAggro", &Perl_EntityList_HalveAggro);
 	package.add("IsMobSpawnedByNpcTypeID", &Perl_EntityList_IsMobSpawnedByNpcTypeID);
 	package.add("MakeNameUnique", &Perl_EntityList_MakeNameUnique);
+	package.add("Marquee", (void(*)(EntityList*, uint32, std::string))&Perl_EntityList_Marquee);
+	package.add("Marquee", (void(*)(EntityList*, uint32, std::string, uint32))&Perl_EntityList_Marquee);
+	package.add("Marquee", (void(*)(EntityList*, uint32, uint32, uint32, uint32, uint32, std::string))&Perl_EntityList_Marquee);
 	package.add("Message", &Perl_EntityList_Message);
 	package.add("MessageClose", &Perl_EntityList_MessageClose);
 	package.add("MessageGroup", &Perl_EntityList_MessageGroup);
@@ -605,7 +690,14 @@ void perl_register_entitylist()
 	package.add("RemoveObject", &Perl_EntityList_RemoveObject);
 	package.add("RemoveTrap", &Perl_EntityList_RemoveTrap);
 	package.add("ReplaceWithTarget", &Perl_EntityList_ReplaceWithTarget);
+#ifdef BOTS
+	package.add("SignalAllBotsByOwnerCharacterID", &Perl_EntityList_SignalAllBotsByOwnerCharacterID);
+#endif
 	package.add("SignalAllClients", &Perl_EntityList_SignalAllClients);
+#ifdef BOTS
+	package.add("SignalBotByBotID", &Perl_EntityList_SignalBotByBotID);
+	package.add("SignalBotByBotName", &Perl_EntityList_SignalBotByBotName);
+#endif
 	package.add("SignalMobsByNPCID", &Perl_EntityList_SignalMobsByNPCID);
 }
 

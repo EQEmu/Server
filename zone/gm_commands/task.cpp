@@ -18,7 +18,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] List active tasks for a client",
-				Saylink::Create("#task show", false, "show")
+				Saylink::Silent("#task show", "show")
 			).c_str()
 		);
 		c->Message(Chat::White, "--- update <task_id> <activity_id> [count] | Updates task");
@@ -28,42 +28,35 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload all Task information from the database",
-				Saylink::Create("#task reloadall", false, "reloadall")
+				Saylink::Silent("#task reloadall", "reloadall")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] <task_id> Reload Task and Activity information for a single task",
-				Saylink::Create("#task reload task", false, "reload task")
+				Saylink::Silent("#task reload task", "reload task")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload goal/reward list information",
-				Saylink::Create("#task reload lists", false, "reload lists")
-			).c_str()
-		);
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"--- [{}] Reload proximity information",
-				Saylink::Create("#task reload prox", false, "reload prox")
+				Saylink::Silent("#task reload lists", "reload lists")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload task set information",
-				Saylink::Create("#task reload sets", false, "reload sets")
+				Saylink::Silent("#task reload sets", "reload sets")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges targeted characters task timers",
-				Saylink::Create("#task purgetimers", false, "purgetimers")
+				Saylink::Silent("#task purgetimers", "purgetimers")
 			).c_str()
 		);
 
@@ -74,7 +67,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges all active Shared Tasks in memory and database ",
-				Saylink::Create("#task sharedpurge", false, "sharedpurge")
+				Saylink::Silent("#task sharedpurge", "sharedpurge")
 			).c_str()
 		);
 		return;
@@ -112,7 +105,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] List active tasks for a client",
-				Saylink::Create("#task show", false, "show")
+				Saylink::Silent("#task show", "show")
 			).c_str()
 		);
 		c->Message(Chat::White, "--- update <task_id> <activity_id> [count] | Updates task");
@@ -122,42 +115,35 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload all Task information from the database",
-				Saylink::Create("#task reloadall", false, "reloadall")
+				Saylink::Silent("#task reloadall", "reloadall")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] <task_id> Reload Task and Activity information for a single task",
-				Saylink::Create("#task reload task", false, "reload task")
+				Saylink::Silent("#task reload task", "reload task")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload goal/reward list information",
-				Saylink::Create("#task reload lists", false, "reload lists")
-			).c_str()
-		);
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"--- [{}] Reload proximity information",
-				Saylink::Create("#task reload prox", false, "reload prox")
+				Saylink::Silent("#task reload lists", "reload lists")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Reload task set information",
-				Saylink::Create("#task reload sets", false, "reload sets")
+				Saylink::Silent("#task reload sets", "reload sets")
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges targeted characters task timers",
-				Saylink::Create("#task purgetimers", false, "purgetimers")
+				Saylink::Silent("#task purgetimers", "purgetimers")
 			).c_str()
 		);
 
@@ -168,7 +154,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges all active Shared Tasks in memory and database ",
-				Saylink::Create("#task sharedpurge", false, "sharedpurge")
+				Saylink::Silent("#task sharedpurge", "sharedpurge")
 			).c_str()
 		);
 		return;
@@ -176,7 +162,7 @@ void command_task(Client *c, const Seperator *sep)
 
 	if (is_assign) {
 		auto task_id = std::strtoul(sep->arg[2], nullptr, 10);
-		if (task_id && task_id < MAXTASKS) {
+		if (task_id) {
 			target->AssignTask(task_id, 0, false);
 			c->Message(
 				Chat::Yellow,
@@ -205,24 +191,14 @@ void command_task(Client *c, const Seperator *sep)
 		return;
 	} else if (is_reload) {
 		if (arguments >= 2) {
-			if (!strcasecmp(sep->arg[2], "lists")) {
-				c->Message(Chat::Yellow, "Attempting to reload goal lists.");
-				worldserver.SendReloadTasks(RELOADTASKGOALLISTS);
-				c->Message(Chat::Yellow, "Successfully reloaded goal lists.");
-				return;
-			} else if (!strcasecmp(sep->arg[2], "prox")) {
-				c->Message(Chat::Yellow, "Attempting to reload task proximites.");
-				worldserver.SendReloadTasks(RELOADTASKPROXIMITIES);
-				c->Message(Chat::Yellow, "Successfully reloaded task proximites.");
-				return;
-			} else if (!strcasecmp(sep->arg[2], "sets")) {
+			if (!strcasecmp(sep->arg[2], "sets")) {
 				c->Message(Chat::Yellow, "Attempting to reload task sets.");
 				worldserver.SendReloadTasks(RELOADTASKSETS);
 				c->Message(Chat::Yellow, "Successfully reloaded task sets.");
 				return;
 			} else if (!strcasecmp(sep->arg[2], "task") && arguments == 3) {
 				int task_id = std::strtoul(sep->arg[3], nullptr, 10);
-				if (task_id && task_id < MAXTASKS) {
+				if (task_id) {
 					c->Message(
 						Chat::Yellow,
 						fmt::format(
@@ -260,7 +236,7 @@ void command_task(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"[WARNING] This will purge all active Shared Tasks [{}]?",
-				Saylink::Create("#task sharedpurge confirm", false, "confirm")
+				Saylink::Silent("#task sharedpurge confirm", "confirm")
 			).c_str()
 		);
 
@@ -271,7 +247,7 @@ void command_task(Client *c, const Seperator *sep)
 	} else if (is_uncomplete) {
 		if (sep->IsNumber(2)) {
 			auto task_id = std::stoul(sep->arg[2]);
-			if (!task_id || task_id > MAXTASKS) {
+			if (!task_id) {
 				c->Message(Chat::White, "Invalid task ID specified.");
 				return;
 			}

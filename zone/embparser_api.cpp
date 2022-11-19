@@ -26,6 +26,7 @@
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
+#include "dialogue_window.h"
 #include "embperl.h"
 #include "embxs.h"
 #include "entity.h"
@@ -689,6 +690,11 @@ void Perl__faction(int faction_id, int value, int temp)
 	quest_manager.faction(faction_id, value, temp);
 }
 
+void Perl__rewardfaction(int faction_id, int value)
+{
+	quest_manager.rewardfaction(faction_id, value);
+}
+
 void Perl__setsky(uint8 new_sky)
 {
 	quest_manager.setsky(new_sky);
@@ -1059,9 +1065,19 @@ int Perl__createbotcount()
 	return quest_manager.createbotcount();
 }
 
+int Perl__createbotcount(uint8 class_id)
+{
+	return quest_manager.createbotcount(class_id);
+}
+
 int Perl__spawnbotcount()
 {
 	return quest_manager.spawnbotcount();
+}
+
+int Perl__spawnbotcount(uint8 class_id)
+{
+	return quest_manager.spawnbotcount(class_id);
 }
 
 bool Perl__botquest()
@@ -1083,17 +1099,32 @@ void Perl__taskselector(perl::array task_ids)
 		throw std::runtime_error(fmt::format("Exceeded max number of task offers [{}]", MAXCHOOSERENTRIES));
 	}
 
-	int tasks[MAXCHOOSERENTRIES];
+	std::vector<int> tasks;
 	for (int i = 0; i < task_ids.size(); ++i)
 	{
-		tasks[i] = task_ids[i];
+		tasks.push_back(task_ids[i]);
 	}
-	quest_manager.taskselector(static_cast<int>(task_ids.size()), tasks);
+	quest_manager.taskselector(tasks);
+}
+
+void Perl__taskselector_nocooldown(perl::array task_ids)
+{
+	std::vector<int> tasks;
+	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
+	{
+		tasks.push_back(task_ids[i]);
+	}
+	quest_manager.taskselector(tasks, true);
 }
 
 void Perl__task_setselector(int task_set_id)
 {
 	quest_manager.tasksetselector(task_set_id);
+}
+
+void Perl__task_setselector(int task_set_id, bool ignore_cooldown)
+{
+	quest_manager.tasksetselector(task_set_id, ignore_cooldown);
 }
 
 void Perl__enabletask(perl::array task_ids)
@@ -1160,11 +1191,6 @@ void Perl__updatetaskactivity(int task_id, int activity_id, int count, bool igno
 void Perl__resettaskactivity(int task_id, int activity_id)
 {
 	quest_manager.resettaskactivity(task_id, activity_id);
-}
-
-void Perl__taskexploredarea(int explore_id)
-{
-	quest_manager.taskexploredarea(explore_id);
 }
 
 void Perl__assigntask(int task_id)
@@ -1240,6 +1266,21 @@ bool Perl__istaskappropriate(int task_id)
 std::string Perl__gettaskname(uint32 task_id)
 {
 	return quest_manager.gettaskname(task_id);
+}
+
+int Perl__get_dz_task_id()
+{
+	return quest_manager.GetCurrentDzTaskID();
+}
+
+void Perl__end_dz_task()
+{
+	quest_manager.EndCurrentDzTask();
+}
+
+void Perl__end_dz_task(bool send_fail)
+{
+	quest_manager.EndCurrentDzTask(send_fail);
 }
 
 void Perl__popup(const char* window_title, const char* message)
@@ -2258,9 +2299,19 @@ double Perl__getaaexpmodifierbycharid(uint32 character_id, uint32 zone_id)
 	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id);
 }
 
+double Perl__getaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, int16 instance_version)
+{
+	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id, instance_version);
+}
+
 double Perl__getexpmodifierbycharid(uint32 character_id, uint32 zone_id)
 {
 	return quest_manager.GetEXPModifierByCharID(character_id, zone_id);
+}
+
+double Perl__getexpmodifierbycharid(uint32 character_id, uint32 zone_id, int16 instance_version)
+{
+	return quest_manager.GetEXPModifierByCharID(character_id, zone_id, instance_version);
 }
 
 void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double aa_modifier)
@@ -2268,9 +2319,19 @@ void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double 
 	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier);
 }
 
+void Perl__setaaexpmodifierbycharid(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version)
+{
+	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier, instance_version);
+}
+
 void Perl__setexpmodifierbycharid(uint32 character_id, uint32 zone_id, double exp_modifier)
 {
 	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier);
+}
+
+void Perl__setexpmodifierbycharid(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version)
+{
+	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier, instance_version);
 }
 
 std::string Perl__getcleannpcnamebyid(uint32 npc_id)
@@ -3073,38 +3134,38 @@ void Perl__crosszonesetentityvariablebynpctypeid(int npc_id, const char* variabl
 	quest_manager.CrossZoneSetEntityVariable(CZUpdateType_NPC, npc_id, variable_name, variable_value);
 }
 
-void Perl__crosszonesignalclientbycharid(int character_id, uint32 signal)
+void Perl__crosszonesignalclientbycharid(int character_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Character, character_id, signal);
 }
 
-void Perl__crosszonesignalclientbygroupid(int group_id, uint32 signal)
+void Perl__crosszonesignalclientbygroupid(int group_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Group, group_id, signal);
 }
 
-void Perl__crosszonesignalclientbyraidid(int raid_id, uint32 signal)
+void Perl__crosszonesignalclientbyraidid(int raid_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Raid, raid_id, signal);
 }
 
-void Perl__crosszonesignalclientbyguildid(int guild_id, uint32 signal)
+void Perl__crosszonesignalclientbyguildid(int guild_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Guild, guild_id, signal);
 }
 
-void Perl__crosszonesignalclientbyexpeditionid(uint32 expedition_id, uint32 signal)
+void Perl__crosszonesignalclientbyexpeditionid(uint32 expedition_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, expedition_id, signal);
 }
 
-void Perl__crosszonesignalclientbyname(const char* client_name, uint32 signal)
+void Perl__crosszonesignalclientbyname(const char* client_name, int signal)
 {
 	int update_identifier = 0;
 	quest_manager.CrossZoneSignal(CZUpdateType_Expedition, update_identifier, signal, client_name);
 }
 
-void Perl__crosszonesignalnpcbynpctypeid(uint32 npc_id, uint32 signal)
+void Perl__crosszonesignalnpcbynpctypeid(uint32 npc_id, int signal)
 {
 	quest_manager.CrossZoneSignal(CZUpdateType_NPC, npc_id, signal);
 }
@@ -3538,22 +3599,22 @@ void Perl__worldwidesetentityvariablenpc(const char* variable_name, const char* 
 	quest_manager.WorldWideSetEntityVariable(WWSetEntityVariableUpdateType_NPC, variable_name, variable_value);
 }
 
-void Perl__worldwidesignalnpc(uint32 signal)
+void Perl__worldwidesignalnpc(int signal)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_NPC, signal);
 }
 
-void Perl__worldwidesignalclient(uint32 signal)
+void Perl__worldwidesignalclient(int signal)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal);
 }
 
-void Perl__worldwidesignalclient(uint32 signal, uint8 min_status)
+void Perl__worldwidesignalclient(int signal, uint8 min_status)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal, min_status);
 }
 
-void Perl__worldwidesignalclient(uint32 signal, uint8 min_status, uint8 max_status)
+void Perl__worldwidesignalclient(int signal, uint8 min_status, uint8 max_status)
 {
 	quest_manager.WorldWideSignal(WWSignalUpdateType_Character, signal, min_status, max_status);
 }
@@ -3656,6 +3717,138 @@ void Perl__tracknpc(uint32 entity_id)
 	quest_manager.TrackNPC(entity_id);
 }
 
+int Perl__getrecipemadecount(uint32 recipe_id)
+{
+	return quest_manager.GetRecipeMadeCount(recipe_id);
+}
+
+std::string Perl__getrecipename(uint32 recipe_id)
+{
+	return quest_manager.GetRecipeName(recipe_id);
+}
+
+bool Perl__hasrecipelearned(uint32 recipe_id)
+{
+	return quest_manager.HasRecipeLearned(recipe_id);
+}
+
+bool Perl__IsRaining()
+{
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsRaining();
+}
+
+bool Perl__IsSnowing()
+{
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsSnowing();
+}
+
+std::string Perl__getaaname(int aa_id)
+{
+	if (!zone) {
+		return std::string();
+	}
+
+	return zone->GetAAName(aa_id);
+}
+
+std::string Perl__popupbreak() {
+	return DialogueWindow::Break();
+}
+
+std::string Perl__popupbreak(uint32 break_count) {
+	return DialogueWindow::Break(break_count);
+}
+
+std::string Perl__popupcentermessage(std::string message) {
+	return DialogueWindow::CenterMessage(message);
+}
+
+std::string Perl__popupcolormessage(std::string color, std::string message) {
+	return DialogueWindow::ColorMessage(color, message);
+}
+
+std::string Perl__popupindent() {
+	return DialogueWindow::Indent();
+}
+
+std::string Perl__popupindent(uint32 indent_count) {
+	return DialogueWindow::Indent(indent_count);
+}
+
+std::string Perl__popuplink(std::string link) {
+	return DialogueWindow::Link(link);
+}
+
+std::string Perl__popuplink(std::string link, std::string message) {
+	return DialogueWindow::Link(link, message);
+}
+
+std::string Perl__popuptable(std::string message) {
+	return DialogueWindow::Table(message);
+}
+
+std::string Perl__popuptablecell() {
+	return DialogueWindow::TableCell();
+}
+
+std::string Perl__popuptablecell(std::string message) {
+	return DialogueWindow::TableCell(message);
+}
+
+std::string Perl__popuptablerow(std::string message) {
+	return DialogueWindow::TableRow(message);
+}
+
+void Perl__marquee(uint32 type, std::string message)
+{
+	quest_manager.marquee(type, message);
+}
+
+void Perl__marquee(uint32 type, std::string message, uint32 duration)
+{
+	quest_manager.marquee(type, message, duration);
+}
+
+void Perl__marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	quest_manager.marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message);
+}
+
+void Perl__zonemarquee(uint32 type, std::string message, uint32 duration)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, message, duration);
+}
+
+void Perl__zonemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	if (!zone) {
+		return;
+	}
+
+	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3664,8 +3857,10 @@ void perl_register_quest()
 
 #ifdef BOTS
 	package.add("botquest", &Perl__botquest);
-	package.add("spawnbotcount", &Perl__spawnbotcount);
-	package.add("createbotcount", &Perl__createbotcount);
+	package.add("spawnbotcount", (int(*)())&Perl__spawnbotcount);
+	package.add("spawnbotcount", (int(*)(uint8))&Perl__spawnbotcount);
+	package.add("createbotcount", (int(*)())&Perl__createbotcount);
+	package.add("createbotcount", (int(*)(uint8))&Perl__createbotcount);
 	package.add("createBot", &Perl__createBot);
 #endif //BOTS
 
@@ -3702,6 +3897,8 @@ void perl_register_quest()
 	package.add("delete_data", &Perl__delete_data);
 	package.add("IsBeneficialSpell", &Perl__IsBeneficialSpell);
 	package.add("IsEffectInSpell", &Perl__IsEffectInSpell);
+	package.add("IsRaining", &Perl__IsRaining);
+	package.add("IsSnowing", &Perl__IsSnowing);
 	package.add("IsRunning", &Perl__IsRunning);
 	package.add("LearnRecipe", &Perl__LearnRecipe);
 	package.add("MerchantCountItem", &Perl__MerchantCountItem);
@@ -3966,9 +4163,9 @@ void perl_register_quest()
 	package.add("worldwidesetentityvariableclient", (void(*)(const char*, const char*, uint8))&Perl__worldwidesetentityvariableclient);
 	package.add("worldwidesetentityvariableclient", (void(*)(const char*, const char*, uint8, uint8))&Perl__worldwidesetentityvariableclient);
 	package.add("worldwidesetentityvariablenpc", &Perl__worldwidesetentityvariablenpc);
-	package.add("worldwidesignalclient", (void(*)(uint32))&Perl__worldwidesignalclient);
-	package.add("worldwidesignalclient", (void(*)(uint32, uint8))&Perl__worldwidesignalclient);
-	package.add("worldwidesignalclient", (void(*)(uint32, uint8, uint8))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int, uint8))&Perl__worldwidesignalclient);
+	package.add("worldwidesignalclient", (void(*)(int, uint8, uint8))&Perl__worldwidesignalclient);
 	package.add("worldwidesignalnpc", &Perl__worldwidesignalnpc);
 	package.add("worldwideupdateactivity", (void(*)(uint32, int))&Perl__worldwideupdateactivity);
 	package.add("worldwideupdateactivity", (void(*)(uint32, int, int))&Perl__worldwideupdateactivity);
@@ -3999,6 +4196,8 @@ void perl_register_quest()
 	package.add("enablerecipe", &Perl__enablerecipe);
 	package.add("enabletask", &Perl__enabletask);
 	package.add("enabletitle", &Perl__enabletitle);
+	package.add("end_dz_task", (void(*)())&Perl__end_dz_task);
+	package.add("end_dz_task", (void(*)(bool))&Perl__end_dz_task);
 	package.add("exp", &Perl__exp);
 	package.add("faction", (void(*)(int, int))&Perl__faction);
 	package.add("faction", (void(*)(int, int, int))&Perl__faction);
@@ -4011,7 +4210,9 @@ void perl_register_quest()
 	package.add("forcedoorclose", (void(*)(uint32, bool))&Perl__forcedoorclose);
 	package.add("forcedooropen", (void(*)(uint32))&Perl__forcedooropen);
 	package.add("forcedooropen", (void(*)(uint32, bool))&Perl__forcedooropen);
-	package.add("getaaexpmodifierbycharid", &Perl__getaaexpmodifierbycharid);
+	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getaaexpmodifierbycharid);
+	package.add("getaaexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getaaexpmodifierbycharid);
+	package.add("getaaname", (std::string(*)(int))&Perl__getaaname);
 	package.add("getbodytypename", &Perl__getbodytypename);
 	package.add("getcharidbyname", &Perl__getcharidbyname);
 	package.add("getclassname", (std::string(*)(uint8))&Perl__getclassname);
@@ -4020,7 +4221,9 @@ void perl_register_quest()
 	package.add("getconsiderlevelname", &Perl__getconsiderlevelname);
 	package.add("gethexcolorcode", &Perl__gethexcolorcode);
 	package.add("getcurrencyid", &Perl__getcurrencyid);
-	package.add("getexpmodifierbycharid", &Perl__getexpmodifierbycharid);
+	package.add("get_dz_task_id", &Perl__get_dz_task_id);
+	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32))&Perl__getexpmodifierbycharid);
+	package.add("getexpmodifierbycharid", (double(*)(uint32, uint32, int16))&Perl__getexpmodifierbycharid);
 	package.add("get_expedition", &Perl__get_expedition);
 	package.add("get_expedition_by_char_id", &Perl__get_expedition_by_char_id);
 	package.add("get_expedition_by_dz_id", &Perl__get_expedition_by_dz_id);
@@ -4060,6 +4263,8 @@ void perl_register_quest()
 	package.add("getplayerburiedcorpsecount", &Perl__getplayerburiedcorpsecount);
 	package.add("getplayercorpsecount", &Perl__getplayercorpsecount);
 	package.add("getplayercorpsecountbyzoneid", &Perl__getplayercorpsecountbyzoneid);
+	package.add("getrecipemadecount", &Perl__getrecipemadecount);
+	package.add("getrecipename", &Perl__getrecipename);
 	package.add("gettaskactivitydonecount", &Perl__gettaskactivitydonecount);
 	package.add("gettaskname", &Perl__gettaskname);
 	package.add("gettimerdurationMS", &Perl__gettimerdurationMS);
@@ -4074,6 +4279,7 @@ void perl_register_quest()
 	package.add("gmsay", (void(*)(const char*, int, bool, int))&Perl__gmsay);
 	package.add("gmsay", (void(*)(const char*, int, bool, int, int))&Perl__gmsay);
 	package.add("has_zone_flag", &Perl__has_zone_flag);
+	package.add("hasrecipelearned", &Perl__hasrecipelearned);
 	package.add("hastimer", &Perl__hastimer);
 	package.add("incstat", &Perl__incstat);
 	package.add("isdisctome", &Perl__isdisctome);
@@ -4089,6 +4295,9 @@ void perl_register_quest()
 	package.add("level", &Perl__level);
 	package.add("log", &Perl__log);
 	package.add("log_combat", &Perl__log_combat);
+	package.add("marquee", (void(*)(uint32, std::string))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, std::string, uint32))&Perl__marquee);
+	package.add("marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__marquee);
 	package.add("me", &Perl__me);
 	package.add("message", &Perl__message);
 	package.add("modifynpcstat", &Perl__ModifyNPCStat);
@@ -4117,6 +4326,18 @@ void perl_register_quest()
 	package.add("popup", (void(*)(const char*, const char*, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int))&Perl__popup);
 	package.add("popup", (void(*)(const char*, const char*, int, int, int))&Perl__popup);
+	package.add("popupbreak", (std::string(*)())&Perl__popupbreak);
+	package.add("popupbreak", (std::string(*)(uint32))&Perl__popupbreak);
+	package.add("popupcentermessage", &Perl__popupcentermessage);
+	package.add("popupcolormessage", &Perl__popupcolormessage);
+	package.add("popupindent", (std::string(*)())&Perl__popupindent);
+	package.add("popupindent", (std::string(*)(uint32))&Perl__popupindent);
+	package.add("popuplink", (std::string(*)(std::string))&Perl__popuplink);
+	package.add("popuplink", (std::string(*)(std::string, std::string))&Perl__popuplink);
+	package.add("popuptable", &Perl__popuptable);
+	package.add("popuptablecell", (std::string(*)())&Perl__popuptablecell);
+	package.add("popuptablecell", (std::string(*)(std::string))&Perl__popuptablecell);
+	package.add("popuptablerow", &Perl__popuptablerow);
 	package.add("processmobswhilezoneempty", &Perl__processmobswhilezoneempty);
 	package.add("pvp", &Perl__pvp);
 	package.add("qs_player_event", &Perl__qs_player_event);
@@ -4136,6 +4357,7 @@ void perl_register_quest()
 	package.add("resettaskactivity", &Perl__resettaskactivity);
 	package.add("respawn", &Perl__respawn);
 	package.add("resume", &Perl__resume);
+	package.add("rewardfaction", &Perl__rewardfaction);
 	package.add("safemove", &Perl__safemove);
 	package.add("save", &Perl__save);
 	package.add("say", (void(*)(const char*))&Perl__say);
@@ -4150,14 +4372,16 @@ void perl_register_quest()
 	package.add("scribespells", (int(*)(int, int))&Perl__scribespells);
 	package.add("secondstotime", &Perl__secondstotime);
 	package.add("selfcast", &Perl__selfcast);
-	package.add("setaaexpmodifierbycharid", &Perl__setaaexpmodifierbycharid);
+	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setaaexpmodifierbycharid);
+	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setaaexpmodifierbycharid);
 	package.add("set_proximity", (void(*)(float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float, bool))&Perl__set_proximity);
 	package.add("set_zone_flag", &Perl__set_zone_flag);
 	package.add("setallskill", &Perl__setallskill);
 	package.add("setanim", &Perl__setanim);
-	package.add("setexpmodifierbycharid", &Perl__setexpmodifierbycharid);
+	package.add("setexpmodifierbycharid", (void(*)(uint32, uint32, double))&Perl__setexpmodifierbycharid);
+	package.add("setexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setexpmodifierbycharid);
 	package.add("setglobal", &Perl__setglobal);
 	package.add("setguild", &Perl__setguild);
 	package.add("sethp", &Perl__sethp);
@@ -4196,9 +4420,10 @@ void perl_register_quest()
 	package.add("summonitem", (void(*)(int, int))&Perl__summonitem);
 	package.add("surname", &Perl__surname);
 	package.add("targlobal", &Perl__targlobal);
-	package.add("taskexploredarea", &Perl__taskexploredarea);
 	package.add("taskselector", &Perl__taskselector);
-	package.add("task_setselector", &Perl__task_setselector);
+	package.add("taskselector_nocooldown", &Perl__taskselector_nocooldown);
+	package.add("task_setselector", (void(*)(int))&Perl__task_setselector);
+	package.add("task_setselector", (void(*)(int, bool))&Perl__task_setselector);
 	package.add("tasktimeleft", &Perl__tasktimeleft);
 	package.add("toggle_spawn_event", &Perl__toggle_spawn_event);
 	package.add("toggledoorstate", &Perl__toggledoorstate);
@@ -4225,6 +4450,9 @@ void perl_register_quest()
 	package.add("write", &Perl__write);
 	package.add("ze", &Perl__ze);
 	package.add("zone", &Perl__zone);
+	package.add("zonemarquee", (void(*)(uint32, std::string))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, std::string, uint32))&Perl__zonemarquee);
+	package.add("zonemarquee", (void(*)(uint32, uint32, uint32, uint32, uint32, std::string))&Perl__zonemarquee);
 	package.add("zonegroup", &Perl__zonegroup);
 	package.add("zoneraid", &Perl__zoneraid);
 

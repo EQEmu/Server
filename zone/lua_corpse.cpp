@@ -82,6 +82,16 @@ uint32 Lua_Corpse::CountItems() {
 	return self->CountItems();
 }
 
+void Lua_Corpse::AddItem(uint32 itemnum, uint16 charges) {
+	Lua_Safe_Call_Void();
+	self->AddItem(itemnum, charges);
+}
+
+void Lua_Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot) {
+	Lua_Safe_Call_Void();
+	self->AddItem(itemnum, charges, slot);
+}
+
 void Lua_Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5) {
 	Lua_Safe_Call_Void();
 	self->AddItem(itemnum, charges, slot, aug1, aug2, aug3, aug4, aug5);
@@ -110,6 +120,11 @@ void Lua_Corpse::RemoveCash() {
 bool Lua_Corpse::IsEmpty() {
 	Lua_Safe_Call_Bool();
 	return self->IsEmpty();
+}
+
+void Lua_Corpse::ResetDecayTimer() {
+	Lua_Safe_Call_Void();
+	self->ResetDecayTimer();
 }
 
 void Lua_Corpse::SetDecayTimer(uint32 decaytime) {
@@ -204,6 +219,8 @@ luabind::scope lua_register_corpse() {
 	.def(luabind::constructor<>())
 	.property("null", &Lua_Corpse::Null)
 	.property("valid", &Lua_Corpse::Valid)
+	.def("AddItem", (void(Lua_Corpse::*)(uint32, uint16))&Lua_Corpse::AddItem)
+	.def("AddItem", (void(Lua_Corpse::*)(uint32, uint16, int16))&Lua_Corpse::AddItem)
 	.def("AddItem", (void(Lua_Corpse::*)(uint32, uint16, int16, uint32, uint32, uint32, uint32, uint32))&Lua_Corpse::AddItem)
 	.def("AddLooter", (void(Lua_Corpse::*)(Lua_Mob))&Lua_Corpse::AddLooter)
 	.def("AllowMobLoot", (void(Lua_Corpse::*)(Lua_Mob, uint8))&Lua_Corpse::AllowMobLoot)
@@ -234,6 +251,7 @@ luabind::scope lua_register_corpse() {
 	.def("RemoveItem", (void(Lua_Corpse::*)(uint16))&Lua_Corpse::RemoveItem)
 	.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32))&Lua_Corpse::RemoveItemByID)
 	.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32,int))&Lua_Corpse::RemoveItemByID)
+	.def("ResetDecayTimer", &Lua_Corpse::ResetDecayTimer)
 	.def("ResetLooter", (void(Lua_Corpse::*)(void))&Lua_Corpse::ResetLooter)
 	.def("Save", (bool(Lua_Corpse::*)(void))&Lua_Corpse::Save)
 	.def("SetCash", (void(Lua_Corpse::*)(uint32, uint32, uint32, uint32))&Lua_Corpse::SetCash)

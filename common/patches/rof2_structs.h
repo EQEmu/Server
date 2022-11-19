@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -620,40 +620,40 @@ struct NewZone_Struct {
 	/*0800*/	int32	SkyRelated2;			//seen -1 -- maybe some default sky time?
 	/*0804*/	char	WeatherString2[32];		//
 	/*0836*/	float	WeatherChangeTime;		// not sure :P
-	/*0840*/	uint32	Climate;
-	/*0844*/	int32	NPCAggroMaxDist;		//seen 600
-	/*0848*/	int32	FilterID;				//seen 2008 -- maybe zone guide related?
-	/*0852*/	uint16	zone_id;				// this might just be instance ID got 1736 for time
-	/*0854*/	uint16	zone_instance;
-	/*0856*/	uint32	scriptNPCReceivedanItem;
-	/*0860*/	uint32	bCheck;					// padded bool
-	/*0864*/	uint32	scriptIDSomething;
-	/*0868*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
-	/*0872*/	uint32	scriptIDSomething3;
-	/*0876*/	uint32	SuspendBuffs;			// padded bool
-	/*0880*/	uint32	LavaDamage;				// LavaDamage value
-	/*0884*/	uint32	MinLavaDamage;			// min cap after resist calcs
-	/*0888*/	uint8	bDisallowManaStone;		// can't use manastone in this zone
-	/*0889*/	uint8	bNoBind;				// can't bind even if outdoor says we can!
-	/*0890*/	uint8	bNoAttack;				// non-attack zone
-	/*0891*/	uint8	bNoCallOfHero;			// coth line disabled
-	/*0892*/	uint8	bNoFlux;				// gflux no worky
-	/*0893*/	uint8	bNoFear;				// fear spells no worky
-	/*0894*/	uint8	fall_damage;			// 0 = Fall Damage on, 1 = Fall Damage off MQ2 calls bNoEncumber
-	/*0895*/	uint8	unknown895;				// padding
-	/*0896*/	uint32	FastRegenHP;			// percentage I think?
-	/*0900*/	uint32	FastRegenMana;			// percentage I think?
-	/*0904*/	uint32	FastRegenEndurance;		// percentage I think?
-	/*0908*/	uint32	CanPlaceCampsite;		// 0 = no, 1 = can place, 2 = place and goto
-	/*0912*/	uint32	CanPlaceGuildBanner;	// ^
-	/*0916*/	float	FogDensity;				// Most zones have this set to 0.33 Blightfire had 0.16
-	/*0920*/	uint32	bAdjustGamma;			// padded bool
-	/*0924*/	uint32	TimeStringID;			// Seen 0
-	/*0928*/	uint32	bNoMercenaries;			// padded bool
-	/*0932*/	int32	FishingRelated;			// Seen -1 idk
-	/*0936*/	int32	ForageRelated;			// Seen -1 idk
-	/*0940*/	uint32	bNoLevitate;			// padded bool
-	/*0944*/	float	Blooming;				// Seen 1.0 in PoK, and 0.25 in Guild Lobby
+	/*0840*/	uint32 Climate;
+	/*0844*/	int32  NPCAggroMaxDist;		//seen 600
+	/*0848*/	int32  FilterID;				//seen 2008 -- maybe zone guide related?
+	/*0852*/	uint16 zone_id;				// this might just be instance ID got 1736 for time
+	/*0854*/	uint16 zone_instance;
+	/*0856*/	uint32 scriptNPCReceivedanItem;
+	/*0860*/	uint32 bCheck;					// padded bool
+	/*0864*/	uint32 scriptIDSomething;
+	/*0868*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
+	/*0872*/	uint32 scriptIDSomething3;
+	/*0876*/	uint32 suspend_buffs;			// padded bool
+	/*0880*/	uint32 lava_damage;				// lava_damage value
+	/*0884*/	uint32 min_lava_damage;			// min cap after resist calcs
+	/*0888*/	uint8  bDisallowManaStone;		// can't use manastone in this zone
+	/*0889*/	uint8  bNoBind;				// can't bind even if outdoor says we can!
+	/*0890*/	uint8  bNoAttack;				// non-attack zone
+	/*0891*/	uint8  bNoCallOfHero;			// coth line disabled
+	/*0892*/	uint8  bNoFlux;				// gflux no worky
+	/*0893*/	uint8  bNoFear;				// fear spells no worky
+	/*0894*/	uint8  fall_damage;			// 0 = Fall Damage on, 1 = Fall Damage off MQ2 calls bNoEncumber
+	/*0895*/	uint8  unknown895;				// padding
+	/*0896*/	uint32 fast_regen_hp;			// percentage I think?
+	/*0900*/	uint32 fast_regen_mana;			// percentage I think?
+	/*0904*/	uint32 fast_regen_endurance;		// percentage I think?
+	/*0908*/	uint32 can_place_campsite;		// 0 = no, 1 = can place, 2 = place and goto
+	/*0912*/	uint32 can_place_guild_banner;	// ^
+	/*0916*/	float  fog_density;				// Most zones have this set to 0.33 Blightfire had 0.16
+	/*0920*/	uint32 b_adjust_gamma;			// padded bool
+	/*0924*/	uint32 time_string_id;			// Seen 0
+	/*0928*/	uint32 b_no_mercenaries;			// padded bool
+	/*0932*/	int32  fishing_related;			// Seen -1 idk
+	/*0936*/	int32  forage_related;			// Seen -1 idk
+	/*0940*/	uint32 b_no_levitate;			// padded bool
+	/*0944*/	float  blooming;				// Seen 1.0 in PoK, and 0.25 in Guild Lobby
 	/*0948*/
 };
 
@@ -3476,7 +3476,7 @@ struct TraderClick_Struct{
 	/*000*/	uint32 Code;
 	/*004*/	uint32 TraderID;
 	/*008*/	uint32 Approval;
-	/*012*/	
+	/*012*/
 };
 
 struct FormattedMessage_Struct{

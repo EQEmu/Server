@@ -159,18 +159,12 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	// Dynamic zones need to Sync here.
 	// Static zones sync when they connect in worldserver.cpp.
 	// Static zones cannot sync here as request is ignored by worldserver.
-	if (!is_static)
-	{
+	if (!is_static) {
 		zone->GetTimeSync();
 	}
 
 	zone->RequestUCSServerStatus();
-
-	/**
-	 * Set Shutdown timer
-	 */
-	uint32 shutdown_timer = static_cast<uint32>(content_db.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion()));
-	zone->StartShutdownTimer(shutdown_timer);
+	zone->StartShutdownTimer();
 
 	/*
 	 * Set Logging
@@ -903,11 +897,23 @@ void Zone::Shutdown(bool quiet)
 	}
 	zone->ldon_trap_entry_list.clear();
 
-	LogInfo("Zone Shutdown: [{}] ([{}])", zone->GetShortName(), zone->GetZoneID());
+	LogInfo(
+		"[Zone Shutdown] Zone [{}] zone_id [{}] version [{}] instance_id [{}]",
+		zone->GetShortName(),
+		zone->GetZoneID(),
+		zone->GetInstanceVersion(),
+		zone->GetInstanceID()
+	);
 	petition_list.ClearPetitions();
 	zone->SetZoneHasCurrentTime(false);
 	if (!quiet) {
-		LogInfo("Zone Shutdown: Going to sleep");
+		LogInfo(
+			"[Zone Shutdown] Zone [{}] zone_id [{}] version [{}] instance_id [{}] Going to sleep",
+			zone->GetShortName(),
+			zone->GetZoneID(),
+			zone->GetInstanceVersion(),
+			zone->GetInstanceID()
+		);
 	}
 
 	is_zone_loaded = false;
@@ -921,7 +927,7 @@ void Zone::Shutdown(bool quiet)
 	LogSys.CloseFileLogs();
 
 	if (RuleB(Zone, KillProcessOnDynamicShutdown)) {
-		LogInfo("[KillProcessOnDynamicShutdown] Shutting down");
+		LogInfo("[Zone Shutdown] Shutting down");
 		EQ::EventLoop::Get().Shutdown();
 	}
 }
@@ -944,14 +950,14 @@ void Zone::LoadZoneDoors()
 }
 
 Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
-:	initgrids_timer(10000),
-	autoshutdown_timer((RuleI(Zone, AutoShutdownDelay))),
-	clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
-	spawn2_timer(1000),
-	hot_reload_timer(1000),
-	qglobal_purge_timer(30000),
-	m_SafePoint(0.0f,0.0f,0.0f,0.0f),
-	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
+: initgrids_timer(10000),
+  autoshutdown_timer((RuleI(Zone, AutoShutdownDelay))),
+  clientauth_timer(AUTHENTICATION_TIMEOUT * 1000),
+  spawn2_timer(1000),
+  hot_reload_timer(1000),
+  qglobal_purge_timer(30000),
+  m_safe_points(0.0f, 0.0f, 0.0f, 0.0f),
+  m_graveyard(0.0f, 0.0f, 0.0f, 0.0f)
 {
 	zoneid = in_zoneid;
 	instanceid = in_instanceid;
@@ -971,29 +977,45 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	tradevar = 0;
 	lootvar = 0;
 
-	if(RuleB(TaskSystem, EnableTaskSystem)) {
-		task_manager->LoadProximities(zoneid);
-	}
-
 	short_name = strcpy(new char[strlen(in_short_name)+1], in_short_name);
 	strlwr(short_name);
 	memset(file_name, 0, sizeof(file_name));
 	long_name = 0;
-	aggroedmobs =0;
-	pgraveyard_id = 0;
+	aggroedmobs       =0;
+	m_graveyard_id    = 0;
 	pgraveyard_zoneid = 0;
-	pMaxClients = 0;
-	pvpzone = false;
-	if(database.GetServerType() == 1)
+	m_max_clients     = 0;
+	pvpzone           = false;
+
+	if (database.GetServerType() == 1) {
 		pvpzone = true;
-	content_db.GetZoneLongName(short_name, &long_name, file_name, &m_SafePoint.x, &m_SafePoint.y, &m_SafePoint.z, &pgraveyard_id, &pMaxClients);
-	if(graveyard_id() > 0)
-	{
+	}
+
+	auto z = GetZoneVersionWithFallback(ZoneID(short_name), instanceversion);
+	if (z) {
+		long_name = strcpy(new char[strlen(z->long_name.c_str()) + 1], z->long_name.c_str());
+
+		m_safe_points.x = z->safe_x;
+		m_safe_points.y = z->safe_y;
+		m_safe_points.z = z->safe_z;
+		m_safe_points.w = z->safe_heading;
+		m_graveyard_id = z->graveyard_id;
+		m_max_clients  = z->maxclients;
+
+		if (z->file_name.empty()) {
+			strcpy(file_name, short_name);
+		}
+		else {
+			strcpy(file_name, z->file_name.c_str());
+		}
+	}
+
+	if (graveyard_id() > 0) {
 		LogDebug("Graveyard ID is [{}]", graveyard_id());
-		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_Graveyard.x, &m_Graveyard.y, &m_Graveyard.z, &m_Graveyard.w);
+		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_graveyard.x, &m_graveyard.y, &m_graveyard.z, &m_graveyard.w);
 
 		if (GraveYardLoaded) {
-			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_Graveyard).c_str());
+			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_graveyard).c_str());
 		}
 		else {
 			LogError("Unable to load the graveyard id [{}] for zone [{}]", graveyard_id(), short_name);
@@ -1002,11 +1024,10 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	if (long_name == 0) {
 		long_name = strcpy(new char[18], "Long zone missing");
 	}
-	autoshutdown_timer.Start(AUTHENTICATION_TIMEOUT * 1000, false);
 	Weather_Timer = new Timer(60000);
 	Weather_Timer->Start();
 	LogDebug("The next weather check for zone: [{}] will be in [{}] seconds", short_name, Weather_Timer->GetRemainingTime()/1000);
-	zone_weather              = 0;
+	zone_weather              = EQ::constants::WeatherTypes::None;
 	weather_intensity         = 0;
 	blocked_spells            = nullptr;
 	zone_total_blocked_spells = 0;
@@ -1275,52 +1296,125 @@ void Zone::ReloadStaticData() {
 
 bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
+	auto z = zone_store.GetZoneWithFallback(ZoneID(filename), instance_version);
+
+	if (!z) {
+		LogError("[LoadZoneCFG] Failed to load zone data for [{}] instance_version [{}]", filename, instance_version);
+		return false;
+	}
 
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
 	map_name = nullptr;
+	map_name = new char[100];
+	newzone_data.zone_id = zoneid;
 
-	if (!content_db.GetZoneCFG(
-		ZoneID(filename),
-		instance_version,
-		&newzone_data,
-		can_bind,
-		can_combat,
-		can_levitate,
-		can_castoutdoor,
-		is_city,
-		is_hotzone,
-		allow_mercs,
-		max_movement_update_range,
-		zone_type,
-		default_ruleset,
-		&map_name
-	)) {
-		// If loading a non-zero instance failed, try loading the default
-		if (instance_version != 0) {
-			safe_delete_array(map_name);
-			if (!content_db.GetZoneCFG(
-				ZoneID(filename),
-				0,
-				&newzone_data,
-				can_bind,
-				can_combat,
-				can_levitate,
-				can_castoutdoor,
-				is_city,
-				is_hotzone,
-				allow_mercs,
-				max_movement_update_range,
-				zone_type,
-				default_ruleset,
-				&map_name
-			)) {
-				LogError("Error loading the Zone Config");
-				return false;
-			}
-		}
+	strcpy(map_name, "default");
+
+	newzone_data.ztype = z->ztype;
+	zone_type = newzone_data.ztype;
+
+	// fog:red
+	newzone_data.fog_red[0] = z->fog_red;
+	newzone_data.fog_red[1] = z->fog_red2;
+	newzone_data.fog_red[2] = z->fog_red3;
+	newzone_data.fog_red[3] = z->fog_red4;
+
+	// fog:blue
+	newzone_data.fog_blue[0] = z->fog_blue;
+	newzone_data.fog_blue[1] = z->fog_blue2;
+	newzone_data.fog_blue[2] = z->fog_blue3;
+	newzone_data.fog_blue[3] = z->fog_blue4;
+
+	// fog:green
+	newzone_data.fog_green[0] = z->fog_green;
+	newzone_data.fog_green[1] = z->fog_green2;
+	newzone_data.fog_green[2] = z->fog_green3;
+	newzone_data.fog_green[3] = z->fog_green4;
+
+	// fog:minclip
+	newzone_data.fog_minclip[0] = z->fog_minclip;
+	newzone_data.fog_minclip[1] = z->fog_minclip2;
+	newzone_data.fog_minclip[2] = z->fog_minclip3;
+	newzone_data.fog_minclip[3] = z->fog_minclip4;
+
+	// fog:maxclip
+	newzone_data.fog_maxclip[0] = z->fog_maxclip;
+	newzone_data.fog_maxclip[1] = z->fog_maxclip2;
+	newzone_data.fog_maxclip[2] = z->fog_maxclip3;
+	newzone_data.fog_maxclip[3] = z->fog_maxclip4;
+
+	// rain_chance
+	newzone_data.rain_chance[0] = z->rain_chance1;
+	newzone_data.rain_chance[1] = z->rain_chance2;
+	newzone_data.rain_chance[2] = z->rain_chance3;
+	newzone_data.rain_chance[3] = z->rain_chance4;
+
+	// rain_duration
+	newzone_data.rain_duration[0] = z->rain_duration1;
+	newzone_data.rain_duration[1] = z->rain_duration2;
+	newzone_data.rain_duration[2] = z->rain_duration3;
+	newzone_data.rain_duration[3] = z->rain_duration4;
+
+	// snow_chance
+	newzone_data.snow_chance[0] = z->snow_chance1;
+	newzone_data.snow_chance[1] = z->snow_chance2;
+	newzone_data.snow_chance[2] = z->snow_chance3;
+	newzone_data.snow_chance[3] = z->snow_chance4;
+
+	// snow_duration
+	newzone_data.snow_duration[0] = z->snow_duration1;
+	newzone_data.snow_duration[1] = z->snow_duration2;
+	newzone_data.snow_duration[2] = z->snow_duration3;
+	newzone_data.snow_duration[3] = z->snow_duration4;
+
+	// misc
+	newzone_data.fog_density               = z->fog_density;
+	newzone_data.sky                       = z->sky;
+	newzone_data.zone_exp_multiplier       = z->zone_exp_multiplier;
+	newzone_data.safe_x                    = z->safe_x;
+	newzone_data.safe_y                    = z->safe_y;
+	newzone_data.safe_z                    = z->safe_z;
+	newzone_data.underworld                = z->underworld;
+	newzone_data.minclip                   = z->minclip;
+	newzone_data.maxclip                   = z->maxclip;
+	newzone_data.time_type                 = z->time_type;
+	newzone_data.gravity                   = z->gravity;
+	newzone_data.fast_regen_hp             = z->fast_regen_hp;
+	newzone_data.fast_regen_mana           = z->fast_regen_mana;
+	newzone_data.fast_regen_endurance      = z->fast_regen_endurance;
+	newzone_data.npc_aggro_max_dist        = z->npc_max_aggro_dist;
+	newzone_data.underworld_teleport_index = z->underworld_teleport_index;
+	newzone_data.lava_damage               = z->lava_damage;
+	newzone_data.min_lava_damage           = z->min_lava_damage;
+	newzone_data.suspend_buffs             = z->suspendbuffs;
+
+	// local attributes
+	can_bind                  = z->canbind != 0;
+	is_city                   = z->canbind == 2;
+	can_combat                = z->cancombat != 0;
+	can_levitate              = z->canlevitate != 0;
+	can_castoutdoor           = z->castoutdoor != 0;
+	is_hotzone                = z->hotzone != 0;
+	max_movement_update_range = z->max_movement_update_range;
+	default_ruleset           = z->ruleset;
+	allow_mercs               = true;
+	m_graveyard_id            = z->graveyard_id;
+	m_max_clients             = z->maxclients;
+
+	// safe coordinates
+	m_safe_points.x = z->safe_x;
+	m_safe_points.y = z->safe_y;
+	m_safe_points.z = z->safe_z;
+	m_safe_points.w = z->safe_heading;
+
+	if (!z->map_file_name.empty()) {
+		strcpy(map_name, z->map_file_name.c_str());
+	}
+	else {
+		strcpy(map_name, z->short_name.c_str());
 	}
 
-	//overwrite with our internal variables
+	// overwrite with our internal variables
 	strcpy(newzone_data.zone_short_name, GetShortName());
 	strcpy(newzone_data.zone_long_name, GetLongName());
 	strcpy(newzone_data.zone_short_name2, GetShortName());
@@ -1495,9 +1589,9 @@ bool Zone::Process() {
 		}
 	}
 
-	if(!staticzone) {
+	if (!staticzone) {
 		if (autoshutdown_timer.Check()) {
-			StartShutdownTimer();
+			ResetShutdownTimer();
 			if (numclients == 0) {
 				return false;
 			}
@@ -1611,133 +1705,158 @@ void Zone::ChangeWeather()
 	}
 
 	int chance = zone->random.Int(0, 3);
-	uint8 rainchance = zone->newzone_data.rain_chance[chance];
-	uint8 rainduration = zone->newzone_data.rain_duration[chance];
-	uint8 snowchance = zone->newzone_data.snow_chance[chance];
-	uint8 snowduration = zone->newzone_data.snow_duration[chance];
-	uint32 weathertimer = 0;
-	uint16 tmpweather = zone->random.Int(0, 100);
+	auto rain_chance = zone->newzone_data.rain_chance[chance];
+	auto rain_duration = zone->newzone_data.rain_duration[chance];
+	auto snow_chance = zone->newzone_data.snow_chance[chance];
+	auto snow_duration = zone->newzone_data.snow_duration[chance];
+	uint32 weather_timer = 0;
+	auto temporary_weather = static_cast<uint8>(zone->random.Int(0, 100));
 	uint8 duration = 0;
-	uint8 tmpOldWeather = zone->zone_weather;
+	auto temporary_old_weather = zone->zone_weather;
 	bool changed = false;
 
-	if(tmpOldWeather == 0)
-	{
-		if(rainchance > 0 || snowchance > 0)
-		{
-			uint8 intensity = zone->random.Int(1, 10);
-			if((rainchance > snowchance) || (rainchance == snowchance))
-			{
-				//It's gunna rain!
-				if(rainchance >= tmpweather)
-				{
-					if(rainduration == 0)
+	if (temporary_old_weather == EQ::constants::WeatherTypes::None) {
+		if (rain_chance || snow_chance) {
+			auto intensity = static_cast<uint8>(zone->random.Int(1, 10));
+			if (rain_chance > snow_chance || rain_chance == snow_chance) { // Rain
+				if (rain_chance >= temporary_weather) {
+					if (!rain_duration) {
 						duration = 1;
-					else
-						duration = rainduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
+					} else {
+						duration = rain_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+					}
 
-					weathertimer = (duration*60)*1000;
-					Weather_Timer->Start(weathertimer);
-					zone->zone_weather = 1;
+					weather_timer = (duration * 60) * 1000;
+					Weather_Timer->Start(weather_timer);
+					zone->zone_weather = EQ::constants::WeatherTypes::Raining;
 					zone->weather_intensity = intensity;
 					changed = true;
 				}
-			}
-			else
-			{
-				//It's gunna snow!
-				if(snowchance >= tmpweather)
-				{
-					if(snowduration == 0)
+			} else { // Snow
+				if (snow_chance >= temporary_weather) {
+					if (!snow_duration) {
 						duration = 1;
-					else
-						duration = snowduration*3;
-					weathertimer = (duration*60)*1000;
-					Weather_Timer->Start(weathertimer);
-					zone->zone_weather = 2;
+					} else {
+						duration = snow_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+					}
+
+					weather_timer = (duration * 60) * 1000;
+					Weather_Timer->Start(weather_timer);
+					zone->zone_weather = EQ::constants::WeatherTypes::Snowing;
 					zone->weather_intensity = intensity;
 					changed = true;
 				}
 			}
 		}
-	}
-	else
-	{
+	} else {
 		changed = true;
 		//We've had weather, now taking a break
-		if(tmpOldWeather == 1)
-		{
-			if(rainduration == 0)
+		if (temporary_old_weather == EQ::constants::WeatherTypes::Raining) {
+			if (!rain_duration) {
 				duration = 1;
-			else
-				duration = rainduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
+			} else {
+				duration = rain_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+			}
 
-			weathertimer = (duration*60)*1000;
-			Weather_Timer->Start(weathertimer);
+			weather_timer = (duration * 60) * 1000;
+			Weather_Timer->Start(weather_timer);
 			zone->weather_intensity = 0;
-		}
-		else if(tmpOldWeather == 2)
-		{
-			if(snowduration == 0)
+		} else if (temporary_old_weather == EQ::constants::WeatherTypes::Snowing) {
+			if (!snow_duration) {
 				duration = 1;
-			else
-				duration = snowduration*3; //Duration is 1 EQ hour which is 3 earth minutes.
+			} else {
+				duration = snow_duration * 3; //Duration is 1 EQ hour which is 3 earth minutes.
+			}
 
-			weathertimer = (duration*60)*1000;
-			Weather_Timer->Start(weathertimer);
+			weather_timer = (duration * 60) * 1000;
+			Weather_Timer->Start(weather_timer);
 			zone->weather_intensity = 0;
 		}
 	}
 
-	if(changed == false)
-	{
-		if(weathertimer == 0)
-		{
-			uint32 weatherTimerRule = RuleI(Zone, WeatherTimer);
-			weathertimer = weatherTimerRule*1000;
-			Weather_Timer->Start(weathertimer);
+	if (!changed) {
+		if (!weather_timer) {
+			uint32 weather_timer_rule = RuleI(Zone, WeatherTimer);
+			weather_timer = weather_timer_rule * 1000;
+			Weather_Timer->Start(weather_timer);
 		}
 		LogDebug("The next weather check for zone: [{}] will be in [{}] seconds", zone->GetShortName(), Weather_Timer->GetRemainingTime()/1000);
-	}
-	else
-	{
-		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
+	} else {
+		LogDebug("The weather for zone: [{}] has changed. Old weather was = [{}]. New weather is = [{}] The next check will be in [{}] seconds. Rain chance: [{}], Rain duration: [{}], Snow chance [{}], Snow duration: [{}]", zone->GetShortName(), temporary_old_weather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rain_chance,rain_duration,snow_chance,snow_duration);
 		weatherSend();
-		if (zone->weather_intensity == 0)
-		{
-			zone->zone_weather = 0;
+		if (!zone->weather_intensity) {
+			zone->zone_weather = EQ::constants::WeatherTypes::None;
 		}
 	}
 }
 
 bool Zone::HasWeather()
 {
-	uint8 rain1 = zone->newzone_data.rain_chance[0];
-	uint8 rain2 = zone->newzone_data.rain_chance[1];
-	uint8 rain3 = zone->newzone_data.rain_chance[2];
-	uint8 rain4 = zone->newzone_data.rain_chance[3];
-	uint8 snow1 = zone->newzone_data.snow_chance[0];
-	uint8 snow2 = zone->newzone_data.snow_chance[1];
-	uint8 snow3 = zone->newzone_data.snow_chance[2];
-	uint8 snow4 = zone->newzone_data.snow_chance[3];
+	auto rain_chance_one = zone->newzone_data.rain_chance[0];
+	auto rain_chance_two = zone->newzone_data.rain_chance[1];
+	auto rain_chance_three = zone->newzone_data.rain_chance[2];
+	auto rain_chance_four = zone->newzone_data.rain_chance[3];
 
-	if(rain1 == 0 && rain2 == 0 && rain3 == 0 && rain4 == 0 && snow1 == 0 && snow2 == 0 && snow3 == 0 && snow4 == 0)
+	auto snow_chance_one = zone->newzone_data.snow_chance[0];
+	auto snow_chance_two = zone->newzone_data.snow_chance[1];
+	auto snow_chance_three = zone->newzone_data.snow_chance[2];
+	auto snow_chance_four = zone->newzone_data.snow_chance[3];
+
+	if (
+		!rain_chance_one &&
+		!rain_chance_two &&
+		!rain_chance_three &&
+		!rain_chance_four &&
+		!snow_chance_one &&
+		!snow_chance_two &&
+		!snow_chance_three &&
+		!snow_chance_four
+	) {
 		return false;
-	else
+	} else {
 		return true;
+	}
 }
 
-void Zone::StartShutdownTimer(uint32 set_time) {
-	if (set_time > autoshutdown_timer.GetRemainingTime()) {
-		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
-			set_time = static_cast<uint32>(content_db.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion()));
+void Zone::StartShutdownTimer(uint32 set_time)
+{
+	// if we pass in the default value, we should pull from the zone and use it is different
+	std::string loaded_from = "rules";
+	if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
+		auto delay = content_db.getZoneShutDownDelay(
+			GetZoneID(),
+			GetInstanceVersion()
+		);
+		if (delay != RuleI(Zone, AutoShutdownDelay)) {
+			set_time = delay;
+			loaded_from = "zone table";
 		}
-
-		autoshutdown_timer.SetTimer(set_time);
-		LogDebug("Zone::StartShutdownTimer set to {}", set_time);
 	}
 
-	LogDebug("Zone::StartShutdownTimer trigger - set_time: [{}] remaining_time: [{}] diff: [{}]", set_time, autoshutdown_timer.GetRemainingTime(), (set_time - autoshutdown_timer.GetRemainingTime()));
+	if (set_time != autoshutdown_timer.GetDuration()) {
+		LogInfo(
+			"[StartShutdownTimer] Reset to [{}] {} from original remaining time [{}] duration [{}] zone [{}]",
+			Strings::SecondsToTime(set_time, true),
+			!loaded_from.empty() ? fmt::format("(Loaded from [{}])", loaded_from) : "",
+			Strings::SecondsToTime(autoshutdown_timer.GetRemainingTime(), true),
+			Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+			zone->GetZoneDescription()
+		);
+	}
+
+	autoshutdown_timer.SetTimer(set_time);
+}
+
+void Zone::ResetShutdownTimer() {
+	LogInfo(
+		"[ResetShutdownTimer] Reset to [{}] from original remaining time [{}] duration [{}] zone [{}]",
+		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+		Strings::SecondsToTime(autoshutdown_timer.GetRemainingTime(), true),
+		Strings::SecondsToTime(autoshutdown_timer.GetDuration(), true),
+		zone->GetZoneDescription()
+	);
+
+	autoshutdown_timer.Start(autoshutdown_timer.GetDuration(), true);
 }
 
 bool Zone::Depop(bool StartSpawnTimer) {
@@ -1755,6 +1874,7 @@ bool Zone::Depop(bool StartSpawnTimer) {
 
 	// clear spell cache
 	database.ClearNPCSpells();
+	database.ClearBotSpells();
 
 	zone->spawn_group_list.ReloadSpawnGroups();
 
@@ -2078,18 +2198,20 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 void Zone::weatherSend(Client *client)
 {
 	auto outapp = new EQApplicationPacket(OP_Weather, 8);
-	if (zone_weather > 0) {
+	if (zone_weather > EQ::constants::WeatherTypes::None) {
 		outapp->pBuffer[0] = zone_weather - 1;
 	}
-	if (zone_weather > 0) {
+
+	if (zone_weather > EQ::constants::WeatherTypes::None) {
 		outapp->pBuffer[4] = zone->weather_intensity;
 	}
+
 	if (client) {
 		client->QueuePacket(outapp);
-	}
-	else {
+	} else {
 		entity_list.QueueClients(0, outapp);
 	}
+
 	safe_delete(outapp);
 }
 
@@ -2104,7 +2226,7 @@ bool Zone::HasGraveyard() {
 
 void Zone::SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition) {
 	pgraveyard_zoneid = zoneid;
-	m_Graveyard = graveyardPosition;
+	m_graveyard       = graveyardPosition;
 }
 
 void Zone::LoadZoneBlockedSpells()
@@ -2667,8 +2789,8 @@ void Zone::SetQuestHotReloadQueued(bool in_quest_hot_reload_queued)
 
 void Zone::LoadGrids()
 {
-	zone_grids        = GridRepository::GetZoneGrids(GetZoneID());
-	zone_grid_entries = GridEntriesRepository::GetZoneGridEntries(GetZoneID());
+	zone_grids        = GridRepository::GetZoneGrids(content_db, GetZoneID());
+	zone_grid_entries = GridEntriesRepository::GetZoneGridEntries(content_db, GetZoneID());
 }
 
 Timer Zone::GetInitgridsTimer()
@@ -2750,7 +2872,8 @@ std::string Zone::GetZoneDescription()
 	}
 
 	return fmt::format(
-		"{} ({}){}{}",
+		"PID ({}) {} ({}){}{}",
+		EQ::GetPID(),
 		GetLongName(),
 		GetZoneID(),
 		(
@@ -2826,4 +2949,205 @@ void Zone::LoadDynamicZoneTemplates()
 	{
 		dz_template_cache[dz_template.id] = dz_template;
 	}
+}
+
+std::string Zone::GetAAName(int aa_id)
+{
+	if (!aa_id) {
+		return std::string();
+	}
+
+	int current_aa_id = 0;
+
+	const auto& r = aa_ranks.find(aa_id);
+	if (
+		r != aa_ranks.end() &&
+		r->second.get()->base_ability
+	) {
+		current_aa_id = r->second.get()->base_ability->id;
+	}
+
+	if (current_aa_id) {
+		const auto& a = aa_abilities.find(current_aa_id);
+		if (a != aa_abilities.end()) {
+			return a->second.get()->name;
+		}
+	}
+
+	return std::string();
+}
+
+bool Zone::CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value)
+{
+	std::vector<std::string> bucket_checks;
+	bool found = false;
+	bool passes = false;
+
+	switch (bucket_comparison) {
+		case BucketComparison::BucketEqualTo:
+		{
+			if (player_value != bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketNotEqualTo:
+		{
+			if (player_value == bucket_value) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketGreaterThanOrEqualTo:
+		{
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) < std::stoll(bucket_value)) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketLesserThanOrEqualTo:
+		{
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) > std::stoll(bucket_value)) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketGreaterThan:
+		{
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) <= std::stoll(bucket_value)) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketLesserThan:
+		{
+			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
+				break;
+			}
+
+			if (std::stoll(player_value) >= std::stoll(bucket_value)) {
+				break;
+			}
+
+			passes = true;
+
+			break;
+		}
+		case BucketComparison::BucketIsAny:
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
+				found = true;
+			}
+
+			if (!found) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketIsNotAny:
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
+				found = true;
+			}
+
+			if (found) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketIsBetween:
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (
+				!Strings::IsNumber(player_value) ||
+				!Strings::IsNumber(bucket_checks[0]) ||
+				!Strings::IsNumber(bucket_checks[1])
+			) {
+				break;
+			}
+
+			if (
+				!EQ::ValueWithin(
+					std::stoll(player_value),
+					std::stoll(bucket_checks[0]),
+					std::stoll(bucket_checks[1])
+				)
+			) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+		case BucketComparison::BucketIsNotBetween:
+		{
+			bucket_checks = Strings::Split(bucket_value, "|");
+			if (bucket_checks.empty()) {
+				break;
+			}
+
+			if (
+				!Strings::IsNumber(player_value) ||
+				!Strings::IsNumber(bucket_checks[0]) ||
+				!Strings::IsNumber(bucket_checks[1])
+			) {
+				break;
+			}
+
+			if (
+				EQ::ValueWithin(
+					std::stoll(player_value),
+					std::stoll(bucket_checks[0]),
+					std::stoll(bucket_checks[1])
+				)
+			) {
+				break;
+			}
+
+			passes = true;
+			break;
+		}
+	}
+
+	return passes;
 }

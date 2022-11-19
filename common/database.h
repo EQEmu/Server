@@ -113,9 +113,9 @@ public:
 	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const std::string &hacked, const char *zone);
 	bool UpdateName(const char *oldname, const char *newname);
 	bool CopyCharacter(
-		std::string source_character_name,
-		std::string destination_character_name,
-		std::string destination_account_name
+		const std::string& source_character_name,
+		const std::string& destination_character_name,
+		const std::string& destination_account_name
 	);
 
 	/* General Information Queries */
@@ -246,9 +246,7 @@ public:
 
 	/* General Queries */
 
-	bool	GetSafePoints(const char* zone_short_name, uint32 instance_version, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, float* safe_heading = 0, int16* minstatus = 0, uint8* minlevel = 0, char *flag_needed = nullptr);
 	bool	GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid = 0, float* graveyard_x = 0, float* graveyard_y = 0, float* graveyard_z = 0, float* graveyard_heading = 0);
-	bool	GetZoneLongName(const char* short_name, char** long_name, char* file_name = 0, float* safe_x = 0, float* safe_y = 0, float* safe_z = 0, uint32* graveyard_id = 0, uint32* maxclients = 0);
 	bool	LoadPTimers(uint32 charid, PTimerList &into);
 
 	uint8	GetPEQZone(uint32 zone_id, uint32 version);

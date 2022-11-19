@@ -17,6 +17,7 @@
 */
 
 #include "rulesys.h"
+#include "eqemu_logsys.h"
 #include "database.h"
 #include "strings.h"
 #include <cstdlib>

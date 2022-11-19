@@ -175,11 +175,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			return true;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, export_string, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, this, nullptr, spell_id, export_string, 0) != 0) {
 			CalcBonuses();
 			return true;
 		}
-	}
+#ifdef BOTS
+	} else if (IsBot()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BOT, this, nullptr, spell_id, export_string, 0) != 0) {
+			CalcBonuses();
+			return true;
+		}
+#endif
+	}	
 
 	if(IsVirusSpell(spell_id)) {
 
@@ -2146,7 +2153,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Stop Rain");
 #endif
-				zone->zone_weather = 0;
+				zone->zone_weather = EQ::constants::WeatherTypes::None;
 				zone->weather_intensity = 0;
 				zone->weatherSend();
 				break;
@@ -3818,9 +3825,15 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			return;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, buff.spellid, export_string, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, this, nullptr, buff.spellid, export_string, 0) != 0) {
 			return;
 		}
+#ifdef BOTS
+	} else if (IsBot()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_BOT, this, nullptr, buff.spellid, export_string, 0) != 0) {
+			return;
+		}
+#endif
 	}
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
@@ -4165,9 +4178,15 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			return;
 		}
 	} else if (IsNPC()) {
-		if (parse->EventSpell(EVENT_SPELL_FADE, CastToNPC(), nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
 			return;
 		}
+#ifdef BOTS
+	} else if (IsBot()) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, this, nullptr, buffs[slot].spellid, export_string, 0) != 0) {
+			return;
+		}
+#endif
 	}
 
 	for (int i=0; i < EFFECT_COUNT; i++)
@@ -8102,7 +8121,18 @@ bool Mob::PassCastRestriction(int value)
 			}
 			break;
 		}
-
+		case IS_END_OR_MANA_BELOW_10_PCT: {
+			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
+				return true;
+			}
+			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 10) {
+				return true;
+			} 
+			else if (IsHybridClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
+				return true;
+			}
+			break;
+		}
 		case IS_END_OR_MANA_BELOW_30_PCT:
 		case IS_END_OR_MANA_BELOW_30_PCT2: {
 			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 30) {

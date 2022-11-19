@@ -329,7 +329,7 @@ void Client::CalculateStandardAAExp(uint32 &add_aaxp, uint8 conlevel, bool resex
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_aaxp *= GetAAEXPModifier(GetZoneID());
+		add_aaxp *= GetAAEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
 	}
 
 	add_aaxp = (uint32)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
@@ -492,7 +492,7 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_exp *= GetEXPModifier(GetZoneID());
+		add_exp *= GetEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
 	}
 
 	add_exp = GetEXP() + add_exp;
@@ -505,8 +505,9 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	uint32 exp = 0;
 	uint32 aaexp = 0;
 
-	if (m_epp.perAA<0 || m_epp.perAA>100)
-		m_epp.perAA=0;	// stop exploit with sanity check
+	if (m_epp.perAA < 0 || m_epp.perAA > 100) {
+		m_epp.perAA = 0;    // stop exploit with sanity check
+	}
 
 	// Calculate regular XP
 	CalculateExp(in_add_exp, exp, aaexp, conlevel, resexp);
@@ -539,6 +540,23 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 	if (aaexp < had_aaexp)
 	{
 		aaexp = had_aaexp;	//watch for wrap
+	}
+
+	// Check for Unused AA Cap.  If at or above cap, set AAs to cap, set aaexp to 0 and set aa percentage to 0.
+	// Doing this here means potentially one kill wasted worth of experience, but easiest to put it here than to rewrite this function.
+	int aa_cap = RuleI(AA, UnusedAAPointCap);
+
+	if (aa_cap >= 0 && aaexp > 0) {
+		if (m_pp.aapoints == aa_cap) {
+			MessageString(Chat::Red, AA_CAP);
+			aaexp = 0;
+			m_epp.perAA = 0;
+		} else if (m_pp.aapoints > aa_cap) {
+			MessageString(Chat::Red, OVER_AA_CAP, fmt::format_int(aa_cap).c_str(), fmt::format_int(aa_cap).c_str());
+			m_pp.aapoints = aa_cap;
+			aaexp = 0;
+			m_epp.perAA = 0;
+		}
 	}
 
 	// AA Sanity Checking for players who set aa exp and deleveled below allowed aa level.
@@ -696,6 +714,13 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		if (RuleB(AA, SoundForAAEarned)) {
 			SendSound();
 		}
+
+		const auto export_string = fmt::format(
+			"{}",
+			gained
+		);
+
+		parse->EventPlayer(EVENT_AA_GAIN, this, export_string, 0);
 
 		/* QS: PlayerLogAARate */
 		if (RuleB(QueryServ, PlayerLogAARate)){

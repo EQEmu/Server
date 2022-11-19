@@ -5,6 +5,8 @@
 #include "map.h"
 #include "raycast_mesh.h"
 #include "zone.h"
+#include "../common/file.h"
+#include "../common/path_manager.h"
 
 #include <algorithm>
 #include <map>
@@ -46,16 +48,16 @@ float Map::FindBestZ(glm::vec3 &start, glm::vec3 *result) const {
 	if(hit) {
 		return result->z;
 	}
-	
+
 	// Find nearest Z above us
-	
+
 	to.z = -BEST_Z_INVALID;
 	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
 	if (hit)
 	{
 		return result->z;
 	}
-	
+
 	return BEST_Z_INVALID;
 }
 
@@ -64,25 +66,25 @@ float Map::FindClosestZ(glm::vec3 &start, glm::vec3 *result) const {
 	//
 	if (!imp)
 		return false;
-	
+
 	float ClosestZ = BEST_Z_INVALID;
-	
+
 	glm::vec3 tmp;
 	if (!result)
 		result = &tmp;
-	
+
 	glm::vec3 from(start.x, start.y, start.z);
 	glm::vec3 to(start.x, start.y, BEST_Z_INVALID);
 	float hit_distance;
 	bool hit = false;
-	
+
 	// first check is below us
 	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
 	if (hit) {
 		ClosestZ = result->z;
-		
+
 	}
-	
+
 	// Find nearest Z above us
 	to.z = -BEST_Z_INVALID;
 	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
@@ -103,7 +105,7 @@ bool Map::LineIntersectsZone(glm::vec3 start, glm::vec3 end, float step, glm::ve
 bool Map::LineIntersectsZoneNoZLeaps(glm::vec3 start, glm::vec3 end, float step_mag, glm::vec3 *result) const {
 	if (!imp)
 		return false;
-	
+
 	float z = BEST_Z_INVALID;
 	glm::vec3 step;
 	glm::vec3 cur;
@@ -200,28 +202,9 @@ bool Map::DoCollisionCheck(glm::vec3 myloc, glm::vec3 oloc, glm::vec3 &outnorm, 
 	return imp->rm->raycast((const RmReal*)&myloc, (const RmReal*)&oloc, nullptr, (RmReal *)&outnorm, (RmReal *)&distance);
 }
 
-inline bool file_exists(const std::string& name) {
-	std::ifstream f(name.c_str());
-	return f.good();
-}
-
 Map *Map::LoadMapFile(std::string file) {
-
-	std::string filename = "";
-	if (file_exists("maps")) {
-		filename = "maps";
-	}
-	else if (file_exists("Maps")) {
-		filename = "Maps";
-	}
-	else {
-		filename = Config->MapDir;
-	}
-
 	std::transform(file.begin(), file.end(), file.begin(), ::tolower);
-	filename += "/base/";
-	filename += file;
-	filename += ".map";
+	std::string filename = fmt::format("{}/base/{}.map", path.GetMapsPath(), file);
 
 	LogInfo("Attempting to load Map File [{}]", filename.c_str());
 
@@ -308,19 +291,19 @@ bool Map::LoadV1(FILE *f) {
 	uint32 face_count;
 	uint16 node_count;
 	uint32 facelist_count;
-	
+
 	if(fread(&face_count, sizeof(face_count), 1, f) != 1) {
 		return false;
 	}
-	
+
 	if(fread(&node_count, sizeof(node_count), 1, f) != 1) {
 		return false;
 	}
-	
+
 	if(fread(&facelist_count, sizeof(facelist_count), 1, f) != 1) {
 		return false;
 	}
-	
+
 	std::vector<glm::vec3> verts;
 	std::vector<uint32> indices;
 	for(uint32 i = 0; i < face_count; ++i) {
@@ -354,22 +337,22 @@ bool Map::LoadV1(FILE *f) {
 		verts.push_back(c);
 		indices.push_back((uint32)sz + 2);
 	}
-	
+
 	if(imp) {
 		imp->rm->release();
 		imp->rm = nullptr;
 	} else {
 		imp = new impl;
 	}
-	
+
 	imp->rm = createRaycastMesh((RmUint32)verts.size(), (const RmReal*)&verts[0], face_count, &indices[0]);
-	
+
 	if(!imp->rm) {
 		delete imp;
 		imp = nullptr;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -978,7 +961,7 @@ bool Map::LoadMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 		LogInfo("Failed to load Map MMF file: [{}] - f@file_version", mmf_file_name.c_str());
 		return false;
 	}
-	
+
 	uint32 rm_buffer_size;
 	if (fread(&rm_buffer_size, sizeof(uint32), 1, f) != 1) {
 		fclose(f);
@@ -1011,7 +994,7 @@ bool Map::LoadMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 		LogInfo("Failed to load Map MMF file: [{}] - f@mmf_buffer", mmf_file_name.c_str());
 		return false;
 	}
-	
+
 	fclose(f);
 
 	std::vector<char> rm_buffer(rm_buffer_size);
@@ -1055,14 +1038,14 @@ bool Map::SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 		LogInfo("Failed to save Map MMF file: [{}]", mmf_file_name.c_str());
 		return false;
 	}
-	
+
 	FILE* f = fopen(mmf_file_name.c_str(), "rb");
 	if (f) {
 		fclose(f);
 		if (!force_mmf_overwrite)
 			return true;
 	}
-	
+
 	std::vector<char> rm_buffer; // size set in MyRaycastMesh::serialize()
 	serializeRaycastMesh(imp->rm, rm_buffer);
 	if (rm_buffer.empty()) {
@@ -1074,19 +1057,19 @@ bool Map::SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 	uint32 mmf_buffer_size = EstimateDeflateBuffer(rm_buffer.size());
 
 	std::vector<char> mmf_buffer(mmf_buffer_size);
-	
+
 	mmf_buffer_size = DeflateData(rm_buffer.data(), rm_buffer.size(), mmf_buffer.data(), mmf_buffer.size());
 	if (!mmf_buffer_size) {
 		LogInfo("Failed to save Map MMF file: [{}] - null MMF buffer size", mmf_file_name.c_str());
 		return false;
 	}
-	
+
 	f = fopen(mmf_file_name.c_str(), "wb");
 	if (!f) {
 		LogInfo("Failed to save Map MMF file: [{}] - could not open file", mmf_file_name.c_str());
 		return false;
 	}
-	
+
 	uint32 file_version = 0;
 	if (fwrite(&file_version, sizeof(uint32), 1, f) != 1) {
 		fclose(f);
@@ -1094,7 +1077,7 @@ bool Map::SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 		LogInfo("Failed to save Map MMF file: [{}] - f@file_version", mmf_file_name.c_str());
 		return false;
 	}
-	
+
 	if (fwrite(&rm_buffer_size, sizeof(uint32), 1, f) != 1) {
 		fclose(f);
 		std::remove(mmf_file_name.c_str());
@@ -1116,7 +1099,7 @@ bool Map::SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 		LogInfo("Failed to save Map MMF file: [{}] - f@mmf_buffer_size", mmf_file_name.c_str());
 		return false;
 	}
-	
+
 	if (fwrite(mmf_buffer.data(), mmf_buffer_size, 1, f) != 1) {
 		fclose(f);
 		std::remove(mmf_file_name.c_str());
@@ -1125,7 +1108,7 @@ bool Map::SaveMMF(const std::string& map_file_name, bool force_mmf_overwrite)
 	}
 
 	fclose(f);
-	
+
 	return true;
 }
 

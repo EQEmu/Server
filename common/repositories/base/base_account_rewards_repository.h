@@ -19,9 +19,9 @@
 class BaseAccountRewardsRepository {
 public:
 	struct AccountRewards {
-		int account_id;
-		int reward_id;
-		int amount;
+		uint32_t account_id;
+		uint32_t reward_id;
+		uint32_t amount;
 	};
 
 	static std::string PrimaryKey()
@@ -82,16 +82,16 @@ public:
 
 	static AccountRewards NewEntity()
 	{
-		AccountRewards entry{};
+		AccountRewards e{};
 
-		entry.account_id = 0;
-		entry.reward_id  = 0;
-		entry.amount     = 0;
+		e.account_id = 0;
+		e.reward_id  = 0;
+		e.amount     = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AccountRewards GetAccountRewardsEntry(
+	static AccountRewards GetAccountRewards(
 		const std::vector<AccountRewards> &account_rewardss,
 		int account_rewards_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AccountRewards entry{};
+			AccountRewards e{};
 
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
+			e.account_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.reward_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,24 +151,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AccountRewards account_rewards_entry
+		const AccountRewards &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(account_rewards_entry.account_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(account_rewards_entry.reward_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(account_rewards_entry.amount));
+		v.push_back(columns[0] + " = " + std::to_string(e.account_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.reward_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				account_rewards_entry.account_id
+				e.account_id
 			)
 		);
 
@@ -177,51 +177,51 @@ public:
 
 	static AccountRewards InsertOne(
 		Database& db,
-		AccountRewards account_rewards_entry
+		AccountRewards e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(account_rewards_entry.account_id));
-		insert_values.push_back(std::to_string(account_rewards_entry.reward_id));
-		insert_values.push_back(std::to_string(account_rewards_entry.amount));
+		v.push_back(std::to_string(e.account_id));
+		v.push_back(std::to_string(e.reward_id));
+		v.push_back(std::to_string(e.amount));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			account_rewards_entry.account_id = results.LastInsertedID();
-			return account_rewards_entry;
+			e.account_id = results.LastInsertedID();
+			return e;
 		}
 
-		account_rewards_entry = NewEntity();
+		e = NewEntity();
 
-		return account_rewards_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AccountRewards> account_rewards_entries
+		const std::vector<AccountRewards> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &account_rewards_entry: account_rewards_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(account_rewards_entry.account_id));
-			insert_values.push_back(std::to_string(account_rewards_entry.reward_id));
-			insert_values.push_back(std::to_string(account_rewards_entry.amount));
+			v.push_back(std::to_string(e.account_id));
+			v.push_back(std::to_string(e.reward_id));
+			v.push_back(std::to_string(e.amount));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -248,19 +248,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountRewards entry{};
+			AccountRewards e{};
 
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
+			e.account_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.reward_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<AccountRewards> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AccountRewards> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AccountRewards> all_entries;
 
@@ -275,19 +275,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AccountRewards entry{};
+			AccountRewards e{};
 
-			entry.account_id = atoi(row[0]);
-			entry.reward_id  = atoi(row[1]);
-			entry.amount     = atoi(row[2]);
+			e.account_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.reward_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.amount     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -310,6 +310,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

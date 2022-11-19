@@ -2,7 +2,7 @@
 
 #include "lua_expedition.h"
 #include "expedition.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>

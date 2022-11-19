@@ -19,7 +19,7 @@
 #include "../common/strings.h"
 #include "../common/say_link.h"
 #include "../common/net/eqstream.h"
-#include "../common/file_util.h"
+#include "../common/file.h"
 #include "../common/repositories/dynamic_zones_repository.h"
 
 #include "data_bucket.h"
@@ -48,11 +48,12 @@ int command_count; // how many commands we have
 
 // this is the pointer to the dispatch function, updated once
 // init has been performed to point at the real function
-int (*command_dispatch)(Client *,std::string) = command_notavail;
+int (*command_dispatch)(Client *, std::string, bool) = command_notavail;
 
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
 std::vector<CommandRecord *> command_delete_list;
+std::map<std::string, uint8> commands_map;
 
 /*
  * command_notavail
@@ -62,7 +63,7 @@ std::vector<CommandRecord *> command_delete_list;
  *	not used
  *
  */
-int command_notavail(Client *c, std::string message)
+int command_notavail(Client *c, std::string message, bool ignore_status)
 {
 	c->Message(Chat::White, "Commands not available.");
 	return -1;
@@ -82,7 +83,9 @@ int command_notavail(Client *c, std::string message)
 
 int command_init(void)
 {
-	commandaliases.clear();
+	if (!commandaliases.empty()) {
+		command_deinit();
+	}
 
 	if (
 		command_add("acceptrules", "[acceptrules] - Accept the EQEmu Agreement", AccountStatus::Player, command_acceptrules) ||
@@ -94,7 +97,7 @@ int command_init(void)
 		command_add("appearanceeffects", "[view] [set] [remove] appearance effects.", AccountStatus::GMAdmin, command_appearanceeffects) ||
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", AccountStatus::GMImpossible, command_apply_shared_memory) ||
 		command_add("attack", "[Entity Name] - Make your NPC target attack an entity by name", AccountStatus::GMLeadAdmin, command_attack) ||
-		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
+		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
 		command_add("ban", "[Character Name] [Reason] - Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bind", "Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
 
@@ -102,7 +105,7 @@ int command_init(void)
 		command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
 #endif
 
-		command_add("camerashake",  "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
+		command_add("camerashake", "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
 		command_add("chat", "[channel num] [message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
 		command_add("checklos", "Check for line of sight to your target", AccountStatus::Guide, command_checklos) ||
@@ -114,35 +117,38 @@ int command_init(void)
 		command_add("damage", "[Amount] - Damage yourself or your target", AccountStatus::GMAdmin, command_damage) ||
 		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", AccountStatus::QuestTroupe, command_databuckets) ||
 		command_add("date", "[Year] [Month] [Day] [Hour] [Minute] - Set EQ time (Hour and Minute are optional)", AccountStatus::EQSupport, command_date) ||
-		command_add("dbspawn2", "[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table", AccountStatus::GMAdmin, command_dbspawn2) ||
+		command_add("dbspawn2", "[Spawngroup ID] [Respawn] [Variance] [Condition ID] [Condition Minimum] - Spawn an NPC from a predefined row in the spawn2 table, Respawn and Variance are in Seconds (condition is optional)", AccountStatus::GMAdmin, command_dbspawn2) ||
 		command_add("delacct", "[accountname] - Delete an account", AccountStatus::GMLeadAdmin, command_delacct) ||
 		command_add("delpetition", "[petition number] - Delete a petition", AccountStatus::ApprenticeGuide, command_delpetition) ||
-		command_add("depop", "Depop your NPC target", AccountStatus::Guide, command_depop) ||
-		command_add("depopzone", "Depop the zone", AccountStatus::GMAdmin, command_depopzone) ||
-		command_add("devtools", "Manages devtools", AccountStatus::GMMgmt, command_devtools) ||
-		command_add("disablerecipe",  "[Recipe ID] - Disables a Recipe", AccountStatus::QuestTroupe, command_disablerecipe) ||
-		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", AccountStatus::QuestTroupe, command_disarmtrap) ||
+		command_add("depop", "[Start Spawn Timer] - Depop your NPC target and optionally start their spawn timer (false by default)", AccountStatus::Guide, command_depop) ||
+		command_add("depopzone", "[Start Spawn Timers] - Depop the zone and optionally start spawn timers (false by default)", AccountStatus::GMAdmin, command_depopzone) ||
+		command_add("devtools", "[Enable|Disable] - Manages Developer Tools (send no parameter for menu)", AccountStatus::GMMgmt, command_devtools) ||
+		command_add("disablerecipe", "[Recipe ID] - Disables a Recipe", AccountStatus::QuestTroupe, command_disablerecipe) ||
+		command_add("disarmtrap", "Analog for ldon disarm trap for the newer clients since we still don't have it working.", AccountStatus::QuestTroupe, command_disarmtrap) ||
 		command_add("distance", "Reports the distance between you and your target.", AccountStatus::QuestTroupe, command_distance) ||
 		command_add("door", "Door editing command", AccountStatus::QuestTroupe, command_door) ||
-		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", AccountStatus::Guide, command_doanim) ||
+		command_add("doanim", "[Animation ID|Animation Name] [Speed] - Send an animation by ID or name at the specified speed to you or your target (Speed is optional)", AccountStatus::Guide, command_doanim) ||
 		command_add("dye", "[slot|'help'] [red] [green] [blue] [use_tint] - Dyes the specified armor slot to Red, Green, and Blue provided, allows you to bypass darkness limits.", AccountStatus::ApprenticeGuide, command_dye) ||
 		command_add("dz", "Manage expeditions and dynamic zone instances", AccountStatus::QuestTroupe, command_dz) ||
 		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", AccountStatus::Player, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", AccountStatus::GMAdmin, command_editmassrespawn) ||
-		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", AccountStatus::QuestTroupe, command_emote) ||
-		command_add("emotesearch", "Searches NPC Emotes", AccountStatus::QuestTroupe, command_emotesearch) ||
+		command_add("emote", "[Name|World|Zone] [type] [message] - Send an emote message by name, to the world, or to your zone (^ separator allows multiple messages to be sent at once)", AccountStatus::QuestTroupe, command_emote) ||
+		command_add("emotesearch", "[Search Criteria] - Search for NPC Emotes", AccountStatus::QuestTroupe, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", AccountStatus::QuestTroupe, command_emoteview) ||
 		command_add("emptyinventory", "Clears your or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", AccountStatus::GMImpossible, command_emptyinventory) ||
-		command_add("enablerecipe",  "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
+		command_add("enablerecipe", "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores your or your target's endurance.", AccountStatus::Guide, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", AccountStatus::Guide, command_equipitem) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", AccountStatus::QuestTroupe, command_faction) ||
+		command_add("factionassociation", "[factionid] [amount] - triggers a faction hits via association", AccountStatus::GMLeadAdmin, command_faction_association) ||
 		command_add("feature", "Change your or your target's feature's temporarily", AccountStatus::QuestTroupe, command_feature) ||
+		command_add("findaa", "[Search Criteria] - Search for an AA", AccountStatus::Guide, command_findaa) ||
 		command_add("findaliases", "[Search Criteria]- Searches for available command aliases, by alias or command", AccountStatus::Player, command_findaliases) ||
 		command_add("findclass", "[Search Criteria] - Search for a class", AccountStatus::Guide, command_findclass) ||
 		command_add("findfaction", "[Search Criteria] - Search for a faction", AccountStatus::Guide, command_findfaction) ||
 		command_add("findnpctype", "[Search Criteria] - Search database NPC types", AccountStatus::GMAdmin, command_findnpctype) ||
 		command_add("findrace", "[Search Criteria] - Search for a race", AccountStatus::Guide, command_findrace) ||
+		command_add("findrecipe", "[Search Criteria] - Search for a recipe", AccountStatus::Guide, command_findrecipe) ||
 		command_add("findskill", "[Search Criteria] - Search for a skill", AccountStatus::Guide, command_findskill) ||
 		command_add("findspell", "[Search Criteria] - Search for a spell", AccountStatus::Guide, command_findspell) ||
 		command_add("findtask", "[Search Criteria] - Search for a task", AccountStatus::Guide, command_findtask) ||
@@ -177,7 +183,7 @@ int command_init(void)
 		command_add("hatelist", "Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "Completely heal your target", AccountStatus::Steward, command_heal) ||
 		command_add("help", "[Search Criteria] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
-		command_add("heromodel",  "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
+		command_add("heromodel", "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
 		command_add("hideme", "[on/off] - Hide yourself from spawn lists.", AccountStatus::QuestTroupe, command_hideme) ||
 		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", AccountStatus::GMImpossible, command_hotfix) ||
 		command_add("hp", "Refresh your HP bar from the server.", AccountStatus::Player, command_hp) ||
@@ -198,16 +204,17 @@ int command_init(void)
 		command_add("level", "[Level] - Set your target's level", AccountStatus::Steward, command_level) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", AccountStatus::ApprenticeGuide, command_list) ||
 		command_add("listpetition", "List petitions", AccountStatus::Guide, command_listpetition) ||
+		command_add("lootsim", "[npc_type_id] [loottable_id] [iterations] - Runs benchmark simulations using real loot logic to report numbers and data", AccountStatus::GMImpossible, command_lootsim) ||
 		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", AccountStatus::GMImpossible, command_load_shared_memory) ||
 		command_add("loc", "Print out your or your target's current location and heading", AccountStatus::Player, command_loc) ||
-		command_add("logs",  "Manage anything to do with logs", AccountStatus::GMImpossible, command_logs) ||
+		command_add("logs", "Manage anything to do with logs", AccountStatus::GMImpossible, command_logs) ||
 		command_add("makepet", "[Pet Name] - Make a pet", AccountStatus::Guide, command_makepet) ||
 		command_add("mana", "Fill your or your target's mana", AccountStatus::Guide, command_mana) ||
 		command_add("maxskills", "Maxes skills for you.", AccountStatus::GMMgmt, command_max_all_skills) ||
 		command_add("memspell", "[Spell ID] [Spell Gem] - Memorize a Spell by ID to the specified Spell Gem for you or your target", AccountStatus::Guide, command_memspell) ||
-		command_add("merchant_close_shop",  "Closes a merchant shop", AccountStatus::GMAdmin, command_merchantcloseshop) ||
-		command_add("merchant_open_shop",  "Opens a merchants shop", AccountStatus::GMAdmin, command_merchantopenshop) ||
-		command_add("modifynpcstat", "Modifies an NPC's stats", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
+		command_add("merchant_close_shop", "Closes a merchant shop", AccountStatus::GMAdmin, command_merchantcloseshop) ||
+		command_add("merchant_open_shop", "Opens a merchants shop", AccountStatus::GMAdmin, command_merchantopenshop) ||
+		command_add("modifynpcstat", "[Stat] [Value] - Modifies an NPC's stats temporarily.", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
 		command_add("motd", "[Message of the Day] - Set Message of the Day (leave empty to have no Message of the Day)", AccountStatus::GMLeadAdmin, command_motd) ||
 		command_add("movechar", "[Character ID|Character Name] [Zone ID|Zone Short Name] - Move an offline character to the specified zone", AccountStatus::Guide, command_movechar) ||
 		command_add("movement", "Various movement commands", AccountStatus::GMMgmt, command_movement) ||
@@ -232,7 +239,7 @@ int command_init(void)
 		command_add("nukeitem", "[Item ID] - Removes the specified Item ID from you or your player target's inventory", AccountStatus::GMLeadAdmin, command_nukeitem) ||
 		command_add("object", "List|Add|Edit|Move|Rotate|Copy|Save|Undo|Delete - Manipulate static and tradeskill objects within the zone", AccountStatus::GMAdmin, command_object) ||
 		command_add("oocmute", "[0|1] - Enable or Disable Server OOC", AccountStatus::GMMgmt, command_oocmute) ||
-		command_add("opcode", "opcode management", AccountStatus::GMImpossible, command_opcode) ||
+		command_add("opcode", "Reloads all server patches", AccountStatus::GMImpossible, command_opcode) ||
 		command_add("path", "view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
 		command_add("peqzone", "[Zone ID|Zone Short Name] - Teleports you to the specified zone if you meet the requirements.", AccountStatus::Player, command_peqzone) ||
@@ -242,7 +249,7 @@ int command_init(void)
 		command_add("permarace", "[Race ID] - Change your or your player target's race", AccountStatus::QuestTroupe, command_permarace) ||
 		command_add("petitems", "View your pet's items if you have one", AccountStatus::ApprenticeGuide, command_petitems) ||
 		command_add("petitioninfo", "[petition number] - Get info about a petition", AccountStatus::ApprenticeGuide, command_petitioninfo) ||
-		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
+		command_add("picklock", "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
 		command_add("profanity", "Manage censored language.", AccountStatus::GMLeadAdmin, command_profanity) ||
 		command_add("push", "[Back Push] [Up Push] - Lets you do spell push on an NPC", AccountStatus::GMLeadAdmin, command_push) ||
 		command_add("proximity", "Shows NPC proximity", AccountStatus::GMLeadAdmin, command_proximity) ||
@@ -264,10 +271,10 @@ int command_init(void)
 		command_add("rules", "(subcommand) - Manage server rules", AccountStatus::GMImpossible, command_rules) ||
 		command_add("save", "Force your player or player corpse target to be saved to the database", AccountStatus::Guide, command_save) ||
 		command_add("scale", "Handles npc scaling", AccountStatus::GMLeadAdmin, command_scale) ||
-		command_add("scribespell", "[spellid] - Scribe specified spell in your target's spell book.", AccountStatus::GMCoder, command_scribespell) ||
-		command_add("scribespells", "[max level] [min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_scribespells) ||
+		command_add("scribespell", "[Spell ID] - Scribe a spell by ID to your or your target's spell book.", AccountStatus::GMCoder, command_scribespell) ||
+		command_add("scribespells", "[Max level] [Min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_scribespells) ||
 		command_add("sendzonespawns", "Refresh spawn list for all clients in zone", AccountStatus::GMLeadAdmin, command_sendzonespawns) ||
-		command_add("sensetrap",  "Analog for ldon sense trap for the newer clients since we still don't have it working.", AccountStatus::Player, command_sensetrap) ||
+		command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", AccountStatus::Player, command_sensetrap) ||
 		command_add("serverinfo", "Get CPU, Operating System, and Process Information about the server", AccountStatus::GMMgmt, command_serverinfo) ||
 		command_add("serverlock", "[0|1] - Lock or Unlock the World Server (0 = Unlocked, 1 = Locked)", AccountStatus::GMLeadAdmin, command_serverlock) ||
 		command_add("serverrules", "Read this server's rules", AccountStatus::Player, command_serverrules) ||
@@ -280,7 +287,7 @@ int command_init(void)
 		command_add("setendurance", "[Endurance] - Set your or your target's Endurance", AccountStatus::GMAdmin, command_setendurance) ||
 		command_add("setfaction", "[Faction ID] - Sets targeted NPC's faction in the database", AccountStatus::GMAreas, command_setfaction) ||
 		command_add("sethp", "[Health] - Set your or your target's Health", AccountStatus::GMAdmin, command_sethp) ||
-		command_add("setlanguage", "[language ID] [value] - Set your target's language skillnum to value", AccountStatus::Guide, command_setlanguage) ||
+		command_add("setlanguage", "[Language ID] [Value] - Set your or your target's Language by ID to Value", AccountStatus::Guide, command_setlanguage) ||
 		command_add("setlsinfo", "[Email] [Password] - Set loginserver email address and password (if supported by loginserver)", AccountStatus::Steward, command_setlsinfo) ||
 		command_add("setmana", "[Mana] - Set your or your target's Mana", AccountStatus::GMAdmin, command_setmana) ||
 		command_add("setpass", "[Account Name] [Password] - Set local password by account name", AccountStatus::GMLeadAdmin, command_setpass) ||
@@ -292,7 +299,7 @@ int command_init(void)
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
 		command_add("showbonusstats", "[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.", AccountStatus::Guide, command_showbonusstats) ||
 		command_add("showbuffs", "List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
-		command_add("shownumhits",  "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
+		command_add("shownumhits", "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
 		command_add("shownpcgloballoot", "Show global loot entries for your target NPC", AccountStatus::Guide, command_shownpcgloballoot) ||
 		command_add("showskills", "[Start Skill ID] [All] - Show the values of your or your player target's skills in a popup 50 at a time, use 'all' as second argument to show non-usable skill's values", AccountStatus::Guide, command_showskills) ||
 		command_add("showspellslist", "Shows spell list of targeted NPC", AccountStatus::GMAdmin, command_showspellslist) ||
@@ -321,7 +328,7 @@ int command_init(void)
 		command_add("titlesuffix", "[Title Suffix] - Set your or your player target's title suffix (use \"-1\" to remove title suffix)", AccountStatus::Guide, command_titlesuffix) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_traindisc) ||
 		command_add("trapinfo", "Gets infomation about the traps currently spawned in the zone.", AccountStatus::QuestTroupe, command_trapinfo) ||
-		command_add("tune",  "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||
+		command_add("tune", "Calculate statistical values related to combat.", AccountStatus::GMAdmin, command_tune) ||
 		command_add("undye", "Remove dye from all of your or your target's armor slots", AccountStatus::GMAdmin, command_undye) ||
 		command_add("undyeme", "Remove dye from all of your armor slots", AccountStatus::Player, command_undyeme) ||
 		command_add("unfreeze", "Unfreeze your target", AccountStatus::QuestTroupe, command_unfreeze) ||
@@ -337,6 +344,7 @@ int command_init(void)
 		command_add("viewcurrencies", "View your or your target's currencies", AccountStatus::GMAdmin, command_viewcurrencies) ||
 		command_add("viewnpctype", "[NPC ID] - Show stats for an NPC by NPC ID", AccountStatus::GMAdmin, command_viewnpctype) ||
 		command_add("viewpetition", "[petition number] - View a petition", AccountStatus::ApprenticeGuide, command_viewpetition) ||
+		command_add("viewrecipe", "[Recipe ID] - Show a recipe's entries", AccountStatus::GMAdmin, command_viewrecipe) ||
 		command_add("viewzoneloot", "[item id] - Allows you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", AccountStatus::QuestTroupe, command_viewzoneloot) ||
 		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", AccountStatus::GMMgmt, command_wc) ||
 		command_add("weather", "[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather", AccountStatus::QuestTroupe, command_weather) ||
@@ -346,7 +354,7 @@ int command_init(void)
 		command_add("wpadd", "[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path. (-h to use current heading)", AccountStatus::GMAreas, command_wpadd) ||
 		command_add("wpinfo", "Show waypoint info about your NPC target", AccountStatus::GMAreas, command_wpinfo) ||
 		command_add("worldwide", "Performs world-wide GM functions such as cast (can be extended for other commands). Use caution", AccountStatus::GMImpossible, command_worldwide) ||
-		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.", AccountStatus::GMImpossible, command_xtargets) ||
+		command_add("xtargets", "[New Max XTargets] - Show your or your target's XTargets and optionally set max XTargets.", AccountStatus::GMImpossible, command_xtargets) ||
 		command_add("zclip", "[Minimum Clip] [Maximum Clip] [Fog Minimum Clip] [Fog Maximum Clip] [Permanent (0 = False, 1 = True)] - Change zone clipping", AccountStatus::QuestTroupe, command_zclip) ||
 		command_add("zcolor", "[Red] [Green] [Blue] [Permanent (0 = False, 1 = True)] - Change sky color", AccountStatus::QuestTroupe, command_zcolor) ||
 		command_add("zheader", "[Zone ID|Zone Short Name] [Version] - Load a zone header from the database", AccountStatus::QuestTroupe, command_zheader) ||
@@ -356,7 +364,7 @@ int command_init(void)
 		command_add("zonelock", "[List|Lock|Unlock] [Zone ID|Zone Short Name] - Set or get lock status of a Zone by ID or Short Name", AccountStatus::GMAdmin, command_zonelock) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
 		command_add("zonestatus", "Show connected zoneservers, synonymous with /servers", AccountStatus::GMLeadAdmin, command_zonestatus) ||
-		command_add("zopp",  "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", AccountStatus::GMImpossible, command_zopp) ||
+		command_add("zopp", "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", AccountStatus::GMImpossible, command_zopp) ||
 		command_add("zsafecoords", "[X] [Y] [Z] [Heading] [Permanent (0 = False, 1 = True)] - Set the current zone's safe coordinates", AccountStatus::QuestTroupe, command_zsafecoords) ||
 		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
 		command_add("zsky", "[Sky Type] [Permanent (0 = False, 1 = True)] - Change zone sky type", AccountStatus::QuestTroupe, command_zsky) ||
@@ -468,8 +476,10 @@ int command_init(void)
  */
 void command_deinit(void)
 {
-	for (auto &c : command_delete_list)
+	for (auto &c : command_delete_list) {
 		delete c;
+	}
+
 	command_delete_list.clear();
 	commandlist.clear();
 	commandaliases.clear();
@@ -520,12 +530,19 @@ int command_add(std::string command_name, std::string description, uint8 admin, 
 	c->description = description;
 	c->function = function;
 
+	commands_map[command_name] = admin;
+
 	commandlist[command_name] = c;
 	commandaliases[command_name] = command_name;
 	command_delete_list.push_back(c);
 	command_count++;
 
 	return 0;
+}
+
+uint8 GetCommandStatus(Client *c, std::string command_name) {
+	auto command_status = commands_map[command_name];
+	return command_status;
 }
 
 /*
@@ -540,7 +557,7 @@ int command_add(std::string command_name, std::string description, uint8 admin, 
  *	message		- what the client typed
  *
  */
-int command_realdispatch(Client *c, std::string message)
+int command_realdispatch(Client *c, std::string message, bool ignore_status)
 {
 	Seperator sep(message.c_str(), ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
@@ -553,7 +570,7 @@ int command_realdispatch(Client *c, std::string message)
 	}
 
 	auto cur = commandlist[cstr];
-	if (c->Admin() < cur->admin) {
+	if (!ignore_status && c->Admin() < cur->admin) {
 		c->Message(Chat::White, "Your status is not high enough to use this command.");
 		return -1;
 	}
@@ -606,13 +623,7 @@ void command_help(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		command_link = Saylink::Create(
-			fmt::format(
-				"{}{}",
-				COMMAND_CHAR,
-				cur.first
-			),
-			false,
+		command_link = Saylink::Silent(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
@@ -623,8 +634,9 @@ void command_help(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} | {}",
+				"{} | Status: {} | {}",
 				command_link,
+				cur.second->admin,
 				!cur.second->description.empty() ? cur.second->description : ""
 			).c_str()
 		);
@@ -688,13 +700,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto current_commmand_link = Saylink::Create(
-		fmt::format(
-			"{}{}",
-			COMMAND_CHAR,
-			command_iter->first
-		),
-		false,
+	auto current_commmand_link = Saylink::Silent(
 		fmt::format(
 			"{}{}",
 			COMMAND_CHAR,
@@ -713,13 +719,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		alias_link = Saylink::Create(
-			fmt::format(
-				"{}{}",
-				COMMAND_CHAR,
-				a.first
-			),
-			false,
+		alias_link = Saylink::Silent(
 			fmt::format(
 				"{}{}",
 				COMMAND_CHAR,
@@ -812,7 +812,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 
 #ifdef WIN32
 			shared_memory_path = "shared_memory";
-			if (file_exists("bin/shared_memory.exe")) {
+			if (File::Exists("bin/shared_memory.exe")) {
 				shared_memory_path = "bin\\shared_memory.exe";
 			}
 
@@ -828,7 +828,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 			if (system(hotfix_command.c_str())) {}
 #else
 			shared_memory_path = "./shared_memory";
-			if (file_exists("./bin/shared_memory")) {
+			if (File::Exists("./bin/shared_memory")) {
 				shared_memory_path = "./bin/shared_memory";
 			}
 
@@ -981,10 +981,12 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/equipitem.cpp"
 #include "gm_commands/faction.cpp"
 #include "gm_commands/feature.cpp"
+#include "gm_commands/findaa.cpp"
 #include "gm_commands/findclass.cpp"
 #include "gm_commands/findfaction.cpp"
 #include "gm_commands/findnpctype.cpp"
 #include "gm_commands/findrace.cpp"
+#include "gm_commands/findrecipe.cpp"
 #include "gm_commands/findskill.cpp"
 #include "gm_commands/findspell.cpp"
 #include "gm_commands/findtask.cpp"
@@ -1038,6 +1040,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/level.cpp"
 #include "gm_commands/list.cpp"
 #include "gm_commands/listpetition.cpp"
+#include "gm_commands/lootsim.cpp"
 #include "gm_commands/loc.cpp"
 #include "gm_commands/logcommand.cpp"
 #include "gm_commands/logs.cpp"
@@ -1146,6 +1149,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/spawnfix.cpp"
 #include "gm_commands/spawnstatus.cpp"
 #include "gm_commands/spellinfo.cpp"
+#include "gm_commands/faction_association.cpp"
 #include "gm_commands/stun.cpp"
 #include "gm_commands/summon.cpp"
 #include "gm_commands/summonburiedplayercorpse.cpp"
@@ -1177,6 +1181,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/viewcurrencies.cpp"
 #include "gm_commands/viewnpctype.cpp"
 #include "gm_commands/viewpetition.cpp"
+#include "gm_commands/viewrecipe.cpp"
 #include "gm_commands/viewzoneloot.cpp"
 #include "gm_commands/wc.cpp"
 #include "gm_commands/weather.cpp"

@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include "dynamic_zone.h"
 #include "dynamic_zone_manager.h"
 #include "expedition_message.h"
@@ -94,7 +94,7 @@ ZoneServer::~ZoneServer() {
 	}
 }
 
-bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_static_zone) {
+bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool in_is_static_zone) {
 	is_booting_up = false;
 
 	std::string zone_short_name = ZoneName(in_zone_id, true);
@@ -114,7 +114,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_stati
 				) :
 				""
 			),
-			is_static_zone ? " (Static)" : ""
+			in_is_static_zone ? " (Static)" : ""
 		);
 	}
 
@@ -130,7 +130,7 @@ bool ZoneServer::SetZone(uint32 in_zone_id, uint32 in_instance_id, bool is_stati
 		LSSleepUpdate(GetPrevZoneID());
 	}
 
-	is_static_zone = is_static_zone;
+	is_static_zone = in_is_static_zone;
 
 	strn0cpy(zone_name, zone_short_name.c_str(), sizeof(zone_name));
 	strn0cpy(long_name, zone_long_name.c_str(), sizeof(long_name));
@@ -526,6 +526,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				}
 			} else {
 				if (
+					scm->chan_num == ChatChannel_Guild ||
 					scm->chan_num == ChatChannel_Auction ||
 					scm->chan_num == ChatChannel_OOC ||
 					scm->chan_num == ChatChannel_Broadcast ||
@@ -818,7 +819,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					ingress_server->SendPacket(pack);	// inform target server
 				}
 			} else {
-				LogInfo("Processing ZTZ for ingress to zone for client [{}]", ztz->name);
+				LogInfo(
+					"Processing ZTZ for ingress to zone for client [{}] instance_id [{}] zone_id [{}]",
+					ztz->name,
+					ztz->current_instance_id,
+					ztz->current_zone_id
+				);
 				auto egress_server = (
 					ztz->current_instance_id ?
 					zoneserver_list.FindByInstanceID(ztz->current_instance_id) :
@@ -826,6 +832,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				);
 
 				if (egress_server) {
+					LogInfo("Found egress server, forwarding client");
 					egress_server->SendPacket(pack);
 				}
 			}
@@ -1307,6 +1314,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadAAData:
 		case ServerOP_ReloadAlternateCurrencies:
 		case ServerOP_ReloadBlockedSpells:
+		case ServerOP_ReloadCommands:
 		case ServerOP_ReloadDoors:
 		case ServerOP_ReloadGroundSpawns:
 		case ServerOP_ReloadLevelEXPMods:
@@ -1322,6 +1330,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadVeteranRewards:
 		case ServerOP_ReloadWorld:
 		case ServerOP_ReloadZonePoints:
+		case ServerOP_ReloadZoneData:
 		case ServerOP_RezzPlayerAccept:
 		case ServerOP_SpawnStatusChange:
 		case ServerOP_UpdateSpawn:
@@ -1345,6 +1354,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_ReloadLogs: {
 			zoneserver_list.SendPacket(pack);
+			UCSLink.SendPacket(pack);
 			LogSys.LoadLogDatabaseSettings();
 			break;
 		}
@@ -1401,6 +1411,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_SharedTaskPurgeAllCommand:
 		case ServerOP_SharedTaskPlayerList:
 		case ServerOP_SharedTaskLock:
+		case ServerOP_SharedTaskEndByDz:
+		case ServerOP_SharedTaskEnd:
 		case ServerOP_SharedTaskKickPlayers: {
 			SharedTaskWorldMessaging::HandleZoneMessage(pack);
 			break;

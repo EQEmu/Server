@@ -40,7 +40,7 @@ public:
 	void		SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);
 	void		SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message);
 	void		SendKeepAlive();
-	bool		SetZone(uint32 in_zone_id, uint32 in_instance_id = 0, bool is_static_zone = false);
+	bool		SetZone(uint32 in_zone_id, uint32 in_instance_id = 0, bool in_is_static_zone = false);
 	void		TriggerBootup(uint32 in_zone_id = 0, uint32 in_instance_id = 0, const char* admin_name = 0, bool is_static_zone = false);
 	void		Disconnect() { auto handle = tcpc->Handle(); if (handle) { handle->Disconnect(); } }
 	void		IncomingClient(Client* client);

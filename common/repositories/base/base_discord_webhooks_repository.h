@@ -19,7 +19,7 @@
 class BaseDiscordWebhooksRepository {
 public:
 	struct DiscordWebhooks {
-		int         id;
+		int32_t     id;
 		std::string webhook_name;
 		std::string webhook_url;
 		time_t      created_at;
@@ -88,18 +88,18 @@ public:
 
 	static DiscordWebhooks NewEntity()
 	{
-		DiscordWebhooks entry{};
+		DiscordWebhooks e{};
 
-		entry.id           = 0;
-		entry.webhook_name = "";
-		entry.webhook_url  = "";
-		entry.created_at   = 0;
-		entry.deleted_at   = 0;
+		e.id           = 0;
+		e.webhook_name = "";
+		e.webhook_url  = "";
+		e.created_at   = 0;
+		e.deleted_at   = 0;
 
-		return entry;
+		return e;
 	}
 
-	static DiscordWebhooks GetDiscordWebhooksEntry(
+	static DiscordWebhooks GetDiscordWebhooks(
 		const std::vector<DiscordWebhooks> &discord_webhookss,
 		int discord_webhooks_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			DiscordWebhooks entry{};
+			DiscordWebhooks e{};
 
-			entry.id           = atoi(row[0]);
-			entry.webhook_name = row[1] ? row[1] : "";
-			entry.webhook_url  = row[2] ? row[2] : "";
-			entry.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.deleted_at   = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.webhook_name = row[1] ? row[1] : "";
+			e.webhook_url  = row[2] ? row[2] : "";
+			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.deleted_at   = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,25 +161,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DiscordWebhooks discord_webhooks_entry
+		const DiscordWebhooks &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(discord_webhooks_entry.webhook_name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(discord_webhooks_entry.webhook_url) + "'");
-		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (discord_webhooks_entry.created_at > 0 ? std::to_string(discord_webhooks_entry.created_at) : "null") + ")");
-		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (discord_webhooks_entry.deleted_at > 0 ? std::to_string(discord_webhooks_entry.deleted_at) : "null") + ")");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.webhook_name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.webhook_url) + "'");
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				discord_webhooks_entry.id
+				e.id
 			)
 		);
 
@@ -188,55 +188,55 @@ public:
 
 	static DiscordWebhooks InsertOne(
 		Database& db,
-		DiscordWebhooks discord_webhooks_entry
+		DiscordWebhooks e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(discord_webhooks_entry.id));
-		insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_name) + "'");
-		insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_url) + "'");
-		insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.created_at > 0 ? std::to_string(discord_webhooks_entry.created_at) : "null") + ")");
-		insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.deleted_at > 0 ? std::to_string(discord_webhooks_entry.deleted_at) : "null") + ")");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
+		v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			discord_webhooks_entry.id = results.LastInsertedID();
-			return discord_webhooks_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		discord_webhooks_entry = NewEntity();
+		e = NewEntity();
 
-		return discord_webhooks_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DiscordWebhooks> discord_webhooks_entries
+		const std::vector<DiscordWebhooks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &discord_webhooks_entry: discord_webhooks_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(discord_webhooks_entry.id));
-			insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_name) + "'");
-			insert_values.push_back("'" + Strings::Escape(discord_webhooks_entry.webhook_url) + "'");
-			insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.created_at > 0 ? std::to_string(discord_webhooks_entry.created_at) : "null") + ")");
-			insert_values.push_back("FROM_UNIXTIME(" + (discord_webhooks_entry.deleted_at > 0 ? std::to_string(discord_webhooks_entry.deleted_at) : "null") + ")");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
+			v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -263,21 +263,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DiscordWebhooks entry{};
+			DiscordWebhooks e{};
 
-			entry.id           = atoi(row[0]);
-			entry.webhook_name = row[1] ? row[1] : "";
-			entry.webhook_url  = row[2] ? row[2] : "";
-			entry.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.deleted_at   = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.webhook_name = row[1] ? row[1] : "";
+			e.webhook_url  = row[2] ? row[2] : "";
+			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.deleted_at   = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<DiscordWebhooks> GetWhere(Database& db, std::string where_filter)
+	static std::vector<DiscordWebhooks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<DiscordWebhooks> all_entries;
 
@@ -292,21 +292,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DiscordWebhooks entry{};
+			DiscordWebhooks e{};
 
-			entry.id           = atoi(row[0]);
-			entry.webhook_name = row[1] ? row[1] : "";
-			entry.webhook_url  = row[2] ? row[2] : "";
-			entry.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.deleted_at   = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.webhook_name = row[1] ? row[1] : "";
+			e.webhook_url  = row[2] ? row[2] : "";
+			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			e.deleted_at   = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -329,6 +329,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

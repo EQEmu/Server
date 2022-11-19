@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 #include <algorithm>
 #include <cctype>
+#include <cinttypes>
 
 #ifdef _WINDOWS
 #include <windows.h>
@@ -243,7 +244,7 @@ char *RemoveApostrophes(const char *s)
 
 const char *ConvertArray(int64 input, char *returnchar)
 {
-	sprintf(returnchar, "%lld", input);
+	sprintf(returnchar, "%" PRId64, input);
 	return returnchar;
 }
 

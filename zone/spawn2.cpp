@@ -26,7 +26,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -203,6 +203,11 @@ bool Spawn2::Process() {
 			LogSpawns("Spawn2 [{}]: Spawn group [{}] yeilded an invalid NPC type [{}]", spawn2_id, spawngroup_id_, npcid);
 			Reset();    //try again later
 			return (true);
+		}
+
+		if (tmp->npc_id == 0) {
+			LogError("NPC type did not load for npc_id [{}]", npcid);
+			return true;
 		}
 
 		if (tmp->unique_spawn_by_name) {

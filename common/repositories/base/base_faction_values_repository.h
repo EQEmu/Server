@@ -19,10 +19,10 @@
 class BaseFactionValuesRepository {
 public:
 	struct FactionValues {
-		int char_id;
-		int faction_id;
-		int current_value;
-		int temp;
+		int32_t char_id;
+		int32_t faction_id;
+		int16_t current_value;
+		int8_t  temp;
 	};
 
 	static std::string PrimaryKey()
@@ -85,17 +85,17 @@ public:
 
 	static FactionValues NewEntity()
 	{
-		FactionValues entry{};
+		FactionValues e{};
 
-		entry.char_id       = 0;
-		entry.faction_id    = 0;
-		entry.current_value = 0;
-		entry.temp          = 0;
+		e.char_id       = 0;
+		e.faction_id    = 0;
+		e.current_value = 0;
+		e.temp          = 0;
 
-		return entry;
+		return e;
 	}
 
-	static FactionValues GetFactionValuesEntry(
+	static FactionValues GetFactionValues(
 		const std::vector<FactionValues> &faction_valuess,
 		int faction_values_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			FactionValues entry{};
+			FactionValues e{};
 
-			entry.char_id       = atoi(row[0]);
-			entry.faction_id    = atoi(row[1]);
-			entry.current_value = atoi(row[2]);
-			entry.temp          = atoi(row[3]);
+			e.char_id       = static_cast<int32_t>(atoi(row[0]));
+			e.faction_id    = static_cast<int32_t>(atoi(row[1]));
+			e.current_value = static_cast<int16_t>(atoi(row[2]));
+			e.temp          = static_cast<int8_t>(atoi(row[3]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,25 +156,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		FactionValues faction_values_entry
+		const FactionValues &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(faction_values_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(faction_values_entry.faction_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(faction_values_entry.current_value));
-		update_values.push_back(columns[3] + " = " + std::to_string(faction_values_entry.temp));
+		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.faction_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.current_value));
+		v.push_back(columns[3] + " = " + std::to_string(e.temp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				faction_values_entry.char_id
+				e.char_id
 			)
 		);
 
@@ -183,53 +183,53 @@ public:
 
 	static FactionValues InsertOne(
 		Database& db,
-		FactionValues faction_values_entry
+		FactionValues e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(faction_values_entry.char_id));
-		insert_values.push_back(std::to_string(faction_values_entry.faction_id));
-		insert_values.push_back(std::to_string(faction_values_entry.current_value));
-		insert_values.push_back(std::to_string(faction_values_entry.temp));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.faction_id));
+		v.push_back(std::to_string(e.current_value));
+		v.push_back(std::to_string(e.temp));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			faction_values_entry.char_id = results.LastInsertedID();
-			return faction_values_entry;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		faction_values_entry = NewEntity();
+		e = NewEntity();
 
-		return faction_values_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<FactionValues> faction_values_entries
+		const std::vector<FactionValues> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &faction_values_entry: faction_values_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(faction_values_entry.char_id));
-			insert_values.push_back(std::to_string(faction_values_entry.faction_id));
-			insert_values.push_back(std::to_string(faction_values_entry.current_value));
-			insert_values.push_back(std::to_string(faction_values_entry.temp));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.faction_id));
+			v.push_back(std::to_string(e.current_value));
+			v.push_back(std::to_string(e.temp));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -256,20 +256,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionValues entry{};
+			FactionValues e{};
 
-			entry.char_id       = atoi(row[0]);
-			entry.faction_id    = atoi(row[1]);
-			entry.current_value = atoi(row[2]);
-			entry.temp          = atoi(row[3]);
+			e.char_id       = static_cast<int32_t>(atoi(row[0]));
+			e.faction_id    = static_cast<int32_t>(atoi(row[1]));
+			e.current_value = static_cast<int16_t>(atoi(row[2]));
+			e.temp          = static_cast<int8_t>(atoi(row[3]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<FactionValues> GetWhere(Database& db, std::string where_filter)
+	static std::vector<FactionValues> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<FactionValues> all_entries;
 
@@ -284,20 +284,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			FactionValues entry{};
+			FactionValues e{};
 
-			entry.char_id       = atoi(row[0]);
-			entry.faction_id    = atoi(row[1]);
-			entry.current_value = atoi(row[2]);
-			entry.temp          = atoi(row[3]);
+			e.char_id       = static_cast<int32_t>(atoi(row[0]));
+			e.faction_id    = static_cast<int32_t>(atoi(row[1]));
+			e.current_value = static_cast<int16_t>(atoi(row[2]));
+			e.temp          = static_cast<int8_t>(atoi(row[3]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -320,6 +320,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

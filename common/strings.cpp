@@ -1,3 +1,4 @@
+// for folly stuff
 /*
  * Copyright 2013 Facebook, Inc.
  *
@@ -13,6 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// for our stuff
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2022 EQEMu Development Team (http://eqemulator.net)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 
 #include "strings.h"
 #include <fmt/format.h>
@@ -45,7 +64,7 @@ std::vector<std::string> Strings::Split(const std::string &str, const char delim
 }
 
 // this one takes delimiter length into consideration
-std::vector<std::string> Strings::Split(std::string s, std::string delimiter)
+std::vector<std::string> Strings::Split(const std::string& s, const std::string& delimiter)
 {
 	size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
 	std::string              token;
@@ -343,11 +362,26 @@ std::string Strings::Money(uint32 platinum, uint32 gold, uint32 silver, uint32 c
 			Strings::Commify(std::to_string(copper))
 		);
 	}
+	else if (copper && silver && !gold && platinum) { // CSP
+		money_string = fmt::format(
+			"{} Platinum, {} Silver, and {} Copper",
+			Strings::Commify(std::to_string(platinum)),
+			Strings::Commify(std::to_string(silver)),
+			Strings::Commify(std::to_string(copper))
+		);
+	}
 	else if (copper && silver && gold && !platinum) { // CSG
 		money_string = fmt::format(
 			"{} Gold, {} Silver, and {} Copper",
 			Strings::Commify(std::to_string(gold)),
 			Strings::Commify(std::to_string(silver)),
+			Strings::Commify(std::to_string(copper))
+		);
+	}
+	else if (copper && !silver && !gold && platinum) { // CP
+		money_string = fmt::format(
+			"{} Platinum and {} Copper",
+			Strings::Commify(std::to_string(platinum)),
 			Strings::Commify(std::to_string(copper))
 		);
 	}
@@ -363,6 +397,13 @@ std::string Strings::Money(uint32 platinum, uint32 gold, uint32 silver, uint32 c
 			"{} Platinum, {} Gold, and {} Silver",
 			Strings::Commify(std::to_string(platinum)),
 			Strings::Commify(std::to_string(gold)),
+			Strings::Commify(std::to_string(silver))
+		);
+	}
+	else if (!copper && silver && !gold && platinum) { // SP
+		money_string = fmt::format(
+			"{} Platinum and {} Silver",
+			Strings::Commify(std::to_string(platinum)),
 			Strings::Commify(std::to_string(silver))
 		);
 	}
@@ -632,4 +673,8 @@ std::string Strings::ConvertToDigit(int n, std::string suffix)
 	else {
 		return NUM_TO_ENGLISH_X[n] + suffix;
 	}
+}
+bool Strings::Contains(const std::string& subject, const std::string& search)
+{
+	return subject.find(search) != std::string::npos;
 }

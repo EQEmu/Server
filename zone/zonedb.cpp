@@ -11,7 +11,6 @@
 #include "merc.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
 #include "aura.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/npc_types_repository.h"
@@ -91,182 +90,6 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_S
 	if (!results.Success()) {
         return false;
 	}
-
-	return true;
-}
-
-bool ZoneDatabase::GetZoneCFG(
-	uint32 zoneid,
-	uint16 instance_version,
-	NewZone_Struct *zone_data,
-	bool &can_bind,
-	bool &can_combat,
-	bool &can_levitate,
-	bool &can_castoutdoor,
-	bool &is_city,
-	bool &is_hotzone,
-	bool &allow_mercs,
-	double &max_movement_update_range,
-	uint8 &zone_type,
-	int &ruleset,
-	char **map_filename) {
-
-	*map_filename = new char[100];
-	zone_data->zone_id = zoneid;
-
-	std::string query = fmt::format(
-		"SELECT "
-		"ztype, "						// 0
-		"fog_red, "						// 1
-		"fog_green, "					// 2
-		"fog_blue, "					// 3
-		"fog_minclip, "					// 4
-		"fog_maxclip, "					// 5
-		"fog_red2, "					// 6
-		"fog_green2, "					// 7
-		"fog_blue2, "					// 8
-		"fog_minclip2, "				// 9
-		"fog_maxclip2, "				// 10
-		"fog_red3, "					// 11
-		"fog_green3, "					// 12
-		"fog_blue3, "					// 13
-		"fog_minclip3, "				// 14
-		"fog_maxclip3, "				// 15
-		"fog_red4, "					// 16
-		"fog_green4, "					// 17
-		"fog_blue4, "					// 18
-		"fog_minclip4, "				// 19
-		"fog_maxclip4, "				// 20
-		"fog_density, "					// 21
-		"sky, "							// 22
-		"zone_exp_multiplier, "			// 23
-		"safe_x, "						// 24
-		"safe_y, "						// 25
-		"safe_z, "						// 26
-		"underworld, "					// 27
-		"minclip, "						// 28
-		"maxclip, "						// 29
-		"time_type, "					// 30
-		"canbind, "						// 31
-		"cancombat, "					// 32
-		"canlevitate, "					// 33
-		"castoutdoor, "					// 34
-		"hotzone, "						// 35
-		"ruleset, "						// 36
-		"suspendbuffs, "				// 37
-		"map_file_name, "				// 38
-		"short_name, "					// 39
-		"rain_chance1, "				// 40
-		"rain_chance2, "				// 41
-		"rain_chance3, "				// 42
-		"rain_chance4, "				// 43
-		"rain_duration1, "				// 44
-		"rain_duration2, "				// 45
-		"rain_duration3, "				// 46
-		"rain_duration4, "				// 47
-		"snow_chance1, "				// 48
-		"snow_chance2, "				// 49
-		"snow_chance3, "				// 50
-		"snow_chance4, "				// 51
-		"snow_duration1, "				// 52
-		"snow_duration2, "				// 53
-		"snow_duration3, "				// 54
-		"snow_duration4, "				// 55
-		"gravity, "						// 56
-		"fast_regen_hp, "				// 57
-		"fast_regen_mana, "				// 58
-		"fast_regen_endurance, "		// 59
-		"npc_max_aggro_dist, "			// 60
-		"max_movement_update_range, "	// 61
-		"underworld_teleport_index, "	// 62
-		"lava_damage, "					// 63
-		"min_lava_damage "				// 64
-		"FROM zone WHERE zoneidnumber = {} AND version = {} {}",
-		zoneid,
-		instance_version,
-		ContentFilterCriteria::apply()
-	);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		strcpy(*map_filename, "default");
-		return false;
-	}
-
-	if (results.RowCount() == 0) {
-		strcpy(*map_filename, "default");
-		return false;
-	}
-
-	auto& row = results.begin();
-
-	memset(zone_data, 0, sizeof(NewZone_Struct));
-	zone_data->ztype = atoi(row[0]);
-	zone_type = zone_data->ztype;
-
-	int index;
-	for (index = 0; index < 4; index++) {
-		zone_data->fog_red[index] = atoi(row[1 + index * 5]);
-		zone_data->fog_green[index] = atoi(row[2 + index * 5]);
-		zone_data->fog_blue[index] = atoi(row[3 + index * 5]);
-		zone_data->fog_minclip[index] = atof(row[4 + index * 5]);
-		zone_data->fog_maxclip[index] = atof(row[5 + index * 5]);
-	}
-
-	zone_data->fog_density = atof(row[21]);
-	zone_data->sky = atoi(row[22]);
-	zone_data->zone_exp_multiplier = atof(row[23]);
-	zone_data->safe_x = atof(row[24]);
-	zone_data->safe_y = atof(row[25]);
-	zone_data->safe_z = atof(row[26]);
-	zone_data->underworld = atof(row[27]);
-	zone_data->minclip = atof(row[28]);
-	zone_data->maxclip = atof(row[29]);
-	zone_data->time_type = atoi(row[30]);
-
-	//not in the DB yet:
-	zone_data->gravity = atof(row[56]);
-	LogDebug("Zone Gravity is [{}]", zone_data->gravity);
-	allow_mercs = true;
-
-	zone_data->FastRegenHP = atoi(row[57]);
-	zone_data->FastRegenMana = atoi(row[58]);
-	zone_data->FastRegenEndurance = atoi(row[59]);
-	zone_data->NPCAggroMaxDist = atoi(row[60]);
-	zone_data->underworld_teleport_index = atoi(row[62]);
-	zone_data->LavaDamage = atoi(row[63]);
-	zone_data->MinLavaDamage = atoi(row[64]);
-
-	int bindable = 0;
-	bindable = atoi(row[31]);
-
-	can_bind = bindable == 0 ? false : true;
-	is_city = bindable == 2 ? true : false;
-	can_combat = atoi(row[32]) == 0 ? false : true;
-	can_levitate = atoi(row[33]) == 0 ? false : true;
-	can_castoutdoor = atoi(row[34]) == 0 ? false : true;
-	is_hotzone = atoi(row[35]) == 0 ? false : true;
-	max_movement_update_range = atof(row[61]);
-
-	ruleset = atoi(row[36]);
-	zone_data->SuspendBuffs = atoi(row[37]);
-
-	char *file = row[38];
-	if (file)
-		strcpy(*map_filename, file);
-	else
-		strcpy(*map_filename, row[39]);
-
-	for (index = 0; index < 4; index++)
-		zone_data->rain_chance[index] = atoi(row[40 + index]);
-
-	for (index = 0; index < 4; index++)
-		zone_data->rain_duration[index] = atoi(row[44 + index]);
-
-	for (index = 0; index < 4; index++)
-		zone_data->snow_chance[index] = atoi(row[48 + index]);
-
-	for (index = 0; index < 4; index++)
-		zone_data->snow_duration[index] = atof(row[52 + index]);
 
 	return true;
 }
@@ -2561,6 +2384,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->exp_mod                = n.exp_mod;
 		t->skip_auto_scale        = false; // hardcoded here for now
 		t->hp_regen_per_second    = n.hp_regen_per_second;
+		t->heroic_strikethrough   = n.heroic_strikethrough;
+		t->faction_amount         = n.faction_amount;
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -3319,22 +3144,9 @@ bool ZoneDatabase::LoadBlockedSpells(int32 blockedSpellsCount, ZoneSpellsBlocked
 
 int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 {
-	std::string query = StringFormat("SELECT shutdowndelay FROM zone "
-                                    "WHERE zoneidnumber = %i AND (version=%i OR version=0) "
-                                    "ORDER BY version DESC", zoneID, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return (RuleI(Zone, AutoShutdownDelay));
-    }
+	auto z = GetZoneVersionWithFallback(zoneID, version);
 
-    if (results.RowCount() == 0) {
-        std::cerr << "Error in getZoneShutDownDelay no result '" << query << "' " << std::endl;
-        return (RuleI(Zone, AutoShutdownDelay));
-    }
-
-    auto& row = results.begin();
-
-    return atoi(row[0]);
+    return z ? z->shutdowndelay : RuleI(Zone, AutoShutdownDelay);
 }
 
 uint32 ZoneDatabase::GetKarma(uint32 acct_id)
@@ -4842,8 +4654,8 @@ uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
 	return results.LastInsertedID();
 }
 
-double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id) const {
-	std::string query = fmt::format(
+double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	const std::string query = fmt::format(
 		SQL(
 			SELECT
 			`aa_modifier`
@@ -4852,22 +4664,26 @@ double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id) const
 			WHERE
 			`character_id` = {}
 			AND
-			(`zone_id` = {} OR `zone_id` = 0)
-			ORDER BY `zone_id` DESC
+			(`zone_id` = {} OR `zone_id` = 0) AND
+			(`instance_version` = {} OR `instance_version` = -1)
+			ORDER BY `zone_id`, `instance_version` DESC
 			LIMIT 1
 		),
 		character_id,
-		zone_id
+		zone_id,
+		instance_version
 	);
+
 	auto results = database.QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atof(row[0]);
 	}
+
 	return 1.0f;
 }
 
-double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id) const {
-	std::string query = fmt::format(
+double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	const std::string query = fmt::format(
 		SQL(
 			SELECT
 			`exp_modifier`
@@ -4876,48 +4692,54 @@ double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id) const {
 			WHERE
 			`character_id` = {}
 			AND
-			(`zone_id` = {} OR `zone_id` = 0)
-			ORDER BY `zone_id` DESC
+			(`zone_id` = {} OR `zone_id` = 0) AND
+			(`instance_version` = {} OR `instance_version` = -1)
+			ORDER BY `zone_id`, `instance_version` DESC
 			LIMIT 1
 		),
 		character_id,
-		zone_id
+		zone_id,
+		instance_version
 	);
+
 	auto results = database.QueryDatabase(query);
 	for (auto& row = results.begin(); row != results.end(); ++row) {
 		return atof(row[0]);
 	}
+
 	return 1.0f;
 }
 
-void ZoneDatabase::SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier) {
-	float exp_modifier = GetEXPModifier(character_id, zone_id);
+void ZoneDatabase::SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version) {
+	float exp_modifier = GetEXPModifier(character_id, zone_id, instance_version);
 	std::string query = fmt::format(
 		SQL(
 			REPLACE INTO
 			`character_exp_modifiers`
 			VALUES
-			({}, {}, {}, {})
+			({}, {}, {}, {}, {})
 		),
 		character_id,
 		zone_id,
+		instance_version,
 		aa_modifier,
 		exp_modifier
 	);
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier) {
-	float aa_modifier = GetAAEXPModifier(character_id, zone_id);
+void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version) {
+	float aa_modifier = GetAAEXPModifier(character_id, zone_id, instance_version);
 	std::string query = fmt::format(
 		SQL(
 			REPLACE INTO
 			`character_exp_modifiers`
 			VALUES
-			({}, {}, {}, {})
+			({}, {}, {}, {}, {})
 		),
 		character_id,
 		zone_id,
+		instance_version,
 		aa_modifier,
 		exp_modifier
 	);

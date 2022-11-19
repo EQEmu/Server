@@ -15,6 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -567,7 +568,6 @@ void EntityList::MobProcess()
 				in.s_addr = mob->CastToClient()->GetIP();
 				LogInfo("Dropping client: Process=false, ip=[{}] port=[{}]", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
-				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
 					LogError("About to delete a client still in a group");
@@ -699,9 +699,9 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	}
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
-	uint16 emoteid = npc->GetEmoteID();
+	uint32 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)
-		npc->DoNPCEmote(ONSPAWN, emoteid);
+		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emoteid);
 	npc->SetSpawned();
 	if (SendSpawnPacket) {
 		if (dontqueue) { // aka, SEND IT NOW BITCH!
@@ -730,17 +730,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
 	/* Zone controller process EVENT_SPAWN_ZONE */
-	if (RuleB(Zone, UseZoneController)) {
-		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
-		if (controller && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
-			std::string export_string = fmt::format(
-				"{} {}",
-				npc->GetID(),
-				npc->GetNPCTypeID()
-			);
-			parse->EventNPC(EVENT_SPAWN_ZONE, controller, nullptr, export_string, 0);
-		}
-	}
+	npc->DispatchZoneControllerEvent(EVENT_SPAWN_ZONE, npc, "", 0, nullptr);
 
 	/**
 	 * Set whether NPC was spawned in or out of water
@@ -1725,6 +1715,9 @@ void EntityList::QueueCloseClients(
 
 	for (auto &e : GetCloseMobList(sender, distance)) {
 		Mob *mob = e.second;
+		if (!mob) {
+			continue;
+		}
 
 		if (!mob->IsClient()) {
 			continue;
@@ -1871,14 +1864,57 @@ Client *EntityList::GetClientByLSID(uint32 iLSID)
 	return nullptr;
 }
 
+#ifdef BOTS
+Bot* EntityList::GetRandomBot(const glm::vec3& location, float distance, Bot* exclude_bot)
+{
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
+	std::vector<Bot*> bots_in_range;
+
+	for (const auto& b : bot_list) {
+		if (
+			b != exclude_bot &&
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(b->GetPosition()), location) <= distance_squared
+			)
+		) {
+			bots_in_range.push_back(b);
+		}
+	}
+
+	if (bots_in_range.empty()) {
+		return nullptr;
+	}
+
+	return bots_in_range[zone->random.Int(0, bots_in_range.size() - 1)];
+
+}
+#endif
+
 Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, Client *exclude_client)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
 	std::vector<Client*> clients_in_range;
 
 	for (const auto& client : client_list) {
 		if (
 			client.second != exclude_client &&
-			DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(client.second->GetPosition()), location) <= distance_squared
+			)
 		) {
 			clients_in_range.push_back(client.second);
 		}
@@ -1893,12 +1929,22 @@ Client *EntityList::GetRandomClient(const glm::vec3& location, float distance, C
 
 NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
 	std::vector<NPC*> npcs_in_range;
 
 	for (const auto& npc : npc_list) {
 		if (
 			npc.second != exclude_npc &&
-			DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(npc.second->GetPosition()), location) <= distance_squared
+			)
 		) {
 			npcs_in_range.push_back(npc.second);
 		}
@@ -1913,12 +1959,22 @@ NPC* EntityList::GetRandomNPC(const glm::vec3& location, float distance, NPC* ex
 
 Mob* EntityList::GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob)
 {
+	auto is_whole_zone = false;
+	if (location.x == 0.0f && location.y == 0.0f) {
+		is_whole_zone = true;
+	}
+
+	auto distance_squared = (distance * distance);
+
 	std::vector<Mob*> mobs_in_range;
 
 	for (const auto& mob : mob_list) {
 		if (
 			mob.second != exclude_mob &&
-			DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance
+			(
+				is_whole_zone ||
+				DistanceSquared(static_cast<glm::vec3>(mob.second->GetPosition()), location) <= distance_squared
+			)
 		) {
 			mobs_in_range.push_back(mob.second);
 		}
@@ -4258,10 +4314,12 @@ bool EntityList::LimitCheckName(const char *npc_name)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-		NPC* npc = it->second;
-		if (npc)
-			if (strcasecmp(npc_name, npc->GetRawNPCTypeName()) == 0)
+		NPC *npc = it->second;
+		if (npc) {
+			if (strcasecmp(npc_name, npc->GetRawNPCTypeName()) == 0) {
 				return false;
+			}
+		}
 		++it;
 	}
 	return true;
@@ -4415,6 +4473,9 @@ void EntityList::QuestJournalledSayClose(
 	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
 		for (auto &e : GetCloseMobList(sender, (dist * dist))) {
 			Mob *mob = e.second;
+			if (!mob) {
+				continue;
+			}
 
 			if (!mob->IsClient()) {
 				continue;
@@ -5040,14 +5101,12 @@ void EntityList::GateAllClients()
 	}
 }
 
-void EntityList::SignalAllClients(uint32 data)
+void EntityList::SignalAllClients(int signal_id)
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *ent = it->second;
-		if (ent)
-			ent->Signal(data);
-		++it;
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->Signal(signal_id);
+		}
 	}
 }
 
@@ -5099,12 +5158,13 @@ void EntityList::GetClientList(std::list<Client *> &c_list)
 void EntityList::GetBotList(std::list<Bot *> &b_list)
 {
 	b_list.clear();
-	for (auto bot : bot_list) {
-		b_list.push_back(bot);
+
+	for (const auto& b : bot_list) {
+		b_list.push_back(b);
 	}
 }
 
-std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id)
+std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id, uint8 class_id)
 {
 	std::vector<Bot *> client_bot_list;
 
@@ -5112,9 +5172,12 @@ std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id)
 		return client_bot_list;
 	}
 
-	for (auto bot : bot_list) {
-		if (bot->GetOwner() && bot->GetBotOwnerCharacterID() == character_id) {
-			client_bot_list.push_back(bot);
+	for (const auto& b : bot_list) {
+		if (
+			b->GetOwner() &&
+			b->GetBotOwnerCharacterID() == character_id
+		) {
+			client_bot_list.push_back(b);
 		}
 	}
 
@@ -5129,13 +5192,44 @@ std::vector<Bot *> EntityList::GetBotListByClientName(std::string client_name)
 		return client_bot_list;
 	}
 
-	for (auto bot : bot_list) {
-		if (bot->GetOwner() && Strings::ToLower(bot->GetOwner()->GetCleanName()) == Strings::ToLower(client_name)) {
-			client_bot_list.push_back(bot);
+	for (const auto& b : bot_list) {
+		if (
+			b->GetOwner() &&
+			Strings::ToLower(b->GetOwner()->GetCleanName()) == Strings::ToLower(client_name)
+		) {
+			client_bot_list.push_back(b);
 		}
 	}
 
 	return client_bot_list;
+}
+
+void EntityList::SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id)
+{
+	auto client_bot_list = GetBotListByCharacterID(character_id);
+	if (client_bot_list.empty()) {
+		return;
+	}
+
+	for (const auto& b : client_bot_list) {
+		b->SignalBot(signal_id);
+	}
+}
+
+void EntityList::SignalBotByBotID(uint32 bot_id, int signal_id)
+{
+	auto b = GetBotByBotID(bot_id);
+	if (b) {
+		b->SignalBot(signal_id);
+	}
+}
+
+void EntityList::SignalBotByBotName(std::string bot_name, int signal_id)
+{
+	auto b = GetBotByBotName(bot_name);
+	if (b) {
+		b->SignalBot(signal_id);
+	}
 }
 #endif
 
@@ -5550,7 +5644,6 @@ std::vector<Mob*> EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *origi
 	bool               is_detrimental_spell = IsDetrimentalSpell(spell_id);
 	for (auto          &it : entity_list.GetCloseMobList(spreader, range)) {
 		Mob *mob = it.second;
-
 		if (!mob) {
 			continue;
 		}
@@ -5738,6 +5831,93 @@ void EntityList::DespawnGridNodes(int32 grid_id) {
 		Mob *mob = mob_iterator.second;
 		if (mob->IsNPC() && mob->GetRace() == 2254 && mob->EntityVariableExists("grid_id") && atoi(mob->GetEntityVariable("grid_id")) == grid_id) {
 			mob->Depop();
+		}
+	}
+}
+
+void EntityList::Marquee(uint32 type, std::string message, uint32 duration) {
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->SendMarqueeMessage(type, message, duration);
+		}
+	}
+}
+
+void EntityList::Marquee(
+	uint32 type,
+	uint32 priority,
+	uint32 fade_in,
+	uint32 fade_out,
+	uint32 duration,
+	std::string message
+) {
+	for (const auto& c : client_list) {
+		if (c.second) {
+			c.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+		}
+	}
+}
+
+std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance, uint8 filter_type)
+{
+	std::vector<Mob *> l;
+	if (!sender) {
+		return l;
+	}
+
+	const auto squared_distance = (distance * distance);
+	const auto position = sender->GetPosition();
+	for (auto &m: mob_list) {
+		if (!m.second) {
+			continue;
+		}
+
+		if (m.second == sender) {
+			continue;
+		}
+
+		if (
+			distance &&
+			DistanceSquaredNoZ(
+				position,
+				m.second->GetPosition()
+			) > squared_distance
+		) {
+			continue;
+		}
+
+		if (
+			(filter_type == EntityFilterTypes::Bots && !m.second->IsBot()) ||
+			(filter_type == EntityFilterTypes::Clients && !m.second->IsClient()) ||
+			(filter_type == EntityFilterTypes::NPCs && !m.second->IsNPC())
+		) {
+			continue;
+		}
+
+		l.push_back(m.second);
+	}
+
+	return l;
+}
+
+void EntityList::DamageArea(Mob* sender, int64 damage, uint32 distance, uint8 filter_type, bool is_percentage)
+{
+	if (!sender) {
+		return;
+	}
+
+	if (damage <= 0) {
+		return;
+	}
+
+	const auto& l = GetFilteredEntityList(sender, distance, filter_type);
+	for (const auto& e : l) {
+		if (is_percentage) {
+			const auto damage_percentage = EQ::Clamp(damage, static_cast<int64>(1), static_cast<int64>(100));
+			const auto total_damage = (e->GetMaxHP() / 100) * damage_percentage;
+			e->Damage(sender, total_damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+		} else {
+			e->Damage(sender, damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
 		}
 	}
 }

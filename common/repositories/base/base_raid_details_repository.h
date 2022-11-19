@@ -19,9 +19,9 @@
 class BaseRaidDetailsRepository {
 public:
 	struct RaidDetails {
-		int         raidid;
-		int         loottype;
-		int         locked;
+		int32_t     raidid;
+		int32_t     loottype;
+		int8_t      locked;
 		std::string motd;
 	};
 
@@ -85,17 +85,17 @@ public:
 
 	static RaidDetails NewEntity()
 	{
-		RaidDetails entry{};
+		RaidDetails e{};
 
-		entry.raidid   = 0;
-		entry.loottype = 0;
-		entry.locked   = 0;
-		entry.motd     = "";
+		e.raidid   = 0;
+		e.loottype = 0;
+		e.locked   = 0;
+		e.motd     = "";
 
-		return entry;
+		return e;
 	}
 
-	static RaidDetails GetRaidDetailsEntry(
+	static RaidDetails GetRaidDetails(
 		const std::vector<RaidDetails> &raid_detailss,
 		int raid_details_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			RaidDetails entry{};
+			RaidDetails e{};
 
-			entry.raidid   = atoi(row[0]);
-			entry.loottype = atoi(row[1]);
-			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3] ? row[3] : "";
+			e.raidid   = static_cast<int32_t>(atoi(row[0]));
+			e.loottype = static_cast<int32_t>(atoi(row[1]));
+			e.locked   = static_cast<int8_t>(atoi(row[2]));
+			e.motd     = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,25 +156,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RaidDetails raid_details_entry
+		const RaidDetails &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(raid_details_entry.raidid));
-		update_values.push_back(columns[1] + " = " + std::to_string(raid_details_entry.loottype));
-		update_values.push_back(columns[2] + " = " + std::to_string(raid_details_entry.locked));
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(raid_details_entry.motd) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.raidid));
+		v.push_back(columns[1] + " = " + std::to_string(e.loottype));
+		v.push_back(columns[2] + " = " + std::to_string(e.locked));
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				raid_details_entry.raidid
+				e.raidid
 			)
 		);
 
@@ -183,53 +183,53 @@ public:
 
 	static RaidDetails InsertOne(
 		Database& db,
-		RaidDetails raid_details_entry
+		RaidDetails e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(raid_details_entry.raidid));
-		insert_values.push_back(std::to_string(raid_details_entry.loottype));
-		insert_values.push_back(std::to_string(raid_details_entry.locked));
-		insert_values.push_back("'" + Strings::Escape(raid_details_entry.motd) + "'");
+		v.push_back(std::to_string(e.raidid));
+		v.push_back(std::to_string(e.loottype));
+		v.push_back(std::to_string(e.locked));
+		v.push_back("'" + Strings::Escape(e.motd) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			raid_details_entry.raidid = results.LastInsertedID();
-			return raid_details_entry;
+			e.raidid = results.LastInsertedID();
+			return e;
 		}
 
-		raid_details_entry = NewEntity();
+		e = NewEntity();
 
-		return raid_details_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RaidDetails> raid_details_entries
+		const std::vector<RaidDetails> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &raid_details_entry: raid_details_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(raid_details_entry.raidid));
-			insert_values.push_back(std::to_string(raid_details_entry.loottype));
-			insert_values.push_back(std::to_string(raid_details_entry.locked));
-			insert_values.push_back("'" + Strings::Escape(raid_details_entry.motd) + "'");
+			v.push_back(std::to_string(e.raidid));
+			v.push_back(std::to_string(e.loottype));
+			v.push_back(std::to_string(e.locked));
+			v.push_back("'" + Strings::Escape(e.motd) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -256,20 +256,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RaidDetails entry{};
+			RaidDetails e{};
 
-			entry.raidid   = atoi(row[0]);
-			entry.loottype = atoi(row[1]);
-			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3] ? row[3] : "";
+			e.raidid   = static_cast<int32_t>(atoi(row[0]));
+			e.loottype = static_cast<int32_t>(atoi(row[1]));
+			e.locked   = static_cast<int8_t>(atoi(row[2]));
+			e.motd     = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<RaidDetails> GetWhere(Database& db, std::string where_filter)
+	static std::vector<RaidDetails> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<RaidDetails> all_entries;
 
@@ -284,20 +284,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RaidDetails entry{};
+			RaidDetails e{};
 
-			entry.raidid   = atoi(row[0]);
-			entry.loottype = atoi(row[1]);
-			entry.locked   = atoi(row[2]);
-			entry.motd     = row[3] ? row[3] : "";
+			e.raidid   = static_cast<int32_t>(atoi(row[0]));
+			e.loottype = static_cast<int32_t>(atoi(row[1]));
+			e.locked   = static_cast<int8_t>(atoi(row[2]));
+			e.motd     = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -320,6 +320,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

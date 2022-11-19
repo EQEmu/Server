@@ -50,11 +50,7 @@ void command_qglobal(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto repop_link = Saylink::Create(
-			"#repop",
-			false,
-			"repop"
-		);
+		auto repop_link = Saylink::Silent("#repop", "repop");
 
 		c->Message(
 			Chat::White,
@@ -83,11 +79,7 @@ void command_qglobal(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto repop_link = Saylink::Create(
-			"#repop",
-			false,
-			"repop"
-		);
+		auto repop_link = Saylink::Silent("#repop", "repop");
 
 		c->Message(
 			Chat::White,

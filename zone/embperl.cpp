@@ -18,6 +18,8 @@ Eglin
 #include "embperl.h"
 #include "embxs.h"
 #include "../common/features.h"
+#include "../common/path_manager.h"
+
 #ifndef GvCV_set
 #define GvCV_set(gv,cv)   (GvCV(gv) = (cv))
 #endif
@@ -79,7 +81,7 @@ void Embperl::DoInit() {
 	perl_run(my_perl);
 
 	//a little routine we use a lot.
-	eval_pv("sub my_eval { eval $_[0];}", TRUE);	//dies on error 
+	eval_pv("sub my_eval { eval $_[0];}", TRUE);	//dies on error
 
 	//ruin the perl exit and command:
 	eval_pv("sub my_exit {}",TRUE);
@@ -146,11 +148,11 @@ void Embperl::DoInit() {
 		//should probably read the directory in c, instead, so that
 		//I can echo filenames as I do it, but c'mon... I'm lazy and this 1 line reads in all the plugins
 		std::string perl_command =
-			"if(opendir(D,'" + Config->PluginDir +"')) { "
+			"if(opendir(D,'" + path.GetPluginsPath() +"')) { "
 			"	my @d = readdir(D);"
 			"	closedir(D);"
 			"	foreach(@d){ "
-			"		main::eval_file('plugin','" + Config->PluginDir + "/'.$_)if/\\.pl$/;"
+			"		main::eval_file('plugin','" + path.GetPluginsPath() + "/'.$_)if/\\.pl$/;"
 			"	}"
 			"}";
 		eval_pv(perl_command.c_str(),FALSE);

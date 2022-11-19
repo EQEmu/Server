@@ -19,11 +19,11 @@
 class BaseTributesRepository {
 public:
 	struct Tributes {
-		int         id;
-		int         unknown;
+		uint32_t    id;
+		uint32_t    unknown;
 		std::string name;
 		std::string descr;
-		int         isguild;
+		int8_t      isguild;
 	};
 
 	static std::string PrimaryKey()
@@ -88,18 +88,18 @@ public:
 
 	static Tributes NewEntity()
 	{
-		Tributes entry{};
+		Tributes e{};
 
-		entry.id      = 0;
-		entry.unknown = 0;
-		entry.name    = "";
-		entry.descr   = "";
-		entry.isguild = 0;
+		e.id      = 0;
+		e.unknown = 0;
+		e.name    = "";
+		e.descr   = "";
+		e.isguild = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Tributes GetTributesEntry(
+	static Tributes GetTributes(
 		const std::vector<Tributes> &tributess,
 		int tributes_id
 	)
@@ -128,15 +128,15 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Tributes entry{};
+			Tributes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.unknown = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.descr   = row[3] ? row[3] : "";
-			entry.isguild = atoi(row[4]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.unknown = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.name    = row[2] ? row[2] : "";
+			e.descr   = row[3] ? row[3] : "";
+			e.isguild = static_cast<int8_t>(atoi(row[4]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -161,26 +161,26 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Tributes tributes_entry
+		const Tributes &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(tributes_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(tributes_entry.unknown));
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(tributes_entry.name) + "'");
-		update_values.push_back(columns[3] + " = '" + Strings::Escape(tributes_entry.descr) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(tributes_entry.isguild));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.unknown));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.descr) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.isguild));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				tributes_entry.id
+				e.id
 			)
 		);
 
@@ -189,55 +189,55 @@ public:
 
 	static Tributes InsertOne(
 		Database& db,
-		Tributes tributes_entry
+		Tributes e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(tributes_entry.id));
-		insert_values.push_back(std::to_string(tributes_entry.unknown));
-		insert_values.push_back("'" + Strings::Escape(tributes_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(tributes_entry.descr) + "'");
-		insert_values.push_back(std::to_string(tributes_entry.isguild));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.unknown));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.descr) + "'");
+		v.push_back(std::to_string(e.isguild));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			tributes_entry.id = results.LastInsertedID();
-			return tributes_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		tributes_entry = NewEntity();
+		e = NewEntity();
 
-		return tributes_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Tributes> tributes_entries
+		const std::vector<Tributes> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tributes_entry: tributes_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(tributes_entry.id));
-			insert_values.push_back(std::to_string(tributes_entry.unknown));
-			insert_values.push_back("'" + Strings::Escape(tributes_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(tributes_entry.descr) + "'");
-			insert_values.push_back(std::to_string(tributes_entry.isguild));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.unknown));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.descr) + "'");
+			v.push_back(std::to_string(e.isguild));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -264,21 +264,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Tributes entry{};
+			Tributes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.unknown = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.descr   = row[3] ? row[3] : "";
-			entry.isguild = atoi(row[4]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.unknown = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.name    = row[2] ? row[2] : "";
+			e.descr   = row[3] ? row[3] : "";
+			e.isguild = static_cast<int8_t>(atoi(row[4]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Tributes> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Tributes> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Tributes> all_entries;
 
@@ -293,21 +293,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Tributes entry{};
+			Tributes e{};
 
-			entry.id      = atoi(row[0]);
-			entry.unknown = atoi(row[1]);
-			entry.name    = row[2] ? row[2] : "";
-			entry.descr   = row[3] ? row[3] : "";
-			entry.isguild = atoi(row[4]);
+			e.id      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.unknown = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.name    = row[2] ? row[2] : "";
+			e.descr   = row[3] ? row[3] : "";
+			e.isguild = static_cast<int8_t>(atoi(row[4]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -330,6 +330,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

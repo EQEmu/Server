@@ -1,9 +1,11 @@
 #ifndef EQEMU_TASKS_H
 #define EQEMU_TASKS_H
 
+#include "../common/strings.h"
 #include "serialize_buffer.h"
+#include <algorithm>
+#include <array>
 
-#define MAXTASKS 10000
 #define MAXTASKSETS 1000
 #define MAXACTIVEQUESTS 19 // The Client has a hard cap of 19 active quests, 29 in SoD+
 #define MAXCHOOSERENTRIES 40 // The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
@@ -15,13 +17,10 @@
 
 // Command Codes for worldserver ServerOP_ReloadTasks
 #define RELOADTASKS 0
-#define RELOADTASKGOALLISTS 1
-#define RELOADTASKPROXIMITIES 2
-#define RELOADTASKSETS 3
+#define RELOADTASKSETS 2
 
 typedef enum {
 	METHODSINGLEID = 0,
-	METHODLIST     = 1,
 	METHODQUEST    = 2
 } TaskMethodType;
 
@@ -50,22 +49,9 @@ enum class TaskTimerType
 	Request
 };
 
-// live alt currency types, may not match current server alternate currency ids
-enum class AltCurrencyType
-{
-	RadiantCrystal       = 4,
-	EbonCrystal          = 5,
-	MarkOfValor          = 31,
-	CommemorativeCoin    = 33,
-	PieceOfEight         = 37,
-	RemnantOfTranquility = 38,
-	SathirTradeGem       = 41,
-	BathezidTradeGem     = 43,
-	FroststoneDucat      = 48,
-};
-
 struct ActivityInformation {
-	int              step_number;
+	int              req_activity_id;
+	int              step;
 	TaskActivityType activity_type;
 	std::string      target_name; // name mob, location -- default empty, max length 64
 	std::string      item_list; // likely defaults to empty
@@ -74,17 +60,24 @@ struct ActivityInformation {
 	std::string      description_override; // overrides auto generated description -- default empty, max length 128
 	int              skill_id; // older clients, first id from above
 	int              spell_id; // older clients, first id from above
-	int              goal_id;
-	std::string      goal_match_list;
 	TaskMethodType   goal_method;
 	int              goal_count;
-	int              deliver_to_npc;
+	std::string      npc_match_list; // delimited by '|' for partial name matches but also supports ids
+	std::string      item_id_list; // delimited by '|' to support multiple item ids
+	int              dz_switch_id;
+	float            min_x;
+	float            min_y;
+	float            min_z;
+	float            max_x;
+	float            max_y;
+	float            max_z;
 	std::vector<int> zone_ids;
 	std::string      zones; // IDs ; separated, ZoneID is the first in this list for older clients -- default empty string, max length 64
 	int              zone_version;
 	bool             optional;
+	bool             has_area; // non-database field
 
-	inline bool CheckZone(int zone_id, int version)
+	inline bool CheckZone(int zone_id, int version) const
 	{
 		if (zone_ids.empty()) {
 			return true;
@@ -163,7 +156,7 @@ struct ActivityInformation {
 			out.WriteInt32(zone_ids.empty() ? 0 : zone_ids.front());
 		}
 
-		out.WriteInt32(activity_type == TaskActivityType::Touch ? goal_id : 0); // dz_switch_id (maybe add separate field)
+		out.WriteInt32(dz_switch_id);
 		out.WriteString(description_override);
 		out.WriteInt32(done_count);
 		out.WriteInt8(1); // unknown
@@ -174,11 +167,6 @@ struct ActivityInformation {
 		}
 	}
 };
-
-typedef enum {
-	ActivitiesSequential = 0,
-	ActivitiesStepped    = 1
-} SequenceType;
 
 enum class TaskType {
 	Task   = 0,        // can have at max 1
@@ -200,33 +188,32 @@ enum class DurationCode {
 
 struct TaskInformation {
 	TaskType            type;
-	int                 duration{};
+	uint32_t            duration{};
 	DurationCode        duration_code;         // description for time investment for when duration == 0
 	std::string         title{};            // max length 64
 	std::string         description{};      // max length 4000, 2048 on Tit
 	std::string         reward{};
 	std::string         item_link{};        // max length 128 older clients, item link gets own string
 	std::string         completion_emote{}; // emote after completing task, yellow. Maybe should make more generic ... but yellow for now!
-	int                 reward_id{};
-	int                 cash_reward{};       // Expressed in copper
+	std::string         reward_id_list{};
+	uint32_t            cash_reward{};       // Expressed in copper
 	int                 experience_reward{};
-	int                 faction_reward{};   // just a npc_faction_id
+	int                 faction_reward{};   // npc_faction_id if amount == 0, otherwise primary faction ID
+	int                 faction_amount{};   // faction hit value
 	TaskMethodType      reward_method;
 	int                 reward_points;
-	AltCurrencyType     reward_point_type;
+	int32_t             reward_point_type;
 	int                 activity_count{};
-	SequenceType        sequence_mode;
-	int                 last_step{};
-	short               min_level{};
-	short               max_level{};
-	int                 level_spread;
-	int                 min_players;
-	int                 max_players;
+	uint8_t             min_level{};
+	uint8_t             max_level{};
+	uint32_t            level_spread;
+	uint32_t            min_players;
+	uint32_t            max_players;
 	bool                repeatable{};
-	int                 replay_timer_group;
-	int                 replay_timer_seconds;
-	int                 request_timer_group;
-	int                 request_timer_seconds;
+	uint32_t            replay_timer_group;
+	uint32_t            replay_timer_seconds;
+	uint32_t            request_timer_group;
+	uint32_t            request_timer_seconds;
 	ActivityInformation activity_information[MAXACTIVITIESPERTASK];
 
 	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const
@@ -270,7 +257,6 @@ struct ClientActivityInformation {
 struct ClientTaskInformation {
 	int                       slot; // intrusive, but makes things easier :P
 	int                       task_id;
-	int                       current_step;
 	int                       accepted_time;
 	bool                      updated;
 	bool                      was_rewarded; // character has received reward for this task
@@ -342,6 +328,104 @@ namespace Tasks {
 				return "Task";
 		}
 	}
+
+	struct ActiveElements
+	{
+		bool is_task_complete;
+		std::vector<int> active;
+	};
+
+	// Processes task activity states and returns those currently active
+	// It is templated to support the different structs used by zone and world
+	template <typename Td, typename Ts>
+	ActiveElements GetActiveElements(const Td& activity_data, const Ts& activity_states, size_t activity_count)
+	{
+		ActiveElements result;
+		result.is_task_complete = true;
+		result.active.reserve(activity_count);
+
+		std::array<bool, MAXACTIVITIESPERTASK> completed_ids;
+		completed_ids.fill(false);
+		std::fill_n(completed_ids.begin(), activity_count, true);
+
+		bool sequence_mode = true;
+		int current_step = std::numeric_limits<int>::max(); // lowest step not completed
+
+		// fill non-completed elements and find the current task step
+		for (int i = 0; i < activity_count; ++i)
+		{
+			const auto& el = activity_data[i];
+
+			if (activity_states[i].activity_state != ActivityCompleted)
+			{
+				completed_ids[i] = false;
+				current_step = std::min(current_step, el.step);
+				if (!el.optional)
+				{
+					result.is_task_complete = false;
+				}
+			}
+
+			// if all steps are 0 treat each as a separate step (previously called "sequential" mode)
+			if (el.step != 0)
+			{
+				sequence_mode = false;
+			}
+		}
+
+		// fill active elements based on current step and req activity ids
+		bool added_sequence = false;
+		for (int i = 0; i < activity_count; ++i)
+		{
+			const auto& el = activity_data[i];
+
+			if (activity_states[i].activity_state != ActivityCompleted)
+			{
+				bool has_req_id = el.req_activity_id >= 0 && el.req_activity_id < activity_count;
+
+				// if a valid requirement is set then it's active if its req is completed
+				// in non-sequence mode all on current step and optionals in previous steps are active
+				// in sequence mode the first non-complete is active (and any optionals up to it)
+				if ((has_req_id && completed_ids[el.req_activity_id]) ||
+				    (!has_req_id && !sequence_mode && el.step <= current_step) ||
+				    (!has_req_id && sequence_mode && !added_sequence))
+				{
+					result.active.push_back(i);
+					if (!has_req_id && sequence_mode)
+					{
+						added_sequence = !el.optional;
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	static bool IsInMatchList(const std::string& match_list, const std::string& entry)
+	{
+		for (auto &s: Strings::Split(match_list, '|')) {
+			if (s == entry) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static bool IsInMatchListPartial(const std::string &match_list, const std::string &entry)
+	{
+		std::string entry_match = Strings::ToLower(entry);
+		for (auto &s: Strings::Split(match_list, '|')) {
+			if (entry_match.find(Strings::ToLower(s)) != std::string::npos) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
 }
 
 namespace TaskStr {

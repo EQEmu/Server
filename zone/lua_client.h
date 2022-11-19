@@ -73,9 +73,13 @@ public:
 	int GetWeight();
 	uint32 GetEXP();
 	double GetEXPModifier(uint32 zone_id);
+	double GetEXPModifier(uint32 zone_id, int16 instance_version);
 	double GetAAEXPModifier(uint32 zone_id);
+	double GetAAEXPModifier(uint32 zone_id, int16 instance_version);
 	void SetAAEXPModifier(uint32 zone_id, double aa_modifier);
+	void SetAAEXPModifier(uint32 zone_id, double aa_modifier, int16 instance_version);
 	void SetEXPModifier(uint32 zone_id, double exp_modifier);
+	void SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version);
 	uint32 GetAAExp();
 	uint32 GetAAPercent();
 	uint32 GetTotalSecondsPlayed();
@@ -118,14 +122,21 @@ public:
 	void MoveZoneInstance(uint16 instance_id);
 	void MoveZoneInstanceGroup(uint16 instance_id);
 	void MoveZoneInstanceRaid(uint16 instance_id);
+	bool TeleportToPlayerByCharID(uint32 character_id);
+	bool TeleportToPlayerByName(std::string player_name);
+	bool TeleportGroupToPlayerByCharID(uint32 character_id);
+	bool TeleportGroupToPlayerByName(std::string player_name);
+	bool TeleportRaidToPlayerByCharID(uint32 character_id);
+	bool TeleportRaidToPlayerByName(std::string player_name);
 	void ChangeLastName(std::string last_name);
 	int GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc);
 	void SetFactionLevel(uint32 char_id, uint32 npc_id, int char_class, int char_race, int char_deity);
 	void SetFactionLevel2(uint32 char_id, int faction_id, int char_class, int char_race, int char_deity, int value, int temp);
+	void RewardFaction(int id, int amount);
 	int GetRawItemAC();
 	uint32 AccountID();
 	const char *AccountName();
-	int Admin();
+	int16 Admin();
 	uint32 CharacterID();
 	int GuildRank();
 	uint32 GuildID();
@@ -300,7 +311,9 @@ public:
 	void UpdateGroupAAs(int points, uint32 type);
 	uint32 GetGroupPoints();
 	uint32 GetRaidPoints();
-	void LearnRecipe(uint32 recipe);
+	void LearnRecipe(uint32 recipe_id);
+	int GetRecipeMadeCount(uint32 recipe_id);
+	bool HasRecipeLearned(uint32 recipe_id);
 	int GetEndurance();
 	int GetMaxEndurance();
 	int GetEndurancePercent();
@@ -316,6 +329,7 @@ public:
 	void IncrementAA(int aa);
 	bool GrantAlternateAdvancementAbility(int aa_id, int points);
 	bool GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost);
+	void ResetAlternateAdvancementRank(int aa_id);
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z);
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, int count);
 	void ClearCompassMark();
@@ -334,6 +348,8 @@ public:
 	bool IsTaskActive(int task);
 	bool IsTaskActivityActive(int task, int activity);
 	void LockSharedTask(bool lock);
+	void EndSharedTask();
+	void EndSharedTask(bool send_fail);
 	int GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);
@@ -347,7 +363,7 @@ public:
 	uint32 GetMoney(uint8 type, uint8 subtype);
 	void OpenLFGuildWindow();
 	void NotifyNewTitlesAvailable();
-	void Signal(uint32 id);
+	void Signal(int signal_id);
 	void AddAlternateCurrencyValue(uint32 currency, int amount);
 	void SetAlternateCurrencyValue(uint32 currency, int amount);
 	int GetAlternateCurrencyValue(uint32 currency);
@@ -371,7 +387,9 @@ public:
 	void SetHunger(int in_hunger);
 	void SetThirst(int in_thirst);
 	void SetConsumption(int in_hunger, int in_thirst);
-	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
+	void SendMarqueeMessage(uint32 type, std::string message);
+	void SendMarqueeMessage(uint32 type, std::string message, uint32 duration);
+	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void SendColoredText(uint32 type, std::string msg);
 	void PlayMP3(std::string file);
 	void QuestReward(Lua_Mob target);
@@ -407,7 +425,8 @@ public:
 	int CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity);
-	void SetGMStatus(uint32 newStatus);
+	void SetGMStatus(int16 new_status);
+	int16 GetGMStatus();
 	void AddItem(luabind::object item_table);
 	int CountAugmentEquippedByID(uint32 item_id);
 	int CountItemEquippedByID(uint32 item_id);
@@ -424,9 +443,30 @@ public:
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 	void TaskSelector(luabind::adl::object table);
+	void TaskSelector(luabind::adl::object table, bool ignore_cooldown);
 
 	void SetClientMaxLevel(uint8 max_level);
 	uint8 GetClientMaxLevel();
+
+	bool SendGMCommand(std::string message);
+	bool SendGMCommand(std::string message, bool ignore_status);
+
+#ifdef BOTS
+
+	int GetBotRequiredLevel();
+	int GetBotRequiredLevel(uint8 class_id);
+	uint32 GetBotCreationLimit();
+	uint32 GetBotCreationLimit(uint8 class_id);
+	int GetBotSpawnLimit();
+	int GetBotSpawnLimit(uint8 class_id);
+	void SetBotRequiredLevel(int new_required_level);
+	void SetBotRequiredLevel(int new_required_level, uint8 class_id);
+	void SetBotCreationLimit(uint32 new_creation_limit);
+	void SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id);
+	void SetBotSpawnLimit(int new_spawn_limit);
+	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id);
+
+#endif
 
 	void DialogueWindow(std::string markdown);
 

@@ -64,6 +64,26 @@ int Perl_QuestItem_CountAugmentByID(EQ::ItemInstance* self, uint32_t item_id) //
 	return self->CountAugmentByID(item_id);
 }
 
+bool Perl_QuestItem_IsStackable(EQ::ItemInstance* self)
+{
+	return self->IsStackable();
+}
+
+void Perl_QuestItem_SetCharges(EQ::ItemInstance* self, int16_t charges)
+{
+	self->SetCharges(charges);
+}
+
+int Perl_QuestItem_GetTaskDeliveredCount(EQ::ItemInstance* self)
+{
+	return self->GetTaskDeliveredCount();
+}
+
+int Perl_QuestItem_RemoveTaskDeliveredItems(EQ::ItemInstance* self)
+{
+	return self->RemoveTaskDeliveredItems();
+}
+
 void perl_register_questitem()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -75,10 +95,14 @@ void perl_register_questitem()
 	package.add("GetCharges", &Perl_QuestItem_GetCharges);
 	package.add("GetID", &Perl_QuestItem_GetID);
 	package.add("GetName", &Perl_QuestItem_GetName);
+	package.add("GetTaskDeliveredCount", &Perl_QuestItem_GetTaskDeliveredCount);
 	package.add("IsAttuned", &Perl_QuestItem_IsAttuned);
+	package.add("IsStackable", &Perl_QuestItem_IsStackable);
 	package.add("IsType", &Perl_QuestItem_IsType);
 	package.add("ItemSay", (void(*)(EQ::ItemInstance*, const char*))&Perl_QuestItem_ItemSay);
 	package.add("ItemSay", (void(*)(EQ::ItemInstance*, const char*, int))&Perl_QuestItem_ItemSay);
+	package.add("RemoveTaskDeliveredItems", &Perl_QuestItem_RemoveTaskDeliveredItems);
+	package.add("SetCharges", &Perl_QuestItem_SetCharges);
 	package.add("SetScale", &Perl_QuestItem_SetScale);
 }
 

@@ -19,8 +19,8 @@
 class BaseDamageshieldtypesRepository {
 public:
 	struct Damageshieldtypes {
-		int spellid;
-		int type;
+		uint32_t spellid;
+		uint8_t  type;
 	};
 
 	static std::string PrimaryKey()
@@ -79,15 +79,15 @@ public:
 
 	static Damageshieldtypes NewEntity()
 	{
-		Damageshieldtypes entry{};
+		Damageshieldtypes e{};
 
-		entry.spellid = 0;
-		entry.type    = 0;
+		e.spellid = 0;
+		e.type    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Damageshieldtypes GetDamageshieldtypesEntry(
+	static Damageshieldtypes GetDamageshieldtypes(
 		const std::vector<Damageshieldtypes> &damageshieldtypess,
 		int damageshieldtypes_id
 	)
@@ -116,12 +116,12 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Damageshieldtypes entry{};
+			Damageshieldtypes e{};
 
-			entry.spellid = atoi(row[0]);
-			entry.type    = atoi(row[1]);
+			e.spellid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type    = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -146,23 +146,23 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Damageshieldtypes damageshieldtypes_entry
+		const Damageshieldtypes &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(damageshieldtypes_entry.spellid));
-		update_values.push_back(columns[1] + " = " + std::to_string(damageshieldtypes_entry.type));
+		v.push_back(columns[0] + " = " + std::to_string(e.spellid));
+		v.push_back(columns[1] + " = " + std::to_string(e.type));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				damageshieldtypes_entry.spellid
+				e.spellid
 			)
 		);
 
@@ -171,49 +171,49 @@ public:
 
 	static Damageshieldtypes InsertOne(
 		Database& db,
-		Damageshieldtypes damageshieldtypes_entry
+		Damageshieldtypes e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(damageshieldtypes_entry.spellid));
-		insert_values.push_back(std::to_string(damageshieldtypes_entry.type));
+		v.push_back(std::to_string(e.spellid));
+		v.push_back(std::to_string(e.type));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			damageshieldtypes_entry.spellid = results.LastInsertedID();
-			return damageshieldtypes_entry;
+			e.spellid = results.LastInsertedID();
+			return e;
 		}
 
-		damageshieldtypes_entry = NewEntity();
+		e = NewEntity();
 
-		return damageshieldtypes_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Damageshieldtypes> damageshieldtypes_entries
+		const std::vector<Damageshieldtypes> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &damageshieldtypes_entry: damageshieldtypes_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(damageshieldtypes_entry.spellid));
-			insert_values.push_back(std::to_string(damageshieldtypes_entry.type));
+			v.push_back(std::to_string(e.spellid));
+			v.push_back(std::to_string(e.type));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,18 +240,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Damageshieldtypes entry{};
+			Damageshieldtypes e{};
 
-			entry.spellid = atoi(row[0]);
-			entry.type    = atoi(row[1]);
+			e.spellid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type    = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Damageshieldtypes> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Damageshieldtypes> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Damageshieldtypes> all_entries;
 
@@ -266,18 +266,18 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Damageshieldtypes entry{};
+			Damageshieldtypes e{};
 
-			entry.spellid = atoi(row[0]);
-			entry.type    = atoi(row[1]);
+			e.spellid = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.type    = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -300,6 +300,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

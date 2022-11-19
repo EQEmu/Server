@@ -19,17 +19,17 @@
 class BaseCharacterCorpseItemsRepository {
 public:
 	struct CharacterCorpseItems {
-		int corpse_id;
-		int equip_slot;
-		int item_id;
-		int charges;
-		int aug_1;
-		int aug_2;
-		int aug_3;
-		int aug_4;
-		int aug_5;
-		int aug_6;
-		int attuned;
+		uint32_t corpse_id;
+		uint32_t equip_slot;
+		uint32_t item_id;
+		uint32_t charges;
+		uint32_t aug_1;
+		uint32_t aug_2;
+		uint32_t aug_3;
+		uint32_t aug_4;
+		uint32_t aug_5;
+		int32_t  aug_6;
+		int16_t  attuned;
 	};
 
 	static std::string PrimaryKey()
@@ -106,24 +106,24 @@ public:
 
 	static CharacterCorpseItems NewEntity()
 	{
-		CharacterCorpseItems entry{};
+		CharacterCorpseItems e{};
 
-		entry.corpse_id  = 0;
-		entry.equip_slot = 0;
-		entry.item_id    = 0;
-		entry.charges    = 0;
-		entry.aug_1      = 0;
-		entry.aug_2      = 0;
-		entry.aug_3      = 0;
-		entry.aug_4      = 0;
-		entry.aug_5      = 0;
-		entry.aug_6      = 0;
-		entry.attuned    = 0;
+		e.corpse_id  = 0;
+		e.equip_slot = 0;
+		e.item_id    = 0;
+		e.charges    = 0;
+		e.aug_1      = 0;
+		e.aug_2      = 0;
+		e.aug_3      = 0;
+		e.aug_4      = 0;
+		e.aug_5      = 0;
+		e.aug_6      = 0;
+		e.attuned    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterCorpseItems GetCharacterCorpseItemsEntry(
+	static CharacterCorpseItems GetCharacterCorpseItems(
 		const std::vector<CharacterCorpseItems> &character_corpse_itemss,
 		int character_corpse_items_id
 	)
@@ -152,21 +152,21 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterCorpseItems entry{};
+			CharacterCorpseItems e{};
 
-			entry.corpse_id  = atoi(row[0]);
-			entry.equip_slot = atoi(row[1]);
-			entry.item_id    = atoi(row[2]);
-			entry.charges    = atoi(row[3]);
-			entry.aug_1      = atoi(row[4]);
-			entry.aug_2      = atoi(row[5]);
-			entry.aug_3      = atoi(row[6]);
-			entry.aug_4      = atoi(row[7]);
-			entry.aug_5      = atoi(row[8]);
-			entry.aug_6      = atoi(row[9]);
-			entry.attuned    = atoi(row[10]);
+			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
+			e.attuned    = static_cast<int16_t>(atoi(row[10]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -191,32 +191,32 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterCorpseItems character_corpse_items_entry
+		const CharacterCorpseItems &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_corpse_items_entry.corpse_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_corpse_items_entry.equip_slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_corpse_items_entry.item_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_corpse_items_entry.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_corpse_items_entry.aug_1));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_corpse_items_entry.aug_2));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_corpse_items_entry.aug_3));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_corpse_items_entry.aug_4));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_corpse_items_entry.aug_5));
-		update_values.push_back(columns[9] + " = " + std::to_string(character_corpse_items_entry.aug_6));
-		update_values.push_back(columns[10] + " = " + std::to_string(character_corpse_items_entry.attuned));
+		v.push_back(columns[0] + " = " + std::to_string(e.corpse_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.equip_slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.charges));
+		v.push_back(columns[4] + " = " + std::to_string(e.aug_1));
+		v.push_back(columns[5] + " = " + std::to_string(e.aug_2));
+		v.push_back(columns[6] + " = " + std::to_string(e.aug_3));
+		v.push_back(columns[7] + " = " + std::to_string(e.aug_4));
+		v.push_back(columns[8] + " = " + std::to_string(e.aug_5));
+		v.push_back(columns[9] + " = " + std::to_string(e.aug_6));
+		v.push_back(columns[10] + " = " + std::to_string(e.attuned));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_corpse_items_entry.corpse_id
+				e.corpse_id
 			)
 		);
 
@@ -225,67 +225,67 @@ public:
 
 	static CharacterCorpseItems InsertOne(
 		Database& db,
-		CharacterCorpseItems character_corpse_items_entry
+		CharacterCorpseItems e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_corpse_items_entry.corpse_id));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.equip_slot));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.item_id));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.charges));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.aug_1));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.aug_2));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.aug_3));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.aug_4));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.aug_5));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.aug_6));
-		insert_values.push_back(std::to_string(character_corpse_items_entry.attuned));
+		v.push_back(std::to_string(e.corpse_id));
+		v.push_back(std::to_string(e.equip_slot));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.aug_1));
+		v.push_back(std::to_string(e.aug_2));
+		v.push_back(std::to_string(e.aug_3));
+		v.push_back(std::to_string(e.aug_4));
+		v.push_back(std::to_string(e.aug_5));
+		v.push_back(std::to_string(e.aug_6));
+		v.push_back(std::to_string(e.attuned));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_corpse_items_entry.corpse_id = results.LastInsertedID();
-			return character_corpse_items_entry;
+			e.corpse_id = results.LastInsertedID();
+			return e;
 		}
 
-		character_corpse_items_entry = NewEntity();
+		e = NewEntity();
 
-		return character_corpse_items_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterCorpseItems> character_corpse_items_entries
+		const std::vector<CharacterCorpseItems> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_corpse_items_entry: character_corpse_items_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_corpse_items_entry.corpse_id));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.equip_slot));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.item_id));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.charges));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.aug_1));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.aug_2));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.aug_3));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.aug_4));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.aug_5));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.aug_6));
-			insert_values.push_back(std::to_string(character_corpse_items_entry.attuned));
+			v.push_back(std::to_string(e.corpse_id));
+			v.push_back(std::to_string(e.equip_slot));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.aug_1));
+			v.push_back(std::to_string(e.aug_2));
+			v.push_back(std::to_string(e.aug_3));
+			v.push_back(std::to_string(e.aug_4));
+			v.push_back(std::to_string(e.aug_5));
+			v.push_back(std::to_string(e.aug_6));
+			v.push_back(std::to_string(e.attuned));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -312,27 +312,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterCorpseItems entry{};
+			CharacterCorpseItems e{};
 
-			entry.corpse_id  = atoi(row[0]);
-			entry.equip_slot = atoi(row[1]);
-			entry.item_id    = atoi(row[2]);
-			entry.charges    = atoi(row[3]);
-			entry.aug_1      = atoi(row[4]);
-			entry.aug_2      = atoi(row[5]);
-			entry.aug_3      = atoi(row[6]);
-			entry.aug_4      = atoi(row[7]);
-			entry.aug_5      = atoi(row[8]);
-			entry.aug_6      = atoi(row[9]);
-			entry.attuned    = atoi(row[10]);
+			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
+			e.attuned    = static_cast<int16_t>(atoi(row[10]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterCorpseItems> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterCorpseItems> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterCorpseItems> all_entries;
 
@@ -347,27 +347,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterCorpseItems entry{};
+			CharacterCorpseItems e{};
 
-			entry.corpse_id  = atoi(row[0]);
-			entry.equip_slot = atoi(row[1]);
-			entry.item_id    = atoi(row[2]);
-			entry.charges    = atoi(row[3]);
-			entry.aug_1      = atoi(row[4]);
-			entry.aug_2      = atoi(row[5]);
-			entry.aug_3      = atoi(row[6]);
-			entry.aug_4      = atoi(row[7]);
-			entry.aug_5      = atoi(row[8]);
-			entry.aug_6      = atoi(row[9]);
-			entry.attuned    = atoi(row[10]);
+			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
+			e.attuned    = static_cast<int16_t>(atoi(row[10]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -390,6 +390,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

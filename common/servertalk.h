@@ -226,25 +226,27 @@
 #define ServerOP_ReloadAAData 0x4100
 #define ServerOP_ReloadAlternateCurrencies 0x4101
 #define ServerOP_ReloadBlockedSpells 0x4102
-#define ServerOP_ReloadContentFlags 0x4103
-#define ServerOP_ReloadDoors 0x4104
-#define ServerOP_ReloadGroundSpawns 0x4105
-#define ServerOP_ReloadLevelEXPMods 0x4106
-#define ServerOP_ReloadLogs 0x4107
-#define ServerOP_ReloadMerchants 0x4108
-#define ServerOP_ReloadNPCEmotes 0x4109
-#define ServerOP_ReloadObjects 0x4110
-#define ServerOP_ReloadPerlExportSettings 0x4111
-#define ServerOP_ReloadRules 0x4112
-#define ServerOP_ReloadStaticZoneData 0x4113
-#define ServerOP_ReloadTasks 0x4114
-#define ServerOP_ReloadTitles 0x4115
-#define ServerOP_ReloadTraps 0x4116
-#define ServerOP_ReloadVariables 0x4117
-#define ServerOP_ReloadVeteranRewards 0x4118
-#define ServerOP_ReloadWorld 0x4119
-#define ServerOP_ReloadZonePoints 0x4120
-#define ServerOP_ReloadDzTemplates 0x4121
+#define ServerOP_ReloadCommands 0x4103
+#define ServerOP_ReloadContentFlags 0x4104
+#define ServerOP_ReloadDoors 0x4105
+#define ServerOP_ReloadGroundSpawns 0x4106
+#define ServerOP_ReloadLevelEXPMods 0x4107
+#define ServerOP_ReloadLogs 0x4108
+#define ServerOP_ReloadMerchants 0x4109
+#define ServerOP_ReloadNPCEmotes 0x4110
+#define ServerOP_ReloadObjects 0x4111
+#define ServerOP_ReloadPerlExportSettings 0x4112
+#define ServerOP_ReloadRules 0x4113
+#define ServerOP_ReloadStaticZoneData 0x4114
+#define ServerOP_ReloadTasks 0x4115
+#define ServerOP_ReloadTitles 0x4116
+#define ServerOP_ReloadTraps 0x4117
+#define ServerOP_ReloadVariables 0x4118
+#define ServerOP_ReloadVeteranRewards 0x4119
+#define ServerOP_ReloadWorld 0x4120
+#define ServerOP_ReloadZonePoints 0x4121
+#define ServerOP_ReloadDzTemplates 0x4122
+#define ServerOP_ReloadZoneData 0x4123
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
@@ -1526,7 +1528,7 @@ struct CZSetEntityVariable_Struct {
 struct CZSignal_Struct {
 	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name, 6 - NPC
 	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, Expedition ID, or NPC ID based on update type, 0 for Character Name
-	uint32 signal;
+	int signal;
 	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
@@ -1599,7 +1601,7 @@ struct WWSetEntityVariable_Struct {
 
 struct WWSignal_Struct {
 	uint8 update_type; // 0 - Character, 1 - NPC
-	uint32 signal;
+	int signal;
 	uint8 min_status;
 	uint8 max_status;
 };

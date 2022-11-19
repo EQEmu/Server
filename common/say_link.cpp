@@ -418,7 +418,11 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 	return {};
 }
 
-std::string Saylink::Create(std::string saylink_text, bool silent, std::string link_name)
+std::string Saylink::Create(const std::string &saylink_text, bool silent, const std::string &link_name)
 {
-	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, (link_name.empty() ? saylink_text : link_name));
+}
+
+std::string Saylink::Silent(const std::string &saylink_text, const std::string &link_name) {
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, true, (link_name.empty() ? saylink_text : link_name));
 }

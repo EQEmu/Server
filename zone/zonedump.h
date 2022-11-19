@@ -54,6 +54,7 @@ struct NPCType
 	uint32	npc_spells_id;
 	uint32	npc_spells_effects_id;
 	int32	npc_faction_id;
+	int32	faction_amount;	// faction association magnitude, will use primary faction
 	uint32	merchanttype;
 	uint32	alt_currency_type;
 	uint32	adventure_template;
@@ -150,6 +151,7 @@ struct NPCType
 	int8	flymode;
 	bool	always_aggro;
 	int     exp_mod;
+	int 	heroic_strikethrough;
 };
 
 namespace player_lootitem {

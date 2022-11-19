@@ -16,6 +16,7 @@ SET(zone_sources
     botspellsai.cpp
     cheat_manager.cpp
     client.cpp
+    client_bot.cpp
     client_mods.cpp
     client_packet.cpp
     client_process.cpp
@@ -140,9 +141,7 @@ SET(zone_sources
     spell_effects.cpp
     spells.cpp
     task_client_state.cpp
-    task_goal_list_manager.cpp
     task_manager.cpp
-    task_proximity_manager.cpp
     tasks.cpp
     titles.cpp
     tradeskills.cpp
@@ -161,7 +160,6 @@ SET(zone_sources
     zonedb.cpp
     zone_event_scheduler.cpp
     zone_reload.cpp
-    zone_store.cpp
     zoning.cpp
 )
 
@@ -267,9 +265,7 @@ SET(zone_headers
     spawngroup.h
     string_ids.h
     task_client_state.h
-    task_goal_list_manager.h
     task_manager.h
-    task_proximity_manager.h
     tasks.h
     titles.h
     trap.h
@@ -284,7 +280,6 @@ SET(zone_headers
     zonedb.h
     zonedump.h
     zone_reload.h
-    zone_store.h
 )
 
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})

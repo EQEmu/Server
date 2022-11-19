@@ -24,7 +24,7 @@
 #include "spawngroup.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 extern EntityList entity_list;

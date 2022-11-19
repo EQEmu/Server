@@ -97,6 +97,7 @@ Mob::Mob(
 	uint8 in_feettexture,
 	uint16 in_usemodel,
 	bool in_always_aggro,
+	int32 in_heroic_strikethrough,
 	int64 in_hp_regen_per_second
 ) :
 	attack_timer(2000),
@@ -283,6 +284,7 @@ Mob::Mob(
 	spawned             = false;
 	rare_spawn          = false;
 	always_aggro        = in_always_aggro;
+	heroic_strikethrough = in_heroic_strikethrough;
 
 	InitializeBuffSlots();
 
@@ -2318,24 +2320,18 @@ void Mob::ShowStats(Client* client)
 	}
 }
 
-void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter)
+void Mob::DoAnim(const int animation_id, int animation_speed, bool ackreq, eqFilterType filter)
 {
 	if (!attack_anim_timer.Check()) {
 		return;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-	auto *anim  = (Animation_Struct *) outapp->pBuffer;
-	anim->spawnid = GetID();
+	auto *a  = (Animation_Struct *) outapp->pBuffer;
 
-	if (type == 0) {
-		anim->action = animnum;
-		anim->speed  = 10;
-	}
-	else {
-		anim->action = animnum;
-		anim->speed  = type;
-	}
+	a->spawnid = GetID();
+	a->action  = animation_id;
+	a->speed   = animation_speed ? animation_speed : 10;
 
 	entity_list.QueueCloseClients(
 		this, /* Sender */
@@ -3864,6 +3860,9 @@ void Mob::Say(const char *format, ...)
 	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
 		for (auto &e : entity_list.GetCloseMobList(talker, (distance * distance))) {
 			Mob *mob = e.second;
+			if (!mob) {
+				continue;
+			}
 
 			if (!mob->IsClient()) {
 				continue;
@@ -4301,6 +4300,8 @@ void Mob::SetTarget(Mob *mob)
 
 #ifdef BOTS
 		CastToClient()->SetBotPrecombat(false); // Any change in target will nullify this flag (target == mob checked above)
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_TARGET_CHANGE, CastToBot(), mob, "", 0);
 #endif
 	}
 
@@ -5473,7 +5474,7 @@ int16 Mob::GetSkillReuseTime(uint16 skill)
 	return skill_reduction;
 }
 
-int16 Mob::GetSkillDmgAmt(uint16 skill)
+int Mob::GetSkillDmgAmt(uint16 skill)
 {
 	int skill_dmg = 0;
 
@@ -6862,6 +6863,10 @@ std::string Mob::GetBucketKey() {
 		return fmt::format("character-{}", CastToClient()->CharacterID());
 	} else if (IsNPC()) {
 		return fmt::format("npc-{}", GetNPCTypeID());
+#ifdef BOTS
+	} else if (IsBot()) {
+		return fmt::format("bot-{}", CastToBot()->GetBotID());
+#endif
 	}
 	return std::string();
 }
@@ -6889,4 +6894,109 @@ std::string Mob::GetMobDescription()
 		GetCleanName(),
 		GetID()
 	);
+}
+
+uint8 Mob::ConvertItemTypeToSkillID(uint8 item_type)
+{
+	if (item_type >= EQ::item::ItemTypeCount) {
+		return EQ::skills::SkillHandtoHand;
+	}
+
+	std::map<uint8, uint8> convert_item_types_map = {
+		{ EQ::item::ItemType1HSlash, EQ::skills::Skill1HSlashing },
+		{ EQ::item::ItemType2HSlash, EQ::skills::Skill2HSlashing },
+		{ EQ::item::ItemType1HPiercing, EQ::skills::Skill1HPiercing },
+		{ EQ::item::ItemType2HPiercing, EQ::skills::Skill2HPiercing },
+		{ EQ::item::ItemType1HBlunt, EQ::skills::Skill1HBlunt },
+		{ EQ::item::ItemType2HBlunt, EQ::skills::Skill2HBlunt },
+		{ EQ::item::ItemTypeBow, EQ::skills::SkillArchery },
+		{ EQ::item::ItemTypeSmallThrowing, EQ::skills::SkillThrowing },
+		{ EQ::item::ItemTypeLargeThrowing, EQ::skills::SkillThrowing },
+		{ EQ::item::ItemTypeShield, EQ::skills::SkillBash },
+		{ EQ::item::ItemTypeArmor, EQ::skills::SkillHandtoHand },
+		{ EQ::item::ItemTypeMartial, EQ::skills::SkillHandtoHand }
+	};
+
+	const auto& s = convert_item_types_map.find(item_type);
+	if (s != convert_item_types_map.end()) {
+		return s->second;
+	}
+
+	return EQ::skills::SkillHandtoHand;
+}
+
+void Mob::CloneAppearance(Mob* other, bool clone_name)
+{
+	if (!other) {
+		return;
+	}
+
+	SendIllusionPacket(
+		other->GetRace(),
+		other->GetGender(),
+		other->GetTexture(),
+		other->GetHelmTexture(),
+		other->GetHairColor(),
+		other->GetBeardColor(),
+		other->GetEyeColor1(),
+		other->GetEyeColor2(),
+		other->GetHairStyle(),
+		other->GetBeard(),
+		0xFF,
+		other->GetRace() == DRAKKIN ? other->GetDrakkinHeritage() : 0xFFFFFFFF,
+		other->GetRace() == DRAKKIN ? other->GetDrakkinTattoo() : 0xFFFFFFFF,
+		other->GetRace() == DRAKKIN ? other->GetDrakkinDetails() : 0xFFFFFFFF,
+		other->GetSize()
+	);
+
+	for (
+		uint8 slot = EQ::textures::armorHead;
+		slot <= EQ::textures::armorFeet;
+		slot++
+	) {
+		auto color = 0;
+		auto material = 0;
+		if (other->IsClient()) {
+			color = other->CastToClient()->GetEquipmentColor(slot);
+			material = other->CastToClient()->GetEquipmentMaterial(slot);
+		} else {
+			color = other->GetArmorTint(slot);
+			material = !slot ? other->GetHelmTexture() : other->GetTexture();
+		}
+
+		WearChange(slot, material, color);
+	}
+
+	WearChange(
+		EQ::textures::weaponPrimary,
+		other->GetEquipmentMaterial(EQ::textures::weaponPrimary),
+		other->GetEquipmentColor(EQ::textures::weaponPrimary)
+	);
+
+	WearChange(
+		EQ::textures::weaponSecondary,
+		other->GetEquipmentMaterial(EQ::textures::weaponSecondary),
+		other->GetEquipmentColor(EQ::textures::weaponSecondary)
+	);
+
+	if (IsNPC()) {
+		auto primary_skill = (
+			other->IsNPC() ?
+			other->CastToNPC()->GetPrimSkill() :
+			ConvertItemTypeToSkillID(other->GetEquipmentType(EQ::textures::weaponSecondary))
+		);
+
+		auto secondary_skill = (
+			other->IsNPC() ?
+			other->CastToNPC()->GetSecSkill()  :
+			ConvertItemTypeToSkillID(other->GetEquipmentType(EQ::textures::weaponSecondary))
+		);
+
+		CastToNPC()->SetPrimSkill(primary_skill);
+		CastToNPC()->SetSecSkill(secondary_skill);
+	}
+
+	if (clone_name) {
+		TempName(other->GetCleanName());
+	}
 }

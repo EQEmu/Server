@@ -119,6 +119,7 @@ foreach my $table_to_generate (@tables) {
     my $table_found_in_schema = 0;
 
     my @categories = (
+        "bot_tables",
         "content_tables",
         "version_tables",
         "state_tables",
@@ -130,10 +131,8 @@ foreach my $table_to_generate (@tables) {
     # These tables don't have a typical schema
     my @table_ignore_list = (
         "character_enabledtasks",
-        "grid",         # Manually created
-        "grid_entries", # Manually created
+        # "grid",         # Manually created
         # "tradeskill_recipe",     # Manually created
-        # "character_recipe_list", # Manually created
         "guild_bank",
         "inventory_versions",
         "raid_leaders",
@@ -190,12 +189,13 @@ foreach my $table_to_generate (@tables) {
         my $column_name           = $row[0];
         my $column_name_formatted = format_column_name_for_cpp_var($column_name);
         my $data_type             = $row[2];
+        my $column_type           = $row[3];
 
         if ($longest_column_length < length($column_name_formatted)) {
             $longest_column_length = length($column_name_formatted);
         }
 
-        my $struct_data_type = translate_mysql_data_type_to_c($data_type);
+        my $struct_data_type = translate_mysql_data_type_to_c($data_type, $column_type);
 
         if ($longest_data_type_length < length($struct_data_type)) {
             $longest_data_type_length = length($struct_data_type);
@@ -254,13 +254,13 @@ foreach my $table_to_generate (@tables) {
             $default_value = 0;
         }
 
-        my $struct_data_type = translate_mysql_data_type_to_c($data_type);
+        my $struct_data_type = translate_mysql_data_type_to_c($data_type, $column_type);
 
         # struct
         $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name_formatted);
 
         # new entity
-        $default_entries .= sprintf("\t\tentry.%-${longest_column_length}s = %s;\n", $column_name_formatted, $default_value);
+        $default_entries .= sprintf("\t\te.%-${longest_column_length}s = %s;\n", $column_name_formatted, $default_value);
 
         # column names (string)
         $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", format_column_name_for_mysql($column_name));
@@ -273,53 +273,68 @@ foreach my $table_to_generate (@tables) {
 
         # update one
         if ($extra ne "auto_increment") {
-            my $query_value = sprintf('\'" + Strings::Escape(%s_entry.%s) + "\'");', $table_name, $column_name_formatted);
+            my $query_value = sprintf('\'" + Strings::Escape(e.%s) + "\'");', $column_name_formatted);
             if ($data_type =~ /int|float|double|decimal/) {
-                $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name_formatted);
+                $query_value = sprintf('" + std::to_string(e.%s));', $column_name_formatted);
             }
             elsif ($data_type =~ /datetime/) {
-                $query_value = sprintf('FROM_UNIXTIME(" + (%s_entry.%s > 0 ? std::to_string(%s_entry.%s) : "null") + ")");', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
+                $query_value = sprintf('FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")");', $column_name_formatted, $column_name_formatted);
             }
 
             $update_one_entries .= sprintf(
-                "\t\t" . 'update_values.push_back(columns[%s] + " = %s' . "\n",
+                "\t\t" . 'v.push_back(columns[%s] + " = %s' . "\n",
                 $index,
                 $query_value
             );
         }
 
         # insert
-        my $value = sprintf("\"'\" + Strings::Escape(%s_entry.%s) + \"'\"", $table_name, $column_name_formatted);
+        my $value = sprintf("\"'\" + Strings::Escape(e.%s) + \"'\"", $column_name_formatted);
         if ($data_type =~ /int|float|double|decimal/) {
-            $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name_formatted);
+            $value = sprintf('std::to_string(e.%s)', $column_name_formatted);
         }
         elsif ($data_type =~ /datetime/) {
-            $value = sprintf('"FROM_UNIXTIME(" + (%s_entry.%s > 0 ? std::to_string(%s_entry.%s) : "null") + ")"', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
+            $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")"', $column_name_formatted, $column_name_formatted);
         }
 
-        $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
-        $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
+        $insert_one_entries  .= sprintf("\t\tv.push_back(%s);\n", $value);
+        $insert_many_entries .= sprintf("\t\t\tv.push_back(%s);\n", $value);
 
         # find one / all (select)
-        if ($data_type =~ /bigint/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+
+        if ($column_type =~ /unsigned/) {
+            if ($data_type =~ /bigint/) {
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoull(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoull(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+            }
+            elsif ($data_type =~ /int/) {
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(strtoul(row[%s], nullptr, 10));\n", $column_name_formatted, $struct_data_type, $index);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(strtoul(row[%s], nullptr, 10));\n", $column_name_formatted, $struct_data_type, $index);
+            }
+        }
+        elsif ($data_type =~ /bigint/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
         }
         elsif ($data_type =~ /datetime/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
         }
         elsif ($data_type =~ /int/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(atoi(row[%s]));\n", $column_name_formatted, $struct_data_type, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(atoi(row[%s]));\n", $column_name_formatted, $struct_data_type, $index);
         }
-        elsif ($data_type =~ /float|double|decimal/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
+        elsif ($data_type =~ /float|decimal/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtof(row[%s], nullptr);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtof(row[%s], nullptr);\n", $column_name_formatted, $index);
+        }
+        elsif ($data_type =~ /double/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtod(row[%s], nullptr);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtod(row[%s], nullptr);\n", $column_name_formatted, $index);
         }
         else {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
         }
 
         # print $column_name . "\n";
@@ -493,22 +508,40 @@ sub trim {
 
 sub translate_mysql_data_type_to_c {
     my $mysql_data_type = $_[0];
+    my $mysql_column_type = $_[1];
 
     my $struct_data_type = "std::string";
-    if ($mysql_data_type =~ /tinyint/) {
-        $struct_data_type = 'int';
-    }
-    elsif ($mysql_data_type =~ /smallint/) {
-        $struct_data_type = 'int';
+    if ($mysql_column_type =~ /unsigned/) {
+        if ($mysql_data_type =~ /bigint/) {
+            $struct_data_type = 'uint64_t';
+        }
+        elsif ($mysql_data_type =~ /tinyint/) {
+            $struct_data_type = 'uint8_t';
+        }
+        elsif ($mysql_data_type =~ /smallint/) {
+            $struct_data_type = 'uint16_t';
+        }
+        elsif ($mysql_data_type =~ /int/) {
+            $struct_data_type = 'uint32_t';
+        }
     }
     elsif ($mysql_data_type =~ /bigint/) {
-        $struct_data_type = 'int64';
+        $struct_data_type = 'int64_t';
+    }
+    elsif ($mysql_data_type =~ /tinyint/) {
+        $struct_data_type = 'int8_t';
+    }
+    elsif ($mysql_data_type =~ /smallint/) {
+        $struct_data_type = 'int16_t';
     }
     elsif ($mysql_data_type =~ /int/) {
-        $struct_data_type = 'int';
+        $struct_data_type = 'int32_t';
     }
-    elsif ($mysql_data_type =~ /float|double|decimal/) {
+    elsif ($mysql_data_type =~ /float|decimal/) {
         $struct_data_type = 'float';
+    }
+    elsif ($mysql_data_type =~ /double/) {
+        $struct_data_type = 'double';
     }
     elsif ($mysql_data_type =~ /datetime/) {
         $struct_data_type = 'time_t';

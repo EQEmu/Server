@@ -15,7 +15,7 @@ volumes:
 steps:
   - name: server-build
     # Source build script https://github.com/Akkadius/akk-stack/blob/master/containers/eqemu-server/Dockerfile#L20
-    image: akkadius/eqemu-server:latest
+    image: akkadius/eqemu-server:v11
     commands:
       - sudo chown eqemu:eqemu /drone/src/ * -R
       - sudo chown eqemu:eqemu /home/eqemu/.ccache/ * -R

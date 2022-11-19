@@ -19,9 +19,9 @@
 class BaseDynamicZoneMembersRepository {
 public:
 	struct DynamicZoneMembers {
-		int id;
-		int dynamic_zone_id;
-		int character_id;
+		uint32_t id;
+		uint32_t dynamic_zone_id;
+		uint32_t character_id;
 	};
 
 	static std::string PrimaryKey()
@@ -82,16 +82,16 @@ public:
 
 	static DynamicZoneMembers NewEntity()
 	{
-		DynamicZoneMembers entry{};
+		DynamicZoneMembers e{};
 
-		entry.id              = 0;
-		entry.dynamic_zone_id = 0;
-		entry.character_id    = 0;
+		e.id              = 0;
+		e.dynamic_zone_id = 0;
+		e.character_id    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static DynamicZoneMembers GetDynamicZoneMembersEntry(
+	static DynamicZoneMembers GetDynamicZoneMembers(
 		const std::vector<DynamicZoneMembers> &dynamic_zone_memberss,
 		int dynamic_zone_members_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			DynamicZoneMembers entry{};
+			DynamicZoneMembers e{};
 
-			entry.id              = atoi(row[0]);
-			entry.dynamic_zone_id = atoi(row[1]);
-			entry.character_id    = atoi(row[2]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.character_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,23 +151,23 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		DynamicZoneMembers dynamic_zone_members_entry
+		const DynamicZoneMembers &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zone_members_entry.character_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.dynamic_zone_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.character_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				dynamic_zone_members_entry.id
+				e.id
 			)
 		);
 
@@ -176,51 +176,51 @@ public:
 
 	static DynamicZoneMembers InsertOne(
 		Database& db,
-		DynamicZoneMembers dynamic_zone_members_entry
+		DynamicZoneMembers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(dynamic_zone_members_entry.id));
-		insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
-		insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.dynamic_zone_id));
+		v.push_back(std::to_string(e.character_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			dynamic_zone_members_entry.id = results.LastInsertedID();
-			return dynamic_zone_members_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		dynamic_zone_members_entry = NewEntity();
+		e = NewEntity();
 
-		return dynamic_zone_members_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<DynamicZoneMembers> dynamic_zone_members_entries
+		const std::vector<DynamicZoneMembers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &dynamic_zone_members_entry: dynamic_zone_members_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(dynamic_zone_members_entry.id));
-			insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
-			insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.dynamic_zone_id));
+			v.push_back(std::to_string(e.character_id));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -247,19 +247,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DynamicZoneMembers entry{};
+			DynamicZoneMembers e{};
 
-			entry.id              = atoi(row[0]);
-			entry.dynamic_zone_id = atoi(row[1]);
-			entry.character_id    = atoi(row[2]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.character_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<DynamicZoneMembers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<DynamicZoneMembers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<DynamicZoneMembers> all_entries;
 
@@ -274,19 +274,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			DynamicZoneMembers entry{};
+			DynamicZoneMembers e{};
 
-			entry.id              = atoi(row[0]);
-			entry.dynamic_zone_id = atoi(row[1]);
-			entry.character_id    = atoi(row[2]);
+			e.id              = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.dynamic_zone_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.character_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -309,6 +309,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

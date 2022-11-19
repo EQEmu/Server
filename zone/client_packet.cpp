@@ -447,17 +447,13 @@ void ClearMappedOpcode(EmuOpcode op)
 // client methods
 int Client::HandlePacket(const EQApplicationPacket *app)
 {
-	if (LogSys.log_settings[Logs::LogCategory::Netcode].is_category_enabled == 1) {
-		char buffer[64];
-		app->build_header_dump(buffer);
-		Log(Logs::Detail, Logs::PacketClientServer, "Dispatch opcode: %s", buffer);
-	}
-
-	if (LogSys.log_settings[Logs::PacketClientServer].is_category_enabled == 1)
-		Log(Logs::General, Logs::PacketClientServer, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
-
-	if (LogSys.log_settings[Logs::PacketClientServerWithDump].is_category_enabled == 1)
-		Log(Logs::General, Logs::PacketClientServerWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
+	LogPacketClientServer(
+		"[{}] [{:#06x}] Size [{}] {}",
+		OpcodeManager::EmuToName(app->GetOpcode()),
+		eqs->GetOpcodeManager()->EmuToEQ(app->GetOpcode()),
+		app->Size(),
+		(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+	);
 
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {
@@ -500,11 +496,6 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			if (LogSys.log_settings[Logs::PacketClientServerUnhandled].is_category_enabled == 1) {
-				char buffer[64];
-				app->build_header_dump(buffer);
-				Log(Logs::General, Logs::PacketClientServerUnhandled, "%s %s", buffer, DumpPacketToString(app).c_str());
-			}
 			break;
 		}
 
@@ -780,13 +771,6 @@ void Client::CompleteConnect()
 
 	conn_state = ClientConnectFinished;
 
-	//enforce some rules..
-	if (!CanBeInZone()) {
-		LogDebug("[CLIENT] Kicking char from zone, not allowed here");
-		GoToSafeCoords(ZoneID("arena"), 0);
-		return;
-	}
-
 	if (zone)
 		zone->weatherSend(this);
 
@@ -918,6 +902,13 @@ void Client::CompleteConnect()
 	}
 
 	heroforge_wearchange_timer.Start(250);
+
+	// enforce some rules..
+	if (!CanBeInZone()) {
+		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
+		GoToSafeCoords(ZoneID("arena"), 0);
+		return;
+	}
 }
 
 // connecting opcode handlers
@@ -1736,8 +1727,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	 * DevTools Load Settings
 	 */
 	if (Admin() >= EQ::DevTools::GM_ACCOUNT_STATUS_LEVEL) {
-		std::string dev_tools_window_key = StringFormat("%i-dev-tools-disabled", AccountID());
-		if (DataBucket::GetData(dev_tools_window_key) == "true") {
+		const auto dev_tools_key = fmt::format("{}-dev-tools-disabled", AccountID());
+		if (DataBucket::GetData(dev_tools_key) == "true") {
 			dev_tools_enabled = false;
 		}
 	}
@@ -1757,11 +1748,14 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	outapp = new EQApplicationPacket(OP_Weather, 12);
 	Weather_Struct *ws = (Weather_Struct *)outapp->pBuffer;
 	ws->val1 = 0x000000FF;
-	if (zone->zone_weather == 1) { ws->type = 0x31; } // Rain
-	if (zone->zone_weather == 2) {
+
+	if (zone->zone_weather == EQ::constants::WeatherTypes::Raining) {
+		ws->type = 0x31;
+	} else if (zone->zone_weather == EQ::constants::WeatherTypes::Snowing) {
 		outapp->pBuffer[8] = 0x01;
-		ws->type = 0x02;
+		ws->type = EQ::constants::WeatherTypes::Snowing;
 	}
+
 	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2577,6 +2571,16 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
 		}
 
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {}",
+			alt_cur_id,
+			tar->GetNPCTypeID(),
+			tar->MerchantType,
+			item->ID,
+			cost
+		);
+		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_BUY, this, export_string, 0);
+
 		AddAlternateCurrencyValue(alt_cur_id, -((int32)cost));
 		int16 charges = 1;
 		if (item->MaxCharges != 0)
@@ -2731,6 +2735,16 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 			std::string event_desc = StringFormat("Sold to Merchant :: itemid:%u npcid:%u alt_currency_id:%u cost:%u in zoneid:%u instid:%i", item->ID, npc_id, alt_cur_id, cost, GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, CharacterID(), event_desc);
 		}
+
+		const auto& export_string = fmt::format(
+			"{} {} {} {} {}",
+			alt_cur_id,
+			tar->GetNPCTypeID(),
+			tar->MerchantType,
+			item->ID,
+			cost
+		);
+		parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_SELL, this, export_string, 0);
 
 		FastQueuePacket(&outapp);
 		AddAlternateCurrencyValue(alt_cur_id, cost);
@@ -4273,7 +4287,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 			fmt::format(
 				"Door ({}) [{}]",
 				currentdoor->GetEntityID(),
-				Saylink::Create("#door edit", false, "#door edit")
+				Saylink::Silent("#door edit")
 			).c_str()
 		);
 	}
@@ -6629,7 +6643,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 		return;
 	}
 
-	GMZoneRequest_Struct* gmzr = (GMZoneRequest_Struct*)app->pBuffer;
+	auto* gmzr = (GMZoneRequest_Struct*)app->pBuffer;
 	float target_x = -1, target_y = -1, target_z = -1, target_heading;
 
 	int16 min_status = AccountStatus::Player;
@@ -6646,21 +6660,18 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 		strcpy(target_zone, zone_short_name);
 
 	// this both loads the safe points and does a sanity check on zone name
-	if (!content_db.GetSafePoints(
-		target_zone,
-		0,
-		&target_x,
-		&target_y,
-		&target_z,
-		&target_heading,
-		&min_status,
-		&min_level
-	)) {
+	auto z = GetZone(target_zone, 0);
+	if (z) {
+		target_x       = z->safe_x;
+		target_y       = z->safe_y;
+		target_z       = z->safe_z;
+		target_heading = z->safe_heading;
+	} else {
 		target_zone[0] = 0;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_GMZoneRequest, sizeof(GMZoneRequest_Struct));
-	GMZoneRequest_Struct* gmzr2 = (GMZoneRequest_Struct*)outapp->pBuffer;
+	auto* gmzr2 = (GMZoneRequest_Struct*)outapp->pBuffer;
 	strcpy(gmzr2->charname, GetName());
 	gmzr2->zone_id = gmzr->zone_id;
 	gmzr2->x = target_x;
@@ -8531,53 +8542,18 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			response = row[0];
 		}
 
-		if ((response).size() > 0) {
+		if (!response.empty()) {
 			if (!mod_saylink(response, silentsaylink)) {
 				return;
 			}
 
-			if (GetTarget() && GetTarget()->IsNPC()) {
-				if (silentsaylink) {
-					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response, 0);
+			ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
 
-					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
-					}
-#ifdef BOTS
-					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
-					}
-#endif
-					else {
-						parse->EventPlayer(EVENT_SAY, this, response, 0);
-					}
-				}
-				else {
-					Message(Chat::LightGray, "You say, '%s'", response.c_str());
-					ChannelMessageReceived(8, 0, 100, response.c_str());
-				}
-				return;
+			if (!silentsaylink) {
+				Message(Chat::LightGray, "You say, '%s'", response.c_str());
 			}
-			else {
-				if (silentsaylink) {
-					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
-					}
-#ifdef BOTS
-					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
-					}
-#endif
-					else {
-						parse->EventPlayer(EVENT_SAY, this, response, 0);
-					}
-				}
-				else {
-					Message(Chat::LightGray, "You say, '%s'", response.c_str());
-					ChannelMessageReceived(8, 0, 100, response.c_str());
-				}
-				return;
-			}
+
+			return;
 		}
 		else {
 			Message(Chat::Red, "Error: Say Link not found or is too long.");
@@ -8592,7 +8568,6 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
 	}
-	return;
 }
 
 void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app)
@@ -8952,9 +8927,29 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else if (item->ItemType == EQ::item::ItemTypeSpell)
 			{
-				if (RuleB(Spells, AllowSpellMemorizeFromItem)) {
+				spell_id = item->Scroll.Effect;
+				if (RuleB(Spells, AllowSpellMemorizeFromItem))
+				{
+					int highest_spell_id = GetHighestScribedSpellinSpellGroup(spells[spell_id].spell_group);
+					if (spells[spell_id].spell_group > 0 && highest_spell_id > 0)
+					{
+						if (spells[spell_id].rank > spells[highest_spell_id].rank)
+						{
+							std::string message = fmt::format("{} will replace {} in your spellbook", GetSpellName(spell_id), GetSpellName(highest_spell_id));
+							SetEntityVariable("slot_id",itoa(slot_id));
+							SetEntityVariable("spell_id",itoa(item->ID));
+							SendPopupToClient("", message.c_str(), 1000001, 1, 10);
+							return;
+						}
+						else if (spells[spell_id].rank < spells[highest_spell_id].rank)
+						{
+							MessageString(Chat::Red, LESSER_SPELL_VERSION, spells[spell_id].name, spells[highest_spell_id].name);
+							return;
+						}
+					}
 					DeleteItemInInventory(slot_id, 1, true);
 					MemorizeSpellFromItem(item->ID);
+					return;
 				} else {
 					return;
 				}
@@ -9168,7 +9163,13 @@ void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 {
 	Mob * target = GetTarget();
 	if (target && target->GetClass() == LDON_TREASURE && !target->IsAura())
-		Message(Chat::Yellow, "%s", target->GetCleanName());
+	{
+		std::vector<std::any> args = { target };
+		if (parse->EventPlayer(EVENT_INSPECT, this, "", target->GetID(), &args) == 0)
+		{
+			Message(Chat::Yellow, "%s", target->GetCleanName());
+		}
+	}
 }
 
 void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
@@ -11157,11 +11158,19 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 
 	PopupResponse_Struct *popup_response = (PopupResponse_Struct *) app->pBuffer;
 
+	//Get Item Details if POPUPID_REPLACE_SPELLWINDOW was used
+
 	/**
 	 * Handle any EQEmu defined popup Ids first
 	 */
 	std::string response;
 	switch (popup_response->popupid) {
+		case POPUPID_REPLACE_SPELLWINDOW:
+			DeleteItemInInventory(std::stoi(GetEntityVariable("slot_id")), 1, true);
+			MemorizeSpellFromItem(std::stoi(GetEntityVariable("spell_id")));
+			return;
+			break;
+
 		case POPUPID_UPDATE_SHOWSTATSWINDOW:
 			if (GetTarget() && GetTarget()->IsClient()) {
 				GetTarget()->CastToClient()->SendStatsWindow(this, true);
@@ -11176,7 +11185,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY.c_str())) {
 				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str());
 				if (!response.empty()) {
-					ChannelMessageReceived(8, 0, 100, response.c_str());
+					ChannelMessageReceived(8, 0, 100, response.c_str(), nullptr, true);
 				}
 			}
 			break;
@@ -11185,7 +11194,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY.c_str())) {
 				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY.c_str());
 				if (!response.empty()) {
-					ChannelMessageReceived(8, 0, 100, response.c_str());
+					ChannelMessageReceived(8, 0, 100, response.c_str(), nullptr, true);
 				}
 			}
 			break;
@@ -11198,13 +11207,19 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 	}
 
-	std::string export_string = fmt::format("{}", popup_response->popupid);
+	const auto export_string = fmt::format("{}", popup_response->popupid);
 
 	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, export_string, 0);
 
-	Mob *Target = GetTarget();
-	if (Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, export_string, 0);
+	auto t = GetTarget();
+	if (t) {
+		if (t->IsNPC()) {
+			parse->EventNPC(EVENT_POPUP_RESPONSE, t->CastToNPC(), this, export_string, 0);
+#ifdef BOTS
+		} else if (t->IsBot()) {
+			parse->EventBot(EVENT_POPUP_RESPONSE, t->CastToBot(), this, export_string, 0);
+#endif
+		}
 	}
 }
 
@@ -12982,10 +12997,14 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		return;
 	}
 
-	pTimerType timer = pTimerShieldAbility;
+	if (!RuleB(Combat, EnableWarriorShielding)) {
+		Message(Chat::White, "/shield is disabled.");
+		return;
+	}
 
+	pTimerType timer = pTimerShieldAbility;
 	if (!p_timers.Expired(&database, timer, false)) {
-		uint32 remaining_time = p_timers.GetRemainingTime(timer);
+		auto remaining_time = p_timers.GetRemainingTime(timer);
 		Message(
 			Chat::White,
 			fmt::format(
@@ -12996,8 +13015,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		return;
 	}
 
-	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
-
+	auto shield = (Shielding_Struct*) app->pBuffer;
 	if (ShieldAbility(shield->target_id, 15, 12000, 50, 25, true, false)) {
 		p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
 	}
@@ -13268,6 +13286,16 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (RuleB(EventLog, RecordBuyFromMerchant))
 		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
 
+	const auto& export_string = fmt::format(
+		"{} {} {} {} {}",
+		tmp->GetNPCTypeID(),
+		tmp->CastToNPC()->MerchantType,
+		item_id,
+		mpo->quantity,
+		mpo->price
+	);
+	parse->EventPlayer(EVENT_MERCHANT_BUY, this, export_string, 0);
+
 	if ((RuleB(Character, EnableDiscoveredItems)))
 	{
 		if (!GetGM() && !IsDiscovered(item_id))
@@ -13424,6 +13452,17 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		safe_delete(qspack);
 	}
 	// end QS code
+
+	const auto& export_string = fmt::format(
+		"{} {} {} {} {}",
+		vendor->GetNPCTypeID(),
+		vendor->CastToNPC()->MerchantType,
+		itemid,
+		mp->quantity,
+		price
+	);
+	parse->EventPlayer(EVENT_MERCHANT_SELL, this, export_string, 0);
+
 
 	// Now remove the item from the player, this happens regardless of outcome
 	DeleteItemInInventory(

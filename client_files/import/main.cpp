@@ -25,9 +25,13 @@
 #include "../../common/rulesys.h"
 #include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
+#include "../../common/zone_store.h"
+#include "../../common/path_manager.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
+ZoneStore zone_store;
+PathManager path;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -38,6 +42,8 @@ int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	LogInfo("Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
@@ -81,6 +87,7 @@ int main(int argc, char **argv) {
 	}
 
 	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
@@ -125,9 +132,10 @@ bool IsStringField(int i) {
 
 void ImportSpells(SharedDatabase *db) {
 	LogInfo("Importing Spells");
-	FILE *f = fopen("import/spells_us.txt", "r");
+	std::string file = fmt::format("{}/import/spells_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/spells_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -214,9 +222,10 @@ void ImportSpells(SharedDatabase *db) {
 void ImportSkillCaps(SharedDatabase *db) {
 	LogInfo("Importing Skill Caps");
 
-	FILE *f = fopen("import/SkillCaps.txt", "r");
+	std::string file = fmt::format("{}/import/SkillCaps.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/SkillCaps.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -249,9 +258,10 @@ void ImportSkillCaps(SharedDatabase *db) {
 void ImportBaseData(SharedDatabase *db) {
 	LogInfo("Importing Base Data");
 
-	FILE *f = fopen("import/BaseData.txt", "r");
+	std::string file = fmt::format("{}/import/BaseData.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/BaseData.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -294,9 +304,10 @@ void ImportBaseData(SharedDatabase *db) {
 void ImportDBStrings(SharedDatabase *db) {
 	LogInfo("Importing DB Strings");
 
-	FILE *f = fopen("import/dbstr_us.txt", "r");
+	std::string file = fmt::format("{}/import/dbstr_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/dbstr_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 

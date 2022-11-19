@@ -514,6 +514,7 @@ enum SpellRestriction
 	IS_SUMMONED_OR_UNDEAD                                                     = 49326, //
 	IS_CLASS_CASTER_PRIEST                                                    = 49529, //
 	IS_END_OR_MANA_ABOVE_20_PCT                                               = 49543, // You must have at least 20% of your maximum mana and endurance to use this ability.	//pure melee class check end, other check mana
+	IS_END_OR_MANA_BELOW_10_PCT                                               = 49545, // 																			//pure melee class check end, other check mana, hybrid check both
 	IS_END_OR_MANA_BELOW_30_PCT                                               = 49573, // Your target already has 30% or more of their maximum mana or endurance.	//pure melee class check the, other check more
 	IS_CLASS_BARD2                                                            = 49574, //
 	IS_NOT_CLASS_BARD                                                         = 49575, //
@@ -1298,7 +1299,7 @@ struct SPDat_Spell_Struct
 /* 016 */	uint32 buff_duration_formula; // -- DURATIONBASE
 /* 017 */	uint32 buff_duration; // -- DURATIONCAP
 /* 018 */	uint32 aoe_duration;	// sentinel, rain of something -- IMPACTDURATION
-/* 019 */	uint16 mana; // Mana Used -- MANACOST
+/* 019 */	int32 mana; // Mana Used -- MANACOST
 /* 020 */	int base_value[EFFECT_COUNT];	//various purposes -- BASEAFFECT1 .. BASEAFFECT12
 /* 032 */	int limit_value[EFFECT_COUNT]; //various purposes -- BASE_EFFECT2_1 ... BASE_EFFECT2_12
 /* 044 */	int32 max_value[EFFECT_COUNT]; // -- AFFECT1CAP ... AFFECT12CAP

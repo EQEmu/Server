@@ -2,6 +2,7 @@
 
 #ifdef EMBPERL_XS_CLASSES
 
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "embperl.h"
 #include "groups.h"
@@ -34,10 +35,10 @@ void Perl_Group_GroupMessage(Group* self, Mob* sender, const char* message) // @
 
 void Perl_Group_GroupMessage(Group* self, Mob* sender, uint8_t language, const char* message) // @categories Script Utility, Group
 {
-	if ((language >= MAX_PP_LANGUAGE) || (language < 0))
-	{
+	if (!EQ::ValueWithin(language, 0, (MAX_PP_LANGUAGE - 1))) {
 		language = 0;
 	}
+
 	self->GroupMessage(sender, language, 100, message);
 }
 
@@ -49,6 +50,11 @@ uint32_t Perl_Group_GetTotalGroupDamage(Group* self, Mob* other) // @categories 
 void Perl_Group_SplitMoney(Group* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points, Script Utility, Group
 {
 	self->SplitMoney(copper, silver, gold, platinum);
+}
+
+void Perl_Group_SplitMoney(Group* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client* splitter) // @categories Currency and Points, Script Utility, Group
+{
+	self->SplitMoney(copper, silver, gold, platinum, splitter);
 }
 
 void Perl_Group_SetLeader(Group* self, Mob* new_leader) // @categories Account and Character, Script Utility, Group
@@ -101,13 +107,13 @@ uint32_t Perl_Group_GetID(Group* self) // @categories Script Utility, Group
 	return self->GetID();
 }
 
-Client* Perl_Group_GetMember(Group* self, int group_index) // @categories Account and Character, Script Utility, Group
+Client* Perl_Group_GetMember(Group* self, int member_index) // @categories Account and Character, Script Utility, Group
 {
 	Mob* member = nullptr;
-	if (group_index >= 0 && group_index < 6)
-	{
-		member = self->members[group_index];
+	if (EQ::ValueWithin(member_index, 0, 5)) {
+		member = self->members[member_index];
 	}
+
 	return member ? member->CastToClient() : nullptr;
 }
 
@@ -121,6 +127,16 @@ bool Perl_Group_DoesAnyMemberHaveExpeditionLockout(Group* self, std::string expe
 	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
 }
 
+uint32_t Perl_Group_GetLowestLevel(Group* self) // @categories Script Utility, Group
+{
+	return self->GetLowestLevel();
+}
+
+uint32_t Perl_Group_GetAverageLevel(Group* self) // @categories Script Utility, Group
+{
+	return self->GetAvgLevel();
+}
+
 void perl_register_group()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -130,10 +146,12 @@ void perl_register_group()
 	package.add("DisbandGroup", &Perl_Group_DisbandGroup);
 	package.add("DoesAnyMemberHaveExpeditionLockout", (bool(*)(Group*, std::string, std::string))&Perl_Group_DoesAnyMemberHaveExpeditionLockout);
 	package.add("DoesAnyMemberHaveExpeditionLockout", (bool(*)(Group*, std::string, std::string, int))&Perl_Group_DoesAnyMemberHaveExpeditionLockout);
+	package.add("GetAverageLevel", &Perl_Group_GetAverageLevel);
 	package.add("GetHighestLevel", &Perl_Group_GetHighestLevel);
 	package.add("GetID", &Perl_Group_GetID);
 	package.add("GetLeader", &Perl_Group_GetLeader);
 	package.add("GetLeaderName", &Perl_Group_GetLeaderName);
+	package.add("GetLowestLevel", &Perl_Group_GetLowestLevel);
 	package.add("GetMember", &Perl_Group_GetMember);
 	package.add("GetTotalGroupDamage", &Perl_Group_GetTotalGroupDamage);
 	package.add("GroupCount", &Perl_Group_GroupCount);
@@ -145,7 +163,8 @@ void perl_register_group()
 	package.add("SendHPPacketsTo", &Perl_Group_SendHPPacketsTo);
 	package.add("SetLeader", &Perl_Group_SetLeader);
 	package.add("SplitExp", &Perl_Group_SplitExp);
-	package.add("SplitMoney", &Perl_Group_SplitMoney);
+	package.add("SplitMoney", (void(*)(Group*, uint32, uint32, uint32, uint32))&Perl_Group_SplitMoney);
+	package.add("SplitMoney", (void(*)(Group*, uint32, uint32, uint32, uint32, Client*))&Perl_Group_SplitMoney);
 	package.add("TeleportGroup", &Perl_Group_TeleportGroup);
 }
 

@@ -148,6 +148,8 @@ namespace EQ
 		const ItemData* GetItem() const;
 		const ItemData* GetUnscaledItem() const;
 
+		const uint8 GetItemType() const { return m_item ? m_item->ItemType : 255; } // Return 255 so you know there's no valid item
+
 		int16 GetCharges() const				{ return m_charges; }
 		void SetCharges(int16 charges)			{ m_charges = charges; }
 
@@ -228,6 +230,13 @@ namespace EQ
 		void SetTimer(std::string name, uint32 time);
 		void StopTimer(std::string name);
 		void ClearTimers();
+
+		int GetTaskDeliveredCount() const { return m_task_delivered_count; }
+		void SetTaskDeliveredCount(int count) { m_task_delivered_count = count; }
+		// This function should only be used by trade return apis
+		// Removes delivered task items from stack count and returns remaining count
+		// Return value should be used to determine if an item still exists (for stackable and non-stackable)
+		int RemoveTaskDeliveredItems();
 
 		// Get a total of a stat, including augs
 		// These functions should be used in place of other code manually totaling
@@ -313,6 +322,7 @@ namespace EQ
 		uint32				m_new_id_file;
 		uint32				m_ornament_hero_model;
 		uint32				m_recast_timestamp;
+		int                 m_task_delivered_count = 0;
 
 		//
 		// Items inside of this item (augs or contents);

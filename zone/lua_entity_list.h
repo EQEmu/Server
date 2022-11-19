@@ -88,6 +88,9 @@ public:
 	Lua_Spawn GetSpawnByID(uint32 id);
 	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Lua_Mob p);
+	void Marquee(uint32 type, std::string message);
+	void Marquee(uint32 type, std::string message, uint32 duration);
+	void Marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void Message(uint32 guild_dbid, uint32 type, const char *message);
 	void MessageStatus(uint32 guild_dbid, int min_status, uint32 type, const char *message);
 	void MessageClose(Lua_Mob sender, bool skip_sender, float dist, uint32 type, const char *message);
@@ -108,10 +111,13 @@ public:
 	void RemoveFromHateLists(Lua_Mob who);
 	void RemoveFromHateLists(Lua_Mob who, bool set_to_one);
 	void MessageGroup(Lua_Mob who, bool skip_close, uint32 type, const char *message);
+	Lua_Client GetRandomClient();
 	Lua_Client GetRandomClient(float x, float y, float z, float distance);
 	Lua_Client GetRandomClient(float x, float y, float z, float distance, Lua_Client exclude_client);
+	Lua_Mob GetRandomMob();
 	Lua_Mob GetRandomMob(float x, float y, float z, float distance);
 	Lua_Mob GetRandomMob(float x, float y, float z, float distance, Lua_Mob exclude_mob);
+	Lua_NPC GetRandomNPC();
 	Lua_NPC GetRandomNPC(float x, float y, float z, float distance);
 	Lua_NPC GetRandomNPC(float x, float y, float z, float distance, Lua_NPC exclude_npc);
 	Lua_Mob_List GetMobList();
@@ -129,7 +135,14 @@ public:
 	Lua_Bot GetBotByName(std::string bot_name);
 	Lua_Bot_List GetBotList();
 	Lua_Bot_List GetBotListByCharacterID(uint32 character_id);
+	Lua_Bot_List GetBotListByCharacterID(uint32 character_id, uint8 class_id);
 	Lua_Bot_List GetBotListByClientName(std::string client_name);
+	Lua_Bot GetRandomBot();
+	Lua_Bot GetRandomBot(float x, float y, float z, float distance);
+	Lua_Bot GetRandomBot(float x, float y, float z, float distance, Lua_Bot exclude_bot);
+	void SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id);
+	void SignalBotByBotID(uint32 bot_id, int signal_id);
+	void SignalBotByBotName(std::string bot_name, int signal_id);
 #endif
 };
 

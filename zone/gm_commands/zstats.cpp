@@ -159,7 +159,7 @@ void command_zstats(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Suspend Buffs: {}",
-			zone->newzone_data.SuspendBuffs
+			zone->newzone_data.suspend_buffs
 		).c_str()
 	);
 
@@ -168,9 +168,9 @@ void command_zstats(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Regen | Health: {} Mana: {} Endurance: {}",
-			zone->newzone_data.FastRegenHP,
-			zone->newzone_data.FastRegenMana,
-			zone->newzone_data.FastRegenEndurance
+			zone->newzone_data.fast_regen_hp,
+			zone->newzone_data.fast_regen_mana,
+			zone->newzone_data.fast_regen_endurance
 		).c_str()
 	);
 
@@ -179,7 +179,7 @@ void command_zstats(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"NPC Max Aggro Distance: {}",
-			zone->newzone_data.NPCAggroMaxDist
+			zone->newzone_data.npc_aggro_max_dist
 		).c_str()
 	);
 
@@ -197,8 +197,8 @@ void command_zstats(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Lava Damage | Min: {} Max: {}",
-			zone->newzone_data.MinLavaDamage,
-			zone->newzone_data.LavaDamage
+			zone->newzone_data.min_lava_damage,
+			zone->newzone_data.lava_damage
 		).c_str()
 	);
 }

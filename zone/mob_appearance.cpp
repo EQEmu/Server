@@ -18,8 +18,9 @@
  *
  */
 
+#include "../common/data_verification.h"
 #include "../common/eqemu_logsys.h"
-
+#include "../common/item_data.h"
 #include "../common/misc_functions.h"
 #include "../common/spdat.h"
 #include "../common/strings.h"
@@ -27,7 +28,7 @@
 #include "mob.h"
 #include "quest_parser_collection.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -225,39 +226,31 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 	auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
 
-	if (item != nullptr) {
+	if (item) {
+		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
 
-		/**
-		 * Handle primary / secondary texture
-		 */
-		bool is_primary_or_secondary_weapon =
-				 material_slot == EQ::textures::weaponPrimary ||
-				 material_slot == EQ::textures::weaponSecondary;
-
-		if (is_primary_or_secondary_weapon) {
+		if (is_equipped_weapon) {
 			if (IsClient()) {
-
-				int16 inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+				const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 				if (inventory_slot == INVALID_INDEX) {
 					return 0;
 				}
 
-				const EQ::ItemInstance *item_instance = CastToClient()->m_inv[inventory_slot];
-				if (item_instance) {
-					if (item_instance->GetOrnamentationAug(ornamentation_augment_type)) {
-						item = item_instance->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
+				const auto* inst = CastToClient()->m_inv[inventory_slot];
+				if (inst) {
+					if (inst->GetOrnamentationAug(ornamentation_augment_type)) {
+						item = inst->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
 						if (item && strlen(item->IDFile) > 2) {
-							equipment_material = atoi(&item->IDFile[2]);
+							equipment_material = std::stoi(&item->IDFile[2]);
 						}
-					}
-					else if (item_instance->GetOrnamentationIDFile()) {
-						equipment_material = item_instance->GetOrnamentationIDFile();
+					} else if (inst->GetOrnamentationIDFile()) {
+						equipment_material = inst->GetOrnamentationIDFile();
 					}
 				}
 			}
 
 			if (equipment_material == 0 && strlen(item->IDFile) > 2) {
-				equipment_material = atoi(&item->IDFile[2]);
+				equipment_material = std::stoi(&item->IDFile[2]);
 			}
 		}
 		else {
@@ -266,6 +259,32 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	}
 
 	return equipment_material;
+}
+
+uint8 Mob::GetEquipmentType(uint8 material_slot) const
+{
+	auto item_type = static_cast<uint8>(EQ::item::ItemType2HBlunt);
+	auto item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+
+	if (item) {
+		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
+
+		if (is_equipped_weapon) {
+			if (IsClient()) {
+				const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+				if (inventory_slot == INVALID_INDEX) {
+					return item_type;
+				}
+
+				const auto* inst = CastToClient()->m_inv[inventory_slot];
+				if (inst) {
+					item_type = inst->GetItemType();
+				}
+			}
+		}
+	}
+
+	return item_type;
 }
 
 /**

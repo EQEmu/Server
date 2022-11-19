@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/json/json.h"
 #include "../common/event_sub.h"
 #include "web_interface.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 
 extern uint32 numzones;
 extern EQ::Random emu_random;

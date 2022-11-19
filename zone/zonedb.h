@@ -107,6 +107,47 @@ struct DBnpcspellseffects_Struct {
 	DBnpcspellseffects_entries_Struct entries[0];
 };
 
+#pragma pack(1)
+struct DBbotspells_entries_Struct {
+	uint16		spellid;
+	uint8		minlevel;
+	uint8		maxlevel;
+	uint32		type;
+	int16		manacost;
+	int16		priority;
+	int32		recast_delay;
+	int16		resist_adjust;
+	int8		min_hp;
+	int8		max_hp;
+	std::string	bucket_name;
+	std::string	bucket_value;
+	uint8		bucket_comparison;
+};
+#pragma pack()
+
+struct DBbotspells_Struct {
+	uint32	parent_list;
+	uint16	attack_proc;
+	uint8	proc_chance;
+	uint16	range_proc;
+	int16	rproc_chance;
+	uint16	defensive_proc;
+	int16	dproc_chance;
+	uint32	fail_recast;
+	uint32	engaged_no_sp_recast_min;
+	uint32	engaged_no_sp_recast_max;
+	uint8	engaged_beneficial_self_chance;
+	uint8	engaged_beneficial_other_chance;
+	uint8	engaged_detrimental_chance;
+	uint32	pursue_no_sp_recast_min;
+	uint32	pursue_no_sp_recast_max;
+	uint8	pursue_detrimental_chance;
+	uint32	idle_no_sp_recast_min;
+	uint32	idle_no_sp_recast_max;
+	uint8	idle_beneficial_chance;
+	std::vector<DBbotspells_entries_Struct> entries;
+};
+
 struct DBTradeskillRecipe_Struct {
 	EQ::skills::SkillType tradeskill;
 	int16 skill_needed;
@@ -246,7 +287,7 @@ struct ClientMercEntry {
 	uint32 npcid;
 };
 
-namespace BeastlordPetData {	
+namespace BeastlordPetData {
 	struct PetStruct {
 		uint16 race_id = WOLF;
 		uint8 texture = 0;
@@ -369,11 +410,11 @@ public:
 	bool SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
-	
-	double GetAAEXPModifier(uint32 character_id, uint32 zone_id) const;
-	double GetEXPModifier(uint32 character_id, uint32 zone_id) const;
-	void SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier);
-	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier);
+
+	double GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	double GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	void SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version = -1);
+	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version = -1);
 
 	/* Character Inventory  */
 	bool	NoRentExpired(const char* name);
@@ -386,7 +427,7 @@ public:
 	void	DivergeCharacterInvSnapshotFromInventory(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list);
 	void	DivergeCharacterInventoryFromInvSnapshot(uint32 character_id, uint32 timestamp, std::list<std::pair<int16, uint32>> &compare_list);
 	bool	RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp);
-	
+
 	/* Corpses  */
 	bool		DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id);
 	uint32		GetCharacterCorpseItemCount(uint32 corpse_id);
@@ -432,21 +473,6 @@ public:
 	bool	LoadAlternateAdvancement(Client *c);
 
 	/* Zone related   */
-	bool		GetZoneCFG(
-		uint32 zoneid, 
-		uint16 instance_version, 
-		NewZone_Struct *data, 
-		bool &can_bind, 
-		bool &can_combat, 
-		bool &can_levitate, 
-		bool &can_castoutdoor, 
-		bool &is_city, 
-		bool &is_hotzone, 
-		bool &allow_mercs, 
-		double &max_movement_update_range, 
-		uint8 &zone_type, 
-		int &ruleset, 
-		char **map_filename);
 	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
 	int			getZoneShutDownDelay(uint32 zoneID, uint32 version);
@@ -505,6 +531,10 @@ public:
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
+
+	/*Bots	*/
+	DBbotspells_Struct*	GetBotSpells(uint32 iDBSpellsID);
+	void ClearBotSpells() { Bot_Spells_Cache.clear(); Bot_Spells_LoadTried.clear(); }
 
 	/* Mercs   */
 	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
@@ -610,6 +640,8 @@ protected:
 	std::unordered_set<uint32> npc_spells_loadtried;
 	DBnpcspellseffects_Struct** npc_spellseffects_cache;
 	bool*				npc_spellseffects_loadtried;
+	std::unordered_map<uint32, DBbotspells_Struct> Bot_Spells_Cache;
+	std::unordered_set<uint32> Bot_Spells_LoadTried;
 };
 
 extern ZoneDatabase database;

@@ -449,22 +449,22 @@ void Perl_NPC_SetSwarmTarget(NPC* self, int target_id) // @categories Pet
 	self->SetSwarmTarget(target_id);
 }
 
-void Perl_NPC_ModifyNPCStat(NPC* self, const char* stat, const char* value) // @categories Stats and Attributes
+void Perl_NPC_ModifyNPCStat(NPC* self, std::string stat, std::string value) // @categories Stats and Attributes
 {
 	self->ModifyNPCStat(stat, value);
 }
 
-float Perl_NPC_GetNPCStat(NPC* self, const char* identifier) // @categories Stats and Attributes
+float Perl_NPC_GetNPCStat(NPC* self, std::string stat) // @categories Stats and Attributes
 {
-	return self->GetNPCStat(identifier);
+	return self->GetNPCStat(stat);
 }
 
-void Perl_NPC_AddSpellToNPCList(NPC* self, int16 priority, uint16_t spell_id, uint32 type, int16 mana_cost, int recast_delay, int16 resist_adjust) // @categories Spells and Disciplines, Script Utility
+void Perl_NPC_AddSpellToNPCList(NPC* self, int16 priority, uint16_t spell_id, uint32 type, int mana_cost, int recast_delay, int16 resist_adjust) // @categories Spells and Disciplines, Script Utility
 {
 	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, 0, 0);
 }
 
-void Perl_NPC_AddSpellToNPCList(NPC* self, int16 priority, uint16_t spell_id, uint32 type, int16 mana_cost, int recast_delay, int16 resist_adjust, int8 min_hp, int8 max_hp) // @categories Spells and Disciplines, Script Utility
+void Perl_NPC_AddSpellToNPCList(NPC* self, int16 priority, uint16_t spell_id, uint32 type, int mana_cost, int recast_delay, int16 resist_adjust, int8 min_hp, int8 max_hp) // @categories Spells and Disciplines, Script Utility
 {
 	self->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, min_hp, max_hp);
 }
@@ -665,6 +665,11 @@ bool Perl_NPC_IsRareSpawn(NPC* self)
 	return self->IsRareSpawn();
 }
 
+void Perl_NPC_ReloadSpells(NPC* self)
+{
+	self->ReloadSpells();
+}
+
 void perl_register_npc()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -674,8 +679,8 @@ void perl_register_npc()
 	package.add("AI_SetRoambox", (void(*)(NPC*, float, float, float, float, float))&Perl_NPC_AI_SetRoambox);
 	package.add("AI_SetRoambox", (void(*)(NPC*, float, float, float, float, float, uint32))&Perl_NPC_AI_SetRoambox);
 	package.add("AI_SetRoambox", (void(*)(NPC*, float, float, float, float, float, uint32, uint32))&Perl_NPC_AI_SetRoambox);
-	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int16, int, int16))&Perl_NPC_AddSpellToNPCList);
-	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int16, int, int16, int8, int8))&Perl_NPC_AddSpellToNPCList);
+	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int, int, int16))&Perl_NPC_AddSpellToNPCList);
+	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int, int, int16, int8, int8))&Perl_NPC_AddSpellToNPCList);
 	package.add("AddAISpellEffect", &Perl_NPC_AddAISpellEffect);
 	package.add("AddCash", &Perl_NPC_AddCash);
 	package.add("AddDefensiveProc", &Perl_NPC_AddDefensiveProc);
@@ -765,6 +770,7 @@ void perl_register_npc()
 	package.add("PauseWandering", &Perl_NPC_PauseWandering);
 	package.add("PickPocket", &Perl_NPC_PickPocket);
 	package.add("RecalculateSkills", &Perl_NPC_RecalculateSkills);
+	package.add("ReloadSpells", &Perl_NPC_ReloadSpells);
 	package.add("RemoveAISpell", &Perl_NPC_RemoveSpellFromNPCList);
 	package.add("RemoveAISpellEffect", &Perl_NPC_RemoveAISpellEffect);
 	package.add("RemoveCash", &Perl_NPC_RemoveCash);

@@ -71,6 +71,11 @@ void command_logs(Client *c, const Seperator *sep)
 				break;
 			}
 
+			bool is_deprecated_category = Strings::Contains(fmt::format("{}", Logs::LogCategoryName[index]), "Deprecated");
+			if (is_deprecated_category) {
+				continue;
+			}
+
 			std::vector<std::string> gmsay;
 			for (int i = 0; i <= 3; i++) {
 				if (i == 2) {
@@ -184,11 +189,7 @@ void command_logs(Client *c, const Seperator *sep)
 				next_category_id
 			);
 
-			auto next_list_link = Saylink::Create(
-				next_list_string,
-				false,
-				next_list_string
-			);
+			auto next_list_link = Saylink::Silent(next_list_string, next_list_string);
 
 			c->Message(
 				Chat::White,

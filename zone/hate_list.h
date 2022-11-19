@@ -19,6 +19,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #ifndef HATELIST_H
 #define HATELIST_H
 
+#include "../common/emu_constants.h"
+
 class Client;
 class Group;
 class Mob;
@@ -64,7 +66,17 @@ public:
 	int64 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
 	std::list<struct_HateList *> &GetHateList() { return list; }
-	std::list<struct_HateList *> GetHateListByDistance(int distance = 0);
+	std::list<struct_HateList *> GetFilteredHateList(
+		uint32 distance = 0,
+		uint8 filter_type = EntityFilterTypes::All
+	);
+
+	void DamageHateList(
+		int64 damage,
+		uint32 distance = 0,
+		uint8 filter_type = EntityFilterTypes::All,
+		bool is_percentage = false
+	);
 
 	void AddEntToHateList(
 		Mob *ent,
@@ -73,7 +85,7 @@ public:
 		bool in_is_frenzied = false,
 		bool add_to_hate_list_if_not_exist = true
 	);
-	void DoFactionHits(int64 npc_faction_level_id);
+	void DoFactionHits(int64 npc_faction_level_id, int32 faction_id, int32 faction_value);
 	void IsEntityInFrenzyMode();
 	void PrintHateListToClient(Client *c);
 	void SetHateAmountOnEnt(Mob *other, int64 in_hate, uint64 in_damage);

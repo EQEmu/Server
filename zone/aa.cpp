@@ -29,11 +29,16 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "groups.h"
 #include "mob.h"
 #include "queryserv.h"
+#include "quest_parser_collection.h"
 #include "raids.h"
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
+
+#ifdef BOTS
+#include "bot.h"
+#endif
 
 extern QueryServ* QServ;
 
@@ -1147,65 +1152,95 @@ bool Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore
 }
 
 void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost) {
-	int rank_id = rank->base_ability->first_rank_id;
+	auto rank_id = rank->base_ability->first_rank_id;
 
-	if(rank->base_ability->charges > 0) {
+	if (rank->base_ability->charges) {
 		uint32 charges = 0;
 		GetAA(rank_id, &charges);
 
-		if(charges > 0) {
+		if (charges) {
 			return;
 		}
 
 		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
-	}
-	else {
+	} else {
 		SetAA(rank_id, rank->current_value, 0);
 
 		//if not max then send next aa
-		if(rank->next) {
+		if (rank->next) {
 			SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
 		}
 	}
 
-	int cost = !ignore_cost ? rank->cost : 0;
+	auto cost = !ignore_cost ? rank->cost : 0;
 
-	m_pp.aapoints -= cost ;
+	m_pp.aapoints -= static_cast<uint32>(cost);
 	SaveAA();
 
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
 
-	if(rank->prev) {
-		MessageString(Chat::Yellow, AA_IMPROVE,
-						 std::to_string(rank->title_sid).c_str(),
-						 std::to_string(rank->prev->current_value).c_str(),
-						 std::to_string(cost).c_str(),
-						 cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str());
+	if (rank->prev) {
+		MessageString(
+			Chat::Yellow,
+			AA_IMPROVE,
+			std::to_string(rank->title_sid).c_str(),
+			std::to_string(rank->prev->current_value).c_str(),
+			std::to_string(cost).c_str(),
+			cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+		);
 
 		/* QS: Player_Log_AA_Purchases */
-		if(RuleB(QueryServ, PlayerLogAAPurchases)) {
-			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, cost, GetZoneID(), GetInstanceID());
+		if (RuleB(QueryServ, PlayerLogAAPurchases)) {
+			const auto event_desc = fmt::format(
+				"Ranked AA Purchase :: aa_id:{} at cost:{} in zoneid:{} instid:{}",
+				rank->id,
+				cost,
+				GetZoneID(),
+				GetInstanceID()
+			);
+
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
-	}
-	else {
-		MessageString(Chat::Yellow, AA_GAIN_ABILITY,
-						 std::to_string(rank->title_sid).c_str(),
-						 std::to_string(cost).c_str(),
-						 cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str());
+	} else {
+		MessageString(
+			Chat::Yellow,
+			AA_GAIN_ABILITY,
+			std::to_string(rank->title_sid).c_str(),
+			std::to_string(cost).c_str(),
+			cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str()
+		);
+
 		/* QS: Player_Log_AA_Purchases */
-		if(RuleB(QueryServ, PlayerLogAAPurchases)) {
-			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, cost, GetZoneID(), GetInstanceID());
+		if (RuleB(QueryServ, PlayerLogAAPurchases)) {
+			const auto event_desc = fmt::format(
+				"Initial AA Purchase :: aa_id:{} at cost:{} in zoneid:{} instid:{}",
+				rank->id,
+				cost,
+				GetZoneID(),
+				GetInstanceID()
+			);
+
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
 	}
+
+	const auto export_string = fmt::format(
+		"{} {} {} {}",
+		cost,
+		rank->id,
+		rank->prev_id,
+		rank->next_id
+	);
+
+	parse->EventPlayer(EVENT_AA_BUY, this, export_string, 0);
 
 	CalcBonuses();
 
-	if(cost > 0) {
-		if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
+	if (cost) {
+		if (title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass())) {
 			NotifyNewTitlesAvailable();
+		}
 	}
 }
 
@@ -1563,7 +1598,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	}
 #ifdef BOTS
 	else if (IsBot()) {
-		if (rank->expansion && !(RuleI(Bots, BotExpansionSettings) & (1 << (rank->expansion - 1)))) {
+		if (rank->expansion && !(CastToBot()->GetExpansionBitmask() & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	}

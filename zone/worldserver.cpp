@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/profanity_manager.h"
 
 #include "client.h"
+#include "command.h"
 #include "corpse.h"
 #include "entity.h"
 #include "expedition.h"
@@ -364,6 +365,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				zc2->success = ZONE_ERROR_NOTREADY;
 				entity->CastToMob()->SetZone(ztz->current_zone_id, ztz->current_instance_id);
 				entity->CastToClient()->SetZoning(false);
+				entity->CastToClient()->SetLockSavePosition(false);
 			}
 			else {
 				entity->CastToClient()->UpdateWho(1);
@@ -412,8 +414,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				ztz->response = -1;
 			else {
 				ztz->response = 1;
-				// since they asked about comming, lets assume they are on their way and not shut down.
-				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 			}
 
 			SendPacket(pack);
@@ -549,7 +549,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
 			if (zst->zoneid == zone->GetZoneID()) {
 				// This packet also doubles as "incoming client" notification, lets not shut down before they get here
-				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
+//				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 			}
 			else {
 				SendEmoteMessage(
@@ -589,8 +589,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 				zone->RemoveAuth(szic->lsid);
 				zone->AddAuth(szic);
-				// This packet also doubles as "incoming client" notification, lets not shut down before they get here
-				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 			}
 		}
 		else {
@@ -1899,20 +1897,32 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadAAData:
 	{
-		zone->SendReloadMessage("Alternate Advancement Data");
-		zone->LoadAlternateAdvancement();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Alternate Advancement Data");
+			zone->LoadAlternateAdvancement();
+		}
 		break;
 	}
 	case ServerOP_ReloadAlternateCurrencies:
 	{
-		zone->SendReloadMessage("Alternate Currencies");
-		zone->LoadAlternateCurrencies();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Alternate Currencies");
+			zone->LoadAlternateCurrencies();
+		}
 		break;
 	}
 	case ServerOP_ReloadBlockedSpells:
 	{
-		zone->SendReloadMessage("Blocked Spells");
-		zone->LoadZoneBlockedSpells();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Blocked Spells");
+			zone->LoadZoneBlockedSpells();
+		}
+		break;
+	}
+	case ServerOP_ReloadCommands:
+	{
+		zone->SendReloadMessage("Commands");
+		command_init();
 		break;
 	}
 	case ServerOP_ReloadContentFlags:
@@ -1923,10 +1933,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadDoors:
 	{
-		zone->SendReloadMessage("Doors");
-		entity_list.RemoveAllDoors();
-		zone->LoadZoneDoors();
-		entity_list.RespawnAllDoors();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Doors");
+			entity_list.RemoveAllDoors();
+			zone->LoadZoneDoors();
+			entity_list.RespawnAllDoors();
+		}
 		break;
 	}
 	case ServerOP_ReloadDzTemplates:
@@ -1940,8 +1952,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadGroundSpawns:
 	{
-		zone->SendReloadMessage("Ground Spawns");
-		zone->LoadGroundSpawns();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Ground Spawns");
+			zone->LoadGroundSpawns();
+		}
 		break;
 	}
 	case ServerOP_ReloadLevelEXPMods:
@@ -1957,21 +1971,27 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadMerchants: {
-		zone->SendReloadMessage("Merchants");
-		entity_list.ReloadMerchants();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Merchants");
+			entity_list.ReloadMerchants();
+		}
 		break;
 	}
 	case ServerOP_ReloadNPCEmotes:
 	{
-		zone->SendReloadMessage("NPC Emotes");
-		zone->LoadNPCEmotes(&zone->NPCEmoteList);
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("NPC Emotes");
+			zone->LoadNPCEmotes(&zone->NPCEmoteList);
+		}
 		break;
 	}
 	case ServerOP_ReloadObjects:
 	{
-		zone->SendReloadMessage("Objects");
-		entity_list.RemoveAllObjects();
-		zone->LoadZoneObjects();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Objects");
+			entity_list.RemoveAllObjects();
+			zone->LoadZoneObjects();
+		}
 		break;
 	}
 	case ServerOP_ReloadPerlExportSettings:
@@ -1987,13 +2007,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadStaticZoneData: {
-		zone->SendReloadMessage("Static Zone Data");
-		zone->ReloadStaticData();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Static Zone Data");
+			zone->ReloadStaticData();
+		}
 		break;
 	}
 	case ServerOP_ReloadTasks:
 	{
-		if (RuleB(Tasks, EnableTaskSystem)) {
+		if (RuleB(Tasks, EnableTaskSystem) && zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("Tasks");
 			HandleReloadTasks(pack);
 		}
@@ -2002,26 +2024,35 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadTitles:
 	{
-		zone->SendReloadMessage("Titles");
-		title_manager.LoadTitles();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Titles");
+			title_manager.LoadTitles();
+		}
 		break;
 	}
 	case ServerOP_ReloadTraps:
 	{
-		zone->SendReloadMessage("Traps");
-		entity_list.UpdateAllTraps(true, true);
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Traps");
+			entity_list.UpdateAllTraps(true, true);
+		}
+
 		break;
 	}
 	case ServerOP_ReloadVariables:
 	{
-		zone->SendReloadMessage("Variables");
-		database.LoadVariables();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Variables");
+			database.LoadVariables();
+		}
 		break;
 	}
 	case ServerOP_ReloadVeteranRewards:
 	{
-		zone->SendReloadMessage("Veteran Rewards");
-		zone->LoadVeteranRewards();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Veteran Rewards");
+			zone->LoadVeteranRewards();
+		}
 		break;
 	}
 	case ServerOP_ReloadWorld:
@@ -2034,8 +2065,19 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadZonePoints:
 	{
-		zone->SendReloadMessage("Zone Points");
-		content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Zone Points");
+			content_db.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
+		}
+		break;
+	}
+	case ServerOP_ReloadZoneData:
+	{
+		zone_store.LoadZones(content_db);
+		if (zone && zone->IsLoaded()) {
+			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
+			zone->SendReloadMessage("Zone Data");
+		}
 		break;
 	}
 	case ServerOP_CameraShake:
@@ -2572,7 +2614,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		CZSignal_Struct* CZS = (CZSignal_Struct*) pack->pBuffer;
 		uint8 update_type = CZS->update_type;
 		int update_identifier = CZS->update_identifier;
-		uint32 signal = CZS->signal;
+		int signal = CZS->signal;
 		const char* client_name = CZS->client_name;
 		if (update_type == CZUpdateType_Character) {
 			auto client = entity_list.GetClientByCharID(update_identifier);
@@ -3147,16 +3189,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (request_zone_short_name == local_zone_short_name || can_reload_global_script) {
 			zone->SetQuestHotReloadQueued(true);
 		} else if (request_zone_short_name == "all") {
-			std::string reload_quest_saylink = Saylink::Create(
-				"#reload quest",
-				false,
-				"Locally"
-			);
-			std::string reload_world_saylink = Saylink::Create(
-				"#reload world",
-				false,
-				"Globally"
-			);
+			std::string reload_quest_saylink = Saylink::Silent("#reload quest", "Locally");
+			std::string reload_world_saylink = Saylink::Silent("#reload world", "Globally");
 			worldserver.SendEmoteMessage(
 				0,
 				0,
@@ -3182,6 +3216,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		LogInfo("Loading npc faction lists");
 		if (!content_db.LoadNPCFactionLists(hotfix_name)) {
 			LogError("Loading npcs faction lists failed!");
+		}
+
+		LogInfo("Loading faction association hits");
+		if (!content_db.LoadFactionAssociation(hotfix_name)) {
+			LogError("Loading faction association hits failed!");
 		}
 
 		LogInfo("Loading loot tables");
@@ -3252,6 +3291,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_SharedTaskMemberChange:
 	case ServerOP_SharedTaskInvitePlayer:
 	case ServerOP_SharedTaskPurgeAllCommand:
+	case ServerOP_SharedTaskFailed:
 	{
 		SharedTaskZoneMessaging::HandleWorldMessage(pack);
 		break;
@@ -3449,10 +3489,6 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				task_manager = new TaskManager;
 				task_manager->LoadTasks();
 
-				if (zone) {
-					task_manager->LoadProximities(zone->GetZoneID());
-				}
-
 				entity_list.ReloadAllClientsTaskState();
 			} else {
 				LogTasks("Global reload of Task ID [{}]", rts->task_id);
@@ -3460,21 +3496,6 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				entity_list.ReloadAllClientsTaskState(rts->task_id);
 			}
 
-			break;
-		}
-		case RELOADTASKPROXIMITIES:
-		{
-			if (zone) {
-				LogTasks("Global reload of all Task Proximities");
-				task_manager->LoadProximities(zone->GetZoneID());
-			}
-
-			break;
-		}
-		case RELOADTASKGOALLISTS:
-		{
-			LogTasks("Global reload of all Task Goal Lists");
-			task_manager->ReloadGoalLists();
 			break;
 		}
 		case RELOADTASKSETS:

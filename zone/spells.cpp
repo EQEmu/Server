@@ -182,7 +182,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	//Goal of Spells:UseSpellImpliedTargeting is to replicate the EQ2 feature where spells will 'pass through' invalid targets to target's target to try to find a valid target.
-    if (RuleB(Spells,UseSpellImpliedTargeting) && IsClient()) {
+	if (RuleB(Spells,UseSpellImpliedTargeting) && IsClient()) {
 		Mob* spell_target = entity_list.GetMobID(target_id);
 		if (spell_target) {
 			Mob* targets_target = spell_target->GetTarget();
@@ -202,7 +202,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				}
 			}
 		}
-    }
+	}
 
 	if (!DoCastingChecksOnCaster(spell_id, slot) ||
 		!DoCastingChecksZoneRestrictions(true, spell_id) ||
@@ -245,17 +245,21 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		GetID(),
 		GetCasterLevel(spell_id)
 	);
-	if(IsClient()) {
+	if (IsClient()) {
 		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), export_string, 0) != 0) {
 			if (IsDiscipline(spell_id)) {
 				CastToClient()->SendDisciplineTimer(spells[spell_id].timer_id, 0);
 			} else {
 				CastToClient()->SendSpellBarEnable(spell_id);
 			}
-			return(false);
+			return false;
 		}
-	} else if(IsNPC()) {
+	} else if (IsNPC()) {
 		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, export_string, 0);
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_CAST_BEGIN, CastToBot(), nullptr, export_string, 0);
+#endif
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
@@ -1666,10 +1670,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		GetID(),
 		GetCasterLevel(spell_id)
 	);
-	if(IsClient()) {
+	if (IsClient()) {
 		parse->EventPlayer(EVENT_CAST, CastToClient(), export_string, 0);
-	} else if(IsNPC()) {
+	} else if (IsNPC()) {
 		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, export_string, 0);
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_CAST, CastToBot(), nullptr, export_string, 0);
+#endif
 	}
 
 	if(bard_song_mode)
@@ -2270,7 +2278,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		return false;
 
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
-	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS) {
+	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && (spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
 		Mob* owner =  spell_target->GetOwner();
 
 		if (owner) {
@@ -2278,12 +2286,15 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		}
 	}
 
-    //Guard Assist Code
+	//Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist) && spell_target && IsDetrimentalSpell(spell_id) && spell_target != this) {
 		if (IsClient() && spell_target->IsClient()|| (HasOwner() && GetOwner()->IsClient() && spell_target->IsClient())) {
 			auto& mob_list = entity_list.GetCloseMobList(spell_target);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
+				if (!mob) {
+					continue;
+				}
 				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
 					float distance = Distance(spell_target->GetPosition(), mob->GetPosition());
 					if ((mob->CheckLosFN(spell_target) || mob->CheckLosFN(this)) && distance <= 70) {
@@ -2588,8 +2599,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		case Beam:
 		{
 			BeamDirectional(spell_id, resist_adjust);
- 			break;
- 		}
+			break;
+		}
 
 		case TargetRing:
 		{
@@ -2882,7 +2893,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 		temp = 10 * (level + 10);
 		break;
 	case 50: // Permanent. Cancelled by casting/combat for perm invis, non-lev zones for lev, curing poison/curse
-		 // counters, etc.
+		// counters, etc.
 		return -1;
 	case 51: // Permanent. Cancelled when out of range of aura.
 		return -4;
@@ -3105,7 +3116,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			continue;
 
 		if (IsBardOnlyStackEffect(effect1) && GetSpellLevel(spellid1, BARD) != 255 &&
-		    GetSpellLevel(spellid2, BARD) != 255)
+			GetSpellLevel(spellid2, BARD) != 255)
 			continue;
 
 		// big ol' list according to the client, wasn't that nice!
@@ -3538,7 +3549,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	// other AE spells this is redundant, oh well
 	// 1 = PCs, 2 = NPCs
 	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].target_type != ST_AETargetHateList &&
-	    spells[spell_id].target_type != ST_HateList) {
+		spells[spell_id].target_type != ST_HateList) {
 		if (spells[spell_id].pcnpc_only_flag == 1 && !spelltar->IsClient() && !spelltar->IsMerc() && !spelltar->IsBot())
 			return false;
 		else if (spells[spell_id].pcnpc_only_flag == 2 && (spelltar->IsClient() || spelltar->IsMerc() || spelltar->IsBot()))
@@ -3625,7 +3636,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, export_string, 0);
 	} else if (spelltar->IsClient()) {
 		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), export_string, 0);
+#ifdef BOTS
+	} else if (spelltar->IsBot()) {
+		parse->EventBot(EVENT_CAST_ON, spelltar->CastToBot(), this, export_string, 0);
+#endif
 	}
+
 
 	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);
 
@@ -5517,6 +5533,33 @@ uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
 	return highest_spell_id;
 }
 
+std::unordered_map<uint32, std::vector<uint16>> Client::LoadSpellGroupCache(uint8 min_level, uint8 max_level) {
+	std::unordered_map<uint32, std::vector<uint16>> spell_group_cache;
+
+	const auto query = fmt::format(
+		"SELECT a.spellgroup, a.id, a.rank "
+		"FROM spells_new a "
+		"INNER JOIN ("
+		"SELECT spellgroup, MAX(rank) rank "
+		"FROM spells_new "
+		"GROUP BY spellgroup) "
+		"b ON a.spellgroup = b.spellgroup AND a.rank = b.rank "
+		"WHERE a.spellgroup IN (SELECT DISTINCT spellgroup FROM spells_new WHERE spellgroup != 0 and classes{} BETWEEN {} AND {}) ORDER BY rank DESC",
+		m_pp.class_, min_level, max_level
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return spell_group_cache;
+	}
+
+	for (auto row : results) {
+		spell_group_cache[std::stoul(row[0])].push_back(static_cast<uint16>(std::stoul(row[1])));
+	}
+
+	return spell_group_cache;
+}
+
 bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 	std::string query = fmt::format(
 		"SELECT qglobal, value FROM spell_globals WHERE spellid = {}",
@@ -6337,7 +6380,7 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 
 	while (iter != targets_in_range.end()) {
 		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) ||
-		    (*iter)->BehindMob(this, (*iter)->GetX(), (*iter)->GetY())) {
+			(*iter)->BehindMob(this, (*iter)->GetX(), (*iter)->GetY())) {
 			++iter;
 			continue;
 		}
@@ -6426,7 +6469,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		}
 
 		float heading_to_target =
-		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 512.0f);
+			(CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 512.0f);
 
 		while (heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
@@ -6470,7 +6513,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 
 		if (angle_start > angle_end) {
 			if ((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
-			    (heading_to_target >= 0.0f && heading_to_target <= angle_end)) {
+				(heading_to_target >= 0.0f && heading_to_target <= angle_end)) {
 				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 					SpellOnTarget(spell_id, (*iter), 0, true, resist_adjust);

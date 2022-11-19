@@ -54,7 +54,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -855,7 +855,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				continue;
 			}
 
-			if (!CheckMerchantDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
+			if (!zone->CheckDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
 				continue;
 			}
 		}

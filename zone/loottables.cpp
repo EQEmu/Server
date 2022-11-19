@@ -26,7 +26,7 @@
 #include "mob.h"
 #include "npc.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "global_loot_manager.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/say_link.h"
@@ -39,7 +39,7 @@
 #endif
 
 // Queries the loottable: adds item & coin to the npc
-void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
+void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat) {
 	const LootTable_Struct* lts = nullptr;
 	// global loot passes nullptr for these
 	bool bGlobal = copper == nullptr && silver == nullptr && gold == nullptr && plat == nullptr;
@@ -164,12 +164,21 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		droplimit = mindrop;
 	}
 
-	float       roll_t           = 0.0f;
-	bool        active_item_list = false;
-	for (uint32 i                = 0; i < loot_drop->NumEntries; ++i) {
+	float roll_t                   = 0.0f;
+	float no_loot_prob             = 1.0f;
+	bool  roll_table_chance_bypass = false;
+	bool  active_item_list         = false;
+
+	for (uint32 i = 0; i < loot_drop->NumEntries; ++i) {
 		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
 		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
 			roll_t += loot_drop->Entries[i].chance;
+			if (loot_drop->Entries[i].chance >= 100) {
+				roll_table_chance_bypass = true;
+			}
+			else {
+				no_loot_prob *= (100 - loot_drop->Entries[i].chance) / 100.0f;
+			}
 			active_item_list = true;
 		}
 	}
@@ -183,103 +192,51 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	// The roll isn't 0-100, its 0-total and it picks the item, we're just
 	// looping to find the lucky item, descremening otherwise. This is ok,
 	// items with chance 60 are 6 times more likely than items chance 10.
-	for (int i = 0; i < mindrop; ++i) {
-		float       roll = (float) zone->random.Real(0.0, roll_t);
-		for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
-			const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
-			if (db_item) {
-				// if it doesn't meet the requirements do nothing
-				if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j]))
-					continue;
+	int drops = 0;
 
-				if (roll < loot_drop->Entries[j].chance) {
-					npc->AddLootDrop(
-						db_item,
-						item_list,
-						loot_drop->Entries[j]
-					);
-
-					int charges = (int) loot_drop->Entries[i].multiplier;
-					charges = EQ::ClampLower(charges, 1);
-
-					for (int k = 1; k < charges; ++k) {
-						float c_roll = (float) zone->random.Real(0.0, 100.0);
-						if (c_roll <= loot_drop->Entries[i].chance) {
-							npc->AddLootDrop(
-								db_item,
-								item_list,
-								loot_drop->Entries[i]
-							);
-						}
+	for (int i = 0; i < droplimit; ++i) {
+		if (drops < mindrop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
+			float       roll = (float) zone->random.Real(0.0, roll_t);
+			for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
+				const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
+				if (db_item) {
+					// if it doesn't meet the requirements do nothing
+					if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
+						continue;
 					}
 
-					j = loot_drop->NumEntries;
-					break;
-				}
-				else {
-					roll -= loot_drop->Entries[j].chance;
-				}
-			}
-		}
-	}
-
-	// Now that mindrop has been established see if we get any more based
-	// on item odds. Pick a random entry to start at so no one entry is favored.
-	// Look at all items until we hit droplimit or look at all items.
-
-	if (droplimit <= mindrop) {
-		return;
-	}
-
-	int start_index = zone->random.Int(0,loot_drop->NumEntries-1);
-	int j = start_index;
-	int dropped = mindrop;
-
-	do {
-
-		LogLootDetail("DropLimit Starting at [{}] out of [{}]", j,
-			loot_drop->NumEntries);
-
-		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
-		if (db_item &&
-			npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
-
-			float iroll = (float) zone->random.Real(0.0, 100.0);
-
-			LogLootDetail("Rolled [{}] Needed [{}]", iroll, loot_drop->Entries[j].chance);
-			// If this item succeeds the chance roll
-			if (iroll < loot_drop->Entries[j].chance) {
-
-				++dropped;
-				LogLootDetail("Dropping item [{}]", loot_drop->Entries[j].item_id);
-				npc->AddLootDrop(
-					db_item,
-					item_list,
-					loot_drop->Entries[j]
-				);
-
-				int charges = (int) loot_drop->Entries[j].multiplier;
-				charges = EQ::ClampLower(charges, 1);
-
-				for (int k = 1; k < charges; ++k) {
-					float c_roll = (float) zone->random.Real(0.0, 100.0);
-					if (c_roll <= loot_drop->Entries[j].chance) {
+					if (roll < loot_drop->Entries[j].chance) {
 						npc->AddLootDrop(
 							db_item,
 							item_list,
 							loot_drop->Entries[j]
 						);
+						drops++;
+
+						int charges = (int) loot_drop->Entries[i].multiplier;
+						charges = EQ::ClampLower(charges, 1);
+
+						for (int k = 1; k < charges; ++k) {
+							float c_roll = (float) zone->random.Real(0.0, 100.0);
+							if (c_roll <= loot_drop->Entries[i].chance) {
+								npc->AddLootDrop(
+									db_item,
+									item_list,
+									loot_drop->Entries[i]
+								);
+							}
+						}
+
+						j = loot_drop->NumEntries;
+						break;
+					}
+					else {
+						roll -= loot_drop->Entries[j].chance;
 					}
 				}
 			}
 		}
-
-		// Wrap the loop back to catch the start of loop
-		if (++j >= loot_drop->NumEntries) {
-			j = 0;
-		}
-
-	} while (dropped < droplimit && j != start_index);
+	}
 
 	npc->UpdateEquipmentLight();
 	// no wearchange associated with this function..so, this should not be needed
@@ -558,6 +515,10 @@ void NPC::AddLootDrop(
 		itemlist->push_back(item);
 	}
 	else safe_delete(item);
+
+	if (IsRecordLootStats()) {
+		m_rolled_items.emplace_back(item->item_id);
+	}
 
 	if (wear_change && outapp) {
 		entity_list.QueueClients(this, outapp);

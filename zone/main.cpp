@@ -49,7 +49,7 @@
 #include "bot_command.h"
 #endif
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "titles.h"
 #include "guild_mgr.h"
 #include "task_manager.h"
@@ -78,8 +78,6 @@
 #else
 #include <pthread.h>
 #include "../common/unix.h"
-#include "zone_store.h"
-#include "zone_event_scheduler.h"
 
 #endif
 
@@ -90,21 +88,28 @@ volatile bool RunLoops = true;
 
 extern volatile bool is_zone_loaded;
 
-EntityList entity_list;
+#include "zone_event_scheduler.h"
+#include "../common/file.h"
+#include "../common/path_manager.h"
+
+EntityList  entity_list;
 WorldServer worldserver;
-ZoneStore zone_store;
-uint32 numclients = 0;
-char errorname[32];
-extern Zone* zone;
-npcDecayTimes_Struct npcCorpseDecayTimes[100];
-TitleManager title_manager;
-QueryServ *QServ          = 0;
-TaskManager *task_manager = 0;
-NpcScaleManager *npc_scale_manager;
-QuestParserCollection *parse = 0;
-EQEmuLogSys          LogSys;
-ZoneEventScheduler event_scheduler;
-WorldContentService  content_service;
+ZoneStore   zone_store;
+uint32      numclients = 0;
+char        errorname[32];
+extern Zone *zone;
+
+npcDecayTimes_Struct  npcCorpseDecayTimes[100];
+TitleManager          title_manager;
+QueryServ             *QServ        = 0;
+TaskManager           *task_manager = 0;
+NpcScaleManager       *npc_scale_manager;
+QuestParserCollection *parse        = 0;
+EQEmuLogSys           LogSys;
+ZoneEventScheduler    event_scheduler;
+WorldContentService   content_service;
+PathManager           path;
+
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
@@ -121,6 +126,8 @@ int main(int argc, char** argv) {
 	LogSys.LoadLogSettingsDefaults();
 
 	set_exception_handler();
+
+	path.LoadPaths();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
@@ -256,6 +263,7 @@ int main(int argc, char** argv) {
 
 	/* Register Log System and Settings */
 	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
 		->StartFileLogs();
@@ -303,7 +311,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading zone names");
 
-	zone_store.LoadZones();
+	zone_store.LoadZones(content_db);
 
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name)) {
@@ -314,6 +322,11 @@ int main(int argc, char** argv) {
 	LogInfo("Loading npc faction lists");
 	if (!content_db.LoadNPCFactionLists(hotfix_name)) {
 		LogError("Loading npcs faction lists failed!");
+		return 1;
+	}
+	LogInfo("Loading faction association hits");
+	if (!content_db.LoadFactionAssociation(hotfix_name)) {
+		LogError("Loading faction association hits failed!");
 		return 1;
 	}
 	LogInfo("Loading loot tables");

@@ -32,6 +32,10 @@
 #include "fastmath.h"
 #include "../common/data_verification.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <iostream>
@@ -84,7 +88,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 
 	float manaR = GetManaRatio();
 	for (int i = static_cast<int>(AIspells.size()) - 1; i >= 0; i--) {
-		if (AIspells[i].spellid <= 0 || AIspells[i].spellid >= SPDAT_RECORDS) {
+		if (!IsValidSpell(AIspells[i].spellid)) {
 			// this is both to quit early to save cpu and to avoid casting bad spells
 			// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
 			//return false;
@@ -1075,7 +1079,7 @@ void Mob::AI_Process() {
 		// NPCs will forget people after 10 mins of not interacting with them or out of range
 		// both of these maybe zone specific, hardcoded for now
 		if (hate_list_cleanup_timer.Check()) {
-			hate_list.RemoveStaleEntries(600000, static_cast<float>(zone->newzone_data.NPCAggroMaxDist));
+			hate_list.RemoveStaleEntries(600000, static_cast<float>(zone->newzone_data.npc_aggro_max_dist));
 			if (hate_list.IsHateListEmpty()) {
 				AI_Event_NoLongerEngaged();
 				zone->DelAggroMob();
@@ -1923,10 +1927,11 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			if (attacker->GetHP() > 0) {
 				if (!CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
-					uint16 emoteid = GetEmoteID();
-					if (emoteid != 0) {
-						CastToNPC()->DoNPCEmote(ENTERCOMBAT, emoteid);
+					auto emote_id = GetEmoteID();
+					if (emote_id) {
+						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid);
 					}
+
 					std::string mob_name = GetCleanName();
 					combat_record.Start(mob_name);
 					CastToNPC()->SetCombatEvent(true);
@@ -1934,18 +1939,28 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 			}
 		}
 	}
+
+#ifdef BOTS
+	if (IsBot()) {
+		parse->EventBot(EVENT_COMBAT, CastToBot(), attacker, "1", 0);
+	}
+#endif
 }
 
 // Note: Hate list may not be actually clear until after this function call completes
 void Mob::AI_Event_NoLongerEngaged() {
-	if (!IsAIControlled())
+	if (!IsAIControlled()) {
 		return;
+	}
+
 	AI_walking_timer->Start(RandomTimer(3000,20000));
 	time_until_can_move = Timer::GetCurrentTime();
-	if (minLastFightingDelayMoving == maxLastFightingDelayMoving)
+
+	if (minLastFightingDelayMoving == maxLastFightingDelayMoving) {
 		time_until_can_move += minLastFightingDelayMoving;
-	else
+	} else {
 		time_until_can_move += zone->random.Int(minLastFightingDelayMoving, maxLastFightingDelayMoving);
+	}
 
 	StopNavigation();
 	ClearRampage();
@@ -1954,16 +1969,21 @@ void Mob::AI_Event_NoLongerEngaged() {
 		SetPrimaryAggro(false);
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
-			if (entity_list.GetNPCByID(this->GetID())) {
-				uint16 emoteid = CastToNPC()->GetEmoteID();
+			if (entity_list.GetNPCByID(GetID())) {
+				auto emote_id = CastToNPC()->GetEmoteID();
 				parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
-				if (emoteid != 0) {
-					CastToNPC()->DoNPCEmote(LEAVECOMBAT, emoteid);
+				if (emote_id) {
+					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
 				}
+
 				combat_record.Stop();
 				CastToNPC()->SetCombatEvent(false);
 			}
 		}
+#ifdef BOTS
+	} else if (IsBot()) {
+		parse->EventBot(EVENT_COMBAT, CastToBot(), nullptr, "0", 0);
+#endif
 	}
 }
 
@@ -2114,12 +2134,12 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 	// this is wrong, flurry is extra attacks on the current target
 	Mob *target = GetTarget();
 	if (target) {
-		if (!IsPet()) {
+		if (IsPet() || IsTempPet() || IsCharmed() || IsAnimation()) {
 			entity_list.MessageCloseString(
 				this,
 				true,
 				200,
-				Chat::NPCFlurry,
+				Chat::PetFlurry,
 				NPC_FLURRY,
 				GetCleanName(),
 				target->GetCleanName());
@@ -2128,7 +2148,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 				this,
 				true,
 				200,
-				Chat::PetFlurry,
+				Chat::NPCFlurry,
 				NPC_FLURRY,
 				GetCleanName(),
 				target->GetCleanName());
@@ -2167,11 +2187,11 @@ void Mob::ClearRampage()
 bool Mob::Rampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
-	if (!IsPet())
-		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
-	else
+	if (IsPet() || IsTempPet() || IsCharmed() || IsAnimation()){
 		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, NPC_RAMPAGE, GetCleanName());
-
+	} else {
+		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
+	}
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
 	if (rampage_targets == 0) // if set to 0 or not set in the DB
 		rampage_targets = RuleI(Combat, DefaultRampageTargets);
@@ -2224,10 +2244,10 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 void Mob::AreaRampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
-	if (!IsPet()) { // do not know every pet AA so thought it safer to add this
-		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, AE_RAMPAGE, GetCleanName());
-	} else {
+	if (IsPet() || IsTempPet() || IsCharmed() || IsAnimation()) { // do not know every pet AA so thought it safer to add this
 		entity_list.MessageCloseString(this, true, 200, Chat::PetFlurry, AE_RAMPAGE, GetCleanName());
+	} else {
+		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, AE_RAMPAGE, GetCleanName());
 	}
 
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 1);
@@ -2988,16 +3008,9 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		query = StringFormat(
 		    "SELECT spellid, type, minlevel, maxlevel, "
 		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
-#ifdef BOTS
-		    "FROM %s "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    (iDBSpellsID >= 3001 && iDBSpellsID <= 3016 ? "bot_spells_entries" : "npc_spells_entries"),
-		    iDBSpellsID);
-#else
 		    "FROM npc_spells_entries "
 		    "WHERE npc_spells_id=%d ORDER BY minlevel",
 		    iDBSpellsID);
-#endif
 		results = QueryDatabase(query);
 
 		if (!results.Success()) {

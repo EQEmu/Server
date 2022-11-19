@@ -40,6 +40,8 @@
 #include "data_verification.h"
 #include "repositories/criteria/content_filter_criteria.h"
 #include "repositories/account_repository.h"
+#include "repositories/faction_association_repository.h"
+#include "path_manager.h"
 
 namespace ItemField
 {
@@ -939,7 +941,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("items");
 		mutex.Lock();
-		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
+		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("items"));
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		items_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		items_hash = std::make_unique<EQ::FixedMemoryHashSet<EQ::ItemData>>(static_cast<uint8*>(items_mmf->Get()), items_mmf->Size());
@@ -1435,13 +1437,87 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("faction");
 		mutex.Lock();
-		std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
+		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("faction"));
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		faction_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		faction_hash = std::make_unique<EQ::FixedMemoryHashSet<NPCFactionList>>(static_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		LogError("Error Loading npc factions: {}", ex.what());
+		return false;
+	}
+
+	return true;
+}
+
+void SharedDatabase::GetFactionAssociationInfo(uint32 &list_count, uint32 &max_lists)
+{
+	list_count = static_cast<uint32>(FactionAssociationRepository::Count(*this));
+	max_lists = static_cast<uint32>(FactionAssociationRepository::GetMaxId(*this));
+}
+
+const FactionAssociations *SharedDatabase::GetFactionAssociationHit(int id)
+{
+	if (!faction_associations_hash) {
+		return nullptr;
+	}
+
+	if (faction_associations_hash->exists(id)) {
+		return &(faction_associations_hash->at(id));
+	}
+
+	return nullptr;
+}
+
+void SharedDatabase::LoadFactionAssociation(void *data, uint32 size, uint32 list_count, uint32 max_lists)
+{
+	EQ::FixedMemoryHashSet<FactionAssociations> hash(reinterpret_cast<uint8 *>(data), size, list_count, max_lists);
+	FactionAssociations faction{};
+
+	auto results = FactionAssociationRepository::All(*this);
+	for (auto &row : results) {
+		faction.hits[0].id = row.id_1;
+		faction.hits[0].multiplier = row.mod_1;
+		faction.hits[1].id = row.id_2;
+		faction.hits[1].multiplier = row.mod_2;
+		faction.hits[2].id = row.id_3;
+		faction.hits[2].multiplier = row.mod_3;
+		faction.hits[3].id = row.id_4;
+		faction.hits[3].multiplier = row.mod_4;
+		faction.hits[4].id = row.id_5;
+		faction.hits[4].multiplier = row.mod_5;
+		faction.hits[5].id = row.id_6;
+		faction.hits[5].multiplier = row.mod_6;
+		faction.hits[6].id = row.id_7;
+		faction.hits[6].multiplier = row.mod_7;
+		faction.hits[7].id = row.id_8;
+		faction.hits[7].multiplier = row.mod_8;
+		faction.hits[8].id = row.id_9;
+		faction.hits[8].multiplier = row.mod_9;
+		faction.hits[9].id = row.id_10;
+		faction.hits[9].multiplier = row.mod_10;
+
+		hash.insert(row.id, faction);
+	}
+}
+
+bool SharedDatabase::LoadFactionAssociation(const std::string &prefix)
+{
+	faction_associations_mmf.reset(nullptr);
+	faction_associations_hash.reset(nullptr);
+
+	try {
+		auto Config = EQEmuConfig::get();
+		EQ::IPCMutex mutex("factionassociations");
+		mutex.Lock();
+		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("factionassociations"));
+		faction_associations_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
+		faction_associations_hash = std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>>(
+		    new EQ::FixedMemoryHashSet<FactionAssociations>(reinterpret_cast<uint8 *>(faction_associations_mmf->Get()),
+								  faction_associations_mmf->Size()));
+		mutex.Unlock();
+	} catch (std::exception &ex) {
+		LogError("Error Loading faction associations: {}", ex.what());
 		return false;
 	}
 
@@ -1629,7 +1705,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("skill_caps");
 		mutex.Lock();
-		std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
+		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("skill_caps"));
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		skill_caps_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		mutex.Unlock();
@@ -1788,7 +1864,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		EQ::IPCMutex mutex("spells");
 		mutex.Lock();
 
-		std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
+		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("spells"));
 		spells_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		*records = *static_cast<uint32*>(spells_mmf->Get());
@@ -2002,7 +2078,7 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 		EQ::IPCMutex mutex("base_data");
 		mutex.Lock();
 
-		std::string file_name = Config->SharedMemDir + prefix + std::string("base_data");
+		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("base_data"));
 		base_data_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		mutex.Unlock();
 	} catch(std::exception& ex) {
@@ -2323,12 +2399,13 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 		const auto Config = EQEmuConfig::get();
 		EQ::IPCMutex mutex("loot");
 		mutex.Lock();
-		std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
+		std::string file_name_lt = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("loot_table"));
+
 		loot_table_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_lt);
 		loot_table_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootTable_Struct>>(
 			static_cast<uint8*>(loot_table_mmf->Get()),
 			loot_table_mmf->Size());
-		std::string file_name_ld = Config->SharedMemDir + prefix + std::string("loot_drop");
+		std::string file_name_ld = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("loot_drop"));
 		loot_drop_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_ld);
 		loot_drop_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>(
 			static_cast<uint8*>(loot_drop_mmf->Get()),

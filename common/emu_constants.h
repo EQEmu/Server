@@ -217,6 +217,25 @@ namespace EQ
 			stanceBurnAE
 		};
 
+		enum BotSpellIDs : int {
+			Warrior = 3001,
+			Cleric,
+			Paladin,
+			Ranger,
+			Shadowknight,
+			Druid,
+			Monk,
+			Bard,
+			Rogue,
+			Shaman,
+			Necromancer,
+			Wizard,
+			Magician,
+			Enchanter,
+			Beastlord,
+			Berserker
+		};
+
 		enum GravityBehavior : int8 {
 			Ground,
 			Flying,
@@ -248,6 +267,94 @@ namespace EQ
 			Looting
 		};
 
+		enum ObjectTypes : int {
+			SmallBag,
+			LargeBag,
+			Quiver,
+			BeltPouch,
+			WristPouch,
+			Backpack,
+			SmallChest,
+			LargeChest,
+			Bandolier,
+			Medicine,
+			Tinkering,
+			Lexicon,
+			PoisonMaking,
+			Quest,
+			MixingBowl,
+			Baking,
+			Tailoring,
+			Blacksmithing,
+			Fletching,
+			Brewing,
+			JewelryMaking,
+			Pottery,
+			Kiln,
+			KeyMaker,
+			ResearchWIZ,
+			ResearchMAG,
+			ResearchNEC,
+			ResearchENC,
+			Unknown,
+			ResearchPractice,
+			Alchemy,
+			HighElfForge,
+			DarkElfForge,
+			OgreForge,
+			DwarfForge,
+			GnomeForge,
+			BarbarianForge,
+			IksarForge,
+			HumanForgeOne,
+			HumanForgeTwo,
+			HalflingTailoringOne,
+			HalflingTailoringTwo,
+			EruditeTailoring,
+			WoodElfTailoring,
+			WoodElfFletching,
+			IksarPottery,
+			Fishing,
+			TrollForge,
+			WoodElfForge,
+			HalflingForge,
+			EruditeForge,
+			Merchant,
+			FroglokForge,
+			Augmenter,
+			Churn,
+			TransformationMold,
+			DetransformationMold,
+			Unattuner,
+			TradeskillBag,
+			CollectibleBag,
+			NoDeposit
+		};
+
+		enum WeatherTypes : uint8 {
+			None,
+			Raining,
+			Snowing
+		};
+
+		enum EmoteEventTypes : uint8 {
+			LeaveCombat,
+			EnterCombat,
+			OnDeath,
+			AfterDeath,
+			Hailed,
+			KilledPC,
+			KilledNPC,
+			OnSpawn,
+			OnDespawn
+		};
+
+		enum EmoteTypes : uint8 {
+			Emote,
+			Shout,
+			Proximity
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
@@ -277,6 +384,18 @@ namespace EQ
 
 		extern const std::map<uint8, std::string>& GetSpawnAnimationMap();
 		std::string GetSpawnAnimationName(uint8 animation_id);
+
+		extern const std::map<int, std::string>& GetObjectTypeMap();
+		std::string GetObjectTypeName(int object_type);
+
+		extern const std::map<uint8, std::string>& GetWeatherTypeMap();
+		std::string GetWeatherTypeName(uint8 weather_type);
+
+		extern const std::map<uint8, std::string>& GetEmoteEventTypeMap();
+		std::string GetEmoteEventTypeName(uint8 emote_event_type);
+
+		extern const std::map<uint8, std::string>& GetEmoteTypeMap();
+		std::string GetEmoteTypeName(uint8 emote_type);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
@@ -448,7 +567,7 @@ enum ReloadWorld : uint8 {
 	ForceRepop
 };
 
-enum MerchantBucketComparison : uint8 {
+enum BucketComparison : uint8 {
 	BucketEqualTo = 0,
 	BucketNotEqualTo,
 	BucketGreaterThanOrEqualTo,
@@ -459,6 +578,13 @@ enum MerchantBucketComparison : uint8 {
 	BucketIsNotAny,
 	BucketIsBetween,
 	BucketIsNotBetween
+};
+
+enum EntityFilterTypes : uint8 {
+	All,
+	Bots,
+	Clients,
+	NPCs
 };
 
 #endif /*COMMON_EMU_CONSTANTS_H*/

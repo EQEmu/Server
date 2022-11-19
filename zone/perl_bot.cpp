@@ -81,6 +81,31 @@ uint32 Perl_Bot_GetBotItemIDBySlot(Bot* self, uint16 slot_id)
 	return self->GetBotItemBySlot(slot_id);
 }
 
+void Perl_Bot_SignalBot(Bot* self, int signal_id)
+{
+	self->SignalBot(signal_id);
+}
+
+void Perl_Bot_OwnerMessage(Bot* self, std::string message)
+{
+	self->OwnerMessage(message);
+}
+
+int Perl_Bot_GetExpansionBitmask(Bot* self)
+{
+	return self->GetExpansionBitmask();
+}
+
+void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask)
+{
+	self->SetExpansionBitmask(expansion_bitmask);
+}
+
+void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask, bool save)
+{
+	self->SetExpansionBitmask(expansion_bitmask, save);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);
@@ -99,10 +124,16 @@ void perl_register_bot()
 	package.add("CountBotItem", &Perl_Bot_CountBotItem);
 	package.add("GetBotItem", &Perl_Bot_GetBotItem);
 	package.add("GetBotItemIDBySlot", &Perl_Bot_GetBotItemIDBySlot);
+	package.add("GetExpansionBitmask", &Perl_Bot_GetExpansionBitmask);
 	package.add("GetOwner", &Perl_Bot_GetOwner);
 	package.add("HasBotItem", &Perl_Bot_HasBotItem);
+	package.add("OwnerMessage", &Perl_Bot_OwnerMessage);
 	package.add("RemoveBotItem", &Perl_Bot_RemoveBotItem);
+	package.add("SetExpansionBitmask", (void(*)(Bot*, int))&Perl_Bot_SetExpansionBitmask);
+	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);
+	package.add("SignalBot", &Perl_Bot_SignalBot);
 }
 
 #endif //EMBPERL_XS_CLASSES
 #endif //BOTS
+

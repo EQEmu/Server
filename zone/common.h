@@ -210,7 +210,8 @@ enum {
 	IMMUNE_AGGRO_NPC = 50,
 	MODIFY_AVOID_DAMAGE = 51,                    //Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
 	IMMUNE_FADING_MEMORIES = 52,
-	MAX_SPECIAL_ATTACK = 53
+	IMMUNE_OPEN = 53,
+	MAX_SPECIAL_ATTACK
 };
 
 typedef enum {	//fear states
@@ -413,7 +414,7 @@ struct StatBonuses {
 	uint32	windMod;
 	uint32	stringedMod;
 	uint32	songModCap;
-	int8	hatemod;
+	int32	hatemod;
 	int64	EnduranceReduction;
 
 	int32	StrikeThrough;						// PoP: Strike Through %

@@ -127,7 +127,7 @@ void command_scale(Client *c, const Seperator *sep)
 			c->Message(Chat::Yellow, "Found (%i) NPC's that match this search...", found_count);
 			c->Message(
 				Chat::Yellow, "To apply these changes, click <%s> or type %s",
-				Saylink::Create(saylink, false, "Apply").c_str(),
+				Saylink::Silent(saylink, "Apply").c_str(),
 				saylink.c_str()
 			);
 		}

@@ -19,16 +19,19 @@
 class BaseMerchantlistRepository {
 public:
 	struct Merchantlist {
-		int         merchantid;
-		int         slot;
-		int         item;
-		int         faction_required;
-		int         level_required;
-		int         alt_currency_cost;
-		int         classes_required;
-		int         probability;
-		int         min_expansion;
-		int         max_expansion;
+		int32_t     merchantid;
+		int32_t     slot;
+		int32_t     item;
+		int16_t     faction_required;
+		uint8_t     level_required;
+		uint16_t    alt_currency_cost;
+		int32_t     classes_required;
+		int32_t     probability;
+		std::string bucket_name;
+		std::string bucket_value;
+		uint8_t     bucket_comparison;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -49,6 +52,9 @@ public:
 			"alt_currency_cost",
 			"classes_required",
 			"probability",
+			"bucket_name",
+			"bucket_value",
+			"bucket_comparison",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -67,6 +73,9 @@ public:
 			"alt_currency_cost",
 			"classes_required",
 			"probability",
+			"bucket_name",
+			"bucket_value",
+			"bucket_comparison",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -109,25 +118,28 @@ public:
 
 	static Merchantlist NewEntity()
 	{
-		Merchantlist entry{};
+		Merchantlist e{};
 
-		entry.merchantid             = 0;
-		entry.slot                   = 0;
-		entry.item                   = 0;
-		entry.faction_required       = -100;
-		entry.level_required         = 0;
-		entry.alt_currency_cost      = 0;
-		entry.classes_required       = 65535;
-		entry.probability            = 100;
-		entry.min_expansion          = -1;
-		entry.max_expansion          = -1;
-		entry.content_flags          = "";
-		entry.content_flags_disabled = "";
+		e.merchantid             = 0;
+		e.slot                   = 0;
+		e.item                   = 0;
+		e.faction_required       = -100;
+		e.level_required         = 0;
+		e.alt_currency_cost      = 0;
+		e.classes_required       = 65535;
+		e.probability            = 100;
+		e.bucket_name            = "";
+		e.bucket_value           = "";
+		e.bucket_comparison      = 0;
+		e.min_expansion          = -1;
+		e.max_expansion          = -1;
+		e.content_flags          = "";
+		e.content_flags_disabled = "";
 
-		return entry;
+		return e;
 	}
 
-	static Merchantlist GetMerchantlistEntry(
+	static Merchantlist GetMerchantlist(
 		const std::vector<Merchantlist> &merchantlists,
 		int merchantlist_id
 	)
@@ -156,22 +168,25 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Merchantlist entry{};
+			Merchantlist e{};
 
-			entry.merchantid             = atoi(row[0]);
-			entry.slot                   = atoi(row[1]);
-			entry.item                   = atoi(row[2]);
-			entry.faction_required       = atoi(row[3]);
-			entry.level_required         = atoi(row[4]);
-			entry.alt_currency_cost      = atoi(row[5]);
-			entry.classes_required       = atoi(row[6]);
-			entry.probability            = atoi(row[7]);
-			entry.min_expansion          = atoi(row[8]);
-			entry.max_expansion          = atoi(row[9]);
-			entry.content_flags          = row[10] ? row[10] : "";
-			entry.content_flags_disabled = row[11] ? row[11] : "";
+			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
+			e.slot                   = static_cast<int32_t>(atoi(row[1]));
+			e.item                   = static_cast<int32_t>(atoi(row[2]));
+			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
+			e.probability            = static_cast<int32_t>(atoi(row[7]));
+			e.bucket_name            = row[8] ? row[8] : "";
+			e.bucket_value           = row[9] ? row[9] : "";
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -196,33 +211,36 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Merchantlist merchantlist_entry
+		const Merchantlist &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(merchantlist_entry.merchantid));
-		update_values.push_back(columns[1] + " = " + std::to_string(merchantlist_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(merchantlist_entry.item));
-		update_values.push_back(columns[3] + " = " + std::to_string(merchantlist_entry.faction_required));
-		update_values.push_back(columns[4] + " = " + std::to_string(merchantlist_entry.level_required));
-		update_values.push_back(columns[5] + " = " + std::to_string(merchantlist_entry.alt_currency_cost));
-		update_values.push_back(columns[6] + " = " + std::to_string(merchantlist_entry.classes_required));
-		update_values.push_back(columns[7] + " = " + std::to_string(merchantlist_entry.probability));
-		update_values.push_back(columns[8] + " = " + std::to_string(merchantlist_entry.min_expansion));
-		update_values.push_back(columns[9] + " = " + std::to_string(merchantlist_entry.max_expansion));
-		update_values.push_back(columns[10] + " = '" + Strings::Escape(merchantlist_entry.content_flags) + "'");
-		update_values.push_back(columns[11] + " = '" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.merchantid));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.item));
+		v.push_back(columns[3] + " = " + std::to_string(e.faction_required));
+		v.push_back(columns[4] + " = " + std::to_string(e.level_required));
+		v.push_back(columns[5] + " = " + std::to_string(e.alt_currency_cost));
+		v.push_back(columns[6] + " = " + std::to_string(e.classes_required));
+		v.push_back(columns[7] + " = " + std::to_string(e.probability));
+		v.push_back(columns[8] + " = '" + Strings::Escape(e.bucket_name) + "'");
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.bucket_value) + "'");
+		v.push_back(columns[10] + " = " + std::to_string(e.bucket_comparison));
+		v.push_back(columns[11] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[12] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[13] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[14] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				merchantlist_entry.merchantid
+				e.merchantid
 			)
 		);
 
@@ -231,69 +249,75 @@ public:
 
 	static Merchantlist InsertOne(
 		Database& db,
-		Merchantlist merchantlist_entry
+		Merchantlist e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(merchantlist_entry.merchantid));
-		insert_values.push_back(std::to_string(merchantlist_entry.slot));
-		insert_values.push_back(std::to_string(merchantlist_entry.item));
-		insert_values.push_back(std::to_string(merchantlist_entry.faction_required));
-		insert_values.push_back(std::to_string(merchantlist_entry.level_required));
-		insert_values.push_back(std::to_string(merchantlist_entry.alt_currency_cost));
-		insert_values.push_back(std::to_string(merchantlist_entry.classes_required));
-		insert_values.push_back(std::to_string(merchantlist_entry.probability));
-		insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
-		insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.merchantid));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.item));
+		v.push_back(std::to_string(e.faction_required));
+		v.push_back(std::to_string(e.level_required));
+		v.push_back(std::to_string(e.alt_currency_cost));
+		v.push_back(std::to_string(e.classes_required));
+		v.push_back(std::to_string(e.probability));
+		v.push_back("'" + Strings::Escape(e.bucket_name) + "'");
+		v.push_back("'" + Strings::Escape(e.bucket_value) + "'");
+		v.push_back(std::to_string(e.bucket_comparison));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			merchantlist_entry.merchantid = results.LastInsertedID();
-			return merchantlist_entry;
+			e.merchantid = results.LastInsertedID();
+			return e;
 		}
 
-		merchantlist_entry = NewEntity();
+		e = NewEntity();
 
-		return merchantlist_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Merchantlist> merchantlist_entries
+		const std::vector<Merchantlist> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &merchantlist_entry: merchantlist_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(merchantlist_entry.merchantid));
-			insert_values.push_back(std::to_string(merchantlist_entry.slot));
-			insert_values.push_back(std::to_string(merchantlist_entry.item));
-			insert_values.push_back(std::to_string(merchantlist_entry.faction_required));
-			insert_values.push_back(std::to_string(merchantlist_entry.level_required));
-			insert_values.push_back(std::to_string(merchantlist_entry.alt_currency_cost));
-			insert_values.push_back(std::to_string(merchantlist_entry.classes_required));
-			insert_values.push_back(std::to_string(merchantlist_entry.probability));
-			insert_values.push_back(std::to_string(merchantlist_entry.min_expansion));
-			insert_values.push_back(std::to_string(merchantlist_entry.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(merchantlist_entry.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.merchantid));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.item));
+			v.push_back(std::to_string(e.faction_required));
+			v.push_back(std::to_string(e.level_required));
+			v.push_back(std::to_string(e.alt_currency_cost));
+			v.push_back(std::to_string(e.classes_required));
+			v.push_back(std::to_string(e.probability));
+			v.push_back("'" + Strings::Escape(e.bucket_name) + "'");
+			v.push_back("'" + Strings::Escape(e.bucket_value) + "'");
+			v.push_back(std::to_string(e.bucket_comparison));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -320,28 +344,31 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Merchantlist entry{};
+			Merchantlist e{};
 
-			entry.merchantid             = atoi(row[0]);
-			entry.slot                   = atoi(row[1]);
-			entry.item                   = atoi(row[2]);
-			entry.faction_required       = atoi(row[3]);
-			entry.level_required         = atoi(row[4]);
-			entry.alt_currency_cost      = atoi(row[5]);
-			entry.classes_required       = atoi(row[6]);
-			entry.probability            = atoi(row[7]);
-			entry.min_expansion          = atoi(row[8]);
-			entry.max_expansion          = atoi(row[9]);
-			entry.content_flags          = row[10] ? row[10] : "";
-			entry.content_flags_disabled = row[11] ? row[11] : "";
+			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
+			e.slot                   = static_cast<int32_t>(atoi(row[1]));
+			e.item                   = static_cast<int32_t>(atoi(row[2]));
+			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
+			e.probability            = static_cast<int32_t>(atoi(row[7]));
+			e.bucket_name            = row[8] ? row[8] : "";
+			e.bucket_value           = row[9] ? row[9] : "";
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Merchantlist> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Merchantlist> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Merchantlist> all_entries;
 
@@ -356,28 +383,31 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Merchantlist entry{};
+			Merchantlist e{};
 
-			entry.merchantid             = atoi(row[0]);
-			entry.slot                   = atoi(row[1]);
-			entry.item                   = atoi(row[2]);
-			entry.faction_required       = atoi(row[3]);
-			entry.level_required         = atoi(row[4]);
-			entry.alt_currency_cost      = atoi(row[5]);
-			entry.classes_required       = atoi(row[6]);
-			entry.probability            = atoi(row[7]);
-			entry.min_expansion          = atoi(row[8]);
-			entry.max_expansion          = atoi(row[9]);
-			entry.content_flags          = row[10] ? row[10] : "";
-			entry.content_flags_disabled = row[11] ? row[11] : "";
+			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
+			e.slot                   = static_cast<int32_t>(atoi(row[1]));
+			e.item                   = static_cast<int32_t>(atoi(row[2]));
+			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.level_required         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.alt_currency_cost      = static_cast<uint16_t>(strtoul(row[5], nullptr, 10));
+			e.classes_required       = static_cast<int32_t>(atoi(row[6]));
+			e.probability            = static_cast<int32_t>(atoi(row[7]));
+			e.bucket_name            = row[8] ? row[8] : "";
+			e.bucket_value           = row[9] ? row[9] : "";
+			e.bucket_comparison      = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.min_expansion          = static_cast<int8_t>(atoi(row[11]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[12]));
+			e.content_flags          = row[13] ? row[13] : "";
+			e.content_flags_disabled = row[14] ? row[14] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -400,6 +430,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

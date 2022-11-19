@@ -3,6 +3,7 @@
 
 #include "database.h"
 #include "timer.h"
+#include "tasks.h"
 #include "types.h"
 #include "repositories/character_data_repository.h"
 #include "repositories/tasks_repository.h"
@@ -30,6 +31,9 @@
 #define ServerOP_SharedTaskMemberChange             0x0314 // world -> zone. Send shared task single member added/removed (client also handles message)
 #define ServerOP_SharedTaskKickPlayers              0x0315 // zone -> world /kickplayers task
 #define ServerOP_SharedTaskLock                     0x0316 // zone -> world
+#define ServerOP_SharedTaskEnd                      0x0317 // zone -> world
+#define ServerOP_SharedTaskEndByDz                  0x0318 // zone -> world
+#define ServerOP_SharedTaskFailed                   0x0319 // world -> zone. Sends red text task failed banner to client
 
 enum class SharedTaskRequestGroupType {
 	Solo = 0,
@@ -79,8 +83,8 @@ struct SharedTaskMember {
 
 // used in shared task requests to validate group/raid members
 struct SharedTaskRequest {
-	int  lowest_level;
-	int  highest_level;
+	uint32_t lowest_level;
+	uint32_t highest_level;
 	uint32_t leader_id;
 	SharedTaskRequestGroupType group_type;
 	std::vector<uint32_t> character_ids;
@@ -108,8 +112,10 @@ struct SharedTaskActivityStateEntry {
 	uint32 max_done_count; // goalcount
 	uint32 updated_time;
 	uint32 completed_time;
+	int    req_activity_id;
 	int    step;
 	bool   optional;
+	ActivityState activity_state; // world only uses Hidden and Completed states
 };
 
 struct ServerSharedTaskActivityUpdate_Struct {
@@ -173,6 +179,18 @@ struct ServerSharedTaskLock_Struct {
 	bool   lock;
 };
 
+struct ServerSharedTaskCharacterTask_Struct {
+	uint32 character_id;
+	uint32 task_id;
+};
+
+struct ServerSharedTaskEnd_Struct {
+	uint32 character_id;
+	uint32 task_id;
+	uint32 dz_id;
+	bool   send_fail; // if true members receive red text failure banner
+};
+
 class SharedTask {
 public:
 	// used in both zone and world validation
@@ -184,6 +202,7 @@ public:
 	SharedTaskMember GetLeader() const;
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	const std::vector<SharedTaskMember>& GetMembers() const;
+	bool IsExpired() const;
 
 	// getters
 	const std::vector<TaskActivitiesRepository::TaskActivities> &GetTaskActivityData() const;

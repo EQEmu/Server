@@ -154,7 +154,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	in_npc->GetDeity(),in_npc->GetLevel(),in_npc->GetNPCTypeID(),in_npc->GetSize(),0,
 	in_npc->GetPosition(), in_npc->GetInnateLightType(), in_npc->GetTexture(),in_npc->GetHelmTexture(),
 	0,0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,0,0,EQ::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,EQ::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	(*in_npctypedata)->use_model, false),
 	corpse_decay_timer(in_decaytime),
 	corpse_rez_timer(0),
@@ -263,7 +263,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	0,								  // uint8		in_legtexture,
 	0,								  // uint8		in_feettexture,
 	0,								  // uint8		in_usemodel,
-	0								  // bool		in_always_aggro
+	0,								  // bool		in_always_aggro,
+	0								  // Int32		in_heroic_strikethrough
 	),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
@@ -488,6 +489,7 @@ in_helmtexture,
 0,
 EQ::TintProfile(),
 0xff,
+0,
 0,
 0,
 0,
@@ -904,6 +906,33 @@ bool Corpse::Process() {
 	}
 
 	return true;
+}
+
+void Corpse::ResetDecayTimer()
+{
+	int decay_ms = level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS) : RuleI(NPC, MinorNPCCorpseDecayTimeMS);
+
+	if (IsPlayerCorpse())
+	{
+		decay_ms = RuleI(Character, CorpseDecayTimeMS);
+	}
+	else if (IsEmpty())
+	{
+		decay_ms = RuleI(NPC, EmptyNPCCorpseDecayTimeMS) + 1000;
+	}
+	else
+	{
+		for (const npcDecayTimes_Struct& decay_time : npcCorpseDecayTimes)
+		{
+			if (level >= decay_time.minlvl && level <= decay_time.maxlvl)
+			{
+				decay_ms = decay_time.seconds * 1000;
+				break;
+			}
+		}
+	}
+
+	corpse_decay_timer.SetTimer(decay_ms);
 }
 
 void Corpse::SetDecayTimer(uint32 decaytime) {
@@ -1368,6 +1397,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
+		// get count for task update before it's mutated by AutoPutLootInInventory
+		int count = inst->IsStackable() ? inst->GetCharges() : 1;
+
 		/* First add it to the looter - this will do the bag contents too */
 		if (lootitem->auto_loot > 0) {
 			if (!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
@@ -1378,8 +1410,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		/* Update any tasks that have an activity to loot this item */
-		if (RuleB(TaskSystem, EnableTaskSystem))
-			client->UpdateTasksForItem(TaskActivityType::Loot, item->ID);
+		if (RuleB(TaskSystem, EnableTaskSystem) && IsNPCCorpse()) {
+			client->UpdateTasksOnLoot(this, item->ID, count);
+		}
 
 		/* Remove it from Corpse */
 		if (item_data) {

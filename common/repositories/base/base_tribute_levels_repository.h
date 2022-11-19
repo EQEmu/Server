@@ -19,10 +19,10 @@
 class BaseTributeLevelsRepository {
 public:
 	struct TributeLevels {
-		int tribute_id;
-		int level;
-		int cost;
-		int item_id;
+		uint32_t tribute_id;
+		uint32_t level;
+		uint32_t cost;
+		uint32_t item_id;
 	};
 
 	static std::string PrimaryKey()
@@ -85,17 +85,17 @@ public:
 
 	static TributeLevels NewEntity()
 	{
-		TributeLevels entry{};
+		TributeLevels e{};
 
-		entry.tribute_id = 0;
-		entry.level      = 0;
-		entry.cost       = 0;
-		entry.item_id    = 0;
+		e.tribute_id = 0;
+		e.level      = 0;
+		e.cost       = 0;
+		e.item_id    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static TributeLevels GetTributeLevelsEntry(
+	static TributeLevels GetTributeLevels(
 		const std::vector<TributeLevels> &tribute_levelss,
 		int tribute_levels_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			TributeLevels entry{};
+			TributeLevels e{};
 
-			entry.tribute_id = atoi(row[0]);
-			entry.level      = atoi(row[1]);
-			entry.cost       = atoi(row[2]);
-			entry.item_id    = atoi(row[3]);
+			e.tribute_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.level      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.cost       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,25 +156,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		TributeLevels tribute_levels_entry
+		const TributeLevels &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(tribute_levels_entry.tribute_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(tribute_levels_entry.level));
-		update_values.push_back(columns[2] + " = " + std::to_string(tribute_levels_entry.cost));
-		update_values.push_back(columns[3] + " = " + std::to_string(tribute_levels_entry.item_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.tribute_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.level));
+		v.push_back(columns[2] + " = " + std::to_string(e.cost));
+		v.push_back(columns[3] + " = " + std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				tribute_levels_entry.tribute_id
+				e.tribute_id
 			)
 		);
 
@@ -183,53 +183,53 @@ public:
 
 	static TributeLevels InsertOne(
 		Database& db,
-		TributeLevels tribute_levels_entry
+		TributeLevels e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(tribute_levels_entry.tribute_id));
-		insert_values.push_back(std::to_string(tribute_levels_entry.level));
-		insert_values.push_back(std::to_string(tribute_levels_entry.cost));
-		insert_values.push_back(std::to_string(tribute_levels_entry.item_id));
+		v.push_back(std::to_string(e.tribute_id));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.cost));
+		v.push_back(std::to_string(e.item_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			tribute_levels_entry.tribute_id = results.LastInsertedID();
-			return tribute_levels_entry;
+			e.tribute_id = results.LastInsertedID();
+			return e;
 		}
 
-		tribute_levels_entry = NewEntity();
+		e = NewEntity();
 
-		return tribute_levels_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<TributeLevels> tribute_levels_entries
+		const std::vector<TributeLevels> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tribute_levels_entry: tribute_levels_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(tribute_levels_entry.tribute_id));
-			insert_values.push_back(std::to_string(tribute_levels_entry.level));
-			insert_values.push_back(std::to_string(tribute_levels_entry.cost));
-			insert_values.push_back(std::to_string(tribute_levels_entry.item_id));
+			v.push_back(std::to_string(e.tribute_id));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.cost));
+			v.push_back(std::to_string(e.item_id));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -256,20 +256,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			TributeLevels entry{};
+			TributeLevels e{};
 
-			entry.tribute_id = atoi(row[0]);
-			entry.level      = atoi(row[1]);
-			entry.cost       = atoi(row[2]);
-			entry.item_id    = atoi(row[3]);
+			e.tribute_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.level      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.cost       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<TributeLevels> GetWhere(Database& db, std::string where_filter)
+	static std::vector<TributeLevels> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<TributeLevels> all_entries;
 
@@ -284,20 +284,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			TributeLevels entry{};
+			TributeLevels e{};
 
-			entry.tribute_id = atoi(row[0]);
-			entry.level      = atoi(row[1]);
-			entry.cost       = atoi(row[2]);
-			entry.item_id    = atoi(row[3]);
+			e.tribute_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.level      = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.cost       = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.item_id    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -320,6 +320,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

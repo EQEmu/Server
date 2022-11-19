@@ -4,11 +4,7 @@ void command_feature(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (arguments < 2 || !sep->IsNumber(2)) {
-		auto feature_save_link = Saylink::Create(
-			"#npcedit featuresave",
-			false,
-			"#npcedit featuresave"
-		);
+		auto feature_save_link = Saylink::Silent("#npcedit featuresave");
 
 		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
 		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color");
@@ -67,11 +63,7 @@ void command_feature(Client *c, const Seperator *sep)
 		!is_tattoo &&
 		!is_texture
 	) {
-		auto feature_save_link = Saylink::Create(
-			"#npcedit featuresave",
-			false,
-			"#npcedit featuresave"
-		);
+		auto feature_save_link = Saylink::Silent("#npcedit featuresave");
 
 		c->Message(Chat::White, "Usage: #feature beard [Beard] - Change your or your target's Beard");
 		c->Message(Chat::White, "Usage: #feature beardcolor [Beard Color] - Change your or your target's Beard Color");

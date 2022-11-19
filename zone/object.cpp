@@ -26,7 +26,7 @@
 
 #include "quest_parser_collection.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
@@ -144,8 +144,8 @@ Object::Object(Client* client, const EQ::ItemInstance* inst)
 	// Set object name
 	if (inst) {
 		const EQ::ItemData* item = inst->GetItem();
-		if (item && item->IDFile) {
-			if (strlen(item->IDFile) == 0) {
+		if (item) {
+			if (item->IDFile[0] == '\0') {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
 			}
 			else {
@@ -200,8 +200,8 @@ Object::Object(const EQ::ItemInstance *inst, float x, float y, float z, float he
 	// Set object name
 	if (inst) {
 		const EQ::ItemData* item = inst->GetItem();
-		if (item && item->IDFile) {
-			if (strlen(item->IDFile) == 0) {
+		if (item) {
+			if (item->IDFile[0] == '\0') {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
 			}
 			else {

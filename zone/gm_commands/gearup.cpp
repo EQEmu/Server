@@ -161,9 +161,8 @@ void command_gearup(Client *c, const Seperator *sep)
 		std::string message;
 		for (auto   row = results.begin(); row != results.end(); ++row) {
 			int expansion = atoi(row[0]);
-			message += "[" + Saylink::Create(
+			message += "[" + Saylink::Silent(
 				fmt::format("#gearup {}", expansion),
-				false,
 				Expansion::ExpansionName[expansion]
 			) + "] ";
 

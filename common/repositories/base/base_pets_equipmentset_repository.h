@@ -19,9 +19,9 @@
 class BasePetsEquipmentsetRepository {
 public:
 	struct PetsEquipmentset {
-		int         set_id;
+		int32_t     set_id;
 		std::string setname;
-		int         nested_set;
+		int32_t     nested_set;
 	};
 
 	static std::string PrimaryKey()
@@ -82,16 +82,16 @@ public:
 
 	static PetsEquipmentset NewEntity()
 	{
-		PetsEquipmentset entry{};
+		PetsEquipmentset e{};
 
-		entry.set_id     = 0;
-		entry.setname    = "";
-		entry.nested_set = -1;
+		e.set_id     = 0;
+		e.setname    = "";
+		e.nested_set = -1;
 
-		return entry;
+		return e;
 	}
 
-	static PetsEquipmentset GetPetsEquipmentsetEntry(
+	static PetsEquipmentset GetPetsEquipmentset(
 		const std::vector<PetsEquipmentset> &pets_equipmentsets,
 		int pets_equipmentset_id
 	)
@@ -120,13 +120,13 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			PetsEquipmentset entry{};
+			PetsEquipmentset e{};
 
-			entry.set_id     = atoi(row[0]);
-			entry.setname    = row[1] ? row[1] : "";
-			entry.nested_set = atoi(row[2]);
+			e.set_id     = static_cast<int32_t>(atoi(row[0]));
+			e.setname    = row[1] ? row[1] : "";
+			e.nested_set = static_cast<int32_t>(atoi(row[2]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -151,24 +151,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		PetsEquipmentset pets_equipmentset_entry
+		const PetsEquipmentset &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(pets_equipmentset_entry.set_id));
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(pets_equipmentset_entry.setname) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(pets_equipmentset_entry.nested_set));
+		v.push_back(columns[0] + " = " + std::to_string(e.set_id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.setname) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.nested_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				pets_equipmentset_entry.set_id
+				e.set_id
 			)
 		);
 
@@ -177,51 +177,51 @@ public:
 
 	static PetsEquipmentset InsertOne(
 		Database& db,
-		PetsEquipmentset pets_equipmentset_entry
+		PetsEquipmentset e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(pets_equipmentset_entry.set_id));
-		insert_values.push_back("'" + Strings::Escape(pets_equipmentset_entry.setname) + "'");
-		insert_values.push_back(std::to_string(pets_equipmentset_entry.nested_set));
+		v.push_back(std::to_string(e.set_id));
+		v.push_back("'" + Strings::Escape(e.setname) + "'");
+		v.push_back(std::to_string(e.nested_set));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			pets_equipmentset_entry.set_id = results.LastInsertedID();
-			return pets_equipmentset_entry;
+			e.set_id = results.LastInsertedID();
+			return e;
 		}
 
-		pets_equipmentset_entry = NewEntity();
+		e = NewEntity();
 
-		return pets_equipmentset_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<PetsEquipmentset> pets_equipmentset_entries
+		const std::vector<PetsEquipmentset> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &pets_equipmentset_entry: pets_equipmentset_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(pets_equipmentset_entry.set_id));
-			insert_values.push_back("'" + Strings::Escape(pets_equipmentset_entry.setname) + "'");
-			insert_values.push_back(std::to_string(pets_equipmentset_entry.nested_set));
+			v.push_back(std::to_string(e.set_id));
+			v.push_back("'" + Strings::Escape(e.setname) + "'");
+			v.push_back(std::to_string(e.nested_set));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -248,19 +248,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			PetsEquipmentset entry{};
+			PetsEquipmentset e{};
 
-			entry.set_id     = atoi(row[0]);
-			entry.setname    = row[1] ? row[1] : "";
-			entry.nested_set = atoi(row[2]);
+			e.set_id     = static_cast<int32_t>(atoi(row[0]));
+			e.setname    = row[1] ? row[1] : "";
+			e.nested_set = static_cast<int32_t>(atoi(row[2]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<PetsEquipmentset> GetWhere(Database& db, std::string where_filter)
+	static std::vector<PetsEquipmentset> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<PetsEquipmentset> all_entries;
 
@@ -275,19 +275,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			PetsEquipmentset entry{};
+			PetsEquipmentset e{};
 
-			entry.set_id     = atoi(row[0]);
-			entry.setname    = row[1] ? row[1] : "";
-			entry.nested_set = atoi(row[2]);
+			e.set_id     = static_cast<int32_t>(atoi(row[0]));
+			e.setname    = row[1] ? row[1] : "";
+			e.nested_set = static_cast<int32_t>(atoi(row[2]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -310,6 +310,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

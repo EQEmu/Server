@@ -11,7 +11,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;

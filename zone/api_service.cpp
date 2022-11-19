@@ -22,7 +22,7 @@
 #include "../common/net/websocket_server.h"
 #include "../common/eqemu_logsys.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "client.h"
 #include "entity.h"
 #include "corpse.h"
@@ -829,7 +829,7 @@ Json::Value ApiGetZoneAttributes(EQ::Net::WebsocketServerConnection *connection,
 
 Json::Value ApiGetLogsysCategories(EQ::Net::WebsocketServerConnection *connection, Json::Value params)
 {
-	if (zone->GetZoneID() == 0) {
+	if (!zone || (zone && zone->GetZoneID() == 0)) {
 		throw EQ::Net::WebsocketException("Zone must be loaded to invoke this call");
 	}
 

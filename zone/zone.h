@@ -25,7 +25,7 @@
 #include "../common/random.h"
 #include "../common/strings.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/grid_repository.h"
 #include "../common/repositories/grid_entries_repository.h"
 #include "../common/repositories/zone_points_repository.h"
@@ -155,7 +155,7 @@ public:
 	ZonePoint *
 	GetClosestZonePoint(const glm::vec3 &location, const char *to_name, Client *client, float max_distance = 40000.0f);
 
-	inline bool BuffTimersSuspended() const { return newzone_data.SuspendBuffs != 0; };
+	inline bool BuffTimersSuspended() const { return newzone_data.suspend_buffs != 0; };
 	inline bool HasMap() { return zonemap != nullptr; }
 	inline bool HasWaterMap() { return watermap != nullptr; }
 	inline bool InstantGrids() { return (!initgrids_timer.Enabled()); }
@@ -166,13 +166,13 @@ public:
 	inline const char *GetShortName() { return short_name; }
 	inline const uint8 GetZoneType() const { return zone_type; }
 	inline const uint16 GetInstanceVersion() const { return instanceversion; }
-	inline const uint32 &GetMaxClients() { return pMaxClients; }
-	inline const uint32 &graveyard_id() { return pgraveyard_id; }
+	inline const uint32 &GetMaxClients() { return m_max_clients; }
+	inline const uint32 &graveyard_id() { return m_graveyard_id; }
 	inline const uint32 &graveyard_zoneid() { return pgraveyard_zoneid; }
 	inline const uint32 GetInstanceID() const { return instanceid; }
 	inline const uint32 GetZoneID() const { return zoneid; }
-	inline glm::vec4 GetSafePoint() { return m_SafePoint; }
-	inline glm::vec4 GetGraveyardPoint() { return m_Graveyard; }
+	inline glm::vec4 GetSafePoint() { return m_safe_points; }
+	inline glm::vec4 GetGraveyardPoint() { return m_graveyard; }
 	inline std::vector<int> GetGlobalLootTables(NPC *mob) const { return m_global_loot.GetGlobalLootTables(mob); }
 	inline Timer *GetInstanceTimer() { return Instance_Timer; }
 	inline void AddGlobalLootEntry(GlobalLootEntry &in) { return m_global_loot.AddEntry(in); }
@@ -223,8 +223,8 @@ public:
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>>    aa_ranks;
 
-	std::vector<GridRepository::Grid>             zone_grids;
-	std::vector<GridEntriesRepository::GridEntry> zone_grid_entries;
+	std::vector<GridRepository::Grid>               zone_grids;
+	std::vector<GridEntriesRepository::GridEntries> zone_grid_entries;
 
 	std::unordered_map<uint32, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 	std::unordered_map<uint32, std::unique_ptr<Expedition>>  expedition_cache;
@@ -248,6 +248,11 @@ public:
 
 	uint32 GetCurrencyID(uint32 item_id);
 	uint32 GetCurrencyItemID(uint32 currency_id);
+
+	std::string GetAAName(int aa_id);
+
+	inline bool IsRaining() { return zone_weather == EQ::constants::WeatherTypes::Raining; }
+	inline bool IsSnowing() { return zone_weather == EQ::constants::WeatherTypes::Snowing; }
 
 	std::string GetZoneDescription();
 	void SendReloadMessage(std::string reload_type);
@@ -298,12 +303,15 @@ public:
 	void SetUCSServerAvailable(bool ucss_available, uint32 update_timestamp);
 	void SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
 	void StartShutdownTimer(uint32 set_time = (RuleI(Zone, AutoShutdownDelay)));
+	void ResetShutdownTimer();
 	void UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void weatherSend(Client *client = nullptr);
 	void ClearSpawnTimers();
 
 	bool IsQuestHotReloadQueued() const;
 	void SetQuestHotReloadQueued(bool in_quest_hot_reload_queued);
+
+	bool CheckDataBucket(uint8 bucket_comparison, std::string bucket_value, std::string player_value);
 
 	WaterMap *watermap;
 	ZonePoint *GetClosestZonePoint(const glm::vec3 &location, uint32 to, Client *client, float max_distance = 40000.0f);
@@ -321,6 +329,11 @@ public:
 	 */
 	static void GMSayHookCallBackProcess(uint16 log_category, std::string message)
 	{
+		// we don't want to loop up with chat messages
+		if (message.find("OP_SpecialMesg") != std::string::npos) {
+			return;
+		}
+
 		/**
 		 * Cut messages down to 4000 max to prevent client crash
 		 */
@@ -408,8 +421,8 @@ private:
 	char      *map_name;
 	char      *short_name;
 	char      file_name[16];
-	glm::vec4 m_SafePoint;
-	glm::vec4 m_Graveyard;
+	glm::vec4 m_safe_points;
+	glm::vec4 m_graveyard;
 	int       default_ruleset;
 	int       zone_total_blocked_spells;
 	int       npc_position_update_distance;
@@ -418,8 +431,8 @@ private:
 	uint16    instanceversion;
 	uint32    instanceid;
 	uint32    instance_time_remaining;
-	uint32    pgraveyard_id, pgraveyard_zoneid;
-	uint32    pMaxClients;
+	uint32    m_graveyard_id, pgraveyard_zoneid;
+	uint32    m_max_clients;
 	uint32    zoneid;
 	uint32    m_last_ucss_update;
 

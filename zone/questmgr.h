@@ -113,8 +113,8 @@ public:
 	void changedeity(int deity_id);
 	void exp(int amt);
 	void level(int newlevel);
-	void traindisc(int discipline_tome_item_id);
-	bool isdisctome(int item_id);
+	void traindisc(uint32 discipline_tome_item_id);
+	bool isdisctome(uint32 item_id);
 	std::string getracename(uint16 race_id);
 	std::string getspellname(uint32 spell_id);
 	std::string getskillname(int skill_id);
@@ -150,6 +150,7 @@ public:
 	void attacknpctype(int npc_type_id);
 	void save();
 	void faction(int faction_id, int faction_value, int temp);
+	void rewardfaction(int faction_id, int faction_value);
 	void setsky(uint8 new_sky);
 	void setguild(uint32 new_guild_id, uint8 new_rank);
 	void CreateGuild(const char *guild_name, const char *leader);
@@ -209,8 +210,8 @@ public:
 	void playerfeature(char *feature, int setting);
 	void npcfeature(char *feature, int setting);
 	void popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration);
-	void taskselector(int taskcount, int *tasks);
-	void tasksetselector(int tasksettid);
+	void taskselector(const std::vector<int>& tasks, bool ignore_cooldown = false);
+	void tasksetselector(int tasksettid, bool ignore_cooldown = false);
 	void enabletask(int taskcount, int *tasks);
 	void disabletask(int taskcount, int *tasks);
 	bool istaskenabled(int taskid);
@@ -219,7 +220,6 @@ public:
 	int gettaskactivitydonecount(int task, int activity);
 	void updatetaskactivity(int task, int activity, int count, bool ignore_quest_update = false);
 	void resettaskactivity(int task, int activity);
-	void taskexploredarea(int exploreid);
 	void assigntask(int taskid, bool enforce_level_requirement = false);
 	void failtask(int taskid);
 	int tasktimeleft(int taskid);
@@ -234,27 +234,31 @@ public:
 	int completedtasksinset(int taskset);
 	bool istaskappropriate(int task);
 	std::string gettaskname(uint32 task_id);
-    void clearspawntimers();
+	int GetCurrentDzTaskID();
+	void EndCurrentDzTask(bool send_fail = false);
+	void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);
-	void message(int color, const char *message);
+	void marquee(uint32 type, std::string message, uint32 duration = 3000);
+	void marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
+	void message(uint32 type, const char *message);
 	void whisper(const char *message);
-    int getlevel(uint8 type);
-    int collectitems(uint32 item_id, bool remove);
-    int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
+	int getlevel(uint8 type);
+	int collectitems(uint32 item_id, bool remove);
+	int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
 	int countitem(uint32 item_id);
 	void removeitem(uint32 item_id, uint32 quantity = 1);
 	std::string getitemname(uint32 item_id);
-    void enabletitle(int titleset);
-   	bool checktitle(int titlecheck);
-   	void removetitle(int titlecheck);
+	void enabletitle(int titleset);
+	bool checktitle(int titlecheck);
+	void removetitle(int titlecheck);
 	uint16 CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
 	uint16 CreateGroundObjectFromModel(const char* model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
-	void ModifyNPCStat(const char *identifier, const char *newValue);
+	void ModifyNPCStat(std::string stat, std::string value);
 	void UpdateSpawnTimer(uint32 id, uint32 newTime);
 	void MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity = 0);
 	uint32 MerchantCountItem(uint32 NPCid, uint32 itemid);
-	uint16 CreateInstance(const char *zone, int16 version, uint32 duration);
+	uint16 CreateInstance(const char *zone_short_name, int16 instance_version, uint32 duration);
 	void UpdateInstanceTimer(uint16 instance_id, uint32 new_duration);
 	void UpdateZoneHeader(std::string type, std::string value);
 	uint32 GetInstanceTimer();
@@ -294,12 +298,12 @@ public:
 	uint8 FactionValue();
 	void wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0);
 	void voicetell(const char *str, int macronum, int racenum, int gendernum);
-    void LearnRecipe(uint32 recipe_id);
-    void SendMail(const char *to, const char *from, const char *subject, const char *message);
+	void LearnRecipe(uint32 recipe_id);
+	void SendMail(const char *to, const char *from, const char *subject, const char *message);
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
-    int32 GetZoneID(const char *zone);
-    static std::string GetZoneLongName(std::string zone_short_name);
-    static std::string GetZoneLongNameByID(uint32 zone_id);
+	int32 GetZoneID(const char *zone);
+	static std::string GetZoneLongName(std::string zone_short_name);
+	static std::string GetZoneLongNameByID(uint32 zone_id);
 	static std::string GetZoneShortName(uint32 zone_id);
 	void CrossZoneDialogueWindow(uint8 update_type, int update_identifier, const char* message, const char* client_name = "");
 	void CrossZoneLDoNUpdate(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 theme_id, int points = 1, const char* client_name = "");
@@ -307,7 +311,7 @@ public:
 	void CrossZoneMessage(uint8 update_type, int update_identifier, uint32 type, const char* message, const char* client_name = "");
 	void CrossZoneMove(uint8 update_type, uint8 update_subtype, int update_identifier, const char* zone_short_name, uint16 instance_id, const char* client_name = "");
 	void CrossZoneSetEntityVariable(uint8 update_type, int update_identifier, const char* variable_name, const char* variable_value, const char* client_name = "");
-	void CrossZoneSignal(uint8 update_type, int update_identifier, uint32 signal, const char* client_name = "");
+	void CrossZoneSignal(uint8 update_type, int update_identifier, int signal, const char* client_name = "");
 	void CrossZoneSpell(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 spell_id, const char* client_name = "");
 	void CrossZoneTaskUpdate(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 task_identifier, int task_subidentifier = -1, int update_count = 1, bool enforce_level_requirement = false, const char* client_name = "");
 	void WorldWideDialogueWindow(const char* message, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
@@ -316,7 +320,7 @@ public:
 	void WorldWideMessage(uint32 type, const char* message, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
 	void WorldWideMove(uint8 update_type, const char* zone_short_name, uint16 instance_id = 0, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
 	void WorldWideSetEntityVariable(uint8 update_type, const char* variable_name, const char* variable_value, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
-	void WorldWideSignal(uint8 update_type, uint32 signal, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
+	void WorldWideSignal(uint8 update_type, int signal, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
 	void WorldWideSpell(uint8 update_type, uint32 spell_id, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
 	void WorldWideTaskUpdate(uint8 update_type, uint32 task_identifier, int task_subidentifier = -1, int update_count = 1, bool enforce_level_requirement = false, uint8 min_status = AccountStatus::Player, uint8 max_status = AccountStatus::Player);
 	bool EnableRecipe(uint32 recipe_id);
@@ -325,10 +329,10 @@ public:
 	void ReloadZoneStaticData();
 	std::string secondstotime(int duration);
 	std::string gethexcolorcode(std::string color_name);
-	double GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
-	double GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
-	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier);
-	void SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier);
+	double GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	double GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
+	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version = -1);
+	void SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version = -1);
 	std::string getgendername(uint32 gender_id);
 	std::string getdeityname(uint32 deity_id);
 	std::string getinventoryslotname(int16 slot_id);
@@ -337,6 +341,13 @@ public:
 	const SPDat_Spell_Struct *getspell(uint32 spell_id);
 	std::string getenvironmentaldamagename(uint8 damage_type);
 	void TrackNPC(uint32 entity_id);
+	int GetRecipeMadeCount(uint32 recipe_id);
+	std::string GetRecipeName(uint32 recipe_id);
+	bool HasRecipeLearned(uint32 recipe_id);
+
+#ifdef BOTS
+	Bot *GetBot() const;
+#endif
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
@@ -348,8 +359,8 @@ public:
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 
 #ifdef BOTS
-	int createbotcount();
-	int spawnbotcount();
+	int createbotcount(uint8 class_id = 0);
+	int spawnbotcount(uint8 class_id = 0);
 	bool botquest();
 	bool createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender);
 #endif

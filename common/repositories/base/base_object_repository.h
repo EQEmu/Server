@@ -19,34 +19,34 @@
 class BaseObjectRepository {
 public:
 	struct Object {
-		int         id;
-		int         zoneid;
-		int         version;
+		int32_t     id;
+		uint32_t    zoneid;
+		int16_t     version;
 		float       xpos;
 		float       ypos;
 		float       zpos;
 		float       heading;
-		int         itemid;
-		int         charges;
+		int32_t     itemid;
+		uint16_t    charges;
 		std::string objectname;
-		int         type;
-		int         icon;
-		int         unknown08;
-		int         unknown10;
-		int         unknown20;
-		int         unknown24;
-		int         unknown60;
-		int         unknown64;
-		int         unknown68;
-		int         unknown72;
-		int         unknown76;
-		int         unknown84;
+		int32_t     type;
+		int32_t     icon;
+		int32_t     unknown08;
+		int32_t     unknown10;
+		int32_t     unknown20;
+		int32_t     unknown24;
+		int32_t     unknown60;
+		int32_t     unknown64;
+		int32_t     unknown68;
+		int32_t     unknown72;
+		int32_t     unknown76;
+		int32_t     unknown84;
 		float       size;
 		float       tilt_x;
 		float       tilt_y;
 		std::string display_name;
-		int         min_expansion;
-		int         max_expansion;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -163,43 +163,43 @@ public:
 
 	static Object NewEntity()
 	{
-		Object entry{};
+		Object e{};
 
-		entry.id                     = 0;
-		entry.zoneid                 = 0;
-		entry.version                = 0;
-		entry.xpos                   = 0;
-		entry.ypos                   = 0;
-		entry.zpos                   = 0;
-		entry.heading                = 0;
-		entry.itemid                 = 0;
-		entry.charges                = 0;
-		entry.objectname             = "";
-		entry.type                   = 0;
-		entry.icon                   = 0;
-		entry.unknown08              = 0;
-		entry.unknown10              = 0;
-		entry.unknown20              = 0;
-		entry.unknown24              = 0;
-		entry.unknown60              = 0;
-		entry.unknown64              = 0;
-		entry.unknown68              = 0;
-		entry.unknown72              = 0;
-		entry.unknown76              = 0;
-		entry.unknown84              = 0;
-		entry.size                   = 100;
-		entry.tilt_x                 = 0;
-		entry.tilt_y                 = 0;
-		entry.display_name           = "";
-		entry.min_expansion          = -1;
-		entry.max_expansion          = -1;
-		entry.content_flags          = "";
-		entry.content_flags_disabled = "";
+		e.id                     = 0;
+		e.zoneid                 = 0;
+		e.version                = 0;
+		e.xpos                   = 0;
+		e.ypos                   = 0;
+		e.zpos                   = 0;
+		e.heading                = 0;
+		e.itemid                 = 0;
+		e.charges                = 0;
+		e.objectname             = "";
+		e.type                   = 0;
+		e.icon                   = 0;
+		e.unknown08              = 0;
+		e.unknown10              = 0;
+		e.unknown20              = 0;
+		e.unknown24              = 0;
+		e.unknown60              = 0;
+		e.unknown64              = 0;
+		e.unknown68              = 0;
+		e.unknown72              = 0;
+		e.unknown76              = 0;
+		e.unknown84              = 0;
+		e.size                   = 100;
+		e.tilt_x                 = 0;
+		e.tilt_y                 = 0;
+		e.display_name           = "";
+		e.min_expansion          = -1;
+		e.max_expansion          = -1;
+		e.content_flags          = "";
+		e.content_flags_disabled = "";
 
-		return entry;
+		return e;
 	}
 
-	static Object GetObjectEntry(
+	static Object GetObject(
 		const std::vector<Object> &objects,
 		int object_id
 	)
@@ -228,40 +228,40 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Object entry{};
+			Object e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.zoneid                 = atoi(row[1]);
-			entry.version                = atoi(row[2]);
-			entry.xpos                   = static_cast<float>(atof(row[3]));
-			entry.ypos                   = static_cast<float>(atof(row[4]));
-			entry.zpos                   = static_cast<float>(atof(row[5]));
-			entry.heading                = static_cast<float>(atof(row[6]));
-			entry.itemid                 = atoi(row[7]);
-			entry.charges                = atoi(row[8]);
-			entry.objectname             = row[9] ? row[9] : "";
-			entry.type                   = atoi(row[10]);
-			entry.icon                   = atoi(row[11]);
-			entry.unknown08              = atoi(row[12]);
-			entry.unknown10              = atoi(row[13]);
-			entry.unknown20              = atoi(row[14]);
-			entry.unknown24              = atoi(row[15]);
-			entry.unknown60              = atoi(row[16]);
-			entry.unknown64              = atoi(row[17]);
-			entry.unknown68              = atoi(row[18]);
-			entry.unknown72              = atoi(row[19]);
-			entry.unknown76              = atoi(row[20]);
-			entry.unknown84              = atoi(row[21]);
-			entry.size                   = static_cast<float>(atof(row[22]));
-			entry.tilt_x                 = static_cast<float>(atof(row[23]));
-			entry.tilt_y                 = static_cast<float>(atof(row[24]));
-			entry.display_name           = row[25] ? row[25] : "";
-			entry.min_expansion          = atoi(row[26]);
-			entry.max_expansion          = atoi(row[27]);
-			entry.content_flags          = row[28] ? row[28] : "";
-			entry.content_flags_disabled = row[29] ? row[29] : "";
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.xpos                   = strtof(row[3], nullptr);
+			e.ypos                   = strtof(row[4], nullptr);
+			e.zpos                   = strtof(row[5], nullptr);
+			e.heading                = strtof(row[6], nullptr);
+			e.itemid                 = static_cast<int32_t>(atoi(row[7]));
+			e.charges                = static_cast<uint16_t>(strtoul(row[8], nullptr, 10));
+			e.objectname             = row[9] ? row[9] : "";
+			e.type                   = static_cast<int32_t>(atoi(row[10]));
+			e.icon                   = static_cast<int32_t>(atoi(row[11]));
+			e.unknown08              = static_cast<int32_t>(atoi(row[12]));
+			e.unknown10              = static_cast<int32_t>(atoi(row[13]));
+			e.unknown20              = static_cast<int32_t>(atoi(row[14]));
+			e.unknown24              = static_cast<int32_t>(atoi(row[15]));
+			e.unknown60              = static_cast<int32_t>(atoi(row[16]));
+			e.unknown64              = static_cast<int32_t>(atoi(row[17]));
+			e.unknown68              = static_cast<int32_t>(atoi(row[18]));
+			e.unknown72              = static_cast<int32_t>(atoi(row[19]));
+			e.unknown76              = static_cast<int32_t>(atoi(row[20]));
+			e.unknown84              = static_cast<int32_t>(atoi(row[21]));
+			e.size                   = strtof(row[22], nullptr);
+			e.tilt_x                 = strtof(row[23], nullptr);
+			e.tilt_y                 = strtof(row[24], nullptr);
+			e.display_name           = row[25] ? row[25] : "";
+			e.min_expansion          = static_cast<int8_t>(atoi(row[26]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[27]));
+			e.content_flags          = row[28] ? row[28] : "";
+			e.content_flags_disabled = row[29] ? row[29] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -286,50 +286,50 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Object object_entry
+		const Object &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(object_entry.zoneid));
-		update_values.push_back(columns[2] + " = " + std::to_string(object_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(object_entry.xpos));
-		update_values.push_back(columns[4] + " = " + std::to_string(object_entry.ypos));
-		update_values.push_back(columns[5] + " = " + std::to_string(object_entry.zpos));
-		update_values.push_back(columns[6] + " = " + std::to_string(object_entry.heading));
-		update_values.push_back(columns[7] + " = " + std::to_string(object_entry.itemid));
-		update_values.push_back(columns[8] + " = " + std::to_string(object_entry.charges));
-		update_values.push_back(columns[9] + " = '" + Strings::Escape(object_entry.objectname) + "'");
-		update_values.push_back(columns[10] + " = " + std::to_string(object_entry.type));
-		update_values.push_back(columns[11] + " = " + std::to_string(object_entry.icon));
-		update_values.push_back(columns[12] + " = " + std::to_string(object_entry.unknown08));
-		update_values.push_back(columns[13] + " = " + std::to_string(object_entry.unknown10));
-		update_values.push_back(columns[14] + " = " + std::to_string(object_entry.unknown20));
-		update_values.push_back(columns[15] + " = " + std::to_string(object_entry.unknown24));
-		update_values.push_back(columns[16] + " = " + std::to_string(object_entry.unknown60));
-		update_values.push_back(columns[17] + " = " + std::to_string(object_entry.unknown64));
-		update_values.push_back(columns[18] + " = " + std::to_string(object_entry.unknown68));
-		update_values.push_back(columns[19] + " = " + std::to_string(object_entry.unknown72));
-		update_values.push_back(columns[20] + " = " + std::to_string(object_entry.unknown76));
-		update_values.push_back(columns[21] + " = " + std::to_string(object_entry.unknown84));
-		update_values.push_back(columns[22] + " = " + std::to_string(object_entry.size));
-		update_values.push_back(columns[23] + " = " + std::to_string(object_entry.tilt_x));
-		update_values.push_back(columns[24] + " = " + std::to_string(object_entry.tilt_y));
-		update_values.push_back(columns[25] + " = '" + Strings::Escape(object_entry.display_name) + "'");
-		update_values.push_back(columns[26] + " = " + std::to_string(object_entry.min_expansion));
-		update_values.push_back(columns[27] + " = " + std::to_string(object_entry.max_expansion));
-		update_values.push_back(columns[28] + " = '" + Strings::Escape(object_entry.content_flags) + "'");
-		update_values.push_back(columns[29] + " = '" + Strings::Escape(object_entry.content_flags_disabled) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.zoneid));
+		v.push_back(columns[2] + " = " + std::to_string(e.version));
+		v.push_back(columns[3] + " = " + std::to_string(e.xpos));
+		v.push_back(columns[4] + " = " + std::to_string(e.ypos));
+		v.push_back(columns[5] + " = " + std::to_string(e.zpos));
+		v.push_back(columns[6] + " = " + std::to_string(e.heading));
+		v.push_back(columns[7] + " = " + std::to_string(e.itemid));
+		v.push_back(columns[8] + " = " + std::to_string(e.charges));
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.objectname) + "'");
+		v.push_back(columns[10] + " = " + std::to_string(e.type));
+		v.push_back(columns[11] + " = " + std::to_string(e.icon));
+		v.push_back(columns[12] + " = " + std::to_string(e.unknown08));
+		v.push_back(columns[13] + " = " + std::to_string(e.unknown10));
+		v.push_back(columns[14] + " = " + std::to_string(e.unknown20));
+		v.push_back(columns[15] + " = " + std::to_string(e.unknown24));
+		v.push_back(columns[16] + " = " + std::to_string(e.unknown60));
+		v.push_back(columns[17] + " = " + std::to_string(e.unknown64));
+		v.push_back(columns[18] + " = " + std::to_string(e.unknown68));
+		v.push_back(columns[19] + " = " + std::to_string(e.unknown72));
+		v.push_back(columns[20] + " = " + std::to_string(e.unknown76));
+		v.push_back(columns[21] + " = " + std::to_string(e.unknown84));
+		v.push_back(columns[22] + " = " + std::to_string(e.size));
+		v.push_back(columns[23] + " = " + std::to_string(e.tilt_x));
+		v.push_back(columns[24] + " = " + std::to_string(e.tilt_y));
+		v.push_back(columns[25] + " = '" + Strings::Escape(e.display_name) + "'");
+		v.push_back(columns[26] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[27] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[28] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[29] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				object_entry.id
+				e.id
 			)
 		);
 
@@ -338,105 +338,105 @@ public:
 
 	static Object InsertOne(
 		Database& db,
-		Object object_entry
+		Object e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(object_entry.id));
-		insert_values.push_back(std::to_string(object_entry.zoneid));
-		insert_values.push_back(std::to_string(object_entry.version));
-		insert_values.push_back(std::to_string(object_entry.xpos));
-		insert_values.push_back(std::to_string(object_entry.ypos));
-		insert_values.push_back(std::to_string(object_entry.zpos));
-		insert_values.push_back(std::to_string(object_entry.heading));
-		insert_values.push_back(std::to_string(object_entry.itemid));
-		insert_values.push_back(std::to_string(object_entry.charges));
-		insert_values.push_back("'" + Strings::Escape(object_entry.objectname) + "'");
-		insert_values.push_back(std::to_string(object_entry.type));
-		insert_values.push_back(std::to_string(object_entry.icon));
-		insert_values.push_back(std::to_string(object_entry.unknown08));
-		insert_values.push_back(std::to_string(object_entry.unknown10));
-		insert_values.push_back(std::to_string(object_entry.unknown20));
-		insert_values.push_back(std::to_string(object_entry.unknown24));
-		insert_values.push_back(std::to_string(object_entry.unknown60));
-		insert_values.push_back(std::to_string(object_entry.unknown64));
-		insert_values.push_back(std::to_string(object_entry.unknown68));
-		insert_values.push_back(std::to_string(object_entry.unknown72));
-		insert_values.push_back(std::to_string(object_entry.unknown76));
-		insert_values.push_back(std::to_string(object_entry.unknown84));
-		insert_values.push_back(std::to_string(object_entry.size));
-		insert_values.push_back(std::to_string(object_entry.tilt_x));
-		insert_values.push_back(std::to_string(object_entry.tilt_y));
-		insert_values.push_back("'" + Strings::Escape(object_entry.display_name) + "'");
-		insert_values.push_back(std::to_string(object_entry.min_expansion));
-		insert_values.push_back(std::to_string(object_entry.max_expansion));
-		insert_values.push_back("'" + Strings::Escape(object_entry.content_flags) + "'");
-		insert_values.push_back("'" + Strings::Escape(object_entry.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.zoneid));
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.xpos));
+		v.push_back(std::to_string(e.ypos));
+		v.push_back(std::to_string(e.zpos));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.itemid));
+		v.push_back(std::to_string(e.charges));
+		v.push_back("'" + Strings::Escape(e.objectname) + "'");
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.unknown08));
+		v.push_back(std::to_string(e.unknown10));
+		v.push_back(std::to_string(e.unknown20));
+		v.push_back(std::to_string(e.unknown24));
+		v.push_back(std::to_string(e.unknown60));
+		v.push_back(std::to_string(e.unknown64));
+		v.push_back(std::to_string(e.unknown68));
+		v.push_back(std::to_string(e.unknown72));
+		v.push_back(std::to_string(e.unknown76));
+		v.push_back(std::to_string(e.unknown84));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.tilt_x));
+		v.push_back(std::to_string(e.tilt_y));
+		v.push_back("'" + Strings::Escape(e.display_name) + "'");
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			object_entry.id = results.LastInsertedID();
-			return object_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		object_entry = NewEntity();
+		e = NewEntity();
 
-		return object_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Object> object_entries
+		const std::vector<Object> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &object_entry: object_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(object_entry.id));
-			insert_values.push_back(std::to_string(object_entry.zoneid));
-			insert_values.push_back(std::to_string(object_entry.version));
-			insert_values.push_back(std::to_string(object_entry.xpos));
-			insert_values.push_back(std::to_string(object_entry.ypos));
-			insert_values.push_back(std::to_string(object_entry.zpos));
-			insert_values.push_back(std::to_string(object_entry.heading));
-			insert_values.push_back(std::to_string(object_entry.itemid));
-			insert_values.push_back(std::to_string(object_entry.charges));
-			insert_values.push_back("'" + Strings::Escape(object_entry.objectname) + "'");
-			insert_values.push_back(std::to_string(object_entry.type));
-			insert_values.push_back(std::to_string(object_entry.icon));
-			insert_values.push_back(std::to_string(object_entry.unknown08));
-			insert_values.push_back(std::to_string(object_entry.unknown10));
-			insert_values.push_back(std::to_string(object_entry.unknown20));
-			insert_values.push_back(std::to_string(object_entry.unknown24));
-			insert_values.push_back(std::to_string(object_entry.unknown60));
-			insert_values.push_back(std::to_string(object_entry.unknown64));
-			insert_values.push_back(std::to_string(object_entry.unknown68));
-			insert_values.push_back(std::to_string(object_entry.unknown72));
-			insert_values.push_back(std::to_string(object_entry.unknown76));
-			insert_values.push_back(std::to_string(object_entry.unknown84));
-			insert_values.push_back(std::to_string(object_entry.size));
-			insert_values.push_back(std::to_string(object_entry.tilt_x));
-			insert_values.push_back(std::to_string(object_entry.tilt_y));
-			insert_values.push_back("'" + Strings::Escape(object_entry.display_name) + "'");
-			insert_values.push_back(std::to_string(object_entry.min_expansion));
-			insert_values.push_back(std::to_string(object_entry.max_expansion));
-			insert_values.push_back("'" + Strings::Escape(object_entry.content_flags) + "'");
-			insert_values.push_back("'" + Strings::Escape(object_entry.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.zoneid));
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.xpos));
+			v.push_back(std::to_string(e.ypos));
+			v.push_back(std::to_string(e.zpos));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.itemid));
+			v.push_back(std::to_string(e.charges));
+			v.push_back("'" + Strings::Escape(e.objectname) + "'");
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.unknown08));
+			v.push_back(std::to_string(e.unknown10));
+			v.push_back(std::to_string(e.unknown20));
+			v.push_back(std::to_string(e.unknown24));
+			v.push_back(std::to_string(e.unknown60));
+			v.push_back(std::to_string(e.unknown64));
+			v.push_back(std::to_string(e.unknown68));
+			v.push_back(std::to_string(e.unknown72));
+			v.push_back(std::to_string(e.unknown76));
+			v.push_back(std::to_string(e.unknown84));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.tilt_x));
+			v.push_back(std::to_string(e.tilt_y));
+			v.push_back("'" + Strings::Escape(e.display_name) + "'");
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -463,46 +463,46 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Object entry{};
+			Object e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.zoneid                 = atoi(row[1]);
-			entry.version                = atoi(row[2]);
-			entry.xpos                   = static_cast<float>(atof(row[3]));
-			entry.ypos                   = static_cast<float>(atof(row[4]));
-			entry.zpos                   = static_cast<float>(atof(row[5]));
-			entry.heading                = static_cast<float>(atof(row[6]));
-			entry.itemid                 = atoi(row[7]);
-			entry.charges                = atoi(row[8]);
-			entry.objectname             = row[9] ? row[9] : "";
-			entry.type                   = atoi(row[10]);
-			entry.icon                   = atoi(row[11]);
-			entry.unknown08              = atoi(row[12]);
-			entry.unknown10              = atoi(row[13]);
-			entry.unknown20              = atoi(row[14]);
-			entry.unknown24              = atoi(row[15]);
-			entry.unknown60              = atoi(row[16]);
-			entry.unknown64              = atoi(row[17]);
-			entry.unknown68              = atoi(row[18]);
-			entry.unknown72              = atoi(row[19]);
-			entry.unknown76              = atoi(row[20]);
-			entry.unknown84              = atoi(row[21]);
-			entry.size                   = static_cast<float>(atof(row[22]));
-			entry.tilt_x                 = static_cast<float>(atof(row[23]));
-			entry.tilt_y                 = static_cast<float>(atof(row[24]));
-			entry.display_name           = row[25] ? row[25] : "";
-			entry.min_expansion          = atoi(row[26]);
-			entry.max_expansion          = atoi(row[27]);
-			entry.content_flags          = row[28] ? row[28] : "";
-			entry.content_flags_disabled = row[29] ? row[29] : "";
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.xpos                   = strtof(row[3], nullptr);
+			e.ypos                   = strtof(row[4], nullptr);
+			e.zpos                   = strtof(row[5], nullptr);
+			e.heading                = strtof(row[6], nullptr);
+			e.itemid                 = static_cast<int32_t>(atoi(row[7]));
+			e.charges                = static_cast<uint16_t>(strtoul(row[8], nullptr, 10));
+			e.objectname             = row[9] ? row[9] : "";
+			e.type                   = static_cast<int32_t>(atoi(row[10]));
+			e.icon                   = static_cast<int32_t>(atoi(row[11]));
+			e.unknown08              = static_cast<int32_t>(atoi(row[12]));
+			e.unknown10              = static_cast<int32_t>(atoi(row[13]));
+			e.unknown20              = static_cast<int32_t>(atoi(row[14]));
+			e.unknown24              = static_cast<int32_t>(atoi(row[15]));
+			e.unknown60              = static_cast<int32_t>(atoi(row[16]));
+			e.unknown64              = static_cast<int32_t>(atoi(row[17]));
+			e.unknown68              = static_cast<int32_t>(atoi(row[18]));
+			e.unknown72              = static_cast<int32_t>(atoi(row[19]));
+			e.unknown76              = static_cast<int32_t>(atoi(row[20]));
+			e.unknown84              = static_cast<int32_t>(atoi(row[21]));
+			e.size                   = strtof(row[22], nullptr);
+			e.tilt_x                 = strtof(row[23], nullptr);
+			e.tilt_y                 = strtof(row[24], nullptr);
+			e.display_name           = row[25] ? row[25] : "";
+			e.min_expansion          = static_cast<int8_t>(atoi(row[26]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[27]));
+			e.content_flags          = row[28] ? row[28] : "";
+			e.content_flags_disabled = row[29] ? row[29] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Object> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Object> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Object> all_entries;
 
@@ -517,46 +517,46 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Object entry{};
+			Object e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.zoneid                 = atoi(row[1]);
-			entry.version                = atoi(row[2]);
-			entry.xpos                   = static_cast<float>(atof(row[3]));
-			entry.ypos                   = static_cast<float>(atof(row[4]));
-			entry.zpos                   = static_cast<float>(atof(row[5]));
-			entry.heading                = static_cast<float>(atof(row[6]));
-			entry.itemid                 = atoi(row[7]);
-			entry.charges                = atoi(row[8]);
-			entry.objectname             = row[9] ? row[9] : "";
-			entry.type                   = atoi(row[10]);
-			entry.icon                   = atoi(row[11]);
-			entry.unknown08              = atoi(row[12]);
-			entry.unknown10              = atoi(row[13]);
-			entry.unknown20              = atoi(row[14]);
-			entry.unknown24              = atoi(row[15]);
-			entry.unknown60              = atoi(row[16]);
-			entry.unknown64              = atoi(row[17]);
-			entry.unknown68              = atoi(row[18]);
-			entry.unknown72              = atoi(row[19]);
-			entry.unknown76              = atoi(row[20]);
-			entry.unknown84              = atoi(row[21]);
-			entry.size                   = static_cast<float>(atof(row[22]));
-			entry.tilt_x                 = static_cast<float>(atof(row[23]));
-			entry.tilt_y                 = static_cast<float>(atof(row[24]));
-			entry.display_name           = row[25] ? row[25] : "";
-			entry.min_expansion          = atoi(row[26]);
-			entry.max_expansion          = atoi(row[27]);
-			entry.content_flags          = row[28] ? row[28] : "";
-			entry.content_flags_disabled = row[29] ? row[29] : "";
+			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.zoneid                 = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.xpos                   = strtof(row[3], nullptr);
+			e.ypos                   = strtof(row[4], nullptr);
+			e.zpos                   = strtof(row[5], nullptr);
+			e.heading                = strtof(row[6], nullptr);
+			e.itemid                 = static_cast<int32_t>(atoi(row[7]));
+			e.charges                = static_cast<uint16_t>(strtoul(row[8], nullptr, 10));
+			e.objectname             = row[9] ? row[9] : "";
+			e.type                   = static_cast<int32_t>(atoi(row[10]));
+			e.icon                   = static_cast<int32_t>(atoi(row[11]));
+			e.unknown08              = static_cast<int32_t>(atoi(row[12]));
+			e.unknown10              = static_cast<int32_t>(atoi(row[13]));
+			e.unknown20              = static_cast<int32_t>(atoi(row[14]));
+			e.unknown24              = static_cast<int32_t>(atoi(row[15]));
+			e.unknown60              = static_cast<int32_t>(atoi(row[16]));
+			e.unknown64              = static_cast<int32_t>(atoi(row[17]));
+			e.unknown68              = static_cast<int32_t>(atoi(row[18]));
+			e.unknown72              = static_cast<int32_t>(atoi(row[19]));
+			e.unknown76              = static_cast<int32_t>(atoi(row[20]));
+			e.unknown84              = static_cast<int32_t>(atoi(row[21]));
+			e.size                   = strtof(row[22], nullptr);
+			e.tilt_x                 = strtof(row[23], nullptr);
+			e.tilt_y                 = strtof(row[24], nullptr);
+			e.display_name           = row[25] ? row[25] : "";
+			e.min_expansion          = static_cast<int8_t>(atoi(row[26]));
+			e.max_expansion          = static_cast<int8_t>(atoi(row[27]));
+			e.content_flags          = row[28] ? row[28] : "";
+			e.content_flags_disabled = row[29] ? row[29] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -579,6 +579,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

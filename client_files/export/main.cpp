@@ -27,9 +27,13 @@
 #include "../../common/rulesys.h"
 #include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
+#include "../../common/zone_store.h"
+#include "../../common/path_manager.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
+ZoneStore zone_store;
+PathManager path;
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
@@ -41,6 +45,8 @@ int main(int argc, char **argv)
 	RegisterExecutablePlatform(ExePlatformClientExport);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	LogInfo("Client Files Export Utility");
 	if (!EQEmuConfig::LoadConfig()) {
@@ -84,6 +90,7 @@ int main(int argc, char **argv)
 	}
 
 	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
@@ -124,7 +131,8 @@ void ExportSpells(SharedDatabase *db)
 {
 	LogInfo("Exporting Spells");
 
-	FILE *f = fopen("export/spells_us.txt", "w");
+	std::string file = fmt::format("{}/export/spells_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "w");
 	if (!f) {
 		LogError("Unable to open export/spells_us.txt to write, skipping.");
 		return;
@@ -206,7 +214,8 @@ void ExportSkillCaps(SharedDatabase *db)
 {
 	LogInfo("Exporting Skill Caps");
 
-	FILE *f = fopen("export/SkillCaps.txt", "w");
+	std::string file = fmt::format("{}/export/SkillCaps.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "w");
 	if (!f) {
 		LogError("Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
@@ -236,7 +245,8 @@ void ExportBaseData(SharedDatabase *db)
 {
 	LogInfo("Exporting Base Data");
 
-	FILE *f = fopen("export/BaseData.txt", "w");
+	std::string file = fmt::format("{}/export/BaseData.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "w");
 	if (!f) {
 		LogError("Unable to open export/BaseData.txt to write, skipping.");
 		return;
@@ -269,7 +279,8 @@ void ExportDBStrings(SharedDatabase *db)
 {
 	LogInfo("Exporting DB Strings");
 
-	FILE *f = fopen("export/dbstr_us.txt", "w");
+	std::string file = fmt::format("{}/export/dbstr_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "w");
 	if (!f) {
 		LogError("Unable to open export/dbstr_us.txt to write, skipping.");
 		return;

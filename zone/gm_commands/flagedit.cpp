@@ -4,7 +4,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
 	if (!arguments) {
-		auto flags_link = Saylink::Create("#flags", false, "#flags");
+		auto flags_link = Saylink::Silent("#flags");
 		c->Message(
 			Chat::White,
 			"Usage: #flagedit lock [Zone ID|Zone Short Name] [Flag Name] - Set the specified flag name on the zone, locking the zone"
@@ -48,7 +48,7 @@ void command_flagedit(Client *c, const Seperator *sep)
 		!is_take &&
 		!is_unlock
 	) {
-		auto flags_link = Saylink::Create("#flags", false, "#flags");
+		auto flags_link = Saylink::Silent("#flags");
 		c->Message(
 			Chat::White,
 			"Usage: #flagedit lock [Zone ID|Zone Short Name] [Flag Name] - Set the specified flag name on the zone, locking the zone"

@@ -32,6 +32,7 @@
 #include "../inventory_profile.h"
 #include "rof2_structs.h"
 #include "../rulesys.h"
+#include "../path_manager.h"
 
 #include <iostream>
 #include <sstream>
@@ -76,12 +77,9 @@ namespace RoF2
 	{
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
-			//TODO: get this file name from the config file
-			auto Config = EQEmuConfig::get();
-			std::string opfile = Config->PatchDir;
-			opfile += "patch_";
-			opfile += name;
-			opfile += ".conf";
+
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
+
 			//load up the opcode manager.
 			//TODO: figure out how to support shared memory with multiple patches...
 			opcodes = new RegularOpcodeManager();
@@ -122,12 +120,7 @@ namespace RoF2
 		//we need to go to every stream and replace it's manager.
 
 		if (opcodes != nullptr) {
-			//TODO: get this file name from the config file
-			auto Config = EQEmuConfig::get();
-			std::string opfile = Config->PatchDir;
-			opfile += "patch_";
-			opfile += name;
-			opfile += ".conf";
+			std::string opfile = fmt::format("{}/patch_{}.conf", path.GetPatchPath(), name);
 			if (!opcodes->ReloadOpcodes(opfile.c_str())) {
 				LogNetcode("[OPCODES] Error reloading opcodes file [{}] for patch [{}]", opfile.c_str(), name);
 				return;
@@ -1863,13 +1856,13 @@ namespace RoF2
 		OUT_str(zone_short_name2);
 		OUT(zone_id);
 		OUT(zone_instance);
-		OUT(SuspendBuffs);
-		OUT(FastRegenHP);
-		OUT(FastRegenMana);
-		OUT(FastRegenEndurance);
+		OUT(suspend_buffs);
+		OUT(fast_regen_hp);
+		OUT(fast_regen_mana);
+		OUT(fast_regen_endurance);
 		OUT(underworld_teleport_index);
 
-		eq->FogDensity = emu->fog_density;
+		eq->fog_density = emu->fog_density;
 
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->ZoneTimeZone = 0;
@@ -1881,22 +1874,22 @@ namespace RoF2
 		eq->SkyRelated2 = -1;
 		eq->NPCAggroMaxDist = 600;
 		eq->FilterID = 2008; // Guild Lobby observed value
-		OUT(LavaDamage);
-		OUT(MinLavaDamage);
-		eq->bDisallowManaStone = 1;
-		eq->bNoBind = 0;
-		eq->bNoAttack = 0;
-		eq->bNoCallOfHero = 0;
-		eq->bNoFlux = 0;
-		eq->bNoFear = 0;
-		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
-		eq->unknown895 = 0;
-		eq->CanPlaceCampsite = 2;
-		eq->CanPlaceGuildBanner = 2;
-		eq->FishingRelated = -1;	// Set from PoK Example
-		eq->ForageRelated = -1;	// Set from PoK Example
-		eq->bNoLevitate = 0;
-		eq->Blooming = 1.0;	// Set from PoK Example
+		OUT(lava_damage);
+		OUT(min_lava_damage);
+		eq->bDisallowManaStone     = 1;
+		eq->bNoBind                = 0;
+		eq->bNoAttack              = 0;
+		eq->bNoCallOfHero          = 0;
+		eq->bNoFlux                = 0;
+		eq->bNoFear                = 0;
+		eq->fall_damage            = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
+		eq->unknown895             = 0;
+		eq->can_place_campsite     = 2;
+		eq->can_place_guild_banner = 2;
+		eq->fishing_related        = -1;	// Set from PoK Example
+		eq->forage_related         = -1;	// Set from PoK Example
+		eq->b_no_levitate          = 0;
+		eq->blooming               = 1.0;	// Set from PoK Example
 
 		FINISH_ENCODE();
 	}

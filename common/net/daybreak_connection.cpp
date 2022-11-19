@@ -3,6 +3,7 @@
 #include "../event/task.h"
 #include "../data_verification.h"
 #include "crc32.h"
+#include "../eqemu_logsys.h"
 #include <zlib.h>
 #include <fmt/format.h>
 #include <sstream>
@@ -308,6 +309,8 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
 	m_outgoing_budget = owner->m_options.outgoing_data_rate;
+
+	LogNetcode("New session [{}] with encode key [{}]", m_connect_code, HostToNetwork(m_encode_key));
 }
 
 //new connection made as client
@@ -466,7 +469,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 			for (int i = 1; i >= 0; --i) {
 				switch (m_encode_passes[i]) {
 					case EncodeXOR:
-						if (temp.GetInt8(0) == 0) 
+						if (temp.GetInt8(0) == 0)
 							Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
 						else
 							Decode(temp, 1, temp.Length() - 1);
@@ -630,6 +633,8 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 					DynamicPacket p;
 					p.PutSerialize(0, reply);
 					InternalSend(p);
+
+					LogNetcode("[OP_SessionRequest] Session [{}] started with encode key [{}]", m_connect_code, HostToNetwork(m_encode_key));
 				}
 
 				break;
@@ -647,6 +652,12 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 						m_encode_passes[1] = (DaybreakEncodeType)reply.encode_pass2;
 						m_max_packet_size = reply.max_packet_size;
 						ChangeStatus(StatusConnected);
+
+						LogNetcode(
+							"[OP_SessionResponse] Session [{}] refresh with encode key [{}]",
+							m_connect_code,
+							HostToNetwork(m_encode_key)
+						);
 					}
 				}
 				break;
@@ -771,6 +782,12 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 					SendDisconnect();
 				}
 
+				LogNetcode(
+					"[OP_SessionDisconnect] Session [{}] disconnect with encode key [{}]",
+					m_connect_code,
+					HostToNetwork(m_encode_key)
+				);
+
 				ChangeStatus(StatusDisconnecting);
 				break;
 			}
@@ -835,6 +852,7 @@ bool EQ::Net::DaybreakConnection::ValidateCRC(Packet &p)
 	}
 
 	if (p.Length() < (size_t)m_crc_bytes) {
+		LogNetcode("Session [{}] ignored packet (crc bytes invalid on session)", m_connect_code);
 		return false;
 	}
 
@@ -1078,7 +1096,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	if (m_status == DbProtocolStatus::StatusDisconnected) {
 		return;
 	}
-	
+
 	auto resends = 0;
 	auto now = Clock::now();
 	auto s = &m_streams[stream];
@@ -1113,7 +1131,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				Close();
 				return;
 			}
-	
+
 			if ((size_t)time_since_last_send.count() > entry.second.resend_delay) {
 				auto &p = entry.second.packet;
 				if (p.Length() >= DaybreakHeader::size()) {
@@ -1406,8 +1424,8 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 		sent.first_sent = Clock::now();
 		sent.times_resent = 0;
 		sent.resend_delay = EQ::Clamp(
-			static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms), 
-			m_owner->m_options.resend_delay_min, 
+			static_cast<size_t>((m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms),
+			m_owner->m_options.resend_delay_min,
 			m_owner->m_options.resend_delay_max);
 		stream->sent_packets.insert(std::make_pair(stream->sequence_out, sent));
 		stream->sequence_out++;

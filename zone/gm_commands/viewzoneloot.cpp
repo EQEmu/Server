@@ -30,7 +30,7 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 			std::string npc_name     = current_npc->GetCleanName();
 			uint32      instance_id  = zone->GetInstanceID();
 			uint32      zone_id      = zone->GetZoneID();
-			std::string command_link = Saylink::Create(
+			std::string command_link = Saylink::Silent(
 				fmt::format(
 					"#{} {} {} {} {}",
 					(instance_id != 0 ? "zoneinstance" : "zone"),
@@ -39,7 +39,6 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 					current_npc->GetY(),
 					current_npc->GetZ()
 				),
-				false,
 				"Goto"
 			);
 			npc_link = fmt::format(

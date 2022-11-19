@@ -69,7 +69,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Create(saylink, false, "Goto").c_str(),
+					Saylink::Silent(saylink, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetName(),
 					entity->GetX(),
@@ -110,7 +110,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Create(saylink, false, "Goto").c_str(),
+					Saylink::Silent(saylink, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetName(),
 					entity->GetX(),
@@ -151,7 +151,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Create(saylink, false, "Goto").c_str(),
+					Saylink::Silent(saylink, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetName(),
 					entity->GetX(),
@@ -192,7 +192,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | Entity ID %5d | Door ID %i | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Create(saylink, false, "Goto").c_str(),
+					Saylink::Silent(saylink, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetDoorID(),
 					entity->GetDoorName(),
@@ -234,7 +234,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | Entity ID %5d | Object DBID %i | %s | x %.0f | y %0.f | z %.0f",
-					Saylink::Create(saylink, false, "Goto").c_str(),
+					Saylink::Silent(saylink, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetDBID(),
 					entity->GetModelName(),

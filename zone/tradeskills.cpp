@@ -33,8 +33,8 @@
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
-#include "zone_store.h"
-#include "../common/repositories/character_recipe_list_repository.h"
+#include "../common/repositories/char_recipe_list_repository.h"
+#include "../common/zone_store.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 
 extern QueryServ* QServ;
@@ -758,7 +758,11 @@ void Client::SendTradeskillSearchResults(
 		return;
 	}
 
-	auto character_learned_recipe_list = CharacterRecipeListRepository::GetLearnedRecipeList(CharacterID());
+
+	auto character_learned_recipe_list = CharRecipeListRepository::GetWhere(
+		database,
+		fmt::format("char_id = {}", CharacterID())
+	);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr ||
@@ -777,8 +781,7 @@ void Client::SendTradeskillSearchResults(
 		// Skip the recipes that exceed the threshold in skill difference
 		// Recipes that have either been made before or were
 		// explicitly learned are excempt from that limit
-
-		auto character_learned_recipe = CharacterRecipeListRepository::GetRecipe(
+		auto character_learned_recipe = CharRecipeListRepository::GetCharRecipeListEntry(
 			character_learned_recipe_list,
 			recipe_id
 		);
@@ -789,7 +792,7 @@ void Client::SendTradeskillSearchResults(
 
 			LogTradeskills("Checking limit recipe_id [{}] name [{}]", recipe_id, name);
 
-			if (character_learned_recipe.made_count == 0) {
+			if (character_learned_recipe.madecount == 0) {
 				continue;
 			}
 		}
@@ -1484,17 +1487,16 @@ bool ZoneDatabase::GetTradeRecipe(
 	spec->madecount         = 0;
 	spec->recipe_id         = recipe_id;
 
-	auto character_learned_recipe_list = CharacterRecipeListRepository::GetLearnedRecipeList(char_id);
-	auto character_learned_recipe      = CharacterRecipeListRepository::GetRecipe(
-		character_learned_recipe_list,
-		recipe_id
+	auto r = CharRecipeListRepository::GetWhere(
+		database,
+		fmt::format("char_id = {} and recipe_id = {}", char_id, recipe_id)
 	);
 
-	if (character_learned_recipe.recipe_id) { //If this exists we learned it
-		LogTradeskills("[GetTradeRecipe] made_count [{}]", character_learned_recipe.made_count);
+	if (!r.empty() && r[0].recipe_id) { //If this exists we learned it
+		LogTradeskills("[GetTradeRecipe] made_count [{}]", r[0].madecount);
 
 		spec->has_learnt = true;
-		spec->madecount = (uint32)character_learned_recipe.made_count;
+		spec->madecount  = (uint32) r[0].madecount;
 	}
 
 	//Pull the on-success items...

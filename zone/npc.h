@@ -23,10 +23,11 @@
 #include "mob.h"
 #include "qglobals.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/zone_store.h"
 #include "zonedump.h"
 #include "../common/loottable.h"
 
+#include <any>
 #include <deque>
 #include <list>
 
@@ -35,25 +36,15 @@
 	#define M_PI	3.141592
 #endif
 
-#define LEAVECOMBAT 0
-#define ENTERCOMBAT 1
-#define	ONDEATH		2
-#define	AFTERDEATH	3
-#define HAILED		4
-#define	KILLEDPC	5
-#define	KILLEDNPC	6
-#define	ONSPAWN		7
-#define	ONDESPAWN	8
-
 typedef struct {
-	float min_x;
-	float max_x;
-	float min_y;
-	float max_y;
-	float min_z;
-	float max_z;
-	bool say;
-	bool proximity_set;
+	float	min_x;
+	float	max_x;
+	float	min_y;
+	float	max_y;
+	float	min_z;
+	float	max_z;
+	bool	say;
+	bool	proximity_set;
 } NPCProximity;
 
 struct AISpells_Struct {
@@ -68,6 +59,21 @@ struct AISpells_Struct {
 	int8	max_hp; // >0 won't cast if HP is above
 };
 
+struct BotSpells_Struct {
+	uint32		type;			// 0 = never, must be one (and only one) of the defined values
+	int16		spellid;			// <= 0 = no spell
+	int16		manacost;		// -1 = use spdat, -2 = no cast time
+	uint32		time_cancast;	// when we can cast this spell next
+	int32		recast_delay;
+	int16		priority;
+	int16		resist_adjust;
+	int16		min_hp;			// >0 won't cast if HP is below
+	int16		max_hp;			// >0 won't cast if HP is above
+	std::string	bucket_name;
+	std::string	bucket_value;
+	uint8		bucket_comparison;
+};
+
 struct AISpellsEffects_Struct {
 	uint16	spelleffectid;
 	int32	base_value;
@@ -76,17 +82,17 @@ struct AISpellsEffects_Struct {
 };
 
 struct AISpellsVar_Struct {
-	uint32  fail_recast;
+	uint32	fail_recast;
 	uint32	engaged_no_sp_recast_min;
 	uint32	engaged_no_sp_recast_max;
 	uint8	engaged_beneficial_self_chance;
 	uint8	engaged_beneficial_other_chance;
 	uint8	engaged_detrimental_chance;
-	uint32  pursue_no_sp_recast_min;
-	uint32  pursue_no_sp_recast_max;
-	uint8   pursue_detrimental_chance;
-	uint32  idle_no_sp_recast_min;
-	uint32  idle_no_sp_recast_max;
+	uint32	pursue_no_sp_recast_min;
+	uint32	pursue_no_sp_recast_max;
+	uint8	pursue_detrimental_chance;
+	uint32	idle_no_sp_recast_min;
+	uint32	idle_no_sp_recast_max;
 	uint8	idle_beneficial_chance;
 };
 
@@ -108,6 +114,13 @@ public:
 	static NPC* SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client = nullptr);
 	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);
+
+	// loot recording / simulator
+	bool IsRecordLootStats() const;
+	void SetRecordLootStats(bool record_loot_stats);
+	void FlushLootStats();
+	const std::vector<uint32> &GetRolledItems() const;
+	int GetRolledItemCount(uint32 item_id);
 
 	NPC(const NPCType* npc_type_data, Spawn2* respawn, const glm::vec4& position, GravityBehavior iflymode, bool IsCorpse = false);
 
@@ -271,6 +284,9 @@ public:
 	inline int32 GetPrimaryFaction() const
 	{ return primary_faction; }
 
+	inline int32 GetFactionAmount() const
+	{ return faction_amount; }
+
 	int64 GetNPCHate(Mob *in_ent)
 	{ return hate_list.GetEntHateAmount(in_ent); }
 
@@ -409,8 +425,8 @@ public:
 	void	SetAvoidanceRating(int32 d) { avoidance_rating = d;}
 	int32 GetRawAC() const { return AC; }
 
-	float	GetNPCStat(const char *identifier);
-	void	ModifyNPCStat(const char *identifier, const char *new_value);
+	float	GetNPCStat(std::string stat);
+	void	ModifyNPCStat(std::string stat, std::string value);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 
 	bool IsLDoNTrapped() const { return (ldon_trapped); }
@@ -458,8 +474,8 @@ public:
 	Timer *GetRefaceTimer() const { return reface_timer; }
 	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
 
-	NPC_Emote_Struct* GetNPCEmote(uint16 emoteid, uint8 event_);
-	void DoNPCEmote(uint8 event_, uint16 emoteid);
+	NPC_Emote_Struct* GetNPCEmote(uint32 emoteid, uint8 event_);
+	void DoNPCEmote(uint8 event_, uint32 emoteid);
 	bool CanTalk();
 	void DoQuestPause(Mob *other);
 
@@ -534,8 +550,12 @@ public:
 	void ScaleNPC(uint8 npc_level);
 
 	void RecalculateSkills();
+	void ReloadSpells();
 
 	static LootDropEntries_Struct NewLootDropEntry();
+
+	int DispatchZoneControllerEvent(QuestEventID evt, Mob* init, const std::string& data, uint32 extra, std::vector<std::any>* pointers);
+
 protected:
 
 	const NPCType*	NPCTypedata;
@@ -554,6 +574,7 @@ protected:
 
 	int32	npc_faction_id;
 	int32	primary_faction;
+	int32	faction_amount;
 
 	Timer	attacked_timer;		//running while we are being attacked (damaged)
 	Timer	swarm_timer;
@@ -573,6 +594,7 @@ protected:
 
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
+	std::vector<BotSpells_Struct> AIBot_spells; //Will eventually be moved to Bot Class once Bots are no longer reliant on NPC constructor
 	bool HasAISpell;
 	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates = false);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
@@ -678,10 +700,12 @@ protected:
 
 
 private:
-	uint32 loottable_id;
-	bool   skip_global_loot;
-	bool   skip_auto_scale;
-	bool   p_depop;
+	uint32              loottable_id;
+	bool                skip_global_loot;
+	bool                skip_auto_scale;
+	bool                p_depop;
+	bool                m_record_loot_stats;
+	std::vector<uint32> m_rolled_items = {};
 };
 
 #endif

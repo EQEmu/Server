@@ -19,12 +19,12 @@
 class BaseCharCreateCombinationsRepository {
 public:
 	struct CharCreateCombinations {
-		int allocation_id;
-		int race;
-		int class_;
-		int deity;
-		int start_zone;
-		int expansions_req;
+		uint32_t allocation_id;
+		uint32_t race;
+		uint32_t class_;
+		uint32_t deity;
+		uint32_t start_zone;
+		uint32_t expansions_req;
 	};
 
 	static std::string PrimaryKey()
@@ -91,19 +91,19 @@ public:
 
 	static CharCreateCombinations NewEntity()
 	{
-		CharCreateCombinations entry{};
+		CharCreateCombinations e{};
 
-		entry.allocation_id  = 0;
-		entry.race           = 0;
-		entry.class_         = 0;
-		entry.deity          = 0;
-		entry.start_zone     = 0;
-		entry.expansions_req = 0;
+		e.allocation_id  = 0;
+		e.race           = 0;
+		e.class_         = 0;
+		e.deity          = 0;
+		e.start_zone     = 0;
+		e.expansions_req = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharCreateCombinations GetCharCreateCombinationsEntry(
+	static CharCreateCombinations GetCharCreateCombinations(
 		const std::vector<CharCreateCombinations> &char_create_combinationss,
 		int char_create_combinations_id
 	)
@@ -132,16 +132,16 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharCreateCombinations entry{};
+			CharCreateCombinations e{};
 
-			entry.allocation_id  = atoi(row[0]);
-			entry.race           = atoi(row[1]);
-			entry.class_         = atoi(row[2]);
-			entry.deity          = atoi(row[3]);
-			entry.start_zone     = atoi(row[4]);
-			entry.expansions_req = atoi(row[5]);
+			e.allocation_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.class_         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.deity          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.start_zone     = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.expansions_req = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -166,27 +166,27 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharCreateCombinations char_create_combinations_entry
+		const CharCreateCombinations &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(char_create_combinations_entry.allocation_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(char_create_combinations_entry.race));
-		update_values.push_back(columns[2] + " = " + std::to_string(char_create_combinations_entry.class_));
-		update_values.push_back(columns[3] + " = " + std::to_string(char_create_combinations_entry.deity));
-		update_values.push_back(columns[4] + " = " + std::to_string(char_create_combinations_entry.start_zone));
-		update_values.push_back(columns[5] + " = " + std::to_string(char_create_combinations_entry.expansions_req));
+		v.push_back(columns[0] + " = " + std::to_string(e.allocation_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.race));
+		v.push_back(columns[2] + " = " + std::to_string(e.class_));
+		v.push_back(columns[3] + " = " + std::to_string(e.deity));
+		v.push_back(columns[4] + " = " + std::to_string(e.start_zone));
+		v.push_back(columns[5] + " = " + std::to_string(e.expansions_req));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				char_create_combinations_entry.race
+				e.race
 			)
 		);
 
@@ -195,57 +195,57 @@ public:
 
 	static CharCreateCombinations InsertOne(
 		Database& db,
-		CharCreateCombinations char_create_combinations_entry
+		CharCreateCombinations e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(char_create_combinations_entry.allocation_id));
-		insert_values.push_back(std::to_string(char_create_combinations_entry.race));
-		insert_values.push_back(std::to_string(char_create_combinations_entry.class_));
-		insert_values.push_back(std::to_string(char_create_combinations_entry.deity));
-		insert_values.push_back(std::to_string(char_create_combinations_entry.start_zone));
-		insert_values.push_back(std::to_string(char_create_combinations_entry.expansions_req));
+		v.push_back(std::to_string(e.allocation_id));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.start_zone));
+		v.push_back(std::to_string(e.expansions_req));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			char_create_combinations_entry.race = results.LastInsertedID();
-			return char_create_combinations_entry;
+			e.race = results.LastInsertedID();
+			return e;
 		}
 
-		char_create_combinations_entry = NewEntity();
+		e = NewEntity();
 
-		return char_create_combinations_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharCreateCombinations> char_create_combinations_entries
+		const std::vector<CharCreateCombinations> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &char_create_combinations_entry: char_create_combinations_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(char_create_combinations_entry.allocation_id));
-			insert_values.push_back(std::to_string(char_create_combinations_entry.race));
-			insert_values.push_back(std::to_string(char_create_combinations_entry.class_));
-			insert_values.push_back(std::to_string(char_create_combinations_entry.deity));
-			insert_values.push_back(std::to_string(char_create_combinations_entry.start_zone));
-			insert_values.push_back(std::to_string(char_create_combinations_entry.expansions_req));
+			v.push_back(std::to_string(e.allocation_id));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.start_zone));
+			v.push_back(std::to_string(e.expansions_req));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -272,22 +272,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharCreateCombinations entry{};
+			CharCreateCombinations e{};
 
-			entry.allocation_id  = atoi(row[0]);
-			entry.race           = atoi(row[1]);
-			entry.class_         = atoi(row[2]);
-			entry.deity          = atoi(row[3]);
-			entry.start_zone     = atoi(row[4]);
-			entry.expansions_req = atoi(row[5]);
+			e.allocation_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.class_         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.deity          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.start_zone     = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.expansions_req = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharCreateCombinations> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharCreateCombinations> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharCreateCombinations> all_entries;
 
@@ -302,22 +302,22 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharCreateCombinations entry{};
+			CharCreateCombinations e{};
 
-			entry.allocation_id  = atoi(row[0]);
-			entry.race           = atoi(row[1]);
-			entry.class_         = atoi(row[2]);
-			entry.deity          = atoi(row[3]);
-			entry.start_zone     = atoi(row[4]);
-			entry.expansions_req = atoi(row[5]);
+			e.allocation_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.race           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.class_         = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.deity          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
+			e.start_zone     = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			e.expansions_req = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -340,6 +340,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

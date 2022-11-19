@@ -26,6 +26,7 @@
 #include "../common/servertalk.h"
 #include "../common/bodytypes.h"
 #include "../common/eq_constants.h"
+#include "../common/emu_constants.h"
 
 #include "position.h"
 #include "zonedump.h"
@@ -189,9 +190,14 @@ public:
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClientByLSID(uint32 iLSID);
 	Client *GetClient(uint32 ip, uint16 port);
-	Client* GetRandomClient(const glm::vec3& location, float distance, Client* exclude_client = nullptr);
-	NPC* GetRandomNPC(const glm::vec3& location, float distance, NPC* exclude_npc = nullptr);
-	Mob* GetRandomMob(const glm::vec3& location, float distance, Mob* exclude_mob = nullptr);
+
+#ifdef BOTS
+	Bot* GetRandomBot(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Bot* exclude_bot = nullptr);
+#endif
+
+	Client* GetRandomClient(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Client* exclude_client = nullptr);
+	NPC* GetRandomNPC(const glm::vec3& location = glm::vec3(0.f), float distance = 0, NPC* exclude_npc = nullptr);
+	Mob* GetRandomMob(const glm::vec3& location = glm::vec3(0.f), float distance = 0, Mob* exclude_mob = nullptr);
 	Group *GetGroupByMob(Mob* mob);
 	bool IsInSameGroupOrRaidGroup(Client *client1, Client *client2);
 	Group *GetGroupByClient(Client* client);
@@ -334,6 +340,11 @@ public:
 
 	void DescribeAggro(Client *to_who, NPC *from_who, float dist, bool verbose);
 
+	std::vector<Mob*> GetFilteredEntityList(Mob* sender, uint32 distance = 0, uint8 filter_type = EntityFilterTypes::All);
+	void DamageArea(Mob* sender, int64 damage, uint32 distance = 0, uint8 filter_type = EntityFilterTypes::All, bool is_percentage = false);
+
+	void	Marquee(uint32 type, std::string message, uint32 duration = 3000);
+	void	Marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message);
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
 	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);
@@ -501,7 +512,7 @@ public:
 	void	UnMarkNPC(uint16 ID);
 
 	void	GateAllClients();
-	void	SignalAllClients(uint32 data);
+	void	SignalAllClients(int signal_id);
 	void	UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void	DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);
 	void	SendFindableNPCList(Client *c);
@@ -528,8 +539,11 @@ public:
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
 #ifdef BOTS
 	inline const std::list<Bot *> &GetBotList() { return bot_list; }
-	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id);
+	std::vector<Bot *> GetBotListByCharacterID(uint32 character_id, uint8 class_id = 0);
 	std::vector<Bot *> GetBotListByClientName(std::string client_name);
+	void SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id);
+	void SignalBotByBotID(uint32 bot_id, int signal_id);
+	void SignalBotByBotName(std::string bot_name, int signal_id);
 #endif
 	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
@@ -598,7 +612,7 @@ private:
 	// Please Do Not Declare Any EntityList Class Members After This Comment
 #ifdef BOTS
 	public:
-		void AddBot(Bot* newBot, bool SendSpawnPacket = true, bool dontqueue = false);
+		void AddBot(Bot* new_bot, bool send_spawn_packet = true, bool dont_queue = false);
 		bool RemoveBot(uint16 entityID);
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);

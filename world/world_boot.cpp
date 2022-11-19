@@ -18,18 +18,25 @@
 #include "world_boot.h"
 #include "world_config.h"
 #include "world_event_scheduler.h"
-#include "world_server_command_handler.h"
-#include "world_store.h"
+#include "world_server_cli.h"
+#include "../common/zone_store.h"
 #include "worlddb.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "../common/ip_util.h"
+#include "../common/zone_store.h"
+#include "../common/path_manager.h"
 
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
 
 void WorldBoot::GMSayHookCallBackProcessWorld(uint16 log_category, std::string message)
 {
+	// we don't want to loop up with chat messages
+	if (message.find("OP_SpecialMesg") != std::string::npos) {
+		return;
+	}
+
 	// Cut messages down to 4000 max to prevent client crash
 	if (!message.empty()) {
 		message = message.substr(0, 4000);
@@ -83,10 +90,11 @@ bool WorldBoot::HandleCommandInput(int argc, char **argv)
 	// command handler
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
+		path.LoadPaths();
 		WorldConfig::LoadConfig();
 		LoadDatabaseConnections();
 		LogSys.EnableConsoleLogging();
-		WorldserverCommandHandler::CommandHandler(argc, argv);
+		WorldserverCLI::CommandHandler(argc, argv);
 	}
 
 	return false;
@@ -163,14 +171,14 @@ int get_file_size(const std::string &filename) // path to file
 
 void WorldBoot::CheckForServerScript(bool force_download)
 {
-	const std::string file = "eqemu_server.pl";
+	const std::string file = fmt::format("{}/eqemu_server.pl", path.GetServerPath());
 	std::ifstream     f(file);
 
 	/* Fetch EQEmu Server script */
 	if (!f || get_file_size(file) < 100 || force_download) {
 
 		if (force_download) {
-			std::remove("eqemu_server.pl");
+			std::remove(fmt::format("{}/eqemu_server.pl", path.GetServerPath()).c_str());
 		} /* Delete local before fetch */
 
 		std::cout << "Pulling down EQEmu Server Maintenance Script (eqemu_server.pl)..." << std::endl;
@@ -193,13 +201,15 @@ void WorldBoot::CheckForServerScript(bool force_download)
 		if (auto res = r.Get(u.get_path().c_str())) {
 			if (res->status == 200) {
 				// write file
-				std::ofstream out("eqemu_server.pl");
+
+				std::string script = fmt::format("{}/eqemu_server.pl", path.GetServerPath());
+				std::ofstream out(script);
 				out << res->body;
 				out.close();
 #ifdef _WIN32
 #else
-				system("chmod 755 eqemu_server.pl");
-				system("chmod +x eqemu_server.pl");
+				system(fmt::format("chmod 755 {}", script).c_str());
+				system(fmt::format("chmod +x {}", script).c_str());
 #endif
 			}
 		}
@@ -210,7 +220,8 @@ void WorldBoot::CheckForXMLConfigUpgrade()
 {
 	if (!std::ifstream("eqemu_config.json") && std::ifstream("eqemu_config.xml")) {
 		CheckForServerScript(true);
-		if (system("perl eqemu_server.pl convert_xml")) {}
+		std::string command = fmt::format("perl {}/eqemu_server.pl convert_xml", path.GetServerPath());
+		if (system(command.c_str())) {}
 	}
 	else {
 		CheckForServerScript();
@@ -285,6 +296,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	// logging system init
 	auto logging = LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings();
 
 	if (RuleB(Logging, WorldGMSayLogging)) {
@@ -310,7 +322,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	LogInfo("Loading zones");
 
-	world_store.LoadZones();
+	zone_store.LoadZones(content_db);
 
 	LogInfo("Clearing groups");
 	database.ClearGroup();

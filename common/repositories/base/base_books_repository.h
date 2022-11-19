@@ -19,10 +19,10 @@
 class BaseBooksRepository {
 public:
 	struct Books {
-		int         id;
+		int32_t     id;
 		std::string name;
 		std::string txtfile;
-		int         language;
+		int32_t     language;
 	};
 
 	static std::string PrimaryKey()
@@ -85,17 +85,17 @@ public:
 
 	static Books NewEntity()
 	{
-		Books entry{};
+		Books e{};
 
-		entry.id       = 0;
-		entry.name     = "";
-		entry.txtfile  = "";
-		entry.language = 0;
+		e.id       = 0;
+		e.name     = "";
+		e.txtfile  = "";
+		e.language = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Books GetBooksEntry(
+	static Books GetBooks(
 		const std::vector<Books> &bookss,
 		int books_id
 	)
@@ -124,14 +124,14 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Books entry{};
+			Books e{};
 
-			entry.id       = atoi(row[0]);
-			entry.name     = row[1] ? row[1] : "";
-			entry.txtfile  = row[2] ? row[2] : "";
-			entry.language = atoi(row[3]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
+			e.name     = row[1] ? row[1] : "";
+			e.txtfile  = row[2] ? row[2] : "";
+			e.language = static_cast<int32_t>(atoi(row[3]));
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -156,24 +156,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Books books_entry
+		const Books &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + Strings::Escape(books_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + Strings::Escape(books_entry.txtfile) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(books_entry.language));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.txtfile) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.language));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				Strings::Implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				books_entry.id
+				e.id
 			)
 		);
 
@@ -182,53 +182,53 @@ public:
 
 	static Books InsertOne(
 		Database& db,
-		Books books_entry
+		Books e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(books_entry.id));
-		insert_values.push_back("'" + Strings::Escape(books_entry.name) + "'");
-		insert_values.push_back("'" + Strings::Escape(books_entry.txtfile) + "'");
-		insert_values.push_back(std::to_string(books_entry.language));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.txtfile) + "'");
+		v.push_back(std::to_string(e.language));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				Strings::Implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			books_entry.id = results.LastInsertedID();
-			return books_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		books_entry = NewEntity();
+		e = NewEntity();
 
-		return books_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Books> books_entries
+		const std::vector<Books> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &books_entry: books_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(books_entry.id));
-			insert_values.push_back("'" + Strings::Escape(books_entry.name) + "'");
-			insert_values.push_back("'" + Strings::Escape(books_entry.txtfile) + "'");
-			insert_values.push_back(std::to_string(books_entry.language));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.txtfile) + "'");
+			v.push_back(std::to_string(e.language));
 
-			insert_chunks.push_back("(" + Strings::Implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -255,20 +255,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Books entry{};
+			Books e{};
 
-			entry.id       = atoi(row[0]);
-			entry.name     = row[1] ? row[1] : "";
-			entry.txtfile  = row[2] ? row[2] : "";
-			entry.language = atoi(row[3]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
+			e.name     = row[1] ? row[1] : "";
+			e.txtfile  = row[2] ? row[2] : "";
+			e.language = static_cast<int32_t>(atoi(row[3]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Books> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Books> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Books> all_entries;
 
@@ -283,20 +283,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Books entry{};
+			Books e{};
 
-			entry.id       = atoi(row[0]);
-			entry.name     = row[1] ? row[1] : "";
-			entry.txtfile  = row[2] ? row[2] : "";
-			entry.language = atoi(row[3]);
+			e.id       = static_cast<int32_t>(atoi(row[0]));
+			e.name     = row[1] ? row[1] : "";
+			e.txtfile  = row[2] ? row[2] : "";
+			e.language = static_cast<int32_t>(atoi(row[3]));
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -319,6 +319,32 @@ public:
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
 };

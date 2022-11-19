@@ -21,7 +21,7 @@
 #include "launcher_link.h"
 #include "launcher_list.h"
 #include "../common/strings.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include <cstdlib>
 #include <cstring>
 

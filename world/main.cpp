@@ -88,15 +88,17 @@ union semun {
 #include "dynamic_zone_manager.h"
 #include "expedition_database.h"
 
-#include "world_server_command_handler.h"
+#include "world_server_cli.h"
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/character_task_timers_repository.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 #include "world_event_scheduler.h"
 #include "shared_task_manager.h"
 #include "world_boot.h"
+#include "../common/path_manager.h"
 
-WorldStore          world_store;
+
+ZoneStore           zone_store;
 ClientList          client_list;
 GroupLFPList        LFPGroupList;
 ZSList              zoneserver_list;
@@ -115,6 +117,7 @@ const WorldConfig   *Config;
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
 WebInterfaceList    web_interface;
+PathManager         path;
 
 void CatchSignal(int sig_num);
 
@@ -141,6 +144,8 @@ int main(int argc, char **argv)
 	if (WorldBoot::HandleCommandInput(argc, argv)) {
 		return 0;
 	}
+
+	path.LoadPaths();
 
 	if (!WorldBoot::LoadServerConfig()) {
 		return 0;
@@ -366,8 +371,14 @@ int main(int argc, char **argv)
 		}
 	);
 
-	while (RunLoops) {
+	auto loop_fn = [&](EQ::Timer* t) {
 		Timer::SetCurrentTime();
+
+		if (!RunLoops) {
+			EQ::EventLoop::Get().Shutdown();
+			return;
+		}
+
 		eqs = nullptr;
 
 		//give the stream identifier a chance to do its work....
@@ -376,7 +387,7 @@ int main(int argc, char **argv)
 		//check the stream identifier for any now-identified streams
 		while ((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
-			struct in_addr in{};
+			struct in_addr in {};
 			in.s_addr = eqsi->GetRemoteIP();
 			if (RuleB(World, UseBannedIPsTable)) { //Lieka: Check to see if we have the responsibility for blocking IPs.
 				LogInfo("Checking inbound connection [{}] against BannedIPs table", inet_ntoa(in));
@@ -442,10 +453,13 @@ int main(int argc, char **argv)
 			);
 			UpdateWindowTitle(window_title);
 		}
+	};
 
-		EQ::EventLoop::Get().Process();
-		Sleep(5);
-	}
+	EQ::Timer process_timer(loop_fn);
+	process_timer.Start(32, true);
+
+	EQ::EventLoop::Get().Run();
+
 	LogInfo("World main loop completed");
 	LogInfo("Shutting down zone connections (if any)");
 	zoneserver_list.KillAll();
