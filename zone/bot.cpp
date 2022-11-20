@@ -4682,8 +4682,8 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 					trade_index
 				).c_str()
 			);
-			client->ResetTrade();
-			return;
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
 		}
 
 		EQ::SayLinkEngine linker;
@@ -4695,8 +4695,8 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		if (trade_index != invslot::slotCursor && !trade_instance->IsDroppable()) {
 			LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 			client->Message(Chat::White, "Trade hack detected, the trade has been cancelled.");
-			client->ResetTrade();
-			return;
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
 		}
 
 		if (trade_instance->IsStackable() && trade_instance->GetCharges() < trade_instance->GetItem()->StackSize) { // temp until partial stacks are implemented
@@ -4707,8 +4707,8 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 					item_link
 				).c_str()
 			);
-			client->ResetTrade();
-			return;
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
 		}
 
 		if (CheckLoreConflict(trade_instance->GetItem())) {
@@ -4719,8 +4719,8 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 					item_link
 				).c_str()
 			);
-			client->ResetTrade();
-			return;
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
 		}
 
 		if (!trade_instance->IsType(item::ItemClassCommon)) {
@@ -4756,15 +4756,15 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			if (trade_instance->GetItem()->LoreGroup == -1 && check_iterator.trade_item_instance->GetItem()->ID == trade_instance->GetItem()->ID) {
 				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 				client->Message(Chat::White, "Trade hack detected, the trade has been cancelled.");
-				client->ResetTrade();
-				return;
+				client_return.push_back(ClientReturn(trade_instance, trade_index));
+				continue;
 			}
 
 			if ((trade_instance->GetItem()->LoreGroup > 0) && (check_iterator.trade_item_instance->GetItem()->LoreGroup == trade_instance->GetItem()->LoreGroup)) {
 				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 				client->Message(Chat::White, "Trade hack detected, the trade has been cancelled.");
-				client->ResetTrade();
-				return;
+				client_return.push_back(ClientReturn(trade_instance, trade_index));
+				continue;
 			}
 		}
 	}
@@ -4898,6 +4898,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
 		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
+		// Need to test this with new logic
 		if (client->CheckLoreConflict(return_instance->GetItem())) {
 			client->Message(
 				Chat::Yellow,
@@ -4959,6 +4960,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 			}
 		}
 
+		//Need to test this with new Logic
 		if (return_iterator.to_client_slot == invslot::SLOT_INVALID) {
 			client->Message(Chat::Yellow, "You do not have room to complete this trade, the trade has been cancelled!");
 			client->ResetTrade();
@@ -9821,9 +9823,9 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 }
 
 /**
- * @param close_mobs
- * @param scanning_mob
- */
+	* @param close_mobs
+	* @param scanning_mob
+	*/
 void EntityList::ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mobs, Mob* scanning_mob)
 {
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
