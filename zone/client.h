@@ -1640,6 +1640,7 @@ public:
 
 protected:
 	friend class Mob;
+	friend class Bot;
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0, bool ammo_slot_item = false);
 	void AdditiveWornBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug = false);
@@ -1675,6 +1676,8 @@ protected:
 	char *adv_requested_data;
 	int adv_requested_member_count;
 	char *adv_data;
+
+	EQ::InventoryProfile m_inv;
 
 private:
 
@@ -1816,7 +1819,6 @@ private:
 
 	PlayerProfile_Struct m_pp;
 	ExtendedProfile_Struct m_epp;
-	EQ::InventoryProfile m_inv;
 	Object* m_tradeskill_object;
 	PetInfo m_petinfo; // current pet data, used while loading from and saving to DB
 	PetInfo m_suspendedminion; // pet data for our suspended minion.

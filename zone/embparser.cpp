@@ -1575,6 +1575,12 @@ void PerlembParser::ExportEventVariables(
 			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item2};").c_str());
 			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item3};").c_str());
 			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item4};").c_str());
+			if (npcmob->IsBot()) {
+				perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item5};").c_str());
+				perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item6};").c_str());
+				perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item7};").c_str());
+				perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item8};").c_str());
+			}
 			break;
 		}
 
