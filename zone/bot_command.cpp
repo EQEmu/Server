@@ -1416,6 +1416,12 @@ int bot_command_init(void)
 		bot_command_add("rune", "Orders a bot to cast a rune of protection", AccountStatus::Player, bot_command_rune) ||
 		bot_command_add("sendhome", "Orders a bot to open a magical doorway home", AccountStatus::Player, bot_command_send_home) ||
 		bot_command_add("size", "Orders a bot to change a player's size", AccountStatus::Player, bot_command_size) ||
+		bot_command_add("spelllist", "Lists a Caster of Hybrid bot's spells", AccountStatus::Player, bot_command_spell_list) ||
+		bot_command_add("spellsettingsadd", "Add a bot spell setting for a Caster or Hybrid bot", AccountStatus::Player, bot_command_spell_settings_add) ||
+		bot_command_add("spellsettingsdelete", "Delete a bot spell setting from a Caster or Hybrid bot", AccountStatus::Player, bot_command_spell_settings_delete) ||
+		bot_command_add("spellsettingslist", "Lists a Caster or Hybrid bot's spell settings", AccountStatus::Player, bot_command_spell_settings_list) ||
+		bot_command_add("spellsettingstoggle", "Toggle a bot spell for a Caster or Hybrid bot", AccountStatus::Player, bot_command_spell_settings_toggle) ||
+		bot_command_add("spellsettingsupdate", "Update a bot spell setting for a Caster or Hybrid bot", AccountStatus::Player, bot_command_spell_settings_update) ||
 		bot_command_add("summoncorpse", "Orders a bot to summon a corpse to its feet", AccountStatus::Player, bot_command_summon_corpse) ||
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", AccountStatus::Player, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", AccountStatus::Player, bot_command_taunt) ||
@@ -10086,7 +10092,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			if (local_entry->single != single_flag) {
 				continue;
 			}
-			
+
 			msg = fmt::format(
 				"{}circle {}{}",
 				std::to_string(BOT_COMMAND_CHAR),
@@ -10122,7 +10128,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 			if (local_entry->single != single_flag) {
 				continue;
 			}
-			
+
 			msg = fmt::format(
 				"{}portal {}{}",
 				std::to_string(BOT_COMMAND_CHAR),
@@ -10224,6 +10230,516 @@ bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::Sp
 	}
 
 	return false;
+}
+
+void bot_command_spell_list(Client* c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_spell_list", sep->arg[0], "spelllist")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID] [Priority] [Min Level] [Max Level] [Min HP] [Max HP]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::White, "You must target a bot that you own to use this command.");
+		return;
+	}
+
+	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		return;
+	}
+
+	my_bot->ListBotSpells();
+}
+
+void bot_command_spell_settings_add(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_spell_settings_add", sep->arg[0], "spellsettingsadd")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID] [Priority] [Min Level] [Max Level] [Min HP] [Max HP]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::White, "You must target a bot that you own to use this command.");
+		return;
+	}
+
+	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		return;
+	}
+
+	auto arguments = sep->argnum;
+	if (
+		arguments < 6 ||
+		!sep->IsNumber(1) ||
+		!sep->IsNumber(2) ||
+		!sep->IsNumber(3) ||
+		!sep->IsNumber(4) ||
+		!sep->IsNumber(5) ||
+		!sep->IsNumber(6)
+	) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID] [Priority] [Min Level] [Max Level] [Min HP] [Max HP]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+
+	if (!IsValidSpell(spell_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spell ID {} is invalid or could not be found.",
+				spell_id
+			).c_str()
+		);
+		return;
+	}
+
+	if (my_bot->GetBotSpellSetting(spell_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} already has a spell setting for {} ({}), trying using {} instead.",
+				my_bot->GetCleanName(),
+				spells[spell_id].name,
+				spell_id,
+				Saylink::Silent("^spellsettingsupdate")
+			).c_str()
+		);
+		return;
+	}
+
+	auto priority = static_cast<int16>(std::stoi(sep->arg[2]));
+	auto min_level = static_cast<uint8>(std::stoul(sep->arg[3]));
+	auto max_level = static_cast<uint8>(std::stoul(sep->arg[4]));
+	auto min_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[5]), -1, 99));
+	auto max_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[6]), -1, 100));
+
+	BotSpellSetting bs;
+
+	bs.priority = priority;
+	bs.min_level = min_level;
+	bs.max_level = max_level;
+	bs.min_hp = min_hp;
+	bs.max_hp = max_hp;
+
+	if (!my_bot->UpdateBotSpellSetting(spell_id, &bs)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to add spell setting for {}.",
+				my_bot->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	my_bot->AI_AddBotSpells(my_bot->GetBotSpellID());
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully added spell setting for {}.",
+			my_bot->GetCleanName()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Spell Setting Added | Spell: {} ({}) ",
+			spells[spell_id].name,
+			spell_id
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Spell Setting Added | Priority: {} Levels: {} Health: {}",
+			priority,
+			my_bot->GetLevelString(min_level, max_level),
+			my_bot->GetHPString(min_hp, max_hp)
+		).c_str()
+	);
+}
+
+void bot_command_spell_settings_delete(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_spell_settings_delete", sep->arg[0], "spellsettingsdelete")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::White, "You must target a bot that you own to use this command.");
+		return;
+	}
+
+	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		return;
+	}
+
+	auto arguments = sep->argnum;
+	if (
+		arguments < 1 ||
+		!sep->IsNumber(1)
+	) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+
+	if (!IsValidSpell(spell_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spell ID {} is invalid or could not be found.",
+				spell_id
+			).c_str()
+		);
+		return;
+	}
+
+	if (!my_bot->DeleteBotSpellSetting(spell_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to delete spell setting for {}.",
+				my_bot->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	my_bot->AI_AddBotSpells(my_bot->GetBotSpellID());
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully deleted spell setting for {}.",
+			my_bot->GetCleanName()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Spell Setting Deleted | Spell: {} ({})",
+			spells[spell_id].name,
+			spell_id
+		).c_str()
+	);
+}
+
+void bot_command_spell_settings_list(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_spell_settings_list", sep->arg[0], "spellsettingslist")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {}",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::White, "You must target a bot that you own to use this command.");
+		return;
+	}
+
+	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		return;
+	}
+
+	my_bot->ListBotSpellSettings();
+}
+
+void bot_command_spell_settings_toggle(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_spell_settings_toggle", sep->arg[0], "spellsettingstoggle")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID] [Toggle]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::White, "You must target a bot that you own to use this command.");
+		return;
+	}
+
+	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		return;
+	}
+
+	auto arguments = sep->argnum;
+	if (
+		arguments < 2 ||
+		!sep->IsNumber(1)
+	) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID] [Toggle]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+	if (!IsValidSpell(spell_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spell ID {} is invalid or could not be found.",
+				spell_id
+			).c_str()
+		);
+		return;
+	}
+
+	bool toggle = (
+		sep->IsNumber(2) ?
+		(std::stoi(sep->arg[2]) ? true : false) :
+		atobool(sep->arg[2])
+	);
+
+	auto obs = my_bot->GetBotSpellSetting(spell_id);
+	if (!obs) {
+		return;
+	}
+
+	BotSpellSetting bs;
+
+	bs.priority = obs->priority;
+	bs.min_level = obs->min_level;
+	bs.max_level = obs->max_level;
+	bs.min_hp = obs->min_hp;
+	bs.max_hp = obs->max_hp;
+	bs.is_enabled = toggle;
+
+	if (!my_bot->UpdateBotSpellSetting(spell_id, &bs)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to {}able spell for {}.",
+				toggle ? "en" : "dis",
+				my_bot->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	my_bot->AI_AddBotSpells(my_bot->GetBotSpellID());
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully {}abled spell for {}.",
+			toggle ? "en" : "dis",
+			my_bot->GetCleanName()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Spell {}abled | Spell: {} ({})",
+			toggle ? "En" : "Dis",
+			spells[spell_id].name,
+			spell_id
+		).c_str()
+	);
+}
+
+void bot_command_spell_settings_update(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_command_spell_settings_update", sep->arg[0], "spellsettingsupdate")) {
+		return;
+	}
+
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID] [Priority] [Min Level] [Max Level] [Min HP] [Max HP]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto my_bot = ActionableBots::AsTarget_ByBot(c);
+	if (!my_bot) {
+		c->Message(Chat::White, "You must target a bot that you own to use this command.");
+		return;
+	}
+
+	if (!my_bot->IsBotCaster() && !my_bot->IsBotHybrid()) {
+		c->Message(Chat::White, "You must target a Caster or Hybrid bot to use this command.");
+		return;
+	}
+
+	auto arguments = sep->argnum;
+	if (
+		arguments < 6 ||
+		!sep->IsNumber(1) ||
+		!sep->IsNumber(2) ||
+		!sep->IsNumber(3) ||
+		!sep->IsNumber(4) ||
+		!sep->IsNumber(5) ||
+		!sep->IsNumber(6)
+	) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Usage: {} [Spell ID] [Priority] [Min Level] [Max Level] [Min HP] [Max HP]",
+				sep->arg[0]
+			).c_str()
+		);
+		return;
+	}
+
+	auto spell_id = static_cast<uint16>(std::stoul(sep->arg[1]));
+
+	if (!IsValidSpell(spell_id)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spell ID {} is invalid or could not be found.",
+				spell_id
+			).c_str()
+		);
+		return;
+	}
+
+	auto priority = static_cast<int16>(std::stoi(sep->arg[2]));
+	auto min_level = static_cast<uint8>(std::stoul(sep->arg[3]));
+	auto max_level = static_cast<uint8>(std::stoul(sep->arg[4]));
+	auto min_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[5]), -1, 99));
+	auto max_hp = static_cast<int8>(EQ::Clamp(std::stoi(sep->arg[6]), -1, 100));
+
+	BotSpellSetting bs;
+
+	bs.priority = priority;
+	bs.min_level = min_level;
+	bs.max_level = max_level;
+	bs.min_hp = min_hp;
+	bs.max_hp = max_hp;
+
+	if (!my_bot->UpdateBotSpellSetting(spell_id, &bs)) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to update spell setting for {}.",
+				my_bot->GetCleanName()
+			).c_str()
+		);
+		return;
+	}
+
+	my_bot->AI_AddBotSpells(my_bot->GetBotSpellID());
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Successfully updated spell setting for {}.",
+			my_bot->GetCleanName()
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Spell Setting Updated | Spell: {} ({})",
+			spells[spell_id].name,
+			spell_id
+		).c_str()
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Spell Setting Updated | Priority: {} Levels: {} Health: {}",
+			priority,
+			my_bot->GetLevelString(min_level, max_level),
+			my_bot->GetHPString(min_hp, max_hp)
+		).c_str()
+	);
 }
 
 #endif // BOTS

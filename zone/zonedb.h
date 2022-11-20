@@ -533,8 +533,8 @@ public:
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);
 
 	/*Bots	*/
-	DBbotspells_Struct*	GetBotSpells(uint32 iDBSpellsID);
-	void ClearBotSpells() { Bot_Spells_Cache.clear(); Bot_Spells_LoadTried.clear(); }
+	DBbotspells_Struct*	GetBotSpells(uint32 bot_spell_id);
+	void ClearBotSpells() { bot_spells_cache.clear(); bot_spells_loadtried.clear(); }
 
 	/* Mercs   */
 	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
@@ -640,8 +640,9 @@ protected:
 	std::unordered_set<uint32> npc_spells_loadtried;
 	DBnpcspellseffects_Struct** npc_spellseffects_cache;
 	bool*				npc_spellseffects_loadtried;
-	std::unordered_map<uint32, DBbotspells_Struct> Bot_Spells_Cache;
-	std::unordered_set<uint32> Bot_Spells_LoadTried;
+	std::unordered_map<uint32, DBbotspells_Struct> bot_spells_cache;
+	std::unordered_set<uint32> bot_spells_loadtried;
+
 };
 
 extern ZoneDatabase database;
