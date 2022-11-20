@@ -446,6 +446,8 @@ public:
 	bool HasItemEquippedByID(uint32 item_id);
 	int GetHealAmount();
 	int GetSpellDamage();
+	void UpdateAdmin();
+	void UpdateAdmin(bool from_database);
 
 	int GetEnvironmentDamageModifier();
 	void SetEnvironmentDamageModifier(int value);
