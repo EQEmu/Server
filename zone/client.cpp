@@ -1680,19 +1680,18 @@ void Client::FriendsWho(char *FriendsString) {
 	}
 }
 
-void Client::UpdateAdmin(bool iFromDB) {
+void Client::UpdateAdmin(bool from_database) {
 	int16 tmp = admin;
-	if (iFromDB)
+	if (from_database) {
 		admin = database.CheckStatus(account_id);
-	if (tmp == admin && iFromDB)
-		return;
+	}
 
-	if(m_pp.gm)
-	{
+	if (tmp == admin && from_database) {
+		return;
+	}
+
+	if (m_pp.gm) {
 		LogInfo("[{}] - [{}] is a GM", __FUNCTION__ , GetName());
-// no need for this, having it set in pp you already start as gm
-// and it's also set in your spawn packet so other people see it too
-//		SendAppearancePacket(AT_GM, 1, false);
 		petition_list.UpdateGMQueue();
 	}
 
@@ -10786,9 +10785,11 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 	}
 }
 
-void Client::SetGMStatus(int newStatus) {
-	if (Admin() != newStatus)
-		database.UpdateGMStatus(AccountID(), newStatus);
+void Client::SetGMStatus(int16 new_status) {
+	if (Admin() != new_status) {
+		database.UpdateGMStatus(AccountID(), new_status);
+		UpdateAdmin();
+	}
 }
 
 void Client::ApplyWeaponsStance()

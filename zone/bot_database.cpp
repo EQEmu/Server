@@ -452,9 +452,9 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		std::stoul(row[17]), // Beard Color
 		std::stoul(row[18]), // Drakkin Heritage
 		std::stoul(row[19]), // Drakkin Tattoo
-		std::stoul(row[19]), // Drakkin Details
-		std::stoi(row[20]), // Health
-		std::stoi(row[21]), // Mana
+		std::stoul(row[20]), // Drakkin Details
+		std::stoi(row[21]), // Health
+		std::stoi(row[22]), // Mana
 		d->MR,
 		d->CR,
 		d->DR,

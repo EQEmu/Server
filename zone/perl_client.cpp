@@ -424,9 +424,9 @@ void Perl_Client_UpdateAdmin(Client* self) // @categories Account and Character
 	self->UpdateAdmin();
 }
 
-void Perl_Client_UpdateAdmin(Client* self, bool from_db) // @categories Account and Character
+void Perl_Client_UpdateAdmin(Client* self, bool from_database) // @categories Account and Character
 {
-	self->UpdateAdmin(from_db);
+	self->UpdateAdmin(from_database);
 }
 
 void Perl_Client_UpdateWho(Client* self) // @categories Script Utility
@@ -1230,7 +1230,6 @@ void Perl_Client_ReadBook(Client* self, const char* book_text, uint8 type) // @c
 void Perl_Client_SetGMStatus(Client* self, int16 new_status) // @categories Script Utility
 {
 	self->SetGMStatus(new_status);
-	self->UpdateAdmin(true);
 }
 
 int16 Perl_Client_GetGMStatus(Client* self) // @categories Account and Character
