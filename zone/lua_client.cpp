@@ -2613,6 +2613,16 @@ void Lua_Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in
 	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
+void Lua_Client::UpdateAdmin() {
+	Lua_Safe_Call_Void();
+	self->UpdateAdmin();
+}
+
+void Lua_Client::UpdateAdmin(bool from_database) {
+	Lua_Safe_Call_Void();
+	self->UpdateAdmin(from_database);
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3156,6 +3166,8 @@ luabind::scope lua_register_client() {
 	.def("UntrainDiscAll", (void(Lua_Client::*)(void))&Lua_Client::UntrainDiscAll)
 	.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UntrainDiscBySpellID)
 	.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UntrainDiscBySpellID)
+	.def("UpdateAdmin", (void(Lua_Client::*)(void))&Lua_Client::UpdateAdmin)
+	.def("UpdateAdmin", (void(Lua_Client::*)(bool))&Lua_Client::UpdateAdmin)
 	.def("UpdateGroupAAs", (void(Lua_Client::*)(int,uint32))&Lua_Client::UpdateGroupAAs)
 	.def("UpdateLDoNPoints", (void(Lua_Client::*)(uint32,int))&Lua_Client::UpdateLDoNPoints)
 	.def("UpdateTaskActivity", (void(Lua_Client::*)(int,int,int))&Lua_Client::UpdateTaskActivity)
