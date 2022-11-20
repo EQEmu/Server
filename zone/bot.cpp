@@ -2451,7 +2451,7 @@ void Bot::SetHoldMode() {
 // AI Processing for the Bot object
 
 constexpr float MAX_CASTER_DISTANCE[PLAYER_CLASS_COUNT] = {
-    0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, (30 * 30), 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (32 * 32), 0
+	0, (34 * 34), (24 * 24), (28 * 28), (26 * 26), (42 * 42), 0, (30 * 30), 0, (38 * 38), (54 * 54), (48 * 48), (52 * 52), (50 * 50), (32 * 32), 0
 //  W      C          P          R          S          D      M      B      R      S          N          W          M          E          B      B
 //  A      L          A          N          H          R      N      R      O      H          E          I          A          N          S      E
 //  R      R          L          G          D          U      K      D      G      M          C          Z          G          C          T      R
@@ -4639,11 +4639,36 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 
 	std::list<ClientTrade> client_trade;
+	std::list<ClientTrade> event_return;
 	std::list<ClientReturn> client_return;
+	
+	// Get Traded Items 
+	EQ::ItemInstance* insts[8];
+	EQ::InventoryProfile& user_inv = client->GetInv();
+	for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
+		insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
+		database.SaveInventory(CharacterID(), nullptr, i);
+	}
+
+	// copy to be filtered by task updates, null trade slots preserved for quest event arg
+	std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
+
+	// Check if EVENT_TRADE accepts any items
+	std::vector<std::any> item_list(items.begin(), items.end());
+	parse->EventBot(EVENT_TRADE, this, this, "", 0, &item_list);
+	
+	// copy to be filtered by Equipment checks, dropping null trade slots.
+	for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
+		EQ::ItemInstance* items = std::any_cast<EQ::ItemInstance*>(item_list.at(i - EQ::invslot::TRADE_BEGIN));
+		if (items) {
+			event_return.push_back(ClientTrade(items, i));
+		}
+	}
 
 	// pre-checks for incoming illegal transfers
-	for (int16 trade_index = begin_slot_id; trade_index <= end_slot_id; ++trade_index) {
-		auto trade_instance = client->GetInv()[trade_index];
+	for (const auto& trade_iterator : event_return) {
+		auto trade_instance = trade_iterator.trade_item_instance;
+		auto trade_index = trade_iterator.from_client_slot;
 		if (!trade_instance) {
 			continue;
 		}
@@ -4713,12 +4738,14 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 	// check for incoming lore hacks
 	for (auto& trade_iterator : client_trade) {
-		if (!trade_iterator.trade_item_instance->GetItem()->LoreFlag) {
+		auto trade_instance = trade_iterator.trade_item_instance;
+		auto trade_index = trade_iterator.from_client_slot;
+		if (!trade_instance->GetItem()->LoreFlag) {
 			continue;
 		}
 
 		for (const auto& check_iterator : client_trade) {
-			if (check_iterator.from_client_slot == trade_iterator.from_client_slot) {
+			if (check_iterator.from_client_slot == trade_index) {
 				continue;
 			}
 
@@ -4726,14 +4753,14 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				continue;
 			}
 
-			if (trade_iterator.trade_item_instance->GetItem()->LoreGroup == -1 && check_iterator.trade_item_instance->GetItem()->ID == trade_iterator.trade_item_instance->GetItem()->ID) {
+			if (trade_instance->GetItem()->LoreGroup == -1 && check_iterator.trade_item_instance->GetItem()->ID == trade_instance->GetItem()->ID) {
 				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 				client->Message(Chat::White, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
 				return;
 			}
 
-			if ((trade_iterator.trade_item_instance->GetItem()->LoreGroup > 0) && (check_iterator.trade_item_instance->GetItem()->LoreGroup == trade_iterator.trade_item_instance->GetItem()->LoreGroup)) {
+			if ((trade_instance->GetItem()->LoreGroup > 0) && (check_iterator.trade_item_instance->GetItem()->LoreGroup == trade_instance->GetItem()->LoreGroup)) {
 				LogError("Bot::PerformTradeWithClient trade hack detected by {} with {}.", client->GetCleanName(), GetCleanName());
 				client->Message(Chat::White, "Trade hack detected, the trade has been cancelled.");
 				client->ResetTrade();
