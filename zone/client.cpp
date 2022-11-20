@@ -1219,7 +1219,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 #ifdef BOTS
 	else if (GetTarget() && GetTarget()->IsBot() && !IsInvisible(GetTarget())) {
 		if (DistanceNoZ(m_Position, GetTarget()->GetPosition()) <= RuleI(Range, Say)) {
-			parse->EventBot(GetTarget()->IsEngaged() ? EVENT_AGGRO_SAY : EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+			if (GetTarget()->IsEngaged()) {
+				parse->EventBot(EVENT_AGGRO_SAY, GetTarget()->CastToBot(), this, message, language);
+			} else {
+				parse->EventBot(EVENT_SAY, GetTarget()->CastToBot(), this, message, language);
+			}
 		}
 	}
 #endif
