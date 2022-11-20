@@ -2903,11 +2903,11 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 						continue;
 					}
 
-					if (bs->min_level && GetLevel() < bs->min_level) {
+					if (bs->min_level > 0 && GetLevel() < bs->min_level) {
 						continue;
 					}
 
-					if (bs->max_level && GetLevel() > bs->max_level) {
+					if (bs->max_level > 0 && GetLevel() > bs->max_level) {
 						continue;
 					}
 
@@ -3002,13 +3002,13 @@ bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 					continue;
 				}
 
-					if (bs->min_level && GetLevel() < bs->min_level) {
-						continue;
-					}
+				if (bs->min_level > 0- && GetLevel() < bs->min_level) {
+					continue;
+				}
 
-					if (bs->max_level && GetLevel() > bs->max_level) {
-						continue;
-					}
+				if (bs->max_level > 0- && GetLevel() > bs->max_level) {
+					continue;
+				}
 
 				AddSpellToBotList(
 					bs->priority,
