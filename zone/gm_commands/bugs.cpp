@@ -232,10 +232,18 @@ void command_bugs(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Bug ID {} | Zone: {} ({}) Position: {:.2f}, {:.2f}, {:.2f}, {}",
+				"Bug ID {} | Zone: {} ({})",
 				r.id,
 				ZoneLongName(ZoneID(r.zone)),
-				r.zone,
+				r.zone
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Bug ID {} | Position: {:.2f}, {:.2f}, {:.2f}, {}",
+				r.id,
 				r.pos_x,
 				r.pos_y,
 				r.pos_z,
@@ -258,10 +266,18 @@ void command_bugs(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Bug ID {} | Can Duplicate: {} Crash Bug: {} Character Flags: {} Unknown Value: {}",
+				"Bug ID {} | Can Duplicate: {} Crash Bug: {}",
 				r.id,
 				r._can_duplicate ? "Yes" : "No",
-				r._crash_bug ? "Yes" : "No",
+				r._crash_bug ? "Yes" : "No"
+			).c_str()
+		);,
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Bug ID {} | Character Flags: {} Unknown Value: {}",
+				r.id,
 				r._character_flags ? "Yes" : "No",
 				r._unknown_value ? "Yes" : "No"
 			).c_str()
