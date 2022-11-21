@@ -857,6 +857,20 @@ bool WorldDatabase::LoadCharacterCreateCombos()
 // this is a slightly modified version of SharedDatabase::GetInventory(...) for character select use-only
 bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv)
 {
+
+	const std::string classQuery =
+		StringFormat("SELECT class FROM character_data WHERE name = %s AND account_id = %i", name, account_id);
+
+	auto classResults = QueryDatabase(classQuery);
+	int16 class_id = 0;
+
+	if (!classResults.Success()) { return false; }
+
+	for (auto& row = classResults.begin(); row != classResults.end(); ++row) {
+		class_id = atoi(row[0]);
+	}
+
+
 	if (!account_id || !name || !inv)
 		return false;
 
@@ -890,11 +904,14 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 		"AND"
 		" slotid >= %i "
 		"AND"
-		" slotid <= %i",
+		" slotid <= %i"
+		"AND"
+		"(class = %i OR class = 0)",
 		name,
 		account_id,
 		EQ::invslot::slotHead,
-		EQ::invslot::slotFeet
+		EQ::invslot::slotFeet,
+		class_id
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
