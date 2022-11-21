@@ -296,10 +296,12 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 		StringFormat("SELECT class FROM character_data WHERE id = %i", char_id);
 
 	auto classResults = QueryDatabase(classQuery);
+	int16 class_id = 0;
+
 	if (!classResults.Success()) { return false; }
 
 	for (auto& row = classResults.begin(); row != classResults.end(); ++row) {
-		int16 class_id = atoi(row[0]);
+		class_id = atoi(row[0]);
 	}
 
 	// Update/Insert item
@@ -605,10 +607,12 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		StringFormat("SELECT class FROM character_data WHERE id = %i", char_id);
 
 	auto classResults = QueryDatabase(classQuery);
+	int16 class_id = 0;
+
 	if (!classResults.Success()) { return false; }
 
 	for (auto& row = classResults.begin(); row != classResults.end(); ++row) {
-		int16 class_id = atoi(row[0]);
+		class_id = atoi(row[0]);
 	}
 
 	if (!char_id || !inv || !class_id)
