@@ -271,7 +271,7 @@ void command_bugs(Client *c, const Seperator *sep)
 				r._can_duplicate ? "Yes" : "No",
 				r._crash_bug ? "Yes" : "No"
 			).c_str()
-		);,
+		);
 
 		c->Message(
 			Chat::White,
