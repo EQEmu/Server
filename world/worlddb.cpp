@@ -896,8 +896,7 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 		name,
 		account_id,
 		EQ::invslot::slotHead,
-		EQ::invslot::slotFeet,
-		class_id
+		EQ::invslot::slotFeet
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
