@@ -910,6 +910,8 @@ public:
 
 	bool SendGMCommand(std::string message, bool ignore_status = false);
 
+	void RegisterBug(BugReport_Struct* r);
+
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();

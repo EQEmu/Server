@@ -3946,7 +3946,7 @@ void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 	}
 
 	auto *r = (BugReport_Struct *) app->pBuffer;
-	database.RegisterBug(this, r);
+	RegisterBug(r);
 }
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app)

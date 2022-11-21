@@ -12,7 +12,6 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "aura.h"
-#include "../common/repositories/bug_reports_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/npc_types_repository.h"
 
@@ -197,48 +196,7 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 	return true;
 }
 
-void ZoneDatabase::RegisterBug(Client* c, BugReport_Struct* r) {
-	if (!c || !r) {
-		return;
-	};
 
-	auto b = BugReportsRepository::NewEntity();
-
-	b.zone                = zone->GetShortName();
-	b.client_version_id   = static_cast<uint32_t>(c->ClientVersion());
-	b.client_version_name = EQ::versions::ClientVersionName(c->ClientVersion());
-	b.account_id          = c->AccountID();
-	b.character_id        = c->CharacterID();
-	b.character_name      = c->GetName();
-	b.reporter_spoof      = (strcmp(c->GetName(), r->reporter_name) != 0 ? 1 : 0);
-	b.category_id         = r->category_id;
-	b.category_name       = r->category_name;
-	b.reporter_name       = r->reporter_name;
-	b.ui_path             = r->ui_path;
-	b.pos_x               = r->pos_x;
-	b.pos_y               = r->pos_y;
-	b.pos_z               = r->pos_z;
-	b.heading             = r->heading;
-	b.time_played         = r->time_played;
-	b.target_id           = r->target_id;
-	b.target_name         = r->target_name;
-	b.optional_info_mask  = r->optional_info_mask;
-	b._can_duplicate      = ((r->optional_info_mask & EQ::bug::infoCanDuplicate) != 0 ? 1 : 0);
-	b._crash_bug          = ((r->optional_info_mask & EQ::bug::infoCrashBug) != 0 ? 1 : 0);
-	b._target_info        = ((r->optional_info_mask & EQ::bug::infoTargetInfo) != 0 ? 1 : 0);
-	b._character_flags    = ((r->optional_info_mask & EQ::bug::infoCharacterFlags) != 0 ? 1 : 0);
-	b._unknown_value      = ((r->optional_info_mask & EQ::bug::infoUnknownValue) != 0 ? 1 : 0);
-	b.bug_report          = r->bug_report;
-	b.system_info         = r->system_info;
-
-	auto n = BugReportsRepository::InsertOne(database, b);
-	if (!n.id) {
-		c->Message(Chat::White, "Failed to created your bug report."); // Client sends success message
-		return;
-	}
-
-	LogBugs("id [{}] report [{}] name [{}] charid [{}] zone [{}]", n.id, r->bug_report, c->GetCleanName(), c->CharacterID(), zone->GetShortName());
-}
 
 bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
 
