@@ -383,8 +383,17 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
 
 bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 
+	auto classResults = QueryDatabase(classQuery);
+	int16 class_id = 0;
+
+	if (!classResults.Success()) { return false; }
+
+	for (auto& row = classResults.begin(); row != classResults.end(); ++row) {
+		class_id = atoi(row[0]);
+	}
+
 	// Delete item
-	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid = %i", char_id, slot_id);
+	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid = %i AND (class = %i OR class = 0)", char_id, slot_id, class_id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return false;
