@@ -797,13 +797,26 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv) // deprecated
 {
 	// Retrieve character inventory
+
+	const std::string classQuery =
+		StringFormat("SELECT class FROM character_data WHERE id = %i", char_id);
+
+	auto classResults = QueryDatabase(classQuery);
+	int16 class_id = 0;
+
+	if (!classResults.Success()) { return false; }
+
+	for (auto& row = classResults.begin(); row != classResults.end(); ++row) {
+		class_id = atoi(row[0]);
+	}
+
 	const std::string query =
 	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, "
 			 "augslot2, augslot3, augslot4, augslot5, augslot6, instnodrop, custom_data, ornamenticon, "
-			 "ornamentidfile, ornament_hero_model "
+			 "ornamentidfile, ornament_hero_model, class "
 			 "FROM inventory INNER JOIN character_data ch "
-			 "ON ch.id = charid WHERE ch.name = '%s' AND ch.account_id = %i ORDER BY slotid",
-			 name, account_id);
+			 "ON ch.id = charid WHERE ch.name = '%s' AND ch.account_id = %i AND ( class = %i OR class = 0 ) ORDER BY slotid ",
+			 name, account_id, class_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("If you got an error related to the 'instnodrop' field, run the "
