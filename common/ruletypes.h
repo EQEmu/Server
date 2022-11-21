@@ -742,8 +742,6 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(Bugs)
 RULE_BOOL(Bugs, ReportingSystemActive, true, "Activates bug reporting")
-RULE_BOOL(Bugs, UseOldReportingMethod, true, "Forces the use of the old bug reporting system")
-RULE_BOOL(Bugs, DumpTargetEntity, false, "Dumps the target entity, if one is provided")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Faction)

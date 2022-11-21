@@ -546,10 +546,10 @@ public:
 	bool	SaveMerc(Merc *merc);
 	bool	DeleteMerc(uint32 merc_id);
 
+	/* Bugs */
+	void	RegisterBug(Client* c, BugReport_Struct* r);
+
 	/* Petitions   */
-	void	RegisterBug(BugReport_Struct* bug_report); // old method
-	void	RegisterBug(Client* client, BugReport_Struct* bug_report); // new method
-	//void	UpdateBug(PetitionBug_Struct* bug);
 	void	DeletePetitionFromDB(Petition* wpet);
 	void	UpdatePetitionToDB(Petition* wpet);
 	void	InsertPetitionToDB(Petition* wpet);
