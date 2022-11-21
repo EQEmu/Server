@@ -799,7 +799,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 	// Retrieve character inventory
 
 	const std::string classQuery =
-		StringFormat("SELECT class FROM character_data WHERE id = %i", char_id);
+		StringFormat("SELECT class FROM character_data WHERE name = %s AND account_id = %i", name, account_id);
 
 	auto classResults = QueryDatabase(classQuery);
 	int16 class_id = 0;
