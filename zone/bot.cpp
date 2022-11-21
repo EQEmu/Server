@@ -5042,15 +5042,19 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 	if (event_trade.size()) {
 
-		// Setup event list to pass to EVENT_TRADE
-		std::vector<EQ::ItemInstance*> items;
-		for (auto& trade_iterator : event_trade) {
-			if (trade_iterator.trade_item_instance) {
-				items.push_back(trade_iterator.trade_item_instance);
-			}
+		// Get Traded Items 
+		EQ::ItemInstance* insts[8] = { 0 };
+		EQ::InventoryProfile& user_inv = client->GetInv();
+		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
+			insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
+			client->DeleteItemInInventory(i);
+
 		}
 
-		// Check EVENT_TRADE
+		// copy to be filtered by task updates, null trade slots preserved for quest event arg
+		std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
+
+		// Check if EVENT_TRADE accepts any items
 		std::vector<std::any> item_list(items.begin(), items.end());
 		parse->EventBot(EVENT_TRADE, this, client, "", 0, &item_list);
 	}
