@@ -892,7 +892,7 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::Inven
 		"AND"
 		" slotid <= %i"
 		"AND"
-		"class = ch.class",
+		"inventory.class = ch.class",
 		name,
 		account_id,
 		EQ::invslot::slotHead,
