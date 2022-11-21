@@ -383,6 +383,9 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
 
 bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 
+	const std::string classQuery =
+		StringFormat("SELECT class FROM character_data WHERE id = %i", char_id);
+
 	auto classResults = QueryDatabase(classQuery);
 	int16 class_id = 0;
 
