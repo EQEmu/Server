@@ -1,40 +1,48 @@
 #include "../client.h"
+#include "../dialogue_window.h"
 
 void command_timers(Client *c, const Seperator *sep)
 {
-	auto target = c;
+	auto t = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+		t = c->GetTarget()->CastToClient();
 	}
 
-	std::vector<std::pair<pTimerType, PersistentTimer *>> timers;
-	target->GetPTimers().ToVector(timers);
+	std::vector<std::pair<pTimerType, PersistentTimer *>> l;
+	t->GetPTimers().ToVector(l);
 
-	std::string popup_title = fmt::format(
-		"Recast Timers for {}",
-		c->GetTargetDescription(target, TargetDescriptionType::UCSelf)
+	if (l.empty()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} no recast timers.",
+				c->GetTargetDescription(t, TargetDescriptionType::UCYou),
+				c == t ? "have" : "has"
+			).c_str()
+		);
+		return;
+	}
+
+	auto m = DialogueWindow::TableRow(
+		DialogueWindow::TableCell("Timer ID") +
+		DialogueWindow::TableCell("Remaining Time")
 	);
 
-	std::string popup_text = "<table>";
-
-	popup_text += "<tr><td>Timer ID</td><td>Remaining</td></tr>";
-
-	for (const auto& timer : timers) {
-		auto remaining_time = timer.second->GetRemainingTime();
-		if (remaining_time) {
-			popup_text += fmt::format(
-				"<tr><td>{}</td><td>{}</td></tr>",
-				timer.first,
-				Strings::SecondsToTime(remaining_time)
+	for (const auto& e : l) {
+		auto r = e.second->GetRemainingTime();
+		if (r) {
+			m += DialogueWindow::TableRow(
+				DialogueWindow::TableCell(std::to_string(e.first)) +
+				DialogueWindow::TableCell(Strings::SecondsToTime(r))
 			);
 		}
 	}
 
-	popup_text += "</table>";
-
 	c->SendPopupToClient(
-		popup_title.c_str(),
-		popup_text.c_str()
+		fmt::format(
+			"Recast Timers for {}",
+			c->GetTargetDescription(t, TargetDescriptionType::UCSelf)
+		).c_str(),
+		DialogueWindow::Table(m).c_str()
 	);
 }
-
