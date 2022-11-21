@@ -304,6 +304,10 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 		class_id = atoi(row[0]);
 	}
 
+	if (slot_id >= EQ::invslot::EQUIPMENT_END) {
+		class_id = 0;
+	}
+
 	// Update/Insert item
 	const std::string query = StringFormat("REPLACE INTO inventory "
 	                                       "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
