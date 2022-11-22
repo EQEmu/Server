@@ -5858,9 +5858,9 @@ void EntityList::Marquee(
 	}
 }
 
-std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance, uint8 filter_type)
+std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance, EntityFilterType filter_type)
 {
-	std::vector<Mob *> l;
+	std::vector<Mob*> l;
 	if (!sender) {
 		return l;
 	}
@@ -5887,9 +5887,9 @@ std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance
 		}
 
 		if (
-			(filter_type == EntityFilterTypes::Bots && !m.second->IsBot()) ||
-			(filter_type == EntityFilterTypes::Clients && !m.second->IsClient()) ||
-			(filter_type == EntityFilterTypes::NPCs && !m.second->IsNPC())
+			(filter_type == EntityFilterType::Bots && !m.second->IsBot()) ||
+			(filter_type == EntityFilterType::Clients && !m.second->IsClient()) ||
+			(filter_type == EntityFilterType::NPCs && !m.second->IsNPC())
 		) {
 			continue;
 		}
@@ -5900,8 +5900,13 @@ std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance
 	return l;
 }
 
-void EntityList::DamageArea(Mob* sender, int64 damage, uint32 distance, uint8 filter_type, bool is_percentage)
-{
+void EntityList::DamageArea(
+	Mob* sender,
+	int64 damage,
+	uint32 distance,
+	EntityFilterType filter_type,
+	bool is_percentage
+) {
 	if (!sender) {
 		return;
 	}

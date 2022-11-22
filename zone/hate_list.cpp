@@ -999,13 +999,13 @@ NPC* HateList::GetRandomNPCOnHateList(bool skip_mezzed)
 	return nullptr;
 }
 
-void HateList::DamageHateList(int64 damage, uint32 distance, uint8 filter_type, bool is_percentage)
+void HateList::DamageHateList(int64 damage, uint32 distance, EntityFilterType filter_type, bool is_percentage)
 {
 	if (damage <= 0) {
 		return;
 	}
 
-	const auto& l = GetFilteredHateList(distance, filter_type);
+	const auto& l = GetFilteredHateList(filter_type, distance);
 	for (const auto& h : l) {
 		auto e = h->entity_on_hatelist;
 		if (is_percentage) {
@@ -1018,7 +1018,7 @@ void HateList::DamageHateList(int64 damage, uint32 distance, uint8 filter_type, 
 	}
 }
 
-std::list<struct_HateList*> HateList::GetFilteredHateList(uint32 distance, uint8 filter_type)
+std::list<struct_HateList*> HateList::GetFilteredHateList(EntityFilterType filter_type, uint32 distance)
 {
 	std::list<struct_HateList*> l;
 	const auto squared_distance = (distance * distance);
@@ -1039,9 +1039,9 @@ std::list<struct_HateList*> HateList::GetFilteredHateList(uint32 distance, uint8
 		}
 
 		if (
-			(filter_type == EntityFilterTypes::Bots && !e->IsBot()) ||
-			(filter_type == EntityFilterTypes::Clients && !e->IsClient()) ||
-			(filter_type == EntityFilterTypes::NPCs && !e->IsNPC())
+			(filter_type == EntityFilterType::Bots && !e->IsBot()) ||
+			(filter_type == EntityFilterType::Clients && !e->IsClient()) ||
+			(filter_type == EntityFilterType::NPCs && !e->IsNPC())
 		) {
 			continue;
 		}

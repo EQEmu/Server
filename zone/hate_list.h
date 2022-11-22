@@ -66,15 +66,16 @@ public:
 	int64 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
 	std::list<struct_HateList *> &GetHateList() { return list; }
+
 	std::list<struct_HateList *> GetFilteredHateList(
-		uint32 distance = 0,
-		uint8 filter_type = EntityFilterTypes::All
+		EntityFilterType filter_type = EntityFilterType::All,
+		uint32 distance = 0
 	);
 
 	void DamageHateList(
 		int64 damage,
 		uint32 distance = 0,
-		uint8 filter_type = EntityFilterTypes::All,
+		EntityFilterType filter_type = EntityFilterType::All,
 		bool is_percentage = false
 	);
 

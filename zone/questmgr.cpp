@@ -204,17 +204,18 @@ void QuestManager::write(const char *file, const char *str) {
 	fclose (pFile);
 }
 
-Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& position) {
-	const NPCType* tmp = 0;
-	if (tmp = content_db.LoadNPCTypesData(npc_type))
-	{
-		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
+Mob* QuestManager::spawn2(int npc_id, int grid, int unused, const glm::vec4& position) {
+	const NPCType* t = 0;
+	if (t = content_db.LoadNPCTypesData(npc_id)) {
+		auto npc = new NPC(t, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
-		if (npc->DropsGlobalLoot())
+		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
-		entity_list.AddNPC(npc,true,true);
-		if(grid > 0)
-		{
+		}
+
+		entity_list.AddNPC(npc, true, true);
+
+		if (grid) {
 			npc->AssignWaypoints(grid);
 		}
 
