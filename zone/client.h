@@ -910,6 +910,8 @@ public:
 
 	bool SendGMCommand(std::string message, bool ignore_status = false);
 
+	void RegisterBug(BugReport_Struct* r);
+
 	std::vector<Mob*> GetApplySpellList(
 		ApplySpellType apply_type,
 		bool allow_pets,

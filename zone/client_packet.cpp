@@ -3936,23 +3936,17 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
 	if (!RuleB(Bugs, ReportingSystemActive)) {
-		Message(0, "Bug reporting is disabled on this server.");
+		Message(Chat::White, "Bug reporting is disabled on this server.");
 		return;
 	}
 
 	if (app->size != sizeof(BugReport_Struct)) {
-		printf("Wrong size of BugReport_Struct got %d expected %zu!\n", app->size, sizeof(BugReport_Struct));
-	}
-	else {
-		BugReport_Struct* bug_report = (BugReport_Struct*)app->pBuffer;
-
-		if (RuleB(Bugs, UseOldReportingMethod))
-			database.RegisterBug(bug_report);
-		else
-			database.RegisterBug(this, bug_report);
+		LogError("Wrong size of BugReport_Struct got {} expected {}!", app->size, sizeof(BugReport_Struct));
+		return;
 	}
 
-	return;
+	auto *r = (BugReport_Struct *) app->pBuffer;
+	RegisterBug(r);
 }
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app)

@@ -836,6 +836,16 @@
         OutF(LogSys, Logs::Moderate, Logs::Expeditions, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogBugs(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::Bugs))\
+        OutF(LogSys, Logs::General, Logs::Bugs, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBugsDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::Bugs))\
+        OutF(LogSys, Logs::Detail, Logs::Bugs, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -1284,6 +1294,12 @@
 } while (0)
 
 #define LogFactionDetail(message, ...) do {\
+} while (0)
+
+#define LogBugs(message, ...) do {\
+} while (0)
+
+#define LogBugsDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\
