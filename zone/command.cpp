@@ -100,7 +100,7 @@ int command_init(void)
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
 		command_add("ban", "[Character Name] [Reason] - Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bind", "Sets your targets bind spot to their current location", AccountStatus::GMMgmt, command_bind) ||
-		command_add("bugs", "[Close|Delete|Review|Search|View] - Handles player bug reports", AccountStatus::GMAdmin, command_bugs) ||
+		command_add("bugs", "[Close|Delete|Review|Search|View] - Handles player bug reports", AccountStatus::QuestTroupe, command_bugs) ||
 
 #ifdef BOTS
 		command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
