@@ -135,7 +135,6 @@ void command_invsnapshot(Client *c, const Seperator *sep);
 void command_invul(Client *c, const Seperator *sep);
 void command_ipban(Client *c, const Seperator *sep);
 void command_iplookup(Client *c, const Seperator *sep);
-void command_iteminfo(Client *c, const Seperator *sep);
 void command_itemsearch(Client *c, const Seperator *sep);
 void command_kick(Client *c, const Seperator *sep);
 void command_killallnpcs(Client *c, const Seperator *sep);
