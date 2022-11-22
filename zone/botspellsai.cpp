@@ -3185,7 +3185,7 @@ void Bot::AI_Bot_Event_SpellCastFinished(bool iCastSucceeded, uint16 slot) {
 	}
 }
 
-bool Bot::CheckBotSpellEntries(int spellid) {
+bool Bot::HasBotSpellEntry(uint16 spellid) {
 	
 	auto* spell_list = content_db.GetBotSpells(GetBotSpellID());
 

@@ -106,9 +106,9 @@ void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask, bool save)
 	self->SetExpansionBitmask(expansion_bitmask, save);
 }
 
-bool Perl_Bot_CheckBotSpellEntries(Bot* self, int spellid)
+bool Perl_Bot_HasBotSpellEntry(Bot* self, uint16 spellid)
 {
-	return self->CheckBotSpellEntries(spellid);
+	return self->HasBotSpellEntry(spellid);
 }
 
 void perl_register_bot()
@@ -137,7 +137,7 @@ void perl_register_bot()
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int))&Perl_Bot_SetExpansionBitmask);
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);
 	package.add("SignalBot", &Perl_Bot_SignalBot);
-	package.add("CheckBotSpellEntries", &Perl_Bot_CheckBotSpellEntries);
+	package.add("HasBotSpellEntry", &Perl_Bot_HasBotSpellEntry);
 }
 
 #endif //EMBPERL_XS_CLASSES
