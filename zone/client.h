@@ -661,12 +661,12 @@ public:
 	void MovePC(uint32 zoneID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
-	void MoveZone(const char *zone_short_name);
-	void MoveZoneGroup(const char *zone_short_name);
-	void MoveZoneRaid(const char *zone_short_name);
-	void MoveZoneInstance(uint16 instance_id);
-	void MoveZoneInstanceGroup(uint16 instance_id);
-	void MoveZoneInstanceRaid(uint16 instance_id);
+	void MoveZone(const char *zone_short_name, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneGroup(const char *zone_short_name, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneRaid(const char *zone_short_name, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneInstance(uint16 instance_id, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneInstanceGroup(uint16 instance_id, const glm::vec4& location = glm::vec4(0.f));
+	void MoveZoneInstanceRaid(uint16 instance_id, const glm::vec4& location = glm::vec4(0.f));
 	void SendToGuildHall();
 	void SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration);
 	void AssignToInstance(uint16 instance_id);

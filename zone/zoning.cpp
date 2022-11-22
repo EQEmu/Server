@@ -512,68 +512,69 @@ void Client::MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z,
 	ProcessMovePC(zoneID, instanceID, x, y, z, heading, ignorerestrictions, zm);
 }
 
-void Client::MoveZone(const char *zone_short_name) {
-	ProcessMovePC(ZoneID(zone_short_name), 0, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+void Client::MoveZone(const char *zone_short_name, const glm::vec4 &location) {
+	ProcessMovePC(ZoneID(zone_short_name), 0, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
 }
 
-void Client::MoveZoneGroup(const char *zone_short_name) {
+void Client::MoveZoneGroup(const char *zone_short_name, const glm::vec4 &location) {
 	if (!GetGroup()) {
-		MoveZone(zone_short_name);
+		MoveZone(zone_short_name, location);
 	} else {
 		auto client_group = GetGroup();
 		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 				auto group_member = client_group->members[member_index]->CastToClient();
-				group_member->MoveZone(zone_short_name);
+				group_member->MoveZone(zone_short_name, location);
 			}
 		}
 	}
 }
 
-void Client::MoveZoneRaid(const char *zone_short_name) {
+void Client::MoveZoneRaid(const char *zone_short_name, const glm::vec4 &location) {
 	if (!GetRaid()) {
-		MoveZone(zone_short_name);
+		MoveZone(zone_short_name, location);
 	} else {
 		auto client_raid = GetRaid();
 		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
 				auto raid_member = client_raid->members[member_index].member->CastToClient();
-				raid_member->MoveZone(zone_short_name);
+				raid_member->MoveZone(zone_short_name, location);
 			}
 		}
 	}
 }
 
-void Client::MoveZoneInstance(uint16 instance_id) {
+void Client::MoveZoneInstance(uint16 instance_id, const glm::vec4 &location) {
 	if (!database.CharacterInInstanceGroup(instance_id, CharacterID())) {
 		database.AddClientToInstance(instance_id, CharacterID());
 	}
-	ProcessMovePC(database.ZoneIDFromInstanceID(instance_id), instance_id, 0.0f, 0.0f, 0.0f, 0.0f, 3, ZoneToSafeCoords);
+
+	ProcessMovePC(database.ZoneIDFromInstanceID(instance_id), instance_id, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
 }
 
-void Client::MoveZoneInstanceGroup(uint16 instance_id) {
+void Client::MoveZoneInstanceGroup(uint16 instance_id, const glm::vec4 &location) {
 	if (!GetGroup()) {
-		MoveZoneInstance(instance_id);
+		MoveZoneInstance(instance_id, location);
 	} else {
 		auto client_group = GetGroup();
 		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 				auto group_member = client_group->members[member_index]->CastToClient();
-				group_member->MoveZoneInstance(instance_id);
+				group_member->MoveZoneInstance(instance_id, location);
 			}
 		}
 	}
 }
 
-void Client::MoveZoneInstanceRaid(uint16 instance_id) {
+void Client::MoveZoneInstanceRaid(uint16 instance_id, const glm::vec4 &location) {
 	if (!GetRaid()) {
-		MoveZoneInstance(instance_id);
+		MoveZoneInstance(instance_id, location);
 	} else {
 		auto client_raid = GetRaid();
 		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
 				auto raid_member = client_raid->members[member_index].member->CastToClient();
-				raid_member->MoveZoneInstance(instance_id);
+				raid_member->MoveZoneInstance(instance_id, location);
 			}
 		}
 	}
