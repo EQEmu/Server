@@ -5175,7 +5175,8 @@ std::vector<Bot *> EntityList::GetBotListByCharacterID(uint32 character_id, uint
 	for (const auto& b : bot_list) {
 		if (
 			b->GetOwner() &&
-			b->GetBotOwnerCharacterID() == character_id
+			b->GetBotOwnerCharacterID() == character_id &&
+			(!class_id || b->GetClass() == class_id)
 		) {
 			client_bot_list.push_back(b);
 		}
