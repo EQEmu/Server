@@ -183,7 +183,7 @@ int command_init(void)
 		command_add("hatelist", "Display hate list for NPC.", AccountStatus::QuestTroupe, command_hatelist) ||
 		command_add("heal", "Completely heal your target", AccountStatus::Steward, command_heal) ||
 		command_add("help", "[Search Criteria] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
-		command_add("heromodel", "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
+		command_add("heromodel", "[Hero Model] [Slot] - Set your or your target's appearance to a full set of Hero's Forge Armor, if slot is set, sends exact model just to slot.", AccountStatus::GMMgmt, command_heromodel) ||
 		command_add("hideme", "[on/off] - Hide yourself from spawn lists.", AccountStatus::QuestTroupe, command_hideme) ||
 		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", AccountStatus::GMImpossible, command_hotfix) ||
 		command_add("hp", "Refresh your HP bar from the server.", AccountStatus::Player, command_hp) ||
