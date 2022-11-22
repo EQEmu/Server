@@ -3849,6 +3849,24 @@ void Perl__zonemarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade
 	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
 }
 
+bool Perl__ishotzone()
+{
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsHotzone();
+}
+
+void Perl__sethotzone(bool is_hotzone)
+{
+	if (!zone) {
+		return;
+	}
+
+	zone->SetIsHotzone(is_hotzone);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4284,6 +4302,7 @@ void perl_register_quest()
 	package.add("incstat", &Perl__incstat);
 	package.add("isdisctome", &Perl__isdisctome);
 	package.add("isdooropen", &Perl__isdooropen);
+	package.add("ishotzone", &Perl__ishotzone);
 	package.add("isnpcspawned", &Perl__isnpcspawned);
 	package.add("istaskactive", &Perl__istaskactive);
 	package.add("istaskactivityactive", &Perl__istaskactivityactive);
@@ -4385,6 +4404,7 @@ void perl_register_quest()
 	package.add("setglobal", &Perl__setglobal);
 	package.add("setguild", &Perl__setguild);
 	package.add("sethp", &Perl__sethp);
+	package.add("sethotzone", &Perl__sethotzone);
 	package.add("setlanguage", &Perl__setlanguage);
 	package.add("setnexthpevent", &Perl__setnexthpevent);
 	package.add("setnextinchpevent", &Perl__setnextinchpevent);

@@ -3561,6 +3561,24 @@ void lua_zone_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_
 	entity_list.Marquee(type, priority, fade_in, fade_out, duration, message);
 }
 
+bool lua_is_hotzone()
+{
+	if (!zone) {
+		return false;
+	}
+
+	return zone->IsHotzone();
+}
+
+void lua_set_hotzone(bool is_hotzone)
+{
+	if (!zone) {
+		return;
+	}
+
+	zone->SetIsHotzone(is_hotzone);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -4052,6 +4070,8 @@ luabind::scope lua_register_general() {
 		luabind::def("zone_marquee", (void(*)(uint32,std::string))&lua_zone_marquee),
 		luabind::def("zone_marquee", (void(*)(uint32,std::string,uint32))&lua_zone_marquee),
 		luabind::def("zone_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,std::string))&lua_zone_marquee),
+		luabind::def("is_hotzone", (bool(*)(void))&lua_is_hotzone),
+		luabind::def("set_hotzone", (void(*)(bool))&lua_set_hotzone),
 
 		/*
 			Cross Zone

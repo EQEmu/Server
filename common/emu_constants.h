@@ -580,11 +580,17 @@ enum BucketComparison : uint8 {
 	BucketIsNotBetween
 };
 
-enum EntityFilterTypes : uint8 {
+enum class EntityFilterType {
 	All,
 	Bots,
 	Clients,
 	NPCs
+};
+
+enum class ApplySpellType {
+	Solo,
+	Group,
+	Raid
 };
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
