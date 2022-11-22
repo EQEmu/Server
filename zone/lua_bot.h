@@ -47,6 +47,7 @@ public:
 	void SetExpansionBitmask(int expansion_bitmask);
 	void SetExpansionBitmask(int expansion_bitmask, bool save);
 	void SignalBot(int signal_id);
+	bool IsSpellInBotSpellEntries(int spellid);
 };
 
 #endif

@@ -109,6 +109,11 @@ void Lua_Bot::SetExpansionBitmask(int expansion_bitmask, bool save) {
 	self->SetExpansionBitmask(expansion_bitmask, save);
 }
 
+bool Lua_Bot::IsSpellInBotSpellEntries(int spellid) {
+	Lua_Safe_Call_Bool();
+	return self->CheckBotSpellEntries(spellid);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())

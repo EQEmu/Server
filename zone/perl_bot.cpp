@@ -106,6 +106,11 @@ void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask, bool save)
 	self->SetExpansionBitmask(expansion_bitmask, save);
 }
 
+bool Perl_Bot_IsSpellInBotSpellEntries(Bot* self, int spellid)
+{
+	return self->CheckBotSpellEntries(spellid);
+}
+
 void perl_register_bot()
 {
 	perl::interpreter state(PERL_GET_THX);

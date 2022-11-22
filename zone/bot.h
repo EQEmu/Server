@@ -557,6 +557,9 @@ public:
 	inline InspectMessage_Struct& GetInspectMessage() { return _botInspectMessage; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return _botInspectMessage; }
 
+	// "Quest API" Methods 
+	bool CheckBotSpellEntries(int spellid);
+	
 	// "SET" Class Methods
 	void SetBotSpellID(uint32 newSpellID);
 	virtual void SetSpawnStatus(bool spawnStatus) { _spawnStatus = spawnStatus; }
