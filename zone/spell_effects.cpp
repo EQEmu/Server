@@ -46,7 +46,7 @@ extern WorldServer worldserver;
 
 // the spell can still fail here, if the buff can't stack
 // in this case false will be returned, true otherwise
-bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int reflect_effectiveness, int32 duration_override, bool disable_buff_overrwrite)
+bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int reflect_effectiveness, int32 duration_override, bool disable_buff_overwrite)
 {
 	int caster_level, buffslot, effect, effect_value, i;
 	EQ::ItemInstance *SummonedItem=nullptr;
@@ -119,7 +119,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 			else
 			{
-				buffslot = AddBuff(caster, spell_id, duration_override, -1, disable_buff_overrwrite);
+				buffslot = AddBuff(caster, spell_id, duration_override, -1, disable_buff_overwrite);
 			}
 			if(buffslot == -1)	// stacking failure
 				return false;
@@ -186,7 +186,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			return true;
 		}
 #endif
-	}	
+	}
 
 	if(IsVirusSpell(spell_id)) {
 
@@ -8091,7 +8091,7 @@ bool Mob::PassCastRestriction(int value)
 			}
 			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 10) {
 				return true;
-			} 
+			}
 			else if (IsHybridClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
 				return true;
 			}
@@ -10292,7 +10292,7 @@ bool Mob::HasPersistDeathIllusion(int32 spell_id) {
 	return false;
 }
 
-void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
+void Mob::SetBuffDuration(int spell_id, int duration) {
 
 	/*
 		Will refresh the buff with specified spell_id to the specified duration
@@ -10331,7 +10331,7 @@ void Mob::SetBuffDuration(int32 spell_id, int32 duration) {
 	}
 }
 
-void Mob::ApplySpellBuff(int32 spell_id, int32 duration)
+void Mob::ApplySpellBuff(int spell_id, int duration)
 {
 	/*
 		Used for quest command to apply a new buff with custom duration.
@@ -10340,11 +10340,12 @@ void Mob::ApplySpellBuff(int32 spell_id, int32 duration)
 	if (!IsValidSpell(spell_id)) {
 		return;
 	}
+
 	if (!spells[spell_id].buff_duration) {
 		return;
 	}
 
-	if (duration < -1) {
+	if (duration <= -1) {
 		duration = PERMANENT_BUFF_DURATION;
 	}
 

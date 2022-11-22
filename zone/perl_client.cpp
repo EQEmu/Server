@@ -2506,6 +2506,148 @@ void Perl_Client_SendMarqueeMessage(Client* self, uint32 type, uint32 priority, 
 	self->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 }
 
+void Perl_Client_ApplySpell(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id);
+}
+
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration);
+}
+
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets);
+}
+
+#ifdef BOTS
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
+}
+#endif
+
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id, 0, ApplySpellType::Group);
+}
+
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group);
+}
+
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets);
+}
+
+#ifdef BOTS
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
+}
+#endif
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id, 0, ApplySpellType::Raid);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets);
+}
+
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
+void Perl_Client_SetSpellDuration(Client* self, int spell_id)
+{
+	self->SetSpellDuration(spell_id);
+}
+
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration)
+{
+	self->SetSpellDuration(spell_id, duration);
+}
+
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets);
+}
+
+#ifdef BOTS
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
+}
+#endif
+
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id)
+{
+	self->SetSpellDuration(spell_id, 0, ApplySpellType::Group);
+}
+
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group);
+}
+
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets);
+}
+
+#ifdef BOTS
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
+}
+#endif
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id)
+{
+	self->ApplySpell(spell_id, 0, ApplySpellType::Raid);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration)
+{
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets);
+}
+
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
+}
+
+#ifdef BOTS
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots)
+{
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+}
+#endif
+
 #ifdef BOTS
 
 int Perl_Client_GetBotRequiredLevel(Client* self)
@@ -2601,6 +2743,25 @@ void perl_register_client()
 	package.add("AddPVPPoints", &Perl_Client_AddPVPPoints);
 	package.add("AddSkill", &Perl_Client_AddSkill);
 	package.add("Admin", &Perl_Client_Admin);
+	package.add("ApplySpell", (void(*)(Client*, int))&Perl_Client_ApplySpell);
+	package.add("ApplySpell", (void(*)(Client*, int, int))&Perl_Client_ApplySpell);
+	package.add("ApplySpell", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpell);
+#ifdef BOTS
+	package.add("ApplySpell", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpell);
+#endif
+	package.add("ApplySpellGroup", (void(*)(Client*, int))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpellGroup);
+#ifdef BOTS
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpellGroup);
+#endif
+	package.add("ApplySpellRaid", (void(*)(Client*, int))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpellRaid);
+#ifdef BOTS
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool, bool, bool))&Perl_Client_ApplySpellRaid);
+#endif
 	package.add("AssignTask", (void(*)(Client*, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int, bool))&Perl_Client_AssignTask);
@@ -2983,6 +3144,25 @@ void perl_register_client()
 	package.add("SetSecondaryWeaponOrnamentation", &Perl_Client_SetSecondaryWeaponOrnamentation);
 	package.add("SetSkill", &Perl_Client_SetSkill);
 	package.add("SetSkillPoints", &Perl_Client_SetSkillPoints);
+	package.add("SetSpellDuration", (void(*)(Client*, int))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Client*, int, int))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDuration);
+#ifdef BOTS
+	package.add("SetSpellDuration", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDuration);
+#endif
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDurationGroup);
+#ifdef BOTS
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDurationGroup);
+#endif
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDurationRaid);
+#ifdef BOTS
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool, bool, bool))&Perl_Client_SetSpellDurationRaid);
+#endif
 	package.add("SetStartZone", (void(*)(Client*, uint32))&Perl_Client_SetStartZone);
 	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float))&Perl_Client_SetStartZone);
 	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float, float))&Perl_Client_SetStartZone);

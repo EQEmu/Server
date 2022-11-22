@@ -2346,7 +2346,7 @@ perl::array Perl_Mob_GetHateListByDistance(Mob* self, uint32 distance) // @categ
 {
 	perl::array result;
 
-	auto h_list = self->GetFilteredHateList(distance, EntityFilterTypes::All);
+	auto h_list = self->GetFilteredHateList(EntityFilterType::All, distance);
 	for (auto h : h_list) {
 		result.push_back(h);
 	}
@@ -2491,57 +2491,57 @@ void Perl_Mob_DamageArea(Mob* self, int64 damage) // @categories Hate and Aggro
 
 void Perl_Mob_DamageArea(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::All);
+	self->DamageArea(damage, distance, EntityFilterType::All);
 }
 
 void Perl_Mob_DamageAreaPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, 0, EntityFilterTypes::All, true);
+	self->DamageArea(damage, 0, EntityFilterType::All, true);
 }
 
 void Perl_Mob_DamageAreaPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::All, true);
+	self->DamageArea(damage, distance, EntityFilterType::All, true);
 }
 
 void Perl_Mob_DamageAreaClients(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, 0, EntityFilterTypes::Clients);
+	self->DamageArea(damage, 0, EntityFilterType::Clients);
 }
 
 void Perl_Mob_DamageAreaClients(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::Clients);
+	self->DamageArea(damage, distance, EntityFilterType::Clients);
 }
 
 void Perl_Mob_DamageAreaClientsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, 0, EntityFilterTypes::Clients, true);
+	self->DamageArea(damage, 0, EntityFilterType::Clients, true);
 }
 
 void Perl_Mob_DamageAreaClientsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::Clients, true);
+	self->DamageArea(damage, distance, EntityFilterType::Clients, true);
 }
 
 void Perl_Mob_DamageAreaNPCs(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, 0, EntityFilterTypes::NPCs);
+	self->DamageArea(damage, 0, EntityFilterType::NPCs);
 }
 
 void Perl_Mob_DamageAreaNPCs(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::NPCs);
+	self->DamageArea(damage, distance, EntityFilterType::NPCs);
 }
 
 void Perl_Mob_DamageAreaNPCsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, 0, EntityFilterTypes::NPCs, true);
+	self->DamageArea(damage, 0, EntityFilterType::NPCs, true);
 }
 
 void Perl_Mob_DamageAreaNPCsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::NPCs, true);
+	self->DamageArea(damage, distance, EntityFilterType::NPCs, true);
 }
 
 void Perl_Mob_DamageHateList(Mob* self, int64 damage) // @categories Hate and Aggro
@@ -2551,64 +2551,64 @@ void Perl_Mob_DamageHateList(Mob* self, int64 damage) // @categories Hate and Ag
 
 void Perl_Mob_DamageHateList(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::All);
+	self->DamageHateList(damage, distance, EntityFilterType::All);
 }
 
 void Perl_Mob_DamageHateListPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, 0, EntityFilterTypes::All, true);
+	self->DamageHateList(damage, 0, EntityFilterType::All, true);
 }
 
 void Perl_Mob_DamageHateListPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::All, true);
+	self->DamageHateList(damage, distance, EntityFilterType::All, true);
 }
 
 void Perl_Mob_DamageHateListClients(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, 0, EntityFilterTypes::Clients);
+	self->DamageHateList(damage, 0, EntityFilterType::Clients);
 }
 
 void Perl_Mob_DamageHateListClients(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::Clients);
+	self->DamageHateList(damage, distance, EntityFilterType::Clients);
 }
 
 void Perl_Mob_DamageHateListClientsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, 0, EntityFilterTypes::Clients, true);
+	self->DamageHateList(damage, 0, EntityFilterType::Clients, true);
 }
 
 void Perl_Mob_DamageHateListClientsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::Clients, true);
+	self->DamageHateList(damage, distance, EntityFilterType::Clients, true);
 }
 
 void Perl_Mob_DamageHateListNPCs(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, 0, EntityFilterTypes::NPCs);
+	self->DamageHateList(damage, 0, EntityFilterType::NPCs);
 }
 
 void Perl_Mob_DamageHateListNPCs(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::NPCs);
+	self->DamageHateList(damage, distance, EntityFilterType::NPCs);
 }
 
 void Perl_Mob_DamageHateListNPCsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, 0, EntityFilterTypes::NPCs, true);
+	self->DamageHateList(damage, 0, EntityFilterType::NPCs, true);
 }
 
 void Perl_Mob_DamageHateListNPCsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::NPCs, true);
+	self->DamageHateList(damage, distance, EntityFilterType::NPCs, true);
 }
 
 perl::array Perl_Mob_GetHateListClients(Mob* self)
 {
 	perl::array result;
 
-	auto h_list = self->GetFilteredHateList(EntityFilterTypes::Clients);
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Clients);
 	for (auto h : h_list) {
 		result.push_back(h);
 	}
@@ -2620,7 +2620,7 @@ perl::array Perl_Mob_GetHateListClients(Mob* self, uint32 distance)
 {
 	perl::array result;
 
-	auto h_list = self->GetFilteredHateList(distance, EntityFilterTypes::Clients);
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Clients, distance);
 	for (auto h : h_list) {
 		result.push_back(h);
 	}
@@ -2632,7 +2632,7 @@ perl::array Perl_Mob_GetHateListNPCs(Mob* self)
 {
 	perl::array result;
 
-	auto h_list = self->GetFilteredHateList(EntityFilterTypes::NPCs);
+	auto h_list = self->GetFilteredHateList(EntityFilterType::NPCs);
 	for (auto h : h_list) {
 		result.push_back(h);
 	}
@@ -2644,7 +2644,7 @@ perl::array Perl_Mob_GetHateListNPCs(Mob* self, uint32 distance)
 {
 	perl::array result;
 
-	auto h_list = self->GetFilteredHateList(distance, EntityFilterTypes::NPCs);
+	auto h_list = self->GetFilteredHateList(EntityFilterType::NPCs, distance);
 	for (auto h : h_list) {
 		result.push_back(h);
 	}
@@ -2655,49 +2655,49 @@ perl::array Perl_Mob_GetHateListNPCs(Mob* self, uint32 distance)
 #ifdef BOTS
 void Perl_Mob_DamageAreaBots(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, 0, EntityFilterTypes::Bots);
+	self->DamageArea(damage, 0, EntityFilterType::Bots);
 }
 
 void Perl_Mob_DamageAreaBots(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::Bots);
+	self->DamageArea(damage, distance, EntityFilterType::Bots);
 }
 
 void Perl_Mob_DamageAreaBotsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, 0, EntityFilterTypes::Bots, true);
+	self->DamageArea(damage, 0, EntityFilterType::Bots, true);
 }
 
 void Perl_Mob_DamageAreaBotsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageArea(damage, distance, EntityFilterTypes::Bots, true);
+	self->DamageArea(damage, distance, EntityFilterType::Bots, true);
 }
 
 void Perl_Mob_DamageHateListBots(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, 0, EntityFilterTypes::Bots);
+	self->DamageHateList(damage, 0, EntityFilterType::Bots);
 }
 
 void Perl_Mob_DamageHateListBots(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::Bots);
+	self->DamageHateList(damage, distance, EntityFilterType::Bots);
 }
 
 void Perl_Mob_DamageHateListBotsPercentage(Mob* self, int64 damage) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, 0, EntityFilterTypes::Bots, true);
+	self->DamageHateList(damage, 0, EntityFilterType::Bots, true);
 }
 
 void Perl_Mob_DamageHateListBotsPercentage(Mob* self, int64 damage, uint32 distance) // @categories Hate and Aggro
 {
-	self->DamageHateList(damage, distance, EntityFilterTypes::Bots, true);
+	self->DamageHateList(damage, distance, EntityFilterType::Bots, true);
 }
 
 perl::array Perl_Mob_GetHateListBots(Mob* self)
 {
 	perl::array result;
 
-	auto h_list = self->GetFilteredHateList(EntityFilterTypes::Bots);
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Bots);
 	for (auto h : h_list) {
 		result.push_back(h);
 	}
@@ -2709,7 +2709,7 @@ perl::array Perl_Mob_GetHateListBots(Mob* self, uint32 distance)
 {
 	perl::array result;
 
-	auto h_list = self->GetFilteredHateList(distance, EntityFilterTypes::Bots);
+	auto h_list = self->GetFilteredHateList(EntityFilterType::Bots, distance);
 	for (auto h : h_list)
 	{
 		result.push_back(h);
