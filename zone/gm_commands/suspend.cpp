@@ -1,98 +1,89 @@
 #include "../client.h"
 #include "../worldserver.h"
+#include "../../common/repositories/account_repository.h"
 
 extern WorldServer worldserver;
 
 void command_suspend(Client *c, const Seperator *sep)
 {
-	if ((sep->arg[1][0] == 0) || (sep->arg[2][0] == 0)) {
+	auto arguments = sep->argnum;
+	if (arguments < 2 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #suspend [Character Name] [Days] [Reason]");
+		c->Message(Chat::White, "Note: Specify 0 days to lift a suspension");
+		return;
+	}
+
+	const std::string character_name = sep->arg[1];
+	auto days = std::stoul(sep->arg[2]);
+
+	const std::string reason = sep->arg[3] ? sep->argplus[3] : "";
+
+	auto a = AccountRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"charname = '{}'",
+			Strings::Escape(character_name)
+		)
+	);
+
+	if (a.empty() || !a[0].id) {
 		c->Message(
 			Chat::White,
-			"Usage: #suspend <charname> <days> (Specify 0 days to lift the suspension immediately) <message>"
+			fmt::format(
+				"Character {} does not exist.",
+				character_name
+			).c_str()
 		);
 		return;
 	}
 
-	int duration = atoi(sep->arg[2]);
+	a[0].status = -1;
+	a[0].suspendeduntil = std::time(nullptr) + (days * 86400);
+	a[0].suspend_reason = reason;
 
-	if (duration < 0) {
-		duration = 0;
-	}
-
-	std::string message;
-
-	if (duration > 0) {
-		int i = 3;
-		while (1) {
-			if (sep->arg[i][0] == 0) {
-				break;
-			}
-
-			if (message.length() > 0) {
-				message.push_back(' ');
-			}
-
-			message += sep->arg[i];
-			++i;
-		}
-
-		if (message.length() == 0) {
-			c->Message(
-				Chat::White,
-				"Usage: #suspend <charname> <days>(Specify 0 days to lift the suspension immediately) <message>"
-			);
-			return;
-		}
-	}
-
-	auto escName = new char[strlen(sep->arg[1]) * 2 + 1];
-	database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
-	int accountID = database.GetAccountIDByChar(escName);
-	safe_delete_array(escName);
-
-	if (accountID <= 0) {
-		c->Message(Chat::Red, "Character does not exist.");
+	if (!AccountRepository::UpdateOne(content_db, a[0])) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to suspend {}.",
+				character_name
+			).c_str()
+		);
 		return;
 	}
 
-	std::string query   = StringFormat(
-		"UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY), "
-		"suspend_reason = '%s' WHERE `id` = %i",
-		duration, Strings::Escape(message).c_str(), accountID
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Account {} ({}) with the character {} {}.",
+			a[0].name,
+			a[0].id,
+			character_name,
+			(
+				days ?
+				fmt::format(
+					"has been temporarily suspended for {} day{}.",
+					days,
+					days != 1 ? "s" : ""
+				) :
+				"is no longer suspended"
+			)
+		).c_str()
 	);
-	auto        results = database.QueryDatabase(query);
 
-	if (duration) {
-		c->Message(
-			Chat::Red,
-			"Account number %i with the character %s has been temporarily suspended for %i day(s).",
-			accountID,
-			sep->arg[1],
-			duration
-		);
-	}
-	else {
-		c->Message(
-			Chat::Red,
-			"Account number %i with the character %s is no longer suspended.",
-			accountID,
-			sep->arg[1]
-		);
-	}
+	auto* b = entity_list.GetClientByName(character_name.c_str());
 
-	Client *bannedClient = entity_list.GetClientByName(sep->arg[1]);
-
-	if (bannedClient) {
-		bannedClient->WorldKick();
+	if (b) {
+		b->WorldKick();
 		return;
 	}
 
-	auto                    pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-	ServerKickPlayer_Struct *sks = (ServerKickPlayer_Struct *) pack->pBuffer;
+	auto pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+	auto* k = (ServerKickPlayer_Struct *) pack->pBuffer;
 
-	strn0cpy(sks->adminname, c->GetName(), sizeof(sks->adminname));
-	strn0cpy(sks->name, sep->arg[1], sizeof(sks->name));
-	sks->adminrank = c->Admin();
+	strn0cpy(k->adminname, c->GetName(), sizeof(k->adminname));
+	strn0cpy(k->name, character_name.c_str(), sizeof(k->name));
+	k->adminrank = c->Admin();
 
 	worldserver.SendPacket(pack);
 
