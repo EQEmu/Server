@@ -195,7 +195,6 @@ int command_init(void)
 		command_add("invul", "[On|Off]] - Turn player target's or your invulnerable flag on or off", AccountStatus::QuestTroupe, command_invul) ||
 		command_add("ipban", "[IP] - Ban IP", AccountStatus::GMMgmt, command_ipban) ||
 		command_add("iplookup", "[charname] - Look up IP address of charname", AccountStatus::GMMgmt, command_iplookup) ||
-		command_add("iteminfo", "Get information about the item on your cursor", AccountStatus::Steward, command_iteminfo) ||
 		command_add("itemsearch", "[Search Criteria] - Search for an item", AccountStatus::Steward, command_itemsearch) ||
 		command_add("kick", "[Character Name] - Disconnect a player by name", AccountStatus::GMLeadAdmin, command_kick) ||
 		command_add("kill", "Kill your target", AccountStatus::GMAdmin, command_kill) ||
@@ -1031,7 +1030,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/invul.cpp"
 #include "gm_commands/ipban.cpp"
 #include "gm_commands/iplookup.cpp"
-#include "gm_commands/iteminfo.cpp"
 #include "gm_commands/itemsearch.cpp"
 #include "gm_commands/kick.cpp"
 #include "gm_commands/kill.cpp"
