@@ -53,9 +53,9 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 	lua_createtable(L, 0, 0);
 	const auto npc_id = npc->GetNPCTypeID();
 
-	if(extra_pointers) {
+	if (extra_pointers) {
 		size_t sz = extra_pointers->size();
-		for(size_t i = 0; i < sz; ++i) {
+		for (size_t i = 0; i < sz; ++i) {
 			auto prefix = fmt::format("item{}", i + 1);
 			auto* inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(i));
 
@@ -1182,9 +1182,9 @@ void handle_bot_trade(
 	lua_createtable(L, 0, 0);
 	const auto bot_id = bot->GetBotID();
 
-	if(extra_pointers) {
+	if (extra_pointers) {
 		size_t sz = extra_pointers->size();
-		for(size_t i = 0; i < sz; ++i) {
+		for (size_t i = 0; i < sz; ++i) {
 			auto prefix = fmt::format("item{}", i + 1);
 			auto* inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(i));
 
