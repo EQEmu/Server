@@ -1234,6 +1234,10 @@ bool QuestParserCollection::BotHasQuestSubGlobal(QuestEventID evt) {
 	return false;
 }
 
+bool QuestParserCollection::BotHasQuestSub(QuestEventID evt) {
+	return BotHasQuestSubLocal(evt) || BotHasQuestSubGlobal(evt);
+}
+
 QuestInterface *QuestParserCollection::GetQIByBotQuest(std::string &filename) {
 	if (!zone || !zone->IsLoaded()) {
 		return nullptr;

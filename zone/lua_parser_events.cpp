@@ -49,16 +49,15 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
-	
+
 	lua_createtable(L, 0, 0);
-	std::stringstream ident;
-	ident << npc->GetNPCTypeID();
-	
-	if(extra_pointers) {
+	const auto npc_id = npc->GetNPCTypeID();
+
+	if (extra_pointers) {
 		size_t sz = extra_pointers->size();
-		for(size_t i = 0; i < sz; ++i) {
-			std::string prefix = "item" + std::to_string(i + 1);
-			EQ::ItemInstance *inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(i));
+		for (size_t i = 0; i < sz; ++i) {
+			auto prefix = fmt::format("item{}", i + 1);
+			auto* inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(i));
 
 			Lua_ItemInst l_inst = inst;
 			luabind::adl::object l_inst_o = luabind::adl::object(L, l_inst);
@@ -68,17 +67,30 @@ void handle_npc_event_trade(QuestInterface *parse, lua_State* L, NPC* npc, Mob *
 		}
 	}
 
-	lua_pushinteger(L, std::stoul(parse->GetVar("platinum." + ident.str())));
+	auto money_string = fmt::format("platinum.{}", npc_id);
+	uint32 money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "platinum");
 
-	lua_pushinteger(L, std::stoul(parse->GetVar("gold." + ident.str())));
+	money_string = fmt::format("gold.{}", npc_id);
+	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "gold");
 
-	lua_pushinteger(L, std::stoul(parse->GetVar("silver." + ident.str())));
+	money_string = fmt::format("silver.{}", npc_id);
+	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "silver");
 
-	lua_pushinteger(L, std::stoul(parse->GetVar("copper." + ident.str())));
+	money_string = fmt::format("copper.{}", npc_id);
+	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
 	lua_setfield(L, -2, "copper");
+
 	lua_setfield(L, -2, "trade");
 }
 
@@ -262,12 +274,12 @@ void handle_npc_loot_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *in
 	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
 	l_client_o.push(L);
 	lua_setfield(L, -2, "other");
-	
+
 	Lua_ItemInst l_item(std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
 	lua_setfield(L, -2, "item");
-	
+
 	Lua_Corpse l_corpse(std::any_cast<Corpse*>(extra_pointers->at(1)));
 	luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
 	l_corpse_o.push(L);
@@ -420,10 +432,10 @@ void handle_player_cast(QuestInterface *parse, lua_State* L, Client* client, std
 	}
 
 	lua_setfield(L, -2, "spell");
-	
+
 	lua_pushinteger(L, std::stoi(sep.arg[1]));
 	lua_setfield(L, -2, "caster_id");
-	
+
 	lua_pushinteger(L, std::stoi(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
 }
@@ -534,7 +546,7 @@ void handle_player_combine(QuestInterface *parse, lua_State* L, Client* client, 
 	lua_setfield(L, -2, "recipe_id");
 
 	lua_pushstring(L, data.c_str());
-	lua_setfield(L, -2, "recipe_name");	
+	lua_setfield(L, -2, "recipe_name");
 }
 
 void handle_player_feign(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
@@ -650,7 +662,7 @@ void handle_player_quest_combine(QuestInterface* parse, lua_State* L, Client* cl
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "container_slot");
  }
- 
+
 void handle_player_consider(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<std::any>* extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "entity_id");
@@ -817,7 +829,7 @@ void handle_spell_event(QuestInterface *parse, lua_State* L, Mob* mob, Client* c
 
 	lua_pushinteger(L, std::stoi(sep.arg[3]));
 	lua_setfield(L, -2, "buff_slot");
-	
+
 	Lua_Spell l_spell(spell_id);
 	luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 	l_spell_o.push(L);
@@ -853,7 +865,7 @@ void handle_player_equip_item(QuestInterface *parse, lua_State* L, Client* clien
 
 	lua_pushnumber(L, std::stoi(sep.arg[1]));
 	lua_setfield(L, -2, "slot_id");
-	
+
 	Lua_ItemInst l_item(extra_data);
 	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
 	l_item_o.push(L);
@@ -995,10 +1007,10 @@ void handle_bot_cast(
 	}
 
 	lua_setfield(L, -2, "spell");
-	
+
 	lua_pushinteger(L, std::stoi(sep.arg[1]));
 	lua_setfield(L, -2, "caster_id");
-	
+
 	lua_pushinteger(L, std::stoi(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
 }
@@ -1151,6 +1163,64 @@ void handle_bot_timer(
 ) {
 	lua_pushstring(L, data.c_str());
 	lua_setfield(L, -2, "timer");
+}
+
+void handle_bot_trade(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Lua_Client l_client(reinterpret_cast<Client*>(init));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+
+	lua_createtable(L, 0, 0);
+	const auto bot_id = bot->GetBotID();
+
+	if (extra_pointers) {
+		size_t sz = extra_pointers->size();
+		for (size_t i = 0; i < sz; ++i) {
+			auto prefix = fmt::format("item{}", i + 1);
+			auto* inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(i));
+
+			Lua_ItemInst l_inst = inst;
+			luabind::adl::object l_inst_o = luabind::adl::object(L, l_inst);
+			l_inst_o.push(L);
+
+			lua_setfield(L, -2, prefix.c_str());
+		}
+	}
+
+	auto money_string = fmt::format("platinum.{}", bot_id);
+	uint32 money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
+	lua_setfield(L, -2, "platinum");
+
+	money_string = fmt::format("gold.{}", bot_id);
+	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
+	lua_setfield(L, -2, "gold");
+
+	money_string = fmt::format("silver.{}", bot_id);
+	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
+	lua_setfield(L, -2, "silver");
+
+	money_string = fmt::format("copper.{}", bot_id);
+	money_value = !parse->GetVar(money_string).empty() ? std::stoul(parse->GetVar(money_string)) : 0;
+
+	lua_pushinteger(L, money_value);
+	lua_setfield(L, -2, "copper");
+
+	lua_setfield(L, -2, "trade");
 }
 
 void handle_bot_use_skill(

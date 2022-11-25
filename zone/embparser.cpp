@@ -1116,12 +1116,12 @@ void PerlembParser::GetQuestTypes(
 	if (
 		event == EVENT_SPELL_EFFECT_CLIENT ||
 		event == EVENT_SPELL_EFFECT_NPC ||
-#ifdef BOTS		
+#ifdef BOTS
 		event == EVENT_SPELL_EFFECT_BOT ||
 #endif
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT ||
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_NPC ||
-#ifdef BOTS		
+#ifdef BOTS
 		event == EVENT_SPELL_EFFECT_BUFF_TIC_BOT ||
 #endif
 		event == EVENT_SPELL_FADE ||
@@ -1241,7 +1241,7 @@ void PerlembParser::ExportQGlobals(
 	if (
 		!isPlayerQuest &&
 		!isGlobalPlayerQuest &&
-		!isBotQuest && 
+		!isBotQuest &&
 		!isGlobalBotQuest &&
 		!isItemQuest &&
 		!isSpellQuest
@@ -1427,7 +1427,7 @@ void PerlembParser::ExportMobVariables(
 	if (
 		!isPlayerQuest &&
 		!isGlobalPlayerQuest &&
-		!isBotQuest && 
+		!isBotQuest &&
 		!isGlobalBotQuest &&
 		!isItemQuest &&
 		!isSpellQuest
@@ -1525,56 +1525,55 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_TRADE: {
 			if (extra_pointers) {
-				size_t      sz = extra_pointers->size();
+				size_t sz = extra_pointers->size();
 				for (size_t i  = 0; i < sz; ++i) {
-					EQ::ItemInstance *inst = std::any_cast<EQ::ItemInstance *>(extra_pointers->at(i));
+					auto* inst = std::any_cast<EQ::ItemInstance *>(extra_pointers->at(i));
+					const uint32 item_id = inst ? inst->GetItem()->ID : 0;
+					const int16 item_charges = inst ? inst->GetCharges() : 0;
+					const auto is_attuned = inst ? inst->IsAttuned() : false;
 
-					std::string var_name = "item";
-					var_name += std::to_string(i + 1);
+					auto var_name = fmt::format("item{}", i + 1);
+					ExportVar(package_name.c_str(), var_name.c_str(), item_id);
 
+					auto temp_var_name = fmt::format("{}_charges", var_name);
+					ExportVar(package_name.c_str(), temp_var_name.c_str(), item_charges);
+
+					temp_var_name = fmt::format("{}_attuned", var_name);
+					ExportVar(package_name.c_str(), temp_var_name.c_str(), is_attuned);
+
+					temp_var_name = fmt::format("{}_inst", var_name);
 					if (inst) {
-						ExportVar(package_name.c_str(), var_name.c_str(), inst->GetItem()->ID);
-
-						std::string temp_var_name = var_name;
-						temp_var_name += "_charges";
-						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->GetCharges());
-
-						temp_var_name = var_name;
-						temp_var_name += "_attuned";
-						ExportVar(package_name.c_str(), temp_var_name.c_str(), inst->IsAttuned());
-
-						temp_var_name = var_name;
-						temp_var_name += "_inst";
 						ExportVar(package_name.c_str(), temp_var_name.c_str(), "QuestItem", inst);
-					}
-					else {
-						ExportVar(package_name.c_str(), var_name.c_str(), 0);
-
-						std::string temp_var_name = var_name;
-						temp_var_name += "_charges";
-						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
-
-						temp_var_name = var_name;
-						temp_var_name += "_attuned";
-						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
-
-						temp_var_name = var_name;
-						temp_var_name += "_inst";
+					} else {
 						ExportVar(package_name.c_str(), temp_var_name.c_str(), 0);
 					}
 				}
 			}
 
-			ExportVar(package_name.c_str(), "copper", GetVar("copper." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "silver", GetVar("silver." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "gold", GetVar("gold." + std::string(itoa(objid))).c_str());
-			ExportVar(package_name.c_str(), "platinum", GetVar("platinum." + std::string(itoa(objid))).c_str());
-			std::string hashname = package_name + std::string("::itemcount");
-			perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
-			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item1};").c_str());
-			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item2};").c_str());
-			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item3};").c_str());
-			perl->eval(std::string("++$").append(hashname).append("{$").append(package_name).append("::item4};").c_str());
+			auto unique_id = npcmob->GetNPCTypeID();
+			if (npcmob->IsBot()) {
+				unique_id = npcmob->CastToBot()->GetBotID();
+			}
+
+			ExportVar(package_name.c_str(), "copper", GetVar(fmt::format("copper.{}", unique_id)).c_str());
+			ExportVar(package_name.c_str(), "silver", GetVar(fmt::format("silver.{}", unique_id)).c_str());
+			ExportVar(package_name.c_str(), "gold", GetVar(fmt::format("gold.{}", unique_id)).c_str());
+			ExportVar(package_name.c_str(), "platinum", GetVar(fmt::format("platinum.{}", unique_id)).c_str());
+
+			auto hash_name = fmt::format("{}::itemcount", package_name);
+			perl->eval(fmt::format("%{} = ();", hash_name).c_str());
+			perl->eval(fmt::format("++${}{{${}::item1}};", hash_name, package_name).c_str());
+			perl->eval(fmt::format("++${}{{${}::item2}};", hash_name, package_name).c_str());
+			perl->eval(fmt::format("++${}{{${}::item3}};", hash_name, package_name).c_str());
+			perl->eval(fmt::format("++${}{{${}::item4}};", hash_name, package_name).c_str());
+
+			if (npcmob->IsBot()) {
+				perl->eval(fmt::format("++${}{{${}::item5}};", hash_name, package_name).c_str());
+				perl->eval(fmt::format("++${}{{${}::item6}};", hash_name, package_name).c_str());
+				perl->eval(fmt::format("++${}{{${}::item7}};", hash_name, package_name).c_str());
+				perl->eval(fmt::format("++${}{{${}::item8}};", hash_name, package_name).c_str());
+			}
+
 			break;
 		}
 
@@ -1744,7 +1743,7 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-		
+
 #ifdef BOTS
 		case EVENT_SPELL_EFFECT_BUFF_TIC_BOT:
 #endif
