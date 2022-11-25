@@ -294,6 +294,7 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_SLAY] = handle_bot_slay;
 	BotArgumentDispatch[EVENT_TARGET_CHANGE] = handle_bot_target_change;
 	BotArgumentDispatch[EVENT_TIMER] = handle_bot_timer;
+	BotArgumentDispatch[EVENT_TRADE] = handle_bot_trade;
 	BotArgumentDispatch[EVENT_USE_SKILL] = handle_bot_use_skill;
 #endif
 
