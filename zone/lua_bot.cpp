@@ -132,12 +132,12 @@ luabind::scope lua_register_bot() {
 	.def("GetExpansionBitmask", (int(Lua_Bot::*)(void)) & Lua_Bot::GetExpansionBitmask)
 	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void)) & Lua_Bot::GetOwner)
 	.def("HasBotItem", (bool(Lua_Bot::*)(uint32)) & Lua_Bot::HasBotItem)
+	.def("HasBotSpellEntry", (bool(Lua_Bot::*)(uint16)) & Lua_Bot::HasBotSpellEntry)
 	.def("OwnerMessage", (void(Lua_Bot::*)(std::string)) & Lua_Bot::OwnerMessage)
 	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32)) & Lua_Bot::RemoveBotItem)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int)) & Lua_Bot::SetExpansionBitmask)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int, bool)) & Lua_Bot::SetExpansionBitmask)
-	.def("SignalBot", (void(Lua_Bot::*)(int)) & Lua_Bot::SignalBot)
-	.def("HasBotSpellEntry", (bool(Lua_Bot::*)(uint16)) & Lua_Bot::HasBotSpellEntry);
+	.def("SignalBot", (void(Lua_Bot::*)(int)) & Lua_Bot::SignalBot);
 }
 
 #endif

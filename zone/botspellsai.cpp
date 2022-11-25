@@ -3193,33 +3193,6 @@ bool Bot::HasBotSpellEntry(uint16 spellid) {
 		return false;
 	}
 
-	auto debug_msg = fmt::format(
-		"Loading BotSpells onto {}: dbspellsid={}, level={}",
-		GetName(),
-		GetBotSpellID(),
-		GetLevel()
-	);
-
-	if (spell_list) {
-		debug_msg.append(
-			fmt::format(
-				" (found, {})",
-				spell_list->entries.size()
-			)
-		);
-	}
-	else {
-		debug_msg.append(" (not found)");
-	}
-
-	if (spell_list) {
-		for (const auto& iter : spell_list->entries) {
-			LogAIDetail("([{}]) [{}]", iter.spellid, spells[iter.spellid].name);
-		}
-	}
-
-	LogAIModerate("fin (spell list)");
-
 	// Check if Spell ID is found in Bot Spell Entries
 	for (auto& e : spell_list->entries) {
 		if (spellid == e.spellid) {
