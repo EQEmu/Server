@@ -4644,7 +4644,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 
 	bool trade_event_exists = false;
 	if (parse->BotHasQuestSub(EVENT_TRADE)) {
-		// There is a EVENT_TRADE, we will let the Event handle returning of items. 
+		// There is a EVENT_TRADE, we will let the Event handle returning of items.
 		trade_event_exists = true;
 	}
 
@@ -5078,14 +5078,12 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 
 	if (event_trade.size()) {
-
-		// Get Traded Items 
+		// Get Traded Items
 		EQ::ItemInstance* insts[8] = { 0 };
 		EQ::InventoryProfile& user_inv = client->GetInv();
 		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_END; ++i) {
 			insts[i - EQ::invslot::TRADE_BEGIN] = user_inv.GetItem(i);
 			client->DeleteItemInInventory(i);
-
 		}
 
 		// copy to be filtered by task updates, null trade slots preserved for quest event arg
