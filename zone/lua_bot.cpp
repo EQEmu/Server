@@ -109,29 +109,35 @@ void Lua_Bot::SetExpansionBitmask(int expansion_bitmask, bool save) {
 	self->SetExpansionBitmask(expansion_bitmask, save);
 }
 
+bool Lua_Bot::HasBotSpellEntry(uint16 spellid) {
+	Lua_Safe_Call_Bool();
+	return self->HasBotSpellEntry(spellid);
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32,uint32))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32,uint32,uint32))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32,uint32,uint32,uint32))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32,uint32,uint32,uint32,uint32))&Lua_Bot::AddBotItem)
-	.def("AddBotItem", (void(Lua_Bot::*)(uint16,uint32,int16,bool,uint32,uint32,uint32,uint32,uint32,uint32))&Lua_Bot::AddBotItem)
-	.def("CountBotItem", (uint32(Lua_Bot::*)(uint32))&Lua_Bot::CountBotItem)
-	.def("GetBotItem", (Lua_ItemInst(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItem)
-	.def("GetBotItemIDBySlot", (uint32(Lua_Bot::*)(uint16))&Lua_Bot::GetBotItemIDBySlot)
-	.def("GetExpansionBitmask", (int(Lua_Bot::*)(void))&Lua_Bot::GetExpansionBitmask)
-	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void))&Lua_Bot::GetOwner)
-	.def("HasBotItem", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasBotItem)
-	.def("OwnerMessage", (void(Lua_Bot::*)(std::string))&Lua_Bot::OwnerMessage)
-	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32))&Lua_Bot::RemoveBotItem)
-	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int))&Lua_Bot::SetExpansionBitmask)
-	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int,bool))&Lua_Bot::SetExpansionBitmask)
-	.def("SignalBot", (void(Lua_Bot::*)(int))&Lua_Bot::SignalBot);
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16, bool)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16, bool, uint32)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16, bool, uint32, uint32)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16, bool, uint32, uint32, uint32)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16, bool, uint32, uint32, uint32, uint32)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32)) & Lua_Bot::AddBotItem)
+	.def("AddBotItem", (void(Lua_Bot::*)(uint16, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32, uint32)) & Lua_Bot::AddBotItem)
+	.def("CountBotItem", (uint32(Lua_Bot::*)(uint32)) & Lua_Bot::CountBotItem)
+	.def("GetBotItem", (Lua_ItemInst(Lua_Bot::*)(uint16)) & Lua_Bot::GetBotItem)
+	.def("GetBotItemIDBySlot", (uint32(Lua_Bot::*)(uint16)) & Lua_Bot::GetBotItemIDBySlot)
+	.def("GetExpansionBitmask", (int(Lua_Bot::*)(void)) & Lua_Bot::GetExpansionBitmask)
+	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void)) & Lua_Bot::GetOwner)
+	.def("HasBotItem", (bool(Lua_Bot::*)(uint32)) & Lua_Bot::HasBotItem)
+	.def("HasBotSpellEntry", (bool(Lua_Bot::*)(uint16)) & Lua_Bot::HasBotSpellEntry)
+	.def("OwnerMessage", (void(Lua_Bot::*)(std::string)) & Lua_Bot::OwnerMessage)
+	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32)) & Lua_Bot::RemoveBotItem)
+	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int)) & Lua_Bot::SetExpansionBitmask)
+	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int, bool)) & Lua_Bot::SetExpansionBitmask)
+	.def("SignalBot", (void(Lua_Bot::*)(int)) & Lua_Bot::SignalBot);
 }
 
 #endif
