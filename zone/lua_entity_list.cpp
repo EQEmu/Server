@@ -441,6 +441,20 @@ Lua_Bot_List Lua_EntityList::GetBotListByClientName(std::string client_name) {
 	return ret;
 }
 
+Lua_Bot_List Lua_EntityList::GetBotListByClientName(std::string client_name, uint8 class_id) {
+	Lua_Safe_Call_Class(Lua_Bot_List);
+	Lua_Bot_List ret;
+	auto bot_list = self->GetBotListByClientName(client_name, class_id);
+
+	if (bot_list.size()) {
+		for (auto bot : bot_list) {
+			ret.entries.push_back(Lua_Bot(bot));
+		}
+	}
+
+	return ret;
+}
+
 void Lua_EntityList::SignalAllBotsByOwnerCharacterID(uint32 character_id, int signal_id) {
 	Lua_Safe_Call_Void();
 	self->SignalAllBotsByOwnerCharacterID(character_id, signal_id);
@@ -638,6 +652,7 @@ luabind::scope lua_register_entity_list() {
 	.def("GetBotListByCharacterID", (Lua_Bot_List(Lua_EntityList::*)(uint32))&Lua_EntityList::GetBotListByCharacterID)
 	.def("GetBotListByCharacterID", (Lua_Bot_List(Lua_EntityList::*)(uint32,uint8))&Lua_EntityList::GetBotListByCharacterID)
 	.def("GetBotListByClientName", (Lua_Bot_List(Lua_EntityList::*)(std::string))&Lua_EntityList::GetBotListByClientName)
+	.def("GetBotListByClientName", (Lua_Bot_List(Lua_EntityList::*)(std::string,uint8))&Lua_EntityList::GetBotListByClientName)
 #endif
 	.def("GetClientByAccID", (Lua_Client(Lua_EntityList::*)(uint32))&Lua_EntityList::GetClientByAccID)
 	.def("GetClientByCharID", (Lua_Client(Lua_EntityList::*)(uint32))&Lua_EntityList::GetClientByCharID)
