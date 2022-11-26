@@ -246,7 +246,7 @@ bool Database::RemoveClientFromInstance(uint16 instance_id, uint32 char_id)
 
 bool Database::RemoveClientsFromInstance(uint16 instance_id)
 {
-	return InstanceListPlayerRepository::DeleteOne(content_db, instance_id) ? true : false;
+	return InstanceListPlayerRepository::DeleteOne(*this, instance_id) ? true : false;
 }
 
 bool Database::VerifyInstanceAlive(uint16 instance_id, uint32 character_id)
