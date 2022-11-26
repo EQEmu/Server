@@ -36,8 +36,10 @@ extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern Zone* zone;
 
-#include "../common/repositories/zone_repository.h"
 #include "../common/content/world_content_service.h"
+
+#include "../common/repositories/character_peqzone_flags_repository.h"
+#include "../common/repositories/zone_repository.h"
 
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
@@ -999,13 +1001,13 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 }
 
 void Client::LoadZoneFlags() {
-	std::string query = fmt::format(
+	const auto query = fmt::format(
 		"SELECT zoneID from zone_flags WHERE charID = {}",
 		CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
 		return;
 	}
@@ -1045,23 +1047,23 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		const char* zone_short_name = ZoneName(zone_id, true);
 		if (strncmp(zone_short_name, "UNKNOWN", strlen(zone_short_name)) != 0) {
 			std::string zone_long_name = ZoneLongName(zone_id);
-			char flag_name[128];
+			std::string flag_name = "ERROR";
 
 			auto z = GetZone(zone_id);
-			if (!z) {
-				strcpy(flag_name, "ERROR");
+			if (z) {
+				flag_name = z->flag_needed;
 			}
 
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Flag {} | Zone ID: {} Zone Name: {} ({}){}",
+					"Flag {} | Zone: {} ({}) ID: {}",
 					flag_number,
-					zone_id,
 					zone_long_name,
 					zone_short_name,
+					zone_id,
 					(
-						flag_name[0] != '\0' ?
+						!flag_name.empty() ?
 						fmt::format(
 							" Flag Required: {}",
 							flag_name
@@ -1092,7 +1094,7 @@ void Client::SetZoneFlag(uint32 zone_id) {
 
 	zone_flags.insert(zone_id);
 
-	std::string query = fmt::format(
+	const auto query = fmt::format(
 		"INSERT INTO zone_flags (charID, zoneID) VALUES ({}, {})",
 		CharacterID(),
 		zone_id
@@ -1111,15 +1113,8 @@ void Client::ClearPEQZoneFlag(uint32 zone_id) {
 
 	peqzone_flags.erase(zone_id);
 
-	auto query = fmt::format(
-		"DELETE FROM character_peqzone_flags WHERE id = {} AND zone_id = {}",
-		CharacterID(),
-		zone_id
-	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to clear zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
+	if (!CharacterPeqzoneFlagsRepository::DeleteFlag(content_db, CharacterID(), zone_id)) {
+		LogError("MySQL Error while trying to clear PEQZone flag for [{}]", GetName());
 	}
 }
 
@@ -1128,21 +1123,22 @@ bool Client::HasPEQZoneFlag(uint32 zone_id) const {
 }
 
 void Client::LoadPEQZoneFlags() {
-	std::string query = fmt::format(
-		"SELECT zone_id from character_peqzone_flags WHERE id = {}",
-		CharacterID()
+	const auto l = CharacterPeqzoneFlagsRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"id = {}",
+			CharacterID()
+		)
 	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
+	if (l.empty() || !l[0].id){
+		LogError("MySQL Error while trying to load PEQZone flags for [{}].", GetName());
 		return;
 	}
 
 	peqzone_flags.clear();
 
-	for (auto row : results) {
-		peqzone_flags.insert(std::stoul(row[0]));
+	for (const auto& f : l) {
+		peqzone_flags.insert(f.zone_id);
 	}
 }
 
@@ -1177,11 +1173,11 @@ void Client::SendPEQZoneFlagInfo(Client *to) const {
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Flag {} | Zone ID: {} Zone Name: {} ({})",
+					"Flag {} | Zone: {} ({}) ID: {}",
 					flag_number,
-					zone_id,
 					zone_long_name,
-					zone_short_name
+					zone_short_name,
+					zone_id
 				).c_str()
 			);
 			flag_count++;
@@ -1206,15 +1202,13 @@ void Client::SetPEQZoneFlag(uint32 zone_id) {
 
 	peqzone_flags.insert(zone_id);
 
-	auto query = fmt::format(
-		"INSERT INTO character_peqzone_flags (id, zone_id) VALUES ({}, {})",
-		CharacterID(),
-		zone_id
-	);
-	auto results = database.QueryDatabase(query);
+	auto f = CharacterPeqzoneFlagsRepository::NewEntity();
 
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to set zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
+	f.id = CharacterID();
+	f.zone_id = zone_id;
+
+	if (!CharacterPeqzoneFlagsRepository::InsertOne(content_db, f).id) {
+		LogError("MySQL Error while trying to set zone flag for [{}]", GetName());
 	}
 }
 

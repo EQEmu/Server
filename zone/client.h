@@ -1029,12 +1029,14 @@ public:
 	void DoClassAttacks(Mob *ca_target, uint16 skill = -1, bool IsRiposte=false);
 
 	void ClearZoneFlag(uint32 zone_id);
+	inline std::set<uint32> GetZoneFlags() { return zone_flags; } ;
 	bool HasZoneFlag(uint32 zone_id) const;
 	void LoadZoneFlags();
 	void SendZoneFlagInfo(Client *to) const;
 	void SetZoneFlag(uint32 zone_id);
 
 	void ClearPEQZoneFlag(uint32 zone_id);
+	inline std::set<uint32> GetPEQZoneFlags() { return peqzone_flags; };
 	bool HasPEQZoneFlag(uint32 zone_id) const;
 	void LoadPEQZoneFlags();
 	void SendPEQZoneFlagInfo(Client *to) const;
