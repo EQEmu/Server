@@ -44,7 +44,19 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int DeleteFlag(Database& db, uint32 character_id, uint32 zone_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM {} WHERE id = {} AND zone_id = {}",
+				TableName(),
+				character_id,
+				zone_id
+			)
+		);
 
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_CHARACTER_PEQZONE_FLAGS_REPOSITORY_H
