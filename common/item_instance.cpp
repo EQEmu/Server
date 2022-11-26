@@ -263,16 +263,17 @@ bool EQ::ItemInstance::IsCharged() const
 // Can item be equipped?
 bool EQ::ItemInstance::IsEquipable(uint16 race, uint16 class_) const
 {
-	if (!m_item || (m_item->Slots == 0)) {
+	if (!m_item || !m_item->Slots) {
 		return false;
 	}
+
 	return m_item->IsEquipable(race, class_);
 }
 
 // Can item be equipped by Class?
 bool EQ::ItemInstance::IsClassEquipable(uint16 class_) const
 {
-	if (!m_item || (m_item->Slots == 0)) {
+	if (!m_item || !m_item->Slots) {
 		return false;
 	}
 
@@ -282,20 +283,23 @@ bool EQ::ItemInstance::IsClassEquipable(uint16 class_) const
 // Can item be equipped by Race?
 bool EQ::ItemInstance::IsRaceEquipable(uint16 race) const
 {
-	if (!m_item || (m_item->Slots == 0)) {
+	if (!m_item || !m_item->Slots) {
 		return false;
 	}
+
 	return m_item->IsRaceEquipable(race);
 }
 
 // Can equip at this slot?
 bool EQ::ItemInstance::IsEquipable(int16 slot_id) const
 {
-	if (!m_item)
+	if (!m_item || !m_item->Slots) {
 		return false;
+	}
 
-	if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END)
+	if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END) {
 		return false;
+	}
 
 	return ((m_item->Slots & (1 << slot_id)) != 0);
 }
