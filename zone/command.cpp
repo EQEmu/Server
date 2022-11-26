@@ -108,7 +108,7 @@ int command_init(void)
 
 		command_add("camerashake", "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
-		command_add("chat", "[channel num] [message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
+		command_add("chat", "[Channel ID] [Message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
 		command_add("checklos", "Check for line of sight to your target", AccountStatus::Guide, command_checklos) ||
 		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] - Copies character to destination account", AccountStatus::GMImpossible, command_copycharacter) ||
 		command_add("corpse", "Manipulate corpses, use with no arguments for help", AccountStatus::Guide, command_corpse) ||
