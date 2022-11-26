@@ -177,7 +177,8 @@ public:
 	void setnexthpevent(int at);
 	void setnextinchpevent(int at);
 	void respawn(int npc_type, int grid);
-	void set_proximity(float minx, float maxx, float miny, float maxy, float minz=-999999, float maxz=999999, bool bSay = false);
+	void set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z = -999999.0f, float max_z = 999999.0f, bool enable_say = false);
+	void set_proximity_range(float x_range, float y_range, float z_range = 999999.0f, bool enable_say = false);
 	void clear_proximity();
 	void enable_proximity_say();
 	void disable_proximity_say();
