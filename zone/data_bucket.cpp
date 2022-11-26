@@ -21,7 +21,7 @@ void DataBucket::SetData(std::string bucket_key, std::string bucket_value, std::
 
 	if (!expires_time.empty()) {
 		if (isalpha(expires_time[0]) || isalpha(expires_time[expires_time.length() - 1])) {
-			expires_time_unix = (long long) std::time(nullptr) + DataBucket::ParseStringTimeToInt(expires_time);
+			expires_time_unix = (long long) std::time(nullptr) + Strings::TimeToSeconds(expires_time);
 		} else {
 			expires_time_unix = (long long) std::time(nullptr) + atoi(expires_time.c_str());
 		}
@@ -163,37 +163,4 @@ bool DataBucket::DeleteData(std::string bucket_key) {
 	auto results = database.QueryDatabase(query);
 
 	return results.Success();
-}
-
-/**
- * Converts string to integer for use when setting expiration times
- * @param time_string
- * @return
- */
-uint32 DataBucket::ParseStringTimeToInt(std::string time_string)
-{
-	uint32 duration = 0;
-
-	std::transform(time_string.begin(), time_string.end(), time_string.begin(), ::tolower);
-
-	if (time_string.length() < 1)
-		return 0;
-
-	std::string time_unit = time_string;
-	time_unit.erase(remove_if(time_unit.begin(), time_unit.end(), [](char c) { return !isdigit(c); }), time_unit.end());
-
-	uint32 unit = static_cast<uint32>(atoi(time_unit.c_str()));
-
-	if (time_string.find('s') != std::string::npos)
-		duration = unit;
-	if (time_string.find('m') != std::string::npos)
-		duration = unit * 60;
-	if (time_string.find('h') != std::string::npos)
-		duration = unit * 3600;
-	if (time_string.find('d') != std::string::npos)
-		duration = unit * 86400;
-	if (time_string.find('y') != std::string::npos)
-		duration = unit * 31556926;
-
-	return duration;
 }
