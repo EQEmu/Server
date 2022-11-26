@@ -47,9 +47,8 @@ public:
 	static int BuryInstance(Database& db, uint16 instance_id) {
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE {} = {}",
+				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
 				TableName(),
-				PrimaryKey(),
 				instance_id
 			)
 		);
@@ -61,9 +60,8 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE {} IN ({})",
+				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})",
 				TableName(),
-				PrimaryKey(),
 				joined_instance_ids
 			)
 		);
