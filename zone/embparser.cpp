@@ -1551,9 +1551,11 @@ void PerlembParser::ExportEventVariables(
 			}
 
 			auto unique_id = npcmob->GetNPCTypeID();
+#ifdef BOTS
 			if (npcmob->IsBot()) {
 				unique_id = npcmob->CastToBot()->GetBotID();
 			}
+#endif
 
 			ExportVar(package_name.c_str(), "copper", GetVar(fmt::format("copper.{}", unique_id)).c_str());
 			ExportVar(package_name.c_str(), "silver", GetVar(fmt::format("silver.{}", unique_id)).c_str());
@@ -1567,12 +1569,14 @@ void PerlembParser::ExportEventVariables(
 			perl->eval(fmt::format("++${}{{${}::item3}};", hash_name, package_name).c_str());
 			perl->eval(fmt::format("++${}{{${}::item4}};", hash_name, package_name).c_str());
 
+#ifdef BOTS
 			if (npcmob->IsBot()) {
 				perl->eval(fmt::format("++${}{{${}::item5}};", hash_name, package_name).c_str());
 				perl->eval(fmt::format("++${}{{${}::item6}};", hash_name, package_name).c_str());
 				perl->eval(fmt::format("++${}{{${}::item7}};", hash_name, package_name).c_str());
 				perl->eval(fmt::format("++${}{{${}::item8}};", hash_name, package_name).c_str());
 			}
+#endif
 
 			break;
 		}
