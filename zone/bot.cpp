@@ -4728,8 +4728,9 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				return;
 			}
 		}
-
-		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) { // deity checks will be handled within IsEquipable()
+		
+		bool bots_ignore_race = RuleB(Bot, AllowBotEquipAnyRaceGear);
+		if (!trade_instance->IsClassEquipable(GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel) || (!trade_instance->IsRaceEquipable(GetRace()) && !bots_ignore_race)) { // deity checks will be handled within IsEquipable()
 			if (trade_event_exists) {
 				event_trade.push_back(ClientTrade(trade_instance, trade_index));
 				continue;

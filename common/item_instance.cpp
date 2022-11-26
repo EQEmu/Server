@@ -263,10 +263,29 @@ bool EQ::ItemInstance::IsCharged() const
 // Can item be equipped?
 bool EQ::ItemInstance::IsEquipable(uint16 race, uint16 class_) const
 {
-	if (!m_item || (m_item->Slots == 0))
+	if (!m_item || (m_item->Slots == 0)) {
 		return false;
-
+	}
 	return m_item->IsEquipable(race, class_);
+}
+
+// Can item be equipped by Class?
+bool EQ::ItemInstance::IsClassEquipable(uint16 class_) const
+{
+	if (!m_item || (m_item->Slots == 0)) {
+		return false;
+	}
+
+	return m_item->IsClassEquipable(class_);
+}
+
+// Can item be equipped by Race?
+bool EQ::ItemInstance::IsRaceEquipable(uint16 race) const
+{
+	if (!m_item || (m_item->Slots == 0)) {
+		return false;
+	}
+	return m_item->IsRaceEquipable(race);
 }
 
 // Can equip at this slot?
