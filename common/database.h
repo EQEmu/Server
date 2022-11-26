@@ -161,7 +161,6 @@ public:
 	std::vector<uint16> GetInstanceIDs(uint32 zone_id, uint32 character_id);
 	uint8_t GetInstanceVersion(uint16 instance_id);
 	uint32 GetTimeRemainingInstance(uint16 instance_id, bool &is_perma);
-	uint32 VersionFromInstanceID(uint16 instance_id);
 	uint32 GetInstanceZoneID(uint16 instance_id);
 
 	void AssignGroupToInstance(uint32 gid, uint32 instance_id);
