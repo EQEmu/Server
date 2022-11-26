@@ -60,9 +60,10 @@ public:
 	void Delete(bool reset_state);
 	bool IsGroundSpawn();
 	void Close();
-	const char *GetEntityVariable(const char *name);
-	void SetEntityVariable(const char *name, const char *value);
-	bool EntityVariableExists(const char *name);
+	std::string GetEntityVariable(std::string variable_name);
+	luabind::object GetEntityVariables(lua_State* L);
+	void SetEntityVariable(std::string variable_name, std::string variable_value);
+	bool EntityVariableExists(std::string variable_name);
 };
 
 #endif

@@ -1357,21 +1357,6 @@ void Lua_Mob::SetOOCRegen(int64 new_ooc_regen) {
 	self->SetOOCRegen(new_ooc_regen);
 }
 
-const char* Lua_Mob::GetEntityVariable(const char *name) {
-	Lua_Safe_Call_String();
-	return self->GetEntityVariable(name);
-}
-
-void Lua_Mob::SetEntityVariable(const char *name, const char *value) {
-	Lua_Safe_Call_Void();
-	self->SetEntityVariable(name, value);
-}
-
-bool Lua_Mob::EntityVariableExists(const char *name) {
-	Lua_Safe_Call_Bool();
-	return self->EntityVariableExists(name);
-}
-
 void Lua_Mob::Signal(int signal_id) {
 	Lua_Safe_Call_Void();
 
@@ -2684,6 +2669,36 @@ void Lua_Mob::DamageAreaNPCsPercentage(int64 damage, uint32 distance) {
 	self->DamageArea(damage, distance, EntityFilterType::NPCs, true);
 }
 
+std::string Lua_Mob::GetEntityVariable(std::string variable_name) {
+	Lua_Safe_Call_String();
+	return self->GetEntityVariable(variable_name);
+}
+
+luabind::object Lua_Mob::GetEntityVariables(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetEntityVariables();
+		auto i = 0;
+		for (const auto& v : l) {
+			t[i] = v;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+void Lua_Mob::SetEntityVariable(std::string variable_name, std::string variable_value) {
+	Lua_Safe_Call_Void();
+	self->SetEntityVariable(variable_name, variable_value);
+}
+
+bool Lua_Mob::EntityVariableExists(std::string variable_name) {
+	Lua_Safe_Call_Bool();
+	return self->EntityVariableExists(variable_name);
+}
+
 #ifdef BOTS
 void Lua_Mob::DamageAreaBots(int64 damage) {
 	Lua_Safe_Call_Void();
@@ -2906,7 +2921,7 @@ luabind::scope lua_register_mob() {
 	.def("DoThrowingAttackDmg", (void(Lua_Mob::*)(Lua_Mob,Lua_ItemInst,Lua_Item,int,int,int))&Lua_Mob::DoThrowingAttackDmg)
 	.def("DoubleAggro", &Lua_Mob::DoubleAggro)
 	.def("Emote", &Lua_Mob::Emote)
-	.def("EntityVariableExists", (bool(Lua_Mob::*)(const char*))&Lua_Mob::EntityVariableExists)
+	.def("EntityVariableExists", &Lua_Mob::EntityVariableExists)
 	.def("FaceTarget", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::FaceTarget)
 	.def("FindBuff", &Lua_Mob::FindBuff)
 	.def("FindBuffBySlot", (uint16(Lua_Mob::*)(int))&Lua_Mob::FindBuffBySlot)
@@ -2955,7 +2970,8 @@ luabind::scope lua_register_mob() {
 	.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
 	.def("GetDrakkinHeritage", &Lua_Mob::GetDrakkinHeritage)
 	.def("GetDrakkinTattoo", &Lua_Mob::GetDrakkinTattoo)
-	.def("GetEntityVariable", (const char*(Lua_Mob::*)(const char*))&Lua_Mob::GetEntityVariable)
+	.def("GetEntityVariable", &Lua_Mob::GetEntityVariable)
+	.def("GetEntityVariables",&Lua_Mob::GetEntityVariables)
 	.def("GetEyeColor1", &Lua_Mob::GetEyeColor1)
 	.def("GetEyeColor2", &Lua_Mob::GetEyeColor2)
 	.def("GetFR", &Lua_Mob::GetFR)
@@ -3172,7 +3188,7 @@ luabind::scope lua_register_mob() {
 	.def("SetCurrentWP", &Lua_Mob::SetCurrentWP)
 	.def("SetDestructibleObject", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDestructibleObject)
 	.def("SetDisableMelee", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDisableMelee)
-	.def("SetEntityVariable", (void(Lua_Mob::*)(const char*,const char*))&Lua_Mob::SetEntityVariable)
+	.def("SetEntityVariable", &Lua_Mob::SetEntityVariable)
 	.def("SetExtraHaste", (void(Lua_Mob::*)(int))&Lua_Mob::SetExtraHaste)
 	.def("SetFlurryChance", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlurryChance)
 	.def("SetFlyMode", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlyMode)

@@ -58,7 +58,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* it
 	if (!content_service.DoesPassContentFiltering(lts->content_flags)) {
 		return;
 	}
-
+	SetEntityVariableSetEntityVariable
 	uint32 min_cash = lts->mincash;
 	uint32 max_cash = lts->maxcash;
 	if(min_cash > max_cash) {

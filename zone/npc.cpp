@@ -2454,7 +2454,7 @@ void NPC::ModifyNPCStat(std::string stat, std::string value)
 		stat_lower
 	);
 
-	SetEntityVariable(variable_key.c_str(), value.c_str());
+	SetEntityVariable(variable_key, value);
 
 	LogNPCScaling("NPC::ModifyNPCStat: Key [{}] Value [{}] ", variable_key, value);
 
