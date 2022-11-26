@@ -861,9 +861,9 @@ void Perl__set_proximity(float min_x, float max_x, float min_y, float max_y, flo
 	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z);
 }
 
-void Perl__set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool say)
+void Perl__set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say)
 {
-	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, say);
+	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, enable_say);
 }
 
 void Perl__clear_proximity()
@@ -3867,6 +3867,21 @@ void Perl__sethotzone(bool is_hotzone)
 	zone->SetIsHotzone(is_hotzone);
 }
 
+void Perl__set_proximity_range(float x_range, float y_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range);
+}
+
+void Perl__set_proximity_range(float x_range, float y_range, float z_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range);
+}
+
+void Perl__set_proximity_range(float x_range, float y_range, float z_range, bool enable_say)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -4396,6 +4411,9 @@ void perl_register_quest()
 	package.add("set_proximity", (void(*)(float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float, bool))&Perl__set_proximity);
+	package.add("set_proximity_range", (void(*)(float, float))&Perl__set_proximity_range);
+	package.add("set_proximity_range", (void(*)(float, float, float))&Perl__set_proximity_range);
+	package.add("set_proximity_range", (void(*)(float, float, float, bool))&Perl__set_proximity_range);
 	package.add("set_zone_flag", &Perl__set_zone_flag);
 	package.add("setallskill", &Perl__setallskill);
 	package.add("setanim", &Perl__setanim);

@@ -542,8 +542,8 @@ void lua_set_proximity(float min_x, float max_x, float min_y, float max_y, float
 	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z);
 }
 
-void lua_set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool say) {
-	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, say);
+void lua_set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say) {
+	quest_manager.set_proximity(min_x, max_x, min_y, max_y, min_z, max_z, enable_say);
 }
 
 void lua_clear_proximity() {
@@ -3579,6 +3579,21 @@ void lua_set_hotzone(bool is_hotzone)
 	zone->SetIsHotzone(is_hotzone);
 }
 
+void lua_set_proximity_range(float x_range, float y_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range);
+}
+
+void lua_set_proximity_range(float x_range, float y_range, float z_range)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range);
+}
+
+void lua_set_proximity_range(float x_range, float y_range, float z_range, bool enable_say)
+{
+	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3847,6 +3862,9 @@ luabind::scope lua_register_general() {
 		luabind::def("set_proximity", (void(*)(float,float,float,float))&lua_set_proximity),
 		luabind::def("set_proximity", (void(*)(float,float,float,float,float,float))&lua_set_proximity),
 		luabind::def("set_proximity", (void(*)(float,float,float,float,float,float,bool))&lua_set_proximity),
+		luabind::def("set_proximity_range", (void(*)(float,float))&lua_set_proximity_range),
+		luabind::def("set_proximity_range", (void(*)(float,float,float))&lua_set_proximity_range),
+		luabind::def("set_proximity_range", (void(*)(float,float,float,bool))&lua_set_proximity_range),
 		luabind::def("clear_proximity", &lua_clear_proximity),
 		luabind::def("enable_proximity_say", &lua_enable_proximity_say),
 		luabind::def("disable_proximity_say", &lua_disable_proximity_say),

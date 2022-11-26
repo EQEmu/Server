@@ -1821,23 +1821,46 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	}
 }
 
-void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz, bool bSay)
+void QuestManager::set_proximity_range(float x_range, float y_range, float z_range, bool enable_say)
 {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC()) {
 		return;
 	}
 
-	entity_list.AddProximity(owner->CastToNPC());
+	auto n = owner->CastToNPC();
 
-	owner->CastToNPC()->proximity->min_x         = minx;
-	owner->CastToNPC()->proximity->max_x         = maxx;
-	owner->CastToNPC()->proximity->min_y         = miny;
-	owner->CastToNPC()->proximity->max_y         = maxy;
-	owner->CastToNPC()->proximity->min_z         = minz;
-	owner->CastToNPC()->proximity->max_z         = maxz;
-	owner->CastToNPC()->proximity->say           = bSay;
-	owner->CastToNPC()->proximity->proximity_set = true;
+	entity_list.AddProximity(n);
+
+	n->proximity->min_x         = n->GetX() - x_range;
+	n->proximity->max_x         = n->GetX() + x_range;
+	n->proximity->min_y         = n->GetY() - y_range;
+	n->proximity->max_y         = n->GetY() + y_range;
+	n->proximity->min_z         = n->GetZ() - z_range;
+	n->proximity->max_z         = n->GetZ() + z_range;
+	n->proximity->say           = enable_say;
+	n->proximity->proximity_set = true;
+}
+
+void QuestManager::set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say)
+{
+	QuestManagerCurrentQuestVars();
+	if (!owner || !owner->IsNPC()) {
+		return;
+	}
+
+	auto n = owner->CastToNPC();
+
+	entity_list.AddProximity(n);
+
+	n->proximity->min_x         = min_x;
+	n->proximity->max_x         = max_x;
+	n->proximity->min_y         = min_y;
+	n->proximity->max_y         = max_y;
+	n->proximity->min_z         = min_z;
+	n->proximity->max_z         = max_z;
+	n->proximity->say           = enable_say;
+	n->proximity->proximity_set = true;
 }
 
 void QuestManager::clear_proximity() {
