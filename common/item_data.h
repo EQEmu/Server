@@ -533,6 +533,8 @@ namespace EQ
 		//BardName
 
 		bool IsEquipable(uint16 Race, uint16 Class) const;
+		bool IsClassEquipable(uint16 Class) const;
+		bool IsRaceEquipable(uint16 Race) const;
 		bool IsClassCommon() const;
 		bool IsClassBag() const;
 		bool IsClassBook() const;
