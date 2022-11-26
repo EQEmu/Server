@@ -97,9 +97,9 @@ void command_instance(Client *c, const Seperator *sep)
 			return;
 		}
 
-		uint32 zone_id = database.ZoneIDFromInstanceID(instance_id);
-		uint32 version = database.VersionFromInstanceID(instance_id);
-		uint32 current_id  = database.GetInstanceID(zone_id, character_id, version);
+		auto zone_id = database.GetInstanceZoneID(instance_id);
+		auto version = database.GetInstanceVersion(instance_id);
+		auto current_id  = database.GetInstanceID(zone_id, character_id, version);
 		if (!current_id) {
 			c->Message(
 				Chat::White,

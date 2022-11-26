@@ -545,11 +545,11 @@ void Client::MoveZoneRaid(const char *zone_short_name, const glm::vec4 &location
 }
 
 void Client::MoveZoneInstance(uint16 instance_id, const glm::vec4 &location) {
-	if (!database.CharacterInInstanceGroup(instance_id, CharacterID())) {
+	if (!database.CheckInstanceByCharID(instance_id, CharacterID())) {
 		database.AddClientToInstance(instance_id, CharacterID());
 	}
 
-	ProcessMovePC(database.ZoneIDFromInstanceID(instance_id), instance_id, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
+	ProcessMovePC(database.GetInstanceZoneID(instance_id), instance_id, location.x, location.y, location.z, location.w, 3, ZoneToSafeCoords);
 }
 
 void Client::MoveZoneInstanceGroup(uint16 instance_id, const glm::vec4 &location) {

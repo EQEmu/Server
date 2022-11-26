@@ -1464,23 +1464,57 @@ int Perl__GetInstanceID(const char* zone_name, uint16 version)
 	return quest_manager.GetInstanceID(zone_name, version);
 }
 
-int Perl__GetInstanceIDByCharID(const char* zone_name, int16 version, uint32 char_id)
+uint8 Perl__GetInstanceVersionByID(uint16 instance_id)
 {
-	return quest_manager.GetInstanceIDByCharID(zone_name, version, char_id);
+	return database.GetInstanceVersion(instance_id);
+}
+
+uint32 Perl__GetInstanceZoneIDByID(uint16 instance_id)
+{
+	return database.GetInstanceZoneID(instance_id);
+}
+
+perl::array Perl__GetInstanceIDs(std::string zone_name)
+{
+	perl::array result;
+
+	const auto instance_ids = quest_manager.GetInstanceIDs(zone_name);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		result.push_back(instance_ids[i]);
+	}
+
+	return result;
+}
+
+int Perl__GetInstanceIDByCharID(const char* zone_name, int16 version, uint32 character_id)
+{
+	return quest_manager.GetInstanceIDByCharID(zone_name, version, character_id);
+}
+
+perl::array Perl__GetInstanceIDsByCharID(std::string zone_name, uint32 character_id)
+{
+	perl::array result;
+
+	const auto instance_ids = quest_manager.GetInstanceIDs(zone_name, character_id);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		result.push_back(instance_ids[i]);
+	}
+
+	return result;
 }
 
 std::string Perl__GetCharactersInInstance(uint16 instance_id)
 {
-	std::list<uint32> char_id_list;
+	std::list<uint32> character_ids;
 	std::string char_id_string = "No players in that instance.";
 
-	database.GetCharactersInInstance(instance_id, char_id_list);
+	database.GetCharactersInInstance(instance_id, character_ids);
 
-	if (char_id_list.size() > 0)
+	if (character_ids.size() > 0)
 	{
-		char_id_string = fmt::format("{} player(s) in instance: ", char_id_list.size());
-		auto iter = char_id_list.begin();
-		while (iter != char_id_list.end()) {
+		char_id_string = fmt::format("{} player(s) in instance: ", character_ids.size());
+		auto iter = character_ids.begin();
+		while (iter != character_ids.end()) {
 			char char_name[64];
 			database.GetCharName(*iter, char_name);
 			char_id_string += char_name;
@@ -1488,7 +1522,7 @@ std::string Perl__GetCharactersInInstance(uint16 instance_id)
 			char_id_string += itoa(*iter);
 			char_id_string += ")";
 			++iter;
-			if (iter != char_id_list.end())
+			if (iter != character_ids.end())
 				char_id_string += ", ";
 		}
 	}
@@ -1501,9 +1535,9 @@ void Perl__AssignToInstance(uint16 instance_id)
 	quest_manager.AssignToInstance(instance_id);
 }
 
-void Perl__AssignToInstanceByCharID(uint16 instance_id, uint32 char_id)
+void Perl__AssignToInstanceByCharID(uint16 instance_id, uint32 character_id)
 {
-	quest_manager.AssignToInstanceByCharID(instance_id, char_id);
+	quest_manager.AssignToInstanceByCharID(instance_id, character_id);
 }
 
 void Perl__AssignGroupToInstance(uint16 instance_id)
@@ -1521,14 +1555,14 @@ void Perl__RemoveFromInstance(uint16 instance_id)
 	quest_manager.RemoveFromInstance(instance_id);
 }
 
-void Perl__RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id)
+void Perl__RemoveFromInstanceByCharID(uint16 instance_id, uint32 character_id)
 {
-	quest_manager.RemoveFromInstanceByCharID(instance_id, char_id);
+	quest_manager.RemoveFromInstanceByCharID(instance_id, character_id);
 }
 
-bool Perl__CheckInstanceByCharID(uint16 instance_id, uint32 char_id)
+bool Perl__CheckInstanceByCharID(uint16 instance_id, uint32 character_id)
 {
-	return quest_manager.CheckInstanceByCharID(instance_id, char_id);
+	return quest_manager.CheckInstanceByCharID(instance_id, character_id);
 }
 
 void Perl__RemoveAllFromInstance(uint16 instance_id)
@@ -3913,6 +3947,10 @@ void perl_register_quest()
 	package.add("GetCharactersInInstance", &Perl__GetCharactersInInstance);
 	package.add("GetInstanceID", &Perl__GetInstanceID);
 	package.add("GetInstanceIDByCharID", &Perl__GetInstanceIDByCharID);
+	package.add("GetInstanceIDs", &Perl__GetInstanceIDs);
+	package.add("GetInstanceIDsByCharID", &Perl__GetInstanceIDsByCharID);
+	package.add("GetInstanceVersionByID", &Perl__GetInstanceVersionByID);
+	package.add("GetInstanceZoneIDByID", &Perl__GetInstanceZoneIDByID);
 	package.add("GetSpellResistType", &Perl__GetSpellResistType);
 	package.add("GetSpellTargetType", &Perl__GetSpellTargetType);
 	package.add("GetTimeSeconds", &Perl__GetTimeSeconds);
