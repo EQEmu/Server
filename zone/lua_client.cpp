@@ -2825,6 +2825,36 @@ void Lua_Client::UpdateAdmin(bool from_database) {
 	self->UpdateAdmin(from_database);
 }
 
+luabind::object Lua_Client::GetPEQZoneFlags(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetPEQZoneFlags();
+		auto i = 0;
+		for (const auto& f : l) {
+			t[i] = f;
+			i++;
+		}
+	}
+
+	return t;
+}
+
+luabind::object Lua_Client::GetZoneFlags(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetZoneFlags();
+		auto i = 0;
+		for (const auto& f : l) {
+			t[i] = f;
+			i++;
+		}
+	}
+
+	return t;
+}
+
 #ifdef BOTS
 
 int Lua_Client::GetBotRequiredLevel()
@@ -3135,6 +3165,8 @@ luabind::scope lua_register_client() {
 	.def("GetThirst", (int(Lua_Client::*)(void))&Lua_Client::GetThirst)
 	.def("GetTotalSecondsPlayed", (uint32(Lua_Client::*)(void))&Lua_Client::GetTotalSecondsPlayed)
 	.def("GetWeight", (int(Lua_Client::*)(void))&Lua_Client::GetWeight)
+	.def("GetPEQZoneFlags", (luabind::object(Lua_Client::*)(lua_State*))&Lua_Client::GetPEQZoneFlags)
+	.def("GetZoneFlags", (luabind::object(Lua_Client::*)(lua_State*))&Lua_Client::GetZoneFlags)
 	.def("GoFish", (void(Lua_Client::*)(void))&Lua_Client::GoFish)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 	.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)

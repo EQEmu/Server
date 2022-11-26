@@ -448,6 +448,8 @@ public:
 	int GetSpellDamage();
 	void UpdateAdmin();
 	void UpdateAdmin(bool from_database);
+	luabind::object GetPEQZoneFlags(lua_State* L);
+	luabind::object GetZoneFlags(lua_State* L);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

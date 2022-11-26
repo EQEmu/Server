@@ -999,13 +999,13 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 }
 
 void Client::LoadZoneFlags() {
-	std::string query = fmt::format(
+	const auto query = fmt::format(
 		"SELECT zoneID from zone_flags WHERE charID = {}",
 		CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
 		return;
 	}
