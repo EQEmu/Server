@@ -1128,13 +1128,13 @@ bool Client::HasPEQZoneFlag(uint32 zone_id) const {
 }
 
 void Client::LoadPEQZoneFlags() {
-	std::string query = fmt::format(
+	const auto query = fmt::format(
 		"SELECT zone_id from character_peqzone_flags WHERE id = {}",
 		CharacterID()
 	);
 	auto results = database.QueryDatabase(query);
 
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
 		return;
 	}
