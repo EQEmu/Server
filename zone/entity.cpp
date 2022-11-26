@@ -5829,9 +5829,13 @@ int EntityList::MovePlayerCorpsesToGraveyard(bool force_move_from_instance)
 }
 
 void EntityList::DespawnGridNodes(int32 grid_id) {
-	for (auto mob_iterator : mob_list) {
-		Mob *mob = mob_iterator.second;
-		if (mob->IsNPC() && mob->GetRace() == 2254 && mob->EntityVariableExists("grid_id") && atoi(mob->GetEntityVariable("grid_id")) == grid_id) {
+	for (auto m : mob_list) {
+		Mob *mob = m.second;
+		if (
+			mob->IsNPC() &&
+			mob->GetRace() == 2254 &&
+			mob->EntityVariableExists("grid_id") &&
+			std::stoi(mob->GetEntityVariable("grid_id")) == grid_id) {
 			mob->Depop();
 		}
 	}

@@ -1465,22 +1465,6 @@ void Perl_Mob_SetOOCRegen(Mob* self, int64 new_ooc_regen) // @categories Stats a
 	self->SetOOCRegen(new_ooc_regen);
 }
 
-const char* Perl_Mob_GetEntityVariable(Mob* self, const char* id) // @categories Script Utility
-{
-	// supports possible nullptr return
-	return self->GetEntityVariable(id);
-}
-
-bool Perl_Mob_EntityVariableExists(Mob* self, const char* id)
-{
-	return self->EntityVariableExists(id);
-}
-
-void Perl_Mob_SetEntityVariable(Mob* self, const char* id, const char* var) // @categories Script Utility
-{
-	self->SetEntityVariable(id, var);
-}
-
 perl::array Perl_Mob_GetHateList(Mob* self)
 {
 	perl::array result;
@@ -2652,6 +2636,33 @@ perl::array Perl_Mob_GetHateListNPCs(Mob* self, uint32 distance)
 	return result;
 }
 
+bool Perl_Mob_EntityVariableExists(Mob* self, std::string variable_name) // @categories Script Utility
+{
+	return self->EntityVariableExists(variable_name);
+}
+
+std::string Perl_Mob_GetEntityVariable(Mob* self, std::string variable_name) // @categories Script Utility
+{
+	return self->GetEntityVariable(variable_name);
+}
+
+perl::array Perl_Mob_GetEntityVariables(Mob* self) // @categories Script Utility
+{
+	perl::array a;
+
+	const auto& l = self->GetEntityVariables();
+	for (const auto& v : l) {
+		a.push_back(v);
+	}
+
+	return a;
+}
+
+void Perl_Mob_SetEntityVariable(Mob* self, std::string variable_name, std::string variable_value) // @categories Script Utility
+{
+	self->SetEntityVariable(variable_name, variable_value);
+}
+
 #ifdef BOTS
 void Perl_Mob_DamageAreaBots(Mob* self, int64 damage) // @categories Hate and Aggro
 {
@@ -2921,6 +2932,7 @@ void perl_register_mob()
 	package.add("GetDrakkinHeritage", &Perl_Mob_GetDrakkinHeritage);
 	package.add("GetDrakkinTattoo", &Perl_Mob_GetDrakkinTattoo);
 	package.add("GetEntityVariable", &Perl_Mob_GetEntityVariable);
+	package.add("GetEntityVariables", &Perl_Mob_GetEntityVariables);
 	package.add("GetEquipment", &Perl_Mob_GetEquipment);
 	package.add("GetEquipmentColor", &Perl_Mob_GetEquipmentColor);
 	package.add("GetEquipmentMaterial", &Perl_Mob_GetEquipmentMaterial);

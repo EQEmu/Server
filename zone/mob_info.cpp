@@ -29,12 +29,12 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 {
 	std::string entity_variable = "modify_stat_" + attribute;
 	std::string scaling_modified;
-	if (mob->GetEntityVariable(entity_variable.c_str())) {
+	if (mob->EntityVariableExists(entity_variable)) {
 		scaling_modified = " *";
 	}
 
 	if (attribute == "ac") {
-		if (mob->GetEntityVariable(std::string("modify_stat_max_hp").c_str())) {
+		if (mob->EntityVariableExists("modify_stat_max_hp")) {
 			scaling_modified = " *";
 		}
 
@@ -59,7 +59,7 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "hp_min_max") {
-		if (mob->GetEntityVariable(std::string("modify_stat_max_hp").c_str())) {
+		if (mob->EntityVariableExists("modify_stat_max_hp")) {
 			scaling_modified = " *";
 		}
 
@@ -352,49 +352,49 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 			return std::to_string((int)npc->GetAccuracyRating()) + scaling_modified;
 		}
 		if (attribute == "slow_mitigation") {
-			if (mob->GetEntityVariable(std::string("modify_stat_slow_mitigation").c_str())) {
+			if (mob->EntityVariableExists("modify_stat_slow_mitigation")) {
 				scaling_modified = " *";
 			}
 
 			return std::to_string((int)npc->GetSlowMitigation()) + scaling_modified;
 		}
 		if (attribute == "min_hit") {
-			if (mob->GetEntityVariable(std::string("modify_stat_min_hit").c_str())) {
+			if (mob->EntityVariableExists("modify_stat_min_hit")) {
 				scaling_modified = " *";
 			}
 
 			return Strings::Commify(std::to_string((int) npc->GetMinDMG())) + scaling_modified;
 		}
 		if (attribute == "max_hit") {
-			if (mob->GetEntityVariable(std::string("modify_stat_max_hit").c_str())) {
+			if (mob->EntityVariableExists("modify_stat_max_hit")) {
 				scaling_modified = " *";
 			}
 
 			return Strings::Commify(std::to_string((int) npc->GetMaxDMG())) + scaling_modified;
 		}
 		if (attribute == "hp_regen") {
-			if (mob->GetEntityVariable(std::string("modify_stat_hp_regen").c_str())) {
+			if (mob->EntityVariableExists("modify_stat_hp_regen")) {
 				scaling_modified = " *";
 			}
 
 			return Strings::Commify(std::to_string((int) npc->GetHPRegen())) + scaling_modified;
 		}
 		if (attribute == "attack_delay") {
-			if (mob->GetEntityVariable(std::string("modify_stat_attack_delay").c_str())) {
+			if (mob->EntityVariableExists("modify_stat_attack_delay")) {
 				scaling_modified = " *";
 			}
 
 			return Strings::Commify(std::to_string(npc->GetAttackDelay())) + scaling_modified;
 		}
 		if (attribute == "spell_scale") {
-			if (mob->GetEntityVariable(std::string("modify_stat_spell_scale").c_str())) {
+			if (mob->EntityVariableExists("modify_stat_spell_scale")) {
 				scaling_modified = " *";
 			}
 
 			return Strings::Commify(std::to_string((int) npc->GetSpellScale())) + scaling_modified;
 		}
 		if (attribute == "heal_scale") {
-			if (mob->GetEntityVariable(std::string("modify_stat_heal_scale").c_str())) {
+			if (mob->EntityVariableExists("modify_stat_heal_scale")) {
 				scaling_modified = " *";
 			}
 

@@ -2556,8 +2556,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		CZSetEntityVariable_Struct* CZSEV = (CZSetEntityVariable_Struct*) pack->pBuffer;
 		uint8 update_type = CZSEV->update_type;
 		int update_identifier = CZSEV->update_identifier;
-		const char* variable_name = CZSEV->variable_name;
-		const char* variable_value = CZSEV->variable_value;
+		std::string variable_name = CZSEV->variable_name;
+		std::string variable_value = CZSEV->variable_value;
 		const char* client_name = CZSEV->client_name;
 		if (update_type == CZUpdateType_Character) {
 			auto client = entity_list.GetClientByCharID(update_identifier);
@@ -3062,8 +3062,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		WWSetEntityVariable_Struct* WWSEV = (WWSetEntityVariable_Struct*) pack->pBuffer;
 		uint8 update_type = WWSEV->update_type;
-		const char* variable_name = WWSEV->variable_name;
-		const char* variable_value = WWSEV->variable_value;
+		std::string variable_name = WWSEV->variable_name;
+		std::string variable_value = WWSEV->variable_value;
 		uint8 min_status = WWSEV->min_status;
 		uint8 max_status = WWSEV->max_status;
 		if (update_type == WWSetEntityVariableUpdateType_Character) {

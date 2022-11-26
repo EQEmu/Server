@@ -1130,9 +1130,10 @@ public:
 	virtual void AI_ShutDown();
 	virtual void AI_Process();
 
-	const char* GetEntityVariable(const char *id);
-	void SetEntityVariable(const char *id, const char *m_var);
-	bool EntityVariableExists(const char *id);
+	std::string GetEntityVariable(std::string variable_name);
+	std::vector<std::string> GetEntityVariables();
+	void SetEntityVariable(std::string variable_name, std::string variable_value);
+	bool EntityVariableExists(std::string variable_name);
 
 	void AI_Event_Engaged(Mob* attacker, bool yell_for_help = true);
 	void AI_Event_NoLongerEngaged();
