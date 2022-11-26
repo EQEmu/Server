@@ -145,31 +145,31 @@ public:
 
 	/* Instancing */
 
-	bool AddClientToInstance(uint16 instance_id, uint32 char_id);
-	bool CharacterInInstanceGroup(uint16 instance_id, uint32 char_id);
+	bool AddClientToInstance(uint16 instance_id, uint32 character_id);
+	bool CheckInstanceByCharID(uint16 instance_id, uint32 character_id);
 	bool CheckInstanceExists(uint16 instance_id);
 	bool CheckInstanceExpired(uint16 instance_id);
 	bool CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration);
 	bool GetUnusedInstanceID(uint16 &instance_id);
-	bool GlobalInstance(uint16 instance_id);
+	bool IsGlobalInstance(uint16 instance_id);
 	bool RemoveClientFromInstance(uint16 instance_id, uint32 char_id);
 	bool RemoveClientsFromInstance(uint16 instance_id);
-	bool VerifyInstanceAlive(uint16 instance_id, uint32 char_id);
+	bool VerifyInstanceAlive(uint16 instance_id, uint32 character_id);
 	bool VerifyZoneInstance(uint32 zone_id, uint16 instance_id);
 
 	uint16 GetInstanceID(uint32 zone, uint32 charid, int16 version);
-	uint16 GetInstanceVersion(uint16 instance_id);
+	std::vector<uint16> GetInstanceIDs(uint32 zone_id, uint32 character_id);
+	uint8_t GetInstanceVersion(uint16 instance_id);
 	uint32 GetTimeRemainingInstance(uint16 instance_id, bool &is_perma);
 	uint32 VersionFromInstanceID(uint16 instance_id);
-	uint32 ZoneIDFromInstanceID(uint16 instance_id);
+	uint32 GetInstanceZoneID(uint16 instance_id);
 
 	void AssignGroupToInstance(uint32 gid, uint32 instance_id);
 	void AssignRaidToInstance(uint32 rid, uint32 instance_id);
-	void BuryCorpsesInInstance(uint16 instance_id);
 	void DeleteInstance(uint16 instance_id);
-	void FlagInstanceByGroupLeader(uint32 zone, int16 version, uint32 charid, uint32 gid);
-	void FlagInstanceByRaidLeader(uint32 zone, int16 version, uint32 charid, uint32 rid);
-	void GetCharactersInInstance(uint16 instance_id, std::list<uint32> &charid_list);
+	void FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 charid, uint32 group_id);
+	void FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 charid, uint32 raid_id);
+	void GetCharactersInInstance(uint16 instance_id, std::list<uint32> &character_ids);
 	void PurgeExpiredInstances();
 	void SetInstanceDuration(uint16 instance_id, uint32 new_duration);
 

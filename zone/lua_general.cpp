@@ -1002,16 +1002,46 @@ int lua_get_instance_id(const char *zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }
 
-int lua_get_instance_id_by_char_id(const char *zone, uint32 version, uint32 char_id) {
-	return quest_manager.GetInstanceIDByCharID(zone, version, char_id);
+uint8 lua_get_instance_version_by_id(uint16 instance_id) {
+	return database.GetInstanceVersion(instance_id);
+}
+
+uint32 lua_get_instance_zone_id_by_id(uint16 instance_id) {
+	return database.GetInstanceZoneID(instance_id);
+}
+
+luabind::adl::object lua_get_instance_ids(lua_State* L, std::string zone_name) {
+	luabind::adl::object ret = luabind::newtable(L);
+
+	auto instance_ids = quest_manager.GetInstanceIDs(zone_name);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		ret[i] = instance_ids[i];
+	}
+
+	return ret;
+}
+
+luabind::adl::object lua_get_instance_ids_by_char_id(lua_State* L, std::string zone_name, uint32 character_id) {
+	luabind::adl::object ret = luabind::newtable(L);
+
+	auto instance_ids = quest_manager.GetInstanceIDs(zone_name, character_id);
+	for (int i = 0; i < instance_ids.size(); i++) {
+		ret[i] = instance_ids[i];
+	}
+
+	return ret;
+}
+
+int lua_get_instance_id_by_char_id(const char *zone, uint32 version, uint32 character_id) {
+	return quest_manager.GetInstanceIDByCharID(zone, version, character_id);
 }
 
 void lua_assign_to_instance(uint32 instance_id) {
 	quest_manager.AssignToInstance(instance_id);
 }
 
-void lua_assign_to_instance_by_char_id(uint32 instance_id, uint32 char_id) {
-	quest_manager.AssignToInstanceByCharID(instance_id, char_id);
+void lua_assign_to_instance_by_char_id(uint32 instance_id, uint32 character_id) {
+	quest_manager.AssignToInstanceByCharID(instance_id, character_id);
 }
 
 void lua_assign_group_to_instance(uint32 instance_id) {
@@ -1026,12 +1056,12 @@ void lua_remove_from_instance(uint32 instance_id) {
 	quest_manager.RemoveFromInstance(instance_id);
 }
 
-void lua_remove_from_instance_by_char_id(uint32 instance_id, uint32 char_id) {
-	quest_manager.RemoveFromInstanceByCharID(instance_id, char_id);
+void lua_remove_from_instance_by_char_id(uint32 instance_id, uint32 character_id) {
+	quest_manager.RemoveFromInstanceByCharID(instance_id, character_id);
 }
 
-bool lua_check_instance_by_char_id(uint32 instance_id, uint32 char_id) {
-	return quest_manager.CheckInstanceByCharID(instance_id, char_id);
+bool lua_check_instance_by_char_id(uint32 instance_id, uint32 character_id) {
+	return quest_manager.CheckInstanceByCharID(instance_id, character_id);
 }
 
 void lua_remove_all_from_instance(uint32 instance_id) {
@@ -1215,11 +1245,11 @@ int lua_get_zone_instance_version() {
 luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
 	luabind::adl::object ret = luabind::newtable(L);
 
-	std::list<uint32> charid_list;
+	std::list<uint32> character_ids;
 	uint16 i = 1;
-	database.GetCharactersInInstance(instance_id,charid_list);
-	auto iter = charid_list.begin();
-	while(iter != charid_list.end()) {
+	database.GetCharactersInInstance(instance_id, character_ids);
+	auto iter = character_ids.begin();
+	while(iter != character_ids.end()) {
 		ret[i] = *iter;
 		++i;
 		++iter;
@@ -3939,8 +3969,12 @@ luabind::scope lua_register_general() {
 		luabind::def("update_instance_timer", &lua_update_instance_timer),
 		luabind::def("get_instance_id", &lua_get_instance_id),
 		luabind::def("get_instance_id_by_char_id", &lua_get_instance_id_by_char_id),
+		luabind::def("get_instance_ids", &lua_get_instance_ids),
+		luabind::def("get_instance_ids_by_char_id", &lua_get_instance_id_by_char_id),
 		luabind::def("get_instance_timer", &lua_get_instance_timer),
 		luabind::def("get_instance_timer_by_id", &lua_get_instance_timer_by_id),
+		luabind::def("get_instance_version_by_id", &lua_get_instance_version_by_id),
+		luabind::def("get_instance_zone_id_by_id", &lua_get_instance_zone_id_by_id),
 		luabind::def("get_characters_in_instance", &lua_get_characters_in_instance),
 		luabind::def("assign_to_instance", &lua_assign_to_instance),
 		luabind::def("assign_to_instance_by_char_id", &lua_assign_to_instance_by_char_id),

@@ -3007,6 +3007,20 @@ uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 	return 0;
 }
 
+std::vector<uint16> QuestManager::GetInstanceIDs(std::string zone_name, uint32 character_id)
+{
+	if (!character_id) {
+		QuestManagerCurrentQuestVars();
+		if (initiator) {
+			return database.GetInstanceIDs(ZoneID(zone_name), initiator->CharacterID());
+		}
+
+		return { };
+	}
+
+	return database.GetInstanceIDs(ZoneID(zone_name), character_id);
+}
+
 uint16 QuestManager::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id) {
 	return database.GetInstanceID(ZoneID(zone), char_id, version);
 }
@@ -3069,7 +3083,7 @@ void QuestManager::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id
 }
 
 bool QuestManager::CheckInstanceByCharID(uint16 instance_id, uint32 char_id) {
-	return database.CharacterInInstanceGroup(instance_id, char_id);
+	return database.CheckInstanceByCharID(instance_id, char_id);
 }
 
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
@@ -3077,14 +3091,14 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 	QuestManagerCurrentQuestVars();
 	if (initiator)
 	{
-		std::list<uint32> charid_list;
+		std::list<uint32> character_ids;
 
 		if (database.RemoveClientsFromInstance(instance_id))
 			initiator->Message(Chat::Say, "Removed all players from instance.");
 		else
 		{
-			database.GetCharactersInInstance(instance_id, charid_list);
-			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
+			database.GetCharactersInInstance(instance_id, character_ids);
+			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", character_ids.size()); // once the expedition system is in, this message it not relevant
 		}
 	}
 }

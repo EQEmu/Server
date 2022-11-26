@@ -25,7 +25,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto zone_id = database.ZoneIDFromInstanceID(instance_id);
+	auto zone_id = database.GetInstanceZoneID(instance_id);
 	if (!zone_id) {
 		c->Message(
 			Chat::White,
@@ -36,11 +36,11 @@ void command_zone_instance(Client *c, const Seperator *sep)
 		);
 		return;
 	}
-	
-	if (!database.CharacterInInstanceGroup(instance_id, c->CharacterID())) {
+
+	if (!database.CheckInstanceByCharID(instance_id, c->CharacterID())) {
 		database.AddClientToInstance(instance_id, c->CharacterID());
 	}
-	
+
 	if (!database.VerifyInstanceAlive(instance_id, c->CharacterID())) {
 		c->Message(
 			Chat::White,

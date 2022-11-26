@@ -265,6 +265,7 @@ public:
 	uint32 GetInstanceTimerByID(uint16 instance_id = 0);
 	void DestroyInstance(uint16 instance_id);
 	uint16 GetInstanceID(const char *zone, int16 version);
+	std::vector<uint16> GetInstanceIDs(std::string zone_name, uint32 character_id = 0);
 	uint16 GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id);
 	void AssignToInstance(uint16 instance_id);
 	void AssignToInstanceByCharID(uint16 instance_id, uint32 char_id);
