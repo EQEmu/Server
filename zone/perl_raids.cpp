@@ -13,6 +13,11 @@ bool Perl_Raid_IsRaidMember(Raid* self, const char* name) // @categories Raid
 	return self->IsRaidMember(name);
 }
 
+bool Perl_Raid_IsRaidMember(Raid* self, Client* c) // @categories Raid
+{
+	return self->IsRaidMember(c);
+}
+
 void Perl_Raid_CastGroupSpell(Raid* self, Mob* caster, uint16 spell_id, uint32 group_id) // @categories Group, Raid
 {
 	self->CastGroupSpell(caster, spell_id, group_id);
@@ -68,14 +73,19 @@ bool Perl_Raid_IsLeader(Raid* self, const char* name) // @categories Raid
 	return self->IsLeader(name);
 }
 
-bool Perl_Raid_IsLeader(Raid* self, Client* client) // @categories Raid
+bool Perl_Raid_IsLeader(Raid* self, Client* c) // @categories Raid
 {
-	return self->IsLeader(client);
+	return self->IsLeader(c);
 }
 
 bool Perl_Raid_IsGroupLeader(Raid* self, const char* who) // @categories Group, Raid
 {
 	return self->IsGroupLeader(who);
+}
+
+bool Perl_Raid_IsGroupLeader(Raid* self, Client* c) // @categories Group, Raid
+{
+	return self->IsGroupLeader(c);
 }
 
 uint32_t Perl_Raid_GetHighestLevel(Raid* self) // @categories Raid
@@ -157,10 +167,12 @@ void perl_register_raid()
 	package.add("GetMember", &Perl_Raid_GetMember);
 	package.add("GetTotalRaidDamage", &Perl_Raid_GetTotalRaidDamage);
 	package.add("GroupCount", &Perl_Raid_GroupCount);
-	package.add("IsGroupLeader", &Perl_Raid_IsGroupLeader);
+	package.add("IsGroupLeader", (bool(*)(Raid*, const char*))&Perl_Raid_IsGroupLeader);
+	package.add("IsGroupLeader", (bool(*)(Raid*, Client*))&Perl_Raid_IsGroupLeader);
 	package.add("IsLeader", (bool(*)(Raid*, const char*))&Perl_Raid_IsLeader);
 	package.add("IsLeader", (bool(*)(Raid*, Client*))&Perl_Raid_IsLeader);
-	package.add("IsRaidMember", &Perl_Raid_IsRaidMember);
+	package.add("IsRaidMember", (bool(*)(Raid*, const char*))&Perl_Raid_IsRaidMember);
+	package.add("IsRaidMember", (bool(*)(Raid*, Client*))&Perl_Raid_IsRaidMember);
 	package.add("RaidCount", &Perl_Raid_RaidCount);
 	package.add("SplitExp", &Perl_Raid_SplitExp);
 	package.add("SplitMoney", (void(*)(Raid*, uint32, uint32, uint32, uint32, uint32))&Perl_Raid_SplitMoney);

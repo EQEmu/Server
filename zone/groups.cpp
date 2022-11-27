@@ -833,26 +833,28 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 	disbandcheck = true;
 }
 
-bool Group::IsGroupMember(Mob* client)
+bool Group::IsGroupMember(Mob* c)
 {
-	bool Result = false;
-
-	if(client) {
-		for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if (members[i] == client)
-				Result = true;
+	if (c) {
+		for (const auto &m: members) {
+			if (m == c) {
+				return true;
+			}
 		}
 	}
 
-	return Result;
+	return false;
 }
 
-bool Group::IsGroupMember(const char *Name)
+bool Group::IsGroupMember(const char *name)
 {
-	if(Name)
-		for(uint32 i = 0; i < MAX_GROUP_MEMBERS; i++)
-			if((strlen(Name) == strlen(membername[i])) && !strncmp(membername[i], Name, strlen(Name)))
+	if (name) {
+		for (const auto& m : membername) {
+			if (!strcmp(m, name)) {
 				return true;
+			}
+		}
+	}
 
 	return false;
 }
@@ -2472,5 +2474,17 @@ bool Group::DoesAnyMemberHaveExpeditionLockout(
 			}
 		}
 	}
+	return false;
+}
+
+bool Group::IsLeader(const char* name) {
+	if (name) {
+		for (const auto& m : membername) {
+			if (!strcmp(m, name)) {
+				return true;
+			}
+		}
+	}
+
 	return false;
 }

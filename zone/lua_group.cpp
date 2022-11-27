@@ -19,9 +19,14 @@ void Lua_Group::DisbandGroup() {
 	self->DisbandGroup();
 }
 
-bool Lua_Group::IsGroupMember(Lua_Mob mob) {
+bool Lua_Group::IsGroupMember(const char* name) {
 	Lua_Safe_Call_Bool();
-	return self->IsGroupMember(mob);
+	return self->IsGroupMember(name);
+}
+
+bool Lua_Group::IsGroupMember(Lua_Mob c) {
+	Lua_Safe_Call_Bool();
+	return self->IsGroupMember(c);
 }
 
 void Lua_Group::CastGroupSpell(Lua_Mob caster, int spell_id) {
@@ -59,9 +64,9 @@ void Lua_Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 pla
 	self->SplitMoney(copper, silver, gold, platinum, splitter);
 }
 
-void Lua_Group::SetLeader(Lua_Mob leader) {
+void Lua_Group::SetLeader(Lua_Mob c) {
 	Lua_Safe_Call_Void();
-	self->SetLeader(leader);
+	self->SetLeader(c);
 }
 
 Lua_Mob Lua_Group::GetLeader() {
@@ -74,9 +79,14 @@ const char *Lua_Group::GetLeaderName() {
 	return self->GetLeaderName();
 }
 
-bool Lua_Group::IsLeader(Lua_Mob leader) {
+bool Lua_Group::IsLeader(const char* name) {
 	Lua_Safe_Call_Bool();
-	return self->IsLeader(leader);
+	return self->IsLeader(name);
+}
+
+bool Lua_Group::IsLeader(Lua_Mob c) {
+	Lua_Safe_Call_Bool();
+	return self->IsLeader(c);
 }
 
 int Lua_Group::GroupCount() {
@@ -151,7 +161,9 @@ luabind::scope lua_register_group() {
 	.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
 	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,const char*))&Lua_Group::GroupMessage)
 	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,int,const char*))&Lua_Group::GroupMessage)
+	.def("IsGroupMember", (bool(Lua_Group::*)(const char*))&Lua_Group::IsGroupMember)
 	.def("IsGroupMember", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsGroupMember)
+	.def("IsLeader", (bool(Lua_Group::*)(const char*))&Lua_Group::IsLeader)
 	.def("IsLeader", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsLeader)
 	.def("SetLeader", (void(Lua_Group::*)(Lua_Mob))&Lua_Group::SetLeader)
 	.def("SplitExp", (void(Lua_Group::*)(uint32,Lua_Mob))&Lua_Group::SplitExp)
