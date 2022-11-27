@@ -1373,7 +1373,7 @@ bool BotDatabase::LoadItemSlots(const uint32 bot_id, std::map<uint16, uint32>& m
 		fmt::format(
 			"bot_id = {}",
 			bot_id
-		).c_str()
+		)
 	);
 	if (l.empty() || !l[0].inventories_index) {
 		return false;
