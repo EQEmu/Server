@@ -772,6 +772,7 @@ private:
 
 	BotCastingRoles m_CastingRoles;
 	std::map<std::string,std::string> bot_data_buckets;
+	std::map<std::string,std::string> bot_owner_data_buckets;
 
 	std::map<uint16, BotSpellSetting> bot_spell_settings;
 

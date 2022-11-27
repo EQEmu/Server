@@ -109,6 +109,26 @@ void Lua_Bot::SetExpansionBitmask(int expansion_bitmask, bool save) {
 	self->SetExpansionBitmask(expansion_bitmask, save);
 }
 
+bool Lua_Bot::ReloadBotDataBuckets() {
+	Lua_Safe_Call_Bool();
+	return self->GetBotDataBuckets();
+}
+
+bool Lua_Bot::ReloadBotOwnerDataBuckets() {
+	Lua_Safe_Call_Bool();
+	return self->GetBotOwnerDataBuckets();
+}
+
+bool Lua_Bot::ReloadBotSpells() {
+	Lua_Safe_Call_Bool();
+	return self->AI_AddBotSpells(self->GetBotSpellID());
+}
+
+void Lua_Bot::ReloadBotSpellSettings() {
+	Lua_Safe_Call_Void();
+	self->LoadBotSpellSettings();
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -128,6 +148,10 @@ luabind::scope lua_register_bot() {
 	.def("GetOwner", (Lua_Mob(Lua_Bot::*)(void))&Lua_Bot::GetOwner)
 	.def("HasBotItem", (bool(Lua_Bot::*)(uint32))&Lua_Bot::HasBotItem)
 	.def("OwnerMessage", (void(Lua_Bot::*)(std::string))&Lua_Bot::OwnerMessage)
+	.def("ReloadBotDataBuckets", (bool(Lua_Bot::*)(void))&Lua_Bot::ReloadBotDataBuckets)
+	.def("ReloadBotOwnerDataBuckets", (bool(Lua_Bot::*)(void))&Lua_Bot::ReloadBotOwnerDataBuckets)
+	.def("ReloadBotSpells", (bool(Lua_Bot::*)(void))&Lua_Bot::ReloadBotSpells)
+	.def("ReloadBotSpellSettings", (void(Lua_Bot::*)(void))&Lua_Bot::ReloadBotSpellSettings)
 	.def("RemoveBotItem", (void(Lua_Bot::*)(uint32))&Lua_Bot::RemoveBotItem)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int))&Lua_Bot::SetExpansionBitmask)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int,bool))&Lua_Bot::SetExpansionBitmask)

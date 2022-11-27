@@ -406,6 +406,11 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
 	}
 
+	GetBotOwnerDataBuckets();
+	GetBotDataBuckets();
+	LoadBotSpellSettings();
+	AI_AddBotSpells(GetBotSpellID());
+
 	CalcBotStats(false);
 	hp_regen = CalcHPRegen();
 	mana_regen = CalcManaRegen();
@@ -9356,11 +9361,6 @@ void Bot::CalcBotStats(bool showtext) {
 
 	CalcBonuses();
 
-	GetBotOwnerDataBuckets();
-	GetBotDataBuckets();
-	LoadBotSpellSettings();
-	AI_AddBotSpells(GetBotSpellID());
-
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());
 		GetBotOwner()->Message(Chat::Yellow, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), max_hp, GetAC(), max_mana, GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
@@ -10477,18 +10477,24 @@ bool Bot::GetBotOwnerDataBuckets()
 		return false;
 	}
 
-	auto query = fmt::format(
+	const auto query = fmt::format(
 		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
 		Strings::Escape(bot_owner->GetBucketKey())
 	);
-	auto results = database.QueryDatabase(query);
 
-	if (!results.Success() || !results.RowCount()) {
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		return false;
 	}
 
+	bot_owner_data_buckets.clear();
+
+	if (!results.RowCount()) {
+		return true;
+	}
+
 	for (auto row : results) {
-		bot_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
+		bot_owner_data_buckets.insert(std::pair<std::string,std::string>(row[0], row[1]));
 	}
 
 	return true;
@@ -10496,14 +10502,20 @@ bool Bot::GetBotOwnerDataBuckets()
 
 bool Bot::GetBotDataBuckets()
 {
-	auto query = fmt::format(
+	const auto query = fmt::format(
 		"SELECT `key`, `value` FROM data_buckets WHERE `key` LIKE '{}-%'",
 		Strings::Escape(GetBucketKey())
 	);
-	auto results = database.QueryDatabase(query);
 
-	if (!results.Success() || !results.RowCount()) {
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		return false;
+	}
+
+	bot_data_buckets.clear();
+
+	if (!results.RowCount()) {
+		return true;
 	}
 
 	for (auto row : results) {
@@ -10530,7 +10542,7 @@ bool Bot::CheckDataBucket(std::string bucket_name, std::string bucket_value, uin
 				bucket_name
 			);
 
-			player_value = bot_data_buckets[full_name];
+			player_value = bot_owner_data_buckets[full_name];
 			if (player_value.empty()) {
 				return false;
 			}
