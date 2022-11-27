@@ -106,6 +106,26 @@ void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask, bool save)
 	self->SetExpansionBitmask(expansion_bitmask, save);
 }
 
+bool Perl_Bot_ReloadBotDataBuckets(Bot* self)
+{
+	return self->GetBotDataBuckets();
+}
+
+bool Perl_Bot_ReloadBotOwnerDataBuckets(Bot* self)
+{
+	return self->GetBotOwnerDataBuckets();
+}
+
+bool Perl_Bot_ReloadBotSpells(Bot* self)
+{
+	return self->AI_AddBotSpells(self->GetBotSpellID());
+}
+
+void Perl_Bot_ReloadBotSpellSettings(Bot* self)
+{
+	self->LoadBotSpellSettings();
+}
+
 bool Perl_Bot_HasBotSpellEntry(Bot* self, uint16 spellid)
 {
 	return self->HasBotSpellEntry(spellid);
@@ -134,6 +154,10 @@ void perl_register_bot()
 	package.add("HasBotItem", &Perl_Bot_HasBotItem);
 	package.add("HasBotSpellEntry", &Perl_Bot_HasBotSpellEntry);
 	package.add("OwnerMessage", &Perl_Bot_OwnerMessage);
+	package.add("ReloadBotDataBuckets", &Perl_Bot_ReloadBotDataBuckets);
+	package.add("ReloadBotOwnerDataBuckets", &Perl_Bot_ReloadBotOwnerDataBuckets);
+	package.add("ReloadBotSpells", &Perl_Bot_ReloadBotSpells);
+	package.add("ReloadBotSpellSettings", &Perl_Bot_ReloadBotSpellSettings);
 	package.add("RemoveBotItem", &Perl_Bot_RemoveBotItem);
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int))&Perl_Bot_SetExpansionBitmask);
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);

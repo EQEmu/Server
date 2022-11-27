@@ -21,6 +21,8 @@
 #include "bot.h"
 #include "../common/data_verification.h"
 #include "../common/strings.h"
+#include "../common/repositories/bot_spells_entries_repository.h"
+#include "../common/repositories/npc_spells_repository.h"
 
 #if EQDEBUG >= 12
 	#define BotAI_DEBUG_Spells	25
@@ -2877,16 +2879,16 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 	return database.botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
 }
 
-bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
+bool Bot::AI_AddBotSpells(uint32 bot_spell_id) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
-	npc_spells_id = iDBSpellsID;
+	npc_spells_id = bot_spell_id;
 	AIBot_spells.clear();
-	if (!iDBSpellsID) {
+	if (!bot_spell_id) {
 		AIautocastspell_timer->Disable();
 		return false;
 	}
 
-	auto* spell_list = content_db.GetBotSpells(iDBSpellsID);
+	auto* spell_list = content_db.GetBotSpells(bot_spell_id);
 	if (!spell_list) {
 		AIautocastspell_timer->Disable();
 		return false;
@@ -2897,7 +2899,7 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 	auto debug_msg = fmt::format(
 		"Loading NPCSpells onto {}: dbspellsid={}, level={}",
 		GetName(),
-		iDBSpellsID,
+		bot_spell_id,
 		GetLevel()
 	);
 
@@ -2993,7 +2995,50 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 						continue;
 					}
 				}
-				AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
+
+				const auto& bs = GetBotSpellSetting(e.spellid);
+				if (bs) {
+					if (!bs->is_enabled) {
+						continue;
+					}
+
+					if (bs->min_level > 0 && GetLevel() < bs->min_level) {
+						continue;
+					}
+
+					if (bs->max_level > 0 && GetLevel() > bs->max_level) {
+						continue;
+					}
+
+					AddSpellToBotList(
+						bs->priority,
+						e.spellid,
+						e.type,
+						e.manacost,
+						e.recast_delay,
+						e.resist_adjust,
+						bs->min_hp,
+						bs->max_hp,
+						e.bucket_name,
+						e.bucket_value,
+						e.bucket_comparison
+					);
+					continue;
+				}
+
+				AddSpellToBotList(
+					e.priority,
+					e.spellid,
+					e.type,
+					e.manacost,
+					e.recast_delay,
+					e.resist_adjust,
+					e.min_hp,
+					e.max_hp,
+					e.bucket_name,
+					e.bucket_value,
+					e.bucket_comparison
+				);
 			}
 		}
 	}
@@ -3049,7 +3094,50 @@ bool Bot::AI_AddBotSpells(uint32 iDBSpellsID) {
 					continue;
 				}
 			}
-			AddSpellToBotList(e.priority, e.spellid, e.type, e.manacost, e.recast_delay, e.resist_adjust, e.min_hp, e.max_hp, e.bucket_name, e.bucket_value, e.bucket_comparison);
+
+			const auto& bs = GetBotSpellSetting(e.spellid);
+			if (bs) {
+				if (!bs->is_enabled) {
+					continue;
+				}
+
+				if (bs->min_level > 0 && GetLevel() < bs->min_level) {
+					continue;
+				}
+
+				if (bs->max_level > 0 && GetLevel() > bs->max_level) {
+					continue;
+				}
+
+				AddSpellToBotList(
+					bs->priority,
+					e.spellid,
+					e.type,
+					e.manacost,
+					e.recast_delay,
+					e.resist_adjust,
+					bs->min_hp,
+					bs->max_hp,
+					e.bucket_name,
+					e.bucket_value,
+					e.bucket_comparison
+				);
+				continue;
+			}
+
+			AddSpellToBotList(
+				e.priority,
+				e.spellid,
+				e.type,
+				e.manacost,
+				e.recast_delay,
+				e.resist_adjust,
+				e.min_hp,
+				e.max_hp,
+				e.bucket_name,
+				e.bucket_value,
+				e.bucket_comparison
+			);
 		}
 	}
 
@@ -3108,108 +3196,91 @@ bool IsSpellInBotList(DBbotspells_Struct* spell_list, uint16 iSpellID) {
 	return it != spell_list->entries.end();
 }
 
-DBbotspells_Struct *ZoneDatabase::GetBotSpells(uint32 iDBSpellsID)
+DBbotspells_Struct* ZoneDatabase::GetBotSpells(uint32 bot_spell_id)
 {
-	if (!iDBSpellsID) {
+	if (!bot_spell_id) {
 		return nullptr;
 	}
 
-	auto it = Bot_Spells_Cache.find(iDBSpellsID);
-
-	if (it != Bot_Spells_Cache.end()) { // it's in the cache, easy =)
-		return &it->second;
+	auto c = bot_spells_cache.find(bot_spell_id);
+	if (c != bot_spells_cache.end()) { // it's in the cache, easy =)
+		return &c->second;
 	}
 
-	if (!Bot_Spells_LoadTried.count(iDBSpellsID)) { // no reason to ask the DB again if we have failed once already
-		Bot_Spells_LoadTried.insert(iDBSpellsID);
+	if (!bot_spells_loadtried.count(bot_spell_id)) { // no reason to ask the DB again if we have failed once already
+		bot_spells_loadtried.insert(bot_spell_id);
 
-		auto query = fmt::format(
-			"SELECT id, parent_list, attack_proc, proc_chance, "
-			"range_proc, rproc_chance, defensive_proc, dproc_chance, "
-			"fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, "
-			"engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, "
-			"pursue_no_sp_recast_min, pursue_no_sp_recast_max, "
-			"pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, "
-			"idle_b_chance FROM npc_spells WHERE id = {}",
-			iDBSpellsID
-		);
-
-		auto results = QueryDatabase(query);
-		if (!results.Success() || !results.RowCount()) {
+		auto n = NpcSpellsRepository::FindOne(content_db, bot_spell_id);
+		if (!n.id) {
 			return nullptr;
 		}
 
-		auto row = results.begin();
 		DBbotspells_Struct spell_set;
 
-		spell_set.parent_list = std::stoul(row[1]);
-		spell_set.attack_proc = static_cast<uint16>(std::stoul(row[2]));
-		spell_set.proc_chance = static_cast<uint8>(std::stoul(row[3]));
-		spell_set.range_proc = static_cast<uint16>(std::stoul(row[4]));
-		spell_set.rproc_chance = static_cast<int16>(std::stoi(row[5]));
-		spell_set.defensive_proc = static_cast<uint16>(std::stoul(row[6]));
-		spell_set.dproc_chance = static_cast<int16>(std::stoi(row[7]));
-		spell_set.fail_recast = std::stoul(row[8]);
-		spell_set.engaged_no_sp_recast_min = std::stoul(row[9]);
-		spell_set.engaged_no_sp_recast_max = std::stoul(row[10]);
-		spell_set.engaged_beneficial_self_chance = static_cast<uint8>(std::stoul(row[11]));
-		spell_set.engaged_beneficial_other_chance = static_cast<uint8>(std::stoul(row[12]));
-		spell_set.engaged_detrimental_chance = static_cast<uint8>(std::stoul(row[13]));
-		spell_set.pursue_no_sp_recast_min = std::stoul(row[14]);
-		spell_set.pursue_no_sp_recast_max = std::stoul(row[15]);
-		spell_set.pursue_detrimental_chance = static_cast<uint8>(std::stoul(row[16]));
-		spell_set.idle_no_sp_recast_min = std::stoul(row[17]);
-		spell_set.idle_no_sp_recast_max = std::stoul(row[18]);
-		spell_set.idle_beneficial_chance = static_cast<uint8>(std::stoul(row[19]));
+		spell_set.parent_list = n.parent_list;
+		spell_set.attack_proc = n.attack_proc;
+		spell_set.proc_chance = n.proc_chance;
+		spell_set.range_proc = n.range_proc;
+		spell_set.rproc_chance = n.rproc_chance;
+		spell_set.defensive_proc = n.defensive_proc;
+		spell_set.dproc_chance = n.dproc_chance;
+		spell_set.fail_recast = n.fail_recast;
+		spell_set.engaged_no_sp_recast_min = n.engaged_no_sp_recast_min;
+		spell_set.engaged_no_sp_recast_max = n.engaged_no_sp_recast_max;
+		spell_set.engaged_beneficial_self_chance = n.engaged_b_self_chance;
+		spell_set.engaged_beneficial_other_chance = n.engaged_b_other_chance;
+		spell_set.engaged_detrimental_chance = n.engaged_d_chance;
+		spell_set.pursue_no_sp_recast_min = n.pursue_no_sp_recast_min;
+		spell_set.pursue_no_sp_recast_max = n.pursue_no_sp_recast_max;
+		spell_set.pursue_detrimental_chance = n.pursue_d_chance;
+		spell_set.idle_no_sp_recast_min = n.idle_no_sp_recast_min;
+		spell_set.idle_no_sp_recast_max = n.idle_no_sp_recast_max;
+		spell_set.idle_beneficial_chance = n.idle_b_chance;
 
-		// pulling fixed values from an auto-increment field is dangerous...
-		query = fmt::format(
-			"SELECT spellid, type, minlevel, maxlevel, "
-			"manacost, recast_delay, priority, min_hp, max_hp, resist_adjust, "
-			"bucket_name, bucket_value, bucket_comparison "
-			"FROM bot_spells_entries "
-			"WHERE npc_spells_id = {} ORDER BY minlevel",
-			iDBSpellsID
+		auto bse = BotSpellsEntriesRepository::GetWhere(
+			content_db,
+			fmt::format(
+				"npc_spells_id = {}",
+				bot_spell_id
+			)
 		);
-		results = QueryDatabase(query);
-		if (!results.Success() || !results.RowCount()) {
+		if (bse.empty()) {
 			return nullptr;
 		}
 
-		for (auto row : results) {
+		for (const auto& e : bse) {
 			DBbotspells_entries_Struct entry;
-			auto spell_id = std::stoi(row[0]);
-			entry.spellid = spell_id;
-			entry.type = std::stoul(row[1]);
-			entry.minlevel = static_cast<uint8>(std::stoul(row[2]));
-			entry.maxlevel = static_cast<uint8>(std::stoul(row[3]));
-			entry.manacost = static_cast<int16>(std::stoi(row[4]));
-			entry.recast_delay = std::stoi(row[5]);
-			entry.priority = static_cast<int16>(std::stoi(row[6]));
-			entry.min_hp = static_cast<int8>(std::stoi(row[7]));
-			entry.max_hp = static_cast<int8>(std::stoi(row[8]));
-			entry.resist_adjust = static_cast<int16>(std::stoi(row[9]));
-			entry.bucket_name = row[10];
-			entry.bucket_value = row[11];
-			entry.bucket_comparison = static_cast<uint8>(std::stoul(row[12]));
+			entry.spellid = e.spellid;
+			entry.type = e.type;
+			entry.minlevel = e.minlevel;
+			entry.maxlevel = e.maxlevel;
+			entry.manacost = e.manacost;
+			entry.recast_delay = e.recast_delay;
+			entry.priority = e.priority;
+			entry.min_hp = e.min_hp;
+			entry.max_hp = e.max_hp;
+			entry.resist_adjust = e.resist_adjust;
+			entry.bucket_name = e.bucket_name;
+			entry.bucket_value = e.bucket_value;
+			entry.bucket_comparison = e.bucket_comparison;
 
 			// some spell types don't make much since to be priority 0, so fix that
 			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0) {
 				entry.priority = 1;
 			}
 
-			if (row[9]) {
-				entry.resist_adjust = static_cast<int16>(std::stoi(row[9]));
-			} else if (IsValidSpell(spell_id)) {
-				entry.resist_adjust = spells[spell_id].resist_difficulty;
+			if (e.resist_adjust) {
+				entry.resist_adjust = e.resist_adjust;
+			} else if (IsValidSpell(e.spellid)) {
+				entry.resist_adjust = spells[e.spellid].resist_difficulty;
 			}
 
 			spell_set.entries.push_back(entry);
 		}
 
-		Bot_Spells_Cache.insert(std::make_pair(iDBSpellsID, spell_set));
+		bot_spells_cache.insert(std::make_pair(bot_spell_id, spell_set));
 
-		return &Bot_Spells_Cache[iDBSpellsID];
+		return &bot_spells_cache[bot_spell_id];
 	}
 
 	return nullptr;

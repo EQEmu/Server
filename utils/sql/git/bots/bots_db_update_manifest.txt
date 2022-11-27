@@ -31,6 +31,7 @@
 9030|2022_10_27_bot_data_buckets.sql|SHOW COLUMNS FROM `bot_spells_entries` LIKE 'bucket_name'|empty|
 9031|2022_11_13_bot_spells_entries.sql|SELECT * FROM db_version WHERE bots_version >= 9031|empty|
 9032|2022_11_07_bot_expansion_bitmask.sql|SHOW COLUMNS FROM `bot_data` LIKE 'expansion_bitmask'|empty|
+9033|2022_11_19_bot_spell_settings.sql|SHOW TABLES LIKE 'bot_spell_settings'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
