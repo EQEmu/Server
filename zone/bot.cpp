@@ -405,6 +405,10 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 		bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
 	}
 
+	GetBotOwnerDataBuckets();
+	GetBotDataBuckets();
+	AI_AddBotSpells(GetBotSpellID());
+
 	CalcBotStats(false);
 	hp_regen = CalcHPRegen();
 	mana_regen = CalcManaRegen();
@@ -9417,10 +9421,6 @@ void Bot::CalcBotStats(bool showtext) {
 	//	GetBotOwner()->CastToClient()->Message(Chat::White, "%s save failed!", GetCleanName());
 
 	CalcBonuses();
-
-	GetBotOwnerDataBuckets();
-	GetBotDataBuckets();
-	AI_AddBotSpells(GetBotSpellID());
 
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());
