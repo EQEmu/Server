@@ -1375,7 +1375,7 @@ bool BotDatabase::LoadItemSlots(const uint32 bot_id, std::map<uint16, uint32>& m
 			bot_id
 		)
 	);
-	if (l.empty() || !l[0].inventories_index) {
+	if (l.empty()) {
 		return false;
 	}
 
