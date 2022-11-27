@@ -12,9 +12,14 @@ void Perl_Group_DisbandGroup(Group* self) // @categories Script Utility, Group
 	self->DisbandGroup();
 }
 
-bool Perl_Group_IsGroupMember(Group* self, Mob* client) // @categories Account and Character, Script Utility, Group
+bool Perl_Group_IsGroupMember(Group* self, Mob* c) // @categories Account and Character, Script Utility, Group
 {
-	return self->IsGroupMember(client);
+	return self->IsGroupMember(c);
+}
+
+bool Perl_Group_IsGroupMember(Group* self, const char* name) // @categories Account and Character, Script Utility, Group
+{
+	return self->IsGroupMember(name);
 }
 
 void Perl_Group_CastGroupSpell(Group* self, Mob* caster, uint16 spell_id) // @categories Account and Character, Script Utility, Group
@@ -82,9 +87,14 @@ void Perl_Group_SendHPPacketsFrom(Group* self, Mob* new_member) // @categories S
 	self->SendHPPacketsFrom(new_member);
 }
 
-bool Perl_Group_IsLeader(Group* self, Mob* leadertest) // @categories Account and Character, Script Utility, Group
+bool Perl_Group_IsLeader(Group* self, Mob* c) // @categories Account and Character, Script Utility, Group
 {
-	return self->IsLeader(leadertest);
+	return self->IsLeader(c);
+}
+
+bool Perl_Group_IsLeader(Group* self, const char* name) // @categories Account and Character, Script Utility, Group
+{
+	return self->IsLeader(name);
 }
 
 int Perl_Group_GroupCount(Group* self) // @categories Script Utility, Group
@@ -157,8 +167,10 @@ void perl_register_group()
 	package.add("GroupCount", &Perl_Group_GroupCount);
 	package.add("GroupMessage", (void(*)(Group*, Mob*, const char*))&Perl_Group_GroupMessage);
 	package.add("GroupMessage", (void(*)(Group*, Mob*, uint8_t, const char*))&Perl_Group_GroupMessage);
-	package.add("IsGroupMember", &Perl_Group_IsGroupMember);
-	package.add("IsLeader", &Perl_Group_IsLeader);
+	package.add("IsGroupMember", (bool(*)(Group*, const char*))&Perl_Group_IsGroupMember);
+	package.add("IsGroupMember", (bool(*)(Group*, Mob*))&Perl_Group_IsGroupMember);
+	package.add("IsLeader", (bool(*)(Group*, const char*))&Perl_Group_IsLeader);
+	package.add("IsLeader", (bool(*)(Group*, Mob*))&Perl_Group_IsLeader);
 	package.add("SendHPPacketsFrom", &Perl_Group_SendHPPacketsFrom);
 	package.add("SendHPPacketsTo", &Perl_Group_SendHPPacketsTo);
 	package.add("SetLeader", &Perl_Group_SetLeader);

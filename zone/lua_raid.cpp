@@ -18,6 +18,11 @@ bool Lua_Raid::IsRaidMember(const char *name) {
 	return self->IsRaidMember(name);
 }
 
+bool Lua_Raid::IsRaidMember(Lua_Client c) {
+	Lua_Safe_Call_Bool();
+	return self->IsRaidMember(c);
+}
+
 void Lua_Raid::CastGroupSpell(Lua_Mob caster, int spell_id, uint32 group_id) {
 	Lua_Safe_Call_Void();
 	self->CastGroupSpell(caster, spell_id, group_id);
@@ -81,6 +86,11 @@ bool Lua_Raid::IsLeader(Lua_Client c) {
 bool Lua_Raid::IsGroupLeader(const char *name) {
 	Lua_Safe_Call_Bool();
 	return self->IsGroupLeader(name);
+}
+
+bool Lua_Raid::IsGroupLeader(Lua_Client c) {
+	Lua_Safe_Call_Bool();
+	return self->IsGroupLeader(c);
 }
 
 int Lua_Raid::GetHighestLevel() {
@@ -168,8 +178,11 @@ luabind::scope lua_register_raid() {
 	.def("GetTotalRaidDamage", (uint32(Lua_Raid::*)(Lua_Mob))&Lua_Raid::GetTotalRaidDamage)
 	.def("GroupCount", (int(Lua_Raid::*)(uint32))&Lua_Raid::GroupCount)
 	.def("IsGroupLeader", (bool(Lua_Raid::*)(const char*))&Lua_Raid::IsGroupLeader)
+	.def("IsGroupLeader", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsGroupLeader)
 	.def("IsLeader", (bool(Lua_Raid::*)(const char*))&Lua_Raid::IsLeader)
+	.def("IsLeader", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsLeader)
 	.def("IsRaidMember", (bool(Lua_Raid::*)(const char*))&Lua_Raid::IsRaidMember)
+	.def("IsRaidMember", (bool(Lua_Raid::*)(Lua_Client))&Lua_Raid::IsRaidMember)
 	.def("RaidCount", (int(Lua_Raid::*)(void))&Lua_Raid::RaidCount)
 	.def("SplitExp", (void(Lua_Raid::*)(uint32,Lua_Mob))&Lua_Raid::SplitExp)
 	.def("SplitMoney", (void(Lua_Raid::*)(uint32,uint32,uint32,uint32,uint32))&Lua_Raid::SplitMoney)

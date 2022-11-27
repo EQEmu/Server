@@ -354,12 +354,26 @@ void Raid::UpdateRaidAAs()
 	SaveRaidLeaderAA();
 }
 
-bool Raid::IsGroupLeader(const char *who)
+bool Raid::IsGroupLeader(const char* name)
 {
-	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
-	{
-		if(strcmp(who, members[x].membername) == 0){
-			return members[x].IsGroupLeader;
+	if (name) {
+		for (const auto &m: members) {
+			if (!strcmp(m.membername, name)) {
+				return m.IsGroupLeader;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool Raid::IsGroupLeader(Client *c)
+{
+	if (c) {
+		for (const auto &m: members) {
+			if (m.member == c) {
+				return true;
+			}
 		}
 	}
 
@@ -890,12 +904,29 @@ void Raid::RemoveRaidLooter(const char* looter)
 	safe_delete(pack);
 }
 
-bool Raid::IsRaidMember(const char *name){
-	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
-	{
-		if(strcmp(name, members[x].membername) == 0)
-			return true;
+bool Raid::IsRaidMember(const char *name)
+{
+	if (name) {
+		for (const auto &m: members) {
+			if (!strcmp(m.membername, name)) {
+				return true;
+			}
+		}
 	}
+
+	return false;
+}
+
+bool Raid::IsRaidMember(Client* c)
+{
+	if (c) {
+		for (const auto &m: members) {
+			if (m.member == c) {
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 

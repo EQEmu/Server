@@ -102,10 +102,10 @@ public:
 	Raid(uint32 raidID);
 	~Raid();
 
-	void SetLeader(Client *newLeader) { leader = newLeader; }
+	void SetLeader(Client* c) { leader = c; }
 	Client* GetLeader() { return leader; }
-	bool IsLeader(Client *c) { return leader==c; }
-	bool IsLeader(const char* name) { return (strcmp(leadername, name)==0); }
+	bool IsLeader(Client* c) { return c == leader; }
+	bool IsLeader(const char* name) { return !strcmp(leadername, name); }
 	void SetRaidLeader(const char *wasLead, const char *name);
 
 	bool	Process();
@@ -118,8 +118,10 @@ public:
 	void	SetGroupLeader(const char *who, bool glFlag = true);
 	Client	*GetGroupLeader(uint32 group_id);
 	void	RemoveGroupLeader(const char *who);
-	bool	IsGroupLeader(const char *who);
-	bool	IsRaidMember(const char *name);
+	bool	IsGroupLeader(const char* name);
+	bool	IsGroupLeader(Client *c);
+	bool	IsRaidMember(const char* name);
+	bool	IsRaidMember(Client *c);
 	void	UpdateLevel(const char *name, int newLevel);
 
 	uint32	GetFreeGroup();

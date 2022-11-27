@@ -27,6 +27,7 @@ public:
 	}
 
 	bool IsRaidMember(const char *name);
+	bool IsRaidMember(Lua_Client c);
 	void CastGroupSpell(Lua_Mob caster, int spell_id, uint32 group_id);
 	int GroupCount(uint32 group_id);
 	int RaidCount();
@@ -40,6 +41,7 @@ public:
 	bool IsLeader(const char *c);
 	bool IsLeader(Lua_Client c);
 	bool IsGroupLeader(const char *name);
+	bool IsGroupLeader(Lua_Client c);
 	int GetHighestLevel();
 	int GetLowestLevel();
 	Lua_Client GetClientByIndex(int member_index);
