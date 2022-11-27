@@ -1588,14 +1588,8 @@ void PerlembParser::ExportEventVariables(
 		}
 
 		case EVENT_HP: {
-			if (extradata == 1) {
-				ExportVar(package_name.c_str(), "hpevent", "-1");
-				ExportVar(package_name.c_str(), "inchpevent", data);
-			}
-			else {
-				ExportVar(package_name.c_str(), "hpevent", data);
-				ExportVar(package_name.c_str(), "inchpevent", "-1");
-			}
+			ExportVar(package_name.c_str(), "hpevent", extradata ? "-1" : data);
+			ExportVar(package_name.c_str(), "inchpevent", extradata ? data : "-1");
 			break;
 		}
 
