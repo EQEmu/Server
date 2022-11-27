@@ -2320,7 +2320,12 @@ EQ::ItemInstance* Perl__createitem(uint32 item_id, int16 charges, uint32 augment
 
 std::string Perl__secondstotime(int duration)
 {
-	return quest_manager.secondstotime(duration);
+	return Strings::SecondsToTime(duration);
+}
+
+uint32 Perl__timetoseconds(std::string time_string)
+{
+	return Strings::TimeToSeconds(time_string);
 }
 
 std::string Perl__gethexcolorcode(std::string color_name)
@@ -4501,6 +4506,7 @@ void perl_register_quest()
 	package.add("task_setselector", (void(*)(int))&Perl__task_setselector);
 	package.add("task_setselector", (void(*)(int, bool))&Perl__task_setselector);
 	package.add("tasktimeleft", &Perl__tasktimeleft);
+	package.add("timetoseconds", &Perl__timetoseconds);
 	package.add("toggle_spawn_event", &Perl__toggle_spawn_event);
 	package.add("toggledoorstate", &Perl__toggledoorstate);
 	package.add("tracknpc", &Perl__tracknpc);

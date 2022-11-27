@@ -3576,10 +3576,6 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 	return nullptr;
 }
 
-std::string QuestManager::secondstotime(int duration) {
-	return Strings::SecondsToTime(duration);
-}
-
 std::string QuestManager::gethexcolorcode(std::string color_name) {
 
 	for (auto color : html_colors) {

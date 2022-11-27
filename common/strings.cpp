@@ -678,3 +678,41 @@ bool Strings::Contains(const std::string& subject, const std::string& search)
 {
 	return subject.find(search) != std::string::npos;
 }
+
+uint32 Strings::TimeToSeconds(std::string time_string)
+{
+	if (time_string.empty()) {
+		return 0;
+	}
+
+	uint32 duration = 0;
+
+	std::transform(time_string.begin(), time_string.end(), time_string.begin(), ::tolower);
+
+	std::string time_unit = time_string;
+	time_unit.erase(remove_if(time_unit.begin(), time_unit.end(), [](char c) { return !isdigit(c); }), time_unit.end());
+
+	auto unit = std::stoul(time_unit);
+
+	if (time_string.find('s') != std::string::npos) {
+		duration = unit;
+	}
+
+	if (time_string.find('m') != std::string::npos) {
+		duration = unit * 60;
+	}
+
+	if (time_string.find('h') != std::string::npos) {
+		duration = unit * 3600;
+	}
+
+	if (time_string.find('d') != std::string::npos) {
+		duration = unit * 86400;
+	}
+
+	if (time_string.find('y') != std::string::npos) {
+		duration = unit * 31556926;
+	}
+
+	return duration;
+}
