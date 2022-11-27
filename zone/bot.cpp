@@ -4078,7 +4078,6 @@ std::map<uint16, uint32> Bot::GetBotItemSlots()
 				GetCleanName()
 			).c_str()
 		);
-		return m;
 	}
 
 	return m;
