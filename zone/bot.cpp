@@ -4016,11 +4016,10 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		ping_timer.Start(8000);
 		// there is something askew with spawn struct appearance fields...
 		// I re-enabled this until I can sort it out
-		uint32 item_id = 0;
+		const auto& m = GetBotItemSlots();
 		uint8 material_from_slot = 0xFF;
 		for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-			item_id = GetBotItemBySlot(slot_id);
-			if (item_id != 0) {
+			if (m.find(slot_id) != l.end()) {
 				material_from_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot_id);
 				if (material_from_slot != 0xFF) {
 					SendWearChange(material_from_slot);
@@ -4064,6 +4063,27 @@ void Bot::GetBotItems(EQ::InventoryProfile &inv, std::string* error_message)
 	UpdateEquipmentLight();
 }
 
+std::map<uint16, uint32> Bot::GetBotItemSlots()
+{
+	std::map<uint16, uint32> m;
+	if (!GetBotID()) {
+		return m;
+	}
+
+	if (!database.botdb.LoadItemSlots(GetBotID(), m)) {
+		GetBotOwner()->CastToClient()->Message(
+			Chat::White,
+			fmt::format(
+				"Failed to load inventory slots for {}.",
+				GetCleanName()
+			).c_str()
+		);
+		return m;
+	}
+
+	return m;
+}
+
 // Returns the inventory record for this bot from the database for the specified equipment slot.
 uint32 Bot::GetBotItemBySlot(uint16 slot_id)
 {
@@ -4077,8 +4097,9 @@ uint32 Bot::GetBotItemBySlot(uint16 slot_id)
 			GetBotOwner()->CastToClient()->Message(
 				Chat::White,
 				fmt::format(
-					"{}",
-					BotDatabase::fail::LoadItemBySlot()
+					"Failed to load slot ID {} for {}.",
+					slot_id,
+					GetCleanName()
 				).c_str()
 			);
 		}
@@ -4734,11 +4755,11 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				return;
 			}
 		}
-		
+
 		if (
 			!trade_instance->IsClassEquipable(GetClass()) ||
 			GetLevel() < trade_instance->GetItem()->ReqLevel ||
-			(!trade_instance->IsRaceEquipable(GetRace()) && !RuleB(Bot, AllowBotEquipAnyRaceGear))
+			(!trade_instance->IsRaceEquipable(GetRace()) && !RuleB(Bots, AllowBotEquipAnyRaceGear))
 		) {
 			if (trade_event_exists) {
 				event_trade.push_back(ClientTrade(trade_instance, trade_index));

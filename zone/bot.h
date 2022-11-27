@@ -558,9 +558,9 @@ public:
 	inline InspectMessage_Struct& GetInspectMessage() { return _botInspectMessage; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return _botInspectMessage; }
 
-	// "Quest API" Methods 
+	// "Quest API" Methods
 	bool HasBotSpellEntry(uint16 spellid);
-	
+
 	// "SET" Class Methods
 	void SetBotSpellID(uint32 newSpellID);
 	virtual void SetSpawnStatus(bool spawnStatus) { _spawnStatus = spawnStatus; }
@@ -672,6 +672,7 @@ public:
 		uint32 augment_six = 0
 	);
 	uint32 CountBotItem(uint32 item_id);
+	std::map<uint16, uint32> GetBotItemSlots();
 	uint32 GetBotItemBySlot(uint16 slot_id);
 	bool HasBotItem(uint32 item_id);
 	void RemoveBotItem(uint32 item_id);

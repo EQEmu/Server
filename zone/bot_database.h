@@ -89,6 +89,7 @@ public:
 	bool SaveItems(Bot* bot_inst);
 	bool DeleteItems(const uint32 bot_id);
 
+	bool LoadItemSlots(const uint32 bot_id, std::map<uint16, uint32>& m);
 	bool LoadItemBySlot(Bot* bot_inst);
 	bool LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint32& item_id);
 	bool SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQ::ItemInstance* item_inst);
@@ -219,7 +220,6 @@ public:
 		static const char* LoadItems();
 		static const char* SaveItems();
 		static const char* DeleteItems();
-		static const char* LoadItemBySlot();
 		static const char* SaveItemBySlot();
 		static const char* DeleteItemBySlot();
 		static const char* LoadEquipmentColor();
