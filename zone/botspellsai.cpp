@@ -374,7 +374,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					// TODO: Add ST_TargetsTarget support for Buffing.
 					if (!((spells[selectedBotSpell.SpellId].target_type == ST_Target || 
 						spells[selectedBotSpell.SpellId].target_type == ST_Pet || 
-						(tar == this && !spells[selectedBotSpell.SpellId].target_type == ST_TargetsTarget) ||
+						(tar == this && spells[selectedBotSpell.SpellId].target_type != ST_TargetsTarget) ||
 						spells[selectedBotSpell.SpellId].target_type == ST_Group || 
 						spells[selectedBotSpell.SpellId].target_type == ST_GroupTeleport ||
 						(botClass == BARD && spells[selectedBotSpell.SpellId].target_type == ST_AEBard)) &&
