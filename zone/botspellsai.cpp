@@ -371,13 +371,22 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						continue;
 					}
 					// Validate target
-
-					if (!((spells[selectedBotSpell.SpellId].target_type == ST_Target || spells[selectedBotSpell.SpellId].target_type == ST_Pet || tar == this ||
-						spells[selectedBotSpell.SpellId].target_type == ST_Group || spells[selectedBotSpell.SpellId].target_type == ST_GroupTeleport ||
-						(botClass == BARD && spells[selectedBotSpell.SpellId].target_type == ST_AEBard))
-						&& !tar->IsImmuneToSpell(selectedBotSpell.SpellId, this)
-						&& (tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0))) {
-							continue;
+					// TODO: Add ST_TargetsTarget support for Buffing.
+					if (
+						!(
+							(
+								spells[selectedBotSpell.SpellId].target_type == ST_Target || 
+								spells[selectedBotSpell.SpellId].target_type == ST_Pet || 
+								(tar == this && spells[selectedBotSpell.SpellId].target_type != ST_TargetsTarget) ||
+								spells[selectedBotSpell.SpellId].target_type == ST_Group || 
+								spells[selectedBotSpell.SpellId].target_type == ST_GroupTeleport ||
+								(botClass == BARD && spells[selectedBotSpell.SpellId].target_type == ST_AEBard)
+							) &&
+							!tar->IsImmuneToSpell(selectedBotSpell.SpellId, this) &&
+							tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0
+						)
+					) {
+						continue;
 					}
 
 					// Put the zone levitate and movement check here since bots are able to bypass the client casting check
